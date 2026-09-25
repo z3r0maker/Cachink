@@ -1,0 +1,94 @@
+/* Motion for the home page, ported from the design canvas.
+ *
+ * Every loop starts from a negative delay so its paused first frame is a
+ * finished-looking frame. A section's animations only run while it is on
+ * screen: useInView (use-in-view.js) sets data-inview on the [data-motion] element. */
+[data-motion]:not([data-inview='true']) *,
+[data-motion]:not([data-inview='true']) { animation-play-state: paused !important; }
+
+/* ── hero loop (6s) ── */
+@keyframes stampPop{0%,38%{transform:scale(0) rotate(-45deg);opacity:0}44%{transform:scale(1.18) rotate(-8deg);opacity:1}49%,86%{transform:scale(1) rotate(-12deg);opacity:1}94%,100%{transform:scale(.85) rotate(-12deg);opacity:0}}
+@keyframes payPress{0%,34%,44%,100%{transform:none;box-shadow:var(--shadow-sm)}37%,41%{transform:translate(2px,2px);box-shadow:var(--shadow-pressed)}}
+@keyframes flyToPortal{0%,42%{transform:translate(0,0) scale(.6);opacity:0}48%{transform:translate(-40px,-40px) scale(1);opacity:1}66%{transform:translate(-330px,-250px) scale(1);opacity:1}72%,100%{transform:translate(-340px,-258px) scale(.7);opacity:0}}
+@keyframes valA{0%,66%{opacity:1}69%,97%{opacity:0}100%{opacity:1}}
+@keyframes valB{0%,66%{opacity:0}69%,97%{opacity:1}100%{opacity:0}}
+@keyframes barGrow{0%,66%{transform:scaleY(.78)}72%,97%{transform:scaleY(1)}100%{transform:scaleY(.78)}}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 var(--green)}50%{box-shadow:0 0 0 4px var(--green-soft)}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.a-stamp{animation:stampPop 6s cubic-bezier(.2,.8,.2,1) -4.8s infinite}
+.a-pay{animation:payPress 6s linear -4.8s infinite}
+.a-fly{animation:flyToPortal 6s cubic-bezier(.2,.8,.2,1) -4.8s infinite}
+.a-valA{animation:valA 6s linear -4.8s infinite}
+.a-valB{animation:valB 6s linear -4.8s infinite}
+.a-bar{transform-origin:bottom;animation:barGrow 6s cubic-bezier(.2,.8,.2,1) -4.8s infinite}
+.a-live{animation:livePulse 1.6s ease-in-out infinite}
+.a-marquee{animation:marquee 28s linear infinite}
+
+/* ── the 16-second reel ── */
+@keyframes scene{0%{opacity:0;visibility:visible}2%,27%{opacity:1;visibility:visible}27.01%,100%{opacity:0;visibility:hidden}}
+@keyframes reelBar{from{width:0}to{width:100%}}
+@keyframes chip{0%,1.9%{background:var(--white);color:var(--gray-600)}2%,26.9%{background:var(--yellow);color:var(--black)}27%,100%{background:var(--white);color:var(--gray-600)}}
+@keyframes popIn{0%{transform:scale(.82) rotate(-8deg)}4%{transform:scale(1.06) rotate(2deg)}6%,100%{transform:scale(1) rotate(0)}}
+@keyframes slideUp{0%{transform:translateY(18px)}5%,100%{transform:none}}
+@keyframes scribble{0%,3%{stroke-dashoffset:600}13%,100%{stroke-dashoffset:0}}
+.sc{position:absolute;inset:0;opacity:0;will-change:opacity;backface-visibility:hidden;animation:scene 16s linear -2.4s infinite both}
+.sc2{animation-delay:-14.4s}.sc3{animation-delay:-10.4s}.sc4{animation-delay:-6.4s}
+.sc .pop,.sc .up{will-change:transform;backface-visibility:hidden}
+.sc .pop{animation:popIn 16s cubic-bezier(.2,.8,.2,1) -2.4s infinite both}
+.sc .up{animation:slideUp 16s cubic-bezier(.2,.8,.2,1) -2.4s infinite both}
+.sc2 .pop,.sc2 .up{animation-delay:-14.4s}.sc3 .pop,.sc3 .up{animation-delay:-10.4s}.sc4 .pop,.sc4 .up{animation-delay:-6.4s}
+.up.d1{animation-delay:-2.15s}.sc2 .up.d1{animation-delay:-14.15s}.sc3 .up.d1{animation-delay:-10.1s}.sc3 .up.d2{animation-delay:-9.8s}.sc4 .up.d1{animation-delay:-6.15s}
+.a-scribble{stroke-dasharray:600;animation:scribble 16s ease-out -2.4s infinite both}
+.a-reelbar{animation:reelBar 16s linear -2.4s infinite}
+.chip{animation:chip 16s linear -2.4s infinite}
+.chip2{animation-delay:-14.4s}.chip3{animation-delay:-10.4s}.chip4{animation-delay:-6.4s}
+
+/* ── Don Cuentas chat (20s) ── */
+@keyframes tp1{0%,3%{opacity:0}4%,9%{opacity:1}10%,100%{opacity:0}}
+@keyframes tp2{0%,15%{opacity:0}16%,21%{opacity:1}22%,100%{opacity:0}}
+@keyframes tp3{0%,27%{opacity:0}28%,33%{opacity:1}34%,100%{opacity:0}}
+@keyframes ms1{0%,9%{opacity:0;transform:translateY(8px)}11%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes ms2{0%,21%{opacity:0;transform:translateY(8px)}23%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes ms3{0%,33%{opacity:0;transform:translateY(8px)}35%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes ms4{0%,42%{opacity:0;transform:translateY(12px)}46%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes av1{0%,3%{opacity:0;transform:scale(.6)}5%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes av2{0%,15%{opacity:0;transform:scale(.6)}17%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes av3{0%,27%{opacity:0;transform:scale(.6)}29%,92%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes dotB{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+.c-tp1{animation:tp1 20s linear -1s infinite}.c-tp2{animation:tp2 20s linear -1s infinite}.c-tp3{animation:tp3 20s linear -1s infinite}
+.c-ms1{animation:ms1 20s cubic-bezier(.2,.8,.2,1) -1s infinite}.c-ms2{animation:ms2 20s cubic-bezier(.2,.8,.2,1) -1s infinite}
+.c-ms3{animation:ms3 20s cubic-bezier(.2,.8,.2,1) -1s infinite}.c-ms4{animation:ms4 20s cubic-bezier(.2,.8,.2,1) -1s infinite}
+.c-av1{animation:av1 20s cubic-bezier(.2,.8,.2,1) -1s infinite}.c-av2{animation:av2 20s cubic-bezier(.2,.8,.2,1) -1s infinite}.c-av3{animation:av3 20s cubic-bezier(.2,.8,.2,1) -1s infinite}
+.dot{display:inline-block;width:7px;height:7px;border-radius:9999px;background:var(--black);animation:dotB .9s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+
+/* ── offline demo (10s) ── */
+@keyframes onA{0%,14%{opacity:1}15%,69%{opacity:0}70%,100%{opacity:1}}
+@keyframes onB{0%,14%{opacity:0}15%,69%{opacity:1}70%,100%{opacity:0}}
+@keyframes rw1{0%,24%{opacity:0;transform:translateX(-12px)}27%,96%{opacity:1;transform:none}99%,100%{opacity:0}}
+@keyframes rw2{0%,39%{opacity:0;transform:translateX(-12px)}42%,96%{opacity:1;transform:none}99%,100%{opacity:0}}
+@keyframes pend{0%,71%{opacity:1}72%,100%{opacity:0}}
+@keyframes sent{0%,71%{opacity:0}72%,100%{opacity:1}}
+@keyframes ch1{0%,24%{opacity:0}25%,39%{opacity:1}40%,100%{opacity:0}}
+@keyframes ch2{0%,39%{opacity:0}40%,71%{opacity:1}72%,100%{opacity:0}}
+@keyframes ch3{0%,24%{opacity:1}25%,71%{opacity:0}72%,100%{opacity:1}}
+.o-onA{animation:onA 10s linear -8.5s infinite}.o-onB{animation:onB 10s linear -8.5s infinite}
+.o-rw1{animation:rw1 10s cubic-bezier(.2,.8,.2,1) -8.5s infinite}.o-rw2{animation:rw2 10s cubic-bezier(.2,.8,.2,1) -8.5s infinite}
+.o-pend{animation:pend 10s linear -8.5s infinite}.o-sent{animation:sent 10s linear -8.5s infinite}
+.o-ch1{animation:ch1 10s linear -8.5s infinite}.o-ch2{animation:ch2 10s linear -8.5s infinite}.o-ch3{animation:ch3 10s linear -8.5s infinite}
+
+/* ── goal stamp (7s) ── */
+@keyframes gfill{0%{width:0}40%,95%{width:86%}100%{width:0}}
+@keyframes slam{0%,42%{transform:scale(2.3) rotate(-24deg);opacity:0}47%{transform:scale(.9) rotate(2deg);opacity:1}51%{transform:scale(1.05) rotate(0)}55%,94%{transform:scale(1);opacity:1}99%,100%{transform:scale(1);opacity:0}}
+@keyframes thump{0%,46%,53%,100%{transform:none}48%{transform:translate(3px,3px)}}
+.g-fill{animation:gfill 7s cubic-bezier(.2,.8,.2,1) -6s infinite}
+.g-slam{animation:slam 7s cubic-bezier(.2,.8,.2,1) -6s infinite}
+.g-thump{animation:thump 7s linear -6s infinite}
+
+/* Reduced motion: no loops; every element rests in its finished state. */
+@media (prefers-reduced-motion: reduce) {
+  [data-motion] *, [data-motion] { animation: none !important; }
+  .a-valA, .a-fly, .c-tp1, .c-tp2, .c-tp3, .o-onB, .o-pend, .o-ch1, .o-ch2 { opacity: 0 !important; }
+  .a-valB { opacity: 1 !important; }
+  .sc { opacity: 0; } .sc1 { opacity: 1; }
+}

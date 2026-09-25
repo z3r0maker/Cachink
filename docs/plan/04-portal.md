@@ -1446,6 +1446,38 @@ critical avisos cannot be switched off.
     now sets `DATABASE_SUPER_URL` (the sync specs' cleanup needs the owner role) and reports
     coverage even when E2E fails. The six failing `[sync]` specs belong to the session behind
     ADR-103 (census assertions; fixes in flight).
+  - 2026-09-24 · **First green `portal-e2e` under the gate** (run 36026962224): lines 84.1%,
+    statements 77.5%, functions 76.8%, branches 62.5%. Floor 83 / 76 / 75 / 61. `/inventario-inicial`
+    (N-17) had no spec — `e2e/inventario-inicial.spec.ts` now drives it on a throwaway owner, and
+    found its «Capturado: …» banner lost to the capture's own revalidation ~1 run in 10
+    (fixed in `parts.tsx`). The primitives galleries under `src/app/inventario/` leave the count.
+  - 2026-09-24 · **Lines past 85%** (run 36030650074): lines 85.4%, statements 78.4%,
+    functions 78.8%, branches 62.4%. Floor 84 / 77 / 77 / 61. Open: statements, functions and
+    branches to the acceptance line — `server/actions` error paths, `server/billing/actions.ts`
+    (Stripe, 0%), the Estados chart components.
+  - 2026-09-24 · **Statements and branches were under-reported**: the minified coverage build
+    mapped phantom branches onto `src/` that never merged with the unit suite's (`csv.ts`: 52
+    statements / 46 branches counted, 38 / 25 real). The coverage build is no longer minified
+    (ADR-102 amendment); `csv.ts` now reads 38/39 and 25/25 merged.
+  - 2026-09-24 · **Re-measured unminified** (run 36038951217): lines 85.6%, statements 83.2%,
+    functions 79.8%, branches 69.5%. Floor 84 / 82 / 78 / 68.
+  - 2026-09-24 · **Two more measurement bugs, both under-counting the server**: the unminified
+    build renamed server sources (`xangarro/src/…`) and the path rule dropped ~500 of them; and a
+    module compiled into both webpack layers of one chunk kept its dead copy's 0 (29 files, e.g.
+    `server/import/templates.ts`). Fixed in `options.ts` and — after a splitter that did not
+    work — a one-rule patch to MCR (`patches/`, ADR-102 correction). Also:
+    `server/billing/actions.ts` unit-tested (was 0%).
+  - 2026-09-24 · **Measurement settled** (run 36047293665): lines 87.1%, statements 84.7%,
+    functions 81.2%, branches 71.1%. Floor 86 / 83 / 80 / 70. The gap left is real.
+  - 2026-09-24 · **Open question for the owner (found by tests, not changed):** Revisión de
+    caja's «Aprobar» requires a menu category (Tacos / Guisados / Bebidas / Extras), but
+    `aprobarProducto` always writes `categoria = 'Producto Terminado'` — the column is an
+    _inventory_ category — so the owner's choice is discarded. Either the menu category needs a
+    home, or the form should not ask. `tests/actions/revision.test.ts` pins today's behaviour.
+  - 2026-09-24 · **Lines, statements and functions past 85%** (run 36069556142, after browser
+    coverage stopped being lost at each full navigation): lines 91.4%, statements 89.1%,
+    functions 85.9%, branches 75.8%. Floor 90 / 88 / 84 / 74. Open: branches — mostly per-screen
+    states (empty, error, viewer) no spec renders yet.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.

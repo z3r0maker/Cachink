@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@jridgewell/gen-mapping": "^0.3.13",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.0",
     "@types/qrcode": "1.5.6",

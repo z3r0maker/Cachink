@@ -40,7 +40,9 @@ export function InventarioInicialScreen(view: InventarioView) {
   const [banner, setBanner] = useState<{ tone: 'success' | 'critical'; text: string } | null>(null);
   const [pendiente, start] = useTransition();
 
-  if (view.yaCapturado) return <Capturado />;
+  // The capture's own revalidation re-renders this with `yaCapturado`, which
+  // used to swap the screen before its «Capturado: …» banner was ever seen.
+  if (view.yaCapturado) return <Capturado banner={banner} />;
 
   const validas = filas.filter((f) => f.cantidad.trim() !== '' && Number(f.cantidad) > 0);
 
@@ -92,11 +94,16 @@ function EncabezadoInventario({
   );
 }
 
-function Capturado() {
+function Capturado({
+  banner,
+}: {
+  readonly banner: { tone: 'success' | 'critical'; text: string } | null;
+}) {
   return (
     <>
       <h1 className={pageTitle}>Inventario inicial</h1>
       <p className={pageSubtitle}>Ya está capturado</p>
+      {banner !== null ? <Banner tone={banner.tone} title={banner.text} /> : null}
       <Banner
         tone="info"
         title="El inventario inicial ya se capturó. Ajusta existencias con un movimiento."

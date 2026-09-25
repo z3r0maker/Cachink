@@ -5,10 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { cajaTurnos, mensajesOperador } from '@xangarro/data-pg';
 import { newEntityId, type CajaTurnoId } from '@xangarro/domain';
 
+import { failure, refusal } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { PORTAL_DEVICE_ID } from '../repositories/portal-device';
-import { reportError } from '../observability/report';
 
 /**
  * Cortes de turno's two owner exits (O-37), writing for real:
@@ -31,8 +31,9 @@ export async function marcarAclarado(turnoId: string): Promise<CorteAccionResult
     revalidatePath('/cortes');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'marcarAclarado' });
-    return { ok: false, message: 'No se pudo marcar el corte. Intenta de nuevo.' };
+    return failure(error, 'marcarAclarado', {
+      retry: 'No se pudo marcar el corte. Intenta de nuevo.',
+    });
   }
 }
 
@@ -51,7 +52,7 @@ export async function pedirAclaracion(turnoId: string, cuerpo: string): Promise<
         .select({ userId: cajaTurnos.userId })
         .from(cajaTurnos)
         .where(eq(cajaTurnos.id, turnoId as CajaTurnoId));
-      if (turno === undefined) throw new Error('turno no encontrado');
+      if (turno === undefined) throw refusal('TURNO_NO_EXISTE', 'Ese turno ya no existe.');
       const now = new Date().toISOString();
       await tx.insert(mensajesOperador).values({
         id: newEntityId(),
@@ -70,7 +71,8 @@ export async function pedirAclaracion(turnoId: string, cuerpo: string): Promise<
     revalidatePath('/cortes');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'pedirAclaracion' });
-    return { ok: false, message: 'No se pudo pedir la aclaración. Intenta de nuevo.' };
+    return failure(error, 'pedirAclaracion', {
+      retry: 'No se pudo pedir la aclaración. Intenta de nuevo.',
+    });
   }
 }

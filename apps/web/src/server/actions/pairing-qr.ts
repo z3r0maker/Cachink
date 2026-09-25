@@ -10,10 +10,10 @@ import {
   pairingExpiry,
   pairingLink,
 } from '../../lib/pairing-token';
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { portalOrigin } from '../billing/origin';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 
 /**
  * «Mostrar QR» — a scannable pairing link for the live code (C-14, P-06).
@@ -57,7 +57,6 @@ export async function generarQr(): Promise<QrResult> {
     const svgDataUri = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
     return { ok: true, link, svgDataUri, expiresAt: minted.expiresAt };
   } catch (error) {
-    reportError(error, { endpoint: 'generarQr' });
-    return { ok: false, message: 'No pudimos generar el QR. Intenta de nuevo.' };
+    return failure(error, 'generarQr', { retry: 'No pudimos generar el QR. Intenta de nuevo.' });
   }
 }

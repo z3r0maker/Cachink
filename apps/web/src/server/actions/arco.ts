@@ -6,8 +6,8 @@ import { throttleKey, throttleTake } from '@xangarro/data-pg';
 import { newUlid } from '@xangarro/domain';
 import { headers } from 'next/headers';
 
+import { failure } from '../action-errors';
 import { db } from '../db';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 import { supportInboxFromEnv } from '../support-inbox';
 
@@ -50,7 +50,6 @@ export async function enviarSolicitudArco(form: unknown): Promise<ArcoResult> {
     if (!result.ok) return { ok: false, message: FIELD_MESSAGE[result.field] ?? FALLO };
     return { ok: true, folio: result.folio, responderA: result.plazos.responderA };
   } catch (error) {
-    reportError(error, { endpoint: 'enviarSolicitudArco' });
-    return { ok: false, message: FALLO };
+    return failure(error, 'enviarSolicitudArco', { retry: FALLO });
   }
 }

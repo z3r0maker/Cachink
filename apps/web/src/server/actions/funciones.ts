@@ -9,10 +9,10 @@ import {
 } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgBusinessesRepository } from '../repositories/businesses';
 
 /**
@@ -27,12 +27,7 @@ import { pgBusinessesRepository } from '../repositories/businesses';
  */
 export type FuncionResult = { ok: true; flags: FeatureFlags } | { ok: false; message: string };
 
-const KNOWN = new Set([
-  'FLAG_NOT_ALLOWED',
-  'FLAG_DEPENDENCY',
-  'BUSINESS_NOT_FOUND',
-  'NOT_PERMITTED',
-]);
+const KNOWN = ['FLAG_NOT_ALLOWED', 'FLAG_DEPENDENCY', 'BUSINESS_NOT_FOUND'];
 
 /** The entitlement's features: already the plan ∩ what the platform released (B-10, N-09). */
 function allowedKeys(features: readonly string[]): ReadonlySet<FeatureFlagKey> {
@@ -54,11 +49,9 @@ export async function cambiarFuncion(key: FeatureFlagKey, on: boolean): Promise<
     revalidatePath('/negocio');
     return { ok: true, flags };
   } catch (error) {
-    const code = (error as { code?: string } | null)?.code;
-    if (error instanceof Error && code !== undefined && KNOWN.has(code)) {
-      return { ok: false, message: error.message };
-    }
-    reportError(error, { endpoint: 'cambiarFuncion' });
-    return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
+    return failure(error, 'cambiarFuncion', {
+      shown: KNOWN,
+      retry: 'No pudimos guardar el cambio. Intenta de nuevo.',
+    });
   }
 }

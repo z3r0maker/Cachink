@@ -14,7 +14,12 @@
  * for misuse from JS callers.
  */
 
-import { ProductSchema, type Product, type ProductId } from '@xangarro/domain';
+import {
+  ProductNotFoundError,
+  ProductSchema,
+  type Product,
+  type ProductId,
+} from '@xangarro/domain';
 import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
@@ -33,13 +38,14 @@ export class EditarProductoUseCase implements UseCase<EditarProductoInput, Produ
   async execute(input: EditarProductoInput): Promise<Product> {
     const existing = await this.#products.findById(input.id);
     if (!existing) {
-      throw new TypeError(`Producto ${input.id} no existe o fue eliminado`);
+      throw new ProductNotFoundError(input.id);
     }
     const merged = { ...existing, ...input.patch };
     ProductSchema.parse(merged);
     const updated = await this.#products.update(input.id, input.patch);
     if (!updated) {
-      throw new TypeError(`Producto ${input.id} desapareció durante la actualización`);
+      // Deleted between the read and the write: the same fact, the same error.
+      throw new ProductNotFoundError(input.id);
     }
     return updated;
   }

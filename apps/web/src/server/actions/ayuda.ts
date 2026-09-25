@@ -1,8 +1,8 @@
 'use server';
 
+import { failure } from '../action-errors';
 import { supportInboxFromEnv } from '../support-inbox';
 import { requireMember } from '../auth';
-import { reportError } from '../observability/report';
 
 /**
  * «Ayuda» (N-08's wiring list): a support request from the portal — a
@@ -50,7 +50,8 @@ export async function enviarAyuda(form: AyudaForm): Promise<AyudaResult> {
     });
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'enviarAyuda' });
-    return { ok: false, message: 'No pudimos enviar tu mensaje. Intenta de nuevo.' };
+    return failure(error, 'enviarAyuda', {
+      retry: 'No pudimos enviar tu mensaje. Intenta de nuevo.',
+    });
   }
 }

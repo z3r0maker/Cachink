@@ -1,0 +1,13 @@
+/* The home page's styles, one file per part. Imported once from src/main.jsx so
+ * the prerendered HTML is styled before any JavaScript loads. */
+@import './base.css';
+@import './nav.css';
+@import './hero.css';
+@import './hero-phone.css';
+@import './sections.css';
+@import './reel.css';
+@import './doncuentas.css';
+@import './more.css';
+@import './pricing.css';
+@import './end.css';
+@import './motion.css';

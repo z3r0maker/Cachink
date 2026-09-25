@@ -6,7 +6,13 @@ import { colors } from '@xangarro/tokens';
 import { anton, jakarta } from './fonts';
 import '../styles/global.css';
 
+/**
+ * `metadataBase` resolves the relative URLs in metadata (icons, and any OG
+ * image a page adds) against the public origin; `PORTAL_URL` is set in
+ * production and previews fall back to the local origin.
+ */
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.PORTAL_URL || 'http://localhost:3100'),
   title: 'Xangarro!',
   description: 'Finanzas para emprendedores.',
 };

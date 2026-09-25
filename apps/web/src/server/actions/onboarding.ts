@@ -19,13 +19,13 @@ import { revalidatePath } from 'next/cache';
 import { allowedFor } from '@/onboarding/plan-copy';
 import { reconcile, skipKeys } from '@/onboarding/wizard-steps';
 
+import { failure, type Failure, type FailurePolicy } from '../action-errors';
 import { requireMember } from '../auth';
 import { portalOrigin } from '../billing/origin';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant, type Tx } from '../db';
 import { recordGeo } from '../geo/record';
 import { trialCheckoutFor } from '../onboarding/checkout';
-import { failure, type Failure } from '../onboarding/errors';
 import { pgOnboardingStore } from '../onboarding/store';
 import { pgBusinessesRepository } from '../repositories/businesses';
 
@@ -37,6 +37,22 @@ import { pgBusinessesRepository } from '../repositories/businesses';
 export type OkOr<T> = ({ ok: true } & T) | Failure;
 
 const FREE_PLAN: PlanId = PLAN_IDS[0];
+
+/** The wizard's refusals; two in the wizard's words, since the domain's are written for logs. */
+const REFUSALS: FailurePolicy = {
+  shown: [
+    'INVALID_WIZARD_ANSWERS',
+    'CONTRADICTORY_WIZARD_ANSWERS',
+    'NOT_A_PAID_PLAN',
+    'BUSINESS_NOT_FOUND',
+    'FLAG_NOT_ALLOWED',
+    'FLAG_DEPENDENCY',
+  ],
+  copy: {
+    INVALID_WIZARD_ANSWERS: 'Revisa tu respuesta: hay un dato que no pudimos guardar.',
+    CONTRADICTORY_WIZARD_ANSWERS: 'Esa respuesta contradice otra anterior. Revísalas.',
+  },
+};
 
 async function owner(): Promise<BusinessId> {
   return (await requireMember('owner')).business_id as BusinessId;
@@ -60,7 +76,7 @@ export async function guardarPaso(
     });
     return { ok: true, answers };
   } catch (error) {
-    return failure(error, 'guardarPaso', businessId);
+    return failure(error, 'guardarPaso', { ...REFUSALS, businessId });
   }
 }
 
@@ -81,7 +97,7 @@ export async function seguirGratis(): Promise<OkOr<object>> {
     revalidatePath('/negocio');
     return { ok: true };
   } catch (error) {
-    return failure(error, 'seguirGratis', businessId);
+    return failure(error, 'seguirGratis', { ...REFUSALS, businessId });
   }
 }
 
@@ -96,7 +112,7 @@ export async function aplicarCambios(): Promise<OkOr<object>> {
     revalidatePath('/negocio');
     return { ok: true };
   } catch (error) {
-    return failure(error, 'aplicarCambios', businessId);
+    return failure(error, 'aplicarCambios', { ...REFUSALS, businessId });
   }
 }
 
@@ -128,6 +144,6 @@ export async function probarGratis(
     if (redirect !== null) await recordGeo('compra');
     return { ok: true, redirect };
   } catch (error) {
-    return failure(error, 'probarGratis', businessId);
+    return failure(error, 'probarGratis', { ...REFUSALS, businessId });
   }
 }

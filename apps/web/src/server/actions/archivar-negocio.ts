@@ -2,12 +2,11 @@
 
 import { ArchivarNegocioUseCase } from '@xangarro/application';
 import { archiveCurrentBusiness, businesses, subscriptionsOfBusiness } from '@xangarro/data-pg';
-import { ConfirmacionNombreError, SuscripcionActivaError } from '@xangarro/domain';
 import { eq } from 'drizzle-orm';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { endSession } from '../session';
 
 /**
@@ -34,14 +33,9 @@ export async function archivarNegocio(confirmacion: string): Promise<ArchivarNeg
     await endSession();
     return { ok: true };
   } catch (error) {
-    if (
-      error instanceof ConfirmacionNombreError ||
-      error instanceof SuscripcionActivaError ||
-      (error as { code?: string } | null)?.code === 'NOT_PERMITTED'
-    ) {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'archivarNegocio' });
-    return { ok: false, message: 'No pudimos archivar el negocio. Intenta de nuevo.' };
+    return failure(error, 'archivarNegocio', {
+      shown: ['CONFIRMACION_NOMBRE', 'SUSCRIPCION_ACTIVA'],
+      retry: 'No pudimos archivar el negocio. Intenta de nuevo.',
+    });
   }
 }

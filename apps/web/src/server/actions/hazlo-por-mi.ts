@@ -16,7 +16,7 @@ import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { supportInboxFromEnv } from '../support-inbox';
 import { tenantEntitlement } from '../billing/plan';
-import { reportError } from '../observability/report';
+import { failure, refusal, type FailurePolicy } from '../action-errors';
 import { TEMPLATES } from '../import/templates';
 
 /**
@@ -27,16 +27,11 @@ import { TEMPLATES } from '../import/templates';
  * self-service import uses, over the staff-mapped file, in one transaction.
  */
 
-type PortError = { code?: string };
-
-function fallo(error: unknown, endpoint: string): { ok: false; message: string } {
-  const code = (error as PortError | null)?.code;
-  if (code === 'NOT_PERMITTED' || code?.startsWith('IMPORTACION_')) {
-    return { ok: false, message: (error as Error).message };
-  }
-  reportError(error, { endpoint });
-  return { ok: false, message: 'No pudimos enviar tu solicitud. Intenta de nuevo.' };
-}
+/** The use case's and the data layer's refusals; anything else is an incident. */
+const REFUSALS: FailurePolicy = {
+  shown: ['IMPORTACION_*'],
+  retry: 'No pudimos enviar tu solicitud. Intenta de nuevo.',
+};
 
 export type HazloPorMiResult = { ok: true } | { ok: false; message: string };
 
@@ -70,7 +65,7 @@ export async function solicitarHazloPorMi(form: FormData): Promise<HazloPorMiRes
     revalidatePath('/importar');
     return { ok: true };
   } catch (error) {
-    return fallo(error, 'solicitarHazloPorMi');
+    return failure(error, 'solicitarHazloPorMi', REFUSALS);
   }
 }
 
@@ -100,7 +95,7 @@ export async function resolverImportacionAsistida(
     revalidatePath(`/${summary.plantilla}`);
     return { ok: true };
   } catch (error) {
-    return fallo(error, 'resolverImportacionAsistida');
+    return failure(error, 'resolverImportacionAsistida', REFUSALS);
   }
 }
 
@@ -160,7 +155,12 @@ async function aplicarPendiente(
   const planned = await template.plan(tx, file);
   const count = (kind: string) => planned.filter((r) => r.kind === kind).length;
   const utiles = count('nuevo') + count('actualizar');
-  if (utiles === 0) throw new Error('El archivo mapeado no trae filas válidas.');
+  // A refusal, so the owner hears this reason — they can reject the mapping —
+  // rather than «No pudimos enviar tu solicitud», which named the wrong action
+  // and promised a retry could help.
+  if (utiles === 0) {
+    throw refusal('IMPORTACION_SIN_FILAS', 'El archivo mapeado no trae filas válidas.');
+  }
   await template.apply(tx, businessId, planned as readonly unknown[]);
   return { outcome: 'aplicada', plantilla: claim.plantilla };
 }
