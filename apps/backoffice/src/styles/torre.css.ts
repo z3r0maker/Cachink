@@ -75,6 +75,12 @@ export const kpiValue = style([
   },
 ]);
 
+/** A counter whose number is itself the verdict: green when zero is good, red when not. */
+export const kpiTone = styleVariants({
+  ok: { color: t.ok },
+  bad: { color: t.bad },
+});
+
 export const kpiSub = style({
   fontSize: fontSizes.sm,
   fontWeight: typography.weights.semibold,

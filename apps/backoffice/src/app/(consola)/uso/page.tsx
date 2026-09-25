@@ -9,6 +9,7 @@ import {
   type UsageFilter,
   type UsageListResult,
 } from '@/server/usage/list';
+import { usageCounters, type UsageCounters as Counters } from '@/server/usage/counters';
 import { usageDeps } from '@/server/usage/wiring';
 import { requireStaffPage } from '@/server/staff';
 import { body, buttonQuiet, errorText, heading, muted } from '@/styles/ui.css';
@@ -16,6 +17,7 @@ import { body, buttonQuiet, errorText, heading, muted } from '@/styles/ui.css';
 import { chip, chipRow } from '../inbox/inbox.css';
 import type { SearchParams } from '../search-params';
 import { notice, wide } from '../tenants/tenants.css';
+import { UsageCounters } from './counters';
 import { parseUsageFilter, toUsageListInput, usageHref } from './params';
 import { UsageTable } from './usage-table';
 
@@ -34,6 +36,16 @@ async function load(input: unknown): Promise<UsageListResult | TenantError> {
   } catch (error) {
     if (error instanceof TenantError && error.code !== 'STORE_FAILED') return error;
     throw error;
+  }
+}
+
+/** The counters read the first unfiltered page; a failure hides them, not the page. */
+async function counters(now: Date): Promise<Counters | null> {
+  try {
+    return usageCounters(await listUsage(usageDeps(db()), { limit: 100 }, now));
+  } catch (error) {
+    console.error('uso: counters failed', error);
+    return null;
   }
 }
 
@@ -91,7 +103,10 @@ export default async function UsoPage(props: { searchParams: Promise<SearchParam
   const sp = await props.searchParams;
   const filtro = parseUsageFilter(sp);
   const cursor = typeof sp.cursor === 'string' ? sp.cursor : null;
-  const result = await load(toUsageListInput(filtro, cursor));
+  const [result, c] = await Promise.all([
+    load(toUsageListInput(filtro, cursor)),
+    counters(new Date()),
+  ]);
 
   return (
     <section className={wide} aria-labelledby="uso-title">
@@ -99,6 +114,7 @@ export default async function UsoPage(props: { searchParams: Promise<SearchParam
         Uso
       </h1>
       <p className={body}>Uso del mes contra los límites del plan. Nunca se bloquea una venta.</p>
+      <UsageCounters c={c} />
       <Filters current={filtro} />
       {result instanceof TenantError ? (
         <p role="alert" className={errorText}>

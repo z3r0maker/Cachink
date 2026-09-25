@@ -8,6 +8,7 @@ import { tenantDeps } from '@/server/tenants/wiring';
 import { briefing } from '@/server/torre/briefing';
 import { capacityNow, openInboxItems } from '@/server/torre/readings';
 import { listUsage, type UsageListResult } from '@/server/usage/list';
+import { usageCounters } from '@/server/usage/counters';
 import { usageDeps } from '@/server/usage/wiring';
 import * as u from '@/styles/torre.css';
 
@@ -49,11 +50,10 @@ function billingKpi(r: TenantListResult | null) {
 
 function usageKpi(r: UsageListResult | null) {
   if (r === null) return { value: '—', sub: 'no se pudo leer' };
-  const now = r.rows.reduce((a, x) => a + x.current.transactions.value, 0);
-  const prev = r.rows.reduce((a, x) => a + (x.previous?.transactions ?? 0), 0);
+  const c = usageCounters(r);
   return {
-    value: now.toLocaleString('es-MX'),
-    sub: `mes ${r.period} · el anterior: ${prev.toLocaleString('es-MX')}`,
+    value: c.transactions.toLocaleString('es-MX'),
+    sub: `mes ${c.period} · el anterior: ${c.previous.toLocaleString('es-MX')}`,
   };
 }
 

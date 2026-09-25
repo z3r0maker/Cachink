@@ -40,3 +40,11 @@ export const gauge = style({
     '&::-moz-progress-bar': { background: t.accent, borderRadius: shapeRadii.pill },
   },
 });
+
+/** The three counters on top of the page. */
+export const counters = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  gap: 14,
+  '@media': { 'screen and (max-width: 899px)': { gridTemplateColumns: 'minmax(0, 1fr)' } },
+});

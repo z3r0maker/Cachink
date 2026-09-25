@@ -44,15 +44,17 @@ export function Kpi({
   label,
   value,
   sub,
+  tone,
 }: {
   readonly label: string;
   readonly value: string;
   readonly sub: string;
+  readonly tone?: keyof typeof u.kpiTone;
 }) {
   return (
     <section className={u.kpi} aria-label={label}>
       <span className={u.eyebrow}>{label}</span>
-      <span className={u.kpiValue}>{value}</span>
+      <span className={tone ? `${u.kpiValue} ${u.kpiTone[tone]}` : u.kpiValue}>{value}</span>
       <span className={u.kpiSub}>{sub}</span>
     </section>
   );
