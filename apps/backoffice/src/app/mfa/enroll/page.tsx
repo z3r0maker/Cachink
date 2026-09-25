@@ -1,9 +1,10 @@
+import { Trastienda, Vale } from '@/components/trastienda/trastienda';
 import { prepareEnrolment } from '@/server/auth/enrolment';
 import { groupKey, qrDataUri } from '@/server/auth/qr';
 import { authDeps } from '@/server/auth/wiring';
 import { MFA_ENROLL_PATH } from '@/server/gate';
 import { requireStaffPage } from '@/server/staff';
-import { body, card, centered, errorText, heading, muted } from '@/styles/ui.css';
+import { body, errorText, muted } from '@/styles/ui.css';
 
 import { qr as qrClass, secret as secretClass } from '../mfa.css';
 import { EnrolForm } from './form';
@@ -18,11 +19,12 @@ export default async function EnrollPage() {
   const view = await prepareEnrolment(authDeps(), session);
 
   return (
-    <main className={centered}>
-      <section className={card} aria-labelledby="mfa-title">
-        <h1 id="mfa-title" className={heading}>
-          Verificación en dos pasos
-        </h1>
+    <Trastienda mood="enroll">
+      <Vale
+        eyebrow="Primera vez · Verificación en dos pasos"
+        title="Ponle candado a tu cuenta."
+        titleId="mfa-title"
+      >
         {view === null ? (
           <p className={errorText}>
             No pudimos preparar la verificación en dos pasos. Recarga la página.
@@ -46,7 +48,7 @@ export default async function EnrollPage() {
             <EnrolForm />
           </>
         )}
-      </section>
-    </main>
+      </Vale>
+    </Trastienda>
   );
 }

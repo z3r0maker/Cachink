@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 
 import { FormStatus } from '@/components/form-status';
 import { confirmTotp, type EnrolState } from '@/server/actions/mfa';
+import { cta } from '@/components/trastienda/controls.css';
 import { body, button, stack } from '@/styles/ui.css';
 
 import { CodeField } from '../code-field';
@@ -45,7 +46,7 @@ export function EnrolForm() {
     <form action={action} className={stack}>
       <CodeField caption="Código de 6 dígitos" allowRecovery={false} />
       <FormStatus state={state} />
-      <button className={button} type="submit" disabled={pending}>
+      <button className={cta} type="submit" disabled={pending}>
         {pending ? 'Verificando…' : 'Registrar'}
       </button>
     </form>
