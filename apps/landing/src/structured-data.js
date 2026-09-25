@@ -3,6 +3,7 @@
  *
  * @graph blocks:
  *   1. Organization       — the company
+ *   1b. WebSite           — the site, for sitelinks
  *   2. SoftwareApplication — the product + Offer nodes
  *   3. Service            — cash management service for Mexican SMBs
  *   4. FAQPage            — 15 questions imported from landing/copy.jsx
@@ -18,6 +19,7 @@ import { FAQ_ITEMS } from '../landing/copy.jsx';
 import { PLANES, signupUrl } from '../landing/planes.js';
 // Public profiles — the Organization's sameAs, the same list llms-full.txt names
 import { SOCIAL_PROFILES } from '../landing/social.js';
+import { ogImagePath } from './articles.js';
 
 const SITE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://xangarro.mx';
@@ -109,9 +111,19 @@ const faqPage = {
   })),
 };
 
+// WebSite: names the site for sitelinks and ties it to the Organization
+const webSite = {
+  '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: 'Xangarro',
+  inLanguage: 'es-MX',
+  publisher: { '@id': `${SITE_URL}/#organization` },
+};
+
 export const structuredData = {
   '@context': 'https://schema.org',
-  '@graph': [organization, softwareApplication, service, faqPage],
+  '@graph': [organization, webSite, softwareApplication, service, faqPage],
 };
 
 const RECURSOS_URL = `${SITE_URL}/recursos/`;
@@ -151,6 +163,12 @@ export function buildArticleSchema({
     '@id': `${url}#article`,
     headline: title,
     description,
+    image: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}${ogImagePath(slug)}`,
+      width: 1200,
+      height: 630,
+    },
     datePublished,
     dateModified: dateModified ?? datePublished,
     inLanguage: 'es-MX',

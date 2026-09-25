@@ -1,6 +1,17 @@
-import { useInView } from './useInView.js';
+import { useInView } from './use-in-view.js';
 
-const WORDS = ['Ventas', 'Gastos', 'Caja y turnos', 'Inventario', 'Fiado y cobranza', 'Estados NIF', 'Metas', 'Don Cuentas', 'Cortes', 'Excel'];
+const WORDS = [
+  'Ventas',
+  'Gastos',
+  'Caja y turnos',
+  'Inventario',
+  'Fiado y cobranza',
+  'Estados NIF',
+  'Metas',
+  'Don Cuentas',
+  'Cortes',
+  'Excel',
+];
 
 function X() {
   return (

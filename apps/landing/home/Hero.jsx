@@ -1,6 +1,6 @@
 import { HeroArt } from './HeroArt.jsx';
 import { Icon } from './icons.jsx';
-import { useInView } from './useInView.js';
+import { useInView } from './use-in-view.js';
 import { signupUrl } from '../landing/planes.js';
 
 const CHECKS = ['Gratis para siempre', 'Sin tarjeta', 'En español y en pesos'];

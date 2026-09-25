@@ -2,7 +2,7 @@
  *
  * Every loop starts from a negative delay so its paused first frame is a
  * finished-looking frame. A section's animations only run while it is on
- * screen: useInView sets data-inview on the [data-motion] element. */
+ * screen: useInView (use-in-view.js) sets data-inview on the [data-motion] element. */
 [data-motion]:not([data-inview='true']) *,
 [data-motion]:not([data-inview='true']) { animation-play-state: paused !important; }
 

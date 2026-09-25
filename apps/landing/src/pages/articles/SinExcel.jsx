@@ -127,8 +127,12 @@ export default function SinExcel() {
           fontWeight: 500,
         }}
       >
-        La diferencia clave entre una app de caja y Excel es que la app está diseñada para el
-        momento de la venta, no para el análisis posterior. Eso cambia todo:
+        La diferencia clave entre una{' '}
+        <a href="/#como" style={{ color: 'var(--black)' }}>
+          app de caja
+        </a>{' '}
+        y Excel es que la app está diseñada para el momento de la venta, no para el análisis
+        posterior. Eso cambia todo:
       </p>
       <ul
         style={{
@@ -143,7 +147,12 @@ export default function SinExcel() {
           'Registras desde el teléfono que ya tienes en la mano — sin abrir otro dispositivo.',
           'El formulario tiene 3 campos, no 12 columnas.',
           'Los totales se calculan solos — nunca hay un error de suma.',
-          'Funciona sin internet — si se cae el WiFi, sigues registrando.',
+          <>
+            <a href="/#por-que" style={{ color: 'var(--black)' }}>
+              Funciona sin internet
+            </a>{' '}
+            — si se cae el WiFi, sigues registrando.
+          </>,
         ].map((t, i) => (
           <li
             key={i}

@@ -242,9 +242,13 @@ export default function VsExcel() {
         }}
       >
         Si tardas 3 minutos por venta en Excel y tienes 30 ventas al día, son 90 minutos diarios
-        solo en captura. Con una app que procesa cada venta en 10 segundos, son 5 minutos. La
-        diferencia: 85 minutos al día — más de 35 horas al mes que puedes dedicar a atender
-        clientes, mejorar tu producto o simplemente descansar.
+        solo en captura, y{' '}
+        <a href="/#precios" style={{ color: 'var(--black)' }}>
+          empezar con Xangarro es gratis
+        </a>
+        . Con una app que procesa cada venta en 10 segundos, son 5 minutos. La diferencia: 85
+        minutos al día — más de 35 horas al mes que puedes dedicar a atender clientes, mejorar tu
+        producto o simplemente descansar.
       </p>
 
       <RelatedGuides slug="vs-excel" />

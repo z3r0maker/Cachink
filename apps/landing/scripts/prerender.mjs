@@ -20,6 +20,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { ROUTES } from '../src/routes.js';
 import { PLANES } from '../landing/planes.js';
+import { ARTICLE_BY_SLUG, ogImagePath } from '../src/articles.js';
 import { SOCIAL_PROFILES } from '../landing/social.js';
 import {
   checkCrawlerFiles,
@@ -97,6 +98,21 @@ for (const route of ROUTES) {
     /(<meta name="twitter:description"\s+content=")[^"]*(")/,
     `$1${route.description}$2`,
   );
+
+  // A guide gets its own social card (generated into public/og/ by generate-og.mjs)
+  const slug = route.path.match(/^\/recursos\/([a-z-]+)\/$/)?.[1];
+  const article = slug && ARTICLE_BY_SLUG[slug];
+  if (article) {
+    for (const ext of ['webp', 'png']) {
+      const file = resolve(root, 'public', ogImagePath(slug, ext).slice(1));
+      if (!existsSync(file))
+        failures.push(
+          `✗  ${route.path} — missing social card ${file}; run scripts/generate-og.mjs`,
+        );
+      html = html.replaceAll(`${SITE_URL}/og-image.${ext}`, `${SITE_URL}${ogImagePath(slug, ext)}`);
+    }
+    html = html.replaceAll('Xangarro! — Tu caja, clara. Cada día.', `${article.title} · Xangarro`);
+  }
 
   // A page that must not be indexed (the 404) says so and carries no canonical
   if (route.index === false) {

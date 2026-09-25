@@ -105,6 +105,14 @@
     NIF guide links CINIF and SAT; Offers carry their signup URL and `operatingSystem` says «Web»;
     a branded `404.html` (noindex, no canonical, kept out of the sitemap); the two FAQ answers over
     60 words are trimmed and the build now fails past 60 (`checkFaqLengths`).
+- Done (round 2, code): 2026-09-24 · every guide has its own social card — `scripts/generate-og.mjs`
+  (now a driver over `scripts/og-card.mjs`) renders `public/og/<slug>.{png,webp}` from `src/articles.js`,
+  committed because the build server lacks the font; the prerender puts it in `og:image` /
+  `twitter:image` with the guide's title as alt and fails when a card is missing; the Article
+  schema carries it as `image` (Google's article rich result needs one). A `WebSite` node joins the
+  home graph. The portal's two indexable pages, `/login` and `/signup`, have their own title and
+  description. Each guide links into the home section it argues for (`/#portal`, `/#por-que`,
+  `/#como`, `/#precios`). `home/useInView.js` → `use-in-view.js`, so the landing lints clean.
 - **Round 2 (needs the owner):** an author name and one-line bio for the guides' byline and a
   Person node; content for an «Acerca de» page; customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the

@@ -167,7 +167,11 @@ export default function ErroresCaja() {
         }}
       >
         La solución no es más disciplina — es un sistema que haga el registro tan rápido que sea más
-        fácil hacerlo que no hacerlo. Menos de 5 segundos por venta es el objetivo.
+        fácil hacerlo que no hacerlo. Menos de 5 segundos por venta es el objetivo, con el{' '}
+        <a href="/#portal" style={{ color: 'var(--black)' }}>
+          corte de turno y el fiado
+        </a>{' '}
+        ya resueltos.
       </p>
 
       <RelatedGuides slug="errores-caja" />

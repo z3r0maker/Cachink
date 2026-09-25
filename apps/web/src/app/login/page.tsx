@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { readSession } from '@/server/session';
@@ -5,6 +6,13 @@ import { readSession } from '@/server/session';
 import { LoginDoor } from './door';
 import { LoginForm } from './form';
 import { PUERTA_DUENO } from './puertas';
+
+/** One of the two portal pages a search engine may index (see app/robots.ts). */
+export const metadata: Metadata = {
+  title: 'Iniciar sesión · Xangarro',
+  description:
+    'Entra al portal de Xangarro para ver tu caja, tus ventas y tus estados financieros NIF. Si aún no tienes cuenta, créala gratis en un minuto.',
+};
 
 /**
  * Sign in.

@@ -194,9 +194,12 @@ export default function NIF() {
           fontWeight: 500,
         }}
       >
-        Con Xangarro, el estado de resultados mensual en formato NIF se genera automáticamente a
-        partir de tus registros diarios. No tienes que aprender contabilidad — solo registrar cada
-        venta y egreso como siempre, y la app hace el resto.
+        Con Xangarro, el{' '}
+        <a href="/#portal" style={{ color: 'var(--black)' }}>
+          estado de resultados mensual en formato NIF
+        </a>{' '}
+        se genera automáticamente a partir de tus registros diarios. No tienes que aprender
+        contabilidad — solo registrar cada venta y egreso como siempre, y la app hace el resto.
       </p>
 
       <RelatedGuides slug="nif" />
