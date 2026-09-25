@@ -42,6 +42,36 @@ async function waitForHydration(page: Page): Promise<void> {
     .locator('next-route-announcer')
     .waitFor({ state: 'attached', timeout: 3_000 })
     .catch(() => undefined);
+  await waitForPageHydration(page);
+}
+
+/**
+ * The page under the portal's loading boundary hydrates on its own schedule.
+ *
+ * `(portal)/loading.tsx` (DonCargando, ADR-107) wraps every page in a Suspense
+ * boundary, and React hydrates a boundary after the root: the route announcer
+ * is there while the page's form is still inert, and a fill in that window is
+ * reset when the boundary hydrates — `/saldos-iniciales` answered «Revisa
+ * estos datos: fechaApertura» and `/inventario-inicial` dropped its .csv that
+ * way. React attaches a `__reactFiber$…` key to every element it hydrates, so
+ * the page is live once the loading screen is gone and every element in `main`
+ * carries one. Best effort, like
+ * the announcer: a page with no `main` passes at once, and after ten seconds
+ * (a cold dev-server compile) the wait gives up quietly.
+ */
+async function waitForPageHydration(page: Page): Promise<void> {
+  await page
+    .waitForFunction(
+      () => {
+        // Still on DonCargando: the page has not even arrived.
+        if (document.querySelector('[data-cargando]') !== null) return false;
+        const nodes = Array.from(document.querySelectorAll('main, main *'));
+        return nodes.every((n) => Object.keys(n).some((k) => k.startsWith('__reactFiber$')));
+      },
+      undefined,
+      { timeout: 10_000 },
+    )
+    .catch(() => undefined);
 }
 
 const hydrated = base.extend({

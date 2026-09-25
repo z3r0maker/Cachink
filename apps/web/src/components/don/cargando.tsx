@@ -31,7 +31,7 @@ function useFrase(): string {
 export function DonCargando() {
   const frase = useFrase();
   return (
-    <div role="status" aria-live="polite">
+    <div role="status" aria-live="polite" data-cargando="">
       <div className={s.track} aria-hidden="true">
         <span className={s.bar} />
       </div>
