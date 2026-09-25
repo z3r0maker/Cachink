@@ -55,7 +55,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     includesLabel: 'Incluye',
     emphasis: false,
     features: [
-      on('1 usuario'),
+      on('Dueño + 1 empleado (1 dispositivo)'),
       on('Registro de ventas y gastos'),
       on('Hasta 300 transacciones al mes'),
       on('Catálogo de hasta 50 productos'),
@@ -73,7 +73,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     includesLabel: 'Todo en Xangarrito, más:',
     emphasis: true,
     features: [
-      on('2 usuarios (dueño + empleado)'),
+      on('Dueño + 2 empleados (2 dispositivos)'),
       on('Catálogo de hasta 1 000 productos'),
       on('Escaneo de código de barras'),
       on('Estados financieros NIF (B-2, B-3, B-6)'),
@@ -90,7 +90,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     includesLabel: 'Todo en Xangarro, más:',
     emphasis: false,
     features: [
-      on('5 usuarios'),
+      on('Dueño + 5 empleados (5 dispositivos)'),
       on('Hasta 30 000 transacciones al mes'),
       on('Catálogo de hasta 5 000 productos'),
       on('Multi-sucursal (próximamente)'),

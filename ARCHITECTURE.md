@@ -145,6 +145,7 @@ Links to discussion, docs, prior art.
 | [103](#adr-103) | 2026-09-24 | The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial` | Accepted |
 | [104](#adr-104) | 2026-09-23 | The layer boundaries are enforced for real, and the rule table is reconciled with the code | Accepted |
 | [105](#adr-105) | 2026-09-24 | No free trial: a plan is either free (Xangarrito) or paid from day one | Accepted |
+| [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7230,3 +7231,46 @@ it: Xangarrito is the free way to try Xangarro, and the paid tiers are paid.
   `trialDays` mapping, and the backoffice `extend_trial` override. Remove them in
   a later cleanup once no subscription is `trialing`.
 - Stripe prices need no change; trials were set per Checkout session, not on the price.
+
+## ADR-106
+
+**Title:** Each plan is «dueño + N empleados»: N linked devices and N + 1 operators
+
+**Date:** 2026-09-24
+
+**Status:** Accepted — owner decision of 2026-09-24 (landing redesign); amends the
+«devices equal operators» rule of `PLAN_LIMITS`
+
+**Context**
+
+The plans were sold as 1 / 2 / 5 operators, and `PLAN_LIMITS` kept devices equal
+to operators. «2 operadores (dueño + empleado)» meant an owner who works the
+counter spends one of the two seats. The redesigned landing and the portal's plan
+cards now say «Dueño + 1 empleado», «Dueño + 2 empleados», «Dueño + 5 empleados»,
+each with that many linked devices, and the owner decided that the owner is not
+counted against the employees.
+
+**Decision**
+
+- `devices` stays 1 / 2 / 5: one linked device per employee.
+- `operators` becomes 2 / 3 / 6: the employees plus one NIP for the owner, so an
+  owner who cobra never takes an employee's seat. The invariant is now
+  `operators = devices + 1`, pinned by `plan.test.ts`.
+- The onboarding suggestion (`planSatisfies`) keeps requiring both an operator and
+  a device per person who cobra; devices are now the tighter limit, so the plan it
+  suggests does not change.
+
+**Alternatives considered**
+
+- *Employees only (1 / 2 / 5 operators, owner portal-only).* Rejected: owners of
+  small businesses cobran themselves, and a NIP is how the caja knows who sold.
+- *Copy only.* Rejected: the page would promise a seat the entitlement refuses.
+
+**Consequences**
+
+- Every surface reads `PLAN_LIMITS`, so the portal (Equipo, Suscripción), the
+  backoffice tenant view, the signed entitlement and the phones pick the new
+  numbers up without further change.
+- `e2e/operators.spec.ts` changes shape: the seeded tenant (Xangarro, Ana and Luis)
+  starts at «2 de 3 operadores»; adding a third fills it.
+- The design files still say «operadores»; they follow this ADR.

@@ -7,10 +7,10 @@ import { SERIAL_TAG, SHARED_BIZ } from './shared-tenant';
 /**
  * Operator management (B-13 / P-05), end to end.
  *
- * Taquería Don Pedro is seeded at its plan's allowance — Xangarro includes 2
- * operators and the seed has Ana and Luis — so "Nuevo operador" starts
- * disabled, and the only way to add someone is to deactivate someone first.
- * That is the rule, exercised through the portal rather than asserted about it.
+ * Taquería Don Pedro is on Xangarro — dueño + 2 empleados, so 3 operator seats
+ * (ADR-106) — and the seed has Ana and Luis. Adding Rosa fills the allowance and
+ * disables "Nuevo operador"; deactivating someone frees a seat again. That is
+ * the rule, exercised through the portal rather than asserted about it.
  *
  * Every test mutates the demo business's operators, so every test is `@serial`:
  * the `serial` project runs the file once, after the viewport projects have
@@ -46,21 +46,15 @@ const card = (page: Page, nombre: string) =>
     .last();
 
 test(
-  'a full allowance is freed by deactivating, and a new operator takes the slot',
+  'a new operator fills the allowance, and deactivating frees a seat',
   { tag: SERIAL_TAG },
   async ({ page }) => {
     await page.goto('/equipo');
-    await expect(page.getByText('2 de 2 operadores')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Nuevo operador' })).toBeDisabled();
+    await expect(page.getByText('2 de 3 operadores')).toBeVisible();
 
     const before = await usersLogged();
 
-    // Free a slot.
-    await card(page, 'Luis Ortega').getByRole('button', { name: 'Desactivar' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
-    await expect(page.getByText('1 de 2 operadores')).toBeVisible();
-
-    // Take it.
+    // Take the free seat.
     await page.getByRole('button', { name: 'Nuevo operador' }).click();
     await page.getByTestId('operador-nombre').fill('Rosa Medina');
     await page.getByTestId('operador-pin').fill('4321');
@@ -70,8 +64,15 @@ test(
     await expect(page.getByText('Los dos NIP no coinciden.')).toBeVisible();
     await page.getByTestId('operador-pin-confirmar').fill('4321');
     await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
-    await expect(page.getByText('2 de 2 operadores')).toBeVisible();
+    await expect(page.getByText('3 de 3 operadores')).toBeVisible();
     await expect(page.locator('main').getByText('Rosa Medina', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nuevo operador' })).toBeDisabled();
+
+    // Free one again.
+    await card(page, 'Luis Ortega').getByRole('button', { name: 'Desactivar' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
+    await expect(page.getByText('2 de 3 operadores')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nuevo operador' })).toBeEnabled();
 
     // The PIN is stored hashed and verifies; and both writes reached sync_log,
     // because every phone pulls `users` — a deactivation that never left the
