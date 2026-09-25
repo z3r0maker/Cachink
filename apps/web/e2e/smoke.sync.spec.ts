@@ -51,6 +51,7 @@ const next = (page: Page, label = 'Siguiente') =>
 
 /** Answer the wizard minimally: a giro on step 1, defaults onward. */
 async function wizardMinimo(page: Page): Promise<void> {
+  await next(page, '¡Va, empecemos!');
   await expect(page.getByText('Paso 1 de 8')).toBeVisible();
   await page.getByRole('radio', { name: /Servicios/ }).click();
   await next(page);

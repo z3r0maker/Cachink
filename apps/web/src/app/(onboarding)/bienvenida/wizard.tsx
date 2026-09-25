@@ -4,10 +4,12 @@ import type { WizardAnswers } from '@xangarro/domain';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { Banner, Button, Card } from '@/components';
+import { Banner, Button } from '@/components';
 import { normalizeWhatsapp } from '@/onboarding/choices';
-import { OnboardingFrame, Progress } from '@/onboarding/ui/frame';
-import { actions, push, stack } from '@/onboarding/ui/onboarding.css';
+import { INTRO, donLine } from '@/onboarding/don-lines';
+import { Stage } from '@/onboarding/ui/stage';
+import * as intro from '@/onboarding/ui/intro.css';
+import * as s from '@/onboarding/ui/stage.css';
 import { StepBody } from '@/onboarding/ui/steps-preguntas';
 import { STEPS, TOTAL_STEPS, stepLabel } from '@/onboarding/wizard-steps';
 import { guardarPaso } from '@/server/actions/onboarding';
@@ -22,6 +24,8 @@ export interface WizardProps {
   readonly initial: WizardAnswers;
   /** Where the last step goes: "Tu plan ideal", or the N-15 review. */
   readonly next: string;
+  /** First run only: Don Cuentas introduces himself before question 1. */
+  readonly intro?: boolean;
 }
 
 /** Blank text is "no answer", not an empty string the schema would refuse. */
@@ -68,39 +72,82 @@ function useWizard(props: WizardProps) {
   return { answers, index, draft, error, pending, save, set, back };
 }
 
+/** Before the first question: Don Cuentas says hi and says what's coming. */
+function Intro({ onStart }: { readonly onStart: () => void }) {
+  return (
+    <Stage
+      fase="Platícanos de ti"
+      paso={`${TOTAL_STEPS} preguntas`}
+      done={0}
+      total={TOTAL_STEPS}
+      don={INTRO}
+    >
+      <span className={s.eyebrow}>Antes de empezar</span>
+      <h1 className={s.question}>Platícanos de ti</h1>
+      <p className={s.hint}>
+        Te voy a hacer {TOTAL_STEPS} preguntas para acomodar Xangarro a tu changarro. Son rápidas,
+        puedes omitir cualquiera y cambiarla después en Mi negocio.
+      </p>
+      <ol className={intro.temario} aria-label="Lo que te vamos a preguntar">
+        {STEPS.map((step, i) => (
+          <li key={step.title} className={intro.tema}>
+            <span className={intro.temaNum} aria-hidden="true">
+              {i + 1}
+            </span>
+            {step.title}
+          </li>
+        ))}
+      </ol>
+      <div className={intro.introActions}>
+        <Button size="lg" onClick={onStart} autoFocus>
+          ¡Va, empecemos!
+        </Button>
+        <span className={s.muted}>Te toma como 2 minutos.</span>
+      </div>
+    </Stage>
+  );
+}
+
+function Actions({ w }: { readonly w: ReturnType<typeof useWizard> }) {
+  return (
+    <div className={s.actions}>
+      {w.index > 0 ? (
+        <Button variant="ghost" onClick={w.back} disabled={w.pending}>
+          Atrás
+        </Button>
+      ) : null}
+      <span className={s.push} />
+      <Button variant="secondary" onClick={() => w.save(true)} disabled={w.pending}>
+        Omitir
+      </Button>
+      <Button onClick={() => w.save(false)} disabled={w.pending} data-testid="wizard-next">
+        {w.index === TOTAL_STEPS - 1 ? 'Terminar' : 'Siguiente'}
+      </Button>
+    </div>
+  );
+}
+
 export function Wizard(props: WizardProps) {
   const w = useWizard(props);
+  const [started, setStarted] = useState(!props.intro);
+  if (!started) return <Intro onStart={() => setStarted(true)} />;
   const step = STEPS[w.index];
   return (
-    <OnboardingFrame
-      title="Platícanos de ti"
-      subtitle="Ocho preguntas rápidas. Puedes omitir cualquiera."
+    <Stage
+      fase="Platícanos de ti"
+      paso={stepLabel(w.index)}
+      done={w.index}
+      total={TOTAL_STEPS}
+      don={donLine(w.index)}
     >
-      <Progress value={w.index + 1} max={TOTAL_STEPS} label={stepLabel(w.index)} />
-      <Card>
-        <div className={stack}>
-          <div>
-            <h2 style={{ margin: 0 }}>{step?.title}</h2>
-            <p style={{ margin: '4px 0 0' }}>{step?.hint}</p>
-          </div>
-          <StepBody index={w.index} draft={w.draft} stored={w.answers} set={w.set} />
-          {w.error ? <Banner tone="critical" title={w.error} /> : null}
-          <div className={actions}>
-            {w.index > 0 ? (
-              <Button variant="ghost" onClick={w.back} disabled={w.pending}>
-                Atrás
-              </Button>
-            ) : null}
-            <span className={push} />
-            <Button variant="secondary" onClick={() => w.save(true)} disabled={w.pending}>
-              Omitir
-            </Button>
-            <Button onClick={() => w.save(false)} disabled={w.pending} data-testid="wizard-next">
-              {w.index === TOTAL_STEPS - 1 ? 'Terminar' : 'Siguiente'}
-            </Button>
-          </div>
-        </div>
-      </Card>
-    </OnboardingFrame>
+      <span className={s.eyebrow}>Pregunta {w.index + 1}</span>
+      <h1 className={s.question}>{step?.title}</h1>
+      {step?.hint ? <p className={s.hint}>{step.hint}</p> : null}
+      <div className={s.answers}>
+        <StepBody index={w.index} draft={w.draft} stored={w.answers} set={w.set} />
+      </div>
+      {w.error ? <Banner tone="critical" title={w.error} /> : null}
+      <Actions w={w} />
+    </Stage>
   );
 }

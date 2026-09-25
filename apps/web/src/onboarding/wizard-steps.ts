@@ -55,7 +55,7 @@ export const STEPS: readonly StepDef[] = [
   },
   {
     title: '¿Cuántas personas cobran en tu negocio?',
-    hint: 'Cada una usa su propio teléfono.',
+    hint: 'Cada una con su propia caja y su NIP.',
     keys: ['personasQueCobran'],
   },
 ];

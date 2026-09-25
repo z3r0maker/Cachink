@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
+import { colors, portalFontSizes, typography } from '@xangarro/tokens';
 
 /**
  * The onboarding pages: one centred column on the yellow-soft ground, no
@@ -47,16 +47,6 @@ export const actions = style({
 });
 
 export const push = style({ marginLeft: 'auto' });
-
-export const track = style({
-  height: 14,
-  background: colors.white,
-  border: `2px solid ${colors.black}`,
-  borderRadius: radii[0],
-  overflow: 'hidden',
-});
-
-export const fill = style({ display: 'block', height: '100%', background: colors.yellow });
 
 export const note = style({
   margin: 0,

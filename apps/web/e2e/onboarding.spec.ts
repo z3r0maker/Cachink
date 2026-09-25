@@ -13,6 +13,7 @@ async function next(page: Page, label = 'Siguiente') {
 }
 
 async function answerWizard(page: Page) {
+  await next(page, '¡Va, empecemos!');
   await expect(page.getByText('Paso 1 de 8')).toBeVisible();
   await expect(page.getByTestId('wizard-nombre')).toHaveValue('Tortas Lupita');
   await page.getByRole('radio', { name: /Servicios/ }).click();
