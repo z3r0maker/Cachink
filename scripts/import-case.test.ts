@@ -38,6 +38,15 @@ function sources(): readonly string[] {
   return out.split('\n').filter((f) => f !== '' && !f.includes('node_modules/'));
 }
 
+/** The file's text, or null when the index lists a path that is no longer there. */
+function leer(file: string): string | null {
+  try {
+    return readFileSync(join(REPO, file), 'utf8');
+  } catch {
+    return null;
+  }
+}
+
 /** The path as the filesystem really spells it, or undefined if any segment differs. */
 function spelledExactly(path: string): boolean {
   let at = REPO;
@@ -84,7 +93,12 @@ describe('import case', () => {
     () => {
       const wrong: string[] = [];
       for (const file of sources()) {
-        const text = readFileSync(join(REPO, file), 'utf8');
+        // `git ls-files` lists what the index holds, which during an
+        // uncommitted deletion or a half-finished rebase is not what is on
+        // disk. A file that is gone has no imports to check — it must not
+        // crash the sweep for every other file.
+        const text = leer(file);
+        if (text === null) continue;
         for (const [, specifier] of text.matchAll(IMPORT)) {
           if (specifier === undefined) continue;
           const real = offender(file, specifier);
