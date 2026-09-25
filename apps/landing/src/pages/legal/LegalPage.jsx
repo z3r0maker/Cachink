@@ -60,7 +60,8 @@ function cellStyle(head) {
 
 function Block({ block }) {
   if (block.type === 'heading') {
-    const Tag = `h${Math.min(block.level + 1, 4)}`;
+    // The document's `#` title is the page's H1; deeper levels keep their rank.
+    const Tag = `h${Math.min(block.level, 4)}`;
     return (
       <Tag style={{ marginTop: block.level === 1 ? 0 : 28 }}>
         <Inline text={block.text} />

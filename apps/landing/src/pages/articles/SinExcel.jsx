@@ -1,12 +1,37 @@
-import { buildArticleSchema } from '../../structured-data.js';
+import { buildHowToSchema } from '../../structured-data.js';
+import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
 
-const schema = buildArticleSchema({
-  slug: 'sin-excel',
-  title: 'Cómo llevar la caja de tu negocio sin Excel',
-  description:
-    'Guía práctica para dueños de pequeños negocios en México que quieren dejar de usar hojas de cálculo y llevar un control de caja más rápido, preciso y sin errores.',
-  datePublished: '2026-05-09',
-});
+/** The week plan: the visible steps and the HowTo schema read the same list. */
+const PASOS = [
+  {
+    n: '01',
+    t: 'Lunes: descarga la app y registra solo las ventas del día',
+    d: 'No migres datos históricos. Empieza hoy. El objetivo es que el equipo se acostumbre al flujo: monto, concepto, método de pago.',
+  },
+  {
+    n: '02',
+    t: 'Martes y miércoles: agrega los egresos',
+    d: 'Proveedores, servicios, nómina. Cada gasto tiene su registro. No te preocupes por categorías perfectas al inicio.',
+  },
+  {
+    n: '03',
+    t: 'Jueves: revisa el corte del día',
+    d: 'Compara el efectivo real en tu caja con lo que dice la app. Si cuadra, vas bien. Si no, hay un registro faltante — la app te ayuda a encontrarlo.',
+  },
+  {
+    n: '04',
+    t: 'Viernes: genera tu primer reporte',
+    d: 'La semana completa: total de ventas, desglose por método de pago, total de egresos, utilidad bruta. En un toque.',
+  },
+];
+
+const schema = articleSchema('sin-excel', [
+  buildHowToSchema({
+    slug: 'sin-excel',
+    name: 'Cómo hacer la transición en una semana',
+    steps: PASOS.map((s) => ({ name: s.t, text: s.d })),
+  }),
+]);
 
 export default function SinExcel() {
   return (
@@ -19,55 +44,7 @@ export default function SinExcel() {
         color: 'var(--black)',
       }}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-
-      <a
-        href="/recursos/"
-        style={{
-          fontSize: 13,
-          fontWeight: 700,
-          color: 'var(--gray-600)',
-          textDecoration: 'none',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        ← Recursos
-      </a>
-
-      <div
-        style={{
-          display: 'inline-block',
-          background: 'var(--yellow)',
-          border: '2px solid var(--black)',
-          borderRadius: 8,
-          padding: '4px 10px',
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginTop: 24,
-          marginBottom: 16,
-        }}
-      >
-        Guía práctica
-      </div>
-
-      <h1
-        style={{
-          fontSize: 'clamp(32px, 6vw, 52px)',
-          fontWeight: 900,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.05,
-          margin: '0 0 20px',
-          color: 'var(--black)',
-        }}
-      >
-        Cómo llevar la caja de tu negocio sin Excel
-      </h1>
+      <ArticleHeader slug="sin-excel" schema={schema} />
 
       <p
         style={{
@@ -181,30 +158,10 @@ export default function SinExcel() {
         Cómo hacer la transición en una semana
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: '0 0 32px' }}>
-        {[
-          {
-            n: '01',
-            t: 'Lunes: descarga la app y registra solo las ventas del día',
-            d: 'No migres datos históricos. Empieza hoy. El objetivo es que el equipo se acostumbre al flujo: monto, concepto, método de pago.',
-          },
-          {
-            n: '02',
-            t: 'Martes y miércoles: agrega los egresos',
-            d: 'Proveedores, servicios, nómina. Cada gasto tiene su registro. No te preocupes por categorías perfectas al inicio.',
-          },
-          {
-            n: '03',
-            t: 'Jueves: revisa el corte del día',
-            d: 'Compara el efectivo real en tu caja con lo que dice la app. Si cuadra, vas bien. Si no, hay un registro faltante — la app te ayuda a encontrarlo.',
-          },
-          {
-            n: '04',
-            t: 'Viernes: genera tu primer reporte',
-            d: 'La semana completa: total de ventas, desglose por método de pago, total de egresos, utilidad bruta. En un toque.',
-          },
-        ].map((s, i) => (
+        {PASOS.map((s, i) => (
           <div
             key={i}
+            id={`paso-${i + 1}`}
             style={{
               background: i % 2 === 0 ? 'var(--yellow)' : 'var(--offwhite)',
               border: '2px solid var(--black)',
@@ -265,58 +222,11 @@ export default function SinExcel() {
         negocio.
       </p>
 
-      <div
-        style={{
-          background: 'var(--yellow)',
-          border: '2.5px solid var(--black)',
-          borderRadius: 16,
-          boxShadow: '6px 6px 0 var(--black)',
-          padding: '28px 32px',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            color: 'var(--black)',
-            marginBottom: 10,
-          }}
-        >
-          Xangarro · crea tu cuenta hoy
-        </div>
-        <p
-          style={{
-            fontSize: 15,
-            fontWeight: 500,
-            color: 'var(--ink)',
-            margin: '0 0 20px',
-            lineHeight: 1.5,
-          }}
-        >
-          Empieza gratis con Xangarrito y crece cuando tu negocio crezca.
-        </p>
-        <a
-          href="https://app.xangarro.mx/signup?plan=xangarrito"
-          style={{
-            display: 'inline-block',
-            background: 'var(--black)',
-            color: 'var(--yellow)',
-            fontWeight: 800,
-            fontSize: 14,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '14px 24px',
-            borderRadius: 12,
-            border: '2px solid var(--black)',
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.25)',
-            textDecoration: 'none',
-          }}
-        >
-          Unirme a la lista →
-        </a>
-      </div>
+      <RelatedGuides slug="sin-excel" />
+      <ArticleCta
+        title="Xangarro · crea tu cuenta hoy"
+        text="Empieza gratis con Xangarrito y crece cuando tu negocio crezca."
+      />
     </article>
   );
 }

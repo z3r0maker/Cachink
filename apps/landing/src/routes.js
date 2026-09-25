@@ -4,7 +4,9 @@
  * card), sitemap.xml and the smoke test that proves each page rendered.
  *
  * `sources` are the paths (relative to apps/landing) whose last commit dates
- * the page's `<lastmod>`; `type` picks the Open Graph object type.
+ * the page's `<lastmod>`; `type` picks the Open Graph object type. A route
+ * with `index: false` is written but kept out of the sitemap and marked
+ * noindex; `outFile` names the file when it is not index.html.
  */
 export const ROUTES = [
   {
@@ -106,5 +108,16 @@ export const ROUTES = [
     changefreq: 'monthly',
     priority: '0.3',
     sources: ['src/pages/legal', '../../docs/legal/aviso/arco-procedimiento.md'],
+  },
+  {
+    path: '/404',
+    outDir: 'dist',
+    outFile: '404.html',
+    title: 'Página no encontrada · Xangarro',
+    description: 'Esa página no existe. Vuelve al inicio o a las guías para pequeños negocios.',
+    smoke: 'Esa página no existe',
+    type: 'website',
+    index: false,
+    sources: ['src/pages/NotFound.jsx'],
   },
 ];

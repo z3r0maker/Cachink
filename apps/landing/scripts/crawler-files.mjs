@@ -21,18 +21,20 @@ export function lastmodFor(root, sources, today) {
   }
 }
 
-export function buildSitemap(routes, siteUrl, root, today = new Date().toISOString().slice(0, 10)) {
-  const urls = routes.map((r) => {
-    const lastmod = lastmodFor(root, r.sources, today);
-    return [
+/** Only the routes a crawler should index appear in the sitemap. */
+export const indexable = (routes) => routes.filter((r) => r.index !== false);
+
+export function buildSitemap(routes, siteUrl, lastmod) {
+  const urls = indexable(routes).map((r) =>
+    [
       '  <url>',
       `    <loc>${siteUrl}${r.path}</loc>`,
-      `    <lastmod>${lastmod}</lastmod>`,
+      `    <lastmod>${lastmod[r.path]}</lastmod>`,
       `    <changefreq>${r.changefreq}</changefreq>`,
       `    <priority>${r.priority}</priority>`,
       '  </url>',
-    ].join('\n');
-  });
+    ].join('\n'),
+  );
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -43,10 +45,17 @@ export function buildSitemap(routes, siteUrl, root, today = new Date().toISOStri
 }
 
 /** Writes the three files into dist and returns what a caller should assert on. */
-export function writeCrawlerFiles({ root, siteUrl, routes, buildLlmsTxt, buildLlmsFullTxt }) {
+export function writeCrawlerFiles({
+  root,
+  siteUrl,
+  routes,
+  lastmod,
+  buildLlmsTxt,
+  buildLlmsFullTxt,
+}) {
   const dist = resolve(root, 'dist');
   const files = {
-    'sitemap.xml': buildSitemap(routes, siteUrl, root),
+    'sitemap.xml': buildSitemap(routes, siteUrl, lastmod),
     'llms.txt': buildLlmsTxt(siteUrl),
     'llms-full.txt': buildLlmsFullTxt(siteUrl),
   };
@@ -73,7 +82,7 @@ export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profile
     ...missing(
       'sitemap.xml',
       files['sitemap.xml'],
-      routes.map((r) => `<loc>${siteUrl}${r.path}</loc>`),
+      indexable(routes).map((r) => `<loc>${siteUrl}${r.path}</loc>`),
       'route',
     ),
     ...missing('llms.txt', files['llms.txt'], nombres, 'plan'),
@@ -106,4 +115,14 @@ export function checkHeadLengths(routes) {
       ? [`✗  ${r.path} — description is ${r.description.length} chars (max ${DESCRIPTION_MAX})`]
       : []),
   ]);
+}
+
+/** A featured snippet or voice answer lifts about 60 words; a longer FAQ answer is never picked whole. */
+export const FAQ_ANSWER_MAX_WORDS = 60;
+
+export function checkFaqLengths(faq) {
+  return faq
+    .map(({ q, a }) => ({ q, n: a.trim().split(/\s+/).length }))
+    .filter(({ n }) => n > FAQ_ANSWER_MAX_WORDS)
+    .map(({ q, n }) => `✗  FAQ "${q}" — answer is ${n} words (max ${FAQ_ANSWER_MAX_WORDS})`);
 }

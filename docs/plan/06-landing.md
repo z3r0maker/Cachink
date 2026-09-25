@@ -90,3 +90,22 @@
 - Done: 2026-09-24 · every title is ≤ 60 characters and every description ≤ 155 (the home
   description leads with Don Cuentas; the NIF, errores-caja and vs-excel titles shortened), and the
   prerender fails past those limits (`checkHeadLengths`).
+
+### L-07 SEO/GEO/AEO audit — round 1 (code-level findings)
+
+- [x] Status · **Blocked by:** —
+  - Done: 2026-09-24 · from the full audit (`scratchpad` report, scores SEO 7 · GEO 6 · AEO 7), every
+    finding that lives in code: the legal pages' document title is the H1; each guide shows
+    «Publicado / Actualizado» with the route's last commit date (`virtual:lastmod`, a Vite plugin
+    over the same `lastmodFor` the sitemap uses) and carries it as `dateModified`; the four guides
+    share one header, «Sigue leyendo» links and one CTA (`pages/articles/shared.jsx`, fed by
+    `src/articles.js`, which the Recursos index and the 404 also read) — the leftover «Unirme a la
+    lista» waitlist buttons and the stale «$149 MXN/mes» in the comparativa went with it; the
+    sin-excel week plan is a HowTo (steps anchored `#paso-n`); the five errores are an `<ol>`; the
+    NIF guide links CINIF and SAT; Offers carry their signup URL and `operatingSystem` says «Web»;
+    a branded `404.html` (noindex, no canonical, kept out of the sitemap); the two FAQ answers over
+    60 words are trimmed and the build now fails past 60 (`checkFaqLengths`).
+- **Round 2 (needs the owner):** an author name and one-line bio for the guides' byline and a
+  Person node; content for an «Acerca de» page; customer quotes once the beta yields them (Review
+  schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
+  NIF guide into a 1,200-word pillar with an example estado de resultados.

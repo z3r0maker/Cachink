@@ -1,12 +1,6 @@
-import { buildArticleSchema } from '../../structured-data.js';
+import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
 
-const schema = buildArticleSchema({
-  slug: 'errores-caja',
-  title: '5 errores comunes al registrar ventas en efectivo (y cómo evitarlos)',
-  description:
-    'Los errores más frecuentes que cometen los dueños de pequeños negocios al llevar el control de caja en efectivo, y cómo un sistema de registro simple los elimina.',
-  datePublished: '2026-05-09',
-});
+const schema = articleSchema('errores-caja');
 
 const errores = [
   {
@@ -52,55 +46,7 @@ export default function ErroresCaja() {
         color: 'var(--black)',
       }}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-
-      <a
-        href="/recursos/"
-        style={{
-          fontSize: 13,
-          fontWeight: 700,
-          color: 'var(--gray-600)',
-          textDecoration: 'none',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        ← Recursos
-      </a>
-
-      <div
-        style={{
-          display: 'inline-block',
-          background: 'var(--yellow)',
-          border: '2px solid var(--black)',
-          borderRadius: 8,
-          padding: '4px 10px',
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginTop: 24,
-          marginBottom: 16,
-        }}
-      >
-        Control de caja
-      </div>
-
-      <h1
-        style={{
-          fontSize: 'clamp(32px, 6vw, 52px)',
-          fontWeight: 900,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.05,
-          margin: '0 0 20px',
-          color: 'var(--black)',
-        }}
-      >
-        5 errores comunes al registrar ventas en efectivo (y cómo evitarlos)
-      </h1>
+      <ArticleHeader slug="errores-caja" schema={schema} />
 
       <p
         style={{
@@ -118,9 +64,18 @@ export default function ErroresCaja() {
         caja, todos evitables con un sistema simple.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 40 }}>
+      <ol
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+          margin: '0 0 40px',
+        }}
+      >
         {errores.map((e, i) => (
-          <div
+          <li
             key={i}
             style={{
               border: '2.5px solid var(--black)',
@@ -182,9 +137,9 @@ export default function ErroresCaja() {
                 {e.fix}
               </div>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
 
       <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
         La raíz de todos los errores
@@ -215,58 +170,11 @@ export default function ErroresCaja() {
         fácil hacerlo que no hacerlo. Menos de 5 segundos por venta es el objetivo.
       </p>
 
-      <div
-        style={{
-          background: 'var(--yellow)',
-          border: '2.5px solid var(--black)',
-          borderRadius: 16,
-          boxShadow: '6px 6px 0 var(--black)',
-          padding: '28px 32px',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            color: 'var(--black)',
-            marginBottom: 10,
-          }}
-        >
-          Registra cada venta en 3 segundos con Xangarro
-        </div>
-        <p
-          style={{
-            fontSize: 15,
-            fontWeight: 500,
-            color: 'var(--ink)',
-            margin: '0 0 20px',
-            lineHeight: 1.5,
-          }}
-        >
-          Crea tu cuenta gratis hoy — sin tarjeta, sin compromisos.
-        </p>
-        <a
-          href="https://app.xangarro.mx/signup?plan=xangarrito"
-          style={{
-            display: 'inline-block',
-            background: 'var(--black)',
-            color: 'var(--yellow)',
-            fontWeight: 800,
-            fontSize: 14,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '14px 24px',
-            borderRadius: 12,
-            border: '2px solid var(--black)',
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.25)',
-            textDecoration: 'none',
-          }}
-        >
-          Unirme a la lista →
-        </a>
-      </div>
+      <RelatedGuides slug="errores-caja" />
+      <ArticleCta
+        title="Registra cada venta en 3 segundos con Xangarro"
+        text="Crea tu cuenta gratis hoy — sin tarjeta, sin compromisos."
+      />
     </article>
   );
 }

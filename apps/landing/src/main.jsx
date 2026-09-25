@@ -30,9 +30,12 @@ async function mountApp() {
     Component = (await import('./pages/legal/Arco.jsx')).default;
   } else if (path === '/recursos') {
     Component = (await import('./pages/Recursos.jsx')).default;
-  } else {
-    // Default: home / landing page (with lazy below-fold sections)
+  } else if (path === '/') {
+    // Home / landing page (with lazy below-fold sections)
     Component = (await import('./App.jsx')).default;
+  } else {
+    // Anything else is served as dist/404.html; hydrate it as such, not as the home.
+    Component = (await import('./pages/NotFound.jsx')).default;
   }
 
   // UtmPassthrough wraps every route, not just the home page (N-57).

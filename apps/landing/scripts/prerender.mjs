@@ -21,7 +21,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROUTES } from '../src/routes.js';
 import { PLANES } from '../landing/planes.js';
 import { SOCIAL_PROFILES } from '../landing/social.js';
-import { checkCrawlerFiles, checkHeadLengths, writeCrawlerFiles } from './crawler-files.mjs';
+import {
+  checkCrawlerFiles,
+  checkFaqLengths,
+  checkHeadLengths,
+  writeCrawlerFiles,
+} from './crawler-files.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -47,7 +52,7 @@ console.log('SSR bundle complete.');
 
 // ── 2. Load SSR module ─────────────────────────────────────────────────────
 const serverBundle = pathToFileURL(resolve(root, 'dist/server/entry-server.js')).href;
-const { render, buildLlmsTxt, buildLlmsFullTxt, FAQ_ITEMS } = await import(serverBundle);
+const { render, buildLlmsTxt, buildLlmsFullTxt, FAQ_ITEMS, lastmod } = await import(serverBundle);
 
 // ── 3. Read base template ──────────────────────────────────────────────────
 const distHtml = resolve(root, 'dist/index.html');
@@ -93,10 +98,15 @@ for (const route of ROUTES) {
     `$1${route.description}$2`,
   );
 
+  // A page that must not be indexed (the 404) says so and carries no canonical
+  if (route.index === false) {
+    html = html.replace(/<link rel="canonical"[^>]*>/, '<meta name="robots" content="noindex">');
+  }
+
   // Write file
   const outDir = resolve(root, route.outDir);
   mkdirSync(outDir, { recursive: true });
-  const outFile = resolve(outDir, 'index.html');
+  const outFile = resolve(outDir, route.outFile ?? 'index.html');
   writeFileSync(outFile, html);
 
   // Smoke test
@@ -107,7 +117,7 @@ for (const route of ROUTES) {
     failures.push(`✗  ${route.path} — expected "${route.smoke}" not found in output`);
     console.error(`✗  ${route.path} smoke-test FAILED (missing: "${route.smoke}")`);
   } else {
-    console.log(`✓  ${route.path} → ${route.outDir}/index.html`);
+    console.log(`✓  ${route.path} → ${route.outDir}/${route.outFile ?? 'index.html'}`);
   }
 }
 
@@ -122,10 +132,11 @@ const files = writeCrawlerFiles({
   root,
   siteUrl: SITE_URL,
   routes: ROUTES,
+  lastmod,
   buildLlmsTxt,
   buildLlmsFullTxt,
 });
-const crawlerFailures = checkHeadLengths(ROUTES);
+const crawlerFailures = [...checkHeadLengths(ROUTES), ...checkFaqLengths(FAQ_ITEMS)];
 crawlerFailures.push(
   ...checkCrawlerFiles(files, {
     routes: ROUTES,

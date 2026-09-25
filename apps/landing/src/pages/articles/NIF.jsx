@@ -1,12 +1,6 @@
-import { buildArticleSchema } from '../../structured-data.js';
+import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
 
-const schema = buildArticleSchema({
-  slug: 'nif',
-  title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador',
-  description:
-    'Guía en lenguaje simple sobre los estados financieros en formato NIF que solicitan los contadores y bancos en México, y cómo generarlos desde tu app de caja.',
-  datePublished: '2026-05-09',
-});
+const schema = articleSchema('nif');
 
 export default function NIF() {
   return (
@@ -19,55 +13,7 @@ export default function NIF() {
         color: 'var(--black)',
       }}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-
-      <a
-        href="/recursos/"
-        style={{
-          fontSize: 13,
-          fontWeight: 700,
-          color: 'var(--gray-600)',
-          textDecoration: 'none',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        ← Recursos
-      </a>
-
-      <div
-        style={{
-          display: 'inline-block',
-          background: 'var(--yellow)',
-          border: '2px solid var(--black)',
-          borderRadius: 8,
-          padding: '4px 10px',
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginTop: 24,
-          marginBottom: 16,
-        }}
-      >
-        Finanzas en español
-      </div>
-
-      <h1
-        style={{
-          fontSize: 'clamp(32px, 6vw, 52px)',
-          fontWeight: 900,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.05,
-          margin: '0 0 20px',
-          color: 'var(--black)',
-        }}
-      >
-        Estados financieros NIF: qué son y cómo generarlos sin ser contador
-      </h1>
+      <ArticleHeader slug="nif" schema={schema} />
 
       <p
         style={{
@@ -99,10 +45,13 @@ export default function NIF() {
         }}
       >
         NIF son las siglas de <strong>Normas de Información Financiera</strong>, el estándar oficial
-        que regula cómo se presentan los estados financieros en México. Las emite el CINIF (Consejo
-        Mexicano de Normas de Información Financiera) y todos los contadores mexicanos las conocen.
-        Cuando tu contador te pide estados financieros "en formato NIF", te está pidiendo que la
-        información esté organizada de cierta manera — ni más ni menos.
+        que regula cómo se presentan los estados financieros en México. Las emite el{' '}
+        <a href="https://www.cinif.org.mx/" style={{ color: 'var(--black)' }}>
+          CINIF
+        </a>{' '}
+        (Consejo Mexicano de Normas de Información Financiera) y todos los contadores mexicanos las
+        conocen. Cuando tu contador te pide estados financieros "en formato NIF", te está pidiendo
+        que la información esté organizada de cierta manera — ni más ni menos.
       </p>
 
       <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
@@ -228,9 +177,13 @@ export default function NIF() {
         }}
       >
         El formato NIF no es capricho burocrático. Es el lenguaje común que permite a cualquier
-        contador — el tuyo, el del banco, el del SAT — entender la situación de tu negocio
-        rápidamente. Cuando le llegas con tu hoja de Excel o tu libreta, él tiene que rehacer todo
-        el trabajo de clasificación y cálculo, lo que tarda más y te cuesta más.
+        contador — el tuyo, el del banco, el del{' '}
+        <a href="https://www.sat.gob.mx/" style={{ color: 'var(--black)' }}>
+          SAT
+        </a>{' '}
+        — entender la situación de tu negocio rápidamente. Cuando le llegas con tu hoja de Excel o
+        tu libreta, él tiene que rehacer todo el trabajo de clasificación y cálculo, lo que tarda
+        más y te cuesta más.
       </p>
       <p
         style={{
@@ -246,58 +199,11 @@ export default function NIF() {
         venta y egreso como siempre, y la app hace el resto.
       </p>
 
-      <div
-        style={{
-          background: 'var(--yellow)',
-          border: '2.5px solid var(--black)',
-          borderRadius: 16,
-          boxShadow: '6px 6px 0 var(--black)',
-          padding: '28px 32px',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            color: 'var(--black)',
-            marginBottom: 10,
-          }}
-        >
-          Genera tus estados financieros NIF automáticamente
-        </div>
-        <p
-          style={{
-            fontSize: 15,
-            fontWeight: 500,
-            color: 'var(--ink)',
-            margin: '0 0 20px',
-            lineHeight: 1.5,
-          }}
-        >
-          La beta de Xangarro ya está abierta: crea tu cuenta gratis.
-        </p>
-        <a
-          href="https://app.xangarro.mx/signup?plan=xangarrito"
-          style={{
-            display: 'inline-block',
-            background: 'var(--black)',
-            color: 'var(--yellow)',
-            fontWeight: 800,
-            fontSize: 14,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '14px 24px',
-            borderRadius: 12,
-            border: '2px solid var(--black)',
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.25)',
-            textDecoration: 'none',
-          }}
-        >
-          Unirme a la lista →
-        </a>
-      </div>
+      <RelatedGuides slug="nif" />
+      <ArticleCta
+        title="Genera tus estados financieros NIF automáticamente"
+        text="La beta de Xangarro ya está abierta: crea tu cuenta gratis."
+      />
     </article>
   );
 }

@@ -15,7 +15,7 @@
 // FAQ_ITEMS is the single source of truth — also consumed by FAQAccordion
 import { FAQ_ITEMS } from '../landing/copy.jsx';
 // Plan prices/limits — same source as the visible pricing table (L-02)
-import { PLANES } from '../landing/planes.js';
+import { PLANES, signupUrl } from '../landing/planes.js';
 // Public profiles — the Organization's sameAs, the same list llms-full.txt names
 import { SOCIAL_PROFILES } from '../landing/social.js';
 
@@ -51,7 +51,8 @@ const softwareApplication = {
   '@id': `${SITE_URL}/#app`,
   name: 'Xangarro',
   applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web, iOS, Android',
+  // What ships today; the phone apps join when they are in the stores.
+  operatingSystem: 'Web',
   url: SITE_URL,
   description:
     'Plataforma de finanzas para pequeños negocios mexicanos: panaderías, cafeterías, tiendas de barrio y talleres. Registra ventas y egresos desde la web o la app, ve el estado de tu caja en tiempo real, y exporta estados financieros en formato NIF para tu contador.',
@@ -59,6 +60,7 @@ const softwareApplication = {
   offers: PLANES.map((p) => ({
     '@type': 'Offer',
     name: p.nombre,
+    url: signupUrl(p.id),
     price: String(p.mensual),
     priceCurrency: 'MXN',
     description: `${p.features.join('. ')}. Precios más IVA.`,
@@ -133,8 +135,16 @@ function breadcrumbs(id, leaf) {
   };
 }
 
-// Per-article schema builder — used by /recursos article pages
-export function buildArticleSchema({ slug, title, description, datePublished }) {
+// Per-article schema builder — used by /recursos article pages.
+// `dateModified` is the route's last commit date (virtual:lastmod); `extra` adds nodes such as a HowTo.
+export function buildArticleSchema({
+  slug,
+  title,
+  description,
+  datePublished,
+  dateModified,
+  extra = [],
+}) {
   const url = `${RECURSOS_URL}${slug}/`;
   const article = {
     '@type': 'Article',
@@ -142,7 +152,7 @@ export function buildArticleSchema({ slug, title, description, datePublished }) 
     headline: title,
     description,
     datePublished,
-    dateModified: datePublished,
+    dateModified: dateModified ?? datePublished,
     inLanguage: 'es-MX',
     url,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
@@ -151,7 +161,25 @@ export function buildArticleSchema({ slug, title, description, datePublished }) 
   };
   return {
     '@context': 'https://schema.org',
-    '@graph': [article, breadcrumbs(url, { name: title, item: url })],
+    '@graph': [article, breadcrumbs(url, { name: title, item: url }), ...extra],
+  };
+}
+
+/** A HowTo node for a guide's step sequence, to sit beside its Article. */
+export function buildHowToSchema({ slug, name, steps }) {
+  const url = `${RECURSOS_URL}${slug}/`;
+  return {
+    '@type': 'HowTo',
+    '@id': `${url}#howto`,
+    name,
+    inLanguage: 'es-MX',
+    step: steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      url: `${url}#paso-${i + 1}`,
+    })),
   };
 }
 

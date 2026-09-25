@@ -6,6 +6,7 @@ import AppSSR from './AppSSR.jsx';
 export { buildLlmsTxt } from './llms/short.js';
 export { buildLlmsFullTxt } from './llms/full.js';
 export { FAQ_ITEMS } from '../landing/copy.jsx';
+export { default as lastmod } from 'virtual:lastmod';
 
 /**
  * @param {string} [route='/'] — pathname to render, e.g. '/recursos/sin-excel/'

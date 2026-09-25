@@ -249,7 +249,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
 - `04-portal.md` — 5 abiertos (3 en curso, 0 bloqueados, 30 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
-- `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 4 hechos)
+- `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 5 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 44 abiertos (10 en curso, 0 bloqueados, 26 hechos)
