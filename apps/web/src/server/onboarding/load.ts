@@ -77,6 +77,14 @@ function pagosRevisados(json: string | null | undefined): boolean {
   return chosen.length !== METODOS_CONFIGURABLES.length;
 }
 
+/** Whether the business went through «Platícanos de ti» (the gate of P-36 D-2 applies only then). */
+export function wizardCompleted(businessId: string): Promise<boolean> {
+  return withTenant(businessId, async (tx) => {
+    const record = await pgOnboardingStore(tx, businessId).find();
+    return record?.completedAt != null;
+  });
+}
+
 export function loadChecklistSignals(businessId: string): Promise<ChecklistSignals> {
   return withTenant(businessId, async (tx) => {
     const c = { n: count() };

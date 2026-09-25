@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { buildChecklist } from '@/onboarding/checklist';
 import { GUIA_OMITIDA_COOKIE, debeIrALaGuia } from '@/onboarding/guia';
 import { currentSession } from '@/server/current-session';
-import { loadChecklistSignals } from '@/server/onboarding/load';
+import { loadChecklistSignals, wizardCompleted } from '@/server/onboarding/load';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
@@ -38,8 +38,10 @@ import { column, content, frame, main } from '@/shell/shell.css';
 async function guiaPrimero(role: string, businessId: string): Promise<void> {
   const omitida = (await cookies()).get(GUIA_OMITIDA_COOKIE) !== undefined;
   if (!debeIrALaGuia({ role, complete: false, omitida })) return;
-  const complete = await loadChecklistSignals(businessId)
-    .then((signals) => buildChecklist(signals).complete)
+  // Only a business that finished the wizard is walked; a seeded or older one is not.
+  const complete = await wizardCompleted(businessId)
+    .then((wizard) => (wizard ? loadChecklistSignals(businessId) : null))
+    .then((signals) => signals === null || buildChecklist(signals).complete)
     .catch(() => true);
   if (debeIrALaGuia({ role, complete, omitida })) redirect('/como-empiezo');
 }
