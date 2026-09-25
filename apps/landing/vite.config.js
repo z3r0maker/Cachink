@@ -1,5 +1,12 @@
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+
+import { ROUTES } from './src/routes.js';
+import { lastmodMap } from './scripts/crawler-files.mjs';
+
+const root = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -21,7 +28,7 @@ export default defineConfig(({ mode }) => {
     : '';
 
   return {
-    plugins: [react(), htmlEnvPlugin({ siteUrl, plausibleSnippet, geoPixel })],
+    plugins: [react(), htmlEnvPlugin({ siteUrl, plausibleSnippet, geoPixel }), lastmodPlugin()],
     publicDir: 'public',
     build: {
       outDir: 'dist',
@@ -39,6 +46,26 @@ function htmlEnvPlugin({ siteUrl, plausibleSnippet, geoPixel }) {
         .replace(/__SITE_URL__/g, siteUrl)
         .replace(/__PLAUSIBLE_SNIPPET__/g, plausibleSnippet)
         .replace(/__GEO_PIXEL__/g, geoPixel);
+    },
+  };
+}
+
+/**
+ * `virtual:lastmod` — each route's last commit date, `{ '/recursos/nif/': '2026-09-18', … }`.
+ * The guides print it and put it in their Article schema; the prerender dates
+ * the sitemap from the same map, so the page and the sitemap never disagree.
+ */
+function lastmodPlugin() {
+  const id = 'virtual:lastmod';
+  const resolved = `\0${id}`;
+  return {
+    name: 'lastmod',
+    resolveId(source) {
+      return source === id ? resolved : null;
+    },
+    load(source) {
+      if (source !== resolved) return null;
+      return `export default ${JSON.stringify(lastmodMap(root, ROUTES))};`;
     },
   };
 }

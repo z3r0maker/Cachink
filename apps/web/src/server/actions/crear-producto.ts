@@ -4,9 +4,9 @@ import { CrearProductoUseCase } from '@xangarro/application';
 import type { BusinessId, NewProduct } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgProductsRepository } from '../repositories/products';
 
 /**
@@ -21,8 +21,6 @@ export type NuevoProductoForm = Omit<
 >;
 export type CrearProductoResult = { ok: true; id: string } | { ok: false; message: string };
 
-const KNOWN = new Set(['PRODUCT_INVALID', 'INITIAL_STOCK_NOT_ALLOWED', 'NOT_PERMITTED']);
-
 export async function crearProducto(form: NuevoProductoForm): Promise<CrearProductoResult> {
   try {
     const session = await requireMember('admin');
@@ -35,11 +33,9 @@ export async function crearProducto(form: NuevoProductoForm): Promise<CrearProdu
     revalidatePath('/productos');
     return { ok: true, id: product.id };
   } catch (error) {
-    const code = (error as { code?: string } | null)?.code;
-    if (error instanceof Error && code !== undefined && KNOWN.has(code)) {
-      return { ok: false, message: error.message };
-    }
-    reportError(error, { endpoint: 'crearProducto' });
-    return { ok: false, message: 'No pudimos crear el producto. Intenta de nuevo.' };
+    return failure(error, 'crearProducto', {
+      shown: ['PRODUCT_INVALID', 'INITIAL_STOCK_NOT_ALLOWED'],
+      retry: 'No pudimos crear el producto. Intenta de nuevo.',
+    });
   }
 }

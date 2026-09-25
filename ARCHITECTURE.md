@@ -143,6 +143,8 @@ Links to discussion, docs, prior art.
 | [101](#adr-101) | 2026-09-23 | Activation answers one generic error, and the QR carries a 15-minute token in the fragment | Accepted |
 | [102](#adr-102) | 2026-09-23 | The portal's coverage is unit + E2E merged, and a floor that only rises holds it | Accepted |
 | [103](#adr-103) | 2026-09-24 | The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial` | Accepted |
+| [104](#adr-104) | 2026-09-23 | The layer boundaries are enforced for real, and the rule table is reconciled with the code | Accepted |
+| [105](#adr-105) | 2026-09-24 | No free trial: a plan is either free (Xangarrito) or paid from day one | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -6953,6 +6955,71 @@ not enforced them yet. From here the ratchet holds as written: `--raise` only.
 The floor step also runs after a failed E2E step, with `--report-only`, so the
 coverage artifact always carries a number.
 
+**Update 2026-09-24, first green CI (run 36026962224).** With every project
+reaching the end, CI measured lines 84.1%, statements 77.5%, functions 76.8%,
+branches 62.5% — the earlier local figures never got past the viewport phase.
+Floor 83 / 76 / 75 / 61. `src/app/inventario/` (the primitives galleries) is
+left out by name, the one exclusion besides style modules; another needs an ADR.
+
+**Amendment 2026-09-24 — the coverage build is not minified.** Decision 1 said
+the build under test changes only by source maps; it now also skips the
+minifier (`optimization.minimize`, `serverMinification`). Coverage derives
+statements and branches from the executed code's syntax tree and maps them back
+to `src/`; minified code has a different structure (`if/else` becomes a
+ternary, statements become sequences), so those mapped back as phantom branches
+spanning real ones and could never merge with the unit suite's. `csv.ts` read
+52 statements and 46 branches against its 38 and 25 — every file both suites
+touch was under-reported. Lines were unaffected (merged by byte range), which is
+why lines read 85% while statements and branches lagged. Behaviour is the same
+unminified; bundle size is the only difference, and nothing in the suite
+measures it.
+
+**Amendment 2026-09-24 — one copy per entry.** Next compiles a module once per
+webpack layer, so a page's server chunk can hold two copies of one file — the
+render layer's and the server action's — and only one runs. MCR folds copies
+inside one script into one state and keeps the first it meets, which was often
+the dead one: `server/import/templates.ts` read 0% while the import specs drove
+it. `e2e/coverage-split.ts` hands such a script to MCR as one entry per copy,
+the other copies marked unexecuted, so MCR's cross-script merge (covered if any
+copy ran) applies. 29 portal files were duplicated this way. Also: the
+source-path rule is now structural (strip wrapper segments, expect `src/`) —
+the unminified build renamed the server's sources and the old list of
+spellings silently dropped ~500 of them.
+
+**Correction 2026-09-24 — a patch, not a splitter.** The per-copy split above
+did not work: every entry still carried the whole chunk's source, so MCR
+parsed both copies again and again kept the first. The fault is one rule in
+MCR — a repeated original range is dropped, first copy wins — and
+`patches/monocart-coverage-reports@2.13.0.patch` changes it to add the
+repeat's counts. `e2e/coverage-split.ts` is gone; `addFromDir` is back.
+Replaying a full run's server data: `templates.ts` from 0 functions to
+`templateOf` ×10 and its `apply` loop covered. `tests/coverage-duplicate-copies.test.ts`
+runs the case through MCR itself, so an upgrade that loses the patch fails
+there first.
+
+**Amendment 2026-09-24 — browser coverage survives navigation.** V8's page
+coverage lives with the document: a `goto` or `reload` discarded what ran
+before it, and most specs navigate after acting. `inventario-inicial.spec.ts`
+uploads a CSV and then reloads — `grid.tsx` read 1 of 32 branches and 0 for the
+upload handler it had just run. `e2e/test.ts` now collects the page's (and its
+workers') coverage just before every `goto` / `reload` / `goBack` / `goForward`
+and restarts it; `grid.tsx` reads 17 of 32 and every function. Client-side App
+Router navigations keep the document and never lost anything.
+
+**Amendment 2026-09-24 — navigations the app makes.** Wrapping `goto` / `reload`
+/ `goBack` / `goForward` kept the test's own navigations exact, but the app
+navigates too — a redirect after signup, `window.location.assign`, a link —
+and each still discarded the document before it: the onboarding wizard read
+0% after a spec walked it end to end. Page coverage is now taken over CDP
+(`e2e/page-coverage.ts`, `Profiler.takePreciseCoverage`: counters only,
+sources fetched once at the end), and also as each main-frame document is
+*requested* (`page.on('request')`) — the wizard reads 19 of 26 branches.
+That take races the response and can lose on a fast page; it is best effort
+by design. Tried and rejected: `page.route` to hold the navigation while
+taking — any CDP call made inside a route handler waits on the navigation the
+handler holds, and never returns (it also aborted sign-in outright when the
+worker session was recreated there).
+
 ## ADR-103
 
 **Title:** The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial`
@@ -7049,6 +7116,85 @@ was quietly violating it two projects later.
 - The lock lives in a test-only `e2e` schema on the throwaway database. It is
   never a migration, and `pnpm dev` against that database is unencumbered once
   the run ends.
+
+## ADR-104
+
+**Title:** The layer boundaries are enforced for real, and the rule table is reconciled with the code
+
+**Date:** 2026-09-23
+
+**Status:** Accepted — follows the 2026-09-23 finding that `boundaries/element-types` never fired
+
+**Context**
+
+CLAUDE.md §2.5 and §4 call the layer boundaries hard, enforced by ESLint. They
+were not. A file in `packages/domain/src` importing `@xangarro/application`
+linted clean from the repo root and from the package. Two independent faults:
+
+1. **Workspace imports never resolved.** eslint-plugin-boundaries resolves
+   imports through `import/resolver`, which defaulted to the node resolver. With
+   `node-linker=hoisted`, pnpm links a workspace package only into the
+   `node_modules` of packages that declare it, and a boundary-crossing import
+   is almost always undeclared, so it was unresolvable exactly when it mattered.
+   The plugin files unresolvable bare imports as external and checks nothing.
+   A TypeScript resolver would not help either: there are no `paths`.
+2. **Globs resolved against the working directory.** Every package lints with
+   `eslint . --config ../../eslint.config.js`. With an explicit `--config`,
+   ESLint resolves `files`/`ignores` against the cwd, and the plugin resolves
+   element patterns against `process.cwd()`. `packages/ui/src/components/**`
+   and `packages/domain/src/**` matched nothing from inside the package.
+
+Also, the `sync` element's pattern `packages/sync-*/src/**` never matched
+`packages/sync`, the package ADR-053 made the phone's sync.
+
+**Decision**
+
+1. `packages/config/eslint-workspace-resolver.cjs` maps `@xangarro/<pkg>[/<sub>]`
+   to the package's source through its `exports`, and relative `./x.js` to
+   `./x.ts`. Everything else stays unresolved, so it stays external.
+2. The shared config anchors itself to the repo root: every config object gets
+   `basePath`, and `boundaries/root-path` is set. The result no longer depends
+   on where ESLint runs.
+3. The rule moves to v6's `boundaries/dependencies` with object selectors.
+4. Switching it on surfaced 46 violations. None was a leak; each was an edge
+   the table never recorded. The table now says:
+   - **application → data, types only.** 33 use cases import repository
+     *interfaces* (`import type { SalesRepository }`), as §3–4 prescribe. A
+     value import of a Drizzle implementation is still rejected.
+   - **testing → ui.** `MockRepositoryProvider` wraps ui's `RepositoryProvider`
+     and lives in testing so it stays off the runtime graph (ADR-033).
+   - **testing → sync, types only.** An in-memory fake implements sync's
+     `ReferenceDataRepository`.
+   - **ui → sync.** 11 imports: the cloud sync bridge, activation, entitlement
+     and the rejected-rows screen take `SyncEngine`, `ApiClient` and
+     `resolveEntitlement` from `@xangarro/sync`, which `@xangarro/ui` declares
+     as a dependency. `packages/ui` is where the phone's providers and screens
+     live, and no rule ever forbade this edge. The sync element simply did not
+     match the package.
+5. `scripts/lint-boundaries.test.ts` lints fixtures that break a boundary and
+   the ui barrel rule, from the root and from the package directories the real
+   `lint` scripts use, and asserts the errors. Against the old config, 4 of its
+   5 tests fail.
+
+**Alternatives considered**
+
+- *Run each package's lint from the repo root* (as `apps/landing` does). It
+  fixes the globs for `pnpm lint`, but not for editors, `lint-staged`, or the
+  next package script written the usual way. Fixing the config fixes all of them.
+- *eslint-import-resolver-typescript.* It resolves through `node_modules` too,
+  so undeclared workspace imports stay unresolvable.
+- *Keep the table and move ui's sync wiring into `apps/mobile`.* That is a
+  refactor of the phone, not a lint fix. If the owner wants `ui` free of sync,
+  deleting `'sync'` from ui's allow list makes the 11 imports the work list.
+
+**Consequences**
+
+- contracts, data-pg, auth-core, tokens, email and observability have no
+  element, so the rule skips them, and so does the portal's §4 chain. Classifying
+  them means deciding each one's allowed imports. That is a separate decision.
+- A new workspace package is invisible to the rule until it gets an element.
+- Adding an edge to the table is now a visible change reviewed in the config,
+  and the test fails if the rule stops firing.
 
 ## ADR-105
 

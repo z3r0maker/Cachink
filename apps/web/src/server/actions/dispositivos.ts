@@ -4,9 +4,9 @@ import { devices } from '@xangarro/data-pg';
 import { and, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 
 /**
  * Revoke a device (B-12).
@@ -49,11 +49,9 @@ export async function revocarDispositivo(deviceId: string): Promise<RevokeResult
     revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'revocarDispositivo' });
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'No pudimos revocar el dispositivo. Intenta de nuevo.';
-    return { ok: false, message };
+    // Once any Error's own text — a database failure's words on the owner's screen.
+    return failure(error, 'revocarDispositivo', {
+      retry: 'No pudimos revocar el dispositivo. Intenta de nuevo.',
+    });
   }
 }

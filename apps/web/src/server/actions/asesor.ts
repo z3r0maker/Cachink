@@ -6,10 +6,10 @@ import { getBusiness, notices } from '@xangarro/data-pg';
 import { transicionAviso, type AccionAviso } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure, refusal } from '../action-errors';
 import { requireMember } from '../auth';
 import { hoy } from '../clock';
 import { loadEstadosModel } from '../estados';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 import { withTenant } from '../db';
 /**
@@ -28,7 +28,9 @@ export async function cerrarAvisoAsesor(id: string, accion: AccionAviso): Promis
         .select({ state: notices.state })
         .from(notices)
         .where(and(eq(notices.id, id), eq(notices.source, 'asesor')));
-      if (!row) throw new TypeError('Ese aviso ya no existe.');
+      if (!row) {
+        throw refusal('AVISO_NO_EXISTE', 'Ese aviso ya no existe.');
+      }
       const state = transicionAviso(row.state, accion);
       const now = new Date().toISOString();
       const cerrado = state === 'listo' || state === 'descartado';
@@ -40,12 +42,12 @@ export async function cerrarAvisoAsesor(id: string, accion: AccionAviso): Promis
     revalidatePath('/asesor');
     return { ok: true };
   } catch (error) {
-    const code = (error as { code?: string } | null)?.code;
-    if (code === 'AVISO_TRANSICION' || code === 'NOT_PERMITTED' || error instanceof TypeError) {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'cerrarAvisoAsesor' });
-    return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
+    // Coded refusals only. This once passed every TypeError through, which
+    // showed real bugs to the owner in their own words and never reported them.
+    return failure(error, 'cerrarAvisoAsesor', {
+      shown: ['AVISO_TRANSICION'],
+      retry: 'No pudimos guardar el cambio. Intenta de nuevo.',
+    });
   }
 }
 
@@ -73,7 +75,8 @@ export async function resumenParaCompartir(): Promise<ResumenCompartirResult> {
       utilidad: model.resultados.utilidadOperativa,
     };
   } catch (error) {
-    reportError(error, { endpoint: 'resumenParaCompartir' });
-    return { ok: false, message: 'No pudimos armar el mensaje. Intenta de nuevo.' };
+    return failure(error, 'resumenParaCompartir', {
+      retry: 'No pudimos armar el mensaje. Intenta de nuevo.',
+    });
   }
 }

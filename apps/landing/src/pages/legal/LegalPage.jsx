@@ -60,7 +60,8 @@ function cellStyle(head) {
 
 function Block({ block }) {
   if (block.type === 'heading') {
-    const Tag = `h${Math.min(block.level + 1, 4)}`;
+    // The document's `#` title is the page's H1; deeper levels keep their rank.
+    const Tag = `h${Math.min(block.level, 4)}`;
     return (
       <Tag style={{ marginTop: block.level === 1 ? 0 : 28 }}>
         <Inline text={block.text} />
@@ -87,12 +88,18 @@ function Block({ block }) {
   );
 }
 
-export function LegalPage({ source }) {
+export function LegalPage({ source, schema }) {
   const blocks = parseLegalMarkdown(source);
   return (
     <div
       style={{ fontFamily: 'var(--font-sans)', background: 'var(--offwhite)', minHeight: '100vh' }}
     >
+      {schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      )}
       <header style={{ borderBottom: '2.5px solid var(--black)', background: 'var(--white)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '14px clamp(16px, 5vw, 28px)' }}>
           <a href="/" style={{ fontWeight: 900, color: 'var(--black)', textDecoration: 'none' }}>
@@ -101,6 +108,7 @@ export function LegalPage({ source }) {
         </div>
       </header>
       <main
+        id="main-content"
         style={{
           maxWidth: 800,
           margin: '0 auto',

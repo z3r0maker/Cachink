@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { CODE_TTL_MS, mintActivationCode } from '../activation';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
+import { failure } from '../action-errors';
 import { sendActivationCode } from '../email/activation-code';
 
 /**
@@ -65,18 +65,19 @@ export async function generarCodigo(): Promise<CodeResult> {
           .returning({ code: activationCodes.code });
         if (inserted.length > 0) return candidate;
       }
-      throw new Error('No pudimos generar un código. Intenta de nuevo.');
+      throw new Error(`No free activation code after ${ATTEMPTS} attempts`);
     });
 
     revalidatePath('/equipo');
     return { ok: true, code, expiresAt };
   } catch (error) {
-    reportError(error, { endpoint: 'generarCodigo' });
-    const message =
-      error instanceof Error ? error.message : 'No pudimos generar el código. Intenta de nuevo.';
-    return { ok: false, message };
+    return failure(error, 'generarCodigo', {
+      retry: 'No pudimos generar el código. Intenta de nuevo.',
+    });
   }
 }
+
+const ENVIO_FALLIDO = 'No pudimos enviar el correo. Intenta de nuevo.';
 
 /**
  * «Enviar por correo» (P-06): the live code to whatever address the owner
@@ -100,10 +101,9 @@ export async function enviarCodigoPorCorreo(address: string): Promise<EnviarCodi
       return { ok: false, message: 'Genera un código primero.' };
     }
     const r = await sendActivationCode(to, { code: live.code, negocio, expiresAt: live.expiresAt });
-    if (!r.ok) return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
+    if (!r.ok) return { ok: false, message: ENVIO_FALLIDO };
     return { ok: true, sentTo: to };
   } catch (error) {
-    reportError(error, { endpoint: 'enviarCodigoPorCorreo' });
-    return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
+    return failure(error, 'enviarCodigoPorCorreo', { retry: ENVIO_FALLIDO });
   }
 }

@@ -1,37 +1,9 @@
-const articles = [
-  {
-    slug: 'sin-excel',
-    badge: 'Guía práctica',
-    title: 'Cómo llevar la caja de tu negocio sin Excel',
-    description:
-      'Por qué las hojas de cálculo fallan para negocios pequeños y cómo hacer el cambio a una app de caja en una semana, sin perder datos históricos.',
-    readTime: '5 min',
-  },
-  {
-    slug: 'nif',
-    badge: 'Finanzas en español',
-    title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador',
-    description:
-      'Tu contador te pide "los estados financieros" y no sabes exactamente de qué habla. Esta guía explica qué son las NIF, para qué sirven, y cómo generarlos automáticamente.',
-    readTime: '6 min',
-  },
-  {
-    slug: 'errores-caja',
-    badge: 'Control de caja',
-    title: '5 errores comunes al registrar ventas en efectivo (y cómo evitarlos)',
-    description:
-      'Los errores más frecuentes que cometen los dueños de pequeños negocios al llevar el control de caja, todos evitables con un sistema simple.',
-    readTime: '4 min',
-  },
-  {
-    slug: 'vs-excel',
-    badge: 'Comparativa',
-    title: 'Xangarro vs hojas de cálculo: comparativa honesta para pequeños negocios',
-    description:
-      'Comparación directa en 9 criterios: velocidad, offline, multi-dispositivo, costo, curva de aprendizaje, estados NIF, resistencia a errores y más.',
-    readTime: '4 min',
-  },
-];
+import { buildRecursosSchema } from '../schema-pages.js';
+
+import { ARTICLES } from '../articles.js';
+import { AUTHORS } from '../../landing/authors.js';
+
+const schema = buildRecursosSchema(ARTICLES);
 
 export default function Recursos() {
   return (
@@ -43,6 +15,10 @@ export default function Recursos() {
         background: 'var(--offwhite)',
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       {/* Nav */}
       <nav
         style={{
@@ -158,15 +134,40 @@ export default function Recursos() {
       </div>
 
       {/* Article cards */}
-      <div
+      <main
+        id="main-content"
         style={{
           maxWidth: 800,
           margin: '0 auto',
           padding: 'clamp(32px, 6vw, 56px) clamp(16px, 5vw, 28px)',
         }}
       >
+        <p
+          style={{
+            fontSize: 16,
+            fontWeight: 500,
+            color: 'var(--ink)',
+            lineHeight: 1.7,
+            margin: '0 0 28px',
+            maxWidth: 640,
+          }}
+        >
+          Cuatro guías cortas sobre lo que un dueño de negocio necesita entender de sus números: por
+          qué la libreta y el Excel se quedan cortos, qué son los estados financieros NIF que piden
+          un contador y un banco, los errores de caja que más cuestan y una comparación honesta con
+          las hojas de cálculo. Las escriben {AUTHORS.map((a) => a.name).join(' y ')}, cofundadores
+          de Xangarro, desde{' '}
+          <a href="/acerca/" style={{ color: 'var(--black)', fontWeight: 700 }}>
+            Zapopan
+          </a>
+          , y se actualizan cuando el producto cambia. Cada una termina con un{' '}
+          <a href="/#como" style={{ color: 'var(--black)', fontWeight: 700 }}>
+            vistazo a cómo lo resuelve Xangarro
+          </a>
+          .
+        </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {articles.map((a) => (
+          {ARTICLES.map((a) => (
             <a
               key={a.slug}
               href={`/recursos/${a.slug}/`}
@@ -231,7 +232,7 @@ export default function Recursos() {
                   margin: '0 0 16px',
                 }}
               >
-                {a.description}
+                {a.blurb}
               </p>
               <span
                 style={{
@@ -301,7 +302,7 @@ export default function Recursos() {
             Unirme a la lista →
           </a>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

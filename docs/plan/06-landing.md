@@ -59,13 +59,112 @@
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
       **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
 
+- **State (2026-09-24, verified over DNS-over-HTTPS):** registrar GoDaddy, zone on Cloudflare
+  (`elle`/`leland.ns.cloudflare.com`), apex `xangarro.mx` CNAME-flattened to Vercel (DNS only), `www`
+  308 → apex, Let's Encrypt active; production is `main` @ `caa0ff43`, deployed by hand
+  (`vercel.json` has `git.deploymentEnabled: false`). Mail on Zoho (MX/SPF/DKIM/DMARC pass).
+  **Deployed 2026-09-24 (night):** `main` @ `2887b280` (the audit rounds) is production. **How to
+  deploy:** Vercel blocks a deployment whose commit author is not a team member, and the repo's
+  commits are authored with the Unosquare address — so export the tree without git metadata
+  (`node apps/landing/scripts/lastmod.mjs` first, then `git archive HEAD | tar -x -C <dir>`, copy
+  `apps/landing/.lastmod.json` to `<dir>/apps/landing/` and `apps/landing/.vercel/project.json` to
+  `<dir>/.vercel/`),
+  `npx vercel deploy --yes --archive=tgz` from `<dir>`, check the preview with `npx vercel curl <url>`
+  (previews sit behind Vercel Authentication), then `npx vercel promote <preview-url> --yes`, then
+  `node apps/landing/scripts/indexnow.mjs` so Bing fetches the changed pages at once (IndexNow;
+  Google needs Search Console's «Request indexing» instead). Or add
+  the commit author's email to the Vercel account.
+  **Missing:** `app.xangarro.mx` and `admin.xangarro.mx` are NXDOMAIN, so every signup CTA is a
+  dead link until the portal and console projects get their domains (Add domain in Vercel, then a
+  CNAME `app` / `admin` in Cloudflare, DNS only) — or the CTAs point at a waitlist. **Gotcha:** the
+  owner's ISP intercepts port 53 and serves stale answers; check DNS with `dns.google/resolve` or
+  `cloudflare-dns.com/dns-query`, never plain `dig` (the second audit's "apex on GoDaddy" finding
+  was that artefact). Full detail in memory `domain-dns-email-setup.md`.
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
 ### L-05 Store badges + legal pages
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
-      **Remaining (2026-09-23, verified against the code):** no privacidad/términos route on the landing and the legal texts are not linked from it; store badges wait for X-05's real URLs; `docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade.
+      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs.
 
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
+
+### L-06 SEO/GEO: crawler files are generated, not written
+
+- [x] Status · **Blocked by:** —
+  - Done: 2026-09-24 · `sitemap.xml`, `llms.txt` and `llms-full.txt` are no longer files in `public/`:
+    `scripts/prerender.mjs` writes them into `dist/` from the route manifest (`src/routes.js`, now
+    the single list behind the prerendered HTML, the smoke tests and the sitemap), `landing/planes.js`
+    and `FAQ_ITEMS` (`src/llms/`), so the plans and all 15 FAQ answers models read are the ones the
+    page renders. `<lastmod>` is each route's last commit date over its `sources` (build date when
+    git is unavailable). The build fails when the sitemap misses a route or an llms file misses a
+    plan or a question. Per-route `twitter:title`/`twitter:description` and `og:type` (`article` on
+    the four guides) are substituted like the OG tags; articles carry Article + BreadcrumbList and
+    `/recursos/` a CollectionPage + ItemList. The portal gained `app/robots.ts` (allow `/login` and
+    `/signup`, disallow the rest; `tests/robots.test.ts`) and `metadataBase` from `PORTAL_URL`.
+- Done: 2026-09-24 · the public profiles (Instagram @xangarro.mx, Facebook /xangarro) live once in
+  `landing/social.js`: the Organization schema lists them as `sameAs` (plus `email`), `llms-full.txt`
+  names them with their URLs, and the build fails when one is missing from it. The old line that
+  claimed TikTok, X and YouTube is gone.
+- Done: 2026-09-24 · every title is ≤ 60 characters and every description ≤ 155 (the home
+  description leads with Don Cuentas; the NIF, errores-caja and vs-excel titles shortened), and the
+  prerender fails past those limits (`checkHeadLengths`).
+
+### L-07 SEO/GEO/AEO audit — round 1 (code-level findings)
+
+- [x] Status · **Blocked by:** —
+  - Done: 2026-09-24 · from the full audit (`scratchpad` report, scores SEO 7 · GEO 6 · AEO 7), every
+    finding that lives in code: the legal pages' document title is the H1; each guide shows
+    «Publicado / Actualizado» with the route's last commit date (`virtual:lastmod`, a Vite plugin
+    over the same `lastmodFor` the sitemap uses) and carries it as `dateModified`; the four guides
+    share one header, «Sigue leyendo» links and one CTA (`pages/articles/shared.jsx`, fed by
+    `src/articles.js`, which the Recursos index and the 404 also read) — the leftover «Unirme a la
+    lista» waitlist buttons and the stale «$149 MXN/mes» in the comparativa went with it; the
+    sin-excel week plan is a HowTo (steps anchored `#paso-n`); the five errores are an `<ol>`; the
+    NIF guide links CINIF and SAT; Offers carry their signup URL and `operatingSystem` says «Web»;
+    a branded `404.html` (noindex, no canonical, kept out of the sitemap); the two FAQ answers over
+    60 words are trimmed and the build now fails past 60 (`checkFaqLengths`).
+- Done (round 2, code): 2026-09-24 · every guide has its own social card — `scripts/generate-og.mjs`
+  (now a driver over `scripts/og-card.mjs`) renders `public/og/<slug>.{png,webp}` from `src/articles.js`,
+  committed because the build server lacks the font; the prerender puts it in `og:image` /
+  `twitter:image` with the guide's title as alt and fails when a card is missing; the Article
+  schema carries it as `image` (Google's article rich result needs one). A `WebSite` node joins the
+  home graph. The portal's two indexable pages, `/login` and `/signup`, have their own title and
+  description. Each guide links into the home section it argues for (`/#portal`, `/#por-que`,
+  `/#como`, `/#precios`). `home/useInView.js` → `use-in-view.js`, so the landing lints clean.
+- Done: 2026-09-24 · the guides are signed by both founders — `landing/authors.js` (Eduardo
+  Torres, producto y tecnología; Antonio Alejo, estrategia, finanzas y legal; no profile links, no
+  bios, by choice) feeds the byline, two Person nodes (on the home graph and beside every Article,
+  as its `author`), the Organization's `founder`, and a «Quiénes están detrás» section in
+  llms-full.txt that the build checks.
+- Done: 2026-09-24 · `/acerca/` — why Xangarro exists (drafted from the owner's words: the
+  taquería, the puesto, the florería; the libreta, the Excel, the system they do not need; no fixed
+  internet on the street), both founders, Don Cuentas, four principles, contact. `landing/empresa.js`
+  holds Zapopan, Jalisco, 2026 — the Organization's `foundingDate`/`foundingLocation`, the page and
+  llms-full read it; the page carries an AboutPage graph; footer link beside the aviso; in the
+  sitemap. No legal entity yet: the aviso keeps `[RAZÓN SOCIAL]` (production-readiness blocker).
+- Done (round 3, code + content): 2026-09-24 · the NIF guide is the pillar (~1,300 words): what the
+  NIF are and their series, who issues them and since when (CINIF, 2006), the three statements with
+  their norms (B-3, B-6, B-2) and one month of a fonda shown in all three so the numbers connect,
+  who asks for them, a five-step HowTo, three quick questions; CINIF and SAT cited. The other guides
+  cite a source each (INEGI ENAPROCE, INEGI ENIF, Microsoft's price page). `/recursos/` has an
+  intro naming the authors; `/acerca/` links into the guides and the home; the hero opens with
+  «Xangarro es …»; the legal pages carry a WebPage node. Second audit (same day): SEO 8 · GEO 7 ·
+  AEO 8 as built. (Its "apex on GoDaddy" finding was the ISP's stale DNS — over DoH the apex is on
+  Vercel; what is really missing is `app`/`admin`, see L-04.)
+- Done (round 4, Lighthouse): 2026-09-24 · fonts self-hosted — `scripts/fonts.mjs` copies the
+  variable Plus Jakarta Sans and Anton from their packages into `public/fonts` before every build
+  and `vite`; `@font-face` with `font-display: swap` in `colors_and_type.css`; the Google Fonts
+  stylesheet, its `@import`, the preconnects and the `gstatic` preload that 404'd on every visit are
+  gone; one preload for the sans. Every page has `<main id="main-content">`, the skip link's target.
+- Done (round 5, from the SEO advisor's notes): 2026-09-25 · the home targets the queries it should
+  win — title «Xangarro · Control de caja para negocios pequeños en México», description with
+  «sistema de caja», «control financiero», «México», the hero lead and a line under «Si tienes caja»
+  carrying the same words; the H1 stays the slogan. IndexNow: `landing/indexnow.js` holds the key,
+  the prerender writes `<key>.txt`, `scripts/indexnow.mjs` pings after a deploy. Bing's "description
+  too long" flags were the pre-deploy build; live descriptions are 98–144 characters.
+- **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
+  schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
+  NIF guide into a 1,200-word pillar with an example estado de resultados.

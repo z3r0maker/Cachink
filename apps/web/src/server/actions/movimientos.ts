@@ -3,11 +3,10 @@
 import { RegistrarMovimientoInventarioUseCase } from '@xangarro/application';
 import type { BusinessId, NewInventoryMovement, ProductId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
-import { ZodError } from 'zod';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgExpensesCreator, pgMovementsCreator } from '../repositories/ledger';
 
 /**
@@ -54,13 +53,9 @@ export async function registrarMovimiento(form: MovimientoForm): Promise<Movimie
     revalidatePath('/productos');
     return { ok: true };
   } catch (error) {
-    if (error instanceof ZodError) {
-      return { ok: false, message: 'Revisa la cantidad, el costo y el motivo.' };
-    }
-    if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'registrarMovimiento' });
-    return { ok: false, message: 'No pudimos registrar el movimiento. Intenta de nuevo.' };
+    return failure(error, 'registrarMovimiento', {
+      invalid: () => 'Revisa la cantidad, el costo y el motivo.',
+      retry: 'No pudimos registrar el movimiento. Intenta de nuevo.',
+    });
   }
 }

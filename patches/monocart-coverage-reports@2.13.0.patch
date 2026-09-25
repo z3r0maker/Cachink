@@ -1,0 +1,51 @@
+diff --git a/lib/converter/converter.js b/lib/converter/converter.js
+index 06601a633cea11f8700e21d1e39ea791b6d3542c..890920488034b1568be1353f7d98c478080c91b6 100644
+--- a/lib/converter/converter.js
++++ b/lib/converter/converter.js
+@@ -436,6 +436,22 @@ const checkOriginalRangeCode = (range, state, startEndMap, type) => {
+     // check repeated range
+     const key = `${start}_${end}`;
+     if (startEndMap.has(key)) {
++        // Xangarro patch (ADR-102): one script can hold two copies of a module
++        // (Next compiles it once per webpack layer) and only one runs. Keeping
++        // the first copy's count dropped the one that ran; add the repeat's
++        // counts to the first instead — covered if either copy ran.
++        const first = startEndMap.get(key);
++        if (typeof first.count === 'number' && typeof range.count === 'number') {
++            first.count += range.count;
++        }
++        if (Array.isArray(first.locations) && Array.isArray(range.locations)) {
++            range.locations.forEach((loc, i) => {
++                const into = first.locations[i];
++                if (into && typeof into.count === 'number' && typeof loc.count === 'number') {
++                    into.count += loc.count;
++                }
++            });
++        }
+         return false;
+     }
+     startEndMap.set(key, range);
+@@ -458,7 +474,10 @@ const handleFunctionsCoverage = (state) => {
+             return;
+         }
+ 
+-        functions.push(new InfoFunction(it, state.original));
++        const info = new InfoFunction(it, state.original);
++        functions.push(info);
++        // Xangarro patch: a repeat adds its count to what is reported, not to `it`.
++        startEndMap.set(`${it.start}_${it.end}`, info);
+     });
+ 
+ };
+@@ -498,7 +517,10 @@ const handleStatementsCoverage = (state) => {
+             return;
+         }
+ 
+-        statements.push(new InfoStatement(it, state.original));
++        const info = new InfoStatement(it, state.original);
++        statements.push(info);
++        // Xangarro patch: a repeat adds its count to what is reported, not to `it`.
++        startEndMap.set(`${it.start}_${it.end}`, info);
+     });
+ 
+ };

@@ -5,9 +5,9 @@ import { listNotices, notices } from '@xangarro/data-pg';
 import { transicionAviso, type AccionAviso } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure, refusal } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 
 /**
@@ -43,10 +43,9 @@ export async function marcarAvisosLeidos(): Promise<MarkResult> {
     revalidatePath('/');
     return { ok: true, marked };
   } catch (error) {
-    reportError(error, { endpoint: 'marcarAvisosLeidos' });
-    const message =
-      error instanceof Error ? error.message : 'No pudimos marcar los avisos. Intenta de nuevo.';
-    return { ok: false, message };
+    return failure(error, 'marcarAvisosLeidos', {
+      retry: 'No pudimos marcar los avisos. Intenta de nuevo.',
+    });
   }
 }
 
@@ -65,7 +64,7 @@ export async function cambiarEstadoAviso(id: string, accion: AccionAviso): Promi
         .select({ state: notices.state })
         .from(notices)
         .where(and(eq(notices.id, id), ne(notices.source, 'asesor')));
-      if (!row) throw new TypeError('Ese aviso ya no existe.');
+      if (!row) throw refusal('AVISO_NO_EXISTE', 'Ese aviso ya no existe.');
       const state = transicionAviso(row.state, accion);
       const now = new Date().toISOString();
       const cerrado = state === 'listo' || state === 'descartado';
@@ -78,12 +77,12 @@ export async function cambiarEstadoAviso(id: string, accion: AccionAviso): Promi
     revalidatePath('/');
     return { ok: true };
   } catch (error) {
-    const code = (error as { code?: string } | null)?.code;
-    if (code === 'AVISO_TRANSICION' || code === 'NOT_PERMITTED' || error instanceof TypeError) {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'cambiarEstadoAviso' });
-    return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
+    // A refusal, not a TypeError: letting every TypeError through showed real
+    // bugs to the owner in their own words and never reported them.
+    return failure(error, 'cambiarEstadoAviso', {
+      shown: ['AVISO_TRANSICION'],
+      retry: 'No pudimos guardar el cambio. Intenta de nuevo.',
+    });
   }
 }
 
@@ -99,8 +98,7 @@ export async function avisosDelBell(): Promise<BellResult> {
     const rows = await withTenant(session.business_id, (tx) => listNotices(tx));
     return { ok: true, avisos: rows.filter((n) => n.source !== 'asesor').slice(0, 10) };
   } catch (error) {
-    reportError(error, { endpoint: 'avisosDelBell' });
-    return { ok: false, message: 'No pudimos cargar tus avisos.' };
+    return failure(error, 'avisosDelBell', { retry: 'No pudimos cargar tus avisos.' });
   }
 }
 
