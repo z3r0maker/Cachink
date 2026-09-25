@@ -69,3 +69,21 @@
 
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
+
+### L-06 SEO/GEO: crawler files are generated, not written
+
+- [x] Status · **Blocked by:** —
+  - Done: 2026-09-24 · `sitemap.xml`, `llms.txt` and `llms-full.txt` are no longer files in `public/`:
+    `scripts/prerender.mjs` writes them into `dist/` from the route manifest (`src/routes.js`, now
+    the single list behind the prerendered HTML, the smoke tests and the sitemap), `landing/planes.js`
+    and `FAQ_ITEMS` (`src/llms/`), so the plans and all 15 FAQ answers models read are the ones the
+    page renders. `<lastmod>` is each route's last commit date over its `sources` (build date when
+    git is unavailable). The build fails when the sitemap misses a route or an llms file misses a
+    plan or a question. Per-route `twitter:title`/`twitter:description` and `og:type` (`article` on
+    the four guides) are substituted like the OG tags; articles carry Article + BreadcrumbList and
+    `/recursos/` a CollectionPage + ItemList. The portal gained `app/robots.ts` (allow `/login` and
+    `/signup`, disallow the rest; `tests/robots.test.ts`) and `metadataBase` from `PORTAL_URL`.
+- **Not done (needs the owner):** confirm the social handles `llms-full.txt` claims (Instagram,
+  TikTok, X, YouTube — @xangarro) and add them as `sameAs` on the Organization schema, or drop the
+  line; trim the home description (~200 chars) and the NIF article title (~80 chars) for SERP
+  truncation.

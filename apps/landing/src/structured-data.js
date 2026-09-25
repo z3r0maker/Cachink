@@ -108,20 +108,67 @@ export const structuredData = {
   '@graph': [organization, softwareApplication, service, faqPage],
 };
 
+const RECURSOS_URL = `${SITE_URL}/recursos/`;
+
+/** BreadcrumbList: Inicio → Recursos → (the article, when given). */
+function breadcrumbs(id, leaf) {
+  const crumbs = [
+    { name: 'Inicio', item: `${SITE_URL}/` },
+    { name: 'Recursos', item: RECURSOS_URL },
+    ...(leaf ? [leaf] : []),
+  ];
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': `${id}#breadcrumb`,
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  };
+}
+
 // Per-article schema builder — used by /recursos article pages
 export function buildArticleSchema({ slug, title, description, datePublished }) {
-  return {
-    '@context': 'https://schema.org',
+  const url = `${RECURSOS_URL}${slug}/`;
+  const article = {
     '@type': 'Article',
-    '@id': `${SITE_URL}/recursos/${slug}/#article`,
+    '@id': `${url}#article`,
     headline: title,
     description,
     datePublished,
     dateModified: datePublished,
     inLanguage: 'es-MX',
-    url: `${SITE_URL}/recursos/${slug}/`,
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/recursos/${slug}/` },
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     author: { '@id': `${SITE_URL}/#organization` },
     publisher: { '@id': `${SITE_URL}/#organization` },
   };
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [article, breadcrumbs(url, { name: title, item: url })],
+  };
+}
+
+// The /recursos/ index: a CollectionPage listing its articles, plus breadcrumbs
+export function buildRecursosSchema(articles) {
+  const page = {
+    '@type': 'CollectionPage',
+    '@id': RECURSOS_URL,
+    url: RECURSOS_URL,
+    name: 'Recursos para pequeños negocios',
+    inLanguage: 'es-MX',
+    isPartOf: { '@id': `${SITE_URL}/#organization` },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: articles.map((a, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: a.title,
+        url: `${RECURSOS_URL}${a.slug}/`,
+      })),
+    },
+  };
+  return { '@context': 'https://schema.org', '@graph': [page, breadcrumbs(RECURSOS_URL)] };
 }

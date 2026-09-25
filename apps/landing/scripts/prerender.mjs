@@ -6,8 +6,11 @@
  * 2. For each route: call render(route), inject into the HTML template,
  *    substitute per-route <title>/<description>/<canonical>, and write
  *    to dist/<route>/index.html.
- * 3. Substitute the real domain into robots.txt and sitemap.xml.
- * 4. Smoke-test: assert each HTML contains its expected H1.
+ * 3. Generate sitemap.xml, llms.txt and llms-full.txt from the same data
+ *    the pages render (src/routes.js, landing/planes.js, landing/copy.jsx),
+ *    and substitute the real domain into robots.txt.
+ * 4. Smoke-test: assert each HTML contains its expected H1, and that the
+ *    generated files carry every route, plan and FAQ question.
  */
 
 import { build, loadEnv } from 'vite';
@@ -15,86 +18,16 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { ROUTES } from '../src/routes.js';
+import { PLANES } from '../landing/planes.js';
+import { checkCrawlerFiles, writeCrawlerFiles } from './crawler-files.mjs';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 // Load env so we can substitute the real domain into static files
 const env = loadEnv('production', root, '');
 const SITE_URL = (env.VITE_SITE_URL || 'https://xangarro.mx').replace(/\/$/, '');
-
-// ── Route manifest ─────────────────────────────────────────────────────────
-// Each entry drives: SSR render, output path, <title>, <meta description>,
-// <link rel="canonical">, and the smoke-test assertion.
-const ROUTES = [
-  {
-    path: '/',
-    outDir: 'dist',
-    title: 'Xangarro · Finanzas para emprendedores',
-    description:
-      'Control de caja, punto de venta y estados financieros NIF para tu negocio, desde el navegador. Tu equipo cobra en la caja; tú ves todo en el portal, con Don Cuentas, tu asesor.',
-    smoke: 'El mostrador cobra',
-  },
-  {
-    path: '/recursos/',
-    outDir: 'dist/recursos',
-    title: 'Recursos para pequeños negocios · Xangarro',
-    description:
-      'Guías prácticas sobre control de caja, estados financieros NIF y comparativas para dueños de pequeños negocios en México.',
-    smoke: 'Guías para llevar mejor',
-  },
-  {
-    path: '/recursos/sin-excel/',
-    outDir: 'dist/recursos/sin-excel',
-    title: 'Cómo llevar la caja de tu negocio sin Excel · Xangarro',
-    description:
-      'Guía práctica para dueños de pequeños negocios en México que quieren dejar de usar hojas de cálculo y llevar un control de caja más rápido, preciso y sin errores.',
-    smoke: 'Cómo llevar la caja',
-  },
-  {
-    path: '/recursos/nif/',
-    outDir: 'dist/recursos/nif',
-    title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador · Xangarro',
-    description:
-      'Guía en lenguaje simple sobre los estados financieros en formato NIF que solicitan los contadores y bancos en México, y cómo generarlos desde tu app de caja.',
-    smoke: 'Estados financieros NIF',
-  },
-  {
-    path: '/recursos/errores-caja/',
-    outDir: 'dist/recursos/errores-caja',
-    title: '5 errores comunes al registrar ventas en efectivo · Xangarro',
-    description:
-      'Los errores más frecuentes que cometen los dueños de pequeños negocios al llevar el control de caja en efectivo, y cómo un sistema de registro simple los elimina.',
-    smoke: '5 errores comunes',
-  },
-  {
-    path: '/recursos/vs-excel/',
-    outDir: 'dist/recursos/vs-excel',
-    title: 'Xangarro vs hojas de cálculo: comparativa honesta · Xangarro',
-    description:
-      'Comparación directa entre usar Excel o Google Sheets y una app de caja especializada para el control financiero de pequeños negocios en México.',
-    smoke: 'comparativa honesta',
-  },
-  {
-    path: '/privacidad/',
-    outDir: 'dist/privacidad',
-    title: 'Aviso de privacidad · Xangarro',
-    description:
-      'Cómo trata Xangarro tus datos personales, con quién los comparte y cómo ejercer tus derechos ARCO.',
-    smoke: 'Aviso de Privacidad Integral',
-    // The draft's banner and its notes for counsel are never published.
-    absent: ['BORRADOR', 'Nota:', 'Nota para revisión'],
-  },
-  {
-    path: '/privacidad/arco/',
-    outDir: 'dist/privacidad/arco',
-    title: 'Derechos ARCO · Xangarro',
-    description:
-      'Cómo pedir acceso, rectificación, cancelación u oposición sobre tus datos personales en Xangarro, y en qué plazos respondemos.',
-    smoke: 'derechos ARCO',
-    // Section B is the staff's internal annex.
-    absent: ['BORRADOR', 'Anexo interno', 'Nota:'],
-  },
-];
 
 // ── 1. Build SSR bundle ────────────────────────────────────────────────────
 console.log('Building SSR bundle…');
@@ -113,7 +46,7 @@ console.log('SSR bundle complete.');
 
 // ── 2. Load SSR module ─────────────────────────────────────────────────────
 const serverBundle = pathToFileURL(resolve(root, 'dist/server/entry-server.js')).href;
-const { render } = await import(serverBundle);
+const { render, buildLlmsTxt, buildLlmsFullTxt, FAQ_ITEMS } = await import(serverBundle);
 
 // ── 3. Read base template ──────────────────────────────────────────────────
 const distHtml = resolve(root, 'dist/index.html');
@@ -150,6 +83,14 @@ for (const route of ROUTES) {
     /(<meta property="og:description"\s+content=")[^"]*(")/,
     `$1${route.description}$2`,
   );
+  html = html.replace(/(<meta property="og:type"\s+content=")[^"]*(")/, `$1${route.type}$2`);
+
+  // Substitute the Twitter card title + description
+  html = html.replace(/(<meta name="twitter:title"\s+content=")[^"]*(")/, `$1${route.title}$2`);
+  html = html.replace(
+    /(<meta name="twitter:description"\s+content=")[^"]*(")/,
+    `$1${route.description}$2`,
+  );
 
   // Write file
   const outDir = resolve(root, route.outDir);
@@ -175,15 +116,33 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-// ── 5. Substitute domain in static crawler files ───────────────────────────
+// ── 5. Generated crawler files + robots domain ─────────────────────────────
+const files = writeCrawlerFiles({
+  root,
+  siteUrl: SITE_URL,
+  routes: ROUTES,
+  buildLlmsTxt,
+  buildLlmsFullTxt,
+});
+const crawlerFailures = checkCrawlerFiles(files, {
+  routes: ROUTES,
+  siteUrl: SITE_URL,
+  planes: PLANES,
+  faq: FAQ_ITEMS,
+});
+if (crawlerFailures.length > 0) {
+  console.error('\nGenerated crawler files failed their checks:');
+  crawlerFailures.forEach((f) => console.error(f));
+  process.exit(1);
+}
+
 const PLACEHOLDER = 'https://xangarro.mx';
-for (const filename of ['robots.txt', 'sitemap.xml']) {
-  const filePath = resolve(root, 'dist', filename);
-  if (!existsSync(filePath)) continue;
-  const content = readFileSync(filePath, 'utf-8');
+const robotsPath = resolve(root, 'dist', 'robots.txt');
+if (existsSync(robotsPath)) {
+  const content = readFileSync(robotsPath, 'utf-8');
   if (content.includes(PLACEHOLDER) && SITE_URL !== PLACEHOLDER) {
-    writeFileSync(filePath, content.replaceAll(PLACEHOLDER, SITE_URL));
-    console.log(`✓  Updated ${filename} → ${SITE_URL}`);
+    writeFileSync(robotsPath, content.replaceAll(PLACEHOLDER, SITE_URL));
+    console.log(`✓  Updated robots.txt → ${SITE_URL}`);
   }
 }
 

@@ -1,3 +1,5 @@
+import { buildRecursosSchema } from '../structured-data.js';
+
 const articles = [
   {
     slug: 'sin-excel',
@@ -33,6 +35,8 @@ const articles = [
   },
 ];
 
+const schema = buildRecursosSchema(articles);
+
 export default function Recursos() {
   return (
     <div
@@ -43,6 +47,10 @@ export default function Recursos() {
         background: 'var(--offwhite)',
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       {/* Nav */}
       <nav
         style={{
