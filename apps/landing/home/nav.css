@@ -1,0 +1,23 @@
+.nav { position: sticky; top: 0; z-index: 40; background: var(--white); border-bottom: var(--border-thick); }
+.nav-row { height: 84px; display: flex; align-items: center; gap: 36px; }
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-links { display: flex; gap: 28px; flex-grow: 1; }
+.nav-links a, .nav-login { font-size: 15px; font-weight: 700; text-decoration: none; color: var(--black); white-space: nowrap; }
+.nav-links a:hover, .nav-login:hover { text-decoration: underline; text-underline-offset: 4px; }
+.nav-menu { display: none; width: 44px; height: 44px; align-items: center; justify-content: center; background: var(--white); border: var(--border-thin); border-radius: var(--r-12); box-shadow: var(--shadow-sm); color: var(--black); cursor: pointer; }
+.coin-light { border-color: var(--white); box-shadow: 3px 3px 0 var(--white); }
+.menu { position: fixed; inset: 0; z-index: 60; background: var(--yellow); display: flex; flex-direction: column; gap: 28px; padding: 16px; overflow-y: auto; }
+.menu-close { display: flex; align-self: flex-end; }
+.menu-links { display: flex; flex-direction: column; gap: 6px; }
+.menu-links a { font-size: 32px; font-weight: 800; letter-spacing: -.03em; color: var(--black); text-decoration: none; padding: 8px 0; border-bottom: var(--border-thin); }
+.menu-actions { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+
+@media (max-width: 1099px) {
+  .nav-links, .nav-cta { display: none; }
+  .nav-row { height: 64px; gap: 14px; justify-content: space-between; }
+  .nav-brand { margin-right: auto; }
+  .nav-brand .coin { width: 34px !important; height: 34px !important; }
+  .nav-brand .wm { font-size: 24px !important; }
+  .nav-menu { display: inline-flex; }
+}
+.nav-cta { white-space: nowrap; }

@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import '../colors_and_type.css';
 import './global.css';
+import '../home/home.css';
 import { UtmPassthrough } from './utm.jsx';
 
 /**
