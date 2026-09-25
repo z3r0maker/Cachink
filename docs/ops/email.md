@@ -15,21 +15,22 @@ sign-in and reset links) and the **admin console** (the 08:00 staff digest).
 
 1. Resend → **Domains → Add domain** → `xangarro.mx`, region **us-east-1**
    (Resend's nearest to Vercel `pdx1`; it has no us-west region — B-01).
-2. Add the DNS records Resend shows at the DNS host of `xangarro.mx`. They
-   have this shape; **copy the exact values from the dashboard** (the DKIM key
+2. Add the DNS records Resend shows at the DNS host of `xangarro.mx` (Cloudflare, every record
+   **DNS only**). Since 2026-09 Resend issues **CNAMEs** for sending, not an MX + SPF TXT; this is
+   the shape it showed on 2026-09-25 — **copy the exact values from the dashboard** (the DKIM key
    is unique to the account):
 
-   | Type | Name                            | Value                                                 | Why     |
-   | ---- | ------------------------------- | ----------------------------------------------------- | ------- |
-   | MX   | `send.xangarro.mx`              | `feedback-smtp.us-east-1.amazonses.com` (priority 10) | bounces |
-   | TXT  | `send.xangarro.mx`              | `v=spf1 include:amazonses.com ~all`                   | SPF     |
-   | TXT  | `resend._domainkey.xangarro.mx` | `p=MIGfMA0…` (from the dashboard)                     | DKIM    |
-   | TXT  | `_dmarc.xangarro.mx`            | `v=DMARC1; p=none; rua=mailto:dmarc@xangarro.mx`      | DMARC   |
+   | Type  | Name                            | Value                       | Purpose            |
+   | ----- | ------------------------------- | --------------------------- | ------------------ |
+   | TXT   | `resend._domainkey.xangarro.mx` | `p=MIGfMA…` (from the dashboard) | DKIM          |
+   | CNAME | `send.xangarro.mx`              | `send.forge.rmta.net`       | return-path / SPF  |
+   | CNAME | `rsend.xangarro.mx`             | `rsend.forge.rmta.net`      | sending            |
 
-   SPF and the bounce MX sit on the `send.` subdomain, so they do not touch the
-   root domain's own MX (the mailbox that receives replies). Start DMARC at
-   `p=none`; after two weeks of clean reports move to `p=quarantine`.
-
+   Both CNAMEs live under the `send`/`rsend` names, so the root domain's own MX (Zoho, the
+   mailbox that receives replies) and its SPF are untouched. **Do not add a second DMARC**: the
+   root's `_dmarc` (`v=DMARC1; p=none; rua=mailto:dmarc@xangarro.mx`, set with Zoho) already covers
+   Resend's mail; tighten it to `p=quarantine` once both Zoho and Resend pass for two weeks. In the
+   Add-domain form: region `us-east-1`, custom return-path `send`, click and open tracking **off**.
 3. Wait for **Verified** on every record, then send a test from the dashboard.
 4. **API keys → Create**: one key per Vercel project, permission **Sending
    access**, domain `xangarro.mx` only. Paste each straight into Vercel; never
