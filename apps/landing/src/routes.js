@@ -110,6 +110,20 @@ export const ROUTES = [
     sources: ['src/pages/legal', '../../docs/legal/aviso/arco-procedimiento.md'],
   },
   {
+    path: '/terminos/',
+    outDir: 'dist/terminos',
+    title: 'Términos y Condiciones · Xangarro',
+    description:
+      'Las condiciones para usar Xangarro: tu cuenta, planes y cobros recurrentes, cancelación, el Asesor con IA y tus datos.',
+    smoke: 'Quién te presta el servicio',
+    // The draft's title note, banner and open questions for counsel are never published.
+    absent: ['borrador', 'Borrador', 'Preguntas abiertas', 'OQ-T1'],
+    type: 'website',
+    changefreq: 'monthly',
+    priority: '0.3',
+    sources: ['src/pages/legal', '../../docs/legal/aviso/terminos-borrador.md'],
+  },
+  {
     path: '/acerca/',
     outDir: 'dist/acerca',
     title: 'Acerca de Xangarro · Hecho en Zapopan',
