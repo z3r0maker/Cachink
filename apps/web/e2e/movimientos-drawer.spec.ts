@@ -23,10 +23,10 @@ test('a venta row opens its detail, and closes again', async ({ page }) => {
 
   const cajon = page.getByRole('dialog');
   await clickUntil(fila, cajon);
-  // The field list the design specifies, and the amount as its own block.
-  await expect(cajon.getByText('Método de pago')).toBeVisible();
-  await expect(cajon.getByText('Operador')).toBeVisible();
-  await expect(cajon.getByText('Dispositivo')).toBeVisible();
+  // The tiles the design specifies (ADR-107): how they paid, who, which caja.
+  await expect(cajon.getByText('Cómo pagaron')).toBeVisible();
+  await expect(cajon.getByText('Quién cobró')).toBeVisible();
+  await expect(cajon.getByText('En qué caja')).toBeVisible();
   expect(concepto.length).toBeGreaterThan(0);
 
   await page.keyboard.press('Escape');

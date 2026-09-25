@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
 export const stackedDate = style({
   display: 'flex',
@@ -85,49 +85,66 @@ export const conceptBadge = style({
   fontSize: portalFontSizes.body,
 });
 
-/** The drawer's amount block: a 44px figure over its date stamp (B-2). */
-export const detalleHero = style({
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
-  boxShadow: shadows.card,
-  padding: 20,
-  fontWeight: typography.weights.bold,
-});
-
-export const detalleCifra = style({
-  fontSize: portalFontSizes.displayLg,
+/** The drawer's amount (ADR-107): big and signed, on the record's soft tint. */
+export const detalleMonto = style({
+  padding: '16px 18px',
+  borderRadius: radii[3],
+  fontSize: portalFontSizes.display,
   lineHeight: 1,
-  fontWeight: 800,
+  fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tighter,
   fontVariantNumeric: 'tabular-nums',
-  marginBottom: 8,
 });
 
-/** One `label · value` row of the field list, ruled off from the next. */
-export const fichaFila = style({
-  display: 'flex',
-  alignItems: 'baseline',
-  justifyContent: 'space-between',
-  gap: 16,
-  padding: '10px 0',
-  borderBottom: `2px solid ${colors.gray200}`,
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.semibold,
-});
-
+/** Small caps over each block of the drawer. */
 export const detalleLinea = style({
-  display: 'inline-block',
-  fontSize: portalFontSizes.md,
-  fontWeight: 800,
-  letterSpacing: typography.letterSpacing.wide,
+  margin: '18px 0 8px',
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.extraBold,
+  letterSpacing: typography.letterSpacing.widest,
   textTransform: 'uppercase',
-  color: colors.gray600,
+  color: colors.textMuted,
 });
 
-export const detalleSello = style({
-  border: `2px solid ${colors.black}`,
+/** Who, where, how: two tiles a row instead of a ruled list. */
+export const fichas = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: 10,
+  marginTop: 14,
+});
+
+export const ficha = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  padding: '12px 14px',
+  border: borders.quiet,
   borderRadius: radii[3],
-  padding: 14,
-  fontSize: portalFontSizes.md,
-  fontWeight: typography.weights.semibold,
+});
+
+export const fichaLabel = style({
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.bold,
+  color: colors.textMuted,
+});
+
+export const fichaValor = style({
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.extraBold,
+  overflowWrap: 'anywhere',
+});
+
+/** One line of the ticket: what, and how much. */
+export const renglon = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 12,
+  padding: '10px 14px',
+  borderRadius: radii[3],
+  background: colors.offwhite,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.bold,
+  fontVariantNumeric: 'tabular-nums',
+  selectors: { '& + &': { marginTop: 6 } },
 });

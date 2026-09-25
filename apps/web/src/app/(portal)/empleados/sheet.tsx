@@ -81,6 +81,7 @@ function EmpleadoSheet(props: {
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
+      eyebrow="Mi gente"
       heading={props.editing ? `Editar a ${props.editing.nombre}` : 'Nuevo empleado'}
       description="Quién trabaja contigo y cuánto le pagas por periodo."
       actions={<Actions f={f} editing={props.editing !== null} />}

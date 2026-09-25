@@ -43,6 +43,7 @@ export function PagosEmpleadoDrawer({
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
+      eyebrow="Nómina"
       heading={empleado === null ? '' : `Pagos a ${empleado.nombre}`}
       description="Cada pago se registró también como un gasto, desde el teléfono."
     >

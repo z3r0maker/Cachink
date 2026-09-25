@@ -53,6 +53,7 @@ export function DispositivoDetalle(props: { readonly d: Dispositivo; readonly ma
       <Drawer
         open={open}
         onOpenChange={setOpen}
+        eyebrow="Caja"
         heading={d.nombre}
         description="El dispositivo, su última sincronización y sus cortes recientes."
         actions={

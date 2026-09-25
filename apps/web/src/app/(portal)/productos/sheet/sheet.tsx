@@ -25,6 +25,7 @@ function ProductoSheet(props: {
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
+      eyebrow="Tu catálogo"
       heading={f.editing ? `Editar ${props.editing?.nombre ?? ''}` : 'Nuevo producto'}
       description="Llega a todos los teléfonos en su siguiente sincronización."
       actions={

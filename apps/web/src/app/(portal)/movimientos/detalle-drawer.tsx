@@ -3,16 +3,11 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { Drawer } from '@/components';
+import { Drawer, DrawerStatus } from '@/components';
+import { button } from '@/components/button.css';
 
+import * as s from './movimientos.css';
 import type { Row } from './parts';
-import {
-  detalleCifra,
-  detalleHero,
-  detalleLinea,
-  detalleSello,
-  fichaFila,
-} from './movimientos.css';
 
 /**
  * The movement drawer (B-2). Rows were inert: the table was the whole screen,
@@ -29,12 +24,12 @@ export interface DetalleProps {
   readonly onClose: () => void;
 }
 
-/** One `label · value` line of the field list. */
+/** One tile: what it is, and its value. */
 function Ficha({ label, value }: { readonly label: string; readonly value: string }) {
   return (
-    <div className={fichaFila}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className={s.ficha}>
+      <span className={s.fichaLabel}>{label}</span>
+      <span className={s.fichaValor}>{value}</span>
     </div>
   );
 }
@@ -48,39 +43,27 @@ function Renglones({ row, rows }: { readonly row: Row; readonly rows: readonly R
   const hermanas = rows.filter((r) => r.ticketId === row.ticketId);
   if (hermanas.length < 2) return null;
   return (
-    <div style={{ marginTop: 18 }}>
-      <div className={detalleLinea}>Lo que llevó</div>
+    <section>
+      <h3 className={s.detalleLinea}>Lo que llevó</h3>
       {hermanas.map((r) => (
-        <div key={r.id} className={fichaFila}>
+        <div key={r.id} className={s.renglon}>
           <span>{r.concepto}</span>
-          <strong>{formatMoney(r.amount)}</strong>
+          <span>{formatMoney(r.amount)}</span>
         </div>
       ))}
-    </div>
+    </section>
   );
 }
 
 /**
  * Where the row came from. A movement the portal is showing has arrived by
  * definition — «Pendiente de sincronizar» is a queue on the phone that the
- * server cannot see — so this says which phone delivered it, or that it was
- * captured here.
+ * server cannot see — so the pill says it arrived, or that it was captured here.
  */
-function Origen({ row }: { readonly row: Row }) {
-  const desdeTelefono = row.dispositivo !== null;
-  return (
-    <div
-      className={detalleSello}
-      style={{ background: desdeTelefono ? colors.greenSoft : colors.gray100 }}
-    >
-      <strong>{desdeTelefono ? 'Sincronizado' : 'Capturado en el portal'}</strong>
-      <p style={{ margin: '4px 0 0' }}>
-        {desdeTelefono
-          ? `Llegó desde ${row.dispositivo} y está guardado en tus números.`
-          : 'Se registró desde esta pantalla, no desde un teléfono.'}
-      </p>
-    </div>
-  );
+function Estado({ row, venta }: { readonly row: Row; readonly venta: boolean }) {
+  if (row.cancelada) return <DrawerStatus tone="warn">Cancelada</DrawerStatus>;
+  if (row.dispositivo === null) return <DrawerStatus tone="neutral">Capturado aquí</DrawerStatus>;
+  return <DrawerStatus>{venta ? 'Sincronizada' : 'Sincronizado'}</DrawerStatus>;
 }
 
 function Acciones({ row }: { readonly row: Row }) {
@@ -89,44 +72,31 @@ function Acciones({ row }: { readonly row: Row }) {
   if (row.ticketId === null || row.cancelada) return null;
   return (
     <a
-      className={detalleLinea}
+      className={button({ variant: 'primary', full: true })}
       href={`/api/comprobantes/${row.ticketId}?formato=png`}
       target="_blank"
       rel="noreferrer"
       data-testid="compartir-comprobante"
     >
-      Compartir comprobante →
+      Compartir comprobante
     </a>
-  );
-}
-
-/** The amount block: a 44px figure over its date stamp. */
-function Monto({ row, venta }: { readonly row: Row; readonly venta: boolean }) {
-  return (
-    <div className={detalleHero} style={{ background: venta ? colors.yellow : colors.white }}>
-      <div className={detalleCifra}>
-        {venta ? '+' : '−'}
-        {formatMoney(row.amount)}
-      </div>
-      <div>
-        {row.fecha}
-        {row.hora === '' ? '' : ` · ${row.hora}`}
-      </div>
-    </div>
   );
 }
 
 function Fichas({ row, venta }: { readonly row: Row; readonly venta: boolean }) {
   return (
-    <div style={{ marginTop: 18 }}>
-      <Ficha label={venta ? 'Método de pago' : 'Categoría'} value={row.clasificacion} />
-      <Ficha label="Operador" value={row.operador ?? '—'} />
-      <Ficha label="Dispositivo" value={row.dispositivo ?? '—'} />
-      {row.folio === null ? null : <Ficha label="Folio" value={`V-${row.folio}`} />}
+    <div className={s.fichas}>
+      <Ficha label={venta ? 'Cómo pagaron' : 'Categoría'} value={row.clasificacion} />
+      <Ficha label={venta ? 'Quién cobró' : 'Quién lo anotó'} value={row.operador ?? '—'} />
+      <Ficha label="En qué caja" value={row.dispositivo ?? 'En el portal'} />
       <Ficha label="Turno" value={row.turno ?? 'Sin turno'} />
-      {row.cancelada ? <Ficha label="Estado" value="Cancelada" /> : null}
     </div>
   );
+}
+
+function eyebrow(row: Row, venta: boolean): string {
+  if (!venta) return 'Gasto';
+  return row.folio === null ? 'Venta' : `Venta · folio V-${row.folio}`;
 }
 
 export function DetalleMovimiento({ row, rows, onClose }: DetalleProps) {
@@ -136,17 +106,25 @@ export function DetalleMovimiento({ row, rows, onClose }: DetalleProps) {
     <Drawer
       open
       onOpenChange={(abierto) => (abierto ? undefined : onClose())}
+      eyebrow={eyebrow(row, venta)}
+      status={<Estado row={row} venta={venta} />}
       heading={row.concepto}
-      headerTone={venta ? colors.greenSoft : colors.redSoft}
+      subtitle={row.hora === '' ? row.fecha : `${row.fecha} · ${row.hora}`}
       description={`Detalle de ${venta ? 'la venta' : 'el gasto'} ${row.concepto}`}
       actions={<Acciones row={row} />}
     >
-      <Monto row={row} venta={venta} />
+      <div
+        className={s.detalleMonto}
+        style={{
+          background: venta ? colors.greenSoft : colors.redSoft,
+          color: venta ? colors.greenText : colors.redText,
+        }}
+      >
+        {venta ? '+' : '−'}
+        {formatMoney(row.amount)}
+      </div>
       <Fichas row={row} venta={venta} />
       <Renglones row={row} rows={rows} />
-      <div style={{ marginTop: 18 }}>
-        <Origen row={row} />
-      </div>
     </Drawer>
   );
 }
