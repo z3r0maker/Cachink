@@ -1,4 +1,4 @@
-import { buildRecursosSchema } from '../structured-data.js';
+import { buildRecursosSchema } from '../schema-pages.js';
 
 import { ARTICLES } from '../articles.js';
 

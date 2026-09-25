@@ -59,6 +59,22 @@
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
       **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
 
+- **Records (2026-09-24, from the owner: domain at GoDaddy moving to Cloudflare DNS, both Vercel
+  projects exist).** At GoDaddy, point the nameservers at the two Cloudflare gives. In Cloudflare,
+  **proxy off (grey cloud)** on every Vercel record so Vercel terminates TLS itself:
+
+  | Name  | Type  | Value                  | For                                |
+  | ----- | ----- | ---------------------- | ---------------------------------- |
+  | `@`   | A     | `76.76.21.21`          | `xangarro.mx` → landing project    |
+  | `www` | CNAME | `cname.vercel-dns.com` | redirect to apex (set in Vercel)   |
+  | `app` | CNAME | `cname.vercel-dns.com` | `app.xangarro.mx` → portal project |
+
+  Then in each Vercel project add its domain (landing: `xangarro.mx` + `www.xangarro.mx` with
+  www → apex redirect; portal: `app.xangarro.mx`) and wait for the certificate. Resend's MX/SPF/DKIM
+  rows (O-13) go in the same zone. Verify: `dig +short xangarro.mx` → `76.76.21.21`,
+  `dig +short app.xangarro.mx` → a `vercel-dns` name, then `pnpm --filter @xangarro/landing build`
+  and the audit's live fetch.
+
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
@@ -118,8 +134,12 @@
   bios, by choice) feeds the byline, two Person nodes (on the home graph and beside every Article,
   as its `author`), the Organization's `founder`, and a «Quiénes están detrás» section in
   llms-full.txt that the build checks.
-- **Round 2 (needs the owner):** content for an «Acerca de» page (the founders' names and roles are
-  in `landing/authors.js`; missing: city, year, the reason it exists, and the legal name the aviso
-  also needs); customer quotes once the beta yields them (Review
+- Done: 2026-09-24 · `/acerca/` — why Xangarro exists (drafted from the owner's words: the
+  taquería, the puesto, the florería; the libreta, the Excel, the system they do not need; no fixed
+  internet on the street), both founders, Don Cuentas, four principles, contact. `landing/empresa.js`
+  holds Zapopan, Jalisco, 2026 — the Organization's `foundingDate`/`foundingLocation`, the page and
+  llms-full read it; the page carries an AboutPage graph; footer link beside the aviso; in the
+  sitemap. No legal entity yet: the aviso keeps `[RAZÓN SOCIAL]` (production-readiness blocker).
+- **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.

@@ -6,7 +6,7 @@
  */
 import lastmod from 'virtual:lastmod';
 import { ARTICLES, ARTICLE_BY_SLUG, fechaLarga } from '../../articles.js';
-import { buildArticleSchema } from '../../structured-data.js';
+import { buildArticleSchema } from '../../schema-pages.js';
 import { signupUrl } from '../../../landing/planes.js';
 import { AUTHORS } from '../../../landing/authors.js';
 

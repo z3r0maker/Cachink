@@ -110,6 +110,18 @@ export const ROUTES = [
     sources: ['src/pages/legal', '../../docs/legal/aviso/arco-procedimiento.md'],
   },
   {
+    path: '/acerca/',
+    outDir: 'dist/acerca',
+    title: 'Acerca de Xangarro · Hecho en Zapopan',
+    description:
+      'Por qué existe Xangarro, quiénes lo construyen y qué creemos: finanzas para los negocios mexicanos que apenas empiezan.',
+    smoke: 'Por qué existe Xangarro',
+    type: 'website',
+    changefreq: 'monthly',
+    priority: '0.5',
+    sources: ['src/pages/Acerca.jsx', 'landing/authors.js', 'landing/empresa.js'],
+  },
+  {
     path: '/404',
     outDir: 'dist',
     outFile: '404.html',

@@ -2,6 +2,7 @@
 import { FAQ_ITEMS } from '../../landing/copy.jsx';
 import { SOCIAL_PROFILES } from '../../landing/social.js';
 import { AUTHORS } from '../../landing/authors.js';
+import { EMPRESA } from '../../landing/empresa.js';
 import { PLANES_NOTAS, planesDetalle } from './planes-text.js';
 
 const faqText = () => FAQ_ITEMS.map(({ q, a }) => `**${q}**\n${a}`).join('\n\n');
@@ -109,7 +110,7 @@ const equipo = (siteUrl) => `## Quiénes están detrás
 
 ${AUTHORS.map((a) => `- **${a.name}** — ${a.role}`).join('\n')}
 
-Las guías de ${siteUrl}/recursos/ las firman ambos.`;
+Xangarro nació en ${EMPRESA.ciudad}, ${EMPRESA.estado}, en ${EMPRESA.fundacion}. Las guías de ${siteUrl}/recursos/ las firman ambos. Más en ${siteUrl}/acerca/.`;
 
 const contacto = (siteUrl) => `## Información de contacto y presencia digital
 

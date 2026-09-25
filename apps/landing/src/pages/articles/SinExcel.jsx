@@ -1,4 +1,4 @@
-import { buildHowToSchema } from '../../structured-data.js';
+import { buildHowToSchema } from '../../schema-pages.js';
 import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
 
 /** The week plan: the visible steps and the HowTo schema read the same list. */
