@@ -1,6 +1,4 @@
-import { fromCentavos, PLATFORM_FLAG_DEFAULTS, type Money } from '@xangarro/domain';
-
-import type { Session } from '@/session/types';
+import { fromCentavos, type Money } from '@xangarro/domain';
 
 /**
  * Sample content — Taquería Don Pedro, the business used across every design
@@ -12,33 +10,9 @@ import type { Session } from '@/session/types';
  * is formatted only at the boundary with `@xangarro/domain`'s `formatMoney`.
  *
  * The plan is no longer here: `server/billing/plan.ts` reads it from the
- * business's subscription (B-10).
+ * business's subscription (B-10); nor the capabilities (P-36.6): `data/negocio`
+ * reads them from the plan the session carries.
  */
-
-/** @deprecated Superseded by the real session; remaining uses are being migrated. */
-export const SESSION: Session = {
-  role: 'owner',
-  businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
-  businessName: 'Taquería Don Pedro',
-  planId: 'xangarro',
-  platform: { ...PLATFORM_FLAG_DEFAULTS, asesorLlm: true },
-  capabilities: {
-    estadosFinancieros: true,
-    informeMensual: true,
-    permisosPorUsuario: false,
-    asesor: 'diario',
-    cobrosIntegrados: true,
-  },
-  features: {
-    stock: true,
-    barcode: true,
-    conversionMateriaPrima: false,
-    conversionAutomatica: false,
-    auditoriaInventario: false,
-    merma: false,
-    ventasCredito: false,
-  },
-};
 
 export const pesos = (amount: number): Money => fromCentavos(Math.round(amount * 100));
 

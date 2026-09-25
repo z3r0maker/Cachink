@@ -8,7 +8,7 @@ import { Icon } from '@/shell/icon';
 
 function Item({ item }: { readonly item: ChecklistItem }) {
   return (
-    <li className={row} data-done={item.done}>
+    <li className={row} data-done={item.done} data-group={item.group}>
       <Icon
         path={item.done ? ICON.check : ICON.clock}
         size={22}
@@ -34,6 +34,15 @@ function Item({ item }: { readonly item: ChecklistItem }) {
  * `/como-empiezo` renders, so the portal never shows two checklists that can
  * disagree — this is a window onto that page, with its own link out.
  */
+/** «Para vender» drives the line; the optional list is only counted once selling is possible. */
+function resumen(c: Checklist): string {
+  if (!c.complete) return `${c.done} de ${c.total} listos.`;
+  const pendientes = c.optional.filter((i) => !i.done).length;
+  return pendientes === 0
+    ? '¡Todo listo! Tu negocio ya está andando.'
+    : `Listo para vender. ${pendientes} opcional${pendientes === 1 ? '' : 'es'} por hacer.`;
+}
+
 export function ChecklistCard({ checklist }: { readonly checklist: Checklist }) {
   return (
     <Card>
@@ -46,9 +55,7 @@ export function ChecklistCard({ checklist }: { readonly checklist: Checklist }) 
         </a>
       </div>
       <p className={note} style={{ marginTop: 0 }}>
-        {checklist.complete
-          ? '¡Todo listo! Tu negocio ya está andando.'
-          : `${checklist.done} de ${checklist.total} listos.`}
+        {resumen(checklist)}
       </p>
       <ul className={list} data-testid="inicio-checklist">
         {checklist.items.map((item) => (

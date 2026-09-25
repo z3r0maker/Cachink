@@ -34,20 +34,26 @@ test(
     const card = main.getByTestId('inicio-checklist');
     await expect(card).toBeVisible();
 
-    // The summary counts the items the card renders. It used to say «5 de 6»,
-    // which broke twice over: N-17 added the saldos item (six became seven), and
-    // whether saldos are ticked depends on whether `saldos-iniciales.spec.ts`
-    // ran first — a census here makes this test depend on suite order.
-    const items = card.locator('li[data-done]');
-    const total = await items.count();
-    const listos = await card.locator('li[data-done="true"]').count();
-    await expect(main.getByText(`${listos} de ${total} listos.`)).toBeVisible();
+    // P-36: «Para vender» is the progress; the optional list never blocks. A
+    // census keeps this independent of suite order (saldos may or may not be
+    // ticked by `saldos-iniciales.spec.ts` having run first).
+    const requeridos = card.locator('li[data-group="requerido"]');
+    const total = await requeridos.count();
+    const listos = await card.locator('li[data-group="requerido"][data-done="true"]').count();
+    const opcionales = await card.locator('li[data-group="opcional"][data-done="false"]').count();
+    await expect(
+      main.getByText(
+        listos === total
+          ? `Listo para vender. ${opcionales} opcional${opcionales === 1 ? '' : 'es'} por hacer.`
+          : `${listos} de ${total} listos.`,
+      ),
+    ).toBeVisible();
 
     // And it is really reading data, not rendering a constant: the seed ticks
     // operador, productos, código, dispositivo and venta, and the logo was just
-    // cleared above, so it cannot be complete.
+    // cleared above, so the optional list cannot be done.
     expect(listos).toBeGreaterThanOrEqual(5);
-    expect(listos).toBeLessThan(total);
+    expect(opcionales).toBeGreaterThanOrEqual(1);
     await expect(card.locator('li[data-done="false"]').getByText('Sube tu logo')).toBeVisible();
     await expect(main.getByRole('link', { name: 'Ver todo' })).toHaveAttribute(
       'href',

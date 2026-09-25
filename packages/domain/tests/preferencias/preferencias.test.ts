@@ -29,6 +29,9 @@ describe('tipos de pago', () => {
     assert.deepEqual(parseMetodosPago('["QR/CoDi"]'), ['QR/CoDi']);
     assert.deepEqual(parseMetodosPago('no-json'), [...METODOS_CONFIGURABLES]);
     assert.deepEqual(parseMetodosPago(null), [...METODOS_CONFIGURABLES]);
+    // A row the wizard wrote before P-36 carries «Crédito»; that is the Función, not a method here.
+    assert.deepEqual(parseMetodosPago('["Efectivo","Crédito"]'), ['Efectivo']);
+    assert.deepEqual(parseMetodosPago('["Crédito"]'), [...METODOS_CONFIGURABLES]);
   });
 });
 

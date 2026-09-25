@@ -26,7 +26,8 @@ export function trialCheckoutFor(business: BillingBusiness, origin: string): Tri
     trial,
     business,
     {
-      successUrl: `${origin}/suscripcion?pago=listo&session_id={CHECKOUT_SESSION_ID}`,
+      // P-36.2: both paths end on the guide; the plan is confirmed there.
+      successUrl: `${origin}/como-empiezo?pago=listo&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${origin}/bienvenida/plan`,
     },
     (error) =>
