@@ -82,7 +82,7 @@ export interface DonDiceProps {
 /** Don Cuentas saying one thing about the screen he is on. */
 export function DonDice({ pose, children, size = 96, tone = 'amarillo' }: DonDiceProps) {
   return (
-    <aside className={s.dice} aria-label="Nota de Don Cuentas">
+    <div className={s.dice} role="note" aria-label="Nota de Don Cuentas">
       <Don pose={pose} size={size} />
       <p className={`${s.bubble} ${s.bubbleTone[tone]}`}>
         <svg className={s.tail} viewBox="0 0 20 32" width={20} height={32} aria-hidden="true">
@@ -91,6 +91,6 @@ export function DonDice({ pose, children, size = 96, tone = 'amarillo' }: DonDic
         </svg>
         {children}
       </p>
-    </aside>
+    </div>
   );
 }

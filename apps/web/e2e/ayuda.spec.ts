@@ -40,7 +40,15 @@ test('an empty message is refused with the reason, nothing sent', async ({ page 
 
 test('the sidebar footer links to Ayuda from anywhere', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('aside').getByRole('link', { name: 'Ayuda' })).toHaveAttribute(
+  // ADR-107: the footer is Don Cuentas's «¿Atorado? Te echo la mano» card.
+  await expect(
+    page
+      .locator('aside')
+      .first()
+      .getByRole('link', { name: /¿Atorado\?/ }),
+  ).toHaveAttribute('href', '/ayuda');
+  // And the header's help button reaches the same page from every screen.
+  await expect(page.locator('header').getByRole('link', { name: 'Ayuda' })).toHaveAttribute(
     'href',
     '/ayuda',
   );
