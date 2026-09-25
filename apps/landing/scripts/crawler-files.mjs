@@ -92,3 +92,18 @@ export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profile
     ),
   ];
 }
+
+/** Google shows about 60 characters of a title and 155 of a description; past that it cuts. */
+export const TITLE_MAX = 60;
+export const DESCRIPTION_MAX = 155;
+
+export function checkHeadLengths(routes) {
+  return routes.flatMap((r) => [
+    ...(r.title.length > TITLE_MAX
+      ? [`✗  ${r.path} — title is ${r.title.length} chars (max ${TITLE_MAX})`]
+      : []),
+    ...(r.description.length > DESCRIPTION_MAX
+      ? [`✗  ${r.path} — description is ${r.description.length} chars (max ${DESCRIPTION_MAX})`]
+      : []),
+  ]);
+}

@@ -12,7 +12,7 @@ export const ROUTES = [
     outDir: 'dist',
     title: 'Xangarro · Finanzas para emprendedores',
     description:
-      'Control de caja, punto de venta y estados financieros NIF para tu negocio, desde el navegador. Tu equipo cobra en la caja; tú ves todo en el portal, con Don Cuentas, tu asesor.',
+      'Caja, punto de venta y estados financieros NIF desde el navegador. Tu equipo cobra; tú ves todo en el portal, con Don Cuentas, tu asesor con IA.',
     smoke: 'El mostrador cobra',
     type: 'website',
     changefreq: 'weekly',
@@ -36,7 +36,7 @@ export const ROUTES = [
     outDir: 'dist/recursos/sin-excel',
     title: 'Cómo llevar la caja de tu negocio sin Excel · Xangarro',
     description:
-      'Guía práctica para dueños de pequeños negocios en México que quieren dejar de usar hojas de cálculo y llevar un control de caja más rápido, preciso y sin errores.',
+      'Guía práctica para dueños de pequeños negocios en México que quieren dejar las hojas de cálculo y llevar la caja rápido y sin errores.',
     smoke: 'Cómo llevar la caja',
     type: 'article',
     changefreq: 'monthly',
@@ -46,9 +46,9 @@ export const ROUTES = [
   {
     path: '/recursos/nif/',
     outDir: 'dist/recursos/nif',
-    title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador · Xangarro',
+    title: 'Estados financieros NIF sin ser contador · Xangarro',
     description:
-      'Guía en lenguaje simple sobre los estados financieros en formato NIF que solicitan los contadores y bancos en México, y cómo generarlos desde tu app de caja.',
+      'Qué son los estados financieros NIF que piden contadores y bancos en México, y cómo generarlos desde tu app de caja, en lenguaje simple.',
     smoke: 'Estados financieros NIF',
     type: 'article',
     changefreq: 'monthly',
@@ -58,9 +58,9 @@ export const ROUTES = [
   {
     path: '/recursos/errores-caja/',
     outDir: 'dist/recursos/errores-caja',
-    title: '5 errores comunes al registrar ventas en efectivo · Xangarro',
+    title: '5 errores al registrar ventas en efectivo · Xangarro',
     description:
-      'Los errores más frecuentes que cometen los dueños de pequeños negocios al llevar el control de caja en efectivo, y cómo un sistema de registro simple los elimina.',
+      'Los errores más frecuentes al llevar la caja en efectivo de un pequeño negocio, y cómo un registro simple los elimina.',
     smoke: '5 errores comunes',
     type: 'article',
     changefreq: 'monthly',
@@ -70,7 +70,7 @@ export const ROUTES = [
   {
     path: '/recursos/vs-excel/',
     outDir: 'dist/recursos/vs-excel',
-    title: 'Xangarro vs hojas de cálculo: comparativa honesta · Xangarro',
+    title: 'Xangarro vs hojas de cálculo: comparativa honesta',
     description:
       'Comparación directa entre usar Excel o Google Sheets y una app de caja especializada para el control financiero de pequeños negocios en México.',
     smoke: 'comparativa honesta',

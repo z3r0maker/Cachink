@@ -87,5 +87,6 @@
   `landing/social.js`: the Organization schema lists them as `sameAs` (plus `email`), `llms-full.txt`
   names them with their URLs, and the build fails when one is missing from it. The old line that
   claimed TikTok, X and YouTube is gone.
-- **Not done:** trim the home description (~200 chars) and the NIF article title (~80 chars) for
-  SERP truncation.
+- Done: 2026-09-24 · every title is ≤ 60 characters and every description ≤ 155 (the home
+  description leads with Don Cuentas; the NIF, errores-caja and vs-excel titles shortened), and the
+  prerender fails past those limits (`checkHeadLengths`).
