@@ -108,7 +108,10 @@ test.describe('login gate (signed out)', () => {
     await page.getByTestId('login-email').fill(`nadie-${Date.now()}@example.com`);
     await page.getByTestId('login-password').fill('incorrecta');
 
-    const entrar = page.getByRole('button', { name: /^Entrar$|^Entrando…$/ });
+    // The storefront login's button (feat/portal-cortina): «Abrir mi changarro», «Subiendo la cortina…» while pending.
+    const entrar = page.getByRole('button', {
+      name: /^Abrir mi changarro$|^Subiendo la cortina…$/,
+    });
     await Promise.all(
       Array.from({ length: 6 }, () => entrar.click({ timeout: 2_000 }).catch(() => undefined)),
     );
