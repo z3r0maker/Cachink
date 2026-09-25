@@ -5,9 +5,8 @@ import {
   type FeatureFlagKey,
   type FeatureFlags,
   type PlanId,
+  type PlanLimits,
 } from '@xangarro/domain';
-
-import { SESSION } from '../fixtures/business';
 
 export interface Field {
   readonly label: string;
@@ -110,10 +109,25 @@ export function flagRows(
   }));
 }
 
-/** Plan-level capabilities have no tenant switch — they are read-only rows. */
-export const CAPABILITY_ROWS: readonly (readonly [string, string])[] = [
-  ['Estados financieros NIF', SESSION.capabilities.estadosFinancieros ? 'Incluido' : 'No incluido'],
-  ['Informe mensual PDF', SESSION.capabilities.informeMensual ? 'Incluido' : 'No incluido'],
-  ['Permisos por usuario', SESSION.capabilities.permisosPorUsuario ? 'Incluido' : 'No incluido'],
-  ['Nivel de Asesor', SESSION.capabilities.asesor],
-];
+/** How much of Don Cuentas each tier brings, as the Suscripción page says it. */
+const DON_CUENTAS_TIER: Readonly<Record<PlanLimits['capabilities']['asesor'], string>> = {
+  semanal: 'Don Cuentas · un aviso por semana',
+  diario: 'Don Cuentas · avisos diarios y cierre de mes con IA',
+  completo: 'Don Cuentas completo · diagnóstico mensual y estrategia',
+};
+
+/**
+ * Plan-level capabilities have no tenant switch — read-only rows, from the
+ * plan the business is on (P-36.6: they used to come from a fixture pinned
+ * to Xangarro with a daily Don Cuentas, whatever the subscription said).
+ */
+export function capabilityRows(planId: PlanId): readonly (readonly [string, string])[] {
+  const c = PLAN_LIMITS[planId].capabilities;
+  const yn = (on: boolean) => (on ? 'Incluido' : 'No incluido');
+  return [
+    ['Estados financieros NIF', yn(c.estadosFinancieros)],
+    ['Informe mensual PDF', yn(c.informeMensual)],
+    ['Permisos por usuario', yn(c.permisosPorUsuario)],
+    ['Don Cuentas', DON_CUENTAS_TIER[c.asesor]],
+  ];
+}

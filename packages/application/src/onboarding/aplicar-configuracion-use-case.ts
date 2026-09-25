@@ -32,7 +32,11 @@ import type { BusinessPatch, BusinessesRepository } from '@xangarro/data';
 
 import type { UseCase } from '../_use-case.js';
 import { ToggleFeatureFlagUseCase } from '../toggle-feature-flag/index.js';
-import { clampToAllowed, currentConfiguration } from './configuracion-actual.js';
+import {
+  clampToAllowed,
+  currentConfiguration,
+  storablePaymentTypes,
+} from './configuracion-actual.js';
 import type { OnboardingStore } from './ports.js';
 
 export interface AplicarConfiguracionInput {
@@ -109,8 +113,10 @@ export class AplicarConfiguracionUseCase implements UseCase<
     nombre: string | undefined,
   ): Promise<void> {
     const patch: { -readonly [K in keyof BusinessPatch]: BusinessPatch[K] } = {};
-    if (changes.some((c) => c.kind === 'paymentType') && next.paymentTypes.length > 0) {
-      patch.enabledPaymentMethods = JSON.stringify(next.paymentTypes);
+    const storable = storablePaymentTypes(next.paymentTypes);
+    const listChanged = changes.some((c) => c.kind === 'paymentType' && c.method !== 'Crédito');
+    if (listChanged && storable.length > 0) {
+      patch.enabledPaymentMethods = JSON.stringify(storable);
     }
     if (nombre !== undefined && nombre !== business.nombre) patch.nombre = nombre;
     if (Object.keys(patch).length > 0) await this.#businesses.update(business.id, patch);

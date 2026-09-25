@@ -26,12 +26,19 @@ export function validateMetodosPago(chosen: readonly string[]): MetodosPagoResul
   return { ok: true, value: JSON.stringify(value) };
 }
 
-/** The stored JSON as methods; all four when it is missing or unreadable. */
+/**
+ * The stored JSON as methods; all four when it is missing, unreadable or names
+ * nothing configurable. An entry that is not configurable (a row the wizard
+ * wrote with «Crédito» before P-36) is ignored, not a reason to fall back.
+ */
 export function parseMetodosPago(json: string | null | undefined): PaymentMethod[] {
   try {
     const parsed: unknown = JSON.parse(json ?? '');
-    if (Array.isArray(parsed) && parsed.every((m) => typeof m === 'string' && isConfigurable(m))) {
-      return parsed as PaymentMethod[];
+    if (Array.isArray(parsed)) {
+      const known = parsed.filter(
+        (m): m is MetodoConfigurable => typeof m === 'string' && isConfigurable(m),
+      );
+      if (known.length > 0) return METODOS_CONFIGURABLES.filter((m) => known.includes(m));
     }
   } catch {
     // Unreadable is the same as unset: take every method.
