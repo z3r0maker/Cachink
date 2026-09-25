@@ -113,7 +113,13 @@
   home graph. The portal's two indexable pages, `/login` and `/signup`, have their own title and
   description. Each guide links into the home section it argues for (`/#portal`, `/#por-que`,
   `/#como`, `/#precios`). `home/useInView.js` → `use-in-view.js`, so the landing lints clean.
-- **Round 2 (needs the owner):** an author name and one-line bio for the guides' byline and a
-  Person node; content for an «Acerca de» page; customer quotes once the beta yields them (Review
+- Done: 2026-09-24 · the guides are signed by both founders — `landing/authors.js` (Eduardo
+  Torres, producto y tecnología; Antonio Alejo, estrategia, finanzas y legal; no profile links, no
+  bios, by choice) feeds the byline, two Person nodes (on the home graph and beside every Article,
+  as its `author`), the Organization's `founder`, and a «Quiénes están detrás» section in
+  llms-full.txt that the build checks.
+- **Round 2 (needs the owner):** content for an «Acerca de» page (the founders' names and roles are
+  in `landing/authors.js`; missing: city, year, the reason it exists, and the legal name the aviso
+  also needs); customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.

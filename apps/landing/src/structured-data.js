@@ -19,10 +19,23 @@ import { FAQ_ITEMS } from '../landing/copy.jsx';
 import { PLANES, signupUrl } from '../landing/planes.js';
 // Public profiles — the Organization's sameAs, the same list llms-full.txt names
 import { SOCIAL_PROFILES } from '../landing/social.js';
+// The founders — Person nodes, the Organization's founders and every guide's authors
+import { AUTHORS } from '../landing/authors.js';
 import { ogImagePath } from './articles.js';
 
 const SITE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://xangarro.mx';
+
+const personId = (a) => `${SITE_URL}/#${a.id}`;
+
+/** One Person per founder; the same nodes sit in the home graph and beside every Article. */
+export const persons = AUTHORS.map((a) => ({
+  '@type': 'Person',
+  '@id': personId(a),
+  name: a.name,
+  jobTitle: a.role,
+  worksFor: { '@id': `${SITE_URL}/#organization` },
+}));
 
 const organization = {
   '@type': 'Organization',
@@ -46,6 +59,7 @@ const organization = {
   inLanguage: 'es-MX',
   email: 'hola@xangarro.mx',
   sameAs: SOCIAL_PROFILES.map((p) => p.url),
+  founder: AUTHORS.map((a) => ({ '@id': personId(a) })),
 };
 
 const softwareApplication = {
@@ -123,7 +137,7 @@ const webSite = {
 
 export const structuredData = {
   '@context': 'https://schema.org',
-  '@graph': [organization, webSite, softwareApplication, service, faqPage],
+  '@graph': [organization, ...persons, webSite, softwareApplication, service, faqPage],
 };
 
 const RECURSOS_URL = `${SITE_URL}/recursos/`;
@@ -174,12 +188,12 @@ export function buildArticleSchema({
     inLanguage: 'es-MX',
     url,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    author: { '@id': `${SITE_URL}/#organization` },
+    author: AUTHORS.map((a) => ({ '@id': personId(a) })),
     publisher: { '@id': `${SITE_URL}/#organization` },
   };
   return {
     '@context': 'https://schema.org',
-    '@graph': [article, breadcrumbs(url, { name: title, item: url }), ...extra],
+    '@graph': [article, ...persons, breadcrumbs(url, { name: title, item: url }), ...extra],
   };
 }
 

@@ -1,6 +1,7 @@
 /** /llms-full.txt — the full product spec; plans and FAQ come from the same data the page renders. */
 import { FAQ_ITEMS } from '../../landing/copy.jsx';
 import { SOCIAL_PROFILES } from '../../landing/social.js';
+import { AUTHORS } from '../../landing/authors.js';
 import { PLANES_NOTAS, planesDetalle } from './planes-text.js';
 
 const faqText = () => FAQ_ITEMS.map(({ q, a }) => `**${q}**\n${a}`).join('\n\n');
@@ -104,6 +105,12 @@ const faq = `## Preguntas frecuentes
 
 ${faqText()}`;
 
+const equipo = (siteUrl) => `## Quiénes están detrás
+
+${AUTHORS.map((a) => `- **${a.name}** — ${a.role}`).join('\n')}
+
+Las guías de ${siteUrl}/recursos/ las firman ambos.`;
+
 const contacto = (siteUrl) => `## Información de contacto y presencia digital
 
 - **Sitio web**: ${siteUrl}
@@ -126,6 +133,7 @@ const SECCIONES = [
   precios,
   especificaciones,
   faq,
+  equipo,
   contacto,
   pie,
 ];

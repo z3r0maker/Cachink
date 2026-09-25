@@ -8,6 +8,7 @@ import lastmod from 'virtual:lastmod';
 import { ARTICLES, ARTICLE_BY_SLUG, fechaLarga } from '../../articles.js';
 import { buildArticleSchema } from '../../structured-data.js';
 import { signupUrl } from '../../../landing/planes.js';
+import { AUTHORS } from '../../../landing/authors.js';
 
 /** The Article + BreadcrumbList graph for a guide, plus any extra nodes (a HowTo). */
 export function articleSchema(slug, extra = []) {
@@ -43,7 +44,14 @@ function Fechas({ a }) {
   const updated = modified && modified > a.datePublished;
   return (
     <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-600)', margin: '0 0 20px' }}>
-      Por el equipo de Xangarro · Publicado el{' '}
+      Por{' '}
+      {AUTHORS.map((a, i) => (
+        <span key={a.id}>
+          {i > 0 && ' y '}
+          <strong style={{ color: 'var(--black)' }}>{a.name}</strong> ({a.area})
+        </span>
+      ))}
+      , cofundadores de Xangarro · Publicado el{' '}
       <time dateTime={a.datePublished}>{fechaLarga(a.datePublished)}</time>
       {updated && (
         <>

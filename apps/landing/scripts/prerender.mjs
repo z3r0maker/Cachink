@@ -22,6 +22,7 @@ import { ROUTES } from '../src/routes.js';
 import { PLANES } from '../landing/planes.js';
 import { ARTICLE_BY_SLUG, ogImagePath } from '../src/articles.js';
 import { SOCIAL_PROFILES } from '../landing/social.js';
+import { AUTHORS } from '../landing/authors.js';
 import {
   checkCrawlerFiles,
   checkFaqLengths,
@@ -160,6 +161,7 @@ crawlerFailures.push(
     planes: PLANES,
     faq: FAQ_ITEMS,
     profiles: SOCIAL_PROFILES,
+    authors: AUTHORS,
   }),
 );
 if (crawlerFailures.length > 0) {

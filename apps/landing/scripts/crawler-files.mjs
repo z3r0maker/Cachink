@@ -75,7 +75,7 @@ const missing = (file, text, needles, label) =>
  * sitemap, every plan and every FAQ question in the llms files, every
  * public profile in the full one.
  */
-export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profiles }) {
+export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profiles, authors }) {
   const full = files['llms-full.txt'];
   const nombres = planes.map((p) => p.nombre);
   return [
@@ -98,6 +98,12 @@ export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profile
       full,
       profiles.map((p) => p.url),
       'profile',
+    ),
+    ...missing(
+      'llms-full.txt',
+      full,
+      authors.map((a) => a.name),
+      'author',
     ),
   ];
 }
