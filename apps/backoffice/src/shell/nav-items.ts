@@ -2,9 +2,19 @@
  * The console's destinations. Each launch module (ADR-063 row 3) is a stub
  * until the task named in `task` fills it.
  */
+export type NavHref =
+  | '/'
+  | '/tenants'
+  | '/uso'
+  | '/inbox'
+  | '/flags'
+  | '/mapa'
+  | '/campanas'
+  | '/capacidad';
+
 export interface NavItem {
   readonly label: string;
-  readonly href: '/' | '/tenants' | '/uso' | '/inbox' | '/flags' | '/mapa' | '/campanas';
+  readonly href: NavHref;
   readonly task: string | null;
   readonly summary: string;
 }
@@ -46,5 +56,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/campanas',
     task: 'N-57',
     summary: 'Qué campaña trajo cada negocio, por primer contacto, y desde qué estado.',
+  },
+  {
+    label: 'Capacidad',
+    href: '/capacidad',
+    task: null,
+    summary: 'La base de datos contra los umbrales S2 y S3 de ADR-068.',
   },
 ] as const;

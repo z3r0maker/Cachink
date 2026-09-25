@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { connection } from 'next/server';
 import { colors } from '@xangarro/tokens';
 
+import { anton, jakarta } from './fonts';
 import '../styles/global.css';
 
 /**
@@ -26,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The CSP nonce is per request, so nothing here may be statically rendered.
   await connection();
   return (
-    <html lang="es-MX">
+    <html lang="es-MX" className={`${jakarta.variable} ${anton.variable}`}>
       <body>{children}</body>
     </html>
   );

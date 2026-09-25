@@ -1,15 +1,17 @@
 import { style } from '@vanilla-extract/css';
-import { borders, colors, radii, shadows } from '@xangarro/tokens';
+import { colors, radii } from '@xangarro/tokens';
+
+import { line, t } from './theme.css';
 
 /** The confirmation `<dialog>` of `ConfirmForm`. */
 export const dialog = style({
   maxWidth: 440,
   padding: 24,
-  border: borders.thick,
+  border: line.thick,
   borderRadius: radii[4],
-  boxShadow: shadows.card,
-  background: colors.white,
-  color: colors.ink,
+  boxShadow: `4px 4px 0 ${t.line}`,
+  background: t.surface,
+  color: t.body,
   selectors: { '&::backdrop': { background: colors.scrim } },
 });
 

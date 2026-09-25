@@ -11,6 +11,9 @@ import { attributionDeps } from '@/server/attribution/wiring';
 import { classifyInfraFailure, infraFailureMessage } from '@/server/auth/infra-failure';
 import { db } from '@/server/db/client';
 import { dbFingerprint } from '@/server/db/fingerprint';
+import { DonNote } from '@/components/don-cuentas/don-cuentas';
+import { geoView } from '@/server/geo/list';
+import { geoDeps } from '@/server/geo/wiring';
 import { requireStaffPage } from '@/server/staff';
 import { TenantError } from '@/server/tenants/errors';
 import { body, errorText, heading, muted } from '@/styles/ui.css';
@@ -18,6 +21,8 @@ import { body, errorText, heading, muted } from '@/styles/ui.css';
 import { chip, chipRow } from '../inbox/inbox.css';
 import { one, oneOf, type SearchParams } from '../search-params';
 import { table, tableWrap, td, th, wide } from '../tenants/tenants.css';
+import { campanasNota, type Embudo } from './embudo';
+import { EmbudoView } from './embudo-view';
 
 /**
  * N-57 · Campañas: which campaign brought each business in, and from where.
@@ -53,6 +58,21 @@ async function load(rango: AttributionRangeId): Promise<AttributionView | string
   }
 }
 
+/** Visits and checkouts from the Mapa rollup; a failure hides the funnel, not the page. */
+async function loadEmbudo(rango: AttributionRangeId, altas: number): Promise<Embudo | null> {
+  try {
+    const now = new Date();
+    const [v, c] = await Promise.all([
+      geoView(geoDeps(db()), { metrica: 'visitas', rango }, now),
+      geoView(geoDeps(db()), { metrica: 'checkouts', rango }, now),
+    ]);
+    return { visitas: v.national ?? 0, checkouts: c.national ?? 0, altas };
+  } catch (error) {
+    console.error('[campanas] embudo failed', error);
+    return null;
+  }
+}
+
 function Ranges({ current }: { readonly current: AttributionRangeId }) {
   return (
     <nav aria-label="Periodo" className={chipRow}>
@@ -67,6 +87,22 @@ function Ranges({ current }: { readonly current: AttributionRangeId }) {
         </Link>
       ))}
     </nav>
+  );
+}
+
+async function Results({ view }: { readonly view: AttributionView }) {
+  const embudo = await loadEmbudo(view.rango, view.total);
+  const nota = campanasNota(view);
+  return (
+    <>
+      <DonNote mood={nota.mood}>{nota.text}</DonNote>
+      <EmbudoView e={embudo} />
+      <p className={muted}>
+        {view.total.toLocaleString('es-MX')} altas en el periodo;{' '}
+        {view.directTotal.toLocaleString('es-MX')} sin campaña.
+      </p>
+      <Rows view={view} />
+    </>
   );
 }
 
@@ -126,13 +162,7 @@ export default async function CampanasPage(props: { searchParams: Promise<Search
           {result} <Link href="/campanas">Ver 30 días</Link>
         </p>
       ) : (
-        <>
-          <p className={muted}>
-            {result.total.toLocaleString('es-MX')} altas en el periodo;{' '}
-            {result.directTotal.toLocaleString('es-MX')} sin campaña.
-          </p>
-          <Rows view={result} />
-        </>
+        <Results view={result} />
       )}
     </section>
   );

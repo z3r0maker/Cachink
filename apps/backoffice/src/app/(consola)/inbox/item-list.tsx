@@ -3,6 +3,7 @@ import type { Route } from 'next';
 import type { StaffMemberId, SupportItem } from '@xangarro/domain';
 
 import { formatDueDay, formatInstant, KIND_LABELS, STATUS_LABELS } from '@/server/inbox/labels';
+import { DonNote } from '@/components/don-cuentas/don-cuentas';
 import { muted } from '@/styles/ui.css';
 
 import { list, meta, pill, row, rowTitle, urgentBadge } from './inbox.css';
@@ -40,7 +41,12 @@ export function ItemList(props: {
   readonly me: StaffMemberId;
 }) {
   if (props.items.length === 0) {
-    return <p className={muted}>No hay items con estos filtros.</p>;
+    return (
+      <DonNote mood="tranquilo">
+        Inbox en cero con estos filtros. Don Cuentas se fue por unos tacos; cuando entre algo, aquí
+        lo ves primero.
+      </DonNote>
+    );
   }
   return (
     <ul className={list} aria-label="Items del inbox">

@@ -30,6 +30,7 @@ export {
 } from './shape.js';
 export { breakpoints, type BreakpointKey } from './layout.js';
 export { brand } from './brand.js';
+export { consoleTheme, type ConsoleTheme } from './console.js';
 
 import { colors } from './colors.js';
 import { typography } from './type.js';

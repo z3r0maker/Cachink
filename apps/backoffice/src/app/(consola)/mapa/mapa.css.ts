@@ -1,12 +1,14 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { borders, colors, fontSizes, radii, typography } from '@xangarro/tokens';
+import { fontSizes, radii, typography } from '@xangarro/tokens';
+
+import { line, t } from '@/styles/theme.css';
 
 const swatchBase = style({
   display: 'inline-block',
   width: 14,
   height: 14,
   marginRight: 6,
-  border: borders.thin,
+  border: line.thin,
   borderRadius: radii[1],
   verticalAlign: 'middle',
 });
@@ -21,15 +23,15 @@ const swatchBase = style({
  * attribute, because the CSP has no 'unsafe-inline' (ui.css.ts:86).
  */
 export const swatch = styleVariants({
-  cero: [swatchBase, { background: colors.white }],
-  b1: [swatchBase, { background: colors.yellowSoft }],
-  b2: [swatchBase, { background: colors.yellow }],
-  b3: [swatchBase, { background: colors.warningSoft }],
-  b4: [swatchBase, { background: colors.redSoft }],
-  insuficiente: [swatchBase, { background: colors.gray200 }],
-  abajo: [swatchBase, { background: colors.redSoft }],
-  igual: [swatchBase, { background: colors.white }],
-  arriba: [swatchBase, { background: colors.greenSoft }],
+  cero: [swatchBase, { background: t.raised }],
+  b1: [swatchBase, { background: t.heat1 }],
+  b2: [swatchBase, { background: t.heat2 }],
+  b3: [swatchBase, { background: t.heat3 }],
+  b4: [swatchBase, { background: t.heat4 }],
+  insuficiente: [swatchBase, { background: t.raised }],
+  abajo: [swatchBase, { background: t.badSoft }],
+  igual: [swatchBase, { background: t.surface }],
+  arriba: [swatchBase, { background: t.okSoft }],
 });
 
 export const legend = style({
@@ -47,10 +49,10 @@ export const value = style({
   fontWeight: typography.weights.bold,
 });
 
-export const faint = style({ color: colors.textMuted });
+export const faint = style({ color: t.dim });
 
 const pathBase = style({
-  stroke: colors.black,
+  stroke: t.bg,
   strokeWidth: 1.2,
   strokeLinejoin: 'round',
   vectorEffect: 'non-scaling-stroke',
@@ -63,15 +65,15 @@ const pathBase = style({
  * state would render the same colour (ui.css.ts:86).
  */
 export const region = styleVariants({
-  cero: [pathBase, { fill: colors.white }],
-  b1: [pathBase, { fill: colors.yellowSoft }],
-  b2: [pathBase, { fill: colors.yellow }],
-  b3: [pathBase, { fill: colors.warningSoft }],
-  b4: [pathBase, { fill: colors.redSoft }],
-  insuficiente: [pathBase, { fill: colors.gray200 }],
-  abajo: [pathBase, { fill: colors.redSoft }],
-  igual: [pathBase, { fill: colors.white }],
-  arriba: [pathBase, { fill: colors.greenSoft }],
+  cero: [pathBase, { fill: t.raised }],
+  b1: [pathBase, { fill: t.heat1 }],
+  b2: [pathBase, { fill: t.heat2 }],
+  b3: [pathBase, { fill: t.heat3 }],
+  b4: [pathBase, { fill: t.heat4 }],
+  insuficiente: [pathBase, { fill: t.raised }],
+  abajo: [pathBase, { fill: t.badSoft }],
+  igual: [pathBase, { fill: t.surface }],
+  arriba: [pathBase, { fill: t.okSoft }],
 });
 
 export const mapFrame = style({
@@ -84,6 +86,6 @@ export const mapFrame = style({
 
 /** The column the map is currently shaded by; colour is backed by the header text. */
 export const selectedCol = style({
-  background: colors.yellowSoft,
+  background: t.accentSoft,
   fontWeight: typography.weights.bold,
 });

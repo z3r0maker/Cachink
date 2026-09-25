@@ -8,7 +8,7 @@ import type { UsageRow } from '@/server/usage/row';
 import { muted } from '@/styles/ui.css';
 
 import { name, sub, table, tableWrap, tag, td, th } from '../tenants/tenants.css';
-import { badge } from './uso.css';
+import { badge, gauge } from './uso.css';
 
 const HEADERS = ['Negocio', 'Plan', 'Transacciones del mes', 'Productos activos', 'Mes anterior'];
 
@@ -24,6 +24,14 @@ function MetricCell({ m }: { readonly m: MetricUsage }) {
       <span className={sub}>
         {m.limit === null ? 'Sin límite' : `${m.percent ?? 0} % de ${count.format(m.limit)}`}
       </span>
+      {m.limit === null ? null : (
+        <progress
+          className={gauge}
+          value={Math.min(m.value, m.limit)}
+          max={m.limit}
+          aria-hidden="true"
+        />
+      )}
     </td>
   );
 }
@@ -54,7 +62,9 @@ function Row({ row }: { readonly row: UsageRow }) {
 }
 
 export function UsageTable({ rows }: { readonly rows: readonly UsageRow[] }) {
-  if (rows.length === 0) return <p className={muted}>Ningún negocio en esta vista.</p>;
+  if (rows.length === 0) {
+    return <p className={muted}>Ningún negocio en esta vista. Mejor: nadie se pasó del plan.</p>;
+  }
   return (
     <div className={tableWrap}>
       <table className={table}>

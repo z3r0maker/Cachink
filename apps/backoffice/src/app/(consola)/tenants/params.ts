@@ -5,12 +5,14 @@ import type { ListTenantsInput } from '@/server/tenants/list';
 
 import { one, oneOf, type SearchParams } from '../search-params';
 
-/** The tenant list's URL is its state: `?q=&plan=&estado=&sin_sync=1&cursor=`. */
+/** The tenant list's URL is its state: `?q=&plan=&estado=&sin_sync=1&cursor=&ficha=`. */
 export interface TenantView {
   readonly q: string | null;
   readonly plan: PlanId | null;
   readonly estado: BillingStatus | null;
   readonly sinSync: boolean;
+  /** The business whose side panel is open (its id), if any. */
+  readonly ficha: string | null;
 }
 
 export function parseTenantView(sp: SearchParams): TenantView {
@@ -19,6 +21,7 @@ export function parseTenantView(sp: SearchParams): TenantView {
     plan: oneOf(one(sp, 'plan'), PLAN_IDS),
     estado: oneOf(one(sp, 'estado'), BILLING_STATUSES),
     sinSync: one(sp, 'sin_sync') === '1',
+    ficha: one(sp, 'ficha')?.slice(0, 40) ?? null,
   };
 }
 
@@ -45,6 +48,7 @@ export function tenantsHref(
   if (v.estado) q.set('estado', v.estado);
   if (v.sinSync) q.set('sin_sync', '1');
   if (cursor) q.set('cursor', cursor);
+  if (v.ficha) q.set('ficha', v.ficha);
   const s = q.toString();
   return s === '' ? '/tenants' : `/tenants?${s}`;
 }

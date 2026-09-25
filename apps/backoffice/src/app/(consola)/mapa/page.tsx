@@ -14,6 +14,7 @@ import {
 import { METRICS, METRIC_IDS, type MetricId } from '@/server/geo/metrics';
 import { geoDeps } from '@/server/geo/wiring';
 import { requireStaffPage } from '@/server/staff';
+import { DonNote } from '@/components/don-cuentas/don-cuentas';
 import { TenantError } from '@/server/tenants/errors';
 import { body, errorText, heading, muted } from '@/styles/ui.css';
 
@@ -21,8 +22,10 @@ import { chip, chipRow } from '../inbox/inbox.css';
 import type { SearchParams } from '../search-params';
 import { notice, wide } from '../tenants/tenants.css';
 import { Choropleth } from './choropleth';
-import { EstadoTable, formatValue } from './estado-table';
+import { EstadoTable } from './estado-table';
+import { formatValue } from './format';
 import { legend, swatch } from './mapa.css';
+import { mapaNota } from './nota';
 import { mapaHref, parseMetric, parseRange } from './params';
 
 /**
@@ -124,6 +127,11 @@ function Legend({ view }: { readonly view: GeoView }) {
   );
 }
 
+function Nota({ view }: { readonly view: GeoView }) {
+  const n = mapaNota(view);
+  return <DonNote mood={n.mood}>{n.text}</DonNote>;
+}
+
 function Totals({ view }: { readonly view: GeoView }) {
   const national = formatValue(view.metric, view.national);
   return (
@@ -159,6 +167,7 @@ export default async function MapaPage(props: { searchParams: Promise<SearchPara
         </p>
       ) : (
         <>
+          <Nota view={result} />
           <Totals view={result} />
           {result.sinEstadoShare > UNKNOWN_REGION_WARN ? (
             <p className={notice} role="note">

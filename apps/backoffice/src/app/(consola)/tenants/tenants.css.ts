@@ -1,5 +1,7 @@
 import { style } from '@vanilla-extract/css';
-import { borders, colors, fontSizes, radii, typography } from '@xangarro/tokens';
+import { fontSizes, radii, typography } from '@xangarro/tokens';
+
+import { line, t } from '@/styles/theme.css';
 
 import { card } from '@/styles/ui.css';
 
@@ -24,11 +26,12 @@ export const check = style({
 export const notice = style({
   margin: 0,
   padding: '10px 12px',
-  border: borders.thin,
+  border: line.thin,
   borderRadius: radii[2],
-  background: colors.yellow,
+  background: t.warnSoft,
+  borderColor: t.warn,
   fontSize: fontSizes.sm,
-  color: colors.black,
+  color: t.body,
 });
 
 export const tableWrap = style({ overflowX: 'auto' });
@@ -37,34 +40,43 @@ export const table = style({
   width: '100%',
   borderCollapse: 'collapse',
   fontSize: fontSizes.sm,
-  color: colors.ink,
+  color: t.body,
 });
 
 export const th = style({
   textAlign: 'left',
-  padding: '8px 10px',
-  borderBottom: borders.thick,
+  padding: '10px 12px',
+  borderBottom: line.thin,
+  fontSize: fontSizes.xs,
   fontWeight: typography.weights.extraBold,
-  color: colors.black,
+  letterSpacing: typography.letterSpacing.widest,
+  textTransform: 'uppercase',
+  color: t.dim,
   whiteSpace: 'nowrap',
 });
 
-export const td = style({ padding: '10px', borderTop: borders.thin, verticalAlign: 'top' });
+export const td = style({
+  padding: '12px',
+  borderTop: `2px solid ${t.lineSoft}`,
+  verticalAlign: 'top',
+  fontVariantNumeric: 'tabular-nums',
+  selectors: { 'tr:hover > &': { background: t.raised } },
+});
 
 export const name = style({
-  color: colors.black,
+  color: t.text,
   fontWeight: typography.weights.extraBold,
   textDecoration: 'none',
   selectors: { '&:hover': { textDecoration: 'underline' } },
 });
 
-export const sub = style({ display: 'block', color: colors.textMuted, fontSize: fontSizes.xs });
+export const sub = style({ display: 'block', color: t.dim, fontSize: fontSizes.xs });
 
 export const tag = style({
   marginLeft: 6,
   padding: '1px 6px',
   borderRadius: radii[2],
-  border: borders.thin,
+  border: line.thin,
   fontSize: fontSizes.xs,
   fontWeight: typography.weights.bold,
 });
@@ -79,5 +91,9 @@ export const sectionTitle = style({
   margin: 0,
   fontSize: fontSizes.lg,
   fontWeight: typography.weights.extraBold,
-  color: colors.black,
+  color: t.text,
 });
+
+export const healthCell = style({ width: 44, textAlign: 'center', verticalAlign: 'middle' });
+
+export const stale = style({ color: t.bad, fontWeight: typography.weights.bold });

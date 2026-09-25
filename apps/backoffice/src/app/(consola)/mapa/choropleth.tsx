@@ -2,7 +2,7 @@ import type { GeoStateRow } from '@/server/geo/list';
 import type { Bucket, Metric } from '@/server/geo/metrics';
 import { MX_STATE_CODES, MX_STATES, MX_VIEWBOX } from '@/server/geo/mx-states';
 
-import { formatValue } from './estado-table';
+import { formatValue } from './format';
 import { mapFrame, region } from './mapa.css';
 
 /**

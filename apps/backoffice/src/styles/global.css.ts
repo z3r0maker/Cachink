@@ -13,7 +13,8 @@ globalStyle('html, body', {
   padding: 0,
   background: colors.gray200,
   color: colors.ink,
-  fontFamily: typography.fontFamily,
+  // `next/font` self-hosts the faces (app/fonts.ts) as CSS variables.
+  fontFamily: `var(--font-jakarta), ${typography.fontFamily}`,
   fontWeight: typography.weights.semibold,
   WebkitFontSmoothing: 'antialiased',
 });
