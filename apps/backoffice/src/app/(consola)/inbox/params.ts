@@ -8,6 +8,9 @@ import {
 
 import { SAVED_FILTERS, type ListInput, type SavedFilter } from '@/server/inbox/list';
 
+/** How many items each board column shows before «Ver todos». */
+export const BOARD_COLUMN_LIMIT = 30;
+
 import { one, oneOf, type SearchParams } from '../search-params';
 
 /** The inbox's URL is its state: `?tipo=&estado=&urgente=1&mias=1&negocio=&filtro=&cursor=`. */
@@ -65,4 +68,21 @@ export function inboxHref(
   if (cursor) q.set('cursor', cursor);
   const s = q.toString();
   return s === '' ? '/inbox' : `/inbox?${s}`;
+}
+
+/**
+ * The board (one column per status) is the default view. A status chip, a
+ * saved filter or a page cursor asks for a single list instead.
+ */
+export function isBoard(view: InboxView, cursor: string | null): boolean {
+  return view.estado === null && view.filtro === null && cursor === null;
+}
+
+/** The use-case input for one board column: the view's chips plus that status. */
+export function toColumnInput(
+  view: InboxView,
+  me: StaffMemberId,
+  status: SupportStatus,
+): ListInput {
+  return { ...toListInput(view, me, null), statuses: [status], limit: BOARD_COLUMN_LIMIT };
 }

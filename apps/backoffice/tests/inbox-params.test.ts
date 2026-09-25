@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { inboxHref, parseView, toListInput } from '@/app/(consola)/inbox/params';
+import {
+  inboxHref,
+  isBoard,
+  parseView,
+  toColumnInput,
+  toListInput,
+} from '@/app/(consola)/inbox/params';
 
 import { STAFF } from './support/inbox';
 
@@ -35,5 +41,24 @@ describe('inbox URL state', () => {
     assert.equal(inboxHref(view), '/inbox?tipo=bug&urgente=1');
     assert.equal(inboxHref(view, { tipo: null, urgente: false }), '/inbox');
     assert.equal(inboxHref(view, {}, 'abc'), '/inbox?tipo=bug&urgente=1&cursor=abc');
+  });
+});
+
+describe('inbox board', () => {
+  it('is the default, and gives way to a status chip, a saved filter or a page', () => {
+    assert.equal(isBoard(parseView({ tipo: 'factura', urgente: '1' }), null), true);
+    assert.equal(isBoard(parseView({ estado: 'nuevo' }), null), false);
+    assert.equal(isBoard(parseView({ filtro: 'pagos_sin_cfdi' }), null), false);
+    assert.equal(isBoard(parseView({}), 'c2'), false);
+  });
+
+  it('asks each column for its own status on top of the chips', () => {
+    const view = parseView({ tipo: 'factura', mias: '1' });
+    assert.deepEqual(toColumnInput(view, STAFF, 'en_curso'), {
+      kinds: ['factura'],
+      ownerStaffId: STAFF,
+      statuses: ['en_curso'],
+      limit: 30,
+    });
   });
 });
