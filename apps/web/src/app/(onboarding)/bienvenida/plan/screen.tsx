@@ -34,6 +34,13 @@ const SOON: Notice = {
   body: 'Guardamos tu elección y te avisaremos. Mientras tanto, sigue gratis: no pierdes nada.',
 };
 
+/** P-36 D-1: the beta charges nobody; the choice is kept and the business is configured. */
+const BETA: Notice = {
+  tone: 'info',
+  title: 'Durante la beta no cobramos',
+  body: 'Guardamos tu elección y ya configuramos tu negocio. Sigue gratis; te avisamos cuando abramos los planes de pago.',
+};
+
 function usePlanActions(plan: PlanId, interval: Interval) {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [pending, startTransition] = useTransition();
@@ -43,7 +50,7 @@ function usePlanActions(plan: PlanId, interval: Interval) {
       const r = await probarGratis(plan, interval);
       if (!r.ok) return setNotice({ tone: 'critical', title: r.message });
       if (r.redirect !== null) return window.location.assign(r.redirect);
-      setNotice(SOON);
+      setNotice(r.beta ? BETA : SOON);
     });
   const gratis = () =>
     startTransition(async () => {

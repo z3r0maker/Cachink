@@ -1497,7 +1497,10 @@ critical avisos cannot be switched off.
 - **Context:** the owner walked signup → wizard → «Tu plan ideal» → Stripe → portal on production
   the night the domains went live and wrote down what was off. Verified against the code
   (`origin/main` @ `d9e0c4a8`); each item names its cause.
-- **Decisions the owner must make first:**
+- **Decisions (owner, 2026-09-25):** D-1 → **no charge during the beta**: paid CTAs show the «pronto»
+  notice behind `BILLING_BETA_NO_CHARGE`, Checkout never opens; D-2 → **yes, gate**: redirect to
+  `/como-empiezo` until the required steps pass, with an escape.
+- **Decisions as they were put:**
   - **D-1 · Charge during the beta?** ADR-105 removes the trial: a paid plan is paid from day one
     through Stripe Checkout, Xangarrito is the free way in. Stripe is the billing backbone (B-10),
     not a placeholder — but if the beta should not charge anyone yet, the paid CTAs must say so
@@ -1527,7 +1530,7 @@ critical avisos cannot be switched off.
      path never runs `AplicarConfiguracionUseCase` — answers wait in `pending_paid_answers` for the
      entitlement listener (`server/onboarding/paid-answers.ts`), which needs the Stripe webhook to
      fire on production (`STRIPE_WEBHOOK_SECRET` set on `xangarro-web`; verify with `stripe
-     listen`/dashboard events); (b) even when applied, the wizard can write «Crédito» into
+listen`/dashboard events); (b) even when applied, the wizard can write «Crédito» into
      `enabled_payment_methods` (`answers-to-configuration.ts:90,95`) and `parseMetodosPago`
      (`metodos-pago.ts:33-39`) then falls back to all four. Fix: apply the non-plan-dependent answers
      (payment types, inventory, cash) at «Seguir gratis» **and** before redirecting to Checkout;
