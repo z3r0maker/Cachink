@@ -62,7 +62,7 @@ export async function signInAsStaff(page: Page): Promise<void> {
   await page.goto('/login');
   await page.fill('input[name="email"]', STAFF_EMAIL);
   await page.fill('input[name="password"]', STAFF_PASSWORD);
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir la trastienda' }).click();
   // The action's redirect is a soft navigation the proxy never sees; wait for
   // it to finish (the cookie is only set once it does), then a full load
   // re-gates and lands on the MFA step the AAL1 session owes.

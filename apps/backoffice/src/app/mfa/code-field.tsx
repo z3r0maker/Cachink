@@ -4,9 +4,11 @@ import { field, input, label } from '@/styles/ui.css';
 export function CodeField({
   caption,
   allowRecovery,
+  onChange,
 }: {
   readonly caption: string;
   readonly allowRecovery: boolean;
+  readonly onChange?: () => void;
 }) {
   return (
     <label className={field}>
@@ -21,6 +23,7 @@ export function CodeField({
         pattern={allowRecovery ? undefined : '[0-9 ]{6,7}'}
         maxLength={allowRecovery ? 24 : 7}
         required
+        onChange={onChange}
       />
     </label>
   );

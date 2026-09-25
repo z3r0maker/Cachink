@@ -34,7 +34,7 @@ test('first sign-in forces TOTP enrolment, and the seed on the page verifies', a
   await page.goto('/login');
   await page.fill('input[name="email"]', STAFF_EMAIL);
   await page.fill('input[name="password"]', STAFF_PASSWORD);
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir la trastienda' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 10_000 });
   await page.goto('/');
   await expect(page).toHaveURL(/\/mfa\/enroll/);
@@ -116,7 +116,7 @@ test('five wrong passwords lock the account for fifteen minutes', async ({ page 
     await page.goto('/login');
     await page.fill('input[name="email"]', STAFF_EMAIL);
     await page.fill('input[name="password"]', 'incorrecta-total-9');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.getByRole('button', { name: 'Abrir la trastienda' }).click();
     await expect(
       page.getByText(/correo o contraseña incorrectos|demasiados intentos/i).first(),
     ).toBeVisible();
@@ -124,6 +124,6 @@ test('five wrong passwords lock the account for fifteen minutes', async ({ page 
   await page.goto('/login');
   await page.fill('input[name="email"]', STAFF_EMAIL);
   await page.fill('input[name="password"]', STAFF_PASSWORD);
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir la trastienda' }).click();
   await expect(page.getByText(/demasiados intentos|bloqueado/i).first()).toBeVisible();
 });

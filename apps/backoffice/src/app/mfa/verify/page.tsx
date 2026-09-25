@@ -1,6 +1,7 @@
+import { Trastienda, Vale } from '@/components/trastienda/trastienda';
 import { MFA_VERIFY_PATH } from '@/server/gate';
 import { requireStaffPage } from '@/server/staff';
-import { body, card, centered, heading, muted } from '@/styles/ui.css';
+import { muted } from '@/styles/ui.css';
 
 import { VerifyForm } from './form';
 
@@ -8,17 +9,18 @@ import { VerifyForm } from './form';
 export default async function VerifyPage() {
   await requireStaffPage(MFA_VERIFY_PATH);
   return (
-    <main className={centered}>
-      <section className={card} aria-labelledby="mfa-title">
-        <h1 id="mfa-title" className={heading}>
-          Verificación en dos pasos
-        </h1>
-        <p className={body}>Escribe el código que muestra tu app de autenticación.</p>
+    <Trastienda mood="otp">
+      <Vale
+        eyebrow="Paso 2 de 2 · Verificación"
+        title="Nomás el código y ya."
+        titleId="mfa-title"
+        intro="Escribe el código que muestra tu app de autenticación."
+      >
         <VerifyForm />
         <p className={muted}>
           ¿Perdiste tu teléfono? Escribe uno de tus códigos de recuperación en el mismo campo.
         </p>
-      </section>
-    </main>
+      </Vale>
+    </Trastienda>
   );
 }
