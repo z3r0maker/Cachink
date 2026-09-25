@@ -3,6 +3,7 @@ import { METRICS, METRIC_IDS, type Metric, type MetricId } from '@/server/geo/me
 import { muted } from '@/styles/ui.css';
 
 import { table, tableWrap, td, th } from '../tenants/tenants.css';
+import { formatValue } from './format';
 import { faint, selectedCol, swatch, value as valueClass } from './mapa.css';
 
 /**
@@ -14,11 +15,6 @@ import { faint, selectedCol, swatch, value as valueClass } from './mapa.css';
  * reading four numbers does not mean changing the filter four times; the
  * selected one is marked, and the map above is the glance.
  */
-export function formatValue(metric: Metric, value: number | null): string {
-  if (value === null) return metric.kind === 'tasa' ? '—' : '0';
-  return metric.kind === 'tasa' ? `${(value * 100).toFixed(1)} %` : value.toLocaleString('es-MX');
-}
-
 function Row({ row, selected }: { readonly row: GeoStateRow; readonly selected: MetricId }) {
   return (
     <tr>
