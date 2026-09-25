@@ -124,12 +124,12 @@ const noCheckout: TrialCheckout = {
 };
 
 /**
- * The paid CTA: first apply what the wizard answered and the current (free)
+ * [Contratar este plan], paid from day one (ADR-105): first apply what the wizard answered and the current (free)
  * plan allows — payment types, inventory, cash — so the business is configured
  * whichever way the tap ends (P-36.3: before this, only [Seguir gratis]
  * applied anything and a paid tap left Negocio at its defaults); the plan-gated
  * answers stay pending for the entitlement webhook. Then record the intent and
- * open B-10's Stripe Checkout, unless the beta keeps it closed.
+ * open B-10's Stripe Checkout (card collected, no trial), unless the beta keeps it closed.
  */
 export async function probarGratis(
   plan: PlanId,

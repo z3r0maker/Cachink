@@ -25,20 +25,20 @@ describe('StartTrialCheckoutUseCase', () => {
   const run = (plan: string, interval: string) =>
     new StartTrialCheckoutUseCase(repo, gateway).execute({ business, plan, interval, ...urls });
 
-  it('first subscription: a 14-day trial Checkout on the plan and interval asked for', async () => {
+  it('first subscription: a paid Checkout on the plan and interval asked for, no trial (ADR-105)', async () => {
     const url = await run('xangarrote', 'year');
     assert.match(url, /^https:\/\/checkout\.stripe\.com\//);
     assert.deepEqual(gateway.checkouts[0], {
       customerId: 'cus_new1',
       businessId: BIZ,
       lookupKey: 'plan_xangarrote_annual',
-      trialDays: 14,
+      trialDays: null,
       ...urls,
     });
     assert.equal(repo.customers.get(BIZ), 'cus_new1', 'the customer is remembered');
   });
 
-  it('a business that already had a subscription gets no second trial, and no second customer', async () => {
+  it('a business that already had a subscription reuses its customer, still with no trial', async () => {
     repo.customers.set(BIZ, 'cus_1');
     repo.rows.set('sub_1', record({ status: 'lapsed' }));
     await run('xangarro', 'month');

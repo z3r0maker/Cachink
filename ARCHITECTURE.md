@@ -144,6 +144,7 @@ Links to discussion, docs, prior art.
 | [102](#adr-102) | 2026-09-23 | The portal's coverage is unit + E2E merged, and a floor that only rises holds it | Accepted |
 | [103](#adr-103) | 2026-09-24 | The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial` | Accepted |
 | [104](#adr-104) | 2026-09-23 | The layer boundaries are enforced for real, and the rule table is reconciled with the code | Accepted |
+| [105](#adr-105) | 2026-09-24 | No free trial: a plan is either free (Xangarrito) or paid from day one | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7194,3 +7195,38 @@ Also, the `sync` element's pattern `packages/sync-*/src/**` never matched
 - A new workspace package is invisible to the rule until it gets an element.
 - Adding an edge to the table is now a visible change reviewed in the config,
   and the test fails if the rule stops firing.
+
+## ADR-105
+
+**Title:** No free trial: a plan is either free (Xangarrito) or paid from day one
+
+**Date:** 2026-09-24
+
+**Status:** Accepted — owner decision of 2026-09-24; supersedes the 14-day trial
+of N-01 / ADR-067 (prices, IVA and intervals of ADR-067 stand)
+
+**Context**
+
+Both paid tiers started with a card-less 14-day Stripe trial: «Probar 14 días» in
+onboarding, «Probar 14 días gratis» on the plan cards, daily trial emails, and a
+staff override to extend a trial. The owner decided the offer is simpler without
+it: Xangarrito is the free way to try Xangarro, and the paid tiers are paid.
+
+**Decision**
+
+- `StartTrialCheckoutUseCase` never sends `trialDays`; Checkout always collects
+  the card (`payment_method_collection: 'always'`). The class keeps its name so
+  the N-13 seam does not move.
+- Every customer-facing «14 días» / «prueba» goes: onboarding's button is
+  «Contratar este plan», the Xangarrote card says «Empezar ahora», and the
+  landing, FAQ, structured data and llms files say «empiezas gratis con
+  Xangarrito».
+
+**Consequences**
+
+- What stays, for subscriptions that began a trial before this ADR: the
+  `trialing` status and its «Prueba gratis hasta el …» line in Suscripción, the
+  daily trial-emails cron (it finds nothing once those trials end), the gateway's
+  `trialDays` mapping, and the backoffice `extend_trial` override. Remove them in
+  a later cleanup once no subscription is `trialing`.
+- Stripe prices need no change; trials were set per Checkout session, not on the price.

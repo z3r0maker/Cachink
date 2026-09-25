@@ -48,7 +48,7 @@ function fail(error: unknown, where: string): BillingActionResult {
   return { ok: false, message: 'No pudimos abrir el pago. Intenta de nuevo en un momento.' };
 }
 
-/** [Probar 14 días] / [Contratar]: Stripe Checkout, card only, either interval. */
+/** [Contratar este plan]: Stripe Checkout, card only, either interval, no trial (ADR-105). */
 export async function iniciarPrueba(plan: string, interval: string): Promise<BillingActionResult> {
   if (betaNoCharge()) return { ok: false, message: BETA_NO_CHARGE_MESSAGE };
   try {

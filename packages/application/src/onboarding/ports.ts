@@ -18,7 +18,7 @@ import type {
 export const BILLING_INTERVALS = ['mensual', 'anual'] as const;
 export type BillingInterval = (typeof BILLING_INTERVALS)[number];
 
-/** A [Probar 14 días] tap, kept until Checkout exists (B-10). */
+/** A [Contratar este plan] tap, kept until Checkout exists (B-10). */
 export interface TrialIntent {
   readonly plan: PlanId;
   readonly interval: BillingInterval;
