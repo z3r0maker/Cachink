@@ -3,11 +3,21 @@ import type { Route } from 'next';
 
 import { BILLING_STATUS_LABELS, formatDay, PLAN_LABELS } from '@/server/tenants/labels';
 import type { TenantRow } from '@/server/tenants/list';
+import { syncIsStale, tenantHealth, type Health } from '@/server/torre/briefing';
+import { led } from '@/shell/shell.css';
 import { muted } from '@/styles/ui.css';
 
-import { name, sub, table, tableWrap, tag, td, th } from './tenants.css';
+import { healthCell, name, stale, sub, table, tableWrap, tag, td, th } from './tenants.css';
+
+const HEALTH_LABEL: Readonly<Record<Health, string>> = {
+  ok: 'Sin pendientes',
+  warn: 'Revisar',
+  bad: 'Requiere atención',
+  off: 'Detalle menor',
+};
 
 const HEADERS = [
+  'Salud',
   'Negocio',
   'Plan',
   'Suscripción',
@@ -30,10 +40,14 @@ function PlanCell({ row }: { readonly row: TenantRow }) {
   );
 }
 
-function Row({ row }: { readonly row: TenantRow }) {
+function Row({ row, now }: { readonly row: TenantRow; readonly now: Date }) {
   const s = row.summary;
+  const health = tenantHealth(row, now);
   return (
     <tr>
+      <td className={`${td} ${healthCell}`}>
+        <span className={led[health]} role="img" aria-label={HEALTH_LABEL[health]} />
+      </td>
       <td className={td}>
         <Link href={`/tenants/${s.id}` as Route} className={name}>
           {s.nombre}
@@ -46,7 +60,7 @@ function Row({ row }: { readonly row: TenantRow }) {
         {s.devicesActive} activos
         <span className={sub}>{s.devicesTotal} en total</span>
       </td>
-      <td className={td}>{formatDay(s.lastSyncAt)}</td>
+      <td className={syncIsStale(row, now) ? `${td} ${stale}` : td}>{formatDay(s.lastSyncAt)}</td>
       <td className={td}>{formatDay(s.lastOwnerLoginAt)}</td>
       <td className={td}>{formatDay(s.createdAt)}</td>
     </tr>
@@ -54,7 +68,14 @@ function Row({ row }: { readonly row: TenantRow }) {
 }
 
 export function TenantTable({ rows }: { readonly rows: readonly TenantRow[] }) {
-  if (rows.length === 0) return <p className={muted}>No hay negocios con estos filtros.</p>;
+  if (rows.length === 0) {
+    return (
+      <p className={muted}>
+        No hay negocios con estos filtros. Don Cuentas revisó dos veces, y eso que cobra por hora.
+      </p>
+    );
+  }
+  const now = new Date();
   return (
     <div className={tableWrap}>
       <table className={table}>
@@ -69,7 +90,7 @@ export function TenantTable({ rows }: { readonly rows: readonly TenantRow[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <Row key={r.summary.id} row={r} />
+            <Row key={r.summary.id} row={r} now={now} />
           ))}
         </tbody>
       </table>

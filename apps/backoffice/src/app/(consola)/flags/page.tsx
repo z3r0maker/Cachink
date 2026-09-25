@@ -1,5 +1,7 @@
 import { db } from '@/server/db/client';
+import { FLAG_COPY } from '@/server/flags/labels';
 import { listFlags } from '@/server/flags/overview';
+import { led } from '@/shell/shell.css';
 import { flagDeps } from '@/server/flags/wiring';
 import { requireStaffPage } from '@/server/staff';
 import { body, heading } from '@/styles/ui.css';
@@ -7,6 +9,7 @@ import { body, heading } from '@/styles/ui.css';
 import type { SearchParams } from '../search-params';
 import { notice, wide } from '../tenants/tenants.css';
 import { FlagEditor } from './editor';
+import { groupTitle } from './flags.css';
 import { FlagTable } from './flag-table';
 import { HistoryDrawer } from './history-drawer';
 import { parseFlagView } from './params';
@@ -38,7 +41,13 @@ export default async function FlagsPage(props: { searchParams: Promise<SearchPar
         instante.
       </p>
       {editing ? <FlagEditor row={editing} q={view.q} tenantCount={tenantCount} /> : null}
-      <FlagTable rows={rows} />
+      <h2 className={groupTitle}>Funciones</h2>
+      <FlagTable rows={rows.filter((r) => FLAG_COPY[r.key].tipo === 'Función')} />
+      <h2 className={groupTitle}>
+        <span className={led.bad} aria-hidden="true" />
+        Kill switches · con tapa
+      </h2>
+      <FlagTable rows={rows.filter((r) => FLAG_COPY[r.key].tipo === 'Kill switch')} />
       {view.historial ? <HistoryDrawer flagKey={view.historial} /> : null}
     </section>
   );

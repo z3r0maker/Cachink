@@ -1,5 +1,7 @@
 import { style } from '@vanilla-extract/css';
-import { borders, colors, fontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { fontSizes, radii, typography } from '@xangarro/tokens';
+
+import { line, shade, t } from '@/styles/theme.css';
 
 import { card } from '@/styles/ui.css';
 
@@ -15,17 +17,18 @@ export const chip = style({
   minHeight: 36,
   padding: '0 12px',
   borderRadius: radii[2],
-  border: borders.thin,
-  background: colors.white,
-  color: colors.black,
+  border: line.thin,
+  background: t.surface,
+  color: t.text,
   textDecoration: 'none',
   fontSize: fontSizes.sm,
   fontWeight: typography.weights.bold,
   selectors: {
     '&[aria-current="true"]': {
-      background: colors.yellow,
-      border: borders.thick,
-      boxShadow: shadows.small,
+      background: t.accent,
+      color: t.onAccent,
+      border: line.thick,
+      boxShadow: shade.small,
     },
   },
 });
@@ -37,11 +40,11 @@ export const row = style({
   gridTemplateColumns: '1fr auto',
   gap: 4,
   padding: '12px 0',
-  borderTop: borders.thin,
+  borderTop: line.thin,
 });
 
 export const rowTitle = style({
-  color: colors.black,
+  color: t.text,
   fontSize: fontSizes.md,
   fontWeight: typography.weights.extraBold,
   textDecoration: 'none',
@@ -54,14 +57,14 @@ export const meta = style({
   gap: 8,
   alignItems: 'center',
   fontSize: fontSizes.sm,
-  color: colors.textMuted,
+  color: t.dim,
 });
 
 export const urgentBadge = style({
   padding: '2px 8px',
   borderRadius: radii[2],
-  background: colors.redText,
-  color: colors.white,
+  background: t.bad,
+  color: t.onAccent,
   fontSize: fontSizes.xs,
   fontWeight: typography.weights.extraBold,
   textTransform: 'uppercase',
@@ -71,10 +74,10 @@ export const urgentBadge = style({
 export const pill = style({
   padding: '2px 8px',
   borderRadius: radii[2],
-  border: borders.thin,
+  border: line.thin,
   fontSize: fontSizes.xs,
   fontWeight: typography.weights.bold,
-  color: colors.black,
+  color: t.text,
 });
 
 export const bodyText = style({
@@ -82,7 +85,7 @@ export const bodyText = style({
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
   fontSize: fontSizes.md,
-  color: colors.ink,
+  color: t.body,
 });
 
 export const facts = style({
@@ -103,10 +106,10 @@ export const actions = style({
 export const select = style({
   minHeight: 44,
   padding: '0 12px',
-  border: borders.thin,
+  border: line.thin,
   borderRadius: radii[2],
   fontSize: fontSizes.md,
   fontFamily: 'inherit',
-  background: colors.white,
-  color: colors.black,
+  background: t.surface,
+  color: t.text,
 });

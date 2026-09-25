@@ -7,6 +7,7 @@ import { formatDay } from '@/server/tenants/labels';
 
 import { name, sub, table, tableWrap, td, th } from '../tenants/tenants.css';
 import { actions, mode } from './flags.css';
+import { Tapa } from './tapa';
 import { editHref, historyHref } from './params';
 
 const HEADERS = ['Clave', 'Estado actual', 'Predeterminado', 'Último cambio', ''] as const;
@@ -52,7 +53,11 @@ function Row({ row }: { readonly row: FlagRow }) {
       </td>
       <td className={td}>
         <span className={actions}>
-          <Link href={editHref(row.key) as Route}>Editar</Link>
+          {copy.tipo === 'Kill switch' ? (
+            <Tapa href={editHref(row.key)} name={copy.nombre} />
+          ) : (
+            <Link href={editHref(row.key) as Route}>Editar</Link>
+          )}
           <Link href={historyHref(row.key) as Route}>Historial</Link>
         </span>
       </td>

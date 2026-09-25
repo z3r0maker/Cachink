@@ -1,5 +1,7 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { borders, colors, fontSizes, radii, typography } from '@xangarro/tokens';
+import { fontSizes, radii, typography } from '@xangarro/tokens';
+
+import { line, t } from '@/styles/theme.css';
 
 import { card } from '@/styles/ui.css';
 
@@ -16,17 +18,17 @@ const tileBase = style({
   flexDirection: 'column',
   gap: 4,
   padding: 12,
-  border: borders.thin,
+  border: line.thin,
   borderRadius: radii[2],
-  color: colors.black,
+  color: t.text,
 });
 
 /** Amber at 80 % of a trigger, red at the trigger (N-07 acceptance). */
 export const tile = styleVariants({
-  ok: [tileBase, { background: colors.white }],
-  amber: [tileBase, { background: colors.warningSoft, borderColor: colors.warning }],
-  red: [tileBase, { background: colors.redSoft, borderColor: colors.red }],
-  'sin-datos': [tileBase, { background: colors.gray100 }],
+  ok: [tileBase, { background: t.surface }],
+  amber: [tileBase, { background: t.warnSoft, borderColor: t.warn }],
+  red: [tileBase, { background: t.badSoft, borderColor: t.bad }],
+  'sin-datos': [tileBase, { background: t.raised }],
 });
 
 export const tileLabel = style({ fontSize: fontSizes.sm, fontWeight: typography.weights.bold });
@@ -36,4 +38,4 @@ export const tileValue = style({
   fontWeight: typography.weights.extraBold,
 });
 
-export const tileMeta = style({ fontSize: fontSizes.xs, color: colors.gray600 });
+export const tileMeta = style({ fontSize: fontSizes.xs, color: t.dim });
