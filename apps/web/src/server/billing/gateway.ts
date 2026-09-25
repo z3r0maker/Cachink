@@ -12,9 +12,9 @@ import { subscriptionFacts } from './stripe-mapping';
 /**
  * `BillingGateway` over the Stripe SDK (B-10, N-01, ADR-067).
  *
- * - Checkout is **card only**, on either interval; the trial is sent with
- *   `payment_method_collection: 'if_required'`, so no card is asked for, and a
- *   trial that ends without one **cancels** (→ lapsed → the free plan).
+ * - Checkout is **card only**, on either interval, and always collects the
+ *   card: there is no trial (ADR-105). `trialDays` stays on the port for the
+ *   subscriptions that started one before, but the use case never sends it.
  * - SPEI is an API-created `send_invoice` subscription paid from the
  *   customer's balance by Mexican bank transfer (a per-customer CLABE). No
  *   OXXO anywhere.
@@ -41,7 +41,7 @@ function checkoutParams(
     client_reference_id: r.businessId,
     line_items: [{ price, quantity: 1, tax_rates: [tax] }],
     payment_method_types: ['card'],
-    payment_method_collection: 'if_required',
+    payment_method_collection: 'always',
     subscription_data: {
       metadata,
       ...(r.trialDays === null

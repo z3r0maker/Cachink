@@ -60,7 +60,7 @@
 ### X-07 Brand masters + derivatives (ADR-054 §6)
 
 - [ ] Status · **Blocked by:** logo work (external) · **Blocks:** X-05
-      **Remaining (2026-09-24):** the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`.
+      **Remaining (2026-09-24):** the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest + the OG image). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`.
 - **Steps:** land `assets/brand/{icon.png,icon-padded.png,logo.png,splash-mobile.png}` at the sizes `assets/brand/README.md` specifies (drop `splash-desktop.png` from the README — desktop archived); regenerate `apps/mobile/assets/*` and `packages/ui/src/assets/logo.png`; rewrite the README to match reality; delete the four `role-*.png`.
 - **Acceptance:** README lists only files that exist; app shows the new icon/splash on a fresh install.
 

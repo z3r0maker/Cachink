@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { membershipsOf } from '../memberships';
-import { reportError } from '../observability/report';
 import { endSession, readSession, startSession } from '../session';
 
 /**
@@ -28,7 +28,8 @@ export async function cambiarNegocio(businessId: string): Promise<CambiarNegocio
     revalidatePath('/', 'layout');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'cambiarNegocio' });
-    return { ok: false, message: 'No pudimos cambiar de negocio. Intenta de nuevo.' };
+    return failure(error, 'cambiarNegocio', {
+      retry: 'No pudimos cambiar de negocio. Intenta de nuevo.',
+    });
   }
 }

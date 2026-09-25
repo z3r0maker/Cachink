@@ -41,9 +41,12 @@ const nextConfig = {
   // cannot be pulled out from under the server using it.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // The coverage build (ADR-102): source maps on both sides, so the V8 data the
-  // E2E run collects maps back to `src/`. Nothing else about the build changes.
+  // E2E run collects maps back to `src/`, and no minifier — see `webpack` below.
   ...(process.env.XG_COVERAGE === '1' ? { productionBrowserSourceMaps: true } : {}),
-  experimental: { serverSourceMaps: process.env.XG_COVERAGE === '1' },
+  experimental: {
+    serverSourceMaps: process.env.XG_COVERAGE === '1',
+    serverMinification: process.env.XG_COVERAGE !== '1',
+  },
   // `@xangarro/tokens` and `@xangarro/domain` ship TypeScript sources, not a
   // build output, so Next must compile them rather than treat them as external.
   transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],
@@ -52,6 +55,12 @@ const nextConfig = {
   // breaks. Keep it external on the Node server…
   serverExternalPackages: ['@sentry/node'],
   webpack: (config, { nextRuntime }) => {
+    // Coverage build only: the minifier rewrites structure — `if/else` into
+    // `a ? b : c`, statements into sequences — and coverage reads statements
+    // and branches from that structure. Mapped back to `src/`, they came out
+    // as phantom branches spanning real ones, merged beside the unit suite's
+    // true ones (ADR-102, 2026-09-24). Lines were never affected.
+    if (process.env.XG_COVERAGE === '1') config.optimization.minimize = false;
     // …and absent from any non-Node compile. `next dev` also compiles
     // `src/instrumentation.ts` for the Edge runtime, where `path` and the other
     // built-ins do not exist; without this every page returned 500 in dev

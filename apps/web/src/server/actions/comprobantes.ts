@@ -5,13 +5,13 @@ import { colors } from '@xangarro/tokens';
 import type { BusinessId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
-import { processLogo } from '../branding/logo';
+import { LOGO_INVALIDO, processLogo } from '../branding/logo';
 import { portalOrigin } from '../billing/origin';
 import { withTenant } from '../db';
 import { logoPublico, upsertLogo } from '@xangarro/data-pg';
 import { pgBusinessesRepository } from '../repositories/businesses';
-import { reportError } from '../observability/report';
 
 /**
  * Negocio → Comprobantes (N-19): the logo upload and the receipt branding
@@ -52,14 +52,12 @@ export async function subirLogo(form: FormData): Promise<SubirLogoResult> {
     revalidatePath('/negocio/comprobantes');
     return { ok: true, brandColor: processed.brandColor };
   } catch (error) {
-    if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'subirLogo' });
-    return {
-      ok: false,
-      message: error instanceof Error ? error.message : 'No pudimos guardar el logo.',
-    };
+    // The owner's file (LOGO_INVALIDO) or role: say why. Anything else is an
+    // outage — reported, and never shown in its own words.
+    return failure(error, 'subirLogo', {
+      shown: [LOGO_INVALIDO],
+      retry: 'No pudimos guardar el logo. Intenta de nuevo.',
+    });
   }
 }
 
@@ -112,11 +110,7 @@ export async function guardarComprobantes(
     revalidatePath('/negocio/comprobantes');
     return { ok: true };
   } catch (error) {
-    if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'guardarComprobantes' });
-    return { ok: false, message: 'No pudimos guardar. Intenta de nuevo.' };
+    return failure(error, 'guardarComprobantes');
   }
 }
 

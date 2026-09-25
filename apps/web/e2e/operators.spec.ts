@@ -8,7 +8,7 @@ import { SERIAL_TAG, SHARED_BIZ } from './shared-tenant';
  * Operator management (B-13 / P-05), end to end.
  *
  * Taquería Don Pedro is on Xangarro — dueño + 2 empleados, so 3 operator seats
- * (ADR-104) — and the seed has Ana and Luis. Adding Rosa fills the allowance and
+ * (ADR-106) — and the seed has Ana and Luis. Adding Rosa fills the allowance and
  * disables "Nuevo operador"; deactivating someone frees a seat again. That is
  * the rule, exercised through the portal rather than asserted about it.
  *

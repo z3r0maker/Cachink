@@ -9,10 +9,10 @@ import {
 import type { BusinessId, UserId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure, type FailurePolicy } from '../action-errors';
 import { requireMember } from '../auth';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgUsersRepository } from '../repositories/users';
 
 /**
@@ -29,23 +29,16 @@ import { pgUsersRepository } from '../repositories/users';
  */
 export type OperadorResult = { ok: true; warning?: string } | { ok: false; message: string };
 
-const KNOWN = new Set([
-  'OPERATOR_LIMIT',
-  'INVALID_PIN',
-  'OPERATOR_NOT_FOUND',
-  'DUPLICATE_OPERATOR',
-  'NOT_PERMITTED',
-  'PERMISOS_NO_INCLUIDOS',
-]);
-
-function fail(error: unknown, where: string): OperadorResult {
-  const code = (error as { code?: string } | null)?.code;
-  if (error instanceof Error && code !== undefined && KNOWN.has(code)) {
-    return { ok: false, message: error.message };
-  }
-  reportError(error, { endpoint: where });
-  return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
-}
+const REFUSALS: FailurePolicy = {
+  shown: [
+    'OPERATOR_LIMIT',
+    'INVALID_PIN',
+    'OPERATOR_NOT_FOUND',
+    'DUPLICATE_OPERATOR',
+    'PERMISOS_NO_INCLUIDOS',
+  ],
+  retry: 'No pudimos guardar el cambio. Intenta de nuevo.',
+};
 
 export async function crearOperador(nombre: string, pin: string): Promise<OperadorResult> {
   try {
@@ -63,7 +56,7 @@ export async function crearOperador(nombre: string, pin: string): Promise<Operad
     revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
-    return fail(error, 'crearOperador');
+    return failure(error, 'crearOperador', REFUSALS);
   }
 }
 
@@ -80,7 +73,7 @@ export async function restablecerPin(operatorId: string, pin: string): Promise<O
     );
     return { ok: true };
   } catch (error) {
-    return fail(error, 'restablecerPin');
+    return failure(error, 'restablecerPin', REFUSALS);
   }
 }
 
@@ -102,7 +95,7 @@ export async function desactivarOperador(operatorId: string): Promise<OperadorRe
         }
       : { ok: true };
   } catch (error) {
-    return fail(error, 'desactivarOperador');
+    return failure(error, 'desactivarOperador', REFUSALS);
   }
 }
 
@@ -126,6 +119,6 @@ export async function cambiarPermisos(
     revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
-    return fail(error, 'cambiarPermisos');
+    return failure(error, 'cambiarPermisos', REFUSALS);
   }
 }

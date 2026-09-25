@@ -61,7 +61,7 @@ describe('stripe:seed — the catalog (N-01)', () => {
 describe('stripeGateway', () => {
   const gateway = () => stripeGateway(fake.stripe);
 
-  it('Checkout: card only, trial without a card, IVA on the line, business in metadata', async () => {
+  it('Checkout: card only and always collected, IVA on the line, business in metadata (a legacy trialDays still maps)', async () => {
     await gateway().createCheckoutSession({
       customerId: 'cus_1',
       businessId: BIZ,
@@ -73,7 +73,7 @@ describe('stripeGateway', () => {
     const [p] = fake.created('checkout.sessions.create');
     assert.equal(p?.mode, 'subscription');
     assert.deepEqual(p?.payment_method_types, ['card']);
-    assert.equal(p?.payment_method_collection, 'if_required');
+    assert.equal(p?.payment_method_collection, 'always');
     assert.equal(p?.client_reference_id, BIZ);
     const sub = p?.subscription_data as Record<string, unknown>;
     assert.equal(sub.trial_period_days, 14);

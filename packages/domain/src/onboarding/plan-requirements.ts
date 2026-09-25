@@ -53,7 +53,7 @@ export function requirementsFor(answers: WizardAnswers): AnswerRequirement[] {
 
 /**
  * Each person who cobra needs an operator and a device slot. Devices are the
- * tighter of the two since ADR-104 (operators = devices + 1), so the
+ * tighter of the two since ADR-106 (operators = devices + 1), so the
  * suggestion is the same as before the owner got a seat of his own.
  */
 export function planSatisfies(plan: PlanId, requirement: PlanRequirement): boolean {

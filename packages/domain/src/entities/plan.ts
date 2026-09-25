@@ -46,10 +46,10 @@ export interface PlanCapabilities {
 export interface PlanLimits {
   /**
    * Max active Operators (PIN users): the plan's employees plus one NIP for
-   * the owner, so an owner who cobra never takes an employee's seat (ADR-104).
+   * the owner, so an owner who cobra never takes an employee's seat (ADR-106).
    */
   readonly operators: number;
-  /** Max linked devices — one per employee, i.e. `operators - 1` (ADR-104). */
+  /** Max linked devices — one per employee, i.e. `operators - 1` (ADR-106). */
   readonly devices: number;
   /** Transactions (tickets + gastos + manual/portal movements) per month (C-12, ADR-065). */
   readonly transactionsPerMonth: number;

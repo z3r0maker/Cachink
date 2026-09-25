@@ -3,6 +3,10 @@ node_modules/
 
 # Build output
 dist/
+# Copied from their packages by scripts/fonts.mjs
+public/fonts/
+# Snapshot of each route's last commit date, for a tree exported without git
+.lastmod.json
 
 # Environment — never commit secrets
 .env

@@ -8,9 +8,9 @@ import { trialCheckoutWith } from '../billing/trial-seam';
 import { reportError } from '../observability/report';
 
 /**
- * [Probar 14 días] (N-13) through B-10's Stripe Checkout: a subscription
- * session with a card-less 14-day trial on the plan and interval chosen
- * (ADR-059, ADR-067). `SolicitarPruebaUseCase` records the intent first, so
+ * [Contratar este plan] (N-13) through B-10's Stripe Checkout: a subscription
+ * session on the plan and interval chosen, paid from day one — there is no
+ * trial (ADR-105; prices ADR-059, ADR-067). `SolicitarPruebaUseCase` records the intent first, so
  * the tap is kept even when Checkout fails.
  *
  * Billing is built only when the owner taps: a portal without Stripe

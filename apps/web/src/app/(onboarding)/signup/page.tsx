@@ -1,10 +1,18 @@
 import { PLAN_IDS } from '@xangarro/domain';
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { parseUtm } from '@/server/attribution/utm';
 import { readSession } from '@/server/session';
 
 import { SignupForm } from './form';
+
+/** One of the two portal pages a search engine may index (see app/robots.ts). */
+export const metadata: Metadata = {
+  title: 'Crea tu cuenta gratis · Xangarro',
+  description:
+    'Abre tu negocio en Xangarro sin tarjeta: caja, punto de venta y estados financieros NIF desde el navegador. Gratis para empezar.',
+};
 
 /**
  * `/signup?plan=` — "Crea tu negocio" (P-03, reordered by N-13). Outside the

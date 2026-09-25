@@ -4,10 +4,10 @@ import type { MotivoMeta, NivelMeta, ObjetivoMeta } from '@xangarro/domain';
 import { celebrada } from '@xangarro/data-pg';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { fijarMeta } from '../metas';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 
 /**
  * The wizard's save (P-27): the use case anchors the target to the last
@@ -28,8 +28,9 @@ export async function fijarMetaAction(input: {
     revalidatePath('/asesor');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'fijarMetaAction' });
-    return { ok: false, message: 'No pudimos guardar tu meta. Intenta de nuevo.' };
+    return failure(error, 'fijarMetaAction', {
+      retry: 'No pudimos guardar tu meta. Intenta de nuevo.',
+    });
   }
 }
 

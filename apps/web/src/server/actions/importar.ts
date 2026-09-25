@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant, type Tx } from '../db';
+import { failure, type FailurePolicy } from '../action-errors';
 import { SheetError } from '../import/read-sheet';
 import { templateOf, type ImportTemplate, type PreviewRow } from '../import/templates';
-import { reportError } from '../observability/report';
 
 /**
  * The import (P-07, generalised by N-16): pick a template → dry-run preview
@@ -24,13 +24,11 @@ export type ImportResult =
   | { ok: true; nuevos: number; actualizados: number; sinCambios: number; omitidos: number }
   | { ok: false; message: string };
 
-function failure(error: unknown, endpoint: string): { ok: false; message: string } {
-  if (error instanceof SheetError) return { ok: false, message: error.message };
-  const code = (error as { code?: string } | null)?.code;
-  if (code === 'NOT_PERMITTED') return { ok: false, message: (error as Error).message };
-  reportError(error, { endpoint });
-  return { ok: false, message: 'No pudimos procesar el archivo. Intenta de nuevo.' };
-}
+/** A file the owner must fix says why; anything else is an incident. */
+const REFUSALS: FailurePolicy = {
+  shown: ['SHEET_INVALID'],
+  retry: 'No pudimos procesar el archivo. Intenta de nuevo.',
+};
 
 const fileOf = (form: FormData): File => {
   const f = form.get('archivo');
@@ -45,7 +43,7 @@ export async function previsualizarImportacion(form: FormData): Promise<PreviewR
     const plan = await withTenant(session.business_id, (tx: Tx) => template.plan(tx, fileOf(form)));
     return { ok: true, rows: template.preview(plan) };
   } catch (error) {
-    return failure(error, `previsualizarImportacion:${template.id}`);
+    return failure(error, `previsualizarImportacion:${template.id}`, REFUSALS);
   }
 }
 
@@ -69,6 +67,6 @@ export async function importarDatos(form: FormData): Promise<ImportResult> {
       omitidos: count('error'),
     };
   } catch (error) {
-    return failure(error, `importarDatos:${template.id}`);
+    return failure(error, `importarDatos:${template.id}`, REFUSALS);
   }
 }

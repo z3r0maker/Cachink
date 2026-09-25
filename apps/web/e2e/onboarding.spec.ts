@@ -70,14 +70,15 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await expect(page.getByTestId('plan-price')).toHaveText('$1,990 al año + IVA');
   await expect(page.getByText('Incluido en Xangarro').first()).toBeVisible();
 
-  // «Probar 14 días» is deliberately not clicked here. What it does depends on
+  // «Contratar este plan» is deliberately not clicked here. What it does depends on
   // whether Stripe is configured: with keys it navigates to Checkout
   // (`window.location.assign`), and this test — whose subject is the *free*
   // path — cannot come back from that. Without keys it showed «Pronto podrás
-  // activar tu prueba», which is the branch this test used to assert, so the
+  // contratar este plan», which is the branch this test used to assert, so the
   // test only passed on a machine with billing half-configured. The button's
   // presence is the claim that belongs here; where it leads is B-10's.
-  await expect(page.getByRole('button', { name: 'Probar 14 días' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Contratar este plan' })).toBeEnabled();
+  await expect(page.getByText(/14 días/)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Seguir gratis' }).click();
   await expect(page.getByRole('heading', { name: '¿Cómo empiezo?' })).toBeVisible();

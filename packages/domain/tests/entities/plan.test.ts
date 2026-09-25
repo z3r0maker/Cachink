@@ -3,7 +3,7 @@ import { FALLBACK_PLAN, PLAN_IDS, PLAN_LIMITS, PlanIdSchema } from '../../src/en
 import { FEATURE_FLAG_KEYS } from '../../src/entities/feature-flags.js';
 
 describe('plan', () => {
-  it('gives each plan dueño + N empleados: N devices and N + 1 operators (ADR-104)', () => {
+  it('gives each plan dueño + N empleados: N devices and N + 1 operators (ADR-106)', () => {
     expect([PLAN_LIMITS.xangarrito.devices, PLAN_LIMITS.xangarrito.operators]).toEqual([1, 2]);
     expect([PLAN_LIMITS.xangarro.devices, PLAN_LIMITS.xangarro.operators]).toEqual([2, 3]);
     expect([PLAN_LIMITS.xangarrote.devices, PLAN_LIMITS.xangarrote.operators]).toEqual([5, 6]);
