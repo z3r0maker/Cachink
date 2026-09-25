@@ -1,13 +1,4 @@
-const GIROS = [
-  'Taquerías y fondas',
-  'Panaderías y cafés',
-  'Tiendas de barrio',
-  'Talleres y servicios',
-  'Consultorios',
-  'Puestos y tianguis',
-  'Papelerías',
-  'Estéticas',
-];
+const GIROS = ['Taquerías y fondas', 'Panaderías y cafés', 'Tiendas de barrio', 'Talleres y servicios', 'Consultorios', 'Puestos y tianguis', 'Papelerías', 'Estéticas'];
 
 export function ParaQuien() {
   return (
@@ -16,9 +7,7 @@ export function ParaQuien() {
         <h2>Si tienes caja, tienes Xangarro.</h2>
         <ul className="quien-list">
           {GIROS.map((g) => (
-            <li key={g} className={g === 'Tiendas de barrio' ? 'xtag on' : 'xtag'}>
-              {g}
-            </li>
+            <li key={g} className={g === 'Tiendas de barrio' ? 'xtag on' : 'xtag'}>{g}</li>
           ))}
         </ul>
       </div>

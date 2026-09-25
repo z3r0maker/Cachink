@@ -5,20 +5,10 @@ import { PAGO_LINEA, PLANES, notaIva } from '../landing/planes.js';
 function Toggle({ anual, setAnual }) {
   return (
     <div role="group" aria-label="Periodo de pago" className="pr-toggle">
-      <button
-        type="button"
-        aria-pressed={!anual}
-        className={anual ? '' : 'on'}
-        onClick={() => setAnual(false)}
-      >
+      <button type="button" aria-pressed={!anual} className={anual ? '' : 'on'} onClick={() => setAnual(false)}>
         Mensual
       </button>
-      <button
-        type="button"
-        aria-pressed={anual}
-        className={anual ? 'on' : ''}
-        onClick={() => setAnual(true)}
-      >
+      <button type="button" aria-pressed={anual} className={anual ? 'on' : ''} onClick={() => setAnual(true)}>
         Anual · 2 meses gratis
       </button>
     </div>

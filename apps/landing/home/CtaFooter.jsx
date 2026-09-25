@@ -2,30 +2,9 @@ import { Brand } from './Nav.jsx';
 import { LOGIN_URL, signupUrl } from '../landing/planes.js';
 
 const COLS = [
-  [
-    'Producto',
-    [
-      ['#portal', 'El portal'],
-      ['#como', 'La caja'],
-      ['#asesor', 'Don Cuentas'],
-      ['#precios', 'Precios'],
-    ],
-  ],
-  [
-    'Recursos',
-    [
-      ['/recursos', 'Guías'],
-      ['/recursos/vs-excel', 'Xangarro vs. Excel'],
-      ['/recursos/nif', '¿Qué es la NIF?'],
-    ],
-  ],
-  [
-    'Legal',
-    [
-      ['/privacidad', 'Aviso de privacidad'],
-      ['/privacidad/arco', 'Derechos ARCO'],
-    ],
-  ],
+  ['Producto', [['#portal', 'El portal'], ['#como', 'La caja'], ['#asesor', 'Don Cuentas'], ['#precios', 'Precios']]],
+  ['Recursos', [['/recursos', 'Guías'], ['/recursos/vs-excel', 'Xangarro vs. Excel'], ['/recursos/nif', '¿Qué es la NIF?']]],
+  ['Legal', [['/privacidad', 'Aviso de privacidad'], ['/privacidad/arco', 'Derechos ARCO']]],
 ];
 
 function Cta() {
@@ -37,9 +16,7 @@ function Cta() {
           <p className="xlead">Crea tu cuenta en dos minutos y registra tu primera venta hoy.</p>
         </div>
         <div className="cta-actions">
-          <a className="xbtn xbtn-dark cta-btn" href={signupUrl('xangarrito')}>
-            Crear cuenta gratis
-          </a>
+          <a className="xbtn xbtn-dark cta-btn" href={signupUrl('xangarrito')}>Crear cuenta gratis</a>
           <span>
             ¿Ya tienes cuenta? <a href={LOGIN_URL}>Entra aquí</a>
           </span>
@@ -65,9 +42,7 @@ export default function CtaFooter() {
                 <nav key={title} aria-label={title}>
                   <span className="xeyebrow">{title}</span>
                   {links.map(([href, label]) => (
-                    <a key={href} href={href}>
-                      {label}
-                    </a>
+                    <a key={href} href={href}>{label}</a>
                   ))}
                 </nav>
               ))}

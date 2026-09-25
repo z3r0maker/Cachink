@@ -42,12 +42,7 @@ export function MobileMenu({ onClose, triggerRef }) {
   useTrap(ref, onClose);
   return (
     <div ref={ref} className="menu" role="dialog" aria-modal="true" aria-label="Menú">
-      <button
-        type="button"
-        className="nav-menu menu-close"
-        aria-label="Cerrar menú"
-        onClick={onClose}
-      >
+      <button type="button" className="nav-menu menu-close" aria-label="Cerrar menú" onClick={onClose}>
         <Icon name="close" size={22} />
       </button>
       <nav aria-label="Menú principal" className="menu-links">

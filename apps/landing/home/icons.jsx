@@ -30,12 +30,10 @@ export const PATHS = {
   sandwich:
     'M3 11v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3M12 19H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-3.8M3 11l7.8-6a2 2 0 0 1 2.4 0L21 11z',
   cup: 'M6 8l1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8M5 8h14M7 15a6.5 6.5 0 0 1 5 0 6.5 6.5 0 0 0 5 0M12 8l1-6h2',
-  pizza:
-    'M15 11h.01M11 15h.01M16 16h.01M2 16l20 6-6-20A20 20 0 0 0 2 16M5.7 17.1a17 17 0 0 1 11.4-11.4',
+  pizza: 'M15 11h.01M11 15h.01M16 16h.01M2 16l20 6-6-20A20 20 0 0 0 2 16M5.7 17.1a17 17 0 0 1 11.4-11.4',
   bottle:
     'M8 2h8M9 2v2.8a4 4 0 0 1-.67 2.2l-.66 1A4 4 0 0 0 7 10.2V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.8a4 4 0 0 0-.67-2.2l-.66-1A4 4 0 0 1 15 4.8V2M7 15a6.5 6.5 0 0 1 5 0 6.5 6.5 0 0 0 5 0',
-  utensils:
-    'M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7',
+  utensils: 'M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7',
 };
 
 export function Icon({ name, size, className = 'ico' }) {
@@ -51,11 +49,7 @@ export function Icon({ name, size, className = 'ico' }) {
 export function Coin({ size = 40, className = '', style }) {
   const x = Math.round(size * 0.6);
   return (
-    <span
-      className={`coin ${className}`}
-      style={{ width: size, height: size, ...style }}
-      aria-hidden="true"
-    >
+    <span className={`coin ${className}`} style={{ width: size, height: size, ...style }} aria-hidden="true">
       <svg viewBox="0 0 24 24" width={x} height={x}>
         <path d="M5 5L19 19M19 5L5 19" stroke="currentColor" strokeWidth="4.6" />
       </svg>
@@ -72,10 +66,7 @@ export function DonCuentasFace({ size = 24 }) {
       <path d="M11.1 10h1.8" stroke="currentColor" strokeWidth="1.6" />
       <circle cx="8.3" cy="10.2" r="0.9" fill="currentColor" />
       <circle cx="15.7" cy="10.2" r="0.9" fill="currentColor" />
-      <path
-        d="M6 16.2c2-2.2 4-2.2 6-.3 2-1.9 4-1.9 6 .3-2 2.2-4.2 1.8-6 .4-1.8 1.4-4 1.8-6-.4z"
-        fill="currentColor"
-      />
+      <path d="M6 16.2c2-2.2 4-2.2 6-.3 2-1.9 4-1.9 6 .3-2 2.2-4.2 1.8-6 .4-1.8 1.4-4 1.8-6-.4z" fill="currentColor" />
     </svg>
   );
 }
@@ -83,11 +74,7 @@ export function DonCuentasFace({ size = 24 }) {
 /** Don Cuentas' avatar: the yellow coin wearing his face. */
 export function DonCuentas({ size = 38, className = '' }) {
   return (
-    <span
-      className={`dc-avatar ${className}`}
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    >
+    <span className={`dc-avatar ${className}`} style={{ width: size, height: size }} aria-hidden="true">
       <DonCuentasFace size={Math.round(size * 0.66)} />
     </span>
   );

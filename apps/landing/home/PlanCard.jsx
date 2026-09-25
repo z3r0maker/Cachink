@@ -18,8 +18,7 @@ function Precio({ p, anual }) {
       </div>
       {anual ? (
         <div className="pc-equiv">
-          Equivale a <span className="num">{pesos(mensualEquivalente(p.id))}</span> al mes + IVA · 2
-          meses gratis
+          Equivale a <span className="num">{pesos(mensualEquivalente(p.id))}</span> al mes + IVA · 2 meses gratis
         </div>
       ) : null}
     </>
@@ -40,8 +39,7 @@ function DonCuentasItem({ dc }) {
 
 /** One plan, straight from planes.js. `tone` paints it white, yellow (recommended) or black. */
 export function PlanCard({ p, anual }) {
-  const btn =
-    p.tone === 'yellow' ? 'xbtn xbtn-dark' : p.tone === 'black' ? 'xbtn' : 'xbtn xbtn-white';
+  const btn = p.tone === 'yellow' ? 'xbtn xbtn-dark' : p.tone === 'black' ? 'xbtn' : 'xbtn xbtn-white';
   return (
     <div className={`xcard pc pc-${p.tone}`}>
       <div className="pc-top">
@@ -50,9 +48,7 @@ export function PlanCard({ p, anual }) {
       </div>
       <p className="pc-tag">{p.tagline}</p>
       <Precio p={p} anual={anual} />
-      <a className={btn} href={signupUrl(p.id)}>
-        {p.cta}
-      </a>
+      <a className={btn} href={signupUrl(p.id)}>{p.cta}</a>
       <ul className="pc-list">
         {p.incluye ? <li className="pc-plus">Todo lo de {p.incluye}, más:</li> : null}
         {p.features.map((f) => (

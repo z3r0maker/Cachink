@@ -108,8 +108,6 @@ export const pesos = (n) =>
 export const notaIva = (interval) => {
   const unidad = interval === 'anual' ? 'al año' : 'al mes';
   const a = totalConIva('xangarro', interval).toLocaleString('es-MX', { minimumFractionDigits: 2 });
-  const b = totalConIva('xangarrote', interval).toLocaleString('es-MX', {
-    minimumFractionDigits: 2,
-  });
+  const b = totalConIva('xangarrote', interval).toLocaleString('es-MX', { minimumFractionDigits: 2 });
   return `Precios más IVA: $${a} y $${b} ${unidad} con IVA`;
 };

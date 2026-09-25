@@ -6,12 +6,7 @@ const TILES = [
   { name: 'Horchata', price: '$20.00 · ×1', icon: 'cup', on: true },
   { name: 'Quesadilla', price: '$35.00', icon: 'pizza', tint: 'var(--yellow-soft)' },
   { name: 'Refresco', price: '$25.00', icon: 'bottle', tint: 'var(--green-soft)' },
-  {
-    name: 'Orden de 5 tacos',
-    price: '$100.00',
-    icon: 'utensils',
-    tint: 'var(--purple-soft, #F0E5FF)',
-  },
+  { name: 'Orden de 5 tacos', price: '$100.00', icon: 'utensils', tint: 'var(--purple-soft, #F0E5FF)' },
 ];
 
 /** The counter's caja on a phone, mid-sale (decorative). */
