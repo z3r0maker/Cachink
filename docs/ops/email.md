@@ -20,17 +20,18 @@ sign-in and reset links) and the **admin console** (the 08:00 staff digest).
    the shape it showed on 2026-09-25 — **copy the exact values from the dashboard** (the DKIM key
    is unique to the account):
 
-   | Type  | Name                            | Value                       | Purpose            |
-   | ----- | ------------------------------- | --------------------------- | ------------------ |
-   | TXT   | `resend._domainkey.xangarro.mx` | `p=MIGfMA…` (from the dashboard) | DKIM          |
-   | CNAME | `send.xangarro.mx`              | `send.forge.rmta.net`       | return-path / SPF  |
-   | CNAME | `rsend.xangarro.mx`             | `rsend.forge.rmta.net`      | sending            |
+   | Type  | Name                            | Value                            | Purpose           |
+   | ----- | ------------------------------- | -------------------------------- | ----------------- |
+   | TXT   | `resend._domainkey.xangarro.mx` | `p=MIGfMA…` (from the dashboard) | DKIM              |
+   | CNAME | `send.xangarro.mx`              | `send.forge.rmta.net`            | return-path / SPF |
+   | CNAME | `rsend.xangarro.mx`             | `rsend.forge.rmta.net`           | sending           |
 
    Both CNAMEs live under the `send`/`rsend` names, so the root domain's own MX (Zoho, the
    mailbox that receives replies) and its SPF are untouched. **Do not add a second DMARC**: the
    root's `_dmarc` (`v=DMARC1; p=none; rua=mailto:dmarc@xangarro.mx`, set with Zoho) already covers
    Resend's mail; tighten it to `p=quarantine` once both Zoho and Resend pass for two weeks. In the
    Add-domain form: region `us-east-1`, custom return-path `send`, click and open tracking **off**.
+
 3. Wait for **Verified** on every record, then send a test from the dashboard.
 4. **API keys → Create**: one key per Vercel project, permission **Sending
    access**, domain `xangarro.mx` only. Paste each straight into Vercel; never
