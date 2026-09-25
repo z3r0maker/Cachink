@@ -112,7 +112,7 @@ for (const route of ROUTES) {
         );
       html = html.replaceAll(`${SITE_URL}/og-image.${ext}`, `${SITE_URL}${ogImagePath(slug, ext)}`);
     }
-    html = html.replaceAll('Xangarro! — Tu caja, clara. Cada día.', `${article.title} · Xangarro`);
+    html = html.replaceAll('Xangarro — El mostrador cobra. Tú ves todo.', `${article.title} · Xangarro`);
   }
 
   // A page that must not be indexed (the 404) says so and carries no canonical
