@@ -10,7 +10,6 @@ import { Header } from '@/shell/header';
 import { OfflineRegister } from '@/shell/offline-register';
 import { Sidebar } from '@/shell/sidebar';
 
-import { pendientesRevision } from './revision-caja/pendientes';
 import { column, content, frame, main } from '@/shell/shell.css';
 
 /**
@@ -19,9 +18,11 @@ import { column, content, frame, main } from '@/shell/shell.css';
  * Navigating between routes must not move it a single pixel — that is the
  * Fase 2 compuerta.
  *
- * The **counts are real**: they come from `sync_rejections` and `notices`
- * through `loadShellCounts`, which catches so that a database blip degrades two
- * badges instead of handing every route to `global-error`. The **identity**
+ * The **counts are real**: they come from `sync_rejections`, `notices` and the
+ * rows awaiting review, through `loadShellCounts`, which catches so that a
+ * database blip degrades three badges instead of handing every route to
+ * `global-error`. The Revisión badge was a fixture length until 2026-09-25 —
+ * it read 6 in production over a page that said there was nothing to review. The **identity**
  * comes from the session; the switcher lists every business the account
  * belongs to (P-02).
  */
@@ -44,7 +45,7 @@ export default async function PortalLayout({ children }: { children: React.React
       {/* N-23: the offline page's service worker, on the Director surface only. */}
       <OfflineRegister />
       <div className={frame}>
-        <Sidebar logoUrl={logoUrl} badges={{ '/revision-caja': pendientesRevision() }} />
+        <Sidebar logoUrl={logoUrl} badges={{ '/revision-caja': counts.revisionPendiente }} />
         <div className={column}>
           {/* The plan from the business's entitlement (B-10), as people name it. */}
           <Header

@@ -5,9 +5,11 @@ import { RevisionScreen } from './screen';
 import type { Pestana, RevisionData } from './types';
 
 /**
- * Revisión de caja (O-30). Owner-only, like every portal screen. Fixture data
- * until the review status on products and clients exists (ADR-074 §2, C-18);
- * `?startTab=clientes` is the design's forcing, development only.
+ * Revisión de caja (O-30). Owner-only, like every portal screen. Reads the
+ * real rows — products and clients an operator created at the counter, still
+ * `estado_revision = 'pendiente'` (ADR-074 §2) — through `listarPendientes`,
+ * which shares its predicate with the sidebar badge so the two cannot
+ * disagree. `?startTab=clientes` is the design's forcing, development only.
  */
 export const dynamic = 'force-dynamic';
 

@@ -7,7 +7,14 @@
  */
 
 import { and, eq, isNull, ne } from 'drizzle-orm';
-import { clientPayments, clients, products, sales, tickets } from '@xangarro/data-pg';
+import {
+  clientPayments,
+  clients,
+  pendienteDeRevision,
+  products,
+  sales,
+  tickets,
+} from '@xangarro/data-pg';
 
 import { mapearClientes, mapearProductos } from './revision-mapear';
 import { withTenant, type Tx } from './db';
@@ -51,7 +58,7 @@ export async function listarPendientes(businessId: string): Promise<Pendientes> 
         creado: products.createdAt,
       })
       .from(products)
-      .where(pendiente(products, businessId));
+      .where(pendienteDeRevision(products, businessId));
     const clientesRows = await tx
       .select({
         id: clients.id,
@@ -60,7 +67,7 @@ export async function listarPendientes(businessId: string): Promise<Pendientes> 
         creado: clients.createdAt,
       })
       .from(clients)
-      .where(pendiente(clients, businessId));
+      .where(pendienteDeRevision(clients, businessId));
 
     const ctx = await leerContexto(tx, businessId, productos, clientesRows);
     const filasProductos = mapearProductos(productos, ctx.ventas, ctx.dupsProductos);
@@ -74,18 +81,6 @@ export async function listarPendientes(businessId: string): Promise<Pendientes> 
       ),
     };
   });
-}
-
-/** `estado_revision = 'pendiente'`, alive, this business. */
-function pendiente(
-  table: typeof products | typeof clients,
-  businessId: string,
-): ReturnType<typeof and> {
-  return and(
-    eq(table.businessId, businessId),
-    eq(table.estadoRevision, 'pendiente'),
-    isNull(table.deletedAt),
-  );
 }
 
 /** Everything the mapping needs beyond the rows themselves. */

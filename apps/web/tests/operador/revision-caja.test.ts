@@ -2,7 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import { colors } from '@xangarro/tokens';
 
-import { REVISION_FIXTURE } from '../../src/app/(portal)/revision-caja/fixture';
+import { REVISION_FIXTURE } from './revision-fixture';
 import {
   aprobadoProducto,
   avisoRechazo,

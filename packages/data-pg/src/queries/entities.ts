@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 
 import { businesses, clients, employees } from '../schema/tenant.js';
 import { expenses, sales } from '../schema/ledger.js';
+import { products } from '../schema/catalog.js';
 import { activationCodes, devices, notices } from '../schema/portal.js';
 import { syncRejections } from '../schema/sync.js';
 import type { Db } from '../client.js';
@@ -115,7 +116,10 @@ export async function periodLedger(tx: Tx, from: string, to: string) {
  * item separate unread notions (ADR-060). `state = 'nuevo'` is what "unread"
  * means for a notice.
  */
-export async function shellCounts(tx: Tx): Promise<{ pendingRows: number; unreadNotices: number }> {
+export async function shellCounts(
+  tx: Tx,
+  businessId: string,
+): Promise<{ pendingRows: number; unreadNotices: number; revisionPendiente: number }> {
   const [pending] = await tx
     .select({ n: count() })
     .from(syncRejections)
@@ -129,7 +133,39 @@ export async function shellCounts(tx: Tx): Promise<{ pendingRows: number; unread
       and(isNull(notices.resolvedAt), eq(notices.state, 'nuevo'), ne(notices.source, 'asesor')),
     );
 
-  return { pendingRows: pending?.n ?? 0, unreadNotices: unread?.n ?? 0 };
+  const [productos] = await tx
+    .select({ n: count() })
+    .from(products)
+    .where(pendienteDeRevision(products, businessId));
+  const [clientes] = await tx
+    .select({ n: count() })
+    .from(clients)
+    .where(pendienteDeRevision(clients, businessId));
+
+  return {
+    pendingRows: pending?.n ?? 0,
+    unreadNotices: unread?.n ?? 0,
+    revisionPendiente: (productos?.n ?? 0) + (clientes?.n ?? 0),
+  };
+}
+
+/**
+ * `estado_revision = 'pendiente'`, alive, this business (ADR-074 §2).
+ *
+ * Exported because the Revisión de caja screen lists exactly these rows and
+ * the sidebar badge counts exactly these rows. They were two definitions once
+ * — the badge's was a fixture length — and production showed a 6 above a page
+ * that said there was nothing to review.
+ */
+export function pendienteDeRevision(
+  table: typeof products | typeof clients,
+  businessId: string,
+): ReturnType<typeof and> {
+  return and(
+    eq(table.businessId, businessId),
+    eq(table.estadoRevision, 'pendiente'),
+    isNull(table.deletedAt),
+  );
 }
 
 /**
