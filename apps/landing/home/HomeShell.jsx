@@ -12,7 +12,7 @@ export function HomeShell({ children }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <Nav />
-      <main>
+      <main id="main-content">
         <Hero />
         <Ticker />
         {children}

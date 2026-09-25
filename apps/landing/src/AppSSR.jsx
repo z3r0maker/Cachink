@@ -16,6 +16,8 @@ import ErroresCaja from './pages/articles/ErroresCaja.jsx';
 import VsExcel from './pages/articles/VsExcel.jsx';
 import Privacidad from './pages/legal/Privacidad.jsx';
 import Arco from './pages/legal/Arco.jsx';
+import NotFound from './pages/NotFound.jsx';
+import Acerca from './pages/Acerca.jsx';
 
 function HomePage() {
   return (
@@ -40,6 +42,8 @@ export default function AppSSR({ route = '/' }) {
   if (clean === '/recursos') return <Recursos />;
   if (clean === '/privacidad') return <Privacidad />;
   if (clean === '/privacidad/arco') return <Arco />;
+  if (clean === '/acerca') return <Acerca />;
+  if (clean === '/404') return <NotFound />;
 
   return <HomePage />;
 }

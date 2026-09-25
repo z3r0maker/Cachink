@@ -19,7 +19,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Cuánto cuesta Xangarro?',
-    a: 'Xangarrito es $0 para siempre: 300 movimientos al mes, 50 productos y el dueño más 1 empleado. Xangarro cuesta $199 MXN al mes: 10,000 movimientos, 1,000 productos, el dueño más 2 empleados, estados financieros NIF y el cierre de mes con Don Cuentas. Xangarrote cuesta $399 MXN al mes: 30,000 movimientos, 5,000 productos, el dueño más 5 empleados y Don Cuentas completo. Los precios son más IVA y el plan anual trae 2 meses gratis. Empiezas gratis con Xangarrito y cambias de plan cuando quieras.',
+    a: 'Xangarrito es gratis para siempre: 300 movimientos al mes, 50 productos y el dueño más 1 empleado. Xangarro cuesta $199 MXN al mes y Xangarrote $399 MXN al mes, más IVA, con más movimientos, productos y empleados, estados financieros NIF y Don Cuentas. El plan anual trae 2 meses gratis. Empiezas gratis y cambias de plan cuando quieras.',
   },
   {
     q: '¿En qué dispositivos está disponible?',
@@ -35,7 +35,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Quién es Don Cuentas?',
-    a: 'Don Cuentas es el asesor de Xangarro. Todos los días revisa tus ventas, gastos e inventario y te avisa, calculado a partir de tus registros, qué subió, qué no se mueve y qué se ve raro. Cada fin de mes te entrega tu revisión con IA: qué funcionó, qué no y qué precios ajustar. El cierre de mes viene en Xangarro; Xangarrote suma la estrategia de precios y crecimiento.',
+    a: 'Don Cuentas es el asesor de Xangarro. Cada día revisa tus ventas, gastos e inventario y te avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de tus registros. Cada fin de mes te entrega tu revisión con IA: qué funcionó, qué no y qué precios ajustar.',
   },
   {
     q: '¿Xangarro maneja CFDI o facturación electrónica?',
