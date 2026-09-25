@@ -36,8 +36,11 @@ Revocation is server-side: every handler checks `tenant.devices.status = 'active
 Request — **either** the typed path (unchanged) **or** the scan path (C-14, 2026-09-23):
 
 ```json
-{ "qrToken": "q8Zb3n0pXg2KlV7wR4tY1A", "device": { … as below … } }
+{ "qrToken": "dev-only-not-a-real-secret", "device": { … as below … } }
 ```
+
+_The example token is a named placeholder — `.gitleaks.toml`'s allowlist — because a real one
+reads as a live credential to the secret scan._
 
 The scan token is ≥128 random bits (base64url, 22–64 chars), single use, **15 minutes**, minted by
 the portal's «Mostrar QR» on the live code and stored only as its SHA-256. It reaches the phone in

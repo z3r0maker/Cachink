@@ -37,7 +37,6 @@
     "mock:api": "pnpm --filter @xangarro/contracts mock:api",
     "design:contract": "tsx scripts/design-contract/index.ts",
     "lint:root": "eslint scripts supabase/functions '*.config.ts' --config eslint.config.js",
-    "design:compare": "tsx scripts/design-compare/compare.ts",
     "audit:gate": "pnpm audit --prod --json > .audit.json; tsx scripts/audit-gate.ts .audit.json"
   },
   "devDependencies": {

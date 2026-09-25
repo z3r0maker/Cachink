@@ -18,7 +18,13 @@ import { integrationSuite } from './support/db';
  * is no wipe, because the app role cannot DELETE (0036), and the password
  * sticks, because the app role cannot rewrite `auth.users`.
  */
-const PASSWORD = 'revisor-de-prueba-2026';
+// Both passwords are named for `.gitleaks.toml`'s allowlist: a reviewer-shaped
+// credential reads as live to gitleaks' generic-api-key rule. The seed imposes
+// no shape — it only bcrypts what it is given — and all that matters here is
+// that the two differ, so every assertion is unchanged.
+const PASSWORD = 'ci-only-not-a-real-secret';
+/** The rotation the second run must ignore: the first password sticks. */
+const SECOND_PASSWORD = 'ci-only-not-a-real-secret-2';
 const TODAY = new Date('2026-09-23T18:00:00.000Z');
 const { url, describe } = integrationSuite();
 
@@ -111,7 +117,7 @@ describe('the App Review demo tenant (B-04)', () => {
       (await app<{ n: string }[]>`SELECT count(*)::text AS n FROM sales`)[0]?.n;
     const before = await count();
     await owner`UPDATE activation_codes SET redeemed_at = now() WHERE code = ${DEMO.activationCode}`;
-    await seedDemo(app, { password: 'otra-clave-2026', today: TODAY });
+    await seedDemo(app, { password: SECOND_PASSWORD, today: TODAY });
     assert.equal(await count(), before);
     const [code] = await app<{ redeemed_at: string | null }[]>`
       SELECT redeemed_at FROM activation_codes WHERE code = ${DEMO.activationCode}`;
@@ -119,7 +125,7 @@ describe('the App Review demo tenant (B-04)', () => {
     const [row] = await app<{ hash: string }[]>`
       SELECT encrypted_password AS hash FROM xangarro.login_lookup(${DEMO.owner.email})`;
     assert.equal(await compare(PASSWORD, row?.hash ?? ''), true, 'the first password sticks');
-    assert.equal(await compare('otra-clave-2026', row?.hash ?? ''), false);
+    assert.equal(await compare(SECOND_PASSWORD, row?.hash ?? ''), false);
   });
 
   it('stays out of the dev seed: nothing of Tacos La Esquina is visible to Taquería Don Pedro', async () => {

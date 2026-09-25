@@ -112,15 +112,19 @@ describe('roles', () => {
     );
   });
 
+  // Both literals here are named for `.gitleaks.toml`'s allowlist: a 32-char
+  // random password is exactly what the generic-api-key rule reads as live.
+  // They still clear `passwordProblem` — 24+ printable ASCII, no spaces, and
+  // the `+/=` openssl emits — so the assertions are unchanged.
   it('accepts an openssl base64 password and rejects weak or odd ones', () => {
-    assert.equal(passwordProblem('q3J9v0x2Zb7mT1kLp8Wn4sYc6Hd5Rf0g+/aB='), null);
+    assert.equal(passwordProblem('ci-only-not-a-real-secret+/aB='), null);
     assert.equal(passwordProblem(undefined), 'is not set');
     assert.equal(passwordProblem('short'), 'is shorter than 24 characters');
     assert.match(passwordProblem('has a space in it but is long enough') ?? '', /ASCII/);
   });
 
   it('sends a SCRAM verifier, never the password, salted afresh each time', () => {
-    const password = 'q3J9v0x2Zb7mT1kLp8Wn4sYc6Hd5Rf0g';
+    const password = 'ci-only-not-a-real-secret';
     const v = scramVerifier(password);
     assert.match(
       v,

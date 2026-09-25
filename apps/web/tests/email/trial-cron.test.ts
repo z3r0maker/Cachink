@@ -10,7 +10,10 @@ import { stripeRecipients, type StripeCustomers } from '../../src/server/email/r
 import { composeTrialEmail } from '../../src/server/email/trial-emails';
 import { toRecord } from '../../src/server/email/trial-source';
 
-const SECRET = 'cron-secret-0123456789abcdef';
+// Named for `.gitleaks.toml`'s allowlist: a random-looking cron secret reads
+// as a live credential to gitleaks' generic-api-key rule. The value is only
+// ever compared with itself, so every assertion is unchanged.
+const SECRET = 'ci-only-not-a-real-secret';
 const NOW = new Date('2026-09-18T15:00:00.000Z');
 const req = (auth: string | null = `Bearer ${SECRET}`) =>
   new Request('https://portal.xangarro.mx/api/cron/trial-emails', {
