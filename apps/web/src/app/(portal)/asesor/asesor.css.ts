@@ -57,6 +57,9 @@ export const feedBody = style({
  * either direction.
  */
 export const provenance = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
   marginTop: 14,
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.semibold,

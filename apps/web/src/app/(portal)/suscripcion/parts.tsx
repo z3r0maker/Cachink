@@ -2,7 +2,7 @@
 
 import { colors } from '@xangarro/tokens';
 
-import { Card, Tag } from '@/components';
+import { Card, DonCuentasAvatar } from '@/components';
 import { eyebrow, planLabel } from '@/styles/text.css';
 import type { AsesorTier } from '@/data/planes';
 import { administrarSuscripcion } from '@/server/billing/actions';
@@ -48,9 +48,9 @@ export function AsesorBlock({ tiers }: { readonly tiers: readonly AsesorTier[] }
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <span className={eyebrow} style={{ color: colors.gray600 }}>
-          Asesor en cada plan
+          Don Cuentas en cada plan
         </span>
-        <Tag tone="soft">Asesor</Tag>
+        <DonCuentasAvatar size="sm" />
       </div>
       <div className={planGrid}>
         {tiers.map((t) => (

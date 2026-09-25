@@ -120,7 +120,7 @@ export const ASESOR_TIERS: readonly AsesorTier[] = [
   },
   {
     name: 'Xangarro',
-    oneLiner: 'Tu Asesor te avisa cada día qué atender.',
+    oneLiner: 'Don Cuentas te avisa cada día qué atender.',
     items: [
       '"Para ti hoy" diario',
       'Conclusiones en tus estados financieros',

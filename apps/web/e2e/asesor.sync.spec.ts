@@ -21,7 +21,7 @@ test('visiting Para ti materialises insights and real capacidades', async ({ pag
   await expect(main.getByText('El queso te cuesta 18% más que en junio')).toBeVisible();
 
   // Capacidades read the seed's real counts (capped at each objective).
-  await expect(main.getByText('Lo que tu Asesor ya puede ver')).toBeVisible();
+  await expect(main.getByText('Lo que Don Cuentas ya puede ver')).toBeVisible();
   await expect(main.getByText(/de 60 días · \d+ de 2 compras/)).toBeVisible();
 
   // The provenance line never claims AI authorship for computed output.
