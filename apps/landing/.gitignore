@@ -3,6 +3,8 @@ node_modules/
 
 # Build output
 dist/
+# Copied from their packages by scripts/fonts.mjs
+public/fonts/
 
 # Environment — never commit secrets
 .env

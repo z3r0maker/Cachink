@@ -7,9 +7,12 @@ import { structuredData } from '../src/structured-data.js';
 export function HomeShell({ children }) {
   return (
     <div className="xh">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Nav />
-      <main>
+      <main id="main-content">
         <Hero />
         <Ticker />
         {children}

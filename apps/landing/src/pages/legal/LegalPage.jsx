@@ -108,6 +108,7 @@ export function LegalPage({ source, schema }) {
         </div>
       </header>
       <main
+        id="main-content"
         style={{
           maxWidth: 800,
           margin: '0 auto',

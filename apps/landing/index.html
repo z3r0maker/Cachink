@@ -4,15 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ── Font loading (preconnect + preload hero weight + async sheet) ── -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Preload the 800-weight woff2 used in the hero h1 — eliminates FOUT on LCP element.
-     URL is stable for Plus Jakarta Sans 800; re-verify if Google rotates the hash. -->
-<link rel="preload" as="font" type="font/woff2" crossorigin
-      href="https://fonts.gstatic.com/s/plusjakartasans/v8/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yys9Ts.woff2">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
+<!-- ── Fonts: self-hosted (scripts/fonts.mjs), declared in colors_and_type.css.
+     One preload for the sans the whole page uses; Anton is only the wordmark. ── -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/plus-jakarta-sans-latin-wght.woff2">
 
 <!-- ── Primary SEO ─────────────────────────────────────────────────── -->
 <title>Xangarro · Finanzas para emprendedores</title>

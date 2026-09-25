@@ -43,6 +43,7 @@ export const PRINCIPIOS = [
 export default function Acerca() {
   return (
     <main
+      id="main-content"
       style={{
         maxWidth: 720,
         margin: '0 auto',

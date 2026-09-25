@@ -134,7 +134,8 @@ export default function Recursos() {
       </div>
 
       {/* Article cards */}
-      <div
+      <main
+        id="main-content"
         style={{
           maxWidth: 800,
           margin: '0 auto',
@@ -301,7 +302,7 @@ export default function Recursos() {
             Unirme a la lista →
           </a>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

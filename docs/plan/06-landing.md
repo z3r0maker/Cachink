@@ -59,22 +59,16 @@
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
       **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
 
-- **Records (2026-09-24, from the owner: domain at GoDaddy moving to Cloudflare DNS, both Vercel
-  projects exist).** At GoDaddy, point the nameservers at the two Cloudflare gives. In Cloudflare,
-  **proxy off (grey cloud)** on every Vercel record so Vercel terminates TLS itself:
-
-  | Name  | Type  | Value                  | For                                |
-  | ----- | ----- | ---------------------- | ---------------------------------- |
-  | `@`   | A     | `76.76.21.21`          | `xangarro.mx` → landing project    |
-  | `www` | CNAME | `cname.vercel-dns.com` | redirect to apex (set in Vercel)   |
-  | `app` | CNAME | `cname.vercel-dns.com` | `app.xangarro.mx` → portal project |
-
-  Then in each Vercel project add its domain (landing: `xangarro.mx` + `www.xangarro.mx` with
-  www → apex redirect; portal: `app.xangarro.mx`) and wait for the certificate. Resend's MX/SPF/DKIM
-  rows (O-13) go in the same zone. Verify: `dig +short xangarro.mx` → `76.76.21.21`,
-  `dig +short app.xangarro.mx` → a `vercel-dns` name, then `pnpm --filter @xangarro/landing build`
-  and the audit's live fetch.
-
+- **State (2026-09-24, verified over DNS-over-HTTPS):** registrar GoDaddy, zone on Cloudflare
+  (`elle`/`leland.ns.cloudflare.com`), apex `xangarro.mx` CNAME-flattened to Vercel (DNS only), `www`
+  308 → apex, Let's Encrypt active; production is `main` @ `caa0ff43`, deployed by hand
+  (`vercel.json` has `git.deploymentEnabled: false`). Mail on Zoho (MX/SPF/DKIM/DMARC pass).
+  **Missing:** `app.xangarro.mx` and `admin.xangarro.mx` are NXDOMAIN, so every signup CTA is a
+  dead link until the portal and console projects get their domains (Add domain in Vercel, then a
+  CNAME `app` / `admin` in Cloudflare, DNS only) — or the CTAs point at a waitlist. **Gotcha:** the
+  owner's ISP intercepts port 53 and serves stale answers; check DNS with `dns.google/resolve` or
+  `cloudflare-dns.com/dns-query`, never plain `dig` (the second audit's "apex on GoDaddy" finding
+  was that artefact). Full detail in memory `domain-dns-email-setup.md`.
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
@@ -147,7 +141,13 @@
   cite a source each (INEGI ENAPROCE, INEGI ENIF, Microsoft's price page). `/recursos/` has an
   intro naming the authors; `/acerca/` links into the guides and the home; the hero opens with
   «Xangarro es …»; the legal pages carry a WebPage node. Second audit (same day): SEO 8 · GEO 7 ·
-  AEO 8 as built; the live apex still serves GoDaddy's builder (see L-04).
+  AEO 8 as built. (Its "apex on GoDaddy" finding was the ISP's stale DNS — over DoH the apex is on
+  Vercel; what is really missing is `app`/`admin`, see L-04.)
+- Done (round 4, Lighthouse): 2026-09-24 · fonts self-hosted — `scripts/fonts.mjs` copies the
+  variable Plus Jakarta Sans and Anton from their packages into `public/fonts` before every build
+  and `vite`; `@font-face` with `font-display: swap` in `colors_and_type.css`; the Google Fonts
+  stylesheet, its `@import`, the preconnects and the `gstatic` preload that 404'd on every visit are
+  gone; one preload for the sans. Every page has `<main id="main-content">`, the skip link's target.
 - **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.

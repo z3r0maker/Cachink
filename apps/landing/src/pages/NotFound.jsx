@@ -53,7 +53,7 @@ function Chat() {
 
 export default function NotFound() {
   return (
-    <main className="nf" data-page="404">
+    <main id="main-content" className="nf" data-page="404">
       <div className="nf-grid">
         <h1 className="nf-title">Esta página no cuadra.</h1>
         <picture className="nf-art">
