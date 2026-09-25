@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 function Item({ item }: { readonly item: ChecklistItem }) {
   return (
-    <li className={row} data-done={item.done}>
+    <li className={row} data-done={item.done} data-group={item.group}>
       <Icon
         path={item.done ? ICON.check : ICON.clock}
         size={22}

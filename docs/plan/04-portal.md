@@ -1492,8 +1492,18 @@ critical avisos cannot be switched off.
 
 ### P-36 First production walkthrough: the owner's findings (2026-09-25)
 
-- [ ] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
-      `feat/don-cuentas-portal` landing for P-36.7 · **Owner decisions:** D-1, D-2 below
+- [~] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
+  `feat/don-cuentas-portal` landing for P-36.7
+  - Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required
+    and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie)
+    with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's
+    answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old
+    rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout
+    closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two
+    one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests:
+    domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run).
+    **Remaining:** P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para
+    vender. N opcionales por hacer» once the required list is done.
 - **Context:** the owner walked signup → wizard → «Tu plan ideal» → Stripe → portal on production
   the night the domains went live and wrote down what was off. Verified against the code
   (`origin/main` @ `d9e0c4a8`); each item names its cause.
