@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import '../colors_and_type.css';
 import './global.css';
 import '../home/home.css';
+import './pages/not-found.css';
 import { UtmPassthrough } from './utm.jsx';
 
 /**
@@ -34,7 +35,10 @@ async function mountApp() {
     // Home / landing page (with lazy below-fold sections)
     Component = (await import('./App.jsx')).default;
   } else {
-    // Anything else is served as dist/404.html; hydrate it as such, not as the home.
+    // Anything else is served as dist/404.html. That page is static and its
+    // sequence is CSS, so a served 404 is left as is (re-rendering would
+    // replay it); a dev server's SPA fallback still gets the component.
+    if (document.querySelector('[data-page="404"]')) return;
     Component = (await import('./pages/NotFound.jsx')).default;
   }
 
