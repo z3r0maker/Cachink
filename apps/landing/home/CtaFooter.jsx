@@ -25,6 +25,7 @@ const COLS = [
       ['/acerca/', 'Acerca de'],
       ['/privacidad', 'Aviso de privacidad'],
       ['/privacidad/arco', 'Derechos ARCO'],
+      ['/terminos', 'Términos y condiciones'],
     ],
   ],
 ];

@@ -29,6 +29,8 @@ async function mountApp() {
     Component = (await import('./pages/legal/Privacidad.jsx')).default;
   } else if (path === '/privacidad/arco') {
     Component = (await import('./pages/legal/Arco.jsx')).default;
+  } else if (path === '/terminos') {
+    Component = (await import('./pages/legal/Terminos.jsx')).default;
   } else if (path === '/acerca') {
     Component = (await import('./pages/Acerca.jsx')).default;
   } else if (path === '/recursos') {

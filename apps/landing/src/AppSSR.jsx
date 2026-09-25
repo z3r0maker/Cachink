@@ -16,6 +16,7 @@ import ErroresCaja from './pages/articles/ErroresCaja.jsx';
 import VsExcel from './pages/articles/VsExcel.jsx';
 import Privacidad from './pages/legal/Privacidad.jsx';
 import Arco from './pages/legal/Arco.jsx';
+import Terminos from './pages/legal/Terminos.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Acerca from './pages/Acerca.jsx';
 
@@ -42,6 +43,7 @@ export default function AppSSR({ route = '/' }) {
   if (clean === '/recursos') return <Recursos />;
   if (clean === '/privacidad') return <Privacidad />;
   if (clean === '/privacidad/arco') return <Arco />;
+  if (clean === '/terminos') return <Terminos />;
   if (clean === '/acerca') return <Acerca />;
   if (clean === '/404') return <NotFound />;
 

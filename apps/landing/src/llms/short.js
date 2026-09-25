@@ -42,6 +42,7 @@ ${PLANES_NOTAS.slice(1, 3)
 - Guías: ${siteUrl}/recursos/
 - Acerca de (quiénes somos, Zapopan, Jalisco): ${siteUrl}/acerca/
 - Aviso de privacidad: ${siteUrl}/privacidad/
+- Términos y condiciones: ${siteUrl}/terminos/
 
 ## Información de contacto
 
