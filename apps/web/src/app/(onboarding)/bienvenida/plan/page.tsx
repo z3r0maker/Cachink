@@ -3,6 +3,7 @@ import { PLAN_IDS } from '@xangarro/domain';
 import { displayedPlan, headline } from '@/onboarding/plan-copy';
 import { LoadFailed } from '@/onboarding/ui/frame';
 import { requireSession } from '@/server/auth';
+import { betaNoCharge } from '@/server/billing/beta';
 import { reportError } from '@/server/observability/report';
 import { loadRecommendation } from '@/server/onboarding/load';
 
@@ -36,6 +37,7 @@ export default async function PlanPage({
       plan={plan}
       headline={headline(plan, plan === config.suggestedPlan ? config.reasons : [])}
       pending={config.pendingPaidAnswers}
+      beta={betaNoCharge()}
     />
   );
 }
