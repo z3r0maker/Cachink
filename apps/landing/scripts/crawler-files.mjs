@@ -4,21 +4,37 @@
  * the page renders. Called by prerender.mjs after the HTML is written.
  */
 import { execFileSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-/** Last commit date (YYYY-MM-DD) touching any of `sources`; today when git cannot say. */
-export function lastmodFor(root, sources, today) {
+/** Last commit date (YYYY-MM-DD) touching any of `sources`, or null when git cannot say. */
+export function lastmodFor(root, sources) {
   try {
     const out = execFileSync('git', ['log', '-1', '--format=%cs', '--', ...sources], {
       cwd: root,
       encoding: 'utf-8',
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : today;
+    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
   } catch {
-    return today;
+    return null;
   }
+}
+
+/** Where scripts/lastmod.mjs snapshots the map for a tree that has no git (a deploy export). */
+export const LASTMOD_SNAPSHOT = '.lastmod.json';
+
+/**
+ * `{ route path → YYYY-MM-DD }` for every route: from git when the tree has
+ * one, else from the snapshot, else today — the one map the pages, their
+ * schema and the sitemap all read, so they never disagree.
+ */
+export function lastmodMap(root, routes, today = new Date().toISOString().slice(0, 10)) {
+  const snapshotPath = resolve(root, LASTMOD_SNAPSHOT);
+  const snapshot = existsSync(snapshotPath) ? JSON.parse(readFileSync(snapshotPath, 'utf-8')) : {};
+  return Object.fromEntries(
+    routes.map((r) => [r.path, lastmodFor(root, r.sources) ?? snapshot[r.path] ?? today]),
+  );
 }
 
 /** Only the routes a crawler should index appear in the sitemap. */

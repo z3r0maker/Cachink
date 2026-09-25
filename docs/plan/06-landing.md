@@ -63,6 +63,15 @@
   (`elle`/`leland.ns.cloudflare.com`), apex `xangarro.mx` CNAME-flattened to Vercel (DNS only), `www`
   308 → apex, Let's Encrypt active; production is `main` @ `caa0ff43`, deployed by hand
   (`vercel.json` has `git.deploymentEnabled: false`). Mail on Zoho (MX/SPF/DKIM/DMARC pass).
+  **Deployed 2026-09-24 (night):** `main` @ `2887b280` (the audit rounds) is production. **How to
+  deploy:** Vercel blocks a deployment whose commit author is not a team member, and the repo's
+  commits are authored with the Unosquare address — so export the tree without git metadata
+  (`node apps/landing/scripts/lastmod.mjs` first, then `git archive HEAD | tar -x -C <dir>`, copy
+  `apps/landing/.lastmod.json` to `<dir>/apps/landing/` and `apps/landing/.vercel/project.json` to
+  `<dir>/.vercel/`),
+  `npx vercel deploy --yes --archive=tgz` from `<dir>`, check the preview with `npx vercel curl <url>`
+  (previews sit behind Vercel Authentication), then `npx vercel promote <preview-url> --yes`. Or add
+  the commit author's email to the Vercel account.
   **Missing:** `app.xangarro.mx` and `admin.xangarro.mx` are NXDOMAIN, so every signup CTA is a
   dead link until the portal and console projects get their domains (Add domain in Vercel, then a
   CNAME `app` / `admin` in Cloudflare, DNS only) — or the CTAs point at a waitlist. **Gotcha:** the
