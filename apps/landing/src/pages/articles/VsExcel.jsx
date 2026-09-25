@@ -197,6 +197,23 @@ export default function VsExcel() {
         </table>
       </div>
 
+      <p
+        style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-600)', margin: '-24px 0 32px' }}
+      >
+        Fuentes: el precio de Microsoft 365 según{' '}
+        <a
+          href="https://www.microsoft.com/es-mx/microsoft-365/buy/compare-all-microsoft-365-products"
+          style={{ color: 'var(--gray-600)' }}
+        >
+          microsoft.com
+        </a>
+        ; el de Xangarro, según{' '}
+        <a href="/#precios" style={{ color: 'var(--gray-600)' }}>
+          nuestra página de precios
+        </a>
+        .
+      </p>
+
       <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
         ¿Cuándo tiene sentido seguir con Excel?
       </h2>

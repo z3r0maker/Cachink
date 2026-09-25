@@ -24,7 +24,7 @@ export const ARTICLES = [
       'Guía en lenguaje simple sobre los estados financieros en formato NIF que solicitan los contadores y bancos en México, y cómo generarlos desde tu app de caja.',
     blurb:
       'Tu contador te pide "los estados financieros" y no sabes exactamente de qué habla. Esta guía explica qué son las NIF, para qué sirven, y cómo generarlos automáticamente.',
-    readTime: '6 min',
+    readTime: '9 min',
     datePublished: '2026-05-09',
   },
   {

@@ -81,7 +81,7 @@
 ### L-05 Store badges + legal pages
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
-      **Remaining (2026-09-23, verified against the code):** no privacidad/términos route on the landing and the legal texts are not linked from it; store badges wait for X-05's real URLs; `docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade.
+      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs.
 
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
@@ -140,6 +140,14 @@
   holds Zapopan, Jalisco, 2026 — the Organization's `foundingDate`/`foundingLocation`, the page and
   llms-full read it; the page carries an AboutPage graph; footer link beside the aviso; in the
   sitemap. No legal entity yet: the aviso keeps `[RAZÓN SOCIAL]` (production-readiness blocker).
+- Done (round 3, code + content): 2026-09-24 · the NIF guide is the pillar (~1,300 words): what the
+  NIF are and their series, who issues them and since when (CINIF, 2006), the three statements with
+  their norms (B-3, B-6, B-2) and one month of a fonda shown in all three so the numbers connect,
+  who asks for them, a five-step HowTo, three quick questions; CINIF and SAT cited. The other guides
+  cite a source each (INEGI ENAPROCE, INEGI ENIF, Microsoft's price page). `/recursos/` has an
+  intro naming the authors; `/acerca/` links into the guides and the home; the hero opens with
+  «Xangarro es …»; the legal pages carry a WebPage node. Second audit (same day): SEO 8 · GEO 7 ·
+  AEO 8 as built; the live apex still serves GoDaddy's builder (see L-04).
 - **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.

@@ -112,7 +112,15 @@ export default function SinExcel() {
       >
         El resultado: la mayoría de los dueños terminan usando la hoja de cálculo solo al final del
         día —o ni eso— y el control de caja se convierte en una tarea que se pospone hasta que hay
-        un problema.
+        un problema. No es un caso raro: la{' '}
+        <a
+          href="https://www.inegi.org.mx/programas/enaproce/2018/"
+          style={{ color: 'var(--black)' }}
+        >
+          ENAPROCE del INEGI
+        </a>{' '}
+        documenta que buena parte de las microempresas mexicanas no lleva registros contables
+        formales.
       </p>
 
       <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>

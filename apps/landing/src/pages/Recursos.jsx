@@ -1,6 +1,7 @@
 import { buildRecursosSchema } from '../schema-pages.js';
 
 import { ARTICLES } from '../articles.js';
+import { AUTHORS } from '../../landing/authors.js';
 
 const schema = buildRecursosSchema(ARTICLES);
 
@@ -140,6 +141,30 @@ export default function Recursos() {
           padding: 'clamp(32px, 6vw, 56px) clamp(16px, 5vw, 28px)',
         }}
       >
+        <p
+          style={{
+            fontSize: 16,
+            fontWeight: 500,
+            color: 'var(--ink)',
+            lineHeight: 1.7,
+            margin: '0 0 28px',
+            maxWidth: 640,
+          }}
+        >
+          Cuatro guías cortas sobre lo que un dueño de negocio necesita entender de sus números: por
+          qué la libreta y el Excel se quedan cortos, qué son los estados financieros NIF que piden
+          un contador y un banco, los errores de caja que más cuestan y una comparación honesta con
+          las hojas de cálculo. Las escriben {AUTHORS.map((a) => a.name).join(' y ')}, cofundadores
+          de Xangarro, desde{' '}
+          <a href="/acerca/" style={{ color: 'var(--black)', fontWeight: 700 }}>
+            Zapopan
+          </a>
+          , y se actualizan cuando el producto cambia. Cada una termina con un{' '}
+          <a href="/#como" style={{ color: 'var(--black)', fontWeight: 700 }}>
+            vistazo a cómo lo resuelve Xangarro
+          </a>
+          .
+        </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {ARTICLES.map((a) => (
             <a

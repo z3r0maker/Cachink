@@ -126,3 +126,20 @@ export function buildAboutSchema() {
     ],
   };
 }
+
+/** A legal page: a WebPage about the Organization, so the notice is a named node too. */
+export function buildLegalSchema({ path, name, description }) {
+  const url = `${SITE_URL}${path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url,
+    url,
+    name,
+    description,
+    inLanguage: 'es-MX',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  };
+}

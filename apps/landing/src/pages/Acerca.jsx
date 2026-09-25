@@ -4,6 +4,7 @@
  * landing/empresa.js, the same facts the Organization schema states.
  */
 import { AUTHORS } from '../../landing/authors.js';
+import { ARTICLES } from '../articles.js';
 import { EMPRESA } from '../../landing/empresa.js';
 import { DonCuentas } from '../../home/icons.jsx';
 import { signupUrl } from '../../landing/planes.js';
@@ -164,6 +165,30 @@ export default function Acerca() {
             <strong style={{ color: 'var(--black)' }}>{t}</strong> {d}
           </li>
         ))}
+      </ul>
+
+      <h2 style={h2}>Lo que puedes leer</h2>
+      <ul
+        style={{
+          paddingLeft: 20,
+          margin: '0 0 8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        {ARTICLES.map((a) => (
+          <li key={a.slug} style={{ fontSize: 16, lineHeight: 1.5 }}>
+            <a href={`/recursos/${a.slug}/`} style={{ color: 'var(--black)', fontWeight: 700 }}>
+              {a.title}
+            </a>
+          </li>
+        ))}
+        <li style={{ fontSize: 16, lineHeight: 1.5 }}>
+          <a href="/#como" style={{ color: 'var(--black)', fontWeight: 700 }}>
+            Cómo funciona la caja, el portal y la app
+          </a>
+        </li>
       </ul>
 
       <h2 style={h2}>Escríbenos</h2>

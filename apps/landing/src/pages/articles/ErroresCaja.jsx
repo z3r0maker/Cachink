@@ -59,9 +59,13 @@ export default function ErroresCaja() {
           paddingBottom: 32,
         }}
       >
-        El efectivo es el método de pago más común en los pequeños negocios de México — y el más
-        propenso a errores de registro. Estos son los cinco errores que más daño hacen al control de
-        caja, todos evitables con un sistema simple.
+        El efectivo sigue siendo{' '}
+        <a href="https://www.inegi.org.mx/programas/enif/2021/" style={{ color: 'var(--black)' }}>
+          el método de pago más usado en México
+        </a>{' '}
+        y el más común en los pequeños negocios — y también el más propenso a errores de registro.
+        Estos son los cinco errores que más daño hacen al control de caja, todos evitables con un
+        sistema simple.
       </p>
 
       <ol
