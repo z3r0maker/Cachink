@@ -45,7 +45,8 @@ const UNGOVERNED = /\/screens\/Telemetria\//;
  * number is.
  *
  * Both surfaces here are transcribed from the design files coordinate by
- * coordinate: the login animation on its `460×200` stage, and the Estados
+ * coordinate: the login storefront (awning, shutter, Don Cuentas) on the
+ * design's `648`-wide canvas, and the Estados
  * charts on the `560×214`, `700×180`, `180×106` and `120×120` canvases the
  * handoff draws them on. Their geometry **is** the spec; the token scale
  * describes the page around them.
@@ -55,7 +56,7 @@ const UNGOVERNED = /\/screens\/Telemetria\//;
  * looks drawn does not qualify. Audit 2026-09.
  */
 const LIENZOS_FIJOS = [
-  /\/app\/login\/(animation|escena-)/,
+  /\/app\/login\/escena-/,
   /\/estados\/(cascada|donut|flujo-barras|gauge)\.tsx$/,
 ];
 

@@ -1,38 +1,22 @@
 'use client';
 
-import Image from 'next/image';
-
-import { AnimacionAcceso } from './animation';
-import { heroImagen, heroMarco, marca, monedaMarca, panel, subtitulo, titular } from './aside.css';
 import { colors } from '@xangarro/tokens';
 
-/**
- * The login page's left panel (P-02): the wordmark row, the looping
- * animation, and the headline pinned to the bottom with `margin-top: auto`.
- * The hero illustration sits between the mark and the stage, as the design
- * has it (ADR-093 reverses ADR-058 §7). It is the handoff's own
- * `hero-taqueria.png`, served as a 52 KB WebP at the asset's 2.5:1.
- */
-/** The handoff's illustration, framed as block 2 of the panel (A-12). */
-function Hero() {
-  return (
-    <div className={heroMarco}>
-      <Image
-        className={heroImagen}
-        src="/hero-taqueria.webp"
-        alt="Una taquera atiende su puesto con el teléfono en la mano"
-        width={1400}
-        height={560}
-        priority
-        sizes="(max-width: 1023px) 0px, 50vw"
-      />
-    </div>
-  );
-}
+import { marca, monedaMarca, panel, subtitulo, titular } from './aside.css';
+import { useCortina } from './cortina';
+import { Fachada } from './fachada';
 
+/**
+ * The login page's left panel (P-02): the wordmark row, the storefront whose
+ * shutter follows the sign-in (see `cortina.tsx`), and the headline pinned to
+ * the bottom with `margin-top: auto`. `data-etapa` drives every reaction in
+ * CSS. The hero illustration now sits inside the storefront, behind the
+ * shutter (ADR-093's asset, reused).
+ */
 export function PanelAcceso() {
+  const { etapa } = useCortina();
   return (
-    <aside className={panel}>
+    <aside className={panel} data-etapa={etapa} data-testid="panel-acceso">
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <span className={marca}>XANGARRO!</span>
         <span className={monedaMarca} aria-hidden="true">
@@ -51,14 +35,13 @@ export function PanelAcceso() {
         </span>
       </div>
 
-      <Hero />
+      <Fachada />
 
-      <AnimacionAcceso data-testid="animacion-acceso" />
-
-      <div>
-        <h1 className={titular}>Finanzas para emprendedores.</h1>
+      <div style={{ marginTop: 'auto' }}>
+        <p className={titular}>Abre tu changarro.</p>
         <p className={subtitulo}>
-          Registra tus ventas y gastos desde el mostrador. Nosotros armamos tus estados financieros.
+          Tus ventas, tu caja y tus estados financieros en un solo lugar. Finanzas para
+          emprendedores.
         </p>
       </div>
     </aside>

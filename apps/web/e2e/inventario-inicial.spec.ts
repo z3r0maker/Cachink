@@ -55,7 +55,7 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('inventario-123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
 
   await page.goto('/inventario-inicial');

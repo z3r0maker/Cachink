@@ -1,5 +1,4 @@
 import { expect, test } from './test';
-import assert from 'node:assert/strict';
 
 import { BASE_URL } from './base-url';
 import { ROUTES } from './routes';
@@ -29,7 +28,7 @@ for (const route of ROUTES) {
 test('the owner door reveals the member form, and the way back works', async ({ page }) => {
   await page.goto('/login');
   await page.getByTestId('login-door-owner').click();
-  await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sube la cortina.' })).toBeVisible();
   await expect(page.getByTestId('login-email')).toBeVisible();
 
   // The way back, for whoever picked the wrong door. It was a dead control
@@ -60,7 +59,7 @@ test('a wrong password does not say which half was wrong', async ({ page }) => {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('not-the-password');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
 
   // The same message as an unknown address: telling them apart reveals which
   // emails are registered.
@@ -76,7 +75,7 @@ test('an unknown address gets the identical message', async ({ page }) => {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('nobody@example.com');
   await page.getByTestId('login-password').fill('whatever');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await expect(page.getByText('Correo o contraseña incorrectos.')).toBeVisible();
 });
 
@@ -116,7 +115,7 @@ test('signing out ends the session on the server: a copied cookie stops working'
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('donpedro123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await expect(page.getByRole('heading', { name: 'Hola, Pedro', level: 1 })).toBeVisible();
   const copied = (await context.cookies()).find((c) => c.name === 'xg_session');
 
@@ -148,7 +147,7 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
     // Wait for this attempt's answer: the previous one's message is still on screen.
     await Promise.all([
       page.waitForResponse((r) => r.request().method() === 'POST'),
-      page.getByRole('button', { name: 'Entrar' }).click(),
+      page.getByRole('button', { name: 'Abrir mi changarro' }).click(),
     ]);
     const expected = i < 5 ? 'Correo o contraseña incorrectos.' : /Demasiados intentos/;
     await expect(page.getByText(expected)).toBeVisible();
@@ -156,74 +155,32 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
 });
 
 /**
- * A-12 / ADR-093: the handoff's hero illustration is block 2 of the brand
- * panel, in its own framed box at the asset's 2.5:1 ratio.
+ * The login panel's storefront: its shutter follows the sign-in. The panel's
+ * `data-etapa` is the whole contract — the CSS reads it, and so does this.
  */
-test('the login panel carries the hero illustration at its own ratio', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'the panel exists at ≥1024 px');
+test('the shutter rises with the form and drops on a refusal', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Don Cuentas and the headline are desktop-only');
   await page.goto('/login');
-  const hero = page.getByRole('img', {
-    name: 'Una taquera atiende su puesto con el teléfono en la mano',
-  });
-  await expect(hero).toBeVisible();
-  // Served optimised, never the 1.4 MB source PNG.
-  await expect(hero).toHaveAttribute('src', /hero-taqueria\.webp|\/_next\/image/);
+  const panel = page.getByTestId('panel-acceso');
+  await expect(panel).toHaveAttribute('data-etapa', 'cerrada');
 
-  const caja = await hero.boundingBox();
-  const ratio = (caja?.width ?? 0) / (caja?.height ?? 1);
-  expect(ratio).toBeGreaterThan(2.35);
-  expect(ratio).toBeLessThan(2.65);
+  await page.getByTestId('login-door-owner').click();
+  await expect(panel).toHaveAttribute('data-etapa', 'dueno');
+  await page.getByTestId('login-email').fill('pedro@taqueria.mx');
+  await expect(panel).toHaveAttribute('data-etapa', 'correo');
+  await page.getByTestId('login-password').fill('not-the-password');
+  await expect(panel).toHaveAttribute('data-etapa', 'lista');
+
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
+  await expect(panel).toHaveAttribute('data-etapa', 'error');
 });
 
-/** P-02: the login animation — four scenes on one clock, held under reduced motion.
- * Desktop-only: below 1024 px the yellow panel folds away by design. */
-test('the login panel carries the four-scene animation', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'the panel exists at ≥1024 px');
-  // It watches a 20-second animation and then waits again to prove focus pauses
-  // it: ~24 s of deliberate waiting inside the 30 s default, which on a loaded
-  // machine ran out in teardown. The test is slow by nature, so it says so.
-  test.slow();
-  await page.goto('/login');
-  const stage = page.getByTestId('animacion-acceso');
-  await expect(stage).toBeVisible();
-
-  // The scene index rides the stage; over 20 s it must pass through all four.
-  const vistas = new Set<string>();
-  for (let i = 0; i < 40; i += 1) {
-    const escena = await stage.getAttribute('data-escena');
-    if (escena !== null) vistas.add(escena);
-    await page.waitForTimeout(550);
-    if (vistas.size === 4) break;
-  }
-  assert(vistas.size === 4, `expected 4 scenes, saw ${[...vistas].join(',')}`);
-
-  // Focus pauses the clock: with the email input focused the scene holds.
-  // The field lives behind the owner door, and the panel is the same either
-  // side of it — the animation is the layout's, not the card's.
-  await page.goto('/login?puerta=dueno');
-  await page.getByTestId('login-email').focus();
-  const alFoco = await stage.getAttribute('data-escena');
-  await page.waitForTimeout(1400);
-  assert.equal(await stage.getAttribute('data-escena'), alFoco, 'focus pauses the stage');
-});
-
-test('below 1024 px the panel folds away and the card stands alone', async ({ browser }) => {
+test('below 1024 px the panel is a band above the card', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 768, height: 900 } });
   const page = await context.newPage();
-  // Straight to the member form: the point is the panel, and the form is the
-  // widest card the login has to stand alone with.
   await page.goto('/login?puerta=dueno');
-  await expect(page.getByTestId('animacion-acceso')).toBeHidden();
+  await expect(page.getByTestId('panel-acceso')).toBeVisible();
+  await expect(page.getByText('Abre tu changarro.')).toBeHidden();
   await expect(page.getByTestId('login-email')).toBeVisible();
-  await context.close();
-});
-
-test('with reduced motion the animation holds scene four', async ({ browser }) => {
-  const context = await browser.newContext({ reducedMotion: 'reduce' });
-  const page = await context.newPage();
-  await page.goto('/login');
-  await expect(page.getByTestId('animacion-acceso')).toHaveAttribute('data-escena', '3');
   await context.close();
 });
