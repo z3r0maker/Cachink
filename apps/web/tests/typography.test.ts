@@ -34,11 +34,6 @@ describe('S-4 — body text is 15, not 14', () => {
     { archivo: ['shell', 'sidebar.css.ts'], estilo: 'navItem', que: 'the nav label' },
     { archivo: ['shell', 'header.css.ts'], estilo: 'bizName', que: 'the business name' },
     { archivo: ['components', 'states.css.ts'], estilo: 'stateBody', que: 'the empty-state body' },
-    {
-      archivo: ['app', '(portal)', '_inicio', 'inicio.css.ts'],
-      estilo: 'pageDate',
-      que: "Inicio's subtitle",
-    },
   ] as const;
 
   for (const s of sitios) {
@@ -78,17 +73,11 @@ describe('S-5 — the KPI figure is 34, and 36 on Inicio', () => {
     assert.equal(portalFontSizes.pageTitle, 36);
   });
 
-  it('Inicio actually asks for it', () => {
-    // A step nothing passes is the same defect S-2 was about.
-    const cards = lee('app', '(portal)', '_inicio', 'cards.tsx');
-    const resumen = cards.slice(cards.indexOf('export function ResumenDeHoy'));
-    const corte = resumen.indexOf('export function', 10);
-    const cuerpo = corte === -1 ? resumen : resumen.slice(0, corte);
-    assert.equal(
-      (cuerpo.match(/size="lg"/g) ?? []).length,
-      3,
-      'all three Resumen de hoy cards take the 36 step',
-    );
+  it('Hoy actually asks for it', () => {
+    // A step nothing passes is the same defect S-2 was about. ADR-107 redrew
+    // «Resumen de hoy» as Hoy's today card; its figures keep the 36 step.
+    const hoy = lee('app', '(portal)', '_inicio', 'hoy.css.ts');
+    assert.ok(bloque(hoy, 'midFigure').includes('portalFontSizes.pageTitle'));
   });
 });
 
