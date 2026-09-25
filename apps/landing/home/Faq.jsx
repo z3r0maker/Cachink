@@ -20,7 +20,9 @@ export default function Faq() {
             <details key={f.q} className="xcard faq-item" open={i === 0}>
               <summary>
                 {f.q}
-                <span className="faq-plus" aria-hidden="true">+</span>
+                <span className="faq-plus" aria-hidden="true">
+                  +
+                </span>
               </summary>
               <p className="xbody">{f.a}</p>
             </details>

@@ -9,7 +9,9 @@ export function DonCuentasMeta() {
       <div className="xcard dc-goal g-thump">
         <div className="dc-goal-top">
           <span className="xeyebrow">Meta de septiembre</span>
-          <span className="xtag" style={{ background: 'var(--green-soft)' }}>Adelantado</span>
+          <span className="xtag" style={{ background: 'var(--green-soft)' }}>
+            Adelantado
+          </span>
         </div>
         <div className="dc-goal-title">Vender 20% más para comprar el segundo trompo</div>
         <div className="dc-track" role="img" aria-label="86% de la meta">
@@ -23,7 +25,13 @@ export function DonCuentasMeta() {
       <div className="dc-seal">
         <div className="g-slam">
           <svg viewBox="0 0 220 220" aria-hidden="true">
-            <path d={SEAL} fill="var(--yellow)" stroke="var(--black)" strokeWidth="2.5" transform="translate(5 5)" />
+            <path
+              d={SEAL}
+              fill="var(--yellow)"
+              stroke="var(--black)"
+              strokeWidth="2.5"
+              transform="translate(5 5)"
+            />
           </svg>
           <div className="dc-seal-txt">
             <span>Meta lograda</span>
