@@ -111,3 +111,12 @@ export const chartSubtitle = style({
   color: colors.textMuted,
   margin: '4px 0 0',
 });
+
+/** Resultados (ADR-107): the cascade, and the break-even and margins beside it. */
+export const resultadosGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1.65fr) minmax(280px, 1fr)',
+  gap: 18,
+  alignItems: 'start',
+  '@media': { 'screen and (max-width: 1099px)': { gridTemplateColumns: 'minmax(0, 1fr)' } },
+});

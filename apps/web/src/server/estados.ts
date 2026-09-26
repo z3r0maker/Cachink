@@ -56,6 +56,24 @@ export interface EstadosModel {
    * is a snapshot, and an empty window can still sit on a real position.
    */
   readonly vacio: boolean;
+  /** The period's merma movements, product by product, for the cascade's detail (ADR-107). */
+  readonly mermas: readonly MermaFila[];
+}
+
+export interface MermaFila {
+  readonly producto: string;
+  readonly cantidad: number;
+  readonly fecha: string;
+  readonly monto: bigint;
+}
+
+function mermasDe(rows: Awaited<ReturnType<typeof periodBalanceInputs>>['merma']): MermaFila[] {
+  return rows.map((r) => ({
+    producto: r.producto ?? 'Producto borrado',
+    cantidad: r.cantidad,
+    fecha: String(r.fecha).slice(0, 10),
+    monto: BigInt(r.cantidad) * BigInt(r.costoUnitCentavos),
+  }));
 }
 
 const DIA_MS = 86_400_000;
@@ -223,5 +241,6 @@ export async function loadEstadosModel(
 
   const desglose = desgloseDeResultados({ ventas: tickets, egresos });
   const vacio = sinMovimiento(ventas, egresos, pagosClientes, inputs.cortes);
-  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose, vacio };
+  const mermas = mermasDe(inputs.merma);
+  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose, vacio, mermas };
 }

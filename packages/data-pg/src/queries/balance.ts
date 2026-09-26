@@ -67,14 +67,19 @@ function stockACosto(tx: Tx) {
 /**
  * The period's merma at cost. The cloud's `tipo` enum has no merma member —
  * a merma is a `salida` whose motivo is «Merma / daño», the domain's rule.
+ * Each row also names its product and day, so the portal can list what was
+ * lost (ADR-107); the domain reads only `cantidad × costoUnitCentavos`.
  */
 function mermasDelPeriodo(tx: Tx, from: string, to: string) {
   return tx
     .select({
       cantidad: inventoryMovements.cantidad,
       costoUnitCentavos: inventoryMovements.costoUnitCentavos,
+      fecha: inventoryMovements.fecha,
+      producto: products.nombre,
     })
     .from(inventoryMovements)
+    .leftJoin(products, eq(products.id, inventoryMovements.productoId))
     .where(
       and(
         isNull(inventoryMovements.deletedAt),
@@ -82,7 +87,8 @@ function mermasDelPeriodo(tx: Tx, from: string, to: string) {
         eq(inventoryMovements.motivo, 'Merma / daño'),
         enRango(inventoryMovements.fecha, from, to),
       ),
-    );
+    )
+    .orderBy(inventoryMovements.fecha);
 }
 
 /**
