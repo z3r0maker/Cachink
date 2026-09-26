@@ -1,6 +1,7 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -12,13 +13,13 @@ import {
   KpiCard,
   kpiGrid,
 } from '@/components';
+import { button } from '@/components/button.css';
 import type { ProductosData } from '@/server/screens';
 
 import { margenPromedio } from './derive';
 
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
-import { NuevoProductoSheet } from './sheet/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
 export type Movimiento = ProductosData['movimientos'][number];
@@ -40,7 +41,9 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
           <Button variant="secondary" onClick={() => router.push('/importar?plantilla=productos')}>
             Importar desde Excel
           </Button>
-          <NuevoProductoSheet />
+          <Link href="/productos/nuevo" className={button({ variant: 'primary' })}>
+            Nuevo producto
+          </Link>
         </div>
       ) : null}
     </div>

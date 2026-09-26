@@ -21,23 +21,6 @@ export const swatch = style({
   },
 });
 
-export const iconGrid = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
-  gap: 8,
-});
-
-export const iconButton = style({
-  display: 'grid',
-  placeItems: 'center',
-  height: 44,
-  border: `2px solid ${colors.black}`,
-  borderRadius: radii[1],
-  background: colors.white,
-  cursor: 'pointer',
-  selectors: { '&[aria-checked="true"]': { background: colors.yellow, boxShadow: shadows.small } },
-});
-
 export const preview = style({
   display: 'grid',
   placeItems: 'center',

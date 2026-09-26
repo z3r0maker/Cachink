@@ -1,9 +1,7 @@
 'use client';
 
 import {
-  InventoryCategoryEnum,
   InventoryUnitEnum,
-  type InventoryCategory,
   type InventoryUnit,
   type ProductoTipo,
   type UsoProducto,
@@ -68,16 +66,6 @@ export function Basico({ draft, set, editing }: SectionProps) {
           onValueChange={(v) => set({ tipo: v as ProductoTipo })}
         />
       )}
-      <div className={chipRow} role="group" aria-label="Categoría">
-        {InventoryCategoryEnum.options.map((c) => (
-          <FilterChip
-            key={c}
-            label={c}
-            selected={draft.categoria === c}
-            onSelect={() => set({ categoria: c as InventoryCategory })}
-          />
-        ))}
-      </div>
     </div>
   );
 }

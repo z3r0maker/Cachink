@@ -61,6 +61,14 @@ export const ROUTES: readonly Route[] = [
   // PRODUCTS p-tac sku → `productos/columns.tsx`.
   { path: '/productos', heading: 'Productos', data: { kind: 'db', sentinel: 'TAC-001' } },
   {
+    path: '/productos/nuevo',
+    heading: 'Nuevo producto',
+    data: {
+      kind: 'fixture',
+      reason: 'productos/nuevo/page.tsx renders an empty form; it reads no rows',
+    },
+  },
+  {
     path: '/revision-caja',
     heading: 'Revisión de caja',
     data: { kind: 'fixture', reason: 'fixture until C-18 — revision-caja/page.tsx' },
