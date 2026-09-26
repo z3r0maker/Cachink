@@ -82,7 +82,10 @@ test('the Resultados waterfall and donuts render from the same numbers', async (
   await expect.poll(() => cascada.getByRole('row').count()).toBeGreaterThanOrEqual(6);
   await expect(cascada.getByRole('row').first()).toContainText('la base: 100%');
   // Beside it, the month's break-even (ADR-107).
-  await expect(main(page).getByTestId('para-no-perder')).toContainText('Necesitas vender unos');
+  // May's seed sells below cost, so the tile says that rather than a target.
+  await expect(main(page).getByTestId('para-no-perder')).toContainText(
+    'Hoy vendes abajo de lo que te cuesta',
+  );
   // The donuts were drawn to the design in the same change, and with them went
   // the names this asserted («Ingresos por método») and the «Total: $885.00.»
   // line — the total now lives inside the ring. Each donut speaks its own

@@ -8,9 +8,25 @@ import * as s from './lado.css';
 import { mayorGolpe, margenes, paraNoPerder } from './lado-data';
 
 /** «Para no perder»: the month's break-even and how far along the owner is. */
+/** Selling below cost has no break-even: say that instead of hiding the tile. */
+function SinMargen() {
+  return (
+    <section className={s.equilibrio} aria-labelledby="para-no-perder" data-testid="para-no-perder">
+      <h2 id="para-no-perder" className={s.eyebrow}>
+        Para no perder
+      </h2>
+      <span className={s.lead}>Hoy vendes abajo de lo que te cuesta.</span>
+      <p className={s.explica}>
+        Mientras lo vendido cueste más de lo que cobras, ninguna cantidad de ventas cubre tus
+        gastos. Revisa tus precios en Productos.
+      </p>
+    </section>
+  );
+}
+
 function Equilibrio({ er }: { readonly er: EstadoDeResultados }) {
   const p = paraNoPerder(er);
-  if (p === null) return null;
+  if (p === null) return er.ingresos > 0n && er.utilidadBruta <= 0n ? <SinMargen /> : null;
   return (
     <section className={s.equilibrio} aria-labelledby="para-no-perder" data-testid="para-no-perder">
       <h2 id="para-no-perder" className={s.eyebrow}>
@@ -70,7 +86,11 @@ function Margenes({ er }: { readonly er: EstadoDeResultados }) {
       <Margen
         titulo="Margen bruto"
         valor={m.bruto}
-        dice={`De cada $100 que vendes, te quedan $${m.bruto ?? 0} después de pagar lo vendido.`}
+        dice={
+          (m.bruto ?? 0) < 0
+            ? `Lo vendido te cuesta más de lo que cobras: pierdes $${-(m.bruto ?? 0)} de cada $100.`
+            : `De cada $100 que vendes, te quedan $${m.bruto ?? 0} después de pagar lo vendido.`
+        }
       />
       <Margen
         titulo="Margen de operación"
