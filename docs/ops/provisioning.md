@@ -111,7 +111,7 @@ What it does, in order (`packages/data-pg/scripts/migrate-hosted.ts`):
    `xangarro_metering`, `xangarro_admin` as LOGIN roles with your passwords
    (sent as SCRAM verifiers, so no password lands in Supabase's DDL log), and
    sets DB-CONN-01's bounds: `statement_timeout` 5 s / 10 s / 60 s / 15 s,
-   `idle_in_transaction_session_timeout` 10 s. Re-running rotates nothing
+   `idle_in_transaction_session_timeout` 10 s, and `jit = off` on every role but metering (RLS inflates cost estimates past the JIT threshold; audit DB2-PAGE-01). Re-running rotates nothing
    unless you changed a password.
 4. **Migrations** — ledger table `xangarro_ops.migrations` (name, checksum,
    applied_at); applies, in order, only the files it lacks:
