@@ -2,20 +2,42 @@
  * SyncEngine — single-flight orchestration of push and pull (A-06).
  *
  * `syncNow()` pushes first (so a sale leaves the phone before anything else)
- * then pulls. Concurrent calls share the in-flight run instead of starting
- * a second one. Triggers (debounce, interval, foreground) live in the UI
- * layer (A-07); this class only runs and reports.
+ * then pulls; concurrent calls share the in-flight run. `pushOnly()` and
+ * `capture()` follow a local write: when a run is already in flight they
+ * queue ONE trailing run, because the in-flight one may have read the
+ * outbox before the write. `capture()` pulls at most every
+ * `PULL_AFTER_CAPTURE_MS` — a busy caja must not pull after every sale.
+ *
+ * At the evening peak (DB2-DEV-02) a failed run starts a jittered
+ * exponential backoff, floored by the server's Retry-After; automatic
+ * triggers inside it are answered without contacting the server. Triggers
+ * (debounce, interval, foreground) live in the UI layer (A-07); this class
+ * only runs, reports, and says when to try again (`retryAt`).
  */
 
 import { DrizzleAppConfigRepository, type XangarroDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
-import { pullAll, type PullOutcome } from './pull.js';
-import { purgeAcknowledged, type PurgeOutcome } from './retention.js';
-import { drainPush, type PushOutcome } from './push.js';
+import { RunBackoff, type Random } from './backoff.js';
+import { pullAll } from './pull.js';
+import { drainPush } from './push.js';
 import { readRows } from './row-reader.js';
 import { rowKey } from './table-map.js';
-import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 import { StatusStore, type RejectedEntry } from './status-store.js';
+import {
+  NOT_ACTIVATED,
+  deferredResult,
+  firstError,
+  isTransient,
+  purgeIfDue,
+  type RunMode,
+  type RunOptions,
+  type SyncRunResult,
+} from './sync-run.js';
+
+export type { RunMode, RunOptions, SyncRunResult } from './sync-run.js';
+
+/** After a capture, pull only if the last pull is at least this old. */
+export const PULL_AFTER_CAPTURE_MS = 45_000;
 
 export interface SyncEngineDeps {
   readonly db: XangarroDatabase;
@@ -23,32 +45,8 @@ export interface SyncEngineDeps {
   /** Device token from secure storage; `null` = not activated. */
   readonly getToken: () => Promise<string | null>;
   readonly now?: () => Date;
-}
-
-export interface SyncRunResult {
-  readonly push: PushOutcome | null;
-  readonly pull: PullOutcome | null;
-  /** True when the server says this device is revoked (A-04 returns to activation). */
-  readonly revoked: boolean;
-  /** Retention purge run after this pull, if one was due (A-11). */
-  readonly purge?: PurgeOutcome | null;
-}
-
-const PURGE_EVERY_MS = 86_400_000;
-
-/** After a clean pull: purge once per server day. Anchored on server time only. */
-async function purgeIfDue(
-  db: XangarroDatabase,
-  appConfig: DrizzleAppConfigRepository,
-): Promise<PurgeOutcome | null> {
-  const serverTime = await appConfig.get(SYNC_CONFIG_KEYS.lastServerTime);
-  if (!serverTime) return null;
-  const last = await appConfig.get(SYNC_CONFIG_KEYS.lastPurgeAt);
-  if (last && new Date(serverTime).getTime() - new Date(last).getTime() < PURGE_EVERY_MS)
-    return null;
-  const outcome = await purgeAcknowledged({ db, appConfig });
-  await appConfig.set(SYNC_CONFIG_KEYS.lastPurgeAt, serverTime);
-  return outcome;
+  /** Injected for tests; spreads backoffs so devices don't retry in step. */
+  readonly random?: Random;
 }
 
 export interface SyncCounts {
@@ -64,30 +62,39 @@ export interface RejectedRow extends RejectedEntry {
 
 const MAX_REJECTED_LISTED = 200;
 
-const NOT_ACTIVATED: SyncRunResult = { push: null, pull: null, revoked: false };
+interface Trailing {
+  readonly promise: Promise<SyncRunResult>;
+  mode: RunMode;
+  manual: boolean;
+}
 
 export class SyncEngine {
   readonly #deps: SyncEngineDeps;
   readonly #status: StatusStore;
+  readonly #backoff: RunBackoff;
+  readonly #now: () => Date;
   #inFlight: Promise<SyncRunResult> | null = null;
+  #trailing: Trailing | null = null;
+  #lastPullMs: number | null = null;
 
   constructor(deps: SyncEngineDeps) {
     this.#deps = deps;
-    this.#status = new StatusStore(deps.db);
+    this.#now = deps.now ?? (() => new Date());
+    this.#status = new StatusStore(deps.db, { random: deps.random });
+    this.#backoff = new RunBackoff(deps.random);
   }
 
-  syncNow(): Promise<SyncRunResult> {
-    this.#inFlight ??= this.#run('both').finally(() => {
-      this.#inFlight = null;
-    });
-    return this.#inFlight;
+  syncNow(opts: RunOptions = {}): Promise<SyncRunResult> {
+    return this.#inFlight ?? this.#launch('both', opts.manual ?? false);
   }
 
-  pushOnly(): Promise<SyncRunResult> {
-    this.#inFlight ??= this.#run('push').finally(() => {
-      this.#inFlight = null;
-    });
-    return this.#inFlight;
+  pushOnly(opts: RunOptions = {}): Promise<SyncRunResult> {
+    return this.#afterWrite('push', opts.manual ?? false);
+  }
+
+  /** A sale, gasto or cierre was just recorded: push it, pull only if stale. */
+  capture(opts: RunOptions = {}): Promise<SyncRunResult> {
+    return this.#afterWrite('capture', opts.manual ?? false);
   }
 
   counts(): Promise<SyncCounts> {
@@ -105,20 +112,68 @@ export class SyncEngine {
   }
 
   requeue(tableName: string, rowId: string): Promise<void> {
-    return this.#status.requeue(tableName, rowId, (this.#deps.now ?? (() => new Date()))());
+    return this.#status.requeue(tableName, rowId, this.#now());
   }
 
-  async #run(mode: 'push' | 'both'): Promise<SyncRunResult> {
+  #launch(mode: RunMode, manual: boolean): Promise<SyncRunResult> {
+    const run = this.#run(mode, manual).finally(() => {
+      this.#inFlight = null;
+    });
+    this.#inFlight = run;
+    return run;
+  }
+
+  /** One trailing run behind the in-flight one; later writes join it. */
+  #afterWrite(mode: RunMode, manual: boolean): Promise<SyncRunResult> {
+    const current = this.#inFlight;
+    if (current === null) return this.#launch(mode, manual);
+    if (this.#trailing !== null) {
+      if (mode === 'capture') this.#trailing.mode = 'capture';
+      this.#trailing.manual ||= manual;
+      return this.#trailing.promise;
+    }
+    const promise = current
+      .catch(() => undefined)
+      .then(() => {
+        const t = this.#trailing!;
+        this.#trailing = null;
+        return this.#inFlight ?? this.#launch(t.mode, t.manual);
+      });
+    this.#trailing = { promise, mode, manual };
+    return promise;
+  }
+
+  async #run(mode: RunMode, manual: boolean): Promise<SyncRunResult> {
     const token = await this.#deps.getToken();
     if (!token) return NOT_ACTIVATED;
+    const blocked = this.#backoff.blockedUntil(this.#now().getTime(), manual);
+    if (blocked !== null) return deferredResult(this.#backoff.lastError, blocked);
+    const result = await this.#exchange(mode, token);
+    const error = result.revoked ? null : firstError(result);
+    if (error === null) {
+      this.#backoff.succeeded();
+      return result;
+    }
+    const until = this.#backoff.failed(error, this.#now().getTime());
+    return { ...result, retryAt: new Date(until).toISOString() };
+  }
+
+  async #exchange(mode: RunMode, token: string): Promise<SyncRunResult> {
     const appConfig = new DrizzleAppConfigRepository(this.#deps.db);
-    const now = this.#deps.now ?? (() => new Date());
     const base = { db: this.#deps.db, appConfig, client: this.#deps.client, token };
-    const push = await drainPush({ ...base, now });
+    const push = await drainPush({ ...base, now: this.#now });
     if (push.error?.code === 'DEVICE_REVOKED') return { push, pull: null, revoked: true };
-    if (mode === 'push') return { push, pull: null, revoked: false };
+    if (!this.#wantsPull(mode) || (push.error !== null && isTransient(push.error)))
+      return { push, pull: null, revoked: false };
     const pull = await pullAll(base);
     if (pull.error) return { push, pull, revoked: pull.error.code === 'DEVICE_REVOKED' };
+    this.#lastPullMs = this.#now().getTime();
     return { push, pull, revoked: false, purge: await purgeIfDue(this.#deps.db, appConfig) };
+  }
+
+  #wantsPull(mode: RunMode): boolean {
+    if (mode !== 'capture') return mode === 'both';
+    const last = this.#lastPullMs;
+    return last === null || this.#now().getTime() - last >= PULL_AFTER_CAPTURE_MS;
   }
 }
