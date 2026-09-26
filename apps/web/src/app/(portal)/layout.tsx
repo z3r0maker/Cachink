@@ -44,14 +44,19 @@ import { column, content, frame, main } from '@/shell/shell.css';
  */
 async function guiaPrimero(role: string, businessId: string): Promise<Pasos | null> {
   const omitida = (await cookies()).get(GUIA_OMITIDA_COOKIE) !== undefined;
-  const checklist = await wizardCompleted(businessId)
-    .then((wizard) => (wizard ? loadChecklistSignals(businessId) : null))
-    .then((signals) => (signals === null ? null : buildChecklist(signals)))
-    .catch(() => null);
-  const complete = checklist === null || checklist.complete;
+  const [wizard, checklist] = await Promise.all([
+    wizardCompleted(businessId).catch(() => false),
+    loadChecklistSignals(businessId)
+      .then(buildChecklist)
+      .catch(() => null),
+  ]);
+  // Only a business that went through the wizard is sent to the guide; one
+  // that predates it (or a failed read) is never locked out of the portal.
+  const complete = !wizard || checklist === null || checklist.complete;
   if (debeIrALaGuia({ role, complete, omitida })) redirect('/como-empiezo');
   if (checklist === null || role === 'viewer') return null;
-  // The card counts optional steps too: it is the owner's to-do list, not a gate.
+  // The card counts optional steps too: it is the owner's to-do list, not a
+  // gate, so it shows whether or not the wizard ran — as Inicio's did.
   const done = checklist.items.filter((i) => i.done).length;
   return done === checklist.items.length ? null : { done, total: checklist.items.length };
 }
