@@ -30,17 +30,19 @@ export async function pull(caller: DeviceCaller, since: number): Promise<PullRes
   const usage = usageFor(caller.businessId, now).catch(() => null);
   const read = await withTenant(caller.businessId, async (tx) => {
     const cursor = await committedCursor(tx);
-    const page =
+    // Independent reads, all after the cursor: sent together, pipelined.
+    const [page, [device], entitlement] = await Promise.all([
       since === 0
-        ? { serverSeq: cursor, tables: await referenceTables(tx) }
-        : await changesSince(tx, since, cursor);
-
-    const [device] = await tx
-      .update(devices)
-      .set({ lastPullAt: now.toISOString() })
-      .where(eq(devices.id, caller.deviceId))
-      .returning({ acknowledgedThrough: devices.acknowledgedThrough });
-    return { page, device, entitlement: await entitlementFor(tx, caller.businessId, now) };
+        ? referenceTables(tx).then((tables) => ({ serverSeq: cursor, tables }))
+        : changesSince(tx, since, cursor),
+      tx
+        .update(devices)
+        .set({ lastPullAt: now.toISOString() })
+        .where(eq(devices.id, caller.deviceId))
+        .returning({ acknowledgedThrough: devices.acknowledgedThrough }),
+      entitlementFor(tx, caller.businessId, now),
+    ]);
+    return { page, device, entitlement };
   });
 
   const uso = await usage;

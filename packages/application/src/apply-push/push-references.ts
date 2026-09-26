@@ -35,10 +35,12 @@ export class PushReferences {
         wanted.set(table, (wanted.get(table) ?? new Set<string>()).add(id));
       }
     }
-    for (const [table, ids] of wanted) {
-      const found = await this.store.existing(table, [...ids]);
-      for (const id of found) this.knownOf(table).add(id);
-    }
+    await Promise.all(
+      [...wanted].map(async ([table, ids]) => {
+        const found = await this.store.existing(table, [...ids]);
+        for (const id of found) this.knownOf(table).add(id);
+      }),
+    );
   }
 
   /** The first reference of this item that points at nothing, or null. */

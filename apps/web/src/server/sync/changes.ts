@@ -55,11 +55,10 @@ export async function changesSince(tx: Tx, since: number, cursor: number, pageSi
   const ids = new Map<PullableTable, Set<string>>(PULLABLE.map((t) => [t, new Set()]));
   for (const e of page) if (isPullable(e.table)) ids.get(e.table)?.add(e.rowId);
 
-  const loaded = await Promise.all(
-    PULLABLE.map(async (t) => [t, await rowsById(tx, t, [...(ids.get(t) ?? [])])] as const),
-  );
-  return {
-    serverSeq,
-    tables: { ...Object.fromEntries(loaded), feature_flags: await tenantFeatureFlags(tx) },
-  };
+  // Sent together: postgres.js pipelines them on the transaction's connection.
+  const [flags, ...loaded] = await Promise.all([
+    tenantFeatureFlags(tx),
+    ...PULLABLE.map(async (t) => [t, await rowsById(tx, t, [...(ids.get(t) ?? [])])] as const),
+  ]);
+  return { serverSeq, tables: { ...Object.fromEntries(loaded), feature_flags: flags } };
 }

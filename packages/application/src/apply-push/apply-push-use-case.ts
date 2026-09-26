@@ -72,8 +72,11 @@ export class ApplyPushUseCase {
     references: PushReferences,
     writer: PushWriter,
   ): Promise<void> {
-    const receipts = await this.store.receipts(segment.map(({ delta: d }) => d));
-    await references.load(segment);
+    // Independent lookups: sent together (Postgres pipelines them).
+    const [receipts] = await Promise.all([
+      this.store.receipts(segment.map(({ delta: d }) => d)),
+      references.load(segment),
+    ]);
     const first = segment.filter((i) => REFERENCED.has(i.delta.table));
     const rest = segment.filter((i) => !REFERENCED.has(i.delta.table));
     const toAccept: Item[] = [];
