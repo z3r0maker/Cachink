@@ -1,4 +1,5 @@
 import { BrowserMock } from './BrowserMock.jsx';
+import { Don } from './Don.jsx';
 import { PhoneMock } from './PhoneMock.jsx';
 import { Icon, sealPath } from './icons.jsx';
 
@@ -19,7 +20,7 @@ function Stamp({ size }) {
 }
 
 const LABEL =
-  'El portal de Xangarro muestra la utilidad del mes mientras la caja, en un teléfono, cobra una venta de $85.00 que llega sola al portal.';
+  'El portal de Xangarro muestra la utilidad del mes mientras la caja, en un teléfono, cobra una venta de $85.00 que llega sola al portal. Don Cuentas saluda: yo te cuido los números mientras tú atiendes.';
 
 /** The hero composite: portal in a browser, the caja on a phone, the sale flying across. */
 export function HeroArt() {
@@ -34,6 +35,12 @@ export function HeroArt() {
           +$85.00
         </div>
         <Stamp size={160} />
+        <div className="hero-don">
+          <Don pose="hola" size={200} eager />
+        </div>
+        <p className="don-dice hero-dice">
+          ¡Quiúbole! Yo te cuido los números mientras tú atiendes.
+        </p>
         <div className="hero-label">
           <Icon name="sync" size={15} />
           Cada venta llega sola al portal
@@ -47,6 +54,9 @@ export function HeroArt() {
           +$85.00
         </div>
         <Stamp size={116} />
+        <div className="hero-don">
+          <Don pose="hola" size={130} eager />
+        </div>
       </div>
     </>
   );

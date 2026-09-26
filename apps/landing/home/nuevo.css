@@ -1,0 +1,22 @@
+.nv-head { align-items: flex-end; flex-wrap: nowrap; }
+.nv-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.nv-card { padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+.nv-card h3 { margin: 0; font-size: 22px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; color: var(--black); }
+.nv-card p { margin: 0; font-size: 15px; line-height: 1.5; font-weight: 600; color: var(--ink); }
+.nv-tag { align-self: flex-start; height: 28px; padding: 0 12px; display: flex; align-items: center; border-radius: 9999px; background: var(--yellow); border: var(--border-thin); font-size: 12px; font-weight: 800; color: var(--black); }
+.nv-big { margin-top: auto; font-family: Anton, Impact, sans-serif; font-size: 36px; color: var(--black); }
+.nv-big small { font-family: var(--font-sans); font-size: 14px; font-weight: 800; color: var(--gray-600); }
+.nv-sug { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.nv-input { height: 38px; box-sizing: border-box; display: flex; align-items: center; padding: 0 12px; border: var(--border-thin); border-radius: var(--r-10); font-size: 14px; font-weight: 700; color: var(--black); }
+.nv-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.nv-ico { flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-10); background: var(--warning-soft); border: var(--border-thin); color: var(--black); }
+.nv-gente { margin: auto 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: var(--black); }
+.nv-gente li { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 6px; }
+.nv-gente li + li { padding-bottom: 0; }
+.nv-gente li:first-child { border-bottom: var(--border-thin); }
+
+@media (max-width: 1099px) { .nv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 699px) {
+  .nv-grid { grid-template-columns: minmax(0, 1fr); }
+  .nv-head .don { width: 80px !important; height: 80px !important; }
+}

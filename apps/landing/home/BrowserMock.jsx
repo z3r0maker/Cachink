@@ -12,6 +12,12 @@ const SIDE = [
 ];
 const BARS = [44, 58, 50, 66, 62, 84, 72];
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+/** Thursday: the days before it earned, the rest of the week has not happened yet. */
+const TODAY = 3;
+const barClass = (i) => {
+  if (i === TODAY) return 'bw-bar today a-bar';
+  return i > TODAY ? 'bw-bar future' : 'bw-bar';
+};
 
 function Sidebar() {
   return (
@@ -36,8 +42,8 @@ function Chart() {
       <div className="bw-label">Ventas de la semana</div>
       <div className="bw-bars">
         {BARS.map((h, i) => (
-          <div key={i} className="bw-barcol">
-            <div className={i === 3 ? 'bw-bar today a-bar' : 'bw-bar'} style={{ height: h }} />
+          <div key={i} className={i === TODAY ? 'bw-barcol today' : 'bw-barcol'}>
+            <div className={barClass(i)} style={{ height: h }} />
             <span>{DAYS[i]}</span>
           </div>
         ))}

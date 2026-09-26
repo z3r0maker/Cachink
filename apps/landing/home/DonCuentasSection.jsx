@@ -1,6 +1,7 @@
 import { DonCuentasChat } from './DonCuentasChat.jsx';
 import { DonCuentasMeta } from './DonCuentasMeta.jsx';
-import { DonCuentas, Icon } from './icons.jsx';
+import { Don } from './Don.jsx';
+import { Icon } from './icons.jsx';
 import { useInView } from './use-in-view.js';
 
 const POINTS = [
@@ -16,7 +17,7 @@ const POINTS = [
   },
   {
     k: 'ia',
-    b: 'Pronto: cada fin de mes, tu revisión con IA.',
+    b: 'Cada fin de mes, tu revisión con IA.',
     t: 'Qué funcionó, qué no y qué precios ajustar, con tus números de verdad. Y después, tu catálogo desde una foto.',
   },
 ];
@@ -25,7 +26,7 @@ function Point({ p }) {
   return (
     <li className="dc-point">
       {p.k === 'ia' ? (
-        <DonCuentas size={34} />
+        <span className="dc-pronto">Pronto</span>
       ) : (
         <span className="dc-check">
           <Icon name="check" size={18} />
@@ -45,8 +46,11 @@ export function DonCuentasSection() {
       <div className="xh-wrap dc-grid">
         <div className="dc-copy">
           <div className="dc-id">
-            <DonCuentas size={76} className="dc-big" />
-            <span className="xeyebrow">Don Cuentas · tu contador de cabecera</span>
+            <Don pose="quieto" size={200} />
+            <div className="dc-plate">
+              <span className="wm">Don Cuentas</span>
+              <span>Tu contador de cabecera</span>
+            </div>
           </div>
           <h2 className="xh2">Te echa aguas antes de que duela.</h2>
           <p className="xlead">

@@ -43,7 +43,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Qué métodos de pago puedo registrar?',
-    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI) y crédito (fiado) para tus clientes frecuentes. El formulario se adapta al giro de tu negocio — si solo cobras efectivo, los demás métodos no estorban.',
+    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI) y crédito (fiado) para tus clientes frecuentes. El formulario se adapta al giro de tu negocio: si solo cobras efectivo, los demás métodos no estorban.',
   },
   {
     q: '¿Mis datos están seguros? ¿Quién puede verlos?',
