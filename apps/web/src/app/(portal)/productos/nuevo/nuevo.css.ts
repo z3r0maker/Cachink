@@ -89,9 +89,10 @@ export const cuerpo = style({
   '@media': { 'screen and (max-width: 1023px)': { gridTemplateColumns: 'minmax(0, 1fr)' } },
 });
 
+/** Slides, never fades: a half-transparent step fails contrast while it settles. */
 const entra = keyframes({
-  from: { opacity: 0, transform: 'translateY(8px)' },
-  to: { opacity: 1, transform: 'none' },
+  from: { transform: 'translateY(8px)' },
+  to: { transform: 'none' },
 });
 
 export const tarjeta = style({
