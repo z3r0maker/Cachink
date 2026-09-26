@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { type Tx } from '../db';
+import { reportError } from '../observability/report';
 import {
   getBusiness,
   logoPublico,
@@ -89,7 +90,20 @@ export async function comprobanteDeTicket(
 export async function comprobanteDeMuestra(tx: Tx): Promise<Comprobante> {
   const negocio = await negocioParaComprobante(tx);
   const propia = await ultimoTicketComprobante(tx);
-  return deTicket(propia ?? DEMO, negocio);
+  return deTicket(fechable(propia) ?? DEMO, negocio);
+}
+
+/**
+ * A preview never fails over one row: a last ticket whose date will not parse
+ * (the renderer's `Intl` throws «Invalid time value») falls back to the demo
+ * venta, and the stamp is reported so the row can be found.
+ */
+function fechable(t: TicketComprobante | null): TicketComprobante | null {
+  if (t === null || !Number.isNaN(Date.parse(t.fechaHora))) return t;
+  reportError(new Error(`comprobante de muestra: fechaHora inválida «${t.fechaHora}»`), {
+    endpoint: 'comprobante-muestra',
+  });
+  return null;
 }
 
 function deTicket(t: TicketComprobante, negocio: NegocioComprobante): Comprobante {
