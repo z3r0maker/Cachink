@@ -35,7 +35,7 @@ const TEMPLATES: readonly TemplateMeta[] = [
   {
     id: 'clientes',
     label: 'Clientes',
-    description: 'Nombre, teléfono y RFC opcional. Llega a los teléfonos al sincronizar.',
+    description: 'Nombre, teléfono y RFC opcional. Llega a tus cajas al sincronizar.',
     intro:
       'Descarga la plantilla, llénala y súbela. Si un cliente ya existe (mismo teléfono o nombre), sus datos se actualizan.',
     templateHref: '/api/import/clientes',
@@ -71,7 +71,7 @@ function Listo({ step }: { readonly step: Extract<Step, { name: 'listo' }> }) {
   return (
     <p data-testid="import-listo">
       Listo: {r.nuevos} nuevos, {r.actualizados} actualizados, {r.sinCambios} sin cambios,{' '}
-      {r.omitidos} con error. Llegan a los teléfonos en su siguiente sincronización.
+      {r.omitidos} con error. Llegan a tus cajas en su siguiente sincronización.
     </p>
   );
 }

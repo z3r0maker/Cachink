@@ -33,7 +33,7 @@ export function PermisosDialog(props: {
       open={props.open}
       onOpenChange={props.onOpenChange}
       title={`Permisos de ${props.nombre}`}
-      body="Lo que puede hacer en el teléfono además de vender. Llega en su siguiente sincronización."
+      body="Lo que puede hacer en la caja además de vender. Llega en su siguiente sincronización."
       confirmLabel={pending ? 'Guardando…' : 'Guardar'}
       onConfirm={save}
     >

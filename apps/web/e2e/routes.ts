@@ -105,6 +105,6 @@ export const ROUTES: readonly Route[] = [
     path: '/suscripcion',
     heading: 'Suscripción',
     // The seeded Xangarro subscription (seed-billing.ts), as the phones receive it.
-    data: { kind: 'db', sentinel: 'Tus teléfonos reciben el plan Xangarro' },
+    data: { kind: 'db', sentinel: 'Tus cajas reciben el plan Xangarro' },
   },
 ];

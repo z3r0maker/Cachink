@@ -67,7 +67,7 @@ const VACIO = {
   },
   dispositivos: {
     title: 'Vincula tu primer dispositivo',
-    body: 'Genera un código aquí arriba y escríbelo en el teléfono de tu operador. En cuanto se vincule, aparecerá en esta lista.',
+    body: 'Genera un código aquí arriba y escríbelo en el teléfono o la computadora donde va a cobrar. En cuanto se conecte, aparecerá en esta lista.',
   },
 } as const;
 

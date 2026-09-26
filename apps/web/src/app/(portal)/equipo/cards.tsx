@@ -96,7 +96,7 @@ function Pie({ o }: { readonly o: Operador }) {
   return (
     <p className={cardFoot}>
       {o.dispositivo === null
-        ? 'Todavía no entra desde ningún teléfono.'
+        ? 'Todavía no entra desde ninguna caja.'
         : `${o.dispositivo} · último turno ${formatFechaHora(o.ultimoTurnoAt)}`}
     </p>
   );

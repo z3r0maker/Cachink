@@ -52,8 +52,8 @@ function mensaje(lleno: boolean, limit: number, live: LiveCode | null): string {
   if (lleno) {
     return `Tu plan incluye ${limit} dispositivos y todos están vinculados. Un código nuevo solo funcionará cuando revoques uno.`;
   }
-  if (live === null) return 'No hay un código activo. Genera uno para vincular un teléfono.';
-  return `Escríbelo en el teléfono del operador. Vence ${remaining(live.expiresAt)}.`;
+  if (live === null) return 'No hay un código activo. Genera uno para conectar una caja.';
+  return `Escríbelo en el teléfono o la computadora donde va a cobrar. Vence ${remaining(live.expiresAt)}.`;
 }
 
 /** The handoff the code alone never had: where the person at the counter types it. */

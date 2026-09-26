@@ -25,7 +25,7 @@ function ProductoSheet(props: {
       onOpenChange={props.onOpenChange}
       eyebrow="Tu catálogo"
       heading={f.editing ? `Editar ${props.editing?.nombre ?? ''}` : 'Nuevo producto'}
-      description="Llega a todos los teléfonos en su siguiente sincronización."
+      description="Llega a todas tus cajas en su siguiente sincronización."
       actions={
         <>
           {f.error === null ? null : (

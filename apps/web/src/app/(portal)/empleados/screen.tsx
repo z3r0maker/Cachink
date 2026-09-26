@@ -145,9 +145,7 @@ function Body({
         rowKey={(e) => e.id}
         minWidth={620}
         footer={
-          <span>
-            Cada pago de nómina se registra también como un gasto, capturado en el teléfono.
-          </span>
+          <span>Cada pago de nómina se registra también como un gasto, capturado en la caja.</span>
         }
       />
     </ScreenBody>

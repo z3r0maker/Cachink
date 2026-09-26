@@ -30,7 +30,7 @@ const TIPOS = [
   { value: 'servicio', title: 'Servicio', description: 'Se cobra, pero no tiene existencias.' },
 ];
 const USOS = [
-  { value: 'venta', title: 'Para vender', description: 'Aparece en la caja de los teléfonos.' },
+  { value: 'venta', title: 'Para vender', description: 'Aparece en tus cajas.' },
   {
     value: 'materia-prima',
     title: 'Materia prima',

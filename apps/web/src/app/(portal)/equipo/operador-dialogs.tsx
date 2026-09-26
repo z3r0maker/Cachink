@@ -119,7 +119,7 @@ export function NuevoOperadorDialog({
         open={open}
         onOpenChange={setOpen}
         title="Nuevo operador"
-        body="Entra al teléfono con su nombre y su NIP. No necesita correo."
+        body="Entra a la caja con su nombre y su NIP. No necesita correo."
         confirmLabel={f.pending ? 'Guardando…' : 'Guardar'}
         onConfirm={f.save}
       >
@@ -177,7 +177,7 @@ export function DesactivarDialog({ id, nombre, open, onOpenChange, onDone }: Dia
       open={open}
       onOpenChange={onOpenChange}
       title={`Desactivar a ${nombre}`}
-      body="No podrá entrar a los teléfonos. Sus ventas y registros se conservan."
+      body="No podrá entrar a las cajas. Sus ventas y registros se conservan."
       confirmLabel={pending ? 'Desactivando…' : 'Desactivar'}
       destructive
       onConfirm={() => run(() => desactivarOperador(id))}

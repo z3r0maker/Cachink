@@ -164,7 +164,7 @@ function Contenido(props: {
       {owner && data.estado !== null ? <PauseRow /> : null}
       {/* The entitlement the phones are signed right now (P-10's debug line). */}
       <p style={{ fontWeight: 600 }} data-testid="entitlement-debug">
-        Tus teléfonos reciben el plan {PLAN_NOMBRE[data.recibe.plan]}, válido hasta el{' '}
+        Tus cajas reciben el plan {PLAN_NOMBRE[data.recibe.plan]}, válido hasta el{' '}
         {formatFechaHora(data.recibe.validUntil)}.
       </p>
     </>
