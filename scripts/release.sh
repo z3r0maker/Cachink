@@ -55,13 +55,31 @@ git fetch --quiet origin main
 
 [[ -z "$(git status --porcelain)" ]] ||
   die "the working tree has uncommitted changes — they would ship. Commit, stash, or release from a clean worktree:
-    git worktree add --detach /tmp/release origin/main && /tmp/release/scripts/release.sh"
+    git worktree add --detach /tmp/release origin/main
+    cd /tmp/release && pnpm install --frozen-lockfile
+    cp $ROOT/packages/data-pg/.env.local packages/data-pg/.env.local   # untracked
+    ./scripts/release.sh"
 
 HEAD_SHA="$(git rev-parse HEAD)"
 MAIN_SHA="$(git rev-parse origin/main)"
 [[ "$HEAD_SHA" == "$MAIN_SHA" ]] ||
   die "HEAD is $(git rev-parse --short HEAD) but origin/main is $(git rev-parse --short origin/main).
     Production ships main. To release something else, say so out loud by checking it out deliberately."
+
+# ── Guard: this checkout can actually run ───────────────────────────────────
+# A fresh worktree — which the refusal above tells you to make — has neither
+# dependencies nor the untracked credentials, and without these two checks it
+# fails later with `tsx: command not found`, which says nothing useful.
+[[ -d "$ROOT/node_modules" ]] ||
+  die "no node_modules in $ROOT — install first:
+    (cd $ROOT && pnpm install --frozen-lockfile)"
+
+if [[ $SKIP_MIGRATIONS -eq 0 && ! -f "$ROOT/packages/data-pg/.env.local" ]]; then
+  die "packages/data-pg/.env.local is missing — it holds SUPERUSER_URL and the four
+    role passwords, and it is untracked on purpose, so a fresh worktree never has it.
+    Copy it from the checkout that has it, or see docs/ops/provisioning.md:
+    cp /path/to/your/checkout/packages/data-pg/.env.local $ROOT/packages/data-pg/.env.local"
+fi
 
 say "releasing $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s)"
 [[ $DRY_RUN -eq 1 ]] && say "DRY RUN — nothing will be applied or deployed"
