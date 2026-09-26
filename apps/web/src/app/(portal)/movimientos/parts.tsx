@@ -4,7 +4,7 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { ExportButton, FilterChip, Input, StatusPill, Tag, type ColumnDef } from '@/components';
-import type { MovimientosData } from '@/server/screens';
+import type { MovimientosVista } from '@/server/movimientos';
 
 import {
   amountCell,
@@ -20,7 +20,7 @@ import {
 } from './movimientos.css';
 import type { Personalizado, RangoChip } from './periodo';
 
-export type Row = MovimientosData[number];
+export type Row = MovimientosVista['filas'][number];
 
 export function Heading({ kind }: { readonly kind: 'ventas' | 'gastos' }) {
   return (

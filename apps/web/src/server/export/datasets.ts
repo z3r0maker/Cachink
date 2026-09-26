@@ -1,10 +1,12 @@
 import 'server-only';
 
 import {
+  exportarGastos,
+  exportarMovimientosInventario,
+  exportarVentas,
   listEmpleados,
-  listMovimientos,
-  listMovimientosInventario,
   listProductos,
+  todas,
 } from '@xangarro/data-pg';
 
 import { withTenant } from '../db';
@@ -20,6 +22,10 @@ import { buildSheet, centavosToPesos, type Column } from './workbook';
  * Every export reads through `withTenant`, so it is scoped by RLS exactly as
  * the screen it mirrors — an export is a read like any other, and the most
  * damaging place to accidentally widen one.
+ *
+ * Ledger exports are the **whole** history, read by their own keyset-batched
+ * queries (`exportar*`), never by a screen's list: «Exportar movimientos»
+ * once reused the Productos list and stopped at 50 rows (DB2-EXP-01).
  */
 export const DATASETS = ['ventas', 'gastos', 'productos', 'movimientos', 'empleados'] as const;
 export type Dataset = (typeof DATASETS)[number];
@@ -70,10 +76,10 @@ export async function buildExport(dataset: Dataset, businessId: string): Promise
   const stamp = new Date().toISOString().slice(0, 10);
 
   const rows = await withTenant(businessId, async (tx) => {
-    if (dataset === 'ventas') return listMovimientos(tx, 'venta');
-    if (dataset === 'gastos') return listMovimientos(tx, 'gasto');
+    if (dataset === 'ventas') return todas(exportarVentas(tx));
+    if (dataset === 'gastos') return todas(exportarGastos(tx));
     if (dataset === 'productos') return listProductos(tx);
-    if (dataset === 'movimientos') return listMovimientosInventario(tx);
+    if (dataset === 'movimientos') return todas(exportarMovimientosInventario(tx));
     return listEmpleados(tx);
   });
 

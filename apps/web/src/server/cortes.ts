@@ -5,17 +5,11 @@
  * same rows (the abono part is day-granular, exactly as O-03 computes it).
  */
 
-import { and, count, desc, eq, inArray, isNotNull, isNull, sum } from 'drizzle-orm';
-import {
-  cajaTurnos,
-  clientPayments,
-  expenses as expensesTable,
-  sales as salesTable,
-  tickets as ticketsTable,
-  users,
-} from '@xangarro/data-pg';
+import { and, desc, eq, isNotNull, isNull } from 'drizzle-orm';
+import { cajaTurnos, users } from '@xangarro/data-pg';
 
-import { withTenant, type Tx } from './db';
+import { leerFiguras, type Figuras } from './cortes-figuras';
+import { withTenant } from './db';
 import type { ConteoDenominaciones } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
@@ -44,8 +38,6 @@ export interface CorteRow {
     readonly creados: number;
   };
 }
-
-type Stats = Map<string, { n: number; monto: bigint }>;
 
 const dia = (iso: string): string =>
   new Intl.DateTimeFormat('es-MX', {
@@ -79,8 +71,11 @@ export async function listarCortes(businessId: string): Promise<readonly CorteRo
       .orderBy(desc(cajaTurnos.cierreAt))
       .limit(200);
     if (rows.length === 0) return [];
-    const ids = rows.map((r) => r.t.id);
-    const figuras = await leerFiguras(tx, businessId, ids);
+    const figuras = await leerFiguras(
+      tx,
+      businessId,
+      rows.map((r) => r.t),
+    );
     return rows.map((r) => aCorte(r, figuras));
   });
 }
@@ -88,13 +83,7 @@ export async function listarCortes(businessId: string): Promise<readonly CorteRo
 /** One closed turno as the screen's row. */
 function aCorte(
   r: { t: (typeof cajaTurnos)['$inferSelect']; nombre: string; color: string | null },
-  f: {
-    vivas: Stats;
-    canceladas: Stats;
-    fiado: Stats;
-    gastos: Map<string, bigint>;
-    abonos: Map<string, bigint>;
-  },
+  f: Figuras,
 ): CorteRow {
   const { t, nombre, color } = r;
   const fondo = t.montoAperturaCentavos + t.efectivoAdicionalCentavos;
@@ -128,7 +117,7 @@ function estadoDe(t: (typeof cajaTurnos)['$inferSelect']): CorteRow['estado'] {
 }
 
 /** The «Qué más pasó» card's counts. */
-function statsDe(id: string, f: Awaited<ReturnType<typeof leerFiguras>>): CorteRow['turno'] {
+function statsDe(id: string, f: Figuras): CorteRow['turno'] {
   return {
     ventas: f.vivas.get(id)?.n ?? 0,
     canceladas: { n: f.canceladas.get(id)?.n ?? 0, monto: f.canceladas.get(id)?.monto ?? 0n },
@@ -137,64 +126,6 @@ function statsDe(id: string, f: Awaited<ReturnType<typeof leerFiguras>>): CorteR
     inventario: '0 entradas · 0 mermas',
     creados: 0,
   };
-}
-
-/** All the per-turno figures the rows need, in five grouped queries. */
-async function leerFiguras(tx: Tx, businessId: string, ids: readonly string[]) {
-  const [vivas, fiado, canceladas, gastosFilas, abonosFilas] = await Promise.all([
-    statsPorTurno(tx, ids, isNull(ticketsTable.cancelledAt)),
-    statsPorTurno(
-      tx,
-      ids,
-      and(isNull(ticketsTable.cancelledAt), eq(ticketsTable.metodo, 'Crédito')),
-    ),
-    statsPorTurno(tx, ids, isNotNull(ticketsTable.cancelledAt)),
-    tx
-      .select({ turno: expensesTable.cajaTurnoId, monto: expensesTable.monto })
-      .from(expensesTable)
-      .where(and(inArray(expensesTable.cajaTurnoId, ids), isNull(expensesTable.deletedAt))),
-    tx
-      .select({ fecha: clientPayments.fecha, monto: clientPayments.montoCentavos })
-      .from(clientPayments)
-      .where(
-        and(
-          eq(clientPayments.businessId, businessId),
-          eq(clientPayments.metodo, 'Efectivo'),
-          isNull(clientPayments.deletedAt),
-        ),
-      ),
-  ]);
-  const gastos = new Map<string, bigint>();
-  for (const g of gastosFilas) {
-    if (g.turno !== null) gastos.set(g.turno, (gastos.get(g.turno) ?? 0n) + g.monto);
-  }
-  const abonos = new Map<string, bigint>();
-  for (const a of abonosFilas) abonos.set(a.fecha, (abonos.get(a.fecha) ?? 0n) + a.monto);
-  return { vivas, fiado, canceladas, gastos, abonos };
-}
-
-/** Ticket counts and line-total sums per turno, for the stats card. */
-async function statsPorTurno(
-  tx: Tx,
-  ids: readonly string[],
-  vivo: Parameters<typeof and>[0],
-): Promise<Stats> {
-  const rows = await tx
-    .select({
-      turno: ticketsTable.cajaTurnoId,
-      n: count(ticketsTable.id),
-      monto: sum(salesTable.monto),
-    })
-    .from(ticketsTable)
-    .leftJoin(salesTable, eq(salesTable.ticketId, ticketsTable.id))
-    .where(and(inArray(ticketsTable.cajaTurnoId, ids), vivo, isNull(ticketsTable.deletedAt)))
-    .groupBy(ticketsTable.cajaTurnoId);
-  const m: Stats = new Map();
-  for (const r of rows) {
-    if (r.turno === null) continue;
-    m.set(r.turno, { n: Number(r.n), monto: BigInt(r.monto ?? '0') });
-  }
-  return m;
 }
 
 function iniciales(nombre: string): string {
