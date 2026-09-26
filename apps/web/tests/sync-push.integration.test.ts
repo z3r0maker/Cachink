@@ -1,24 +1,22 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, it } from 'vitest';
+import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import { sql } from 'drizzle-orm';
 import { ApplyPushUseCase } from '@xangarro/application';
 import type { Delta } from '@xangarro/contracts';
 import { committedCursor, createDb, withBusiness, type Db } from '@xangarro/data-pg';
+import { integrationSuite } from '@xangarro/testing/integration';
 
 import { PgPushStore } from '../src/server/sync/pg-push-store';
 
 /**
  * The batched push end to end — `ApplyPushUseCase` over `PgPushStore` on real
  * Postgres under RLS (audit DB2-SYNC-01/-02; ADR-110). Needs `DATABASE_URL`
- * (app role) and `DATABASE_SUPER_URL`; `REQUIRE_DB=1` turns a missing database
- * into a failure instead of a skip, as in data-pg's suites.
+ * (app role) and `DATABASE_SUPER_URL`; `REQUIRE_DB=1` (`pnpm --filter @xangarro/web
+ * test:db`, CI's portal-e2e job) turns a missing database into a failure.
  */
-const url = process.env.DATABASE_URL;
-if (!url && process.env.REQUIRE_DB === '1')
-  throw new Error('REQUIRE_DB=1 but DATABASE_URL is unset');
-const suite = url ? describe : describe.skip;
+const { url, describe: suite } = integrationSuite();
 
 const id = () => `01PUSH${randomUUID().replaceAll('-', '').slice(0, 20).toUpperCase()}`;
 const A = id();
