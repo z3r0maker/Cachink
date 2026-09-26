@@ -65,7 +65,10 @@ export async function ticketParaComprobante(
   }));
   return {
     folio: folioDisplay(ticket.folio),
-    fechaHora: `${ticket.fecha}T${ticket.hora ?? '12:00'}:00-06:00`,
+    // `fecha` may arrive as a bare day or a full timestamp and `hora` as HH:MM
+    // or HH:MM:SS, depending on which client wrote the row; either way the
+    // stamp is built from the day and the minute, or it is an Invalid Date.
+    fechaHora: `${String(ticket.fecha).slice(0, 10)}T${(ticket.hora ?? '12:00').slice(0, 5)}:00-06:00`,
     metodo: ticket.metodo,
     total: vivas.reduce((suma, l) => suma + l.importe, 0n),
     lineas: vivas.slice(0, 3),
