@@ -1,3 +1,4 @@
+import { hoy } from '@/server/clock';
 import { currentSession } from '@/server/current-session';
 import { loadAsesorPage } from '@/server/asesor';
 import { loadMetasPage } from '@/server/metas';
@@ -24,8 +25,8 @@ export default async function AsesorPage() {
       loadAsesorPage(session.businessId, session.capabilities.asesor),
       loadMetasPage(session.businessId),
     ]);
-    return <AsesorScreen data={data} metas={metas} role={session.role} />;
+    return <AsesorScreen data={data} metas={metas} role={session.role} hoy={hoy()} />;
   } catch {
-    return <AsesorScreen data={null} metas={null} role="viewer" />;
+    return <AsesorScreen data={null} metas={null} role="viewer" hoy={hoy()} />;
   }
 }
