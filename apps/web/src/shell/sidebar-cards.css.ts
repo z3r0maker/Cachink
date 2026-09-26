@@ -111,3 +111,12 @@ export const privacy = style([
     color: colors.gray600,
   },
 ]);
+
+/** The rail's help: only Don Cuentas's face, shown exactly where the card hides. */
+export const ayudaRail = style({
+  display: 'none',
+  justifyContent: 'center',
+  margin: '0 0 8px',
+  '@media': { 'screen and (max-width: 1023px)': { display: 'flex' } },
+  selectors: { [`${aside}[data-rail="true"] &`]: { display: 'flex' } },
+});

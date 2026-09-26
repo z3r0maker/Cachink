@@ -106,6 +106,10 @@ export function AyudaFooter() {
           <span className={c.cardSub}>Te echo la mano</span>
         </span>
       </Link>
+      {/* In the 84 px rail the card has no room: Don Cuentas alone, same link. */}
+      <Link href="/ayuda" className={c.ayudaRail} aria-label="¿Atorado? Te echo la mano">
+        <img className={c.ayudaImg} src={ayuda.src} alt="" width={40} height={40} />
+      </Link>
       <a href={AVISO_INTEGRAL_URL} className={c.privacy}>
         Aviso de privacidad
       </a>

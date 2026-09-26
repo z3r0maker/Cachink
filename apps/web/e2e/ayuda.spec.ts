@@ -68,6 +68,8 @@ test('the search narrows answers, and a guide walks through its steps', async ({
     '/equipo?tab=cajas',
   );
 
+  // The guides answer to their own words; an empty search lists them all.
+  await filled(page.getByRole('searchbox', { name: 'Busca tu duda' }), '');
   await page.getByRole('button', { name: /Conecta la caja de quien cobra/ }).click();
   const guia = page.getByRole('dialog', { name: 'Conecta la caja de quien cobra' });
   await expect(guia.getByText('Paso 1 de 4')).toBeVisible();
