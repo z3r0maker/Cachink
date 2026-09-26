@@ -52,6 +52,14 @@ export interface SesionAbierta {
 
 /** The open turno's ticket by folio, with everything the detail screen needs. */
 
+/**
+ * `captura` follows a recorded sale, gasto, abono or cierre: push now, pull at
+ * most every 45 s. `completa` pushes and pulls (reconnect, «Reintentar
+ * envío»). `manual` = a person or the network asked: skip the engine's own
+ * backoff, never the server's Retry-After (DB2-DEV-02).
+ */
+export type SyncMode = 'captura' | 'completa';
+
 export type WorkerRequest =
   | { readonly id: number; readonly method: 'boot' }
   | {
@@ -60,7 +68,13 @@ export type WorkerRequest =
       readonly input: RegistrarTicketInput;
       readonly ctx: RegistrarContext;
     }
-  | { readonly id: number; readonly method: 'sync'; readonly token: string | null }
+  | {
+      readonly id: number;
+      readonly method: 'sync';
+      readonly token: string | null;
+      readonly mode: SyncMode;
+      readonly manual: boolean;
+    }
   | { readonly id: number; readonly method: 'counts' }
   | {
       readonly id: number;

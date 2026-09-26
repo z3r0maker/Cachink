@@ -16,6 +16,8 @@ import { opfsRead, opfsWrite } from './opfs';
 import { registrarTicket } from './tickets';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
+type SyncRequest = Extract<WorkerRequest, { method: 'sync' }>;
+
 export type { BootInfo, OperadorPara, SesionAbierta } from './protocol';
 
 /** The WASM binary ships as a static asset the Worker fetches by URL. */
@@ -71,13 +73,21 @@ async function registrar(
   return runAccess((rt) => registrarTicket(rt.db, input, ctx));
 }
 
-async function sync(token: string | null): Promise<SyncRunResult> {
+/** A capture pushes (and pulls at most every 45 s); `completa` pushes and pulls. */
+async function sync(request: SyncRequest): Promise<SyncRunResult> {
   if (runtime === null) throw new Error('runtime not booted');
-  deviceToken = token;
+  deviceToken = request.token;
+  const opts = { manual: request.manual };
+  let result: SyncRunResult | null = null;
   try {
-    return await runtime.engine.syncNow();
+    result =
+      request.mode === 'captura'
+        ? await runtime.engine.capture(opts)
+        : await runtime.engine.syncNow(opts);
+    return result;
   } finally {
-    await persist();
+    // A deferred run (backoff) touched nothing: skip the full-database write.
+    if (result?.deferred !== true) await persist();
   }
 }
 
@@ -106,7 +116,7 @@ async function handle(request: WorkerRequest): Promise<unknown> {
     case 'registrar':
       return registrar(request.input, request.ctx);
     case 'sync':
-      return sync(request.token);
+      return sync(request);
     case 'counts':
       return counts();
     default: {
