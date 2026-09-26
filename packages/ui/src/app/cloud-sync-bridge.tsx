@@ -3,9 +3,11 @@
  *
  * Bridge layer (like DrizzleRepositoryBridge): it owns the database handle
  * and turns engine results into UI state. Triggers come from SyncScheduler:
- * foreground/resume and a 15-min interval run a full sync; every successful
- * mutation (all app writes go through React Query) schedules a debounced
- * push. A revoked device loses its token and activation record — never its
+ * foreground/resume and a jittered 15-min interval run a full sync; every
+ * successful mutation (all app writes go through React Query) schedules a
+ * debounced push; a failed run schedules one retry when the engine's backoff
+ * ends (DB2-DEV-02). "Actualizar" and a manual retry are `manual` runs: they
+ * skip the engine's backoff, never the server's Retry-After. A revoked device loses its token and activation record — never its
  * data — and the gate sends it back to activation.
  */
 
@@ -67,22 +69,31 @@ function phaseOf(result: SyncRunResult): CloudSyncPhase {
   return error.code === 'NETWORK' ? 'offline' : 'error';
 }
 
+type Mode = 'push' | 'both';
+type RetryIn = { current: (ms: number) => void };
+
+function run(engine: SyncEngine, mode: Mode, manual: boolean): Promise<SyncRunResult> {
+  return mode === 'push' ? engine.pushOnly({ manual }) : engine.syncNow({ manual });
+}
+
 function useSyncRunner(
   engine: SyncEngine,
   setState: (fn: (s: CloudSyncState) => CloudSyncState) => void,
+  retryIn: RetryIn,
 ) {
   const { config } = useActivationContext();
   const appConfig = useAppConfigRepository();
   const queryClient = useQueryClient();
   return useMemo(() => {
-    const run = async (mode: 'push' | 'both'): Promise<void> => {
+    const runOnce = async (mode: Mode, manual: boolean): Promise<void> => {
       setState((s) => ({ ...s, phase: 'syncing' }));
-      const result = mode === 'push' ? await engine.pushOnly() : await engine.syncNow();
+      const result = await run(engine, mode, manual);
+      if (result.retryAt) retryIn.current(Date.parse(result.retryAt) - Date.now());
       if (result.revoked)
         await forgetDevice({ appConfig, tokenStore: config.tokenStore, queryClient });
       const counts = await engine.counts();
       const phase = phaseOf(result);
-      const reached = result.push !== null && phase !== 'offline';
+      const reached = result.push !== null && phase !== 'offline' && !result.deferred;
       setState((s) => ({
         phase,
         counts,
@@ -95,25 +106,32 @@ function useSyncRunner(
     };
     // A throw (e.g. a SQLite error during the retention purge) must not leave
     // the pill stuck on "Sincronizando…"; the next trigger retries.
-    const runSafely = (mode: 'push' | 'both'): void => {
-      run(mode).catch((error: unknown) => {
+    const runSafely = (mode: Mode, manual = false): void => {
+      runOnce(mode, manual).catch((error: unknown) => {
         console.error('[cloud-sync] run failed', error);
         setState((s) => ({ ...s, phase: 'error' }));
       });
     };
-    return { runPush: () => runSafely('push'), runSync: () => runSafely('both') };
-  }, [engine, setState, appConfig, config.tokenStore, queryClient]);
+    return {
+      runPush: () => runSafely('push'),
+      runSync: () => runSafely('both'),
+      /** A person asked: skip the engine's own backoff. */
+      runManual: (mode: Mode) => runSafely(mode, true),
+    };
+  }, [engine, setState, retryIn, appConfig, config.tokenStore, queryClient]);
 }
 
 function useSchedulerWiring(
   runner: { runPush: () => void; runSync: () => void },
   activated: boolean,
+  retryIn: RetryIn,
 ): void {
   const queryClient = useQueryClient();
   const schedulerRef = useRef<SyncScheduler | null>(null);
   useEffect(() => {
     const scheduler = new SyncScheduler(runner);
     schedulerRef.current = scheduler;
+    retryIn.current = (ms) => scheduler.retryIn(ms);
     const unsubscribeWrites = queryClient.getMutationCache().subscribe((event) => {
       if (event.type === 'updated' && event.mutation.state.status === 'success')
         scheduler.noteWrite();
@@ -126,8 +144,9 @@ function useSchedulerWiring(
       unsubscribeWrites();
       appState.remove();
       scheduler.dispose();
+      retryIn.current = () => undefined;
     };
-  }, [runner, queryClient]);
+  }, [runner, queryClient, retryIn]);
   useEffect(() => {
     if (activated) schedulerRef.current?.onForeground();
   }, [activated]);
@@ -142,16 +161,17 @@ export function CloudSyncBridge(props: { readonly children: ReactNode }): ReactE
     () => new SyncEngine({ db, client, getToken: () => config.tokenStore.get() }),
     [db, client, config.tokenStore],
   );
-  const runner = useSyncRunner(engine, setState);
-  useSchedulerWiring(runner, Boolean(record));
+  const retryIn = useRef<(ms: number) => void>(() => undefined);
+  const runner = useSyncRunner(engine, setState, retryIn);
+  useSchedulerWiring(runner, Boolean(record), retryIn);
   const value = useMemo<CloudSyncContextValue>(
     () => ({
       state,
-      syncNow: runner.runSync,
+      syncNow: () => runner.runManual('both'),
       listRejected: () => engine.rejected(),
       requeue: async (rows) => {
         for (const r of rows) await engine.requeue(r.tableName, r.rowId);
-        runner.runPush();
+        runner.runManual('push');
       },
     }),
     [state, runner, engine],
