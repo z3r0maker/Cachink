@@ -37,8 +37,12 @@
 - [x] Ledger `xangarro.privacy_consents` — append-only, hash-chained, definer-only writes
       (`packages/data-pg/drizzle/0034_privacy_consents.sql`).
 - [x] Hash of the exact text (`avisoVigente()`), IP stored only as SHA-256, user agent kept.
-- [ ] **BLOCKER — Apply migration 0034** to hosted (`pnpm --filter @xangarro/data-pg db:migrate:hosted`);
-      confirm `xangarro_app` can EXECUTE `privacy_consent_record` and nothing can UPDATE/DELETE.
+- [x] **Applied and verified on hosted, 2026-09-26.** `db:migrate:hosted --dry-run` reports 0
+      pending, and the table and functions are really there. Both halves of the check:
+      `xangarro_app` **can** EXECUTE `privacy_consent_record`; UPDATE and DELETE are granted to
+      no role but `postgres`, and `privacy_consents_immutable` fires `BEFORE DELETE OR UPDATE`
+      `FOR EACH ROW`, so the owner is blocked too. (`xangarro_app` cannot execute
+      `privacy_consents_day_root` — correct: that is the seal job's, not the app's.)
 - [ ] Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained
       the acepto step and a refusal test) — not run in the session that wrote it.
 - [ ] **SOON — Nightly seal job:** call `xangarro.privacy_consents_day_root(day)` and obtain a

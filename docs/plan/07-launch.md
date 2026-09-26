@@ -40,6 +40,26 @@
 - **Steps:** App Store Connect + Play Console apps under `mx.xangarro.mobile`, name "Xangarro!"; update `docs/store/listing-*.md`; screenshots via `pnpm store:screenshots` after X-07; **review notes** with the demo account (B-04: `demo@xangarro.mx` + the password given to `seed-demo.ts`, operator PINs 1234/5678, activation code **`DEMXK7M3`** — re-run the seed against hosted before each submission so the code is live) and a sentence: "Xangarro is a business tool; subscriptions are purchased by business owners on our website; the app contains no purchase flow." `eas submit` profiles get `ascAppId`. Privacy nutrition labels updated (data now leaves the device). Confirm the current external-purchase/steering rules for the **Mexican** storefront before submission and record the source + date in the Done line (ADR-053 consequence).
 - **Acceptance:** both listings in review with the demo account working from a fresh install.
 
+### X-11 `release.sh` cannot report success without shipping
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+      **Found 2026-09-26, during the first release after `cec30e12`.** A backgrounded
+      `./scripts/release.sh --skip-migrations` ended with **exit 0** after printing only
+      «deploying xangarro-web» — no status line, and neither `xangarro-backoffice` nor `landing`
+      deployed. Production was correct (the web deploy had been refused as `Blocked`, and the
+      manual redeploys that followed are what is live), so nothing was lost, but a release script
+      that can exit 0 having shipped one app of three is a trap: the next person reads 0 as done.
+      The evidence points at the process being killed rather than a logic bug — the output is
+      truncated mid-step and the `Blocked` path would have exited 1 — but that was not proved.
+- **Context:** `scripts/release.sh`, added the same day; `scripts/release.test.ts` guards its
+  refusals but not its completeness.
+- **Steps:** count the apps actually deployed and refuse to print «released» unless it equals the
+  number requested; make the summary list every app with its URL and status, so a truncated run is
+  visibly truncated. Consider `set -o pipefail` for the URL-capture pipelines. Then reproduce the
+  original symptom — kill the script mid-deploy — and confirm it can no longer exit 0.
+- **Acceptance:** a run interrupted after the first app exits non-zero and names the apps that did
+  not ship; a complete run lists all three with `Ready`.
+
 ### X-06 CLAUDE.md amendments (human applies)
 
 - [ ] Status · **Blocked by:** — (can be prepared any time; apply at launch)
