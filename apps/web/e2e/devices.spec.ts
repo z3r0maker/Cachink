@@ -38,8 +38,8 @@ test('generating a code replaces the old one rather than adding to it', async ({
   // SegmentedTabs renders aria-pressed buttons in a labelled group, not a
   // Radix tab list (see components/tabs.tsx for why), so it is a button here.
   await page
-    .getByRole('group', { name: 'Tu equipo' })
-    .getByRole('button', { name: /Dispositivos/ })
+    .getByRole('group', { name: 'Equipo y nómina' })
+    .getByRole('button', { name: /Cajas/ })
     .click();
 
   const generate = page.getByRole('button', { name: /Generar (código|otro)/ });
@@ -96,8 +96,8 @@ test('a full plan refuses a new phone until one is revoked', async ({ page }, te
   // Free a slot from the portal, through the confirmation.
   await page.goto('/equipo');
   await page
-    .getByRole('group', { name: 'Tu equipo' })
-    .getByRole('button', { name: /Dispositivos/ })
+    .getByRole('group', { name: 'Equipo y nómina' })
+    .getByRole('button', { name: /Cajas/ })
     .click();
   await page.getByRole('button', { name: 'Revocar' }).first().click();
   await page.getByRole('dialog').getByRole('button', { name: 'Revocar' }).click();

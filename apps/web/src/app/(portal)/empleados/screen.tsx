@@ -8,7 +8,6 @@ import {
   DataTable,
   KpiCard,
   ScreenBody,
-  SegmentedTabs,
   StatusPill,
   kpiGrid,
   type ColumnDef,
@@ -21,7 +20,7 @@ import { eyebrow } from '@/styles/text.css';
 import { PagosEmpleadoDrawer } from './pagos-drawer';
 import { EditarEmpleadoSheet, NuevoEmpleadoSheet } from './sheet';
 import type { Empleado as Row } from './use-empleado-form';
-import { avatar, pageSubtitle, pageTitle } from './empleados.css';
+import { avatar } from './empleados.css';
 
 type Empleado = EmpleadosData[number];
 
@@ -119,23 +118,6 @@ const columns = (
   ...acciones(onEdit, onPagos),
 ];
 
-function Heading() {
-  const session = useSession();
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-      <div>
-        <h1 className={pageTitle}>Empleados</h1>
-        <p className={pageSubtitle}>Quién trabaja contigo y cuánto le pagas</p>
-      </div>
-      {canWrite(session.role) ? (
-        <div style={{ marginLeft: 'auto' }}>
-          <NuevoEmpleadoSheet />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function Body({
   rows,
   list,
@@ -172,8 +154,11 @@ function Body({
   );
 }
 
-export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null }) {
-  const [tab, setTab] = useState('personas');
+/**
+ * «Nómina», the third tab of Equipo y nómina (ADR-107): who is on payroll,
+ * what the week costs, «Nuevo empleado», and each person's pagos.
+ */
+export function Nomina({ rows }: { readonly rows: EmpleadosData | null }) {
   const [editing, setEditing] = useState<Row | null>(null);
   const [enPagos, setEnPagos] = useState<Row | null>(null);
   const mayWrite = canWrite(useSession().role);
@@ -183,20 +168,15 @@ export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null 
 
   return (
     <>
-      <Heading />
-      <SegmentedTabs
-        ariaLabel="Empleados"
-        value={tab}
-        onValueChange={setTab}
-        tabs={[
-          { value: 'personas', label: 'Personas', count: list.length },
-          { value: 'nomina', label: 'Nómina' },
-        ]}
-      />
       <div className={kpiGrid}>
-        <KpiCard label="Empleados activos" value={`${list.length}`} />
+        <KpiCard label="En nómina" value={`${list.length}`} />
         <KpiCard label="Nómina de la semana" value={formatMoney(semana)} tone="negative" />
       </div>
+      {mayWrite ? (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <NuevoEmpleadoSheet />
+        </div>
+      ) : null}
       <Body rows={rows} list={list} onEdit={mayWrite ? setEditing : null} onPagos={setEnPagos} />
       <EditarEmpleadoSheet empleado={editing} onClose={() => setEditing(null)} />
       <PagosEmpleadoDrawer empleado={enPagos} onClose={() => setEnPagos(null)} />

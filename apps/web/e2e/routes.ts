@@ -79,10 +79,10 @@ export const ROUTES: readonly Route[] = [
     data: { kind: 'fixture', reason: 'fixture until C-18 — cortes/page.tsx' },
   },
   // USERS u-ana; default tab `operadores`.
-  { path: '/equipo', heading: 'Tu equipo', data: { kind: 'db', sentinel: 'Ana Robledo' } },
+  { path: '/equipo', heading: 'Equipo y nómina', data: { kind: 'db', sentinel: 'Ana Robledo' } },
   // EMPLOYEES emp-rosa — deliberately not Ana, who is also a USER, so this
   // cannot pass by reading the wrong table.
-  { path: '/empleados', heading: 'Empleados', data: { kind: 'db', sentinel: 'Rosa Medina' } },
+  { path: '/empleados', heading: 'Equipo y nómina', data: { kind: 'db', sentinel: 'Rosa Medina' } },
   // NOTICES nt-1.
   {
     path: '/avisos',

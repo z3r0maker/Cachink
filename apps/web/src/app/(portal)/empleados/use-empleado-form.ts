@@ -19,9 +19,9 @@ export interface Draft {
 /** Quincenal is the default: it is how most small businesses in México pay. */
 const EMPTY: Draft = { nombre: '', puesto: '', salario: '', periodo: 'quincenal' };
 
-const draftOf = (e: Empleado | null): Draft =>
+const draftOf = (e: Empleado | null, nombre = ''): Draft =>
   e === null
-    ? EMPTY
+    ? { ...EMPTY, nombre }
     : {
         nombre: e.nombre,
         puesto: e.puesto,
@@ -30,8 +30,8 @@ const draftOf = (e: Empleado | null): Draft =>
       };
 
 /** One form for «Nuevo empleado» and «Editar»; the server holds the rules. */
-export function useEmpleadoForm(editing: Empleado | null, onDone: () => void) {
-  const [draft, setDraft] = useState<Draft>(() => draftOf(editing));
+export function useEmpleadoForm(editing: Empleado | null, onDone: () => void, nombre = '') {
+  const [draft, setDraft] = useState<Draft>(() => draftOf(editing, nombre));
   const [campos, setCampos] = useState<Readonly<Record<string, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -50,7 +50,7 @@ export function useEmpleadoForm(editing: Empleado | null, onDone: () => void) {
         setError(r.message);
         return;
       }
-      setDraft(EMPTY);
+      setDraft(draftOf(null, nombre));
       onDone();
       router.refresh();
     });

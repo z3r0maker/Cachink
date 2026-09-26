@@ -12,7 +12,7 @@ export interface NavItem {
   readonly href: string;
   /** Lucide-idiom path data, drawn on a 24×24 viewBox at stroke-width 2.2. */
   readonly icon: string;
-  /** Other paths that light this item: Cortes de turno sits under Tu equipo (O-31). */
+  /** Other paths that light this item: Cortes de turno sits under Equipo y nómina (O-31). */
   readonly activeOn?: readonly string[];
   /** Draw Don Cuentas's face instead of the icon. */
   readonly avatar?: true;
@@ -32,7 +32,6 @@ const ICON = {
   productos: 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8',
   revision: 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',
   equipo: 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3',
-  empleados: 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4',
   negocio: 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6',
   plan: 'M3 7h18v11H3V7Zm0 4h18M7 15h4',
   sync: 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5',
@@ -67,8 +66,13 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Mi gente',
     items: [
-      { label: 'Tu equipo', href: '/equipo', icon: ICON.equipo, activeOn: ['/cortes'] },
-      { label: 'Empleados', href: '/empleados', icon: ICON.empleados },
+      // ADR-107: the cashier and the employee are one person — one page.
+      {
+        label: 'Equipo y nómina',
+        href: '/equipo',
+        icon: ICON.equipo,
+        activeOn: ['/cortes', '/empleados'],
+      },
     ],
   },
 ];

@@ -1,12 +1,22 @@
 import { hoy } from '@/server/clock';
 import { requireSession } from '@/server/auth';
 import { portalOrigin } from '@/server/billing/origin';
-import { loadEquipo } from '@/server/screens';
+import { loadEmpleados, loadEquipo } from '@/server/screens';
 
-import { EquipoScreen } from './screen';
+import { EquipoScreen, type EquipoTab } from './screen';
 
-/** Tu equipo — operators and devices (P-05 + P-06). **Reads Postgres.** */
+/**
+ * Equipo y nómina (ADR-107) — the people (who cobra at a caja, who is on
+ * payroll, usually both), the cajas (P-06) and the nómina (P-12), where Tu
+ * equipo and Empleados used to be two pages. **Reads Postgres.**
+ */
 export const dynamic = 'force-dynamic';
+
+/** `?tab=dispositivos` is the old name of Cajas; links out there still use it. */
+function tabDe(tab: string | undefined): EquipoTab {
+  if (tab === 'cajas' || tab === 'dispositivos') return 'cajas';
+  return tab === 'nomina' ? 'nomina' : 'personas';
+}
 
 export default async function EquipoPage({
   searchParams,
@@ -14,13 +24,18 @@ export default async function EquipoPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const session = await requireSession();
-  const { tab } = await searchParams;
+  const initialTab = tabDe((await searchParams).tab);
   const registerUrl = `${await portalOrigin()}/operador`;
-  const initialTab = tab === 'dispositivos' ? 'dispositivos' : 'operadores';
-  try {
-    const data = await loadEquipo(session.business_id, hoy());
-    return <EquipoScreen initialTab={initialTab} data={data} registerUrl={registerUrl} />;
-  } catch {
-    return <EquipoScreen initialTab={initialTab} data={null} registerUrl={registerUrl} />;
-  }
+  const [data, empleados] = await Promise.all([
+    loadEquipo(session.business_id, hoy()).catch(() => null),
+    loadEmpleados(session.business_id).catch(() => null),
+  ]);
+  return (
+    <EquipoScreen
+      initialTab={initialTab}
+      data={data}
+      empleados={empleados}
+      registerUrl={registerUrl}
+    />
+  );
 }

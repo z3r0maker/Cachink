@@ -14,8 +14,8 @@ import { deviceHeaders } from '@xangarro/contracts';
 export async function freshCode(page: Page): Promise<string> {
   await page.goto('/equipo');
   await page
-    .getByRole('group', { name: 'Tu equipo' })
-    .getByRole('button', { name: /Dispositivos/ })
+    .getByRole('group', { name: 'Equipo y nómina' })
+    .getByRole('button', { name: /Cajas/ })
     .click();
   const panel = page.getByTestId('activation-code');
   const before = (await panel.count()) > 0 ? await panel.getAttribute('aria-label') : null;
