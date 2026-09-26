@@ -30,7 +30,10 @@ export interface MovimientosScreenProps {
  * The shared `Pager` over a page the server cut: the same counter and buttons
  * as a client-side page, with «Siguiente» asking the server for the next ten.
  */
-function paginaDe(v: MovimientosVista, irA: (p: number) => void): Pagina<Row> {
+function paginaDe(
+  v: MovimientosVista,
+  mover: (delta: number, paginas: number) => void,
+): Pagina<Row> {
   const pages = Math.max(1, Math.ceil(v.total / POR_PAGINA));
   const from = v.total === 0 ? 0 : (v.pagina - 1) * POR_PAGINA + 1;
   return {
@@ -40,8 +43,8 @@ function paginaDe(v: MovimientosVista, irA: (p: number) => void): Pagina<Row> {
     from,
     to: v.total === 0 ? 0 : from + v.filas.length - 1,
     total: v.total,
-    prev: () => irA(Math.max(1, v.pagina - 1)),
-    next: () => irA(Math.min(pages, v.pagina + 1)),
+    prev: () => mover(-1, pages),
+    next: () => mover(1, pages),
   };
 }
 
@@ -66,7 +69,7 @@ function Body({ m, vista }: { readonly m: Movimientos; readonly vista: Movimient
             rowKey={(r) => r.id}
             minWidth={820}
             onRowClick={setAbierto}
-            footer={<Pager p={paginaDe(vista, m.irAPagina)} noun="movimientos" />}
+            footer={<Pager p={paginaDe(vista, m.moverPagina)} noun="movimientos" />}
           />
           <DetalleMovimiento row={abierto} rows={vista.lineas} onClose={() => setAbierto(null)} />
         </div>

@@ -77,7 +77,12 @@ export function useMovimientos(servido: EstadoMovimientos) {
     setRange: (r: RangoChip) => ir({ rango: r }),
     setCustom: (c: { desde: string; hasta: string }) => ir({ desde: c.desde, hasta: c.hasta }),
     setFilter: (cat: string | null) => ir({ cat }),
-    irAPagina: (pagina: number) => ir({ pagina }),
+    /**
+     * One page on from the page last **asked for**, within `paginas`: two
+     * quick clicks on «Siguiente» are two pages, not the same one twice.
+     */
+    moverPagina: (delta: number, paginas: number) =>
+      ir({ pagina: Math.min(paginas, Math.max(1, ultimo.current.pagina + delta)) }),
   };
 }
 
