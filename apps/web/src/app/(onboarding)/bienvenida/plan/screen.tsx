@@ -12,7 +12,9 @@ import {
   priceLabel,
   type Interval,
 } from '@/onboarding/plan-copy';
-import { OnboardingFrame } from '@/onboarding/ui/frame';
+import { Stage } from '@/onboarding/ui/stage';
+import { hint, question } from '@/onboarding/ui/stage.css';
+import { TOTAL_STEPS } from '@/onboarding/wizard-steps';
 import { actions, list, note, price, row, rowTitle, stack } from '@/onboarding/ui/onboarding.css';
 import { probarGratis, seguirGratis } from '@/server/actions/onboarding';
 
@@ -102,34 +104,51 @@ function Price(props: {
   );
 }
 
+function Acciones(p: { readonly a: ReturnType<typeof usePlanActions>; readonly free: boolean }) {
+  return (
+    <div className={actions}>
+      {p.free ? null : (
+        <Button onClick={p.a.probar} disabled={p.a.pending}>
+          Contratar este plan
+        </Button>
+      )}
+      <Button
+        variant={p.free ? 'primary' : 'secondary'}
+        onClick={p.a.gratis}
+        disabled={p.a.pending}
+      >
+        {p.free ? 'Empezar gratis' : 'Seguir gratis'}
+      </Button>
+    </div>
+  );
+}
+
 export function PlanScreen({ plan, headline, pending, beta }: PlanScreenProps) {
   const [annual, setAnnual] = useState(false);
   const interval: Interval = annual ? 'anual' : 'mensual';
   const a = usePlanActions(plan, interval);
   const free = plan === 'xangarrito';
   return (
-    <OnboardingFrame title={headline} subtitle={planPitch(plan)}>
+    <Stage
+      fase="Tu plan ideal"
+      paso="Último paso"
+      done={TOTAL_STEPS}
+      total={TOTAL_STEPS}
+      don={{
+        pose: 'celebrando',
+        text: '¡Listo! Con lo que me contaste, este es el plan que te queda.',
+      }}
+    >
+      <h1 className={question}>{headline}</h1>
+      <p className={hint}>{planPitch(plan)}</p>
       <Card>
         <div className={stack}>
           {free ? null : <Price plan={plan} annual={annual} onAnnual={setAnnual} beta={beta} />}
           <Pending items={pending} />
           {a.notice ? <Banner {...a.notice} /> : null}
-          <div className={actions}>
-            {free ? null : (
-              <Button onClick={a.probar} disabled={a.pending}>
-                Contratar este plan
-              </Button>
-            )}
-            <Button
-              variant={free ? 'primary' : 'secondary'}
-              onClick={a.gratis}
-              disabled={a.pending}
-            >
-              {free ? 'Empezar gratis' : 'Seguir gratis'}
-            </Button>
-          </div>
+          <Acciones a={a} free={free} />
         </div>
       </Card>
-    </OnboardingFrame>
+    </Stage>
   );
 }
