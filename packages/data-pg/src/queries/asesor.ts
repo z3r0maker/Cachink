@@ -7,6 +7,7 @@ import { inventoryMovements, products } from '../schema/catalog.js';
 import { expenses, sales, tickets } from '../schema/ledger.js';
 import { notices } from '../schema/portal.js';
 import type { Db } from '../client.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -41,7 +42,9 @@ function ventasRecientes(tx: Tx, desde: string) {
       and(
         isNull(sales.deletedAt),
         isNull(tickets.cancelledAt),
-        sql`left(${sales.fecha}, 10) >= ${desde}`,
+        // Sargable (DB2-QRY-04): a string is >= a ten-character day exactly
+        // when its first ten characters are, so timestamps still count.
+        fechaEnDias(sales.fecha, desde),
       ),
     );
 }
@@ -57,7 +60,7 @@ function gastosRecientes(tx: Tx, desde: string) {
       monto: expenses.monto,
     })
     .from(expenses)
-    .where(and(isNull(expenses.deletedAt), sql`left(${expenses.fecha}, 10) >= ${desde}`));
+    .where(and(isNull(expenses.deletedAt), fechaEnDias(expenses.fecha, desde)));
 }
 
 /** Every purchase entry — the cost-delta detector's history. */
@@ -112,7 +115,7 @@ async function inventarioYConteos(tx: Tx) {
      WHERE m.deleted_at IS NULL
      GROUP BY m.producto_id`);
   const ultimo = await tx.execute<{ producto_id: string; fecha: string | null }>(sql`
-    SELECT producto_id, max(left(fecha, 10)) AS fecha
+    SELECT producto_id, left(max(fecha), 10) AS fecha
       FROM inventory_movements
      WHERE deleted_at IS NULL
      GROUP BY producto_id`);
@@ -126,7 +129,12 @@ async function inventarioYConteos(tx: Tx) {
   };
 }
 
-/** The capacidades' lifetime counts, in one row. */
+/**
+ * The capacidades' lifetime counts, in one row. `left(min(fecha), 10)` rather
+ * than `min(left(fecha, 10))`: the same day (a prefix never sorts after its
+ * string), but the bare `min` can walk the `(business_id, fecha)` index from
+ * its first entry instead of reading every row.
+ */
 async function conteosAsesor(tx: Tx) {
   const r = await tx.execute<{
     dias_con_venta: number;
@@ -141,12 +149,12 @@ async function conteosAsesor(tx: Tx) {
                                 WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL))
              AS dias_con_venta,
            (SELECT min(d) FROM (
-              SELECT min(left(s.fecha, 10)) AS d FROM sales s
+              SELECT left(min(s.fecha), 10) AS d FROM sales s
                WHERE s.deleted_at IS NULL
                  AND NOT EXISTS (SELECT 1 FROM tickets t
                                   WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)
               UNION ALL
-              SELECT min(left(fecha, 10)) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
+              SELECT left(min(fecha), 10) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
            (SELECT count(*) FROM inventory_movements
              WHERE deleted_at IS NULL AND tipo = 'entrada') AS compras,
            (SELECT count(*) FROM day_closes WHERE deleted_at IS NULL) AS cortes,
