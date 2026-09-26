@@ -148,6 +148,7 @@ Links to discussion, docs, prior art.
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
+| [109](#adr-109) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7367,3 +7368,78 @@ enum refuses, so a QR sale there failed its parse and was only logged.
 
 - Column defaults and seeds still carry QR/CoDi; they are harmless because every
   reader filters, and changing them would be a migration for nothing.
+
+## ADR-109
+
+**Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — scale audit 2026-09-26 (`docs/audits/db-2026-09-26.html`), findings DB2-MIG-01, DB2-IDX-01, DB2-USE-01, DB2-HOT-01, DB2-RLS-01, DB2-CRON-01; amends B-01's runner
+
+**Context**
+
+The hosted runner (B-01) sent every file inside one transaction, so
+`CREATE INDEX CONCURRENTLY` could not run, and a plain index build on a table
+of millions of rows blocks its writes for minutes — the audit built six in
+41 s on 5 M-row tables. Every index the audit asks for waits on this. The
+runner also applied pending files in file order even when they sorted below
+files already applied: two late additions (`0033_geo_prune`,
+`0023_business_branding`) ran last on hosted and in the middle on a fresh
+database, so the two orders silently differed.
+
+**Decision**
+
+1. **A file whose first line is `-- xangarro:no-transaction` runs statement by
+   statement**, each autocommitting on one reserved connection, the way
+   `psql -f` already applies files for `db-local.sh` and CI. Its ledger row is
+   written after the last statement succeeds; checksums are unchanged.
+2. **Such files must be repeatable**, because a failure half-way leaves the
+   earlier statements applied and the next run repeats the file. Before
+   anything runs, `hosted/lint.ts` refuses a pending file that lacks
+   `SET lock_timeout`, has a `CREATE INDEX` that is not
+   `CONCURRENTLY IF NOT EXISTS` or a `DROP INDEX` that is not
+   `CONCURRENTLY IF EXISTS`, or opens a transaction; and a transactional file
+   that says `CONCURRENTLY`. The runner drops the INVALID index an interrupted
+   concurrent build leaves behind — which `IF NOT EXISTS` would otherwise skip
+   forever — before repeating the file.
+3. **A pending file that sorts below the last applied file of its set is
+   refused**, naming both: renumber it above. Hosted and fresh databases then
+   always apply the same sequence.
+4. **Every migration from data-pg 0043 and admin 0020 on sets `lock_timeout`**
+   (3 s), so a statement queued behind the evening peak fails fast and is run
+   again in the trough rather than stalling every request behind its lock.
+5. **Old → new for such files runs on a throwaway database** migrated to the
+   file before (`tests/support/scratch-db.ts`), through the runner itself —
+   a concurrent build cannot run inside the test transaction the older
+   migration tests use.
+
+The first files to use it are data-pg 0043 (the audit's index set, the
+`business_members (business_id, user_id)` uniqueness, and the drop of seven
+indexes that repeated a `business_id` primary key) and 0045 (every tenant
+policy wraps `current_business_id()` in a sub-select). In the same change:
+0044 spreads `api_latency_counters` over 16 slots per key, summed on read;
+the console's `admin_user_email` casts its parameter, not the key; the
+digest reads stored `usage_counters` instead of recounting, and runs
+`security_prune()` daily.
+
+**Alternatives considered**
+
+- *A separate out-of-band script for concurrent indexes.* Rejected: a second
+  path to production with no ledger and no drift check is how the two
+  environments diverge.
+- *Plain `CREATE INDEX` in a transaction, run in the trough.* Rejected: it
+  still blocks writes for the whole build, and the trough shrinks as tenants
+  in other time zones arrive.
+- *Accept out-of-order files with a warning.* Rejected: nobody reads a
+  warning in a deploy log, and the difference is invisible until a migration
+  depends on the order.
+
+**Consequences**
+
+- A no-transaction file cannot be rolled back as a whole; reviewers check
+  that each statement is safe to repeat, and the lint checks what it can.
+- `tenant-indexes.test.ts` now counts a single-column `business_id` primary
+  key as the tenant index, which is what let 0043 drop its duplicates.
+- Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
+  decided here; it needs its own ADR.
