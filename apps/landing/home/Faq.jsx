@@ -1,3 +1,4 @@
+import { Don } from './Don.jsx';
 import { FAQ_ITEMS } from '../landing/copy.jsx';
 
 /**
@@ -14,6 +15,7 @@ export default function Faq() {
           <p className="xbody">
             ¿Algo más? Escríbenos a <a href="mailto:hola@xangarro.mx">hola@xangarro.mx</a>.
           </p>
+          <Don pose="ayuda" size={190} className="faq-don" />
         </div>
         <div className="faq-list">
           {FAQ_ITEMS.map((f, i) => (

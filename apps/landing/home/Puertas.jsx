@@ -1,3 +1,4 @@
+import { Don } from './Don.jsx';
 import { Icon } from './icons.jsx';
 
 const PUERTAS = [
@@ -67,7 +68,10 @@ export function Puertas() {
       <div className="xh-wrap">
         <div className="xhead">
           <div className="xhead-text">
-            <span className="xeyebrow">Una cuenta, tres puertas</span>
+            <div className="pu-eyebrow">
+              <Don pose="caminando" size={96} />
+              <span className="xeyebrow">Una cuenta, tres puertas</span>
+            </div>
             <h2 className="xh2">
               El cuartel está en la web. Las herramientas, donde está la chamba.
             </h2>

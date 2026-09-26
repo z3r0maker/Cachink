@@ -34,6 +34,15 @@ const MARK = readFileSync(
   'utf8',
 ).trim();
 
+// Don Cuentas waving, the hero's pose (ADR-107), inlined like the fonts.
+const DON = `data:image/webp;base64,${readFileSync(resolve(here, '../public/assets/don/hola.webp')).toString('base64')}`;
+
+/** Thursday, as in the hero: the days before it earned, the rest has not happened yet. */
+const barClass = (i) => {
+  if (i === 3) return ' today';
+  return i > 3 ? ' future' : '';
+};
+
 const brand = () => `
   <div class="brand">
     <span class="coin">${MARK}</span>
@@ -42,6 +51,7 @@ const brand = () => `
 
 /** The portal, sketched like the hero's browser window: today's caja, and the week. */
 const browserMock = () => `
+  <div class="art">
   <div class="bw">
     <div class="bw-top"><span class="bw-dot"></span><span class="bw-dot"></span><span class="bw-dot"></span><span class="bw-url">app.xangarro.mx</span></div>
     <div class="bw-main">
@@ -56,11 +66,13 @@ const browserMock = () => `
         <div class="bw-card">
           <span class="bw-label">Esta semana</span>
           <div class="bw-bars">
-            ${[52, 70, 46, 88, 64, 96, 78].map((h, i) => `<span class="bw-bar${i === 6 ? ' today' : ''}" style="height:${h}%"></span>`).join('')}
+            ${[52, 70, 46, 88, 64, 96, 78].map((h, i) => `<span class="bw-bar${barClass(i)}" style="height:${h}%"></span>`).join('')}
           </div>
         </div>
       </div>
     </div>
+  </div>
+  <img class="don" src="${DON}" alt="">
   </div>`;
 
 const checks = (items) =>

@@ -1,4 +1,5 @@
 import { Brand } from './Nav.jsx';
+import { Don } from './Don.jsx';
 import { LOGIN_URL, signupUrl } from '../landing/planes.js';
 
 const COLS = [
@@ -34,6 +35,7 @@ function Cta() {
   return (
     <section id="contacto" className="cta">
       <div className="xh-wrap cta-row">
+        <Don pose="celebrando" size={170} className="cta-don" />
         <div className="cta-copy">
           <h2>¿Listo para que suene la caja?</h2>
           <p className="xlead">Crea tu cuenta en dos minutos y registra tu primera venta hoy.</p>

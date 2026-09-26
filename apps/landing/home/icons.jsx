@@ -48,6 +48,14 @@ export function Icon({ name, size, className = 'ico' }) {
 }
 
 /** The brand coin with its X. `size` is the coin's diameter in px. */
+/**
+ * The brush-stroke X of the brand mark (X-07), in the master's own
+ * coordinates (assets/brand/icons/mark-flat.svg), boxed tight around it.
+ */
+export const MARK_X =
+  'M287 352 L414 331 L503 437 L597 310 L697 291 L576 508 L735 675 L584 693 L503 586 L432 701 L315 711 L436 513 Z';
+export const MARK_BOX = '281 271 460 460';
+
 export function Coin({ size = 40, className = '', style }) {
   const x = Math.round(size * 0.6);
   return (
@@ -56,8 +64,8 @@ export function Coin({ size = 40, className = '', style }) {
       style={{ width: size, height: size, ...style }}
       aria-hidden="true"
     >
-      <svg viewBox="0 0 24 24" width={x} height={x}>
-        <path d="M5 5L19 19M19 5L5 19" stroke="currentColor" strokeWidth="4.6" />
+      <svg viewBox={MARK_BOX} width={x} height={x}>
+        <path d={MARK_X} fill="currentColor" />
       </svg>
     </span>
   );

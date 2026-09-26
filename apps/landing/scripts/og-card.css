@@ -346,8 +346,28 @@ body {
   flex: 1;
   border: 2px solid var(--black);
   border-radius: 4px 4px 2px 2px;
-  background: var(--black);
+  background: #d6fff4;
 }
 .bw-bar.today {
-  background: var(--yellow);
+  background: #00c896;
+}
+.bw-bar.future {
+  height: 10% !important;
+  background: none;
+  border-style: dashed;
+  border-color: #9e9e9a;
+}
+
+/* Don Cuentas waving over the window's top corner. */
+.art {
+  position: relative;
+  flex: none;
+}
+.don {
+  position: absolute;
+  right: -46px;
+  top: -118px;
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
 }

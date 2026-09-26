@@ -50,7 +50,7 @@ export function SceneDonCuentas() {
         <DonCuentas size={200} />
       </span>
       <div className="rs-dc-col">
-        <span className="up xeyebrow">Don Cuentas · tu asesor con IA</span>
+        <span className="up xeyebrow">Don Cuentas · tu contador de cabecera</span>
         <div className="up d1 rs-bubble">
           Cierre de agosto: la tortilla te subió 12%. Sube la orden de 5 tacos a $105 y recuperas tu
           margen.

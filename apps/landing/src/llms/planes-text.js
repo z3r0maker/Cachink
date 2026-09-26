@@ -9,7 +9,7 @@ const precio = (p) =>
 
 /** One bullet per plan: name, price and its feature list on one line. */
 export function planesResumen() {
-  return PLANES.map((p) => `- **${p.nombre}** — ${precio(p)}: ${p.features.join(', ')}`).join('\n');
+  return PLANES.map((p) => `- **${p.nombre}**: ${precio(p)}: ${p.features.join(', ')}`).join('\n');
 }
 
 /** One subsection per plan, features as bullets, for the full spec. */
@@ -19,7 +19,7 @@ export function planesDetalle() {
     const incluye = p.incluye ? `Todo lo de ${p.incluye}, más:\n` : '';
     const features = p.features.map((f) => `- ${f}`).join('\n');
     const don = p.donCuentas ? `\n- ${p.donCuentas.title}: ${p.donCuentas.sub}` : '';
-    return `### ${p.nombre} — ${precio(p)}${anual}\n${p.tagline}\n${incluye}${features}${don}`;
+    return `### ${p.nombre}: ${precio(p)}${anual}\n${p.tagline}\n${incluye}${features}${don}`;
   }).join('\n\n');
 }
 

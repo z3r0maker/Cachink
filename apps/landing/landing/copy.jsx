@@ -35,7 +35,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Quién es Don Cuentas?',
-    a: 'Don Cuentas es el asesor de Xangarro. Cada día revisa tus ventas, gastos e inventario y te avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de tus registros. Cada fin de mes te entrega tu revisión con IA: qué funcionó, qué no y qué precios ajustar.',
+    a: 'Don Cuentas es el asesor de Xangarro. Cada día revisa tus ventas, gastos e inventario y te avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de tus registros. Muy pronto, cada fin de mes, también te entregará tu revisión con IA: qué funcionó, qué no y qué precios ajustar.',
   },
   {
     q: '¿Xangarro maneja CFDI o facturación electrónica?',
@@ -43,7 +43,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Qué métodos de pago puedo registrar?',
-    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI), pago con CoDi, pago con QR, y crédito para tus clientes frecuentes. El formulario se adapta al giro de tu negocio — si solo cobras efectivo, los demás métodos no estorban.',
+    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI) y crédito (fiado) para tus clientes frecuentes. El formulario se adapta al giro de tu negocio: si solo cobras efectivo, los demás métodos no estorban.',
   },
   {
     q: '¿Mis datos están seguros? ¿Quién puede verlos?',

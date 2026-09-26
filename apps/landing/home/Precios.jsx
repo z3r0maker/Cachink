@@ -1,4 +1,6 @@
 import { useState } from 'react';
+
+import { Don } from './Don.jsx';
 import { PlanCard } from './PlanCard.jsx';
 import { PAGO_LINEA, PLANES, notaIva } from '../landing/planes.js';
 
@@ -31,6 +33,7 @@ export default function Precios() {
     <section id="precios" className="xh-sec pr">
       <div className="xh-wrap pr-inner">
         <div className="pr-head">
+          <Don pose="senalando" size={120} />
           <span className="xeyebrow">Precios honestos, en pesos</span>
           <h2 className="xh2">Empieza gratis. Crece cuando crezcas.</h2>
           <p className="xlead" style={{ color: 'var(--gray-600)' }}>

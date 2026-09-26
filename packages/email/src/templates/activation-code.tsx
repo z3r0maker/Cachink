@@ -17,7 +17,7 @@ export interface ActivationCodeEmailProps {
   readonly expiresInHours: number;
 }
 
-const REASON = 'Recibes este correo porque el dueño de un negocio pidió vincular un teléfono.';
+const REASON = 'Recibes este correo porque el dueño de un negocio pidió conectar una caja.';
 
 function CodeLine({ code }: { readonly code: string }) {
   return (
@@ -29,26 +29,26 @@ function CodeLine({ code }: { readonly code: string }) {
 
 export function ActivationCodeEmail({ code, negocio, expiresInHours }: ActivationCodeEmailProps) {
   return (
-    <Layout preview={`El código para vincular un teléfono a ${negocio}.`} reason={REASON}>
+    <Layout preview={`El código para conectar una caja a ${negocio}.`} reason={REASON}>
       <P>Hola:</P>
       <P>
-        Este es el código para vincular un teléfono a <strong>{negocio}</strong>. Escríbelo en la
-        app de Xangarro del operador, en la pantalla «Activar».
+        Este es el código para conectar una caja a <strong>{negocio}</strong>. Escríbelo en la
+        pantalla «Activar» del teléfono o la computadora donde se va a cobrar.
       </P>
       <CodeLine code={code} />
       <P>
         El código funciona una sola vez y vence en {expiresInHours}{' '}
         {expiresInHours === 1 ? 'hora' : 'horas'}. Si no lo pediste, ignora este correo: sin el
-        código, ningún teléfono entra a este negocio.
+        código, ninguna caja entra a este negocio.
       </P>
-      <Small>Cada código vincula un solo teléfono. Para otro, genera uno nuevo en tu portal.</Small>
+      <Small>Cada código conecta una sola caja. Para otra, genera uno nuevo en tu portal.</Small>
     </Layout>
   );
 }
 
 export function renderActivationCodeEmail(p: ActivationCodeEmailProps): Promise<EmailContent> {
   return renderEmail(
-    `Tu código para vincular un teléfono a ${p.negocio}`,
+    `Tu código para conectar una caja a ${p.negocio}`,
     <ActivationCodeEmail {...p} />,
   );
 }

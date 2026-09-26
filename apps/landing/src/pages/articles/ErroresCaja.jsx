@@ -12,7 +12,7 @@ const errores = [
   {
     n: '02',
     t: 'No separar el dinero del negocio del dinero personal',
-    d: 'Sacas $200 de la caja para comprar una torta y no lo registras como egreso. Al final del día no cuadra el efectivo y no sabes por qué. Con el tiempo, este hábito hace imposible saber si el negocio es rentable — porque parte del dinero "se fue" sin registro.',
+    d: 'Sacas $200 de la caja para comprar una torta y no lo registras como egreso. Al final del día no cuadra el efectivo y no sabes por qué. Con el tiempo, este hábito hace imposible saber si el negocio es rentable, porque parte del dinero "se fue" sin registro.',
     fix: 'Solución: todo lo que sale de la caja es un egreso, aunque sea para gastos personales. Crea una categoría "Retiro del dueño" y regístralo siempre.',
   },
   {
@@ -25,7 +25,7 @@ const errores = [
     n: '04',
     t: 'No hacer el corte de caja diario',
     d: 'Si no cuentas el efectivo físico y lo comparas con lo que dice tu sistema, los errores se acumulan. Un billete mal contado hoy son $500 de diferencia inexplicable en un mes. El corte diario es la herramienta más simple para detectar problemas antes de que crezcan.',
-    fix: 'Solución: al cerrar el día, cuenta el efectivo físico e ingrésalo en la app. Si hay diferencia, se detecta hoy — no en la reunión con el contador a fin de mes.',
+    fix: 'Solución: al cerrar el día, cuenta el efectivo físico e ingrésalo en la app. Si hay diferencia, se detecta hoy, no en la reunión con el contador a fin de mes.',
   },
   {
     n: '05',
@@ -64,7 +64,7 @@ export default function ErroresCaja() {
           <a href="https://www.inegi.org.mx/programas/enif/2021/" style={{ color: 'var(--black)' }}>
             el método de pago más usado en México
           </a>{' '}
-          y el más común en los pequeños negocios — y también el más propenso a errores de registro.
+          y el más común en los pequeños negocios, y también el más propenso a errores de registro.
           Estos son los cinco errores que más daño hacen al control de caja, todos evitables con un
           sistema simple.
         </p>
@@ -171,7 +171,7 @@ export default function ErroresCaja() {
             fontWeight: 500,
           }}
         >
-          La solución no es más disciplina — es un sistema que haga el registro tan rápido que sea
+          La solución no es más disciplina: es un sistema que haga el registro tan rápido que sea
           más fácil hacerlo que no hacerlo. Menos de 5 segundos por venta es el objetivo, con el{' '}
           <a href="/#portal" style={{ color: 'var(--black)' }}>
             corte de turno y el fiado
@@ -182,7 +182,7 @@ export default function ErroresCaja() {
         <RelatedGuides slug="errores-caja" />
         <ArticleCta
           title="Registra cada venta en 3 segundos con Xangarro"
-          text="Crea tu cuenta gratis hoy — sin tarjeta, sin compromisos."
+          text="Crea tu cuenta gratis hoy, sin tarjeta, sin compromisos."
         />
       </article>
     </main>
