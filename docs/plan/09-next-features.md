@@ -957,58 +957,178 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ### Merchant card payments (ADR-066)
 
+Replanned 2026-09-25 after the doc spikes (`docs/spikes/payments-*.md`). Three phases, one gate:
+
+- **Phase 0 — Prove.** Run both terminal proofs and a reconciliation proof. Output: go / no-go per
+  provider per mode, and **ADR-109**, which fixes the order of Phases 1 and 2 and the owner decisions
+  below.
+- **Phase 1 — Verify card sales, any reader.** Link the merchant's Mercado Pago or Clip _account_ (not a
+  terminal) and match its card payments to the ventas recorded as Tarjeta. This works with the cheap
+  Bluetooth readers (Point Air, Clip Plus) that Phase 2 cannot drive. Skipped if N-75 is a no-go.
+- **Phase 2 — Drive the terminal.** The caja sends the amount to a Point Smart or a PinPad-ready Clip
+  reader and the venta is written only after the provider approves it.
+
+What the owner gets, in order of value: a Tarjeta sale that no card payment backs is visible (the
+cashier who pockets cash and records Tarjeta); the card total in the cierre matches what is deposited;
+fees per sale; and, in Phase 2 only, the amount typed once.
+
+**UI rules for every task below** (owner-approved 2026-09-25):
+
+- Setup lives in **Negocio → Tipos de pago**, under the Tarjeta switch, not in Equipo. Equipo only
+  shows, read-only, which terminal a caja uses.
+- **No terminal or no linked account is not an error.** Nothing warns, nothing blocks a sale. The
+  invitation appears in three places only: the card in Tipos de pago, an optional «Primeros pasos»
+  step, and a one-time line under Tarjeta for the owner (never for an operator).
+- **A warning appears only when something the owner set up has broken** (terminal unreachable, account
+  token expired). The caja shows a badge on Tarjeta; tapping it offers **Cobrar sin terminal**
+  (primary), Reintentar, Cancelar. The owner gets an aviso in the portal with the fix.
+- A sale is never blocked by a payment integration (§2.2).
+
+**Owner decisions for ADR-109** (recommendation first):
+
+- **D-1** How a terminal is assigned: one per caja (recommended; matches Mercado Pago's POS model) ·
+  one per business · picked at each charge.
+- **D-2** A Clip payment link shown as a QR at the caja: drop it (recommended; QR/CoDi was retired in
+  ADR-108 for promising what the product did not do) · keep it as a Clip-only mode.
+- **D-3** Provider fees: shown in the conciliación, recorded by the owner with one monthly
+  «Registrar comisiones» (recommended; the server still never writes a venta or egreso on its own,
+  ADR-058 §2) · shown only.
+- **D-4** Which plans get it (ADR-106): conciliación and terminals on paid plans (recommended, as
+  ADR-066 said) · conciliación on every plan, terminals on paid plans.
+
+#### Phase 0 — Prove
+
 ### N-40 Provider validation + Clip partnership + legal opinion
 
-- [ ] Status · **Trigger:** N-30 exit criteria met. **The Clip conversation starts now** (owner action,
-      not gated by the trigger).
+- [~] Status · **Trigger:** N-30 exit criteria met. **The Clip conversation starts now** (owner action,
+  not gated by the trigger).
 - **Already verified from docs (2026-09-17, §6):** MP — Orders API for Point in MX (Point Smart 1/2,
-  terminal in PDV mode, store + POS setup), dynamic QR, OAuth with 180-day tokens + refresh,
+  terminal in PDV mode, store + POS setup), OAuth with 180-day tokens + refresh,
   `x-signature` HMAC webhooks. Clip — PinPad API (Total 3 / Ultra / PinPad / Stand 2, **not Plus**;
   Clip installs its PinPad app per device on request to sdk@payclip.com with the serial; production
   only, no sandbox; ≥ 10 Mbps Wi-Fi), payment-link API, Basic-auth API keys created by the merchant,
   **unsigned** `PINPAD_INTENT_STATUS_CHANGED` webhook.
-- **What remains:** hands-on sandbox proof for MP (Point order + QR + OAuth + webhook); ask Clip for a
-  partner/OAuth program, a test device, and bulk PinPad installs; **a written opinion from Mexican
-  counsel** that a platform which never holds funds and takes no fee is outside Ley Fintech / Banxico
-  aggregator rules. Output: `docs/spikes/payments-mercadopago.md`, `docs/spikes/payments-clip.md`.
-- **Acceptance:** go / no-go per provider per mode; legal opinion filed.
+- **Read in full 2026-09-25** (`docs/spikes/payments-*.md`, runnable `scripts/spikes/*.ts`): MP's QR in
+  Mexico is **cash-out only** (Managed Wallet clients), so there is no MP QR mode; Point has a virtual
+  terminal (`SBX0000001`) and a simulate-status endpoint, so its sandbox proof needs no reader.
+- **What remains:** run `scripts/spikes/mercadopago-point.ts` with test credentials (O-27: order
+  `processed` and `failed`, a webhook through the panel simulator, OAuth with `test_token`); run
+  `scripts/spikes/clip-pinpad.ts` on a reader with the PinPad app (O-28, a real $1 charge, refunded);
+  Clip's partner answers (O-19); **a written opinion from Mexican counsel** (O-18). Record every
+  output in the two spike files.
+- **Acceptance:** go / no-go per provider for terminals; legal opinion filed.
 
-### N-41 `PaymentProvider` port + Mercado Pago adapter
+### N-75 Reconciliation spike — can we see card payments from any reader?
 
-- [ ] Status · **Blocked by:** N-40, C-13 · **Blocks:** N-42, N-53
-- **What:** port in `packages/application` (`createIntent`, `getIntent`, `cancelIntent`,
-  `verifyWebhook`, `refund`, `listTerminals`), first adapter `mercadopago` (Orders API for Point and
-  QR), backend only. A shared adapter contract suite that N-53 must also pass. The port must not assume
-  signed webhooks (Clip's aren't): `verifyWebhook` may return "unverified — fetch to confirm".
+- [ ] Status · **Blocks:** ADR-109, N-41, N-76
+- **What:** read Mercado Pago's payment search, account-money / released-money reports and settlement
+  reports, and Clip's transactions-by-date and settlements endpoints (`developer.clip.mx/reference/
+transactions`, `…/settlements`). Answer, per provider: does a payment taken on a **non-integrated
+  reader** (Point Air / Blue, Clip Plus) appear, and with which fields — amount, `approved_at`, fee,
+  net, deposit date, card brand + last 4, reader serial, the merchant's own reference? How far back,
+  how fresh (minutes or next day), which auth (OAuth token for MP, the merchant's keys for Clip)?
+- **Output:** `docs/spikes/payments-reconciliation.md` + `scripts/spikes/*-payments.ts` that list the
+  last 7 days of card payments with test (MP) or real (Clip, O-28) credentials.
+- **Acceptance:** go / no-go per provider for Phase 1, with the matching key named (amount + time
+  window + reader, or better).
 
-### N-42 Payment intents backend + reconciliation
+#### Phase 1 — Verify card sales, any reader
 
-- [ ] Status · **Blocked by:** N-41, C-13
-- **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, mode `qr|terminal`,
-  terminal id) → provider intent; `GET …/intents/:id` (polled every 2 s); provider webhooks →
-  `payment_intents.status` — **a webhook is only a signal; status is always confirmed by fetching the
-  payment from the provider API** (mandatory for Clip, defence in depth for MP). Nightly reconciliation matches approved intents to synced ventas by
-  `payment_ref`; unmatched approved intents → portal aviso + inbox item.
-- **Invariant:** the server never writes the venta (ADR-058 §2, ADR-066).
+### N-41 `PaymentProvider` port — read side + Mercado Pago adapter
 
-### N-43 Merchant account linking in the portal
+- [ ] Status · **Blocked by:** N-75, ADR-109 · **Blocks:** N-43, N-53, N-76, N-80
+- **What:** port in `packages/application`: `listPayments(range)`, `getPayment(id)`,
+  `listSettlements(range)`, `verifyWebhook` (may return "unverified — fetch to confirm"). First
+  adapter `mercadopago`, backend only. A shared adapter contract suite that N-53 must also pass.
+  Amounts cross the port as integer centavos, parsed from the providers' decimal strings (§2.8).
+
+### N-43 Merchant account linking in Tipos de pago
 
 - [ ] Status · **Blocked by:** N-41
-- **What:** Configuración → Cobros. **Mercado Pago:** "Conectar" (OAuth), refresh before the 180-day
-  expiry, list the account's Point terminals, switch one to PDV mode per caja, name it ("Caja 1").
-  **Clip (N-53):** guided paste of an API key + secret created in dashboard.clip.mx (secret shown
-  once — explain it), register terminals by serial, and a "Solicitar activación con Clip" step that
-  files the PinPad-install request. Disconnect for both. Tokens encrypted at rest (Supabase Vault), never sent to
-  devices. Gated by `cobrosIntegrados`.
+- **What:** Negocio → Tipos de pago, under the Tarjeta switch: a card «¿Cobras con Mercado Pago o
+  Clip? Conecta tu cuenta» → side panel with the two providers as option cards. **Mercado Pago:**
+  "Conectar" (OAuth + PKCE), refresh before the 180-day expiry. **Clip:** guided paste of an API key +
+  secret created in dashboard.clip.mx (secret shown once — explain it). Connected state: provider,
+  account, last sync; «Desconectar». Tokens encrypted at rest (Supabase Vault), never sent to
+  devices. An expired or revoked token raises an owner aviso («Vuelve a conectar Mercado Pago»).
+  Gated by `cobrosIntegrados`.
+- **Acceptance:** Playwright: connect (mock provider), connected state shows real data, disconnect,
+  expired-token aviso.
 
-### N-44 App "Cobrar con tarjeta"
+### N-76 Conciliación de tarjeta
 
-- [ ] Status · **Blocked by:** N-42, N-43, N-45, N-24, N-53
-- **What:** at checkout: [Mostrar QR] or [Cobrar en terminal: Caja 1]. Approved → the device writes
-  the venta (método Tarjeta, `payment_ref`) and syncs as usual. Declined → retry / cambiar método.
-  Offline → disabled with "Sin conexión: cobra en tu terminal y registra como Tarjeta". On launch,
-  the app lists approved-but-unclaimed intents for this device and offers to register them.
-- **Acceptance:** Maestro flows for approve, decline, timeout, phone-killed-after-approval.
+- [ ] Status · **Blocked by:** N-41, N-43
+- **What:** a job pulls the linked account's card payments (and N-53's, for Clip) and matches them to
+  synced ventas with método Tarjeta, by the key N-75 names. Three states per day and caja:
+  **emparejada**; **venta sin cobro** (Tarjeta recorded, no payment behind it); **cobro sin venta**
+  (a payment nobody recorded). Shown in Revisión de caja next to the cierre, with fee and net per
+  sale and expected vs deposited per settlement. Unmatched items raise one owner aviso a day, never
+  a per-sale alert. Fees per D-3. The job reads ventas and writes only its own match table; it never
+  writes a venta (ADR-058 §2).
+- **Acceptance:** domain matcher TDD (exact, time-window, two same-amount sales, refund, partial);
+  integration test with ventas the seed does not have; Playwright shows real matched rows.
+
+### N-77 Checklist step and invitations
+
+- [ ] Status · **Blocked by:** N-43
+- **What:** «Primeros pasos», group «Cuando quieras»: «Conecta tu cuenta Mercado Pago o Clip» — shown
+  only when Tarjeta is among the business's methods and `cobrosIntegrados` is released; done when an
+  account is linked (detected from data, as every step). The one-time owner-only line under Tarjeta
+  at the web caja («Conecta tu terminal para no teclear el monto»), dismissed for good with «Ahora
+  no». No badge, no modal, no warning when nothing is connected.
+- **Acceptance:** checklist unit tests (Tarjeta off → hidden; flag off → hidden; linked → done);
+  Playwright: the owner sees the line once, an operator never does.
+
+#### Phase 2 — Drive the terminal
+
+### N-80 `PaymentProvider` write side + Mercado Pago Point
+
+- [ ] Status · **Blocked by:** N-41, N-40 (MP go), C-13 · **Blocks:** N-42, N-79
+- **What:** the port gains `createIntent`, `getIntent`, `cancelIntent`, `refund`, `listTerminals`,
+  `setTerminalMode`; the `mercadopago` adapter implements them on the Orders API for Point (stores,
+  POS per caja, PDV mode, `X-Idempotency-Key`). The contract suite runs against the Point sandbox's
+  virtual terminal and `POST /v1/orders/{id}/events`.
+
+### N-42 Payment intents backend
+
+- [ ] Status · **Blocked by:** N-80, C-13
+- **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, terminal id) →
+  provider intent; `GET …/intents/:id` (polled every 2 s); provider webhooks →
+  `payment_intents.status` — **a webhook is only a signal; status is always confirmed by fetching the
+  payment from the provider API** (mandatory for Clip, defence in depth for MP). Approved intents
+  that no venta claims feed N-76's «cobro sin venta».
+- **Invariant:** the server never writes the venta (ADR-058 §2, ADR-066).
+
+### N-79 Terminal per caja
+
+- [ ] Status · **Blocked by:** N-80, N-43, ADR-109 (D-1)
+- **What:** in the Tipos de pago panel of a linked account: list the account's terminals, switch one
+  to integrated mode (PDV), name it and assign it to a caja. **Clip:** register a reader by serial,
+  show whether it is PinPad-ready, and a «Solicitar activación con Clip» step that files the
+  PinPad-install request. The phone's drawer in Equipo shows «Terminal: Point Smart ···3324» linking
+  back here.
+- **Acceptance:** Playwright with the mock provider: assign, rename, unassign; Equipo shows it.
+
+### N-44 Cobrar en terminal (phone and web caja)
+
+- [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
+- **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
+  Cancelar). Approved → the device writes the venta (método Tarjeta, `payment_ref`) and syncs as
+  usual. Declined → Reintentar / Cambiar método. Offline → «Sin conexión: cobra en tu terminal y
+  registra como Tarjeta». On launch, the app lists approved-but-unclaimed intents for this device and
+  offers to register them. Without a terminal, Tarjeta records the sale by hand, as today.
+- **Acceptance:** Maestro flows for approve, decline, timeout, phone-killed-after-approval, no
+  terminal; Playwright for the web caja.
+
+### N-78 Terminal health at the caja
+
+- [ ] Status · **Blocked by:** N-79
+- **What:** the caja reads its terminal's health (MP terminal list + mode; Clip `/devices/status`)
+  and the account's token state. Broken → badge on Tarjeta; tapping it opens «Tu terminal Point
+  ···3324 no responde» with **Cobrar sin terminal** (primary, records a manual Tarjeta sale),
+  Reintentar, Cancelar. The owner gets one aviso («Tu terminal de Caja 1 no responde») linking to
+  Tipos de pago. Never shown when no terminal is configured.
+- **Acceptance:** Maestro + Playwright: healthy (no badge), unreachable, token expired, recovered.
 
 ### N-45 External penetration test
 
@@ -1081,11 +1201,13 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ### N-53 Clip adapter
 
-- [ ] Status · **Blocked by:** N-41, N-40 (Clip go) · **Blocks:** N-44 going public
-- **What:** `clip` adapter for the N-41 port: payment links (`createnewpaymentlink` v2) and PinPad
-  API terminal push; Basic auth from the merchant's keys (encrypted, Supabase Vault); webhooks treated
-  as unsigned signals → fetch to confirm. Passes the shared adapter contract suite. Production-only
-  testing with a real device and a low-amount charge + refund script.
+- [ ] Status · **Blocked by:** N-41, N-40 (Clip go), N-75 (Clip go) · **Blocks:** N-44 going public
+- **What:** `clip` adapter for the N-41 port. **Read side first (Phase 1):** transactions by date and
+  settlements, for N-76. **Write side (Phase 2):** PinPad API terminal push (`/f2f/pinpad/v1`:
+  payment, status, cancel, `/devices/status`); payment links only if D-2 keeps them. Basic auth from
+  the merchant's keys (encrypted, Supabase Vault); webhooks treated as unsigned signals → fetch to
+  confirm. Passes the shared adapter contract suite. Production-only testing with a real reader and
+  `scripts/spikes/clip-pinpad.ts` ($1 charge, refunded).
 
 ### N-55 Analítica geográfica por estado (ADR-092)
 

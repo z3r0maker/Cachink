@@ -320,9 +320,11 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ### C-13 Payment intents API
 
-- [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** N-40 go decision · **Blocks:** N-41, N-42
+- [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** N-40 go decision · **Blocks:** N-80, N-42
+- **Amended 2026-09-25:** Mercado Pago has no QR payment API in Mexico (`docs/spikes/payments-mercadopago.md`),
+  so `mode` is `'terminal'` only; `'link'` returns only if ADR-109's D-2 keeps Clip payment links.
 - **Steps:** `POST /api/v1/payments/intents` `{ clientIntentId (ULID), amountCentavos, mode:
-'qr'|'terminal', terminalId? }` → `{ intentId, status, qrPayload?, expiresAt }`;
+'terminal', terminalId }` → `{ intentId, status, expiresAt }`;
   `GET /api/v1/payments/intents/:id` → `{ status: pending|approved|declined|expired|cancelled,
 paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent on
   `clientIntentId`. Error codes added to `ERROR_CATALOG` (`PAYMENTS_NOT_CONNECTED`,

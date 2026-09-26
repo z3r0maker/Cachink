@@ -19,11 +19,13 @@ const BIZ = testId('Q');
 
 describe('periodBalanceInputs', () => {
   let db: Db;
+  // Hoisted because the merma assertion names this product, and `testId()`
+  // mints a fresh id on every call — asking for it twice would be two products.
+  const pan = testId('A');
 
   beforeAll(async () => {
     db = createDb(url as string);
     await withBusiness(db, BIZ, async (tx) => {
-      const pan = testId('A');
       const queso = testId('B');
       const muerto = testId('C');
       const product = (id: string, costo: number, deleted = false) =>
@@ -188,6 +190,12 @@ describe('periodBalanceInputs', () => {
     const { merma } = await withBusiness(db, BIZ, (tx) =>
       periodBalanceInputs(tx, '2026-05-01', '2026-05-31'),
     );
-    assert.deepEqual(merma, [{ cantidad: 2, costoUnitCentavos: 500n }]);
+    // ADR-107 widened the row: each merma also names its product and its day,
+    // so «Para no perder» can list what was lost. The domain still reads only
+    // `cantidad × costoUnitCentavos`. The fixture inserts each product with
+    // `nombre = id`, so the name here is `pan`'s id.
+    assert.deepEqual(merma, [
+      { cantidad: 2, costoUnitCentavos: 500n, fecha: '2026-05-10', producto: pan },
+    ]);
   });
 });
