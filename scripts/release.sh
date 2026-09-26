@@ -134,13 +134,22 @@ deploy_app() {
     grep -oE 'https://[a-z0-9.-]+\.vercel\.app' | tail -1)"
   [[ -n "$url" ]] || die "$name: the deploy produced no URL — read the output above."
 
-  # "Ready" is the only outcome that shipped. A build that errored still
-  # answers with a URL, which is why this asks rather than assumes.
-  local status
-  status="$(cd "$ROOT" && VERCEL_ORG_ID="$org" VERCEL_PROJECT_ID="$project" \
-    npx --yes vercel@latest inspect "$url" 2>&1 | awk '/status/ {print $NF}' | tail -1)"
+  # "Ready" is the only outcome that shipped. A build that errored — or one
+  # Vercel refused before building — still answers with a URL, which is why
+  # this asks rather than assumes.
+  local inspected status reason
+  inspected="$(cd "$ROOT" && VERCEL_ORG_ID="$org" VERCEL_PROJECT_ID="$project" \
+    npx --yes vercel@latest inspect "$url" 2>&1)"
+  status="$(awk '/^ +status/ {print $NF}' <<<"$inspected" | tail -1)"
   printf '  %s  %s  %s\n' "$name" "$status" "$url"
-  [[ "$status" == *Ready* ]] || die "$name did not reach Ready (status: $status)."
+  if [[ "$status" != *Ready* ]]; then
+    # Vercel's own reason, which is the whole diagnosis when the status is
+    # `Blocked`: it refuses a CLI deploy whose HEAD commit author is not
+    # allowed to deploy the project, and the status alone does not say so.
+    reason="$(sed -n 's/^ *reason[[:space:]]*//p' <<<"$inspected" | head -1)"
+    die "$name did not reach Ready (status: $status).
+    ${reason:-No reason given — open the deployment: $url}"
+  fi
 }
 
 for app in $APPS; do
