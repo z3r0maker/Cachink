@@ -19,6 +19,7 @@ import type {
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
+  SyncMode,
   WorkerRequest,
   WorkerResponse,
 } from './protocol';
@@ -82,8 +83,16 @@ export class RegisterRuntime {
     return this.#call<{ folio: number }>({ method: 'registrar', input, ctx });
   }
 
-  sync(token: string | null): Promise<SyncRunResult> {
-    return this.#call<SyncRunResult>({ method: 'sync', token });
+  sync(
+    token: string | null,
+    opts: { readonly mode: SyncMode; readonly manual?: boolean },
+  ): Promise<SyncRunResult> {
+    return this.#call<SyncRunResult>({
+      method: 'sync',
+      token,
+      mode: opts.mode,
+      manual: opts.manual ?? false,
+    });
   }
 
   counts(): Promise<RuntimeCounts> {
