@@ -8,7 +8,7 @@ export function buildLlmsTxt(siteUrl) {
 
 > Xangarro es la plataforma mexicana para llevar la caja de tu negocio.
 
-Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos — desde el navegador o desde la app del equipo —, ver el estado del negocio en tiempo real y compartir estados financieros con un contador. Don Cuentas, el asesor con IA, revisa las ventas, gastos e inventario todos los días y entrega la revisión de fin de mes.
+Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos — desde el navegador o desde la app del equipo —, ver el estado del negocio en tiempo real y compartir estados financieros con un contador. Don Cuentas, el asesor, revisa las ventas, gastos e inventario todos los días a partir de los registros del negocio; la revisión de fin de mes con IA llega pronto.
 
 ## Para quién es
 

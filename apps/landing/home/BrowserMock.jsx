@@ -1,12 +1,14 @@
-import { Coin, Icon, PATHS } from './icons.jsx';
+import { Coin, DonCuentas, Icon, PATHS } from './icons.jsx';
 
+/** The portal's menu as it is (ADR-107): Hoy and Don Cuentas first, then money, shop, people. */
 const SIDE = [
-  ['home', 'Inicio', true],
+  ['home', 'Hoy', true],
+  ['don', 'Don Cuentas'],
   ['ledger', 'Ventas y gastos'],
-  ['box', 'Productos'],
   ['doc', 'Estados financieros'],
-  ['clock', 'Cortes de turno'],
-  ['team', 'Empleados'],
+  ['box', 'Productos'],
+  ['cuadra', 'Revisión de caja'],
+  ['team', 'Equipo y nómina'],
 ];
 const BARS = [44, 58, 50, 66, 62, 84, 72];
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -20,21 +22,10 @@ function Sidebar() {
       </div>
       {SIDE.map(([icon, label, on]) => (
         <div key={label} className={on ? 'bw-nav on' : 'bw-nav'}>
-          <Icon name={icon} size={15} />
+          {icon === 'don' ? <DonCuentas size={17} /> : <Icon name={icon} size={15} />}
           {label}
         </div>
       ))}
-      <div className="bw-nav">
-        <svg
-          className="ico"
-          style={{ width: 15, height: 15 }}
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path d="M5.5 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M12.9 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M11.1 10h1.8M6 16.5c2-2 4-2 6-.3 2-1.7 4-1.7 6 .3" />
-        </svg>
-        Don Cuentas
-      </div>
     </div>
   );
 }

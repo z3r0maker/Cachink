@@ -16,8 +16,8 @@ const POINTS = [
   },
   {
     k: 'ia',
-    b: 'Cada fin de mes, tu revisión con IA.',
-    t: 'Qué funcionó, qué no y qué precios ajustar, con tus números de verdad. Pronto: tu catálogo desde una foto.',
+    b: 'Pronto: cada fin de mes, tu revisión con IA.',
+    t: 'Qué funcionó, qué no y qué precios ajustar, con tus números de verdad. Y después, tu catálogo desde una foto.',
   },
 ];
 
@@ -46,7 +46,7 @@ export function DonCuentasSection() {
         <div className="dc-copy">
           <div className="dc-id">
             <DonCuentas size={76} className="dc-big" />
-            <span className="xeyebrow">Don Cuentas · tu asesor con IA</span>
+            <span className="xeyebrow">Don Cuentas · tu contador de cabecera</span>
           </div>
           <h2 className="xh2">Te echa aguas antes de que duela.</h2>
           <p className="xlead">

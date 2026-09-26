@@ -22,8 +22,9 @@ export function Hero() {
           </h1>
           <p className="xlead hero-sub">
             Xangarro es el sistema de caja y control financiero para negocios pequeños en México:
-            punto de venta y estados financieros NIF desde el navegador. La caja y el teléfono son
-            las herramientas de tu equipo: ellos cobran y tú ves todo aquí, al momento.
+            punto de venta y estados financieros NIF desde el navegador. La caja —en la computadora,
+            la tablet o el teléfono— es la herramienta de tu equipo: ellos cobran y tú ves todo
+            aquí, al momento.
           </p>
           <div className="hero-ctas">
             <a className="xbtn xbtn-dark" href={signupUrl('xangarrito')}>

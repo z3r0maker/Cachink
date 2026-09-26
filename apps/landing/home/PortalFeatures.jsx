@@ -29,8 +29,8 @@ const FEATS = [
   {
     icon: 'team',
     tile: 'var(--purple-soft, #F0E5FF)',
-    t: 'Tu equipo, con NIP',
-    d: 'Da de alta a tus empleados, vincula cajas con un código y decide quién ve qué. Nadie ve costos que no debe.',
+    t: 'Equipo y nómina',
+    d: 'Quién cobra, en qué caja y cuánto le pagas, en una sola lista. Cada quien entra con su NIP y conectas una caja con un código.',
   },
   {
     icon: 'fiado',

@@ -40,7 +40,7 @@ function Cierre() {
           >
             <DonCuentasFace size={15} />
           </span>
-          Don Cuentas · con IA
+          Pronto · con IA
         </span>
       </div>
       <p>
@@ -53,7 +53,7 @@ function Cierre() {
   );
 }
 
-/** «Para ti · hoy»: three computed tips, then the AI month-end review. */
+/** «Para ti · hoy»: three computed tips, then the AI month-end review — marked «Pronto» until it ships (ADR-059). */
 export function DonCuentasChat() {
   return (
     <div className="xcard dc-chat">
