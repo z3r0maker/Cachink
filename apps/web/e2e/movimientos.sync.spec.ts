@@ -137,7 +137,7 @@ test('archiving asks again while units remain, and the phones drop the product',
   const cursor = (await pull(request, b, b.cursor)).serverSeq;
   await row().getByRole('button', { name: 'Archivar' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Archivar', exact: true }).click();
-  await expect(page.getByRole('dialog')).toContainText('Aún hay 3 unidades');
+  await expect(page.getByRole('dialog')).toContainText('Todavía tiene 3 en existencia');
   await page.getByRole('button', { name: 'Archivar de todos modos' }).click();
   await expect(row()).toHaveCount(0);
 

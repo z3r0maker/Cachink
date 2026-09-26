@@ -54,11 +54,11 @@ test('the owner brands the business: logo, colour, fields, sidebar', async ({ pa
 
   // The sidebar brand block now renders the logo, not the wordmark.
   await page.goto('/');
-  await expect(page.locator('aside img')).toBeVisible();
+  await expect(page.locator('aside img[src*="/api/logos/"]')).toBeVisible();
   await expect(page.getByText('XANGARRO!', { exact: true })).toHaveCount(0);
 
   // The logo route serves the bytes publicly, with the content type.
-  const src = await page.locator('aside img').getAttribute('src');
+  const src = await page.locator('aside img[src*="/api/logos/"]').getAttribute('src');
   expect(src).not.toBeNull();
   const res = await page.request.get((src as string).split('?')[0] as string);
   expect(res.status()).toBe(200);
