@@ -99,7 +99,8 @@ nav.toc a{color:var(--ink)}
 <a href="#prior">6. Status of the 2026-09-17 findings</a><br>
 <a href="#roadmap">7. What to do, in order</a><br>
 <a href="#azure">8. Load curve and the Azure note (O-29)</a><br>
-<a href="#method">9. Method and limits</a>
+<a href="#method">9. Method and limits</a><br>
+<a href="#after">10. After <code>perf/db-scale</code>: measured again</a>
 </nav>
 
 <h2 id="load">1. Load model</h2>
@@ -570,6 +571,46 @@ nav.toc a{color:var(--ink)}
 <li>Azure pricing and SKU behaviour, which is written as items to check.</li>
 </ul>
 <p>The benchmark scripts (<code>push.mjs</code>, generators, harness) are in the session scratchpad next to this file.</p>
+
+<h2 id="after">10. After <code>perf/db-scale</code>: measured again</h2>
+<p>Same generator, same 1,003 tenants plus 3 whales, same 4 vCPU / 4 GB container, now on the merged branch: migrations through 0046, production role settings (5&nbsp;s statement timeout, JIT off). These times are wall-clock for the <strong>real</strong> code: data-pg's exported query functions under the tenant context, and <code>ApplyPushUseCase</code> + <code>PgPushStore</code>. They include local round trips but no simulated network delay.</p>
+<div class="tbl"><table>
+<tr><th>What</th><th class="n">Before (§2–3)</th><th class="n">After, whale</th><th class="n">After, heavy / mid</th></tr>
+<tr><td><code>serieDiaria</code>, 30 days</td><td class="n bad">8,094 ms</td><td class="n good">43 ms</td><td class="n">5.6 / 3.0 ms</td></tr>
+<tr><td>Ventas list</td><td class="n bad">3,628 ms, 576K rows</td><td class="n good">2.3 ms, one page (page 400: 3.3 ms)</td><td class="n">1.9 / 1.8 ms</td></tr>
+<tr><td>Ventas KPIs for the month (<code>resumenMovimientos</code>)</td><td class="n">computed in JS from the full list</td><td class="n">94 ms</td><td class="n">17 / 5.4 ms</td></tr>
+<tr><td><code>recentActivity</code></td><td class="n bad">953 ms</td><td class="n good">1.3 ms</td><td class="n">1.6 / 1.6 ms</td></tr>
+<tr><td><code>historialSync</code></td><td class="n bad">897 ms</td><td class="n good">120 ms (30 days)</td><td class="n">38 / 12 ms</td></tr>
+<tr><td><code>lowStock</code> / <code>listProductos</code></td><td class="n">374 / 350 ms</td><td class="n">66 / 87 ms</td><td class="n">3.4 / 4.6 · 1.8 / 2.1 ms</td></tr>
+<tr><td>Usage recount per push (and now at most once a minute per tenant)</td><td class="n bad">600–1,190 ms at any size</td><td class="n good">40 ms</td><td class="n">12 / 5.8 ms</td></tr>
+<tr><td>One 500-row push</td><td class="n bad">8.0 s (1 ms round trip)</td><td class="n good">52–67 ms, about 14 statements</td><td class="n">—</td></tr>
+<tr><td>3 devices of one shop, 500 rows each, at once</td><td class="n bad">p50 13.5 s, 67 timeouts/min</td><td class="n good">114 ms wall, 0 errors</td><td class="n">—</td></tr>
+<tr><td>15 clients, 500-row pushes, random tenants</td><td class="n bad">1,117 rows/s</td><td class="n good">22,362 rows/s</td><td class="n">—</td></tr>
+</table></div>
+<p><strong>The cost:</strong> the new indexes grow the benchmark database from 8.2 GB to <strong>10.1 GB (+23%)</strong>. Most of that is the three <code>(business_id, created_at)</code> indexes and the covering stock index. That is the trade for per-push recounts that no longer scan every tenant. Retention of <code>sync_receipts</code> (DB2-SYNC-03, still open) would give back more than that.</p>
+<p><strong>Gates run on the merged branch:</strong></p>
+<ul>
+<li>typecheck, unit tests, lint, format and design-lint: green</li>
+<li><code>test:scripts</code>: 133/133</li>
+<li>data-pg <code>test:db</code>: 364/364</li>
+<li>web <code>test:db</code>: 3/3, and the portal's unit tests with a database: 561/561</li>
+<li>back office: 370/371. The one failure is an existing test that fails whenever <code>DATABASE_URL</code> is set.</li>
+<li>device conformance: all green</li>
+<li>full portal Playwright suite: 536 passed, 25 skipped, 0 failed</li>
+</ul>
+<p><strong>Still open:</strong></p>
+<ul>
+<li>DB2-OPS-01 (PITR)</li>
+<li>DB2-QRY-05 (stock rollup and snapshot bootstrap)</li>
+<li>DB2-SYNC-03 (retention)</li>
+<li>DB2-CHK-01 (constraints)</li>
+<li>DB2-KEY-01</li>
+<li>DB2-PART-01</li>
+<li>the drizzle journal half of DB2-MIG-01</li>
+<li>incremental usage counters</li>
+<li>the browser caja writing its whole local database after every sale (<code>operador/runtime/db.worker.ts</code>, needs an ADR-071 decision)</li>
+<li>a device stuck behind a batch the server rejects with 400. Splitting that batch is a follow-up.</li>
+</ul>
 
 </main>
 </body>
