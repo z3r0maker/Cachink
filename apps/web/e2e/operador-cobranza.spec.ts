@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderFiado } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -10,11 +11,7 @@ const PRODUCTOS = [{ nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPCOB
 async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: cliente }).first().click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, cliente);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -28,7 +25,7 @@ test('a fiado sale opens the account, and the abono settles it oldest first', as
   await page.goto('/operador/caja');
   await fiar(page, /Orden del día/, /Doña Mari de la tienda/);
 
-  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
   await expect(page.getByText('1 ventas abiertas').first()).toBeVisible();
   await expect(page.getByText('$80.00').first()).toBeVisible();
 

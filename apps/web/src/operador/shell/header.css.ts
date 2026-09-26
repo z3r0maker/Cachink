@@ -27,6 +27,7 @@ export const inner = style({
 });
 
 export const bizPill = style({
+  '@media': { 'screen and (min-width: 760px)': { display: 'none' } },
   display: 'flex',
   alignItems: 'center',
   gap: 11,
@@ -172,3 +173,10 @@ export const action = style([
     selectors: { '&:hover': { background: colors.yellowDeep } },
   },
 ]);
+
+export const fecha = style({
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+  color: colors.gray600,
+  '@media': { [PHONE]: { display: 'none' } },
+});

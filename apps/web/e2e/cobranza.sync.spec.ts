@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderFiado } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -44,15 +45,11 @@ test('a fiado sale opens an account, and an abono settles it oldest first', asyn
   const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
   await taco.click();
   await taco.click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: CLIENTE }).click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, CLIENTE);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   // Cobranza reads the register's database: the cards and the figures.
-  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
   await expect(page.getByRole('heading', { name: 'Cobranza' })).toBeVisible();
   await expect(page.getByText('$50.00').first()).toBeVisible();
   await expect(page.getByText('1 ventas abiertas · la más antigua V-0001').first()).toBeVisible();

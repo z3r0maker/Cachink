@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -10,11 +11,7 @@ const PRODUCTOS = [{ nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPCIE
 async function vender(page: Page, producto: RegExp, efectivo: string): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill(efectivo);
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, efectivo);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -34,7 +31,7 @@ test('the count starts at zero, a whole shortfall', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
   await expect(page.getByLabel('Cantidad de $1000')).toHaveValue('0');
   await expect(page.getByText('Falta', { exact: true })).toBeVisible();
   await expect(page.getByText('$580.00').first()).toBeVisible();
@@ -44,7 +41,7 @@ test('a surplus needs a reason and a note before closing', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
   await contar(page, { 1000: '2', 500: '1', 100: '1', 10: '1' });
   await expect(page.getByText('Sobra', { exact: true })).toBeVisible();
   await expect(page.getByText('$2,030.00')).toBeVisible();
@@ -61,7 +58,7 @@ test('a balanced count closes without a note', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
   await contar(page, { 500: '1', 50: '1', 20: '1', 10: '1' });
   await expect(page.getByText('Cuadra', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar turno' }).click();

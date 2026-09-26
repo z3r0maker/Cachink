@@ -55,11 +55,11 @@ test.describe('Operador · Acceso (O-12)', () => {
     await expect(page.getByRole('heading', { name: '¿Con cuánto abres la caja?' })).toBeVisible();
     await page.getByTestId('fondo-input').fill('500');
     await page.getByTestId('fondo-abrir').click();
-    await expect(page.getByRole('heading', { name: 'Caja', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cobrar', exact: true })).toBeVisible();
 
     // The link survives a reload, and an open turno walks straight in.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Caja', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cobrar', exact: true })).toBeVisible();
   });
 
   test('a wrong code does not link, and the register stays gated', async ({ page }) => {

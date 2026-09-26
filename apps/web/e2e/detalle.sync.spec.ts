@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -25,11 +26,7 @@ test("the turno's folio opens the real ticket, shares it, and cancels it", async
   const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
   await taco.click();
   await taco.click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill('60');
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, '60');
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   // From the list, into the ticket.

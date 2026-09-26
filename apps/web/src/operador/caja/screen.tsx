@@ -8,8 +8,8 @@ import * as hh from '../shell/header.css';
 import { HeaderAction } from '../shell/shell';
 import { OpMain } from '../ui/parts';
 import * as c from './catalogo.css';
+import { useAtajosCaja } from './atajos';
 import { Catalogo } from './catalogo';
-import { Cobro } from './cobro';
 import { NuevoProducto } from './nuevo';
 import type { Comprobante } from './receipt';
 import { Share } from './share';
@@ -19,12 +19,13 @@ import { useCaja } from './use-caja';
 import { VentaHechaCard } from './venta-hecha';
 
 /**
- * Operador · Caja — the screen that defines the rest (README §4): catalogue
- * first, the ticket always in reach, checkout in a modal, and the change due
- * left in the corner after the sale.
+ * Operador · Cobrar, the screen that defines the rest (README §4, ADR-107):
+ * catalogue first, the ticket always in reach, checkout inside the ticket, and
+ * the change due left in the corner after the sale.
  */
 export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScreenProps) {
   const caja = useCaja(data, paso);
+  useAtajosCaja(caja);
   const [nuevoOpen, setNuevoOpen] = useState(false);
   const [compartir, setCompartir] = useState<Comprobante | null>(null);
   const comprobante = () => {
@@ -39,12 +40,11 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
   return (
     <OpMain top={22} caja>
       <VentasDelTurno n={data.ventasTurno} />
-      <div className={c.layout}>
+      <div className={c.layout} data-cobrando={enPaso(caja.paso) ? '' : undefined}>
         <Catalogo caja={caja} state={state} onNuevo={() => setNuevoOpen(true)} />
-        <TicketPanel caja={caja} />
+        <TicketPanel caja={caja} data={data} permitirNuevo={nuevoCliente} />
       </div>
       <TicketBar caja={caja} />
-      <Cobro caja={caja} data={data} permitirNuevo={nuevoCliente} />
       <NuevoProducto open={nuevoOpen} onClose={() => setNuevoOpen(false)} onAdd={agregar} />
       <VentaHechaCard caja={caja} onComprobante={comprobante} />
       <Share
@@ -55,6 +55,10 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
     </OpMain>
   );
 }
+
+/** While cash or fiado is being taken, the catalogue steps back. */
+const enPaso = (paso: CajaScreenProps['paso']): boolean =>
+  paso === 'efectivo' || paso === 'credito';
 
 /** Caja's header shows the turno's sale count where other screens show the bell. */
 function VentasDelTurno({ n }: { readonly n: number }) {

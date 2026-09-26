@@ -50,5 +50,5 @@ export async function pasarAcceso(
   await page.getByTestId('nip-tecla-→').click();
   await page.getByTestId('fondo-input').fill('500');
   await page.getByTestId('fondo-abrir').click();
-  await page.getByRole('heading', { name: 'Caja', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Cobrar', exact: true }).waitFor();
 }

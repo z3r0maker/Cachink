@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { Icon } from '../../shell/icon';
@@ -25,7 +26,10 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
             {mode.back.label}
           </Link>
         ) : (
-          <BizPill data={data} />
+          <>
+            <BizPill data={data} />
+            <Fecha />
+          </>
         )}
         <div className={h.right}>
           {mode.status === 'none' ? null : <SyncPill data={data} asLink={mode.status === 'full'} />}
@@ -39,6 +43,21 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
   );
 }
 
+/**
+ * On a wide screen the caja lives in the sidebar, so the header says the day.
+ * Read after mount: the server and the counter can sit in different zones.
+ */
+function Fecha() {
+  const [hoy, setHoy] = useState('');
+  useEffect(() => {
+    const f = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    const t = f.format(new Date());
+    setHoy(t.charAt(0).toUpperCase() + t.slice(1));
+  }, []);
+  return <span className={h.fecha}>{hoy}</span>;
+}
+
+/** On a phone there is no sidebar: the header carries the business and the caja. */
 function BizPill({ data }: { readonly data: OperadorShellData }) {
   return (
     <div className={h.bizPill}>

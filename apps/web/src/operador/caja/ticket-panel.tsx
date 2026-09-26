@@ -8,20 +8,46 @@ import * as u from '../ui/ui.css';
 import * as f from './ticket-foot.css';
 import * as t from './ticket.css';
 import { importe } from './ticket';
-import type { LineaTicket } from './types';
+import { Metodos, PasoCobro } from './cobro';
+import type { CajaData, LineaTicket } from './types';
 import type { Caja } from './use-caja';
 
 const MINUS = 'M5 12h14';
 const PLUS = 'M12 5v14M5 12h14';
 const CLOSE = 'M6 6l12 12M18 6 6 18';
 
-/** The ticket: fixed column when wide, bottom sheet when narrow. */
-export function TicketPanel({ caja }: { readonly caja: Caja }) {
+export interface TicketPanelProps {
+  readonly caja: Caja;
+  readonly data: CajaData;
+  readonly permitirNuevo?: boolean;
+}
+
+/** The ticket: fixed column when wide, bottom sheet when narrow. Cobrar
+ *  happens here too: the method under the total, then cash or fiado. */
+export function TicketPanel({ caja, data, permitirNuevo }: TicketPanelProps) {
+  const enPaso = caja.paso === 'efectivo' || caja.paso === 'credito';
   return (
     <aside className={t.panel} data-open={caja.sheetOpen ? '' : undefined} aria-label="Ticket">
+      {enPaso ? (
+        <PasoCobro caja={caja} data={data} permitirNuevo={permitirNuevo} />
+      ) : (
+        <TicketLista caja={caja} folio={data.siguienteFolio} />
+      )}
+    </aside>
+  );
+}
+
+function TicketLista({ caja, folio }: { readonly caja: Caja; readonly folio: string }) {
+  return (
+    <>
       <div className={t.head}>
-        <span className={u.eyebrow}>Ticket</span>
+        <span className={u.eyebrow}>Ticket · {folio}</span>
         <span className={t.count}>{caja.count}</span>
+        {caja.count > 0 ? (
+          <button type="button" className={f.vaciarChico} onClick={() => caja.setLines([])}>
+            Vaciar
+          </button>
+        ) : null}
         <button
           type="button"
           className={t.closeSheet}
@@ -38,11 +64,11 @@ export function TicketPanel({ caja }: { readonly caja: Caja }) {
         ))}
       </div>
       <Pie caja={caja} />
-    </aside>
+    </>
   );
 }
 
-/** Steppers are 36 px — density the README accepts on desktop only. */
+/** 44 px steppers: the counter is touched, not clicked (ADR-107). */
 function Linea({ l, caja }: { readonly l: LineaTicket; readonly caja: Caja }) {
   return (
     <div className={t.line}>
@@ -83,19 +109,16 @@ function Pie({ caja }: { readonly caja: Caja }) {
         <span className={u.eyebrow}>Total</span>
         <span className={t.totalValue}>{formatMoney(caja.total)}</span>
       </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button type="button" className={f.vaciar} onClick={() => caja.setLines([])}>
-          Vaciar
-        </button>
-        <button
-          type="button"
-          className={f.cobrar}
-          disabled={caja.count === 0}
-          onClick={caja.cobrar}
-        >
-          Cobrar
-        </button>
-      </div>
+      <Metodos caja={caja} />
+      <button type="button" className={f.cobrar} disabled={caja.count === 0} onClick={caja.cobrar}>
+        Cobrar
+        <span aria-hidden="true" className={f.cobrarDetalle}>
+          {formatMoney(caja.total)} · {caja.metodo.toLowerCase()}
+        </span>
+      </button>
+      <p className={f.atajos}>
+        Teclado: escribe para buscar · Enter agrega · + y − cantidad · F2 cobra
+      </p>
     </div>
   );
 }

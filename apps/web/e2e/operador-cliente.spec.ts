@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderFiado } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -8,11 +9,7 @@ test.beforeEach(() => test.setTimeout(120_000));
 async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: cliente }).first().click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, cliente);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -26,7 +23,7 @@ test('from Cobranza to the account: balance, open ticket, history', async ({ pag
   await page.goto('/operador/caja');
   await fiar(page, /Quesadilla/, /Doña Mari de la tienda/);
 
-  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
   await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
   await expect(page.locator('main').getByText('$80.00').first()).toBeVisible();
   await expect(page.locator('main').getByText('Al día')).toBeVisible();
@@ -40,7 +37,7 @@ test('an abono settles the ticket and lowers the balance', async ({ page }) => {
   await page.goto('/operador/caja');
   await fiar(page, /Orden del cliente/, /Doña Mari de la tienda/);
 
-  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
   await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
   await page.getByRole('button', { name: 'Recibir abono' }).click();
   const modal = page.getByRole('dialog', { name: 'Abono de Doña Mari de la tienda' });

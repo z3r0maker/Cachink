@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -21,11 +22,7 @@ async function venderTaco(page: Page, efectivo: string): Promise<void> {
     .getByRole('button', { name: /Taco al pastor/ })
     .first()
     .click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill(efectivo);
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, efectivo);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 

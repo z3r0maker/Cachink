@@ -14,18 +14,21 @@ const button = {
   color: colors.black,
 } as const;
 
-export const vaciar = style([
+/** «Vaciar» sits quietly in the ticket's head, away from Cobrar. */
+export const vaciarChico = style([
   pressable,
   {
-    ...button,
-    flex: 'none',
-    padding: '0 16px',
-    border: `2px solid ${colors.black}`,
-    borderRadius: radii[2],
+    marginLeft: 'auto',
+    height: 40,
+    padding: '0 14px',
+    border: `2px solid ${colors.gray200}`,
+    borderRadius: radii[1],
     background: colors.white,
-    boxShadow: shadows.small,
-    fontSize: portalFontSizes.xs,
-    letterSpacing: typography.letterSpacing.wider,
+    fontFamily: 'inherit',
+    fontSize: portalFontSizes.sm,
+    fontWeight: typography.weights.bold,
+    color: colors.gray600,
+    cursor: 'pointer',
   },
 ]);
 
@@ -33,13 +36,20 @@ export const cobrar = style([
   pressable,
   {
     ...button,
-    flex: 1,
+    width: '100%',
+    height: 60,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    fontWeight: typography.weights.extraBold,
     border: `2.5px solid ${colors.black}`,
-    borderRadius: radii[3],
+    borderRadius: radii[4],
     background: colors.yellow,
     boxShadow: shadows.card,
-    fontSize: portalFontSizes.md,
-    letterSpacing: typography.letterSpacing.widest,
+    fontSize: portalFontSizes.xl,
+    textTransform: 'none',
+    letterSpacing: '-0.01em',
     selectors: {
       '&:hover:not(:disabled)': { background: colors.yellowDeep },
       '&:disabled': { background: colors.gray100 },
@@ -136,4 +146,21 @@ export const barTotal = style({
   fontWeight: typography.weights.extraBold,
   fontVariantNumeric: 'tabular-nums',
   letterSpacing: typography.letterSpacing.tight,
+});
+
+export const cobrarDetalle = style({
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.gray600,
+});
+
+/** The keyboard shortcuts, said once and quietly; phones never see them. */
+export const atajos = style({
+  margin: 0,
+  textAlign: 'center',
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
+  '@media': { [NARROW]: { display: 'none' } },
 });

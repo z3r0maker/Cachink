@@ -1,5 +1,6 @@
 import { expect, test, type Page } from './test';
 
+import { cobrarCon } from './cobrar';
 import { puertaOperador } from './puerta-operador';
 
 test.beforeEach(() => test.setTimeout(120_000));
@@ -28,9 +29,7 @@ test('a cash sale shows the change and starts a new ticket', async ({ page }) =>
   const panel = await ticket(page);
   await expect(panel.getByText('$50.00').first()).toBeVisible();
 
-  await panel.getByRole('button', { name: 'Cobrar', exact: true }).click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo' }).click();
+  const cobro = await cobrarCon(page, 'Efectivo');
   await cobro.getByLabel('Con cuánto paga').fill('60');
   await cobro.getByText('$10.00').first().isVisible();
   await cobro.getByRole('button', { name: 'Registrar venta' }).click();
@@ -47,10 +46,9 @@ test('short cash keeps «Registrar venta» disabled and says what is missing', a
     .getByRole('button', { name: /Quesadilla/ })
     .first()
     .click();
-  await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Efectivo' }).click();
-  await page.getByLabel('Con cuánto paga').fill('20');
-  await expect(page.getByRole('dialog').getByText('Falta')).toBeVisible();
+  const cobro = await cobrarCon(page, 'Efectivo');
+  await cobro.getByLabel('Con cuánto paga').fill('20');
+  await expect(cobro.getByText('Falta')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Registrar venta' })).toBeDisabled();
 });
 
@@ -64,9 +62,7 @@ test('a credit sale needs a client, then adds to their balance', async ({ page }
     .getByRole('button', { name: /Suadero del día/ })
     .first()
     .click();
-  await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado' }).click();
+  const cobro = await cobrarCon(page, 'Fiado');
   await expect(cobro.getByRole('button', { name: 'Elige un cliente' })).toBeDisabled();
   await cobro
     .getByRole('button', { name: /Raúl Contreras/ })
@@ -95,8 +91,7 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
     .getByRole('button', { name: /Suadero del día/ })
     .first()
     .click();
-  await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Tarjeta' }).click();
+  await cobrarCon(page, 'Tarjeta');
   await page.getByRole('status').getByRole('button', { name: 'Deshacer' }).click();
   await expect(
     page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),

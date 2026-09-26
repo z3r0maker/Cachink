@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderEfectivo as pagarEfectivo, venderFiado } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -8,11 +9,7 @@ test.beforeEach(() => test.setTimeout(120_000));
 async function venderEfectivo(page: Page, producto: RegExp, efectivo: string): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill(efectivo);
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await pagarEfectivo(page, efectivo);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -20,11 +17,7 @@ async function venderEfectivo(page: Page, producto: RegExp, efectivo: string): P
 async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: cliente }).first().click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, cliente);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
