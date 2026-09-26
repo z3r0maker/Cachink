@@ -160,7 +160,7 @@ describe('activation code email (P-06)', () => {
       negocio: 'Taquería Don Pedro',
       expiresInHours: 47,
     });
-    assert.equal(e.subject, 'Tu código para vincular un teléfono a Taquería Don Pedro');
+    assert.equal(e.subject, 'Tu código para conectar una caja a Taquería Don Pedro');
     assert.match(e.text, /K7M3DQ9P/);
     assert.match(e.text, /vence en 47 horas/);
     assert.match(e.text, /una sola vez/);

@@ -37,7 +37,7 @@ export function UsageThresholdEmail(p: UsageThresholdEmailProps) {
       <P>¡Buenas noticias! Tu negocio va en {count}.</P>
       <P>
         {p.threshold === 100
-          ? 'Nada se detiene: todo lo que registren tus teléfonos se sigue guardando y sincronizando.'
+          ? 'Nada se detiene: todo lo que registren tus cajas se sigue guardando y sincronizando.'
           : 'Todo sigue funcionando igual. Te avisamos con tiempo para que decidas con calma.'}
       </P>
       <P>Si quieres más espacio, puedes cambiar de plan cuando quieras:</P>

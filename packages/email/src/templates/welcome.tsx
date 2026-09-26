@@ -24,7 +24,7 @@ export function WelcomeEmail(p: WelcomeEmailProps) {
       <P>{hola(p.name)}</P>
       <P>{p.nombreNegocio} ya está en Xangarro. Para vender hoy mismo, en este orden:</P>
       <P>1. Agrega tus productos, o impórtalos desde Excel.</P>
-      <P>2. Vincula tu teléfono con el código de activación que te da el portal.</P>
+      <P>2. Conecta tu caja con el código de activación que te da el portal.</P>
       <P>3. Registra tu primera venta. Desde ahí, tus números se arman solos.</P>
       <Cta href={p.comoEmpiezoUrl}>Ver «¿Cómo empiezo?»</Cta>
       <Small>Si algo no queda claro, escríbenos desde Ayuda en el portal.</Small>
