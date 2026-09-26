@@ -47,6 +47,24 @@ done
 say() { printf '\n▸ %s\n' "$*"; }
 die() { printf '\n✗ %s\n' "$*" >&2; exit 1; }
 
+# What actually shipped, in order. The release is only a release when this has
+# a line per app asked for — see the tally at the end, and X-11 for why.
+SHIPPED=()
+
+# A release that ends early must not look like one that finished. `die` exits
+# non-zero and is loud; this catches the other ways a script stops — a kill, a
+# closed terminal, a `set -e` trip inside a function — where the last thing on
+# screen is a step that never completed.
+on_exit() {
+  local code=$?
+  if [[ $code -ne 0 && ${#SHIPPED[@]} -gt 0 ]]; then
+    printf '\n✗ release stopped after %d of %d app(s). Shipped:\n' \
+      "${#SHIPPED[@]}" "$(wc -w <<<"$APPS")" >&2
+    printf '    %s\n' "${SHIPPED[@]}" >&2
+  fi
+}
+trap on_exit EXIT
+
 # ── Guard: what is about to ship ────────────────────────────────────────────
 # Production takes what is in the working tree, not what is on the branch, so
 # both have to be right. `--dry-run` still checks: the point is to find out.
@@ -128,11 +146,15 @@ deploy_app() {
   fi
 
   say "deploying $name"
-  local url
-  url="$(cd "$ROOT" && VERCEL_ORG_ID="$org" VERCEL_PROJECT_ID="$project" \
-    npx --yes vercel@latest deploy --prod --yes --archive=tgz 2>&1 |
-    grep -oE 'https://[a-z0-9.-]+\.vercel\.app' | tail -1)"
-  [[ -n "$url" ]] || die "$name: the deploy produced no URL — read the output above."
+  local out url
+  # Not a pipeline: `grep` succeeding would otherwise hide a `vercel` that died.
+  out="$(cd "$ROOT" && VERCEL_ORG_ID="$org" VERCEL_PROJECT_ID="$project" \
+    npx --yes vercel@latest deploy --prod --yes --archive=tgz 2>&1)" ||
+    die "$name: the deploy command failed.
+    ${out}"
+  url="$(grep -oE 'https://[a-z0-9.-]+\.vercel\.app' <<<"$out" | tail -1)"
+  [[ -n "$url" ]] || die "$name: the deploy produced no URL.
+    ${out}"
 
   # "Ready" is the only outcome that shipped. A build that errored — or one
   # Vercel refused before building — still answers with a URL, which is why
@@ -150,10 +172,19 @@ deploy_app() {
     die "$name did not reach Ready (status: $status).
     ${reason:-No reason given — open the deployment: $url}"
   fi
+  SHIPPED+=("$name  $status  $url")
 }
 
 for app in $APPS; do
   deploy_app "$app"
 done
+
+if [[ $DRY_RUN -eq 0 ]]; then
+  asked="$(wc -w <<<"$APPS" | tr -d ' ')"
+  [[ ${#SHIPPED[@]} -eq $asked ]] ||
+    die "only ${#SHIPPED[@]} of $asked app(s) shipped — this is not a release."
+  printf '\n'
+  printf '    %s\n' "${SHIPPED[@]}"
+fi
 
 say "released $(git rev-parse --short HEAD)"
