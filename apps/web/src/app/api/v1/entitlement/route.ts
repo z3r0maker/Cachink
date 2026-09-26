@@ -17,10 +17,13 @@ export const GET = (request: Request): Promise<Response> =>
     'entitlement',
     request,
     async ({ businessId }) => {
+      // The metering read runs alongside the tenant transaction, on its own
+      // pool, instead of after it (DB2-CONN-01).
+      const reading = usageFor(businessId).catch(() => null);
       const entitlement = await withTenant(businessId, (tx) =>
         entitlementFor(tx, businessId, new Date()),
       );
-      const usage = await usageFor(businessId).catch(() => null);
+      const usage = await reading;
       return {
         response: ok({
           entitlement: await signEntitlement(entitlement),

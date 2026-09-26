@@ -12,6 +12,7 @@ import {
   finishUsageNotice,
   saveUsageCounters,
   subscriptionsOfBusinesses,
+  usageCounterOf,
   usageCounts,
   usageCountersOf,
   type Db,
@@ -35,6 +36,8 @@ export function pgUsageCounters(metering: Db): UsageCounterStore {
   return {
     save: (rows, computedAt) => saveUsageCounters(metering, rows, computedAt),
     history: (periods) => usageCountersOf(metering, periods),
+    computedAt: async (businessId, period) =>
+      (await usageCounterOf(metering, businessId, period))?.computedAt ?? null,
   };
 }
 

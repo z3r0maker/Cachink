@@ -24,6 +24,8 @@ export interface UsageCountSource {
 /** `usage_counters`. */
 export interface UsageCounterStore {
   save(rows: readonly UsageSnapshot[], computedAt: string): Promise<void>;
+  /** When one business's month was last counted (ISO-8601), or null if never. One row, by key. */
+  computedAt(businessId: string, period: UsagePeriod): Promise<string | null>;
   /** Stored rows of the given months, every business. */
   history(periods: readonly UsagePeriod[]): Promise<UsageSnapshot[]>;
 }
