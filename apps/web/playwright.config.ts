@@ -117,6 +117,9 @@ export default defineConfig({
       DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
       ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
       BILLING_DATABASE_URL: billingDatabaseUrl(),
+      // One long-lived server for every worker, not a serverless instance:
+      // it keeps the pool it had before `createDb` defaulted to 2 (DB2-CONN-01).
+      DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX ?? '5',
     },
   },
   use: {

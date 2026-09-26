@@ -19,9 +19,9 @@ let cached: Db | undefined;
 /**
  * **One pool per process, not per module evaluation.**
  *
- * `createDb` opens a pool of 5. Under `next dev` every route bundle and RSC
- * layer evaluates this module again, and a module-level cache is scoped to the
- * evaluation, so each one got its own pool: after a full Playwright run one
+ * `createDb` opens a pool (`DATABASE_POOL_MAX`, default 2). Under `next dev`
+ * every route bundle and RSC layer evaluates this module again, and a
+ * module-level cache is scoped to the evaluation, so each one got its own pool: after a full Playwright run one
  * `next-server` held 97 idle connections against a 100-slot local Postgres and
  * global-setup died on "remaining connection slots are reserved". In
  * development the handle therefore lives on `globalThis`, which survives

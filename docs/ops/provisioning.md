@@ -210,14 +210,11 @@ transaction mode does not support prepared statements, and
 for all four: correct, but each warm function holds its connections, so the
 Nano pool fills sooner. Switch to 6543 once the change is on main.
 
-The change, in `createDb`:
-
-```ts
-const sql = postgres(url, { max: 5, prepare: false, onnotice: () => undefined });
-```
-
-(`prepare: false` is safe on every URL — local, Session and Transaction
-pooler. Consider `max: 1`–`2` per serverless instance on Nano.)
+`createDb` now sets `prepare: false` (safe on every URL — local, Session and
+Transaction pooler), a pool of `DATABASE_POOL_MAX` connections (default **2**
+per process; the metering pool uses 1), `idle_timeout: 20` and
+`connect_timeout: 10` (audit DB2-CONN-01). Leave `DATABASE_POOL_MAX` unset on
+Vercel; raise it only for a long-lived server.
 
 ## 6. First staff member, Stripe, entitlement key
 
