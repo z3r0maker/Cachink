@@ -81,6 +81,19 @@ if [[ $SKIP_MIGRATIONS -eq 0 && ! -f "$ROOT/packages/data-pg/.env.local" ]]; the
     cp /path/to/your/checkout/packages/data-pg/.env.local $ROOT/packages/data-pg/.env.local"
 fi
 
+# Every app named must be deployable *before* a migration is applied. Finding a
+# missing link after the schema has moved leaves a half-release: the database
+# ahead of the code, and nothing shipped.
+for app in $APPS; do
+  # shellcheck disable=SC2076
+  [[ " $ALL_APPS " == *" $app "* ]] || die "unknown app '$app' (known: $ALL_APPS)"
+  [[ -f "$ROOT/apps/$app/.vercel/project.json" ]] ||
+    die "apps/$app is not linked to a Vercel project — and .vercel/ is untracked, so a
+    fresh worktree never has it. Copy it, or link again:
+    cp -R /path/to/your/checkout/apps/$app/.vercel $ROOT/apps/$app/.vercel
+    (or: cd $ROOT/apps/$app && vercel link)"
+done
+
 say "releasing $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s)"
 [[ $DRY_RUN -eq 1 ]] && say "DRY RUN — nothing will be applied or deployed"
 
@@ -104,8 +117,6 @@ fi
 # directory, so the root needs no link and none of the three fight over one.
 deploy_app() {
   local app="$1" link="$ROOT/apps/$1/.vercel/project.json"
-  [[ -f "$link" ]] || die "apps/$app is not linked to a Vercel project ($link missing). Run: cd apps/$app && vercel link"
-
   local org project name
   org="$(node -p "require('$link').orgId")"
   project="$(node -p "require('$link').projectId")"
@@ -133,8 +144,6 @@ deploy_app() {
 }
 
 for app in $APPS; do
-  # shellcheck disable=SC2076
-  [[ " $ALL_APPS " == *" $app "* ]] || die "unknown app '$app' (known: $ALL_APPS)"
   deploy_app "$app"
 done
 
