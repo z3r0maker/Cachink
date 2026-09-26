@@ -1,6 +1,7 @@
 import type { StaticImageData } from 'next/image';
 
 import ayuda from './poses/ayuda.webp';
+import caminando from './poses/caminando.webp';
 import celebrando from './poses/celebrando.webp';
 import contando from './poses/contando.webp';
 import hola from './poses/hola.webp';
@@ -15,7 +16,8 @@ import * as s from './don.css';
  * Don Cuentas, full body (ADR-107). One pose per moment: `hola` greets,
  * `quieto` listens (and blinks), `pensando` gives tips, `contando` is the
  * loader, `celebrando` marks a win, `preocupado` flags a problem,
- * `senalando` points the way, `ayuda` is the help centre.
+ * `senalando` points the way, `ayuda` is the help centre, `caminando` walks
+ * the owner through a guide or a multi-step flow.
  */
 export type DonPose =
   | 'hola'
@@ -25,7 +27,8 @@ export type DonPose =
   | 'celebrando'
   | 'preocupado'
   | 'senalando'
-  | 'ayuda';
+  | 'ayuda'
+  | 'caminando';
 
 export type DonMotion = keyof typeof s.motion;
 
@@ -38,6 +41,7 @@ const POSES: Readonly<Record<DonPose, StaticImageData>> = {
   preocupado,
   senalando,
   ayuda,
+  caminando,
 };
 
 const MOTION: Readonly<Record<DonPose, DonMotion>> = {
@@ -49,6 +53,7 @@ const MOTION: Readonly<Record<DonPose, DonMotion>> = {
   preocupado: 'duda',
   senalando: 'respira',
   ayuda: 'respira',
+  caminando: 'camina',
 };
 
 export interface DonProps {

@@ -5,6 +5,13 @@ import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/t
  * Don Cuentas's motion (ADR-107). Every animation here stops under
  * `prefers-reduced-motion`; the pose alone still says what he means.
  */
+/** A walking bob: two steps per cycle, a slight lean into each. */
+const camina = keyframes({
+  '0%, 50%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+  '25%': { transform: 'translateY(-5px) rotate(-1.5deg)' },
+  '75%': { transform: 'translateY(-5px) rotate(1.5deg)' },
+});
+
 const respira = keyframes({
   '0%, 100%': { transform: 'translateY(0) scale(1)' },
   '50%': { transform: 'translateY(-4px) scale(1.015)' },
@@ -50,6 +57,7 @@ export const figure = style({
 
 export const motion = styleVariants({
   respira: [{ animation: `${respira} 3.4s ease-in-out infinite` }, calm],
+  camina: [{ animation: `${camina} 0.9s ease-in-out infinite` }, calm],
   saluda: [{ animation: `${saluda} 2.2s ease-in-out infinite` }, calm],
   salta: [{ animation: `${salta} 1.1s ease-in-out infinite` }, calm],
   asiente: [{ animation: `${asiente} 1.2s ease-in-out infinite` }, calm],
