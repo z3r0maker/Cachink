@@ -120,6 +120,17 @@ What it does, in order (`packages/data-pg/scripts/migrate-hosted.ts`):
    commit in one transaction (`lock_timeout` 10 s); the first error rolls
    that file back and stops. An applied file whose bytes changed, or that
    disappeared, is a hard error: never edit an applied migration, add one.
+   So is a pending file that sorts below one already applied in its set:
+   renumber it above (ADR-109).
+   A file whose first line is `-- xangarro:no-transaction` (ADR-109) runs
+   statement by statement instead, so it can `CREATE INDEX CONCURRENTLY`
+   without blocking writes; its ledger row is written after the last
+   statement. If one fails, the ones before it stay applied and the next run
+   repeats the file — which is why such files may only hold repeatable
+   statements (`hosted/lint.ts` refuses the rest before anything runs), and
+   why the runner first drops the INVALID index an interrupted concurrent
+   build leaves. A run that stops on `lock_timeout` during the evening peak
+   (17:00–20:00) is simply run again in the trough.
 5. **Posture** — `WARNING` lines: SECURITY DEFINER owners without BYPASSRLS or
    without a pinned `search_path`, definer functions executable by
    `anon`/`authenticated`, login roles that can't log in, have dangerous
@@ -133,8 +144,10 @@ owner moves it behind a SECURITY DEFINER function or approves the grants
 
 Proven locally with `pnpm --filter @xangarro/data-pg db:migrate:hosted:selftest`
 (throwaway `postgres:17` container shaped like Supabase: dry run, fresh run,
-SCRAM logins and timeouts, idempotent re-run, new file, rollback of a failing
-file, preflight blocker, checksum drift). Every later migration: run
+SCRAM logins and timeouts, idempotent re-run, new file, a no-transaction
+file's concurrent index, an out-of-order file, rollback of a failing file,
+preflight blocker, checksum drift). `XG_SELFTEST_NAME` / `XG_SELFTEST_PORT`
+move its container off the default. Every later migration: run
 `db:migrate:hosted` **before** deploying the code that needs it.
 
 ## 4. What the hosted run applies from `local/` — and what it does not

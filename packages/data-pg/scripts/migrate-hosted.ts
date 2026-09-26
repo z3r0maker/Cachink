@@ -4,6 +4,8 @@
  * Provisions the hosted Supabase database: the four LOGIN roles, then every
  * migration not yet in the ledger — `hosted/`, `drizzle/`, then the admin
  * console's — each file in its own transaction, stopping at the first error.
+ * A file starting `-- xangarro:no-transaction` runs statement by statement
+ * instead, so it can build indexes CONCURRENTLY (`hosted/lint.ts`).
  * Runbook: docs/ops/provisioning.md.
  *
  * Inputs (from `packages/data-pg/.env.local`, overridden by the real env):
@@ -104,16 +106,20 @@ async function pending(sql: Sql, root: string): Promise<MigrationFile[]> {
 async function applyAll(sql: Sql, files: readonly MigrationFile[], dryRun: boolean): Promise<void> {
   if (!dryRun) await ensureLedger(sql);
   for (const file of files) {
+    const mode = file.transactional ? '' : ' (no transaction)';
     if (dryRun) {
-      console.log(`would apply ${file.name}`);
+      console.log(`would apply ${file.name}${mode}`);
       continue;
     }
     try {
       await applyMigration(sql, file);
     } catch (error) {
-      throw new Error(`${file.name} failed and was rolled back: ${describe(error)}`);
+      const how = file.transactional
+        ? 'and was rolled back'
+        : '— statements before the failure stay applied; the next run repeats the file';
+      throw new Error(`${file.name} failed ${how}: ${describe(error)}`);
     }
-    console.log(`applied   ${file.name}`);
+    console.log(`applied   ${file.name}${mode}`);
   }
   console.log(
     dryRun ? `${files.length} migration(s) would run.` : `${files.length} migration(s) applied.`,
