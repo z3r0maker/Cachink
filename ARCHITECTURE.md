@@ -148,6 +148,7 @@ Links to discussion, docs, prior art.
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
+| [110](#adr-110) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7367,3 +7368,78 @@ enum refuses, so a QR sale there failed its parse and was only logged.
 
 - Column defaults and seeds still carry QR/CoDi; they are harmless because every
   reader filters, and changing them would be a migration for nothing.
+
+## ADR-110
+
+**Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB2-SYNC-01 and DB2-SYNC-02; amends ADR-078 decision 4
+
+**Context**
+
+ADR-078 wrote each pushed row in its own savepoint: a reference check per
+field, a receipt lookup, the upsert, a cursor bump, a `sync_log` entry and a
+receipt — about eight statements a row, all while holding the tenant's
+`sync_cursors` lock. The DB audit of 2026-09-26 measured a 500-row push at
+8.0 s at a 1 ms round trip (68 ms batched), 67 lock timeouts a minute when a
+shop's phones flush their evening backlog together, and every app backend past
+Postgres's 64-entry subtransaction cache, because postgres.js never releases a
+savepoint and a savepoint that wrote keeps its XID until commit.
+
+**Decision**
+
+1. **The `PushStore` port takes batches.** `receipts(keys)`, `existing(table,
+   ids)`, `write(table, deltas)`, `accept(deltas)`, `reject(rejections)`. The
+   rules stay in `ApplyPushUseCase`; the store only runs statements.
+2. **A push is cut into segments of distinct rows.** A row pushed twice (a turno
+   opened then closed) starts a new segment, which sees the first one stored and
+   accepted. Each segment costs one receipt lookup, one reference lookup per
+   referenced table, one write per table (plus one visibility read for rows it
+   did not write) and one `accept` (cursor, log, receipts): at most
+   `S·(4 + R + 3T) + 3` statements for S segments, R referenced tables and T
+   tables, whatever the row count — 14 for the 500-row, 3-table test push
+   (54 ms locally), against ~4,200 before.
+3. **Receipts are matched on `(table_name, row_id)`**, the primary key with
+   `business_id`, through `unnest($tables, $ids)`. Ids travel as one `text[]`
+   parameter (`= ANY($1)`), never as a list of placeholders.
+4. **Writes are multi-row.** UP: `INSERT … ON CONFLICT (id) DO UPDATE … WHERE
+   updated_at < excluded.updated_at RETURNING id`, with `SET` naming only the
+   fields a row carries (rows are grouped by shape). HYBRID: `ON CONFLICT DO
+   NOTHING RETURNING id`. Unreturned ids are read back: visible means stale or
+   already here, invisible means another tenant's id (DUPLICATE_CONFLICT).
+5. **One cursor bump per segment**: `last_seq = last_seq + n RETURNING`, seqs
+   handed out consecutively in delta order — the "block of seqs per batch"
+   ADR-078 anticipated. The row lock still lasts to commit, so seqs still commit
+   in order. `sync_log` and `sync_receipts` get one insert each, pipelined.
+6. **Failure isolation by splitting.** Each table's write runs in one savepoint.
+   When it fails, the rows are halved and retried down to the row at fault:
+   42501 there is DUPLICATE_CONFLICT, anything else INTERNAL (retryable,
+   logged once). Timeouts, lock waits, deadlocks and lost connections are not
+   split — every row of that write is INTERNAL. At most 60 savepoints that wrote
+   are kept per push (a rolled-back one frees its slot); rows still unresolved
+   after that are INTERNAL and the phone resends them.
+7. **A product or client stored earlier in the same push satisfies a later
+   row's reference, and only then** — the answers one-by-one processing gave.
+
+**Alternatives considered**
+
+- *Cap the push at 64 rows* (the audit's stopgap). It bounds the subtransaction
+  damage but keeps eight round trips a row inside the lock.
+- *Probe halves and roll them back, then write the good rows once.* One
+  savepoint whatever the failures, but every row is written twice on the failure
+  path and a probe that passes alone can still fail together.
+- *Change the conflict target to `(business_id, id)`.* Worth doing with
+  partitioning, but it needs a migration of every pushable table's primary key;
+  left to that work.
+
+**Consequences**
+
+- The response contract is unchanged, row for row; the conformance suite and
+  `apps/web/tests/sync-push.integration.test.ts` hold it.
+- An `accept` or `reject` failure now fails the whole push (the transaction
+  rolls back and the phone retries it) instead of one row: they touch only sync
+  bookkeeping, so such a failure is the database's, not a row's.
+- A push with dozens of rows that fail at the database can leave good rows
+  INTERNAL for one round; they succeed on the next push.
