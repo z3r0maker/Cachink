@@ -40,10 +40,20 @@ export class FakeCounts implements UsageCountSource {
 
 export class MemoryCounters implements UsageCounterStore {
   readonly rows = new Map<string, UsageSnapshot>();
+  readonly computed = new Map<string, string>();
+  lookups = 0;
 
-  save(rows: readonly UsageSnapshot[]): Promise<void> {
-    for (const r of rows) this.rows.set(`${r.businessId}:${r.period}`, r);
+  save(rows: readonly UsageSnapshot[], computedAt: string): Promise<void> {
+    for (const r of rows) {
+      this.rows.set(`${r.businessId}:${r.period}`, r);
+      this.computed.set(`${r.businessId}:${r.period}`, computedAt);
+    }
     return Promise.resolve();
+  }
+
+  computedAt(businessId: string, period: UsagePeriod): Promise<string | null> {
+    this.lookups += 1;
+    return Promise.resolve(this.computed.get(`${businessId}:${period}`) ?? null);
   }
 
   history(periods: readonly UsagePeriod[]): Promise<UsageSnapshot[]> {
