@@ -18,7 +18,7 @@ const descripcion = `## Descripción
 
 Xangarro es una plataforma de finanzas diseñada específicamente para dueños de pequeños negocios en México. Resuelve el problema del control de caja diario: saber exactamente cuánto se vendió, cuánto se gastó y cuánto queda en efectivo, sin necesidad de hojas de Excel, software contable complejo ni conocimientos financieros avanzados.
 
-El dueño administra su negocio desde el portal web (app.xangarro.mx) y su equipo cobra desde la caja en el navegador o desde la app del teléfono. Don Cuentas, el asesor, revisa cada día las ventas, los gastos y el inventario con cálculos a partir de los registros del negocio; la revisión de fin de mes con IA llega pronto.`;
+El dueño administra su negocio desde el portal web (app.xangarro.mx) y su equipo cobra desde la caja en el navegador o desde la app del teléfono. Don Cuentas, el asesor, revisa cada día las ventas, los gastos y el inventario con cálculos a partir de los registros del negocio, y cada fin de mes entrega una revisión con IA.`;
 
 const problema = `## Problema que resuelve
 
@@ -75,7 +75,7 @@ const funcionalidades = `## Funcionalidades principales
 
 ### Don Cuentas (asesor)
 - Revisa todos los días ventas, gastos e inventario y avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de los registros
-- Próximamente: cierre de mes con IA: qué funcionó, qué no y qué precios ajustar (plan Xangarro)
+- Cierre de mes con IA: qué funcionó, qué no y qué precios ajustar (plan Xangarro)
 - Estrategia de precios y crecimiento (plan Xangarrote)
 
 ### Estados financieros

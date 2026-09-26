@@ -1576,3 +1576,50 @@ listen`/dashboard events); (b) even when applied, the wizard can write «Crédit
   matches the Suscripción card; régimen «Ninguno por ahora» yields an estado without ISR; Playwright
   specs for the checklist landing and the Negocio edit bar; unit tests for the answer application
   and the régimen option.
+
+## Fase 10 — Beta: lo que el diseño ya muestra como listo
+
+The El Mostrador designs (ADR-107, canvas «Configuración y primer día» and «Caja del operador»)
+draw these capabilities as available, without a «Pronto» chip, by the owner's decision of
+2026-09-26: they are built during the beta. Capabilities that were already tracked stay in their
+own task and are not repeated here: P-28 (Diagnóstico, estrategia, «¿Me alcanza?»), P-29 (catálogo
+desde una foto), P-30 (the model call behind the monthly review), P-32 (avisos and Compartir por
+WhatsApp).
+
+### P-37 Ticket printing from the caja
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+- **Steps:** the caja sends the comprobante by WhatsApp today; add printing to a ticket printer
+  (58/80 mm) from the «¡Listo!» dialog and from a sale's detail, using the «Ticket» template.
+  Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
+- **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
+  WhatsApp image.
+
+### P-38 Don Cuentas explains a cash difference
+
+- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- **Steps:** on a corte with a faltante or sobrante, Don Cuentas proposes the likely causes from
+  the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
+  and in Revisión de caja.
+- **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
+
+### P-39 Don Cuentas conclusions in Estados financieros
+
+- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
+  computed from the deterministic figures and phrased by the model.
+- **Acceptance:** every figure the text cites matches the statement on screen.
+
+### P-40 First diagnóstico free at 90 days
+
+- [ ] Status · **Blocked by:** P-28 · **Blocks:** —
+- **Steps:** a Xangarrito or Xangarro business that reaches 90 days of records gets one
+  Diagnóstico without upgrading, announced by an aviso.
+- **Acceptance:** the aviso fires once per business; the report opens once.
+
+### P-41 Advanced inventory functions
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+- **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
+  the v1 clamp (Q10), become switchable in Mi negocio › Funciones for Xangarrote.
+- **Acceptance:** each one, switched on, appears in the caja and syncs its records.
