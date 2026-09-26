@@ -4,8 +4,8 @@
  * part of audit M-1 PR 2.5.
  *
  * Fields: monto (pre-fills with saldo pendiente, formats on blur via
- * `<MoneyField>`), metodo (select: Efectivo / Transferencia / Tarjeta /
- * QR/CoDi), nota (optional). Submit bubbles a NewClientPayment; parent
+ * `<MoneyField>`), metodo (select: Efectivo / Transferencia / Tarjeta),
+ * nota (optional). Submit bubbles a NewClientPayment; parent
  * wires `useRegistrarPago` — the use-case owns the state-flip.
  */
 
@@ -29,7 +29,7 @@ import { Btn, Input, Modal } from '../../components/index';
 import { RhfMoneyField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 
-const METODOS: readonly PaymentMethod[] = ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'];
+const METODOS: readonly PaymentMethod[] = ['Efectivo', 'Transferencia', 'Tarjeta'];
 
 /**
  * Form schema. `montoPesos` is the visible string; `<MoneyField>`
@@ -44,7 +44,7 @@ const RegistrarPagoFormSchema = z.object({
     .refine((s) => Number.parseFloat(s) > 0, {
       message: 'monto must be positive',
     }),
-  metodo: z.enum(['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi']),
+  metodo: z.enum(['Efectivo', 'Transferencia', 'Tarjeta']),
   nota: z.string().max(500).or(z.literal('')).optional(),
 });
 

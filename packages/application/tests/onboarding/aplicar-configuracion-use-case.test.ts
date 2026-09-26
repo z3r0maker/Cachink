@@ -73,6 +73,24 @@ describe('AplicarConfiguracionUseCase (N-13, N-15)', () => {
     assert.notEqual(store.record?.completedAt, null);
   });
 
+  it('a business that stored QR/CoDi before ADR-108 is not told it will lose it', async () => {
+    const stored = JSON.parse((await businesses.findById(businessId))!.enabledPaymentMethods);
+    assert.ok(stored.includes('QR/CoDi'), 'the fixture still carries the pre-ADR-108 default');
+    await answer({ metodosCobro: ['Efectivo', 'Transferencia', 'Tarjeta'] });
+    const result = await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
+    assert.deepEqual(
+      result.changes.filter((c) => c.kind === 'paymentType'),
+      [],
+      'a retired method is never a change line in «esto cambiará»',
+    );
+  });
+
+  it('a pending answer naming QR/CoDi never writes it back', async () => {
+    await answer({ metodosCobro: ['QR/CoDi', 'Tarjeta'] });
+    await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
+    assert.deepEqual((await read()).payments, ['Tarjeta']);
+  });
+
   it('turns features off with their dependents when the answers say so', async () => {
     await answer({ manejaInventario: false });
     const result = await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });

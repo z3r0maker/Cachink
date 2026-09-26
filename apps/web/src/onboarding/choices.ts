@@ -49,12 +49,6 @@ export const METODOS_COBRO: readonly ChoiceDef[] = [
     icon: ICON.transfer,
   },
   {
-    value: 'QR/CoDi',
-    title: 'QR / CoDi',
-    description: 'Tu cliente escanea y paga.',
-    icon: ICON.qr,
-  },
-  {
     value: 'Crédito',
     title: 'Crédito',
     description: 'Entregas hoy y te pagan después.',

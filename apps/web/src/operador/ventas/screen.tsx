@@ -23,7 +23,6 @@ const FILTROS: readonly ('Todos' | MetodoVenta)[] = [
   'Efectivo',
   'Transferencia',
   'Tarjeta',
-  'QR / CoDi',
   'Fiado',
 ];
 

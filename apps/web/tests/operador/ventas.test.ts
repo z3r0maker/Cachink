@@ -2,7 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { VENTAS_FIXTURE } from '../../src/operador/ventas/fixture';
-import { filtrar, resumen } from '../../src/operador/ventas/derive';
+import { comoMetodo, filtrar, resumen } from '../../src/operador/ventas/derive';
 
 const ventas = VENTAS_FIXTURE.ventas;
 
@@ -29,5 +29,17 @@ describe('ventas del turno', () => {
 
   it('counts an empty turno as zero', () => {
     assert.deepEqual(resumen([]), { activas: 0, cobrado: 0n, efectivo: 0n });
+  });
+});
+
+describe('el método como lo dice el operador', () => {
+  it('Crédito reads as Fiado; the offered methods read as themselves', () => {
+    assert.equal(comoMetodo('Crédito'), 'Fiado');
+    assert.equal(comoMetodo('Efectivo'), 'Efectivo');
+    assert.equal(comoMetodo('Tarjeta'), 'Tarjeta');
+  });
+
+  it('a ticket taken with QR/CoDi before ADR-108 still reads with its own label', () => {
+    assert.equal(comoMetodo('QR/CoDi'), 'QR / CoDi');
   });
 });

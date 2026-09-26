@@ -1,8 +1,8 @@
 /**
- * CheckoutConfirm — shared confirmation screen for card/transfer/QR.
+ * CheckoutConfirm — shared confirmation screen for card and transfer.
  *
  * Simple 1-tap confirmation: shows the total, payment method description,
- * and a big "confirm" button. Used for Tarjeta, Transferencia, and QR/CoDi.
+ * and a big "confirm" button. Used for Tarjeta and Transferencia.
  */
 
 import type { ReactElement } from 'react';
@@ -42,13 +42,6 @@ function getMethodConfig(metodo: PaymentMethod): MethodConfig {
         title: 'Transferencia (SPEI)',
         message: 'Confirma que recibiste la transferencia',
         buttonLabel: 'Transferencia recibida',
-      };
-    case 'QR/CoDi':
-      return {
-        icon: 'smartphone',
-        title: 'QR / CoDi',
-        message: 'Confirma que el pago fue recibido',
-        buttonLabel: 'Pago recibido',
       };
     default:
       return {

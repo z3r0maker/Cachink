@@ -146,6 +146,8 @@ Links to discussion, docs, prior art.
 | [104](#adr-104) | 2026-09-23 | The layer boundaries are enforced for real, and the rule table is reconciled with the code | Accepted |
 | [105](#adr-105) | 2026-09-24 | No free trial: a plan is either free (Xangarrito) or paid from day one | Accepted |
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
+| [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
+| [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7323,3 +7325,45 @@ the press stamp.
 
 - `borders.quiet` joins the token set; the theme test pins its value.
 - The design files follow the canvas above, not the other way round.
+
+## ADR-108
+
+**Title:** QR/CoDi retired from every picker; the enum keeps it for history
+
+**Date:** 2026-09-25
+
+**Status:** Accepted — owner decision 2026-09-25; revisit with ADR-066
+
+**Context**
+
+«QR/CoDi» was offered at the mostrador, in Negocio and in the wizard, but it was
+only a label: the cashier tapped it and then «Pago recibido», as with Tarjeta.
+Nothing drew a CoDi request or confirmed the money arrived, while the wizard
+promised «Tu cliente escanea y paga». CoDi also has little adoption among the
+emprendedores we serve. The web register spelt it «QR / CoDi», which the domain
+enum refuses, so a QR sale there failed its parse and was only logged.
+
+**Decision**
+
+- `RETIRED_PAYMENT_METHODS` in `@xangarro/domain` names QR/CoDi. It leaves
+  `METODOS_CONFIGURABLES` and `canonicalPaymentTypes`, so Negocio, the wizard,
+  the phone's pickers (through `parseMetodosPago`) and the web register no longer
+  offer it. A stored `enabled_payment_methods` that names it loses it on read.
+- `PaymentMethodEnum`, both schemas' `CHECK`s, cash-flow, cierre and the receipt
+  keep QR/CoDi: historical tickets and abonos must still parse, total and print.
+  No migration, no sync-schema change.
+- QR is not coming back through Mercado Pago either: in Mexico its QR API is
+  cash-out only (`docs/spikes/payments-mercadopago.md`). Card collection at the
+  mostrador stays on ADR-066's terminals, Point and Clip.
+
+**Alternatives considered**
+
+- *Drop QR/CoDi from the enum.* Rejected: it breaks every historical row and
+  needs a migration on both databases for no user gain.
+- *Keep it as a manual tag.* Rejected: it promises something the product does
+  not do, and one tap more is one decision more (§2.1).
+
+**Consequences**
+
+- Column defaults and seeds still carry QR/CoDi; they are harmless because every
+  reader filters, and changing them would be a migration for nothing.

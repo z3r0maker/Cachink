@@ -112,7 +112,8 @@ test('payment methods and product attributes save together, and reach the phone'
 
   const [biz] = (await pull(request, phone, cursor)).tables.businesses;
   expect(biz).toMatchObject({
-    enabledPaymentMethods: '["Efectivo","Transferencia","QR/CoDi"]',
+    // The seed still stores QR/CoDi; ADR-108 drops it on read, so a save writes it out.
+    enabledPaymentMethods: '["Efectivo","Transferencia"]',
     atributosProducto: [
       { clave: 'talla', label: 'Talla', tipo: 'select', opciones: ['Chica', 'Grande'] },
     ],
@@ -121,10 +122,12 @@ test('payment methods and product attributes save together, and reach the phone'
 
 test('the last payment method cannot be turned off', async ({ page }) => {
   await edit(page);
-  for (const m of ['Efectivo', 'Transferencia']) {
-    await page.getByRole('switch', { name: m }).click();
-  }
-  await expect(page.getByRole('switch', { name: 'QR/CoDi' })).toBeDisabled();
+  // The seed takes Efectivo and Transferencia (its QR/CoDi is dropped on read,
+  // ADR-108): turning Efectivo off leaves Transferencia as the last one.
+  await page.getByRole('switch', { name: 'Efectivo' }).click();
+  await expect(page.getByRole('switch', { name: 'Transferencia' })).toBeDisabled();
+  await expect(page.getByRole('switch', { name: 'Tarjeta' })).toBeEnabled();
+  await expect(page.getByRole('switch', { name: 'QR/CoDi' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('button', { name: 'Editar negocio' })).toBeVisible();
 });

@@ -20,7 +20,7 @@ papelerías, food trucks, cafés y tiendas de barrio.
 
 **¿Qué incluye?**
 
-📈 **Ventas** — Efectivo, Transferencia, Tarjeta, QR/CoDi, o Crédito.
+📈 **Ventas** — Efectivo, Transferencia, Tarjeta o Crédito.
 Comprobantes por WhatsApp en un toque.
 
 📉 **Egresos** — Gasto, Nómina e Inventario (compras) en un mismo

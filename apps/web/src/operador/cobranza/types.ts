@@ -1,8 +1,9 @@
 import type { EstadoMode } from '../estado';
 import type { CuentaCliente } from './cliente/types';
 
-export const METODOS_ABONO = ['Efectivo', 'Transferencia', 'Tarjeta', 'QR / CoDi'] as const;
-export type MetodoAbono = (typeof METODOS_ABONO)[number];
+export const METODOS_ABONO = ['Efectivo', 'Transferencia', 'Tarjeta'] as const;
+/** What an abono can be captured with — or read back as, for one taken before ADR-108. */
+export type MetodoAbono = (typeof METODOS_ABONO)[number] | 'QR / CoDi';
 
 export type FiltroCobranza = 'Todos' | 'Con saldo' | 'Atrasados';
 

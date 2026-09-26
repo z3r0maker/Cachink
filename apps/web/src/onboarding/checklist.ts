@@ -19,7 +19,7 @@ export interface ChecklistSignals {
   readonly tieneLogo: boolean;
   /** An RFC is on file — the owner wants Xangarro's invoice for the subscription. */
   readonly tieneRfc: boolean;
-  /** The payment types differ from the default four: someone looked at them. */
+  /** The payment types differ from the full offered set: someone looked at them. */
   readonly pagosRevisados: boolean;
 }
 
@@ -112,7 +112,7 @@ const ITEMS: readonly ItemDef[] = [
     key: 'pagos',
     group: 'opcional',
     title: 'Revisa tus tipos de pago',
-    hint: 'Efectivo, transferencia, tarjeta, QR. Si los cuatro te sirven, déjalo así.',
+    hint: 'Efectivo, transferencia y tarjeta. Si los tres te sirven, déjalo así.',
     href: '/negocio',
     isDone: (s) => s.pagosRevisados,
   },

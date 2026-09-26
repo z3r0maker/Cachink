@@ -71,7 +71,7 @@ export async function loadRecommendation(
 
 const n = (rows: { n: number }[]) => rows[0]?.n ?? 0;
 
-/** The stored list differs from the default four, in any order: someone chose. */
+/** The stored list differs from the full offered set, in any order: someone chose. */
 function pagosRevisados(json: string | null | undefined): boolean {
   const chosen = parseMetodosPago(json);
   return chosen.length !== METODOS_CONFIGURABLES.length;

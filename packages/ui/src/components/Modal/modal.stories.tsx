@@ -107,7 +107,7 @@ export const NuevaVenta: Story = {
         label="Método"
         value=""
         onChange={() => undefined}
-        options={['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito']}
+        options={['Efectivo', 'Transferencia', 'Tarjeta', 'Crédito']}
       />
       <Btn fullWidth>Guardar Venta</Btn>
     </ControlledModal>

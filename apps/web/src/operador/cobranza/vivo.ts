@@ -14,6 +14,7 @@ import type { Credenciales } from '../runtime/use-credenciales';
 import type { CuentaPara } from '../runtime/protocol';
 import { abiertas, estadoCuenta, vence } from './cliente/derive';
 import type { AbonoCuenta, CuentaCliente, VentaCuenta } from './cliente/types';
+import { comoMetodo } from '../ventas/derive';
 import type { MetodoAbono } from './types';
 
 const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;
@@ -49,7 +50,7 @@ function comoAbono(a: CuentaPara['abonos'][number], hoy: string): AbonoCuenta {
     fecha: a.fecha,
     dia: diaDe(a.fecha, hoy),
     monto: BigInt(a.montoCentavos),
-    metodo: a.metodo as MetodoAbono,
+    metodo: comoMetodo(a.metodo) as MetodoAbono,
     ...(a.nota === null ? {} : { nota: a.nota }),
   };
 }

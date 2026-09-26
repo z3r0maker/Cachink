@@ -25,6 +25,20 @@ export const PaymentMethodEnum = z.enum([
 ]);
 export type PaymentMethod = z.infer<typeof PaymentMethodEnum>;
 
+/**
+ * Methods the enum keeps so historical rows still parse, report and print,
+ * but that no surface offers any more (ADR-108). A retired method is never a
+ * choice: not at the mostrador, not in Negocio, not in the wizard.
+ */
+export const RETIRED_PAYMENT_METHODS: ReadonlySet<PaymentMethod> = new Set<PaymentMethod>([
+  'QR/CoDi',
+]);
+
+/** The methods a sale can still be captured with, in enum order. */
+export const OFFERED_PAYMENT_METHODS: readonly PaymentMethod[] = PaymentMethodEnum.options.filter(
+  (m) => !RETIRED_PAYMENT_METHODS.has(m),
+);
+
 export const SaleCategoryEnum = z.enum(['Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro']);
 export type SaleCategory = z.infer<typeof SaleCategoryEnum>;
 
