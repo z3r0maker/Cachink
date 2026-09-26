@@ -35,7 +35,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Quién es Don Cuentas?',
-    a: 'Don Cuentas es el asesor de Xangarro. Cada día revisa tus ventas, gastos e inventario y te avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de tus registros. Muy pronto, cada fin de mes, también te entregará tu revisión con IA: qué funcionó, qué no y qué precios ajustar.',
+    a: 'Don Cuentas es el asesor de Xangarro. Cada día revisa tus ventas, gastos e inventario y te avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de tus registros. Y cada fin de mes te entrega tu revisión con IA: qué funcionó, qué no y qué precios ajustar.',
   },
   {
     q: '¿Xangarro maneja CFDI o facturación electrónica?',

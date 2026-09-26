@@ -1,4 +1,4 @@
-import { DonCuentas, DonCuentasFace } from './icons.jsx';
+import { DonCuentas } from './icons.jsx';
 
 const TIPS = [
   <>
@@ -33,14 +33,8 @@ function Cierre() {
       <div className="dc-cierre-top">
         <strong>¡Tu cierre de agosto está listo!</strong>
         <span className="xtag dc-chip">
-          <span
-            className="dc-avatar"
-            style={{ width: 22, height: 22, boxShadow: 'none' }}
-            aria-hidden="true"
-          >
-            <DonCuentasFace size={15} />
-          </span>
-          Pronto · con IA
+          <DonCuentas size={22} />
+          Con IA
         </span>
       </div>
       <p>
@@ -53,7 +47,7 @@ function Cierre() {
   );
 }
 
-/** «Para ti · hoy»: three computed tips, then the AI month-end review — marked «Pronto» until it ships (ADR-059). */
+/** «Para ti · hoy»: three computed tips, then the AI month-end review (ADR-059). */
 export function DonCuentasChat() {
   return (
     <div className="xcard dc-chat">
