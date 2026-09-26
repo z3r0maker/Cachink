@@ -38,4 +38,6 @@
   .xgrid-3, .xgrid-4 { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .xbtn { width: 100%; }
 }
-.dc-avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; background: var(--yellow); border: var(--border-thin); box-shadow: 2px 2px 0 var(--black); color: var(--black); }
+.dc-avatar { position: relative; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; background: var(--yellow); border: var(--border-thin); box-shadow: 2px 2px 0 var(--black); color: var(--black); }
+
+.dc-avatar-img { position: absolute; max-width: none; object-fit: contain; }

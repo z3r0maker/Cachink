@@ -25,13 +25,8 @@ export function DonCuentasMeta() {
       <div className="dc-seal">
         <div className="g-slam">
           <svg viewBox="0 0 220 220" aria-hidden="true">
-            <path
-              d={SEAL}
-              fill="var(--yellow)"
-              stroke="var(--black)"
-              strokeWidth="2.5"
-              transform="translate(5 5)"
-            />
+            <path d={SEAL} fill="var(--white)" transform="translate(10 10)" />
+            <path d={SEAL} fill="var(--black)" transform="translate(4 4)" />
           </svg>
           <div className="dc-seal-txt">
             <span>Meta lograda</span>

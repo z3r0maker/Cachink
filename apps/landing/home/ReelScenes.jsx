@@ -1,4 +1,5 @@
-import { Coin, DonCuentas, sealPath } from './icons.jsx';
+import { Don } from './Don.jsx';
+import { Coin, sealPath } from './icons.jsx';
 
 const SEAL = sealPath(300, 14);
 
@@ -47,7 +48,7 @@ export function SceneDonCuentas() {
   return (
     <div className="sc sc3 rs-dc">
       <span className="pop rs-avatar">
-        <DonCuentas size={200} />
+        <Don pose="senalando" size={240} />
       </span>
       <div className="rs-dc-col">
         <span className="up xeyebrow">Don Cuentas · tu contador de cabecera</span>

@@ -21,8 +21,8 @@
 .rs-sale { min-height: 48px; padding: 0 22px; font-size: max(14px, 1.8cqw); box-shadow: 4px 4px 0 var(--yellow); }
 
 .rs-dc { background: var(--yellow-soft); display: flex; align-items: center; gap: 4.3cqw; padding: 0 9cqw; box-sizing: border-box; }
-.rs-avatar .dc-avatar { width: 17.9cqw !important; height: 17.9cqw !important; border: 3px solid var(--black); box-shadow: var(--shadow-hero); }
-.rs-avatar .dc-avatar svg { width: 66%; height: 66%; }
+.rs-avatar { flex: none; }
+.rs-avatar .don { width: 22cqw !important; height: 22cqw !important; }
 .rs-dc-col { display: flex; flex-direction: column; gap: 1.6cqw; }
 .rs-bubble { background: var(--white); border: var(--border-thick); border-radius: 22px 22px 22px 6px; padding: 2.3cqw 2.7cqw; font-size: 3cqw; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: var(--black); box-shadow: var(--shadow-hero); }
 .rs-actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -51,7 +51,7 @@
   .rs-wm { font-size: 16cqw; }
   .rs-sale { font-size: 14px; min-height: 38px; }
   .rs-dc { flex-direction: column; align-items: flex-start; justify-content: center; gap: 5cqw; padding: 0 6cqw; }
-  .rs-avatar .dc-avatar { width: 30cqw !important; height: 30cqw !important; }
+  .rs-avatar .don { width: 34cqw !important; height: 34cqw !important; }
   .rs-dc-col { gap: 4cqw; }
   .rs-bubble { font-size: 5.8cqw; padding: 4.5cqw 5cqw; }
   .rs-actions { display: none; }

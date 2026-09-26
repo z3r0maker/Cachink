@@ -18,7 +18,7 @@ const POINTS = [
   {
     k: 'ia',
     b: 'Cada fin de mes, tu revisión con IA.',
-    t: 'Qué funcionó, qué no y qué precios ajustar, con tus números de verdad. Y después, tu catálogo desde una foto.',
+    t: 'Qué funcionó, qué no y qué precios ajustar, con tus números de verdad. Y tu catálogo, desde una foto.',
   },
 ];
 
@@ -26,7 +26,7 @@ function Point({ p }) {
   return (
     <li className="dc-point">
       {p.k === 'ia' ? (
-        <span className="dc-pronto">Pronto</span>
+        <span className="dc-ia">Con IA</span>
       ) : (
         <span className="dc-check">
           <Icon name="check" size={18} />

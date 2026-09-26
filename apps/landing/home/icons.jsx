@@ -96,7 +96,14 @@ export function DonCuentas({ size = 38, className = '' }) {
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <DonCuentasFace size={Math.round(size * 0.66)} />
+      <img
+        src="/assets/don/quieto.webp"
+        alt=""
+        width={Math.round(size * 1.67)}
+        height={Math.round(size * 1.67)}
+        className="dc-avatar-img"
+        style={{ left: Math.round(size * -0.37), top: Math.round(size * -0.1) }}
+      />
     </span>
   );
 }

@@ -10,7 +10,7 @@
 .dc-point p { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 600; }
 .dc-point strong { font-weight: 800; }
 .dc-check { flex: none; width: 34px; height: 34px; border-radius: var(--r-10); background: var(--white); border: var(--border-thin); display: flex; align-items: center; justify-content: center; }
-.dc-pronto { flex: none; height: 30px; padding: 0 10px; display: flex; align-items: center; border-radius: 9999px; background: var(--white); border: var(--border-thin); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--black); }
+.dc-ia { flex: none; height: 30px; padding: 0 10px; display: flex; align-items: center; border-radius: 9999px; background: var(--black); color: var(--yellow); border: var(--border-thin); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .dc-side { display: flex; flex-direction: column; gap: 28px; }
 
 .dc-chat { border-width: 2.5px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
@@ -40,7 +40,8 @@
 .dc-seal { position: absolute; right: 0; top: 40px; width: 220px; height: 220px; transform: rotate(9deg); }
 .dc-seal .g-slam { position: absolute; inset: 0; }
 .dc-seal svg { width: 100%; height: 100%; }
-.dc-seal-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; color: var(--black); }
+.dc-seal-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; color: var(--white); }
+.dc-seal-txt strong { color: var(--yellow); }
 .dc-seal-txt span { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .dc-seal-txt strong { font-size: 33px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
 
