@@ -54,7 +54,7 @@ const funcionalidades = `## Funcionalidades principales
 ### Registro de ventas e ingresos
 - Captura rápida: monto, concepto, método de pago
 - Registro en menos de 3 segundos
-- Métodos de pago: efectivo, tarjeta, transferencia (SPEI), CoDi, QR y crédito para clientes frecuentes
+- Métodos de pago: efectivo, tarjeta, transferencia (SPEI) y crédito para clientes frecuentes
 - Captura sin internet — el negocio sigue aunque se vaya el internet; todo se sincroniza al reconectarse
 
 ### Registro de egresos

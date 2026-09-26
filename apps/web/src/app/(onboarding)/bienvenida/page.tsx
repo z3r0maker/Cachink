@@ -34,5 +34,5 @@ export default async function BienvenidaPage({
     q.modo === 'reconfigurar'
       ? '/bienvenida/revisar'
       : `/bienvenida/plan${plan === undefined ? '' : `?plan=${plan}`}`;
-  return <Wizard initial={data.answers} next={next} />;
+  return <Wizard initial={data.answers} next={next} intro={q.modo !== 'reconfigurar'} />;
 }

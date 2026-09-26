@@ -46,7 +46,7 @@ export async function guardarEmpleado(
         form,
       }),
     );
-    revalidatePath('/empleados');
+    revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
     return fallo(error, 'guardarEmpleado');
@@ -60,7 +60,7 @@ export async function darDeBajaEmpleado(id: string): Promise<EmpleadoResult> {
     await withTenant(biz, (tx) =>
       new DarDeBajaEmpleadoUseCase(pgEmployeesRepository(tx, biz)).execute(id as EmployeeId),
     );
-    revalidatePath('/empleados');
+    revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
     return fallo(error, 'darDeBajaEmpleado');

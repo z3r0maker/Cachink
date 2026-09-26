@@ -26,10 +26,34 @@ test('the active nav item follows the route', async ({ page }) => {
     'aria-current',
     'page',
   );
-  await expect(page.getByRole('link', { name: 'Negocio' })).not.toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Estados financieros' })).not.toHaveAttribute(
     'aria-current',
     'page',
   );
+});
+
+/**
+ * ADR-107: settings moved from the sidebar to the account menu. Each entry
+ * must reach its screen, and Sincronización carries the same count as the pill.
+ */
+test('the account menu reaches the business settings', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Menú de usuario' }).click();
+  const menu = page.getByRole('menu');
+  for (const name of ['Mi negocio', 'Plan y pagos', 'Sincronización', 'Ayuda']) {
+    await expect(menu.getByRole('menuitem', { name: new RegExp(name) })).toBeVisible();
+  }
+  await menu.getByRole('menuitem', { name: /Mi negocio/ }).click();
+  await expect(page).toHaveURL(/\/negocio$/);
+});
+
+test('⌘K finds a screen by name, accents or not', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Buscar o ir a' }).click();
+  // «revision» without the accent must still find «Revisión de caja».
+  await page.getByRole('combobox', { name: 'Buscar' }).fill('revision');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/revision-caja$/);
 });
 
 /**

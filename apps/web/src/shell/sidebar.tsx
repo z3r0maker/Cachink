@@ -1,26 +1,23 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
-
-import { Coin, Icon } from './icon';
-import { NAV_ITEMS, type NavItem } from './nav-items';
+import { BusinessSwitcher, type NegocioOption } from './business-switcher';
+import { Coin } from './icon';
+import { NAV_GROUPS, type NavItem } from './nav-items';
+import { AyudaFooter, NavLink, PasosCard, type Pasos } from './sidebar-parts';
 import {
   aside,
-  badge,
   brandBlock,
-  divider,
-  dividerLabel,
-  dividerRule,
+  groupLabel,
   nav,
-  navItem,
   railToggle,
-  navLabel,
+  switcherSlot,
   wordmark,
 } from './sidebar.css';
+
+export type { Pasos };
 
 function isActive(item: NavItem, pathname: string): boolean {
   const path = item.href.split('?')[0] ?? '/';
@@ -30,28 +27,6 @@ function isActive(item: NavItem, pathname: string): boolean {
 
 /** Pending counts by item href, e.g. `{ '/revision-caja': 6 }`; zero shows nothing. */
 export type NavBadges = Readonly<Partial<Record<string, number>>>;
-
-function NavLink(p: { readonly item: NavItem; readonly active: boolean; readonly badge?: number }) {
-  const { item } = p;
-  const n = p.badge ?? 0;
-  return (
-    <Link
-      href={item.href}
-      title={item.label}
-      aria-label={n > 0 ? `${item.label}, ${n} pendientes` : undefined}
-      className={navItem}
-      aria-current={p.active ? 'page' : undefined}
-    >
-      <Icon path={item.icon} />
-      <span className={navLabel}>{item.label}</span>
-      {n > 0 ? (
-        <span className={badge} aria-hidden="true">
-          {n}
-        </span>
-      ) : null}
-    </Link>
-  );
-}
 
 /**
  * The owner's rail choice (P-24), remembered in this browser only. Storage can
@@ -97,32 +72,52 @@ function BrandBlock({ logoUrl }: { readonly logoUrl: string | null }) {
   );
 }
 
-export function Sidebar({
-  badges = {},
-  logoUrl = null,
-}: {
+export interface SidebarProps {
   readonly badges?: NavBadges;
   /** The owner's logo (N-19); null renders the XANGARRO! wordmark. */
   readonly logoUrl?: string | null;
-}) {
+  readonly current: NegocioOption;
+  readonly negocios: readonly NegocioOption[];
+  /** Setup progress; null hides the card (setup complete, or not the owner). */
+  readonly pasos: Pasos | null;
+}
+
+function Groups({ badges, pathname }: { readonly badges: NavBadges; readonly pathname: string }) {
+  return (
+    <nav className={nav} aria-label="Navegación principal">
+      {NAV_GROUPS.map((group) => (
+        <div
+          key={group.label ?? 'top'}
+          role="group"
+          aria-label={group.label ?? undefined}
+          style={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+        >
+          {group.label === null ? null : <div className={groupLabel}>{group.label}</div>}
+          {group.items.map((item: NavItem) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              active={isActive(item, pathname)}
+              badge={badges[item.href]}
+            />
+          ))}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+export function Sidebar({ badges = {}, logoUrl = null, current, negocios, pasos }: SidebarProps) {
   const pathname = usePathname();
   const { rail, toggle } = useRail();
   return (
     <aside className={aside} data-rail={rail}>
       <BrandBlock logoUrl={logoUrl} />
-      <nav className={nav} aria-label="Navegación principal">
-        {NAV_ITEMS.map((item) => (
-          <div key={item.href} style={{ display: 'contents' }}>
-            <NavLink item={item} active={isActive(item, pathname)} badge={badges[item.href]} />
-            {item.dividerAfter ? (
-              <div className={divider}>
-                <span className={dividerLabel}>Configuración</span>
-                <span className={dividerRule} />
-              </div>
-            ) : null}
-          </div>
-        ))}
-      </nav>
+      <div className={switcherSlot}>
+        <BusinessSwitcher current={current} negocios={negocios} />
+      </div>
+      {pasos === null ? null : <PasosCard pasos={pasos} />}
+      <Groups badges={badges} pathname={pathname} />
       <AyudaFooter />
       <button
         type="button"
@@ -134,23 +129,5 @@ export function Sidebar({
         {rail ? '»' : '« Contraer menú'}
       </button>
     </aside>
-  );
-}
-
-/**
- * The footer's «Ayuda» link (N-08): help is never more than one tap away.
- * Beside it, the aviso de privacidad (N-34): reachable from every screen.
- */
-function AyudaFooter() {
-  const link = { display: 'block', padding: '0 16px 8px', color: 'var(--gray-600)' } as const;
-  return (
-    <>
-      <a href="/ayuda" className={navLabel} style={link}>
-        Ayuda
-      </a>
-      <a href={AVISO_INTEGRAL_URL} className={navLabel} style={link}>
-        Aviso de privacidad
-      </a>
-    </>
   );
 }

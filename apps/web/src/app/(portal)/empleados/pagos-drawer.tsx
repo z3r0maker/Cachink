@@ -43,8 +43,9 @@ export function PagosEmpleadoDrawer({
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
+      eyebrow="Nómina"
       heading={empleado === null ? '' : `Pagos a ${empleado.nombre}`}
-      description="Cada pago se registró también como un gasto, desde el teléfono."
+      description="Cada pago se registró también como un gasto, desde la caja."
     >
       {empleado === null ? null : <ListaPagos nombre={empleado.nombre} pagos={pagos} />}
     </Drawer>
@@ -63,7 +64,7 @@ function ListaPagos({
   if (pagos.length === 0) {
     return (
       <p className={pagoFecha}>
-        Todavía no hay pagos ligados a {nombre}. Los pagos que el teléfono registre con esta persona
+        Todavía no hay pagos ligados a {nombre}. Los pagos que la caja registre con esta persona
         aparecen aquí.
       </p>
     );

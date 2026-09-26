@@ -3,9 +3,11 @@ import { sum, type Money } from '@xangarro/domain';
 import { matches } from '../ui/search';
 import type { MetodoVenta, VentaTurno } from './types';
 
-/** «Crédito» is the wire's word; the operator's screens say «Fiado». */
+/** The wire's words as the operator's screens say them: «Crédito» is «Fiado». */
+const DICHO: Readonly<Record<string, MetodoVenta>> = { Crédito: 'Fiado', 'QR/CoDi': 'QR / CoDi' };
+
 export function comoMetodo(metodo: string): MetodoVenta {
-  return metodo === 'Crédito' ? 'Fiado' : (metodo as MetodoVenta);
+  return DICHO[metodo] ?? (metodo as MetodoVenta);
 }
 
 export interface ResumenVentas {

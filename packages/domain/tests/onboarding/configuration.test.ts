@@ -10,7 +10,7 @@ import { DEFAULT_FEATURE_FLAGS } from '../../src/entities/feature-flags.js';
 
 const CURRENT: TenantConfiguration = {
   toggles: { ...DEFAULT_FEATURE_FLAGS },
-  paymentTypes: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'],
+  paymentTypes: ['Efectivo', 'Transferencia', 'Tarjeta'],
 };
 
 const clone = (c: TenantConfiguration): TenantConfiguration => ({
@@ -29,7 +29,6 @@ describe('diffConfiguration', () => {
       { kind: 'feature', key: 'ventasCredito', enabled: true },
       { kind: 'paymentType', method: 'Transferencia', enabled: false },
       { kind: 'paymentType', method: 'Tarjeta', enabled: false },
-      { kind: 'paymentType', method: 'QR/CoDi', enabled: false },
       { kind: 'paymentType', method: 'Crédito', enabled: true },
     ]);
   });
@@ -41,14 +40,14 @@ describe('diffConfiguration', () => {
   it('payment types are a set: order and duplicates are not changes', () => {
     const next: TenantConfiguration = {
       toggles: { ...DEFAULT_FEATURE_FLAGS },
-      paymentTypes: ['QR/CoDi', 'Tarjeta', 'Efectivo', 'Transferencia', 'Efectivo'],
+      paymentTypes: ['Tarjeta', 'Efectivo', 'Transferencia', 'Efectivo'],
     };
     assert.deepEqual(diffConfiguration(CURRENT, next), []);
   });
 
   it('emptying every payment type lists each removal', () => {
     const next: TenantConfiguration = { ...CURRENT, paymentTypes: [] };
-    assert.equal(diffConfiguration(CURRENT, next).length, 4);
+    assert.equal(diffConfiguration(CURRENT, next).length, 3);
   });
 });
 
@@ -58,7 +57,7 @@ describe('applyConfiguration', () => {
       {
         manejaInventario: true,
         vendeACredito: false,
-        metodosCobro: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'],
+        metodosCobro: ['Efectivo', 'Transferencia', 'Tarjeta'],
       },
       'xangarro',
     );
@@ -75,7 +74,7 @@ describe('applyConfiguration', () => {
     const withCredit = { ...CURRENT, paymentTypes: [...CURRENT.paymentTypes, 'Crédito' as const] };
     const result = answersToConfiguration({ vendeACredito: false }, 'xangarro');
     const next = applyConfiguration(withCredit, result);
-    assert.deepEqual(next.paymentTypes, ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi']);
+    assert.deepEqual(next.paymentTypes, ['Efectivo', 'Transferencia', 'Tarjeta']);
     assert.equal(next.toggles.ventasCredito, false);
   });
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { DON_CUENTAS, DonCuentasAvatar, ScreenBody, SegmentedTabs } from '@/components';
+import { DON_CUENTAS, ScreenBody, SegmentedTabs } from '@/components';
 import { useSession } from '@/session/provider';
 import { asesorShowsDiagnostico, resolveScreenState } from '@/session/gating';
 
@@ -13,25 +13,13 @@ import type { Role } from '@/session/types';
 import { Metas } from './metas';
 import { Anteriores, Capacidades, ParaTi } from './para-ti';
 import { CompartirDiagnostico } from './compartir-diagnostico';
-import { pageSubtitle, pageTitle } from './asesor.css';
+import { DonHero } from './hero';
 
 const TABS = [
   { value: 'parati', label: 'Para ti' },
   { value: 'metas', label: 'Metas' },
   { value: 'diagnostico', label: 'Diagnóstico' },
 ];
-
-function Heading() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-      <DonCuentasAvatar size="lg" />
-      <div>
-        <h1 className={pageTitle}>{DON_CUENTAS}</h1>
-        <p className={pageSubtitle}>Tu asesor: lo que tus números te están diciendo</p>
-      </div>
-    </div>
-  );
-}
 
 function Diagnostico() {
   const session = useSession();
@@ -72,16 +60,19 @@ export function AsesorScreen({
   data,
   metas,
   role,
+  hoy,
 }: {
   readonly data: AsesorPageData | null;
   readonly metas: MetasPageData | null;
   readonly role: Role;
+  /** The server's today (`YYYY-MM-DD`), so the hero's date matches the feed's. */
+  readonly hoy: string;
 }) {
   const [tab, setTab] = useState('parati');
 
   return (
     <>
-      <Heading />
+      <DonHero pendientes={data?.feed.length ?? 0} hoy={hoy} />
       <SegmentedTabs ariaLabel={DON_CUENTAS} value={tab} onValueChange={setTab} tabs={TABS} />
       {tab === 'parati' ? (
         <>

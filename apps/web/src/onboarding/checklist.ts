@@ -19,7 +19,7 @@ export interface ChecklistSignals {
   readonly tieneLogo: boolean;
   /** An RFC is on file — the owner wants Xangarro's invoice for the subscription. */
   readonly tieneRfc: boolean;
-  /** The payment types differ from the default four: someone looked at them. */
+  /** The payment types differ from the full offered set: someone looked at them. */
   readonly pagosRevisados: boolean;
 }
 
@@ -87,16 +87,16 @@ const ITEMS: readonly ItemDef[] = [
   {
     key: 'codigo',
     group: 'requerido',
-    title: 'Genera el código de tu teléfono',
-    hint: 'Ocho letras para vincular el teléfono a tu negocio.',
+    title: 'Genera el código de tu caja',
+    hint: 'Ocho letras para conectar tu caja —teléfono o computadora— a tu negocio.',
     href: '/equipo?tab=dispositivos',
     isDone: (s) => s.codigoGenerado || s.dispositivosActivos > 0,
   },
   {
     key: 'dispositivo',
     group: 'requerido',
-    title: 'Vincula tu teléfono',
-    hint: 'Se marca solo cuando el teléfono usa el código.',
+    title: 'Conecta tu caja',
+    hint: 'Se marca solo cuando tu caja usa el código.',
     href: null,
     isDone: (s) => s.dispositivosActivos > 0,
   },
@@ -112,7 +112,7 @@ const ITEMS: readonly ItemDef[] = [
     key: 'pagos',
     group: 'opcional',
     title: 'Revisa tus tipos de pago',
-    hint: 'Efectivo, transferencia, tarjeta, QR. Si los cuatro te sirven, déjalo así.',
+    hint: 'Efectivo, transferencia y tarjeta. Si los tres te sirven, déjalo así.',
     href: '/negocio',
     isDone: (s) => s.pagosRevisados,
   },

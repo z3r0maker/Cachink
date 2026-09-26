@@ -31,6 +31,7 @@ export function Panel(p: {
     <Drawer
       open={c !== null}
       onOpenChange={(o) => (o ? undefined : p.onClose())}
+      eyebrow="Corte de turno"
       heading={c?.operador ?? ''}
       headerTone={c?.tint}
       width={560}

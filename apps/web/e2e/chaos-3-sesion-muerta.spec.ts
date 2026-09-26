@@ -106,9 +106,9 @@ test(
     await pageB.getByTestId('negocio-nombre').fill(nameB);
 
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(page.locator('header').getByText(nameA)).toBeVisible();
+    await expect(page.locator('aside').getByText(nameA)).toBeVisible();
     await pageB.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(pageB.locator('header').getByText(nameB)).toBeVisible();
+    await expect(pageB.locator('aside').getByText(nameB)).toBeVisible();
 
     // Finding F-3: both saves succeed silently and NEITHER tab surfaces a conflict
     // warning — last-write-wins with no inline notice. (Non-empty only: Next's

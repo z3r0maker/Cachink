@@ -74,7 +74,7 @@ export function Ultimos30Dias({ serie }: { readonly serie: InicioData['serie'] }
   const gastos = serie.reduce((t, d) => t + d.gastos, 0n);
   const resumen = `Últimos 30 días: ventas ${formatMoney(ventas)}, gastos ${formatMoney(gastos)}.`;
   return (
-    <Card>
+    <Card emphasis="quiet">
       <p style={{ margin: '0 0 12px' }}>{resumen}</p>
       <div role="img" aria-label={resumen} style={{ width: '100%', height: 260 }}>
         <Chart points={points} />

@@ -1,7 +1,7 @@
 /**
  * CheckoutMethodPicker — full-screen payment method selection.
  *
- * Shows the same 4 payment method cards as VentaCheckoutSheet but
+ * Shows the same payment method cards as VentaCheckoutSheet but
  * in a full-screen layout. Tapping a method navigates to the
  * method-specific checkout screen.
  */

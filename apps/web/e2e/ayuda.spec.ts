@@ -11,7 +11,9 @@ import { filled, filledAll } from './interact';
  */
 test('any member can send a help request and see the confirmation', async ({ page }) => {
   await page.goto('/ayuda');
-  await expect(page.getByRole('heading', { name: 'Ayuda', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '¿En qué te echo la mano?', level: 1 }),
+  ).toBeVisible();
 
   await filledAll([
     [page.getByPlaceholder('No entiendo el corte del día'), 'No veo el corte de ayer'],
@@ -40,8 +42,40 @@ test('an empty message is refused with the reason, nothing sent', async ({ page 
 
 test('the sidebar footer links to Ayuda from anywhere', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('aside').getByRole('link', { name: 'Ayuda' })).toHaveAttribute(
+  // ADR-107: the footer is Don Cuentas's «¿Atorado? Te echo la mano» card.
+  await expect(
+    page
+      .locator('aside')
+      .first()
+      .getByRole('link', { name: /¿Atorado\?/ }),
+  ).toHaveAttribute('href', '/ayuda');
+  // And the header's help button reaches the same page from every screen.
+  await expect(page.locator('header').getByRole('link', { name: 'Ayuda' })).toHaveAttribute(
     'href',
     '/ayuda',
+  );
+});
+
+test('the search narrows answers, and a guide walks through its steps', async ({ page }) => {
+  await page.goto('/ayuda');
+  await filled(page.getByRole('searchbox', { name: 'Busca tu duda' }), 'vincular');
+  const pregunta = page.getByRole('button', { name: '¿Cómo conecto la caja de quien cobra?' });
+  await expect(pregunta).toBeVisible();
+  await expect(page.getByRole('button', { name: '¿Cómo cambio de plan?' })).toHaveCount(0);
+  await pregunta.click();
+  await expect(page.getByRole('link', { name: /Ir a Cajas/ })).toHaveAttribute(
+    'href',
+    '/equipo?tab=cajas',
+  );
+
+  // The guides answer to their own words; an empty search lists them all.
+  await filled(page.getByRole('searchbox', { name: 'Busca tu duda' }), '');
+  await page.getByRole('button', { name: /Conecta la caja de quien cobra/ }).click();
+  const guia = page.getByRole('dialog', { name: 'Conecta la caja de quien cobra' });
+  await expect(guia.getByText('Paso 1 de 4')).toBeVisible();
+  for (let i = 0; i < 3; i += 1) await guia.getByRole('button', { name: 'Siguiente' }).click();
+  await expect(guia.getByRole('link', { name: 'Ir a Cajas' })).toHaveAttribute(
+    'href',
+    '/equipo?tab=cajas',
   );
 });

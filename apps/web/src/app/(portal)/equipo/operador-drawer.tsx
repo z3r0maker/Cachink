@@ -54,6 +54,7 @@ export function OperadorDetalle({ id, nombre }: { readonly id: string; readonly 
       <Drawer
         open={open}
         onOpenChange={setOpen}
+        eyebrow="Persona que cobra"
         heading={nombre}
         description="Sus turnos recientes en la caja."
       >

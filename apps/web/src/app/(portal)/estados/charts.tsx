@@ -3,7 +3,13 @@
 import { Card } from '@/components';
 import { formatMoneyEntero, type Desglose, type EstadoDeResultados } from '@xangarro/domain';
 
-import { CascadaSvg } from './cascada';
+import { useState } from 'react';
+
+import type { MermaFila } from '@/server/estados';
+
+import { Cascada } from './cascada';
+import { dicho } from './lado-data';
+import { MermaDrawer } from './merma-drawer';
 import { DonutSvg, PALETA_EGRESOS, PALETA_INGRESOS } from './donut';
 import { donutEgresos, donutIngresos, waterfallDeResultados } from './charts-data';
 import { donutGrid } from './charts.css';
@@ -18,15 +24,33 @@ import { chartSubtitle, chartTitle } from './estados.css';
  * drawing lives in `cascada.tsx` and `donut.tsx`; this file is the two cards
  * around them, and `charts-data.ts` stays the pure shape the tests pin.
  */
-export function Waterfall({ er }: { readonly er: EstadoDeResultados }) {
+export function Waterfall({
+  er,
+  mermas,
+}: {
+  readonly er: EstadoDeResultados;
+  readonly mermas: readonly MermaFila[];
+}) {
   const steps = waterfallDeResultados(er);
+  const [merma, setMerma] = useState(false);
+  const conMerma = er.merma > 0n && mermas.length > 0;
   return (
     <Card>
-      <h3 className={chartTitle}>Cascada de resultados</h3>
-      <p className={chartSubtitle}>De lo que vendiste a lo que te quedó</p>
-      <div role="img" aria-label={hablada(steps)}>
-        <CascadaSvg steps={steps} />
-      </div>
+      <h3 className={chartTitle}>De lo que vendiste a lo que te quedó</h3>
+      <p className={chartSubtitle}>Verde es lo que te queda; rojo, lo que se va.</p>
+      <Cascada
+        steps={steps}
+        hablada={hablada(steps)}
+        abrirMerma={conMerma ? () => setMerma(true) : undefined}
+      />
+      {conMerma ? (
+        <MermaDrawer
+          abierto={merma}
+          onCerrar={() => setMerma(false)}
+          mermas={mermas}
+          total={er.merma}
+        />
+      ) : null}
     </Card>
   );
 }
@@ -39,8 +63,8 @@ export function Waterfall({ er }: { readonly er: EstadoDeResultados }) {
 function hablada(steps: ReturnType<typeof waterfallDeResultados>): string {
   const partes = steps.map((s) =>
     s.kind === 'resta'
-      ? `menos ${s.label} ${formatMoneyEntero(s.monto)}`
-      : `${s.label} ${formatMoneyEntero(s.acumulado)}`,
+      ? `menos ${dicho(s.label)} ${formatMoneyEntero(s.monto)}`
+      : `${dicho(s.label)} ${formatMoneyEntero(s.acumulado)}`,
   );
   return `Cascada del Estado de Resultados: ${partes.join(', ')}.`;
 }

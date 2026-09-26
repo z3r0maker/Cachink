@@ -157,7 +157,7 @@ export function MovimientoDialog(props: {
       open={props.producto !== null}
       onOpenChange={(open) => (open ? undefined : props.onClose())}
       title={`Movimiento · ${props.producto?.nombre ?? ''}`}
-      body="Llega a todos los teléfonos en su siguiente sincronización."
+      body="Llega a todas tus cajas en su siguiente sincronización."
       confirmLabel={pending ? 'Guardando…' : 'Registrar'}
       confirmDisabled={pending}
       onConfirm={save}

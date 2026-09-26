@@ -16,13 +16,7 @@ import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
 
-const METODOS: readonly PaymentMethod[] = [
-  'Efectivo',
-  'Transferencia',
-  'Tarjeta',
-  'QR/CoDi',
-  'Crédito',
-];
+const METODOS: readonly PaymentMethod[] = ['Efectivo', 'Transferencia', 'Tarjeta', 'Crédito'];
 
 export interface VentaConfirmSheetProps {
   readonly open: boolean;

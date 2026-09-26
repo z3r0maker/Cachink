@@ -46,13 +46,13 @@ function useAction(onDone: (r: OperadorResult & { ok: true }) => void) {
   return { error, setError, pending, run };
 }
 
-function useNuevoOperador(onClose: () => void) {
-  const [nombre, setNombre] = useState('');
+function useNuevoOperador(onClose: () => void, inicial = '') {
+  const [nombre, setNombre] = useState(inicial);
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
   const action = useAction(() => {
     onClose();
-    setNombre('');
+    setNombre(inicial);
     setPin('');
     setConfirm('');
   });
@@ -91,28 +91,35 @@ function NuevoFields({ f }: { readonly f: ReturnType<typeof useNuevoOperador> })
 export function NuevoOperadorDialog({
   disabled,
   limit,
+  nombreInicial = '',
+  label = 'Nuevo operador',
 }: {
   readonly disabled: boolean;
   readonly limit: number;
+  /** «Darle acceso a la caja» from a payroll row: the name is already known. */
+  readonly nombreInicial?: string;
+  readonly label?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const f = useNuevoOperador(() => setOpen(false));
+  const f = useNuevoOperador(() => setOpen(false), nombreInicial);
 
   return (
     <>
       {/* Disabled rather than hidden: the limit is the message. */}
       <Button
+        variant={label === 'Nuevo operador' ? 'primary' : 'secondary'}
         disabled={disabled}
         title={`Tu plan incluye ${limit} operadores`}
+        aria-label={nombreInicial === '' ? undefined : `${label} a ${nombreInicial}`}
         onClick={() => setOpen(true)}
       >
-        Nuevo operador
+        {label}
       </Button>
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
         title="Nuevo operador"
-        body="Entra al teléfono con su nombre y su NIP. No necesita correo."
+        body="Entra a la caja con su nombre y su NIP. No necesita correo."
         confirmLabel={f.pending ? 'Guardando…' : 'Guardar'}
         onConfirm={f.save}
       >
@@ -170,7 +177,7 @@ export function DesactivarDialog({ id, nombre, open, onOpenChange, onDone }: Dia
       open={open}
       onOpenChange={onOpenChange}
       title={`Desactivar a ${nombre}`}
-      body="No podrá entrar a los teléfonos. Sus ventas y registros se conservan."
+      body="No podrá entrar a las cajas. Sus ventas y registros se conservan."
       confirmLabel={pending ? 'Desactivando…' : 'Desactivar'}
       destructive
       onConfirm={() => run(() => desactivarOperador(id))}

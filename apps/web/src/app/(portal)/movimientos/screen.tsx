@@ -33,7 +33,7 @@ function Body({ m }: { readonly m: Movimientos }) {
       onRetry={() => window.location.reload()}
       empty={{
         title: `Aún no hay ${m.tab === 'gastos' ? 'gastos' : 'ventas'} en este periodo`,
-        body: 'Lo que registren tus operadores en el teléfono aparecerá aquí.',
+        body: 'Lo que se cobre en tus cajas aparecerá aquí.',
       }}
     >
       <DataTable

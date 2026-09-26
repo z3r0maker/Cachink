@@ -49,12 +49,6 @@ export const METODOS_COBRO: readonly ChoiceDef[] = [
     icon: ICON.transfer,
   },
   {
-    value: 'QR/CoDi',
-    title: 'QR / CoDi',
-    description: 'Tu cliente escanea y paga.',
-    icon: ICON.qr,
-  },
-  {
     value: 'Crédito',
     title: 'Crédito',
     description: 'Entregas hoy y te pagan después.',
@@ -74,7 +68,7 @@ export const toYesNo = (v: boolean | undefined): string | null =>
   v === undefined ? null : v ? 'si' : 'no';
 
 export const PERSONAS: readonly ChoiceDef[] = [
-  { value: '1', title: 'Solo yo', description: 'Una persona, un teléfono.', icon: ICON.user },
+  { value: '1', title: 'Solo yo', description: 'Una persona, una caja.', icon: ICON.user },
   { value: '2', title: 'Dos personas', description: 'Tú y alguien más.', icon: ICON.users },
   { value: '3', title: 'De 3 a 5', description: 'Un equipo pequeño.', icon: ICON.users },
   { value: '6', title: 'Más de 5', description: 'Varios turnos o cajas.', icon: ICON.store },

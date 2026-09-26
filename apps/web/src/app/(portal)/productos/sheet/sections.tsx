@@ -1,9 +1,7 @@
 'use client';
 
 import {
-  InventoryCategoryEnum,
   InventoryUnitEnum,
-  type InventoryCategory,
   type InventoryUnit,
   type ProductoTipo,
   type UsoProducto,
@@ -32,7 +30,7 @@ const TIPOS = [
   { value: 'servicio', title: 'Servicio', description: 'Se cobra, pero no tiene existencias.' },
 ];
 const USOS = [
-  { value: 'venta', title: 'Para vender', description: 'Aparece en la caja de los teléfonos.' },
+  { value: 'venta', title: 'Para vender', description: 'Aparece en tus cajas.' },
   {
     value: 'materia-prima',
     title: 'Materia prima',
@@ -68,16 +66,6 @@ export function Basico({ draft, set, editing }: SectionProps) {
           onValueChange={(v) => set({ tipo: v as ProductoTipo })}
         />
       )}
-      <div className={chipRow} role="group" aria-label="Categoría">
-        {InventoryCategoryEnum.options.map((c) => (
-          <FilterChip
-            key={c}
-            label={c}
-            selected={draft.categoria === c}
-            onSelect={() => set({ categoria: c as InventoryCategory })}
-          />
-        ))}
-      </div>
     </div>
   );
 }

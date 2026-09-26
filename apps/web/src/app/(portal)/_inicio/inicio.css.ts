@@ -1,29 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, fontSizes, portalFontSizes, typography } from '@xangarro/tokens';
-
-export const heroRow = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-  gap: 20,
-  alignItems: 'start',
-});
-
-export const heroFigure = style({
-  margin: '12px 0 0',
-  fontSize: portalFontSizes.hero,
-  lineHeight: 1,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tightest,
-  fontVariantNumeric: 'tabular-nums',
-  color: colors.black,
-});
-
-export const heroRange = style({
-  marginTop: 10,
-  fontSize: fontSizes.md,
-  fontWeight: typography.weights.bold,
-  color: colors.black,
-});
+import { colors, fontSizes, typography } from '@xangarro/tokens';
 
 export const sectionTitle = style({
   margin: 0,
@@ -40,14 +16,6 @@ export const pageTitle = style({
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tighter,
   color: colors.black,
-});
-
-export const pageDate = style({
-  // Inicio's page subtitle: «a 15px/600 --gray-600 subtitle 6px below» (S-4).
-  marginTop: 6,
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
 });
 
 export const listRow = style({
@@ -85,27 +53,3 @@ export const rowAmount = style({
 
 export const amountPositive = style({ color: colors.greenText });
 export const amountNegative = style({ color: colors.redText });
-
-export const grid3 = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-  gap: 16,
-  alignItems: 'start',
-});
-
-export const lowStockCount = style({
-  margin: '4px 0 12px',
-  fontSize: portalFontSizes.display,
-  lineHeight: 1,
-  fontWeight: typography.weights.extraBold,
-  fontVariantNumeric: 'tabular-nums',
-  color: colors.redText,
-});
-
-export const heroEyebrow = style({
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  letterSpacing: typography.letterSpacing.wider,
-  textTransform: 'uppercase',
-  color: colors.black,
-});

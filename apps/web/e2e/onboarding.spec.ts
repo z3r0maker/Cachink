@@ -13,6 +13,7 @@ async function next(page: Page, label = 'Siguiente') {
 }
 
 async function answerWizard(page: Page) {
+  await next(page, '¡Va, empecemos!');
   await expect(page.getByText('Paso 1 de 8')).toBeVisible();
   await expect(page.getByTestId('wizard-nombre')).toHaveValue('Tortas Lupita');
   await page.getByRole('radio', { name: /Servicios/ }).click();
@@ -81,13 +82,15 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await expect(page.getByText(/14 días/)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Seguir gratis' }).click();
-  await expect(page.getByRole('heading', { name: '¿Cómo empiezo?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Primeros pasos' })).toBeVisible();
   // A brand-new business has ticked nothing. «Para vender» is what gates the
   // portal (P-36 D-2); «Cuando quieras» is listed but never counts.
   const requerido = page.getByTestId('checklist-requerido');
   const opcional = page.getByTestId('checklist-opcional');
   await expect(
-    page.getByText(`0 de ${await requerido.locator('li[data-done]').count()} listos`),
+    page.getByText(`0 de ${await requerido.locator('li[data-done]').count()} listos`, {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(requerido.locator('li[data-done="true"]')).toHaveCount(0);
   await expect(opcional.locator('li[data-done]')).toHaveCount(3);

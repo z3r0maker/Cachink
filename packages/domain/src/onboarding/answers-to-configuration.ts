@@ -14,7 +14,7 @@ import {
   type FeatureFlags,
 } from '../entities/feature-flags.js';
 import { PLAN_IDS, PlanIdSchema, type PlanId } from '../entities/plan.js';
-import { PaymentMethodEnum, type PaymentMethod } from '../entities/sale.js';
+import { OFFERED_PAYMENT_METHODS, type PaymentMethod } from '../entities/sale.js';
 import { OnboardingError } from './errors.js';
 import {
   cheapestPlanFor,
@@ -55,9 +55,10 @@ export interface WizardConfiguration {
   readonly pendingPaidAnswers: readonly PendingPaidAnswer[];
 }
 
+/** The offered methods among `methods`, in enum order; a retired one (ADR-108) drops out. */
 export function canonicalPaymentTypes(methods: Iterable<PaymentMethod>): PaymentMethod[] {
   const wanted = new Set(methods);
-  return PaymentMethodEnum.options.filter((m) => wanted.has(m));
+  return OFFERED_PAYMENT_METHODS.filter((m) => wanted.has(m));
 }
 
 /** `key` and every flag that transitively depends on it. */

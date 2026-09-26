@@ -13,10 +13,11 @@ import { activoLines, flujoLines, pasivoLines, resultadosLines } from './lines';
 import { IsrNotice, Resumen } from './parts';
 import { Indicadores } from './indicadores';
 import { FlujoCard } from './flujo-card';
-import { pageSubtitle, pageTitle } from './estados.css';
+import { pageSubtitle, pageTitle, resultadosGrid } from './estados.css';
 import type { Periodo } from './periodo';
 import { PeriodoSwitcher } from './periodo-switcher';
 import { Donuts, Waterfall } from './charts';
+import { LadoResultados } from './lado';
 import { Statement } from './statement';
 
 const TABS = [
@@ -37,7 +38,10 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         label="Utilidad neta"
       />
       <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} regimenSat={m.regimenSat} />
-      <Waterfall er={ER} />
+      <div className={resultadosGrid}>
+        <Waterfall er={ER} mermas={m.mermas} />
+        <LadoResultados er={ER} />
+      </div>
       <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER, m.desglose)} />
       <Donuts desglose={m.desglose} />
     </>

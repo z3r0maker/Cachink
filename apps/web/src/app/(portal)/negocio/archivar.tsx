@@ -49,7 +49,7 @@ export function ArchivarNegocio({ nombre }: { readonly nombre: string }) {
         onOpenChange={setOpen}
         destructive
         title="¿Archivar tu negocio?"
-        body={`Nadie podrá entrar y los teléfonos se desvinculan. Para confirmar, escribe «${nombre}».`}
+        body={`Nadie podrá entrar y las cajas se desconectan. Para confirmar, escribe «${nombre}».`}
         confirmLabel={pending ? 'Archivando…' : 'Archivar'}
         onConfirm={confirm}
       >

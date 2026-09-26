@@ -21,6 +21,8 @@ describe('Xangarro brand theme', () => {
   it('defines only 2px or 2.5px black borders', () => {
     expect(borders.thin).toBe('2px solid #0D0D0D');
     expect(borders.thick).toBe('2.5px solid #0D0D0D');
+    // ADR-107: the only non-black edge, for read-only surfaces.
+    expect(borders.quiet).toBe('2px solid #E4E4E0');
   });
 
   it('defines weights from 400 through 900', () => {

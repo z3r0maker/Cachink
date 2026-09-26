@@ -65,12 +65,24 @@ export async function ticketParaComprobante(
   }));
   return {
     folio: folioDisplay(ticket.folio),
-    fechaHora: `${ticket.fecha}T${ticket.hora ?? '12:00'}:00-06:00`,
+    fechaHora: estampa(ticket.fecha, ticket.hora),
     metodo: ticket.metodo,
     total: vivas.reduce((suma, l) => suma + l.importe, 0n),
     lineas: vivas.slice(0, 3),
     cancelada: ticket.canceladoAt !== null,
   };
+}
+
+/**
+ * «YYYY-MM-DDTHH:MM:00-06:00» from a ticket's day and time. Clients have written
+ * `fecha` as a bare day or a full stamp, and `hora` as «09:02», «9:02» or with
+ * seconds; any of those glued as-is made an Invalid Date the receipt renderer
+ * threw on (the preview's «Invalid time value»).
+ */
+export function estampa(fecha: string, hora: string | null): string {
+  const [h = '12', m = '00'] = (hora ?? '12:00').split(':');
+  const hhmm = `${h.padStart(2, '0')}:${m.slice(0, 2).padStart(2, '0')}`;
+  return `${String(fecha).slice(0, 10)}T${hhmm}:00-06:00`;
 }
 
 /** The business's most recent live ticket, for previews. */

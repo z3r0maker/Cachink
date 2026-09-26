@@ -19,7 +19,7 @@ export function describirEvento(e: Evento): string {
   const quien = e.dispositivo ?? 'Un dispositivo desvinculado';
   if (e.tipo === 'envio') return `${quien} envió ${registros(e.registros)}.`;
   if (e.tipo === 'rechazo') return `Se rechazaron ${registros(e.registros)} de ${quien}.`;
-  return `Cambios en el portal: ${registros(e.registros)} para los teléfonos.`;
+  return `Cambios en el portal: ${registros(e.registros)} para las cajas.`;
 }
 
 export function HistorialCard({ eventos }: { readonly eventos: readonly Evento[] }) {

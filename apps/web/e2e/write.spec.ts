@@ -124,9 +124,10 @@ test(
     await page.getByTestId('negocio-nombre').fill(renamed);
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
-    // The shell reads the business name from the row, so seeing it in the header
-    // proves the value came back out of Postgres.
-    await expect(page.locator('header').getByText(renamed)).toBeVisible();
+    // The shell reads the business name from the row, so seeing it in the
+    // sidebar's switcher (ADR-107 moved it off the header) proves the value
+    // came back out of Postgres.
+    await expect(page.locator('aside').getByText(renamed)).toBeVisible();
     expect(await syncLogCount('businesses')).toBe(before + 1);
   },
 );

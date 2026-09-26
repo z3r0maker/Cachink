@@ -33,7 +33,7 @@ function Rechazados({ n }: { readonly n: number }) {
       <Banner
         tone="warning"
         title={`${n} ${n === 1 ? 'registro rechazado' : 'registros rechazados'}`}
-        body="Este teléfono mandó movimientos que no pudimos guardar. Revísalos en Sincronización."
+        body="Esta caja mandó movimientos que no pudimos guardar. Revísalos en Sincronización."
       />
     </div>
   );

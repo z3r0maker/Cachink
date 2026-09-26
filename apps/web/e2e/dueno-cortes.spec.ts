@@ -20,7 +20,7 @@ test('the month: −$60.00 net and the seeded cortes listed', async ({ page }) =
   await expect(page.getByText('−$60.00').first()).toBeVisible();
   await expect(
     // The sidebar's entry, not the breadcrumb's link of the same name.
-    page.getByRole('navigation').getByRole('link', { name: 'Tu equipo', exact: true }),
+    page.getByRole('navigation').getByRole('link', { name: 'Equipo y nómina', exact: true }),
   ).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('row', { name: /Ana Robledo.*13 may/ })).toHaveCount(1);
   await expect(page.getByRole('row', { name: /Luis Ortega.*12 may/ })).toHaveCount(1);

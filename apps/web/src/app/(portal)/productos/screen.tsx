@@ -77,7 +77,11 @@ function Controls({
   return (
     <>
       {isCatalogo && low > 0 ? (
-        <LowStockBanner low={low} onShow={() => setFilter('Stock bajo')} />
+        <LowStockBanner
+          low={low}
+          negativos={catalogo.filter((p) => p.sigueStock && p.stock < 0).length}
+          onShow={() => setFilter('Stock bajo')}
+        />
       ) : null}
       <Tabs tab={tab} onChange={onTab} catalogCount={catalogo.length} movCount={movCount} />
       {isCatalogo ? <Kpis rows={catalogo} /> : <KpisMovimientos rows={movimientos} />}

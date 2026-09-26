@@ -19,50 +19,44 @@ test('Inicio dates itself from the business clock and draws the last 30 days', a
   await expect(main.locator('.recharts-line')).toHaveCount(2);
 });
 
-/** O-24/ADR-087: the greeting names the account from `auth.users` (seeded: Pedro). */
+/**
+ * O-24/ADR-087: the greeting names the account from `auth.users` (seeded:
+ * Pedro). ADR-107 moved the setup checklist off Hoy into the sidebar's
+ * «Primeros pasos» card; it must count exactly what «¿Cómo empiezo?» lists.
+ */
 test(
-  'the greeting names the account and the checklist card reads real data',
+  'the greeting names the account and Primeros pasos counts the real checklist',
   { tag: SERIAL_TAG },
   async ({ page }) => {
-    // Order-independent: the branding e2e (C-15) may have left a logo on the
-    // seeded business, and this test asserts the logo-pending count. Clearing it
-    // is a write to the shared tenant, which is what `@serial` is for.
+    // The branding e2e (C-15) may have left a logo; clearing it keeps «Sube tu
+    // logo» open, so the card is guaranteed to show. A shared-tenant write.
     await asTenant(BIZ, (sql) => sql`UPDATE businesses SET logo_url = NULL WHERE id = ${BIZ}`);
     await page.goto('/');
-    const main = page.locator('main');
-    await expect(main.getByRole('heading', { name: 'Hola, Pedro' })).toBeVisible();
-    const card = main.getByTestId('inicio-checklist');
-    await expect(card).toBeVisible();
+    await expect(page.locator('main').getByRole('heading', { name: 'Hola, Pedro' })).toBeVisible();
 
-    // P-36: «Para vender» is the progress; the optional list never blocks. A
-    // census keeps this independent of suite order (saldos may or may not be
-    // ticked by `saldos-iniciales.spec.ts` having run first).
-    const requeridos = card.locator('li[data-group="requerido"]');
-    const total = await requeridos.count();
-    const listos = await card.locator('li[data-group="requerido"][data-done="true"]').count();
-    const opcionales = await card.locator('li[data-group="opcional"][data-done="false"]').count();
-    await expect(
-      main.getByText(
-        listos === total
-          ? `Listo para vender. ${opcionales} opcional${opcionales === 1 ? '' : 'es'} por hacer.`
-          : `${listos} de ${total} listos.`,
-      ),
-    ).toBeVisible();
+    await page.goto('/como-empiezo');
+    const items = page.locator('[data-testid^="checklist-"] li');
+    const total = await items.count();
+    const done = await page.locator('[data-testid^="checklist-"] li[data-done="true"]').count();
+    // Really reading data: the seed ticks five steps and the logo is open.
+    expect(done).toBeGreaterThanOrEqual(5);
+    expect(done).toBeLessThan(total);
 
-    // And it is really reading data, not rendering a constant: the seed ticks
-    // operador, productos, código, dispositivo and venta, and the logo was just
-    // cleared above, so the optional list cannot be done.
-    expect(listos).toBeGreaterThanOrEqual(5);
-    expect(opcionales).toBeGreaterThanOrEqual(1);
-    await expect(card.locator('li[data-done="false"]').getByText('Sube tu logo')).toBeVisible();
-    await expect(main.getByRole('link', { name: 'Ver todo' })).toHaveAttribute(
-      'href',
-      '/como-empiezo',
-    );
+    await page.goto('/');
+    const card = page.locator('aside').getByRole('link', { name: /Primeros pasos/ });
+    await expect(card).toContainText(`${done} de ${total}`);
+    await expect(card).toHaveAttribute('href', '/como-empiezo');
   },
 );
 
-test('the low-stock banner links into the filtered catalogue', async ({ page }) => {
+/** ADR-107: the pending list is built from the same rows as the badges. */
+test('Hoy lists low stock among today’s pending items', async ({ page }) => {
+  await page.goto('/');
+  const lista = page.locator('main').getByTestId('hoy-pendientes');
+  await expect(lista.getByRole('link', { name: /se (está|están) acabando/ })).toBeVisible();
+});
+
+test('the low-stock row links into the filtered catalogue', async ({ page }) => {
   await page.goto('/');
   await page.locator('main').getByRole('link', { name: 'Ver productos' }).click();
   await expect(page).toHaveURL(/\/productos\?filtro=bajo$/);

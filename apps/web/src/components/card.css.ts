@@ -1,5 +1,5 @@
 import { recipe } from '@vanilla-extract/recipes';
-import { colors, radii, shadows } from '@xangarro/tokens';
+import { borders, colors, radii, shadows } from '@xangarro/tokens';
 
 import { liftOnHover } from '../styles/press.css';
 
@@ -12,6 +12,10 @@ import { liftOnHover } from '../styles/press.css';
  *
  * `standard` is the everyday panel; `hero` is the flat-yellow headline surface
  * with the heavier border, larger radius and deeper shadow.
+ *
+ * `quiet` (ADR-107) is the one exception to the rule above: a read-only panel
+ * — figures, lists, charts — with the gray edge and no shadow, so the black
+ * border and shadow stay the sign of something you can act on.
  */
 export const card = recipe({
   base: { background: colors.white, border: `2px solid ${colors.black}` },
@@ -36,6 +40,7 @@ export const card = recipe({
         padding: 28,
       },
       inset: { borderRadius: radii[2], boxShadow: 'none', padding: 16 },
+      quiet: { border: borders.quiet, borderRadius: radii[6], boxShadow: 'none', padding: 20 },
     },
     interactive: { true: [liftOnHover, { cursor: 'pointer' }] },
   },

@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { card } from './card.css';
 
 type Tone = 'plain' | 'hero' | 'soft' | 'success' | 'danger' | 'warning' | 'info' | 'muted';
-type Emphasis = 'standard' | 'hero' | 'inset';
+type Emphasis = 'standard' | 'hero' | 'inset' | 'quiet';
 
 export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
   readonly tone?: Tone;

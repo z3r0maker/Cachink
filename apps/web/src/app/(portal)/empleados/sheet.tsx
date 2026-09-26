@@ -75,12 +75,14 @@ function EmpleadoSheet(props: {
   readonly editing: Empleado | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
+  readonly nombre?: string;
 }) {
-  const f = useEmpleadoForm(props.editing, () => props.onOpenChange(false));
+  const f = useEmpleadoForm(props.editing, () => props.onOpenChange(false), props.nombre);
   return (
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
+      eyebrow="Mi gente"
       heading={props.editing ? `Editar a ${props.editing.nombre}` : 'Nuevo empleado'}
       description="Quién trabaja contigo y cuánto le pagas por periodo."
       actions={<Actions f={f} editing={props.editing !== null} />}
@@ -90,12 +92,27 @@ function EmpleadoSheet(props: {
   );
 }
 
-export function NuevoEmpleadoSheet() {
+/**
+ * «Nuevo empleado», or «Agregar a nómina» from someone who already cobra at
+ * the caja (ADR-107): then the name is already known.
+ */
+export function NuevoEmpleadoSheet({ nombre }: { readonly nombre?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Nuevo empleado</Button>
-      <EmpleadoSheet editing={null} open={open} onOpenChange={setOpen} />
+      {nombre === undefined ? (
+        <Button onClick={() => setOpen(true)}>Nuevo empleado</Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setOpen(true)}
+          aria-label={`Agregar a ${nombre} a la nómina`}
+        >
+          Agregar a nómina
+        </Button>
+      )}
+      <EmpleadoSheet editing={null} open={open} onOpenChange={setOpen} nombre={nombre} />
     </>
   );
 }

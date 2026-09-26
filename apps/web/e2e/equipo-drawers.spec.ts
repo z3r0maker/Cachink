@@ -92,7 +92,10 @@ test('a full plan says so, the drawer shows cortes, and Desvincular frees the sl
   await page.goto('/equipo?tab=dispositivos');
 
   const main = page.locator('main');
-  await expect(page.locator('header').getByText('Plan Xangarrito')).toBeVisible();
+  // ADR-107: the plan sits in the account menu, beside «Plan y pagos».
+  await page.getByRole('button', { name: 'Menú de usuario' }).click();
+  await expect(page.getByRole('menuitem', { name: /Plan y pagos\s*Xangarrito/ })).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(main.getByText('1 de 1 dispositivos')).toBeVisible();
   await expect(
     main.getByText(/todos están vinculados\. Un código nuevo solo funcionará/),

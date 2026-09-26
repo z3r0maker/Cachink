@@ -72,17 +72,20 @@ test('an expandable line lists what it is made of, largest first', async ({ page
 test('the Resultados waterfall and donuts render from the same numbers', async ({ page }) => {
   await page.goto('/estados');
   const main = (p: Page) => p.locator('main');
-  const cascada = main(page).getByRole('img', { name: /Cascada del Estado de Resultados/ });
+  // ADR-107 laid the cascade on its side as a table: one row per step, in the
+  // owner's words, and the table's name speaks the whole walk.
+  const cascada = main(page).getByRole('table', { name: /Cascada del Estado de Resultados/ });
   await expect(cascada).toBeVisible();
-  // May's seed draws at least the three anchored levels (ingresos, bruta, neta);
-  // an exact count would be brittle to the rows other specs legitimately add.
-  // The bars are the cascada's own `rect`s: C-13 transcribed the chart from the
-  // design and dropped Recharts, so the `.recharts-bar-rectangle` this counted
-  // has not existed for a while — and counted zero, happily, in a project that
-  // a viewport failure kept skipping. They also grow on mount, hence the poll.
-  await expect
-    .poll(() => cascada.locator('rect').count(), { timeout: 10_000 })
-    .toBeGreaterThanOrEqual(6);
+  await expect(cascada).toHaveAttribute('aria-label', /Lo que vendiste .*Te quedó/);
+  // May's seed draws at least the three anchored levels and the drops between
+  // them; an exact count would be brittle to the rows other specs add.
+  await expect.poll(() => cascada.getByRole('row').count()).toBeGreaterThanOrEqual(6);
+  await expect(cascada.getByRole('row').first()).toContainText('la base: 100%');
+  // Beside it, the month's break-even (ADR-107).
+  // May's seed sells below cost, so the tile says that rather than a target.
+  await expect(main(page).getByTestId('para-no-perder')).toContainText(
+    'Hoy vendes abajo de lo que te cuesta',
+  );
   // The donuts were drawn to the design in the same change, and with them went
   // the names this asserted («Ingresos por método») and the «Total: $885.00.»
   // line — the total now lives inside the ring. Each donut speaks its own

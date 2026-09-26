@@ -8,24 +8,13 @@ import { colors, portalFontSizes, typography } from '@xangarro/tokens';
  */
 
 /**
- * The design's own chart motion: bars unroll from the level they start at over
- * 520ms, the donut sweeps over 420ms. Both are held under reduced motion,
+ * The design's own chart motion: flujo bars unroll over 520ms, the donut
+ * sweeps over 420ms. Both are held under reduced motion,
  * where the mark simply appears at full size.
  */
-const crecer = keyframes({
-  from: { transform: 'scaleY(0)' },
-  to: { transform: 'scaleY(1)' },
-});
-
 const barrer = keyframes({
   from: { transform: 'rotate(-40deg)', opacity: 0 },
   to: { transform: 'rotate(0)', opacity: 1 },
-});
-
-export const crece = style({
-  transformBox: 'fill-box',
-  animation: `${crecer} 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both`,
-  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });
 
 export const barrido = style({

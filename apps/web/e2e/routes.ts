@@ -61,6 +61,14 @@ export const ROUTES: readonly Route[] = [
   // PRODUCTS p-tac sku → `productos/columns.tsx`.
   { path: '/productos', heading: 'Productos', data: { kind: 'db', sentinel: 'TAC-001' } },
   {
+    path: '/productos/nuevo',
+    heading: 'Nuevo producto',
+    data: {
+      kind: 'fixture',
+      reason: 'productos/nuevo/page.tsx renders an empty form; it reads no rows',
+    },
+  },
+  {
     path: '/revision-caja',
     heading: 'Revisión de caja',
     data: { kind: 'fixture', reason: 'fixture until C-18 — revision-caja/page.tsx' },
@@ -71,10 +79,10 @@ export const ROUTES: readonly Route[] = [
     data: { kind: 'fixture', reason: 'fixture until C-18 — cortes/page.tsx' },
   },
   // USERS u-ana; default tab `operadores`.
-  { path: '/equipo', heading: 'Tu equipo', data: { kind: 'db', sentinel: 'Ana Robledo' } },
+  { path: '/equipo', heading: 'Equipo y nómina', data: { kind: 'db', sentinel: 'Ana Robledo' } },
   // EMPLOYEES emp-rosa — deliberately not Ana, who is also a USER, so this
   // cannot pass by reading the wrong table.
-  { path: '/empleados', heading: 'Empleados', data: { kind: 'db', sentinel: 'Rosa Medina' } },
+  { path: '/empleados', heading: 'Equipo y nómina', data: { kind: 'db', sentinel: 'Rosa Medina' } },
   // NOTICES nt-1.
   {
     path: '/avisos',
@@ -97,6 +105,6 @@ export const ROUTES: readonly Route[] = [
     path: '/suscripcion',
     heading: 'Suscripción',
     // The seeded Xangarro subscription (seed-billing.ts), as the phones receive it.
-    data: { kind: 'db', sentinel: 'Tus teléfonos reciben el plan Xangarro' },
+    data: { kind: 'db', sentinel: 'Tus cajas reciben el plan Xangarro' },
   },
 ];

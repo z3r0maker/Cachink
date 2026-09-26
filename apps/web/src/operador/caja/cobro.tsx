@@ -23,12 +23,6 @@ const METODOS = [
   { label: 'Transferencia', paso: null, bg: colors.blueSoft, icon: 'M4 12h16M14 6l6 6-6 6' },
   { label: 'Tarjeta', paso: null, bg: colors.purpleSoft, icon: 'M3 6h18v12H3V6Zm0 4h18' },
   {
-    label: 'QR / CoDi',
-    paso: null,
-    bg: colors.peachSoft,
-    icon: 'M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 3h6M17 14v6',
-  },
-  {
     label: 'Fiado',
     paso: 'credito',
     bg: colors.warningSoft,

@@ -35,7 +35,6 @@ export const PAYMENT_OPTIONS: readonly OptionCardItem<PaymentMethod>[] = [
     description: 'SPEI o transferencia',
   },
   { key: 'Tarjeta', icon: 'credit-card', label: 'Tarjeta', description: 'Crédito o débito' },
-  { key: 'QR/CoDi', icon: 'smartphone', label: 'QR/CoDi', description: 'Cobro con código QR' },
 ] as const;
 
 // ---------------------------------------------------------------------------

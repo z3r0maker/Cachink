@@ -7,7 +7,7 @@ import { asTenant } from './sync-phone';
 
 /**
  * P-02's business switcher on throwaway tenants: an account in two businesses
- * starts on the first, switches to the second from the header, and sees the
+ * starts on the first, switches to the second from the sidebar (ADR-107), and sees the
  * second's data under its own role there.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -48,17 +48,17 @@ async function signIn(page: Page) {
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
 }
 
-test('an account in two businesses switches from the header', async ({ page }) => {
+test('an account in two businesses switches from the sidebar', async ({ page }) => {
   await signIn(page);
-  const header = page.locator('header');
-  await expect(header.getByText(A.nombre)).toBeVisible();
-  await expect(header.getByText('Dueño')).toBeVisible();
+  const aside = page.locator('aside');
+  await expect(aside.getByText(A.nombre)).toBeVisible();
+  await expect(aside.getByText('Dueño')).toBeVisible();
 
-  await header.getByRole('button', { name: 'Cambiar de negocio' }).click();
+  await aside.getByRole('button', { name: 'Cambiar de negocio' }).click();
   await page.getByRole('menuitemradio', { name: new RegExp(B.nombre) }).click();
 
-  await expect(header.getByText(B.nombre)).toBeVisible();
-  await expect(header.getByText('Solo lectura')).toBeVisible();
+  await expect(aside.getByText(B.nombre)).toBeVisible();
+  await expect(aside.getByText('Solo lectura')).toBeVisible();
   await page.goto('/negocio');
   await expect(page.locator('main').getByText(B.nombre)).toBeVisible();
   // Read-only there: the owner's controls are gone.

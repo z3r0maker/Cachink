@@ -28,8 +28,8 @@ obligatoria.
 
 **Qué puedes hacer**
 
-- 📈 **Ventas** — registra ventas con Efectivo, Transferencia, Tarjeta,
-  QR/CoDi, o Crédito. Comparte el comprobante por WhatsApp con un toque.
+- 📈 **Ventas** — registra ventas con Efectivo, Transferencia, Tarjeta o
+  Crédito. Comparte el comprobante por WhatsApp con un toque.
 - 📉 **Egresos** — Gasto, Nómina, e Inventario en un mismo modal con
   tres pestañas. Marca gastos como recurrentes y confirma con un toque
   cuando se disparan.

@@ -1,24 +1,25 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
-  Banner,
   Button,
+  DonDice,
   DataTable,
   ExportButton,
   FilterChip,
   KpiCard,
   kpiGrid,
 } from '@/components';
+import { button } from '@/components/button.css';
 import type { ProductosData } from '@/server/screens';
 
 import { margenPromedio } from './derive';
 
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
-import { NuevoProductoSheet } from './sheet/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
 export type Movimiento = ProductosData['movimientos'][number];
@@ -40,7 +41,9 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
           <Button variant="secondary" onClick={() => router.push('/importar?plantilla=productos')}>
             Importar desde Excel
           </Button>
-          <NuevoProductoSheet />
+          <Link href="/productos/nuevo" className={button({ variant: 'primary' })}>
+            Nuevo producto
+          </Link>
         </div>
       ) : null}
     </div>
@@ -105,24 +108,32 @@ export function KpisMovimientos({ rows }: { readonly rows: readonly Movimiento[]
   );
 }
 
+/**
+ * Don Cuentas on what is running out (ADR-107): how many are low, how many
+ * already went negative — sold more than was captured — and «Ver solo esos».
+ */
 export function LowStockBanner({
   low,
+  negativos,
   onShow,
 }: {
   readonly low: number;
+  readonly negativos: number;
   readonly onShow: () => void;
 }) {
+  const cuantos = low === 1 ? 'Un producto se está acabando' : `${low} productos se están acabando`;
+  const neg =
+    negativos === 0
+      ? '. Repón antes de que tus cajas se queden sin qué vender.'
+      : ` y ${negativos} ya ${negativos === 1 ? 'va' : 'van'} en negativo: se vendió más de lo que capturaste. Registra la compra para que cuadre.`;
   return (
-    <Banner
-      tone="critical"
-      title={`${low} productos están por debajo de su umbral.`}
-      body="Repón antes de que tus operadores se queden sin qué vender."
-      action={
-        <Button size="sm" variant="secondary" onClick={onShow}>
-          Ver stock bajo
-        </Button>
-      }
-    />
+    <DonDice pose="preocupado" size={80} tone="rojo">
+      {cuantos}
+      {neg}{' '}
+      <Button size="sm" variant="secondary" onClick={onShow}>
+        Ver solo esos
+      </Button>
+    </DonDice>
   );
 }
 

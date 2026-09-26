@@ -19,7 +19,7 @@ depender del internet**.
 
 Lo que incluye:
 
-- POS con Efectivo, Transferencia, Tarjeta, QR/CoDi, y Crédito
+- POS con Efectivo, Transferencia, Tarjeta y Crédito
 - Control de inventario con alertas de stock bajo
 - Estados NIF (Resultados, Balance, Flujo)
 - Informe mensual en PDF para tu contador

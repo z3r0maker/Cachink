@@ -47,7 +47,7 @@ export function RevokeButton({
         open={open}
         onOpenChange={setOpen}
         title={`Revocar ${nombre}`}
-        body="Revocar borra el acceso, no los datos ya sincronizados. Lo que este teléfono no haya enviado todavía se perderá."
+        body="Revocar borra el acceso, no los datos ya sincronizados. Lo que esta caja no haya enviado todavía se perderá."
         confirmLabel={pending ? 'Revocando…' : 'Revocar'}
         destructive
         onConfirm={revoke}

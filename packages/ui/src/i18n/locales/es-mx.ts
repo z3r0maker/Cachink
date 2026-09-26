@@ -572,7 +572,7 @@ export const esMX = {
     flujoCobrosContado: 'Cobros ventas contado',
     flujoCobrosContadoSubtitle: 'Pagos recibidos al momento de la venta',
     flujoCobrosContadoDetail:
-      'Efectivo, transferencia, tarjeta y QR/CoDi — todo lo que cobraste inmediatamente.',
+      'Efectivo, transferencia y tarjeta — todo lo que cobraste inmediatamente.',
     flujoCobrosCredito: 'Cobros crédito clientes',
     flujoCobrosCredCreditoSubtitle: 'Pagos de clientes que te debían',
     flujoCobrosCredCreditoDetail:

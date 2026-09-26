@@ -21,6 +21,8 @@ export const option = style([
     width: '100%',
     padding: '16px 18px',
     textAlign: 'left',
+    font: 'inherit',
+    color: colors.black,
     background: colors.white,
     border: `2px solid ${colors.black}`,
     borderRadius: radii[3],

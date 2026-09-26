@@ -3,6 +3,7 @@ import { rangoDelMes } from '@xangarro/domain';
 import { requireSession } from '@/server/auth';
 import { hoy } from '@/server/clock';
 import { loadInicio } from '@/server/inicio';
+import { loadShellCounts } from '@/server/shell';
 
 import { InicioScreen } from './_inicio/screen';
 
@@ -23,16 +24,30 @@ export default async function InicioPage() {
   const session = await requireSession();
   // The business's today and its month — never a date pinned in code.
   const today = hoy();
+  // The same counts the shell shows, so Hoy's pending list and the badges agree.
+  const counts = await loadShellCounts(session.business_id);
   try {
     const mes = rangoDelMes(today);
     const data = await loadInicio(session.business_id, today, mes.desde, mes.hasta);
     return (
-      <InicioScreen data={data} role={session.member_role} nombre={session.nombre} hoy={today} />
+      <InicioScreen
+        data={data}
+        role={session.member_role}
+        nombre={session.nombre}
+        hoy={today}
+        counts={counts}
+      />
     );
   } catch {
     // The screen owns the error state; the container only decides which one.
     return (
-      <InicioScreen data={null} role={session.member_role} nombre={session.nombre} hoy={today} />
+      <InicioScreen
+        data={null}
+        role={session.member_role}
+        nombre={session.nombre}
+        hoy={today}
+        counts={counts}
+      />
     );
   }
 }

@@ -4,9 +4,10 @@ import type { PaymentMethod } from '../entities/sale.js';
  * Tipos de pago (P-08): which methods a business takes. Stored as the JSON
  * array phones already read (`Business.enabledPaymentMethods`). Crédito is not
  * here: it is a Función (`ventasCredito`), because it needs clientes and
- * cobranza, not just a button.
+ * cobranza, not just a button. QR/CoDi is not here either: it is retired
+ * (ADR-108), and a stored list that still names it simply loses it on read.
  */
-export const METODOS_CONFIGURABLES = ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'] as const;
+export const METODOS_CONFIGURABLES = ['Efectivo', 'Transferencia', 'Tarjeta'] as const;
 export type MetodoConfigurable = (typeof METODOS_CONFIGURABLES)[number];
 
 const isConfigurable = (m: string): m is MetodoConfigurable =>
@@ -27,8 +28,8 @@ export function validateMetodosPago(chosen: readonly string[]): MetodosPagoResul
 }
 
 /**
- * The stored JSON as methods; all four when it is missing, unreadable or names
- * nothing configurable. An entry that is not configurable (a row the wizard
+ * The stored JSON as methods; every configurable one when it is missing,
+ * unreadable or names nothing configurable. An entry that is not configurable (a row the wizard
  * wrote with «Crédito» before P-36) is ignored, not a reason to fall back.
  */
 export function parseMetodosPago(json: string | null | undefined): PaymentMethod[] {

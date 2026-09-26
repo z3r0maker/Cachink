@@ -5,11 +5,12 @@ import { useState } from 'react';
 
 import { Card, StatusPill, Tag, type Tone as PillTone } from '@/components';
 import { useSession } from '@/session/provider';
-import type { EquipoData } from '@/server/screens';
+import type { EmpleadosData, EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
 import { OperadorActions } from './operador-actions';
 import { OperadorDetalle } from './operador-drawer';
+import { NominaLinea } from './persona-nomina';
 import {
   avatar,
   cardFoot,
@@ -40,6 +41,7 @@ function canCancel(permissions: unknown): boolean {
 }
 
 type Operador = EquipoData['operadores'][number];
+type Empleado = EmpleadosData[number];
 
 /**
  * The shift pill the design puts on every operator card (C-3). Ours drew an
@@ -88,8 +90,21 @@ function Encabezado({
   );
 }
 
+/** The footer names the device and when it was last seen, which is what an
+ *  owner asks when an operator's rows stop arriving. */
+function Pie({ o }: { readonly o: Operador }) {
+  return (
+    <p className={cardFoot}>
+      {o.dispositivo === null
+        ? 'Todavía no entra desde ninguna caja.'
+        : `${o.dispositivo} · último turno ${formatFechaHora(o.ultimoTurnoAt)}`}
+    </p>
+  );
+}
+
 function OperadorCard(props: {
   readonly o: Operador;
+  readonly empleado: Empleado | null;
   readonly mayWrite: boolean;
   readonly showPerms: boolean;
   readonly onWarning: (w: string | null) => void;
@@ -105,13 +120,12 @@ function OperadorCard(props: {
         </div>
       ) : null}
       <StatBoxes o={o} />
-      {/* The footer names the device and when it was last seen, which is
-          what an owner asks when an operator's rows stop arriving. */}
-      <p className={cardFoot}>
-        {o.dispositivo === null
-          ? 'Todavía no entra desde ningún teléfono.'
-          : `${o.dispositivo} · último turno ${formatFechaHora(o.ultimoTurnoAt)}`}
-      </p>
+      <NominaLinea
+        nombre={o.nombre ?? ''}
+        empleado={props.empleado}
+        mayWrite={props.mayWrite && o.active}
+      />
+      <Pie o={o} />
       <OperadorDetalle id={o.id} nombre={o.nombre ?? ''} />
       {props.mayWrite && o.active ? (
         <OperadorActions
@@ -125,7 +139,15 @@ function OperadorCard(props: {
   );
 }
 
-export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }) {
+/** Every operator as a person (ADR-107): their caja, and their line on payroll. */
+export function Operadores({
+  personas,
+}: {
+  readonly personas: ReadonlyArray<{
+    readonly operador: Operador;
+    readonly empleado: Empleado | null;
+  }>;
+}) {
   const session = useSession();
   const mayWrite = canWrite(session.role);
   const showPerms = session.capabilities.permisosPorUsuario && mayWrite;
@@ -138,10 +160,11 @@ export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }
         </p>
       )}
       <div className={cardGrid}>
-        {rows.map((o) => (
+        {personas.map(({ operador: o, empleado }) => (
           <OperadorCard
             key={o.id}
             o={o}
+            empleado={empleado}
             mayWrite={mayWrite}
             showPerms={showPerms}
             onWarning={setWarning}

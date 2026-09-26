@@ -4,8 +4,9 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import type { ReactNode } from 'react';
 
 import { Button } from './button';
+import * as d from './dialog.css';
+import { Don, type DonPose } from './don/don';
 import { overlay } from './drawer.css';
-import { dialogActions, dialogBody, dialogPanel, dialogTitle } from './dialog.css';
 
 export interface ConfirmDialogProps {
   readonly open: boolean;
@@ -19,6 +20,11 @@ export interface ConfirmDialogProps {
   /** Disables the confirm action — an in-flight save must ignore a smash. */
   readonly confirmDisabled?: boolean;
   readonly onConfirm: () => void;
+  /**
+   * Don Cuentas peeking over the card (ADR-107): worried before something
+   * destructive, thinking otherwise. `false` leaves him out.
+   */
+  readonly don?: DonPose | false;
   readonly children?: ReactNode;
 }
 
@@ -29,34 +35,32 @@ export interface ConfirmDialogProps {
  * acceso, no los datos ya sincronizados." Radix supplies the focus trap and
  * Escape.
  */
-export function ConfirmDialog({
-  open,
-  onOpenChange,
-  title,
-  body,
-  confirmLabel,
-  cancelLabel = 'Cancelar',
-  destructive,
-  confirmDisabled,
-  onConfirm,
-  children,
-}: ConfirmDialogProps) {
+export function ConfirmDialog(props: ConfirmDialogProps) {
+  const { open, onOpenChange, title, body, confirmLabel, destructive, children } = props;
+  const pose = props.don ?? (destructive ? 'preocupado' : 'pensando');
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className={overlay} />
-        <RadixDialog.Content className={dialogPanel}>
-          <RadixDialog.Title className={dialogTitle}>{title}</RadixDialog.Title>
-          <RadixDialog.Description className={dialogBody}>{body}</RadixDialog.Description>
-          {children}
-          <div className={dialogActions}>
+        <RadixDialog.Content className={d.dialogPanel[pose === false ? 'plain' : 'conDon']}>
+          {pose === false ? null : (
+            <div className={d.dialogDon} aria-hidden="true">
+              <Don pose={pose} size={136} />
+            </div>
+          )}
+          <div className={d.dialogScroll}>
+            <RadixDialog.Title className={d.dialogTitle}>{title}</RadixDialog.Title>
+            <RadixDialog.Description className={d.dialogBody}>{body}</RadixDialog.Description>
+            {children}
+          </div>
+          <div className={d.dialogActions}>
             <RadixDialog.Close asChild>
-              <Button variant="ghost">{cancelLabel}</Button>
+              <Button variant="secondary">{props.cancelLabel ?? 'Cancelar'}</Button>
             </RadixDialog.Close>
             <Button
               variant={destructive ? 'danger' : 'primary'}
-              onClick={onConfirm}
-              disabled={confirmDisabled}
+              onClick={props.onConfirm}
+              disabled={props.confirmDisabled}
             >
               {confirmLabel}
             </Button>

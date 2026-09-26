@@ -66,8 +66,8 @@ function Encabezado({ onExportar }: { readonly onExportar: () => void }) {
     >
       <div>
         <div className={s.miga}>
-          <Link href="/equipo?tab=operadores" className={s.enlace}>
-            Tu equipo
+          <Link href="/equipo" className={s.enlace}>
+            Equipo y nómina
           </Link>{' '}
           · Cortes
         </div>

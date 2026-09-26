@@ -63,14 +63,19 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
   await expect(page.getByLabel(`Costo de ${TORTILLA}`)).toHaveValue('12.50');
   await expect(page.getByLabel(`Costo de ${SALSA}`)).toHaveValue('3.00');
 
-  // A .csv fills what matches the catalogue and names what does not.
-  await page.getByLabel('Prellenar desde .csv').setInputFiles({
+  // A .csv fills what matches the catalogue and names what does not. The grid
+  // sits under the portal's loading boundary and can hydrate after the root
+  // (ADR-103): a file set before that is dropped, so the upload is what retries.
+  const csv = {
     name: 'inventario.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(`producto,cantidad,costo\n${TORTILLA},4,\nChile fantasma,9,1\n`),
-  });
+  };
+  await expect(async () => {
+    await page.getByLabel('Prellenar desde .csv').setInputFiles(csv);
+    await expect(page.getByLabel(`Cantidad de ${TORTILLA}`)).toHaveValue('4', { timeout: 1_000 });
+  }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
   await expect(page.getByText('Sin match en tu catálogo: Chile fantasma')).toBeVisible();
-  await expect(page.getByLabel(`Cantidad de ${TORTILLA}`)).toHaveValue('4');
 
   await page.getByLabel(`Cantidad de ${SALSA}`).fill('10');
   // 4 × $12.50 + 10 × $3.00, computed before anything is written.

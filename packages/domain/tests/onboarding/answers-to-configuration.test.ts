@@ -104,10 +104,18 @@ describe('answersToConfiguration — "no" answers and deltas', () => {
 
   it('caja de efectivo adds Efectivo to an answered list in canonical order', () => {
     const result = answersToConfiguration(
+      { metodosCobro: ['Tarjeta', 'Transferencia'], manejaCajaEfectivo: true },
+      'xangarrito',
+    );
+    assert.deepEqual(result.paymentTypes.set, ['Efectivo', 'Transferencia', 'Tarjeta']);
+  });
+
+  it('a draft saved before ADR-108 that names QR/CoDi never turns it back on', () => {
+    const result = answersToConfiguration(
       { metodosCobro: ['QR/CoDi', 'Tarjeta'], manejaCajaEfectivo: true },
       'xangarrito',
     );
-    assert.deepEqual(result.paymentTypes.set, ['Efectivo', 'Tarjeta', 'QR/CoDi']);
+    assert.deepEqual(result.paymentTypes.set, ['Efectivo', 'Tarjeta']);
   });
 });
 

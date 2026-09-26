@@ -25,13 +25,32 @@ describe('tipos de pago', () => {
     assert.equal(validateMetodosPago(['Cheque']).ok, false);
   });
 
-  it('reads the stored JSON, falling back to all four on junk', () => {
-    assert.deepEqual(parseMetodosPago('["QR/CoDi"]'), ['QR/CoDi']);
+  it('reads the stored JSON, falling back to every offered method on junk', () => {
+    assert.deepEqual(parseMetodosPago('["Transferencia"]'), ['Transferencia']);
     assert.deepEqual(parseMetodosPago('no-json'), [...METODOS_CONFIGURABLES]);
     assert.deepEqual(parseMetodosPago(null), [...METODOS_CONFIGURABLES]);
     // A row the wizard wrote before P-36 carries «Crédito»; that is the Función, not a method here.
     assert.deepEqual(parseMetodosPago('["Efectivo","Crédito"]'), ['Efectivo']);
     assert.deepEqual(parseMetodosPago('["Crédito"]'), [...METODOS_CONFIGURABLES]);
+  });
+});
+
+describe('QR/CoDi is retired from every picker (ADR-108)', () => {
+  it('is not a configurable method', () => {
+    assert.deepEqual([...METODOS_CONFIGURABLES], ['Efectivo', 'Transferencia', 'Tarjeta']);
+  });
+
+  it('cannot be switched on from the portal', () => {
+    assert.equal(validateMetodosPago(['Efectivo', 'QR/CoDi']).ok, false);
+  });
+
+  it('is dropped from a business that stored it before the retirement', () => {
+    const stored = '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]';
+    assert.deepEqual(parseMetodosPago(stored), ['Efectivo', 'Transferencia', 'Tarjeta']);
+  });
+
+  it('a list that held only QR/CoDi falls back to every offered method', () => {
+    assert.deepEqual(parseMetodosPago('["QR/CoDi"]'), [...METODOS_CONFIGURABLES]);
   });
 });
 

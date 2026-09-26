@@ -1,12 +1,12 @@
-import { LoadingState } from '@/components';
+import { DonCargando } from '@/components';
 import { column, page } from '@/onboarding/ui/onboarding.css';
 
-/** The loading state of every onboarding page (the four states, ADR-058). */
+/** The loading state of every onboarding page (ADR-058), Don Cuentas counting (ADR-107). */
 export default function OnboardingLoading() {
   return (
     <main className={page}>
       <div className={column}>
-        <LoadingState blocks={[48, 14, 320]} />
+        <DonCargando />
       </div>
     </main>
   );

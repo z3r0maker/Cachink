@@ -158,3 +158,24 @@ export const railToggle = style([
     '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
   },
 ]);
+
+/** A group's heading («Dinero», «Mi tiendita», «Mi gente»), ADR-107. */
+export const groupLabel = style({
+  padding: '12px 12px 4px',
+  fontSize: fontSizes.xs,
+  fontWeight: typography.weights.extraBold,
+  letterSpacing: typography.letterSpacing.widest,
+  textTransform: 'uppercase',
+  color: colors.gray600,
+  whiteSpace: 'nowrap',
+  '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: hiddenInRail,
+});
+
+/** Blocks the rail cannot fit: the business switcher and the cards. */
+export const wide = style({
+  '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: hiddenInRail,
+});
+
+export const switcherSlot = style([wide, { padding: '14px 12px 0', display: 'grid' }]);

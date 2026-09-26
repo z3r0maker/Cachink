@@ -11,10 +11,12 @@ import type {
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 
+import { adivinaIcono } from '@/lib/adivina-icono';
 import { pesosToCentavos } from '@/lib/money';
 import { crearProducto } from '@/server/actions/crear-producto';
 import { editarProducto } from '@/server/actions/editar-producto';
 
+import { categoriaDe } from '../nuevo/pasos';
 import type { Producto } from '../parts';
 
 /**
@@ -93,7 +95,17 @@ type Valid = Exclude<ReturnType<typeof validate>, string>;
 function submit(d: Draft, ok: Valid, editing: Producto | null) {
   const { costo: _c, precio: _p, umbral: _u, sku, nombre, seguirStock, tipo, ...rest } = d;
   const common = { ...rest, nombre: nombre.trim(), sku: sku.trim() || undefined };
-  if (editing === null) return crearProducto({ ...common, ...ok, seguirStock, tipo });
+  if (editing === null) {
+    // ADR-107: no category list and no empty icon — both follow from the answers.
+    const nuevo = { categoria: categoriaDe(d.usoProducto), icono: d.icono ?? adivinaIcono(nombre) };
+    return crearProducto({
+      ...common,
+      ...nuevo,
+      ...ok,
+      seguirStock: tipo === 'servicio' ? false : seguirStock,
+      tipo,
+    });
+  }
   const { costoUnitCentavos: _cost, ...patch } = ok;
   return editarProducto(editing.id, { ...common, ...patch });
 }

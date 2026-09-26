@@ -2,7 +2,11 @@ import type { Money } from '@xangarro/domain';
 
 import type { EstadoMode } from '../estado';
 
-/** The operator's words for the ticket's method; «Fiado» is `Crédito` in the domain. */
+/**
+ * The operator's words for the ticket's method; «Fiado» is `Crédito` in the
+ * domain. «QR / CoDi» is only ever read back from a ticket taken before
+ * ADR-108 retired it; the register no longer offers it.
+ */
 export type MetodoVenta = 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR / CoDi' | 'Fiado';
 
 export interface VentaTurno {

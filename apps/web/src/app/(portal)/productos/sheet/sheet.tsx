@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import { Button, Drawer } from '@/components';
 
 import type { Producto } from '../parts';
@@ -10,8 +8,8 @@ import { Basico, Inventario, Precio, Uso } from './sections';
 import { useProductoForm } from './use-producto-form';
 
 /**
- * The product sheet (P-07): «Nuevo producto» and «Editar» are the same five
- * sections. A new product reaches every phone at zero stock (ADR-081); an edit
+ * The product sheet (P-07): «Editar» in a drawer, five sections. «Nuevo
+ * producto» has its own page since ADR-107 (`/productos/nuevo`). A new product reaches every phone at zero stock (ADR-081); an edit
  * reaches them as a logged update, with cost and stock tracking read-only.
  */
 function ProductoSheet(props: {
@@ -25,8 +23,9 @@ function ProductoSheet(props: {
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
+      eyebrow="Tu catálogo"
       heading={f.editing ? `Editar ${props.editing?.nombre ?? ''}` : 'Nuevo producto'}
-      description="Llega a todos los teléfonos en su siguiente sincronización."
+      description="Llega a todas tus cajas en su siguiente sincronización."
       actions={
         <>
           {f.error === null ? null : (
@@ -46,18 +45,6 @@ function ProductoSheet(props: {
       <Inventario {...section} />
       <Apariencia {...section} />
     </Drawer>
-  );
-}
-
-export function NuevoProductoSheet() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button variant="primary" onClick={() => setOpen(true)}>
-        Nuevo producto
-      </Button>
-      <ProductoSheet editing={null} open={open} onOpenChange={setOpen} />
-    </>
   );
 }
 

@@ -14,22 +14,22 @@ Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas p
 tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.
 
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:693`
+- **N-75** Reconciliation spike — can we see card payments from any reader? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1023`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
-- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:323`
-- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:962`
-- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1175`
+- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1003`
+- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:323`
+- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1297`
 - **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 3: P-30, P-28, P-29 · `04-portal.md:1439`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
-- **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1164`
-- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1195`
+- **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1286`
+- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1317`
 - **N-03** Overage warnings and provider alerts `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
 - **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 - **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
 - **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
-- **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:843`
 
-## Lanzamiento (90)
+## Lanzamiento (92)
 
 Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
 
@@ -83,7 +83,9 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:51`
 - [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:52`
 - [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:53`
-- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:61`
+- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:54`
+- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:55`
+- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:63`
 
 ### `../launch/production-readiness.md` · 0. The one thing everything waits on
 
@@ -159,7 +161,7 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] Cyber-liability insurance — business decision. · `../launch/production-readiness.md:115`
 - [ ] INDAUTOR software registration — optional. · `../launch/production-readiness.md:116`
 
-## Post-lanzamiento (38)
+## Post-lanzamiento (44)
 
 Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 
@@ -176,36 +178,42 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 
 ### `09-next-features.md` · 3. Post-launch
 
-- [ ] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:962`
-- [ ] **N-41** `PaymentProvider` port + Mercado Pago adapter — Blocked by: N-40, C-13 · `09-next-features.md:978`
-- [ ] **N-42** Payment intents backend + reconciliation — Blocked by: N-41, C-13 · `09-next-features.md:986`
-- [ ] **N-43** Merchant account linking in the portal — Blocked by: N-41 · `09-next-features.md:996`
-- [ ] **N-44** App "Cobrar con tarjeta" — Blocked by: N-42, N-43, N-45, N-24, N-53 · `09-next-features.md:1006`
-- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1015`
-- [ ] **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:1022`
-- [ ] **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:1028`
-- [ ] **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:1034`
-- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1049`
-- [ ] **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1056`
-- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1062`
-- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1068`
-- [ ] **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1073`
-- [ ] **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go) · `09-next-features.md:1084`
-- [~] **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1120`
-- [~] **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1135`
-- [ ] **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1143`
-- [ ] **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1164`
-- [ ] **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1175`
-- [ ] **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1186`
-- [ ] **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1195`
-- [ ] **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1205`
-- [ ] **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1214`
-- [ ] **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1227`
-- [ ] **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1237`
-- [ ] **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1247`
-- [ ] **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1257`
-- [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1265`
-- [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1275`
+- [~] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:1003`
+- [ ] **N-75** Reconciliation spike — can we see card payments from any reader? · `09-next-features.md:1023`
+- [ ] **N-41** `PaymentProvider` port — read side + Mercado Pago adapter — Blocked by: N-75, ADR-109 · `09-next-features.md:1039`
+- [ ] **N-43** Merchant account linking in Tipos de pago — Blocked by: N-41 · `09-next-features.md:1047`
+- [ ] **N-76** Conciliación de tarjeta — Blocked by: N-41, N-43 · `09-next-features.md:1060`
+- [ ] **N-77** Checklist step and invitations — Blocked by: N-43 · `09-next-features.md:1073`
+- [ ] **N-80** `PaymentProvider` write side + Mercado Pago Point — Blocked by: N-41, N-40 (MP go), C-13 · `09-next-features.md:1086`
+- [ ] **N-42** Payment intents backend — Blocked by: N-80, C-13 · `09-next-features.md:1094`
+- [ ] **N-79** Terminal per caja — Blocked by: N-80, N-43, ADR-109 (D-1) · `09-next-features.md:1104`
+- [ ] **N-44** Cobrar en terminal (phone and web caja) — Blocked by: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1114`
+- [ ] **N-78** Terminal health at the caja — Blocked by: N-79 · `09-next-features.md:1125`
+- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1135`
+- [ ] **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:1142`
+- [ ] **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:1148`
+- [ ] **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:1154`
+- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1169`
+- [ ] **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1176`
+- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1182`
+- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1188`
+- [ ] **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1193`
+- [ ] **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go), N-75 (Clip go) · `09-next-features.md:1204`
+- [~] **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1242`
+- [~] **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1257`
+- [ ] **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1265`
+- [ ] **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1286`
+- [ ] **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1297`
+- [ ] **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1308`
+- [ ] **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1317`
+- [ ] **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1327`
+- [ ] **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1336`
+- [ ] **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1349`
+- [ ] **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1359`
+- [ ] **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1369`
+- [ ] **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1379`
+- [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
+- [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
 ## Colas de tracks (13)
 
@@ -214,7 +222,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ### `02-contracts.md` · §8 Table scope
 
 - [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:323`
-- [ ] **C-21** Kill switches on the wire · `02-contracts.md:492`
+- [ ] **C-21** Kill switches on the wire · `02-contracts.md:494`
 
 ### `03-backend.md`
 
@@ -257,7 +265,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 5 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
-- `09-next-features.md` — 44 abiertos (10 en curso, 0 bloqueados, 26 hechos)
-- `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 7 hechos)
+- `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
+- `11-pre-launch-and-deferred.md` — 21 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `../launch/production-readiness.md` — 47 abiertos (5 en curso, 0 bloqueados, 5 hechos)

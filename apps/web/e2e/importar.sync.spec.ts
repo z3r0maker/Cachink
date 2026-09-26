@@ -78,5 +78,9 @@ test('a viewer sees no way to create, import or change products', async ({ brows
   for (const name of ['Nuevo producto', 'Importar desde Excel', 'Editar', 'Movimiento']) {
     await expect(page.getByRole('button', { name, exact: true })).toHaveCount(0);
   }
+  await expect(page.getByRole('link', { name: 'Nuevo producto', exact: true })).toHaveCount(0);
+  // And the page itself sends a read-only role back to the catalogue (ADR-107).
+  await page.goto('/productos/nuevo');
+  await expect(page).toHaveURL(/\/productos$/);
   await context.close();
 });

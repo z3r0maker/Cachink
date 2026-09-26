@@ -6,17 +6,20 @@ import { PLAN_LIMITS } from '@xangarro/domain';
 
 import { ScreenBody, SegmentedTabs, UsageBar } from '@/components';
 import { useSession } from '@/session/provider';
-import type { EquipoData } from '@/server/screens';
+import type { EmpleadosData, EquipoData } from '@/server/screens';
+import { emparejar } from '@/lib/personas';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
 import { Operadores } from './cards';
 import { Dispositivos } from './device-cards';
 import { NuevoOperadorDialog } from './operador-dialogs';
 import { KpisDispositivos, KpisOperadores } from './kpis';
+import { Nomina } from '../empleados/screen';
 import { PairingPanel } from './pairing-panel';
+import { SoloNomina } from './persona-nomina';
 import { pageSubtitle, pageTitle } from './equipo.css';
 
-export type EquipoTab = 'operadores' | 'dispositivos';
+export type EquipoTab = 'personas' | 'cajas' | 'nomina';
 
 /**
  * The operator allowance. The number comes from the plan (`PLAN_LIMITS`), not a
@@ -64,32 +67,64 @@ const VACIO = {
   },
   dispositivos: {
     title: 'Vincula tu primer dispositivo',
-    body: 'Genera un código aquí arriba y escríbelo en el teléfono de tu operador. En cuanto se vincule, aparecerá en esta lista.',
+    body: 'Genera un código aquí arriba y escríbelo en el teléfono o la computadora donde va a cobrar. En cuanto se conecte, aparecerá en esta lista.',
   },
 } as const;
 
-function Body({
-  data,
-  isOperadores,
-  mayWrite,
-}: {
+/** Personas: everyone who cobra, with their payroll line, then payroll-only people. */
+function Personas(props: {
   readonly data: EquipoData | null;
-  readonly isOperadores: boolean;
-  readonly mayWrite: boolean;
+  readonly empleados: EmpleadosData | null;
+  readonly c: ReturnType<typeof useCupos>;
 }) {
-  const rows = isOperadores ? data?.operadores : data?.dispositivos;
+  const { data, c } = props;
+  const p = emparejar(data?.operadores ?? [], props.empleados ?? []);
+  const vacio = p.conCaja.length === 0 && p.soloNomina.length === 0;
   return (
     <ScreenBody
-      state={resolveScreenState({ error: data === null, isEmpty: rows?.length === 0 })}
+      state={resolveScreenState({ error: data === null, isEmpty: vacio })}
       onRetry={() => window.location.reload()}
-      empty={isOperadores ? VACIO.operadores : VACIO.dispositivos}
+      empty={VACIO.operadores}
     >
-      {data === null ? null : isOperadores ? (
-        <Operadores rows={data.operadores} />
-      ) : (
-        <Dispositivos rows={data.dispositivos} mayWrite={mayWrite} />
-      )}
+      <Operadores personas={p.conCaja} />
+      <SoloNomina
+        empleados={p.soloNomina}
+        mayWrite={c.mayWrite}
+        lleno={c.activos >= c.limit}
+        limit={c.limit}
+      />
     </ScreenBody>
+  );
+}
+
+/** Cajas: the pairing code for a writer, then every linked device. */
+function Cajas(props: {
+  readonly data: EquipoData | null;
+  readonly c: ReturnType<typeof useCupos>;
+  readonly registerUrl: string;
+}) {
+  const { data, c } = props;
+  return (
+    <>
+      {c.mayWrite ? (
+        <PairingPanel
+          initial={data?.codigo ?? null}
+          lleno={c.vinculados >= c.deviceLimit}
+          limit={c.deviceLimit}
+          registerUrl={props.registerUrl}
+        />
+      ) : null}
+      <ScreenBody
+        state={resolveScreenState({
+          error: data === null,
+          isEmpty: data?.dispositivos.length === 0,
+        })}
+        onRetry={() => window.location.reload()}
+        empty={VACIO.dispositivos}
+      >
+        {data === null ? null : <Dispositivos rows={data.dispositivos} mayWrite={c.mayWrite} />}
+      </ScreenBody>
+    </>
   );
 }
 
@@ -106,18 +141,15 @@ function useCupos(data: EquipoData | null) {
   };
 }
 
-function Encabezado(props: {
-  readonly isOperadores: boolean;
-  readonly c: ReturnType<typeof useCupos>;
-}) {
-  const { c, isOperadores } = props;
+function Encabezado(props: { readonly tab: string; readonly c: ReturnType<typeof useCupos> }) {
+  const { c, tab } = props;
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
-        <h1 className={pageTitle}>Tu equipo</h1>
-        <p className={pageSubtitle}>Quién captura, desde qué dispositivo y qué tan al día está</p>
+        <h1 className={pageTitle}>Equipo y nómina</h1>
+        <p className={pageSubtitle}>Quién trabaja contigo, quién cobra y cuánto le pagas</p>
       </div>
-      {!c.mayWrite ? null : isOperadores ? (
+      {!c.mayWrite || tab === 'nomina' ? null : tab === 'personas' ? (
         <Quota activos={c.activos} limit={c.limit} />
       ) : (
         <DeviceQuota activos={c.vinculados} limit={c.deviceLimit} />
@@ -142,42 +174,44 @@ function Kpis({
   );
 }
 
-export function EquipoScreen({
-  initialTab,
-  data,
-  registerUrl,
-}: {
+function Pestanas(props: {
+  readonly tab: string;
+  readonly onTab: (t: string) => void;
+  readonly data: EquipoData | null;
+  readonly empleados: EmpleadosData | null;
+}) {
+  const p = emparejar(props.data?.operadores ?? [], props.empleados ?? []);
+  return (
+    <SegmentedTabs
+      ariaLabel="Equipo y nómina"
+      value={props.tab}
+      onValueChange={props.onTab}
+      tabs={[
+        { value: 'personas', label: 'Personas', count: p.conCaja.length + p.soloNomina.length },
+        { value: 'cajas', label: 'Cajas', count: props.data?.dispositivos.length ?? 0 },
+        { value: 'nomina', label: 'Nómina', count: props.empleados?.length ?? 0 },
+      ]}
+    />
+  );
+}
+
+export function EquipoScreen(props: {
   readonly initialTab: EquipoTab;
   readonly data: EquipoData | null;
+  readonly empleados: EmpleadosData | null;
   readonly registerUrl: string;
 }) {
-  const [tab, setTab] = useState<string>(initialTab);
-  const isOperadores = tab === 'operadores';
+  const { data, empleados } = props;
+  const [tab, setTab] = useState<string>(props.initialTab);
   const c = useCupos(data);
-  const { mayWrite, activos, deviceLimit, vinculados } = c;
-
   return (
     <>
-      <Encabezado isOperadores={isOperadores} c={c} />
-      <Kpis data={data} isOperadores={isOperadores} />
-      <SegmentedTabs
-        ariaLabel="Tu equipo"
-        value={tab}
-        onValueChange={setTab}
-        tabs={[
-          { value: 'operadores', label: 'Operadores', count: activos },
-          { value: 'dispositivos', label: 'Dispositivos', count: data?.dispositivos.length ?? 0 },
-        ]}
-      />
-      {!isOperadores && mayWrite ? (
-        <PairingPanel
-          initial={data?.codigo ?? null}
-          lleno={vinculados >= deviceLimit}
-          limit={deviceLimit}
-          registerUrl={registerUrl}
-        />
-      ) : null}
-      <Body data={data} isOperadores={isOperadores} mayWrite={mayWrite} />
+      <Encabezado tab={tab} c={c} />
+      {tab === 'nomina' ? null : <Kpis data={data} isOperadores={tab === 'personas'} />}
+      <Pestanas tab={tab} onTab={setTab} data={data} empleados={empleados} />
+      {tab === 'personas' ? <Personas data={data} empleados={empleados} c={c} /> : null}
+      {tab === 'cajas' ? <Cajas data={data} c={c} registerUrl={props.registerUrl} /> : null}
+      {tab === 'nomina' ? <Nomina rows={empleados} /> : null}
     </>
   );
 }
