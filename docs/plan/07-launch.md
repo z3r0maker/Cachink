@@ -42,7 +42,16 @@
 
 ### X-11 `release.sh` cannot report success without shipping
 
-- [ ] Status · **Blocked by:** — · **Blocks:** —
+- [x] Status · **Blocked by:** — · **Blocks:** —
+      **Done 2026-09-26** (`b6e0eb8a`). Three closures, one per way it could happen: every
+      `Ready` deployment appends to `SHIPPED` and «released» is refused unless that has a line
+      per app asked for; an EXIT trap prints what did ship whenever the run ends non-zero
+      part-way; and the URL capture is no longer a pipeline, whose status was `tail`'s — a
+      `vercel` that died left an empty URL and the script blamed the output rather than the
+      command. **Reproduced rather than reasoned about:** a stub `npx` that ships the first app
+      and is killed on the second now exits **1**, names the failing app and prints
+      «release stopped after 1 of 2 app(s)» with what shipped; the same stub succeeding twice
+      exits 0 and lists both. Before the change that first case exited 0 in silence.
       **Found 2026-09-26, during the first release after `cec30e12`.** A backgrounded
       `./scripts/release.sh --skip-migrations` ended with **exit 0** after printing only
       «deploying xangarro-web» — no status line, and neither `xangarro-backoffice` nor `landing`
