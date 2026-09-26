@@ -16,10 +16,10 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:693`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
+- **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 6: P-30, P-28, P-29, P-38, P-39, P-40 · `04-portal.md:1439`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:323`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:962`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1175`
-- **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 3: P-30, P-28, P-29 · `04-portal.md:1439`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
 - **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1164`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1195`
@@ -207,7 +207,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1265`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1275`
 
-## Colas de tracks (13)
+## Colas de tracks (18)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -239,6 +239,14 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1439`
 - [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1503`
 
+### `04-portal.md` · Fase 10 — Beta: lo que el diseño ya muestra como listo
+
+- [ ] **P-37** Ticket printing from the caja — Blocked by: — · `04-portal.md:1591`
+- [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: P-30 · `04-portal.md:1600`
+- [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30 · `04-portal.md:1608`
+- [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1615`
+- [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1622`
+
 ### `05-app.md`
 
 - [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
@@ -252,7 +260,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 20 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
-- `04-portal.md` — 7 abiertos (4 en curso, 0 bloqueados, 29 hechos)
+- `04-portal.md` — 12 abiertos (4 en curso, 0 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 5 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
