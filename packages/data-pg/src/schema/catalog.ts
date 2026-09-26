@@ -78,7 +78,13 @@ export const inventoryMovements = pgTable(
       .default('manual'),
     ...auditColumns,
   },
-  (t) => [index('inventory_movements_business_idx').on(t.businessId, t.fecha)],
+  (t) => [
+    index('inventory_movements_business_idx').on(t.businessId, t.fecha),
+    // 0043: the usage recount's range, and stock per product. The SQL adds
+    // `INCLUDE (tipo, cantidad, deleted_at)`, which drizzle cannot declare.
+    index('inventory_movements_business_created_idx').on(t.businessId, t.createdAt),
+    index('inventory_movements_business_producto_idx').on(t.businessId, t.productoId),
+  ],
 );
 
 export const products = pgTable(

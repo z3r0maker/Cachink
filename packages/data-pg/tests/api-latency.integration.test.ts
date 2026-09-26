@@ -26,13 +26,13 @@ function asRole(appUrl: string, role: string): string {
   return u.toString();
 }
 
-/** Today's row for one bucket, as the owner sees it. */
+/** Today's hits for one bucket, summed across its slots (0044), as the owner sees it. */
 async function hitsEn(sql: postgres.Sql, endpoint: string, bucket: number): Promise<number> {
-  const rows = await sql<{ hits: number }[]>`
-    SELECT hits FROM xangarro.api_latency_counters
+  const rows = await sql<{ hits: string | null }[]>`
+    SELECT sum(hits)::text AS hits FROM xangarro.api_latency_counters
      WHERE endpoint = ${endpoint} AND bucket_ms = ${bucket}
        AND day = (now() AT TIME ZONE 'America/Mexico_City')::date`;
-  return rows[0]?.hits ?? 0;
+  return Number(rows[0]?.hits ?? 0);
 }
 
 describe('xangarro.api_latency_counters: the app counts, nobody reads it back', () => {
@@ -65,16 +65,20 @@ describe('xangarro.api_latency_counters: the app counts, nobody reads it back', 
     assert.equal(await hitsEn(owner, 'comprobante', 100), enCien + 1);
   });
 
-  it('counts a second call into the same row, never a second row', async () => {
+  it('spreads calls over at most 16 slots, and the slots sum to every call (DB2-HOT-01)', async () => {
     const antes = await hitsEn(owner, 'comprobante', 50);
-    await recordApiLatency(db, 'comprobante', 33);
-    await recordApiLatency(db, 'comprobante', 41);
-    assert.equal(await hitsEn(owner, 'comprobante', 50), antes + 2);
-    const filas = await owner<{ n: string }[]>`
-      SELECT count(*)::text AS n FROM xangarro.api_latency_counters
+    for (let i = 0; i < 64; i += 1) await recordApiLatency(db, 'comprobante', 33);
+    assert.equal(await hitsEn(owner, 'comprobante', 50), antes + 64, 'no call is lost');
+    const filas = await owner<{ n: string; lo: number; hi: number }[]>`
+      SELECT count(*)::text AS n, min(slot) AS lo, max(slot) AS hi
+        FROM xangarro.api_latency_counters
        WHERE endpoint = 'comprobante' AND bucket_ms = 50
          AND day = (now() AT TIME ZONE 'America/Mexico_City')::date`;
-    assert.equal(filas[0]?.n, '1', 'one row per (day, endpoint, bucket)');
+    const n = Number(filas[0]?.n);
+    // 64 calls over 16 slots: one row per slot used, never one per call. More
+    // than one row is what takes the lock off the single hot row.
+    assert.ok(n > 1 && n <= 16, `rows per (day, endpoint, bucket): ${n}`);
+    assert.ok((filas[0]?.lo ?? -1) >= 0 && (filas[0]?.hi ?? 99) <= 15);
   });
 
   it('anything past the top bound lands in the overflow bucket, not a new bound', async () => {
