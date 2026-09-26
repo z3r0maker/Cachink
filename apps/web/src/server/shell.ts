@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { eq } from 'drizzle-orm';
+import { cache } from 'react';
 import { businesses, shellCounts } from '@xangarro/data-pg';
 
 import { withTenant } from './db';
@@ -29,7 +30,12 @@ export interface ShellCounts {
 
 const NONE: ShellCounts = { pendingRows: 0, unreadNotices: 0, revisionPendiente: 0 };
 
-export async function loadShellCounts(businessId: string): Promise<ShellCounts> {
+/**
+ * `cache()`d per request: the layout and Inicio both read these (Inicio's
+ * pending list must agree with the badges), and it was two transactions of
+ * four counts each on every visit to Inicio (DB2-PAGE-01).
+ */
+export const loadShellCounts = cache(async (businessId: string): Promise<ShellCounts> => {
   try {
     return await withTenant(businessId, (tx) => shellCounts(tx, businessId));
   } catch (error) {
@@ -38,7 +44,7 @@ export async function loadShellCounts(businessId: string): Promise<ShellCounts> 
     reportError(error, { endpoint: 'shell:counts', businessId });
     return NONE;
   }
-}
+});
 
 /**
  * The business's logo for the sidebar brand block (N-19); null when none —

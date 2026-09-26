@@ -4,6 +4,7 @@ import type { Db } from '../client.js';
 import { dayCloses } from '../schema/caja.js';
 import { inventoryMovements, products } from '../schema/catalog.js';
 import { clientPayments } from '../schema/ledger.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -12,8 +13,8 @@ type FechaCol =
   | typeof dayCloses.fecha
   | typeof inventoryMovements.fecha;
 
-const enRango = (col: FechaCol, from: string, to: string) =>
-  sql`left(${col}, 10) BETWEEN ${from} AND ${to}`;
+/** Sargable day range (DB2-QRY-04): timestamped fechas still count on their day. */
+const enRango = (col: FechaCol, from: string, to: string) => fechaEnDias(col, from, to);
 
 /** The period's nightly cortes — the raw cash positions the Balance nets. */
 function cortesDelPeriodo(tx: Tx, from: string, to: string) {
@@ -58,7 +59,12 @@ function stockACosto(tx: Tx) {
     .from(products)
     .leftJoin(
       inventoryMovements,
-      and(eq(inventoryMovements.productoId, products.id), isNull(inventoryMovements.deletedAt)),
+      // `business_id` spelled out: the covering-index prefix (DB2-QRY-05).
+      and(
+        eq(inventoryMovements.businessId, products.businessId),
+        eq(inventoryMovements.productoId, products.id),
+        isNull(inventoryMovements.deletedAt),
+      ),
     )
     .where(isNull(products.deletedAt))
     .groupBy(products.id, products.costoUnitCentavos);

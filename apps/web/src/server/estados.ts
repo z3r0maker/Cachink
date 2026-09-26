@@ -201,13 +201,19 @@ function sinMovimiento(
  * (ADR-089).
  */
 function leerPeriodo(businessId: string, from: string, to: string) {
-  return withTenant(businessId, async (tx) => ({
-    rows: await periodLedger(tx, from, to),
-    inputs: await periodBalanceInputs(tx, from, to),
-    isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
-    regimenSat: (await getBusiness(tx))?.regimenSat ?? null,
-    apertura: await loadApertura(tx, businessId),
-  }));
+  return withTenant(businessId, async (tx) => {
+    const rows = await periodLedger(tx, from, to);
+    const inputs = await periodBalanceInputs(tx, from, to);
+    // One read of the business for both fields — it was two (DB2-PAGE-01).
+    const negocio = await getBusiness(tx);
+    return {
+      rows,
+      inputs,
+      isrTasa: negocio?.isrTasa ?? 0,
+      regimenSat: negocio?.regimenSat ?? null,
+      apertura: await loadApertura(tx, businessId),
+    };
+  });
 }
 
 export async function loadEstadosModel(

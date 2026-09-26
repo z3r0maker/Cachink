@@ -27,3 +27,7 @@ export * from './comprobante.js';
 export * from './assisted-imports-files.js';
 export * from './assisted-imports-resolution.js';
 export * from './entitlement-inputs.js';
+export * from './movimientos-filtro.js';
+export * from './movimientos-resumen.js';
+export * from './rango-fechas.js';
+export * from './exportaciones.js';
