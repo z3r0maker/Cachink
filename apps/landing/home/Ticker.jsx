@@ -1,3 +1,4 @@
+import { MARK_BOX, MARK_X } from './icons.jsx';
 import { useInView } from './use-in-view.js';
 
 const WORDS = [
@@ -15,8 +16,8 @@ const WORDS = [
 
 function X() {
   return (
-    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
-      <path d="M5 5L19 19M19 5L5 19" stroke="var(--yellow)" strokeWidth="4.6" />
+    <svg viewBox={MARK_BOX} width="13" height="13" aria-hidden="true">
+      <path d={MARK_X} fill="var(--yellow)" />
     </svg>
   );
 }

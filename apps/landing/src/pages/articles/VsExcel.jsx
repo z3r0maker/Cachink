@@ -86,7 +86,7 @@ export default function VsExcel() {
           }}
         >
           Antes de cambiar tu sistema de control de caja, vale la pena saber exactamente en qué es
-          mejor cada opción. Esta comparativa es honesta — no siempre gana la app.
+          mejor cada opción. Esta comparativa es honesta: no siempre gana la app.
         </p>
 
         <div style={{ overflowX: 'auto', margin: '0 0 40px' }}>
@@ -232,9 +232,9 @@ export default function VsExcel() {
             fontWeight: 500,
           }}
         >
-          Si tu negocio tiene necesidades muy específicas que una app estándar no cubre — por
+          Si tu negocio tiene necesidades muy específicas que una app estándar no cubre (por
           ejemplo, modelos de costos complejos, análisis de escenarios financieros o integraciones
-          con sistemas de inventario a medida — Excel puede ser la herramienta correcta,
+          con sistemas de inventario a medida), Excel puede ser la herramienta correcta,
           especialmente si tienes a alguien con conocimientos para mantenerlo.
         </p>
         <p
@@ -246,9 +246,9 @@ export default function VsExcel() {
             fontWeight: 500,
           }}
         >
-          Pero para el 95% de los pequeños negocios en México — panadería, cafetería, tienda, taller
-          — las necesidades son: registrar ventas rápido, saber cuánto hay en caja, y generar un
-          reporte mensual para el contador. Para eso, una app especializada gana en todos los
+          Pero para el 95% de los pequeños negocios en México (panadería, cafetería, tienda,
+          taller), las necesidades son: registrar ventas rápido, saber cuánto hay en caja, y generar
+          un reporte mensual para el contador. Para eso, una app especializada gana en todos los
           frentes que importan.
         </p>
 
@@ -270,13 +270,13 @@ export default function VsExcel() {
             empezar con Xangarro es gratis
           </a>
           . Con una app que procesa cada venta en 10 segundos, son 5 minutos. La diferencia: 85
-          minutos al día — más de 35 horas al mes que puedes dedicar a atender clientes, mejorar tu
+          minutos al día: más de 35 horas al mes que puedes dedicar a atender clientes, mejorar tu
           producto o simplemente descansar.
         </p>
 
         <RelatedGuides slug="vs-excel" />
         <ArticleCta
-          title="Prueba Xangarro hoy — gratis"
+          title="Prueba Xangarro hoy, gratis"
           text="Cuenta gratis para siempre. Importa tu catálogo de Excel en unos clics."
         />
       </article>

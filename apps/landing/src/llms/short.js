@@ -8,7 +8,7 @@ export function buildLlmsTxt(siteUrl) {
 
 > Xangarro es la plataforma mexicana para llevar la caja de tu negocio.
 
-Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos — desde el navegador o desde la app del equipo —, ver el estado del negocio en tiempo real y compartir estados financieros con un contador. Don Cuentas, el asesor, revisa las ventas, gastos e inventario todos los días a partir de los registros del negocio; la revisión de fin de mes con IA llega pronto.
+Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos (desde el navegador o desde la app del equipo), ver el estado del negocio en tiempo real y compartir estados financieros con un contador. Don Cuentas, el asesor, revisa las ventas, gastos e inventario todos los días a partir de los registros del negocio; la revisión de fin de mes con IA llega pronto.
 
 ## Para quién es
 
@@ -18,15 +18,15 @@ Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: p
 
 ## Cómo funciona
 
-1. **Captura** — Registra cada venta o egreso del día en menos de 3 segundos
-2. **Ve** — Ventas de hoy, del mes, efectivo en caja. Actualizado al instante
-3. **Decide** — KPIs para dueños, estados financieros para tu contador, Don Cuentas como asesor
+1. **Captura**: registra cada venta o egreso del día en menos de 3 segundos
+2. **Ve**: ventas de hoy, del mes, efectivo en caja. Actualizado al instante
+3. **Decide**: KPIs para dueños, estados financieros para tu contador, Don Cuentas como asesor
 
 ## Características principales
 
 - Registro de ingresos y egresos con categorías y métodos de pago
 - Vista de caja diaria y mensual
-- Captura sin internet — tu negocio sigue aunque se vaya el internet
+- Captura sin internet: tu negocio sigue aunque se vaya el internet
 - Estados financieros exportables para contadores
 - Portal web y caja en el navegador hoy; apps para iOS y Android próximamente
 

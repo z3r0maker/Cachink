@@ -16,7 +16,7 @@ const PASOS = [
   {
     n: '03',
     t: 'Jueves: revisa el corte del día',
-    d: 'Compara el efectivo real en tu caja con lo que dice la app. Si cuadra, vas bien. Si no, hay un registro faltante — la app te ayuda a encontrarlo.',
+    d: 'Compara el efectivo real en tu caja con lo que dice la app. Si cuadra, vas bien. Si no, hay un registro faltante y la app te ayuda a encontrarlo.',
   },
   {
     n: '04',
@@ -58,7 +58,7 @@ export default function SinExcel() {
             paddingBottom: 32,
           }}
         >
-          Si llevas las cuentas de tu negocio en una hoja de cálculo —o en una libreta— ya sabes el
+          Si llevas las cuentas de tu negocio en una hoja de cálculo, o en una libreta, ya sabes el
           problema: se corrompe, se pierde, tiene errores y te quita tiempo que podrías dedicar a
           vender. Esta guía explica por qué el control de caja en Excel falla para negocios pequeños
           y cómo hacer el cambio sin complicaciones.
@@ -90,7 +90,7 @@ export default function SinExcel() {
           }}
         >
           {[
-            'Tienes que abrir la laptop o tablet para cada venta — en el calor del momento, eso no pasa.',
+            'Tienes que abrir la laptop o tablet para cada venta, y en el calor del momento, eso no pasa.',
             'Si dos personas capturan al mismo tiempo, los datos se sobreescriben o se pierden.',
             'Un error de fórmula puede distorsionar todos tus cálculos sin que te des cuenta.',
           ].map((t, i) => (
@@ -112,7 +112,7 @@ export default function SinExcel() {
           }}
         >
           El resultado: la mayoría de los dueños terminan usando la hoja de cálculo solo al final
-          del día —o ni eso— y el control de caja se convierte en una tarea que se pospone hasta que
+          del día (o ni eso) y el control de caja se convierte en una tarea que se pospone hasta que
           hay un problema. No es un caso raro: la{' '}
           <a
             href="https://www.inegi.org.mx/programas/enaproce/2018/"
@@ -153,14 +153,14 @@ export default function SinExcel() {
           }}
         >
           {[
-            'Registras desde el teléfono que ya tienes en la mano — sin abrir otro dispositivo.',
+            'Registras desde el teléfono que ya tienes en la mano, sin abrir otro dispositivo.',
             'El formulario tiene 3 campos, no 12 columnas.',
-            'Los totales se calculan solos — nunca hay un error de suma.',
+            'Los totales se calculan solos: nunca hay un error de suma.',
             <>
               <a href="/#por-que" style={{ color: 'var(--black)' }}>
                 Funciona sin internet
-              </a>{' '}
-              — si se cae el WiFi, sigues registrando.
+              </a>
+              : si se cae el WiFi, sigues registrando.
             </>,
           ].map((t, i) => (
             <li
@@ -226,8 +226,8 @@ export default function SinExcel() {
         >
           Una pregunta frecuente: "¿Qué pasa con mi contador?" La respuesta es que su trabajo se
           vuelve más fácil, no más complicado. En lugar de entregarle una hoja de Excel con errores
-          o una libreta con tachones, le envías un estado financiero en formato NIF — el estándar
-          que él ya conoce — directamente desde la app.
+          o una libreta con tachones, le envías un estado financiero en formato NIF, el estándar que
+          él ya conoce, directamente desde la app.
         </p>
         <p
           style={{

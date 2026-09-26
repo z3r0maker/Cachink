@@ -8,7 +8,7 @@ import { PLANES_NOTAS, planesDetalle } from './planes-text.js';
 const faqText = () => FAQ_ITEMS.map(({ q, a }) => `**${q}**\n${a}`).join('\n\n');
 
 /* One constant or one function per section; the functions take the site URL. */
-const cabecera = (siteUrl) => `# Xangarro — Especificación completa del producto
+const cabecera = (siteUrl) => `# Xangarro: especificación completa del producto
 
 > Plataforma de gestión de caja para pequeños negocios mexicanos.
 > Sitio web: ${siteUrl} · Crear cuenta: https://app.xangarro.mx/signup
@@ -32,7 +32,7 @@ const usuarios = `## Usuarios objetivo
 
 Xangarro está diseñado para dos roles dentro de cada negocio:
 
-**Dueño (Director)**: administra el negocio desde el portal web. Configura su catálogo de productos e impórtalo desde Excel, invita a su equipo, ve KPIs financieros — utilidad del mes, liquidez, cuentas por cobrar —, consulta estados financieros NIF y exporta el informe mensual en PDF para su contador. Accede desde cualquier navegador.
+**Dueño (Director)**: administra el negocio desde el portal web. Configura su catálogo de productos e impórtalo desde Excel, invita a su equipo, ve KPIs financieros (utilidad del mes, liquidez, cuentas por cobrar), consulta estados financieros NIF y exporta el informe mensual en PDF para su contador. Accede desde cualquier navegador.
 
 **Operador (equipo)**: captura ventas, gastos y movimientos de inventario desde la app del teléfono o el navegador de la caja, con su propio NIP. Captura sin conexión: todo se sincroniza cuando vuelve internet.
 
@@ -55,7 +55,7 @@ const funcionalidades = `## Funcionalidades principales
 - Captura rápida: monto, concepto, método de pago
 - Registro en menos de 3 segundos
 - Métodos de pago: efectivo, tarjeta, transferencia (SPEI) y crédito para clientes frecuentes
-- Captura sin internet — el negocio sigue aunque se vaya el internet; todo se sincroniza al reconectarse
+- Captura sin internet: el negocio sigue aunque se vaya el internet; todo se sincroniza al reconectarse
 
 ### Registro de egresos
 - Categorías personalizables (insumos, nómina, servicios, renta, etc.)
@@ -65,7 +65,7 @@ const funcionalidades = `## Funcionalidades principales
 - Ventas del día y del mes en tiempo real
 - Efectivo disponible en caja
 - Movimientos del día con hora y método de pago
-- Corte de día con un toque — resumen imprimible o compartible
+- Corte de día con un toque: resumen imprimible o compartible
 
 ### Panel del Dueño (portal web)
 - KPIs financieros: ventas, utilidad bruta, liquidez, meta de mes
@@ -75,7 +75,7 @@ const funcionalidades = `## Funcionalidades principales
 
 ### Don Cuentas (asesor)
 - Revisa todos los días ventas, gastos e inventario y avisa qué subió, qué no se mueve y qué se ve raro, calculado a partir de los registros
-- Próximamente: cierre de mes con IA — qué funcionó, qué no y qué precios ajustar (plan Xangarro)
+- Próximamente: cierre de mes con IA: qué funcionó, qué no y qué precios ajustar (plan Xangarro)
 - Estrategia de precios y crecimiento (plan Xangarrote)
 
 ### Estados financieros
@@ -99,7 +99,7 @@ const especificaciones = (siteUrl) => `## Especificaciones técnicas
 - **Plataformas**: portal web y caja en cualquier navegador; apps para iOS y Android próximamente
 - **Modo offline**: los dispositivos del equipo capturan sin conexión y sincronizan automáticamente al recuperarla
 - **Seguridad**: cifrado en tránsito y en reposo
-- **Idioma**: Español (México) — sin traducciones al inglés en la interfaz
+- **Idioma**: Español (México), sin traducciones al inglés en la interfaz
 - **Privacidad**: los datos del negocio son del usuario; Xangarro no los vende ni los comparte con terceros; exportación y eliminación de cuenta disponibles. Aviso de privacidad: ${siteUrl}/privacidad/`;
 
 const faq = `## Preguntas frecuentes
@@ -108,7 +108,7 @@ ${faqText()}`;
 
 const equipo = (siteUrl) => `## Quiénes están detrás
 
-${AUTHORS.map((a) => `- **${a.name}** — ${a.role}`).join('\n')}
+${AUTHORS.map((a) => `- **${a.name}**: ${a.role}`).join('\n')}
 
 Xangarro nació en ${EMPRESA.ciudad}, ${EMPRESA.estado}, en ${EMPRESA.fundacion}. Las guías de ${siteUrl}/recursos/ las firman ambos. Más en ${siteUrl}/acerca/.`;
 
