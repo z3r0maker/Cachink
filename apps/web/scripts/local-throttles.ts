@@ -19,6 +19,15 @@ const LOOPBACK = ['unknown', '127.0.0.1', '::1', '::ffff:127.0.0.1'] as const;
  */
 const SUITE_BAD_CODES = ['ZZZZZZZZ'] as const;
 
+/**
+ * The e2e suite's fixed wrong addresses (`auth.spec.ts`, `chaos-2`). Each run
+ * tries each one once per viewport project — three failures — and the
+ * per-address limit is five in fifteen minutes, so the second run inside that
+ * window locked them and the third project's copy answered «Demasiados
+ * intentos» instead of the message under test. Same reset as the bad code.
+ */
+const SUITE_BAD_EMAILS = ['nobody@example.com', '<script>alert(1)</script>@x.com'] as const;
+
 export async function clearLocalThrottles(sql: postgres.Sql): Promise<void> {
   for (const ip of LOOPBACK) {
     for (const door of ['login', 'activate', 'signup']) {
@@ -27,5 +36,8 @@ export async function clearLocalThrottles(sql: postgres.Sql): Promise<void> {
   }
   for (const code of SUITE_BAD_CODES) {
     await sql`SELECT xangarro.throttle_clear(${throttleKey('activate', 'code', code)})`;
+  }
+  for (const email of SUITE_BAD_EMAILS) {
+    await sql`SELECT xangarro.throttle_clear(${throttleKey('login', 'email', email)})`;
   }
 }
