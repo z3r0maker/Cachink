@@ -8,6 +8,14 @@ useDefault = true
 [allowlist]
 description = "Published test fixtures, never used outside tests"
 paths = [
+  # Build output and agent scratch: every `.next/` cache, and
+  # `.claude/worktrees/`, which holds whole stale copies of the repo.
+  # Neither is tracked, so the commit-range scan CI runs never sees them —
+  # but a local `gitleaks dir` over the repo root does, and on 2026-09-26
+  # that answered 250 findings, every one of them inside a single abandoned
+  # worktree. A local scan whose output cannot be read is one nobody runs.
+  '''\.claude/''',
+  '''\.next/''',
   # RFC 8032 test vector 1 — the contract's published entitlement test key
   # (SEC-SEC-02 keeps it out of production builds).
   '''packages/contracts/src/mock/dev-keys\.json''',
