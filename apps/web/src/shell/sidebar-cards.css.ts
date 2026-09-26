@@ -11,7 +11,16 @@ import {
 } from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
-import { wide } from './sidebar.css';
+import { aside, wide } from './sidebar.css';
+
+/**
+ * `wide` alone lost to `card`'s `display: flex` (declared later, same
+ * specificity), so the cards overflowed the rail. They hide themselves.
+ */
+const soloAncho = {
+  '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: { [`${aside}[data-rail="true"] &`]: { display: 'none' } },
+} as const;
 
 /** The sidebar's cards and Don Cuentas's face (ADR-107). */
 
@@ -49,6 +58,7 @@ export const pasosCard = style([
     background: colors.yellowSoft,
     border: `2px solid ${colors.black}`,
     boxShadow: shadows.small,
+    ...soloAncho,
   },
 ]);
 
@@ -76,6 +86,7 @@ export const ayudaCard = style([
     margin: '0 12px 8px',
     background: colors.offwhite,
     border: borders.quiet,
+    ...soloAncho,
   },
 ]);
 

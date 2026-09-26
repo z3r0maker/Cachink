@@ -1,4 +1,4 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
 import {
   borders,
   colors,
@@ -9,8 +9,6 @@ import {
   shapeRadii,
   typography,
 } from '@xangarro/tokens';
-
-import { pressable } from '../../../styles/press.css';
 
 /** Hoy (ADR-107): Don Cuentas's briefing leads; everything else is read-only and quiet. */
 
@@ -79,6 +77,18 @@ export const heroLine = style({
 
 export const heroActions = style({ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 6 });
 
+/** On a phone a long action wraps inside its button instead of running off the card. */
+globalStyle(`${heroActions} > a, ${heroActions} > button`, {
+  '@media': {
+    'screen and (max-width: 599px)': {
+      maxWidth: '100%',
+      whiteSpace: 'normal',
+      height: 'auto',
+      minHeight: 48,
+    },
+  },
+});
+
 export const two = style({
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1.35fr) minmax(0, 1fr)',
@@ -107,6 +117,8 @@ export const cardLink = style({
 
 export const bigFigure = style({
   fontSize: portalFontSizes.displayLg,
+  overflowWrap: 'anywhere',
+  '@media': { 'screen and (max-width: 599px)': { fontSize: portalFontSizes.xl5 } },
   lineHeight: 1,
   fontWeight: typography.weights.extraBold,
   letterSpacing: '-0.03em',
@@ -169,58 +181,8 @@ export const midFigure = style({
   fontSize: portalFontSizes.pageTitle,
   fontWeight: typography.weights.extraBold,
   fontVariantNumeric: 'tabular-nums',
-});
-
-export const pendRow = style([
-  pressable,
-  {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 14,
-    padding: '10px 12px',
-    borderRadius: radii[3],
-    border: 0,
-    boxShadow: 'none',
-    color: colors.black,
-    textDecoration: 'none',
-    selectors: { '&:hover': { background: colors.offwhite } },
-  },
-]);
-
-export const pendIcon = style({
-  width: 40,
-  height: 40,
-  flex: 'none',
-  display: 'grid',
-  placeItems: 'center',
-  borderRadius: radii[2],
-});
-
-export const pendTone = styleVariants({
-  alerta: { background: colors.redSoft, color: colors.redText },
-  sync: { background: colors.warningSoft, color: colors.warningText },
-  gente: { background: colors.blueSoft, color: colors.blueText },
-  paso: { background: colors.purpleSoft, color: colors.black },
-});
-
-export const pendTitle = style({
-  display: 'block',
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.extraBold,
-});
-
-export const pendSub = style({
-  display: 'block',
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.semibold,
-  color: colors.textMuted,
-});
-
-export const pendCta = style({
-  marginLeft: 'auto',
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.extraBold,
-  whiteSpace: 'nowrap',
+  overflowWrap: 'anywhere',
+  '@media': { 'screen and (max-width: 599px)': { fontSize: portalFontSizes.xl3 } },
 });
 
 export const count = style({
@@ -231,3 +193,5 @@ export const count = style({
   fontSize: fontSizes.xs,
   fontWeight: typography.weights.extraBold,
 });
+
+export * from './pendientes.css';

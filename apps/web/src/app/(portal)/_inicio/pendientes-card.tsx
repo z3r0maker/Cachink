@@ -33,7 +33,7 @@ export function PendientesCard({ items }: { readonly items: readonly Pendiente[]
               <span className={`${s.pendIcon} ${s.pendTone[p.tone]}`}>
                 <Icon path={ICONO[p.tone]} />
               </span>
-              <span style={{ minWidth: 0 }}>
+              <span className={s.pendTexto}>
                 <span className={s.pendTitle}>{p.title}</span>
                 <span className={s.pendSub}>{p.sub}</span>
               </span>
