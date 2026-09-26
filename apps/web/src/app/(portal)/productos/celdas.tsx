@@ -1,6 +1,8 @@
-import { colors } from '@xangarro/tokens';
+import type { ProductColor, ProductIcon } from '@xangarro/domain';
+import { colors, productTints } from '@xangarro/tokens';
 
-import { StatusPill } from '@/components';
+import { ProductGlyph } from '@/components/product-glyph';
+import { adivinaIcono } from '@/lib/adivina-icono';
 
 import { llenadoStock } from './derive';
 import { isLow, type Producto } from './parts';
@@ -23,34 +25,17 @@ import {
  * `stockLabel` — were written and imported nowhere.
  */
 
-/**
- * The design tints the pill by category. Ours are the product **types** the
- * catalogue actually stores, mapped onto the same four grounds the design
- * uses for its own four: a thing you sell, a drink, something you buy to
- * make it, and everything else.
- */
-const TONO_CATEGORIA: Record<string, 'soft' | 'info' | 'peach' | 'neutral'> = {
-  'Producto Terminado': 'soft',
-  Platillo: 'soft',
-  Bebida: 'info',
-  'Materia Prima': 'peach',
-  Insumo: 'neutral',
-};
-
-export function CategoriaPill({ categoria }: { readonly categoria: string }) {
-  return <StatusPill tone={TONO_CATEGORIA[categoria] ?? 'neutral'}>{categoria}</StatusPill>;
-}
-
-/** The tile's ground: the product's own colour when it set one. */
+/** The tile's ground: the product's own tint (a `productTints` key) when it set one. */
 function fondo(p: Producto): string {
-  return p.colorFondo !== null && p.colorFondo !== '' ? p.colorFondo : colors.yellowSoft;
+  return productTints[p.colorFondo as ProductColor]?.hex ?? colors.yellowSoft;
 }
 
 export function ProductoCell({ p }: { readonly p: Producto }) {
   return (
     <span className={productCell}>
       <span className={tile} style={{ background: fondo(p) }} aria-hidden="true">
-        {p.nombre.slice(0, 1).toLocaleUpperCase('es-MX')}
+        {/* The caja's own glyph (ADR-107); a product saved before icons gets one from its name. */}
+        <ProductGlyph icon={(p.icono as ProductIcon | null) ?? adivinaIcono(p.nombre)} size={20} />
       </span>
       <span style={{ minWidth: 0 }}>
         <span style={{ display: 'block', fontWeight: 800 }}>{p.nombre}</span>

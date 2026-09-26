@@ -2,7 +2,7 @@ import { formatMoney } from '@xangarro/domain';
 
 import { Button, StatusPill, type ColumnDef } from '@/components';
 
-import { CategoriaPill, ExistenciasCell, ProductoCell } from './celdas';
+import { ExistenciasCell, ProductoCell } from './celdas';
 import { type Movimiento, type Producto } from './parts';
 
 /**
@@ -42,15 +42,11 @@ export function catalogoColumns(onAction: OnRowAction): readonly ColumnDef<Produ
 
 /**
  * The SKU has no column of its own any more: the design stacks it under the
- * name inside the Producto cell, beside the category-coloured tile (B-5).
+ * name inside the Producto cell, beside the product's icon on its tint (B-5).
+ * No Categoría column since ADR-107: the owner never picks one any more.
  */
 export const CATALOGO_COLUMNS: readonly ColumnDef<Producto>[] = [
   { key: 'nombre', header: 'Producto', render: (p) => <ProductoCell p={p} /> },
-  {
-    key: 'categoria',
-    header: 'Categoría',
-    render: (p) => <CategoriaPill categoria={p.categoria} />,
-  },
   { key: 'precio', header: 'Precio', numeric: true, render: (p) => formatMoney(p.precio) },
   {
     key: 'stock',
