@@ -71,7 +71,9 @@ export class RunBackoff {
       told === undefined
         ? 0
         : nowMs + Math.min(told, MAX_SERVER_WAIT_MS) * (1 + SERVER_WAIT_SPREAD * this.#random());
-    this.#until = Math.max(own, this.#serverUntil);
+    // Whole ms, rounded up: a timer set for the ISO `retryAt` must not wake early.
+    this.#serverUntil = Math.ceil(this.#serverUntil);
+    this.#until = Math.ceil(Math.max(own, this.#serverUntil));
     return this.#until;
   }
 
