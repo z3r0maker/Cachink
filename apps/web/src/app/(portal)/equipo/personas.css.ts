@@ -25,7 +25,7 @@ export const seccion = style({
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.widest,
   textTransform: 'uppercase',
-  color: colors.textMuted,
+  color: colors.gray600,
 });
 
 export const tarjeta = style({
