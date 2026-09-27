@@ -52,10 +52,13 @@ export function InventarioViva({
   fixture,
   forzado = 'happy',
   tab,
+  reponer = null,
 }: {
   readonly fixture: InventarioData;
   readonly forzado?: 'happy' | EstadoMode;
   readonly tab: Pestana;
+  /** `?reponer=<id>`: open that product's «Llegó mercancía». */
+  readonly reponer?: string | null;
 }): ReactNode {
   const cred = useCredenciales();
   const linked = cred.device !== null && cred.sesion !== null;
@@ -75,12 +78,15 @@ export function InventarioViva({
     // recargar closes over state setters only; cred identity is stable per mount.
   }, [cred, linked]);
 
-  if (!linked) return <InventarioScreen state={forzado} tab={tab} data={fixture} />;
+  if (!linked) {
+    return <InventarioScreen state={forzado} tab={tab} data={fixture} reponer={reponer} />;
+  }
   return (
     <InventarioScreen
       state={vivo.state}
       tab={tab}
       data={vivo.data}
+      reponer={reponer}
       registrarVivo={(m) => {
         // A failed write reloads too: the optimistic move gives way to the truth.
         void moverEnVivo(cred, m).then(recargar, recargar);

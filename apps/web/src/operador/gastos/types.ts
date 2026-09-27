@@ -1,6 +1,6 @@
 import type { Money } from '@xangarro/domain';
 
-import type { NuevoGasto } from './registrar';
+import type { NuevoGasto, PrefillGasto } from './registrar';
 
 import type { EstadoMode } from '../estado';
 
@@ -32,4 +32,6 @@ export interface GastosScreenProps {
   readonly data: GastosData;
   /** Linked register: the write goes through the use case (O-35). */
   readonly registrarVivo?: (n: NuevoGasto) => void;
+  /** A due recurring gasto to pay: the drawer opens filled with it. */
+  readonly prefill?: PrefillGasto | null;
 }

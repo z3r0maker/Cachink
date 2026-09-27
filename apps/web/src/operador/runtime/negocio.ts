@@ -5,8 +5,9 @@
  * the caja's receipt says, offline too.
  */
 
-import { DrizzleBusinessesRepository } from '@xangarro/data';
+import { DrizzleAppConfigRepository, DrizzleBusinessesRepository } from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
+import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 
 import type { Db } from './db-types';
 
@@ -17,6 +18,14 @@ export interface MarcaDelNegocio {
   readonly whatsapp: string | null;
   /** Only when the owner chose to print it. */
   readonly direccion: string | null;
+  /** The owner's display name as the last pull sent it; null: say «el dueño». */
+  readonly dueno: string | null;
+}
+
+/** The owner's display name the bootstrap and every pull keep in `app_config`. */
+export async function duenoNombre(db: Db): Promise<string | null> {
+  const n = await new DrizzleAppConfigRepository(db as never).get(SYNC_CONFIG_KEYS.duenoNombre);
+  return n === null || n.trim() === '' ? null : n.trim();
 }
 
 export async function marcaDelNegocio(
@@ -36,5 +45,6 @@ export async function marcaDelNegocio(
     leyenda: limpio(b.receiptLeyenda),
     whatsapp: limpio(b.whatsapp),
     direccion: b.addressPrint ? limpio(b.direccion) : null,
+    dueno: await duenoNombre(db),
   };
 }

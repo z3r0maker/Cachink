@@ -11,13 +11,20 @@ function forced(dataState: string | undefined): 'happy' | 'loading' | 'empty' | 
 
 /**
  * Operador · Gastos (O-23, real data O-35). Fixtures for an unlinked
- * browser; a linked register reads and writes its own database.
+ * browser; a linked register reads and writes its own database, and
+ * `?recurrente=<id>` opens the drawer to pay a due recurring gasto.
  */
 export default async function OperadorGastosPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly dataState?: string }>;
+  readonly searchParams: Promise<{ readonly dataState?: string; readonly recurrente?: string }>;
 }) {
-  const { dataState } = await searchParams;
-  return <GastosViva fixture={GASTOS_FIXTURE} forzado={forced(dataState)} />;
+  const { dataState, recurrente } = await searchParams;
+  return (
+    <GastosViva
+      fixture={GASTOS_FIXTURE}
+      forzado={forced(dataState)}
+      recurrente={recurrente ?? null}
+    />
+  );
 }

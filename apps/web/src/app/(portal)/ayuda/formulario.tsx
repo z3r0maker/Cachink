@@ -89,7 +89,7 @@ function MensajeYUrgencia({
           aria-label="Es urgente"
           style={{ width: 18, height: 18 }}
         />
-        Es urgente — mi negocio no puede operar
+        Es urgente: mi negocio no puede operar
       </label>
     </>
   );

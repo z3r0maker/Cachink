@@ -7,7 +7,7 @@ import {
   MAX_PULL_ROWS_PER_TABLE,
   type PullableTable,
 } from '@xangarro/contracts';
-import { SYNCED_TABLES, syncLog } from '@xangarro/data-pg';
+import { ownerNombre, SYNCED_TABLES, syncLog } from '@xangarro/data-pg';
 import { and, asc, gt, inArray, lte } from 'drizzle-orm';
 import type { AnyPgColumn, PgTable } from 'drizzle-orm/pg-core';
 
@@ -56,9 +56,14 @@ export async function changesSince(tx: Tx, since: number, cursor: number, pageSi
   for (const e of page) if (isPullable(e.table)) ids.get(e.table)?.add(e.rowId);
 
   // Sent together: postgres.js pipelines them on the transaction's connection.
-  const [flags, ...loaded] = await Promise.all([
+  const [flags, duenoNombre, ...loaded] = await Promise.all([
     tenantFeatureFlags(tx),
+    // Every pull, not only on a change: a renamed owner reaches the caja (no sync_log row).
+    ownerNombre(tx),
     ...PULLABLE.map(async (t) => [t, await rowsById(tx, t, [...(ids.get(t) ?? [])])] as const),
   ]);
-  return { serverSeq, tables: { ...Object.fromEntries(loaded), feature_flags: flags } };
+  return {
+    serverSeq,
+    tables: { ...Object.fromEntries(loaded), feature_flags: flags, dueno_nombre: duenoNombre },
+  };
 }

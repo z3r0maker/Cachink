@@ -64,7 +64,7 @@ export function joinReasons(reasons: readonly ReasonCode[]): string {
 /** "Tu plan ideal: Xangarro — porque manejas inventario y vendes a crédito". */
 export function headline(plan: PlanId, reasons: readonly ReasonCode[]): string {
   const base = `Tu plan ideal: ${planName(plan)}`;
-  return reasons.length === 0 ? base : `${base} — porque ${joinReasons(reasons)}`;
+  return reasons.length === 0 ? base : `${base}, porque ${joinReasons(reasons)}`;
 }
 
 /** "$199 al mes + IVA" / "$1,990 al año + IVA" / "Gratis". */

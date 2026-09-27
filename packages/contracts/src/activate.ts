@@ -103,6 +103,12 @@ export const ReferenceTablesSchema = z.object({
   inventory_movements: z.array(wireSchema(InventoryMovementSchema)).default([]),
   /** Tenant layer only; the device resolves platform × plan itself. */
   feature_flags: z.record(z.string(), z.boolean()),
+  /**
+   * The owner's display name (auth metadata, ADR-087), sent on the bootstrap
+   * and every pull so the caja says «Pedro» and not «el dueño». `null` when
+   * the owner set none; absent from older servers (keep what the device has).
+   */
+  dueno_nombre: z.string().nullable().optional(),
 });
 export type ReferenceTables = z.infer<typeof ReferenceTablesSchema>;
 

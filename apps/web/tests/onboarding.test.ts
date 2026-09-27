@@ -28,7 +28,7 @@ describe('"Tu plan ideal" copy (N-13)', () => {
     );
     assert.equal(
       headline('xangarro', ['INVENTARIO', 'VENTAS_A_CREDITO']),
-      'Tu plan ideal: Xangarro — porque manejas inventario y vendes a crédito',
+      'Tu plan ideal: Xangarro, porque manejas inventario y vendes a crédito',
     );
     assert.equal(headline('xangarrito', []), 'Tu plan ideal: Xangarrito');
   });
@@ -58,7 +58,7 @@ describe('"esto cambiará" lines (N-15)', () => {
   it('reassures that switching Inventario off deletes nothing', () => {
     assert.equal(
       changeLine({ kind: 'feature', key: 'stock', enabled: false }),
-      'Se desactivará Inventario / Stock — tus productos no se borran',
+      'Se desactivará Inventario / Stock: tus productos no se borran',
     );
     assert.equal(
       changeLine({ kind: 'feature', key: 'barcode', enabled: true }),

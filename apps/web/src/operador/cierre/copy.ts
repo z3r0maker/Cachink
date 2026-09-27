@@ -1,6 +1,8 @@
 import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
+import { mayuscula } from '../ui/dueno';
+
 /** Every sentence of the close that changes with the difference or the queue. */
 export const DIF = {
   cuadra: {
@@ -47,7 +49,7 @@ export const BANDA_SIN_RED = 'Todavía no hay internet. Lo volvemos a intentar s
 
 export function lineaCerrado(d: DiferenciaCorte, motivo: string | null, dueno: string): string {
   if (d.tipo === 'cuadra')
-    return `El conteo cuadró con lo esperado. ${dueno} ya lo tiene en su portal.`;
+    return `El conteo cuadró con lo esperado. ${mayuscula(dueno)} ya lo tiene en su portal.`;
   const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
   return `Quedó un ${que} explicado como «${motivo ?? ''}».`;
 }

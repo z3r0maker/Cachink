@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { buildFixtures, FIXTURE_BUSINESS_ID } from '@xangarro/contracts/mock';
 import type { ReferenceTables } from '@xangarro/contracts';
 import {
+  DrizzleAppConfigRepository,
   DrizzleBusinessesRepository,
   DrizzleProductsRepository,
   DrizzleUsersRepository,
@@ -10,6 +11,7 @@ import {
 import type { BusinessId, ProductId } from '@xangarro/domain';
 import { makeFreshDb } from '../../data/tests/helpers/fresh-db.js';
 import { applyReferenceTables, toColumnValues } from '../src/reference-applier.js';
+import { SYNC_CONFIG_KEYS } from '../src/sync-keys.js';
 import { products } from '@xangarro/data';
 import { sql } from 'drizzle-orm';
 
@@ -186,6 +188,18 @@ describe('applyReferenceTables', () => {
       op: string;
     }[];
     assert.deepEqual(rows, [{ table_name: 'products', op: 'insert' }]);
+  });
+
+  it("keeps the owner's display name in app_config: set, cleared by null, kept when absent", async () => {
+    const db = makeFreshDb();
+    const config = new DrizzleAppConfigRepository(db);
+    await applyReferenceTables(db, tables({ dueno_nombre: ' Pedro ' }), FIXTURE_BUSINESS_ID);
+    assert.equal(await config.get(SYNC_CONFIG_KEYS.duenoNombre), 'Pedro');
+    // An older server sends no field: the name stays.
+    await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
+    assert.equal(await config.get(SYNC_CONFIG_KEYS.duenoNombre), 'Pedro');
+    await applyReferenceTables(db, tables({ dueno_nombre: null }), FIXTURE_BUSINESS_ID);
+    assert.equal(await config.get(SYNC_CONFIG_KEYS.duenoNombre), null);
   });
 
   it('drops keys the local table does not have and JSON-encodes structured values', () => {

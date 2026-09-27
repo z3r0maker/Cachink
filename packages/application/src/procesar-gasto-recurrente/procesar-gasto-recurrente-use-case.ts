@@ -13,13 +13,35 @@
  * by one; each call is atomic at the app level but not cross-template.
  */
 
-import type { Expense, IsoDate, RecurringExpense } from '@xangarro/domain';
+import type {
+  CajaTurnoId,
+  Expense,
+  ExpenseCategory,
+  IsoDate,
+  Money,
+  RecurringExpense,
+} from '@xangarro/domain';
 import type { ExpensesRepository, RecurringExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+
+/**
+ * What was actually paid, when the caller captured it (the web caja's drawer,
+ * prefilled from the template and editable): each field falls back to the
+ * template's. `cajaTurnoId` scopes the egreso to the open turno so the
+ * expected cash sees it (ADR-074).
+ */
+export interface CapturaGastoRecurrente {
+  concepto?: string;
+  categoria?: ExpenseCategory;
+  monto?: Money;
+  proveedor?: string | null;
+  cajaTurnoId?: CajaTurnoId | null;
+}
 
 export interface ProcesarGastoRecurrenteInput {
   template: RecurringExpense;
   today: IsoDate;
+  captura?: CapturaGastoRecurrente;
 }
 
 export interface ProcesarGastoRecurrenteResult {
@@ -41,7 +63,7 @@ export class ProcesarGastoRecurrenteUseCase implements UseCase<
   }
 
   async execute(input: ProcesarGastoRecurrenteInput): Promise<ProcesarGastoRecurrenteResult> {
-    const { template, today } = input;
+    const { template, today, captura = {} } = input;
     if (!template.activo) {
       return { processed: false, egreso: null, nextProximoDisparo: null };
     }
@@ -58,12 +80,14 @@ export class ProcesarGastoRecurrenteUseCase implements UseCase<
       return { processed: true, egreso: existing, nextProximoDisparo: null };
     }
 
+    const proveedor = captura.proveedor === undefined ? template.proveedor : captura.proveedor;
     const egreso = await this.#expenses.create({
       fecha: today,
-      concepto: template.concepto,
-      categoria: template.categoria,
-      monto: template.montoCentavos,
-      proveedor: template.proveedor ?? undefined,
+      concepto: captura.concepto ?? template.concepto,
+      categoria: captura.categoria ?? template.categoria,
+      monto: captura.monto ?? template.montoCentavos,
+      proveedor: proveedor ?? undefined,
+      ...(captura.cajaTurnoId == null ? {} : { cajaTurnoId: captura.cajaTurnoId }),
       gastoRecurrenteId: template.id,
       businessId: template.businessId,
     });

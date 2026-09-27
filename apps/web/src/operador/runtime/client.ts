@@ -35,6 +35,7 @@ import type {
   VentasTurno,
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
+import type { RecurrenteGastoPara } from './recurrentes';
 import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
 import type { TurnoVivoPara } from './turno-shapes';
 import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
@@ -223,6 +224,25 @@ export class RegisterRuntime {
 
   responderAviso(p: Omit<ResponderAvisoCall, 'method'>): Promise<{ readonly id: string }> {
     return this.#call({ ...p, method: 'responderAviso' });
+  }
+
+  /** Gastos' drawer filled from a due recurring gasto; null when it is no longer due. */
+  gastoRecurrente(
+    businessId: string,
+    deviceId: string,
+    recurrenteId: string,
+  ): Promise<RecurrenteGastoPara | null> {
+    return this.#call({ method: 'gastoRecurrente', businessId, deviceId, recurrenteId });
+  }
+
+  /** Pay it: the egreso and the schedule's advance, one use case. */
+  pagarRecurrente(p: GastoInput & { readonly recurrenteId: string }): Promise<{ id: string }> {
+    const { montoCentavos, ...rest } = p;
+    return this.#call({
+      ...rest,
+      method: 'pagarRecurrente',
+      montoCentavos: montoCentavos.toString(),
+    });
   }
 
   terminate(): void {
