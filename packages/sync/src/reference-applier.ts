@@ -133,10 +133,14 @@ async function changeLogHighWater(db: XangarroDatabase): Promise<number> {
   return row?.hw ?? 0;
 }
 
+/** Ids per `IN (…)`: SQLite allows 32,766 variables, a whale's bootstrap has more rows. */
+export const ECHO_CHUNK = 500;
+
 /**
  * The change-log triggers fire on every write, including rows the server just
  * sent. Drop those entries so a pull never pushes server rows back (only
- * entries created after `floor`, and only for the rows applied here).
+ * entries created after `floor`, and only for the rows applied here), a chunk
+ * of ids at a time (audit DB3-BOOT-01).
  */
 async function forgetEchoes(
   db: XangarroDatabase,
@@ -144,12 +148,11 @@ async function forgetEchoes(
   rows: readonly Record<string, unknown>[],
   floor: number,
 ): Promise<void> {
-  if (rows.length === 0) return;
-  const ids = rows.map((r) => String(r['id']));
-  await db.run(
-    sql`DELETE FROM __xangarro_change_log WHERE id > ${floor} AND table_name = ${getTableName(table)} AND row_id IN (${sql.join(
-      ids.map((id) => sql`${id}`),
-      sql`, `,
-    )})`,
-  );
+  const name = getTableName(table);
+  for (let i = 0; i < rows.length; i += ECHO_CHUNK) {
+    const ids = rows.slice(i, i + ECHO_CHUNK).map((r) => sql`${String(r['id'])}`);
+    await db.run(
+      sql`DELETE FROM __xangarro_change_log WHERE id > ${floor} AND table_name = ${name} AND row_id IN (${sql.join(ids, sql`, `)})`,
+    );
+  }
 }

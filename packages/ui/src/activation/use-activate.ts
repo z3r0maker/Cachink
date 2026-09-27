@@ -1,7 +1,8 @@
 /**
  * useActivate — redeems email + code, then makes the device usable offline:
- * token → secure storage, bootstrap rows → SQLite, activation record,
- * entitlement, server time and pull cursor → app_config (A-04).
+ * token → secure storage, the bootstrap's first page and pull cursor →
+ * SQLite in one transaction, activation record, entitlement and server time
+ * → app_config (A-04; the paged snapshot bootstrap, C-23).
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -40,7 +41,9 @@ export async function persistActivation(
   data: ActivateResponse,
 ): Promise<ActivationRecord> {
   await deps.tokenStore.set(data.deviceToken);
-  await deps.referenceData.apply(data.bootstrap.tables, data.businessId);
+  // The first page and the pull cursor together (C-23): a whale's remaining
+  // snapshot pages follow on the engine's first sync, which activation starts.
+  await deps.referenceData.applyBootstrap(data.bootstrap, data.businessId);
   const record: ActivationRecord = {
     deviceId: data.deviceId,
     businessId: data.businessId,
@@ -49,7 +52,6 @@ export async function persistActivation(
   const c = deps.appConfig;
   await c.set(APP_CONFIG_KEYS.entitlement, JSON.stringify(data.entitlement));
   await c.set(APP_CONFIG_KEYS.lastServerTime, data.bootstrap.serverTime);
-  await c.set(APP_CONFIG_KEYS.pullSeq, String(data.bootstrap.serverSeq));
   await c.set(APP_CONFIG_KEYS.currentBusinessId, data.businessId);
   await c.set(APP_CONFIG_KEYS.mode, 'local');
   await c.set(APP_CONFIG_KEYS.discoveryShown, 'true');
@@ -72,6 +74,7 @@ export function useActivate() {
         ...input,
         device: config.deviceInfo,
         avisoVersion: AVISO_VINCULACION_VERSION,
+        bootstrap: 'snapshot',
       });
       if (!res.ok) throw new ActivationError(activationErrorKey(res.code), res.message);
       return persistActivation(

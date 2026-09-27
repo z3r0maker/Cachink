@@ -5,9 +5,18 @@
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MOCK_CODES, startMockServer, type RunningMock } from '@xangarro/contracts/mock';
-import { DrizzleAppConfigRepository, DrizzleUsersRepository } from '@xangarro/data';
+import {
+  DrizzleAppConfigRepository,
+  DrizzleProductsRepository,
+  DrizzleUsersRepository,
+} from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
-import { ApiClient, DrizzleReferenceDataRepository } from '@xangarro/sync';
+import {
+  ApiClient,
+  DrizzleReferenceDataRepository,
+  pullAll,
+  SYNC_CONFIG_KEYS,
+} from '@xangarro/sync';
 import { makeFreshDb } from '../../../data/tests/helpers/fresh-db';
 import { APP_CONFIG_KEYS } from '../../src/app-config/index';
 import { activationErrorKey } from '../../src/activation/activation-errors';
@@ -72,6 +81,34 @@ describe('persistActivation (real SQLite + mock server)', () => {
     const users = new DrizzleUsersRepository(db, 'DEV' as never);
     const ops = await users.findAllByBusiness(res.data.businessId as BusinessId);
     expect(ops.map((u) => u.nombre).sort()).toEqual(['Ana', 'Toni']);
+  });
+
+  it('keeps an opted-in snapshot open after the first page, and the first sync finishes it (C-23)', async () => {
+    mock.api.state.snapshotBudget = { rows: 5, bytes: 1_000_000 };
+    const client = new ApiClient({ baseUrl: mock.url });
+    const res = await client.activate({
+      email: 'dueno@tacoslaesquina.mx',
+      code: mock.api.state.issueCode(),
+      device: { name: 'Test', platform: 'ios', appVersion: '0.1.0', osVersion: '18' },
+      bootstrap: 'snapshot',
+    });
+    mock.api.state.snapshotBudget = undefined;
+    if (!res.ok) throw new Error(res.code);
+    const db = makeFreshDb();
+    const appConfig = new DrizzleAppConfigRepository(db);
+    const referenceData = new DrizzleReferenceDataRepository(db);
+    await persistActivation({ referenceData, appConfig, tokenStore: memoryTokenStore() }, res.data);
+    expect(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext)).toBe(
+      res.data.bootstrap.snapshot?.next,
+    );
+    expect(res.data.bootstrap.snapshot?.next).toBeTruthy();
+    const out = await pullAll({ db, appConfig, client, token: res.data.deviceToken });
+    expect(out.error).toBeNull();
+    expect(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext)).toBeNull();
+    const products = await new DrizzleProductsRepository(db, 'DEV' as never).listForBusiness(
+      res.data.businessId as BusinessId,
+    );
+    expect(products).toHaveLength(20);
   });
 });
 
