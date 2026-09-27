@@ -89,9 +89,9 @@ test('switching a feature off in Negocio reaches the phone on its next pull', as
   request,
 }) => {
   const cursor = (await pull(request, b, b.cursor)).serverSeq;
-  await page.goto('/negocio');
-  await page.getByRole('switch', { name: 'Inventario / Stock' }).click();
-  await expect(page.getByRole('switch', { name: 'Inventario / Stock' })).toHaveAttribute(
+  await page.goto('/negocio/funciones');
+  await page.getByRole('switch', { name: 'Inventario y stock' }).click();
+  await expect(page.getByRole('switch', { name: 'Inventario y stock' })).toHaveAttribute(
     'aria-checked',
     'false',
   );

@@ -67,6 +67,8 @@ export function pgSignupStore(tx: Tx, evidence: ConsentEvidence): SignupStore {
         nombre: o.nombreNegocio,
         regimenFiscal: o.regimenFiscal,
         isrTasa: o.isrTasa,
+        // New businesses start on the real-looking yellow ticket (product decision).
+        receiptTemplate: 'ticket',
         businessId: o.businessId,
         deviceId: PORTAL_DEVICE_ID,
         createdAt: o.at,

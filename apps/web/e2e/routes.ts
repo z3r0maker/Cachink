@@ -92,18 +92,31 @@ export const ROUTES: readonly Route[] = [
   // REJECTIONS rj-1 payload preview.
   {
     path: '/sincronizacion',
-    heading: 'Sincronización',
+    heading: 'Mi negocio',
     data: { kind: 'db', sentinel: 'Venta · Gringa ×1 · $60.00' },
   },
   // `businesses.regimen_fiscal` → `negocio/screen.tsx`.
   {
     path: '/negocio',
-    heading: 'Negocio',
+    heading: 'Mi negocio',
     data: { kind: 'db', sentinel: '626 · Régimen Simplificado de Confianza' },
+  },
+  // `businesses.enabled_payment_methods` → `negocio/cobros/screen.tsx`: the
+  // count renders only once the row is read.
+  {
+    path: '/negocio/cobros',
+    heading: 'Mi negocio',
+    data: { kind: 'db', sentinel: 'La caja ofrece' },
+  },
+  // `businesses.feature_flags` → `negocio/funciones/screen.tsx`.
+  {
+    path: '/negocio/funciones',
+    heading: 'Mi negocio',
+    data: { kind: 'db', sentinel: 'Funciones de tu negocio' },
   },
   {
     path: '/suscripcion',
-    heading: 'Suscripción',
+    heading: 'Mi negocio',
     // The seeded Xangarro subscription (seed-billing.ts), as the phones receive it.
     data: { kind: 'db', sentinel: 'Tus cajas reciben el plan Xangarro' },
   },

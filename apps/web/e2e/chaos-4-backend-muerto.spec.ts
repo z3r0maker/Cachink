@@ -42,7 +42,7 @@ test('a 500 on the negocio action surfaces an error state and writes nothing', a
 
   const attempted = `No Debería Existir ${Date.now()}`;
   await page.goto('/negocio');
-  await page.getByRole('button', { name: 'Editar negocio' }).click();
+  await page.getByRole('button', { name: 'Editar datos generales' }).click();
   await page.getByTestId('negocio-nombre').fill(attempted);
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
 

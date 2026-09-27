@@ -1,18 +1,19 @@
 'use client';
 
 import { REGIMEN_NOMBRE } from '@xangarro/domain';
+import Link from 'next/link';
 
 import { Input, OptionCards, Switch } from '@/components';
 
-import { SectionShell } from '../parts';
-import { hint } from '../negocio.css';
+import * as g from '../general.css';
+import { tipoLabel } from '../lectura';
 import { sugerida, type Business } from './draft';
 import type { Edicion } from './use-edicion';
 
 /**
- * Datos generales in edit mode: the name, and the régimen by SAT code
- * (ADR-082). A new régimen offers its suggested ISR rate behind a switch —
- * never changed silently.
+ * Datos generales in the drawer: the name, and the régimen by SAT code
+ * (ADR-082). A new régimen offers its suggested ISR rate behind a switch,
+ * never changed silently. The tipo de negocio comes from the wizard.
  */
 const COMUNES = ['626', '612', '601', '606', '605'];
 
@@ -42,19 +43,21 @@ function Regimen({ e, business }: { readonly e: Edicion; readonly business: Busi
   const s = sugerida(business, d);
   return (
     <>
-      <p className={hint}>
-        Régimen fiscal. Solo sirve para estimar el ISR en tu estado de resultados; no afecta nada
-        más.
-      </p>
-      <OptionCards
-        ariaLabel="Régimen fiscal"
-        options={cards(business.regimenSat)}
-        value={d.regimenSat ?? NINGUNO}
-        onValueChange={(v) => e.set({ regimenSat: v === NINGUNO ? null : v })}
-      />
-      {e.errores.campos.regimen ? <p role="alert">{e.errores.campos.regimen}</p> : null}
+      <fieldset className={g.grupo}>
+        <legend className={g.legend}>Régimen fiscal</legend>
+        <p className={g.pista}>
+          Solo sirve para estimar el ISR en tu estado de resultados; no afecta nada más.
+        </p>
+        <OptionCards
+          ariaLabel="Régimen fiscal"
+          options={cards(business.regimenSat)}
+          value={d.regimenSat ?? NINGUNO}
+          onValueChange={(v) => e.set({ regimenSat: v === NINGUNO ? null : v })}
+        />
+        {e.errores.campos.regimen ? <p role="alert">{e.errores.campos.regimen}</p> : null}
+      </fieldset>
       {s === null ? null : (
-        <label style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
+        <label className={g.interruptor}>
           <Switch
             checked={d.usarSugerida}
             label="Usar la tasa de ISR sugerida"
@@ -76,17 +79,27 @@ export function GeneralesEdit({
   readonly business: Business;
 }) {
   if (e.draft === null) return null;
-  const d = e.draft;
   return (
-    <SectionShell title="Datos generales" tone="hero">
+    <div className={g.campos}>
       <Input
         labelText="Nombre del negocio"
-        value={d.nombre}
+        hintText="Sale en tus comprobantes y en tus estados."
+        value={e.draft.nombre}
         onChange={(ev) => e.set({ nombre: ev.target.value })}
         error={e.errores.campos.nombre}
         data-testid="negocio-nombre"
       />
       <Regimen e={e} business={business} />
-    </SectionShell>
+      <p className={g.tipoNegocio}>
+        <span style={{ flex: 1 }}>
+          Tipo de negocio: <strong>{tipoLabel(business.tipoNegocio)}</strong>. Se cambia al volver a
+          configurar tu negocio.
+        </span>
+        {/* Re-run the onboarding wizard (N-15): answers change, features follow. */}
+        <Link href="/bienvenida/revisar" className={g.tipoLink}>
+          Volver a configurar
+        </Link>
+      </p>
+    </div>
   );
 }

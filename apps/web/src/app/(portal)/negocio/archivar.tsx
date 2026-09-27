@@ -3,10 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { Button, Card, ConfirmDialog, Input } from '@/components';
+import { Button, ConfirmDialog, Input } from '@/components';
 import { archivarNegocio } from '@/server/actions/archivar-negocio';
 
-import { fieldLabel, sectionTitle } from './negocio.css';
+import * as n from './negocio.css';
 
 /**
  * The archive row (P-08), owner only. Typing the name is the confirmation:
@@ -36,11 +36,16 @@ function useArchivar() {
 export function ArchivarNegocio({ nombre }: { readonly nombre: string }) {
   const { open, setOpen, typed, onTyped, error, pending, confirm } = useArchivar();
   return (
-    <Card>
-      <div className={sectionTitle}>Archivar negocio</div>
-      <p className={fieldLabel}>
-        Se archivan tus registros y se desvinculan todos los dispositivos. No se borra nada.
-      </p>
+    <section className={n.archivar} aria-labelledby="negocio-archivar">
+      <span className={n.compactaTexto}>
+        <h2 id="negocio-archivar" className={n.archivarTitulo}>
+          Archivar negocio
+        </h2>
+        <span className={n.compactaSub}>
+          Nadie podrá entrar y las cajas se desconectan. No se borra nada; te pediremos escribir el
+          nombre para confirmar.
+        </span>
+      </span>
       <Button variant="danger" onClick={() => setOpen(true)}>
         Archivar negocio
       </Button>
@@ -61,6 +66,6 @@ export function ArchivarNegocio({ nombre }: { readonly nombre: string }) {
           data-testid="archivar-confirmacion"
         />
       </ConfirmDialog>
-    </Card>
+    </section>
   );
 }
