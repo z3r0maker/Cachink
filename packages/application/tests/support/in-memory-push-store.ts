@@ -7,11 +7,13 @@ import {
 
 import {
   ForeignRowError,
+  RowRefusedError,
   rowKey as key,
   TransientWriteError,
   type PushReceipt,
   type PushStore,
   type Rejection,
+  type RejectOptions,
   type RowKey,
   type WriteOutcome,
 } from '../../src/apply-push/push-store.js';
@@ -39,6 +41,16 @@ export class InMemoryPushStore implements PushStore {
   failOn = new Set<string>();
   /** Row ids whose presence makes a write time out. */
   transientOn = new Set<string>();
+  /** Row ids the database refuses for good: bad values, or a unique key taken. */
+  refuseOn = new Map<string, 'invalid' | 'duplicate'>();
+  /** How many `reject` calls throw before one succeeds, as a payload Postgres refuses. */
+  failReject = 0;
+  /** How each successful `reject` kept its rows: with the payload, or `bare`. */
+  rejectModes: ('full' | 'bare')[] = [];
+  /** Keys whose open rejection an `accept` resolved. */
+  resolved: string[] = [];
+  /** Runs once, just before the first write: a concurrent push committing first. */
+  racing: (() => void) | null = null;
   /** Savepoints that wrote and stayed — Postgres caches 64 per transaction. */
   isolatedCommits = 0;
   calls = { receipts: 0, existing: 0, write: 0, accept: 0, reject: 0, finish: 0 };
@@ -94,11 +106,16 @@ export class InMemoryPushStore implements PushStore {
 
   private async writeRows(table: PushableTable, deltas: readonly Delta[]) {
     this.calls.write += 1;
+    const race = this.racing;
+    this.racing = null;
+    race?.();
     const ids = deltas.map((d) => d.rowId);
     if (ids.some((id) => this.transientOn.has(id))) {
       throw new TransientWriteError(new Error('statement timeout'));
     }
     if (ids.some((id) => this.failOn.has(id))) throw new Error('disk on fire');
+    const refused = ids.map((id) => this.refuseOn.get(id)).find((r) => r !== undefined);
+    if (refused !== undefined) throw new RowRefusedError(refused, new Error('22021 / 23505'));
     const insertOnly = HYBRID.has(table);
     const foreign = ids.find((id) => this.foreign.has(key(table, id)));
     if (!insertOnly && foreign !== undefined) throw new ForeignRowError(table, foreign);
@@ -126,12 +143,18 @@ export class InMemoryPushStore implements PushStore {
       const updatedAt = String((d.row as Row)['updatedAt']);
       this.receiptsByKey.set(key(d.table, d.rowId), { seq: this.seq, rowUpdatedAt: updatedAt });
       if (HYBRID.has(d.table)) this.logged.push(key(d.table, d.rowId));
+      this.resolved.push(key(d.table, d.rowId));
       return this.seq;
     });
   }
 
-  async reject(rejections: readonly Rejection[]) {
+  async reject(rejections: readonly Rejection[], options: RejectOptions = {}) {
     this.calls.reject += 1;
+    if (this.failReject > 0) {
+      this.failReject -= 1;
+      throw new Error('22P05: unsupported Unicode escape sequence');
+    }
+    this.rejectModes.push(options.withoutPayload === true ? 'bare' : 'full');
     this.rejections.push(...rejections);
   }
 

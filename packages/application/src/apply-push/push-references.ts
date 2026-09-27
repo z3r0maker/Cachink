@@ -6,6 +6,10 @@
  * the rest of the push. A row may also point at a product or client stored
  * **earlier in the same push**; that counts only when the earlier row really was
  * written, and only when it came first — the answers one-by-one processing gave.
+ *
+ * When that earlier row failed **retryably** (a timeout, the savepoint budget),
+ * the row pointing at it is retryable too, not FK_*_MISSING: both come back on
+ * the next push, and the reference is there then (audit DB3-SYNC-02).
  */
 
 import { PUSH_REFERENCES, type ErrorCode, type ReferencedTable } from '@xangarro/contracts';
@@ -22,6 +26,8 @@ export class PushReferences {
   private readonly known = new Map<ReferencedTable, Set<string>>();
   /** Referenced rows written by this push, by `rowKey`, with the index that wrote them. */
   private readonly written = new Map<string, number>();
+  /** Referenced rows this push failed to write, retryably, by `rowKey`, with their index. */
+  private readonly retrying = new Map<string, number>();
 
   constructor(private readonly store: PushStore) {}
 
@@ -49,16 +55,28 @@ export class PushReferences {
     for (const [field, table, code] of PUSH_REFERENCES) {
       const id = row[field];
       if (typeof id !== 'string' || this.knownOf(table).has(id)) continue;
-      const by = this.written.get(rowKey(table, id));
-      if (by === undefined || by > item.index) return { code, message: `${field}=${id} not found` };
+      const k = rowKey(table, id);
+      const by = this.written.get(k);
+      if (by !== undefined && by < item.index) continue;
+      const failed = this.retrying.get(k);
+      if (failed !== undefined && failed < item.index) {
+        return { code: 'INTERNAL', message: `${field}=${id} not stored yet; se reintentará.` };
+      }
+      return { code, message: `${field}=${id} not found` };
     }
     return null;
   }
 
-  /** A row this push wrote, which later rows may now point at. */
+  /** A row this push wrote (or found stored), which later rows may now point at. */
   wrote(item: Item): void {
     const k = rowKey(item.delta.table, item.delta.rowId);
     if (!this.written.has(k)) this.written.set(k, item.index);
+  }
+
+  /** A row this push could not write this time; rows pointing at it retry with it. */
+  failed(item: Item): void {
+    const k = rowKey(item.delta.table, item.delta.rowId);
+    if (!this.retrying.has(k)) this.retrying.set(k, item.index);
   }
 
   private knownOf(table: ReferencedTable): Set<string> {

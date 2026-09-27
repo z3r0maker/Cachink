@@ -69,10 +69,34 @@ export class TransientWriteError extends Error {
   }
 }
 
+/**
+ * The database refused a row for good (audit DB3-SYNC-01 c): a value it cannot
+ * take (`invalid` — class 22, a NOT NULL or CHECK), or a unique key another row
+ * already holds (`duplicate`). Sending it again changes nothing, so the row is
+ * answered terminally. In a batch the store cannot tell which row it was; the
+ * use case narrows it down.
+ */
+export class RowRefusedError extends Error {
+  readonly code = 'ROW_REFUSED' as const;
+
+  constructor(
+    readonly reason: 'invalid' | 'duplicate',
+    cause: unknown,
+  ) {
+    super(`row refused: ${reason}`, { cause });
+    this.name = 'RowRefusedError';
+  }
+}
+
 /** A rejection to keep, with the delta it answers. */
 export interface Rejection {
   readonly delta: Delta;
   readonly rejection: RejectedRow;
+}
+
+export interface RejectOptions {
+  /** Keep the answer, not the row it answers — for a row the payload column refuses. */
+  readonly withoutPayload?: boolean;
 }
 
 export interface PushStore {
@@ -95,11 +119,16 @@ export interface PushStore {
   write(table: PushableTable, deltas: readonly Delta[]): Promise<readonly WriteOutcome[]>;
   /**
    * Give each row its seq — consecutive, in the order given — remember them,
-   * and log the rows devices pull. One cursor bump for the whole call.
+   * log the rows devices pull, and resolve this device's open rejections of
+   * these rows (DB3-SYNC-04). One cursor bump for the whole call.
    */
   accept(deltas: readonly Delta[]): Promise<readonly number[]>;
-  /** Keep rejections so the portal can show them (ADR-053 Q4). */
-  reject(rejections: readonly Rejection[]): Promise<void>;
+  /**
+   * Keep rejections so the portal can show them (ADR-053 Q4). The use case runs
+   * it through `isolated`, and again `withoutPayload` if that fails: bookkeeping
+   * never fails a push (DB3-SYNC-01).
+   */
+  reject(rejections: readonly Rejection[], options?: RejectOptions): Promise<void>;
   /** Record what this device may purge through, and return the tenant's cursor. */
   finish(acknowledgedThrough: number): Promise<number>;
 }

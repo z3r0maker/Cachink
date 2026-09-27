@@ -23,6 +23,7 @@ import { PUSH_REFERENCES, type PushRequest, type PushResponse } from '@xangarro/
 import {
   accepted,
   byTable,
+  decide,
   keyOf,
   precheck,
   rejected,
@@ -30,6 +31,7 @@ import {
   segments,
   type Item,
   type Outcome,
+  type Receipts,
 } from './push-plan.js';
 import { PushReferences } from './push-references.js';
 import { type PushReceipt, type PushStore, type Rejection } from './push-store.js';
@@ -39,8 +41,6 @@ export type PushResult = Omit<PushResponse, 'serverTime'>;
 
 /** Tables other rows point at, which a push may itself write: written first. */
 const REFERENCED: ReadonlySet<string> = new Set(PUSH_REFERENCES.map(([, table]) => table));
-
-type Receipts = ReadonlyMap<string, PushReceipt>;
 
 export class ApplyPushUseCase {
   constructor(
@@ -73,26 +73,50 @@ export class ApplyPushUseCase {
     writer: PushWriter,
   ): Promise<void> {
     // Independent lookups: sent together (Postgres pipelines them).
-    const [receipts] = await Promise.all([
+    const [found] = await Promise.all([
       this.store.receipts(segment.map(({ delta: d }) => d)),
       references.load(segment),
     ]);
+    const receipts = new Map(found);
     const first = segment.filter((i) => REFERENCED.has(i.delta.table));
     const rest = segment.filter((i) => !REFERENCED.has(i.delta.table));
     const toAccept: Item[] = [];
     for (const tier of [first, rest]) {
       const toWrite = this.screen(tier, receipts, references, outcomes);
-      const results = new Map<number, WriteResult>();
-      for (const group of byTable(toWrite)) await writer.write(group.table, group.items, results);
+      const results = await this.write(toWrite, writer, receipts);
       for (const item of toWrite) {
         const result = results.get(item.index) ?? 'internal';
-        if (result === 'written') references.wrote(item);
+        track(references, item, result);
         const outcome = decide(item, result, receipts);
         if (outcome === null) toAccept.push(item);
         else outcomes.set(item.index, outcome);
       }
     }
     await this.accept(toAccept, outcomes);
+  }
+
+  /**
+   * Write a tier, one statement per table. A row that came back already stored
+   * without a receipt at the segment's start may be an overlapping push's, which
+   * committed while this one waited on its lock: its receipt is looked up again
+   * before the row is answered (audit DB3-SYNC-03).
+   */
+  private async write(
+    items: readonly Item[],
+    writer: PushWriter,
+    receipts: Map<string, PushReceipt>,
+  ): Promise<Map<number, WriteResult>> {
+    const results = new Map<number, WriteResult>();
+    for (const group of byTable(items)) await writer.write(group.table, group.items, results);
+    const inDoubt = items.filter((i) => {
+      const result = results.get(i.index);
+      return (result === 'exists' || result === 'stale') && !receipts.has(keyOf(i.delta));
+    });
+    if (inDoubt.length > 0) {
+      const late = await this.store.receipts(inDoubt.map((i) => i.delta));
+      for (const [k, receipt] of late) receipts.set(k, receipt);
+    }
+    return results;
   }
 
   /** Answer what needs no write; return the rest, to be written. */
@@ -137,29 +161,30 @@ export class ApplyPushUseCase {
         rejections.push({ delta, rejection: outcome.rejected });
       }
     });
-    if (rejections.length > 0) await this.store.reject(rejections);
+    await this.keep(rejections);
     return { ...result, serverSeq: await this.store.finish(highest) };
+  }
+
+  /**
+   * Keep the rejections in their own savepoint, and without their payloads if
+   * that fails: bookkeeping never fails the push — a failure here used to roll
+   * back every row the push stored, forever (audit DB3-SYNC-01).
+   */
+  private async keep(rejections: readonly Rejection[]): Promise<void> {
+    if (rejections.length === 0) return;
+    try {
+      await this.store.isolated((s) => s.reject(rejections));
+    } catch (error) {
+      this.logError(error);
+      await this.store
+        .isolated((s) => s.reject(rejections, { withoutPayload: true }))
+        .catch((again: unknown) => this.logError(again));
+    }
   }
 }
 
-/** A written row's answer, or null when it is to be accepted at a fresh seq. */
-function decide(item: Item, result: WriteResult, receipts: Receipts): Outcome | null {
-  const d = item.delta;
-  const receipt = receipts.get(keyOf(d));
-  switch (result) {
-    case 'written':
-      return null;
-    case 'internal':
-      return rejected(d, 'INTERNAL', 'No se pudo guardar; se reintentará.');
-    case 'foreign':
-      return rejected(d, 'DUPLICATE_CONFLICT', `${d.table}/${d.rowId} belongs to another business`);
-    // A HYBRID insert that is already here: this phone's own earlier push
-    // (keep the portal's edits since), or an id nobody here ever sent.
-    case 'exists':
-      return receipt === undefined
-        ? rejected(d, 'DUPLICATE_CONFLICT', `${d.table}/${d.rowId} already exists`)
-        : accepted(d, receipt.seq);
-    case 'stale':
-      return receipt === undefined ? null : accepted(d, receipt.seq);
-  }
+/** What a tier's write tells the reference checks of the rows after it. */
+function track(references: PushReferences, item: Item, result: WriteResult): void {
+  if (result === 'written' || result === 'exists' || result === 'stale') references.wrote(item);
+  else if (result === 'internal') references.failed(item);
 }
