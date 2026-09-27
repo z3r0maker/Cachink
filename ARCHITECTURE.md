@@ -158,6 +158,8 @@ Links to discussion, docs, prior art.
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
 | [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
 | [118](#adr-118) | 2026-09-27 | The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone | Accepted |
+| [119](#adr-119) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [120](#adr-120) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -5675,6 +5677,40 @@ stock.
 
 ---
 
+## ADR-082
+
+**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
+
+**Context**
+
+`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
+«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
+(626), so a tenant with a valid RFC still fell through to the global CFDI, and
+«Otro» cannot be turned into a code at all.
+
+**Decision**
+
+1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
+   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
+   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
+   completar» until the owner picks.
+2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
+   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
+   other → Otro), so phones that read the bucket for ISR keep working.
+3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
+   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
+   suggested ISR rate behind a switch, never silently.
+
+**Consequences**
+
+- Track A: the phone's BusinessForm should write the code too (via
+  `regimenPatch`), not the bucket.
+- The CFDI port should read `regimen_sat` instead of mapping the bucket.
+
 ## ADR-083
 
 **Title:** Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner
@@ -5729,40 +5765,6 @@ here with the option Track O recommended, and marked provisional.
 
 - The design amendments list (plan §4b) gains the files' side of D2 and D7.
 - D3 and D6 bind O-06's writers; D4 binds the Gastos writer.
-
-## ADR-082
-
-**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
-
-**Date:** 2026-09-18
-
-**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
-
-**Context**
-
-`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
-«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
-(626), so a tenant with a valid RFC still fell through to the global CFDI, and
-«Otro» cannot be turned into a code at all.
-
-**Decision**
-
-1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
-   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
-   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
-   completar» until the owner picks.
-2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
-   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
-   other → Otro), so phones that read the bucket for ISR keep working.
-3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
-   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
-   suggested ISR rate behind a switch, never silently.
-
-**Consequences**
-
-- Track A: the phone's BusinessForm should write the code too (via
-  `regimenPatch`), not the bucket.
-- The CFDI port should read `regimen_sat` instead of mapping the bucket.
 
 ## ADR-084
 
@@ -5987,56 +5989,6 @@ budget O-7 has not confirmed, for content that needs no scheduler.
 - A page load may write rows (upserts of a handful of notices) — an acceptable side effect of a
   read path, and the reason the seed's `/asesor` visits in e2e are covered by the routes sweep.
 - «Próximamente» still gates only the model-backed Diagnóstico/catálogo paths (ADR-059).
-
----
-
-## ADR-099
-
-**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
-
-### One SVG renderer for the receipt templates; PDF is a page of that raster
-
-#### Context
-
-N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
-the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
-from one `Comprobante` contract, for the portal live preview now and the phone
-later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
-`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
-the two outputs would drift.
-
-#### Decision
-
-1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
-   pure string builders with no DOM, no measurement — the fichas size by
-   character counts («24 px si pasa de 24 caracteres»), so wrapping and
-   truncation are count-based and deterministic. Snapshots (12 artboards) are
-   the transcription contract.
-2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
-   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
-3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
-   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
-   Linux resolves them through a fontconfig conf generated at render time
-   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
-   darwin rasterizes through CoreText, so dev machines install the same files
-   via `apps/web/scripts/fuentes-comprobantes.sh`.
-4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
-   informe's Blob pattern) wraps the print-destination PNG in one
-   `@react-pdf/renderer` page sized to the template's paper. One layout, two
-   salidas; the phone can reuse both halves as-is.
-5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
-   off-white with its hard shadow; `impresion` fills the page flat and pads
-   Clásico/Moderno to the media-carta proportion.
-
-#### Consequences
-
-- A design change is one SVG edit; both outputs move together.
-- The PDF is a high-density raster (1500 px wide), not vector text — accepted
-  for receipts; the informe keeps its native-text PDF.
-- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
-  value in the transcription (no artboard shows it).
-- The `direccion` block renders only when an address source exists; C-15's
-  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -6547,52 +6499,6 @@ by luck rather than by assertion.
   of monthly ventas — about five weeks on hand, which is what a taquería that
   buys weekly actually looks like.
 
-## ADR-097
-
-**Title:** One sidebar entry per destination; the duplicated pairs merge
-
-**Date:** 2026-09-22
-
-**Status:** Accepted — owner decision; the design files are to follow
-
-**Context**
-
-The portal's design files draw thirteen sidebar entries, two pairs of which
-point at the same screen with a different tab preselected: Ventas and Gastos
-both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
-code copied that verbatim (ADR-058: the files are the specification).
-
-Two rows for one destination cannot answer "where am I". The sidebar's active
-state is a path match, so opening `/movimientos` lit **both** Ventas and
-Gastos, and the screen's own tabs showed the real answer underneath. The owner
-saw the double highlight and asked for one entry (2026-09-22).
-
-**Decision**
-
-1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
-   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
-   inside each screen keep doing the switching, and the old
-   `?tab=` links still work — the screens read the parameter.
-2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
-   place now that Dispositivos is gone as a row.
-3. The design files are **behind** the code on this point until they are
-   amended in Claude Design (the §4b process). Recorded in
-   `docs/plan/10-operador-design-changes.md`.
-4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
-   in normal flow but **stretches** inside a flex column — every tab bar in the
-   portal ran the page's width, leaving the last tab short of the right border
-   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
-   on the component fix it everywhere; Cortes' local wrapper is gone.
-
-**Consequences**
-
-- One question for the design: the merged entry reads «Ventas y gastos» while
-  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
-  gastos" but titles the page "Movimientos"). One of the two should move; the
-  owner decides which.
-- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
-  the Cortes breadcrumb now carries the same words.
-
 ## ADR-096
 
 **Title:** The console measures the business and can look over a tenant's shoulder — two amendments to ADR-063 row 3
@@ -6662,6 +6568,52 @@ those four gaps.
 
 ---
 
+## ADR-097
+
+**Title:** One sidebar entry per destination; the duplicated pairs merge
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — owner decision; the design files are to follow
+
+**Context**
+
+The portal's design files draw thirteen sidebar entries, two pairs of which
+point at the same screen with a different tab preselected: Ventas and Gastos
+both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
+code copied that verbatim (ADR-058: the files are the specification).
+
+Two rows for one destination cannot answer "where am I". The sidebar's active
+state is a path match, so opening `/movimientos` lit **both** Ventas and
+Gastos, and the screen's own tabs showed the real answer underneath. The owner
+saw the double highlight and asked for one entry (2026-09-22).
+
+**Decision**
+
+1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
+   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
+   inside each screen keep doing the switching, and the old
+   `?tab=` links still work — the screens read the parameter.
+2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
+   place now that Dispositivos is gone as a row.
+3. The design files are **behind** the code on this point until they are
+   amended in Claude Design (the §4b process). Recorded in
+   `docs/plan/10-operador-design-changes.md`.
+4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
+   in normal flow but **stretches** inside a flex column — every tab bar in the
+   portal ran the page's width, leaving the last tab short of the right border
+   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
+   on the component fix it everywhere; Cortes' local wrapper is gone.
+
+**Consequences**
+
+- One question for the design: the merged entry reads «Ventas y gastos» while
+  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
+  gastos" but titles the page "Movimientos"). One of the two should move; the
+  owner decides which.
+- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
+  the Cortes breadcrumb now carries the same words.
+
 ## ADR-098
 
 **Title:** The alta wizard asks how you work, not what your papers say — superseding the design's four steps
@@ -6723,6 +6675,56 @@ unavailable later, and nothing it skips is asked twice.
 - Three answers still have no write path — tipoNegocio, WhatsApp and logo —
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
+
+---
+
+## ADR-099
+
+**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
+
+### One SVG renderer for the receipt templates; PDF is a page of that raster
+
+#### Context
+
+N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
+the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
+from one `Comprobante` contract, for the portal live preview now and the phone
+later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
+`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
+the two outputs would drift.
+
+#### Decision
+
+1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
+   pure string builders with no DOM, no measurement — the fichas size by
+   character counts («24 px si pasa de 24 caracteres»), so wrapping and
+   truncation are count-based and deterministic. Snapshots (12 artboards) are
+   the transcription contract.
+2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
+   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
+3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
+   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
+   Linux resolves them through a fontconfig conf generated at render time
+   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
+   darwin rasterizes through CoreText, so dev machines install the same files
+   via `apps/web/scripts/fuentes-comprobantes.sh`.
+4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
+   informe's Blob pattern) wraps the print-destination PNG in one
+   `@react-pdf/renderer` page sized to the template's paper. One layout, two
+   salidas; the phone can reuse both halves as-is.
+5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
+   off-white with its hard shadow; `impresion` fills the page flat and pads
+   Clásico/Moderno to the media-carta proportion.
+
+#### Consequences
+
+- A design change is one SVG edit; both outputs move together.
+- The PDF is a high-density raster (1500 px wide), not vector text — accepted
+  for receipts; the informe keeps its native-text PDF.
+- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
+  value in the transcription (no artboard shows it).
+- The `direccion` block renders only when an address source exists; C-15's
+  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -8389,3 +8391,208 @@ and `ui` may import it.
   hoy» and the avisos. The phone maps them to its own screens until a route
   key replaces the href.
 - CLAUDE.md §3 lists the package.
+
+---
+
+## ADR-119
+
+**Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — scale audit 2026-09-26 (`docs/audits/db-2026-09-26.html`), findings DB2-MIG-01, DB2-IDX-01, DB2-USE-01, DB2-HOT-01, DB2-RLS-01, DB2-CRON-01; amends B-01's runner
+
+**Context**
+
+The hosted runner (B-01) sent every file inside one transaction, so
+`CREATE INDEX CONCURRENTLY` could not run, and a plain index build on a table
+of millions of rows blocks its writes for minutes — the audit built six in
+41 s on 5 M-row tables. Every index the audit asks for waits on this. The
+runner also applied pending files in file order even when they sorted below
+files already applied: two late additions (`0033_geo_prune`,
+`0023_business_branding`) ran last on hosted and in the middle on a fresh
+database, so the two orders silently differed.
+
+**Decision**
+
+1. **A file whose first line is `-- xangarro:no-transaction` runs statement by
+   statement**, each autocommitting on one reserved connection, the way
+   `psql -f` already applies files for `db-local.sh` and CI. Its ledger row is
+   written after the last statement succeeds; checksums are unchanged.
+2. **Such files must be repeatable**, because a failure half-way leaves the
+   earlier statements applied and the next run repeats the file. Before
+   anything runs, `hosted/lint.ts` refuses a pending file that lacks
+   `SET lock_timeout`, has a `CREATE INDEX` that is not
+   `CONCURRENTLY IF NOT EXISTS` or a `DROP INDEX` that is not
+   `CONCURRENTLY IF EXISTS`, or opens a transaction; and a transactional file
+   that says `CONCURRENTLY`. The runner drops the INVALID index an interrupted
+   concurrent build leaves behind — which `IF NOT EXISTS` would otherwise skip
+   forever — before repeating the file.
+3. **A pending file that sorts below the last applied file of its set is
+   refused**, naming both: renumber it above. Hosted and fresh databases then
+   always apply the same sequence.
+4. **Every migration from data-pg 0045 and admin 0020 on sets `lock_timeout`**
+   (3 s), so a statement queued behind the evening peak fails fast and is run
+   again in the trough rather than stalling every request behind its lock.
+5. **Old → new for such files runs on a throwaway database** migrated to the
+   file before (`tests/support/scratch-db.ts`), through the runner itself —
+   a concurrent build cannot run inside the test transaction the older
+   migration tests use.
+
+The first files to use it are data-pg 0045 (the audit's index set, the
+`business_members (business_id, user_id)` uniqueness, and the drop of seven
+indexes that repeated a `business_id` primary key) and 0047 (every tenant
+policy wraps `current_business_id()` in a sub-select). In the same change:
+0046 spreads `api_latency_counters` over 16 slots per key, summed on read;
+the console's `admin_user_email` casts its parameter, not the key; the
+digest reads stored `usage_counters` instead of recounting, and runs
+`security_prune()` daily.
+
+**Alternatives considered**
+
+- *A separate out-of-band script for concurrent indexes.* Rejected: a second
+  path to production with no ledger and no drift check is how the two
+  environments diverge.
+- *Plain `CREATE INDEX` in a transaction, run in the trough.* Rejected: it
+  still blocks writes for the whole build, and the trough shrinks as tenants
+  in other time zones arrive.
+- *Accept out-of-order files with a warning.* Rejected: nobody reads a
+  warning in a deploy log, and the difference is invisible until a migration
+  depends on the order.
+
+**Consequences**
+
+- A no-transaction file cannot be rolled back as a whole; reviewers check
+  that each statement is safe to repeat, and the lint checks what it can.
+- `tenant-indexes.test.ts` now counts a single-column `business_id` primary
+  key as the tenant index, which is what let 0045 drop its duplicates.
+- Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
+  decided here; it needs its own ADR.
+
+**Amendment 2026-09-26 — lock timeouts by lock, and the runner retries.**
+Round 3 of the audit (`docs/audits/db-2026-09-26-r3.html`, DB3-MIG-01) found
+decision 4's flat 3 s wrong both ways. A concurrent index build waits for every
+transaction holding an older snapshot, anywhere in the database, so 3 s failed
+the builds and left INVALID indexes; while an `ALTER` waits for ACCESS
+EXCLUSIVE, every reader of its table queues behind it, so 3 s stalled traffic.
+Statements that take SHARE UPDATE EXCLUSIVE at most (`… CONCURRENTLY`,
+`ALTER TABLE … SET (storage options)`) now run with `lock_timeout = 0`;
+anything heavier waits at most 500 ms (200 ms in practice), and the runner
+retries a lock timeout (55P03) up to 20 times, 250 ms doubling to 5 s with
+jitter — the statement alone in a no-transaction file, the whole transaction
+otherwise. `hosted/lint.ts` enforces it: a no-transaction file sets
+`lock_timeout` as its first statement, a transactional file only with
+`SET LOCAL` (the value used to stay on the runner's session), a heavy
+statement never under a long or zero timeout, and `REINDEX` only
+`CONCURRENTLY`. The INVALID-index sweep now matches schema and name.
+`db-local.sh` applies each transactional file in one transaction, as hosted
+does. data-pg 0045–0048 and admin 0020–0022 were corrected in place, never
+having been applied to the hosted database.
+
+---
+
+## ADR-120
+
+**Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB2-SYNC-01 and DB2-SYNC-02; amends ADR-078 decision 4
+
+**Context**
+
+ADR-078 wrote each pushed row in its own savepoint: a reference check per
+field, a receipt lookup, the upsert, a cursor bump, a `sync_log` entry and a
+receipt — about eight statements a row, all while holding the tenant's
+`sync_cursors` lock. The DB audit of 2026-09-26 measured a 500-row push at
+8.0 s at a 1 ms round trip (68 ms batched), 67 lock timeouts a minute when a
+shop's phones flush their evening backlog together, and every app backend past
+Postgres's 64-entry subtransaction cache, because postgres.js never releases a
+savepoint and a savepoint that wrote keeps its XID until commit.
+
+**Decision**
+
+1. **The `PushStore` port takes batches.** `receipts(keys)`, `existing(table,
+   ids)`, `write(table, deltas)`, `accept(deltas)`, `reject(rejections)`. The
+   rules stay in `ApplyPushUseCase`; the store only runs statements.
+2. **A push is cut into segments of distinct rows.** A row pushed twice (a turno
+   opened then closed) starts a new segment, which sees the first one stored and
+   accepted. Each segment costs one receipt lookup, one reference lookup per
+   referenced table, one write per table (plus one visibility read for rows it
+   did not write) and one `accept` (cursor, log, receipts): at most
+   `S·(4 + R + 3T) + 3` statements for S segments, R referenced tables and T
+   tables, whatever the row count — 14 for the 500-row, 3-table test push
+   (54 ms locally), against ~4,200 before.
+3. **Receipts are matched on `(table_name, row_id)`**, the primary key with
+   `business_id`, through `unnest($tables, $ids)`. Ids travel as one `text[]`
+   parameter (`= ANY($1)`), never as a list of placeholders.
+4. **Writes are multi-row.** UP: `INSERT … ON CONFLICT (id) DO UPDATE … WHERE
+   updated_at < excluded.updated_at RETURNING id`, with `SET` naming only the
+   fields a row carries (rows are grouped by shape). HYBRID: `ON CONFLICT DO
+   NOTHING RETURNING id`. Unreturned ids are read back: visible means stale or
+   already here, invisible means another tenant's id (DUPLICATE_CONFLICT).
+5. **One cursor bump per segment**: `last_seq = last_seq + n RETURNING`, seqs
+   handed out consecutively in delta order — the "block of seqs per batch"
+   ADR-078 anticipated. The row lock still lasts to commit, so seqs still commit
+   in order. `sync_log` and `sync_receipts` get one insert each, pipelined.
+6. **Failure isolation by splitting.** Each table's write runs in one savepoint.
+   When it fails, the rows are halved and retried down to the row at fault:
+   42501 there is DUPLICATE_CONFLICT, anything else INTERNAL (retryable,
+   logged once). Timeouts, lock waits, deadlocks and lost connections are not
+   split — every row of that write is INTERNAL. At most 60 savepoints that wrote
+   are kept per push (a rolled-back one frees its slot); rows still unresolved
+   after that are INTERNAL and the phone resends them.
+7. **A product or client stored earlier in the same push satisfies a later
+   row's reference, and only then** — the answers one-by-one processing gave.
+
+**Alternatives considered**
+
+- *Cap the push at 64 rows* (the audit's stopgap). It bounds the subtransaction
+  damage but keeps eight round trips a row inside the lock.
+- *Probe halves and roll them back, then write the good rows once.* One
+  savepoint whatever the failures, but every row is written twice on the failure
+  path and a probe that passes alone can still fail together.
+- *Change the conflict target to `(business_id, id)`.* Worth doing with
+  partitioning, but it needs a migration of every pushable table's primary key;
+  left to that work.
+
+**Consequences**
+
+- The response contract is unchanged, row for row; the conformance suite and
+  `apps/web/tests/sync-push.integration.test.ts` hold it.
+- An `accept` or `reject` failure now fails the whole push (the transaction
+  rolls back and the phone retries it) instead of one row: they touch only sync
+  bookkeeping, so such a failure is the database's, not a row's.
+- A push with dozens of rows that fail at the database can leave good rows
+  INTERNAL for one round; they succeed on the next push.
+
+**Amendment (2026-09-26) — bookkeeping cannot fail a push; deterministic errors
+are terminal; an accepted retry closes its rejection.** Audit round 3
+(DB3-SYNC-01..04) found one NUL character failing a whole push forever: the row
+was isolated as INTERNAL, then its rejection's payload failed the `::jsonb` cast
+outside any savepoint, the transaction rolled back, and the phone resent the
+same batch indefinitely with nothing stored. Four changes, with the wire
+contract unchanged. (1) The use case refuses a row carrying a NUL or an
+unpaired UTF-16 surrogate in any string (id included) as terminal
+`VALIDATION`, before any write; the rejection payload, id and message are
+cleaned before they are stored. (2) Rejections are kept through `isolated` —
+one savepoint, on top of the 60 the writer may keep, still below 64 — and when
+that fails, again without their payloads; a failure of both is logged and the
+push still answers. This supersedes the consequence above that a `reject`
+failure fails the whole push; an `accept` failure still does. (3) The store
+maps a deterministic database refusal to `RowRefusedError`, which the writer
+narrows to its row like any failure: class 22, NOT NULL and CHECK are
+`VALIDATION`, a 23505 on a unique key other than the primary key
+(`idx_tickets_device_folio`) is `DUPLICATE_CONFLICT` — both terminal and
+logged — while timeouts, locks, deadlocks, connection and resource classes stay
+`INTERNAL`, as does anything unclassified. (4) `accept` closes this device's
+open rejections of the rows it accepts (`resolved_at = now()`, one
+`unnest`-based UPDATE on the rejections' unique key, pipelined with the
+receipts), so a retried INTERNAL row stops counting on the portal's badge and
+in the staff digest. Two further rules follow from decision 7 and the
+receipts: a row pointing at a product or client that failed **retryably**
+earlier in the same push is `INTERNAL`, not `FK_*_MISSING` (DB3-SYNC-02); and a
+row whose write comes back already stored (`exists`/`stale`) without a receipt
+at the segment's start has its receipt looked up again after the write — an
+overlapping retry that waited on the original's lock — and counts as written
+for later references (DB3-SYNC-03).

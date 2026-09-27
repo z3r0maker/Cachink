@@ -360,6 +360,11 @@ jobs:
       - run: pnpm --filter @xangarro/data-pg db:apply
       - run: pnpm --filter @xangarro/data-pg db:seed
 
+      # The portal's own Postgres suites (the batched push, ADR-120), with the
+      # REQUIRE_DB fuse: a missing database fails here instead of skipping.
+      - name: Integration (portal ↔ Postgres)
+        run: pnpm --filter @xangarro/web test:db
+
       # Deliberately NOT `turbo run build`: turbo.json's `build` task declares
       # outputs `dist/**` and `build/**` but not `.next/**`, so a cache hit
       # would restore nothing and `next start` would serve a build that is not

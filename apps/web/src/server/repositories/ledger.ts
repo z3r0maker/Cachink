@@ -42,7 +42,12 @@ export function pgMovementsCreator(
   businessId: string,
 ): Pick<InventoryMovementsRepository, 'create' | 'sumStock'> {
   return {
-    /** Entradas minus salidas — the same sum the phones and the catalogue make. */
+    /**
+     * Entradas minus salidas — the same sum the phones and the catalogue make.
+     * The explicit `business_id` is what RLS already enforces; written out, it
+     * gives the planner the `(business_id, producto_id)` prefix a covering
+     * index serves (DB2-QRY-05) instead of a policy function it cannot see.
+     */
     async sumStock(productoId: ProductId): Promise<number> {
       const [row] = await tx
         .select({
@@ -50,7 +55,11 @@ export function pgMovementsCreator(
         })
         .from(inventoryMovements)
         .where(
-          and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
+          and(
+            eq(inventoryMovements.businessId, businessId),
+            eq(inventoryMovements.productoId, productoId),
+            isNull(inventoryMovements.deletedAt),
+          ),
         );
       return Number(row?.stock ?? 0);
     },

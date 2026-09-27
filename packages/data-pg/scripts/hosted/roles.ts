@@ -19,6 +19,8 @@ export interface LoginRole {
   /** DB-CONN-01: bounds on a runaway query and an abandoned transaction. */
   readonly statementTimeout: string;
   readonly idleInTransactionTimeout: string;
+  /** DB2-PAGE-01: RLS inflates cost estimates past the JIT threshold on short queries. */
+  readonly jit: boolean;
 }
 
 export const LOGIN_ROLES: readonly LoginRole[] = [
@@ -28,6 +30,7 @@ export const LOGIN_ROLES: readonly LoginRole[] = [
     usedBy: 'portal DATABASE_URL (tenant requests, RLS-bound)',
     statementTimeout: '5s',
     idleInTransactionTimeout: '10s',
+    jit: false,
   },
   {
     role: 'xangarro_billing',
@@ -35,6 +38,7 @@ export const LOGIN_ROLES: readonly LoginRole[] = [
     usedBy: 'portal BILLING_DATABASE_URL (Stripe webhook, billing actions)',
     statementTimeout: '10s',
     idleInTransactionTimeout: '10s',
+    jit: false,
   },
   {
     role: 'xangarro_metering',
@@ -42,6 +46,7 @@ export const LOGIN_ROLES: readonly LoginRole[] = [
     usedBy: 'portal METERING_DATABASE_URL (nightly usage recompute)',
     statementTimeout: '60s',
     idleInTransactionTimeout: '10s',
+    jit: true,
   },
   {
     role: 'xangarro_admin',
@@ -49,6 +54,7 @@ export const LOGIN_ROLES: readonly LoginRole[] = [
     usedBy: 'admin DATABASE_URL (staff console, cross-tenant read)',
     statementTimeout: '15s',
     idleInTransactionTimeout: '10s',
+    jit: false,
   },
 ] as const;
 
@@ -98,6 +104,7 @@ export async function ensureRole(sql: Sql, spec: LoginRole, password: string): P
   await sql`ALTER ROLE ${ident} SET idle_in_transaction_session_timeout = ${sql.unsafe(
     literal(spec.idleInTransactionTimeout),
   )}`;
+  await sql`ALTER ROLE ${ident} SET jit = ${sql.unsafe(spec.jit ? 'on' : 'off')}`;
 }
 
 /** A SQL string literal. The verifier alphabet is base64 plus `$:-`, never a quote. */

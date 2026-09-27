@@ -16,6 +16,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 import { centavos, tenantStamps } from './_columns';
@@ -62,10 +63,7 @@ export const noticePreferences = pgTable(
     prefs: jsonb('prefs').notNull().default({}),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
   },
-  (t) => [
-    index('notice_preferences_business_idx').on(t.businessId),
-    primaryKey({ name: 'notice_preferences_pk', columns: [t.businessId, t.userId] }),
-  ],
+  (t) => [primaryKey({ name: 'notice_preferences_pk', columns: [t.businessId, t.userId] })],
 );
 
 /** `metas` — the Asesor's goals. Deterministic arithmetic, portal-only. */
@@ -111,7 +109,13 @@ export const businessMembers = pgTable(
     role: text('role', { enum: ['owner', 'admin', 'viewer'] }).notNull(),
     ...tenantStamps,
   },
-  (t) => [index('business_members_business_idx').on(t.businessId)],
+  (t) => [
+    // 0045: the login path looks members up by user, and one person is one
+    // member of a business. The unique index leads with business_id, so the
+    // plain (business_id) one it made redundant is gone (DB3-IDX-01).
+    index('business_members_user_idx').on(t.userId),
+    uniqueIndex('business_members_business_user_uq').on(t.businessId, t.userId),
+  ],
 );
 
 /** Device slots. A code is single-use, 8 chars, no 0/O/1/I, 48 h (ADR-053 Q5). */

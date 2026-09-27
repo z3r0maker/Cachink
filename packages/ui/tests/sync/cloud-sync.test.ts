@@ -14,10 +14,10 @@ describe('SyncScheduler', () => {
     vi.useRealTimers();
   });
 
-  function make() {
+  function make(random: () => number = () => 0.5) {
     const runPush = vi.fn();
     const runSync = vi.fn();
-    return { runPush, runSync, s: new SyncScheduler({ runPush, runSync }) };
+    return { runPush, runSync, s: new SyncScheduler({ runPush, runSync, random }) };
   }
 
   it('collapses a burst of writes into one push after the debounce', () => {
@@ -55,6 +55,51 @@ describe('SyncScheduler', () => {
     s.onForeground();
     vi.advanceTimersByTime(PULL_INTERVAL_MS);
     expect(runSync).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('SyncScheduler · the evening peak (DB2-DEV-02)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('spreads the foreground tick by ±20 % so devices do not sync in step', () => {
+    for (const [random, factor] of [
+      [0, 0.8],
+      [1, 1.2],
+    ] as const) {
+      const runSync = vi.fn();
+      const s = new SyncScheduler({ runPush: vi.fn(), runSync, random: () => random });
+      s.onForeground();
+      vi.advanceTimersByTime(PULL_INTERVAL_MS * factor - 1);
+      expect(runSync).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(1);
+      expect(runSync).toHaveBeenCalledTimes(2);
+      s.dispose();
+    }
+  });
+
+  it('retries once when the engine says, the latest request winning', () => {
+    const runSync = vi.fn();
+    const s = new SyncScheduler({ runPush: vi.fn(), runSync, random: () => 0.5 });
+    s.retryIn(30_000);
+    s.retryIn(10_000);
+    vi.advanceTimersByTime(9_999);
+    expect(runSync).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(30_000);
+    expect(runSync).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops a scheduled retry on background', () => {
+    const runSync = vi.fn();
+    const s = new SyncScheduler({ runPush: vi.fn(), runSync });
+    s.retryIn(5_000);
+    s.onBackground();
+    vi.advanceTimersByTime(60_000);
+    expect(runSync).not.toHaveBeenCalled();
   });
 });
 

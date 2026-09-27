@@ -8,6 +8,8 @@ import { db } from '@/server/db/client';
 import { pruneApiLatency } from '@/server/db/latency-prune';
 import { pruneGeoCounters } from '@/server/db/geo-prune';
 import { drizzleRejectionSource } from '@/server/db/rejections';
+import { prunePortalSecurity } from '@/server/db/security-prune';
+import { drizzleStoredUsageSource } from '@/server/db/usage';
 import { expireStaleAssistedImports, purgeResolvedAssistedImportFiles } from '@xangarro/data-pg';
 import { pruneStaffSessions } from '@/server/db/staff-sessions-prune';
 import { drizzleSupportItems } from '@/server/db/support-items';
@@ -22,10 +24,12 @@ export async function GET(request: Request): Promise<Response> {
     now: () => new Date(),
     repo: drizzleSupportItems(db()),
     rejections: drizzleRejectionSource(db()),
-    overLimit: usageOverLimitSource(usageDeps(db())),
+    // The counters the 03:00 usage job stored, not a recount (DB2-CRON-01).
+    overLimit: usageOverLimitSource({ ...usageDeps(db()), usage: drizzleStoredUsageSource(db()) }),
     pruneSessions: () => pruneStaffSessions(db()),
     pruneGeo: () => pruneGeoCounters(db()),
     pruneLatency: () => pruneApiLatency(db()),
+    prunePortalSecurity: () => prunePortalSecurity(db()),
     expireAssisted: () => expireStaleAssistedImports(db()),
     purgeAssistedFiles: () => purgeResolvedAssistedImportFiles(db()),
     // B-14: Resend with RESEND_API_KEY; the dev outbox (.email-outbox/) without it.

@@ -32,8 +32,9 @@ export const usageCounters = pgTable(
     computedAt: at('computed_at').notNull().defaultNow(),
   },
   (t) => [
-    index('usage_counters_business_idx').on(t.businessId),
     primaryKey({ columns: [t.businessId, t.period] }),
+    // `usageCountersOf` reads a few months across every business (0045).
+    index('usage_counters_period_idx').on(t.period, t.businessId),
   ],
 );
 

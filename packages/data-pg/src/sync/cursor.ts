@@ -17,17 +17,28 @@ import { syncCursors, syncLog } from '../schema/sync.js';
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 /** Hand out the next seq for this tenant; the lock lasts until commit. */
-export async function allocateSeq(tx: Tx, businessId: string): Promise<number> {
+export function allocateSeq(tx: Tx, businessId: string): Promise<number> {
+  return allocateSeqs(tx, businessId, 1);
+}
+
+/**
+ * Hand out `n` consecutive seqs in **one** statement and return the first
+ * (audit DB2-SYNC-01; ADR-120 — the "block of seqs per batch" ADR-078
+ * anticipated). Same lock, same commit-order guarantee as one at a time; a
+ * push holds it for one round trip instead of one per row.
+ */
+export async function allocateSeqs(tx: Tx, businessId: string, n: number): Promise<number> {
+  if (!Number.isSafeInteger(n) || n < 1) throw new RangeError(`allocateSeqs: n=${n}`);
   const [row] = await tx
     .insert(syncCursors)
-    .values({ businessId, lastSeq: 1 })
+    .values({ businessId, lastSeq: n })
     .onConflictDoUpdate({
       target: syncCursors.businessId,
-      set: { lastSeq: sql`${syncCursors.lastSeq} + 1` },
+      set: { lastSeq: sql`${syncCursors.lastSeq} + ${n}::bigint` },
     })
     .returning({ seq: syncCursors.lastSeq });
   if (row === undefined) throw new Error('sync cursor allocation returned no row');
-  return row.seq;
+  return row.seq - n + 1;
 }
 
 /** The highest seq whose transaction has committed. 0 for a tenant with none. */
@@ -48,9 +59,30 @@ export async function logChange(
   op: 'insert' | 'update',
 ): Promise<number> {
   const seq = await allocateSeq(tx, businessId);
+  await logChanges(tx, businessId, [{ seq, tableName, rowId, op }]);
+  return seq;
+}
+
+/** One `sync_log` entry, at a seq the caller already took. */
+export interface LogEntry {
+  readonly seq: number;
+  readonly tableName: string;
+  readonly rowId: string;
+  readonly op: 'insert' | 'update';
+}
+
+/**
+ * Log several changes in one statement, at seqs taken with `allocateSeqs` in the
+ * same transaction. Nothing to log is not an error.
+ */
+export async function logChanges(
+  tx: Tx,
+  businessId: string,
+  entries: readonly LogEntry[],
+): Promise<void> {
+  if (entries.length === 0) return;
   const now = new Date().toISOString();
   await tx
     .insert(syncLog)
-    .values({ seq, tableName, rowId, op, businessId, createdAt: now, updatedAt: now });
-  return seq;
+    .values(entries.map((e) => ({ ...e, businessId, createdAt: now, updatedAt: now })));
 }

@@ -44,6 +44,7 @@ const PLATFORM = new Set([
 
 /** Package functions that read the environment for the app that calls them. */
 const HELPERS: Readonly<Record<string, string>> = {
+  createDb: 'packages/data-pg/src/client.ts',
   emailSenderFromEnv: 'packages/email/src/adapters/from-env.ts',
   readCfdiMode: 'packages/application/src/cfdi/cfdi-mode.ts',
   readFacturapiConfig: 'packages/application/src/cfdi/adapters/facturapi/facturapi-config.ts',

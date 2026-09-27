@@ -9,16 +9,29 @@ import { loadExcelJs } from '../src/server/export/workbook';
  * turns a row into a cell — centavos into pesos, nulls into blanks — is here.
  */
 
-const listMovimientos = vi.fn();
+const exportarVentas = vi.fn();
+const exportarGastos = vi.fn();
 const listProductos = vi.fn();
-const listMovimientosInventario = vi.fn();
+const exportarMovimientosInventario = vi.fn();
 const listEmpleados = vi.fn();
 
+/** A batched export, as the data-pg generators yield it: two batches. */
+async function* lotes(rows: readonly unknown[]) {
+  yield rows.slice(0, 1);
+  yield rows.slice(1);
+}
+
 vi.mock('@xangarro/data-pg', () => ({
-  listMovimientos,
+  exportarVentas,
+  exportarGastos,
   listProductos,
-  listMovimientosInventario,
+  exportarMovimientosInventario,
   listEmpleados,
+  todas: async (it: AsyncIterable<readonly unknown[]>) => {
+    const out: unknown[] = [];
+    for await (const lote of it) out.push(...lote);
+    return out;
+  },
 }));
 vi.mock('../src/server/db', () => ({
   withTenant: (_biz: string, fn: (tx: unknown) => unknown) => fn({ tx: true }),
@@ -46,8 +59,9 @@ beforeAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  for (const m of [listMovimientos, listProductos, listMovimientosInventario, listEmpleados]) {
-    m.mockResolvedValue([]);
+  for (const m of [listProductos, listEmpleados]) m.mockResolvedValue([]);
+  for (const m of [exportarVentas, exportarGastos, exportarMovimientosInventario]) {
+    m.mockImplementation(() => lotes([]));
   }
 });
 
@@ -61,27 +75,29 @@ describe('isDataset — the name arrives in a URL', () => {
 });
 
 describe('buildExport', () => {
-  it('ventas and gastos read their own kind of movimiento, as pesos', async () => {
-    listMovimientos.mockResolvedValue([
-      {
-        fecha: '2026-05-12',
-        concepto: 'Venta mostrador',
-        clasificacion: 'Efectivo',
-        amount: 12_345n,
-        cancelada: false,
-      },
-      { fecha: null, concepto: undefined, clasificacion: null, amount: null, cancelada: true },
-    ]);
+  it('ventas and gastos read their own kind of movimiento, every batch, as pesos', async () => {
+    exportarVentas.mockImplementation(() =>
+      lotes([
+        {
+          fecha: '2026-05-12',
+          concepto: 'Venta mostrador',
+          clasificacion: 'Efectivo',
+          amount: 12_345n,
+          cancelada: false,
+        },
+        { fecha: null, concepto: undefined, clasificacion: null, amount: null, cancelada: true },
+      ]),
+    );
     const built = await buildExport('ventas', 'biz-1');
     assert.match(built.filename, /^xangarro-ventas-\d{4}-\d{2}-\d{2}\.xlsx$/);
-    assert.deepEqual(listMovimientos.mock.calls[0]?.slice(1), ['venta']);
+    assert.equal(exportarVentas.mock.calls.length, 1);
     const [head, first, second] = await rowsOf(built.bytes);
     assert.deepEqual(head, ['Fecha', 'Concepto', 'Clasificación', 'Monto', 'Cancelada']);
     assert.deepEqual(first, ['2026-05-12', 'Venta mostrador', 'Efectivo', 123.45, 'No']);
     assert.equal(second?.at(-1), 'Sí');
 
     await buildExport('gastos', 'biz-1');
-    assert.deepEqual(listMovimientos.mock.calls[1]?.slice(1), ['gasto']);
+    assert.equal(exportarGastos.mock.calls.length, 1);
   });
 
   it('productos: cost and price in pesos, stock as a number', async () => {
@@ -102,17 +118,19 @@ describe('buildExport', () => {
     assert.equal(second?.at(-1), 0);
   });
 
-  it('movimientos are the inventory movements', async () => {
-    listMovimientosInventario.mockResolvedValue([
-      {
-        fecha: '2026-05-10',
-        producto: 'Tortilla',
-        tipo: 'entrada',
-        cantidad: 40,
-        motivo: 'Compra',
-      },
-      { fecha: '2026-05-11', producto: 'Tortilla', tipo: 'salida', cantidad: null, motivo: null },
-    ]);
+  it('movimientos are the inventory movements, every batch of them', async () => {
+    exportarMovimientosInventario.mockImplementation(() =>
+      lotes([
+        {
+          fecha: '2026-05-10',
+          producto: 'Tortilla',
+          tipo: 'entrada',
+          cantidad: 40,
+          motivo: 'Compra',
+        },
+        { fecha: '2026-05-11', producto: 'Tortilla', tipo: 'salida', cantidad: null, motivo: null },
+      ]),
+    );
     const [head, first, second] = await rowsOf((await buildExport('movimientos', 'biz-1')).bytes);
     assert.deepEqual(head, ['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Motivo']);
     assert.deepEqual(first, ['2026-05-10', 'Tortilla', 'entrada', 40, 'Compra']);

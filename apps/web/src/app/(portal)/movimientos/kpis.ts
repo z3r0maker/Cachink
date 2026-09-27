@@ -1,21 +1,26 @@
-import type { MovimientosData } from '@/server/screens';
-
-type Row = NonNullable<MovimientosData>[number];
+import type { MovimientosVista } from '@/server/movimientos';
 
 /**
- * The Movimientos KPIs (B-1), computed from the rows the table is showing —
- * so a tile always answers for the period, the search and the chips the
- * viewer has actually applied, rather than for some other window.
+ * The Movimientos KPIs (B-1), built from the period's per-category summary
+ * the server aggregated (DB2-QRY-02) — narrowed to the category chip when
+ * one is on — so a tile always answers for the period, the search and the
+ * chip the viewer has applied, not only for the ten rows on the page.
  *
  * A cancelled venta is money that did not happen and stays out of every
- * total; it remains in the table, struck through, because the owner still
- * needs to see that it was cancelled.
+ * total (the summary counts it as a row, never as money or as a ticket); it
+ * remains in the table, struck through, because the owner still needs to see
+ * that it was cancelled.
  */
-const vivas = (rows: readonly Row[]) => rows.filter((r) => !r.cancelada);
+type Grupo = Pick<MovimientosVista['grupos'][number], 'clasificacion' | 'total' | 'tickets'>;
 
-const suma = (rows: readonly Row[]) => rows.reduce((t, r) => t + r.amount, 0n);
+const suma = (gs: readonly Grupo[]) => gs.reduce((t, g) => t + g.total, 0n);
 
-const esCredito = (r: Row) => r.clasificacion === 'Crédito';
+const esCredito = (g: Grupo) => g.clasificacion === 'Crédito';
+
+/** The groups a category chip selects; null is «Todos». */
+export function delFiltro<G extends Grupo>(grupos: readonly G[], cat: string | null): readonly G[] {
+  return cat === null ? grupos : grupos.filter((g) => g.clasificacion === cat);
+}
 
 export interface KpiVentas {
   readonly total: bigint;
@@ -25,15 +30,15 @@ export interface KpiVentas {
   readonly credito: bigint;
 }
 
-export function kpisDeVentas(rows: readonly Row[]): KpiVentas {
-  const v = vivas(rows);
-  const tickets = new Set(v.map((r) => r.ticketId ?? r.id));
-  const total = suma(v);
+export function kpisDeVentas(grupos: readonly Grupo[]): KpiVentas {
+  const total = suma(grupos);
+  // A ticket has one method, so tickets per method add up without overlap.
+  const tickets = grupos.reduce((n, g) => n + g.tickets, 0);
   return {
     total,
-    ticketPromedio: tickets.size === 0 ? null : total / BigInt(tickets.size),
-    contado: suma(v.filter((r) => !esCredito(r))),
-    credito: suma(v.filter(esCredito)),
+    ticketPromedio: tickets === 0 ? null : total / BigInt(tickets),
+    contado: suma(grupos.filter((g) => !esCredito(g))),
+    credito: suma(grupos.filter(esCredito)),
   };
 }
 
@@ -48,20 +53,19 @@ export interface KpiGastos {
   readonly nomina: bigint;
 }
 
-export function kpisDeGastos(rows: readonly Row[]): KpiGastos {
-  const total = suma(rows);
-  const porCategoria = new Map<string, bigint>();
-  for (const r of rows) {
-    porCategoria.set(r.clasificacion, (porCategoria.get(r.clasificacion) ?? 0n) + r.amount);
-  }
-  const ordenadas = [...porCategoria.entries()].sort((a, b) => (b[1] > a[1] ? 1 : -1));
-  const primera = ordenadas[0];
+export function kpisDeGastos(grupos: readonly Grupo[]): KpiGastos {
+  const total = suma(grupos);
+  const primera = [...grupos].sort((a, b) => (b.total > a.total ? 1 : -1))[0];
   return {
     total,
     mayor:
       primera === undefined || total === 0n
         ? null
-        : { nombre: primera[0], monto: primera[1], parte: Number(primera[1]) / Number(total) },
-    nomina: porCategoria.get('Nómina') ?? 0n,
+        : {
+            nombre: primera.clasificacion,
+            monto: primera.total,
+            parte: Number(primera.total) / Number(total),
+          },
+    nomina: grupos.find((g) => g.clasificacion === 'Nómina')?.total ?? 0n,
   };
 }

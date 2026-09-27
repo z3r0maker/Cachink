@@ -60,3 +60,48 @@ describe('ApiClient', () => {
     assert.equal(res.ok ? null : res.code, 'DEVICE_REVOKED');
   });
 });
+
+describe('ApiClient · being told to wait (DB2-DEV-02)', () => {
+  const envelope = (code: string) => JSON.stringify({ error: { code, message: 'espera' } });
+
+  it('reads Retry-After in seconds from a 429', async () => {
+    const fetchImpl = (async () =>
+      new Response(envelope('RATE_LIMITED'), {
+        status: 429,
+        headers: { 'Retry-After': '7' },
+      })) as typeof fetch;
+    const res = await new ApiClient({ baseUrl: 'http://x', fetchImpl }).pull('tok', 0);
+    assert.deepEqual(res.ok ? null : [res.code, res.retryAfterMs], ['RATE_LIMITED', 7_000]);
+  });
+
+  it('reads Retry-After as an HTTP date from a 503', async () => {
+    const when = new Date(Date.now() + 90_000).toUTCString();
+    const fetchImpl = (async () =>
+      new Response(envelope('INTERNAL'), {
+        status: 503,
+        headers: { 'Retry-After': when },
+      })) as typeof fetch;
+    const res = await new ApiClient({ baseUrl: 'http://x', fetchImpl }).push('tok', []);
+    const ms = res.ok ? -1 : (res.retryAfterMs ?? -1);
+    assert.ok(ms > 80_000 && ms <= 90_000, `retryAfterMs ${ms}`);
+  });
+
+  it('leaves retryAfterMs out when the server gives no Retry-After or a bad one', async () => {
+    for (const headers of [{}, { 'Retry-After': 'pronto' }]) {
+      const fetchImpl = (async () =>
+        new Response(envelope('INTERNAL'), { status: 500, headers })) as typeof fetch;
+      const res = await new ApiClient({ baseUrl: 'http://x', fetchImpl }).pull('tok', 0);
+      assert.equal(res.ok ? 'ok' : res.retryAfterMs, undefined);
+    }
+  });
+
+  it('gives up on a request that hangs past its timeout', async () => {
+    const fetchImpl = ((_url: string, init?: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+      })) as typeof fetch;
+    const client = new ApiClient({ baseUrl: 'http://x', fetchImpl, timeoutMs: 20 });
+    const res = await client.push('tok', []);
+    assert.deepEqual(res.ok ? null : [res.status, res.code], [0, 'TIMEOUT']);
+  });
+});

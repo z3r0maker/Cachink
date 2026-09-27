@@ -46,7 +46,14 @@ function toProductoRow(r: ProductoSqlRow): ProductoRow {
   };
 }
 
-/** Stock is derived from movements and signed by `tipo` — never stored. */
+/**
+ * Stock is derived from movements and signed by `tipo` — never stored. The
+ * join names `business_id` beside `producto_id` (RLS already implies it) so it
+ * reads as the `(business_id, producto_id)` prefix a covering index on
+ * movements serves: measured on the audit-shaped whale, this join shape runs
+ * as an index-only nested loop (≈50 ms for 2,000 products and 396K movements)
+ * where aggregating movements before the join fell back to a sequential scan.
+ */
 type ProductoSqlRow = {
   id: string;
   nombre: string;
@@ -74,7 +81,8 @@ export async function listProductos(tx: Tx): Promise<readonly ProductoRow[]> {
            p.seguir_stock AS sigue_stock,
            p.unidad, p.tipo, p.uso_producto, p.color_fondo, p.icono
       FROM ${products} p
-      LEFT JOIN ${inventoryMovements} m ON m.producto_id = p.id AND m.deleted_at IS NULL
+      LEFT JOIN ${inventoryMovements} m
+        ON m.business_id = p.business_id AND m.producto_id = p.id AND m.deleted_at IS NULL
      WHERE p.deleted_at IS NULL
      GROUP BY p.id
      ORDER BY p.nombre`);

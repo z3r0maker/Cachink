@@ -1,18 +1,34 @@
 /**
  * drainPush — sends the outbox to `/sync/push` (A-06, contracts §4).
  *
- * Per batch: read the next change-log slice + due retries, coalesce per row,
- * read current rows in one query per table, validate locally, send, then
- * record every per-row outcome BEFORE advancing the cursor. A batch that
- * fails as a whole (offline, 5xx, auth) leaves the cursor where it was, so
- * nothing is skipped. Stops after `maxBatches` so a large backlog never
- * blocks the UI; the next trigger continues.
+ * Per batch: read the due retries, then the next change-log slice in the
+ * room left under the server's per-push limit, coalesce per row, read current
+ * rows in one query per table, validate locally, send, then record every
+ * per-row outcome BEFORE advancing the cursor. A batch that fails as a whole
+ * (offline, 5xx, 429, timeout, auth) leaves the cursor where it was and puts
+ * the retries it carried back to `rejected` with their next backoff, so
+ * nothing is skipped and nothing is stranded `pending` (DB2-DEV-01). Between
+ * batches it pauses after a slow answer, so a device flushing a long
+ * offline backlog yields to the others (DB2-DEV-02). Stops after
+ * `maxBatches` so a large backlog never blocks the UI; the next trigger
+ * continues.
  */
 
-import { DeltaSchema, ERROR_CATALOG, isKnownErrorCode, type Delta } from '@xangarro/contracts';
+import {
+  DeltaSchema,
+  ERROR_CATALOG,
+  MAX_PUSH_DELTAS,
+  isKnownErrorCode,
+  type Delta,
+} from '@xangarro/contracts';
 import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
-import type { ApiClient, ClientErrorCode } from './api-client.js';
-import { coalesce, readChangeSlice, type CoalescedChange } from './outbox-reader.js';
+import type { ApiClient, ApiResult, ClientErrorCode } from './api-client.js';
+import {
+  coalesce,
+  readChangeSlice,
+  type ChangeEntry,
+  type CoalescedChange,
+} from './outbox-reader.js';
 import { readRows } from './row-reader.js';
 import { StatusStore } from './status-store.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
@@ -24,11 +40,36 @@ export interface PushDeps {
   readonly client: ApiClient;
   readonly token: string;
   readonly now: () => Date;
+  /** Deltas per push; the contract's MAX_PUSH_DELTAS unless the server wants fewer. */
+  readonly batchLimit?: number;
+  /** Awaited before each further batch with the last one's duration; default sleeps `pauseAfter`. */
+  readonly pace?: (elapsedMs: number) => Promise<void>;
 }
 
 export interface SyncError {
   readonly code: ClientErrorCode;
   readonly status: number;
+  /** The server's `Retry-After`, when it sent one (DB2-DEV-02). */
+  readonly retryAfterMs?: number;
+}
+
+const MAX_RETRIES_PER_BATCH = 100;
+const SLOW_ANSWER_MS = 2_000;
+const MAX_PAUSE_MS = 10_000;
+
+/** After a slow answer, wait as long as it took (capped): at most half the server's time is ours. */
+export function pauseAfter(elapsedMs: number): number {
+  return elapsedMs < SLOW_ANSWER_MS ? 0 : Math.min(elapsedMs, MAX_PAUSE_MS);
+}
+
+function sleepAfter(elapsedMs: number): Promise<void> {
+  const ms = pauseAfter(elapsedMs);
+  return ms === 0 ? Promise.resolve() : new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function toSyncError(res: Extract<ApiResult<unknown>, { ok: false }>): SyncError {
+  const wait = res.retryAfterMs === undefined ? {} : { retryAfterMs: res.retryAfterMs };
+  return { code: res.code, status: res.status, ...wait };
 }
 
 export interface PushOutcome {
@@ -99,10 +140,15 @@ async function sendBatch(
   deps: PushDeps,
   store: StatusStore,
   prepared: Prepared,
+  retried: ReadonlySet<string>,
 ): Promise<BatchResult> {
   await store.markPending(prepared.sent, deps.now().toISOString());
   const res = await deps.client.push(deps.token, prepared.deltas);
-  if (!res.ok) return { error: { code: res.code, status: res.status } };
+  if (!res.ok) {
+    const back = prepared.sent.filter((c) => retried.has(rowKey(c.tableName, c.rowId)));
+    await store.restoreRetries(back, deps.now());
+    return { error: toSyncError(res) };
+  }
   const byRowId = new Map(prepared.sent.map((c) => [c.rowId, c] as const));
   for (const a of res.data.accepted) {
     const c = byRowId.get(a.rowId);
@@ -123,25 +169,58 @@ async function sendBatch(
   return { accepted: res.data.accepted.length, rejected: res.data.rejected.length };
 }
 
+interface Round {
+  readonly hwm: number;
+  readonly slice: readonly ChangeEntry[];
+  readonly retries: readonly CoalescedChange[];
+  readonly retryLimit: number;
+}
+
+/** Due retries first (at most half the batch), then the slice in the room left. */
+async function readRound(deps: PushDeps, store: StatusStore, limit: number): Promise<Round> {
+  const retryLimit = Math.min(MAX_RETRIES_PER_BATCH, Math.max(1, Math.floor(limit / 2)));
+  const retries = await store.dueRetries(deps.now(), retryLimit);
+  const hwm = await readCursor(deps.appConfig);
+  const room = limit - retries.length;
+  const slice = room > 0 ? await readChangeSlice(deps.db, hwm, room) : [];
+  return { hwm, slice, retries, retryLimit };
+}
+
+/** Sends a round's deltas, pacing after a slow previous batch; times the exchange. */
+async function sendRound(
+  deps: PushDeps,
+  store: StatusStore,
+  r: Round,
+  prepared: Prepared,
+  lastElapsed: number | null,
+): Promise<{ result: BatchResult; elapsed: number }> {
+  if (lastElapsed !== null) await (deps.pace ?? sleepAfter)(lastElapsed);
+  const started = Date.now();
+  const retried = new Set(r.retries.map((c) => rowKey(c.tableName, c.rowId)));
+  const result = await sendBatch(deps, store, prepared, retried);
+  return { result, elapsed: Date.now() - started };
+}
+
 export async function drainPush(deps: PushDeps, maxBatches = 10): Promise<PushOutcome> {
   const store = new StatusStore(deps.db);
+  const limit = deps.batchLimit ?? MAX_PUSH_DELTAS;
   const total = { batches: 0, accepted: 0, rejected: 0 };
-  while (total.batches < maxBatches) {
-    const hwm = await readCursor(deps.appConfig);
-    const slice = await readChangeSlice(deps.db, hwm);
-    const retries = await store.dueRetries(deps.now(), 100);
-    if (slice.length === 0 && retries.length === 0) break;
-    const prepared = await prepare(deps, store, dedupe([...coalesce(slice), ...retries]));
-    const nextHwm = slice.reduce((m, e) => Math.max(m, e.id), hwm);
+  let lastElapsed: number | null = null;
+  for (let round = 0; round < maxBatches; round += 1) {
+    const r = await readRound(deps, store, limit);
+    if (r.slice.length === 0 && r.retries.length === 0) break;
+    const prepared = await prepare(deps, store, dedupe([...coalesce(r.slice), ...r.retries]));
     if (prepared.deltas.length > 0) {
-      const result = await sendBatch(deps, store, prepared);
+      const sent = await sendRound(deps, store, r, prepared, lastElapsed);
+      lastElapsed = sent.elapsed;
       total.batches += 1;
-      if ('error' in result) return { ...total, error: result.error };
-      total.accepted += result.accepted;
-      total.rejected += result.rejected;
+      if ('error' in sent.result) return { ...total, error: sent.result.error };
+      total.accepted += sent.result.accepted;
+      total.rejected += sent.result.rejected;
     }
+    const nextHwm = r.slice.reduce((m, e) => Math.max(m, e.id), r.hwm);
     await deps.appConfig.set(SYNC_CONFIG_KEYS.pushHwm, String(nextHwm));
-    if (slice.length === 0) break;
+    if (r.slice.length === 0 && r.retries.length < r.retryLimit) break;
   }
   return { ...total, error: null };
 }

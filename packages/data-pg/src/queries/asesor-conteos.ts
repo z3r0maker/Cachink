@@ -52,6 +52,9 @@ export function contarCapacidades(
  * `meses_con_gasto` excludes the current month for the same reason: the baseline
  * the insight averages is the months *before* this one.
  */
+// `primer_dia` takes `left(min(fecha), 10)`, not `min(left(fecha, 10))`: the
+// same day (a prefix never sorts after its string), but the bare `min` can walk
+// the fecha index from its first entry instead of reading every row (DB3-QRY-02).
 export async function conteosAsesor(tx: Tx, hoy: IsoDate) {
   const r = await tx.execute<{
     dias_con_venta: number;
@@ -69,12 +72,12 @@ export async function conteosAsesor(tx: Tx, hoy: IsoDate) {
            (SELECT count(DISTINCT left(im.fecha, 10)) FROM inventory_movements im
              WHERE im.deleted_at IS NULL) AS dias_con_movimiento,
            (SELECT min(d) FROM (
-              SELECT min(left(s.fecha, 10)) AS d FROM sales s
+              SELECT left(min(s.fecha), 10) AS d FROM sales s
                WHERE s.deleted_at IS NULL
                  AND NOT EXISTS (SELECT 1 FROM tickets t
                                   WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)
               UNION ALL
-              SELECT min(left(fecha, 10)) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
+              SELECT left(min(fecha), 10) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
            (SELECT coalesce(max(n), 0) FROM (
               SELECT count(*) AS n FROM inventory_movements
                WHERE deleted_at IS NULL AND tipo = 'entrada'

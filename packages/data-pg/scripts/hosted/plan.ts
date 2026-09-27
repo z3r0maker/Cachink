@@ -7,6 +7,8 @@ import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { migrationProblems, runsInTransaction } from './lint';
+
 /**
  * The three migration sets, applied in this order. `local/` is not here: the
  * part of it a hosted project needs is `hosted/` (see its header).
@@ -24,6 +26,8 @@ export interface MigrationFile {
   readonly body: string;
   /** SHA-256 (hex) of the file's bytes. */
   readonly checksum: string;
+  /** False for a `-- xangarro:no-transaction` file (`lint.ts`). */
+  readonly transactional: boolean;
 }
 
 export interface AppliedMigration {
@@ -33,7 +37,7 @@ export interface AppliedMigration {
 
 export class MigrationPlanError extends Error {
   constructor(
-    readonly code: 'CHECKSUM_MISMATCH' | 'MISSING_FILE',
+    readonly code: 'CHECKSUM_MISMATCH' | 'MISSING_FILE' | 'OUT_OF_ORDER' | 'UNSAFE_FILE',
     message: string,
   ) {
     super(message);
@@ -58,7 +62,13 @@ export function listMigrations(root: string): MigrationFile[] {
       .map((f) => {
         const path = join(root, dir, f);
         const body = readFileSync(path, 'utf8');
-        return { name: `${set}/${f}`, path, body, checksum: checksum(body) };
+        return {
+          name: `${set}/${f}`,
+          path,
+          body,
+          checksum: checksum(body),
+          transactional: runsInTransaction(body),
+        };
       }),
   );
 }
@@ -90,5 +100,42 @@ export function pendingMigrations(
     }
   }
   const done = new Set(applied.map((a) => a.name));
-  return files.filter((f) => !done.has(f.name));
+  const pending = files.filter((f) => !done.has(f.name));
+  refuseOutOfOrder(pending, applied);
+  refuseUnsafe(pending);
+  return pending;
+}
+
+const setOf = (name: string) => name.slice(0, name.indexOf('/'));
+
+/**
+ * A pending file that sorts below one already applied in its set would run
+ * in one order here and in file order on a fresh database — the audit found
+ * two (DB2-MIG-01). Renumber it above the last applied file instead.
+ */
+function refuseOutOfOrder(
+  pending: readonly MigrationFile[],
+  applied: readonly AppliedMigration[],
+): void {
+  const last = new Map<string, string>();
+  for (const { name } of applied) {
+    const seen = last.get(setOf(name));
+    if (seen === undefined || name > seen) last.set(setOf(name), name);
+  }
+  for (const file of pending) {
+    const seen = last.get(setOf(file.name));
+    if (seen !== undefined && file.name < seen) {
+      throw new MigrationPlanError(
+        'OUT_OF_ORDER',
+        `${file.name} sorts before ${seen}, which is already applied: a fresh database ` +
+          `would apply them in the other order. Renumber it above ${seen}.`,
+      );
+    }
+  }
+}
+
+/** Refuse to start when any pending file breaks `lint.ts`'s rules. */
+function refuseUnsafe(pending: readonly MigrationFile[]): void {
+  const bad = pending.flatMap((f) => migrationProblems(f.body).map((p) => `${f.name} ${p}`));
+  if (bad.length > 0) throw new MigrationPlanError('UNSAFE_FILE', bad.join('; '));
 }
