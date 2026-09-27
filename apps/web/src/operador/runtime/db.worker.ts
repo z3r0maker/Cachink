@@ -13,6 +13,7 @@ import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
 import { POR_METODO } from './router';
 import { opfsRead, opfsWrite } from './opfs';
+import { EN_OTRA_PESTANA, reclamador, type Candados } from './pestana';
 import { registrarTicket } from './tickets';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
@@ -33,9 +34,32 @@ interface Runtime {
 
 let runtime: Runtime | null = null;
 let deviceToken: string | null = null;
+/** Opening, once: a second `boot` while the first reads OPFS joins it (never two copies). */
+let arranque: Promise<boolean> | null = null;
+/** The tail of the OPFS writes: each waits for the one before (DB3-CAJA-04, partial). */
+let escritura: Promise<void> = Promise.resolve();
+
+/** One tab owns the register (DB3-CAJA-01): the lock is this Worker's, for its lifetime. */
+const candado = reclamador((navigator as { locks?: Candados }).locks);
+
+type SqlJs = Awaited<ReturnType<typeof initSqlJs>>;
+let motor: Promise<SqlJs> | null = null;
+
+/**
+ * The SQLite engine, loaded once. A tab waiting for the register loads it
+ * while it waits (no database is opened), so it can take over even if the
+ * connection drops before the other tab closes.
+ */
+function cargarMotor(): Promise<SqlJs> {
+  motor ??= initSqlJs({ locateFile: () => WASM_URL });
+  motor.catch(() => {
+    motor = null;
+  });
+  return motor;
+}
 
 async function openRuntime(): Promise<Runtime> {
-  const SQL = await initSqlJs({ locateFile: () => WASM_URL });
+  const SQL = await cargarMotor();
   const persisted = await opfsRead();
   const sql = persisted ? new SQL.Database(persisted) : new SQL.Database();
   const db = drizzle(sql, { schema }) as Db;
@@ -51,17 +75,39 @@ async function openRuntime(): Promise<Runtime> {
   return { sql, db, engine };
 }
 
-async function boot(): Promise<{ fresh: boolean }> {
-  if (runtime === null) {
-    const hadDb = (await opfsRead()) !== null;
-    runtime = await openRuntime();
-    return { fresh: !hadDb };
-  }
-  return { fresh: false };
+/** True when the database was created now (a first boot). */
+async function abrir(): Promise<boolean> {
+  const hadDb = (await opfsRead()) !== null;
+  runtime = await openRuntime();
+  return !hadDb;
 }
 
-async function persist(): Promise<void> {
-  if (runtime !== null) await opfsWrite(runtime.sql.export());
+/** Open the register — only in the tab that owns it; another tab's copy would erase this one's sales. */
+async function boot(): Promise<{ fresh: boolean }> {
+  if ((await candado.reclamar(false)) === 'ocupada') throw new Error(EN_OTRA_PESTANA);
+  if (arranque !== null) {
+    await arranque;
+    return { fresh: false };
+  }
+  arranque = abrir();
+  arranque.catch(() => {
+    arranque = null;
+  });
+  return { fresh: await arranque };
+}
+
+/**
+ * Write the database back to OPFS. The writes queue: each exports the bytes
+ * when its turn comes, so two overlapping writes can never land out of order
+ * and the file always ends at the latest state. Every caller still awaits its
+ * own write (no debounce: durability is unchanged).
+ */
+function persist(): Promise<void> {
+  const rt = runtime;
+  if (rt === null) return Promise.resolve();
+  const turno = escritura.then(() => opfsWrite(rt.sql.export()));
+  escritura = turno.catch(() => undefined);
+  return turno;
 }
 
 /** Record a sale (O-06); every access-shaped op persists afterwards. */
@@ -92,7 +138,12 @@ async function sync(request: SyncRequest): Promise<SyncRunResult> {
 }
 
 /** The queue's counters, as Registros por enviar and the header pill show them. */
-async function counts(): Promise<{ pending: number; rejected: number; retrying: number }> {
+async function counts(): Promise<{
+  pending: number;
+  rejected: number;
+  retrying: number;
+  unsent: number;
+}> {
   if (runtime === null) throw new Error('runtime not booted');
   return runtime.engine.counts();
 }
@@ -113,6 +164,9 @@ async function handle(request: WorkerRequest): Promise<unknown> {
   switch (request.method) {
     case 'boot':
       return boot();
+    case 'reclamar':
+      void cargarMotor().catch(() => undefined);
+      return candado.reclamar(request.esperar);
     case 'registrar':
       return registrar(request.input, request.ctx);
     case 'sync':

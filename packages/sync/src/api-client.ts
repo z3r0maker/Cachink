@@ -62,7 +62,11 @@ interface CallSpec<S extends z.ZodType> {
 }
 
 function failure(res: Response, body: unknown): ApiResult<never> {
-  const retryAfterMs = parseRetryAfter(res.headers.get('Retry-After'), Date.now());
+  const retryAfterMs = parseRetryAfter(
+    res.headers.get('Retry-After'),
+    Date.now(),
+    res.headers.get('Date'),
+  );
   const wait = retryAfterMs === undefined ? {} : { retryAfterMs };
   const env = ErrorEnvelopeSchema.safeParse(body);
   if (env.success)
@@ -151,10 +155,12 @@ export class ApiClient {
     });
   }
 
-  pull(token: string, since: number): Promise<ApiResult<PullResponse>> {
+  /** `snapshot`: `start` or a page's `next` token (C-23); omitted for an ordinary pull. */
+  pull(token: string, since: number, snapshot?: string): Promise<ApiResult<PullResponse>> {
+    const page = snapshot === undefined ? '' : `&snapshot=${encodeURIComponent(snapshot)}`;
     return this.#call({
       method: 'GET',
-      path: `${API_PATHS.syncPull}?since=${since}`,
+      path: `${API_PATHS.syncPull}?since=${since}${page}`,
       token,
       schema: PullResponseSchema,
     });

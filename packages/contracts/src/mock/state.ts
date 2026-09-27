@@ -6,6 +6,7 @@
 import { buildFixtures, FIXTURE_BUSINESS_ID, FIXTURE_EMAIL } from './fixtures.js';
 import { ulidOf } from './ids.js';
 import type { Scenario } from './scenarios.js';
+import type { SnapshotBudget } from '../snapshot-page.js';
 
 export interface StoredRow {
   readonly table: string;
@@ -50,6 +51,8 @@ export class MockState {
   pairingTokens = new Map<string, { code: string; expiresAt: number }>();
   serverSeq = 0;
   deviceSlots = 2;
+  /** Snapshot page budget override (`/__mock/snapshot-budget`); `undefined` = the contract's. */
+  snapshotBudget: SnapshotBudget | undefined = undefined;
   #deviceCounter = 0;
 
   constructor() {
@@ -61,6 +64,7 @@ export class MockState {
     this.forgotten.clear();
     this.defaultScenario = 'xangarro';
     this.transactionsPerMonth = undefined;
+    this.snapshotBudget = undefined;
     this.devices.clear();
     this.codes.clear();
     this.pairingTokens.clear();
@@ -70,6 +74,10 @@ export class MockState {
     for (const [table, list] of Object.entries(fx)) {
       for (const row of list as readonly Record<string, unknown>[]) this.upsert(table, row);
     }
+    this.#seedCodes();
+  }
+
+  #seedCodes(): void {
     const far = Date.now() + 48 * 3_600_000;
     this.codes.set(MOCK_CODES.valid, {
       code: MOCK_CODES.valid,

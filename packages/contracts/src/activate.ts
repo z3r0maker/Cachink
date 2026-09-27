@@ -17,6 +17,7 @@ import {
   UserSchema,
 } from '@xangarro/domain';
 import { SignedEntitlementSchema } from './entitlement.js';
+import { BootstrapModeSchema, SnapshotInfoSchema } from './snapshot.js';
 import { wireSchema } from './wire.js';
 
 /** 8 chars from an alphabet without 0/O/1/I (§3, B-11). */
@@ -60,6 +61,8 @@ export const TypedActivateRequestSchema = z.object({
   code: ActivationCodeSchema,
   device: DeviceInfoSchema,
   avisoVersion: AvisoVersionSchema.optional(),
+  /** C-23: the paged snapshot bootstrap. Absent = an older device, served the legacy one. */
+  bootstrap: BootstrapModeSchema.optional(),
 });
 
 /** Scan path (C-14): the token alone — the 128 bits are the credential, no email. */
@@ -67,6 +70,8 @@ export const ScanActivateRequestSchema = z.object({
   qrToken: PairingTokenSchema,
   device: DeviceInfoSchema,
   avisoVersion: AvisoVersionSchema.optional(),
+  /** C-23: the paged snapshot bootstrap. Absent = an older device, served the legacy one. */
+  bootstrap: BootstrapModeSchema.optional(),
 });
 
 /** Either path; additive at protocol version 1 (C-16 precedent). */
@@ -116,7 +121,10 @@ export const BootstrapSchema = z.object({
   serverSeq: z.number().int().nonnegative(),
   serverTime: z.string().datetime(),
   tables: ReferenceTablesSchema,
+  /** C-23: the first snapshot page's baseline and continuation; absent on the legacy bootstrap. */
+  snapshot: SnapshotInfoSchema.optional(),
 });
+export type Bootstrap = z.infer<typeof BootstrapSchema>;
 
 export const ActivateResponseSchema = z.object({
   deviceToken: z.string().min(1),

@@ -10,11 +10,15 @@ import { ROUTES } from './routes';
  */
 for (const route of ROUTES) {
   test(`${route.path} has no serious or critical accessibility violations`, async ({ page }) => {
+    // A scan mid fade-in reads blended colours (Sincronización's open detail
+    // measured #80807d for gray600), so settle motion before axe looks.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(route.path);
     await expect(page.getByRole('heading', { name: route.heading, level: 1 })).toBeVisible();
     // Without this the scan can run over an error card — three elements, no
     // tables, no charts — and report zero violations for a screen it never saw.
     await expectSeededData(page, route);
+    await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

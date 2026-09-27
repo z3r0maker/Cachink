@@ -13,6 +13,7 @@ import { canonicalize, type SignedEntitlement } from '../entitlement.js';
 import { ERROR_CATALOG, type ErrorCode } from '../errors.js';
 import type { PullResponse } from '../sync-pull.js';
 import { PullQuerySchema } from '../sync-pull.js';
+import { SNAPSHOT_START } from '../snapshot.js';
 import { API_PATHS, HEADER_PROTOCOL, PROTOCOL_VERSION } from '../transport.js';
 import { encodeJson } from '../wire.js';
 import devKeys from './dev-keys.json' with { type: 'json' };
@@ -21,6 +22,8 @@ import { applyPush } from './push-handler.js';
 import { entitlementFor, scenarioOf, type Scenario } from './scenarios.js';
 import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
+import { mockSnapshotPage } from './snapshot.js';
+import { referenceTables } from './tables.js';
 
 export interface MockRequest {
   readonly method: string;
@@ -49,28 +52,6 @@ async function sign(payload: Entitlement): Promise<SignedEntitlement> {
     payload: EntitlementSchema.parse(payload),
     signature: Buffer.from(sig).toString('base64'),
   };
-}
-
-function referenceTables(state: MockState, since: number): PullResponse['tables'] {
-  const pick = (t: string): Record<string, unknown>[] => state.rowsOf(t, since).map((r) => r.row);
-  const users = state.rowsOf('users', since).map((r) => {
-    const { email: _email, ...rest } = r.row;
-    return rest;
-  });
-  return {
-    businesses: pick('businesses'),
-    products: pick('products'),
-    clients: pick('clients'),
-    users,
-    employees: pick('employees'),
-    recurring_expenses: pick('recurring_expenses'),
-    conversion_recetas: pick('conversion_recetas'),
-    inventory_movements: pick('inventory_movements'),
-    mensajes_operador: pick('mensajes_operador'),
-    opening_balances: pick('opening_balances'),
-    opening_balance_clients: pick('opening_balance_clients'),
-    feature_flags: { stock: true },
-  } as unknown as PullResponse['tables'];
 }
 
 /** JSON-safe body: bigint money becomes decimal strings exactly as on the wire. */
@@ -158,31 +139,42 @@ export class MockApi {
       entitlement: await sign(
         entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
-      bootstrap: {
-        serverSeq: this.state.serverSeq,
-        serverTime: now.toISOString(),
-        tables: referenceTables(this.state, 0),
-      },
+      bootstrap:
+        parsed.data.bootstrap === 'snapshot'
+          ? await this.snapshotBootstrap(now)
+          : {
+              serverSeq: this.state.serverSeq,
+              serverTime: now.toISOString(),
+              tables: referenceTables(this.state, 0),
+            },
     };
     return { status: 200, body: jsonBody(body) };
   }
 
+  /** The first page of a snapshot bootstrap (C-23), as `/activate` embeds it. */
+  private async snapshotBootstrap(now: Date): Promise<ActivateResponse['bootstrap']> {
+    const page = await mockSnapshotPage(this.state, SNAPSHOT_START, now);
+    if (page === null) throw new Error('a snapshot always starts');
+    const { serverSeq, tables, snapshot } = page;
+    return { serverSeq, serverTime: now.toISOString(), tables, snapshot };
+  }
+
   private async pull(req: MockRequest, device: Device, scenario: Scenario): Promise<MockResponse> {
     const q = PullQuerySchema.safeParse(req.query);
-    if (!q.success)
-      return {
-        status: 400,
-        body: { error: { code: 'VALIDATION', message: 'since must be a non-negative integer' } },
-      };
+    if (!q.success) return err('VALIDATION', 'since must be a non-negative integer', 400);
     const now = new Date();
+    const token = q.data.snapshot;
+    const page = token === undefined ? null : await mockSnapshotPage(this.state, token, now);
+    if (token !== undefined && page === null) return err('VALIDATION', 'unknown snapshot', 400);
     const body: PullResponse = {
-      serverSeq: this.state.serverSeq,
+      serverSeq: page?.serverSeq ?? this.state.serverSeq,
       serverTime: now.toISOString(),
       entitlement: await sign(
         entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
-      tables: referenceTables(this.state, q.data.since),
+      tables: page?.tables ?? referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,
+      ...(page === null ? {} : { snapshot: page.snapshot }),
     };
     return { status: 200, body: jsonBody(body) };
   }

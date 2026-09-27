@@ -81,7 +81,7 @@ test('a 500 on initial navigation is observable, not a blank tab', async ({ page
   await page.unroute('**/estados');
 });
 
-test('a 500 on export produces no download and a visible error page', async ({ page }) => {
+test('a 500 on export produces no download and a visible failure notice', async ({ page }) => {
   await page.goto('/estados');
   await page.route('**/api/export/ventas', async (route) => {
     await route.fulfill({
@@ -97,10 +97,12 @@ test('a 500 on export produces no download and a visible error page', async ({ p
     page.getByTestId('export-ventas').click(),
   ]);
 
-  // Recovery state: the failure is visible; the browser must NOT save a corrupt file.
+  // Recovery state: the failure is visible as the DS-02 toast, the button is
+  // usable again, and the browser must NOT save a corrupt file.
   expect(response?.status()).toBe(500);
   await expect(download).rejects.toThrow();
-  await expect(page.getByText('Algo salió mal')).toBeVisible();
+  await expect(page.getByText('No pudimos generar el archivo')).toBeVisible();
+  await expect(page.getByTestId('export-ventas')).toBeEnabled();
   await page.unroute('**/api/export/ventas');
 });
 

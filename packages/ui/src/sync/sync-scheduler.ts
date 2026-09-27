@@ -4,7 +4,10 @@
  *
  *   - Local write        → push after a 2 s debounce (a sale leaves the phone
  *                          within seconds; bursts collapse into one push).
- *   - Foreground/resume  → full sync (push then pull).
+ *   - Foreground/resume  → full sync (push then pull) — or only a push when
+ *                          the last full sync is under 45 s old, as after a
+ *                          capture: the phone must not pull on every return
+ *                          to the app (DB3-L-02).
  *   - While in foreground → full sync every 15 min ± 20 %, so the phones of a
  *                          shop (and of every shop) don't tick in step at the
  *                          evening peak (DB2-DEV-02).
@@ -12,12 +15,14 @@
  *   - Background         → nothing scheduled (iOS can't be relied on).
  */
 
-import { spread, type Random } from '@xangarro/sync';
+import { PULL_AFTER_CAPTURE_MS, spread, type Random } from '@xangarro/sync';
 
 export const PUSH_DEBOUNCE_MS = 2_000;
 export const PULL_INTERVAL_MS = 15 * 60_000;
 /** The foreground tick lands anywhere in 12–18 min. */
 export const PULL_INTERVAL_JITTER = 0.2;
+/** A resume sooner than this after the last full sync only pushes. */
+export const RESUME_PULL_MIN_MS = PULL_AFTER_CAPTURE_MS;
 
 type TimerId = ReturnType<typeof setTimeout>;
 
@@ -27,6 +32,8 @@ export interface SchedulerDeps {
   readonly setTimeout?: (fn: () => void, ms: number) => TimerId;
   readonly clearTimeout?: (id: TimerId) => void;
   readonly random?: Random;
+  /** Epoch ms; injected for tests. */
+  readonly now?: () => number;
 }
 
 export class SyncScheduler {
@@ -34,6 +41,7 @@ export class SyncScheduler {
   #debounce: TimerId | null = null;
   #tick: TimerId | null = null;
   #retry: TimerId | null = null;
+  #lastSyncMs: number | null = null;
 
   constructor(deps: SchedulerDeps) {
     this.#deps = deps;
@@ -41,7 +49,9 @@ export class SyncScheduler {
 
   /** App became active (launch, resume, activation just finished). */
   onForeground(): void {
-    this.#deps.runSync();
+    const last = this.#lastSyncMs;
+    if (last !== null && this.#now() - last < RESUME_PULL_MIN_MS) this.#deps.runPush();
+    else this.#sync();
     this.#scheduleTick();
   }
 
@@ -67,7 +77,7 @@ export class SyncScheduler {
     this.#retry = this.#set(
       () => {
         this.#retry = null;
-        this.#deps.runSync();
+        this.#sync();
       },
       Math.max(0, ms),
     );
@@ -82,9 +92,18 @@ export class SyncScheduler {
     const every = spread(PULL_INTERVAL_MS, PULL_INTERVAL_JITTER, this.#deps.random ?? Math.random);
     this.#tick = this.#set(() => {
       this.#tick = null;
-      this.#deps.runSync();
+      this.#sync();
       this.#scheduleTick();
     }, every);
+  }
+
+  #sync(): void {
+    this.#lastSyncMs = this.#now();
+    this.#deps.runSync();
+  }
+
+  #now(): number {
+    return (this.#deps.now ?? Date.now)();
   }
 
   #set(fn: () => void, ms: number): TimerId {

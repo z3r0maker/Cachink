@@ -25,10 +25,6 @@ export const DIF = {
   },
 } as const;
 
-/** While records wait, a shortfall is not final: the expected cash can still move. */
-export const FALTA_PENDIENTE =
-  'Hay menos efectivo del esperado. Cuenta otra vez antes de explicar. Cuando se envíen los registros, la diferencia se vuelve a calcular.';
-
 /** «Cerrar turno», or with the difference in the button itself. */
 export function cerrarLabel(d: DiferenciaCorte): string {
   if (d.tipo === 'cuadra') return 'Cerrar turno';
@@ -42,14 +38,31 @@ export function cerrarHint(faltaMotivo: boolean, faltaNota: boolean): string {
   return 'Al cerrar se guarda el conteo con tu nombre y ya no puedes capturar en esta caja.';
 }
 
-/** The band's second line, and what a failed retry says. */
-export const BANDA_CUERPO =
-  'Para cerrar, primero se tienen que enviar: el efectivo esperado se calcula con ellos.';
+/**
+ * The band while records wait (DS-06 option (a), ADR-123): the close stays
+ * open — the expected cash comes from this caja's own rows, all of them here —
+ * and the queue goes up by itself when the connection comes back.
+ */
+export function bandaTitulo(porEnviar: number, reintentando: number): string {
+  const n = porEnviar === 1 ? '1 registro' : `${porEnviar} registros`;
+  if (reintentando === 0) return `Tienes ${n} por enviar.`;
+  const m = reintentando === 1 ? '1 se reintentará solo' : `${reintentando} se reintentarán solos`;
+  return `Tienes ${n} por enviar (${m}).`;
+}
+export const BANDA_CUERPO = 'Puedes cerrar; se enviarán cuando vuelva la conexión.';
 export const BANDA_SIN_RED = 'Todavía no hay internet. Lo volvemos a intentar solos en un momento.';
 
-export function lineaCerrado(d: DiferenciaCorte, motivo: string | null, dueno: string): string {
+/** The closed line; with records still to send the owner sees the close once they go up. */
+export function lineaCerrado(
+  d: DiferenciaCorte,
+  motivo: string | null,
+  dueno: string,
+  porEnviar = 0,
+): string {
   if (d.tipo === 'cuadra')
-    return `El conteo cuadró con lo esperado. ${mayuscula(dueno)} ya lo tiene en su portal.`;
+    return porEnviar > 0
+      ? `El conteo cuadró con lo esperado. ${mayuscula(dueno)} lo verá en su portal cuando se envíen los registros.`
+      : `El conteo cuadró con lo esperado. ${mayuscula(dueno)} ya lo tiene en su portal.`;
   const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
   return `Quedó un ${que} explicado como «${motivo ?? ''}».`;
 }

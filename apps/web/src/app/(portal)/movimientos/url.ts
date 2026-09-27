@@ -1,3 +1,5 @@
+import { esIsoDate } from '@xangarro/domain';
+
 import type { RangoChip } from './periodo';
 
 /**
@@ -34,7 +36,6 @@ export interface ParamsMovimientos {
 }
 
 const RANGOS: readonly RangoChip[] = ['hoy', 'semana', 'mes', 'personalizado'];
-const DIA = /^\d{4}-\d{2}-\d{2}$/;
 const corto = (v: string | undefined, max: number): string => (v ?? '').trim().slice(0, max);
 
 export function leerEstado(p: ParamsMovimientos): EstadoMovimientos {
@@ -43,8 +44,9 @@ export function leerEstado(p: ParamsMovimientos): EstadoMovimientos {
   return {
     tab: p.tab === 'gastos' ? 'gastos' : 'ventas',
     rango: RANGOS.find((r) => r === p.rango) ?? 'mes',
-    desde: DIA.test(p.desde ?? '') ? (p.desde as string) : '',
-    hasta: DIA.test(p.hasta ?? '') ? (p.hasta as string) : '',
+    // A real day or nothing: `2026-02-30` would roll into March (R3-14).
+    desde: esIsoDate(p.desde) ? p.desde : '',
+    hasta: esIsoDate(p.hasta) ? p.hasta : '',
     cat: cat === '' ? null : cat,
     q: corto(p.q, 80),
     pagina: Number.isFinite(pagina) && pagina > 0 ? pagina : 1,

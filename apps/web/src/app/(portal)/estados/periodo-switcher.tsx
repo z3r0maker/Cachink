@@ -1,21 +1,31 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { esIsoDate } from '@xangarro/domain';
 
 import { Button, FilterChip, Input } from '@/components';
 
-import { PERIODOS, type Periodo, type TipoPeriodo } from './periodo';
+import { dentroDelTope, ERROR_TOPE, PERIODOS, type Periodo, type TipoPeriodo } from './periodo';
 
 /**
  * The period switcher (P-14). Each choice is a URL, so the server recomputes
  * the statements for it — nothing here does arithmetic. Personalizado asks for
- * two dates and applies them together.
+ * two dates and applies them together, and only a range of at most 13 months
+ * (DS-09): past it the second date says so and «Aplicar» stays disabled. The
+ * server refuses the same range whatever the URL says.
  */
+function errorDe(desde: string, hasta: string): string | undefined {
+  if (!esIsoDate(desde) || !esIsoDate(hasta) || desde > hasta) return undefined;
+  return dentroDelTope({ desde, hasta }) ? undefined : ERROR_TOPE;
+}
+
 function Personalizado({ periodo }: { readonly periodo: Periodo }) {
   const router = useRouter();
   const [desde, setDesde] = useState<string>(periodo.rango.desde);
   const [hasta, setHasta] = useState<string>(periodo.rango.hasta);
+  const error = errorDe(desde, hasta);
   const aplicar = () => router.push(`/estados?p=personalizado&desde=${desde}&hasta=${hasta}`);
   return (
     <>
@@ -30,12 +40,18 @@ function Personalizado({ periodo }: { readonly periodo: Periodo }) {
         labelText="Hasta"
         type="date"
         value={hasta}
+        error={error}
         onChange={(e) => setHasta(e.target.value)}
         data-testid="periodo-hasta"
       />
-      <Button variant="secondary" onClick={aplicar}>
+      <Button variant="secondary" onClick={aplicar} disabled={error !== undefined}>
         Aplicar
       </Button>
+      {error === undefined ? null : (
+        <Link href="/movimientos" data-testid="periodo-exportar">
+          ¿Necesitas más? Exporta tus movimientos.
+        </Link>
+      )}
     </>
   );
 }

@@ -2,7 +2,9 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
+  cabeEnMeses,
   enRango,
+  finDeMeses,
   hoyEn,
   nombreDelMes,
   rangoDelMes,
@@ -77,5 +79,35 @@ describe('periodos', () => {
 
   it('a year is the calendar (fiscal) year', () => {
     assert.deepEqual(rangoDelAnio(d('2026-05-12')), { desde: '2026-01-01', hasta: '2026-12-31' });
+  });
+});
+
+describe('finDeMeses / cabeEnMeses — the Estados custom-range cap (DB3-EST-01)', () => {
+  it('ends the day before the same date `meses` months on', () => {
+    assert.equal(finDeMeses(d('2025-05-01'), 13), '2026-05-31');
+    assert.equal(finDeMeses(d('2025-05-12'), 13), '2026-06-11');
+    assert.equal(finDeMeses(d('2026-01-01'), 1), '2026-01-31');
+  });
+
+  it('clamps a start day the target month lacks before stepping back', () => {
+    assert.equal(finDeMeses(d('2025-01-31'), 13), '2026-02-27');
+    assert.equal(finDeMeses(d('2027-01-31'), 13), '2028-02-28');
+  });
+
+  it('refuses a count of months that is not a positive integer', () => {
+    for (const bad of [0, -1, 1.5, Number.NaN]) {
+      assert.throws(() => finDeMeses(d('2026-01-01'), bad), RangeError, String(bad));
+    }
+  });
+
+  it('accepts a range up to and including 13 months', () => {
+    assert.equal(cabeEnMeses({ desde: d('2025-05-01'), hasta: d('2026-05-31') }, 13), true);
+    assert.equal(cabeEnMeses({ desde: d('2026-05-12'), hasta: d('2026-05-12') }, 13), true);
+  });
+
+  it('refuses a range a day past 13 months, years long, or backwards', () => {
+    assert.equal(cabeEnMeses({ desde: d('2025-05-01'), hasta: d('2026-06-01') }, 13), false);
+    assert.equal(cabeEnMeses({ desde: d('2000-01-01'), hasta: d('2099-12-31') }, 13), false);
+    assert.equal(cabeEnMeses({ desde: d('2026-05-12'), hasta: d('2026-05-11') }, 13), false);
   });
 });

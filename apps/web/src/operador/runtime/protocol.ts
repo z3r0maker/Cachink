@@ -5,7 +5,7 @@
  */
 
 import type { RegistrarTicketInput } from '@xangarro/application';
-import type { ReferenceTables } from '@xangarro/contracts';
+import type { Bootstrap } from '@xangarro/contracts';
 import type { ColaRequest, InventarioRequest } from '@xangarro/caja/lectura';
 import type { RecurrenteRequest } from './recurrentes';
 
@@ -68,6 +68,7 @@ export type WorkerRequest =
   | InventarioRequest
   | RecurrenteRequest
   | { readonly id: number; readonly method: 'boot' }
+  | { readonly id: number; readonly method: 'reclamar'; readonly esperar: boolean }
   | {
       readonly id: number;
       readonly method: 'registrar';
@@ -85,7 +86,7 @@ export type WorkerRequest =
   | {
       readonly id: number;
       readonly method: 'vincular';
-      readonly tables: ReferenceTables;
+      readonly bootstrap: Bootstrap;
       readonly businessId: string;
     }
   | {

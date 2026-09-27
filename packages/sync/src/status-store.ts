@@ -11,11 +11,12 @@
  * a crash, a closed tab — is due again.
  */
 
-import { and, count, desc, eq, lte, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, lte, or, sql } from 'drizzle-orm';
 import type { XangarroDatabase } from '@xangarro/data';
 import { syncRowStatus } from '@xangarro/data';
 import { equalJitter, type Random } from './backoff.js';
 import type { CoalescedChange } from './outbox-reader.js';
+import { unsentRows } from './unsent.js';
 
 const BASE_BACKOFF_MS = 60_000;
 /** Far beyond any request timeout: a row pending this long is not in flight. */
@@ -123,13 +124,14 @@ export class StatusStore {
 
   /**
    * The batch carrying these retries failed as a whole (offline, 5xx, 429,
-   * timeout): back to `rejected`, one more attempt counted, next backoff.
+   * timeout): back to `rejected` and rescheduled at their current backoff.
+   * No attempt is counted — the failure was the batch's, not theirs (DB3-L-02).
    */
   async restoreRetries(changes: readonly CoalescedChange[], now: Date): Promise<void> {
     for (const c of changes) {
       const row = await this.#db
         .update(syncRowStatus)
-        .set({ status: 'rejected', retryable: true, attempts: sql`${syncRowStatus.attempts} + 1` })
+        .set({ status: 'rejected', retryable: true })
         .where(byRow(c.tableName, c.rowId))
         .returning({ attempts: syncRowStatus.attempts })
         .get();
@@ -166,9 +168,16 @@ export class StatusStore {
           and(eq(syncRowStatus.status, 'pending'), lte(syncRowStatus.lastAttemptAt, staleBefore)),
         ),
       )
+      .orderBy(asc(syncRowStatus.retryAfter))
       .limit(limit)
       .all();
     return rows.map((r) => ({ tableName: r.tableName, rowId: r.rowId, op: 'insert' as const }));
+  }
+
+  /** Rows gone locally: nothing left to send, so no status to keep (DB3-L-03). */
+  async forget(changes: readonly CoalescedChange[]): Promise<void> {
+    for (const c of changes)
+      await this.#db.delete(syncRowStatus).where(byRow(c.tableName, c.rowId)).run();
   }
 
   /** Rejected rows, most recent attempt first. */
@@ -198,6 +207,11 @@ export class StatusStore {
       .set({ retryable: true, retryAfter: now.toISOString() })
       .where(byRow(tableName, rowId))
       .run();
+  }
+
+  /** Everything not accepted yet, terminal rejections apart (DB3-CAJA-02, `unsent.ts`). */
+  async unsentCount(): Promise<number> {
+    return (await unsentRows(this.#db)).length;
   }
 
   async countByStatus(): Promise<{ pending: number; rejected: number; retrying: number }> {

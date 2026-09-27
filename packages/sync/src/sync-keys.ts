@@ -10,8 +10,12 @@ export const SYNC_CONFIG_KEYS = {
   lastServerTime: 'lastServerTime',
   /** Highest serverSeq applied from pulls. */
   pullSeq: 'pullSeq',
+  /** The next page of an unfinished snapshot bootstrap (C-23); absent once it is complete. */
+  bootstrapNext: 'bootstrapNext',
   /** Highest __xangarro_change_log.id already handed to the pusher. */
   pushHwm: 'pushHwm',
+  /** JSON `{at, count}`: 5xx answers in a row to the same first push batch (DB3-SYNC-01 b). */
+  pushStrikes: 'pushStrikes',
   /** Highest serverSeq the server durably stored for this device's pushes. */
   acknowledgedThrough: 'acknowledgedThrough',
   /** ISO time of the last successful pull (offline-staleness clock). */

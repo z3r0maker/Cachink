@@ -160,6 +160,9 @@ Links to discussion, docs, prior art.
 | [118](#adr-118) | 2026-09-27 | The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone | Accepted |
 | [119](#adr-119) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 | [120](#adr-120) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
+| [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
+| [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8596,3 +8599,366 @@ row whose write comes back already stored (`exists`/`stale`) without a receipt
 at the segment's start has its receipt looked up again after the write — an
 overlapping retry that waited on the original's lock — and counts as written
 for later references (DB3-SYNC-03).
+
+**Amendment (2026-09-27) — the device halves a batch refused as a whole; a
+row has a size limit.** DB3-SYNC-01 (b): a 400 (a stricter schema reaching an
+older app or caja tab), a 413, or a 5xx that repeats for the same first batch
+left the device's push high-water mark in place, so every later capture queued
+behind one row. (1) On a 400 or 413 — or on the third 5xx running for the same
+first batch (`pushStrikes` in app_config) — the device halves the batch: it
+sends the first half of the part known to fail; a half that passes is
+answered and the fault is in the rest, one that fails holds it. One poison row
+among n costs at most ⌈log2 n⌉ + 1 further requests, at most 22 a drain. (2) A
+row still refused alone is kept locally as rejected with the terminal
+**client** code `SERVER_REFUSED` (never sent by a server; the wire catalog is
+unchanged) and «No enviados» shows it with its manual retry. It is blamed only
+on evidence — a 413 alone, or the server accepting another part of the same
+batch; a lone row and its lone neighbour both refused with nothing accepted is
+the server refusing everything alike, and nothing is marked. (3) Network,
+timeout, 429, 503 and anything carrying `Retry-After` never split: they keep
+the engine's backoff (ADR-122 sheds load with 503). (4) The cursor advances
+only over change-log entries whose rows were answered or refused, so a
+halving cut short never skips an unsent row; accepted rows past the cursor
+are resent and answered from their receipts. (5) `@xangarro/contracts` gains
+an additive row-size limit, `maxPushRowBytes` — 16 KB, 1 MB for an
+`auditorias_inventario` row (a line per product) and 256 KB for an
+`entregas_credito` row (the sales it settles), measured as the UTF-8 bytes of
+the row's wire JSON. `precheck` refuses a bigger row as terminal
+`VALIDATION`, before any write; the device refuses it before sending and fits
+each push under 2 MB of row JSON. Rows already stored are untouched; an older
+app whose product carries a runaway `atributos` gets that one row refused
+instead of the whole push. (6) `writeSyncedRows` cuts a write at
+`floor(65,000 / columns)` rows a statement (DB3-L-07); one statement for any
+push the contract allows today.
+
+---
+
+## ADR-121
+
+**Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-BOOT-01 and the bootstrap half of DB2-QRY-05; amends ADR-081 decision 1 (and its consequence "page the bootstrap through `/sync/pull`"); contract task C-23
+
+**Context**
+
+ADR-081 made the bootstrap (`/activate` and `GET /sync/pull?since=0`) send
+every live `inventory_movements` row, because a phone's stock is their sum.
+The round-3 DB audit measured about 400–425 B a movement, so Vercel's 4.5 MB
+response limit is reached at about 11K movements: a heavy tenant (10K tickets
+a month) could no longer link a phone or a caja after about a month, and the
+one-year whale's bootstrap was 159 MB. Around it: activation parsed that body
+with zod while holding `businesses FOR UPDATE`; the caja dropped
+`bootstrap.serverSeq`, so its first pull was a second full bootstrap; the
+device's `forgetEchoes` built one `IN (…)` list per table, past SQLite's
+32,766 variables at about 33K rows; and pulled rows were applied one
+autocommitting statement at a time.
+
+**Decision**
+
+1. **A snapshot, not the history.** An opted-in device receives the tenant as
+   of one cursor `c` (the committed cursor, read before anything else): every
+   live reference row, the movements created in the last 90 days (ADR-053 §8's
+   local window) as rows, and one **stock baseline** row per product — the net
+   units of the older ones. Stock stays "the sum of the movements": baseline +
+   rows.
+2. **The baseline lives in the device's existing `__stock_baseline`.** A-11's
+   retention purge already folds purged movements into it and `sumStock`
+   already adds it, so no device migration and no reader changes. The
+   alternative — a synthetic `inventory_movements` row per product with an
+   `apertura`-like origen — would have worked on old devices unchanged, but it
+   collides with the real `origen = 'apertura'` (N-17's opening stock), would
+   show in every movement list, would need excluding from usage counts and
+   pushes forever, and double-counts on a re-link. The first page of a
+   snapshot **resets** the baseline to minus the old movements the device
+   already holds that the server counts (so a re-link over a kept database,
+   A-12, counts nothing twice; unpushed and refused rows stay the device's
+   own); every page then **adds** its baseline rows.
+3. **The baseline is defined by the cursor, not by the clock:** the live
+   movements created before the cutoff whose `sync_log` entry is at or below
+   `c`. A movement is inserted once and never edited (ADR-081, and the push
+   refuses HYBRID updates), so its one log entry is its insert: a movement
+   landing after `c` — a phone pushing a week-old sale late — is left out of
+   the baseline whenever the page is read, and reaches the device through the
+   ordinary pull from `c`. Pages therefore need no shared snapshot
+   transaction, and agree with each other and with the stream after them.
+   **This makes movement immutability load-bearing**: editing or deleting a
+   movement after it is logged would desynchronise every baseline that
+   counted it. Corrections stay new, compensating movements.
+4. **Paged and bounded.** Sections go in foreign-key order — `businesses`,
+   `users`, `employees`, `products`, `stock_baseline`, `clients`, …, recent
+   `inventory_movements` last — keyset by id within each; a page holds at most
+   5,000 rows and 1.9 MB of row JSON, so a whole response stays under 2 MB,
+   whatever the tenant. The continuation token is opaque to devices
+   (base64url of `{c, cutoff, section, after}`). One pager,
+   `fillSnapshotPage` in `@xangarro/contracts`, serves the portal and the mock.
+   Every page reports `serverSeq = c`; the last has `next: null` and the device
+   continues with `since = c` through the unchanged ordered stream
+   (`changes.ts`), whose no-gap guarantee is untouched. Paging *through* the
+   seq stream, as the audit sketched, was rejected: replaying the log from a
+   seq resends every reference-table edit since it, and a baseline "as of a
+   seq" would need a `sync_log` lookup per movement.
+5. **Compatible at protocol 1.** A device opts in with `bootstrap: 'snapshot'`
+   on `/activate` and `?snapshot=start|<next>` on the pull; responses gain an
+   optional `snapshot: {cutoff, first, next, stockBaseline}`. An older device
+   still gets the legacy all-history bootstrap while the tenant has at most
+   5,000 live movements (the old contract's per-table page) and
+   `426 PROTOCOL_UNSUPPORTED` — «Actualiza la app» — past it, refused before
+   the code is spent. A new device talking to an older server gets a response
+   without `snapshot`, which it applies as a complete legacy bootstrap.
+6. **Every pulled page is applied atomically on the device**: rows, baseline
+   and cursors (`pullSeq`, `bootstrapNext`, clocks) in one SQLite transaction,
+   so a failure half-way leaves nothing behind and the same page is fetched
+   again; an unfinished snapshot resumes from `bootstrapNext`, at most 200
+   pages a run. `forgetEchoes` deletes 500 ids per statement.
+7. **Activation holds the business lock only for the slot count and the
+   insert.** The claim, the slot check and the device row commit first; the
+   first page is read in its own tenant transaction; the token, the
+   entitlement signature and the response's zod parse come after. The signing
+   keys are checked before the claim, so a misconfigured server never spends
+   a code. If reading the first page fails after the commit, activation still
+   hands over the token with an empty first page whose `next` is `start`.
+8. **The caja keeps its cursor.** It stores the activation's `serverSeq` with
+   the first page (`applyBootstrap`) and pulls the remaining pages before the
+   NIP step, «Conectando…» held on the button. The phone applies the first
+   page and cursor with `applyBootstrap`; the rest arrives on the engine's
+   first sync, which activation already triggers.
+
+**Consequences**
+
+- Measured on real Postgres (`snapshot-bootstrap.integration.test.ts`), a
+  tenant with 30,000 live movements: the legacy body was 14.3 MB; the
+  snapshot is 4 pages, the largest 1.91 MB (7.2 MB in all, about 50 ms a
+  page to read). A one-year whale (375,000 movements): 178 MB legacy against
+  24 pages, the largest 1.91 MB (44 MB in all, about 45 ms a page).
+  Activation with the first page: 50–95 ms. Both hold baseline + rows =
+  every movement, including movements pushed while the snapshot was paged.
+- A whale's phone opens after the first page; for a few seconds its stock can
+  read low until the last movements page lands. The progress state for a
+  multi-page link is design request DS-10.
+- Pulled rows (other devices' movements) are still never purged by A-11 —
+  only this device's accepted rows are — so a device's movement table still
+  grows after the bootstrap. Left to the retention work (DB2-SYNC-03).
+- One transaction per page is safe because both device drivers are
+  synchronous (expo-sqlite's `openDatabaseSync`, sql.js in the caja's
+  Worker): between `BEGIN` and `COMMIT` there is no macrotask boundary, so no
+  sale can interleave its statements into a page that might roll back, and
+  the caja's `export()` (which closes the database) cannot run mid-page. An
+  asynchronous driver would need a device-wide write queue first.
+- Not done here: DB3-L-01 (a device re-downloading its own movements). It is
+  independent of the bootstrap.
+
+---
+
+## ADR-122
+
+**Title:** Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-EXP-01, DB3-EST-01, DB3-SYNC-05 (the pool half) and the Estados half of DB3-QRY-04; addresses DB3-QRY-03's summary
+
+**Context**
+
+Round 3 of the DB audit measured three ways one heavy read takes a serverless
+instance — and, with two pooled connections per instance, every device request
+on it — down with it. The portal's «Exportar» built the whole ExcelJS workbook
+in memory (829 MB for 100K rows, 2.7 GB for a one-year whale, 5.4 GB for 1.1 M
+rows, past Excel's own 1,048,576-row sheet limit), with no duration ceiling and
+no rate limit, and every 5,000-row batch hash-joined all of the tenant's
+tickets. Estados «Personalizado» accepted any range and shipped every sale line
+and egreso of it to Node (`?desde=2000-01-01&hasta=2099-12-31`: 375K rows and
++530 MB on the whale). And postgres.js has no acquire timeout: a request that
+finds the pool busy waits until the function dies, so a slow holder stalls a
+push past the phone's 30 s timeout, and a database outage becomes thousands of
+in-flight functions.
+
+**Decision**
+
+1. **Exports stream.** `ExcelJS.stream.xlsx.WorkbookWriter` writes into a
+   `PassThrough` handed to the `Response` as a web stream; rows are committed
+   as each keyset batch arrives, and the next batch is read only when the zip's
+   input and the response have drained (ExcelJS pipes its sheet buffer into
+   archiver ignoring backpressure; without the pacing 1.1 M rows held 250 MB of
+   buffers). The first batch is read before the response starts, so a failure
+   there is still an HTTP error; a later failure aborts the body, and the
+   browser saves nothing. Measured on synthetic rows: 100K rows +742 MB → +68
+   MB RSS; 1.1 M rows +105 MB RSS, 32 MB of buffers.
+2. **Past Excel's limit the file gets another sheet** («Ventas», «Ventas (2)»,
+   …, 1,048,575 data rows each, each with its header), rather than CSV: a CSV
+   opens in Excel with the same truncation, and the contador opens it in Excel.
+3. **Each export batch is its own short transaction on a pool of its own** (one
+   connection per instance), so an export streaming to a slow connection never
+   holds an idle transaction (the role's 10 s idle-in-transaction timeout) nor a
+   connection a device is waiting for. The keyset cursor, not a snapshot, keeps
+   the walk exact. Each ventas batch reads its tickets by id over the batch's
+   own days, then by id alone for any it missed — the bound narrows the read,
+   never the file.
+4. **Exports are rate-limited per business** — 5 per 10 minutes through
+   `xangarro.throttle_take`, 429 with `Retry-After` — and the route declares
+   `maxDuration = 300`. `EXPORTS_PER_TENANT` overrides the count (E2E).
+5. **The export button fetches the file itself** (DS-02): «Preparando tu
+   archivo…» with a spinner, disabled until the file is in hand; a failure or a
+   429 is a toast; a 401 reloads the page so its gate sends the person to sign
+   in.
+6. **Estados computes at most 13 months** (`TOPE_MESES_ESTADOS` in the domain,
+   `cabeEnMeses`). The page refuses a longer Personalizado before reading
+   anything and shows why (DS-09: inline «Elige un periodo de hasta 13 meses.»,
+   «Aplicar» disabled, a link to export instead); `leerPeriodo` refuses it too,
+   whatever the caller.
+7. **Estados reads sums.** Ventas arrive summed per ticket and egresos per
+   category, in SQL, and tickets with only the columns the domain reads — all in
+   the one transaction that reads the rest of the period (the tickets used to be
+   a second one, with `between` instead of `fechaEnDias` and deleted tickets
+   kept). They are handed to the unchanged domain functions in its own shapes;
+   `estados-periodo.integration.test.ts` holds the statements identical to the
+   raw-row path. `periodLedger` stays for the monthly informe.
+8. **`parseIsoDate` round-trips.** A day that does not exist (`2026-02-30`) is
+   refused instead of rolling into March; `esIsoDate` is the predicate the
+   portal's URL parsers use.
+9. **Device requests carry database deadlines.** `deviceRoute` runs
+   authentication and handler under `withDbDeadlines`; every `withTenant` under
+   it picks the policy up through `AsyncLocalStorage` and runs
+   `transactionWithDeadline`: at most 3 s to get a connection, and
+   `DEVICE_DB_DEADLINE_MS` (default 10 s) for the transaction. The clock starts
+   per transaction, not per request, so a push body arriving slowly over a
+   phone's connection never uses up the database's time. Past either the route
+   answers **503 with `Retry-After: 15`** (code `INTERNAL`, the catalog's
+   retryable server code — the contract gains no code), and the transaction
+   **rolls back instead of committing** behind the answer, so a 503 always means
+   nothing was written. Portal pages keep waiting as before: they have no client
+   timing out underneath them.
+
+**Alternatives considered**
+
+- *CSV for big exports.* Streams trivially, but Excel truncates it at the same
+  row, and it loses column widths and number cells.
+- *One transaction for the whole export, `REPEATABLE READ`.* A consistent
+  snapshot, at the price of an idle transaction and a held connection for as
+  long as the slowest client downloads.
+- *Clamp an over-long Estados range to 13 months.* Shows numbers for a period
+  nobody asked for, under the label of the one they did.
+- *A pool-level acquire timeout* (a different driver, or a semaphore around
+  `db()`). The deadline also has to stop the late transaction from committing,
+  which only the transaction itself can do.
+
+**Consequences**
+
+- A dropped download stops reading at the next batch; nothing is left running.
+- Ventas lines whose ticket is missing are still left out of the export and of
+  the Movimientos summary, as the joins always did; Estados counts them in
+  ingresos, as it always did (DB3-QRY-04's orphan note stays open).
+- Device-auth reads outside `withTenant` (the throttle) are bounded by the
+  request deadline but still check a connection out of the shared pool; folding
+  them into the push transaction is the device work's.
+- Movimientos pages still use OFFSET; keyset paging needs cursor URLs and a
+  pager without page numbers, a design change left to DB3-QRY-03's follow-up.
+
+---
+
+## ADR-123
+
+**Title:** The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-CAJA-01, DB3-CAJA-02 and DB3-CAJA-03, and the ordering half of DB3-CAJA-04; amends ADR-071 (its consequence «the turno-close block on unsent records (rule 7) is what keeps cash honest») with the owner's decision of 2026-09-26 on DS-06 (option (a))
+
+**Context**
+
+Round 3 of the DB audit found three ways the browser caja (ADR-071) loses or
+misreports data:
+
+- **Two tabs erase each other's sales.** Every tab starts its own Worker with
+  its own in-memory sql.js copy of the one OPFS file and writes the whole
+  database back after each operation. The last write wins, so a tab that
+  saved after another erased that tab's unpushed captures, outbox included.
+- **The queue was counted three ways.** The cierre gate and the header pill
+  counted `__sync_row_status = 'pending'`, so three sales captured offline (no
+  status row yet) counted as 0 and a failed push counted as 6, and the phone
+  counted `pending + retrying`. The rule itself — «a turno cannot close while
+  records are unsent» (the handoff's rule 7, recorded in ADR-071) — meant an
+  offline caja could not close its turno at all, against ADR-053 §5
+  («offline never blocks capture»). The live-data work (`colaPendiente`)
+  already fixed the caja's count; the rule and the phone remained.
+- **An idle caja never pulled.** It pulled after a capture, on `online` or on
+  a manual retry. NIPs are checked on the device, so an operator the owner
+  deactivated kept a working NIP on a caja nobody sold on, and a price change
+  arrived with the next sale — the one that should have used it.
+
+**Decision**
+
+1. **One tab owns the register (Web Locks).** Before anything opens the
+   database, the tab's Worker requests the lock `xangarro-register` with
+   `ifAvailable` and, when granted, holds it for its lifetime (the callback
+   returns a promise that never settles; the browser frees the lock when the
+   tab, and so the Worker, goes away). The Worker's `boot` refuses to open the
+   database without it (`CAJA_EN_OTRA_PESTANA`), whoever calls it. A second
+   tab renders DS-08's notice instead of the register — «La caja ya está
+   abierta en otra pestaña.» / «Para no perder ventas, usa una sola pestaña.»
+   — and «Usar esta pestaña» queues a plain lock request, so it takes over the
+   moment the first tab closes and reads the file as that tab left it. The
+   lock lives in the Worker, not the page, because the Worker is what owns the
+   database. Browsers without `navigator.locks` (none the caja supports) keep
+   the old behaviour, with a `BroadcastChannel` probe that shows the same
+   notice when another tab answers.
+2. **One definition of «por enviar», in `@xangarro/sync`.** `unsentRows()`
+   is everything the server has not accepted: rows attempted and not accepted
+   (`pending`, and `rejected` + retryable — these are «retrying») plus the
+   change log past the push cursor, coalesced and limited to pushable tables
+   exactly as `drainPush` reads it, each row once. Terminal rejections are not
+   in it; they need a person and each surface shows them apart (the caja's
+   Avisos and the owner's Sincronización; the phone's pill and No enviados).
+   `StatusStore.unsentCount()` and `SyncEngine.counts().unsent` expose it; the
+   phone's pill counts `unsent`; the caja's pill, Registros por enviar and
+   cierre all read `colaPendiente()`, which groups `unsentRows()` per record
+   and marks a record retrying when any of its rows is.
+3. **Cierre stays enabled with records still to send (DS-06 option (a)).**
+   The expected cash is computed from this caja's own rows, all of which are
+   on the device, so the unsent ones cannot change it. The cierre shows a
+   warning band — «Tienes N registros por enviar (M se reintentarán solos).
+   Puedes cerrar; se enviarán cuando vuelva la conexión.» — with «Reintentar
+   envío» and «Ver cuáles»; the close button waits only for a reason when
+   there is a difference. The closed screen says the owner will see the close
+   once the records go up. The «Puede cambiar» chip and the «the difference is
+   recalculated when they are sent» line of the blocked design go with the
+   block. This supersedes rule 7 as ADR-071 recorded it.
+4. **An idle caja pulls.** Besides the capture triggers, the caja runs a full
+   sync on boot, when the tab becomes visible (unless it pulled in the last
+   45 s) and every 5 min ±20 % while visible. The scheduler lives at the gate,
+   so it runs at the door as well as inside, and goes through the shell's
+   flusher when it is mounted (the pill follows); every one of these runs is
+   automatic, so the engine's backoff still holds. At the door the gate also
+   syncs on `online`, so a turno closed offline goes up without a new turno.
+5. **The Worker's OPFS writes queue.** Each persist waits for the previous one
+   and exports when its turn comes, so two overlapping writes can never land
+   out of order and the file ends at the latest state. Every caller still
+   awaits its own write: no debounce, durability unchanged. A second `boot`
+   joins the first instead of opening a second copy.
+
+**Alternatives considered**
+
+- *Option (b) of DS-06: block cierre until every record is sent, counting all
+  of them.* Honest about the queue but makes an offline caja unable to close,
+  which ADR-053 §5 forbids; the owner chose (a).
+- *The lock on the page instead of the Worker.* Simpler to show, but anything
+  that reached the Worker without the gate could still open a second copy.
+- *A SharedWorker owning one database for every tab.* The real fix for
+  multi-tab, but Safari's support and OPFS's sync access handles make it an
+  ADR-071 storage decision (with the OPFS VFS of DB3-CAJA-04), not a launch fix.
+- *Keep the phone on `pending + retrying`.* Leaves offline captures invisible
+  on the phone's pill, the same bug the caja had.
+
+**Consequences**
+
+- Two tabs of the caja can no longer run at once; a cashier who opens a second
+  one sees why and can hand the register over by closing the first.
+- A closed turno can reach the portal later than it was closed, as any
+  offline capture does.
+- The phone's pill now counts rows never tried; its number is rows, the caja's
+  is records (a sale with its lines is one).
+- The idle caja costs one pull per 5 min per visible tab; the caja's capture
+  mode still limits pulls after sales to one per 45 s.
+- DB3-CAJA-04's other halves stay open: the full `export()` per write and the
+  move to an OPFS VFS.

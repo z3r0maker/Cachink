@@ -18,7 +18,7 @@ decisions** first: they change the copy of DS-01 and DS-06.
    Rows in automatic retry, and sales captured offline and never attempted, do not block it. Should
    cierre (a) stay open and say the rows will be sent later, which keeps the register offline-first,
    or (b) block until everything is sent, which means an offline register cannot close?
-   **Recommendation: (a).**
+   **Recommendation: (a).** **Answered 2026-09-26: (a)** — recorded in ADR-123.
 2. **Search scope in Ventas y gastos (DS-01).** The placeholder promises «concepto, folio u
    operador», but search has only ever matched the concepto. Should folio and operador become
    searchable (a small server change), or should the copy shrink to «Buscar por concepto»?
@@ -114,7 +114,11 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-06 Cierre — rows still to send
 
-- [ ] Status · Blocked by: owner decision 1 · Send the matching block; pull; align `operador/cierre/*`.
+- [ ] Status · Owner decision 1 answered: (a) (ADR-123). Minimal version shipped (DB3-CAJA-02): the
+      amber band with the copy below, «Reintentar envío» and «Ver cuáles» kept, the close enabled;
+      the blocked design's «Puede cambiar» chip, its «Espera a que se envíen…» hint and the
+      «la diferencia se vuelve a calcular» line are gone. The closed screen says «Pedro lo verá en su
+      portal cuando se envíen los registros.» Still to do: send option (a)'s block; pull; align.
 
 > **Cierre — option (a), recommended.** Banner (warning tone): «Tienes N registros por enviar (M se
 > reintentarán solos). Puedes cerrar; se enviarán cuando vuelva la conexión.» Cierre stays enabled.
@@ -137,7 +141,10 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ### DS-08 Caja — already open in another tab
 
-- [ ] Status · Send to the operador project; pull; wire the Web Lock (audit DB3-CAJA-01).
+- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-123): Acceso's frame
+      (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
+      («Esperando a que se cierre la otra pestaña…»). No «Cerrar esta pestaña» link: a script can
+      only close a tab it opened. Still to do: send the block below; pull; align.
 
 **Why.** Two tabs of the caja each keep their own copy of the local database, and the last one to
 save erases the other's unsent sales. The fix lets one tab hold the register; the second tab needs
@@ -158,3 +165,24 @@ memory. The range is capped at 13 months.
 > **Estados — Personalizado.** The date picker allows at most 13 months. Past that, the second date
 > shows the inline error «Elige un periodo de hasta 13 meses.» and «Aplicar» stays disabled. For
 > longer periods, a help link: «¿Necesitas más? Exporta tus movimientos.»
+
+### DS-10 Linking a big business — the first download comes in pages
+
+- [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
+      caja» and the phone's activation (audit DB3-BOOT-01, ADR-121).
+
+**Why.** Linking used to download the business's whole movement history in one response, which
+stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at
+most 5,000 rows: one page for almost every business, a handful for a busy one, and about two
+dozen for a year-old whale (tens of seconds on a slow connection). Today the caja keeps «Conectando…» on the button until every page is in; the
+phone opens as soon as the first page lands and the rest arrives on the first sync, so for a few
+seconds its stock can read low on a very big business.
+
+> **Caja — Conectar esta caja, while it downloads.** After the code is accepted and before the NIP
+> step: the button stays busy and a line under it reads «Descargando los datos de tu negocio…»
+> with a progress bar that advances per page («3 de 7»). If the connection drops mid-way: «Se
+> interrumpió la descarga. Lo que ya bajó se queda; toca Reintentar.» with «Reintentar».
+>
+> **Phone — Activación, while it downloads.** Same line and bar on the activation screen after
+> «Vincular». If the phone opens before the last page (poor connection), a slim banner under the
+> top bar on Inventario: «Terminando de descargar el inventario…» until the snapshot completes.

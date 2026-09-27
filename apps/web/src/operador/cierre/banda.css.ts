@@ -4,7 +4,7 @@ import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/t
 import { pressable } from '../../styles/press.css';
 import { PHONE } from '../shell/shell.css';
 
-/** The amber band that blocks the close while records wait (OpCierreBloqueado). */
+/** The amber band while records wait: a warning, the close stays open (DS-06 (a), ADR-123). */
 export const banda = style({
   display: 'flex',
   alignItems: 'center',

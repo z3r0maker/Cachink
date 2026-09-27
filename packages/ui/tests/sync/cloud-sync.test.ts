@@ -50,11 +50,12 @@ describe('SyncScheduler', () => {
   });
 
   it('does not stack intervals when foregrounded repeatedly', () => {
-    const { runSync, s } = make();
+    const { runPush, runSync, s } = make();
     s.onForeground();
-    s.onForeground();
+    s.onForeground(); // within 45 s of the first: push only (DB3-L-02)
+    expect(runPush).toHaveBeenCalledTimes(1);
     vi.advanceTimersByTime(PULL_INTERVAL_MS);
-    expect(runSync).toHaveBeenCalledTimes(3);
+    expect(runSync).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -108,10 +109,11 @@ describe('pillView', () => {
     ...INITIAL_CLOUD_SYNC_STATE,
     ...over,
   });
-  const counts = (pending: number, rejected: number, retrying: number) => ({
+  const counts = (pending: number, rejected: number, retrying: number, unsent = 0) => ({
     pending,
     rejected,
     retrying,
+    unsent,
   });
 
   it('shows rejected rows above everything except an active sync', () => {
@@ -121,15 +123,23 @@ describe('pillView', () => {
     );
   });
 
-  it('counts pending plus retrying as waiting, and shows offline when the last attempt had no network', () => {
-    expect(pillView(at({ counts: counts(2, 0, 1) }))).toEqual({
+  it('counts everything unsent as waiting, and shows offline when the last attempt had no network', () => {
+    expect(pillView(at({ counts: counts(2, 0, 1, 3) }))).toEqual({
       labelKey: 'syncPill.pending',
       count: 3,
       tone: 'warn',
     });
-    expect(pillView(at({ phase: 'offline', counts: counts(1, 0, 0) })).labelKey).toBe(
+    expect(pillView(at({ phase: 'offline', counts: counts(1, 0, 0, 1) })).labelKey).toBe(
       'syncPill.offline',
     );
+  });
+
+  it('counts sales captured offline and never tried, which have no pending row (DB3-CAJA-02)', () => {
+    expect(pillView(at({ phase: 'offline', counts: counts(0, 0, 0, 6) }))).toEqual({
+      labelKey: 'syncPill.offline',
+      count: 6,
+      tone: 'warn',
+    });
   });
 
   it('shows the last sync time when everything is up to date, and "never" before the first sync', () => {

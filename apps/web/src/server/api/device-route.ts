@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { deviceDeadlines, withDbDeadlines } from '../db-deadline';
 import { authenticateDevice, type DeviceCaller } from '../device/authenticate';
 import { countApiLatency } from '../observability/latency';
 import { logApi, reportError, type ApiLine } from '../observability/report';
@@ -13,6 +14,11 @@ import { fail, protocolRefusal } from './respond';
  *
  * A handler returns its response plus any counts worth logging; an unexpected
  * throw is reported with the caller's tags and answered as INTERNAL.
+ *
+ * Authentication and handler run with database deadlines (`db-deadline.ts`,
+ * DB3-SYNC-05): a request the pool cannot serve in time is answered 503 with
+ * `Retry-After` — well before the phone's own 30 s timeout — instead of
+ * queueing until the function dies.
  */
 export interface Handled {
   readonly response: Response;
@@ -32,8 +38,10 @@ export async function deviceRoute(
     const refusal = protocolRefusal(request);
     if (refusal !== null) handled = { response: refusal };
     else {
-      caller = await authenticateDevice(request);
-      handled = await handle(caller);
+      handled = await withDbDeadlines(deviceDeadlines(), async () => {
+        caller = await authenticateDevice(request);
+        return handle(caller);
+      });
     }
   } catch (error) {
     const refused = deviceFailure(error);
