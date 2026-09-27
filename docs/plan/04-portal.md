@@ -1174,6 +1174,16 @@ never invented text.
 > not need a bespoke limiter: N-07 already counts metered resources per business
 > (`usage_counters`, the metering role, the over-limit notices), so an import is a counted resource
 > like any other.
+>
+> **Settled 2026-09-26 (owner).** A **one-time onboarding import per business**, with up to **5
+> extraction attempts** to get a usable photo — it is an accelerator for «start with your catalogue
+> already in», not a recurring tool; a shopkeeper adding one product later uses the normal form.
+> **8 MB per image, 5 images per import**, and the images are **downscaled server-side to the
+> model's working resolution before the call**. The generous byte cap costs nothing because the
+> bytes that reach the model are the resized ones, and P-07's 2 MB spreadsheet limit would have
+> rejected a normal phone photo — meeting an error before the feature ever works is the worst first
+> experience this can give. Still to decide: where the per-business count lives (`usage_counters`
+> needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
 - [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
