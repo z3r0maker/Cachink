@@ -15,6 +15,26 @@ import { pruneStaffSessions } from '../src/server/db/staff-sessions-prune';
 const URL = process.env.DATABASE_URL;
 const suite = URL === undefined || URL === '' ? describe.skip : describe;
 
+/**
+ * `db:reset` applies only data-pg's migrations; the console's own set goes on
+ * top (`e2e-db-setup.sh`). A shared local Postgres that missed them failed
+ * here as a NOT NULL violation on `staff_members.user_id` — name the fix
+ * instead.
+ */
+async function assertAdminMigrations(owner: ReturnType<typeof postgres>): Promise<void> {
+  const [row] = await owner<{ sessions: boolean; nullable: boolean }[]>`SELECT
+      to_regclass('public.staff_sessions') IS NOT NULL AS sessions,
+      EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_schema = 'public' AND table_name = 'staff_members'
+                 AND column_name = 'user_id' AND is_nullable = 'YES') AS nullable`;
+  assert.ok(
+    row?.sessions === true && row.nullable,
+    'DATABASE_URL points at a Postgres without the console migrations (0008+): run ' +
+      '`pnpm --filter @xangarro/backoffice test:e2e:db`, or psql ' +
+      'apps/backoffice/src/server/db/migrations/*.sql in order',
+  );
+}
+
 suite('pruneStaffSessions', () => {
   it('deletes only sessions past the horizon', async () => {
     const db = createDb(URL as string);
@@ -27,6 +47,7 @@ suite('pruneStaffSessions', () => {
         max: 1,
         onnotice: () => undefined,
       });
+      await assertAdminMigrations(owner);
       await owner`INSERT INTO staff_members (id, email, nombre, created_at)
         VALUES ('01PRUNESTAFF00000000000001', 'prune-fixture@xangarro.mx', 'Fixture', now())
         ON CONFLICT DO NOTHING`;
