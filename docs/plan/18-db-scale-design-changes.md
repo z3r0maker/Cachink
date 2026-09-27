@@ -158,3 +158,24 @@ memory. The range is capped at 13 months.
 > **Estados — Personalizado.** The date picker allows at most 13 months. Past that, the second date
 > shows the inline error «Elige un periodo de hasta 13 meses.» and «Aplicar» stays disabled. For
 > longer periods, a help link: «¿Necesitas más? Exporta tus movimientos.»
+
+### DS-10 Linking a big business — the first download comes in pages
+
+- [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
+      caja» and the phone's activation (audit DB3-BOOT-01, ADR-119).
+
+**Why.** Linking used to download the business's whole movement history in one response, which
+stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at
+most 5,000 rows: one page for almost every business, a few for the biggest (about ten seconds on
+a good connection). Today the caja keeps «Conectando…» on the button until every page is in; the
+phone opens as soon as the first page lands and the rest arrives on the first sync, so for a few
+seconds its stock can read low on a very big business.
+
+> **Caja — Conectar esta caja, while it downloads.** After the code is accepted and before the NIP
+> step: the button stays busy and a line under it reads «Descargando los datos de tu negocio…»
+> with a progress bar that advances per page («3 de 7»). If the connection drops mid-way: «Se
+> interrumpió la descarga. Lo que ya bajó se queda; toca Reintentar.» with «Reintentar».
+>
+> **Phone — Activación, while it downloads.** Same line and bar on the activation screen after
+> «Vincular». If the phone opens before the last page (poor connection), a slim banner under the
+> top bar on Inventario: «Terminando de descargar el inventario…» until the snapshot completes.

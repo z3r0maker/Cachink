@@ -157,6 +157,7 @@ Links to discussion, docs, prior art.
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 | [117](#adr-117) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [119](#adr-119) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -5634,7 +5635,7 @@ through SECURITY DEFINER functions with a pinned `search_path` (as 0002).
 
 **Date:** 2026-09-18
 
-**Status:** Accepted — decided by the owner; amends contract §8, ADR-058 §2 (Movimientos no longer read-only) and P-07
+**Status:** Accepted — decided by the owner; amends contract §8, ADR-058 §2 (Movimientos no longer read-only) and P-07; decision 1's bootstrap amended by ADR-119 (a paged snapshot: stock baseline + 90 days of movements)
 
 **Context**
 
@@ -8340,3 +8341,115 @@ row whose write comes back already stored (`exists`/`stale`) without a receipt
 at the segment's start has its receipt looked up again after the write — an
 overlapping retry that waited on the original's lock — and counts as written
 for later references (DB3-SYNC-03).
+
+---
+
+## ADR-119
+
+**Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-BOOT-01 and the bootstrap half of DB2-QRY-05; amends ADR-081 decision 1 (and its consequence "page the bootstrap through `/sync/pull`"); contract task C-23
+
+**Context**
+
+ADR-081 made the bootstrap (`/activate` and `GET /sync/pull?since=0`) send
+every live `inventory_movements` row, because a phone's stock is their sum.
+The round-3 DB audit measured about 400–425 B a movement, so Vercel's 4.5 MB
+response limit is reached at about 11K movements: a heavy tenant (10K tickets
+a month) could no longer link a phone or a caja after about a month, and the
+one-year whale's bootstrap was 159 MB. Around it: activation parsed that body
+with zod while holding `businesses FOR UPDATE`; the caja dropped
+`bootstrap.serverSeq`, so its first pull was a second full bootstrap; the
+device's `forgetEchoes` built one `IN (…)` list per table, past SQLite's
+32,766 variables at about 33K rows; and pulled rows were applied one
+autocommitting statement at a time.
+
+**Decision**
+
+1. **A snapshot, not the history.** An opted-in device receives the tenant as
+   of one cursor `c` (the committed cursor, read before anything else): every
+   live reference row, the movements created in the last 90 days (ADR-053 §8's
+   local window) as rows, and one **stock baseline** row per product — the net
+   units of the older ones. Stock stays "the sum of the movements": baseline +
+   rows.
+2. **The baseline lives in the device's existing `__stock_baseline`.** A-11's
+   retention purge already folds purged movements into it and `sumStock`
+   already adds it, so no device migration and no reader changes. The
+   alternative — a synthetic `inventory_movements` row per product with an
+   `apertura`-like origen — would have worked on old devices unchanged, but it
+   collides with the real `origen = 'apertura'` (N-17's opening stock), would
+   show in every movement list, would need excluding from usage counts and
+   pushes forever, and double-counts on a re-link. The first page of a
+   snapshot **resets** the baseline to minus the old movements the device
+   already holds that the server counts (so a re-link over a kept database,
+   A-12, counts nothing twice; unpushed and refused rows stay the device's
+   own); every page then **adds** its baseline rows.
+3. **The baseline is defined by the cursor, not by the clock:** the live
+   movements created before the cutoff whose `sync_log` entry is at or below
+   `c`. A movement is inserted once and never edited (ADR-081, and the push
+   refuses HYBRID updates), so its one log entry is its insert: a movement
+   landing after `c` — a phone pushing a week-old sale late — is left out of
+   the baseline whenever the page is read, and reaches the device through the
+   ordinary pull from `c`. Pages therefore need no shared snapshot
+   transaction, and agree with each other and with the stream after them.
+   **This makes movement immutability load-bearing**: editing or deleting a
+   movement after it is logged would desynchronise every baseline that
+   counted it. Corrections stay new, compensating movements.
+4. **Paged and bounded.** Sections go in foreign-key order — `businesses`,
+   `users`, `employees`, `products`, `stock_baseline`, `clients`, …, recent
+   `inventory_movements` last — keyset by id within each; a page holds at most
+   5,000 rows and 1.9 MB of row JSON, so a whole response stays under 2 MB,
+   whatever the tenant. The continuation token is opaque to devices
+   (base64url of `{c, cutoff, section, after}`). One pager,
+   `fillSnapshotPage` in `@xangarro/contracts`, serves the portal and the mock.
+   Every page reports `serverSeq = c`; the last has `next: null` and the device
+   continues with `since = c` through the unchanged ordered stream
+   (`changes.ts`), whose no-gap guarantee is untouched. Paging *through* the
+   seq stream, as the audit sketched, was rejected: replaying the log from a
+   seq resends every reference-table edit since it, and a baseline "as of a
+   seq" would need a `sync_log` lookup per movement.
+5. **Compatible at protocol 1.** A device opts in with `bootstrap: 'snapshot'`
+   on `/activate` and `?snapshot=start|<next>` on the pull; responses gain an
+   optional `snapshot: {cutoff, first, next, stockBaseline}`. An older device
+   still gets the legacy all-history bootstrap while the tenant has at most
+   5,000 live movements (the old contract's per-table page) and
+   `426 PROTOCOL_UNSUPPORTED` — «Actualiza la app» — past it, refused before
+   the code is spent. A new device talking to an older server gets a response
+   without `snapshot`, which it applies as a complete legacy bootstrap.
+6. **Every pulled page is applied atomically on the device**: rows, baseline
+   and cursors (`pullSeq`, `bootstrapNext`, clocks) in one SQLite transaction,
+   so a failure half-way leaves nothing behind and the same page is fetched
+   again; an unfinished snapshot resumes from `bootstrapNext`, at most 200
+   pages a run. `forgetEchoes` deletes 500 ids per statement.
+7. **Activation holds the business lock only for the slot count and the
+   insert.** The claim, the slot check and the device row commit first; the
+   first page is read in its own tenant transaction; the token, the
+   entitlement signature and the response's zod parse come after. The signing
+   keys are checked before the claim, so a misconfigured server never spends
+   a code. If reading the first page fails after the commit, activation still
+   hands over the token with an empty first page whose `next` is `start`.
+8. **The caja keeps its cursor.** It stores the activation's `serverSeq` with
+   the first page (`applyBootstrap`) and pulls the remaining pages before the
+   NIP step, «Conectando…» held on the button. The phone applies the first
+   page and cursor with `applyBootstrap`; the rest arrives on the engine's
+   first sync, which activation already triggers.
+
+**Consequences**
+
+- Measured on real Postgres (`snapshot-bootstrap.integration.test.ts`), a
+  tenant with 30,000 live movements: the legacy body was 14.3 MB; the
+  snapshot is 4 pages, the largest 1.91 MB (7.2 MB in all, about 50 ms a
+  page to read). A one-year whale (375,000 movements): 178 MB legacy against
+  24 pages, the largest 1.91 MB (44 MB in all, about 45 ms a page).
+  Activation with the first page: 50–95 ms. Both hold baseline + rows =
+  every movement, including movements pushed while the snapshot was paged.
+- A whale's phone opens after the first page; for a few seconds its stock can
+  read low until the last movements page lands. The progress state for a
+  multi-page link is design request DS-10.
+- Pulled rows (other devices' movements) are still never purged by A-11 —
+  only this device's accepted rows are — so a device's movement table still
+  grows after the bootstrap. Left to the retention work (DB2-SYNC-03).
+- Not done here: DB3-L-01 (a device re-downloading its own movements). It is
+  independent of the bootstrap.
