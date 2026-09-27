@@ -14,6 +14,7 @@ import {
   barFill,
   barTrack,
   capName,
+  capAccion,
   capReq,
   capRow,
   feedBody,
@@ -100,6 +101,7 @@ export function Capacidades({ capacidades }: { readonly capacidades: readonly Ca
           <span style={{ minWidth: 0 }}>
             <span className={capName}>{c.name}</span>
             <span className={capReq}>{c.requirement}</span>
+            {c.lockedCopy !== '' && <span className={capAccion}>{c.lockedCopy}</span>}
           </span>
           <span className={barTrack} aria-hidden="true">
             <span
