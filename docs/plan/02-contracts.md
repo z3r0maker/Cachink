@@ -125,7 +125,7 @@ Response `200`:
   "acknowledgedThrough": 5001 }
 ```
 
-Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
+Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant. `dueno_nombre` (optional, additive) is the owner's display name, sent on the bootstrap and every pull (`xangarro.owner_nombre()`, data-pg 0044); `null` when the owner set none, absent from older servers (the device keeps what it has, in `app_config`).
 
 ## §6 Entitlement payload
 

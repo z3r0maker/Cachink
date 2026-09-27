@@ -1,15 +1,17 @@
 /**
  * Avisos, live (O-16, ADR-075): the Worker's messages and the caja's real
  * state said the way the design's cards say them. Pure, so the tests pin
- * every wording. A linked caja doesn't know the owner's name: «el dueño».
+ * every wording. The owner is named as the last pull sent it, «el dueño» until
+ * then (`ui/dueno`).
  */
 
 import type { AvisosPara, MensajePara, StockBajoPara } from '../runtime/cola-shapes';
 import { hhmmLocal } from '../runtime/fechas';
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { DUENO_GENERICO, nombreDueno } from '../ui/dueno';
 import type { Aviso, AvisosData } from './types';
 
-export const DUENO_GENERICO = 'el dueño';
+export { DUENO_GENERICO };
 
 const PERSONA = 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8';
 const NUBE = 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5';
@@ -143,7 +145,7 @@ export function avisosVivos(a: AvisosPara, hoy: string): AvisosData {
   const leidos = new Set(a.leidos);
   const marcar = (x: Aviso): Aviso => (leidos.has(x.id) ? { ...x, leido: true } : x);
   return {
-    dueno: DUENO_GENERICO,
+    dueno: nombreDueno(a.dueno),
     avisos: [
       ...a.mensajes.map((m) => mensaje(m, leidos, hoy)),
       ...[...cola(a.cola, hoy), ...rechazados(a.rechazados), ...a.stockBajo.map(stock)].map(marcar),
@@ -153,13 +155,4 @@ export function avisosVivos(a: AvisosPara, hoy: string): AvisosData {
 
 export const sinLeer = (avisos: readonly Aviso[]): number => avisos.filter((x) => !x.leido).length;
 
-/** «de Pedro» / «del dueño». */
-export const deDueno = (dueno: string): string =>
-  dueno.startsWith('el ') ? `del ${dueno.slice(3)}` : `de ${dueno}`;
-
-/** «a Pedro» / «al dueño». */
-export const aDueno = (dueno: string): string =>
-  dueno.startsWith('el ') ? `al ${dueno.slice(3)}` : `a ${dueno}`;
-
-/** The sentence-initial form: «El dueño ya tiene tu respuesta». */
-export const mayuscula = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+export { aDueno, deDueno, mayuscula } from '../ui/dueno';

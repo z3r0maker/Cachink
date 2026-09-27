@@ -10,7 +10,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { registerRuntime } from '../runtime/client';
-import { useCredenciales } from '../runtime/use-credenciales';
+import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
+import { primerNombreDueno } from '../ui/dueno';
 import { desencolar, useCola } from '../shell/cola';
 import type { EstadoMode } from '../estado';
 import { PendientesScreen } from './screen';
@@ -27,6 +28,20 @@ async function leerCola(): Promise<Vivo> {
   return { state: 'happy', cola: cola.map(comoRegistro) };
 }
 
+/** The owner's first name as the last pull sent it; null: «el portal del dueño». */
+function useDueno(cred: Credenciales): string | null {
+  const [dueno, setDueno] = useState<string | null>(null);
+  useEffect(() => {
+    const { device } = cred;
+    if (device === null || cred.sesion === null) return;
+    void registerRuntime()
+      .negocio(device.businessId, device.deviceId)
+      .then((n) => setDueno(primerNombreDueno(n?.dueno)))
+      .catch(() => undefined);
+  }, [cred]);
+  return dueno;
+}
+
 export function PendientesViva({
   fixture,
   forzado = 'happy',
@@ -37,6 +52,7 @@ export function PendientesViva({
   const cred = useCredenciales();
   const linked = cred.device !== null && cred.sesion !== null;
   const shell = useCola();
+  const dueno = useDueno(cred);
   // Under the gate a linked caja renders on the client only: start at
   // «loading», never at the fixture.
   const [vivo, setVivo] = useState<Vivo>(() =>
@@ -69,5 +85,5 @@ export function PendientesViva({
   );
 
   if (!linked) return <PendientesScreen state={forzado} cola={fixture} />;
-  return <PendientesScreen state={vivo.state} cola={vivo.cola} dueno={null} vivo={envio} />;
+  return <PendientesScreen state={vivo.state} cola={vivo.cola} dueno={dueno} vivo={envio} />;
 }

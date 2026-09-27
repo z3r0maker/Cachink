@@ -3,6 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 
 import { Icon } from '../../shell/icon';
+import { aDueno, mayuscula } from '../ui/dueno';
 import * as u from './corte.css';
 import * as e from './entrega.css';
 
@@ -25,7 +26,7 @@ export function Entrega(p: {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
                 <span className={u.eyebrow}>Entrega del efectivo</span>
                 <Dialog.Title className={e.titulo}>
-                  {`¿Ya le diste ${p.monto} a ${p.dueno}?`}
+                  {`¿Ya le diste ${p.monto} ${aDueno(p.dueno)}?`}
                 </Dialog.Title>
               </div>
               <Dialog.Close className={e.cerrar} aria-label="Cerrar">
@@ -33,7 +34,7 @@ export function Entrega(p: {
               </Dialog.Close>
             </div>
             <p id="entrega-d" className={e.texto}>
-              {`Cuéntalo frente a él y dáselo completo. ${p.dueno} confirma en su portal que lo recibió y así queda cerrado el día.`}
+              {`Cuéntalo frente a él y dáselo completo. ${mayuscula(p.dueno)} confirma en su portal que lo recibió y así queda cerrado el día.`}
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
               <button type="button" className={e.si} data-onyellow="" onClick={p.onEntregar}>

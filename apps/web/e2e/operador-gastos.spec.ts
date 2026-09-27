@@ -1,6 +1,9 @@
+import { newUlid } from '@xangarro/domain';
+
 import { expect, test, type Page } from './test';
 
 import { puertaOperador } from './puerta-operador';
+import { asTenant, BIZ } from './sync-phone';
 
 test.beforeEach(() => test.setTimeout(120_000));
 
@@ -87,4 +90,87 @@ test('search and category filters narrow the list', async ({ page }) => {
   await expect(page.getByText('Taxi por insumos').first()).toBeVisible();
   await page.getByLabel('Buscar gasto').fill('nada así');
   await expect(page.getByText('Sin resultados')).toBeVisible();
+});
+
+/** The device's local day, as the caja's `hoyLocal()` says it (same machine). */
+function hoy(): { fecha: string; dia: number } {
+  const d = new Date();
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return {
+    fecha: `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`,
+    dia: d.getDate(),
+  };
+}
+
+/**
+ * A monthly recurring gasto due today, planted before the door so the
+ * bootstrap carries it down; soft-deleted after the test so no other caja
+ * lists it. Paying it once moves it a month on: off every list today.
+ */
+async function sembrarRecurrente(concepto: string): Promise<string> {
+  const id = newUlid();
+  const { fecha, dia } = hoy();
+  await asTenant(BIZ, async (sql) => {
+    await sql`
+      INSERT INTO recurring_expenses (id, concepto, categoria, monto_centavos, proveedor,
+                                      frecuencia, dia_del_mes, proximo_disparo, activo,
+                                      business_id, device_id, created_at, updated_at)
+      VALUES (${id}, ${concepto}, 'Servicios', 35000, 'Gas Express', 'mensual', ${dia},
+              ${fecha}, true, ${BIZ}, '01HZ8XQN9GZJXV8AKQ5X0C7DEV', now(), now())`;
+  });
+  return id;
+}
+
+async function retirarRecurrente(id: string): Promise<void> {
+  await asTenant(BIZ, async (sql) => {
+    await sql`UPDATE recurring_expenses SET deleted_at = now(), updated_at = now() WHERE id = ${id}`;
+  });
+}
+
+test('paying a due recurring gasto from Mi turno clears it from Pendientes and Para hoy', async ({
+  page,
+}) => {
+  const concepto = `Gas del local ${Date.now().toString(36)}`;
+  const id = await sembrarRecurrente(concepto);
+  try {
+    await puertaOperador(page);
+    await page.goto('/operador/turno');
+    await expect(page.getByText('Pendientes de registrar')).toBeVisible();
+    await expect(page.getByText(concepto, { exact: true })).toBeVisible();
+    await page.goto('/operador');
+    await expect(
+      page.getByText(`Registrar ${concepto.toLowerCase()}`, { exact: true }),
+    ).toBeVisible();
+
+    // «Registrar» opens Gastos' drawer filled from the template.
+    await page.goto('/operador/turno');
+    await page.locator(`a[href="/operador/gastos?recurrente=${id}"]`).click();
+    const modal = page.getByRole('dialog', { name: 'Registrar gasto' });
+    await expect(modal.getByLabel('¿Qué compraste?')).toHaveValue(concepto);
+    await expect(modal.getByLabel('¿Cuánto?')).toHaveValue('350.00');
+    await expect(modal.getByLabel('¿A quién le pagaste?')).toHaveValue('Gas Express');
+    await expect(modal.getByRole('button', { name: 'Servicios', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    // What was actually paid this time.
+    await modal.getByLabel('¿Cuánto?').fill('365');
+    await modal.getByRole('button', { name: 'Registrar gasto de $365.00' }).click();
+    await expect(page.getByRole('status')).toContainText(`−$365.00 · ${concepto} · Servicios`);
+
+    await page.reload();
+    await expect(page.getByText(concepto, { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Registrar gasto' })).toHaveCount(0);
+
+    await page.goto('/operador/turno');
+    await expect(page.getByRole('heading', { level: 1, name: 'Mi turno' })).toBeVisible();
+    await expect(page.locator(`a[href="/operador/gastos?recurrente=${id}"]`)).toHaveCount(0);
+    await page.goto('/operador');
+    await expect(page.getByText('Turno abierto desde las')).toBeVisible();
+    await expect(
+      page.getByText(`Registrar ${concepto.toLowerCase()}`, { exact: true }),
+    ).toHaveCount(0);
+  } finally {
+    await retirarRecurrente(id);
+  }
 });

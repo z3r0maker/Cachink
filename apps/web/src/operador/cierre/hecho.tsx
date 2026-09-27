@@ -7,6 +7,7 @@ import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 import { Don, type DonPose } from '../../components/don/don';
 import { Icon } from '../../shell/icon';
 import { OPERADOR_BASE } from '../shell/nav';
+import { aDueno } from '../ui/dueno';
 import { conSigno, DIF, lineaCerrado } from './copy';
 import { Corte, fechaCorta } from './corte';
 import { Entrega } from './entrega';
@@ -116,7 +117,7 @@ function PorEntregar(p: {
         <Icon path={BILLETE} size={22} strokeWidth={2} />
       </span>
       <span style={{ flex: 1 }}>
-        <span className={h.pasoTitulo}>{`Entregar el efectivo a ${p.dueno}`}</span>
+        <span className={h.pasoTitulo}>{`Entregar el efectivo ${aDueno(p.dueno)}`}</span>
         <span className={h.pasoTexto}>
           {`Dale los ${p.monto} en la mano. Él confirma en su portal que los recibió.`}
         </span>
@@ -134,7 +135,7 @@ function Entregado({ dueno }: { readonly dueno: string }) {
       </span>
       <span>
         <span className={h.pasoTitulo} style={{ color: 'inherit' }}>
-          {`Le entregaste el efectivo a ${dueno}`}
+          {`Le entregaste el efectivo ${aDueno(dueno)}`}
         </span>
         <span className={h.pasoTexto}>Cuando lo confirme, lo verás en tus cortes.</span>
       </span>

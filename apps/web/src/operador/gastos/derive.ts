@@ -28,3 +28,6 @@ export function filtrar(
     .filter((g) => categoria === 'Todos' || g.categoria === categoria)
     .filter((g) => matches(query, `${g.concepto} ${g.detalle}`));
 }
+
+/** 65000n → «650.00», what the amount field holds when the drawer opens filled. */
+export const montoCrudo = (m: bigint): string => `${m / 100n}.${String(m % 100n).padStart(2, '0')}`;

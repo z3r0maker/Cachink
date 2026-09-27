@@ -3,6 +3,8 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
+import { mayuscula } from '../ui/dueno';
+import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
 import { FilterChips, SearchBox } from '../ui/filters';
@@ -22,8 +24,8 @@ const FLECHA = 'M12 3v14M6 11l6 6 6-6M4 21h16';
 const FILTROS = ['Todos', ...CATEGORIAS] as const;
 
 /** Operador · Gastos: petty cash out of the drawer, each with its category and receipt. */
-export function GastosScreen({ state, data, registrarVivo }: GastosScreenProps) {
-  const x = useGastos(data.gastos, registrarVivo);
+export function GastosScreen({ state, data, registrarVivo, prefill }: GastosScreenProps) {
+  const x = useGastos(data.gastos, registrarVivo, prefill ?? null);
   const firma = `${data.operador}, ${data.caja}`;
   return (
     <OpMain top={24}>
@@ -78,6 +80,7 @@ function Filtros({ x }: { readonly x: Gastos }) {
 /** «Gastos del turno», «Salió de caja», «Sin comprobante»: one quiet strip. */
 function Cifras({ x }: { readonly x: Gastos }) {
   const r = resumen(x.gastos);
+  const dueno = useDueno();
   return (
     <section aria-label="Resumen de gastos" className={g.cifras}>
       <div className={g.cifra}>
@@ -96,7 +99,7 @@ function Cifras({ x }: { readonly x: Gastos }) {
           <span className={g.cifraValor} style={{ color: colors.warningText }}>
             {r.sinComprobante}
           </span>
-          <span className={g.cifraNota}>Pedro te lo va a preguntar</span>
+          <span className={g.cifraNota}>{`${mayuscula(dueno)} te lo va a preguntar`}</span>
         </span>
       </div>
     </section>
@@ -108,7 +111,12 @@ function Capas({ x, firma }: { readonly x: Gastos; readonly firma: string }) {
   return (
     <>
       {x.open ? (
-        <RegistrarGasto firma={firma} onClose={() => x.setOpen(false)} onSave={x.registrar} />
+        <RegistrarGasto
+          firma={firma}
+          prefill={x.prefill}
+          onClose={() => x.setOpen(false)}
+          onSave={x.registrar}
+        />
       ) : null}
       {x.toast ? (
         <Toast

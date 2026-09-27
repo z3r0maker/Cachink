@@ -8,6 +8,7 @@ import { Icon } from '../../shell/icon';
 import { parseRecibido } from '../caja/ticket';
 import { Campos } from './campos';
 import { Comprobante, type Prueba } from './comprobante';
+import { montoCrudo } from './derive';
 import * as d from './drawer.css';
 import type { CategoriaGasto } from './types';
 
@@ -21,6 +22,17 @@ export interface NuevoGasto {
   readonly proveedor: string | null;
   /** The receipt photo's file name; `null` means «sin comprobante». */
   readonly foto: string | null;
+  /** Set when the drawer was opened to pay a due recurring gasto. */
+  readonly recurrenteId?: string;
+}
+
+/** A due recurring gasto the drawer opens filled with (Mi turno and Inicio's «Registrar»). */
+export interface PrefillGasto {
+  readonly recurrenteId: string;
+  readonly concepto: string;
+  readonly monto: bigint;
+  readonly categoria: CategoriaGasto;
+  readonly proveedor: string | null;
 }
 
 /**
@@ -32,8 +44,9 @@ export function RegistrarGasto(p: {
   readonly firma: string;
   readonly onClose: () => void;
   readonly onSave: (g: NuevoGasto) => void;
+  readonly prefill?: PrefillGasto | null;
 }) {
-  const x = useFormGasto(p.onSave);
+  const x = useFormGasto(p.onSave, p.prefill ?? null);
   return (
     <Dialog.Root open onOpenChange={(o) => (o ? undefined : p.onClose())}>
       <Dialog.Portal>
@@ -90,11 +103,11 @@ function Pie({ x, onClose }: { readonly x: FormGasto; readonly onClose: () => vo
   );
 }
 
-function useFormGasto(onSave: (g: NuevoGasto) => void) {
-  const [raw, setRaw] = useState('');
-  const [concepto, setConcepto] = useState('');
-  const [categoria, setCategoria] = useState<CategoriaGasto | null>(null);
-  const [quien, setQuien] = useState('');
+function useFormGasto(onSave: (g: NuevoGasto) => void, pre: PrefillGasto | null) {
+  const [raw, setRaw] = useState(pre === null ? '' : montoCrudo(pre.monto));
+  const [concepto, setConcepto] = useState(pre?.concepto ?? '');
+  const [categoria, setCategoria] = useState<CategoriaGasto | null>(pre?.categoria ?? null);
+  const [quien, setQuien] = useState(pre?.proveedor ?? '');
   const [prueba, setPrueba] = useState<Prueba>({ tipo: 'nada' });
   const monto = parseRecibido(raw);
   const listo = monto !== null && monto > 0n && concepto.trim() !== '' && categoria !== null;
@@ -102,7 +115,8 @@ function useFormGasto(onSave: (g: NuevoGasto) => void) {
     if (monto === null || categoria === null || !listo) return;
     const foto = prueba.tipo === 'foto' ? prueba.nombre : null;
     const proveedor = quien.trim() === '' ? null : quien.trim();
-    onSave({ monto, concepto: concepto.trim(), categoria, proveedor, foto });
+    const recurrente = pre === null ? {} : { recurrenteId: pre.recurrenteId };
+    onSave({ monto, concepto: concepto.trim(), categoria, proveedor, foto, ...recurrente });
   };
   const form = { raw, setRaw, monto, concepto, setConcepto, categoria, setCategoria };
   return { ...form, quien, setQuien, prueba, setPrueba, listo, save };

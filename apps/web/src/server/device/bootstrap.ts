@@ -12,6 +12,7 @@ import {
   users,
   openingBalanceClients,
   openingBalances,
+  ownerNombre,
 } from '@xangarro/data-pg';
 import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
@@ -75,6 +76,7 @@ export async function referenceTables(tx: Tx) {
     opening_balances: ob.map((row) => rowToWire('opening_balances', row)),
     opening_balance_clients: obc.map((row) => rowToWire('opening_balance_clients', row)),
     feature_flags: await tenantFeatureFlags(tx),
+    dueno_nombre: await ownerNombre(tx),
   };
 }
 
