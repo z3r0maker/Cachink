@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { colors } from '@xangarro/tokens';
 
 import { marcarAclarado, pedirAclaracion } from '@/server/actions/cortes';
+import { aclaracion, aclarado, primerNombre } from './derive';
 import type { Corte, EstadoCorte, FiltroCortes } from './types';
 
 export interface Aviso {
@@ -13,16 +14,13 @@ export interface Aviso {
   readonly body: string;
 }
 
-/**
- * Filters, the open corte and the owner's two exits. «Marcar como aclarado»
- * and «Pedir aclaración» stay on this page until the close use case and the
- * owner→operator message (ADR-075) are wired (C-18, O-06).
- */
+type Resultado = { ok: true } | { ok: false; message: string };
+
 /** The aclarado write's outcome: a failure toasts, a success refreshes. */
 function aplicaAclarado(
   setAviso: (a: Aviso) => void,
   refrescar: () => void,
-): (r: { ok: true } | { ok: false; message: string }) => void {
+): (r: Resultado) => void {
   return (r) => {
     if (!r.ok) setAviso({ tint: colors.redSoft, title: 'No se pudo aclarar', body: r.message });
     else refrescar();
@@ -30,10 +28,7 @@ function aplicaAclarado(
 }
 
 /** The failure toast a write can leave behind. */
-function avisaFallo(
-  title: string,
-  setAviso: (a: Aviso) => void,
-): (r: { ok: true } | { ok: false; message: string }) => void {
+function avisaFallo(title: string, setAviso: (a: Aviso) => void): (r: Resultado) => void {
   return (r) => {
     if (!r.ok) setAviso({ tint: colors.redSoft, title, body: r.message });
   };
@@ -43,67 +38,64 @@ function avisaFallo(
 const estadoDe = (c: Corte, aclarados: readonly string[]): EstadoCorte =>
   aclarados.includes(c.id) ? 'Aclarado' : c.estado;
 
-/** The two toasts, as the design words them. */
-function corteAclarado(c: Corte): Aviso {
-  return {
-    tint: colors.greenSoft,
-    title: 'Corte aclarado',
-    body: `El corte de ${c.operador} del ${c.dia} queda cerrado. La diferencia se registra como ajuste de caja.`,
-  };
-}
-
-function aclaracionPedida(c: Corte): Aviso {
-  return {
-    tint: colors.blueSoft,
-    title: 'Aclaración pedida',
-    body: `A ${c.operador.split(' ')[0] ?? c.operador} le llega el detalle del corte en sus Avisos. Cuando responda, su respuesta aparece en los tuyos.`,
-  };
-}
-
-/** «Pedir aclaración» files this message; the operator reads it in Avisos. */
+/** «Preguntarle a Ana» files this message; the operator reads it at her caja. */
 function mensajeAclaracion(c: Corte): string {
   return (
-    `Pedro te pide aclarar el corte del ${c.dia}: lo contado no cuadró con lo esperado. ` +
+    `Pedro te pregunta por el corte del ${c.dia}: lo contado no cuadró con lo esperado. ` +
     'Responde desde aquí con tu explicación.'
   );
 }
 
-export function useCortes(cortes: readonly Corte[], filtroInicial: FiltroCortes) {
+/** The owner's two exits: «Marcar como aclarado» and «Preguntarle a …» (ADR-075). */
+function useSalidas(setSel: (id: string | null) => void, setAviso: (a: Aviso) => void) {
   const router = useRouter();
-  const [filtro, setFiltro] = useState<FiltroCortes>(filtroInicial);
-  const [query, setQuery] = useState('');
-  const [sel, setSel] = useState<string | null>(null);
   const [aclarados, setAclarados] = useState<readonly string[]>([]);
-  const [aviso, setAviso] = useState<Aviso | null>(null);
-  const abierto = cortes.find((c) => c.id === sel) ?? null;
   const aclarar = (c: Corte) => {
     if (estadoDe(c, aclarados) !== 'Por aclarar') return;
     setAclarados((a) => [...a, c.id]);
     setSel(null);
-    setAviso(corteAclarado(c));
+    setAviso({ tint: colors.greenSoft, title: 'Corte aclarado', body: aclarado(c) });
     void marcarAclarado(c.id).then(aplicaAclarado(setAviso, () => router.refresh()));
   };
   const pedir = (c: Corte) => {
     setSel(null);
-    setAviso(aclaracionPedida(c));
-    void pedirAclaracion(c.id, mensajeAclaracion(c)).then(avisaFallo('No se pudo pedir', setAviso));
+    setAviso({
+      tint: colors.blueSoft,
+      title: `Le preguntaste a ${primerNombre(c)}`,
+      body: aclaracion(c),
+    });
+    void pedirAclaracion(c.id, mensajeAclaracion(c)).then(
+      avisaFallo('No se pudo preguntar', setAviso),
+    );
   };
+  return { estado: (c: Corte) => estadoDe(c, aclarados), aclarar, pedir };
+}
+
+/** Filters (state, caja, search), the open corte and the last toast. */
+export function useCortes(cortes: readonly Corte[], filtroInicial: FiltroCortes) {
+  const [filtro, setFiltro] = useState<FiltroCortes>(filtroInicial);
+  const [caja, setCaja] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [sel, setSel] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const salidas = useSalidas(setSel, setAviso);
   const cerrarAviso = useCallback(() => setAviso(null), []);
-  /** «Ver todos los cortes»: back to every corte, no search. */
+  /** «Ver todos los cortes»: back to every corte, no caja, no search. */
   const limpiar = () => {
     setFiltro('Todos');
+    setCaja(null);
     setQuery('');
   };
   return {
     filtro,
     setFiltro,
+    caja,
+    alternarCaja: (c: string) => setCaja((x) => (x === c ? null : c)),
     query,
     setQuery,
-    abierto,
+    abierto: cortes.find((c) => c.id === sel) ?? null,
     setSel,
-    estado: (c: Corte) => estadoDe(c, aclarados),
-    aclarar,
-    pedir,
+    ...salidas,
     aviso,
     cerrarAviso,
     limpiar,

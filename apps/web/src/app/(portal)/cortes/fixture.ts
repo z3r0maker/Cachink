@@ -119,7 +119,7 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     abonosEfectivo: 200_00n,
     gastosCaja: 310_00n,
     conteo: { 'billete-1000': 2, 'billete-100': 1, 'billete-50': 1 },
-    motivo: 'No sé',
+    motivo: 'Otra razón',
     nota: 'Conté tres veces y no encontré de dónde sale',
     estado: 'Por aclarar',
     turno: t(11, [2, 130_00n], 95_00n, '2 entradas', 0),

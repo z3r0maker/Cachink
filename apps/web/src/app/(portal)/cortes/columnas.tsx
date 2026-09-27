@@ -14,18 +14,29 @@ export const ESTADO: Record<EstadoCorte, { bg: string; color: string }> = {
   Aclarado: { bg: colors.blueSoft, color: colors.blueText },
 };
 
+/** The review state with its dot, in the list and in the panel's head. */
+export function EstadoPill({ estado }: { readonly estado: EstadoCorte }) {
+  return (
+    <span
+      className={s.chip}
+      data-estado=""
+      style={{ background: ESTADO[estado].bg, color: ESTADO[estado].color }}
+    >
+      <span className={s.punto} aria-hidden="true" />
+      {estado}
+    </span>
+  );
+}
+
 function Turno({ c }: { readonly c: Corte }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-      <span className={s.avatar} style={{ background: c.tint }}>
+    <div className={s.turno}>
+      <span className={s.avatar} style={{ background: c.tint }} aria-hidden="true">
         {c.iniciales}
       </span>
       <div style={{ minWidth: 0 }}>
         <div className={s.nombre}>{c.operador}</div>
-        <div
-          className={s.linea}
-          style={{ color: colors.gray600 }}
-        >{`${c.caja} · ${c.dia} · ${c.horario}`}</div>
+        <div className={s.linea}>{`${c.caja} · ${c.dia} · ${c.horario}`}</div>
       </div>
     </div>
   );
@@ -42,20 +53,16 @@ function Diferencia({ c }: { readonly c: Corte }) {
 
 /** Turno, expected, counted, the signed difference and the review state. */
 export function columnas(estado: (c: Corte) => EstadoCorte): readonly ColumnDef<Corte>[] {
-  const chip = (c: Corte) => (
-    <span
-      className={s.chip}
-      data-estado=""
-      style={{ background: ESTADO[estado(c)].bg, color: ESTADO[estado(c)].color }}
-    >
-      {estado(c)}
-    </span>
-  );
   return [
     { key: 'turno', header: 'Turno', render: (c) => <Turno c={c} /> },
     { key: 'esperado', header: 'Esperado', numeric: true, render: (c) => formatMoney(esperado(c)) },
     { key: 'contado', header: 'Contado', numeric: true, render: (c) => formatMoney(contado(c)) },
     { key: 'diferencia', header: 'Diferencia', numeric: true, render: (c) => <Diferencia c={c} /> },
-    { key: 'estado', header: 'Estado', numeric: true, render: chip },
+    {
+      key: 'estado',
+      header: 'Estado',
+      numeric: true,
+      render: (c) => <EstadoPill estado={estado(c)} />,
+    },
   ];
 }

@@ -20,7 +20,9 @@ test('the month: −$60.00 net and the seeded cortes listed', async ({ page }) =
   await expect(page.getByText('−$60.00').first()).toBeVisible();
   await expect(
     // The sidebar's entry, not the breadcrumb's link of the same name.
-    page.getByRole('navigation').getByRole('link', { name: 'Equipo y nómina', exact: true }),
+    page
+      .getByRole('navigation', { name: 'Navegación principal' })
+      .getByRole('link', { name: 'Equipo y nómina', exact: true }),
   ).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('row', { name: /Ana Robledo.*13 may/ })).toHaveCount(1);
   await expect(page.getByRole('row', { name: /Luis Ortega.*12 may/ })).toHaveCount(1);
@@ -33,7 +35,9 @@ test(
     await page.goto('/cortes');
     await page.getByRole('row', { name: /Ana Robledo.*13 may/ }).click();
     const panel = page.getByRole('dialog', { name: 'Ana Robledo' });
-    await expect(panel.getByText('Faltó')).toBeVisible();
+    await expect(panel.getByText('Falta', { exact: true })).toBeVisible();
+    // The stored `error-en-cambio`, in the operator's words.
+    await expect(panel.getByText('Cambio mal dado', { exact: true })).toBeVisible();
     await expect(panel.getByText('«Se me fue un cambio de más con un cliente»')).toBeVisible();
     await expect(panel.getByText('×2')).toBeVisible();
     // One project runs this now, so the only way to find it already stamped is a
@@ -67,9 +71,9 @@ test(
   async ({ page }) => {
     await page.goto('/cortes');
     await page.getByRole('row', { name: /Ana Robledo.*13 may/ }).click();
-    await page.getByRole('button', { name: 'Pedir aclaración' }).click();
+    await page.getByRole('button', { name: 'Preguntarle a Ana' }).click();
     await expect(page.getByRole('status')).toContainText(
-      'A Ana le llega el detalle del corte en sus Avisos.',
+      'A Ana le llega el detalle del corte a su caja.',
     );
 
     await expect
