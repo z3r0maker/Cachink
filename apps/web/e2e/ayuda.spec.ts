@@ -15,6 +15,8 @@ test('any member can send a help request and see the confirmation', async ({ pag
     page.getByRole('heading', { name: '¿En qué te echo la mano?', level: 1 }),
   ).toBeVisible();
 
+  // The form opens beside the page only when the answers didn't help.
+  await page.getByRole('button', { name: 'Escribirle al equipo' }).click();
   await filledAll([
     [page.getByPlaceholder('No entiendo el corte del día'), 'No veo el corte de ayer'],
     [
@@ -35,6 +37,7 @@ test('an empty message is refused with the reason, nothing sent', async ({ page 
   // Filled the same careful way: a fill lost to hydration would make the screen
   // complain about the asunto instead, and the test would read as a pass on the
   // wrong claim.
+  await page.getByRole('button', { name: 'Escribirle al equipo' }).click();
   await filled(page.getByPlaceholder('No entiendo el corte del día'), 'Solo asunto');
   await page.getByRole('button', { name: 'Enviar' }).click();
   await expect(page.getByText('Escribe tu mensaje (hasta 4000 caracteres).')).toBeVisible();
@@ -78,4 +81,17 @@ test('the search narrows answers, and a guide walks through its steps', async ({
     'href',
     '/equipo?tab=cajas',
   );
+});
+
+test('the most asked come first; a topic shows all of its answers', async ({ page }) => {
+  await page.goto('/ayuda');
+  await expect(page.getByRole('heading', { name: 'Lo más preguntado' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Ver las \d+ preguntas$/ })).toBeVisible();
+  await page
+    .getByRole('group', { name: 'Temas' })
+    .getByRole('button', { name: 'Tu plan y pagos' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Tu plan y pagos' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '¿Cómo cambio de plan?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '¿Qué es el corte del turno?' })).toHaveCount(0);
 });

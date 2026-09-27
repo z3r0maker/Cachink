@@ -11,6 +11,7 @@ import { useSession } from '@/session/provider';
 
 import { Icon } from './icon';
 import { badge, bell } from './header.css';
+import { button } from '@/components/button.css';
 
 /**
  * The bell (P-31): the unread count on the button, and a 400 px side panel
@@ -79,7 +80,11 @@ export function Bell({ unread }: { readonly unread: number }) {
         description="Lo más reciente que requiere tu atención."
         width={400}
         actions={
-          <Link href="/avisos" onClick={() => p.onOpenChange(false)}>
+          <Link
+            href="/avisos"
+            className={button({ variant: 'secondary', size: 'md', full: true })}
+            onClick={() => p.onOpenChange(false)}
+          >
             Ver todos los avisos
           </Link>
         }

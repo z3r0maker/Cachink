@@ -98,11 +98,9 @@ export const titulo = style({
   color: colors.gray600,
 });
 
-export const temas = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-  gap: 10,
-});
+export const temas = style({ display: 'flex', flexWrap: 'wrap', gap: 8 });
+
+export const seccion = style({ display: 'grid', gap: 0 });
 
 const tarjeta = {
   display: 'grid',
