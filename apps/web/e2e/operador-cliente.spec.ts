@@ -18,13 +18,14 @@ async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void
  * register's own account — a fiado sale this test makes, its detail, and the
  * abono that settles it.
  */
-test('from Cobranza to the account: balance, open ticket, history', async ({ page }) => {
+test('from Fiado y abonos to the account: balance, open ticket, history', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/caja');
   await fiar(page, /Quesadilla/, /Doña Mari de la tienda/);
 
   await page.getByRole('link', { name: 'Fiado y abonos' }).click();
-  await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
+  await page.getByRole('button', { name: 'Ver cuenta de Doña Mari de la tienda' }).click();
+  await page.getByRole('link', { name: 'Ver historial completo' }).click();
   await expect(page.locator('main').getByText('$80.00').first()).toBeVisible();
   await expect(page.locator('main').getByText('Al día')).toBeVisible();
   await expect(page.getByText('Venta fiada V-0001')).toBeAttached();
@@ -38,7 +39,8 @@ test('an abono settles the ticket and lowers the balance', async ({ page }) => {
   await fiar(page, /Orden del cliente/, /Doña Mari de la tienda/);
 
   await page.getByRole('link', { name: 'Fiado y abonos' }).click();
-  await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
+  await page.getByRole('button', { name: 'Ver cuenta de Doña Mari de la tienda' }).click();
+  await page.getByRole('link', { name: 'Ver historial completo' }).click();
   await page.getByRole('button', { name: 'Recibir abono' }).click();
   const modal = page.getByRole('dialog', { name: 'Abono de Doña Mari de la tienda' });
   await modal.getByLabel('Cuánto abona').fill('50');
