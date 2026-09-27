@@ -1,36 +1,32 @@
-import { colors } from '@xangarro/tokens';
-import Link from 'next/link';
+import { Don } from '@/components/don/don';
 
-import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import { ICONS, OPERADOR_BASE } from '../shell/nav';
-import { KpiRow, OpMain } from '../ui/parts';
-import * as u from '../ui/ui.css';
-import { heroFor, type Hero } from './copy';
+import { ICONS } from '../shell/nav';
+import { StatRow } from '../ui/panel';
+import { OpMain } from '../ui/parts';
+import { heroFor, saludo } from './copy';
+import { HeroCard } from './hero';
 import * as s from './inicio.css';
 import { kpisFor } from './kpis';
 import { DeParteDe, ParaHoy, UltimosCortes } from './lists';
-import type { InicioScreenProps } from './types';
+import type { InicioData, InicioScreenProps } from './types';
 
 /**
- * Operador · Inicio — not a dashboard: it answers «what do I do now».
- * Presentational (ADR-058 §9); the shared states replace «Para hoy» only.
+ * Operador · Inicio: not a dashboard, it answers «what do I do now».
+ * Don Cuentas waves once, here; the shared states replace «Para hoy» only.
  */
 export function InicioScreen({ state, data }: InicioScreenProps) {
-  const abierto = data.situacion !== 'turno-cerrado' && data.turno !== null;
   return (
     <OpMain top={24}>
-      <div>
-        <h1 className={s.h1}>
-          {abierto ? `Buenas tardes, ${data.nombre}` : `Buen día, ${data.nombre}`}
-        </h1>
-        <div className={s.fecha}>{data.fecha}</div>
-      </div>
+      <Saludo data={data} />
       <HeroCard hero={heroFor(data)} />
-      <KpiRow items={kpisFor(data)} min={210} valueSize={30} />
+      <StatRow items={kpisFor(data)} />
       <div className={s.columns}>
         {state === 'happy' ? (
-          <ParaHoy tareas={data.tareas} />
+          <ParaHoy
+            tareas={data.tareas}
+            cerrado={data.situacion === 'turno-cerrado' || !data.turno}
+          />
         ) : (
           <OperadorEstado
             mode={state}
@@ -45,85 +41,32 @@ export function InicioScreen({ state, data }: InicioScreenProps) {
           <UltimosCortes cortes={data.cortes} />
         </div>
       </div>
-      <Accesos />
     </OpMain>
   );
 }
 
-function HeroCard({ hero }: { readonly hero: Hero }) {
+function Saludo({ data }: { readonly data: InicioData }) {
+  const t = data.situacion === 'turno-cerrado' ? null : data.turno;
   return (
-    <div className={s.hero} style={{ background: hero.bg }}>
-      <span className={s.heroIcon}>
-        <Icon path={hero.icon} size={28} strokeWidth={2.4} />
-      </span>
-      <div className={s.heroText}>
-        <div className={u.eyebrow}>{hero.eyebrow}</div>
-        <div className={s.heroTitle}>{hero.title}</div>
-        <div className={s.heroBody}>{hero.body}</div>
+    <div className={s.greeting}>
+      <Don pose="hola" size={116} />
+      <div className={s.greetingText}>
+        <div className={s.bubble}>
+          <span className={s.tail} aria-hidden="true" />
+          <h1 className={s.h1}>{saludo(data)}</h1>
+        </div>
+        <span className={s.fecha}>{data.fecha}</span>
       </div>
-      <Link
-        href={hero.href}
-        className={s.heroCta}
-        style={{ background: hero.ctaBg }}
-        data-onyellow=""
-      >
-        {hero.cta}
-      </Link>
-    </div>
-  );
-}
-
-const ACCESOS = [
-  {
-    label: 'Registrar gasto',
-    hint: 'Caja chica con comprobante',
-    slug: 'gastos',
-    bg: colors.redSoft,
-    icon: ICONS.gastos,
-  },
-  {
-    label: 'Inventario',
-    hint: 'Entradas y mermas',
-    slug: 'inventario',
-    bg: colors.greenSoft,
-    icon: ICONS.inventario,
-  },
-  {
-    label: 'Cobranza',
-    hint: 'Recibir un abono',
-    slug: 'cobranza',
-    bg: colors.blueSoft,
-    icon: ICONS.cobranza,
-  },
-  {
-    label: 'Cierre de turno',
-    hint: 'Contar y cerrar',
-    slug: 'cierre',
-    bg: colors.white,
-    icon: ICONS.turno,
-  },
-] as const;
-
-function Accesos() {
-  return (
-    <div
-      className={u.kpiGrid}
-      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}
-    >
-      {ACCESOS.map((a) => (
-        <Link
-          key={a.slug}
-          href={`${OPERADOR_BASE}/${a.slug}`}
-          className={u.shortcut}
-          style={{ background: a.bg, minHeight: 96, gap: 8 }}
-        >
-          <span className={u.tintBox} style={{ width: 38, height: 38, background: colors.white }}>
-            <Icon path={a.icon} size={19} strokeWidth={2.3} />
-          </span>
-          <span className={u.shortcutLabel}>{a.label}</span>
-          <span className={u.shortcutHint}>{a.hint}</span>
-        </Link>
-      ))}
+      <span className={s.turnoChip}>
+        <span className={t ? s.greenDot : `${s.greenDot} ${s.grayDot}`} aria-hidden="true" />
+        {t ? (
+          <>
+            Turno abierto desde las <b className={`${s.figure} ${s.mono}`}>{t.desde}</b>
+          </>
+        ) : (
+          'Turno cerrado'
+        )}
+      </span>
     </div>
   );
 }

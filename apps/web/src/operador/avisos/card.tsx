@@ -4,127 +4,121 @@ import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
-import * as u from '../ui/ui.css';
+import * as p from '../ui/panel.css';
 import * as a from './avisos.css';
-import * as r from './reply.css';
-import type { Aviso, AvisoTono } from './types';
-
-const TONO: Record<AvisoTono, string> = {
-  alerta: colors.redSoft,
-  dueno: colors.yellowSoft,
-  atencion: colors.warningSoft,
-  info: colors.blueSoft,
-  hecho: colors.greenSoft,
-};
-
-/** Phrases so the operator can answer without typing, with a queue waiting. */
-const SUGERENCIAS = ['Di cambio de más', 'Cobré y no capturé', 'Salió un vale', 'No sé qué pasó'];
+import { Enviada, Reply } from './reply';
+import type { Aviso } from './types';
 
 export interface AvisoCardProps {
   readonly aviso: Aviso;
+  readonly dueno: string;
   readonly draft: string;
   readonly onDraft: (text: string) => void;
   readonly onSend: () => void;
   readonly onRead: () => void;
 }
 
-export function AvisoCard({ aviso, draft, onDraft, onSend, onRead }: AvisoCardProps) {
-  const canReply = aviso.responder !== undefined && !aviso.respuesta;
+/** Money inside a sentence, bold (and red on an alert). */
+export function ConCifras({ text, rojo }: { readonly text: string; readonly rojo?: boolean }) {
+  const style = rojo ? { color: colors.redText } : undefined;
   return (
-    <article className={a.card} data-read={aviso.leido ? '' : undefined}>
-      <div className={a.head} style={{ background: TONO[aviso.tono] }}>
-        <span className={a.headIcon}>
-          <Icon path={aviso.icono} size={18} strokeWidth={2.4} />
+    <>
+      {text.split(/(\$[\d,]+\.\d{2})/).map((part, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className={a.cifra} style={style}>
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/** A message from the owner: the strip says who and whether it was read. */
+export function AvisoCard(props: AvisoCardProps) {
+  const { aviso } = props;
+  const strong = aviso.responder !== undefined || aviso.tono === 'alerta';
+  const estadoColor = aviso.leido
+    ? colors.gray600
+    : aviso.tono === 'alerta'
+      ? colors.redText
+      : colors.warningText;
+  const stripBg = strong ? (aviso.leido ? colors.gray100 : colors.redSoft) : undefined;
+  return (
+    <article
+      aria-labelledby={`av-${aviso.id}`}
+      className={strong ? `${a.card} ${a.cardStrong}` : a.card}
+    >
+      <div
+        className={strong ? `${a.strip} ${a.stripStrong}` : a.strip}
+        style={stripBg ? { background: stripBg } : undefined}
+      >
+        <span className={a.avatar}>
+          <Icon path={aviso.icono} size={15} strokeWidth={2.4} />
         </span>
-        <span className={a.kind}>{aviso.tipo}</span>
-        {aviso.leido ? null : <span className={a.unread}>Sin leer</span>}
-        <span className={a.time}>{aviso.hora}</span>
+        <span className={a.de}>{aviso.tipo}</span>
+        <span className={a.de} style={{ color: estadoColor }}>
+          · {aviso.leido ? 'Leído' : 'Sin leer'}
+        </span>
+        <span className={a.hora}>{aviso.hora}</span>
       </div>
-      <div className={a.body}>
-        <div className={a.title}>{aviso.titulo}</div>
-        <div className={a.text}>{aviso.cuerpo}</div>
-        {aviso.respuesta ? (
-          <div className={r.replied}>
-            <div className={a.kind}>Tu respuesta</div>
-            <div className={r.repliedText}>«{aviso.respuesta}»</div>
-          </div>
-        ) : null}
-        {canReply ? <Reply id={aviso.id} draft={draft} onDraft={onDraft} /> : null}
-        <Buttons
-          aviso={aviso}
-          canReply={canReply}
-          canSend={draft.trim().length > 3}
-          onSend={onSend}
-          onRead={onRead}
-        />
-      </div>
+      {strong ? <Cuerpo {...props} /> : <CuerpoCorto {...props} />}
     </article>
   );
 }
 
-function Reply({
-  id,
-  draft,
-  onDraft,
-}: {
-  readonly id: string;
-  readonly draft: string;
-  readonly onDraft: (t: string) => void;
-}) {
-  const inputId = `respuesta-${id}`;
+function Cuerpo({ aviso, dueno, draft, onDraft, onSend, onRead }: AvisoCardProps) {
+  const canReply = aviso.responder !== undefined && !aviso.respuesta;
   return (
-    <div className={r.reply}>
-      <label htmlFor={inputId} className={u.eyebrow}>
-        Tu respuesta
-      </label>
-      <input
-        id={inputId}
-        className={r.input}
-        type="text"
-        placeholder="Cuéntale qué pasó, con tus palabras"
-        value={draft}
-        onChange={(e) => onDraft(e.target.value)}
-      />
-      <div className={r.suggestions}>
-        {SUGERENCIAS.map((s) => (
-          <button key={s} type="button" className={r.suggestion} onClick={() => onDraft(s)}>
-            {s}
-          </button>
-        ))}
+    <div className={a.body}>
+      <div className={a.textsCol}>
+        <h2 id={`av-${aviso.id}`} className={`${a.title} ${a.titleStrong}`}>
+          {aviso.titulo}
+        </h2>
+        <p className={`${a.text} ${a.textStrong}`}>
+          <ConCifras text={aviso.cuerpo} rojo={aviso.tono === 'alerta'} />
+        </p>
       </div>
+      {aviso.respuesta ? <Enviada dueno={dueno} texto={aviso.respuesta} /> : null}
+      {canReply ? (
+        <Reply
+          id={aviso.id}
+          dueno={dueno}
+          draft={draft}
+          onDraft={onDraft}
+          onSend={onSend}
+          onRead={aviso.leido ? undefined : onRead}
+        />
+      ) : null}
+      {!canReply && !aviso.leido ? (
+        <div className={a.actions}>
+          <button type="button" className={p.quietBtn} onClick={onRead}>
+            Marcar leído
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function Buttons(props: {
-  readonly aviso: Aviso;
-  readonly canReply: boolean;
-  readonly canSend: boolean;
-  readonly onSend: () => void;
-  readonly onRead: () => void;
-}) {
-  const { aviso, canReply, canSend } = props;
+function CuerpoCorto({ aviso, onRead }: AvisoCardProps) {
   return (
-    <div className={a.buttons}>
-      {canReply ? (
-        <button
-          type="button"
-          className={a.send}
-          style={{ background: canSend ? colors.yellow : colors.gray100 }}
-          disabled={!canSend}
-          onClick={props.onSend}
-          data-onyellow=""
-        >
-          Enviar respuesta
-        </button>
-      ) : null}
+    <div className={a.bodyRow}>
+      <div className={a.texts}>
+        <h2 id={`av-${aviso.id}`} className={a.title}>
+          <ConCifras text={aviso.titulo} />
+        </h2>
+        <p className={a.text}>{aviso.cuerpo}</p>
+      </div>
       {aviso.cta ? (
-        <Link href={aviso.cta.href} className={a.link}>
+        <Link href={aviso.cta.href} className={p.outlineBtn} style={{ boxShadow: 'none' }}>
           {aviso.cta.label}
         </Link>
       ) : null}
       {aviso.leido ? null : (
-        <button type="button" className={a.markRead} onClick={props.onRead}>
+        <button type="button" className={p.quietBtn} onClick={onRead}>
           Marcar leído
         </button>
       )}

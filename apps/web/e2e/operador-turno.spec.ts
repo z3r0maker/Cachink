@@ -11,9 +11,9 @@ test.beforeEach(() => test.setTimeout(120_000));
 test('Turno shows the expected cash built from its four parts', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/turno');
-  await expect(page.getByRole('heading', { level: 1, name: 'Tu turno' })).toBeVisible();
-  await expect(page.getByText('$2,710.00')).toBeVisible();
-  await expect(page.getByText('Cuatro con comprobante')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mi turno' })).toBeVisible();
+  await expect(page.getByText('$2,710.00').first()).toBeVisible();
+  await expect(page.getByText('Salieron de la caja · 4 comprobantes')).toBeVisible();
   for (const part of [
     'Fondo de caja',
     'Ventas en efectivo',
@@ -43,10 +43,12 @@ test('«Hoy no» hides a recurring expense and the count follows', async ({ page
   await expect(pendientes.getByRole('button', { name: 'Hoy no' })).toHaveCount(2);
 });
 
-test('the header offers «Nueva venta» and «Cerrar turno» leads to the close', async ({ page }) => {
+test('the header offers «Nueva venta» and «Cerrar mi turno» leads to the close', async ({
+  page,
+}) => {
   await puertaOperador(page);
   await page.goto('/operador/turno');
   await expect(page.locator('header').getByRole('link', { name: 'Nueva venta' })).toBeVisible();
-  await page.locator('main').getByRole('link', { name: 'Cerrar turno' }).click();
+  await page.locator('main').getByRole('link', { name: 'Cerrar mi turno' }).click();
   await expect(page).toHaveURL(/\/operador\/cierre$/);
 });

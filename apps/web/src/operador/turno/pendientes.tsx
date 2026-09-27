@@ -5,22 +5,20 @@ import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
-import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
 import { HOY } from '../fixtures';
+import { ICONS, OPERADOR_BASE } from '../shell/nav';
 import { sumarDias, textoVence } from '../ui/frases';
-import * as u from '../ui/ui.css';
-import * as l from './lists.css';
+import { Chip, Panel, Tile } from '../ui/panel';
+import * as p from '../ui/panel.css';
+import * as r from './rows.css';
 import type { PendienteRecurrente } from './types';
 
-const CLOCK = 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2';
-
-/** «Vence hoy» / «Vence mañana» / «Vence el viernes» / «Atrasado 1 día», with the design's tints. */
+/** «Vence hoy» and late in red, the rest in amber; the due ones get the yellow button. */
 function dueChip(vence: number): { label: string; bg: string; color: string } {
-  if (vence === 0) return { label: 'Vence hoy', bg: colors.warningSoft, color: colors.warningText };
+  if (vence === 0) return { label: 'Vence hoy', bg: colors.redSoft, color: colors.redText };
   if (vence > 0) {
     const label = textoVence(HOY, sumarDias(HOY, vence));
-    return { label, bg: colors.gray100, color: colors.gray600 };
+    return { label, bg: colors.warningSoft, color: colors.warningText };
   }
   const dias = -vence;
   return {
@@ -40,47 +38,58 @@ export function PendientesRecurrentes({
   readonly items: readonly PendienteRecurrente[];
 }) {
   const [skipped, setSkipped] = useState<readonly string[]>([]);
-  const shown = items.filter((p) => !skipped.includes(p.id));
-  if (shown.length === 0) return null;
+  const shown = items.filter((x) => !skipped.includes(x.id));
+  if (items.length === 0) return null;
+  const verTodos =
+    skipped.length > 0 ? (
+      <button type="button" className={r.verTodos} onClick={() => setSkipped([])}>
+        Ver todos
+      </button>
+    ) : null;
   return (
-    <section className={u.listCard}>
-      <div className={u.listHead} style={{ background: colors.warningSoft }}>
-        <span className={l.clockTile}>
-          <Icon path={CLOCK} size={18} strokeWidth={2.5} />
-        </span>
-        <span className={l.headTitle}>Pendientes de registrar</span>
-        <span className={u.countPill}>{shown.length}</span>
-        <span className={u.headNote}>Gastos que se repiten y hoy nadie ha capturado.</span>
-      </div>
-      {shown.map((p) => (
-        <Row key={p.id} p={p} onSkip={() => setSkipped((s) => [...s, p.id])} />
+    <Panel
+      label="Pendientes de registrar"
+      count={shown.length}
+      note="Gastos que se repiten y ya tocan"
+      action={verTodos}
+    >
+      {shown.map((x) => (
+        <Row key={x.id} p={x} onSkip={() => setSkipped((s) => [...s, x.id])} />
       ))}
-    </section>
+      {shown.length === 0 ? <div className={r.nada}>No hay gastos por registrar hoy.</div> : null}
+    </Panel>
   );
 }
 
-function Row({ p, onSkip }: { readonly p: PendienteRecurrente; readonly onSkip: () => void }) {
-  const chip = dueChip(p.vence);
+function Row({ p: x, onSkip }: { readonly p: PendienteRecurrente; readonly onSkip: () => void }) {
+  const chip = dueChip(x.vence);
   return (
-    <div className={`${u.row} ${u.rowWrap}`} style={{ gap: 12, padding: '14px 18px' }}>
-      <div className={u.rowMain}>
-        <div className={l.name}>{p.nombre}</div>
-        <div className={l.detail}>{p.detalle}</div>
-      </div>
-      <span className={l.due} style={{ background: chip.bg, color: chip.color }}>
-        {chip.label}
+    <div className={r.row}>
+      <Tile icon={ICONS.gastos} tint={colors.redSoft} />
+      <span className={r.main}>
+        <span className={r.nameLine}>
+          <span className={p.rowTitle}>{x.nombre}</span>
+          <Chip label={chip.label} color={chip.color} bg={chip.bg} />
+        </span>
+        <span className={p.rowDetail}>{x.detalle}</span>
       </span>
-      <span className={l.amount} style={{ color: colors.black, marginLeft: 'auto' }}>
-        {formatMoney(p.monto)}
-      </span>
-      <div className={l.actions}>
-        <Link href={`${OPERADOR_BASE}/gastos`} className={l.registrar} data-onyellow="">
+      <span className={r.monto}>{formatMoney(x.monto)}</span>
+      <span className={r.actions}>
+        <Link
+          href={`${OPERADOR_BASE}/gastos`}
+          className={x.vence <= 0 ? `${p.outlineBtn} ${p.outlineYellow}` : p.outlineBtn}
+        >
           Registrar
         </Link>
-        <button type="button" className={l.hoyNo} onClick={onSkip}>
+        <button
+          type="button"
+          className={p.quietBtn}
+          aria-label={`Hoy no: ${x.nombre}`}
+          onClick={onSkip}
+        >
           Hoy no
         </button>
-      </div>
+      </span>
     </div>
   );
 }

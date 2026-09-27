@@ -1,8 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import {
+  borders,
   colors,
-  denseRadii,
-  fontSizes,
   portalFontSizes,
   radii,
   shapeRadii,
@@ -13,145 +12,208 @@ import {
 import { pressable } from '../../styles/press.css';
 import { PHONE } from '../shell/shell.css';
 
-/** Operador · Avisos, from `Xangarro Portal - Operador Avisos.dc.html`. */
-const contentBox = { boxSizing: 'content-box' } as const;
+/** Operador · Avisos (`OpAvisos.dc.html`, El Mostrador). */
+export const head = style({ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' });
 
-export const h1 = style({
-  margin: 0,
-  fontSize: fontSizes.xl5,
-  lineHeight: 1.05,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tighter,
-  color: colors.black,
-  '@media': { [PHONE]: { fontSize: portalFontSizes.xl4 } },
+export const marcarTodo = style({ marginLeft: 'auto' });
+
+export const tabs = style({
+  alignSelf: 'flex-start',
+  display: 'flex',
+  padding: 4,
+  border: borders.quiet,
+  borderRadius: radii[3],
+  background: colors.white,
 });
 
-export const sub = style({
-  marginTop: 6,
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
-  textWrap: 'pretty',
-});
+export const tab = style([
+  pressable,
+  {
+    height: 44,
+    padding: '0 18px',
+    border: '2px solid transparent',
+    borderRadius: radii[1],
+    background: 'none',
+    fontFamily: 'inherit',
+    fontSize: portalFontSizes.md,
+    fontWeight: typography.weights.extraBold,
+    color: colors.gray600,
+    selectors: {
+      '&[aria-selected="true"]': {
+        borderColor: colors.black,
+        background: colors.yellow,
+        color: colors.black,
+      },
+    },
+  },
+]);
 
-export const list = style({ display: 'flex', flexDirection: 'column', gap: 14 });
+export const list = style({ maxWidth: 880, display: 'flex', flexDirection: 'column', gap: 16 });
+
+export const listCaja = style([list, { gap: 12 }]);
+
+/* A message from the owner ------------------------------------------------ */
 
 export const card = style({
   overflow: 'hidden',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[4],
+  border: borders.quiet,
+  borderRadius: radii[6],
   background: colors.white,
-  boxShadow: shadows.card,
-  selectors: { '&[data-read]': { border: `2px solid ${colors.gray200}` } },
 });
 
-export const head = style({
+export const cardStrong = style({
+  border: borders.thick,
+  borderRadius: radii[7],
+  boxShadow: shadows.hero,
+});
+
+export const strip = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 12,
+  gap: 10,
   flexWrap: 'wrap',
-  padding: '14px 18px',
-  borderBottom: `2px solid ${colors.black}`,
+  padding: '11px 22px',
+  borderBottom: borders.quiet,
+  background: colors.offwhite,
+  '@media': { [PHONE]: { padding: '10px 16px' } },
 });
 
-export const headIcon = style({
-  ...contentBox,
+export const stripStrong = style({ borderBottom: borders.thin });
+
+export const avatar = style({
+  boxSizing: 'border-box',
   flex: 'none',
-  width: 36,
-  height: 36,
+  width: 28,
+  height: 28,
   display: 'grid',
   placeItems: 'center',
-  border: `2px solid ${colors.black}`,
-  borderRadius: denseRadii.r11,
+  border: borders.thin,
+  borderRadius: shapeRadii.pill,
   background: colors.white,
   color: colors.black,
 });
 
-export const kind = style({
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: colors.gray600,
-});
-
-export const unread = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  padding: '2px 9px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-  background: colors.yellow,
-  fontSize: portalFontSizes.tag,
-  fontWeight: typography.weights.bold,
+export const de = style({
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.extraBold,
   color: colors.black,
 });
 
-export const time = style({
+export const hora = style({
   marginLeft: 'auto',
-  fontSize: portalFontSizes.xs,
+  fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.bold,
+  fontVariantNumeric: 'tabular-nums',
   color: colors.gray600,
-  whiteSpace: 'nowrap',
 });
 
-export const body = style({ padding: 18, display: 'flex', flexDirection: 'column', gap: 12 });
+export const body = style({
+  padding: '18px 22px 20px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 14,
+  '@media': { [PHONE]: { padding: 16 } },
+});
+
+export const bodyRow = style({
+  padding: '16px 22px 18px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+  flexWrap: 'wrap',
+  '@media': { [PHONE]: { padding: 16 } },
+});
+
+export const texts = style({
+  flex: '1 1 260px',
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 6,
+});
+
+/** The texts of a full card, stacked (no flex basis in a column). */
+export const textsCol = style({ display: 'flex', flexDirection: 'column', gap: 6 });
 
 export const title = style({
-  fontSize: fontSizes.xl,
+  margin: 0,
+  fontSize: portalFontSizes.xl,
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tight,
   color: colors.black,
   textWrap: 'pretty',
 });
 
+export const titleStrong = style({ fontSize: portalFontSizes.xl2 });
+
 export const text = style({
+  margin: 0,
+  lineHeight: 1.5,
   fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
-  color: colors.ink,
+  color: colors.gray600,
   textWrap: 'pretty',
 });
 
-export const buttons = style({ display: 'flex', gap: 10, flexWrap: 'wrap' });
+export const textStrong = style({ color: colors.ink });
 
-const button = {
-  height: 50,
-  borderRadius: denseRadii.r13,
-  fontFamily: 'inherit',
+export const cifra = style({
+  fontWeight: typography.weights.extraBold,
+  fontVariantNumeric: 'tabular-nums',
+});
+
+export const actions = style({ display: 'flex', gap: 10, flexWrap: 'wrap' });
+
+/* A notice from the register ------------------------------------------- */
+
+export const sistema = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+  flexWrap: 'wrap',
+  padding: '16px 20px',
+  border: borders.quiet,
+  borderRadius: radii[6],
+  background: colors.white,
+  '@media': { [PHONE]: { padding: 16, gap: 12 } },
+});
+
+export const meta = style({ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' });
+
+export const metaHora = style({
   fontSize: portalFontSizes.xs,
   fontWeight: typography.weights.bold,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.textMuted,
+});
+
+export const sinLeer = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 5,
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.extraBold,
   color: colors.black,
-  textDecoration: 'none',
-} as const;
+});
 
-export const send = style([
-  pressable,
-  { ...button, padding: '0 20px', border: `2.5px solid ${colors.black}`, boxShadow: shadows.card },
-]);
+export const sinLeerDot = style({
+  boxSizing: 'border-box',
+  width: 10,
+  height: 10,
+  border: borders.thin,
+  borderRadius: shapeRadii.pill,
+  background: colors.yellow,
+});
 
-export const link = style([
-  pressable,
-  {
-    ...button,
-    ...contentBox,
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '0 20px',
-    border: `2px solid ${colors.black}`,
-    background: colors.white,
-    boxShadow: shadows.small,
-  },
-]);
+export const sistemaTitle = style({
+  fontSize: portalFontSizes.lg,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
 
-export const markRead = style([
-  pressable,
-  {
-    ...button,
-    padding: '0 18px',
-    border: `2px solid ${colors.black}`,
-    background: colors.gray100,
-    boxShadow: shadows.small,
-  },
-]);
+export const sistemaText = style({
+  lineHeight: 1.45,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
+});

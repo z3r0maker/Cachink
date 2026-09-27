@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 import { formatMoney, type Money } from '@xangarro/domain';
 
 import { OPERADOR_BASE } from '../shell/nav';
-import { ListCard, TintBox } from '../ui/parts';
-import * as u from '../ui/ui.css';
-import * as l from './lists.css';
+import { Panel, Tile } from '../ui/panel';
+import * as p from '../ui/panel.css';
+import * as r from './rows.css';
 import type { Movimiento, MovimientoTipo } from './types';
 
 const KIND: Record<MovimientoTipo, { tint: string; icon: string }> = {
@@ -21,37 +22,38 @@ const KIND: Record<MovimientoTipo, { tint: string; icon: string }> = {
   merma: { tint: colors.peachSoft, icon: 'M12 5v14M5 12l7 7 7-7' },
 };
 
-/** «—» for movements that move no money; negatives in red with a true minus. */
+/** «Sin monto» for movements that move no money; negatives in red with a true minus. */
 function amount(m: Money): { text: string; color: string } {
-  if (m === 0n) return { text: '—', color: colors.gray400 };
+  if (m === 0n) return { text: 'Sin monto', color: colors.textMuted };
   if (m < 0n) return { text: `−${formatMoney(-m)}`, color: colors.redText };
   return { text: formatMoney(m), color: colors.black };
 }
 
 export function Movimientos({ items }: { readonly items: readonly Movimiento[] }) {
+  const link = (
+    <Link href={`${OPERADOR_BASE}/ventas`} className={p.headLink}>
+      Ver ventas
+    </Link>
+  );
   return (
-    <ListCard
-      label="Movimientos de tu turno"
-      headBg={colors.gray100}
-      link={{ label: 'Ver ventas', href: `${OPERADOR_BASE}/ventas` }}
-    >
+    <Panel label="Movimientos de tu turno" action={link}>
       {items.map((m) => {
         const k = KIND[m.tipo];
         const a = amount(m.monto);
         return (
-          <div key={m.id} className={u.row} data-hover="" style={{ gap: 14, padding: '13px 18px' }}>
-            <TintBox icon={k.icon} tint={k.tint} size={40} glyph={19} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className={l.name}>{m.titulo}</div>
-              <div className={l.detail}>{m.detalle}</div>
-            </div>
-            <span className={l.time}>{m.hora}</span>
-            <span className={l.amount} style={{ color: a.color }}>
+          <div key={m.id} className={r.row}>
+            <Tile icon={k.icon} tint={k.tint} />
+            <span className={r.main}>
+              <span className={p.rowTitle}>{m.titulo}</span>
+              <span className={p.rowDetail}>{m.detalle}</span>
+            </span>
+            <span className={r.hora}>{m.hora}</span>
+            <span className={r.monto} style={{ color: a.color, marginLeft: 0 }}>
               {a.text}
             </span>
           </div>
         );
       })}
-    </ListCard>
+    </Panel>
   );
 }

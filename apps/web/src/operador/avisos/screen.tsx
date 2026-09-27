@@ -1,16 +1,18 @@
 'use client';
 
+import { Don } from '@/components/don/don';
+
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import * as h from '../shell/actions.css';
 import { ICONS } from '../shell/nav';
-import { HeaderAction } from '../shell/shell';
+import { PageHead } from '../ui/panel';
+import * as p from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
-import { SegTabs } from '../ui/tabs';
 import { Toast } from '../ui/toast';
 import * as a from './avisos.css';
 import { AvisoCard } from './card';
 import * as r from './reply.css';
+import { AvisoSistema } from './sistema';
 import type { AvisoGrupo, AvisosScreenProps } from './types';
 import { useAvisos } from './use-avisos';
 
@@ -18,6 +20,8 @@ const TABS: readonly [AvisoGrupo, string][] = [
   ['dueno', 'De Pedro'],
   ['caja', 'De tu caja'],
 ];
+
+const LEIDO = 'M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16';
 
 /**
  * Operador · Avisos: the owner's messages and the register's own notices.
@@ -27,17 +31,13 @@ const TABS: readonly [AvisoGrupo, string][] = [
 export function AvisosScreen({ state, data, tab: initialTab }: AvisosScreenProps) {
   const v = useAvisos(data, initialTab);
   return (
-    <OpMain top={24} narrow>
-      <HeaderAction>
-        <button type="button" className={h.plainAction} onClick={v.markAll}>
+    <OpMain top={24}>
+      <div className={a.head}>
+        <PageHead title="Avisos" sub={`Lo que te manda ${data.dueno} y lo que la caja te avisa`} />
+        <button type="button" className={`${p.quietBtn} ${a.marcarTodo}`} onClick={v.markAll}>
+          <Icon path={LEIDO} size={18} strokeWidth={2.2} />
           Marcar todo como leído
         </button>
-      </HeaderAction>
-      <div>
-        <h1 className={a.h1}>Avisos</h1>
-        <div className={a.sub}>
-          Lo que te manda {data.dueno} y lo que el sistema te avisa de tu caja.
-        </div>
       </div>
       <Tabs v={v} dueno={data.dueno} />
       {state === 'happy' ? (
@@ -60,49 +60,66 @@ type Avisos = ReturnType<typeof useAvisos>;
 
 function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
   return (
-    <SegTabs
-      items={TABS.map(
-        ([key, label]) => [key, label.replace('Pedro', dueno), v.sinLeer(key)] as const,
-      )}
-      value={v.tab}
-      onChange={v.setTab}
-      density="avisos"
-    />
+    <div role="tablist" aria-label="Quién avisa" className={a.tabs}>
+      {TABS.map(([key, label]) => {
+        const n = v.sinLeer(key);
+        const text = label.replace('Pedro', dueno);
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={v.tab === key}
+            className={a.tab}
+            onClick={() => v.setTab(key)}
+          >
+            {n ? `${text} · ${n}` : text}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 function Lista({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
+  if (v.visibles.length === 0) return <NadaPorLeer tab={v.tab} dueno={dueno} />;
+  if (v.tab === 'caja') {
+    return (
+      <div role="tabpanel" className={a.listCaja}>
+        {v.visibles.map((x) => (
+          <AvisoSistema key={x.id} aviso={x} />
+        ))}
+      </div>
+    );
+  }
   return (
-    <div className={a.list}>
+    <div role="tabpanel" className={a.list}>
       {v.visibles.map((x) => (
         <AvisoCard
           key={x.id}
           aviso={x}
+          dueno={dueno}
           draft={v.draft}
           onDraft={v.setDraft}
           onSend={() => v.send(x)}
           onRead={() => v.markRead(x.id)}
         />
       ))}
-      {v.visibles.length === 0 ? <NadaPorLeer tab={v.tab} dueno={dueno} /> : null}
     </div>
   );
 }
 
-const CHECK = 'M20 6 9 17l-5-5';
-
+/** Don Cuentas with his book, on the empty tab. */
 function NadaPorLeer({ tab, dueno }: { readonly tab: AvisoGrupo; readonly dueno: string }) {
   return (
-    <div className={r.empty}>
-      <div className={r.emptyTile}>
-        <Icon path={CHECK} size={28} strokeWidth={2.7} />
-      </div>
-      <div className={r.emptyTitle}>Nada por leer</div>
-      <div className={r.emptyBody}>
+    <div role="tabpanel" className={r.empty}>
+      <Don pose="ayuda" size={96} />
+      <span className={r.emptyTitle}>Nada por leer</span>
+      <span className={r.emptyBody}>
         {tab === 'dueno'
           ? `${dueno} no te ha escrito nada nuevo.`
           : 'Tu caja no tiene avisos del sistema.'}
-      </div>
+      </span>
     </div>
   );
 }
