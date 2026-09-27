@@ -167,7 +167,7 @@ describe('snapshot bootstrap on the device (C-23)', () => {
     assert.equal(await count(db, 'inventory_movements'), 40_000);
     assert.equal(await count(db, '__xangarro_change_log'), 0);
     assert.equal(await stockOf(db, P1!), 40_000);
-    // ~3 s alone; the default 5 s is overrun when turbo runs every package at once.
+    // Under 1 s alone since rows are batched; the default 5 s is overrun on a loaded runner.
   }, 30_000);
 
   it('applies a page all or nothing: a bad row leaves no row, baseline or cursor behind', async () => {
