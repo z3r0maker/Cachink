@@ -21,7 +21,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 6: P-30, P-28, P-29, P-38, P-39, P-40 · `04-portal.md:1439`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:323`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1297`
-- **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:91`
+- **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
 - **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1286`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1317`
 - **N-03** Overage warnings and provider alerts `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
@@ -29,7 +29,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
 - **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
 
-## Lanzamiento (92)
+## Lanzamiento (91)
 
 Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
 
@@ -40,11 +40,10 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **X-03** Partner migration — Blocked by: X-02 · `07-launch.md:24`
 - [ ] **X-04** Xangarro as tenant #1 (dogfooding) — Blocked by: X-02 · `07-launch.md:30`
 - [ ] **X-05** Store listings + review readiness — Blocked by: F-01, A-15, X-07, B-04 · Falta: `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`. · `07-launch.md:38`
-- [ ] **X-06** CLAUDE.md amendments (human applies) — Blocked by: — (can be prepared any time; apply at launch) · `07-launch.md:74`
-- [ ] **X-07** Brand masters + derivatives (ADR-054 §6) — Blocked by: logo work (external) · Falta: the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest + the OG image). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`. · `07-launch.md:91`
-- [ ] **X-08** Repo + directory rename (optional, coordinate) — Blocked by: A-15 · `07-launch.md:98`
-- [ ] **X-09** ROADMAP.md reset — Blocked by: X-02 · `07-launch.md:104`
-- [ ] **X-10** Launch checklist gate — Blocked by: X-01…X-09 (except X-08) · `07-launch.md:110`
+- [ ] **X-07** Brand masters + derivatives (ADR-054 §6) — Blocked by: logo work (external) · Falta: the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest + the OG image). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`. · `07-launch.md:101`
+- [ ] **X-08** Repo + directory rename (optional, coordinate) — Blocked by: A-15 · `07-launch.md:108`
+- [ ] **X-09** ROADMAP.md reset — Blocked by: X-02 · `07-launch.md:114`
+- [ ] **X-10** Launch checklist gate — Blocked by: X-01…X-09 (except X-08) · `07-launch.md:120`
 
 ### `09-next-features.md` · 2. Launch blockers
 
@@ -271,7 +270,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `04-portal.md` — 12 abiertos (4 en curso, 0 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 5 hechos)
-- `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 1 hechos)
+- `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
 - `11-pre-launch-and-deferred.md` — 22 abiertos (0 en curso, 0 bloqueados, 7 hechos)
