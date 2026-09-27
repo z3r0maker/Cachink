@@ -60,6 +60,15 @@ function setup(d: Device) {
   return { clock, client, engine };
 }
 
+/** Resolves once `cond` holds; fails the test after `ms` instead of hanging. */
+async function until(cond: () => boolean, ms = 5_000): Promise<void> {
+  const deadline = Date.now() + ms;
+  while (!cond()) {
+    if (Date.now() > deadline) throw new Error(`condition not met within ${ms} ms`);
+    await new Promise((r) => setTimeout(r, 5));
+  }
+}
+
 describe('SyncEngine · backoff after a failed run', () => {
   it('defers automatic runs until the backoff ends, but not a manual one', async () => {
     const d = await activatedDevice(mock.url);
@@ -130,7 +139,9 @@ describe('SyncEngine · capture', () => {
     let release = (): void => undefined;
     client.gate = new Promise<void>((r) => (release = r));
     const first = engine.capture(); // pushes the sale, then waits in its pull
-    await new Promise((r) => setTimeout(r, 20));
+    // Wait for the condition, not a fixed 20 ms: CI's runner reached the gated
+    // pull later than that and failed the assertion below.
+    await until(() => client.pulls === 1);
     assert.equal(client.pulls, 1, 'the first run has already read the outbox');
     await ringSale(d);
     const second = engine.capture();
