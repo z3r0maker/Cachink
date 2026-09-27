@@ -8,6 +8,7 @@ import { expenses, sales, tickets } from '../schema/ledger.js';
 import { notices } from '../schema/portal.js';
 import { contarCapacidades, conteosAsesor } from './asesor-conteos.js';
 import type { Db } from '../client.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -42,7 +43,9 @@ function ventasRecientes(tx: Tx, desde: string) {
       and(
         isNull(sales.deletedAt),
         isNull(tickets.cancelledAt),
-        sql`left(${sales.fecha}, 10) >= ${desde}`,
+        // Sargable (DB2-QRY-04): a string is >= a ten-character day exactly
+        // when its first ten characters are, so timestamps still count.
+        fechaEnDias(sales.fecha, desde),
       ),
     );
 }
@@ -58,7 +61,7 @@ function gastosRecientes(tx: Tx, desde: string) {
       monto: expenses.monto,
     })
     .from(expenses)
-    .where(and(isNull(expenses.deletedAt), sql`left(${expenses.fecha}, 10) >= ${desde}`));
+    .where(and(isNull(expenses.deletedAt), fechaEnDias(expenses.fecha, desde)));
 }
 
 /** Every purchase entry — the cost-delta detector's history. */
@@ -106,7 +109,7 @@ async function inventarioYConteos(tx: Tx) {
      WHERE m.deleted_at IS NULL
      GROUP BY m.producto_id`);
   const ultimo = await tx.execute<{ producto_id: string; fecha: string | null }>(sql`
-    SELECT producto_id, max(left(fecha, 10)) AS fecha
+    SELECT producto_id, left(max(fecha), 10) AS fecha
       FROM inventory_movements
      WHERE deleted_at IS NULL
      GROUP BY producto_id`);

@@ -4,6 +4,10 @@
  * Provisions the hosted Supabase database: the four LOGIN roles, then every
  * migration not yet in the ledger — `hosted/`, `drizzle/`, then the admin
  * console's — each file in its own transaction, stopping at the first error.
+ * A file starting `-- xangarro:no-transaction` runs statement by statement
+ * instead, so it can build indexes CONCURRENTLY (`hosted/lint.ts`). A lock
+ * timeout is retried with backoff — the statement, or the whole file's
+ * transaction (`hosted/retry.ts`).
  * Runbook: docs/ops/provisioning.md.
  *
  * Inputs (from `packages/data-pg/.env.local`, overridden by the real env):
@@ -29,6 +33,7 @@ import {
   type MigrationFile,
 } from './hosted/plan';
 import { preflight } from './hosted/preflight';
+import { DEFAULT_RETRY, type RetryPolicy } from './hosted/retry';
 import { ensureRole, LOGIN_ROLES, passwordProblem, roleActions } from './hosted/roles';
 import { verifyPosture } from './hosted/verify';
 
@@ -104,20 +109,37 @@ async function pending(sql: Sql, root: string): Promise<MigrationFile[]> {
 async function applyAll(sql: Sql, files: readonly MigrationFile[], dryRun: boolean): Promise<void> {
   if (!dryRun) await ensureLedger(sql);
   for (const file of files) {
+    const mode = file.transactional ? '' : ' (no transaction)';
     if (dryRun) {
-      console.log(`would apply ${file.name}`);
+      console.log(`would apply ${file.name}${mode}`);
       continue;
     }
     try {
-      await applyMigration(sql, file);
+      await applyMigration(sql, file, retryLogged(file));
     } catch (error) {
-      throw new Error(`${file.name} failed and was rolled back: ${describe(error)}`);
+      const how = file.transactional
+        ? 'and was rolled back'
+        : '— statements before the failure stay applied; the next run repeats the file';
+      throw new Error(`${file.name} failed ${how}: ${describe(error)}`);
     }
-    console.log(`applied   ${file.name}`);
+    console.log(`applied   ${file.name}${mode}`);
   }
   console.log(
     dryRun ? `${files.length} migration(s) would run.` : `${files.length} migration(s) applied.`,
   );
+}
+
+/** The default retry, saying each time a lock was busy (DB3-MIG-01). */
+function retryLogged(file: MigrationFile): RetryPolicy {
+  const what = file.transactional ? 'the file' : 'the statement';
+  return {
+    ...DEFAULT_RETRY,
+    onRetry: (attempt, ms) =>
+      console.log(
+        `retry     ${file.name}: a lock is busy; ${what} again in ${ms} ms ` +
+          `(try ${attempt + 1} of ${DEFAULT_RETRY.attempts})`,
+      ),
+  };
 }
 
 async function checkPreflight(sql: Sql): Promise<number> {

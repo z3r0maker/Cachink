@@ -14,6 +14,7 @@ import {
   openingBalances,
   ownerNombre,
 } from '@xangarro/data-pg';
+import { MAX_PULL_ROWS_PER_TABLE } from '@xangarro/contracts';
 import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
 
@@ -44,6 +45,28 @@ export async function tenantFeatureFlags(tx: Tx): Promise<FeatureFlags> {
   return parseFeatureFlags(row?.flags ?? '{}');
 }
 
+/**
+ * The most live movements the **legacy** bootstrap still carries — the old
+ * contract's own per-table page. Past it an older device is told to update
+ * (426) instead of being sent a body no function can return (C-23).
+ */
+export const LEGACY_BOOTSTRAP_MAX_MOVEMENTS: number = MAX_PULL_ROWS_PER_TABLE;
+
+/** Whether an older device's all-history bootstrap still fits one response. */
+export async function legacyBootstrapFits(tx: Tx): Promise<boolean> {
+  const beyond = await tx
+    .select({ id: inventoryMovements.id })
+    .from(inventoryMovements)
+    .where(isNull(inventoryMovements.deletedAt))
+    .offset(LEGACY_BOOTSTRAP_MAX_MOVEMENTS)
+    .limit(1);
+  return beyond.length === 0;
+}
+
+/**
+ * The legacy bootstrap — everything, in one body — for a device that did not
+ * opt into the snapshot (C-23). New devices page through `snapshot.ts`.
+ */
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
 
@@ -55,7 +78,7 @@ export async function referenceTables(tx: Tx) {
     tx.select().from(employees).where(live(employees)),
     tx.select().from(recurringExpenses).where(live(recurringExpenses)),
     tx.select().from(conversionRecetas).where(live(conversionRecetas)),
-    // Every movement, not a stock snapshot: the phone's stock is their sum (ADR-081).
+    // Every movement: an older device's stock is their sum (ADR-081); capped above.
     tx.select().from(inventoryMovements).where(live(inventoryMovements)),
     tx.select().from(mensajesOperador).where(live(mensajesOperador)),
     // Day-one facts (C-20); an empty list is the common case.

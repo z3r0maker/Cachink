@@ -130,29 +130,39 @@ function Tab({ tab, m }: { readonly tab: string; readonly m: EstadosModel }) {
 }
 
 /** The content area: plan entitlement, load failure and the tab's statement. */
+const VACIO = {
+  title: 'Sin datos en el periodo',
+  body: 'No registraste ventas ni gastos en esta ventana de tiempo. Cambia el periodo arriba o captura un movimiento.',
+};
+
+/** A Personalizado past the cap (DS-09): nothing was computed; the picker says why. */
+const EXCEDIDO = {
+  title: 'Periodo demasiado largo',
+  body: 'Elige un periodo de hasta 13 meses. ¿Necesitas más? Exporta tus movimientos.',
+};
+
 function Statements({
   maySeeStatements,
   model,
   tab,
+  excedido,
 }: {
   readonly maySeeStatements: boolean;
   readonly model: EstadosModel | null;
   readonly tab: string;
+  readonly excedido: boolean;
 }) {
   return (
     <ScreenBody
       state={resolveScreenState({
         entitled: maySeeStatements,
-        error: model === null,
+        error: model === null && !excedido,
         // Posición is a snapshot, not a window: an empty period can still
         // stand on a real opening balance, so it keeps rendering (S-2).
-        isEmpty: model?.vacio === true && tab !== 'posicion',
+        isEmpty: excedido || (model?.vacio === true && tab !== 'posicion'),
       })}
       onRetry={() => window.location.reload()}
-      empty={{
-        title: 'Sin datos en el periodo',
-        body: 'No registraste ventas ni gastos en esta ventana de tiempo. Cambia el periodo arriba o captura un movimiento.',
-      }}
+      empty={excedido ? EXCEDIDO : VACIO}
       locked={{
         title: 'Los estados financieros llegan con Xangarro',
         body: 'Tu plan Xangarrito registra ventas y gastos. Los estados NIF (resultados, balance y flujo) vienen incluidos desde Xangarro.',
@@ -187,7 +197,12 @@ export function EstadosScreen({
         onValueChange={setTab}
         tabs={TABS}
       />
-      <Statements maySeeStatements={hasStatements(session.capabilities)} model={model} tab={tab} />
+      <Statements
+        maySeeStatements={hasStatements(session.capabilities)}
+        model={model}
+        tab={tab}
+        excedido={periodo.excedido}
+      />
     </>
   );
 }

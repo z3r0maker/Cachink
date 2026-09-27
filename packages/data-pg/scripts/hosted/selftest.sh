@@ -10,13 +10,16 @@
 #   3. the roles log in with their passwords (SCRAM) and carry the timeouts;
 #   4. a second run applies nothing;
 #   5. a new file is applied, alone;
-#   6. an edited applied file (checksum drift) aborts with an error.
+#   6. a no-transaction file builds an index CONCURRENTLY (DB2-MIG-01);
+#   7. a pending file that sorts below an applied one is refused;
+#   8. an edited applied file (checksum drift) aborts with an error.
 # The container and the copy are removed on exit, pass or fail. Never points
 # at anything but localhost.
 set -euo pipefail
 
-NAME=xangarro-mig-selftest
-PORT=55499
+# Overridable so concurrent sessions do not share one container.
+NAME="${XG_SELFTEST_NAME:-xangarro-mig-selftest}"
+PORT="${XG_SELFTEST_PORT:-55499}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG="$(cd "$HERE/../.." && pwd)"
 REPO="$(cd "$PKG/../.." && pwd)"
@@ -92,6 +95,21 @@ migrate || fail "run with a new file exited non-zero"
 grep -q "^applied   data-pg/9999_selftest_probe.sql" "$LOG" && grep -q "^1 migration(s) applied." "$LOG" ||
   fail "the new file should be applied alone"
 echo "ok  a new file is applied alone"
+
+printf -- "-- xangarro:no-transaction\nSET lock_timeout = '3s';\nCREATE INDEX CONCURRENTLY IF NOT EXISTS selftest_probe_idx ON public.selftest_probe (id);\n" \
+  >"$TREE/packages/data-pg/drizzle/9999_selftest_probe_idx.sql"
+migrate || fail "a no-transaction file exited non-zero"
+grep -q "^applied   data-pg/9999_selftest_probe_idx.sql (no transaction)" "$LOG" ||
+  fail "the no-transaction file should be applied, and say so"
+[ "$(psql_as postgres selftest "SELECT indisvalid FROM pg_index WHERE indexrelid = 'public.selftest_probe_idx'::regclass")" = t ] ||
+  fail "the concurrent index should exist and be valid"
+echo "ok  a no-transaction file builds its index CONCURRENTLY"
+
+echo "SELECT 1;" >"$TREE/packages/data-pg/drizzle/9998_selftest_late.sql"
+migrate && fail "an out-of-order file should abort"
+grep -q "sorts before data-pg/9999_selftest_probe_idx.sql" "$LOG" || fail "the refusal should name both files"
+rm "$TREE/packages/data-pg/drizzle/9998_selftest_late.sql"
+echo "ok  a file numbered below an applied one is refused"
 
 BAD="$TREE/packages/data-pg/drizzle/9999_selftest_zbad.sql"
 echo "CREATE TABLE public.selftest_bad (id int); SELECT 1 / 0;" >"$BAD"

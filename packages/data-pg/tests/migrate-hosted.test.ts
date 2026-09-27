@@ -95,6 +95,63 @@ describe('pendingMigrations', () => {
     );
   });
 
+  it('refuses a pending file that sorts below the last applied one in its set', () => {
+    // The audit's case: 0033_geo_prune landed after 0034 had been applied, so
+    // hosted applied it last and a fresh database applied it first.
+    const files = listMigrations(
+      tree({
+        'packages/data-pg/drizzle/0033_late.sql': 'L',
+        'packages/data-pg/drizzle/0034_b.sql': 'B',
+        'apps/backoffice/src/server/db/migrations/0001_a.sql': 'A',
+      }),
+    );
+    const applied = files.filter((f) => f.name === 'data-pg/0034_b.sql');
+    assert.throws(
+      () => pendingMigrations(files, applied),
+      (e: unknown) =>
+        e instanceof MigrationPlanError &&
+        e.code === 'OUT_OF_ORDER' &&
+        e.message.includes('data-pg/0033_late.sql'),
+    );
+  });
+
+  it('orders within a set only: a later set may still have lower numbers pending', () => {
+    const files = listMigrations(
+      tree({
+        'packages/data-pg/drizzle/0043_x.sql': 'X',
+        'apps/backoffice/src/server/db/migrations/0001_a.sql': 'A',
+      }),
+    );
+    const applied = files.filter((f) => f.name.startsWith('data-pg/'));
+    assert.deepEqual(
+      pendingMigrations(files, applied).map((f) => f.name),
+      ['admin/0001_a.sql'],
+    );
+  });
+
+  it('marks a no-transaction file and refuses one that could not be repeated', () => {
+    const marker = '-- xangarro:no-transaction\n';
+    const good = `${marker}SET lock_timeout = '3s';\nCREATE INDEX CONCURRENTLY IF NOT EXISTS i ON t (x);\n`;
+    const files = listMigrations(
+      tree({
+        'packages/data-pg/drizzle/0000_a.sql': 'A',
+        'packages/data-pg/drizzle/0001_idx.sql': good,
+      }),
+    );
+    assert.deepEqual(
+      files.map((f) => f.transactional),
+      [true, false],
+    );
+    assert.equal(pendingMigrations(files, []).length, 2);
+    const bad = listMigrations(
+      tree({ 'packages/data-pg/drizzle/0001_idx.sql': `${marker}CREATE INDEX i ON t (x);` }),
+    );
+    assert.throws(
+      () => pendingMigrations(bad, []),
+      (e: unknown) => e instanceof MigrationPlanError && e.code === 'UNSAFE_FILE',
+    );
+  });
+
   it('refuses an applied file that left the repository', () => {
     const files = listMigrations(root());
     assert.throws(

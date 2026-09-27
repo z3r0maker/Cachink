@@ -4,6 +4,8 @@ import postgres from 'postgres';
 
 import { createDb, withBusiness, type Db } from '../src/client';
 import { listMovimientos } from '../src/queries/movimientos';
+import { PORTAL_DEVICE_ID } from '@xangarro/domain/usage';
+
 import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
@@ -58,9 +60,10 @@ describe('B-3: who captured a movimiento, and from what', () => {
     await owner`INSERT INTO sales ${owner({ id: VENTA_CON, ticket_id: TICKET_CON, fecha: '2026-05-12', concepto: 'Taco al pastor ×3', categoria: 'Producto', monto_centavos: 7500, producto_id: PROD, ...fila })}`;
     await owner`INSERT INTO sync_receipts ${owner({ table_name: 'sales', row_id: VENTA_CON, seq: 1, device_id: DEV, row_updated_at: NOW, received_at: NOW, business_id: BIZ })}`;
 
-    // And one the portal created: no shift, no receipt.
+    // And one the portal created: no shift, stamped with the portal's id.
+    const portal = { ...fila, device_id: PORTAL_DEVICE_ID };
     await owner`INSERT INTO tickets ${owner({ id: TICKET_SOLO, folio: 2, fecha: '2026-05-11', hora: '09:05:00', concepto: 'Refresco', metodo: 'Tarjeta', estado_pago: 'pagado', ...fila })}`;
-    await owner`INSERT INTO sales ${owner({ id: VENTA_SOLO, ticket_id: TICKET_SOLO, fecha: '2026-05-11', concepto: 'Refresco ×1', categoria: 'Producto', monto_centavos: 2500, producto_id: PROD, ...fila })}`;
+    await owner`INSERT INTO sales ${owner({ id: VENTA_SOLO, ticket_id: TICKET_SOLO, fecha: '2026-05-11', concepto: 'Refresco ×1', categoria: 'Producto', monto_centavos: 2500, producto_id: PROD, ...portal })}`;
   });
 
   afterAll(async () => {
@@ -69,11 +72,11 @@ describe('B-3: who captured a movimiento, and from what', () => {
     await owner?.end({ timeout: 5 });
   });
 
-  it('names the operator through the shift, and the device through the receipt', async () => {
+  it('names the operator through the shift, and the device the row was captured on', async () => {
     const rows = await withBusiness(app, BIZ, (tx) => listMovimientos(tx, 'venta'));
     const conTodo = rows.find((r) => r.concepto === 'Taco al pastor ×3');
     assert.equal(conTodo?.operador, 'Ana Robledo', 'the shift never reached the operator');
-    assert.equal(conTodo?.dispositivo, 'iPhone de caja', 'the receipt never reached the device');
+    assert.equal(conTodo?.dispositivo, 'iPhone de caja', 'the row never reached its device');
   });
 
   it('leaves both null for a row the portal created, rather than guessing', async () => {

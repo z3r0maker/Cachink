@@ -120,8 +120,11 @@ jobs:
 
       # Includes apps/landing, whose `test` is its production build + prerender
       # smoke assertions (ADR-084) — the marketing site's build gate.
+      # Two packages at a time: each Vitest already runs a worker per core, and
+      # turbo's default of 10 put ~30 workers on this 4-vCPU runner — the sync
+      # suite ran 36x slower than on a laptop and its heavier cases timed out.
       - name: Unit tests
-        run: pnpm test
+        run: pnpm test --concurrency=2
 
       - name: Root script tests
         run: pnpm test:scripts
@@ -359,6 +362,11 @@ jobs:
 
       - run: pnpm --filter @xangarro/data-pg db:apply
       - run: pnpm --filter @xangarro/data-pg db:seed
+
+      # The portal's own Postgres suites (the batched push, ADR-120), with the
+      # REQUIRE_DB fuse: a missing database fails here instead of skipping.
+      - name: Integration (portal ↔ Postgres)
+        run: pnpm --filter @xangarro/web test:db
 
       # Deliberately NOT `turbo run build`: turbo.json's `build` task declares
       # outputs `dist/**` and `build/**` but not `.next/**`, so a cache hit

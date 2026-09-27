@@ -7,6 +7,11 @@
  * `cobrosIntegrados` is released on the platform (N-44); it is not yet.
  */
 
+/**
+ * The counts are **presence**, 0 or 1: every item asks `> 0`, and the loader
+ * answers with EXISTS rather than counting the tenant's history on every
+ * navigation (DB2-PAGE-01).
+ */
 export interface ChecklistSignals {
   readonly operadores: number;
   readonly productos: number;

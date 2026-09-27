@@ -4,6 +4,7 @@
  */
 
 import { ERROR_CATALOG, type ErrorCode } from '../errors.js';
+import { maxPushRowBytes, pushRowBytes } from '../row-size.js';
 import { isPushable } from '../scope.js';
 import {
   PUSH_REFERENCES,
@@ -52,6 +53,8 @@ function applyDelta(state: MockState, d: Delta, device: Device, scenario: Scenar
     return reject(d, d.op === 'update' ? 'HYBRID_UPDATE_FORBIDDEN' : 'TABLE_NOT_WRITABLE', d.table);
   if (row['businessId'] !== device.businessId)
     return reject(d, 'BUSINESS_MISMATCH', 'row.businessId ≠ token');
+  if (pushRowBytes(row) > maxPushRowBytes(d.table))
+    return reject(d, 'VALIDATION', `${d.table} row past its size limit`);
   const fk = missingFk(state, row);
   if (fk) return reject(d, fk.code, fk.message);
   if (scenario === 'flaky' && isFlakyReject(d.rowId))

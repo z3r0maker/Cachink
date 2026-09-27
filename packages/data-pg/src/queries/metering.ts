@@ -57,35 +57,47 @@ export async function usageCounts(
   }));
 }
 
-/** Insert or overwrite each `(business, period)` counter. */
+/**
+ * Rows per INSERT. Each row binds 5 parameters and postgres.js refuses more
+ * than 65,534 in one statement, so one INSERT for every counter broke at
+ * about 6,550 tenants (DB2-USE-01). 1,000 rows is 5,000 parameters.
+ */
+export const USAGE_COUNTER_CHUNK = 1000;
+
+/** Insert or overwrite each `(business, period)` counter, in chunks. */
 export async function saveUsageCounters(
   db: Conn,
   rows: readonly UsageCountRow[],
   computedAt: string,
 ): Promise<void> {
-  if (rows.length === 0) return;
-  await db
-    .insert(usageCounters)
-    .values(
-      rows.map((r) => ({
-        businessId: r.businessId,
-        period: r.period,
-        transactions: r.transactions,
-        products: r.activeProducts,
-        computedAt,
-      })),
-    )
-    .onConflictDoUpdate({
-      target: [usageCounters.businessId, usageCounters.period],
-      set: {
-        transactions: sql`excluded.transactions`,
-        products: sql`excluded.products`,
-        computedAt: sql`excluded.computed_at`,
-      },
-    });
+  for (let i = 0; i < rows.length; i += USAGE_COUNTER_CHUNK) {
+    await db
+      .insert(usageCounters)
+      .values(
+        rows.slice(i, i + USAGE_COUNTER_CHUNK).map((r) => ({
+          businessId: r.businessId,
+          period: r.period,
+          transactions: r.transactions,
+          products: r.activeProducts,
+          computedAt,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [usageCounters.businessId, usageCounters.period],
+        set: {
+          transactions: sql`excluded.transactions`,
+          products: sql`excluded.products`,
+          computedAt: sql`excluded.computed_at`,
+        },
+      });
+  }
 }
 
-/** Stored counters for the given months (every business). */
+/**
+ * Stored counters for the given months (every business). Served by
+ * `usage_counters_period_idx` (0045): the primary key leads with business_id
+ * and cannot answer `period IN (…)` without reading every tenant's months.
+ */
 export async function usageCountersOf(
   db: Conn,
   periods: readonly string[],

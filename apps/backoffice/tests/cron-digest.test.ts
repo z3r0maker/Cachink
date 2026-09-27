@@ -129,6 +129,50 @@ describe('GET /api/cron/digest', () => {
     assert.equal((await handleDigestCron(request(), deps({ repo: brokenRepo() }))).status, 500);
   });
 
+  it('prunes the portal sessions and throttle daily, and reports the count (DB2-CRON-01)', async () => {
+    let calls = 0;
+    const res = await handleDigestCron(
+      request(),
+      deps({
+        prunePortalSecurity: async () => {
+          calls += 1;
+          return 7;
+        },
+      }),
+    );
+    assert.equal(res.status, 200);
+    assert.equal(calls, 1);
+    const body = (await res.json()) as { prunedPortalSecurity: number | null };
+    assert.equal(body.prunedPortalSecurity, 7);
+  });
+
+  it('still mails when a sweep fails, logs it, and runs the sweeps after it', async () => {
+    const mailer = recordingMailer();
+    const logged: string[] = [];
+    const res = await handleDigestCron(
+      request(),
+      deps({
+        mailer,
+        log: (m) => logged.push(m),
+        prunePortalSecurity: async () => {
+          throw new Error('permission denied for function security_prune');
+        },
+        expireAssisted: async () => 2,
+      }),
+    );
+    assert.equal(res.status, 200);
+    assert.equal(mailer.sent.length, 1);
+    assert.deepEqual(logged, ['digest: pruning portal sessions and throttle failed']);
+    const body = (await res.json()) as {
+      prunedPortalSecurity: number | null;
+      prunedSessions: number | null;
+      expiredAssisted: number;
+    };
+    assert.equal(body.prunedPortalSecurity, null);
+    assert.equal(body.prunedSessions, null, 'a step that is not wired reports null');
+    assert.equal(body.expiredAssisted, 2);
+  });
+
   it('answers 502 when the mailer fails', async () => {
     const res = await handleDigestCron(request(), deps({ mailer: recordingMailer(true) }));
     assert.equal(res.status, 502);

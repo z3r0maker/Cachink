@@ -68,13 +68,20 @@ test('each range chip filters the rows and the counter follows', async ({ page }
   // measured against the month, not against this.
   const alAbrir = await enRango(page, '2026-05-01', '2026-05-31');
 
+  // A chip is a navigation now (DB2-QRY-02): the server answers for the
+  // range. Until the URL names it, the rows on screen can still be the last
+  // range's — and a page of ten that all happen to fall on today would pass
+  // the in-range poll below while the counter still counts the month.
   await page.getByRole('button', { name: 'Hoy', exact: true }).click();
+  await expect(page).toHaveURL(/rango=hoy/);
   const hoy = await enRango(page, '2026-05-12', '2026-05-12');
 
   await page.getByRole('button', { name: 'Semana', exact: true }).click();
+  await expect(page).toHaveURL(/rango=semana/);
   const semana = await enRango(page, '2026-05-11', '2026-05-17');
 
   await page.getByRole('button', { name: 'Mayo 2026', exact: true }).click();
+  await expect(page).toHaveURL(/\/movimientos$/);
   const mes = await enRango(page, '2026-05-01', '2026-05-31');
 
   // Nested ranges. The month holds days other than the 12th, so Hoy must be a
@@ -88,6 +95,7 @@ test('each range chip filters the rows and the counter follows', async ({ page }
   await page.getByRole('button', { name: 'Personalizado', exact: true }).click();
   await page.getByTestId('rango-desde').fill('2026-05-11');
   await page.getByTestId('rango-hasta').fill('2026-05-11');
+  await expect(page).toHaveURL(/desde=2026-05-11&hasta=2026-05-11/);
   await enRango(page, '2026-05-11', '2026-05-11');
 });
 
@@ -145,6 +153,12 @@ test.describe('pagination', () => {
 
     await expect(counter(page)).toHaveText('Mostrando 1–10 de 23 movimientos');
     await expect(page.locator('main tbody tr')).toHaveCount(10);
+    // The page is ten rows cut by the server (DB2-QRY-02); the KPIs are the
+    // period's, summed in SQL — all 23 ventas of $10, not the ten on screen.
+    const kpi = page.locator('main').getByText('Ventas del periodo', { exact: true }).locator('..');
+    await expect(kpi).toContainText('$230.00');
+    const tabs = page.getByRole('group', { name: 'Movimientos' });
+    await expect(tabs.getByRole('button', { name: /^Ventas/ })).toHaveText('Ventas23');
     await page.getByRole('button', { name: 'Siguiente' }).click();
     await page.getByRole('button', { name: 'Siguiente' }).click();
     await expect(counter(page)).toHaveText('Mostrando 21–23 de 23 movimientos');
@@ -152,5 +166,9 @@ test.describe('pagination', () => {
 
     await page.getByRole('textbox', { name: 'Buscar movimientos' }).fill('Venta 1');
     await expect(counter(page)).toHaveText('Mostrando 1–10 de 11 movimientos');
+    // The search reached the server: the KPI follows it (Venta 1, 10–19).
+    await expect(kpi).toContainText('$110.00');
+    // And it is in the URL, so a reload keeps the filter.
+    await expect(page).toHaveURL(/q=Venta\+1/);
   });
 });

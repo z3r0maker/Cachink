@@ -62,19 +62,26 @@ export async function abrirTurno(
   }
 }
 
-/** Link, keep the credentials, load the picker, move to the NIP step. */
+/**
+ * Link, keep the credentials, load the picker, move to the NIP step. A
+ * tenant too big for one page (C-23) pulls the rest of its snapshot before
+ * the register opens; a failure there is not fatal — the next sync resumes it.
+ */
 export async function vincularYPasar(
   r: Vinculo,
   setOperadores: (o: readonly OperadorPara[]) => void,
 ): Promise<void> {
   const runtime = registerRuntime();
   await runtime.boot();
-  await runtime.vincular(r.tables as Parameters<typeof runtime.vincular>[0], r.businessId);
+  await runtime.vincular(r.bootstrap, r.businessId);
   writeDevice({
     deviceToken: r.deviceToken,
     deviceId: r.deviceId,
     businessId: r.businessId,
     activatedAt: new Date().toISOString(),
   });
+  if (r.bootstrap.snapshot?.next) {
+    await runtime.sync(r.deviceToken, { mode: 'completa', manual: true }).catch(() => null);
+  }
   setOperadores(await runtime.operadores(r.businessId, r.deviceId));
 }

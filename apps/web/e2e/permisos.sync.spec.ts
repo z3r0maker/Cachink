@@ -71,6 +71,10 @@ test('on Xangarrote an operator can be allowed to cancel sales', async ({ page }
   await page.getByRole('button', { name: 'Editar permisos' }).click();
   await page.getByRole('switch', { name: 'Puede cancelar ventas' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
+  // The switch's own label reads «Puede cancelar ventas» too, so seeing the
+  // text proved nothing: wait for the dialog to close (the save committed)
+  // before reading the database — under full-suite load it read `false`.
+  await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.getByText('Puede cancelar ventas', { exact: true }).first()).toBeVisible();
 
   const [row] = await asTenant(

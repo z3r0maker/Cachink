@@ -25,7 +25,17 @@ const billingUrl = (): string =>
   process.env.BILLING_DATABASE_URL ??
   execFileSync('../../packages/data-pg/scripts/db-local.sh', ['billing-url']).toString().trim();
 
-test.beforeAll(async () => {
+/**
+ * Seeds the two throwaway tenants once per worker. With `fullyParallel`,
+ * Playwright can run this file's `beforeAll` again in a worker that returns to
+ * the file — the module (and so `stamp`) is cached, and a second insert of the
+ * same email failed `users_email_key` under full-suite load. The memo makes
+ * the hook idempotent.
+ */
+let seeded: Promise<void> | undefined;
+test.beforeAll(() => (seeded ??= seedTenants()));
+
+async function seedTenants(): Promise<void> {
   const userId = randomUUID();
   const hash = await hashPassword(password);
   const producto = newUlid();
@@ -78,7 +88,7 @@ test.beforeAll(async () => {
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${freeUserId}, 'owner', ${freeBiz}, now(), now())`;
   });
-});
+}
 
 async function signInAs(page: Page, userEmail: string): Promise<void> {
   await page.goto('/login');

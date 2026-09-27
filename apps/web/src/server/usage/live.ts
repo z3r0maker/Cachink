@@ -30,7 +30,7 @@ let metering: Db | undefined;
 export function meteringDb(): Db {
   const url = process.env.METERING_DATABASE_URL;
   if (!url) throw new Error('METERING_DATABASE_URL is not set.');
-  metering ??= createDb(url);
+  metering ??= createDb(url, { max: 1 });
   return metering;
 }
 

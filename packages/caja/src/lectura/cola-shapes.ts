@@ -20,7 +20,7 @@ export type ClaseMovimiento =
   | 'cliente';
 
 /** One record waiting to be sent, grouped as the operator thinks of it. */
-export type PendienteCrudo =
+export type PendienteCrudo = (
   | {
       readonly tipo: 'venta';
       readonly id: string;
@@ -59,7 +59,11 @@ export type PendienteCrudo =
       /** Only for `inventario`: the ledger rows folded into one line. */
       readonly entradas?: number;
       readonly salidas?: number;
-    };
+    }
+) & {
+  /** Tried at least once and retrying by itself (DS-06's «M se reintentarán solos»). */
+  readonly reintento?: boolean;
+};
 
 /** An owner message addressed to this caja's operator (`mensajes_operador`). */
 export interface MensajePara {

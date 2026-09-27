@@ -3,7 +3,7 @@ import { afterAll, beforeAll, it } from 'vitest';
 import { sql } from 'drizzle-orm';
 
 import { createDb, withBusiness, type Db } from '../src/client';
-import { historialSync } from '../src/queries';
+import { HISTORIAL_DIAS, historialSync } from '../src/queries';
 import { logChange } from '../src/sync/cursor';
 import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
@@ -11,7 +11,8 @@ import { testId } from './support/test-ids';
 /**
  * P-11's Historial, derived from receipts, rejections and the change log, on a
  * throwaway tenant: one push of 3 rows is one «envio» line, a refused row one
- * «rechazo», and 2 portal edits one «portal» line.
+ * «rechazo», and 2 portal edits one «portal» line. Anything older than the
+ * window (30 days) stays out, whatever its kind.
  */
 const { url, describe } = integrationSuite();
 const BIZ = testId('H');
@@ -26,6 +27,19 @@ describe('historialSync', () => {
       await tx.execute(sql`
         INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
         VALUES (${DEV}, 'Caja mostrador', 'android', 'x', ${BIZ}, now(), now())`);
+      // Older than the 30-day window, of every kind: none of it is shown.
+      // Logged first, as time would have it: seq and created_at rise together.
+      const viejo = sql`now() - interval '45 days'`;
+      const seq = await logChange(tx, BIZ, 'products', 'viejo', 'insert');
+      await tx.execute(
+        sql`UPDATE sync_log SET created_at = ${viejo} WHERE business_id = ${BIZ} AND seq = ${seq}`,
+      );
+      await tx.execute(sql`
+        INSERT INTO sync_receipts (table_name, row_id, seq, device_id, row_updated_at, received_at, business_id)
+        VALUES ('sales', 'viejo', ${seq + 1000}, ${DEV}, ${viejo}, ${viejo}, ${BIZ})`);
+      await tx.execute(sql`
+        INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, received_at, business_id, created_at, updated_at)
+        VALUES (${testId('R')}, ${DEV}, 'sales', 'viejo', 'PRODUCT_NOT_FOUND', ${viejo}, ${BIZ}, now(), now())`);
       for (const row of ['p1', 'p2', 'p3']) {
         const seq = await logChange(tx, BIZ, 'products', row, 'insert');
         await tx.execute(sql`
@@ -58,6 +72,16 @@ describe('historialSync', () => {
       { dispositivo: null, registros: 2 },
     );
     assert.match(byTipo.portal?.at ?? '', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00Z$/);
+  });
+
+  it('shows nothing older than the window', async () => {
+    const h = await withBusiness(db, BIZ, (tx) => historialSync(tx));
+    const limite = Date.now() - HISTORIAL_DIAS * 86_400_000;
+    assert.ok(h.every((e) => Date.parse(e.at) >= limite - 60_000));
+    assert.equal(
+      h.reduce((n, e) => n + e.registros, 0),
+      3 + 1 + 2,
+    );
   });
 
   it('honours the limit', async () => {

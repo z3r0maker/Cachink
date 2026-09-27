@@ -6,10 +6,15 @@ import type { TenantUsage, UsagePageQuery, UsageSource } from '../usage/port';
 import type { Db, Tx } from './client';
 
 /**
- * Postgres adapter for `UsageSource` (N-07): one call to
- * `admin_tenant_usage()` (0006_admin_usage_read.sql), which recomputes the
- * page's usage from source rows with the OQ-5 rules. Rows arrive one per
- * tenant per month, tenants already in keyset order.
+ * Postgres adapters for `UsageSource` (N-07). Both make one call and receive
+ * rows one per tenant per month, tenants already in keyset order:
+ *
+ * - `drizzleUsageSource` — `admin_tenant_usage()` (0006/0009), which
+ *   recomputes the page's usage from source rows with the OQ-5 rules. /uso.
+ * - `drizzleStoredUsageSource` — `admin_tenant_usage_stored()` (0022), the
+ *   same page from `usage_counters`, as the nightly job last stored it. The
+ *   digest reads this one (DB2-CRON-01): a day-old view, at the cost of an
+ *   index lookup instead of a recount of every tenant's history.
  */
 type Conn = Db | Tx;
 
@@ -43,11 +48,13 @@ function group(rows: readonly Row[]): TenantUsage[] {
   return out.map((o) => o.t);
 }
 
-export function drizzleUsageSource(conn: Conn): UsageSource {
+type UsageFunction = 'admin_tenant_usage' | 'admin_tenant_usage_stored';
+
+function source(conn: Conn, fn: UsageFunction): UsageSource {
   return {
     async page(q: UsagePageQuery): Promise<TenantUsage[]> {
       const rows = await conn.execute<Row>(sql`
-        SELECT * FROM public.admin_tenant_usage(
+        SELECT * FROM public.${sql.raw(fn)}(
           ${q.period},
           ${q.after?.createdAt ?? null}::timestamptz,
           ${q.after?.id ?? null}::text,
@@ -56,3 +63,8 @@ export function drizzleUsageSource(conn: Conn): UsageSource {
     },
   };
 }
+
+export const drizzleUsageSource = (conn: Conn): UsageSource => source(conn, 'admin_tenant_usage');
+
+export const drizzleStoredUsageSource = (conn: Conn): UsageSource =>
+  source(conn, 'admin_tenant_usage_stored');

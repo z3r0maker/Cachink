@@ -38,12 +38,18 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # `local/` before `drizzle/`: the compat layer creates the roles the migrations
 # grant to. CI calls this against its own service container, so both sides run
 # byte-identical SQL in the same order from one place (CLAUDE.md §2.3).
+# Like the hosted runner (ADR-119), each file runs in one transaction unless
+# its first line is `-- xangarro:no-transaction`; so a file's `SET LOCAL
+# lock_timeout` means here what it means in production.
 apply_sql() {
+  local single
   for f in "$HERE"/local/*.sql "$HERE"/drizzle/*.sql; do
     [ -e "$f" ] || continue
+    single=--single-transaction
+    [ "$(head -n 1 "$f" | tr -d '[:space:]')" = '--xangarro:no-transaction' ] && single=
     PGPASSWORD=xangarro PGOPTIONS='-c client_min_messages=warning' \
       psql -q -h localhost -p "$PORT" -U postgres -d "$DB" \
-      -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+      -v ON_ERROR_STOP=1 $single -f "$f" >/dev/null
   done
 }
 

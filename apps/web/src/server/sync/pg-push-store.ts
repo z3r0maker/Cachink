@@ -1,36 +1,51 @@
 import 'server-only';
 
-import type { PushReceipt, PushStore, WriteOutcome } from '@xangarro/application';
+import {
+  rowKey,
+  storableString,
+  type PushReceipt,
+  type PushStore,
+  type Rejection,
+  type RejectOptions,
+  type RowKey,
+  type WriteOutcome,
+} from '@xangarro/application';
 import {
   HYBRID_TABLES,
   type Delta,
   type PushableTable,
   type ReferencedTable,
-  type RejectedRow,
 } from '@xangarro/contracts';
 import {
-  allocateSeq,
-  committedCursor,
-  devices,
-  logChange,
-  SYNCED_TABLES,
-  syncReceipts,
-  syncRejections,
+  allocateSeqs,
+  existingIds,
+  finishPush,
+  logChanges,
+  receiptsOf,
+  resolveRejections,
+  saveReceipts,
+  saveRejections,
+  writeSyncedRows,
+  type RowWrite,
 } from '@xangarro/data-pg';
-import { newUlid } from '@xangarro/domain';
-import { and, eq, sql } from 'drizzle-orm';
 
 import type { Tx } from '../db';
 import { rowFromWire, type Row } from './codec';
 import { rejectionPayload } from './rejection-payload';
-import { upsertRow } from './upsert-row';
+import { storeError } from './store-error';
 
 /**
  * `PushStore` over Postgres, for one device inside one tenant transaction.
- * The rules are `ApplyPushUseCase`'s; this only stores what it decides.
+ * The rules are `ApplyPushUseCase`'s; this only stores what it decides, a
+ * batch per statement (ADR-120).
  */
 const HYBRID: ReadonlySet<string> = new Set(HYBRID_TABLES);
-const iso = (v: string) => new Date(v).toISOString();
+
+const OUTCOME: Record<RowWrite, (insertOnly: boolean) => WriteOutcome> = {
+  written: () => 'written',
+  kept: (insertOnly) => (insertOnly ? 'exists' : 'stale'),
+  invisible: () => 'foreign',
+};
 
 export class PgPushStore implements PushStore {
   constructor(
@@ -39,22 +54,17 @@ export class PgPushStore implements PushStore {
     private readonly deviceId: string,
   ) {}
 
-  async receipt(table: PushableTable, rowId: string): Promise<PushReceipt | null> {
-    const [r] = await this.tx
-      .select({ seq: syncReceipts.seq, at: syncReceipts.rowUpdatedAt })
-      .from(syncReceipts)
-      .where(and(eq(syncReceipts.tableName, table), eq(syncReceipts.rowId, rowId)));
-    return r === undefined ? null : { seq: r.seq, rowUpdatedAt: iso(r.at) };
+  async receipts(keys: readonly RowKey[]): Promise<ReadonlyMap<string, PushReceipt>> {
+    const rows = await receiptsOf(this.tx, this.businessId, keys);
+    return new Map(rows.map((r) => [rowKey(r.tableName, r.rowId), r]));
   }
 
-  async exists(table: ReferencedTable, id: string): Promise<boolean> {
-    const t = SYNCED_TABLES[table];
-    const [r] = await this.tx.select({ id: t.id }).from(t).where(eq(t.id, id));
-    return r !== undefined;
+  existing(table: ReferencedTable, ids: readonly string[]): Promise<ReadonlySet<string>> {
+    return existingIds(this.tx, table, ids);
   }
 
   /**
-   * A nested transaction is a SAVEPOINT, and the row runs on a store bound to
+   * A nested transaction is a SAVEPOINT, and the write runs on a store bound to
    * **it**. That matters: with postgres-js, a failed statement issued on the
    * outer handle aborts the whole transaction even inside a savepoint — the
    * first conformance run lost a whole batch to one bad row that way.
@@ -63,71 +73,84 @@ export class PgPushStore implements PushStore {
     return this.tx.transaction((sp) => fn(new PgPushStore(sp, this.businessId, this.deviceId)));
   }
 
-  write(d: Delta): Promise<WriteOutcome> {
-    const insertOnly = d.op === 'insert' && HYBRID.has(d.table);
-    return upsertRow(this.tx, d.table, rowFromWire(d.row as Row), insertOnly);
+  async write(table: PushableTable, deltas: readonly Delta[]): Promise<readonly WriteOutcome[]> {
+    const insertOnly = HYBRID.has(table);
+    const rows = deltas.map((d) => rowFromWire(d.row as Row));
+    try {
+      const written = await writeSyncedRows(this.tx, table, rows, insertOnly);
+      return written.map((w) => OUTCOME[w](insertOnly));
+    } catch (error) {
+      throw storeError(error, table, deltas);
+    }
   }
 
-  async accept(d: Delta): Promise<number> {
+  /**
+   * One cursor bump for the batch, then its log entries, its receipts and the
+   * closing of these rows' open rejections (DB3-SYNC-04) together: postgres.js
+   * pipelines the three statements, so accepting 500 rows is two round trips,
+   * with the tenant's cursor lock held from the first to commit.
+   */
+  async accept(deltas: readonly Delta[]): Promise<readonly number[]> {
     const { tx, businessId, deviceId } = this;
-    const seq = HYBRID.has(d.table)
-      ? await logChange(tx, businessId, d.table, d.rowId, d.op)
-      : await allocateSeq(tx, businessId);
-    const receivedAt = new Date().toISOString();
-    const receipt = {
-      seq,
-      deviceId,
-      rowUpdatedAt: String((d.row as Row)['updatedAt']),
-      receivedAt,
-    };
-    await tx
-      .insert(syncReceipts)
-      .values({ ...receipt, businessId, tableName: d.table, rowId: d.rowId })
-      .onConflictDoUpdate({
-        target: [syncReceipts.businessId, syncReceipts.tableName, syncReceipts.rowId],
-        set: receipt,
-      });
-    return seq;
+    if (deltas.length === 0) return [];
+    const first = await allocateSeqs(tx, businessId, deltas.length);
+    const seqs = deltas.map((_, i) => first + i);
+    const entries = deltas.map((d, i) => ({ d, seq: seqs[i] as number }));
+    await Promise.all([
+      logChanges(
+        tx,
+        businessId,
+        entries
+          .filter(({ d }) => HYBRID.has(d.table))
+          .map(({ d, seq }) => ({ seq, tableName: d.table, rowId: d.rowId, op: d.op })),
+      ),
+      saveReceipts(
+        tx,
+        businessId,
+        deviceId,
+        entries.map(({ d, seq }) => ({
+          seq,
+          tableName: d.table,
+          rowId: d.rowId,
+          rowUpdatedAt: String((d.row as Row)['updatedAt']),
+        })),
+      ),
+      resolveRejections(
+        tx,
+        businessId,
+        deviceId,
+        deltas.map((d) => ({ table: d.table, rowId: d.rowId })),
+      ),
+    ]);
+    return seqs;
   }
 
-  /** A retry of the same row updates its rejection rather than adding one. */
-  async reject(d: Delta, r: RejectedRow): Promise<void> {
-    const { tx, businessId, deviceId } = this;
-    const now = new Date().toISOString();
-    const fields = {
-      code: r.code,
-      message: r.message,
-      clientSeq: r.clientSeq,
-      payload: sql`${rejectionPayload(d.table, d.row as Row)}::jsonb`,
-      receivedAt: now,
-      resolvedAt: null,
-      updatedAt: now,
-    };
-    const key = { businessId, deviceId, tableName: d.table, rowId: d.rowId };
-    await tx
-      .insert(syncRejections)
-      .values({ ...fields, ...key, id: newUlid(), createdAt: now })
-      .onConflictDoUpdate({
-        target: [
-          syncRejections.businessId,
-          syncRejections.deviceId,
-          syncRejections.tableName,
-          syncRejections.rowId,
-        ],
-        set: fields,
-      });
+  /**
+   * Text columns refuse a NUL, so the id and the message are cleaned too: the
+   * use case keeps rejections in a savepoint, then `withoutPayload`, and a
+   * failure here must not be the row's own id (DB3-SYNC-01).
+   */
+  reject(rejections: readonly Rejection[], options: RejectOptions = {}): Promise<void> {
+    return saveRejections(
+      this.tx,
+      this.businessId,
+      this.deviceId,
+      rejections.map(({ delta: d, rejection: r }) => ({
+        tableName: d.table,
+        rowId: storableString(d.rowId),
+        clientSeq: r.clientSeq,
+        code: r.code,
+        message: storableString(r.message),
+        payload: options.withoutPayload === true ? null : rejectionPayload(d.table, d.row as Row),
+      })),
+    );
   }
 
-  async finish(acknowledgedThrough: number): Promise<number> {
-    await this.tx
-      .update(devices)
-      .set({
-        acknowledgedThrough: sql`GREATEST(${devices.acknowledgedThrough}, ${acknowledgedThrough})`,
-        lastPushAt: new Date().toISOString(),
-      })
-      .where(eq(devices.id, this.deviceId));
-    // Informational: the tenant's cursor at commit. A phone takes its pull
-    // cursor from pull responses only — UP rows are not in the pull stream.
-    return committedCursor(this.tx);
+  /**
+   * Informational: the tenant's cursor at commit. A phone takes its pull
+   * cursor from pull responses only — UP rows are not in the pull stream.
+   */
+  finish(acknowledgedThrough: number): Promise<number> {
+    return finishPush(this.tx, this.deviceId, acknowledgedThrough);
   }
 }

@@ -1,0 +1,178 @@
+{
+  "audit": "db-2026-09-26",
+  "baseline": "docs/audits/db-2026-09-17.md",
+  "commit": "4c1c837b",
+  "dataset": {
+    "tenants": 1003,
+    "tickets": 3160000,
+    "sales": 5056029,
+    "movements": 3476002,
+    "expenses": 316000,
+    "receipts": 12009024,
+    "sync_log": 3475944,
+    "db_bytes": "8.2 GB",
+    "bytes_per_ticket": 2736
+  },
+  "findings": [
+    {
+      "id": "DB2-USE-01",
+      "severity": "critical",
+      "title": "Per-push usage recount full-scans every tenant's inventory_movements",
+      "evidence": "0.60/0.89/1.19 s per push (mid/heavy/whale); 17/30/148 ms with (business_id, created_at)"
+    },
+    {
+      "id": "DB2-SYNC-01",
+      "severity": "critical",
+      "title": "Push is ~8 sequential statements per row inside the tenant lock",
+      "evidence": "500-row push 8.0 s vs 68 ms batched; backlog 1,117 vs 32,578 rows/s; 67 lock timeouts/min under same-tenant contention"
+    },
+    {
+      "id": "DB2-SYNC-02",
+      "severity": "critical",
+      "title": "Pushes over 64 rows overflow the subtransaction cache",
+      "evidence": "15/15 app backends overflowed during backlog run; postgres.js never RELEASEs"
+    },
+    {
+      "id": "DB2-QRY-01",
+      "severity": "critical",
+      "title": "serieDiaria: 60 full-history scans per Inicio",
+      "evidence": "8,094 ms -> 107 ms; prod statement_timeout 5 s"
+    },
+    {
+      "id": "DB2-DEV-01",
+      "severity": "high",
+      "title": "Retry rows stranded as pending forever; blocks cierre",
+      "evidence": "push.ts:103 markPending, status-store.ts:119 dueRetries rejected-only"
+    },
+    {
+      "id": "DB2-HOT-01",
+      "severity": "high",
+      "title": "api_latency_counters global hot row",
+      "evidence": "65.8% of statement time, 30 ms mean"
+    },
+    {
+      "id": "DB2-QRY-02",
+      "severity": "high",
+      "title": "Unbounded lists and exports",
+      "evidence": "listVentas 3,628 ms / 576K rows"
+    },
+    {
+      "id": "DB2-QRY-03",
+      "severity": "high",
+      "title": "RLS join-before-LIMIT planner trap",
+      "evidence": "1,395-2,649 ms -> 0.5 ms with subquery-first"
+    },
+    {
+      "id": "DB2-QRY-04",
+      "severity": "high",
+      "title": "left(fecha,10) non-sargable",
+      "evidence": "280 vs 48 ms per month on whale"
+    },
+    {
+      "id": "DB2-QRY-05",
+      "severity": "high",
+      "title": "Stock summed from all movements (7 places); unbounded bootstrap",
+      "evidence": "350-374 ms; 114 ms covering idx; bootstrap 396K rows"
+    },
+    {
+      "id": "DB2-SYNC-03",
+      "severity": "high",
+      "title": "sync_receipts 43% of DB; no retention for receipts or sync_log",
+      "evidence": "3.54 of 8.2 GB"
+    },
+    {
+      "id": "DB2-CONN-01",
+      "severity": "high",
+      "title": "Two pools per instance, no idle_timeout, pull awaits metering pool inside tx",
+      "evidence": "client.ts:23, pull.ts:38"
+    },
+    {
+      "id": "DB2-OPS-01",
+      "severity": "high",
+      "title": "No backups / PITR / drill",
+      "evidence": "carries DB-OPS-01, O-3"
+    },
+    {
+      "id": "DB2-MIG-01",
+      "severity": "high",
+      "title": "Migration pipeline: stale journal, no CONCURRENTLY, out-of-order prefixes",
+      "evidence": "journal 8 entries, snapshot 35 vs 45 tables"
+    },
+    {
+      "id": "DB2-EXP-01",
+      "severity": "high",
+      "title": "Movements export capped at 50 rows",
+      "evidence": "datasets.ts:76 -> lists.ts:107"
+    },
+    {
+      "id": "DB2-IDX-01",
+      "severity": "medium",
+      "title": "Index set: 10 to add, 7 redundant to drop",
+      "evidence": ""
+    },
+    {
+      "id": "DB2-DEV-02",
+      "severity": "medium",
+      "title": "No jitter, ignores Retry-After, caja push+pull per sale",
+      "evidence": ""
+    },
+    {
+      "id": "DB2-CRON-01",
+      "severity": "medium",
+      "title": "Crons and console scan everything; security_prune manual",
+      "evidence": ""
+    },
+    {
+      "id": "DB2-PAGE-01",
+      "severity": "medium",
+      "title": "~8 transactions per navigation incl. full count(*) of sales",
+      "evidence": ""
+    },
+    {
+      "id": "DB2-CHK-01",
+      "severity": "medium",
+      "title": "No CHECK/FK/unique integrity (B-19 never created)",
+      "evidence": "41/45 enum columns unchecked"
+    },
+    {
+      "id": "DB2-KEY-01",
+      "severity": "medium",
+      "title": "Text keys under en_US collation",
+      "evidence": "sort 2.8 s vs 1.4 s with COLLATE C (musl)"
+    },
+    {
+      "id": "DB2-NORM-01",
+      "severity": "medium",
+      "title": "Normalization: sale_ids list, duplicated cancellation, repeated enums",
+      "evidence": ""
+    },
+    {
+      "id": "DB2-RLS-01",
+      "severity": "low",
+      "title": "29/40 policies unwrapped; no measurable effect on index paths",
+      "evidence": "240 vs 272 ms"
+    },
+    {
+      "id": "DB2-PART-01",
+      "severity": "low",
+      "title": "Partition key decision for ADR-068 S2",
+      "evidence": "hash(business_id) ledger, range(time) sync tables"
+    }
+  ],
+  "prior_status": {
+    "fixed": [
+      "SYNC-01",
+      "SYNC-02",
+      "IDX-01",
+      "MIG-02",
+      "RLS-01",
+      "RLS-03",
+      "TYPE-01",
+      "CONN-01",
+      "SYNC-03"
+    ],
+    "partial": ["MIG-01", "MIG-03", "RLS-02", "QRY-01", "CHK-02", "FK-01", "SYNC-04", "SYNC-05"],
+    "open": ["OPS-01", "CHK-01", "QRY-02", "TYPE-02", "TYPE-03", "IDX-02"],
+    "obsolete": ["INFO-02"]
+  }
+}

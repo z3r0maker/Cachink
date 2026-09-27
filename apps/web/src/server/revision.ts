@@ -6,7 +6,7 @@
  * name).
  */
 
-import { and, eq, isNull, ne } from 'drizzle-orm';
+import { and, count, eq, inArray, isNull, ne, sum } from 'drizzle-orm';
 import {
   clientPayments,
   clients,
@@ -107,7 +107,12 @@ async function leerContexto(
   return { ventas, dupsProductos, fiado, dupsClientes };
 }
 
-/** Sales count and total per pending product. */
+/**
+ * Sales count and total per pending product — grouped in SQL over just those
+ * products (DB2-QRY-02). It used to read every sale the tenant ever made and
+ * filter the ids in JavaScript. Same rows as before: every line of the
+ * product, whatever its ticket's state.
+ */
 async function ventasPorProducto(
   tx: Tx,
   businessId: string,
@@ -116,14 +121,16 @@ async function ventasPorProducto(
   const m = new Map<string, { n: number; monto: bigint }>();
   if (ids.length === 0) return m;
   const filas = await tx
-    .select({ producto: sales.productoId, monto: sales.monto })
+    .select({
+      producto: sales.productoId,
+      n: count(),
+      // `sum` comes back as text; parsed below, never asserted (ADR-094).
+      monto: sum(sales.monto),
+    })
     .from(sales)
-    .where(eq(sales.businessId, businessId));
-  for (const f of filas) {
-    if (!ids.includes(f.producto)) continue;
-    const prev = m.get(f.producto) ?? { n: 0, monto: 0n };
-    m.set(f.producto, { n: prev.n + 1, monto: prev.monto + f.monto });
-  }
+    .where(and(eq(sales.businessId, businessId), inArray(sales.productoId, [...ids])))
+    .groupBy(sales.productoId);
+  for (const f of filas) m.set(f.producto, { n: Number(f.n), monto: BigInt(f.monto ?? '0') });
   return m;
 }
 
@@ -146,7 +153,11 @@ async function duplicados(
   return new Map(rows.map((r) => [r.nombre.toLowerCase(), r]));
 }
 
-/** Each pending client's standing fiado: Crédito lines minus abonos. */
+/**
+ * Each pending client's standing fiado: Crédito lines minus abonos, summed in
+ * SQL for just those clients (DB2-QRY-02) — both used to read the tenant's
+ * whole history into JavaScript and drop the other clients there.
+ */
 async function fiadoPorCliente(
   tx: Tx,
   businessId: string,
@@ -154,29 +165,35 @@ async function fiadoPorCliente(
 ): Promise<Map<string, bigint>> {
   const m = new Map<string, bigint>(ids.map((i) => [i, 0n]));
   if (ids.length === 0) return m;
+  const lista = [...ids];
   const lineas = await tx
-    .select({ cliente: tickets.clienteId, monto: sales.monto })
+    .select({ cliente: tickets.clienteId, monto: sum(sales.monto) })
     .from(tickets)
     .innerJoin(sales, eq(sales.ticketId, tickets.id))
     .where(
       and(
         eq(tickets.businessId, businessId),
+        inArray(tickets.clienteId, lista),
         eq(tickets.metodo, 'Crédito'),
         isNull(tickets.deletedAt),
         isNull(tickets.cancelledAt),
       ),
-    );
+    )
+    .groupBy(tickets.clienteId);
   for (const l of lineas) {
-    if (l.cliente === null || !m.has(l.cliente)) continue;
-    m.set(l.cliente, (m.get(l.cliente) ?? 0n) + l.monto);
+    if (l.cliente !== null) m.set(l.cliente, (m.get(l.cliente) ?? 0n) + BigInt(l.monto ?? '0'));
   }
   const abonos = await tx
-    .select({ cliente: clientPayments.clienteId, monto: clientPayments.montoCentavos })
+    .select({ cliente: clientPayments.clienteId, monto: sum(clientPayments.montoCentavos) })
     .from(clientPayments)
-    .where(and(eq(clientPayments.businessId, businessId), isNull(clientPayments.deletedAt)));
-  for (const a of abonos) {
-    if (!m.has(a.cliente)) continue;
-    m.set(a.cliente, (m.get(a.cliente) ?? 0n) - a.monto);
-  }
+    .where(
+      and(
+        eq(clientPayments.businessId, businessId),
+        inArray(clientPayments.clienteId, lista),
+        isNull(clientPayments.deletedAt),
+      ),
+    )
+    .groupBy(clientPayments.clienteId);
+  for (const a of abonos) m.set(a.cliente, (m.get(a.cliente) ?? 0n) - BigInt(a.monto ?? '0'));
   return m;
 }

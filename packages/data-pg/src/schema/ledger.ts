@@ -11,9 +11,22 @@
  * stamps, `bigint` for centavos — but never the names.
  */
 
+import { sql } from 'drizzle-orm';
 import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { auditColumns, centavos } from './_columns';
+
+/**
+ * Indexes from 0045_scale_indexes.sql (DB2-IDX-01, DB3-IDX-01), built
+ * CONCURRENTLY there; `created_at` serves the usage recount, the partial
+ * `(fecha DESC, id DESC)` the keyset lists and every date range (all of them
+ * say `deleted_at IS NULL`, so the plain `(business_id, fecha)` index went),
+ * the rest the turno / client / product lookups.
+ *
+ * Drizzle cannot declare `INCLUDE`: the SQL adds `INCLUDE (ticket_id)` to
+ * `sales_business_created_idx`, so the recount never reads the heap.
+ */
+const live = sql`deleted_at IS NULL`;
 
 export const clientPayments = pgTable(
   'client_payments',
@@ -76,7 +89,13 @@ export const expenses = pgTable(
     cajaTurnoId: text('caja_turno_id'),
     ...auditColumns,
   },
-  (t) => [index('expenses_business_idx').on(t.businessId, t.fecha)],
+  (t) => [
+    index('expenses_business_created_idx').on(t.businessId, t.createdAt),
+    index('expenses_business_fecha_id_live_idx')
+      .on(t.businessId, t.fecha.desc(), t.id.desc())
+      .where(live),
+    index('expenses_business_turno_idx').on(t.businessId, t.cajaTurnoId),
+  ],
 );
 
 export const recurringExpenses = pgTable(
@@ -132,7 +151,17 @@ export const tickets = pgTable(
     cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'string' }),
     ...auditColumns,
   },
-  (t) => [index('tickets_business_idx').on(t.businessId, t.fecha)],
+  (t) => [
+    index('tickets_business_idx').on(t.businessId, t.fecha),
+    index('tickets_business_turno_idx').on(t.businessId, t.cajaTurnoId),
+    index('tickets_business_cliente_idx')
+      .on(t.businessId, t.clienteId)
+      .where(sql`cliente_id IS NOT NULL`),
+    // The cancelled-ticket anti-join every total runs (DB3-QRY-01).
+    index('tickets_business_cancelled_idx')
+      .on(t.businessId, t.id)
+      .where(sql`cancelled_at IS NOT NULL`),
+  ],
 );
 
 /** A ticket's lines (ADR-073): product, quantity, amount. */
@@ -152,5 +181,11 @@ export const sales = pgTable(
     cantidad: integer('cantidad').notNull().default(1),
     ...auditColumns,
   },
-  (t) => [index('sales_business_idx').on(t.businessId, t.fecha)],
+  (t) => [
+    index('sales_business_created_idx').on(t.businessId, t.createdAt),
+    index('sales_business_fecha_id_live_idx')
+      .on(t.businessId, t.fecha.desc(), t.id.desc())
+      .where(live),
+    index('sales_business_producto_idx').on(t.businessId, t.productoId),
+  ],
 );

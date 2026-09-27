@@ -18,7 +18,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1003`
-- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:323`
+- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
 - **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1626`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1297`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -29,7 +29,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
 - **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
 
-## Lanzamiento (94)
+## Lanzamiento (95)
 
 Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
 
@@ -55,7 +55,7 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:693`
 - [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:709`
 - [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:727`
-- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01, DB-RLS-01 and DB-MIG-02 (B-03, 2026-09-23). Open: DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project. · `09-next-features.md:745`
+- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:745`
 - [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:759`
 - [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:767`
 - [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:777`
@@ -69,26 +69,27 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **O-4** Vercel project `xangarro-web`, Root Directory `apps/web`, domain `app.xangarro.mx`, region pdx1 · `11-pre-launch-and-deferred.md:27`
 - [ ] **O-5** Vercel project `xangarro-backoffice`, Root Directory `apps/backoffice`, domain `admin.xangarro.mx`, region pd… · `11-pre-launch-and-deferred.md:28`
 - [ ] **O-6** Vercel project `xangarro-landing`, Root Directory `apps/landing`, domain `xangarro.mx` · `11-pre-launch-and-deferred.md:29`
-- [ ] **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:31`
-- [ ] **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:32`
-- [ ] **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:33`
-- [ ] **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:34`
-- [ ] **O-11** `gh auth login` on the dev machine · `11-pre-launch-and-deferred.md:35`
-- [ ] **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:36`
-- [ ] **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:37`
-- [ ] **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:43`
-- [ ] **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:44`
-- [ ] **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:50`
-- [ ] **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:51`
-- [ ] **O-16** Until `live`: issue CFDIs manually in the SAT portal from the backoffice "Pagos sin CFDI" list; mark each pay… · `11-pre-launch-and-deferred.md:52`
-- [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:53`
-- [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:54`
-- [ ] **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:55`
-- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:56`
-- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:57`
-- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:58`
-- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:66`
-- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:67`
+- [ ] **O-32** Note for the Azure move (owner, 2026-09-26): when Postgres moves to Azure (Flexible Server), review a balance… · `11-pre-launch-and-deferred.md:31`
+- [ ] **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:32`
+- [ ] **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:33`
+- [ ] **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:34`
+- [ ] **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:35`
+- [ ] **O-11** `gh auth login` on the dev machine · `11-pre-launch-and-deferred.md:36`
+- [ ] **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:37`
+- [ ] **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:38`
+- [ ] **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:44`
+- [ ] **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:45`
+- [ ] **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:51`
+- [ ] **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:52`
+- [ ] **O-16** Until `live`: issue CFDIs manually in the SAT portal from the backoffice "Pagos sin CFDI" list; mark each pay… · `11-pre-launch-and-deferred.md:53`
+- [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:54`
+- [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:55`
+- [ ] **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:56`
+- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:57`
+- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:58`
+- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:59`
+- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
+- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:68`
 
 ### `../launch/production-readiness.md` · 0. The one thing everything waits on
 
@@ -217,14 +218,14 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (25)
+## Colas de tracks (35)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
 ### `02-contracts.md` · §8 Table scope
 
-- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:323`
-- [ ] **C-21** Kill switches on the wire · `02-contracts.md:494`
+- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:332`
+- [ ] **C-21** Kill switches on the wire · `02-contracts.md:503`
 
 ### `03-backend.md`
 
@@ -266,6 +267,25 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
 - [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
 
+### `18-db-scale-design-changes.md` · Portal
+
+- [ ] **DS-01** Ventas y gastos — filters answered by the server · `18-db-scale-design-changes.md:33`
+- [ ] **DS-02** Exportar — every row, with a preparing state · `18-db-scale-design-changes.md:66`
+- [ ] **DS-03** Sincronización › Historial — the last 30 days · `18-db-scale-design-changes.md:81`
+- [ ] **DS-04** Productos › Movimientos — the newest 50 · `18-db-scale-design-changes.md:91`
+
+### `18-db-scale-design-changes.md` · Caja (operador) and phone
+
+- [ ] **DS-05** Sync status — «Reintentando» · `18-db-scale-design-changes.md:100`
+- [ ] **DS-06** Cierre — rows still to send · `18-db-scale-design-changes.md:117`
+- [ ] **DS-07** Registros por enviar — last and next attempt · `18-db-scale-design-changes.md:131`
+
+### `18-db-scale-design-changes.md` · Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
+
+- [ ] **DS-08** Caja — already open in another tab · `18-db-scale-design-changes.md:144`
+- [ ] **DS-09** Estados — the custom range has a limit · `18-db-scale-design-changes.md:160`
+- [ ] **DS-10** Linking a big business — the first download comes in pages · `18-db-scale-design-changes.md:171`
+
 ### `19-movil-mostrador.md` · Phases
 
 - [ ] **M-06** Entrar y empezar. · `19-movil-mostrador.md:29`
@@ -278,7 +298,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ## Por archivo
 
-- `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 20 hechos)
+- `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 21 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
 - `04-portal.md` — 12 abiertos (4 en curso, 1 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
@@ -286,7 +306,8 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
-- `11-pre-launch-and-deferred.md` — 25 abiertos (0 en curso, 0 bloqueados, 7 hechos)
+- `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
+- `18-db-scale-design-changes.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
 - `19-movil-mostrador.md` — 7 abiertos (0 en curso, 0 bloqueados, 5 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)

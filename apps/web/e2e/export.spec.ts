@@ -1,3 +1,6 @@
+import ExcelJS from 'exceljs';
+
+import { BIZ, asTenant } from './sync-phone';
 import { expect, test } from './test';
 
 /**
@@ -27,6 +30,106 @@ test('Movimientos exports a workbook with a filename', async ({ page }) => {
 
   expect([bytes[0], bytes[1]]).toEqual(XLSX_MAGIC);
   expect(bytes.length).toBeGreaterThan(1000);
+});
+
+/**
+ * Data rows of an .xlsx — every row but each sheet's header. Past Excel's row
+ * limit an export continues in another sheet (DB3-EXP-01), so all of them.
+ */
+async function filasDelLibro(bytes: Buffer): Promise<number> {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(bytes as unknown as ArrayBuffer);
+  return wb.worksheets.reduce((n, w) => n + w.rowCount - 1, 0);
+}
+
+/**
+ * An export is the whole history (DB2-EXP-01). «Exportar movimientos» used the
+ * Productos list, which stops at 50, and the seed has far more than 50
+ * movements — so a file with 50 rows was a silently truncated one. The count
+ * is compared with the database's, read the plain way, not with a number off
+ * the seed.
+ */
+for (const [dataset, tabla] of [
+  ['movimientos', 'inventory_movements'],
+  ['ventas', 'sales'],
+  ['gastos', 'expenses'],
+] as const) {
+  test(`the ${dataset} export has every row the database has`, async ({ page }) => {
+    const res = await page.request.get(`/api/export/${dataset}`);
+    expect(res.status()).toBe(200);
+    const filas = await filasDelLibro(await res.body());
+    const [{ n }] = await asTenant(
+      BIZ,
+      (sql) =>
+        sql<[{ n: number }]>`SELECT count(*)::int AS n FROM ${sql(tabla)} WHERE deleted_at IS NULL`,
+    );
+    expect(n, `the seed has no ${tabla} to export`).toBeGreaterThan(0);
+    expect(filas).toBe(n);
+  });
+}
+
+/**
+ * DS-02's entry point: Productos › Movimientos exports the whole inventory
+ * history, not the fifty rows the tab lists — the file's rows are the table's.
+ */
+test('Productos › Movimientos downloads every inventory movement', async ({ page }) => {
+  await page.goto('/productos');
+  await page
+    .getByRole('group', { name: 'Productos' })
+    .getByRole('button', { name: /^Movimientos/ })
+    .click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('export-movimientos').click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^xangarro-movimientos-\d{4}-\d{2}-\d{2}\.xlsx$/);
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  const [{ n }] = await asTenant(
+    BIZ,
+    (sql) =>
+      sql<
+        [{ n: number }]
+      >`SELECT count(*)::int AS n FROM inventory_movements WHERE deleted_at IS NULL`,
+  );
+  expect(n).toBeGreaterThan(50);
+  expect(await filasDelLibro(Buffer.concat(chunks))).toBe(n);
+});
+
+/**
+ * DS-02: while the file is built the button says so and cannot be pressed
+ * again; a refusal is a toast, not a saved error page. The route is held and
+ * then answered 429 by the test, so the tenant's real allowance is untouched.
+ */
+test('the button shows «Preparando tu archivo…» and a refusal becomes a toast', async ({
+  page,
+}) => {
+  await page.goto('/movimientos');
+  let release: () => void = () => undefined;
+  const held = new Promise<void>((r) => {
+    release = r;
+  });
+  await page.route('**/api/export/ventas', async (route) => {
+    await held;
+    await route.fulfill({
+      status: 429,
+      headers: { 'Retry-After': '300' },
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Hiciste varias exportaciones seguidas.' }),
+    });
+  });
+  const boton = page.getByTestId('export-ventas');
+  await expect(async () => {
+    await boton.click();
+    await expect(boton).toHaveText('Preparando tu archivo…', { timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  await expect(boton).toBeDisabled();
+  release();
+  await expect(page.getByText('Espera unos minutos')).toBeVisible();
+  await expect(boton).toBeEnabled();
+  await expect(boton).toHaveText('Exportar');
+  await page.unroute('**/api/export/ventas');
 });
 
 test('an unknown dataset is refused rather than guessed at', async ({ request }) => {

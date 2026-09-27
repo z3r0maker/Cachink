@@ -64,6 +64,33 @@ export function nombreDelMes(date: IsoDate): string {
   return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)} ${date.slice(0, 4)}`;
 }
 
+/**
+ * The last day of `meses` calendar months starting on `desde`, both ends
+ * included: 2025-05-01 + 13 → 2026-05-31; 2025-05-12 + 13 → 2026-06-11. A
+ * start day the target month lacks is clamped to its end first, the way a
+ * calendar reads «a month after 31 January».
+ */
+export function finDeMeses(desde: IsoDate, meses: number): IsoDate {
+  if (!Number.isInteger(meses) || meses < 1) {
+    throw new RangeError(`meses must be a positive integer, got ${meses}`);
+  }
+  const [y, m, d] = desde.split('-').map(Number) as [number, number, number];
+  const diasDelMes = new Date(Date.UTC(y, m - 1 + meses + 1, 0)).getUTCDate();
+  return iso(Date.UTC(y, m - 1 + meses, Math.min(d, diasDelMes)) - DIA_MS);
+}
+
+/**
+ * The longest period the portal computes financial statements for (DB3-EST-01):
+ * a multi-year «Personalizado» loaded the whole history into memory. Thirteen
+ * months is a fiscal year plus the month either side of it.
+ */
+export const TOPE_MESES_ESTADOS = 13;
+
+/** Whether a range spans at most `meses` calendar months (Estados' cap, DB3-EST-01). */
+export function cabeEnMeses(rango: Rango, meses: number): boolean {
+  return rango.desde <= rango.hasta && rango.hasta <= finDeMeses(rango.desde, meses);
+}
+
 /** Whether `fecha` (a date or a timestamp) falls in the range, both ends included. */
 export function enRango(fecha: string, rango: Rango): boolean {
   const dia = fecha.slice(0, 10);

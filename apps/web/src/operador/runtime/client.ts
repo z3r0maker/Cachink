@@ -8,8 +8,8 @@
  */
 
 import type { RegistrarTicketInput } from '@xangarro/application';
-import type { ReferenceTables } from '@xangarro/contracts';
-import type { SyncRunResult } from '@xangarro/sync';
+import type { Bootstrap } from '@xangarro/contracts';
+import type { SyncCounts, SyncRunResult } from '@xangarro/sync';
 
 import type {
   BootInfo,
@@ -19,6 +19,7 @@ import type {
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
+  SyncMode,
   WorkerRequest,
   WorkerResponse,
 } from './protocol';
@@ -43,12 +44,10 @@ import type {
   InventarioPara,
   MoverInventarioCall,
 } from '@xangarro/caja/lectura';
+import type { Reclamo } from './pestana';
 
-export interface RuntimeCounts {
-  readonly pending: number;
-  readonly rejected: number;
-  readonly retrying: number;
-}
+/** The engine's own counts, as the Worker returns them: one shape, defined in `@xangarro/sync`. */
+export type RuntimeCounts = SyncCounts;
 
 interface Pending {
   readonly resolve: (v: unknown) => void;
@@ -83,6 +82,11 @@ export class RegisterRuntime {
     return promise;
   }
 
+  /** DB3-CAJA-01: does this tab own the register? `esperar` queues until it does. */
+  reclamar(esperar: boolean): Promise<Reclamo> {
+    return this.#call<Reclamo>({ method: 'reclamar', esperar });
+  }
+
   boot(): Promise<BootInfo> {
     void navigator.storage?.persist?.().catch(() => undefined);
     return this.#call<BootInfo>({ method: 'boot' });
@@ -92,8 +96,11 @@ export class RegisterRuntime {
     return this.#call<{ folio: number }>({ method: 'registrar', input, ctx });
   }
 
-  sync(token: string | null): Promise<SyncRunResult> {
-    return this.#call<SyncRunResult>({ method: 'sync', token });
+  sync(
+    token: string | null,
+    opts: { readonly mode: SyncMode; readonly manual: boolean },
+  ): Promise<SyncRunResult> {
+    return this.#call<SyncRunResult>({ method: 'sync', token, ...opts });
   }
 
   counts(): Promise<RuntimeCounts> {
@@ -101,8 +108,8 @@ export class RegisterRuntime {
   }
 
   /** O-12 · Vincular: the activation bootstrap becomes the local database. */
-  vincular(tables: ReferenceTables, businessId: string): Promise<void> {
-    return this.#call(calls.vincular(tables, businessId));
+  vincular(bootstrap: Bootstrap, businessId: string): Promise<void> {
+    return this.#call(calls.vincular(bootstrap, businessId));
   }
 
   operadores(businessId: string, deviceId: string): Promise<readonly OperadorPara[]> {

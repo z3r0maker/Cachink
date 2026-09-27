@@ -6,6 +6,7 @@ import { products } from '../schema/catalog.js';
 import { activationCodes, devices, notices } from '../schema/portal.js';
 import { syncRejections } from '../schema/sync.js';
 import type { Db } from '../client.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -75,16 +76,14 @@ export async function listClientes(tx: Tx) {
   return tx.select().from(clients).where(isNull(clients.deletedAt)).orderBy(asc(clients.nombre));
 }
 
-/** Real `Sale` and `Expense` rows for the NIF statements. */
 /**
  * A period's ledger for the statements (P-14): live sales and expenses whose
- * day falls in [from, to]. Filtered in SQL on the first ten characters of
- * `fecha` (text on both sides of the wire), so a timestamped fecha on the last
- * day still counts and a year's statement does not pull every row ever sold.
+ * day falls in [from, to]. Filtered in SQL with a range the `(business_id,
+ * fecha)` index serves (`fechaEnDias`, DB2-QRY-04), so a timestamped fecha on
+ * the last day still counts and a year's statement reads only its year.
  */
 export async function periodLedger(tx: Tx, from: string, to: string) {
-  const inRange = (col: typeof sales.fecha | typeof expenses.fecha) =>
-    sql`left(${col}, 10) BETWEEN ${from} AND ${to}`;
+  const inRange = (col: typeof sales.fecha | typeof expenses.fecha) => fechaEnDias(col, from, to);
   const [ventas, egresos] = await Promise.all([
     tx
       .select()
