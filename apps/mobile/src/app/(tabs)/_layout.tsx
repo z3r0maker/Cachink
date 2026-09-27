@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { Tabs, usePathname, useRouter } from 'expo-router';
-import { AppShell, useCurrentBusiness, useMode, useFeatureFlags, useSetUserId } from '@xangarro/ui';
+import { AppShell, useCurrentBusiness, useMode, useSetUserId } from '@xangarro/ui';
 
 /** Map the current pathname to the matching BottomTabBar `activeKey`. */
 function deriveActiveTab(pathname: string): string {
@@ -14,7 +14,6 @@ function deriveActiveTab(pathname: string): string {
   switch (segment) {
     case 'ventas':
     case 'productos':
-    case 'merma':
     case 'caja':
       return segment;
     case 'egresos':
@@ -31,12 +30,10 @@ export default function TabsLayout(): ReactElement {
   const pathname = usePathname();
   const business = useCurrentBusiness().data ?? null;
   const setUserId = useSetUserId();
-  const flags = useFeatureFlags();
   return (
     <AppShell
       activeTabKey={deriveActiveTab(pathname)}
       mode={mode}
-      flags={flags}
       title={business?.nombre ?? undefined}
       onNavigate={(path) => router.replace(path as never)}
       onSwitchOperator={() => setUserId(null)}

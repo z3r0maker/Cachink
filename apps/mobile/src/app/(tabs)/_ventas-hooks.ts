@@ -3,31 +3,21 @@
  * Underscore prefix → Expo Router ignores this file.
  */
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Alert } from 'react-native';
-import { PlanLimitError } from '@xangarro/domain';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  buildQuickSellPayload,
   impactLight,
   totalDelDia,
   useCart,
-  useSaleSound,
   useCheckoutStore,
-  useCurrentBusiness,
-  useEliminarVenta,
   useOpenCajaTurno,
   useProductosParaVenta,
   useProductosConStock,
-  useRegistrarVenta,
   useStockMap,
   useVentasByDate,
   type CartAction,
   type CartState,
 } from '@xangarro/ui';
-import type { Business, IsoDate, PaymentMethod, Product, Sale } from '@xangarro/domain';
-import { useSaleSoundPlayer } from '../../shell/use-sale-sound-player';
-import { useSwipeState } from '../../shell/use-swipe-state';
-import { useShareComprobante } from '../../shell/ventas-slots';
+import type { IsoDate, Product, Sale } from '@xangarro/domain';
 
 export type { CartAction, CartState };
 export { useOpenCajaTurno };
@@ -44,46 +34,22 @@ function useCheckoutReturnClear(dispatch: React.Dispatch<CartAction>): void {
   }, [checkoutCart, dispatch]);
 }
 
-export function useSaleConfirmation(): {
-  showSaleBurst: boolean;
-  setShowSaleBurst: (v: boolean) => void;
-  triggerSaleConfirmation: () => void;
-} {
-  const [showSaleBurst, setShowSaleBurst] = useState(false);
-  const saleSoundPlayer = useSaleSoundPlayer();
-  const { play: playSaleSound } = useSaleSound(saleSoundPlayer);
-  const triggerSaleConfirmation = useCallback(() => {
-    setShowSaleBurst(true);
-    playSaleSound();
-  }, [playSaleSound]);
-  return { showSaleBurst, setShowSaleBurst, triggerSaleConfirmation };
-}
-
 export function useVentasQueries(fecha: IsoDate): {
   productos: readonly Product[];
   productosData: readonly Product[] | undefined;
   stockMap: ReadonlyMap<string, number>;
-  business: Business | null;
-  registrar: ReturnType<typeof useRegistrarVenta>;
-  eliminar: ReturnType<typeof useEliminarVenta>;
   ventas: readonly Sale[];
   total: bigint;
 } {
   const ventasQ = useVentasByDate(fecha);
   const productosQ = useProductosParaVenta();
   const stockQ = useProductosConStock();
-  const business = useCurrentBusiness().data ?? null;
-  const registrar = useRegistrarVenta();
-  const eliminar = useEliminarVenta();
   const stockMap = useStockMap(stockQ);
   const ventas = ventasQ.data ?? [];
   return {
     productos: productosQ.data ?? [],
     productosData: productosQ.data,
     stockMap,
-    business,
-    registrar,
-    eliminar,
     ventas,
     total: totalDelDia(ventas),
   };
@@ -122,53 +88,4 @@ export function useCartHelpers(
     [dispatch, stockMap],
   );
   return { cartQuantities, handleAddToCart };
-}
-
-export function useVentasCheckout(
-  business: Business | null,
-  productos: readonly Product[],
-  cartItems: CartState['items'],
-  fecha: IsoDate,
-  registrar: ReturnType<typeof useRegistrarVenta>,
-  dispatch: React.Dispatch<CartAction>,
-  onDone: () => void,
-): (metodo: PaymentMethod) => Promise<void> {
-  return useCallback(
-    async (metodo: PaymentMethod) => {
-      if (!business) {
-        Alert.alert('Negocio no configurado', 'Configura tu negocio en Ajustes.');
-        return;
-      }
-      for (const item of cartItems) {
-        const producto = productos.find((p) => p.id === item.productoId);
-        if (!producto) continue;
-        try {
-          await registrar.mutateAsync({
-            ...buildQuickSellPayload({ producto, business, fecha, metodo }),
-            cantidad: item.cantidad,
-          });
-        } catch (err) {
-          // The plan-limit sheet already explains a PlanLimitError (A-10).
-          if (!(err instanceof PlanLimitError))
-            Alert.alert('Error parcial', (err as Error).message);
-          return;
-        }
-      }
-      dispatch({ type: 'clear' });
-      onDone();
-    },
-    [business, productos, cartItems, fecha, registrar, dispatch, onDone],
-  );
-}
-
-export function useVentasDetail(business: Business | null): {
-  selected: Sale | null;
-  setSelected: (v: Sale | null) => void;
-  handleShare: () => void;
-  swipe: ReturnType<typeof useSwipeState<Sale>>;
-} {
-  const [selected, setSelected] = useState<Sale | null>(null);
-  const handleShare = useShareComprobante(selected, business, () => setSelected(null));
-  const swipe = useSwipeState<Sale>();
-  return { selected, setSelected, handleShare, swipe };
 }

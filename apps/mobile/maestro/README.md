@@ -294,45 +294,31 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 ### Ventas + Checkout
 
-| Flow                                | What it proves                            |
-| ----------------------------------- | ----------------------------------------- |
-| `venta-efectivo.yaml`               | Inline POS → Efectivo → sale appears      |
-| `venta-manual.yaml`                 | Manual venta entry form                   |
-| `venta-otros-metodos.yaml`          | Non-cash payment methods                  |
-| `venta-credito.yaml`                | Crédito + client → Director CxC           |
-| `venta-comprobante.yaml`            | Comprobante generation + share            |
-| `venta-cantidad-multiple.yaml`      | Multiple quantity selection               |
-| `venta-search-product.yaml`         | POS product search                        |
-| `venta-detail-popover-inspect.yaml` | Sale detail popover                       |
-| `checkout-method-picker.yaml`       | **NEW** Multi-step checkout method picker |
-| `editar-venta.yaml`                 | Edit existing sale                        |
-| `editar-venta-full-form.yaml`       | Edit sale with all fields                 |
-| `ventas-total-y-fecha.yaml`         | Sales total + date filter                 |
-| `ventas-caja-gate.yaml`             | Caja gate blocks venta                    |
-| `validation-venta.yaml`             | Venta form validation errors              |
+| Flow                           | What it proves                            |
+| ------------------------------ | ----------------------------------------- |
+| `venta-efectivo.yaml`          | Inline POS → Efectivo → sale appears      |
+| `venta-otros-metodos.yaml`     | Non-cash payment methods                  |
+| `venta-cantidad-multiple.yaml` | Multiple quantity selection               |
+| `venta-search-product.yaml`    | POS product search                        |
+| `checkout-method-picker.yaml`  | **NEW** Multi-step checkout method picker |
+| `ventas-caja-gate.yaml`        | Caja gate blocks venta                    |
 
 ### Egresos (Gasto / Nómina / Inventario / Recurrente)
 
-| Flow                                  | What it proves                   |
-| ------------------------------------- | -------------------------------- |
-| `egreso-gasto.yaml`                   | Simple gasto creation            |
-| `egreso-gasto-via-fab.yaml`           | Gasto via FAB button             |
-| `egreso-gasto-full-form.yaml`         | Gasto with all fields            |
-| `egreso-nomina.yaml`                  | Nómina sub-tab + employee picker |
-| `egreso-nomina-periodo.yaml`          | Nómina period selection          |
-| `egreso-nomina-field-assertions.yaml` | Nómina field validations         |
-| `egreso-inventario.yaml`              | Egreso + inventory dual-write    |
-| `egreso-inventario-empty-state.yaml`  | Inventario egreso empty state    |
-| `egreso-recurrente.yaml`              | Mark gasto as recurrente         |
-| `egreso-recurrente-mensual.yaml`      | Monthly recurrence               |
-| `egreso-recurrente-semanal.yaml`      | Weekly recurrence                |
-| `egreso-recurrente-descartar.yaml`    | Discard recurring entry          |
-| `egresos-total-y-fecha.yaml`          | Egresos total + date filter      |
-| `egresos-por-categoria-donut.yaml`    | Category donut chart             |
-| `editar-egreso.yaml`                  | Edit existing egreso             |
-| `editar-egreso-full-form.yaml`        | Edit egreso with all fields      |
-| `nuevo-egreso-cancel.yaml`            | Cancel new egreso creation       |
-| `validation-egreso.yaml`              | Egreso form validation errors    |
+| Flow                                 | What it proves                |
+| ------------------------------------ | ----------------------------- |
+| `egreso-gasto.yaml`                  | Simple gasto creation         |
+| `egreso-gasto-via-fab.yaml`          | Gasto via FAB button          |
+| `egreso-gasto-full-form.yaml`        | Gasto with all fields         |
+| `egreso-inventario.yaml`             | Egreso + inventory dual-write |
+| `egreso-inventario-empty-state.yaml` | Inventario egreso empty state |
+| `egreso-recurrente.yaml`             | Mark gasto as recurrente      |
+| `egreso-recurrente-mensual.yaml`     | Monthly recurrence            |
+| `egreso-recurrente-semanal.yaml`     | Weekly recurrence             |
+| `egreso-recurrente-descartar.yaml`   | Discard recurring entry       |
+| `egresos-total-y-fecha.yaml`         | Egresos total + date filter   |
+| `nuevo-egreso-cancel.yaml`           | Cancel new egreso creation    |
+| `validation-egreso.yaml`             | Egreso form validation errors |
 
 ### Productos (Catálogo / Stock / Movimientos)
 
@@ -345,9 +331,7 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `producto-via-fab.yaml`             | Product creation via FAB      |
 | `producto-uso-selector.yaml`        | Product uso selector          |
 | `nuevo-producto-icon-picker.yaml`   | Icon picker for new product   |
-| `stock-kpi-strip.yaml`              | Stock KPI strip               |
 | `stock-buscar.yaml`                 | Stock search                  |
-| `stock-bajo-ver-link.yaml`          | Low stock → detail link       |
 | `editar-producto.yaml`              | Edit product                  |
 | `editar-producto-full-form.yaml`    | Edit product all fields       |
 | `movimiento-salida-con-motivo.yaml` | Salida with reason            |
@@ -369,16 +353,12 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `cliente-editar.yaml`             | Edit client               |
 | `cliente-pago-completo.yaml`      | Full payment              |
 | `cliente-pago-parcial.yaml`       | Partial payment           |
-| `registrar-pago-full-form.yaml`   | Payment form all fields   |
 
 ### Corte de Día
 
-| Flow                             | What it proves                             |
-| -------------------------------- | ------------------------------------------ |
-| `corte-de-dia.yaml`              | Operativo home → corte card → modal → save |
-| `corte-de-dia-detail-cards.yaml` | Corte detail cards                         |
-| `corte-con-diferencia.yaml`      | Diferencia explanation field               |
-| `corte-historial-director.yaml`  | Director views corte history               |
+| Flow                            | What it proves               |
+| ------------------------------- | ---------------------------- |
+| `corte-historial-director.yaml` | Director views corte history |
 
 ### Director Home + Reports
 
@@ -392,9 +372,7 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `director-home-utilidad-nav.yaml` | Utilidad navigation                 |
 | `director-home-stock-bajo.yaml`   | Low stock card                      |
 | `director-home-actividad.yaml`    | Activity feed                       |
-| `director-to-ventas.yaml`         | Director → venta detail             |
 | `informe-mensual.yaml`            | Estados → Informe PDF               |
-| `exportar-datos.yaml`             | Settings → Export Excel + PDF       |
 
 ### Estados Financieros + Indicadores
 
@@ -477,8 +455,6 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `settings-negocio-editar.yaml`    | Edit business info             |
 | `settings-edit-business-isr.yaml` | ISR business settings          |
 | `settings-tasas-isr.yaml`         | ISR rate tables                |
-| `settings-sistema-cards.yaml`     | Sistema screen cards           |
-| `settings-export-datos.yaml`      | Export data action             |
 | `settings-funciones-nav.yaml`     | Funciones navigation           |
 | `settings-check-updates.yaml`     | Check for updates              |
 | `settings-tipos-de-pago.yaml`     | **NEW** Payment method toggles |
@@ -503,18 +479,13 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 ### Merma (Shrinkage)
 
-| Flow                       | What it proves     |
-| -------------------------- | ------------------ |
-| `merma-registro.yaml`      | Register shrinkage |
-| `merma-cancel-y-nota.yaml` | Cancel + note      |
+| Flow | What it proves |
+| ---- | -------------- |
 
 ### Conversión (Materia Prima)
 
-| Flow                              | What it proves           |
-| --------------------------------- | ------------------------ |
-| `conversion-crear-receta.yaml`    | Create conversion recipe |
-| `conversion-ejecutar.yaml`        | Execute conversion       |
-| `conversion-eliminar-receta.yaml` | Delete recipe            |
+| Flow | What it proves |
+| ---- | -------------- |
 
 ### Checkout
 
@@ -524,12 +495,9 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 ### Deletions (State-Destroying)
 
-| Flow                               | What it proves            |
-| ---------------------------------- | ------------------------- |
-| `eliminar-venta.yaml`              | Delete sale               |
-| `eliminar-egreso.yaml`             | Delete egreso             |
-| `eliminar-egreso-via-popover.yaml` | Delete egreso via popover |
-| `eliminar-producto.yaml`           | Delete product            |
+| Flow                     | What it proves |
+| ------------------------ | -------------- |
+| `eliminar-producto.yaml` | Delete product |
 
 ### Empty States
 

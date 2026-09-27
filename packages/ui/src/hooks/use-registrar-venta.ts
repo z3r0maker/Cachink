@@ -60,17 +60,6 @@ async function checkStockBajo(
   }
 }
 
-function emitCreditoAlert(sale: Sale, emitAlert: ReturnType<typeof useEmitDirectorAlert>): void {
-  emitAlert.mutate({
-    source: 'credito-entrega',
-    severity: 'info',
-    titleKey: 'notificaciones.creditoEntrega',
-    message: `Se registró una venta a crédito: ${sale.concepto}.`,
-    actionRoute: '/ventas-credito',
-    metadata: JSON.stringify({ saleId: sale.id }),
-  });
-}
-
 /** The audited use case, memoised once per repository swap. */
 function useRegistrarUseCase(
   tickets: ReturnType<typeof useTicketsRepository>,
@@ -141,11 +130,8 @@ export function useRegistrarVenta(): RegistrarVentaResult {
     async mutationFn(input) {
       return useCase.execute(input as never);
     },
-    async onSuccess(sale, input) {
+    async onSuccess(sale) {
       await invalidateVentaSurfaces(queryClient, businessId, sale.fecha);
-      if ((input as { metodo?: string }).metodo === 'Crédito') {
-        emitCreditoAlert(sale, emitAlert);
-      }
       if (stockEnabled && sale.productoId) {
         void checkStockBajo(sale, businessId, products, movements, emitAlert);
       }

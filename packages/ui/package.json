@@ -15,7 +15,6 @@
     "./database": "./src/database/index.ts",
     "./app-config": "./src/app-config/index.ts",
     "./app": "./src/app/index.ts",
-    "./share": "./src/share/index.ts",
     "./hooks": "./src/hooks/index.ts",
     "./notifications": "./src/notifications/index.ts",
     "./sync": "./src/sync/index.ts",

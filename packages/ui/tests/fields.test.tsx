@@ -1,31 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { useState } from 'react';
-import {
-  DateField,
-  EmailField,
-  IntegerField,
-  MoneyField,
-  PasswordField,
-  PhoneField,
-  TextField,
-} from '../src/components/fields/index';
+import { MoneyField, TextField } from '../src/components/fields/index';
 import { fireEvent, renderWithProviders, screen } from './test-utils';
 import { initI18n } from '../src/i18n/index';
 import { keyboardHintsFor } from '../src/components/Input/input-shared';
 
 initI18n();
-
-/**
- * Tamagui's `<View>` wires `onPress` through React Native's Pressable
- * system, which on web listens for the full pointerdown → pointerup →
- * click sequence. `tap(el)` mirrors a real user tap so Pressable fires
- * its handler. Same helper used in input/combobox/modal tests.
- */
-function tap(el: Element): void {
-  fireEvent.pointerDown(el);
-  fireEvent.pointerUp(el);
-  fireEvent.click(el);
-}
 
 function inputOf(testID: string): HTMLInputElement {
   const root = screen.getAllByTestId(testID)[0]!;
@@ -89,91 +69,6 @@ describe('TextField', () => {
   it('exposes the variant via data-input-type so platform tests can assert keyboard hints', () => {
     renderWithProviders(<TextField value="" onChange={() => undefined} testID="text-variant" />);
     expect(inputOf('text-variant').getAttribute('data-input-type')).toBe('text');
-  });
-});
-
-describe('EmailField', () => {
-  it('drives the email keyboard variant onto the underlying input', () => {
-    renderWithProviders(
-      <EmailField label="Correo" value="" onChange={() => undefined} testID="email-row" />,
-    );
-    const input = inputOf('email-row');
-    expect(input.getAttribute('data-input-type')).toBe('email');
-    expect(input.type).toBe('email');
-    expect(input.getAttribute('inputmode')).toBe('email');
-  });
-});
-
-describe('PhoneField', () => {
-  it('drives the tel keyboard variant onto the underlying input', () => {
-    renderWithProviders(
-      <PhoneField label="Teléfono" value="" onChange={() => undefined} testID="phone-row" />,
-    );
-    const input = inputOf('phone-row');
-    expect(input.getAttribute('data-input-type')).toBe('phone');
-    expect(input.type).toBe('tel');
-    expect(input.getAttribute('inputmode')).toBe('tel');
-  });
-});
-
-describe('PasswordField', () => {
-  it('renders the underlying input as type=password by default', () => {
-    renderWithProviders(
-      <PasswordField label="Contraseña" value="hunter2" onChange={() => undefined} testID="pw" />,
-    );
-    expect(inputOf('pw').type).toBe('password');
-  });
-
-  it('toggles between masked and revealed when the show/hide button is tapped', () => {
-    function Harness(): JSX.Element {
-      const [v, setV] = useState('hunter2');
-      return <PasswordField label="Contraseña" value={v} onChange={setV} testID="pw-toggle" />;
-    }
-    renderWithProviders(<Harness />);
-    expect(inputOf('pw-toggle').type).toBe('password');
-    tap(screen.getAllByTestId('pw-toggle-toggle')[0]!);
-    expect(inputOf('pw-toggle').type).toBe('text');
-    tap(screen.getAllByTestId('pw-toggle-toggle')[0]!);
-    expect(inputOf('pw-toggle').type).toBe('password');
-  });
-
-  it('switches autoComplete to new-password when prop is passed', () => {
-    renderWithProviders(
-      <PasswordField
-        value=""
-        onChange={() => undefined}
-        autoComplete="new-password"
-        testID="pw-new"
-      />,
-    );
-    expect(inputOf('pw-new').getAttribute('autocomplete')).toBe('new-password');
-  });
-});
-
-describe('IntegerField', () => {
-  it('strips non-digit characters at the input layer instead of waiting for submit', () => {
-    function Harness(): JSX.Element {
-      const [v, setV] = useState('');
-      return <IntegerField label="Cantidad" value={v} onChange={setV} testID="int-row" />;
-    }
-    renderWithProviders(<Harness />);
-    const input = inputOf('int-row');
-    fireEvent.change(input, { target: { value: '12abc34' } });
-    expect(input.value).toBe('1234');
-  });
-
-  it('clamps the value to the configured max on blur', () => {
-    function Harness(): JSX.Element {
-      const [v, setV] = useState('');
-      return (
-        <IntegerField label="Cantidad" value={v} onChange={setV} max={99} testID="int-clamp" />
-      );
-    }
-    renderWithProviders(<Harness />);
-    const input = inputOf('int-clamp');
-    fireEvent.change(input, { target: { value: '500' } });
-    fireEvent.blur(input);
-    expect(input.value).toBe('99');
   });
 });
 
@@ -322,55 +217,5 @@ describe('MoneyField', () => {
     fireEvent.change(input, { target: { value: '100.00' } });
     fireEvent.blur(input);
     expect(input.value).toBe('100.00');
-  });
-});
-
-describe('IntegerField (edge cases)', () => {
-  // Audit Round 2 G3: clamp guards against overflow when the user
-  // pastes a value larger than Number.MAX_SAFE_INTEGER.
-  it('clamps at Number.MAX_SAFE_INTEGER without precision loss when max is set to it', () => {
-    function Harness(): JSX.Element {
-      const [v, setV] = useState('');
-      return (
-        <IntegerField
-          value={v}
-          onChange={setV}
-          max={Number.MAX_SAFE_INTEGER}
-          testID="int-max-safe"
-        />
-      );
-    }
-    renderWithProviders(<Harness />);
-    const input = inputOf('int-max-safe');
-    // Type 20 digits — well past safe-integer territory.
-    fireEvent.change(input, { target: { value: '99999999999999999999' } });
-    fireEvent.blur(input);
-    // Clamping bounds the value at MAX_SAFE_INTEGER (16 digits) before
-    // any further math runs against it.
-    expect(input.value).toBe(String(Number.MAX_SAFE_INTEGER));
-  });
-});
-
-describe('DateField (edge cases)', () => {
-  // Audit Round 2 G3: invalid dates like `2026-13-45` (month 13, day
-  // 45) are out-of-range. The web variant delegates to the browser's
-  // native `<input type="date">` which sets `validity.badInput` for
-  // unparseable strings; we assert that the field exposes the raw
-  // string but the platform validity flag flips so submit-time Zod
-  // can surface the error.
-  it('forwards an invalid ISO date (`2026-13-45`) to the value but flags it via validity.badInput', () => {
-    function Harness(): JSX.Element {
-      const [v, setV] = useState('');
-      return <DateField value={v} onChange={setV} label="Fecha" testID="date-invalid" />;
-    }
-    renderWithProviders(<Harness />);
-    const input = inputOf('date-invalid');
-    fireEvent.change(input, { target: { value: '2026-13-45' } });
-    // jsdom's `<input type="date">` is permissive — it stores the
-    // string verbatim. Real browsers reject the input via
-    // `validity.badInput`. We assert the round-trip behaviour both
-    // environments share: the value reaches the field unchanged so
-    // the form's Zod schema can decide.
-    expect(input.value === '2026-13-45' || input.value === '').toBe(true);
   });
 });

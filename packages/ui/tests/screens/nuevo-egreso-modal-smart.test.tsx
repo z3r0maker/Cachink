@@ -10,7 +10,7 @@
  * crashing.
  *
  * Form submission paths are already covered at the GastoTab /
- * InventarioTab / NominaTab level; this spec only verifies that the
+ * InventarioTab level; this spec only verifies that the
  * smart wrapper correctly substitutes the real tab bodies for the
  * render-prop slots the Round 1 + Round 2 routes were missing.
  */
@@ -61,17 +61,6 @@ describe('NuevoEgresoModalSmart', () => {
     expect(screen.getByTestId('gasto-concepto')).toBeInTheDocument();
     expect(screen.getByTestId('gasto-categoria')).toBeInTheDocument();
     expect(screen.getAllByTestId('gasto-submit')[0]).toBeInTheDocument();
-  });
-
-  it('renders the real nómina tab when initialTab=nomina', () => {
-    useAppConfigStore.getState().setCurrentBusinessId(BIZ);
-    renderWithProviders(
-      <Wrapper>
-        <NuevoEgresoModalSmart open onClose={() => {}} fecha={FECHA} initialTab="nomina" />
-      </Wrapper>,
-    );
-    // Empty empleados list shows the "Crear empleado" Btn from NominaTab.
-    expect(screen.getByTestId('nomina-crear-empleado')).toBeInTheDocument();
   });
 
   it('wires onCrearProducto through to the InventarioTab empty state', () => {
