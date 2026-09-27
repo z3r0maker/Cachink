@@ -492,6 +492,12 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 ### C-21 Kill switches on the wire
 
 - [ ] Status · **Surfaced by:** N-09 (2026-09-23) · **Blocks:** kill-switch coverage on devices
+      **Decided 2026-09-26 (owner): widen `features` to `PLATFORM_FLAG_KEYS`**, rather than adding a
+      second `killSwitches` object. `entitlement.features` already means «what this tenant may use
+      right now» — the plan intersected with what the platform released — and from a device's point
+      of view a killed feature and an unreleased one are the same thing. One field, one rule, no
+      combining logic on two readers to get wrong. Additive at protocol 1: an older device ignores
+      keys it does not know.
 - **What:** `entitlement.features` carries only `FEATURE_FLAG_KEYS`, so the platform's kill switches
   (`comprobanteShare`, `cobrosIntegrados`, and `asesorLlm` if the phone ever calls a model) never
   reach a device. The portal enforces them at its server boundaries (N-09), but the register's

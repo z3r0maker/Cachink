@@ -244,6 +244,40 @@ pooler. Consider `max: 1`–`2` per serverless instance on Nano.)
 
 ## 7. Vercel
 
+### The commit author has to be allowed to deploy
+
+Vercel attaches HEAD's git author to a CLI deploy and refuses when that
+identity may not deploy the project:
+
+> The deployment was blocked because the commit author doesn't have permission
+> to create deployments for this project.
+
+The deployment then sits **Blocked** — not Error. Nothing is built, nothing
+ships, and the previous build keeps serving, so the site looks healthy and is
+simply stale. That is how it went unnoticed for an afternoon on 2026-09-26:
+the morning's release worked because HEAD was a GitHub merge commit by
+`z3r0maker`, and the evening's was refused because HEAD had become a commit
+authored `eduardo.torres@unosquare.com`.
+
+So this repository sets **its own** identity, which beats the global one and
+cannot collide with another project worked on at the same time:
+
+```bash
+git config --local user.name  "z3r0maker"
+git config --local user.email "61766229+z3r0maker@users.noreply.github.com"
+```
+
+`.git/config` is not committed, so a fresh clone falls back to the global
+identity. `.husky/pre-push` checks HEAD's author for that reason and refuses
+the push with the two commands above; re-author what you already committed
+with `git commit --amend --reset-author --no-edit`.
+
+The durable alternative is on Vercel's side — add the other address to the
+account's emails, or turn off Git Fork/Author Protection on the three
+projects — at which point this repo-local identity stops mattering.
+
+### Project settings
+
 Both projects: Settings → General → Root Directory as in the facts table;
 Settings → Functions shows **pdx1** (from `vercel.json`). Set variables for
 **Production** only, marked Sensitive where secret: Preview deployments would

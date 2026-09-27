@@ -67,6 +67,18 @@ export const capReq = style({
   color: colors.textMuted,
 });
 
+/**
+ * The actionable line beside the count («Disponible en 18 días», «Registra el
+ * costo de tus productos para activarlo»). Weighted above `capReq` because it
+ * is the thing to act on, not the rule being quoted.
+ */
+export const capAccion = style({
+  marginTop: 3,
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.bold,
+  color: colors.black,
+});
+
 export const barTrack = style({
   width: 120,
   height: 12,

@@ -2,7 +2,7 @@
 
 The native app (`apps/mobile` + `packages/ui`) becomes the same register as the
 web caja (`apps/web/src/operador/`), in the El Mostrador language
-(`docs/design/el-mostrador.md`, ADR-109). The boards are on the design canvas,
+(`docs/design/el-mostrador.md`, ADR-117). The boards are on the design canvas,
 page «Teléfono y tableta» (24 phone boards `Mv*`, 3 tablet boards `Tb*`); they
 translate the approved web caja boards and are the spec once the owner
 approves them.

@@ -18,7 +18,7 @@
 | `ARCHITECTURE.md` | Decision log (why)             | Humans + agents (append-only) | Grows forever              |
 | `README.md`       | Orientation                    | Humans                        | Updated as onboarding changes |
 | `DESIGN_CONTRACT.md` | Portal design spec          | **Generated** — never by hand | `pnpm design:contract`     |
-| `docs/design/el-mostrador.md` | Style guide, every surface (ADR-109) | Humans + agents, after the canvas | Follows the approved boards |
+| `docs/design/el-mostrador.md` | Style guide, every surface (ADR-117) | Humans + agents, after the canvas | Follows the approved boards |
 
 **Never edit CLAUDE.md to mark progress.** **Never remove a rule from it** — change one by adding an ADR first (this file's last such rewrite is ADR-100).
 
@@ -117,6 +117,7 @@ pnpm design:contract   # regenerate DESIGN_CONTRACT.md from @xangarro/tokens
 pnpm plan:board        # regenerate docs/plan/PENDIENTES.md
 pnpm adr:index         # regenerate the ARCHITECTURE.md index
 pnpm deps:check        # latest stable versions (§2.7)
+pnpm mock:api          # the contracts' mock server — the phone's wire without a backend
 ```
 
 **E2E** (Playwright, portal + backoffice) needs a live database:
@@ -137,10 +138,11 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - **`as const`** for constant objects, to preserve literal types.
 - **Workspace imports** — `@xangarro/domain`, never a relative path across packages.
 - **Migrations, never hand-written SQL** against a live schema. Postgres: `packages/data-pg/drizzle/`. SQLite: `packages/data/drizzle/migrations/`. Both keep a journal.
+- **`serverSeq` is the cloud's; a device only ever sends `clientSeq`.** A push proposes rows with its own sequence and the server answers with the `serverSeq` each row was accepted at (`sync_receipts`) — which is what makes a re-push idempotent («same row, same serverSeq») and what the pull is ordered by. Nothing on a device may assign it.
 - **Tests:** Vitest + `node:assert/strict`. No Jest, Mocha or external assertion libraries.
 - **React:** functional + hooks, no class components. Portal styling is vanilla-extract over tokens; the phone is Tamagui.
 - **Design tokens only** in the portal — no hex literal, `rgba()`, radius, border width or font size written inline. `pnpm lint:design` fails on all five, and `DESIGN_CONTRACT.md` is generated, never hand-edited.
-- **Design is El Mostrador** (ADR-109): the owner-approved canvas boards are the spec, `docs/design/el-mostrador.md` is the style guide, code translates both into tokens. A visual change goes on the canvas first.
+- **Design is El Mostrador** (ADR-117): the owner-approved canvas boards are the spec, `docs/design/el-mostrador.md` is the style guide, code translates both into tokens. A visual change goes on the canvas first.
 - **Option selectors:** ≤5 mutually-exclusive choices → icon + description cards, not a dropdown. Reserve `<Combobox>` for 6+ or unbounded lists.
 - **Spanish (es-MX)** in the interface, worded as the approved boards word it; code and comments in English.
 
@@ -166,7 +168,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - Do not read a tenant's rows outside `withTenant`.
 - Do not write the seeded portal tenant from an untagged Playwright test (ADR-103).
 - Do not re-baseline `.design-lint-baseline.json` upward to make a change pass.
-- Do not show fixture data on a live screen, or label anything «Pronto» or «Próximamente»: an unbuilt feature is omitted (ADR-109).
+- Do not show fixture data on a live screen, or label anything «Pronto» or «Próximamente»: an unbuilt feature is omitted (ADR-117).
 - Do not write an em dash in UI copy (the «—» empty placeholder excepted), or make an action a bare text link or raw URL.
 - Do not fill a selected chip yellow (selected chips are black with yellow text), or set text below 4.5:1 contrast.
 

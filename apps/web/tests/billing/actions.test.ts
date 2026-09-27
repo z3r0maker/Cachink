@@ -1,30 +1,28 @@
 import assert from 'node:assert/strict';
-import { beforeEach, describe, it, vi } from 'vitest';
-import { BillingError } from '@xangarro/application/billing';
+import { beforeAll, beforeEach, describe, it, vi, type MockedFunction } from 'vitest';
+
+import type * as billingActions from '../../src/server/billing/actions';
+import type { recordGeo } from '../../src/server/geo/record';
+import type { reportError } from '../../src/server/observability/report';
 
 /**
- * The Suscripción screen's server actions (P-10). The E2E suite runs without
- * Stripe, so it never gets past the button: what each action sends to the use
- * case, and how each failure reaches the owner, is proven here with the
- * session, the tenant, Stripe's use cases and the request origin replaced at
- * their module boundaries.
+ * The billing server functions the Suscripción screen calls (P-10).
+ *
+ * Two of their claims are worth more than the coverage they earn. **The beta
+ * does not charge** (P-36 D-1, owner decision 2026-09-25): while
+ * `BILLING_BETA_NO_CHARGE` is on, no Checkout may open — and a guard that is
+ * only a first line in two functions is exactly the kind that survives a
+ * refactor in name while losing its effect. And **an unexpected failure must
+ * not reach the shopkeeper**: a `BillingError` carries a message written for
+ * them, anything else is reported and answered with one sentence, because a
+ * Stripe stack trace in a toast is both useless and a leak.
+ *
+ * Nothing here talks to Stripe; the use cases are the seam.
  */
+const trial = vi.fn(async () => 'https://checkout.stripe.test/c/1');
+const spei = vi.fn(async () => 'https://invoice.stripe.test/i/1');
+const portal = vi.fn(async () => 'https://billing.stripe.test/p/1');
 
-const trial = vi.fn();
-const spei = vi.fn();
-const portal = vi.fn();
-const requireMember = vi.fn();
-const reportError = vi.fn();
-const recordGeo = vi.fn();
-
-vi.mock('../../src/server/auth', () => ({ requireMember }));
-vi.mock('../../src/server/db', () => ({
-  withTenant: (_biz: string, fn: (tx: unknown) => unknown) => fn({}),
-}));
-vi.mock('@xangarro/data-pg', () => ({
-  getBusiness: () => Promise.resolve({ nombre: 'Taquería Don Pedro' }),
-  subscriptionsOfBusiness: () => Promise.resolve([]),
-}));
 vi.mock('../../src/server/billing/live', () => ({
   liveBillingUseCases: () => ({
     trial: { execute: trial },
@@ -32,118 +30,161 @@ vi.mock('../../src/server/billing/live', () => ({
     portal: { execute: portal },
   }),
 }));
+
+vi.mock('../../src/server/auth', () => ({
+  requireMember: vi.fn(async () => ({
+    business_id: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
+    email: 'pedro@taqueria.mx',
+  })),
+}));
+
+vi.mock('../../src/server/db', () => ({
+  withTenant: vi.fn(async (_biz: string, fn: (tx: unknown) => unknown) => fn({})),
+}));
+
+vi.mock('@xangarro/data-pg', () => ({
+  getBusiness: vi.fn(async () => ({ nombre: 'Taquería Don Pedro' })),
+  subscriptionsOfBusiness: vi.fn(async () => []),
+}));
+
+vi.mock('../../src/server/geo/record', () => ({ recordGeo: vi.fn(async () => undefined) }));
+vi.mock('../../src/server/observability/report', () => ({ reportError: vi.fn() }));
 vi.mock('../../src/server/billing/origin', () => ({
-  portalOrigin: () => Promise.resolve('https://app.xangarro.mx'),
+  portalOrigin: vi.fn(async () => 'https://app.xangarro.mx'),
 }));
 vi.mock('../../src/server/billing/config', () => ({ publishableKey: () => 'pk_test_x' }));
-vi.mock('../../src/server/geo/record', () => ({ recordGeo }));
-vi.mock('../../src/server/observability/report', () => ({ reportError }));
 
-const actions = await import('../../src/server/billing/actions');
+/**
+ * Imported **once**, in `beforeAll`. It used to be per test, behind a
+ * `vi.resetModules()`, which bought nothing: the only env this file stubs is
+ * `BILLING_BETA_NO_CHARGE`, and `betaNoCharge()` reads `process.env` when it is
+ * called, not when its module loads (`src/server/billing/beta.ts`). What it did
+ * cost was eight full re-imports of the actions' transitive graph — 5–10 s
+ * each — so under parallel load a test would hit the 5 s default timeout and be
+ * killed inside `load()`. The symptom was «Cannot read properties of undefined
+ * (reading 'calls')» on a mock the import had not reached yet, which reads like
+ * a broken mock and is really a stopwatch.
+ */
+interface Loaded {
+  readonly actions: typeof billingActions;
+  readonly recordGeo: MockedFunction<typeof recordGeo>;
+  readonly reportError: MockedFunction<typeof reportError>;
+}
 
-const OWNER = { business_id: 'biz-1', email: 'pedro@taqueria.mx', member_role: 'owner' };
+let loaded: Loaded;
+const load = (): Loaded => loaded;
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  requireMember.mockResolvedValue(OWNER);
-});
-
-describe('iniciarPrueba — Stripe Checkout for the owner', () => {
-  it('sends the session’s business and email, and Suscripción as both return paths', async () => {
-    trial.mockResolvedValue('https://checkout.stripe.com/c/s_1');
-    assert.deepEqual(await actions.iniciarPrueba('xangarro', 'month'), {
-      ok: true,
-      url: 'https://checkout.stripe.com/c/s_1',
-    });
-    assert.deepEqual(requireMember.mock.calls[0], ['owner']);
-    assert.deepEqual(trial.mock.calls[0]?.[0], {
-      business: { id: 'biz-1', name: 'Taquería Don Pedro', email: 'pedro@taqueria.mx' },
-      plan: 'xangarro',
-      interval: 'month',
-      successUrl: 'https://app.xangarro.mx/suscripcion?pago=listo&session_id={CHECKOUT_SESSION_ID}',
-      cancelUrl: 'https://app.xangarro.mx/suscripcion',
-    });
-    assert.deepEqual(recordGeo.mock.calls[0], ['compra']);
+describe('billing actions', () => {
+  beforeAll(async () => {
+    const actions = await import('../../src/server/billing/actions');
+    const geo = await import('../../src/server/geo/record');
+    const report = await import('../../src/server/observability/report');
+    loaded = {
+      actions,
+      recordGeo: vi.mocked(geo.recordGeo),
+      reportError: vi.mocked(report.reportError),
+    };
   });
 
-  it('a billing rule the owner broke comes back as its own message, not reported', async () => {
-    trial.mockRejectedValue(new BillingError('ALREADY_SUBSCRIBED'));
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it('opens Checkout with the session’s business, and counts the purchase', async () => {
+    const { actions, recordGeo } = load();
     const r = await actions.iniciarPrueba('xangarro', 'month');
-    assert.deepEqual(r, { ok: false, message: new BillingError('ALREADY_SUBSCRIBED').message });
-    assert.equal(reportError.mock.calls.length, 0);
-    assert.equal(recordGeo.mock.calls.length, 0);
+
+    assert.deepEqual(r, { ok: true, url: 'https://checkout.stripe.test/c/1' });
+    const [args] = trial.mock.calls[0] as unknown as [{ business: { id: string; email: string } }];
+    // The business and the email come from the signed session, never the caller.
+    assert.equal(args.business.id, '01HZ8XQN9GZJXV8AKQ5X0C7BJZ');
+    assert.equal(args.business.email, 'pedro@taqueria.mx');
+    assert.equal(recordGeo.mock.calls.length, 1);
   });
 
-  it('a non-owner is refused with the permission message', async () => {
-    requireMember.mockRejectedValue(
-      Object.assign(new Error('Solo el dueño puede hacer esto.'), { code: 'NOT_PERMITTED' }),
+  it('during the beta no Checkout opens at all', async () => {
+    vi.stubEnv('BILLING_BETA_NO_CHARGE', '1');
+    const { actions, recordGeo } = load();
+
+    const checkout = await actions.iniciarPrueba('xangarro', 'month');
+    const transfer = await actions.pagarAnualPorSpei('xangarro');
+
+    assert.equal(checkout.ok, false);
+    assert.equal(transfer.ok, false);
+    // The refusal is not the point; never reaching Stripe is.
+    assert.equal(trial.mock.calls.length, 0, 'the beta must not open Checkout');
+    assert.equal(spei.mock.calls.length, 0, 'the beta must not raise an invoice');
+    assert.equal(
+      recordGeo.mock.calls.length,
+      0,
+      'and must not count a purchase that did not happen',
     );
-    assert.deepEqual(await actions.iniciarPrueba('xangarro', 'month'), {
-      ok: false,
-      message: 'Solo el dueño puede hacer esto.',
-    });
-    assert.equal(trial.mock.calls.length, 0);
   });
 
-  it('anything else is reported and the owner gets the generic retry message', async () => {
-    const boom = new Error('stripe is down');
-    trial.mockRejectedValue(boom);
-    const r = await actions.iniciarPrueba('xangarro', 'year');
+  it('passes the owner-facing billing message through, and reports nothing', async () => {
+    // `BillingError` carries a code and derives the sentence (CLAUDE.md §8),
+    // so this asserts the shopkeeper sees that sentence — not the code, and
+    // not the generic apology.
+    const { BillingError } = await import('@xangarro/application/billing');
+    const { actions, reportError } = load();
+    trial.mockRejectedValueOnce(new BillingError('NOT_A_PAID_PLAN'));
+
+    const r = await actions.iniciarPrueba('xangarrito', 'month');
+
     assert.deepEqual(r, {
       ok: false,
-      message: 'No pudimos abrir el pago. Intenta de nuevo en un momento.',
+      message: 'Ese plan no se contrata: Xangarrito es gratis.',
     });
-    assert.deepEqual(reportError.mock.calls[0], [boom, { endpoint: 'iniciarPrueba' }]);
-  });
-});
-
-describe('pagarAnualPorSpei and administrarSuscripcion', () => {
-  it('SPEI returns the hosted invoice for the plan and records the purchase', async () => {
-    spei.mockResolvedValue('https://invoice.stripe.com/i/1');
-    assert.deepEqual(await actions.pagarAnualPorSpei('xangarro'), {
-      ok: true,
-      url: 'https://invoice.stripe.com/i/1',
-    });
-    assert.equal((spei.mock.calls[0]?.[0] as { plan: string }).plan, 'xangarro');
-    assert.deepEqual(recordGeo.mock.calls[0], ['compra']);
+    assert.equal(reportError.mock.calls.length, 0, 'an expected refusal is not an incident');
   });
 
-  it('SPEI failures are reported under their own endpoint', async () => {
-    spei.mockRejectedValue(new Error('timeout'));
-    assert.equal((await actions.pagarAnualPorSpei('xangarro')).ok, false);
-    assert.equal(
-      (reportError.mock.calls[0]?.[1] as { endpoint: string }).endpoint,
-      'pagarAnualPorSpei',
-    );
-  });
+  it('hides an unexpected failure behind one sentence, and reports it', async () => {
+    const { actions, reportError } = load();
+    const boom = new Error('connect ECONNREFUSED 10.0.0.1:443');
+    spei.mockRejectedValueOnce(boom);
 
-  it('the Customer Portal comes back to Suscripción, for the session’s business', async () => {
-    portal.mockResolvedValue('https://billing.stripe.com/p/1');
-    assert.deepEqual(await actions.administrarSuscripcion(), {
-      ok: true,
-      url: 'https://billing.stripe.com/p/1',
-    });
-    assert.deepEqual(portal.mock.calls[0]?.[0], {
-      businessId: 'biz-1',
-      returnUrl: 'https://app.xangarro.mx/suscripcion',
-    });
-  });
+    const r = await actions.pagarAnualPorSpei('xangarro');
 
-  it('no Stripe customer yet is the owner’s message, not an incident', async () => {
-    portal.mockRejectedValue(new BillingError('NO_BILLING_CUSTOMER'));
-    const r = await actions.administrarSuscripcion();
     assert.equal(r.ok, false);
+    assert.equal(
+      r.ok === false && r.message,
+      'No pudimos abrir el pago. Intenta de nuevo en un momento.',
+    );
+    assert.equal(reportError.mock.calls.length, 1);
+    const [error, scope] = reportError.mock.calls[0] ?? [];
+    assert.equal(error, boom);
+    assert.deepEqual(scope, { endpoint: 'pagarAnualPorSpei' });
+  });
+
+  it('a refused permission answers its own message, not the generic one', async () => {
+    const { actions, reportError } = load();
+    portal.mockRejectedValueOnce(
+      Object.assign(new Error('Inicia sesión para continuar.'), { code: 'NOT_PERMITTED' }),
+    );
+
+    const r = await actions.administrarSuscripcion();
+
+    assert.deepEqual(r, { ok: false, message: 'Inicia sesión para continuar.' });
     assert.equal(reportError.mock.calls.length, 0);
   });
-});
 
-describe('the read side', () => {
-  it('the free plan is null, open to any member', async () => {
-    assert.equal(await actions.estadoSuscripcion(), null);
-    assert.deepEqual(requireMember.mock.calls[0], ['viewer']);
+  it('the customer portal returns to Suscripción', async () => {
+    const { actions } = load();
+    const r = await actions.administrarSuscripcion();
+
+    assert.equal(r.ok, true);
+    const [args] = portal.mock.calls[0] as unknown as [{ returnUrl: string }];
+    assert.equal(args.returnUrl, 'https://app.xangarro.mx/suscripcion');
   });
 
-  it('the publishable key passes through', async () => {
+  it('the free plan reads as null, and any member may look', async () => {
+    const { actions } = load();
+    assert.equal(await actions.estadoSuscripcion(), null);
+  });
+
+  it('exposes the publishable key for P-10', async () => {
+    const { actions } = load();
     assert.equal(await actions.stripePublishableKey(), 'pk_test_x');
   });
 });

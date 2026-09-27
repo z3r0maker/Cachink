@@ -3,6 +3,26 @@
 # Bypass in emergencies with: git push --no-verify
 set -e
 
+# Vercel refuses a CLI deploy whose HEAD commit author may not deploy the
+# project ("the commit author doesn't have permission…"), and the deployment
+# sits Blocked while the previous build keeps serving — so the site looks fine
+# and is stale. It bit a release on 2026-09-26.
+#
+# The identity lives in this repo's own `.git/config`, so it cannot collide
+# with another project's global one. That file is not committed, which is
+# exactly why this check exists: a fresh clone falls through to the global
+# identity and nobody notices until a deploy is refused.
+DEPLOY_AUTHOR="61766229+z3r0maker@users.noreply.github.com"
+author="$(git log -1 --format=%ae)"
+if [ "$author" != "$DEPLOY_AUTHOR" ]; then
+  echo "✗ pre-push: HEAD is authored by <$author>, which Vercel will not deploy." >&2
+  echo "  Set this repository's own identity (it does not touch your global one):" >&2
+  echo "    git config --local user.name  \"z3r0maker\"" >&2
+  echo "    git config --local user.email \"$DEPLOY_AUTHOR\"" >&2
+  echo "  Then re-author what you have: git commit --amend --reset-author --no-edit" >&2
+  exit 1
+fi
+
 echo "▶ pre-push: pnpm lint"
 pnpm lint
 

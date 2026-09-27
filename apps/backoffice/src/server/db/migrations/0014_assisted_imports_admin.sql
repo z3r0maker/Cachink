@@ -7,9 +7,11 @@
 -- `status = 'esperando_aprobacion'` + the tenant's own connection can flip
 -- it to `aplicada` — staff never can.
 
+DROP POLICY IF EXISTS assisted_imports_admin ON public.assisted_imports;
 CREATE POLICY assisted_imports_admin ON public.assisted_imports
   FOR ALL TO xangarro_admin USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS assisted_import_files_admin ON public.assisted_import_files;
 CREATE POLICY assisted_import_files_admin ON public.assisted_import_files
   FOR ALL TO xangarro_admin USING (true) WITH CHECK (true);
 

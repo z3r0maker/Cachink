@@ -42,7 +42,16 @@
 
 ### X-11 `release.sh` cannot report success without shipping
 
-- [ ] Status · **Blocked by:** — · **Blocks:** —
+- [x] Status · **Blocked by:** — · **Blocks:** —
+      **Done 2026-09-26** (`b6e0eb8a`). Three closures, one per way it could happen: every
+      `Ready` deployment appends to `SHIPPED` and «released» is refused unless that has a line
+      per app asked for; an EXIT trap prints what did ship whenever the run ends non-zero
+      part-way; and the URL capture is no longer a pipeline, whose status was `tail`'s — a
+      `vercel` that died left an empty URL and the script blamed the output rather than the
+      command. **Reproduced rather than reasoned about:** a stub `npx` that ships the first app
+      and is killed on the second now exits **1**, names the failing app and prints
+      «release stopped after 1 of 2 app(s)» with what shipped; the same stub succeeding twice
+      exits 0 and lists both. Before the change that first case exited 0 in silence.
       **Found 2026-09-26, during the first release after `cec30e12`.** A backgrounded
       `./scripts/release.sh --skip-migrations` ended with **exit 0** after printing only
       «deploying xangarro-web» — no status line, and neither `xangarro-backoffice` nor `landing`
@@ -62,8 +71,18 @@
 
 ### X-06 CLAUDE.md amendments (human applies)
 
-- [ ] Status · **Blocked by:** — (can be prepared any time; apply at launch)
-- **Context:** CLAUDE.md is humans-only; ADR-053/054 authorise. Prepare the exact diff in `docs/plan/x06-claude-md.diff` and the human applies it.
+- [x] Status · **Done 2026-09-26.** Not as a prepared diff: **ADR-100** rewrote CLAUDE.md against
+      the code it governs and applied all but two of the amendments below directly — the contract's
+      own «change a rule by adding an ADR first» path, used once and recorded. Verified bullet by
+      bullet against the file: §1's capture-client shape, the module list, §2.2 per ADR-053, `apps/web`
+      / `contracts` / `data-pg` / `sync` in the map, `archive/` marked out of the workspace, every
+      Tauri, `apps/desktop` and PowerSync mention gone, §6's Playwright rule, §7's desktop line, and
+      §11 moved to `docs/new-entity-checklist.md` with the data-pg mirror and drift test. The two it
+      had missed are now in: `pnpm mock:api` in §5, and the `serverSeq` rule in §6 — a device sends
+      `clientSeq` and the server answers with the seq each row was accepted at, checked against
+      `sync-push.ts` and `sync_receipts` rather than written from the plan's shorthand.
+- **Context:** CLAUDE.md is humans-only; ADR-053/054 authorise. The diff was applied under ADR-100
+  instead of staged in `docs/plan/x06-claude-md.diff`, which was never created.
 - **Diff to prepare:**
   - §1 Project Overview: app = capture client; portal owns Estados/Indicadores/Director Home/config; roles paragraph → Director (portal) / Operator (app).
   - §1 Modules list: remove Estados Financieros, Indicadores, Director Home; add "Activation" and "Sync status"; note portal modules live in `apps/web`.

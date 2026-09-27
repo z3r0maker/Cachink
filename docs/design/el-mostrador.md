@@ -1,7 +1,7 @@
 # El Mostrador — the style guide
 
 > The design language of every Xangarro surface: the portal, the web caja and the phone app
-> (ADR-109, building on ADR-107). UI terms are in Spanish because that is what the screens say;
+> (ADR-117, building on ADR-107). UI terms are in Spanish because that is what the screens say;
 > the prose is English, like the rest of `docs/`.
 
 **The spec is the canvas.** The El Mostrador boards on the design canvas
@@ -120,7 +120,7 @@ Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner
   components: `DonCargando` / `LoadingState`, `EmptyState`, `ErrorState` (portal), `OperadorEstado`
   (`operador/estado.tsx`, caja).
 - **Nothing is labelled «Pronto» or «Próximamente».** A feature that is not built is omitted:
-  no card, no tab, no disabled button (owner decision, ADR-109; supersedes ADR-059's
+  no card, no tab, no disabled button (owner decision, ADR-117; supersedes ADR-059's
   `ProximamenteState` gate).
 
 ## 9. Touch and accessibility
