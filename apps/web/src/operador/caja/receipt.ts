@@ -19,9 +19,24 @@ export interface Comprobante {
   readonly hora?: string;
   /** «Caja 1 · Ana», when the screen knows it. */
   readonly caja?: string;
+  /** What the owner set in Mi negocio › Comprobantes, when the caja has read it. */
+  readonly marca?: MarcaRecibo;
+}
+
+/** The business's own marks on the receipt; null where the owner left it empty. */
+export interface MarcaRecibo {
+  readonly logoUrl: string | null;
+  readonly leyenda: string | null;
+  readonly whatsapp: string | null;
+  readonly direccion: string | null;
 }
 
 export const GRACIAS = 'Gracias por su compra';
+export const NO_FISCAL = 'Este documento no es un comprobante fiscal (CFDI).';
+
+/** The owner's leyenda, or the thank-you line when there is none. */
+export const leyendaDe = (c: Comprobante): string => c.marca?.leyenda ?? GRACIAS;
+
 export const HECHO_CON = 'Hecho con Xangarro!';
 
 /** «14 de mayo de 2026». */
@@ -70,8 +85,11 @@ export function receiptText(c: Comprobante, cliente?: string): string {
     `${l.cantidad} x ${l.nombre} ${importeTexto(l)}`.trimEnd(),
   );
   const pago = pagoFilas(c, cliente).map(([k, v]) => `${k}: ${v}`);
+  const dir = c.marca?.direccion;
+  const wa = c.marca?.whatsapp;
   return [
     c.negocio,
+    ...(dir ? [dir] : []),
     `Venta ${c.folio} · ${fechaLarga()}, ${horaDe(c)} h`,
     '',
     ...lines,
@@ -79,7 +97,9 @@ export function receiptText(c: Comprobante, cliente?: string): string {
     `Total: ${formatMoney(c.venta.total)}`,
     pago.join(' · '),
     '',
-    GRACIAS,
+    leyendaDe(c),
+    ...(wa ? [`WhatsApp ${wa}`] : []),
+    NO_FISCAL,
     HECHO_CON,
   ].join('\n');
 }
