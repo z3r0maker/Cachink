@@ -118,6 +118,12 @@ export type WorkerRequest =
     }
   | {
       readonly id: number;
+      readonly method: 'negocio';
+      readonly businessId: string;
+      readonly deviceId: string;
+    }
+  | {
+      readonly id: number;
       readonly method: 'ventas';
       readonly businessId: string;
       readonly deviceId: string;

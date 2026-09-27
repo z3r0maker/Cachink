@@ -6,6 +6,7 @@
 
 import * as access from './access';
 import { catalogo } from './catalogo';
+import { marcaDelNegocio } from './negocio';
 import { abonar, cuentasDelNegocio } from './cuentas';
 import { cierreDelTurno, cerrarCaja } from './cierre';
 import { gastosDelTurno, registrarGasto } from './gastos';
@@ -119,6 +120,14 @@ function leerOperadores(
     : access.turnoAbierto(...args);
 }
 
+/** How the business's receipts print (logo, leyenda, WhatsApp, address). */
+function leerNegocio(
+  request: Extract<WorkerRequest, { readonly method: 'negocio' }>,
+  rt: Rt,
+): Promise<unknown> {
+  return marcaDelNegocio(rt.db, request.businessId as never, request.deviceId);
+}
+
 /** The turno's close figures and the close itself (O-36). */
 type CierreRequest = Extract<WorkerRequest, { readonly method: 'cierre' | 'cerrar' }>;
 
@@ -146,6 +155,7 @@ const POR_METODO: Readonly<Record<string, Handler>> = {
   turnoAbierto: estrecho(leerOperadores),
   cuentas: estrecho(leerCuentas),
   abonar: estrecho(leerCuentas),
+  negocio: estrecho(leerNegocio),
   productos: estrecho(leerDato),
   ventas: estrecho(leerDato),
   ticket: estrecho(leerDato),

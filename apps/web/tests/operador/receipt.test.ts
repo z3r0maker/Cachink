@@ -5,6 +5,7 @@ import { formatMoney } from '@xangarro/domain';
 import {
   digits,
   GRACIAS,
+  NO_FISCAL,
   HECHO_CON,
   leerTelefono,
   receiptText,
@@ -65,6 +66,24 @@ describe('receiptText and whatsappUrl', () => {
       `Efectivo: ${formatMoney(120_00n as never)}`,
       '',
       GRACIAS,
+      NO_FISCAL,
+      HECHO_CON,
+    ]);
+  });
+
+  it('prints what the owner set: address on top, their leyenda and WhatsApp below', () => {
+    const marca = {
+      logoUrl: null,
+      leyenda: '¡Vuelve pronto!',
+      whatsapp: '33 1234 5678',
+      direccion: 'Av. Chapultepec 120, Guadalajara',
+    };
+    const lines = receiptText({ ...c, marca }).split('\n');
+    assert.equal(lines[1], 'Av. Chapultepec 120, Guadalajara');
+    assert.deepEqual(lines.slice(-4), [
+      '¡Vuelve pronto!',
+      'WhatsApp 33 1234 5678',
+      NO_FISCAL,
       HECHO_CON,
     ]);
   });

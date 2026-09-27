@@ -84,6 +84,12 @@ export const turnoAbierto = (businessId: string, deviceId: string): Call => ({
   deviceId,
 });
 
+export const negocio = (businessId: string, deviceId: string): Call => ({
+  method: 'negocio',
+  businessId,
+  deviceId,
+});
+
 export const productos = (businessId: string, deviceId: string): Call => ({
   method: 'productos',
   businessId,
