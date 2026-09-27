@@ -1,142 +1,187 @@
 import { keyframes, style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shadows,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
 
 /**
- * `Operador Estado` — the operator's three non-happy states, one card shape.
- *
- * Every value is read from `design-reference/operador/Operador Estado.dc.html`.
- *
- * The design sizes fixed boxes content-box (a 62 px tile with a 2.5 px border
- * renders 67 px), while the portal's reset is border-box. `contentBox` restores
- * the file's geometry wherever it gives an explicit width or height.
+ * `Operador Estado` (OpEstados): every operator screen's three non-happy
+ * states. A quiet card with Don Cuentas: counting while it loads, helping
+ * when there is nothing yet, worried when it failed.
  */
-const contentBox = { boxSizing: 'content-box' } as const;
-const card = {
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
-  boxShadow: shadows.hero,
-} as const;
+const calm = { '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } } };
 
-const centred = style({
-  ...card,
+const card = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: 12,
+  gap: 10,
+  padding: '22px 26px 26px',
+  border: borders.quiet,
+  borderRadius: radii[6],
+  background: colors.white,
   textAlign: 'center',
 });
 
-export const emptyCard = style([centred, { padding: '52px 24px', background: colors.white }]);
-export const errorCard = style([centred, { padding: '44px 24px', background: colors.redSoft }]);
-
-const tileBase = style({
-  ...contentBox,
-  width: 62,
-  height: 62,
-  display: 'grid',
-  placeItems: 'center',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[4],
-});
-export const tileEmpty = style([tileBase, { background: colors.yellowSoft, color: colors.black }]);
-export const tileError = style([tileBase, { background: colors.white, color: colors.redText }]);
+export const emptyCard = style([card, { justifyContent: 'center', minHeight: 380 }]);
+export const errorCard = style([
+  card,
+  { justifyContent: 'center', minHeight: 380, borderColor: colors.redText },
+]);
+export const loadingCard = style([card, { gap: 6, padding: 22, overflow: 'hidden' }]);
 
 export const title = style({
-  fontSize: portalFontSizes.cardTitle,
+  margin: 0,
+  fontSize: portalFontSizes.xl2,
+  lineHeight: 1.2,
   fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tight,
+  letterSpacing: '-0.025em',
   color: colors.black,
   textWrap: 'pretty',
 });
 
-const bodyBase = style({
+export const body = style({
   maxWidth: 440,
-  fontSize: portalFontSizes.body,
+  margin: 0,
+  fontSize: portalFontSizes.md,
+  lineHeight: 1.5,
   fontWeight: typography.weights.semibold,
+  color: colors.gray600,
   textWrap: 'pretty',
 });
-export const bodyEmpty = style([bodyBase, { color: colors.gray600 }]);
-export const bodyError = style([bodyBase, { color: colors.ink }]);
 
-const actionBase = style([
+export const safe = style({ fontWeight: typography.weights.extraBold, color: colors.greenText });
+
+export const action = style([
   pressable,
   {
-    marginTop: 6,
+    marginTop: 10,
     display: 'inline-flex',
     alignItems: 'center',
-    height: 52,
-    padding: '0 22px',
-    border: `2.5px solid ${colors.black}`,
+    gap: 10,
+    height: 54,
+    padding: '0 24px',
+    border: borders.thick,
     borderRadius: radii[3],
+    background: colors.yellow,
     boxShadow: shadows.card,
     fontFamily: 'inherit',
-    fontSize: portalFontSizes.sm,
-    fontWeight: typography.weights.bold,
-    letterSpacing: typography.letterSpacing.wider,
-    textTransform: 'uppercase',
+    fontSize: portalFontSizes.lgx,
+    fontWeight: typography.weights.extraBold,
     color: colors.black,
     textDecoration: 'none',
+    selectors: { '&:disabled': { opacity: 1, cursor: 'progress' } },
   },
 ]);
-/** The empty CTA is an `<a>` (content-box: 52 + borders); the retry is a
- *  `<button>`, which browsers size border-box even in the design file. */
-export const actionYellow = style([actionBase, { ...contentBox, background: colors.yellow }]);
-export const actionWhite = style([actionBase, { background: colors.white }]);
 
-/* Loading: a header with a pulsing dot and five static skeleton rows. */
-export const loadingCard = style({ ...card, background: colors.white, overflow: 'hidden' });
-
-export const loadingHead = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  padding: '14px 18px',
-  background: colors.gray100,
-  borderBottom: `2.5px solid ${colors.black}`,
+/* Loading: Don counting, a coin in the air, the rotating line, three rows. */
+const volado = keyframes({
+  '0%': { transform: 'translateY(0) rotateY(0deg)' },
+  '50%': { transform: 'translateY(-64px) rotateY(540deg)' },
+  '100%': { transform: 'translateY(0) rotateY(1080deg)' },
+});
+const respira = keyframes({ '0%, 100%': { opacity: 0.55 }, '50%': { opacity: 1 } });
+const gira = keyframes({
+  '0%': { transform: 'rotateY(0deg)' },
+  '100%': { transform: 'rotateY(360deg)' },
 });
 
-const pulse = keyframes({ '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.45 } });
+export const scene = style({ position: 'relative', width: 180, height: 170, flex: 'none' });
+export const don = style({ position: 'absolute', left: 0, bottom: 0 });
 
-export const dot = style({
-  ...contentBox,
-  width: 16,
-  height: 16,
-  border: `2px solid ${colors.black}`,
-  borderRadius: 9999,
-  background: colors.yellow,
-  animation: `${pulse} 1.1s ease-in-out infinite`,
-  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+export const coin = style([
+  {
+    position: 'absolute',
+    left: 24,
+    top: 30,
+    zIndex: 1,
+    width: 30,
+    height: 30,
+    display: 'grid',
+    placeItems: 'center',
+    border: borders.thin,
+    borderRadius: shapeRadii.pill,
+    background: colors.yellow,
+    fontFamily: 'var(--font-anton), sans-serif',
+    fontSize: fontSizes.xs,
+    color: colors.black,
+    animation: `${volado} 1.2s cubic-bezier(.3,0,.5,1) infinite`,
+  },
+  calm,
+]);
+
+export const frase = style({
+  fontSize: portalFontSizes.cardTitle,
+  fontWeight: typography.weights.extraBold,
+  letterSpacing: typography.letterSpacing.tight,
+  color: colors.black,
 });
 
-export const loadingLabel = style({
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  letterSpacing: typography.letterSpacing.wider,
-  textTransform: 'uppercase',
-  color: colors.gray600,
+export const sub = style({
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  color: colors.textMuted,
 });
+
+export const rows = style([
+  {
+    alignSelf: 'stretch',
+    marginTop: 'auto',
+    paddingTop: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+    animation: `${respira} 1.6s ease-in-out infinite`,
+  },
+  calm,
+]);
 
 export const row = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 14,
-  padding: '16px 18px',
-  borderBottom: `2px solid ${colors.gray100}`,
-  selectors: { '&:last-child': { borderBottom: 'none' } },
+  gap: 12,
+  height: 44,
+  padding: '0 12px',
+  border: borders.quiet,
+  borderColor: colors.gray100,
+  borderRadius: radii[3],
 });
 
 export const rowTile = style({
-  ...contentBox,
+  width: 28,
+  height: 28,
   flex: 'none',
-  width: 42,
-  height: 42,
-  border: `2px solid ${colors.gray200}`,
-  borderRadius: radii[2],
+  borderRadius: radii[0],
+  background: colors.gray200,
+});
+
+const bar = { height: 10, borderRadius: radii[0] } as const;
+export const rowBar = style({ ...bar, background: colors.gray200 });
+export const rowBarShort = style({
+  ...bar,
+  marginLeft: 'auto',
+  width: 54,
   background: colors.gray100,
 });
 
-const bar = { height: 16, borderRadius: radii[0], background: colors.gray100 } as const;
-export const rowBar = style({ ...bar, flex: 1, minWidth: 0 });
-export const rowBarShort = style({ ...bar, flex: 'none', width: 84 });
+/** The coin that spins inside the retry while it works («Intentando…»). */
+export const spin = style([
+  {
+    width: 18,
+    height: 18,
+    flex: 'none',
+    border: borders.thick,
+    borderRadius: shapeRadii.pill,
+    background: colors.white,
+    animation: `${gira} .9s linear infinite`,
+  },
+  calm,
+]);
