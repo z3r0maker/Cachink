@@ -1259,9 +1259,38 @@ never invented text.
     mes completo de registros para no darte números a medias. Esto es lo que falta:») — so the other
     five capabilities were always meant to be per-section. Extending the whole-report gate to all six
     would make a new business wait for 90 días de ventas and 20 cortes before reading anything.
+  - **Settled 2026-09-26 (owner) — ADR-114, section 10 and its empty month.** The movimientos are a
+    **selection of the findings, not an independent analysis**: each of the design's three fixture
+    entries traces to a section (quesadilla pricing → §3, refrescos → §6, notas de 30 días → §7), and
+    P-28's own rule — every figure computed by `@xangarro/domain`, the model never derives a number —
+    means `+$3,100.00` must come from a section's computation. So **section 10 needs no maturity rule
+    of its own; it inherits from the sections that feed it**, and its empty case splits in two:
+    - **Every contributing section absent** → section 10 is `absent` too and joins ADR-113's aggregate
+      count. We could not look.
+    - **Mature sections, no finding** → section 10 **renders**, with «Este mes no hay nada que
+      cambiar» / «Leímos tus números y no encontramos un movimiento que te acerque más a tu meta.
+      Sigue como vas.» That is a real result and the reader can get it nowhere else.
+  - **The empty card's footer is «Calculado a partir de tus registros», not «Generado con IA».** The
+    design hardcodes the latter on section 10, and copying it onto the empty state would be exactly
+    what `asesor.css.ts` warns against: «Deterministic output says "Calculado"; only model-written text
+    may say "Generado con IA" (ADR-059). Getting this backwards would be a false claim in either
+    direction.» The empty card is the _absence_ of model output.
+  - **The heading is derived, not the literal «Tres cosas para octubre».** Both the count and the month
+    are hardcoded in the design. Count and period both come from the report: «Una cosa para octubre» ·
+    «Dos cosas…» · «Tres cosas…».
+  - **Xangarro's upsell line inside section 10 is count-aware.** ADR-112 gives Xangarro movimiento 1,
+    and the design has **no** upsell markup in section 10 at all, so this is new: 3 findings → «los
+    otros dos llegan con Xangarrote», 2 → «el otro llega con Xangarrote», 0 or 1 → **no line**, because
+    there is nothing withheld. «Los otros dos» shipped unconditionally becomes a lie the first month a
+    business has two findings.
+  - **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and that is deliberate.**
+    A Xangarro reader can get «Sube la quesadilla a $46.00 y la gringa a $65.00 · +$3,100.00» in full
+    while §3 Precios y márgenes stays a teaser card. It is not an inconsistency to be tidied away: a
+    concrete, peso-quantified move out of the half they cannot read is the sharpest form the taste
+    takes. Combined with the impact-descending sort (ADR-112), Xangarro reads the single most valuable
+    conclusion in the report.
   - Two sections have no maturity rule and must not acquire one: **1 Tu meta** (the owner sets it) and
-    **7 Cobranza** (fiado balances are current state, not a trend). **10 Plan de acción** has none
-    either, but it has an empty case of its own — see below.
+    **7 Cobranza** (fiado balances are current state, not a trend).
 
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**

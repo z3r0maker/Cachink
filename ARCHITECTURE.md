@@ -153,6 +153,7 @@ Links to discussion, docs, prior art.
 | [111](#adr-111) | 2026-09-26 | The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it | Accepted |
 | [112](#adr-112) | 2026-09-26 | What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked | Accepted |
 | [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
+| [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7919,3 +7920,113 @@ state was simply never drawn.
   an empty case — a month in which nothing is worth recommending. That is not
   the same as «we could not look», so it cannot use the aggregate line, and it
   is the one section whose emptiness the reader will notice.
+
+---
+
+## ADR-114
+
+**Title:** Section 10 inherits its availability from the findings that feed it, and says so when a month is clean
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; completes ADR-113, which left section 10's empty case open
+
+**Context:**
+
+ADR-113 settled that a section without mature data is not rendered and is
+counted in one closing line. It flagged section **10 Plan de acción** as the
+exception it could not resolve: the section has no maturity rule of its own,
+but it has an empty case, and «we could not look» is not «we looked and there
+is nothing».
+
+Reading the design's section 10 settles more than the empty case.
+
+**The movimientos are a selection of the findings, not an independent
+analysis.** Each of the three fixture entries traces to a section — quesadilla
+pricing to §3 Precios y márgenes, «Pide 30 refrescos» to §6 Inventario, «Cobra
+las tres notas con más de 30 días» to §7 Cobranza — and P-28's own rule, that
+every figure is computed by `@xangarro/domain` and the model never derives a
+number, means `+$3,100.00` cannot originate in section 10. It is a section's
+computation, re-phrased as an action.
+
+Three further things in that markup are hardcoded where they cannot be: the
+heading is the literal `Tres cosas para octubre`, count and month both; there
+is no upsell markup in section 10 at all, so ADR-112's «los otros dos llegan
+con Xangarrote» is new; and the card's footer is `Generado con IA a partir de
+tus registros`.
+
+**Decision**
+
+1. **Section 10 needs no maturity rule. It inherits.** Availability follows the
+   sections that feed it, which makes the empty case determinate rather than a
+   judgement call:
+
+   - **Every contributing section absent** → section 10 is `absent` and joins
+     ADR-113's aggregate count. There was nothing to look at.
+   - **Mature sections, no finding** → section 10 **renders**, with «Este mes no
+     hay nada que cambiar» and «Leímos tus números y no encontramos un
+     movimiento que te acerque más a tu meta. Sigue como vas.»
+
+   The second is a real result. A shopkeeper cannot learn «a month's worth of my
+   own numbers contains nothing that needs fixing» from anywhere else in the
+   product, and hiding section 10 would make that indistinguishable from a
+   report that stopped early.
+
+2. **The empty card's footer is «Calculado a partir de tus registros».** Not the
+   design's «Generado con IA a partir de tus registros», because no model wrote
+   it — the card is the *absence* of model output. `asesor.css.ts` already
+   states the rule and its symmetry: «Deterministic output says "Calculado";
+   only model-written text may say "Generado con IA" (ADR-059). Getting this
+   backwards would be a false claim in either direction.» The populated card
+   keeps «Generado con IA», and keeps «Revisa antes de decidir».
+
+3. **The heading is derived from the count and the period**, not the literal
+   «Tres cosas para octubre»: «Una cosa para octubre» · «Dos cosas para
+   octubre» · «Tres cosas para octubre». Under ADR-112 Xangarro reads one
+   movimiento, so the hardcoded three is already wrong for the tier that sees
+   the report most often.
+
+4. **Xangarro's upsell line is count-aware.** Three findings → «los otros dos
+   llegan con Xangarrote»; two → «el otro llega con Xangarrote»; one or none →
+   **no line at all**, because nothing is being withheld. A fixed «los otros
+   dos» becomes a false statement the first month a business has two findings,
+   and the taste being *complete* on a quiet month is honest, not a bug.
+
+5. **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and
+   that is deliberate.** A Xangarro reader gets «Sube la quesadilla a $46.00 y
+   la gringa a $65.00 · +$3,100.00» in full while §3 stays a teaser card. This
+   is written down so it is not later tidied away as an inconsistency: a
+   concrete, peso-quantified move out of the half they cannot read is the
+   sharpest form the taste takes, and combined with ADR-112's impact-descending
+   sort it means Xangarro reads the single most valuable conclusion in the
+   report.
+
+**Alternatives considered**
+
+- *«Sigue así» plus the metric that improved,* turning an empty plan into
+  positive reinforcement in the register the celebraciones and trophies already
+  use. Warmer, and rejected for now on two counts: it is a new computation
+  section 10 does not otherwise need, and on a flat month — no finding *and* no
+  improvement — it has nothing true to say and falls back to the plain state
+  anyway. Worth revisiting once there is a real corpus of clean months.
+- *One empty state for both cases.* One fewer branch, and it says the same
+  sentence to a 31-day business and to a three-year-old one having a good
+  month. That is the conflation ADR-113 was written to avoid.
+- *Guarantee at least one movimiento,* falling back to a generic suggestion so
+  section 10 is never empty. Rejected outright: it fabricates, which P-26's
+  compuerta and ADR-056's «the model never derives a number» both forbid.
+
+**Consequences**
+
+- Section 10 has three renderings, not two: populated, clean-month empty, and
+  absent. Only the first carries «Generado con IA».
+- The upsell line and the heading both need the finding **count**, so the
+  component takes the total number of findings alongside the movimientos it is
+  allowed to show. For Xangarro those differ by design; for Xangarrote they are
+  equal.
+- A Playwright spec on a Xangarro session should assert the count-aware line —
+  two findings reading «el otro» and one reading nothing — because the failure
+  mode is a plausible-looking sentence with a wrong number in it, which no
+  smoke test catches.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates until
+  P-28 builds it, and production still renders «Próximamente».
