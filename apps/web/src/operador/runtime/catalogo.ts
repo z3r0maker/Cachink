@@ -8,6 +8,7 @@ import { DrizzleProductsRepository } from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
 
 import type { Db } from './db-types';
+import { stockPorProducto } from './inventario';
 
 export interface ProductoDeCaja {
   readonly id: string;
@@ -15,6 +16,9 @@ export interface ProductoDeCaja {
   /** Centavos, as everything money. */
   readonly precio: string;
   readonly categoria: string;
+  /** Stock and low-stock threshold, only for products that track stock (O-24). */
+  readonly existencias: number | null;
+  readonly umbral: number | null;
 }
 
 export async function catalogo(
@@ -25,6 +29,7 @@ export async function catalogo(
   const rows = await new DrizzleProductsRepository(db as never, deviceId as never).listForBusiness(
     businessId,
   );
+  const stock = await stockPorProducto(db, businessId, deviceId);
   return rows
     .filter((p) => p.deletedAt === null && p.estadoRevision !== 'pendiente')
     .map((p) => ({
@@ -32,5 +37,7 @@ export async function catalogo(
       nombre: p.nombre,
       precio: p.precioVentaCentavos.toString(),
       categoria: p.categoria,
+      existencias: stock.get(p.id)?.existencias ?? null,
+      umbral: stock.get(p.id)?.umbral ?? null,
     }));
 }

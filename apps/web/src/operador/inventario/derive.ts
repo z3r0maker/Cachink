@@ -51,7 +51,15 @@ export function aplicar(items: readonly Existencia[], m: Movimiento): readonly E
   );
 }
 
-const UNA: Readonly<Record<string, string>> = { piezas: 'pieza', litros: 'litro' };
+const UNA: Readonly<Record<string, string>> = {
+  piezas: 'pieza',
+  litros: 'litro',
+  metros: 'metro',
+  cajas: 'caja',
+  bolsas: 'bolsa',
+  rollos: 'rollo',
+  pares: 'par',
+};
 
 /** «8 kg», «1 pieza», «220 piezas»: the unit agrees with the amount. */
 export const conUnidad = (n: number, unidad: string): string =>

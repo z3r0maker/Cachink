@@ -155,8 +155,9 @@ Links to discussion, docs, prior art.
 | [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
 | [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
-| [116](#adr-116) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [117](#adr-117) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
+| [117](#adr-117) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [118](#adr-118) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 | [119](#adr-119) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [120](#adr-120) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 
@@ -5636,7 +5637,7 @@ through SECURITY DEFINER functions with a pinned `search_path` (as 0002).
 
 **Date:** 2026-09-18
 
-**Status:** Accepted — decided by the owner; amends contract §8, ADR-058 §2 (Movimientos no longer read-only) and P-07; decision 1's bootstrap amended by ADR-119 (a paged snapshot: stock baseline + 90 days of movements)
+**Status:** Accepted — decided by the owner; amends contract §8, ADR-058 §2 (Movimientos no longer read-only) and P-07
 
 **Context**
 
@@ -8143,7 +8144,99 @@ category's** previous months.
   per-period aggregation bug there is.** Both halves of this defect survived a
   suite of 890 tests for that one reason.
 
+---
+
 ## ADR-116
+
+**Title:** A capacidad promises a date only where the calendar alone gets there
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — completes P-26's capacidades panel; the last item ADR-113 and ADR-115 left open
+
+**Context:**
+
+The design's `readinessDefs` gives every locked capacidad two strings: the count
+(`shortStatus`, «33 de 60 días») and an actionable line (`lockedCopy`). `Capacidad`
+only ever had the count, so the panel could say how far along a shopkeeper was and
+never what to do about it.
+
+The design's four locked examples are not one shape but three:
+
+| Capacidad | `lockedCopy` | Shape |
+| --- | --- | --- |
+| Precios y márgenes | `Registra el costo de tus productos para activarlo` | an instruction |
+| Gastos fuera de lo normal | `Disponible en 31 días` | a date |
+| ¿Me alcanza? (pronóstico) | `Disponible en 23 días` | a date |
+| Corte de caja | `Llevas 8 de 20 cortes` | the count restated |
+
+The arithmetic behind the two dates is `objetivo − actual`, in the counter's own
+unit, rendered as days: Pronóstico is 90 − 67 = 23, and Gastos is one month
+rendered as ~31. That projection assumes the counter advances on its own.
+
+Only one counter does. `diasDeHistorial` is days since the first record and grows
+every day whether or not anything else is ever captured. `mesesConGasto` gains a
+month only when an egreso lands in that category in a new month; `cortes`,
+`compras`, `diasConVenta` and `diasConMovimiento` move only when the shopkeeper
+records something. «Disponible en 31 días» for Gastos is therefore a promise a
+quiet month breaks — and a broken promise about the shopkeeper's own data is the
+failure P-26's compuerta exists to prevent, in a subtler form than an invented
+number.
+
+**Decision**
+
+1. **`Capacidad` gains `lockedCopy: string`**, empty once the capability is
+   active so nothing stale can render, shown in the panel under `requirement`
+   (`capAccion`, weighted above it because it is the thing to act on rather than
+   the rule being quoted).
+
+2. **A date is promised only where the calendar alone gets there.** That is
+   `diasDeHistorial`: «Resumen del mes» and «¿Me alcanza? (pronóstico)» read
+   «Disponible en N días», singular «1 día» on the last one. Two helpers make the
+   distinction structural rather than a matter of remembering —
+   `porCalendario` emits a date, `porRegistro` emits «Llevas X de Y …» — so a
+   capability added later has to pick one.
+
+3. **«Gastos fuera de lo normal» diverges from the design** and reads «Llevas 2
+   de 3 meses». This is the one place we knowingly contradict the mock, for the
+   reason in the Context.
+
+4. **«Precios y márgenes» names the blocker still standing.** «Registra el costo
+   de tus productos para activarlo» while `compras < 2`, and the días count once
+   the compras are there, because repeating the instruction after it has been
+   followed is advice already taken — and the copy would then be describing a
+   blocker that no longer exists.
+
+**Alternatives considered**
+
+- *Follow the design exactly, Gastos included.* One fewer divergence to explain,
+  at the price of a date the product cannot honour. A shopkeeper who stops
+  recording expenses for a month watches «Disponible en 31 días» tick to 31 again.
+- *Give every locked row a date, projecting from the tenant's own rate.* «At your
+  current pace, about 40 days» is honest in aggregate and unfalsifiable in the
+  particular, and it invites the reader to treat a regression line as a
+  commitment. Rejected for the same reason ADR-114 rejected a fabricated
+  movimiento.
+- *Drop the count and keep only the actionable line.* Loses the progress the Fase
+  6 compuerta is built on — «33 de 60 días» is the thing that is never a
+  conclusion.
+
+**Consequences**
+
+- The panel now answers «what do I do about it», which it never could. Two of the
+  six blockers are «do something» rather than «wait longer», and those two were
+  previously indistinguishable from the others.
+- `porCalendario` / `porRegistro` encode the distinction in the type of helper
+  chosen, so the next capability cannot silently acquire a date it has not earned.
+- Every open item from ADR-113 and ADR-115 is now closed. What remains of the
+  Diagnóstico is P-28 building it, and P-30's model call behind that.
+- The E2E assertion for this shipped unverified locally: the shared dev database
+  was not in a seeded state (24 products for Taquería against the sentinel's 8,
+  from a parallel session), and `db:reset` would have destroyed that session's
+  work. CI's `portal-e2e` job seeds fresh and is a required check, so that is
+  where it is proven.
+
+## ADR-117
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -8237,7 +8330,7 @@ statement never under a long or zero timeout, and `REINDEX` only
 `db-local.sh` applies each transactional file in one transaction, as hosted
 does. data-pg 0044–0047 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
-## ADR-117
+## ADR-118
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 
@@ -8342,8 +8435,6 @@ row whose write comes back already stored (`exists`/`stale`) without a receipt
 at the segment's start has its receipt looked up again after the write — an
 overlapping retry that waited on the original's lock — and counts as written
 for later references (DB3-SYNC-03).
-
----
 
 ## ADR-119
 

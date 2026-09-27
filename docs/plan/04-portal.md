@@ -1092,11 +1092,20 @@ never invented text.
     `diasConVenta`, and Pronóstico reads `diasDeHistorial` under the design's own name,
     «¿Me alcanza? (pronóstico) · 90 días de registros». `mesesConGastoDe` was deleted: its only caller
     was its own test, and its semantics were the wrong ones.
-  - **Still open: `lockedCopy`.** The design gives each locked row an actionable line beside the count —
-    `Disponible en 31 días`, `Llevas 8 de 20 cortes`, and crucially `Registra el costo de tus productos
-para activarlo`. Two of the six blockers are «do something», not «wait longer», and `Capacidad` has
-    no field for that distinction. ADR-113's aggregate line needs only a count, so this blocks nothing;
-    the capacidades panel it links to is what stays poorer for it.
+  - **`lockedCopy` landed 2026-09-26 — ADR-116**, and it does not repeat the design everywhere. The
+    field carries the actionable line beside the count, empty once the capacidad is active so nothing
+    stale can render, and the panel shows it under the requirement (`capAccion`). **A date is promised
+    only where the calendar alone gets there**, which is `diasDeHistorial`: «Resumen del mes» and
+    «¿Me alcanza? (pronóstico)» read «Disponible en N días», and the design's own fixture confirms the
+    arithmetic (90 − 67 = «Disponible en 23 días»). Every other counter waits on the shopkeeper, so it
+    gets «Llevas X de Y …» instead — including **«Gastos fuera de lo normal», where the design says
+    «Disponible en 31 días» and we deliberately do not**: a month only counts once an egreso lands in
+    that category, so the calendar alone does not get there and the promise breaks on a quiet month.
+    «Precios y márgenes» has two blockers, so the line names the one still standing — «Registra el
+    costo de tus productos para activarlo» while `compras < 2`, the días count afterwards, because
+    repeating the instruction after the compras have landed is advice already taken.
+  - `porCalendario` / `porRegistro` make that distinction structural: a capacidad added later has to
+    pick one, so it cannot quietly acquire a date it has not earned.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never

@@ -9,17 +9,24 @@ function sum(xs: readonly bigint[]): bigint {
   return xs.reduce((a, b) => a + b, 0n);
 }
 
-/** The turno's headline figures, as the Resumen card lists them. */
-export function resumenDelTurno(
-  delTurno: readonly { id: string; metodo: string; cancelledAt: string | null }[],
+/** Each ticket's total over its standing lines (Resumen, Mi turno, Inicio). */
+export function totalesPorTicket(
   lineas: readonly { ticketId: string; monto: bigint; deletedAt: string | null }[],
-): CierrePara['resumen'] {
+): (id: string) => bigint {
   const deTicket = new Map<string, bigint>();
   for (const l of lineas) {
     if (l.deletedAt !== null) continue;
     deTicket.set(l.ticketId, (deTicket.get(l.ticketId) ?? 0n) + (l.monto as bigint));
   }
-  const total = (id: string) => deTicket.get(id) ?? 0n;
+  return (id: string) => deTicket.get(id) ?? 0n;
+}
+
+/** The turno's headline figures, as the Resumen card lists them. */
+export function resumenDelTurno(
+  delTurno: readonly { id: string; metodo: string; cancelledAt: string | null }[],
+  lineas: readonly { ticketId: string; monto: bigint; deletedAt: string | null }[],
+): CierrePara['resumen'] {
+  const total = totalesPorTicket(lineas);
   const vivas = delTurno.filter((t) => t.cancelledAt === null);
   const canceladas = delTurno.filter((t) => t.cancelledAt !== null);
   return {
@@ -30,8 +37,7 @@ export function resumenDelTurno(
     fiadoCentavos: sum(
       vivas.filter((t) => t.metodo === 'Crédito').map((t) => total(t.id)),
     ).toString(),
-    // The register sells without stock movements until the flags wiring; the
-    // fixtures' entradas/mermas stay zero on real data.
+    // The inventory counts come from the turno's movements (cierre.ts overrides).
     entradas: 0,
     mermas: 0,
   };

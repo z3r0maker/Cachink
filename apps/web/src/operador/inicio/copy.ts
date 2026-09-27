@@ -117,7 +117,10 @@ const vendiendo = (t: TurnoAbierto): Hero => ({
   eyebrow: 'Lo primero',
   icon: CAJA,
   title: 'La caja está lista',
-  body: `Llevas ${t.ventas} ventas en este turno. La última fue hace ${t.ultimaVentaHace}.`,
+  body:
+    t.ventas === 0
+      ? 'Todavía no hay ventas en este turno. La primera se cobra desde aquí.'
+      : `Llevas ${t.ventas} ${t.ventas === 1 ? 'venta' : 'ventas'} en este turno. La última fue hace ${t.ultimaVentaHace}.`,
   cta: 'Cobrar',
   href: `${OPERADOR_BASE}/caja`,
 });

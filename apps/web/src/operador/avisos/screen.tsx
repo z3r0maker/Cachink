@@ -15,6 +15,7 @@ import * as r from './reply.css';
 import { AvisoSistema } from './sistema';
 import type { AvisoGrupo, AvisosScreenProps } from './types';
 import { useAvisos } from './use-avisos';
+import { deDueno, mayuscula } from './vivo';
 
 const TABS: readonly [AvisoGrupo, string][] = [
   ['dueno', 'De Pedro'],
@@ -28,8 +29,8 @@ const LEIDO = 'M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16';
  * Read state and replies live on the device until the message tables land
  * (ADR-075, C-19); the corte reply is answered in place.
  */
-export function AvisosScreen({ state, data, tab: initialTab }: AvisosScreenProps) {
-  const v = useAvisos(data, initialTab);
+export function AvisosScreen({ state, data, tab: initialTab, vivo }: AvisosScreenProps) {
+  const v = useAvisos(data, initialTab, vivo);
   return (
     <OpMain top={24}>
       <div className={a.head}>
@@ -47,7 +48,7 @@ export function AvisosScreen({ state, data, tab: initialTab }: AvisosScreenProps
           mode={state}
           icon={ICONS.bell}
           emptyTitle="Nada por leer"
-          emptyBody={`Ni mensajes de ${data.dueno} ni avisos de tu caja.`}
+          emptyBody={`Ni mensajes ${deDueno(data.dueno)} ni avisos de tu caja.`}
           errorTitle="No pudimos cargar tus avisos"
         />
       )}
@@ -63,7 +64,7 @@ function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
     <div role="tablist" aria-label="Quién avisa" className={a.tabs}>
       {TABS.map(([key, label]) => {
         const n = v.sinLeer(key);
-        const text = label.replace('Pedro', dueno);
+        const text = key === 'dueno' ? mayuscula(deDueno(dueno)) : label;
         return (
           <button
             key={key}
@@ -117,7 +118,7 @@ function NadaPorLeer({ tab, dueno }: { readonly tab: AvisoGrupo; readonly dueno:
       <span className={r.emptyTitle}>Nada por leer</span>
       <span className={r.emptyBody}>
         {tab === 'dueno'
-          ? `${dueno} no te ha escrito nada nuevo.`
+          ? `${mayuscula(dueno)} no te ha escrito nada nuevo.`
           : 'Tu caja no tiene avisos del sistema.'}
       </span>
     </div>

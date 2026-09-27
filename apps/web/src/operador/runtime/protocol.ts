@@ -6,6 +6,8 @@
 
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { Bootstrap } from '@xangarro/contracts';
+import type { ColaRequest } from './cola-shapes';
+import type { InventarioRequest } from './inventario-mapa';
 
 export type {
   AbonoCuentaPara,
@@ -21,6 +23,7 @@ export type {
 export interface RegistrarContext {
   readonly deviceId: string;
   readonly userId: string | null;
+  /** Ignored: the Worker reads the business's own stock switch (runtime/tickets.ts). */
   readonly stockEnabled: boolean;
 }
 
@@ -61,6 +64,8 @@ export interface SesionAbierta {
 export type SyncMode = 'captura' | 'completa';
 
 export type WorkerRequest =
+  | ColaRequest
+  | InventarioRequest
   | { readonly id: number; readonly method: 'boot' }
   | {
       readonly id: number;
@@ -165,6 +170,13 @@ export type WorkerRequest =
       readonly categoria: string;
       readonly montoCentavos: string;
       readonly proveedor: string | null;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'turnoVivo';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly turnoId: string;
     }
   | {
       readonly id: number;
