@@ -9,7 +9,10 @@
 -- runs this one too. EXECUTE only: the function is the whole surface, and it
 -- deletes nothing a live session or an active lockout still needs.
 
-SET lock_timeout = '3s';
+-- `SET LOCAL`: the timeout dies with this file's transaction instead of
+-- staying on the runner's session (R2-13). 200 ms, and the runner retries the
+-- whole file with backoff when it expires (DB3-MIG-01; ADR-109 amendment).
+SET LOCAL lock_timeout = '200ms';
 
 DO $$
 BEGIN

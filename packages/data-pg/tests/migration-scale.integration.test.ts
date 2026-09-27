@@ -61,8 +61,31 @@ const indexState = async (sql: postgres.Sql, names: readonly string[]) =>
     await sql<{ name: string; valid: boolean }[]>`
     SELECT c.relname AS name, i.indisvalid AS valid
       FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid
-     WHERE c.relname = ANY(${names as string[]}) ORDER BY 1`
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE c.relname = ANY(${names as string[]}) AND n.nspname IN ('public', 'xangarro')
+     ORDER BY 1`
   ).map((r) => ({ name: r.name, valid: r.valid }));
+
+const indexDef = async (sql: postgres.Sql, name: string) =>
+  (
+    await sql<{ def: string }[]>`SELECT indexdef AS def FROM pg_indexes WHERE indexname = ${name}`
+  )[0]?.def ?? '';
+
+/** The per-table storage options 0043 sets (DB3-OPS-01), as `pg_class` has them. */
+const reloptions = async (sql: postgres.Sql) =>
+  Object.fromEntries(
+    (
+      await sql<{ t: string; o: string[] | null }[]>`
+      SELECT n.nspname || '.' || c.relname AS t, c.reloptions AS o
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+       WHERE (n.nspname, c.relname) IN (
+         ('public', 'devices'), ('public', 'sync_cursors'), ('xangarro', 'throttle'),
+         ('xangarro', 'api_latency_counters'), ('xangarro', 'portal_sessions'),
+         ('public', 'sales'), ('public', 'tickets'), ('public', 'expenses'),
+         ('public', 'inventory_movements'), ('public', 'sync_log'), ('public', 'sync_receipts'))
+       ORDER BY 1`
+    ).map((r) => [r.t, [...(r.o ?? [])].sort()]),
+  );
 
 const unwrapped = async (sql: postgres.Sql) =>
   (
@@ -85,10 +108,11 @@ const NEW = [
   'expenses_business_turno_idx',
   'tickets_business_cliente_idx',
   'sales_business_producto_idx',
+  'tickets_business_cancelled_idx',
   'sync_receipts_business_received_idx',
   'business_members_user_idx',
   'business_members_business_user_uq',
-  'portal_sessions_business_seen_idx',
+  'portal_sessions_business_idx',
   'usage_counters_period_idx',
 ];
 const REDUNDANT = [
@@ -99,6 +123,10 @@ const REDUNDANT = [
   'business_onboarding_business_idx',
   'notice_preferences_business_idx',
   'usage_counters_business_idx',
+  // Round 3 (DB3-IDX-01): prefixes of the new indexes.
+  'business_members_business_idx',
+  'sales_business_idx',
+  'expenses_business_idx',
 ];
 
 describe('scale migrations 0043–0045, old → new', () => {
@@ -115,6 +143,13 @@ describe('scale migrations 0043–0045, old → new', () => {
 
   afterAll(async () => {
     await db?.drop();
+  });
+
+  it('before 0043 the redundant indexes exist and no table has storage options', async () => {
+    assert.equal((await indexState(sql, REDUNDANT)).length, REDUNDANT.length);
+    const opts = await reloptions(sql);
+    assert.equal(Object.keys(opts).length, 11);
+    assert.ok(Object.values(opts).every((o) => o.length === 0));
   });
 
   it('0043 refuses duplicate memberships before building anything', async () => {
@@ -137,8 +172,21 @@ describe('scale migrations 0043–0045, old → new', () => {
     assert.deepEqual(await indexState(sql, ['business_members_business_user_uq']), [
       { name: 'business_members_business_user_uq', valid: false },
     ]);
+    // The same name, INVALID, in another schema: the sweep must leave it be (R2-12).
+    await sql`CREATE SCHEMA scale_other`;
+    await sql`CREATE TABLE scale_other.bm (business_id text, user_id text)`;
+    await sql`INSERT INTO scale_other.bm VALUES ('a', 'u'), ('a', 'u')`;
+    await assert.rejects(
+      () => sql`CREATE UNIQUE INDEX CONCURRENTLY business_members_business_user_uq
+                  ON scale_other.bm (business_id, user_id)`,
+    );
     await sql`DELETE FROM business_members WHERE id = 'bm-dup'`;
     await applyMigration(sql, fileNamed('0043_scale_indexes.sql'));
+    const [other] = await sql<{ valid: boolean }[]>`
+      SELECT i.indisvalid AS valid FROM pg_index i
+       WHERE i.indexrelid = 'scale_other.business_members_business_user_uq'::regclass`;
+    assert.equal(other?.valid, false, 'another schema’s index is not the sweep’s business');
+    await sql`DROP SCHEMA scale_other CASCADE`;
     const built = await indexState(sql, NEW);
     assert.deepEqual(
       built.map((r) => r.name),
@@ -157,6 +205,81 @@ describe('scale migrations 0043–0045, old → new', () => {
       (await readApplied(sql)).map((r) => r.name),
       ['data-pg/0043_scale_indexes.sql'],
     );
+  });
+
+  it('0043 builds the round-3 shapes: INCLUDE, partial, business_id alone (DB3-IDX-01)', async () => {
+    assert.match(await indexDef(sql, 'sales_business_created_idx'), /INCLUDE \(ticket_id\)/);
+    assert.match(
+      await indexDef(sql, 'inventory_movements_business_created_idx'),
+      /INCLUDE \(origen\)/,
+    );
+    assert.match(
+      await indexDef(sql, 'tickets_business_cliente_idx'),
+      /WHERE \(cliente_id IS NOT NULL\)/,
+    );
+    assert.match(
+      await indexDef(sql, 'tickets_business_cancelled_idx'),
+      /\(business_id, id\) WHERE \(cancelled_at IS NOT NULL\)/,
+    );
+    assert.match(
+      await indexDef(sql, 'portal_sessions_business_idx'),
+      /xangarro\.portal_sessions USING btree \(business_id\)$/,
+      'last_seen_at is not indexed, so the session touch stays HOT',
+    );
+  });
+
+  it('0043 sets fillfactor on the hot-update rows and faster autovacuum on the append tables (DB3-OPS-01)', async () => {
+    const hot = ['fillfactor=80'];
+    const append = [
+      'autovacuum_analyze_scale_factor=0.02',
+      'autovacuum_vacuum_insert_scale_factor=0.02',
+    ];
+    assert.deepEqual(await reloptions(sql), {
+      'public.devices': hot,
+      'public.expenses': append,
+      'public.inventory_movements': append,
+      'public.sales': append,
+      'public.sync_cursors': hot,
+      'public.sync_log': append,
+      'public.sync_receipts': append,
+      'public.tickets': append,
+      'xangarro.api_latency_counters': hot,
+      'xangarro.portal_sessions': hot,
+      'xangarro.throttle': hot,
+    });
+  });
+
+  it('a month of live sales or expenses is still an index range after the (business_id, fecha) drop', async () => {
+    // Two years of one tenant's history among 20 tenants, so the planner has
+    // real statistics to choose from; removed again below.
+    for (const table of ['sales', 'expenses'] as const) {
+      const extra = table === 'sales' ? sql`, ticket_id, producto_id` : sql``;
+      const extraVals = table === 'sales' ? sql`, 't-x', 'p' || (g % 40)` : sql``;
+      const cat = table === 'sales' ? 'Producto' : 'Renta';
+      await sql`
+        INSERT INTO ${sql(table)} (id, fecha, concepto, categoria, monto_centavos, business_id, device_id, created_at, updated_at ${extra})
+        SELECT 'x-' || g, to_char(date '2025-01-01' + (g % 730), 'YYYY-MM-DD'), 'x', ${cat}, 100,
+               CASE WHEN g % 20 = 0 THEN ${A} ELSE 'biz-' || (g % 20) END, 'dev', now(), now() ${extraVals}
+          FROM generate_series(1, 60000) g`;
+      await sql`ANALYZE ${sql(table)}`;
+    }
+    try {
+      for (const table of ['sales', 'expenses'] as const) {
+        const plan = (
+          await sql<{ 'QUERY PLAN': string }[]>`
+          EXPLAIN SELECT sum(monto_centavos) FROM ${sql(table)}
+           WHERE business_id = ${A} AND deleted_at IS NULL
+             AND fecha >= '2026-09-01' AND fecha < '2026-10-01'`
+        )
+          .map((r) => r['QUERY PLAN'])
+          .join('\n');
+        assert.match(plan, new RegExp(`${table}_business_fecha_id_live_idx`), plan);
+        assert.match(plan, /Index Cond: .*fecha >= /, plan);
+      }
+    } finally {
+      await sql`DELETE FROM sales WHERE id LIKE 'x-%'`;
+      await sql`DELETE FROM expenses WHERE id LIKE 'x-%'`;
+    }
   });
 
   it('0043 keeps every row, enforces one membership per person, and repeats as a no-op', async () => {
@@ -178,7 +301,12 @@ describe('scale migrations 0043–0045, old → new', () => {
     const p95 = async () =>
       (await sql<{ ms: number | null }[]>`SELECT xangarro.admin_sync_p95(1) AS ms`)[0]?.ms;
     assert.equal(await p95(), 700, 'before: 90 at ≤50 ms, 10 at ≤700 ms');
+    const timeout = async () =>
+      (await sql<{ v: string }[]>`SELECT current_setting('lock_timeout') AS v`)[0]?.v;
+    const before = await timeout();
+    assert.equal(typeof before, 'string');
     await applyMigration(sql, fileNamed('0044_api_latency_slots.sql'));
+    assert.equal(await timeout(), before, 'SET LOCAL: nothing leaks onto the session (R2-13)');
     const rows = await sql<{ slot: number; hits: number }[]>`
       SELECT slot, hits FROM xangarro.api_latency_counters ORDER BY bucket_ms`;
     assert.deepEqual(

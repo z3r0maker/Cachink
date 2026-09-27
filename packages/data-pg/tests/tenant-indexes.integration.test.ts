@@ -40,11 +40,13 @@ describe('tenant indexes in the database (DB-IDX-01)', () => {
           FROM rls r
           JOIN pg_attribute a ON a.attrelid = r.oid AND a.attname = 'business_id' AND a.attnum > 0
       ),
+      -- A partial index serves only queries that imply its predicate, and an
+      -- INVALID one serves none: neither counts (DB3-IDX-01).
       lead_cols AS (
         SELECT i.indrelid
           FROM pg_index i
           JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = i.indkey[0]
-         WHERE a.attname = 'business_id'
+         WHERE a.attname = 'business_id' AND i.indpred IS NULL AND i.indisvalid
       )
       SELECT k.relname
         FROM keyed k
@@ -62,11 +64,27 @@ describe('tenant indexes in the database (DB-IDX-01)', () => {
     const rows = await sql<{ indexname: string }[]>`
       SELECT indexname FROM pg_indexes
        WHERE schemaname = 'public' AND indexname IN (
-         'sales_business_idx', 'expenses_business_idx', 'inventory_movements_business_idx',
-         'products_business_idx', 'day_closes_business_idx', 'devices_business_idx',
-         'activation_codes_business_idx', 'business_members_business_idx'
+         'inventory_movements_business_idx', 'products_business_idx', 'day_closes_business_idx',
+         'devices_business_idx', 'activation_codes_business_idx'
        )
        ORDER BY indexname`;
-    assert.equal(rows.length, 8, `expected the §2.2 set, got ${rows.map((r) => r.indexname)}`);
+    assert.equal(rows.length, 5, `expected the §2.2 set, got ${rows.map((r) => r.indexname)}`);
+  });
+
+  it('0043 replaced the three prefixes round 3 found redundant (DB3-IDX-01)', async () => {
+    const rows = await sql<{ indexname: string }[]>`
+      SELECT indexname FROM pg_indexes
+       WHERE indexname IN ('sales_business_idx', 'expenses_business_idx',
+                           'business_members_business_idx', 'portal_sessions_business_seen_idx')`;
+    assert.deepEqual(
+      rows.map((r) => r.indexname),
+      [],
+    );
+    const kept = await sql<{ indexname: string; indexdef: string }[]>`
+      SELECT indexname, indexdef FROM pg_indexes
+       WHERE indexname IN ('sales_business_fecha_id_live_idx', 'expenses_business_fecha_id_live_idx',
+                           'business_members_business_user_uq', 'portal_sessions_business_idx')
+       ORDER BY indexname`;
+    assert.equal(kept.length, 4, 'what serves those queries now');
   });
 });

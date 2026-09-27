@@ -12,8 +12,9 @@ import { integrationSuite } from './support/db';
  * 0046 (audit DB2-PAGE-01): what every portal navigation costs the database.
  *
  * - `session_resolve` used to UPDATE `last_seen_at` on every request. It now
- *   touches the row only when the stored stamp is more than a minute old, and
- *   still judges idleness against the stored stamp.
+ *   touches the row only when the stored stamp is older than a minute (or
+ *   half the idle limit, if shorter), and still judges idleness against the
+ *   stored stamp.
  * - `negocios_for_user` returns each membership with its business's name, so
  *   the switcher needs one call instead of one tenant transaction per business.
  */
@@ -92,6 +93,25 @@ describe('0046 — the portal’s per-request cost', () => {
     const before = await lastSeen(token);
     assert.equal((await resolveSession(db, token, 600))?.role, 'owner');
     assert.ok((await lastSeen(token)).getTime() > before.getTime() + 60_000, 'stamp moved to now');
+  });
+
+  it('with an idle limit under two minutes, touches at half the limit (DB3-L-08)', async () => {
+    // A fixed minute would leave a 30 s-idle session's stamp alone until it
+    // expired under a user who clicks every 20 s.
+    const token = await openSession(db, userId, BIZ, 3600);
+    await ageSession(token, 10);
+    const fresh = await lastSeen(token);
+    assert.equal((await resolveSession(db, token, 30))?.businessId, BIZ);
+    assert.equal((await lastSeen(token)).getTime(), fresh.getTime(), '10 s < 15 s: no write');
+    await ageSession(token, 20);
+    const before = await lastSeen(token);
+    assert.equal((await resolveSession(db, token, 30))?.businessId, BIZ);
+    assert.ok(
+      (await lastSeen(token)).getTime() > before.getTime() + 15_000,
+      '20 s > 15 s: touched',
+    );
+    await ageSession(token, 20);
+    assert.equal((await resolveSession(db, token, 30))?.businessId, BIZ, 'still alive 40 s in');
   });
 
   it('still ends a session idle past the limit, judged on the stored stamp', async () => {

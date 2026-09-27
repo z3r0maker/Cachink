@@ -13,10 +13,16 @@
 -- lock for an instant, and one per commit means no statement ever holds a
 -- hot table's lock while it queues behind the next one. Every statement is
 -- repeatable, so a run that stops on `lock_timeout` is simply run again.
+--
+-- While an ALTER waits for its lock, every new reader of that table queues
+-- behind it — at 3 s the audit saw a plain `count(*)` on sales stall 2.5 s
+-- (DB3-MIG-01). So each waits only 200 ms, and the runner retries the
+-- statement with backoff (up to 20 tries, 250 ms doubling to 5 s) when it
+-- expires. Run it in the 00:00–06:00 trough all the same.
 -- `tests/migration-scale.integration.test.ts` fails if any policy is left
 -- unwrapped.
 
-SET lock_timeout = '3s';
+SET lock_timeout = '200ms';
 
 ALTER POLICY tenant_isolation ON public.activation_codes
   USING (business_id = (SELECT xangarro.current_business_id())) WITH CHECK (business_id = (SELECT xangarro.current_business_id()));
