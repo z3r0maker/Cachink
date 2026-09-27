@@ -1072,29 +1072,31 @@ never invented text.
 
 - [x] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
   - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{screen,para-ti}.tsx`, `e2e/asesor.sync.spec.ts`.
-  - **Reopened as a defect 2026-09-26, found while settling ADR-112.** `calcularCapacidades` drifted
-    from the design's `readiness` fixture in four ways. Three are copy, one is a **threshold**, and one
-    field is missing entirely:
-
-    | Capacidad                 | `capacidades.ts` today                     | Design's `readinessDefs`                                     |
-    | ------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
-    | Precios y márgenes        | `60 días de ventas + 2 compras`            | `60 días de ventas + 2 compras **del producto**`             |
-    | Inventario                | `60 días de **ventas**`                    | `60 días de **movimientos**`                                 |
-    | Gastos fuera de lo normal | `3 meses **con gastos**`                   | `3 meses **por categoría**`                                  |
-    | Pronóstico                | name `Pronóstico`, `90 días de **ventas**` | name `¿Me alcanza? (pronóstico)`, `90 días de **registros**` |
-
-    **«3 meses por categoría» is not a wording fix.** `mesesConGastoDe` counts distinct `YYYY-MM` over
-    all egresos, so a business with three months of rent alone passes today; per category it would not.
-    Same for «2 compras **del producto**» — `compras` counts entrada movements estate-wide, not per
-    product, so one product with two purchases currently unlocks margins for every product. Both change
-    who sees what and each needs its own decision before the string is changed to match.
-
-  - **`lockedCopy` is missing.** The design gives each locked row an actionable line beside the count —
-    `Disponible en 31 días`, `Disponible en 23 días`, `Llevas 8 de 20 cortes`, and crucially
-    `Registra el costo de tus productos para activarlo`. Two of the six blockers are not «wait longer»
-    but «do something», and `Capacidad` has no field for that distinction, so the panel can only ever
-    show a count. ADR-112's aggregate line («N secciones más se abren solas conforme captures») does
-    not need it, but the capacidades panel it links to does.
+  - **Fixed 2026-09-26 — ADR-115, and it was worse than drift.** Reading `calcularCapacidades` against
+    the design's `readinessDefs` turned up a live bug in `gastosFueraDeLoNormal`, not just wrong
+    strings. The current month was **summed per category** while the baseline averaged **individual
+    egreso rows**, so a monthly total was compared against a per-row mean. A business logging a
+    category twice a month on perfectly flat spending was told «van 100% arriba» — every month, for
+    ever — and ten times a month reads «900% arriba». Its «three months» gate counted **rows**, so
+    three egresos inside one April produced a warning whose body claimed «un promedio … en los últimos
+    tres». Measured on the seeded tenant at 2026-09-26: «Tus gastos de materia prima van **330%**
+    arriba … contra un promedio de **$980.00** en los últimos tres», where the tenant has **two** prior
+    months averaging $1,960 — wrong figure, wrong percentage, false «últimos tres». The existing tests
+    were blind to it because every fixture logs a category exactly once a month, the one shape where a
+    row mean equals a month mean.
+  - Both sides are monthly totals now, `MESES_BASE` counts distinct prior months per category, and the
+    two panel counts were changed to predict the insights they promise rather than count estate-wide:
+    `compras` is the **best single product's** entrada count (`costosQueSubieron` compares a product
+    against its own previous entrada) and `mesesConGasto` is the **best single category's** prior
+    months, never counting the current one. Inventario reads a new `diasConMovimiento` instead of
+    `diasConVenta`, and Pronóstico reads `diasDeHistorial` under the design's own name,
+    «¿Me alcanza? (pronóstico) · 90 días de registros». `mesesConGastoDe` was deleted: its only caller
+    was its own test, and its semantics were the wrong ones.
+  - **Still open: `lockedCopy`.** The design gives each locked row an actionable line beside the count —
+    `Disponible en 31 días`, `Llevas 8 de 20 cortes`, and crucially `Registra el costo de tus productos
+para activarlo`. Two of the six blockers are «do something», not «wait longer», and `Capacidad` has
+    no field for that distinction. ADR-113's aggregate line needs only a count, so this blocks nothing;
+    the capacidades panel it links to is what stays poorer for it.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never

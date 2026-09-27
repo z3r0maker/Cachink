@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { calcularCapacidades, mesesConGastoDe } from '../../src/asesor/capacidades.js';
+import { calcularCapacidades } from '../../src/asesor/capacidades.js';
 
 /** The Fase 6 compuerta: a locked capability states its progress, never a conclusion. */
 describe('calcularCapacidades', () => {
@@ -9,6 +9,7 @@ describe('calcularCapacidades', () => {
     const joven = calcularCapacidades({
       hoy: '2026-05-12',
       diasConVenta: 33,
+      diasConMovimiento: 21,
       diasDeHistorial: 40,
       compras: 1,
       cortes: 8,
@@ -23,12 +24,21 @@ describe('calcularCapacidades', () => {
     const margenes = joven.find((c) => c.name === 'Precios y márgenes');
     assert.equal(margenes?.locked, true);
     assert.match(margenes?.progress ?? '', /33 de 60 días · 1 de 2 compras/);
+    // Inventario reads movimientos now, not ventas (ADR-115): 21, not 33.
+    const inventario = joven.find((c) => c.name === 'Inventario');
+    assert.equal(inventario?.progress, '21 de 60 días de movimientos');
+    // «90 días de registros» is history, so 40 — not the 33 days carrying a venta.
+    const pronostico = joven.find((c) => c.name === '¿Me alcanza? (pronóstico)');
+    assert.equal(pronostico?.progress, '40 de 90 días de registros');
+    const gastos = joven.find((c) => c.name === 'Gastos fuera de lo normal');
+    assert.equal(gastos?.progress, '2 de 3 meses');
   });
 
   it('capacidades never exceed their objective in the progress line', () => {
     const maduro = calcularCapacidades({
       hoy: '2026-05-12',
       diasConVenta: 200,
+      diasConMovimiento: 180,
       diasDeHistorial: 300,
       compras: 30,
       cortes: 99,
@@ -36,11 +46,5 @@ describe('calcularCapacidades', () => {
     });
     assert.ok(maduro.every((c) => !c.locked));
     assert.ok(maduro.every((c) => c.progress === 'Activo'));
-  });
-});
-
-describe('mesesConGastoDe', () => {
-  it('counts distinct months, not rows', () => {
-    assert.equal(mesesConGastoDe(['2026-02-01', '2026-02-15', '2026-03-01']), 2);
   });
 });

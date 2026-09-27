@@ -19,7 +19,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1003`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:323`
-- **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1615`
+- **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1617`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1297`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
 - **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1286`
@@ -238,22 +238,22 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `04-portal.md` · Fase 6 — Asesor
 
-- [~] **P-28** Diagnóstico + estrategia — «Próximamente» in production — Blocked by: P-26, P-30 · Falta: only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt. 2026-09-22 doc audit: shipped except the ten report sections and the price table. In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built. Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1158`
-- [ ] **P-29** Catálogo desde una foto — «Próximamente» in production — Blocked by: P-07, P-30 · `04-portal.md:1332`
-- [~] **P-30** Asesor generation runtime — Blocked by: — · Falta: the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`. **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table. 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. · `04-portal.md:1342`
+- [~] **P-28** Diagnóstico + estrategia — «Próximamente» in production — Blocked by: P-26, P-30 · Falta: only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt. 2026-09-22 doc audit: shipped except the ten report sections and the price table. In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built. Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1160`
+- [ ] **P-29** Catálogo desde una foto — «Próximamente» in production — Blocked by: P-07, P-30 · `04-portal.md:1334`
+- [~] **P-30** Asesor generation runtime — Blocked by: — · Falta: the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`. **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table. 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. · `04-portal.md:1344`
 
 ### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
 
-- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1615`
-- [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1679`
+- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1617`
+- [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1681`
 
 ### `04-portal.md` · Fase 10 — Beta: lo que el diseño ya muestra como listo
 
-- [!] **P-37** Ticket printing from the caja · `04-portal.md:1767`
-- [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: — · `04-portal.md:1781`
-- [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30, P-28 · `04-portal.md:1796`
-- [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1812`
-- [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1825`
+- [!] **P-37** Ticket printing from the caja · `04-portal.md:1769`
+- [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: — · `04-portal.md:1783`
+- [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30, P-28 · `04-portal.md:1798`
+- [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1814`
+- [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1827`
 
 ### `05-app.md`
 

@@ -41,28 +41,41 @@ export function gastosPorMitadDeMes(rows: InsightRows): readonly Insight[] {
   ];
 }
 
-/** 3 · A category this month is ≥ GASTO_ANOMALO above its three-month average. */
+/**
+ * 3 · A category this month is ≥ GASTO_ANOMALO above its three-month average.
+ *
+ * **Both sides are monthly totals.** The baseline sums each prior month and
+ * averages those sums, because the figure it is compared against is this
+ * month's total. Averaging the individual egreso rows instead makes the
+ * comparison dimensional nonsense — a category logged twice a month reads as
+ * «100% arriba» on perfectly flat spending, and ten times a month as «900%
+ * arriba», every month, for ever. `MESES_BASE` is months for the same reason:
+ * three rows inside one April is one month of history, and the body says «en
+ * los últimos tres».
+ */
 const GASTO_ANOMALO_PCT = 30;
+const MESES_BASE = 3;
 
 export function gastosFueraDeLoNormal(rows: InsightRows): readonly Insight[] {
   const mesActual = ym(rows.hoy);
   const actuales = new Map<string, Money>();
-  const base = new Map<string, Money[]>();
+  /** categoría → mes → total de ese mes. */
+  const base = new Map<string, Map<string, Money>>();
   for (const e of rows.egresos) {
     const m = ym(e.fecha);
     if (m === mesActual) {
       actuales.set(e.categoria, (actuales.get(e.categoria) ?? 0n) + e.monto);
-    } else {
-      const lista = base.get(e.categoria) ?? [];
-      lista.push(e.monto);
-      base.set(e.categoria, lista);
+      continue;
     }
+    const meses = base.get(e.categoria) ?? new Map<string, Money>();
+    meses.set(m, (meses.get(m) ?? 0n) + e.monto);
+    base.set(e.categoria, meses);
   }
   const out: Insight[] = [];
   for (const [categoria, monto] of actuales) {
-    const previos = base.get(categoria) ?? [];
-    if (previos.length < 3) continue;
-    const promedio = previos.reduce((a, b) => a + b, 0n) / BigInt(previos.length);
+    const meses = [...(base.get(categoria)?.values() ?? [])];
+    if (meses.length < MESES_BASE) continue;
+    const promedio = meses.reduce((a, b) => a + b, 0n) / BigInt(meses.length);
     if (promedio === 0n) continue;
     const exceso = Number(((monto - promedio) * 100n) / promedio);
     if (exceso < GASTO_ANOMALO_PCT) continue;

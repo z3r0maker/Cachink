@@ -6,6 +6,7 @@ import { mesAnterior, type IsoDate } from '@xangarro/domain';
 import { inventoryMovements, products } from '../schema/catalog.js';
 import { expenses, sales, tickets } from '../schema/ledger.js';
 import { notices } from '../schema/portal.js';
+import { contarCapacidades, conteosAsesor } from './asesor-conteos.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -25,7 +26,7 @@ export async function asesorInputs(tx: Tx, hoy: IsoDate) {
     gastosRecientes(tx, desdeEgresos),
     entradasDeCompra(tx),
     inventarioYConteos(tx),
-    conteosAsesor(tx),
+    conteosAsesor(tx, hoy),
   ]);
 
   return mapearInsightRows(hoy, ventas, egresos, entradas, catalogo, conteos);
@@ -89,14 +90,7 @@ function mapearInsightRows(
     productos: catalogo.productos,
     stock: catalogo.stock,
     ultimoMovimiento: catalogo.ultimo,
-    cuenta: {
-      hoy,
-      diasConVenta: Number(conteos?.dias_con_venta ?? 0),
-      diasDeHistorial: diasDesde(conteos?.primer_dia ?? null, hoy),
-      compras: Number(conteos?.compras ?? 0),
-      cortes: Number(conteos?.cortes ?? 0),
-      mesesConGasto: Number(conteos?.meses_con_gasto ?? 0),
-    },
+    cuenta: contarCapacidades(hoy, conteos),
   };
 }
 
@@ -124,40 +118,6 @@ async function inventarioYConteos(tx: Tx) {
       fecha: m.fecha === null ? null : (String(m.fecha).slice(0, 10) as IsoDate),
     })),
   };
-}
-
-/** The capacidades' lifetime counts, in one row. */
-async function conteosAsesor(tx: Tx) {
-  const r = await tx.execute<{
-    dias_con_venta: number;
-    primer_dia: string | null;
-    compras: number;
-    cortes: number;
-    meses_con_gasto: number;
-  }>(sql`
-    SELECT (SELECT count(DISTINCT left(s.fecha, 10)) FROM sales s
-             WHERE s.deleted_at IS NULL
-               AND NOT EXISTS (SELECT 1 FROM tickets t
-                                WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL))
-             AS dias_con_venta,
-           (SELECT min(d) FROM (
-              SELECT min(left(s.fecha, 10)) AS d FROM sales s
-               WHERE s.deleted_at IS NULL
-                 AND NOT EXISTS (SELECT 1 FROM tickets t
-                                  WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)
-              UNION ALL
-              SELECT min(left(fecha, 10)) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
-           (SELECT count(*) FROM inventory_movements
-             WHERE deleted_at IS NULL AND tipo = 'entrada') AS compras,
-           (SELECT count(*) FROM day_closes WHERE deleted_at IS NULL) AS cortes,
-           (SELECT count(DISTINCT left(fecha, 7)) FROM expenses WHERE deleted_at IS NULL) AS meses_con_gasto`);
-  return r[0];
-}
-
-function diasDesde(primerDia: string | null, hoy: IsoDate): number {
-  if (primerDia === null) return 0;
-  const ms = Date.parse(`${hoy}T00:00:00Z`) - Date.parse(`${primerDia}T00:00:00Z`);
-  return Math.max(0, Math.round(ms / 86_400_000));
 }
 
 /** Upsert one insight; `state` and `resolved_at` are never in the `set`. */
