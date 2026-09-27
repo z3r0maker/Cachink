@@ -9,7 +9,9 @@
  *   - «Reintentar envío» → `completa`, manual (skips the engine's backoff);
  *   - back online        → `completa`, manual, after 0–3 s of jitter so a
  *                          shop's registers do not reconnect in the same instant;
- *   - after a failure    → one retry when the engine's backoff ends (`retryAt`).
+ *   - after a failure    → one retry when the engine's backoff ends (`retryAt`);
+ *   - an idle caja       → `refrescar()` (shell/cola) on boot, in view and every
+ *                          5 min, scheduled at the gate (DB3-CAJA-03).
  *
  * The counts are the queue as Registros por enviar lists it (`colaPendiente`,
  * one definition with the phone: DB3-CAJA-02). A count that cannot be read

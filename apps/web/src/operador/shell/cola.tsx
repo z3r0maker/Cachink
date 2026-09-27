@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 
 import { useFlusher } from './cola-flusher';
@@ -41,6 +42,26 @@ export function desencolar(): Promise<void> {
   return desencolarAhora?.() ?? Promise.resolve();
 }
 
+/** The linked shell's full sync (push and pull), when mounted; the pill follows it. */
+let refrescarAhora: (() => Promise<void>) | null = null;
+
+/**
+ * A background pull (DB3-CAJA-03): through the shell's flusher when it is
+ * mounted, straight to the runtime at the door. Automatic, so the engine's
+ * backoff holds; a failure waits for the next one.
+ */
+export function refrescar(): Promise<void> {
+  if (refrescarAhora !== null) return refrescarAhora();
+  const device = readDevice();
+  if (device === null) return Promise.resolve();
+  return registerRuntime()
+    .sync(device.deviceToken, { mode: 'completa' })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}
+
 /** The flusher, published for `desencolar` while a linked provider is mounted. */
 function useLinkedQueue(linked: boolean): ReturnType<typeof useFlusher> {
   const real = useFlusher(linked);
@@ -48,8 +69,10 @@ function useLinkedQueue(linked: boolean): ReturnType<typeof useFlusher> {
   useEffect(() => {
     if (!linked) return;
     desencolarAhora = () => flush('captura', false);
+    refrescarAhora = () => flush('completa', false);
     return () => {
       desencolarAhora = null;
+      refrescarAhora = null;
     };
   }, [linked, flush]);
   return real;
