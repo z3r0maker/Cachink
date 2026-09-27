@@ -3,17 +3,22 @@
 import { colors } from '@xangarro/tokens';
 
 import { OperadorEstado } from '../../estado';
-import { ICONS, OPERADOR_BASE } from '../../shell/nav';
+import { ICONS, OPERADOR_BASE } from '@xangarro/caja';
 import { Note } from '../../ui/note';
 import { OpMain } from '../../ui/parts';
 import { Toast } from '../../ui/toast';
 import { RecibirAbono } from '../abono';
-import { vistaAbono } from './abono';
-import { limiteNota, recordatorio } from './derive';
+import {
+  vistaAbono,
+  limiteNota,
+  recordatorio,
+  type CuentaCliente,
+  type DetalleClienteData,
+  type DetalleClienteProps,
+} from '@xangarro/caja/cobranza';
 import { Heroe, Indicadores } from './hero';
 import { Abiertas, Movimientos } from './listas';
 import { Recordar, RecordarBoton } from './recordar';
-import type { CuentaCliente, DetalleClienteData, DetalleClienteProps } from './types';
 import { useCliente } from './use-cliente';
 
 /** Operador · Detalle de cliente: one account, derived from its tickets and abonos. */

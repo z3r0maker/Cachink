@@ -2,7 +2,7 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import type { ColumnDef } from '@/components';
-import { DIF } from '@/operador/cierre/copy';
+import { DIF } from '@xangarro/caja/cierre';
 
 import * as s from './cortes.css';
 import { conSigno, contado, diferencia, esperado } from './derive';

@@ -14,13 +14,12 @@ import {
   DrizzleTicketsRepository,
 } from '@xangarro/data';
 import { esperadoDelTurno } from '@xangarro/domain';
-import { hhmmLocal, hoyLocal } from './fechas';
+import { hhmmLocal, hoyLocal } from '@xangarro/caja';
 import type { BusinessId, CajaTurnoId, DiscrepancyReason } from '@xangarro/domain';
 
 import type { Db } from './db-types';
-import { resumenDelTurno } from './cierre-resumen';
+import { resumenDelTurno, contar } from '@xangarro/caja/lectura';
 import { movimientosDelTurno } from './inventario';
-import { contar } from './inventario-mapa';
 import type { CierrePara } from './protocol';
 
 /**

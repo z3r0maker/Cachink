@@ -1,7 +1,7 @@
 import { calcularMargenProducto, formatMoney, sum, type Money } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { enPalabras } from '../../../operador/inicio/copy';
+import { enPalabras } from '@xangarro/caja/inicio';
 
 import type { ClienteCaja } from './types';
 

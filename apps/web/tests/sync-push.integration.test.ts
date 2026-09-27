@@ -12,7 +12,7 @@ import { PUSH_T1, PUSH_TOUCHED, pushFixtures, pushId } from './support/push-fixt
 
 /**
  * The batched push end to end — `ApplyPushUseCase` over `PgPushStore` on real
- * Postgres under RLS (audit DB2-SYNC-01/-02; ADR-119). Needs `DATABASE_URL`
+ * Postgres under RLS (audit DB2-SYNC-01/-02; ADR-120). Needs `DATABASE_URL`
  * (app role) and `DATABASE_SUPER_URL`; `REQUIRE_DB=1` (`pnpm --filter @xangarro/web
  * test:db`, CI's portal-e2e job) turns a missing database into a failure.
  */

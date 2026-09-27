@@ -9,10 +9,10 @@
 import { useEffect, useState } from 'react';
 
 import { registerRuntime } from '../runtime/client';
-import { hoyLocal } from '../runtime/fechas';
+import { hoyLocal } from '@xangarro/caja';
 import { readDevice } from '../runtime/device-store';
 import { readSesion } from '../runtime/session-store';
-import { avisosVivos, sinLeer } from './vivo';
+import { avisosVivos, sinLeer } from '@xangarro/caja/avisos';
 
 export const AVISOS_CAMBIARON = 'xangarro:avisos';
 

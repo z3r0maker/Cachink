@@ -80,6 +80,8 @@ const configs = tseslint.config(
         { type: 'domain', pattern: 'packages/domain/src/**' },
         { type: 'application', pattern: 'packages/application/src/**' },
         { type: 'data', pattern: 'packages/data/src/**' },
+        // The caja's shared read models (ADR-118): both apps import it.
+        { type: 'caja', pattern: 'packages/caja/src/**' },
         {
           type: 'ui',
           pattern: [
@@ -114,12 +116,13 @@ const configs = tseslint.config(
               ],
             },
             { from: { type: 'data' }, allow: { to: { type: 'domain' } } },
+            { from: { type: 'caja' }, allow: { to: { type: 'domain' } } },
             { from: { type: 'sync' }, allow: { to: { type: ['domain', 'data'] } } },
             {
               // ui is the phone's body: it wires the cloud sync bridge,
               // activation and entitlement from @xangarro/sync (ADR-104).
               from: { type: 'ui' },
-              allow: { to: { type: ['domain', 'application', 'data', 'sync'] } },
+              allow: { to: { type: ['domain', 'application', 'data', 'sync', 'caja'] } },
             },
             {
               // `MockRepositoryProvider` wraps ui's `RepositoryProvider`, and
@@ -134,7 +137,7 @@ const configs = tseslint.config(
             {
               from: { type: 'app' },
               allow: {
-                to: { type: ['domain', 'application', 'data', 'ui', 'sync', 'testing'] },
+                to: { type: ['domain', 'application', 'data', 'ui', 'sync', 'testing', 'caja'] },
               },
             },
           ],

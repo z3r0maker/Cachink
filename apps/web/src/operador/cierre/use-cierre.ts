@@ -8,20 +8,10 @@ import {
   type ConteoDenominaciones,
 } from '@xangarro/domain';
 
-import { motivoDominio } from '../vocabulario';
+import { motivoDominio } from '@xangarro/caja';
 import { useCola } from '../shell/cola';
-import { esperadoDe } from '../turno/desglose';
-import type { CierreData, MotivoDiferencia } from './types';
-
-/** The linked register's close write (O-36): the reason already in the domain's enum. */
-export interface CerrarVivo {
-  (p: {
-    readonly montoCierreCentavos: bigint;
-    readonly discrepancyReason: string | null;
-    readonly explicacion: string | null;
-    readonly denominaciones: Readonly<Record<string, number>> | null;
-  }): Promise<void>;
-}
+import { esperadoDe } from '@xangarro/caja/turno';
+import type { CerrarVivo, CierreData, MotivoDiferencia } from '@xangarro/caja/cierre';
 
 /**
  * The count, the explanation and the close. Closing is blocked while the queue

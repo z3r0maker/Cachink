@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { Icon } from '../../shell/icon';
-import type { Hero, Nota } from './copy';
+import type { Hero, Nota } from '@xangarro/caja/inicio';
 import * as h from './hero.css';
 
 const FLECHA = 'M5 12h14M13 6l6 6-6 6';

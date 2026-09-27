@@ -1,6 +1,5 @@
-import { VENTAS_FIXTURE } from '@/operador/ventas/fixture';
+import { VENTAS_FIXTURE, type VentasScreenProps } from '@xangarro/caja/ventas';
 import { VentasScreen } from '@/operador/ventas/screen';
-import type { VentasScreenProps } from '@/operador/ventas/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 const FILTROS = ['Todos', 'Efectivo', 'Fiado'] as const;

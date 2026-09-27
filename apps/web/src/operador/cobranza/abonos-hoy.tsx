@@ -3,7 +3,7 @@ import { formatMoney } from '@xangarro/domain';
 import * as r from '../ui/resumen.css';
 import * as c from './cobranza.css';
 import * as k from './cuenta.css';
-import type { AbonoDelDia } from './derive';
+import type { AbonoDelDia } from '@xangarro/caja/cobranza';
 
 /** «Abonos que recibiste hoy», newest first. */
 export function AbonosHoy(p: { readonly abonos: readonly AbonoDelDia[] }) {

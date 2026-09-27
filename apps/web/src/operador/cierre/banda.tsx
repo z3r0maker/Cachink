@@ -5,9 +5,9 @@ import { useState } from 'react';
 
 import { Don } from '../../components/don/don';
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import * as b from './banda.css';
-import { BANDA_CUERPO, BANDA_SIN_RED } from './copy';
+import { BANDA_CUERPO, BANDA_SIN_RED } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
 const GIRO =

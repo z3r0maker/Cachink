@@ -6,7 +6,7 @@
  * A store is built for one caller — one business, one device, one open
  * transaction — so none of these take a tenant.
  *
- * **Every method takes a batch** (audit DB2-SYNC-01, ADR-119). One push costs a
+ * **Every method takes a batch** (audit DB2-SYNC-01, ADR-120). One push costs a
  * number of statements set by how many tables it touches, not by how many rows
  * it carries: a 500-row push used to be ~4,200 round trips inside the tenant's
  * cursor lock.

@@ -5,10 +5,14 @@ import type { Money } from '@xangarro/domain';
 
 import { useCredenciales } from '../../runtime/use-credenciales';
 import { abonarEnVivo, hoyLocal } from '../vivo';
-import type { MetodoAbono } from '../types';
-import { nuevoAbono, toastAbono, vistaAbono } from './abono';
-import { estadoCuenta } from './derive';
-import type { CuentaCliente } from './types';
+import {
+  type MetodoAbono,
+  nuevoAbono,
+  toastAbono,
+  vistaAbono,
+  estadoCuenta,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
 
 /**
  * The account and its modals. An abono is appended to the account's abonos, whole —

@@ -1,9 +1,8 @@
 import Link from 'next/link';
 
-import { OPERADOR_BASE } from '../../shell/nav';
-import { fichas, type Ficha } from './copy';
+import { OPERADOR_BASE } from '@xangarro/caja';
+import { fichas, type Ficha, type VentaDetalle } from '@xangarro/caja/ventas';
 import * as s from './side.css';
-import type { VentaDetalle } from './types';
 
 /** The four tiles: how it was paid (or why it was cancelled), who cobró, where. */
 export function Fichas(p: {

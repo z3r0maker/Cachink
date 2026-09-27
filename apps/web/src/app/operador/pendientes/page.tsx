@@ -1,6 +1,5 @@
-import { COLA_FIXTURE } from '@/operador/pendientes/fixture';
+import { COLA_FIXTURE, type PendientesScreenProps } from '@xangarro/caja/pendientes';
 import { PendientesViva } from '@/operador/pendientes/viva';
-import type { PendientesScreenProps } from '@/operador/pendientes/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

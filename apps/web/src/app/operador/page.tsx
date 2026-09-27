@@ -1,6 +1,10 @@
-import { INICIO_FIXTURE } from '@/operador/inicio/fixture';
+import {
+  INICIO_FIXTURE,
+  type InicioData,
+  type InicioScreenProps,
+  type Situacion,
+} from '@xangarro/caja/inicio';
 import { InicioViva } from '@/operador/inicio/viva';
-import type { InicioData, InicioScreenProps, Situacion } from '@/operador/inicio/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 const SITUACIONES: readonly Situacion[] = [

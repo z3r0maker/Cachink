@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { shapeRadii } from '@xangarro/tokens';
+import type { StatItem } from '@xangarro/caja';
 
 import { Icon } from '../../shell/icon';
 import * as p from './panel.css';
@@ -51,16 +52,6 @@ export function Panel({
       {children}
     </section>
   );
-}
-
-export interface StatItem {
-  readonly label: string;
-  readonly value: string;
-  readonly hint: string;
-  /** A token colour for the figure. */
-  readonly color: string;
-  /** The one figure to act on: soft yellow with a black edge. */
-  readonly strong?: boolean;
 }
 
 /** The figures on a grid; `grid` swaps the default auto-fit columns for the screen's own. */

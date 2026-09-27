@@ -22,9 +22,9 @@ Owner decisions (2026-09-27):
 ## Phases
 
 - [x] **M-01 · Remove what the operator doesn't use.** 2026-09-27: Merma, Conversión, Auditoría, crédito, cuentas por cobrar (old), Clientes, nómina, export, sale and gasto edit/delete, unreachable hooks and charts, their tests and 38 Maestro flows (~27.6k lines).
-- [ ] **M-02 · Owner approves the phone and tablet boards.** Canvas page «Teléfono y tableta»; changes land on the boards before code.
-- [ ] **M-03 · Tokens without the fork.** `packages/ui/src/theme.ts` re-exports `@xangarro/tokens` (borders.quiet, yellowRule, denseRadii, font sizes) and the Tamagui config reads it; Don Cuentas poses as native assets.
-- [ ] **M-04 · Shared caja logic.** Move the web caja's derivations (`operador/*/derive.ts`, `para-hoy.ts`, the runtime read models) to a package both apps import, so the phone and the web show the same numbers.
+- [x] **M-02 · Owner approves the phone and tablet boards.** Approved 2026-09-27. Canvas page «Teléfono y tableta»; changes land on the boards before code.
+- [x] **M-03 · Tokens without the fork.** 2026-09-27: `theme.ts` re-exports `@xangarro/tokens` (no value differed; it gained borders.quiet, yellowRule, denseRadii, portalFontSizes), Tamagui reads it, native `Don` with the nine poses. `packages/ui/src/theme.ts` re-exports `@xangarro/tokens` (borders.quiet, yellowRule, denseRadii, font sizes) and the Tamagui config reads it; Don Cuentas poses as native assets.
+- [x] **M-04 · Shared caja logic.** 2026-09-27: `@xangarro/caja` (ADR-118) holds the web caja's types, derivations, copy, fixtures and runtime read models, one subpath per screen; the web imports it and `packages/ui` depends on it. The Worker, OPFS, protocol and Drizzle readers stay in `apps/web`.
 - [ ] **M-05 · Shell.** Four tabs, header with sync pill and avisos, bottom sheet, dialog and toast primitives, lock screen, offline banner; the 88 px rail and full sidebar on tablets.
 - [ ] **M-06 · Entrar y empezar.** Vincular (camera QR + code), Acceso (NIP), Abrir turno, Inicio with «Para hoy», Bloqueo.
 - [ ] **M-07 · Cobrar.** Catalog, scanner (quick add, unknown code opens Producto nuevo), ticket sheet, cobro with the four methods and cambio, venta hecha with the comprobante (N-20 SVG) through the share sheet, venta fiada, producto nuevo.

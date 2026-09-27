@@ -14,7 +14,7 @@ import { readDevice } from '../runtime/device-store';
 
 import { useFlusher } from './cola-flusher';
 
-import type { Connection } from './types';
+import type { Connection } from '@xangarro/caja';
 
 /** How long the fixture «send» takes, as in `Operador Pendientes.dc.html`. */
 const ENVIO_MS = 1400;

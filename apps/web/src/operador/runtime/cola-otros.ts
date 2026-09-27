@@ -7,7 +7,7 @@
 import { sql } from 'drizzle-orm';
 
 import { filas, movimiento, porId, porLotes, type Lector } from './cola-sql';
-import type { ClaseMovimiento } from './cola-shapes';
+import type { ClaseMovimiento } from '@xangarro/caja/lectura';
 
 /** The rarer tables: a title, and a name where the row has one. */
 export const OTROS: Readonly<Record<string, readonly [ClaseMovimiento, boolean]>> = {

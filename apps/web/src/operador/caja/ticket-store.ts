@@ -2,8 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 
-import { addProducto, bump } from './ticket';
-import type { LineaTicket, Producto } from './types';
+import { addProducto, bump, type LineaTicket, type Producto } from '@xangarro/caja/caja';
 
 /**
  * The ticket in progress, as the register's own state (O-13): it survives the

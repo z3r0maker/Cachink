@@ -3,8 +3,7 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { METODO_TONO } from './metodo';
-import type { MetodoVenta, VentaTurno } from './types';
+import { METODO_TONO, type MetodoVenta, type VentaTurno } from '@xangarro/caja/ventas';
 import * as l from './lista.css';
 
 /**

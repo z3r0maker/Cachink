@@ -7,10 +7,9 @@ import { OperadorEstado } from '../estado';
 import { PageHead } from '../ui/panel';
 import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
-import { heroe, intro, portalDe } from './derive';
+import { heroe, intro, portalDe, type PendientesScreenProps } from '@xangarro/caja/pendientes';
 import { ListaCola } from './lista';
 import * as s from './pendientes.css';
-import type { PendientesScreenProps } from './types';
 import { usePendientes } from './use-pendientes';
 
 const SYNC =

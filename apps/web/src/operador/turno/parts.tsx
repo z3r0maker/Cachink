@@ -1,10 +1,9 @@
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
-import { enPalabras } from '../inicio/copy';
-import { hintCanceladas } from '../ui/frases';
-import type { StatItem } from '../ui/panel';
-import type { TurnoData } from './types';
+import { enPalabras } from '@xangarro/caja/inicio';
+import { hintCanceladas, type StatItem } from '@xangarro/caja';
+import type { TurnoData } from '@xangarro/caja/turno';
 
 /** The four turno figures (`OpTurno.dc.html`). */
 export function kpis(d: TurnoData): readonly StatItem[] {

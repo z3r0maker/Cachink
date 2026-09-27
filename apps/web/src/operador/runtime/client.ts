@@ -36,9 +36,14 @@ import type {
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
 import type { RecurrenteGastoPara } from './recurrentes';
-import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
-import type { TurnoVivoPara } from './turno-shapes';
-import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
+import type {
+  AvisosPara,
+  PendienteCrudo,
+  ResponderAvisoCall,
+  TurnoVivoPara,
+  InventarioPara,
+  MoverInventarioCall,
+} from '@xangarro/caja/lectura';
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -90,14 +95,9 @@ export class RegisterRuntime {
 
   sync(
     token: string | null,
-    opts: { readonly mode: SyncMode; readonly manual?: boolean },
+    opts: { readonly mode: SyncMode; readonly manual: boolean },
   ): Promise<SyncRunResult> {
-    return this.#call<SyncRunResult>({
-      method: 'sync',
-      token,
-      mode: opts.mode,
-      manual: opts.manual ?? false,
-    });
+    return this.#call<SyncRunResult>({ method: 'sync', token, ...opts });
   }
 
   counts(): Promise<RuntimeCounts> {

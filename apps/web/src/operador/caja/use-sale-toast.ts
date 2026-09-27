@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Money } from '@xangarro/domain';
 
-import type { LineaTicket } from './types';
+import type { LineaTicket } from '@xangarro/caja/caja';
 
 export interface VentaHecha {
   readonly lines: readonly LineaTicket[];

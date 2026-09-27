@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation';
 import { brand } from '@xangarro/tokens';
 
 import { Coin, Icon } from '../../shell/icon';
-import { ICONS, OPERADOR_BASE, SIDEBAR_GROUPS, isActive, type OperadorNavGroup } from './nav';
+import { ICONS, OPERADOR_BASE, type OperadorShellData } from '@xangarro/caja';
+import { SIDEBAR_GROUPS, isActive, type OperadorNavGroup } from './nav';
 import * as s from './shell.css';
 import * as b from './sidebar.css';
-import type { OperadorShellData } from './types';
 
 /** The coin is 38 px inside a 2.5 px border in the design (content-box). */
 const COIN_OUTER = brand.coinSidebar + 5;

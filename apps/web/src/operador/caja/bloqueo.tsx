@@ -11,7 +11,7 @@ import * as m from '../ui/mostrador.css';
 import * as b from './bloqueo.css';
 import { Entrar, NipPad, teclaDe, useTeclado } from './bloqueo-nip';
 import { Marco, Nota, Quien, QuienSigue, type Operador } from './bloqueo-partes';
-import { contar, total } from './ticket';
+import { contar, total } from '@xangarro/caja/caja';
 
 /** The register's whole lock surface (O-13, OpBloqueo); rendered by the shell. */
 export function BloqueoCaja(): ReactNode {

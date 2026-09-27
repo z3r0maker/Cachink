@@ -1,7 +1,7 @@
-import { MOTIVOS_DIFERENCIA, type MotivoDiferencia } from '@/operador/cierre/types';
+import { MOTIVOS_DIFERENCIA, type MotivoDiferencia } from '@xangarro/caja/cierre';
 
 /**
- * The close's reason as the operator chose it (`operador/vocabulario.ts`). The
+ * The close's reason as the operator chose it (`@xangarro/caja` vocabulario). The
  * record keeps the domain's enum, which folds two of the four reasons into
  * one value per direction: «Otra razón» always carries the operator's note and
  * «Venta no registrada» never does, so the note tells them apart. Older values

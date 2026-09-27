@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { Icon } from '../../shell/icon';
 import * as h from './header.css';
-import { OPERADOR_BASE } from './nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import { HeaderAction } from './shell';
 
 const PLUS = 'M12 5v14M5 12h14';

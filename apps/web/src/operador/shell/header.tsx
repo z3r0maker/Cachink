@@ -7,8 +7,8 @@ import { usePathname } from 'next/navigation';
 import { Icon } from '../../shell/icon';
 import { back } from './back.css';
 import * as h from './header.css';
-import { headerFor, ICONS, OPERADOR_BASE, type HeaderMode } from './nav';
-import type { OperadorShellData } from './types';
+import { headerFor, type HeaderMode } from './nav';
+import { ICONS, OPERADOR_BASE, type OperadorShellData } from '@xangarro/caja';
 
 /** Screens portal their header action («Nueva venta», …) into this node. */
 export const HEADER_ACTION_ID = 'operador-header-action';
