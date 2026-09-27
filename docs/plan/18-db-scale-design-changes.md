@@ -166,8 +166,8 @@ memory. The range is capped at 13 months.
 
 **Why.** Linking used to download the business's whole movement history in one response, which
 stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at
-most 5,000 rows: one page for almost every business, a few for the biggest (about ten seconds on
-a good connection). Today the caja keeps «Conectando…» on the button until every page is in; the
+most 5,000 rows: one page for almost every business, a handful for a busy one, and about two
+dozen for a year-old whale (tens of seconds on a slow connection). Today the caja keeps «Conectando…» on the button until every page is in; the
 phone opens as soon as the first page lands and the rest arrives on the first sync, so for a few
 seconds its stock can read low on a very big business.
 

@@ -8451,5 +8451,11 @@ autocommitting statement at a time.
 - Pulled rows (other devices' movements) are still never purged by A-11 —
   only this device's accepted rows are — so a device's movement table still
   grows after the bootstrap. Left to the retention work (DB2-SYNC-03).
+- One transaction per page is safe because both device drivers are
+  synchronous (expo-sqlite's `openDatabaseSync`, sql.js in the caja's
+  Worker): between `BEGIN` and `COMMIT` there is no macrotask boundary, so no
+  sale can interleave its statements into a page that might roll back, and
+  the caja's `export()` (which closes the database) cannot run mid-page. An
+  asynchronous driver would need a device-wide write queue first.
 - Not done here: DB3-L-01 (a device re-downloading its own movements). It is
   independent of the bootstrap.
