@@ -241,7 +241,7 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS o_idx ON ONLY "Odd"."T" (x) WHERE x IS N
 
   it('every migration from DB2-MIG-01 on sets lock_timeout', () => {
     const since: Record<string, string> = {
-      'packages/data-pg/drizzle': '0044',
+      'packages/data-pg/drizzle': '0045',
       'apps/backoffice/src/server/db/migrations': '0020',
       'packages/data-pg/hosted': '9999',
     };

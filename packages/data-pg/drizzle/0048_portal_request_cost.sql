@@ -1,4 +1,4 @@
--- 0047: what every portal navigation costs the database (audit DB2-PAGE-01).
+-- 0048: what every portal navigation costs the database (audit DB2-PAGE-01).
 --
 -- 1. `session_resolve` UPDATEd `last_seen_at` on every request: one row
 --    write, one WAL record and one dead tuple per page view. It now reads

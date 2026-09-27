@@ -26,7 +26,7 @@ function asRole(appUrl: string, role: string): string {
   return u.toString();
 }
 
-/** Today's hits for one bucket, summed across its slots (0045), as the owner sees it. */
+/** Today's hits for one bucket, summed across its slots (0046), as the owner sees it. */
 async function hitsEn(sql: postgres.Sql, endpoint: string, bucket: number): Promise<number> {
   const rows = await sql<{ hits: string | null }[]>`
     SELECT sum(hits)::text AS hits FROM xangarro.api_latency_counters

@@ -95,7 +95,7 @@ export async function saveUsageCounters(
 
 /**
  * Stored counters for the given months (every business). Served by
- * `usage_counters_period_idx` (0044): the primary key leads with business_id
+ * `usage_counters_period_idx` (0045): the primary key leads with business_id
  * and cannot answer `period IN (…)` without reading every tenant's months.
  */
 export async function usageCountersOf(

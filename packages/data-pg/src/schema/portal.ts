@@ -110,7 +110,7 @@ export const businessMembers = pgTable(
     ...tenantStamps,
   },
   (t) => [
-    // 0044: the login path looks members up by user, and one person is one
+    // 0045: the login path looks members up by user, and one person is one
     // member of a business. The unique index leads with business_id, so the
     // plain (business_id) one it made redundant is gone (DB3-IDX-01).
     index('business_members_user_idx').on(t.userId),

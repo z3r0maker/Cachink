@@ -11,7 +11,7 @@ import { db } from './db';
  *
  * The list comes from `xangarro.memberships_for_user` — the one lookup that is
  * not tenant-scoped, and which skips archived businesses (0016). The switcher's
- * names come from its twin `negocios_for_user` (0047) in the same single call:
+ * names come from its twin `negocios_for_user` (0048) in the same single call:
  * it used to open one tenant transaction per membership on every navigation
  * (audit DB2-PAGE-01). Both return only the caller's own memberships.
  */
