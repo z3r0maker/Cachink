@@ -16,8 +16,14 @@
 -- about 350k rows a year at most, and `api_latency_prune` keeps 400 days.
 --
 -- Rows written before this file keep their counts in slot 0.
+--
+-- The three ALTERs take the table's ACCESS EXCLUSIVE lock, and every latency
+-- write from every request queues behind a statement waiting for it. So they
+-- wait only 200 ms (DB3-MIG-01); the runner retries the whole file with
+-- backoff when that expires. `SET LOCAL`: the timeout dies with this file's
+-- transaction instead of staying on the runner's session (R2-13).
 
-SET lock_timeout = '3s';
+SET LOCAL lock_timeout = '200ms';
 
 ALTER TABLE xangarro.api_latency_counters
   ADD COLUMN IF NOT EXISTS slot smallint NOT NULL DEFAULT 0;

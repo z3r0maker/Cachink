@@ -5,6 +5,7 @@ import { describe, it } from 'vitest';
 
 import {
   concurrentIndexNames,
+  lockTimeoutMs,
   migrationProblems,
   NO_TRANSACTION,
   runsInTransaction,
@@ -83,7 +84,28 @@ CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS c ON t (y);`),
     const problems = migrationProblems(
       `${NO_TRANSACTION}\nCREATE INDEX CONCURRENTLY IF NOT EXISTS a ON t (x);`,
     );
-    assert.deepEqual(problems, ['runs outside a transaction without SET lock_timeout']);
+    assert.deepEqual(problems, ['must SET lock_timeout as its first statement']);
+  });
+
+  it('refuses a no-transaction file that sets lock_timeout late (R2-11)', () => {
+    // Everything before the SET would run under whatever the session had.
+    const problems = migrationProblems(
+      `${NO_TRANSACTION}\nALTER POLICY p ON t USING (true);\nSET lock_timeout = '200ms';\n`,
+    );
+    assert.ok(
+      problems.includes('must SET lock_timeout as its first statement'),
+      problems.join('\n'),
+    );
+  });
+
+  it('refuses SET LOCAL outside a transaction, where it does nothing', () => {
+    const problems = migrationProblems(
+      `${NO_TRANSACTION}\nSET LOCAL lock_timeout = '200ms';\nSELECT 1;`,
+    );
+    assert.ok(
+      problems.some((p) => /SET LOCAL/.test(p)),
+      problems.join('\n'),
+    );
   });
 
   it('refuses unrepeatable index statements and transaction control', () => {
@@ -92,9 +114,90 @@ CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS c ON t (y);`),
 CREATE INDEX CONCURRENTLY b ON t (x);
 DROP INDEX c;
 BEGIN;
-COMMIT;`),
+COMMIT;
+ABORT;
+ROLLBACK;`),
     );
-    assert.equal(problems.length, 5, problems.join('\n'));
+    assert.equal(problems.length, 7, problems.join('\n'));
+  });
+
+  it('refuses a REINDEX that is not CONCURRENTLY, in either kind of file (R2-11)', () => {
+    assert.equal(migrationProblems(noTx('REINDEX INDEX a;')).length, 1);
+    assert.equal(migrationProblems('REINDEX TABLE t;').length, 1);
+    assert.deepEqual(migrationProblems(noTx('REINDEX INDEX CONCURRENTLY a;')), []);
+  });
+
+  it('lets concurrent builds wait forever, but not an ACCESS EXCLUSIVE statement', () => {
+    const forever = `${NO_TRANSACTION}\nSET lock_timeout = 0;\n`;
+    assert.deepEqual(
+      migrationProblems(`${forever}CREATE INDEX CONCURRENTLY IF NOT EXISTS a ON t (x);
+DROP INDEX CONCURRENTLY IF EXISTS b;
+ALTER TABLE public.t SET (fillfactor = 80, autovacuum_analyze_scale_factor = 0.02);
+ALTER TABLE t RESET (fillfactor);`),
+      [],
+      'these take SHARE UPDATE EXCLUSIVE at most: waiting blocks nobody',
+    );
+    for (const stmt of [
+      'ALTER POLICY p ON t USING (true);',
+      'ALTER TABLE t ADD COLUMN c int;',
+      'ALTER TABLE t SET (fillfactor = 80), ADD COLUMN c int;',
+      'DROP TABLE t;',
+      'LOCK TABLE t;',
+      'CREATE TRIGGER g AFTER INSERT ON t FOR EACH ROW EXECUTE FUNCTION f();',
+    ]) {
+      const problems = migrationProblems(forever + stmt);
+      assert.equal(problems.length, 1, `${stmt} → ${problems.join('; ')}`);
+      assert.match(problems[0] ?? '', /ACCESS EXCLUSIVE/);
+    }
+  });
+
+  it('accepts an ACCESS EXCLUSIVE statement under a short timeout, refuses 3 s', () => {
+    const at = (t: string) =>
+      migrationProblems(
+        `${NO_TRANSACTION}\nSET lock_timeout = ${t};\nALTER POLICY p ON t USING (true);`,
+      );
+    assert.deepEqual(at(`'200ms'`), []);
+    assert.deepEqual(at('250'), [], 'a bare number is milliseconds');
+    assert.equal(at(`'3s'`).length, 1, 'the 3 s that stalled readers in DB3-MIG-01');
+    // Switching down before the exclusive part of a file is fine.
+    assert.deepEqual(
+      migrationProblems(`${NO_TRANSACTION}\nSET lock_timeout = 0;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS a ON t (x);
+SET lock_timeout TO '150ms';
+ALTER POLICY p ON t USING (true);`),
+      [],
+    );
+  });
+
+  it('holds a transactional file to SET LOCAL, so nothing leaks onto the session (R2-13)', () => {
+    assert.equal(migrationProblems(`SET lock_timeout = '200ms';\nSELECT 1;`).length, 1);
+    assert.deepEqual(
+      migrationProblems(`SET LOCAL lock_timeout = '200ms';\nALTER TABLE t ADD c int;`),
+      [],
+    );
+    assert.equal(
+      migrationProblems(`SET LOCAL lock_timeout = '3s';\nALTER TABLE t ADD c int;`).length,
+      1,
+      'a transactional file that chooses a timeout must choose a short one',
+    );
+    assert.deepEqual(
+      migrationProblems('ALTER TABLE t ADD c int;'),
+      [],
+      'older files run under the runner default',
+    );
+  });
+
+  it('reads lock_timeout values the way Postgres does', () => {
+    assert.equal(lockTimeoutMs('0'), 0);
+    assert.equal(lockTimeoutMs("'0'"), 0);
+    assert.equal(lockTimeoutMs('200'), 200);
+    assert.equal(lockTimeoutMs("'200ms'"), 200);
+    assert.equal(lockTimeoutMs("'3s'"), 3000);
+    assert.equal(lockTimeoutMs("'10min'"), 600_000);
+    assert.equal(lockTimeoutMs("'1h'"), 3_600_000);
+    assert.equal(lockTimeoutMs("'2 s'"), 2000);
+    assert.equal(lockTimeoutMs('DEFAULT'), null);
+    assert.equal(lockTimeoutMs("'soon'"), null);
   });
 
   it('refuses CONCURRENTLY in a transactional file, but not in its comments', () => {
@@ -109,7 +212,21 @@ COMMIT;`),
 CREATE UNIQUE INDEX CONCURRENTLY "Quoted" ON t (y);
 DROP INDEX CONCURRENTLY IF EXISTS gone;`),
       ),
-      ['sales_x', 'Quoted'],
+      [
+        { schema: 'public', name: 'sales_x' },
+        { schema: 'public', name: 'Quoted' },
+      ],
+    );
+    assert.deepEqual(
+      concurrentIndexNames(
+        noTx(`CREATE INDEX CONCURRENTLY IF NOT EXISTS s_idx ON xangarro.portal_sessions (x);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS o_idx ON ONLY "Odd"."T" (x) WHERE x IS NOT NULL;`),
+      ),
+      [
+        { schema: 'xangarro', name: 's_idx' },
+        { schema: 'Odd', name: 'o_idx' },
+      ],
+      'the table’s schema is the index’s (R2-12)',
     );
   });
 
@@ -133,8 +250,10 @@ DROP INDEX CONCURRENTLY IF EXISTS gone;`),
         (n) => n.endsWith('.sql') && n >= (since[dir] ?? '9999'),
       );
       for (const f of newer) {
-        const body = withoutComments(readFileSync(join(REPO, dir, f), 'utf8'));
-        assert.match(body, /SET\s+(LOCAL\s+)?lock_timeout/i, `${dir}/${f} sets no lock_timeout`);
+        const raw = readFileSync(join(REPO, dir, f), 'utf8');
+        const body = withoutComments(raw);
+        const want = runsInTransaction(raw) ? /SET\s+LOCAL\s+lock_timeout/i : /SET\s+lock_timeout/i;
+        assert.match(body, want, `${dir}/${f} sets no lock_timeout of its kind`);
       }
     }
   });

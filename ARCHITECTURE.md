@@ -7444,6 +7444,26 @@ digest reads stored `usage_counters` instead of recounting, and runs
   key as the tenant index, which is what let 0043 drop its duplicates.
 - Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
   decided here; it needs its own ADR.
+
+**Amendment 2026-09-26 — lock timeouts by lock, and the runner retries.**
+Round 3 of the audit (`docs/audits/db-2026-09-26-r3.html`, DB3-MIG-01) found
+decision 4's flat 3 s wrong both ways. A concurrent index build waits for every
+transaction holding an older snapshot, anywhere in the database, so 3 s failed
+the builds and left INVALID indexes; while an `ALTER` waits for ACCESS
+EXCLUSIVE, every reader of its table queues behind it, so 3 s stalled traffic.
+Statements that take SHARE UPDATE EXCLUSIVE at most (`… CONCURRENTLY`,
+`ALTER TABLE … SET (storage options)`) now run with `lock_timeout = 0`;
+anything heavier waits at most 500 ms (200 ms in practice), and the runner
+retries a lock timeout (55P03) up to 20 times, 250 ms doubling to 5 s with
+jitter — the statement alone in a no-transaction file, the whole transaction
+otherwise. `hosted/lint.ts` enforces it: a no-transaction file sets
+`lock_timeout` as its first statement, a transactional file only with
+`SET LOCAL` (the value used to stay on the runner's session), a heavy
+statement never under a long or zero timeout, and `REINDEX` only
+`CONCURRENTLY`. The INVALID-index sweep now matches schema and name.
+`db-local.sh` applies each transactional file in one transaction, as hosted
+does. data-pg 0043–0046 and admin 0020–0022 were corrected in place, never
+having been applied to the hosted database.
 ## ADR-110
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
