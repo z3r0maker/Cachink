@@ -1153,6 +1153,44 @@ never invented text.
     `semanal`» (`asesorShowsDiagnostico` is `=== 'completo'` today) and the locked card, which reads
     «El Diagnóstico llega con Xangarrote», belongs to Xangarrito now and should name Xangarro.
 
+  - **2026-09-26 (traced against the design): the design already answers this — and answers it
+    twice.** `Xangarro Portal - Asesor.dc.html` carries three independent flags, `diagTeaser`,
+    `lockedSections` and `strategyLocked`. Mapping every numbered section to the `sc-if` that wraps
+    it gives the split: **1 Tu meta** and **2 Resumen del mes** sit under `diagReport`, so both tiers
+    read them; **3 Precios y márgenes, 4 ¿Me alcanza?, 5 ¿Cuánto puedo sacar?, 6 Inventario,
+    7 Cobranza, 8 Gastos fuera de lo normal** and **9 Corte de caja** sit under `diagFull`; and
+    **10 Plan de acción** sits under `diagReport` with only its three-movimiento `strategy` list
+    gated by `strategyLocked`. So the shape is: two sections both tiers read, seven the full report
+    adds, and a section 10 whose heading both see and whose answers only Xangarrote does.
+    `diagTeaser` was drawn for a paid tier that is not Xangarrote — which under ADR-059 did not
+    exist, and under ADR-109 is exactly Xangarro.
+  - **The design's two answers disagree by one section.** `lockedSections`, the hand-written teaser
+    copy, has **six** entries — 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing**, so as the file stands
+    a Xangarro reader loses Cobranza with no card in its place. One of the two is a slip, and the
+    likelier one is the `diagFull` wrapper: that is structural markup repeated verbatim across 3–9,
+    while each `lockedSections` entry is deliberate per-section copywriting. Reading the array as
+    the intent makes the design self-consistent — `diagFull` then covers exactly the six locked
+    sections — and gives Xangarro a third real section. **Recommended: Cobranza is real on both
+    tiers.**
+  - **Recommended line, one change beyond that — awaiting owner sign-off.** As literally drawn,
+    Xangarro's report is two real sections, six padlocks and a locked plan, which is the failure
+    ADR-109 named by name. The part that demonstrates what a written reading of your own numbers is
+    worth is section 10: _what to do about it_. Locking all three movimientos removes exactly the
+    evidence the taste exists to give. So: **Xangarro sees the first movimiento with its peso
+    impact**, under «los otros dos llegan con Xangarrote» — real sections 1, 2, 7 and a partial 10,
+    teaser cards for 3, 4, 5, 6, 8, 9. Xangarrote reads all ten and all three movimientos.
+  - **Tier is not the only axis that withholds a section, and the design has no state for the other
+    one.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they map
+    onto the sections: **2** needs 30 días de registros, **3** 60 días de ventas + 2 compras, **6**
+    60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas (Pronóstico), and
+    **9** 20 cortes de día. A section can therefore be withheld for two unrelated reasons, and they
+    need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de 60 días» must not —
+    showing the first to a Xangarrote three weeks in sells them what they already bought. The design
+    has one whole-report `diagNotEnough` state and no per-section equivalent, so P-28 needs a
+    per-section three-way (real · still gathering data · not in your plan), with **maturity winning
+    when both apply**. Two sections have no maturity rule and should not acquire one: **1 Tu meta**
+    (the owner sets it) and **7 Cobranza** (fiado balances are current state, not a trend).
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
 - **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
@@ -1661,9 +1699,15 @@ WhatsApp).
 ### P-40 First diagnóstico free at 90 days
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
-- **Steps:** a Xangarrito or Xangarro business that reaches 90 days of records gets one
+  - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
+    Diagnóstico was Xangarrote-only. Xangarro now gets one every month as part of the plan, so a
+    one-off free report is not an offer to them — **P-40 is Xangarrito's alone.** What it shows is
+    the _short read_ (Xangarro's shape, per P-28), not the full report: the point is to taste what a
+    written reading is worth, and a free full report would undercut both paid tiers at once. The
+    design already draws the state — `diagFreeOffer`, one of the Diagnóstico's six.
+- **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
-- **Acceptance:** the aviso fires once per business; the report opens once.
+- **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
 ### P-41 Advanced inventory functions
 
