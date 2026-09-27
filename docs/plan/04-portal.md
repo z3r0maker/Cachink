@@ -1072,6 +1072,29 @@ never invented text.
 
 - [x] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
   - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{screen,para-ti}.tsx`, `e2e/asesor.sync.spec.ts`.
+  - **Reopened as a defect 2026-09-26, found while settling ADR-112.** `calcularCapacidades` drifted
+    from the design's `readiness` fixture in four ways. Three are copy, one is a **threshold**, and one
+    field is missing entirely:
+
+    | Capacidad                 | `capacidades.ts` today                     | Design's `readinessDefs`                                     |
+    | ------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+    | Precios y márgenes        | `60 días de ventas + 2 compras`            | `60 días de ventas + 2 compras **del producto**`             |
+    | Inventario                | `60 días de **ventas**`                    | `60 días de **movimientos**`                                 |
+    | Gastos fuera de lo normal | `3 meses **con gastos**`                   | `3 meses **por categoría**`                                  |
+    | Pronóstico                | name `Pronóstico`, `90 días de **ventas**` | name `¿Me alcanza? (pronóstico)`, `90 días de **registros**` |
+
+    **«3 meses por categoría» is not a wording fix.** `mesesConGastoDe` counts distinct `YYYY-MM` over
+    all egresos, so a business with three months of rent alone passes today; per category it would not.
+    Same for «2 compras **del producto**» — `compras` counts entrada movements estate-wide, not per
+    product, so one product with two purchases currently unlocks margins for every product. Both change
+    who sees what and each needs its own decision before the string is changed to match.
+
+  - **`lockedCopy` is missing.** The design gives each locked row an actionable line beside the count —
+    `Disponible en 31 días`, `Disponible en 23 días`, `Llevas 8 de 20 cortes`, and crucially
+    `Registra el costo de tus productos para activarlo`. Two of the six blockers are not «wait longer»
+    but «do something», and `Capacidad` has no field for that distinction, so the panel can only ever
+    show a count. ADR-112's aggregate line («N secciones más se abren solas conforme captures») does
+    not need it, but the capacidades panel it links to does.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never
@@ -1088,6 +1111,7 @@ never invented text.
     vanished insights auto-close as `listo`. The plan's cadence gates the set («semanal»
     keeps the two most urgent); the capacidades panel reports the tenant's real counts;
     Descartar/Listo write through `cerrarAvisoAsesor`. 18 tests + e2e on the seed.
+
 - **Steps:** Three tabs — Para ti / Metas / Diagnóstico. The feed reads `notices` where
   `source='asesor'` (ADR-060): a category tile, icon, title, body and an action link per card.
   **Every insight here is deterministic** — cost deltas, quincena seasonality, expense anomalies
@@ -1199,17 +1223,45 @@ never invented text.
     what the paid report is worth, which sells the opposite of the intent. **So P-28 orders section
     10 by impact, descending**, and «movimiento 1» then means the best of the three by construction.
     This was free before the truncation and is load-bearing after it.
-  - **Tier is not the only axis that withholds a section, and the design has no state for the other
-    one.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they map
-    onto the sections: **2** needs 30 días de registros, **3** 60 días de ventas + 2 compras, **6**
-    60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas (Pronóstico), and
-    **9** 20 cortes de día. A section can therefore be withheld for two unrelated reasons, and they
-    need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de 60 días» must not —
-    showing the first to a Xangarrote three weeks in sells them what they already bought. The design
-    has one whole-report `diagNotEnough` state and no per-section equivalent, so P-28 needs a
-    per-section three-way (real · still gathering data · not in your plan), with **maturity winning
-    when both apply**. Two sections have no maturity rule and should not acquire one: **1 Tu meta**
-    (the owner sets it) and **7 Cobranza** (fiado balances are current state, not a trend).
+  - **Settled 2026-09-26 (owner) — the second axis: tier withholds visibly, maturity withholds
+    silently.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they
+    map onto the sections: **2** wants 30 días de registros, **3** 60 días de ventas + 2 compras,
+    **6** 60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas
+    (Pronóstico), and **9** 20 cortes de día. So a section can be withheld for two unrelated reasons,
+    and the two behave differently:
+    - **Not in your plan → the teaser card.** Visible, named, with the real finding and «Disponible
+      en Xangarrote».
+    - **Data not ready → the section is not rendered at all.** No padlock, no progress bar, no
+      mention. The report ends with **one aggregate line** — «N secciones más se abren solas conforme
+      captures → Ver capacidades» — and the per-capability detail stays where it already lives, the
+      capacidades panel on «Para ti» (`Capacidades` in `para-ti.tsx`, rendered from
+      `data.capacidades`).
+
+    The rule behind the asymmetry: **a tier gate is actionable right now** (upgrade), so it earns
+    space; **a maturity gate resolves itself** by doing what the shopkeeper is already doing, so it
+    earns a line. Rendering both as padlocks is how a 31-day Xangarro ends up reading four real
+    sections behind six locks — the same failure ADR-112 just removed for tiers, re-introduced
+    through the other axis.
+
+  - **Maturity is checked first, and the reason is stronger than «don't upsell what they bought».**
+    The teaser cards carry **real computed findings** — «Detectamos 3 productos con margen en
+    riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes del mes tienen un patrón». If
+    that section's capability is locked, **the finding does not exist**, so showing the tier teaser to
+    an immature business would invent a conclusion, which P-26 forbids outright. Maturity-first is the
+    only ordering that cannot fabricate. A pleasant consequence: the Xangarro teasers get sharper as
+    the business matures, because each one is a true statement about numbers they cannot read.
+  - **Section numbers are names, not positions.** A hidden section leaves a gap — a 31-day Xangarro
+    reads 1, 2, 7, 10 — and the numbers are **not** re-flowed. «3 · Precios y márgenes» must mean the
+    same section every month, or the report stops being comparable across months and P-34's printable
+    variant stops being comparable at all. The closing line is what explains the gaps.
+  - **The whole-report `diagNotEnough` keeps only its 30-day trigger.** The design already reuses the
+    same `readiness` list twice — in the capacidades panel and inside `diagNotEnough` («Necesitamos un
+    mes completo de registros para no darte números a medias. Esto es lo que falta:») — so the other
+    five capabilities were always meant to be per-section. Extending the whole-report gate to all six
+    would make a new business wait for 90 días de ventas and 20 cortes before reading anything.
+  - Two sections have no maturity rule and must not acquire one: **1 Tu meta** (the owner sets it) and
+    **7 Cobranza** (fiado balances are current state, not a trend). **10 Plan de acción** has none
+    either, but it has an empty case of its own — see below.
 
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
