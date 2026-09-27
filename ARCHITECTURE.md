@@ -151,6 +151,9 @@ Links to discussion, docs, prior art.
 | [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
 | [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
 | [111](#adr-111) | 2026-09-26 | The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it | Accepted |
+| [112](#adr-112) | 2026-09-26 | What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked | Accepted |
+| [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
+| [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7686,3 +7689,344 @@ production since N-02 shipped, spelled as a side effect of counting.
 - The deterministic pass now runs nightly for every tenant in production, which
   it never did. Its cost is one SQL read plus an upsert per business; the model
   spend is unchanged, because there is still no model call.
+
+---
+
+## ADR-112
+
+**Title:** What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; answers the question ADR-109 deferred to P-28
+
+**Context:**
+
+ADR-109 gave Xangarro a monthly Diagnóstico and deliberately did not say what
+distinguishes it from Xangarrote's, calling that «P-28's to settle with the
+design» and «now the deciding question of that task rather than a detail of
+it»: a taste that reads as a truncated full report sells nothing, and one that
+is merely shorter teaches the reader that the paid one is padding.
+
+The design answers most of it already, and answers it twice. Mapping every
+numbered section in `Xangarro Portal - Asesor.dc.html` to the `sc-if` that
+wraps it gives ten sections, of which **1 Tu meta** and **2 Resumen del mes**
+sit under `diagReport` and **3–9** under `diagFull`. But `lockedSections` —
+the hand-written teaser copy the `diagTeaser` state renders — has only **six**
+entries: 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing from it**, so as the file
+stands a Xangarro reader loses that section with no card in its place. The two
+halves of the design disagree by exactly one section.
+
+`diagTeaser` itself was drawn for a paid tier that is not Xangarrote — which
+did not exist under ADR-059's tiering and, after ADR-109, is exactly Xangarro.
+
+**Decision**
+
+1. **Sections 1, 2 and 7 are real on both tiers; 3, 4, 5, 6, 8 and 9 are
+   teaser cards for Xangarro.** Where the design contradicted itself, the
+   `lockedSections` array wins and `diagFull` loses Cobranza: the array is
+   deliberate per-section copywriting, while the `diagFull` wrapper is
+   structural markup repeated verbatim across 3–9, so a stray copy-paste is
+   the likelier slip. This also makes the design self-consistent — `diagFull`
+   then covers exactly the six sections that have teaser copy — and it gives
+   the taste a third real section, which it needs.
+
+   The month tiles belong to **section 2**, so they are real on both tiers.
+   The price-suggestion table belongs to **section 3**, so it is Xangarrote's.
+
+2. **Section 10, Plan de acción, is truncated rather than locked.** Xangarro
+   reads **movimiento 1 in full, with its peso impact**, under «los otros dos
+   llegan con Xangarrote». Xangarrote reads all three.
+
+   Two things were wrong to assume here and are worth writing down. First,
+   **`strategyLocked` is not this flag**: `plan !== 'pro'` is right, but its
+   single use sits inside the **Metas** tab guarding «Estrategia personalizada
+   — Disponible en Xangarrote», and section 10 sits under `isDiag >
+   diagReport` with **no tier gate at all**. As drawn, both tiers read all
+   three movimientos, so this decision *narrows* the design rather than
+   relaxing it, and the Diagnóstico needs its own `planTruncado` flag.
+
+   Second, **the design does not order the movimientos by impact.** Its own
+   fixture runs `+$3,100.00`, `+$1,450.00`, `+$6,300.00` — the largest is
+   third. «The first movimiento» out of an unordered list would hand a
+   Xangarro shopkeeper the $1,450 move as its sample of what the paid report
+   is worth. **Section 10 is therefore ordered by impact, descending**, which
+   makes «movimiento 1» the best of the three by construction. The ordering
+   cost nothing before the truncation and is load-bearing after it.
+
+3. **Tier is not the only axis, and maturity wins when both apply.**
+   `calcularCapacidades` (P-26, already built) gates six capabilities on data
+   volume, and they map onto the same sections: **2** wants 30 días de
+   registros, **3** 60 días de ventas + 2 compras, **6** 60 días de ventas,
+   **8** 3 meses con gastos, **4** and **5** 90 días de ventas, **9** 20
+   cortes de día. So a section can be withheld for two unrelated reasons that
+   need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de
+   60 días» must not — showing the first to a Xangarrote three weeks in sells
+   them what they already bought. The design has one whole-report
+   `diagNotEnough` state and no per-section equivalent, so P-28 builds a
+   per-section three-way — real · still gathering data · not in your plan —
+   and **maturity is checked first**.
+
+   Two sections have no maturity rule and must not acquire one: **1 Tu meta**
+   (the owner sets it) and **7 Cobranza** (fiado balances are current state,
+   not a trend).
+
+**Alternatives considered**
+
+- *Give Xangarro a genuinely different, shorter report rather than the same
+  report with sections withheld.* The honest reading of ADR-109's warning, and
+  rejected on cost: two report shapes is two prompts, two renderers and two
+  sets of states, for a tier whose purpose is to make the reader want the
+  other one. The teaser cards already name what is missing in the reader's own
+  numbers («4 insumos se acaban antes de la quincena»), which is a sharper
+  upsell than a different document.
+- *Lock section 10 entirely for Xangarro,* as the six teaser cards do. This is
+  what «the taste reads as a paywall» looks like: two real sections, six
+  padlocks, and the one part that demonstrates the value of a written reading
+  removed.
+- *Leave section 10 whole on both tiers,* which is what the design literally
+  draws. Rejected because it leaves the Diagnóstico nothing to sell: the
+  estrategia is the reason to upgrade, and giving it away in full makes the
+  extra sections the only difference, which is exactly the «paid one is
+  padding» failure.
+
+**Consequences**
+
+- P-28 gains a `planTruncado` flag, an impact-descending sort on section 10,
+  and a per-section availability three-way. `strategyLocked` keeps the Metas
+  tab and is not reused.
+- `diagFull` must stop wrapping section 7. A Playwright spec asserting that a
+  Xangarro session reads Cobranza — and does **not** read the price table — is
+  what keeps this from silently reverting, because both tiers render the same
+  component tree.
+- ADR-109's «not `semanal`» gate still needs implementing:
+  `asesorShowsDiagnostico` is `c.asesor === 'completo'` today, and the locked
+  card reads «El Diagnóstico llega con Xangarrote» when it now belongs to
+  Xangarrito and should name Xangarro.
+- The per-section maturity copy needs the counts `calcularCapacidades` already
+  computes to reach the Diagnóstico, which reads them from the same
+  `inputs.cuenta` the Asesor page does. No new query.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates
+  until P-28 builds it, and production still renders «Próximamente».
+
+---
+
+## ADR-113
+
+**Title:** In the Diagnóstico, tier withholds visibly and maturity withholds silently
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; refines ADR-112 §3, which called for a per-section three-way
+
+**Context:**
+
+ADR-112 settled which sections each paying tier reads and noted that tier is
+not the only axis: `calcularCapacidades` (P-26) also gates six of the same
+sections on data volume — 30 días de registros for **2**, 60 días + 2 compras
+for **3**, 60 días for **6**, 3 meses con gastos for **8**, 90 días for **4**
+and **5**, 20 cortes for **9**. It left the resolution as «a per-section
+three-way — real · still gathering data · not in your plan — with maturity
+checked first», which is the shape but not the behaviour.
+
+Work it through for a Xangarro business at 31 days. Only **2** is mature; **1**,
+**7** and **10** have no maturity rule; **3**, **4**, **5**, **6**, **8** and
+**9** are all short of data. Rendering the immature ones as cards gives four
+real sections behind six padlocks — the exact failure ADR-112 removed for
+tiers, re-introduced through the other axis, and this time with nothing to
+sell, because a maturity lock has no upgrade attached.
+
+The design does not settle it either, but it does rule out the simplest
+alternative. Its `readiness` list renders twice — in the capacidades panel and
+inside `diagNotEnough` («Necesitamos un mes completo de registros para no darte
+números a medias. Esto es lo que falta:») — so the whole-report gate was only
+ever the 30-day one. The other five were always meant to be per-section; that
+state was simply never drawn.
+
+**Decision**
+
+1. **Not in your plan → the teaser card.** Visible, named, carrying the real
+   finding and «Disponible en Xangarrote», exactly as ADR-112 settled.
+
+2. **Data not ready → the section is not rendered at all.** No padlock, no
+   progress bar, no mention in place. The report closes with **one aggregate
+   line** — «N secciones más se abren solas conforme captures → Ver
+   capacidades» — and the per-capability detail stays where it already lives,
+   the capacidades panel on «Para ti».
+
+   The asymmetry is the point: **a tier gate is actionable right now**, so it
+   earns space; **a maturity gate resolves itself** by doing what the
+   shopkeeper is already doing, so it earns a line. Giving both the same
+   treatment optimises for our internal symmetry over the reader's attention.
+
+3. **Maturity is checked first, and the reason is not the one ADR-112 gave.**
+   That ADR argued «33 de 60 días» must not sell an upgrade to someone who
+   already bought it, which is true and secondary. The real reason is that the
+   teaser cards carry **real computed findings** — «Detectamos 3 productos con
+   margen en riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes
+   del mes tienen un patrón». When a section's capability is locked **that
+   finding does not exist**, so showing its teaser would invent a conclusion,
+   which P-26's compuerta forbids outright. Maturity-first is the only ordering
+   that cannot fabricate.
+
+   A welcome consequence: the Xangarro teasers sharpen as the business matures,
+   because each is a true statement about numbers the reader cannot see.
+
+4. **Section numbers are names, not positions.** A hidden section leaves a gap —
+   a 31-day Xangarro reads 1, 2, 7, 10 — and the numbers are not re-flowed.
+   «3 · Precios y márgenes» must mean the same section every month or the report
+   stops being comparable month to month, and P-34's printable variant stops
+   being comparable at all. The closing line is what explains the gaps.
+
+5. **`diagNotEnough` keeps only its 30-day trigger.** Extending it to all six
+   capabilities would make a new business wait on 90 días de ventas and 20
+   cortes before reading anything at all.
+
+**Alternatives considered**
+
+- *An inline progress card per immature section,* reusing the teaser card shape
+  with «67 de 90 días» in place of «Disponible en Xangarrote». Rejected per §2:
+  it is a wall of «not yet» for exactly the businesses whose first Diagnóstico
+  this is, and it duplicates the capacidades panel inside the report.
+- *Raise the whole-report gate until every capability is ready.* One state and
+  no per-section anything, and the design's own `diagNotEnough` copy invites it.
+  Rejected on §5 — roughly three months of silence for a new business.
+- *Re-flow the numbering so a short report reads 1–4.* Contiguous and tidier,
+  and rejected on §4: the number is part of the section's identity, and a
+  «4 · Plan de acción» that becomes «10 · Plan de acción» two months later is
+  worse than a gap.
+
+**Consequences**
+
+- P-28 renders sections from a per-section availability of exactly three
+  values — `real`, `teaser`, `absent` — where `absent` contributes to a count
+  and nothing else. Maturity is resolved before tier, so `teaser` is reachable
+  only for a mature section.
+- The aggregate line needs a count, not copy, so it does not depend on the
+  `lockedCopy` gap below.
+- **P-26 is reopened as a defect** by the same reading. `calcularCapacidades`
+  drifted from the design's `readinessDefs`, and two of the four differences
+  are behaviour rather than wording: `compras` is
+  `count(*) … tipo = 'entrada'` tenant-wide where the design says «2 compras
+  **del producto**», so two purchases of one product unlock margins for the
+  whole catalogue; and `meses_con_gasto` is `count(DISTINCT left(fecha, 7))`
+  over all egresos where the design says «3 meses **por categoría**», so three
+  months of rent alone passes. Each needs its own decision before the string is
+  changed to match. `Capacidad` also has no field for the design's `lockedCopy`
+  («Disponible en 31 días», «Registra el costo de tus productos para
+  activarlo»), so the panel can only ever show a count — and two of the six
+  blockers are «do something», not «wait longer».
+- **Still open:** section **10 Plan de acción** has no maturity rule, but it has
+  an empty case — a month in which nothing is worth recommending. That is not
+  the same as «we could not look», so it cannot use the aggregate line, and it
+  is the one section whose emptiness the reader will notice.
+
+---
+
+## ADR-114
+
+**Title:** Section 10 inherits its availability from the findings that feed it, and says so when a month is clean
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; completes ADR-113, which left section 10's empty case open
+
+**Context:**
+
+ADR-113 settled that a section without mature data is not rendered and is
+counted in one closing line. It flagged section **10 Plan de acción** as the
+exception it could not resolve: the section has no maturity rule of its own,
+but it has an empty case, and «we could not look» is not «we looked and there
+is nothing».
+
+Reading the design's section 10 settles more than the empty case.
+
+**The movimientos are a selection of the findings, not an independent
+analysis.** Each of the three fixture entries traces to a section — quesadilla
+pricing to §3 Precios y márgenes, «Pide 30 refrescos» to §6 Inventario, «Cobra
+las tres notas con más de 30 días» to §7 Cobranza — and P-28's own rule, that
+every figure is computed by `@xangarro/domain` and the model never derives a
+number, means `+$3,100.00` cannot originate in section 10. It is a section's
+computation, re-phrased as an action.
+
+Three further things in that markup are hardcoded where they cannot be: the
+heading is the literal `Tres cosas para octubre`, count and month both; there
+is no upsell markup in section 10 at all, so ADR-112's «los otros dos llegan
+con Xangarrote» is new; and the card's footer is `Generado con IA a partir de
+tus registros`.
+
+**Decision**
+
+1. **Section 10 needs no maturity rule. It inherits.** Availability follows the
+   sections that feed it, which makes the empty case determinate rather than a
+   judgement call:
+
+   - **Every contributing section absent** → section 10 is `absent` and joins
+     ADR-113's aggregate count. There was nothing to look at.
+   - **Mature sections, no finding** → section 10 **renders**, with «Este mes no
+     hay nada que cambiar» and «Leímos tus números y no encontramos un
+     movimiento que te acerque más a tu meta. Sigue como vas.»
+
+   The second is a real result. A shopkeeper cannot learn «a month's worth of my
+   own numbers contains nothing that needs fixing» from anywhere else in the
+   product, and hiding section 10 would make that indistinguishable from a
+   report that stopped early.
+
+2. **The empty card's footer is «Calculado a partir de tus registros».** Not the
+   design's «Generado con IA a partir de tus registros», because no model wrote
+   it — the card is the *absence* of model output. `asesor.css.ts` already
+   states the rule and its symmetry: «Deterministic output says "Calculado";
+   only model-written text may say "Generado con IA" (ADR-059). Getting this
+   backwards would be a false claim in either direction.» The populated card
+   keeps «Generado con IA», and keeps «Revisa antes de decidir».
+
+3. **The heading is derived from the count and the period**, not the literal
+   «Tres cosas para octubre»: «Una cosa para octubre» · «Dos cosas para
+   octubre» · «Tres cosas para octubre». Under ADR-112 Xangarro reads one
+   movimiento, so the hardcoded three is already wrong for the tier that sees
+   the report most often.
+
+4. **Xangarro's upsell line is count-aware.** Three findings → «los otros dos
+   llegan con Xangarrote»; two → «el otro llega con Xangarrote»; one or none →
+   **no line at all**, because nothing is being withheld. A fixed «los otros
+   dos» becomes a false statement the first month a business has two findings,
+   and the taste being *complete* on a quiet month is honest, not a bug.
+
+5. **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and
+   that is deliberate.** A Xangarro reader gets «Sube la quesadilla a $46.00 y
+   la gringa a $65.00 · +$3,100.00» in full while §3 stays a teaser card. This
+   is written down so it is not later tidied away as an inconsistency: a
+   concrete, peso-quantified move out of the half they cannot read is the
+   sharpest form the taste takes, and combined with ADR-112's impact-descending
+   sort it means Xangarro reads the single most valuable conclusion in the
+   report.
+
+**Alternatives considered**
+
+- *«Sigue así» plus the metric that improved,* turning an empty plan into
+  positive reinforcement in the register the celebraciones and trophies already
+  use. Warmer, and rejected for now on two counts: it is a new computation
+  section 10 does not otherwise need, and on a flat month — no finding *and* no
+  improvement — it has nothing true to say and falls back to the plain state
+  anyway. Worth revisiting once there is a real corpus of clean months.
+- *One empty state for both cases.* One fewer branch, and it says the same
+  sentence to a 31-day business and to a three-year-old one having a good
+  month. That is the conflation ADR-113 was written to avoid.
+- *Guarantee at least one movimiento,* falling back to a generic suggestion so
+  section 10 is never empty. Rejected outright: it fabricates, which P-26's
+  compuerta and ADR-056's «the model never derives a number» both forbid.
+
+**Consequences**
+
+- Section 10 has three renderings, not two: populated, clean-month empty, and
+  absent. Only the first carries «Generado con IA».
+- The upsell line and the heading both need the finding **count**, so the
+  component takes the total number of findings alongside the movimientos it is
+  allowed to show. For Xangarro those differ by design; for Xangarrote they are
+  equal.
+- A Playwright spec on a Xangarro session should assert the count-aware line —
+  two findings reading «el otro» and one reading nothing — because the failure
+  mode is a plausible-looking sentence with a wrong number in it, which no
+  smoke test catches.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates until
+  P-28 builds it, and production still renders «Próximamente».

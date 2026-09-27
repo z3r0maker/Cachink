@@ -1,11 +1,9 @@
 import 'server-only';
 
-import { calcularInsights, filtrarPorCadencia } from '@xangarro/domain';
-import { asesorInputs, materializarInsights } from '@xangarro/data-pg';
-
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant, type Tx } from '../db';
 import { hoy } from '../clock';
+import { materializarParaNegocio, type Cadencia } from './pipeline';
 
 /**
  * One business's Asesor generation (P-30, ADR-056).
@@ -19,6 +17,10 @@ import { hoy } from '../clock';
  * can check. The model boundary stays the single module ADR-056 requires
  * (`./model.ts`), and this is where its call joins when P-28 lands.
  *
+ * The four deterministic steps themselves live in `./pipeline.ts`, which the
+ * Asesor page shares: what this module owns is the *entitlement* — resolving
+ * which cadencia the plan grants — and reporting what the run wrote.
+ *
  * The unit of work is one business, which is ADR-056's structural
  * requirement, not a performance note. Choosing *which* businesses are due is
  * the caller's job and deliberately not this module's.
@@ -27,8 +29,6 @@ import { hoy } from '../clock';
  * production before the credential — this runs unchanged and still writes the
  * `notices` the «Para ti» feed reads.
  */
-export type Cadencia = 'semanal' | 'diario' | 'completo';
-
 export interface GeneracionResultado {
   readonly businessId: string;
   /** The plan's tier, which decides how many rows get written (ADR-056). */
@@ -45,12 +45,9 @@ export interface GenerarDeps {
 }
 
 /**
- * Compute this business's insights and materialise them.
+ * Resolve the plan's cadencia, then run the deterministic pipeline for today.
  *
- * Idempotent by construction: `materializarInsights` upserts on
- * `business:clave` and never touches `state` or `resolved_at`, so a second run
- * in the same day rewrites the same rows, a member's dismissal survives it,
- * and an insight that fixed itself closes as «listo».
+ * Idempotent by construction — see `materializarParaNegocio`.
  */
 export async function generarParaNegocio(
   businessId: string,
@@ -62,11 +59,9 @@ export async function generarParaNegocio(
   );
   const cadencia = entitlement.capabilities.asesor;
 
-  const inputs = await withTenant(businessId, (tx) => asesorInputs(tx, dia));
-  const visibles = filtrarPorCadencia(calcularInsights(inputs), cadencia);
-  const { materializados, cerrados } = await withTenant(businessId, (tx) =>
-    materializarInsights(tx, businessId, visibles),
-  );
+  const { materializados, cerrados } = await materializarParaNegocio(businessId, cadencia, dia);
 
   return { businessId, cadencia, materializados, cerrados };
 }
+
+export type { Cadencia };

@@ -1072,6 +1072,29 @@ never invented text.
 
 - [x] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
   - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{screen,para-ti}.tsx`, `e2e/asesor.sync.spec.ts`.
+  - **Reopened as a defect 2026-09-26, found while settling ADR-112.** `calcularCapacidades` drifted
+    from the design's `readiness` fixture in four ways. Three are copy, one is a **threshold**, and one
+    field is missing entirely:
+
+    | Capacidad                 | `capacidades.ts` today                     | Design's `readinessDefs`                                     |
+    | ------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+    | Precios y márgenes        | `60 días de ventas + 2 compras`            | `60 días de ventas + 2 compras **del producto**`             |
+    | Inventario                | `60 días de **ventas**`                    | `60 días de **movimientos**`                                 |
+    | Gastos fuera de lo normal | `3 meses **con gastos**`                   | `3 meses **por categoría**`                                  |
+    | Pronóstico                | name `Pronóstico`, `90 días de **ventas**` | name `¿Me alcanza? (pronóstico)`, `90 días de **registros**` |
+
+    **«3 meses por categoría» is not a wording fix.** `mesesConGastoDe` counts distinct `YYYY-MM` over
+    all egresos, so a business with three months of rent alone passes today; per category it would not.
+    Same for «2 compras **del producto**» — `compras` counts entrada movements estate-wide, not per
+    product, so one product with two purchases currently unlocks margins for every product. Both change
+    who sees what and each needs its own decision before the string is changed to match.
+
+  - **`lockedCopy` is missing.** The design gives each locked row an actionable line beside the count —
+    `Disponible en 31 días`, `Disponible en 23 días`, `Llevas 8 de 20 cortes`, and crucially
+    `Registra el costo de tus productos para activarlo`. Two of the six blockers are not «wait longer»
+    but «do something», and `Capacidad` has no field for that distinction, so the panel can only ever
+    show a count. ADR-112's aggregate line («N secciones más se abren solas conforme captures») does
+    not need it, but the capacidades panel it links to does.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never
@@ -1088,6 +1111,7 @@ never invented text.
     vanished insights auto-close as `listo`. The plan's cadence gates the set («semanal»
     keeps the two most urgent); the capacidades panel reports the tenant's real counts;
     Descartar/Listo write through `cerrarAvisoAsesor`. 18 tests + e2e on the seed.
+
 - **Steps:** Three tabs — Para ti / Metas / Diagnóstico. The feed reads `notices` where
   `source='asesor'` (ADR-060): a category tile, icon, title, body and an action link per card.
   **Every insight here is deterministic** — cost deltas, quincena seasonality, expense anomalies
@@ -1164,39 +1188,121 @@ never invented text.
     adds, and a section 10 whose heading both see and whose answers only Xangarrote does.
     `diagTeaser` was drawn for a paid tier that is not Xangarrote — which under ADR-059 did not
     exist, and under ADR-109 is exactly Xangarro.
-  - **The design's two answers disagree by one section.** `lockedSections`, the hand-written teaser
-    copy, has **six** entries — 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing**, so as the file stands
-    a Xangarro reader loses Cobranza with no card in its place. One of the two is a slip, and the
-    likelier one is the `diagFull` wrapper: that is structural markup repeated verbatim across 3–9,
-    while each `lockedSections` entry is deliberate per-section copywriting. Reading the array as
-    the intent makes the design self-consistent — `diagFull` then covers exactly the six locked
-    sections — and gives Xangarro a third real section. **Recommended: Cobranza is real on both
-    tiers.**
-  - **Recommended line, one change beyond that — awaiting owner sign-off.** As literally drawn,
-    Xangarro's report is two real sections, six padlocks and a locked plan, which is the failure
-    ADR-109 named by name. The part that demonstrates what a written reading of your own numbers is
-    worth is section 10: _what to do about it_. Locking all three movimientos removes exactly the
-    evidence the taste exists to give. So: **Xangarro sees the first movimiento with its peso
-    impact**, under «los otros dos llegan con Xangarrote» — real sections 1, 2, 7 and a partial 10,
-    teaser cards for 3, 4, 5, 6, 8, 9. Xangarrote reads all ten and all three movimientos.
-  - **Tier is not the only axis that withholds a section, and the design has no state for the other
-    one.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they map
-    onto the sections: **2** needs 30 días de registros, **3** 60 días de ventas + 2 compras, **6**
-    60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas (Pronóstico), and
-    **9** 20 cortes de día. A section can therefore be withheld for two unrelated reasons, and they
-    need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de 60 días» must not —
-    showing the first to a Xangarrote three weeks in sells them what they already bought. The design
-    has one whole-report `diagNotEnough` state and no per-section equivalent, so P-28 needs a
-    per-section three-way (real · still gathering data · not in your plan), with **maturity winning
-    when both apply**. Two sections have no maturity rule and should not acquire one: **1 Tu meta**
-    (the owner sets it) and **7 Cobranza** (fiado balances are current state, not a trend).
+  - **Settled 2026-09-26 (owner) — ADR-112. The split is this table, and it is the spec.**
+
+    | §   | Sección                   | Xangarro (la probada)                          | Xangarrote (completo) |
+    | --- | ------------------------- | ---------------------------------------------- | --------------------- |
+    | 1   | Tu meta                   | real                                           | real                  |
+    | 2   | Resumen del mes           | real                                           | real                  |
+    | 3   | Precios y márgenes        | teaser                                         | real                  |
+    | 4   | ¿Me alcanza?              | teaser                                         | real                  |
+    | 5   | ¿Cuánto puedo sacar?      | teaser                                         | real                  |
+    | 6   | Inventario                | teaser                                         | real                  |
+    | 7   | Cobranza                  | **real**                                       | real                  |
+    | 8   | Gastos fuera de lo normal | teaser                                         | real                  |
+    | 9   | Corte de caja             | teaser                                         | real                  |
+    | 10  | Plan de acción            | **the first movimiento, with its peso impact** | all three             |
+
+    So `lockedSections` keeps its six entries — 3, 4, 5, 6, 8, 9 — and **`diagFull` loses Cobranza**,
+    which the design's own teaser array already implied by not having a card for it. The two halves
+    of the design disagreed by exactly that one section; the array won, because it is deliberate
+    per-section copywriting while the `diagFull` wrapper is markup repeated verbatim across 3–9.
+
+  - **Section 10 is truncated, not locked — and it needs a flag the design does not have.**
+    `strategyLocked` (`plan !== 'pro'`) is **not** this: its single use sits inside the **Metas** tab,
+    guarding «Estrategia personalizada — Disponible en Xangarrote». Section 10 and its `plan` list sit
+    under `isDiag > diagReport` with **no tier gate at all**, so as drawn both tiers read all three
+    movimientos. The owner's decision narrows that: Xangarro reads **movimiento 1 in full, with its
+    pesos**, then «los otros dos llegan con Xangarrote». A full plan on both tiers leaves the
+    Diagnóstico nothing to sell, and an empty section 10 removes the one thing that proves a written
+    reading is worth paying for — being told _what to do_. So P-28 introduces a **`planTruncado`**
+    flag for the Diagnóstico; `strategyLocked` keeps the Metas tab and is not reused here.
+  - **Which movimiento Xangarro reads now matters, and the design does not order them.** Its own
+    fixture runs `+$3,100.00`, `+$1,450.00`, `+$6,300.00` — the largest is **third**. Showing «the
+    first» out of an unordered list would hand a Xangarro shopkeeper the $1,450 move as its taste of
+    what the paid report is worth, which sells the opposite of the intent. **So P-28 orders section
+    10 by impact, descending**, and «movimiento 1» then means the best of the three by construction.
+    This was free before the truncation and is load-bearing after it.
+  - **Settled 2026-09-26 (owner) — the second axis: tier withholds visibly, maturity withholds
+    silently.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they
+    map onto the sections: **2** wants 30 días de registros, **3** 60 días de ventas + 2 compras,
+    **6** 60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas
+    (Pronóstico), and **9** 20 cortes de día. So a section can be withheld for two unrelated reasons,
+    and the two behave differently:
+    - **Not in your plan → the teaser card.** Visible, named, with the real finding and «Disponible
+      en Xangarrote».
+    - **Data not ready → the section is not rendered at all.** No padlock, no progress bar, no
+      mention. The report ends with **one aggregate line** — «N secciones más se abren solas conforme
+      captures → Ver capacidades» — and the per-capability detail stays where it already lives, the
+      capacidades panel on «Para ti» (`Capacidades` in `para-ti.tsx`, rendered from
+      `data.capacidades`).
+
+    The rule behind the asymmetry: **a tier gate is actionable right now** (upgrade), so it earns
+    space; **a maturity gate resolves itself** by doing what the shopkeeper is already doing, so it
+    earns a line. Rendering both as padlocks is how a 31-day Xangarro ends up reading four real
+    sections behind six locks — the same failure ADR-112 just removed for tiers, re-introduced
+    through the other axis.
+
+  - **Maturity is checked first, and the reason is stronger than «don't upsell what they bought».**
+    The teaser cards carry **real computed findings** — «Detectamos 3 productos con margen en
+    riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes del mes tienen un patrón». If
+    that section's capability is locked, **the finding does not exist**, so showing the tier teaser to
+    an immature business would invent a conclusion, which P-26 forbids outright. Maturity-first is the
+    only ordering that cannot fabricate. A pleasant consequence: the Xangarro teasers get sharper as
+    the business matures, because each one is a true statement about numbers they cannot read.
+  - **Section numbers are names, not positions.** A hidden section leaves a gap — a 31-day Xangarro
+    reads 1, 2, 7, 10 — and the numbers are **not** re-flowed. «3 · Precios y márgenes» must mean the
+    same section every month, or the report stops being comparable across months and P-34's printable
+    variant stops being comparable at all. The closing line is what explains the gaps.
+  - **The whole-report `diagNotEnough` keeps only its 30-day trigger.** The design already reuses the
+    same `readiness` list twice — in the capacidades panel and inside `diagNotEnough` («Necesitamos un
+    mes completo de registros para no darte números a medias. Esto es lo que falta:») — so the other
+    five capabilities were always meant to be per-section. Extending the whole-report gate to all six
+    would make a new business wait for 90 días de ventas and 20 cortes before reading anything.
+  - **Settled 2026-09-26 (owner) — ADR-114, section 10 and its empty month.** The movimientos are a
+    **selection of the findings, not an independent analysis**: each of the design's three fixture
+    entries traces to a section (quesadilla pricing → §3, refrescos → §6, notas de 30 días → §7), and
+    P-28's own rule — every figure computed by `@xangarro/domain`, the model never derives a number —
+    means `+$3,100.00` must come from a section's computation. So **section 10 needs no maturity rule
+    of its own; it inherits from the sections that feed it**, and its empty case splits in two:
+    - **Every contributing section absent** → section 10 is `absent` too and joins ADR-113's aggregate
+      count. We could not look.
+    - **Mature sections, no finding** → section 10 **renders**, with «Este mes no hay nada que
+      cambiar» / «Leímos tus números y no encontramos un movimiento que te acerque más a tu meta.
+      Sigue como vas.» That is a real result and the reader can get it nowhere else.
+  - **The empty card's footer is «Calculado a partir de tus registros», not «Generado con IA».** The
+    design hardcodes the latter on section 10, and copying it onto the empty state would be exactly
+    what `asesor.css.ts` warns against: «Deterministic output says "Calculado"; only model-written text
+    may say "Generado con IA" (ADR-059). Getting this backwards would be a false claim in either
+    direction.» The empty card is the _absence_ of model output.
+  - **The heading is derived, not the literal «Tres cosas para octubre».** Both the count and the month
+    are hardcoded in the design. Count and period both come from the report: «Una cosa para octubre» ·
+    «Dos cosas…» · «Tres cosas…».
+  - **Xangarro's upsell line inside section 10 is count-aware.** ADR-112 gives Xangarro movimiento 1,
+    and the design has **no** upsell markup in section 10 at all, so this is new: 3 findings → «los
+    otros dos llegan con Xangarrote», 2 → «el otro llega con Xangarrote», 0 or 1 → **no line**, because
+    there is nothing withheld. «Los otros dos» shipped unconditionally becomes a lie the first month a
+    business has two findings.
+  - **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and that is deliberate.**
+    A Xangarro reader can get «Sube la quesadilla a $46.00 y la gringa a $65.00 · +$3,100.00» in full
+    while §3 Precios y márgenes stays a teaser card. It is not an inconsistency to be tidied away: a
+    concrete, peso-quantified move out of the half they cannot read is the sharpest form the taste
+    takes. Combined with the impact-descending sort (ADR-112), Xangarro reads the single most valuable
+    conclusion in the report.
+  - Two sections have no maturity rule and must not acquire one: **1 Tu meta** (the owner sets it) and
+    **7 Cobranza** (fiado balances are current state, not a trend).
 
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
-- **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
-  Costo antes → ahora · Precio actual · Margen · Precio sugerido, margin cells tinted by band), and
-  the estrategia list (move + impact) gated by `strategyLocked` to Xangarrote. Six states: report,
-  generating, notenough, free offer, teaser, error. The printable variant feeds P-34. **Every figure
+- **Steps:** The report's ten sections **per the ADR-112 table above** — sections 1, 2 and 7 real on
+  both tiers, 3–6 and 8–9 as `lockedSections` teaser cards for Xangarro, and section 10 **truncated**
+  rather than locked: `strategyLocked` now means «movimiento 1 with its pesos, then los otros dos
+  llegan con Xangarrote», not an empty section. The month tiles and the price-suggestion table
+  (Producto · Costo antes → ahora · Precio actual · Margen · Precio sugerido, margin cells tinted by
+  band) belong to **section 3**, so they are Xangarrote-only and Xangarro sees that section's teaser.
+  The **month tiles are section 2's**, not section 3's, so they are real on both tiers.
+  Six states: report, generating, notenough, free offer, teaser, error — plus the **per-section**
+  three-way noted above, which the design has no state for yet. The printable variant feeds P-34. **Every figure
   is computed by `@xangarro/domain` and passed to the model; the model never derives a number.**
   Footer: «Generado con IA a partir de tus registros».
 - **Acceptance:** with the production flag on, the tab renders «Próximamente» and no model call is

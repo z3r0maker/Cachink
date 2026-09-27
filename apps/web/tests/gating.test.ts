@@ -2,6 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
+  asesorDiagnosticoCompleto,
   asesorShowsDiagnostico,
   canExport,
   canWrite,
@@ -88,10 +89,20 @@ describe('plan capabilities', () => {
   it('gives Xangarrote statements and the full Asesor', () => {
     assert.equal(hasStatements(XANGARROTE), true);
     assert.equal(asesorShowsDiagnostico(XANGARROTE), true);
+    assert.equal(asesorDiagnosticoCompleto(XANGARROTE), true);
   });
 
-  it('withholds the Diagnóstico below the top tier', () => {
+  it('gives Xangarro a Diagnóstico, but not the full one (ADR-109 §3, ADR-112)', () => {
+    // The gate is «not semanal», so `diario` reads a report — the *teased* one.
+    // These two booleans answering the same thing is the bug this replaced.
+    const xangarro = { ...XANGARROTE, asesor: 'diario' } as const;
+    assert.equal(asesorShowsDiagnostico(xangarro), true);
+    assert.equal(asesorDiagnosticoCompleto(xangarro), false);
+  });
+
+  it('withholds the Diagnóstico from the free tier only', () => {
+    assert.equal(XANGARRITO.asesor, 'semanal', 'the free tier is the semanal one');
     assert.equal(asesorShowsDiagnostico(XANGARRITO), false);
-    assert.equal(asesorShowsDiagnostico({ ...XANGARROTE, asesor: 'diario' }), false);
+    assert.equal(asesorDiagnosticoCompleto(XANGARRITO), false);
   });
 });
