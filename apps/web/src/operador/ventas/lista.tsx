@@ -1,18 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { Icon } from '../../shell/icon';
-import * as l from '../turno/lists.css';
-import { OPERADOR_BASE } from '../shell/nav';
-import { SinResultados } from '../ui/filters';
-import * as u from '../ui/ui.css';
+import { METODO_TONO } from './metodo';
 import type { MetodoVenta, VentaTurno } from './types';
-import * as v from './ventas.css';
+import * as l from './lista.css';
 
-export const METODO_BG: Record<MetodoVenta, string> = {
+/**
+ * Fiado y abonos still tints its method chips with these (its abonos can be
+ * old QR/CoDi ones, read back only).
+ */
+export const METODO_BG: Readonly<Record<MetodoVenta | 'QR / CoDi', string>> = {
   Efectivo: colors.greenSoft,
   Transferencia: colors.blueSoft,
   Tarjeta: colors.purpleSoft,
@@ -20,81 +19,68 @@ export const METODO_BG: Record<MetodoVenta, string> = {
   Fiado: colors.warningSoft,
 };
 
-const CHEVRON = 'M9 6l6 6-6 6';
-const CLOSE = 'M6 6l12 12M18 6 6 18';
-
+/** The turno's sales (OpVentas): each row opens its ticket in the side panel. */
 export function ListaVentas(p: {
   readonly ventas: readonly VentaTurno[];
-  readonly firma: string;
-  readonly onCancel: (v: VentaTurno) => void;
+  readonly seleccionada: string | null;
+  readonly onAbrir: (folio: string) => void;
 }) {
   return (
-    <div className={u.listCard}>
+    <section aria-label="Ventas" className={l.card}>
+      <div className={l.head} aria-hidden="true">
+        <span>Folio</span>
+        <span>Qué se vendió</span>
+        <span>Cómo pagó</span>
+        <span>Hora</span>
+        <span className={l.derecha}>Monto</span>
+      </div>
       {p.ventas.map((x) => (
-        <Fila key={x.folio} x={x} firma={p.firma} onCancel={() => p.onCancel(x)} />
+        <Fila
+          key={x.folio}
+          x={x}
+          sel={p.seleccionada === x.folio}
+          onAbrir={() => p.onAbrir(x.folio)}
+        />
       ))}
       {p.ventas.length === 0 ? (
-        <SinResultados body="Ninguna venta de tu turno coincide con lo que buscas." />
-      ) : null}
-    </div>
-  );
-}
-
-/** A cancelled sale stays: struck through, grey, with its chip and no actions. */
-function Fila({
-  x,
-  firma,
-  onCancel,
-}: {
-  readonly x: VentaTurno;
-  readonly firma: string;
-  readonly onCancel: () => void;
-}) {
-  const c = x.cancelada;
-  const detalle = c ? (x.cliente ?? `Cancelada · ${c.motivo}`) : (x.cliente ?? firma);
-  const strike = c ? 'line-through' : 'none';
-  return (
-    <div className={v.row} data-cancelada={c ? '' : undefined}>
-      <span className={v.folio}>{x.folio}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className={l.name} style={{ textDecoration: strike }}>
-          {x.concepto}
+        <div className={l.vacio}>
+          <span className={l.vacioTitulo}>No hay ventas con ese filtro</span>
+          <span className={l.vacioTexto}>Prueba con otra forma de pago o borra la búsqueda.</span>
         </div>
-        <div className={l.detail}>{detalle}</div>
-      </div>
-      <span className={v.method} style={{ background: METODO_BG[x.metodo] }}>
-        {x.metodo}
-      </span>
-      <span className={v.time}>{x.hora}</span>
-      <div
-        className={v.amount}
-        style={{ color: c ? colors.gray400 : colors.black, textDecoration: strike }}
-      >
-        {formatMoney(x.monto)}
-      </div>
-      <Acciones folio={x.folio} cancelada={!!c} onCancel={onCancel} />
-    </div>
+      ) : null}
+    </section>
   );
 }
 
-/** To the ticket, and cancel — or the «Cancelada» chip once it is. */
-function Acciones(p: {
-  readonly folio: string;
-  readonly cancelada: boolean;
-  readonly onCancel: () => void;
-}) {
+/** A cancelled sale stays: struck through and grey, with its red chip. */
+function Fila(p: { readonly x: VentaTurno; readonly sel: boolean; readonly onAbrir: () => void }) {
+  const { x } = p;
+  const tono = METODO_TONO[x.metodo];
+  const monto = formatMoney(x.monto);
   return (
-    <>
-      <Link href={`${OPERADOR_BASE}/ventas/${p.folio}`} className={v.square} title="Ver el ticket">
-        <Icon path={CHEVRON} size={16} strokeWidth={2.5} />
-      </Link>
-      {p.cancelada ? (
-        <span className={v.cancelada}>Cancelada</span>
-      ) : (
-        <button type="button" className={v.square} title="Cancelar venta" onClick={p.onCancel}>
-          <Icon path={CLOSE} size={16} strokeWidth={2.6} />
-        </button>
-      )}
-    </>
+    <button
+      type="button"
+      className={l.row}
+      onClick={p.onAbrir}
+      aria-label={`Ver venta ${x.folio}, ${monto}${x.cancelada ? ', cancelada' : ''}`}
+      data-sel={p.sel ? '' : undefined}
+      data-cancelada={x.cancelada ? '' : undefined}
+      data-fiado={x.metodo === 'Fiado' ? '' : undefined}
+    >
+      <span className={l.folio}>{x.folio}</span>
+      <span className={l.que}>{x.concepto}</span>
+      <span className={l.pago}>
+        <span
+          className={l.chip}
+          style={{ background: tono.bg, color: tono.fg, border: `2px solid ${tono.borde}` }}
+        >
+          {x.metodo}
+        </span>
+        {x.cliente ? <span className={l.cliente}>{x.cliente}</span> : null}
+        {x.cancelada ? <span className={l.cancelada}>Cancelada</span> : null}
+      </span>
+      <span className={l.hora}>{x.hora}</span>
+      <span className={l.monto}>{monto}</span>
+    </button>
   );
 }

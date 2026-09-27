@@ -1,68 +1,64 @@
-import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
+import { style, styleVariants } from '@vanilla-extract/css';
+import { borders, colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
 
-const contentBox = { boxSizing: 'content-box' } as const;
+/** Inicio's side column: the owner's messages and the last cortes. */
+/* De parte de Pedro ------------------------------------------------------ */
 
-/** «Todo al día»: the empty «Para hoy», inside the card (not the shared state). */
-export const alDia = style({
-  padding: '34px 20px',
+export const mensajes = style({ padding: 10, display: 'flex', flexDirection: 'column', gap: 6 });
+
+export const mensaje = style({
   display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 9,
-  textAlign: 'center',
-});
-
-/** 52 px, radius 16. */
-export const alDiaTile = style({
-  ...contentBox,
-  width: 52,
-  height: 52,
-  display: 'grid',
-  placeItems: 'center',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[4],
-  background: colors.greenSoft,
-  color: colors.greenText,
-});
-
-export const alDiaTitle = style({
-  fontSize: portalFontSizes.lgx,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tight,
-  color: colors.black,
-});
-
-export const alDiaBody = style({
-  fontSize: portalFontSizes.md,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
-  textWrap: 'pretty',
-});
-
-export const msgBody = style({
-  marginTop: 3,
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.semibold,
+  gap: 10,
+  padding: '10px 12px',
+  border: '2px solid transparent',
+  borderRadius: radii[3],
   color: colors.ink,
-  textWrap: 'pretty',
+  textDecoration: 'none',
+  selectors: { '&:hover': { background: colors.gray100 } },
 });
 
-export const msgTime = style({
-  marginTop: 4,
+export const mensajeAlta = style({
+  background: colors.redSoft,
+  borderColor: colors.redText,
+  selectors: { '&:hover': { background: colors.redSoft } },
+});
+
+export const dot = styleVariants({
+  alta: { background: colors.redText },
+  normal: { background: colors.yellow, border: borders.thin },
+});
+
+export const dotBase = style({
+  boxSizing: 'border-box',
+  flex: 'none',
+  width: 10,
+  height: 10,
+  marginTop: 6,
+  borderRadius: shapeRadii.pill,
+});
+
+export const mensajeText = style({ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 });
+
+export const mensajeHora = style({
   fontSize: portalFontSizes.xs,
   fontWeight: typography.weights.bold,
-  color: colors.gray600,
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.textMuted,
+  selectors: { '&[data-alta]': { color: colors.redText } },
 });
 
-export const cortes = style({
-  padding: '16px 18px',
+/* Tus últimos cortes ------------------------------------------------------ */
+
+export const cortes = style({ padding: '4px 18px 8px', display: 'flex', flexDirection: 'column' });
+
+export const corte = style({
   display: 'flex',
-  flexDirection: 'column',
-  gap: 11,
+  alignItems: 'center',
+  gap: 12,
+  minHeight: 36,
+  borderBottom: `2px solid ${colors.gray100}`,
+  selectors: { '&:last-child': { borderBottom: 'none' } },
 });
-
-export const corteRow = style({ display: 'flex', alignItems: 'center', gap: 12 });
 
 export const corteFecha = style({
   flex: 1,
@@ -70,11 +66,4 @@ export const corteFecha = style({
   fontSize: portalFontSizes.md,
   fontWeight: typography.weights.bold,
   color: colors.ink,
-});
-
-export const cortesNota = style({
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
-  textWrap: 'pretty',
 });

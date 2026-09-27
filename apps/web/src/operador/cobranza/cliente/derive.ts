@@ -125,8 +125,18 @@ export function limiteNota(c: CuentaCliente, e: EstadoCuenta, dueno: string): st
     : `Puede fiar hasta ${limite} con plazo de ${c.plazo}. El límite y el plazo los define ${dueno} en el portal.`;
 }
 
+/** «28 de abril»: the day of a ticket, said in full for a message. */
+const diaLargo = (fecha: string) =>
+  new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long' }).format(
+    new Date(`${fecha.slice(0, 10)}T12:00:00`),
+  );
+
+/** The WhatsApp reminder, in the caja's voice («tú»): the live balance and the oldest ticket. */
 export function recordatorio(c: CuentaCliente, e: EstadoCuenta, negocio: string): string {
-  return e.saldo > 0n
-    ? `Hola ${c.nombre}, le recuerdo que tiene ${formatMoney(e.saldo)} pendiente en ${negocio}. Puede abonar en efectivo, transferencia o tarjeta cuando pase. ¡Gracias!`
-    : `Hola ${c.nombre}, su cuenta en ${negocio} está al día. ¡Gracias!`;
+  const hola = `Hola, ${c.nombre}. Te escribimos de ${negocio}.`;
+  const vivas = abiertas(c, e);
+  const vieja = vivas[0];
+  if (e.saldo <= 0n || !vieja) return `${hola} ¡Gracias por estar al corriente!`;
+  const n = vivas.length === 1 ? '1 venta' : `${vivas.length} ventas`;
+  return `${hola} Tu saldo es de ${formatMoney(e.saldo)} (${n}, la más antigua del ${diaLargo(vieja.venta.fecha)}). Puedes abonar cuando pases. ¡Gracias!`;
 }

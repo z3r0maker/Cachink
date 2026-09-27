@@ -1,5 +1,13 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shapeRadii, shadows, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  portalFontSizes,
+  radii,
+  shapeRadii,
+  shadows,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
 import { PHONE } from './shell.css';
@@ -14,7 +22,16 @@ export const header = style({
   padding: '12px 32px',
   background: colors.gray200,
   borderBottom: `2.5px solid ${colors.black}`,
-  '@media': { [PHONE]: { padding: '12px 16px' } },
+  '@media': {
+    [PHONE]: {
+      minHeight: 64,
+      padding: '0 16px',
+      display: 'flex',
+      alignItems: 'center',
+      background: colors.white,
+      borderBottom: borders.quiet,
+    },
+  },
 });
 
 export const inner = style({
@@ -24,49 +41,45 @@ export const inner = style({
   alignItems: 'center',
   gap: 14,
   flexWrap: 'wrap',
+  '@media': { [PHONE]: { width: '100%', gap: 8, flexWrap: 'nowrap' } },
 });
 
 export const bizPill = style({
+  '@media': { 'screen and (min-width: 760px)': { display: 'none' } },
+  flex: 1,
+  minWidth: 0,
   display: 'flex',
   alignItems: 'center',
-  gap: 11,
-  padding: '6px 12px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: radii[3],
-  background: colors.white,
-  boxShadow: shadows.small,
+  gap: 10,
 });
 
 export const bizTile = style({
-  ...contentBox,
   flex: 'none',
-  width: 30,
-  height: 30,
+  width: 36,
+  height: 36,
   display: 'grid',
   placeItems: 'center',
-  border: `2px solid ${colors.black}`,
   borderRadius: radii[1],
-  background: colors.yellow,
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.extraBold,
+  background: colors.black,
+  color: colors.yellow,
 });
 
+export const bizText = style({ display: 'flex', flexDirection: 'column', minWidth: 0 });
+
 export const bizName = style({
-  fontSize: portalFontSizes.body,
+  fontSize: portalFontSizes.md,
   fontWeight: typography.weights.extraBold,
-  letterSpacing: '-0.01em',
-  lineHeight: 1.15,
+  lineHeight: 1.2,
   color: colors.black,
-  whiteSpace: 'nowrap',
 });
 
 export const bizSub = style({
-  marginTop: 1,
   fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  letterSpacing: typography.letterSpacing.wide,
-  textTransform: 'uppercase',
+  fontWeight: typography.weights.semibold,
   color: colors.gray600,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 });
 
 export const right = style({
@@ -75,6 +88,13 @@ export const right = style({
   alignItems: 'center',
   gap: 10,
   flexWrap: 'wrap',
+  '@media': { [PHONE]: { gap: 8, flexWrap: 'nowrap' } },
+});
+
+/** Screens' header actions: on a phone the tab bar already carries Cobrar. */
+export const actionSlot = style({
+  display: 'contents',
+  '@media': { [PHONE]: { display: 'none' } },
 });
 
 /** Shared by the linked pill (main screens) and the static one (Pendientes, Cierre). */
@@ -89,6 +109,7 @@ export const syncBase = {
   textDecoration: 'none',
   background: colors.greenSoft,
   selectors: { '&[data-offline]': { background: colors.warningSoft } },
+  '@media': { [PHONE]: { padding: '5px 10px', gap: 6 } },
 } as const;
 
 export const syncPill = style([pressable, syncBase]);
@@ -110,7 +131,18 @@ export const syncLabel = style({
   fontWeight: typography.weights.bold,
   color: colors.black,
   whiteSpace: 'nowrap',
+  '@media': { [PHONE]: { display: 'none' } },
 });
+
+export const syncCorto = style([
+  syncLabel,
+  {
+    display: 'none',
+    fontSize: portalFontSizes.xs,
+    fontWeight: typography.weights.extraBold,
+    '@media': { [PHONE]: { display: 'inline' } },
+  },
+]);
 
 export const bell = style([
   pressable,
@@ -172,3 +204,10 @@ export const action = style([
     selectors: { '&:hover': { background: colors.yellowDeep } },
   },
 ]);
+
+export const fecha = style({
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+  color: colors.gray600,
+  '@media': { [PHONE]: { display: 'none' } },
+});

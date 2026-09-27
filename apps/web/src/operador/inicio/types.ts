@@ -35,6 +35,8 @@ export interface CorteReciente {
 }
 
 export interface TurnoAbierto {
+  /** «08:15»: when the turno opened. */
+  readonly desde: string;
   readonly ventas: number;
   readonly canceladas: number;
   readonly ultimaCancelada: string | null;
@@ -65,7 +67,13 @@ export interface InicioData {
   readonly pendientes: number;
   readonly turno: TurnoAbierto | null;
   readonly ultimoTurno: UltimoTurno;
-  readonly corteAclarar: { readonly dia: string; readonly caja: string; readonly monto: Money };
+  readonly corteAclarar: {
+    readonly dia: string;
+    readonly caja: string;
+    readonly monto: Money;
+    /** «09:12»: when the owner wrote. */
+    readonly hora: string;
+  };
   readonly tareas: readonly Tarea[];
   readonly mensajes: readonly MensajeDueno[];
   readonly cortes: readonly CorteReciente[];

@@ -98,9 +98,9 @@ export const steppers = style({ flex: 'none', display: 'flex', alignItems: 'cent
 export const step = style([
   pressable,
   {
-    boxSizing: 'content-box',
-    width: 36,
-    height: 36,
+    boxSizing: 'border-box',
+    width: 44,
+    height: 44,
     display: 'grid',
     placeItems: 'center',
     padding: 0,

@@ -4,8 +4,9 @@ import { loadNegocio } from '@/server/screens';
 import { NegocioScreen } from './screen';
 
 /**
- * Negocio — the business profile that feeds the statements and the receipts
- * (P-08), with Funciones (P-15) beneath it. **Reads Postgres.**
+ * Mi negocio · General: the business profile that feeds the statements and
+ * the receipts (P-08). Cobros and Funciones have their own tabs now
+ * (`/negocio/cobros`, `/negocio/funciones`). **Reads Postgres.**
  */
 export const dynamic = 'force-dynamic';
 

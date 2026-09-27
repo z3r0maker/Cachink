@@ -43,7 +43,7 @@ export const AVISOS_FIXTURE: AvisosData = {
         'Quedan 6 y el umbral es 15. Si llega mercancía, registra la entrada para que el stock cuadre.',
       hora: 'Hoy 13:20',
       icono: ICONS.inventario,
-      tono: 'atencion',
+      tono: 'alerta',
       cta: { label: 'Ir a inventario', href: `${OPERADOR_BASE}/inventario` },
       leido: false,
     },

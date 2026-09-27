@@ -4,13 +4,12 @@ import type { EstadoMode } from '../estado';
 import type { PartesEsperado } from '../turno/desglose';
 import type { CerrarVivo } from './use-cierre';
 
-/** Close-out reasons in the file; the `caja_turnos` enum has six (open for O-06). */
+/** Close-out reasons on the board; only «Otra razón» asks for a note. */
 export const MOTIVOS_DIFERENCIA = [
   'Cambio mal dado',
   'Venta no registrada',
-  'Vale de empleado',
-  'Propinas',
-  'No sé',
+  'Salió un vale',
+  'Otra razón',
 ] as const;
 export type MotivoDiferencia = (typeof MOTIVOS_DIFERENCIA)[number];
 
@@ -19,6 +18,8 @@ export interface ResumenTurno {
   readonly cobrado: Money;
   readonly canceladas: number;
   readonly cancelado: Money;
+  /** When the one cancellation happened («12:58»), if there was exactly one. */
+  readonly canceladaHora?: string;
   readonly fiado: Money;
   readonly entradas: number;
   readonly mermas: number;
@@ -30,6 +31,8 @@ export interface CierreData {
   readonly desde: string;
   readonly hasta: string;
   readonly dueno: string;
+  /** The business on the printed corte («Taquería Don Pedro»), when known. */
+  readonly negocio?: string;
   readonly partes: PartesEsperado;
   readonly resumen: ResumenTurno;
   /** The count as the operator left it (the file starts mid-count). */

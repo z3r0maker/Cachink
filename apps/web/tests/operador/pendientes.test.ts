@@ -10,12 +10,12 @@ const gasto = COLA_FIXTURE[2] as RegistroEnCola;
 describe('registros por enviar', () => {
   it('words the waiting queue as the file does', () => {
     const h = heroe('espera', COLA_FIXTURE, 3);
-    assert.equal(h.titulo, '3 registros en espera');
+    assert.equal(h.titulo, '3 registros esperan conexión');
     assert.equal(
       h.cuerpo,
-      'Suman $283.00 de ventas y un gasto de $620.00. El turno no se puede cerrar hasta que se envíen.',
+      'Suman $283.00 de ventas y un gasto de $620.00. Puedes seguir cobrando; se envían solos cuando vuelva el internet.',
     );
-    assert.equal(h.boton, 'Reintentar envío');
+    assert.equal(h.boton, 'Reintentar ahora');
   });
 
   it('moves through sending to sent', () => {

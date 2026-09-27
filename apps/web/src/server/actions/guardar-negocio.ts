@@ -30,7 +30,7 @@ export async function guardarNegocio(form: GuardarNegocioForm): Promise<GuardarN
     const { warnings } = await withTenant(id, (tx) =>
       new GuardarNegocioUseCase(pgBusinessesRepository(tx, id)).execute({ ...form, id }),
     );
-    revalidatePath('/negocio');
+    revalidatePath('/negocio', 'layout');
     return { ok: true, warnings };
   } catch (error) {
     if (error instanceof NegocioInvalidoError) {

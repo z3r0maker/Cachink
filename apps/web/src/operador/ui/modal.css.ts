@@ -1,5 +1,5 @@
 import { keyframes, style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
 const pop = keyframes({
   from: { opacity: 0, transform: 'translateY(10px) scale(0.98)' },
@@ -12,9 +12,10 @@ const fade = keyframes({
 });
 
 /**
- * Every operator modal (README «Modales»): the scrim, the card pinned to the
- * top with 16 px around it and a scrolling body — centring would leave the
- * header unreachable on short screens.
+ * Every operator modal (README «Modales», the boards' dialog): the scrim, the
+ * card centred with 16 px around it and a scrolling body. The card's auto
+ * margins centre it only while it fits: a tall card pins to the top, so its
+ * header is never pushed off a short screen.
  *
  * The close animation is not decoration: Radix keeps the portal mounted while
  * it plays, so the scrim still covers the screen — a smashed confirm button
@@ -36,14 +37,15 @@ export const overlay = style({
 
 export const card = style({
   width: '100%',
+  margin: 'auto 0',
   maxHeight: 'calc(100vh - 32px)',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[6],
+  border: borders.thick,
+  borderRadius: radii[7],
   background: colors.white,
-  boxShadow: shadows.hero,
+  boxShadow: `6px 6px 0 ${colors.black}`,
   animation: `${pop} 140ms cubic-bezier(0.2, 0.8, 0.2, 1)`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });
@@ -54,7 +56,7 @@ export const head = style({
   alignItems: 'center',
   gap: 10,
   padding: '14px 18px',
-  borderBottom: `2.5px solid ${colors.black}`,
+  borderBottom: borders.thick,
 });
 
 /** Radix renders the title as an `<h2>`; the design's is a span with no margin. */
@@ -65,18 +67,25 @@ export const title = style({
   color: colors.black,
 });
 
-/** The head's square buttons (close, back): 32 px in most files, 34 in Cobrar. */
+/**
+ * The head's square buttons (close, back): 32 px drawn, 34 in Cobrar. The
+ * `::after` stretches the target to 44 px without moving the head.
+ */
 export const square = style({
+  position: 'relative',
   boxSizing: 'content-box',
   flex: 'none',
   display: 'grid',
   placeItems: 'center',
   padding: 0,
-  border: `2px solid ${colors.black}`,
+  border: borders.thin,
   borderRadius: radii[1],
   background: colors.white,
   color: colors.black,
   cursor: 'pointer',
+  selectors: {
+    '&::after': { content: '""', position: 'absolute', inset: -6 },
+  },
 });
 
 export const body = style({

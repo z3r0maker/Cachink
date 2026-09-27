@@ -39,10 +39,10 @@ test('operador: smashing Cobrar and Registrar venta yields ONE registered sale',
 
   await smash(cobrar);
 
-  const modal = page.getByRole('dialog');
+  // Efectivo is the default method: Cobrar opens the ticket's cash step once.
+  const modal = page.getByRole('region', { name: 'Cobro' });
   await expect(modal).toBeVisible();
-  await expect(page.getByRole('dialog')).toHaveCount(1);
-  await modal.getByRole('button', { name: 'Efectivo', exact: true }).click();
+  await expect(modal).toHaveCount(1);
   // Two quesadillas are $80 — pay 100 so «Registrar venta» is enabled.
   await modal.getByLabel('Con cuánto paga').fill('100');
 

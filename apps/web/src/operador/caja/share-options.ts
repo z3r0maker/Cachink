@@ -10,40 +10,53 @@ import {
 } from './receipt';
 
 const WA =
-  'M20.5 3.5A10 10 0 0 0 3.2 15.6L2 22l6.5-1.2A10 10 0 1 0 20.5 3.5M8.5 8.5c.3 1.5 1 2.8 2 3.8s2.3 1.7 3.8 2c.6-.6 1-1.3 1.4-1.2l2 .8c.2 1.3-.6 2.2-1.8 2.3-3 .2-7.7-4.4-7.9-7.5-.1-1.2.8-2 2.1-1.8l.8 2c.1.4-.6.9-1.2 1.4';
+  'M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719';
 const DOWNLOAD = 'M12 3v12M7 11l5 5 5-5M4 21h16';
-const COPY = 'M9 9h10v10H9V9Zm-4 6H3V3h12v2';
+const COPY =
+  'M10 8h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2';
 
 export interface Opcion {
   readonly label: string;
   readonly hint: string;
   readonly icon: string;
-  readonly bg: string;
+  /** The first option is the board's green, raised one; the others are white. */
+  readonly principal: boolean;
+  readonly tile: string;
   readonly disabled: boolean;
   readonly run: () => string | Promise<string>;
 }
 
-/** The three ways out; each returns the confirmation the design shows. */
+/** Empty (WhatsApp asks for the contact) or a whole ten-digit number. */
+export const telValido = (tel: string): boolean => {
+  const n = digits(tel).length;
+  return n === 0 || n === 10;
+};
+
+/** The three ways out (OpComprobante); each returns the line the dialog confirms with. */
 export function opciones(c: Comprobante, tel: string, cliente?: string): readonly Opcion[] {
   return [
     {
       label: 'Enviar por WhatsApp',
       hint: 'Se abre WhatsApp con el comprobante listo',
       icon: WA,
-      bg: colors.greenSoft,
-      disabled: digits(tel).length < 10,
+      principal: true,
+      tile: colors.white,
+      disabled: !telValido(tel),
       run: () => {
-        window.open(whatsappUrl(tel, c), '_blank', 'noopener');
+        window.open(whatsappUrl(tel, c, cliente), '_blank', 'noopener');
         recordarTelefono(tel, cliente);
         // D2 (ADR-083): WhatsApp opens with the text; the person still presses send.
-        return `WhatsApp abierto con el comprobante para el ${tel}.`;
+        return digits(tel) === ''
+          ? 'Se abrió WhatsApp. Escoge el contacto y dale enviar.'
+          : `Se abrió WhatsApp con el comprobante para el ${tel.trim()}. Solo dale enviar.`;
       },
     },
     {
       label: 'Guardar imagen',
-      hint: 'PNG del comprobante en este dispositivo',
+      hint: 'Una foto del comprobante en esta caja',
       icon: DOWNLOAD,
-      bg: colors.white,
+      principal: false,
+      tile: colors.gray100,
       disabled: false,
       run: () => guardarImagen(c),
     },
@@ -51,42 +64,15 @@ export function opciones(c: Comprobante, tel: string, cliente?: string): readonl
       label: 'Copiar texto',
       hint: 'Para pegarlo donde quieras',
       icon: COPY,
-      bg: colors.white,
+      principal: false,
+      tile: colors.gray100,
       disabled: false,
       run: () => {
-        void navigator.clipboard.writeText(receiptText(c));
-        return 'Texto del comprobante copiado.';
+        void navigator.clipboard.writeText(receiptText(c, cliente));
+        return 'Texto copiado. Pégalo donde quieras.';
       },
     },
   ];
 }
 
 export type ShareVariant = 'caja' | 'detalle';
-
-/**
- * The two files differ in size only: Caja's modal previews the receipt at 440 px;
- * Detalle de venta's is titled with the folio, 420 px, with 60 px options.
- */
-export const VARIANTS = {
-  caja: {
-    title: () => 'Compartir comprobante',
-    width: 440,
-    gap: 16,
-    preview: true,
-    option: 62,
-    tile: 40,
-    icon: 20,
-    labelSpacing: '-0.015em',
-  },
-  detalle: {
-    title: (folio: string) => `Compartir ${folio}`,
-    width: 420,
-    gap: 14,
-    preview: false,
-    option: 60,
-    tile: 38,
-    icon: 19,
-    labelSpacing: 'normal',
-  },
-} as const;
-export type Variant = (typeof VARIANTS)[ShareVariant];

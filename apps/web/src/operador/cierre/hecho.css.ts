@@ -1,123 +1,169 @@
 import { style } from '@vanilla-extract/css';
 import {
+  borders,
   colors,
-  denseRadii,
-  fontSizes,
   portalFontSizes,
   radii,
   shadows,
+  shapeRadii,
   typography,
 } from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
-import { boton } from './cierre.css';
+import { PHONE } from '../shell/shell.css';
 
-/** The band that blocks the close, and the «Turno cerrado» card. */
-/* The blocking band. */
-export const banda = style({
+/** «¡Turno cerrado!» (OpCierreHecho): Don and the next steps, the corte beside them. */
+export const hecho = style({
+  padding: '8px 20px',
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) 440px',
+  gap: 56,
+  alignItems: 'center',
+  '@media': {
+    'screen and (max-width: 1179px)': { gridTemplateColumns: 'minmax(0, 1fr)', gap: 24 },
+    [PHONE]: { padding: 0 },
+  },
+});
+
+export const izquierda = style({ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 });
+
+export const donFila = style({ display: 'flex', alignItems: 'flex-end', gap: 14 });
+
+export const chip = style({
+  marginBottom: 34,
+  height: 36,
+  padding: '0 14px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 8,
+  borderWidth: 2,
+  borderStyle: 'solid',
+  borderRadius: shapeRadii.pill,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.extraBold,
+});
+
+export const titulo = style({
+  margin: 0,
+  fontSize: portalFontSizes.displayLg,
+  lineHeight: 1.05,
+  fontWeight: typography.weights.extraBold,
+  letterSpacing: typography.letterSpacing.tightest,
+  color: colors.black,
+  '@media': { [PHONE]: { fontSize: portalFontSizes.xl5 } },
+});
+
+export const texto = style({
+  margin: 0,
+  maxWidth: 520,
+  fontSize: portalFontSizes.lgx,
+  lineHeight: 1.45,
+  fontWeight: typography.weights.semibold,
+  color: colors.ink,
+  textWrap: 'pretty',
+});
+
+export const pasos = style({
+  marginTop: 6,
+  maxWidth: 520,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 12,
+});
+
+export const entregar = style([
+  pressable,
+  {
+    minHeight: 76,
+    padding: '12px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    border: borders.thick,
+    borderRadius: radii[4],
+    background: colors.yellow,
+    boxShadow: shadows.card,
+    fontFamily: 'inherit',
+    textAlign: 'left',
+    color: colors.black,
+  },
+]);
+
+export const entregado = style({
+  boxSizing: 'border-box',
+  minHeight: 76,
+  padding: '12px 20px',
   display: 'flex',
   alignItems: 'center',
   gap: 14,
-  flexWrap: 'wrap',
-  padding: '16px 20px',
-  border: `2.5px solid ${colors.black}`,
+  border: `2px solid ${colors.greenText}`,
   borderRadius: radii[4],
-  background: colors.warningSoft,
-  boxShadow: shadows.card,
-});
-
-export const bandaTitulo = style({
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.extraBold,
-  color: colors.black,
-});
-
-export const bandaBoton = style([
-  pressable,
-  {
-    ...boton,
-    flex: 'none',
-    height: 46,
-    padding: '0 18px',
-    border: `2.5px solid ${colors.black}`,
-    borderRadius: denseRadii.r13,
-    background: colors.white,
-    boxShadow: shadows.card,
-  },
-]);
-
-/* Closed. */
-export const hecho = style({
-  padding: 26,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 16,
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
   background: colors.greenSoft,
-  boxShadow: shadows.hero,
-});
-
-export const hechoTile = style({
-  boxSizing: 'content-box',
-  flex: 'none',
-  width: 46,
-  height: 46,
-  display: 'grid',
-  placeItems: 'center',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: denseRadii.r13,
-  background: colors.white,
   color: colors.greenText,
 });
 
-export const hechoTitulo = style({
-  fontSize: portalFontSizes.xl2,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tight,
-  color: colors.black,
-});
-
-export const dato = style({
-  padding: '14px 16px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: radii[3],
+export const icono = style({
+  flex: 'none',
+  width: 44,
+  height: 44,
+  boxSizing: 'border-box',
+  display: 'grid',
+  placeItems: 'center',
+  border: borders.thin,
+  borderRadius: radii[2],
   background: colors.white,
 });
 
-export const datoValor = style({
-  marginTop: 4,
-  fontSize: fontSizes.xl3,
+export const iconoVerde = style({ background: colors.green, color: colors.black });
+
+export const pasoTitulo = style({
+  display: 'block',
+  fontSize: portalFontSizes.lgx,
   fontWeight: typography.weights.extraBold,
-  fontVariantNumeric: 'tabular-nums',
-  letterSpacing: typography.letterSpacing.tight,
 });
 
-export const otroTurno = style([
+export const pasoTexto = style({
+  display: 'block',
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  color: colors.ink,
+});
+
+export const botones = style({ display: 'flex', gap: 12, flexWrap: 'wrap' });
+
+export const whatsapp = style([
   pressable,
   {
-    ...boton,
-    boxSizing: 'content-box',
-    display: 'inline-flex',
+    flex: '1 1 260px',
+    height: 56,
+    display: 'flex',
     alignItems: 'center',
-    height: 52,
-    padding: '0 20px',
-    border: `2.5px solid ${colors.black}`,
-    borderRadius: denseRadii.r13,
-    background: colors.yellow,
-    boxShadow: shadows.card,
+    justifyContent: 'center',
+    gap: 10,
+    border: borders.thin,
+    borderRadius: radii[4],
+    background: colors.white,
+    boxShadow: shadows.small,
+    fontSize: portalFontSizes.lg,
+    fontWeight: typography.weights.extraBold,
+    color: colors.black,
+    textDecoration: 'none',
   },
 ]);
 
-export const verConteo = style([
-  pressable,
-  {
-    ...boton,
-    height: 52,
-    padding: '0 20px',
-    border: `2px solid ${colors.black}`,
-    borderRadius: denseRadii.r13,
-    background: colors.white,
-    boxShadow: shadows.small,
-  },
-]);
+export const salir = style({
+  flex: 'none',
+  height: 56,
+  padding: '0 20px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  border: borders.quiet,
+  borderRadius: radii[4],
+  background: colors.white,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.bold,
+  color: colors.gray600,
+  textDecoration: 'none',
+});

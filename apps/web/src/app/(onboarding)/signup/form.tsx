@@ -1,87 +1,60 @@
 'use client';
 
 import type { PlanId } from '@xangarro/domain';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { Check } from 'lucide-react';
+import Link from 'next/link';
 
-import { Banner, Button, Card, Input } from '@/components';
-import { OnboardingFrame } from '@/onboarding/ui/frame';
-import { link, note, stack } from '@/onboarding/ui/onboarding.css';
+import { Banner, Button, Card } from '@/components';
 import type { Utm } from '@/server/attribution/utm';
-import { registrarse, type SignupFields } from '@/server/actions/signup';
 
-import { Consent, type ConsentState } from './consent';
+import { MarcoPublico } from '../../_publico/marco';
+import { item, lista, punto } from '../../_publico/marco.css';
+import * as p from '../../_publico/publico.css';
+import { Campos } from './campos';
+import { Consent } from './consent';
+import { useSignup, type Signup } from './use-signup';
 
-const SIN_CONSENTIMIENTO = 'Para crear tu cuenta, acepta el aviso de privacidad y los Términos.';
+const PROMESAS = ['Gratis para siempre', 'Sin tarjeta', 'En español y en pesos'] as const;
 
-/** Four fields, the aviso, one button. Everything else is asked by the wizard. */
-function useSignup(plan: PlanId | null, utm: Utm) {
-  const [fields, setFields] = useState<SignupFields>({
-    nombre: '',
-    tuNombre: '',
-    email: '',
-    password: '',
-  });
-  const [consent, setConsent] = useState<ConsentState>({ acepto: false, novedades: true });
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
-  const set = (patch: Partial<SignupFields>) => {
-    setFields((f) => ({ ...f, ...patch }));
-    setError(null);
-  };
-  const setC = (patch: Partial<ConsentState>) => {
-    setConsent((c) => ({ ...c, ...patch }));
-    setError(null);
-  };
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!consent.acepto) return setError(SIN_CONSENTIMIENTO);
-    startTransition(async () => {
-      const r = await registrarse({ ...fields, utm, consentimiento: consent });
-      if (!r.ok) return setError(r.message);
-      router.replace(plan === null ? '/bienvenida' : `/bienvenida?plan=${plan}`);
-      router.refresh();
-    });
-  };
-  return { fields, set, consent, setC, error, pending, submit };
+function Promesas() {
+  return (
+    <ul className={lista}>
+      {PROMESAS.map((t) => (
+        <li key={t} className={item}>
+          <span className={punto} aria-hidden="true">
+            <Check size={16} strokeWidth={3.2} />
+          </span>
+          {t}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
-function Fields({ s }: { readonly s: ReturnType<typeof useSignup> }) {
+function Envio({ s }: { readonly s: Signup }) {
   return (
     <>
-      <Input
-        labelText="Tu nombre"
-        autoComplete="name"
-        hintText="Opcional. Así te saludaremos en tu portal."
-        value={s.fields.tuNombre}
-        onChange={(e) => s.set({ tuNombre: e.target.value })}
-        data-testid="signup-tu-nombre"
-      />
-      <Input
-        labelText="Nombre de tu negocio"
-        autoComplete="organization"
-        value={s.fields.nombre}
-        onChange={(e) => s.set({ nombre: e.target.value })}
-        data-testid="signup-nombre"
-      />
-      <Input
-        labelText="Correo"
-        type="email"
-        autoComplete="email"
-        value={s.fields.email}
-        onChange={(e) => s.set({ email: e.target.value })}
-        data-testid="signup-email"
-      />
-      <Input
-        labelText="Contraseña"
-        type="password"
-        autoComplete="new-password"
-        hintText="Mínimo 8 caracteres."
-        value={s.fields.password}
-        onChange={(e) => s.set({ password: e.target.value })}
-        data-testid="signup-password"
-      />
+      {s.error ? <Banner tone="critical" title={s.error} /> : null}
+      <Button
+        type="submit"
+        size="lg"
+        disabled={s.pending}
+        full
+        aria-describedby={s.falta ? 'signup-falta' : undefined}
+      >
+        {s.pending ? 'Creando tu cuenta…' : 'Crear mi cuenta'}
+      </Button>
+      {s.falta ? (
+        <p id="signup-falta" className={p.falta}>
+          {s.falta}
+        </p>
+      ) : null}
+      <p className={p.pieTexto}>
+        ¿Ya tienes cuenta?
+        <Link className={p.enlace} href="/login">
+          Entra aquí
+        </Link>
+      </p>
     </>
   );
 }
@@ -96,23 +69,25 @@ export function SignupForm({
 }) {
   const s = useSignup(plan, utm);
   return (
-    <OnboardingFrame title="Crea tu negocio" subtitle="Gratis. Sin tarjeta.">
-      <Card>
-        <form onSubmit={s.submit} noValidate className={stack}>
-          <Fields s={s} />
-          <Consent value={s.consent} onChange={s.setC} />
-          {s.error ? <Banner tone="critical" title={s.error} /> : null}
-          <Button type="submit" disabled={s.pending} full>
-            {s.pending ? 'Creando tu cuenta…' : 'Crear cuenta'}
-          </Button>
-          <p className={note}>
-            ¿Ya tienes cuenta?{' '}
-            <a className={link} href="/login">
-              Entra aquí
-            </a>
-          </p>
-        </form>
-      </Card>
-    </OnboardingFrame>
+    <MarcoPublico
+      pose="hola"
+      titulo="Abre tu changarro."
+      bajada="Tus ventas, tu caja y tus estados financieros en un solo lugar. Finanzas para emprendedores."
+      extra={<Promesas />}
+    >
+      <div className={`${p.zona} ${p.ancho.medio}`}>
+        <header className={p.cabeza}>
+          <h1 className={p.titulo}>Crea tu negocio</h1>
+          <p className={p.bajada}>Gratis, sin tarjeta. Lo demás te lo preguntamos después.</p>
+        </header>
+        <Card emphasis="hero">
+          <form onSubmit={s.submit} noValidate className={p.pila}>
+            <Campos s={s} />
+            <Consent value={s.consent} onChange={s.setC} />
+            <Envio s={s} />
+          </form>
+        </Card>
+      </div>
+    </MarcoPublico>
   );
 }

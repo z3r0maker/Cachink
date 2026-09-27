@@ -1,129 +1,120 @@
-import { style } from '@vanilla-extract/css';
-import { colors, denseRadii, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { style, styleVariants } from '@vanilla-extract/css';
+import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
-import { pressable } from '../../../styles/press.css';
+/** The drawer's body: the lines, the four tiles, and its notes. */
+export const seccion = style({ display: 'flex', flexDirection: 'column', gap: 8 });
 
-/** Detalle de venta's right column: the trace, the two actions, the fiado card. */
-export const column = style({ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 });
+export const h3 = style({ margin: 0 });
 
-export const cardHead = style({
-  padding: '14px 18px',
-  background: colors.gray100,
-  borderBottom: `2.5px solid ${colors.black}`,
-});
-
-export const cardBody = style({
-  padding: '16px 18px',
+export const linea = style({
   display: 'flex',
-  flexDirection: 'column',
-  gap: 11,
+  alignItems: 'center',
+  gap: 12,
+  padding: '10px 14px',
+  borderRadius: radii[3],
+  background: colors.offwhite,
 });
 
-export const traza = style({ display: 'flex', alignItems: 'baseline', gap: 10 });
-
-export const trazaLabel = style({
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.bold,
-  color: colors.gray600,
+export const icono = style({
+  boxSizing: 'border-box',
+  flex: 'none',
+  width: 40,
+  height: 40,
+  display: 'grid',
+  placeItems: 'center',
+  border: borders.thin,
+  borderRadius: radii[2],
+  color: colors.black,
 });
 
-export const trazaValue = style({
-  marginLeft: 'auto',
-  fontSize: portalFontSizes.md,
+export const lineaTexto = style({ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' });
+
+export const lineaNombre = style({
+  fontSize: portalFontSizes.body,
   fontWeight: typography.weights.extraBold,
   color: colors.black,
-  textAlign: 'right',
-  textWrap: 'pretty',
 });
 
-const action = {
-  borderRadius: denseRadii.r13,
-  fontFamily: 'inherit',
+const mono = { fontVariantNumeric: 'tabular-nums' } as const;
+
+export const lineaDetalle = style({
+  ...mono,
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  color: colors.textMuted,
+});
+
+export const lineaTotal = style({
+  ...mono,
+  flex: 'none',
+  fontSize: portalFontSizes.lg,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
+
+export const fichas = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: 10,
+});
+
+export const ficha = style({
+  padding: '12px 14px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  border: borders.quiet,
+  borderRadius: radii[3],
+  minWidth: 0,
+});
+
+export const fichaK = style({
   fontSize: portalFontSizes.xs,
   fontWeight: typography.weights.bold,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: colors.black,
-  cursor: 'pointer',
-} as const;
-
-export const share = style([
-  pressable,
-  {
-    ...action,
-    height: 54,
-    border: `2.5px solid ${colors.black}`,
-    background: colors.yellow,
-    boxShadow: shadows.card,
-    selectors: { '&:hover': { background: colors.yellowDeep } },
-  },
-]);
-
-export const cancel = style([
-  pressable,
-  {
-    ...action,
-    height: 54,
-    border: `2px solid ${colors.black}`,
-    background: colors.redSoft,
-    boxShadow: shadows.small,
-    selectors: {
-      '&:disabled': { background: colors.gray100, cursor: 'not-allowed', opacity: 0.5 },
-    },
-  },
-]);
-
-export const hint = style({
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
-  textWrap: 'pretty',
+  color: colors.textMuted,
 });
 
-export const fiado = style({
-  padding: 18,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 11,
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
-  background: colors.warningSoft,
-  boxShadow: shadows.hero,
-});
-
-export const cliente = style({
-  fontSize: portalFontSizes.lgx,
+export const fichaV = style({
+  ...mono,
+  fontSize: portalFontSizes.body,
   fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tight,
   color: colors.black,
+  overflowWrap: 'anywhere',
 });
 
-export const fiadoText = style({
+const nota = {
+  padding: '12px 14px',
+  borderRadius: radii[3],
   fontSize: portalFontSizes.md,
-  fontWeight: typography.weights.semibold,
+  lineHeight: 1.45,
+  fontWeight: typography.weights.bold,
   color: colors.ink,
   textWrap: 'pretty',
+} as const;
+
+export const notaTono = styleVariants({
+  cancelada: { ...nota, border: `2px solid ${colors.redText}`, background: colors.redSoft },
+  fiado: { ...nota, border: `2px solid ${colors.warningText}`, background: colors.warningSoft },
+  hecho: { ...nota, border: `2px solid ${colors.greenText}`, background: colors.greenSoft },
 });
 
-export const abono = style([
-  pressable,
-  {
-    ...action,
-    boxSizing: 'content-box',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    border: `2px solid ${colors.black}`,
-    background: colors.white,
-    boxShadow: shadows.small,
-    textDecoration: 'none',
-  },
-]);
-
-export const intro = style({
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.bold,
+export const enlace = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: 44,
+  fontWeight: typography.weights.extraBold,
   color: colors.black,
-  textWrap: 'pretty',
+  textDecoration: 'underline',
+  textUnderlineOffset: 3,
+});
+
+export const estado = style({
+  padding: '16px 0',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 8,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
 });

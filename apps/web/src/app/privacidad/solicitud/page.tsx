@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
-import { page, title } from '../../activar/activar.css';
-import { FormularioArco } from './formulario';
+import { PantallaArco } from './pantalla';
 
 /**
  * `/privacidad/solicitud` — the public ARCO form (N-34). Anyone can use it,
@@ -14,18 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function SolicitudArcoPage() {
-  return (
-    <main className={page}>
-      <h1 className={title}>Tus datos personales: solicitud ARCO</h1>
-      <p>
-        Pide acceso a tus datos, corregirlos, cancelarlos, oponerte a un uso o retirar tu
-        consentimiento. Te respondemos por correo en un máximo de 20 días hábiles.
-      </p>
-      <p>
-        Para proteger tus datos, antes de actuar te pediremos por correo una identificación. Aviso
-        de privacidad completo: <a href="https://xangarro.mx/privacidad">xangarro.mx/privacidad</a>.
-      </p>
-      <FormularioArco />
-    </main>
-  );
+  return <PantallaArco />;
 }

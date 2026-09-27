@@ -1,34 +1,34 @@
-import Link from 'next/link';
-import { formatMoney } from '@xangarro/domain';
-
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
-import { KpiRow, OpMain } from '../ui/parts';
-import * as t from '../ui/title.css';
-import { desglose } from './desglose';
+import { PageHead, StatRow } from '../ui/panel';
+import * as pc from '../ui/panel.css';
+import { OpMain } from '../ui/parts';
+import { EsperadoCard, PorMetodo } from './esperado';
+import * as m from './mi-turno.css';
 import { Movimientos } from './movimientos';
-import { Atajos, kpis } from './parts';
+import { kpis } from './parts';
 import { PendientesRecurrentes } from './pendientes';
-import * as s from './turno.css';
-import type { TurnoData, TurnoScreenProps } from './types';
+import type { TurnoScreenProps } from './types';
 
-/** Operador · Turno: the expected cash, today's figures, and every movement. */
+/** Operador · Mi turno: the cash that must be there, today's figures, and what is due. */
 export function TurnoScreen({ state, data }: TurnoScreenProps) {
   return (
-    <OpMain top={22}>
+    <OpMain top={24}>
       <NuevaVenta />
-      <div className={t.titleRow}>
-        <h1 className={t.pageTitle}>Tu turno</h1>
-        <span className={t.pageSub}>
-          {data.operador} · {data.caja} · abierto desde las {data.desde}
-        </span>
-      </div>
-      <div className={s.top}>
+      <PageHead
+        title="Mi turno"
+        sub={
+          <>
+            {data.operador}, {data.caja}, desde las <span className={pc.mono}>{data.desde}</span>
+          </>
+        }
+      />
+      <div className={m.top}>
         <EsperadoCard data={data} />
-        <div className={s.right}>
-          <KpiRow items={kpis(data)} min={200} valueSize={28} />
-          <Atajos />
+        <div className={m.right}>
+          <StatRow items={kpis(data)} grid={m.stats} />
+          <PorMetodo items={data.porMetodo} />
         </div>
       </div>
       <PendientesRecurrentes items={data.pendientes} />
@@ -46,26 +46,5 @@ export function TurnoScreen({ state, data }: TurnoScreenProps) {
         />
       )}
     </OpMain>
-  );
-}
-
-function EsperadoCard({ data }: { readonly data: TurnoData }) {
-  const rows = desglose(data);
-  return (
-    <div className={s.hero}>
-      <div className={s.heroLabel}>Efectivo esperado en caja</div>
-      <div className={s.heroAmount}>{formatMoney(data.esperado)}</div>
-      <div className={s.breakdown}>
-        {rows.map(([label, value]) => (
-          <div key={label} className={s.breakdownRow}>
-            <span className={s.breakdownLabel}>{label}</span>
-            <span className={s.breakdownValue}>{value}</span>
-          </div>
-        ))}
-      </div>
-      <Link href={`${OPERADOR_BASE}/cierre`} className={s.heroCta} data-onyellow="">
-        Cerrar turno
-      </Link>
-    </div>
   );
 }

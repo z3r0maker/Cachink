@@ -1,7 +1,7 @@
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
-import type { KpiItem } from '../ui/parts';
+import type { StatItem as KpiItem } from '../ui/panel';
 import { hintCanceladas } from '../ui/frases';
 import { enPalabras } from './copy';
 import type { InicioData, ResultadoCorte, TurnoAbierto, UltimoTurno } from './types';
@@ -9,7 +9,7 @@ import type { InicioData, ResultadoCorte, TurnoAbierto, UltimoTurno } from './ty
 const BLACK = colors.black;
 
 /**
- * The four Inicio figures: the open turno's, or — with no turno — the last
+ * The four Inicio figures: the open turno's, or (with no turno) the last
  * one's plus the suggested float.
  */
 export function kpisFor(d: InicioData): readonly KpiItem[] {
@@ -20,7 +20,7 @@ export function kpisFor(d: InicioData): readonly KpiItem[] {
 function abierto(t: TurnoAbierto): readonly KpiItem[] {
   return [
     {
-      label: 'Ventas de tu turno',
+      label: 'Ventas del turno',
       value: String(t.ventas),
       color: BLACK,
       hint: hintCanceladas(t.canceladas, t.ultimaCancelada),
@@ -36,7 +36,7 @@ function abierto(t: TurnoAbierto): readonly KpiItem[] {
       value: formatMoney(t.esperado),
       color: BLACK,
       hint: 'Es lo que debes contar al cerrar',
-      bg: colors.yellowSoft,
+      strong: true,
     },
     {
       label: 'Fiado de hoy',
@@ -73,7 +73,7 @@ function cerrado(u: UltimoTurno): readonly KpiItem[] {
       value: formatMoney(u.fondoSugerido),
       color: BLACK,
       hint: 'Con el que abriste las últimas veces',
-      bg: colors.yellowSoft,
+      strong: true,
     },
     {
       label: 'Por cobrar',

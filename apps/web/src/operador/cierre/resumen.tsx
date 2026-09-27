@@ -1,47 +1,71 @@
+import { Fragment, type ReactNode } from 'react';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import * as u from '../ui/ui.css';
-import * as s from './cierre.css';
-import { cerrarHint } from './copy';
+import { Icon } from '../../shell/icon';
+import * as r from './resumen.css';
 import type { ResumenTurno } from './types';
 import type { Cierre } from './use-cierre';
 
-function filas(r: ResumenTurno): readonly (readonly [string, string, string])[] {
+const CHECK = 'M20 6 9 17l-5-5';
+
+function partes(t: ResumenTurno): readonly (readonly [string, ReactNode])[] {
+  const canceladas = t.canceladas === 1 ? 'cancelada' : 'canceladas';
   return [
-    ['Ventas del turno', String(r.ventas), colors.black],
-    ['Cobrado (todos los métodos)', formatMoney(r.cobrado), colors.black],
-    ['Ventas canceladas', `${r.canceladas} · ${formatMoney(r.cancelado)}`, colors.redText],
-    ['Ventas fiadas', formatMoney(r.fiado), colors.warningText],
-    ['Movimientos de inventario', `${r.entradas} entradas · ${r.mermas} mermas`, colors.black],
+    [
+      'ventas',
+      <>
+        <b className={r.cifra}>{t.ventas}</b> ventas
+      </>,
+    ],
+    [
+      'canceladas',
+      <>
+        <b className={r.cifra}>{t.canceladas}</b> {canceladas}
+        {t.canceladaHora ? <span className={r.hora}>{` (${t.canceladaHora})`}</span> : null}
+      </>,
+    ],
+    [
+      'fiado',
+      <>
+        Fiado{' '}
+        <b className={r.cifra} style={{ color: colors.warningText }}>
+          {formatMoney(t.fiado)}
+        </b>
+      </>,
+    ],
+    [
+      'inventario',
+      <>
+        <b className={r.cifra}>{t.entradas}</b> entradas · <b className={r.cifra}>{t.mermas}</b>{' '}
+        mermas
+      </>,
+    ],
   ];
 }
 
-/** «Resumen del turno» and the one button, blocked while the queue or the note is missing. */
-export function Resumen({ x, r }: { readonly x: Cierre; readonly r: ResumenTurno }) {
+/** «Resumen del turno» in one line: what happened, and whether everything was sent. */
+export function Resumen({ x, t }: { readonly x: Cierre; readonly t: ResumenTurno }) {
   return (
-    <div className={s.tarjeta}>
-      <div className={u.eyebrow}>Resumen del turno</div>
-      {filas(r).map(([label, value, color]) => (
-        <div key={label} className={s.resumenFila}>
-          <span className={s.resumenLabel}>{label}</span>
-          <span className={s.resumenValor} style={{ color }}>
-            {value}
-          </span>
-        </div>
+    <section aria-label="Resumen del turno" className={r.strip}>
+      <span className={r.eyebrow}>Resumen del turno</span>
+      {partes(t).map(([k, v]) => (
+        <Fragment key={k}>
+          <span className={r.sep} aria-hidden="true" />
+          <span className={r.item}>{v}</span>
+        </Fragment>
       ))}
-      <button
-        type="button"
-        className={s.cerrar}
-        data-onyellow=""
-        disabled={!x.puede}
-        onClick={x.cerrar}
-      >
-        Cerrar turno
-      </button>
-      <div className={s.texto} style={{ color: colors.gray600 }}>
-        {cerrarHint(x.pendientes, x.faltaNota)}
-      </div>
-    </div>
+      {x.pendientes > 0 ? (
+        <span className={r.sync} data-pendiente="">
+          <span className={r.punto} aria-hidden="true" />
+          {`${x.pendientes} sin enviar`}
+        </span>
+      ) : (
+        <span className={r.sync}>
+          <Icon path={CHECK} size={16} strokeWidth={2.6} />
+          Todo enviado
+        </span>
+      )}
+    </section>
   );
 }

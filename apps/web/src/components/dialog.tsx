@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { Button } from './button';
 import * as d from './dialog.css';
 import { Don, type DonPose } from './don/don';
-import { overlay } from './drawer.css';
+import { overlayDialogo as overlay } from './drawer.css';
 
 export interface ConfirmDialogProps {
   readonly open: boolean;

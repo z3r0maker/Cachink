@@ -1,175 +1,171 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shapeRadii, shadows, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  portalFontSizes,
+  radii,
+  shapeRadii,
+  shadows,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
 import { PHONE } from '../shell/shell.css';
 
-/** Operador · Inicio, from `Xangarro Portal - Operador Inicio.dc.html`. */
-const contentBox = { boxSizing: 'content-box' } as const;
+/** Operador · Inicio (`OpInicio.dc.html`, `OpInicioSituaciones.dc.html`). */
 const NARROW = 'screen and (max-width: 1179px)';
+
+/* Don Cuentas' greeting ----------------------------------------------- */
+
+export const greeting = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  flexWrap: 'wrap',
+  '@media': { [PHONE]: { gap: 2 } },
+});
+
+export const greetingText = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+  minWidth: 0,
+  flex: '1 1 200px',
+});
+
+export const bubble = style({
+  position: 'relative',
+  alignSelf: 'flex-start',
+  padding: '12px 20px',
+  border: borders.thin,
+  borderRadius: radii[5],
+  background: colors.white,
+  boxShadow: shadows.small,
+});
+
+/** The tail pointing at Don: a rotated square showing two black edges. */
+export const tail = style({
+  position: 'absolute',
+  left: -9,
+  top: 22,
+  width: 14,
+  height: 14,
+  background: colors.white,
+  borderLeft: borders.thin,
+  borderBottom: borders.thin,
+  transform: 'rotate(45deg)',
+});
 
 export const h1 = style({
   margin: 0,
-  fontSize: portalFontSizes.xl6,
-  lineHeight: 1.05,
+  fontSize: portalFontSizes.xl4,
+  lineHeight: 1.15,
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tighter,
   color: colors.black,
-  '@media': { [PHONE]: { fontSize: portalFontSizes.xl4 } },
+  textWrap: 'pretty',
+  '@media': { [PHONE]: { fontSize: portalFontSizes.cardTitle } },
 });
 
 export const fecha = style({
-  marginTop: 6,
+  paddingLeft: 6,
   fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
+  '@media': { [PHONE]: { fontSize: portalFontSizes.sm } },
 });
 
-/* «Lo primero» --------------------------------------------------------- */
-
-export const hero = style({
-  display: 'flex',
+export const turnoChip = style({
+  marginLeft: 'auto',
+  alignSelf: 'flex-start',
+  marginTop: 12,
+  height: 34,
+  padding: '0 14px',
+  display: 'inline-flex',
   alignItems: 'center',
-  gap: 18,
-  flexWrap: 'wrap',
-  padding: 24,
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[6],
-  boxShadow: shadows.hero,
-  '@media': { [PHONE]: { padding: 18 } },
-});
-
-export const heroIcon = style({
-  ...contentBox,
-  flex: 'none',
-  width: 58,
-  height: 58,
-  display: 'grid',
-  placeItems: 'center',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[4],
+  gap: 8,
+  border: borders.quiet,
+  borderRadius: shapeRadii.pill,
   background: colors.white,
-  color: colors.black,
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.bold,
+  color: colors.gray600,
+  '@media': { [PHONE]: { marginLeft: 0, marginTop: 4 } },
 });
 
-export const heroText = style({ flex: 1, minWidth: 220 });
-
-export const heroTitle = style({
-  marginTop: 6,
-  fontSize: portalFontSizes.xl5,
-  lineHeight: 1.1,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.tighter,
-  color: colors.black,
-  textWrap: 'pretty',
-  '@media': { [PHONE]: { fontSize: portalFontSizes.xl3 } },
+export const greenDot = style({
+  width: 8,
+  height: 8,
+  borderRadius: shapeRadii.pill,
+  background: colors.green,
 });
 
-export const heroBody = style({
-  marginTop: 7,
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.semibold,
-  color: colors.ink,
-  textWrap: 'pretty',
-});
+export const grayDot = style({ background: colors.gray400 });
 
-export const heroCta = style([
-  pressable,
-  {
-    ...contentBox,
-    flex: 'none',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 62,
-    padding: '0 26px',
-    border: `2.5px solid ${colors.black}`,
-    borderRadius: radii[4],
-    boxShadow: shadows.card,
-    fontSize: portalFontSizes.md,
-    fontWeight: typography.weights.bold,
-    letterSpacing: typography.letterSpacing.widest,
-    textTransform: 'uppercase',
-    color: colors.black,
-    textDecoration: 'none',
-    selectors: { '&:hover': { background: colors.yellowDeep } },
-  },
-]);
+export const figure = style({ color: colors.black, fontWeight: typography.weights.extraBold });
+
+export const mono = style({ fontVariantNumeric: 'tabular-nums' });
 
 /* The two-column block ---------------------------------------------------- */
 
 export const columns = style({
   display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1.35fr) minmax(0, 1fr)',
-  gap: 18,
+  gridTemplateColumns: 'minmax(0, 1.38fr) minmax(0, 1fr)',
+  gap: 16,
   alignItems: 'start',
   '@media': { [NARROW]: { gridTemplateColumns: 'minmax(0, 1fr)' } },
 });
 
-export const side = style({ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 });
+export const side = style({ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 });
 
-/* Row text shared by the three lists. */
-export const rowTitle = style({
+export const tarea = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 14,
+  flexWrap: 'wrap',
+  padding: '12px 18px',
+  borderBottom: `2px solid ${colors.gray100}`,
+  selectors: { '&:last-child': { borderBottom: 'none' } },
+});
+
+export const tareaText = style({
+  flex: '1 1 200px',
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+});
+
+export const tareaActions = style({ display: 'flex', gap: 8, flex: 'none', marginLeft: 'auto' });
+
+/** «Nada más para hoy»: the emptied list, inside the panel. */
+export const nada = style({
+  padding: '32px 20px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 6,
+  textAlign: 'center',
+});
+
+export const nadaTitle = style({
+  fontSize: portalFontSizes.lgx,
   fontWeight: typography.weights.extraBold,
   color: colors.black,
-  textWrap: 'pretty',
 });
 
-export const rowDetail = style({
-  marginTop: 2,
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.semibold,
-  color: colors.gray600,
-  textWrap: 'pretty',
-});
-
-export const rowCta = style([
+export const verTodas = style([
   pressable,
   {
-    ...contentBox,
-    flex: 'none',
-    display: 'inline-flex',
-    alignItems: 'center',
-    height: 42,
-    padding: '0 15px',
-    border: `2px solid ${colors.black}`,
-    borderRadius: radii[2],
+    marginLeft: 'auto',
+    height: 40,
+    padding: '0 12px',
+    border: borders.quiet,
+    borderRadius: radii[1],
     background: colors.white,
-    boxShadow: shadows.small,
-    fontSize: portalFontSizes.xs,
+    fontFamily: 'inherit',
+    fontSize: portalFontSizes.sm,
     fontWeight: typography.weights.bold,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    color: colors.black,
-    textDecoration: 'none',
+    color: colors.gray600,
   },
-]);
-
-export const dot = style({
-  ...contentBox,
-  flex: 'none',
-  width: 9,
-  height: 9,
-  marginTop: 6,
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-});
-
-export const chip = style({
-  flex: 'none',
-  display: 'inline-flex',
-  alignItems: 'center',
-  padding: '2px 11px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.extraBold,
-  fontVariantNumeric: 'tabular-nums',
-  whiteSpace: 'nowrap',
-});
-
-/** «Hoy no»: the row's second action, gray, removes the task for today. */
-export const hoyNo = style([
-  rowCta,
-  { padding: '0 14px', background: colors.gray100, cursor: 'pointer', fontFamily: 'inherit' },
 ]);

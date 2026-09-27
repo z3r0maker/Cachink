@@ -2,8 +2,9 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
-  bandaCuerpo,
+  BANDA_CUERPO,
   cerrarHint,
+  cerrarLabel,
   conSigno,
   DIF,
   lineaCerrado,
@@ -18,15 +19,20 @@ describe('cierre de turno', () => {
     assert.deepEqual(desglose(TURNO_FIXTURE).at(-1), ['Gastos de caja chica', '−$620.00']);
   });
 
-  it('blocks the close first on the queue, then on the missing note', () => {
-    assert.equal(cerrarHint(3, true), 'Primero se tienen que enviar los registros pendientes.');
-    assert.equal(cerrarHint(0, true), 'Elige un motivo y escribe la nota para poder cerrar.');
-    assert.match(cerrarHint(0, false), /^Al cerrar se guarda el conteo/);
+  it('asks for a reason, then for the note of «Otra razón»', () => {
+    assert.equal(cerrarHint(true, false), 'Elige un motivo para poder cerrar.');
+    assert.equal(cerrarHint(false, true), 'Escribe la nota para poder cerrar.');
+    assert.match(cerrarHint(false, false), /^Al cerrar se guarda el conteo/);
   });
 
-  it('asks to reconnect offline and to wait online while records are unsent', () => {
-    assert.match(bandaCuerpo('sin-conexion'), /Conéctate y espera a que suban\.$/);
-    assert.match(bandaCuerpo('en-linea'), /Espera a que terminen de subir\.$/);
+  it('puts the difference in the close button, and says why records block it', () => {
+    assert.equal(cerrarLabel({ tipo: 'cuadra', monto: 0n }), 'Cerrar turno');
+    assert.equal(
+      cerrarLabel({ tipo: 'falta', monto: 70_00n }),
+      'Cerrar turno con faltante de $70.00',
+    );
+    assert.equal(cerrarLabel({ tipo: 'sobra', monto: 5n }), 'Cerrar turno con sobrante de $0.05');
+    assert.match(BANDA_CUERPO, /el efectivo esperado se calcula con ellos\.$/);
   });
 
   it('words the difference and the closed line', () => {
@@ -35,8 +41,8 @@ describe('cierre de turno', () => {
     assert.equal(conSigno({ tipo: 'sobra', monto: 910_00n }), '+$910.00');
     assert.equal(conSigno({ tipo: 'cuadra', monto: 0n }), '$0.00');
     assert.equal(
-      lineaCerrado({ tipo: 'falta', monto: 1n }, 'Propinas', 'Pedro'),
-      'Quedó un faltante explicado como «Propinas».',
+      lineaCerrado({ tipo: 'falta', monto: 1n }, 'Salió un vale', 'Pedro'),
+      'Quedó un faltante explicado como «Salió un vale».',
     );
     assert.match(lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro'), /Pedro ya lo tiene/);
   });

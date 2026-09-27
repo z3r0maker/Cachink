@@ -1,121 +1,158 @@
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
-import * as l from '../turno/lists.css';
 import { Glyph } from '../ui/parts';
 import { PRODUCT_ICONS } from '../ui/product-icons';
-import * as u from '../ui/ui.css';
-import * as v from '../ventas/ventas.css';
-import { delta, porReponer } from './derive';
-import * as s from './inventario.css';
+import * as r from '../ui/resumen.css';
+import { conUnidad, delta, nivel, porReponer } from './derive';
+import * as s from './listas.css';
 import type { Existencia, Movimiento, TipoMovimiento } from './types';
 
-export const UP = 'M12 19V5M5 12l7-7 7 7';
-export const DOWN = 'M12 5v14M5 12l7 7 7-7';
+const PLUS = 'M12 5v14M5 12h14';
 
-/** Existencias: threshold, unit, «Reponer» / «Suficiente», the count, and the two quick actions. */
-export function ListaExistencias(p: {
-  readonly items: readonly Existencia[];
-  readonly query: string;
-  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
-}) {
+function Tile({ it }: { readonly it: Existencia }) {
   return (
-    <div className={u.listCard}>
-      {p.items.map((it) => (
-        <div key={it.id} className={`${v.row} ${u.rowWrap}`}>
-          <span className={s.tile} style={{ background: it.tint }}>
-            <Glyph paths={PRODUCT_ICONS[it.icono]} size={21} stroke={2.3} />
-          </span>
-          <div style={{ flex: '1 1 0', minWidth: 120 }}>
-            <div className={l.name}>{it.nombre}</div>
-            <div className={l.detail}>
-              Umbral {it.umbral} · {it.unidad}
-            </div>
-          </div>
-          <div className={s.grupo}>
-            <Estado bajo={porReponer(it)} />
-            <div className={s.qty} style={{ marginLeft: 'auto' }}>
-              {it.existencias}
-            </div>
-            <div style={{ flex: 'none', display: 'flex', gap: 8 }}>
-              <Rapido tipo="Entrada" onClick={() => p.onMover('Entrada', it.id)} />
-              <Rapido tipo="Merma" onClick={() => p.onMover('Merma', it.id)} />
-            </div>
-          </div>
-        </div>
-      ))}
-      {p.items.length === 0 ? (
-        <div className={s.nada}>Ningún producto coincide con «{p.query}».</div>
-      ) : null}
-    </div>
-  );
-}
-
-function Estado({ bajo }: { readonly bajo: boolean }) {
-  return (
-    <span
-      className={v.method}
-      style={{
-        color: bajo ? colors.redText : colors.greenText,
-        background: bajo ? colors.redSoft : colors.greenSoft,
-      }}
-    >
-      {bajo ? 'Reponer' : 'Suficiente'}
+    <span className={s.tile} style={{ background: it.tint }}>
+      <Glyph paths={PRODUCT_ICONS[it.icono]} size={22} stroke={2.2} />
     </span>
   );
 }
 
-function Rapido({
-  tipo,
-  onClick,
-}: {
-  readonly tipo: TipoMovimiento;
-  readonly onClick: () => void;
+/** «Reponer» at or under the threshold, «Suficiente» above it. */
+export function EstadoChip({ it }: { readonly it: Existencia }) {
+  const bajo = porReponer(it);
+  return <span className={r.chip[bajo ? 'red' : 'green']}>{bajo ? 'Reponer' : 'Suficiente'}</span>;
+}
+
+/** Existencias: the threshold, a bar with the threshold at half, the count, and the two moves. */
+export function ListaExistencias(p: {
+  readonly items: readonly Existencia[];
+  readonly query: string;
+  readonly sel: string | null;
+  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
 }) {
-  const entrada = tipo === 'Entrada';
   return (
-    <button
-      type="button"
-      className={v.square}
-      style={{ background: entrada ? colors.greenSoft : colors.redSoft }}
-      title={entrada ? 'Registrar entrada' : 'Registrar merma'}
-      onClick={onClick}
-    >
-      <Icon path={entrada ? UP : DOWN} size={16} strokeWidth={2.6} />
-    </button>
+    <section aria-label="Existencias" className={s.card}>
+      {p.items.map((it) => (
+        <FilaExistencia key={it.id} it={it} sel={p.sel === it.id} onMover={p.onMover} />
+      ))}
+      {p.items.length === 0 ? (
+        <div className={s.nada}>Ningún producto coincide con «{p.query}».</div>
+      ) : null}
+    </section>
   );
 }
 
-/** «Movimientos de mi turno»: entries in green, write-offs in red, oldest first. */
+function FilaExistencia(p: {
+  readonly it: Existencia;
+  readonly sel: boolean;
+  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+}) {
+  const it = p.it;
+  return (
+    <div className={s.fila} data-sel={p.sel ? '' : undefined}>
+      <Tile it={it} />
+      <span className={s.nombre}>
+        <span className={s.name}>{it.nombre}</span>
+        <span className={s.detalle}>Aviso en {conUnidad(it.umbral, it.unidad)}</span>
+      </span>
+      <Barra it={it} />
+      <span className={s.cant}>{conUnidad(it.existencias, it.unidad)}</span>
+      <span className={s.chip}>
+        <EstadoChip it={it} />
+      </span>
+      <Acciones it={it} onMover={p.onMover} />
+    </div>
+  );
+}
+
+function Acciones({
+  it,
+  onMover,
+}: {
+  readonly it: Existencia;
+  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+}) {
+  return (
+    <span className={s.acciones}>
+      <button
+        type="button"
+        className={s.llego}
+        aria-label={`Llegó mercancía de ${it.nombre}`}
+        onClick={() => onMover('Entrada', it.id)}
+      >
+        <span className={s.llegoIcon}>
+          <Icon path={PLUS} size={16} strokeWidth={2.4} />
+        </span>
+        Llegó
+      </button>
+      <button
+        type="button"
+        className={s.merma}
+        aria-label={`Se echó a perder o se dañó ${it.nombre}`}
+        onClick={() => onMover('Merma', it.id)}
+      >
+        Se echó a perder
+      </button>
+    </span>
+  );
+}
+
+function Barra({ it }: { readonly it: Existencia }) {
+  const fill = porReponer(it) ? colors.redText : colors.green;
+  return (
+    <span className={s.barra} aria-hidden="true">
+      <span className={s.barraFill} style={{ width: `${nivel(it)}%`, background: fill }} />
+      <span className={s.barraAviso} />
+    </span>
+  );
+}
+
+/** «Movimientos de mi turno»: the newest first; entries in green, write-offs in red. */
 export function ListaMovimientos(p: {
   readonly movs: readonly Movimiento[];
   readonly items: readonly Existencia[];
 }) {
   return (
-    <div className={u.listCard}>
-      {p.movs.map((m) => {
-        const it = p.items.find((i) => i.id === m.existenciaId);
-        const entrada = m.tipo === 'Entrada';
-        const tint = entrada ? colors.greenSoft : colors.redSoft;
-        return (
-          <div key={m.id} className={v.row}>
-            <span className={s.tile} style={{ background: tint }}>
-              <Icon path={entrada ? UP : DOWN} size={19} strokeWidth={2.5} />
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className={l.name}>{it?.nombre}</div>
-              <div className={l.detail}>{m.detalle}</div>
-            </div>
-            <span className={v.method} style={{ background: tint }}>
-              {m.tipo}
-            </span>
-            <div className={s.delta} style={{ color: entrada ? colors.greenText : colors.redText }}>
-              {delta(m, it?.unidad ?? '')}
-            </div>
-            <span className={v.time}>{m.hora}</span>
-          </div>
-        );
-      })}
+    <section aria-label="Movimientos de mi turno" className={s.card}>
+      <div className={s.movHead} aria-hidden="true">
+        <span>HORA</span>
+        <span />
+        <span>PRODUCTO</span>
+        <span>QUÉ PASÓ</span>
+        <span style={{ textAlign: 'right' }}>CUÁNTO</span>
+      </div>
+      {[...p.movs].reverse().map((m) => (
+        <FilaMovimiento key={m.id} m={m} it={p.items.find((i) => i.id === m.existenciaId)} />
+      ))}
+    </section>
+  );
+}
+
+function FilaMovimiento({
+  m,
+  it,
+}: {
+  readonly m: Movimiento;
+  readonly it: Existencia | undefined;
+}) {
+  const entrada = m.tipo === 'Entrada';
+  return (
+    <div className={s.mov}>
+      <span className={s.hora}>{m.hora}</span>
+      {it ? <Tile it={it} /> : <span className={s.tile} />}
+      <span className={s.nombre}>
+        <span className={s.name}>{it?.nombre}</span>
+        <span className={s.movDetalle}>{m.detalle}</span>
+      </span>
+      <span className={s.chip}>
+        <span className={r.chip[entrada ? 'green' : 'red']}>
+          {entrada ? 'Llegó mercancía' : 'Merma'}
+        </span>
+      </span>
+      <span className={s.movCant} style={{ color: entrada ? colors.greenText : colors.redText }}>
+        {delta(m, it?.unidad ?? '')}
+      </span>
     </div>
   );
 }

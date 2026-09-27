@@ -55,7 +55,8 @@ describe('0023 business branding + logos', () => {
     );
     const row = rows[0];
     assert.equal(row?.brand_color ?? null, null);
-    assert.equal(row?.receipt_template, 'clasico');
+    // 0043: new rows start on the yellow ticket.
+    assert.equal(row?.receipt_template, 'ticket');
     assert.equal(row?.address_print, false);
     assert.equal(row?.social_links, '{}');
   });

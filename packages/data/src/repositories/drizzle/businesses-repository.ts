@@ -48,6 +48,9 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       logoUrl: input.logoUrl ?? null,
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
+      // The yellow ticket is the default receipt (Postgres 0043). Set here, not
+      // as a column default: SQLite would need a table rebuild to change one.
+      receiptTemplate: 'ticket' as const,
       atributosProducto: JSON.stringify(input.atributosProducto ?? []),
       featureFlags:
         input.featureFlags ??
@@ -151,7 +154,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
   > {
     return {
       brandColor: row.brandColor ?? null,
-      receiptTemplate: (row.receiptTemplate ?? 'clasico') as ReceiptTemplate,
+      receiptTemplate: (row.receiptTemplate ?? 'ticket') as ReceiptTemplate,
       receiptLeyenda: row.receiptLeyenda ?? null,
       addressPrint: row.addressPrint ?? false,
       whatsapp: row.whatsapp ?? null,

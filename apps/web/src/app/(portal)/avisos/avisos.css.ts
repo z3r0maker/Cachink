@@ -1,5 +1,21 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, typography } from '@xangarro/tokens';
+import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
+
+/** Avisos (CfgAvisos): the head, the note «3 avisos marcados» and the empty inbox. */
+export const cabeza = style({
+  display: 'flex',
+  alignItems: 'flex-end',
+  gap: 16,
+  flexWrap: 'wrap',
+});
+
+export const titulos = style({
+  flex: 1,
+  minWidth: 240,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 4,
+});
 
 export const pageTitle = style({
   margin: 0,
@@ -8,33 +24,54 @@ export const pageTitle = style({
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tighter,
   color: colors.black,
+  '@media': { '(max-width: 720px)': { fontSize: portalFontSizes.xl5 } },
 });
 
 export const pageSubtitle = style({
-  marginTop: 6,
+  margin: 0,
   fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
 });
 
-export const channelRow = style({
-  display: 'grid',
-  gridTemplateColumns: 'minmax(220px, 1fr) 120px 120px 150px',
-  gap: 12,
+export const hecho = style({
+  display: 'inline-flex',
   alignItems: 'center',
-  padding: '14px 0',
-  borderBottom: `2px solid ${colors.gray200}`,
-});
-
-export const channelHead = style([channelRow, { borderBottom: `2.5px solid ${colors.black}` }]);
-
-export const colLabel = style({
-  fontSize: portalFontSizes.xs,
+  gap: 6,
+  fontSize: portalFontSizes.md,
   fontWeight: typography.weights.bold,
-  letterSpacing: typography.letterSpacing.wider,
-  textTransform: 'uppercase',
-  color: colors.gray600,
-  textAlign: 'center',
+  color: colors.greenText,
 });
 
-export const cell = style({ display: 'grid', placeItems: 'center' });
+export const vacio = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+  flexWrap: 'wrap',
+  padding: '22px 24px',
+  border: borders.quiet,
+  borderRadius: radii[6],
+  background: colors.white,
+});
+
+export const vacioTexto = style({
+  flex: 1,
+  minWidth: 200,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+});
+
+export const vacioTitulo = style({
+  margin: 0,
+  fontSize: portalFontSizes.lgx,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
+
+export const vacioCuerpo = style({
+  margin: 0,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
+});

@@ -1,18 +1,18 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
-import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
-import * as t from '../ui/toast.css';
-import * as u from '../ui/ui.css';
+import * as m from '../ui/mostrador.css';
 import type { Caja } from './use-caja';
 import type { VentaHecha } from './use-sale-toast';
 import * as v from './venta-hecha.css';
 
 const CHECK = 'M20 6 9 17l-5-5';
+const WA =
+  'M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719';
 
-/** The corner card after a sale; it fades by itself over ~8 s. */
+/** The corner card after a sale: the change due, the comprobante, Deshacer; it fades in ~8 s. */
 export function VentaHechaCard({
   caja,
   onComprobante,
@@ -24,14 +24,18 @@ export function VentaHechaCard({
   if (!venta) return null;
   return (
     <div role="status" className={v.card}>
-      <div className={t.head} style={{ background: colors.greenSoft }}>
-        <span style={{ color: colors.greenText, display: 'grid' }}>
-          <Icon path={CHECK} size={20} strokeWidth={2.6} />
-        </span>
-        <span className={t.title}>Venta registrada · {formatMoney(venta.total)}</span>
-        <span className={v.method}>{venta.metodo}</span>
+      <div className={v.body}>
+        <div className={v.top}>
+          <span className={v.check} aria-hidden="true">
+            <Icon path={CHECK} size={20} strokeWidth={3} />
+          </span>
+          <span className={v.titulos}>
+            <span className={m.eyebrow}>{venta.metodo}</span>
+            <span className={v.titulo}>Venta registrada · {formatMoney(venta.total)}</span>
+          </span>
+        </div>
+        <Cuerpo venta={venta} onDeshacer={caja.deshacer} onComprobante={onComprobante} />
       </div>
-      <Cuerpo venta={venta} onDeshacer={caja.deshacer} onComprobante={onComprobante} />
       <div className={v.track}>
         <div className={v.fill} style={{ width: `${caja.toast.progress}%` }} />
       </div>
@@ -45,32 +49,27 @@ function Cuerpo(p: {
   readonly onComprobante: () => void;
 }) {
   return (
-    <div className={v.body}>
+    <>
       {p.venta.cambio === null ? null : (
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <span className={u.eyebrow}>Cambio</span>
+        <div className={v.cambioBox}>
+          <span className={v.cambioK}>Dale de cambio</span>
           <span className={v.cambio}>{formatMoney(p.venta.cambio)}</span>
         </div>
       )}
       {p.venta.nota ? <div className={v.nota}>{p.venta.nota}</div> : null}
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div className={v.acciones}>
         <button
           type="button"
-          className={v.action}
-          style={{ background: colors.redSoft }}
-          onClick={p.onDeshacer}
-        >
-          Deshacer
-        </button>
-        <button
-          type="button"
-          className={v.action}
-          style={{ background: colors.white }}
+          className={`${m.boton.secundario} ${v.crece}`}
           onClick={p.onComprobante}
         >
+          <Icon path={WA} size={18} strokeWidth={2.2} />
           Comprobante
         </button>
+        <button type="button" className={m.boton.quieto} onClick={p.onDeshacer}>
+          Deshacer
+        </button>
       </div>
-    </div>
+    </>
   );
 }

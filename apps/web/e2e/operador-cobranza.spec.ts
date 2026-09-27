@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderFiado } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -10,11 +11,7 @@ const PRODUCTOS = [{ nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPCOB
 async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: cliente }).first().click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, cliente);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -28,16 +25,17 @@ test('a fiado sale opens the account, and the abono settles it oldest first', as
   await page.goto('/operador/caja');
   await fiar(page, /Orden del día/, /Doña Mari de la tienda/);
 
-  await page.getByRole('link', { name: 'Cobranza' }).click();
-  await expect(page.getByText('1 ventas abiertas').first()).toBeVisible();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
+  await expect(page.getByRole('heading', { name: 'Fiado y abonos' })).toBeVisible();
+  await expect(page.getByText('1 venta abierta').first()).toBeVisible();
   await expect(page.getByText('$80.00').first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Recibir abono' }).click();
-  const modal = page.getByRole('dialog', { name: 'Abono de Doña Mari de la tienda' });
-  await expect(modal.getByRole('button', { name: 'Registrar abono' })).toBeDisabled();
-  await modal.getByLabel('Cuánto abona').fill('50');
-  await modal.getByRole('button', { name: 'Transferencia' }).click();
-  await modal.getByRole('button', { name: 'Registrar abono' }).click();
+  const panel = page.getByRole('dialog', { name: 'Doña Mari de la tienda' });
+  await expect(panel.getByRole('button', { name: 'Escribe cuánto abona' })).toBeDisabled();
+  await panel.getByLabel('Cuánto abona').fill('50');
+  await panel.getByRole('radio', { name: 'Transferencia' }).click();
+  await panel.getByRole('button', { name: 'Recibir abono de $50.00' }).click();
 
   await expect(page.getByRole('status')).toContainText(
     '$50.00 de Doña Mari de la tienda por transferencia. Se aplicó a lo más antiguo; queda $30.00.',
@@ -48,7 +46,7 @@ test('a fiado sale opens the account, and the abono settles it oldest first', as
 test('a client without saldo says so, and the filters narrow', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/cobranza');
-  await expect(page.getByText('Sin saldo por cobrar').first()).toBeAttached();
+  await expect(page.getByText('Sin saldo', { exact: true }).first()).toBeAttached();
   await page.getByLabel('Buscar cliente').fill('nadie así');
   await expect(page.getByText('Sin resultados')).toBeVisible();
   await page.getByRole('button', { name: 'Todos', exact: true }).click();

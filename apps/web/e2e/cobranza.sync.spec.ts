@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderFiado } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -44,30 +45,27 @@ test('a fiado sale opens an account, and an abono settles it oldest first', asyn
   const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
   await taco.click();
   await taco.click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: CLIENTE }).click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, CLIENTE);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   // Cobranza reads the register's database: the cards and the figures.
-  await page.getByRole('link', { name: 'Cobranza' }).click();
-  await expect(page.getByRole('heading', { name: 'Cobranza' })).toBeVisible();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
+  await expect(page.getByRole('heading', { name: 'Fiado y abonos' })).toBeVisible();
   await expect(page.getByText('$50.00').first()).toBeVisible();
-  await expect(page.getByText('1 ventas abiertas · la más antigua V-0001').first()).toBeVisible();
+  await expect(page.getByText('1 venta abierta · la más antigua V-0001').first()).toBeVisible();
 
   // The abono: $20 in cash, applied to the oldest (only) ticket.
   await page.getByRole('button', { name: 'Recibir abono' }).click();
   const abono = page.getByRole('dialog');
   await abono.getByLabel('Cuánto abona').fill('20');
-  await abono.getByRole('button', { name: 'Registrar abono' }).click();
+  await abono.getByRole('button', { name: 'Recibir abono de $20.00' }).click();
   await expect(page.getByRole('status')).toContainText(
     '$20.00 de Doña Mari de la tienda por efectivo. Se aplicó a lo más antiguo; queda $30.00.',
   );
   await expect(page.getByText('$30.00').first()).toBeVisible();
 
   // The account's history: the open ticket and today's abono.
+  await page.getByRole('button', { name: 'Ver cuenta de Doña Mari de la tienda' }).click();
   await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
   await expect(page.getByText('Ya abonó $20.00')).toBeVisible();
   await expect(page.getByText(`Vence el ${venceEn(7)}`)).toBeVisible();

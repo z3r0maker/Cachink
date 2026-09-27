@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shapeRadii, shadows, typography } from '@xangarro/tokens';
+import { colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
 
@@ -50,7 +50,7 @@ export const chip = style([
     fontWeight: typography.weights.extraBold,
     color: colors.black,
     selectors: {
-      '&[aria-pressed="true"]': { background: colors.yellow, boxShadow: shadows.small },
+      '&[aria-pressed="true"]': { background: colors.black, color: colors.yellow },
     },
   },
 ]);

@@ -1,6 +1,8 @@
 import { expect, test, type Page } from './test';
 import ExcelJS from 'exceljs';
 
+import { subirParaRevisar } from './interact';
+
 /**
  * The Clientes import (N-16's acceptance, at the surface P-07 set): 3 rows →
  * 3 clientes; the same file again → 3 sin cambios; one row's RFC changed →
@@ -26,34 +28,42 @@ async function xlsx(data: unknown[][]): Promise<Buffer> {
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
 
+/** Pick the Clientes card, retrying a click that beat hydration. */
+async function elegirClientes(page: Page) {
+  const radio = page.getByRole('radio', { name: /Clientes/ });
+  await expect(async () => {
+    await radio.click();
+    await expect(radio).toHaveAttribute('aria-checked', 'true', { timeout: 1_000 });
+  }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
+}
+
 async function preview(page: Page, rfc2: string) {
   await page.goto('/importar');
-  await page.getByRole('radio', { name: new RegExp(`Clientes`) }).click();
-  await page.getByTestId('import-archivo').setInputFiles({
+  await elegirClientes(page);
+  await subirParaRevisar(page, {
     name: 'clientes.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     buffer: await xlsx([HEAD, ...rows(rfc2)]),
   });
-  await page.getByRole('button', { name: 'Revisar archivo' }).click();
 }
 
 test('three rows become three clientes, then match themselves', async ({ page }) => {
   await preview(page, '');
-  await expect(page.getByTestId('import-resumen')).toContainText('3 nuevos · 0 actualizados');
+  await expect(page.getByTestId('import-resumen')).toContainText('3 nuevos, 0 se actualizan');
   await page.getByRole('button', { name: 'Importar 3 clientes' }).click();
   await expect(page.getByTestId('import-listo')).toContainText('3 nuevos');
 
   // The same file again: every row matches what the commit wrote.
   await preview(page, '');
   await expect(page.getByTestId('import-resumen')).toContainText(
-    '0 nuevos · 0 actualizados · 3 sin cambios · 0 con error',
+    '0 nuevos, 0 se actualizan, 3 sin cambios, 0 por revisar',
   );
 });
 
 test('one changed RFC previews exactly one update', async ({ page }) => {
   await preview(page, 'XEXX010101000');
   await expect(page.getByTestId('import-resumen')).toContainText(
-    '0 nuevos · 1 actualizados · 2 sin cambios · 0 con error',
+    '0 nuevos, 1 se actualiza, 2 sin cambios, 0 por revisar',
   );
 });
 
@@ -64,14 +74,13 @@ test('a malformed row is an error row the commit skips', async ({ page }) => {
     sheet.addRow(r);
   }
   await page.goto('/importar');
-  await page.getByRole('radio', { name: /Clientes/ }).click();
-  await page.getByTestId('import-archivo').setInputFiles({
+  await elegirClientes(page);
+  await subirParaRevisar(page, {
     name: 'clientes.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     buffer: Buffer.from(await wb.xlsx.writeBuffer()),
   });
-  await page.getByRole('button', { name: 'Revisar archivo' }).click();
   await expect(page.getByTestId('import-resumen')).toContainText(
-    '1 nuevos · 0 actualizados · 0 sin cambios · 1 con error',
+    '1 nuevo, 0 se actualizan, 0 sin cambios, 1 por revisar',
   );
 });

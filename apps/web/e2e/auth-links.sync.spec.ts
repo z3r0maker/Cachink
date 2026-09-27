@@ -44,9 +44,11 @@ test('a reset link sets a new password and signs in', async ({ page }) => {
 
   await page.goto(link as string);
   await page.getByTestId('reset-password').fill('corta');
+  await page.getByTestId('reset-password-2').fill('corta');
   await page.getByRole('button', { name: 'Guardar y entrar' }).click();
   await expect(page.getByText('Usa mínimo 8 caracteres.')).toBeVisible();
   await page.getByTestId('reset-password').fill('nueva-clave-1');
+  await page.getByTestId('reset-password-2').fill('nueva-clave-1');
   await page.getByRole('button', { name: 'Guardar y entrar' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
 
@@ -54,6 +56,7 @@ test('a reset link sets a new password and signs in', async ({ page }) => {
   await page.context().clearCookies();
   await page.goto(link as string);
   await page.getByTestId('reset-password').fill('otra-clave-2');
+  await page.getByTestId('reset-password-2').fill('otra-clave-2');
   await page.getByRole('button', { name: 'Guardar y entrar' }).click();
   await expect(page.getByText(/Este enlace ya no sirve/)).toBeVisible();
 

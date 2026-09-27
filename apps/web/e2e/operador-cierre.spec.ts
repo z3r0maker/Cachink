@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
 
@@ -10,18 +11,20 @@ const PRODUCTOS = [{ nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPCIE
 async function vender(page: Page, producto: RegExp, efectivo: string): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
   await page.getByRole('button', { name: producto }).first().click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill(efectivo);
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, efectivo);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
-/** The count by denomination, typed into the steppers. */
+/**
+ * The count by denomination, typed into the steppers. Keys are the field's
+ * name: «billetes de $20» and «monedas de $20» are different rows, and the
+ * coins go down to «monedas de 10¢».
+ */
 async function contar(page: Page, piezas: Record<string, string>) {
-  for (const [d, n] of Object.entries(piezas))
-    await page.getByLabel(`Cantidad de $${d}`, { exact: true }).fill(n);
+  for (const [d, n] of Object.entries(piezas)) {
+    const cuantos = d.startsWith('billetes') ? 'Cuántos' : 'Cuántas';
+    await page.getByLabel(`${cuantos} ${d}`, { exact: true }).fill(n);
+  }
 }
 
 /**
@@ -30,53 +33,80 @@ async function contar(page: Page, piezas: Record<string, string>) {
  * closed. The queue is the engine's real one: online, it is always empty
  * (the register flushes after each sale), so the blocking band never shows.
  */
-test('the count starts at zero, a whole shortfall', async ({ page }) => {
+test('the count starts at zero, with no verdict until something is counted', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
-  await expect(page.getByLabel('Cantidad de $1000')).toHaveValue('0');
-  await expect(page.getByText('Falta', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
+  await expect(page.getByLabel('Cuántos billetes de $1000')).toHaveValue('0');
+  const dif = page.getByRole('region', { name: 'Diferencia' });
+  await expect(dif).toContainText('Cuenta los billetes y las monedas de la caja.');
   await expect(page.getByText('$580.00').first()).toBeVisible();
 });
 
-test('a surplus needs a reason and a note before closing', async ({ page }) => {
+test('a surplus needs a reason, and «Otra razón» a note, before closing', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
-  await contar(page, { 1000: '2', 500: '1', 100: '1', 10: '1' });
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
+  await contar(page, {
+    'billetes de $1000': '2',
+    'billetes de $500': '1',
+    'billetes de $100': '1',
+    'monedas de $10': '1',
+  });
   await expect(page.getByText('Sobra', { exact: true })).toBeVisible();
-  await expect(page.getByText('$2,030.00')).toBeVisible();
-  const cerrar = page.getByRole('button', { name: 'Cerrar turno' });
-  await page.getByRole('button', { name: 'Propinas' }).click();
+  const cerrar = page.getByRole('button', { name: 'Cerrar turno con sobrante de $2,030.00' });
   await expect(cerrar).toBeDisabled();
-  await page.getByLabel('Nota').fill('Me dejaron propina');
+  await page.getByRole('button', { name: 'Otra razón' }).click();
+  await expect(cerrar).toBeDisabled();
+  await page.getByLabel('Nota para Pedro').fill('Me dejaron propina');
   await cerrar.click();
-  await expect(page.getByText('Quedó un sobrante explicado como «Propinas».')).toBeVisible();
+  await expect(page.getByText('Quedó un sobrante explicado como «Otra razón».')).toBeVisible();
   await expect(page.getByText('+$2,030.00')).toBeVisible();
+});
+
+test('the $20 bill and the $20 coin are counted apart, down to the centavos', async ({ page }) => {
+  await puertaOperador(page, PRODUCTOS);
+  await page.goto('/operador/cierre');
+  await contar(page, {
+    'billetes de $20': '1',
+    'monedas de $20': '2',
+    'monedas de 50¢': '1',
+    'monedas de 10¢': '3',
+  });
+  // $20 + $40 + $0.50 + $0.30, exact in centavos.
+  await expect(page.getByText('$60.80').first()).toBeVisible();
 });
 
 test('a balanced count closes without a note', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
   await vender(page, /Orden del día/, '80');
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
-  await contar(page, { 500: '1', 50: '1', 20: '1', 10: '1' });
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
+  await contar(page, {
+    'billetes de $500': '1',
+    'billetes de $50': '1',
+    'billetes de $20': '1',
+    'monedas de $10': '1',
+  });
   await expect(page.getByText('Cuadra', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar turno' }).click();
-  await expect(page.getByText('Turno cerrado')).toBeVisible();
+  await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
   await expect(
     page.getByText('El conteo cuadró con lo esperado. Pedro ya lo tiene en su portal.'),
   ).toBeVisible();
+  await page.getByRole('button', { name: /Entregar el efectivo a Pedro/ }).click();
+  await page.getByRole('button', { name: 'Sí, ya se lo di' }).click();
+  await expect(page.getByText('Le entregaste el efectivo a Pedro')).toBeVisible();
 });
 
 test('the steppers change the count and its amount', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/cierre');
-  const row = page.getByLabel('Cantidad de $1000');
+  const row = page.getByLabel('Cuántos billetes de $1000');
   await expect(row).toHaveValue('0');
-  await page.getByTitle('Uno más').first().click();
+  await page.getByRole('button', { name: 'Uno más: billetes de $1000' }).click();
   await expect(row).toHaveValue('1');
   await expect(page.getByText('$1,000.00').first()).toBeVisible();
 });

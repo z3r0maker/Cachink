@@ -24,10 +24,10 @@ describe('operator vocabulary → domain enums (D4, D6)', () => {
 
   it('resolves the reasons whose meaning depends on short or over', () => {
     assert.equal(motivoDominio('Cambio mal dado', 'falta'), 'error-en-cambio');
-    assert.equal(motivoDominio('Vale de empleado', 'falta'), 'retiro-autorizado');
-    assert.equal(motivoDominio('No sé', 'falta'), 'faltante-sin-explicacion');
-    assert.equal(motivoDominio('No sé', 'sobra'), 'sobrante');
-    assert.equal(motivoDominio('Propinas', 'sobra'), 'sobrante');
+    assert.equal(motivoDominio('Salió un vale', 'falta'), 'retiro-autorizado');
+    assert.equal(motivoDominio('Otra razón', 'falta'), 'otro');
+    assert.equal(motivoDominio('Otra razón', 'sobra'), 'sobrante');
+    assert.equal(motivoDominio('Venta no registrada', 'sobra'), 'sobrante');
     assert.equal(motivoDominio('Venta no registrada', 'falta'), 'otro');
   });
 });

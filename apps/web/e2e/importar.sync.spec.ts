@@ -1,6 +1,8 @@
 import { expect, test, type Page } from './test';
 import ExcelJS from 'exceljs';
 
+import { subirParaRevisar } from './interact';
+
 /**
  * The product import (P-07's acceptance): 3 rows → 3 products; the same file
  * again with one price changed → the preview says exactly 1 update; a viewer
@@ -38,17 +40,16 @@ async function preview(page: Page, price2: number) {
   await page.goto('/productos');
   await page.getByRole('button', { name: 'Importar desde Excel' }).click();
   await page.waitForURL((u) => u.pathname === '/importar');
-  await page.getByTestId('import-archivo').setInputFiles({
+  await subirParaRevisar(page, {
     name: 'productos.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     buffer: await xlsx([HEAD, ...rows(price2)]),
   });
-  await page.getByRole('button', { name: 'Revisar archivo' }).click();
 }
 
 test('three rows become three products', async ({ page }) => {
   await preview(page, 15);
-  await expect(page.getByTestId('import-resumen')).toContainText('3 nuevos · 0 actualizados');
+  await expect(page.getByTestId('import-resumen')).toContainText('3 nuevos, 0 se actualizan');
   await page.getByRole('button', { name: 'Importar 3 productos' }).click();
   await expect(page.getByTestId('import-listo')).toContainText('3 nuevos');
   await page.goto('/productos');
@@ -60,7 +61,7 @@ test('three rows become three products', async ({ page }) => {
 test('the same file with one price changed previews exactly one update', async ({ page }) => {
   await preview(page, 16);
   await expect(page.getByTestId('import-resumen')).toContainText(
-    '0 nuevos · 1 actualizados · 2 sin cambios · 0 con error',
+    '0 nuevos, 1 se actualiza, 2 sin cambios, 0 por revisar',
   );
 });
 

@@ -22,18 +22,18 @@ export function useCobranza(data: CobranzaData) {
   const [cuentas, setCuentas] = useState<readonly CuentaCliente[]>(data.cuentas);
   const [filtro, setFiltro] = useState<FiltroCobranza>('Todos');
   const [query, setQuery] = useState('');
-  const [sel, setSel] = useState<string | null>(null);
+  const seleccion = useSeleccion();
+  const { sel, abrir } = seleccion;
   const [toast, setToast] = useState<string | null>(null);
-  useCargaViva(cred, linked, setCuentas);
+  const cargando = useCargaViva(cred, linked, setCuentas);
   const hoy = linked ? hoyLocal() : data.hoy;
-  const cliente = cuentas.find((c) => c.id === sel) ?? null;
-
+  const cliente = cargando ? null : (cuentas.find((c) => c.id === sel) ?? null);
   const registrar = (metodo: MetodoAbono, monto: Money) => {
     if (!cliente) return;
     const o = optimista(cliente, metodo, monto, hoy);
     setCuentas((all) => all.map((c) => (c.id === cliente.id ? o.cuenta : c)));
     setToast(o.toast);
-    setSel(null);
+    abrir(null);
     if (linked) {
       void abonarEnVivo(cred, cliente.id, metodo, monto, hoy).catch((e: unknown) =>
         setToast(`No se pudo registrar el abono: ${String(e)}`),
@@ -42,18 +42,32 @@ export function useCobranza(data: CobranzaData) {
   };
   const closeToast = useCallback(() => setToast(null), []);
   return {
-    cuentas,
+    cuentas: cargando ? [] : cuentas,
+    cargando,
     hoy,
     filtro,
     setFiltro,
     query,
     setQuery,
     cliente,
-    setSel,
+    ...seleccion,
     registrar,
     toast,
     closeToast,
   };
+}
+
+/** The open account, whether it opened on «Recibir abono», and the reminder over it. */
+function useSeleccion() {
+  const [sel, setSel] = useState<string | null>(null);
+  const [abonar, setAbonar] = useState(false);
+  const [recordar, setRecordar] = useState(false);
+  const abrir = (id: string | null, conAbono = false) => {
+    setSel(id);
+    setAbonar(conAbono);
+    setRecordar(false);
+  };
+  return { sel, abrir, abonar, recordar, setRecordar };
 }
 
 /** The optimistic append: same shape the fixture path always used. */
@@ -74,17 +88,27 @@ function optimista(
 }
 
 /** A linked register starts from its own accounts — never the fixture's debts. */
+/**
+ * A linked register reads its own accounts. Until they arrive it says
+ * «cargando» instead of showing the design's sample clients: from the first
+ * effect on, so the server render and hydration still match.
+ */
 function useCargaViva(
   cred: Credenciales,
   linked: boolean,
   setCuentas: React.Dispatch<React.SetStateAction<readonly CuentaCliente[]>>,
-): void {
+): boolean {
+  const [montado, setMontado] = useState(false);
+  const [cargado, setCargado] = useState(false);
   useEffect(() => {
+    setMontado(true);
     if (!linked) return;
     void leerCuentas(cred)
       .then((rows) => setCuentas(rows.map((c) => comoCuenta(c, hoyLocal()))))
-      .catch((e: unknown) => console.error('cuentas', e));
+      .catch((e: unknown) => console.error('cuentas', e))
+      .finally(() => setCargado(true));
   }, [cred, linked, setCuentas]);
+  return montado && linked && !cargado;
 }
 
 export type Cobranza = ReturnType<typeof useCobranza>;

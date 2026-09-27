@@ -1153,6 +1153,44 @@ never invented text.
     `semanal`» (`asesorShowsDiagnostico` is `=== 'completo'` today) and the locked card, which reads
     «El Diagnóstico llega con Xangarrote», belongs to Xangarrito now and should name Xangarro.
 
+  - **2026-09-26 (traced against the design): the design already answers this — and answers it
+    twice.** `Xangarro Portal - Asesor.dc.html` carries three independent flags, `diagTeaser`,
+    `lockedSections` and `strategyLocked`. Mapping every numbered section to the `sc-if` that wraps
+    it gives the split: **1 Tu meta** and **2 Resumen del mes** sit under `diagReport`, so both tiers
+    read them; **3 Precios y márgenes, 4 ¿Me alcanza?, 5 ¿Cuánto puedo sacar?, 6 Inventario,
+    7 Cobranza, 8 Gastos fuera de lo normal** and **9 Corte de caja** sit under `diagFull`; and
+    **10 Plan de acción** sits under `diagReport` with only its three-movimiento `strategy` list
+    gated by `strategyLocked`. So the shape is: two sections both tiers read, seven the full report
+    adds, and a section 10 whose heading both see and whose answers only Xangarrote does.
+    `diagTeaser` was drawn for a paid tier that is not Xangarrote — which under ADR-059 did not
+    exist, and under ADR-109 is exactly Xangarro.
+  - **The design's two answers disagree by one section.** `lockedSections`, the hand-written teaser
+    copy, has **six** entries — 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing**, so as the file stands
+    a Xangarro reader loses Cobranza with no card in its place. One of the two is a slip, and the
+    likelier one is the `diagFull` wrapper: that is structural markup repeated verbatim across 3–9,
+    while each `lockedSections` entry is deliberate per-section copywriting. Reading the array as
+    the intent makes the design self-consistent — `diagFull` then covers exactly the six locked
+    sections — and gives Xangarro a third real section. **Recommended: Cobranza is real on both
+    tiers.**
+  - **Recommended line, one change beyond that — awaiting owner sign-off.** As literally drawn,
+    Xangarro's report is two real sections, six padlocks and a locked plan, which is the failure
+    ADR-109 named by name. The part that demonstrates what a written reading of your own numbers is
+    worth is section 10: _what to do about it_. Locking all three movimientos removes exactly the
+    evidence the taste exists to give. So: **Xangarro sees the first movimiento with its peso
+    impact**, under «los otros dos llegan con Xangarrote» — real sections 1, 2, 7 and a partial 10,
+    teaser cards for 3, 4, 5, 6, 8, 9. Xangarrote reads all ten and all three movimientos.
+  - **Tier is not the only axis that withholds a section, and the design has no state for the other
+    one.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they map
+    onto the sections: **2** needs 30 días de registros, **3** 60 días de ventas + 2 compras, **6**
+    60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas (Pronóstico), and
+    **9** 20 cortes de día. A section can therefore be withheld for two unrelated reasons, and they
+    need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de 60 días» must not —
+    showing the first to a Xangarrote three weeks in sells them what they already bought. The design
+    has one whole-report `diagNotEnough` state and no per-section equivalent, so P-28 needs a
+    per-section three-way (real · still gathering data · not in your plan), with **maturity winning
+    when both apply**. Two sections have no maturity rule and should not acquire one: **1 Tu meta**
+    (the owner sets it) and **7 Cobranza** (fiado balances are current state, not a trend).
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
 - **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
@@ -1174,6 +1212,16 @@ never invented text.
 > not need a bespoke limiter: N-07 already counts metered resources per business
 > (`usage_counters`, the metering role, the over-limit notices), so an import is a counted resource
 > like any other.
+>
+> **Settled 2026-09-26 (owner).** A **one-time onboarding import per business**, with up to **5
+> extraction attempts** to get a usable photo — it is an accelerator for «start with your catalogue
+> already in», not a recurring tool; a shopkeeper adding one product later uses the normal form.
+> **8 MB per image, 5 images per import**, and the images are **downscaled server-side to the
+> model's working resolution before the call**. The generous byte cap costs nothing because the
+> bytes that reach the model are the resized ones, and P-07's 2 MB spreadsheet limit would have
+> rejected a normal phone photo — meeting an error before the feature ever works is the worst first
+> experience this can give. Still to decide: where the per-business count lives (`usage_counters`
+> needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
 - [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
@@ -1185,10 +1233,15 @@ never invented text.
 
 ### P-30 Asesor generation runtime
 
-- [~] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
-  - **Remaining (2026-09-24):** the **fan-out** and the **model call**. Everything else landed — see below. The `notices` line in the previous Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
-    - **Fan-out.** ADR-056's «a daily job selects the businesses that are due» needs a cross-tenant read of which businesses are live. No portal role has one: RLS scopes the app role to a single tenant, and the only privileged cross-tenant path today is `xangarro.usage_counts` on the metering role. Choosing between a new privileged function, reusing the metering role, or the console's service role is a **Track B decision with a migration behind it**. Until it is taken there is no `vercel.json` entry — and could not be, since the unit of work is a POST with a body and Vercel Cron sends neither.
+- [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
+  - **Remaining (2026-09-26):** the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
     - **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table.
+  - 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. **The metering role wins, and the answer was already in the schema:** 0010 grants `xangarro_metering` `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read USING (true)` policy, because `usage_counts(NULL, …)` enumerates the very same set in order to count it. So `liveBusinessIds` reads two already-granted columns — **no migration, no new role, no new secret**, and the portal already holds `METERING_DATABASE_URL` for the nightly recompute. The service role was never eligible: CLAUDE.md §3 makes the backoffice the only project that may hold it, so reaching for it would have moved either the key or the cron. This also un-blocks P-30 from B-02/B-03, which it was only waiting on for that decision.
+    - `server/asesor/fanout.ts` sweeps every live business **sequentially**, like the usage recompute — `generarParaNegocio` opens three transactions per business and a serverless pool is small. Per-tenant try/catch: one tenant failing is reported under its own id, tallied in `fallidos`, and the sweep continues to the next, because a scheduled job that 500s on the first bad tenant hides every tenant behind it.
+    - **Universal and unfiltered, per ADR-109 §1** — no tier gate and no activity gate. Both belong to the _monthly_ Diagnóstico, which is the only part that costs money and has nowhere to be stored until P-28.
+    - **The deadline is explicit.** The sweep stops starting tenants at 240 s (inside Vercel's 300 s) and returns `restantes`, reported as an error so a sweep that outgrew one invocation is loud rather than truncated in silence. It is a freshness bound, not a correctness one: `loadAsesorPage` materialises the same pipeline on read (ADR-088), so a tenant the deadline cut off still sees correct insights the moment it opens the page. **The fix when `restantes` first goes non-zero is sharding by id range** (`?shard=0/4`), which needs no new state because the enumeration is ordered by id.
+    - **`GET /api/cron/asesor` is the scheduled fan-out**; `POST` with `{"businessId"}` stays the on-demand unit of work. The GET is what finally allows a `vercel.json` entry — the old note («could not be, since the unit of work is a POST with a body and Vercel Cron sends neither») was right about the POST and wrong to conclude there could be no entry. Added: `0 8 * * *`, 02:00 in Mexico City, an hour ahead of the usage recompute.
+    - Tests: 6 hermetic (`apps/web/tests/asesor-fanout.test.ts` — the sweep, one tenant failing while the rest continue, a non-Error throw, the deadline, an empty estate, a failure to enumerate failing the whole run) and 3 against real Postgres (`packages/data-pg/tests/asesor-fanout.integration.test.ts` — the metering role sees every live business with no tenant claim, a soft-deleted one is not live, and **the app role running the same SQL sees only its own row**, which is why the fan-out could not be built on the tenant connection).
   - 2026-09-24 · **One business, on demand** (`ab519eb7`). `server/asesor/runtime.ts` composes the deterministic half in ADR-056's order — entitlement → cadencia → `calcularInsights` → `filtrarPorCadencia` → `materializarInsights` — and is idempotent by construction. `server/asesor/invocacion.ts` is the HTTP contract, split from the route so it tests without Next and without a database; `cron.ts` gained `cronAuth`/`cronRefusal` so it shares the guard with the three `handleCron` routes while answering 400 for a nameless request. `POST /api/cron/asesor`. **Verified against a real database and a real Next runtime:** the seeded tenant answered `{"ok":true,"cadencia":"diario","materializados":1,"cerrados":0}`, its asesor `notices` went 1 → 2, a second call left them at 2, a wrong secret got 401, an empty body 400, and an unknown business 200 with nothing written. 5 contract tests cover the same paths hermetically.
   - The Acceptance's «deterministic path, 1 happy + 3 unhappy against fixtures, no network» is met where it belongs: 11 tests in `packages/domain/tests/asesor/insights.test.ts` and 5 against real Postgres in `packages/data-pg/tests/asesor-insights.integration.test.ts`.
   - 2026-09-22 doc audit: shipped except the cron entry, the per-business route and the batch API.
@@ -1651,9 +1704,15 @@ WhatsApp).
 ### P-40 First diagnóstico free at 90 days
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
-- **Steps:** a Xangarrito or Xangarro business that reaches 90 days of records gets one
+  - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
+    Diagnóstico was Xangarrote-only. Xangarro now gets one every month as part of the plan, so a
+    one-off free report is not an offer to them — **P-40 is Xangarrito's alone.** What it shows is
+    the _short read_ (Xangarro's shape, per P-28), not the full report: the point is to taste what a
+    written reading is worth, and a free full report would undercut both paid tiers at once. The
+    design already draws the state — `diagFreeOffer`, one of the Diagnóstico's six.
+- **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
-- **Acceptance:** the aviso fires once per business; the report opens once.
+- **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
 ### P-41 Advanced inventory functions
 
