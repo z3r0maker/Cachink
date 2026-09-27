@@ -10,7 +10,7 @@ import { Conteo } from './conteo';
 import { Hecho } from './hecho';
 import { Diferencia, Esperado } from './lado';
 import { Resumen } from './resumen';
-import type { CierreData, CierreScreenProps } from './types';
+import type { CierreData, CierreScreenProps } from '@xangarro/caja/cierre';
 import { useCierre, type Cierre } from './use-cierre';
 
 /** Wallet glyph from the file, for the empty and error tiles. */

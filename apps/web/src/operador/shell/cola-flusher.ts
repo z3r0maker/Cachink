@@ -22,7 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
-import type { PendienteCrudo } from '../runtime/cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import type { SyncMode } from '../runtime/protocol';
 
 /** The upper bound of the random wait before flushing on `online`. */

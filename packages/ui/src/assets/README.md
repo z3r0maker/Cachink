@@ -21,6 +21,7 @@ Brand-art files consumed by components inside `@xangarro/ui`.
 | `role-director-light.png`  | `<RoleIllustration>` in `AppShell` (Director on dark bg)                 | Audit M-1   |
 | `role-operativo-dark.png`  | `<RoleIllustration>` in `AppShell` (Operativo on yellow bg)              | Audit M-1   |
 | `role-operativo-light.png` | `<RoleIllustration>` in `AppShell` (Operativo on dark bg fallback)       | Audit M-1   |
+| `don/*.webp`               | `<Don>` — copies of `apps/web/src/components/don/poses/` (same names)    | M-03        |
 
 ## Why this directory exists before the component
 

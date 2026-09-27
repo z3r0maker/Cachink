@@ -7,21 +7,24 @@ import { Icon } from '../../shell/icon';
 import { Share } from '../caja/share';
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
-import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { ICONS, OPERADOR_BASE } from '@xangarro/caja';
 import * as m from '../ui/mostrador.css';
 import { OpMain } from '../ui/parts';
 import * as t from '../ui/title.css';
 import { CancelarVenta } from './cancelar';
-import { filtrar, resumen } from './derive';
+import {
+  filtrar,
+  resumen,
+  FILTROS,
+  type VentasScreenProps,
+  type VentaDetalle,
+} from '@xangarro/caja/ventas';
 import { comprobante } from './detalle/acciones';
 import { useTicket } from './detalle/carga';
 import { DetalleCajon } from './detalle/screen';
 import { ListaVentas } from './lista';
-import { FILTROS } from './metodo';
 import * as p from './pantalla.css';
 import { useVentas } from './use-ventas';
-import type { VentasScreenProps } from './types';
-import type { VentaDetalle } from './detalle/types';
 
 /** The fixture's business, until the register knows its own name (O-38). */
 const NEGOCIO = 'Taquería Don Pedro';

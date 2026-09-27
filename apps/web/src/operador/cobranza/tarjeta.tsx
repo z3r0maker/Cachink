@@ -4,8 +4,13 @@ import { colors } from '@xangarro/tokens';
 import { Icon } from '../../shell/icon';
 import * as r from '../ui/resumen.css';
 import * as c from './cobranza.css';
-import { estado, resumenCliente, saldo, type EstadoCliente } from './derive';
-import type { CuentaCliente } from './cliente/types';
+import {
+  estado,
+  resumenCliente,
+  saldo,
+  type EstadoCliente,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
 
 const CHEVRON = 'm9 18 6-6-6-6';
 

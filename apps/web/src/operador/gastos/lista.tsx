@@ -4,8 +4,7 @@ import { colors } from '@xangarro/tokens';
 import { Icon } from '../../shell/icon';
 import { SinResultados } from '../ui/filters';
 import * as g from './gastos.css';
-import { CAT_ICON, CAT_TINT, CAT_TINTA } from './icons';
-import type { GastoTurno } from './types';
+import { CAT_ICON, CAT_TINT, CAT_TINTA, type GastoTurno } from '@xangarro/caja/gastos';
 
 /** The turno's expenses, newest first; the amount in red because it left the drawer. */
 export function ListaGastos(p: {

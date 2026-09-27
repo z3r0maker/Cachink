@@ -14,10 +14,14 @@ import type { BusinessId } from '@xangarro/domain';
 
 import { cierreDeFilas, filasDelTurno } from './cierre';
 import type { Db } from './db-types';
-import { hoyLocal } from './fechas';
+import { hoyLocal } from '@xangarro/caja';
 import type { WorkerRequest } from './protocol';
-import { detalleDelTurno } from './turno-detalle';
-import type { CortePara, RecurrentePara, TurnoVivoPara } from './turno-shapes';
+import {
+  detalleDelTurno,
+  type CortePara,
+  type RecurrentePara,
+  type TurnoVivoPara,
+} from '@xangarro/caja/lectura';
 
 /** Days from `a` to `b`, both `YYYY-MM-DD`. */
 const diasEntre = (a: string, b: string): number =>

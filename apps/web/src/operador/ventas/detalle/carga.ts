@@ -13,10 +13,15 @@ import { hoyLocal } from '../../cobranza/vivo';
 import { registerRuntime } from '../../runtime/client';
 import type { TicketPara } from '../../runtime/protocol';
 import type { Credenciales } from '../../runtime/use-credenciales';
-import { comoMetodo } from '../derive';
-import type { VentaTurno } from '../types';
-import { detalleDeFila, ventaPorFolio } from './fixture';
-import type { Abierta, CargaTicket, VentaDetalle } from './types';
+import {
+  comoMetodo,
+  type VentaTurno,
+  detalleDeFila,
+  ventaPorFolio,
+  type Abierta,
+  type CargaTicket,
+  type VentaDetalle,
+} from '@xangarro/caja/ventas';
 
 /** «Hoy 14:52», or the date when the ticket is from another day. */
 function cuando(fecha: string, hora: string): string {

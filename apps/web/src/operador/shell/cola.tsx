@@ -15,7 +15,7 @@ import { readDevice } from '../runtime/device-store';
 
 import { useFlusher } from './cola-flusher';
 
-import type { Connection } from './types';
+import type { Connection } from '@xangarro/caja';
 
 /** How long the fixture «send» takes, as in `Operador Pendientes.dc.html`. */
 const ENVIO_MS = 1400;
@@ -55,7 +55,7 @@ export function refrescar(): Promise<void> {
   const device = readDevice();
   if (device === null) return Promise.resolve();
   return registerRuntime()
-    .sync(device.deviceToken, { mode: 'completa' })
+    .sync(device.deviceToken, { mode: 'completa', manual: false })
     .then(
       () => undefined,
       () => undefined,

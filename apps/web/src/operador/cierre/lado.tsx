@@ -1,11 +1,10 @@
 import { formatMoney } from '@xangarro/domain';
 
 import { Don } from '../../components/don/don';
-import { desglose } from '../turno/desglose';
+import { desglose } from '@xangarro/caja/turno';
 import * as s from './cierre.css';
-import { DIF } from './copy';
+import { DIF, MOTIVOS_DIFERENCIA, type CierreData } from '@xangarro/caja/cierre';
 import * as d from './don.css';
-import { MOTIVOS_DIFERENCIA, type CierreData } from './types';
 import type { Cierre } from './use-cierre';
 
 /** The yellow card: expected cash and its four parts (this caja's own rows: final even while records wait). */

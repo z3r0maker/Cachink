@@ -1,7 +1,6 @@
-import { cuentaPorId } from '@/operador/cobranza/cuentas';
-import { HOY } from '@/operador/fixtures';
+import { cuentaPorId, type DetalleClienteProps } from '@xangarro/caja/cobranza';
+import { HOY } from '@xangarro/caja';
 import { DetalleClienteViva } from '@/operador/cobranza/cliente/viva';
-import type { DetalleClienteProps } from '@/operador/cobranza/cliente/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

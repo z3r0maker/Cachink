@@ -1,6 +1,6 @@
 import * as d from './drawer.css';
 import type { FormGasto } from './registrar';
-import { CATEGORIAS } from './types';
+import { CATEGORIAS } from '@xangarro/caja/gastos';
 
 /** Digits and one decimal point only; the form parses to centavos. */
 const limpio = (raw: string) => raw.replace(/[^0-9.]/g, '');

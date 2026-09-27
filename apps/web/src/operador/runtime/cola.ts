@@ -10,7 +10,7 @@
 import { unsentRows } from '@xangarro/sync';
 
 import { agrupar, type Entrada } from './cola-filas';
-import type { PendienteCrudo } from './cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 
 /** Every unsent (table, row), retries first, each once. */

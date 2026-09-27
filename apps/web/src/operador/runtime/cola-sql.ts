@@ -5,7 +5,7 @@
 
 import { sql, type SQL } from 'drizzle-orm';
 
-import type { ClaseMovimiento, PendienteCrudo } from './cola-shapes';
+import type { ClaseMovimiento, PendienteCrudo } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 
 export type Lector = (db: Db, ids: readonly string[]) => Promise<Map<string, PendienteCrudo>>;

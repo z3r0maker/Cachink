@@ -11,13 +11,19 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { registerRuntime } from '../runtime/client';
-import { hoyLocal } from '../runtime/fechas';
+import { hoyLocal } from '@xangarro/caja';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { desencolar } from '../shell/cola';
 import { AvisosScreen } from './screen';
 import { avisarCambio } from './sin-leer';
-import type { AvisoGrupo, AvisosData, AvisosScreenProps, AvisosVivo } from './types';
-import { avisosVivos, DUENO_GENERICO } from './vivo';
+import {
+  type AvisoGrupo,
+  type AvisosData,
+  type AvisosScreenProps,
+  type AvisosVivo,
+  avisosVivos,
+  DUENO_GENERICO,
+} from '@xangarro/caja/avisos';
 
 type Estado = AvisosScreenProps['state'];
 

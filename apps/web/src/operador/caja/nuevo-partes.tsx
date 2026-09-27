@@ -2,17 +2,14 @@
 
 import { formatMoney } from '@xangarro/domain';
 
-import { mayuscula } from '../ui/dueno';
+import { mayuscula, PRODUCT_ICONS } from '@xangarro/caja';
 import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { Glyph } from '../ui/parts';
-import { PRODUCT_ICONS } from '../ui/product-icons';
 import * as m from '../ui/mostrador.css';
 import * as c from './catalogo.css';
-import { TINT } from './categorias';
-import { ICONOS_ELEGIBLES } from './nuevo-icono';
+import { TINT, ICONOS_ELEGIBLES, type Categoria } from '@xangarro/caja/caja';
 import * as n from './nuevo-dialogo.css';
-import type { Categoria } from './types';
 import type { Nuevo } from './nuevo';
 
 const CATEGORIAS: readonly Categoria[] = ['Tacos', 'Guisados', 'Bebidas', 'Extras'];

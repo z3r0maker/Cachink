@@ -3,8 +3,7 @@
 /** Detalle de venta's comprobante: the ticket as the share dialog takes it (O-34). */
 
 import type { Comprobante } from '../../caja/receipt';
-import { totalDe } from './copy';
-import type { VentaDetalle } from './types';
+import { totalDe, type VentaDetalle } from '@xangarro/caja/ventas';
 
 export function comprobante(negocio: string, v: VentaDetalle, caja: string): Comprobante {
   const total = totalDe(v);

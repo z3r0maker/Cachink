@@ -12,7 +12,7 @@ import type { BusinessId } from '@xangarro/domain';
 import { applyBootstrap } from '@xangarro/sync';
 import type { Bootstrap } from '@xangarro/contracts';
 
-import { hoyLocal } from './fechas';
+import { hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
 
 export interface OperadorPara {

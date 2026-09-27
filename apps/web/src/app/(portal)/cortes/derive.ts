@@ -8,8 +8,8 @@ import {
   type Money,
 } from '@xangarro/domain';
 
-import { enPalabras } from '../../../operador/inicio/copy';
-import { matches } from '../../../operador/ui/search';
+import { enPalabras } from '@xangarro/caja/inicio';
+import { matches } from '@xangarro/caja';
 import type { Corte, EstadoCorte, Evento, FiltroCortes } from './types';
 
 /** The domain's calculator over the corte's four parts (O-03). */

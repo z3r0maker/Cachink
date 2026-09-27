@@ -4,7 +4,7 @@ import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
 import * as r from './resumen.css';
-import type { ResumenTurno } from './types';
+import type { ResumenTurno } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
 const CHECK = 'M20 6 9 17l-5-5';

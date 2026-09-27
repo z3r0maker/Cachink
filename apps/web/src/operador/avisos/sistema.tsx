@@ -4,7 +4,7 @@ import { colors } from '@xangarro/tokens';
 import { Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import * as a from './avisos.css';
-import type { Aviso, AvisoTono } from './types';
+import type { Aviso, AvisoTono } from '@xangarro/caja/avisos';
 
 const TINTE: Record<AvisoTono, string> = {
   alerta: colors.redSoft,

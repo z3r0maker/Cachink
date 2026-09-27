@@ -16,7 +16,7 @@ import {
 } from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
 
-import { hoyLocal } from './fechas';
+import { hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
 import {
   delTurno,
@@ -25,8 +25,8 @@ import {
   type FilaMovimiento,
   type InventarioPara,
   type InventarioRequest,
-  type MovimientoPara,
-} from './inventario-mapa';
+  type MovimientoInventarioPara as MovimientoPara,
+} from '@xangarro/caja/lectura';
 
 interface Producto {
   readonly id: string;

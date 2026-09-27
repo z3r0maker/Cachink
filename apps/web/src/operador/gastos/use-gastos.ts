@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
-import type { NuevoGasto, PrefillGasto } from './registrar';
-import type { CategoriaGasto, GastoTurno } from './types';
+import type { NuevoGasto, PrefillGasto, CategoriaGasto, GastoTurno } from '@xangarro/caja/gastos';
 
 const hhmm = (d: Date) =>
   `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;

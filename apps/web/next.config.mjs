@@ -47,9 +47,10 @@ const nextConfig = {
     serverSourceMaps: process.env.XG_COVERAGE === '1',
     serverMinification: process.env.XG_COVERAGE !== '1',
   },
-  // `@xangarro/tokens` and `@xangarro/domain` ship TypeScript sources, not a
-  // build output, so Next must compile them rather than treat them as external.
-  transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],
+  // `@xangarro/tokens`, `@xangarro/domain` and `@xangarro/caja` ship TypeScript
+  // sources, not a build output, so Next must compile them rather than treat
+  // them as external.
+  transpilePackages: ['@xangarro/tokens', '@xangarro/domain', '@xangarro/caja'],
   typedRoutes: true,
   // Sentry's Node SDK (B-18) loads Node built-ins at run time; bundling it
   // breaks. Keep it external on the Node server…

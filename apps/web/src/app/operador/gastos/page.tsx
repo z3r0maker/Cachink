@@ -1,4 +1,4 @@
-import { GASTOS_FIXTURE } from '@/operador/gastos/fixture';
+import { GASTOS_FIXTURE } from '@xangarro/caja/gastos';
 import { GastosViva } from '@/operador/gastos/viva';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;

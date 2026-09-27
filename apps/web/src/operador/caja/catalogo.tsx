@@ -3,18 +3,15 @@
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
-import { mayuscula } from '../ui/dueno';
+import { mayuscula, ICONS, PRODUCT_ICONS } from '@xangarro/caja';
 import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import { ICONS } from '../shell/nav';
 import { Glyph } from '../ui/parts';
-import { PRODUCT_ICONS } from '../ui/product-icons';
 import * as t from '../ui/title.css';
 import * as c from './catalogo.css';
 import { BUSCAR_ID } from './atajos';
-import { TINT } from './categorias';
-import type { Producto } from './types';
+import { TINT, type Producto } from '@xangarro/caja/caja';
 import type { Caja, Filtro } from './use-caja';
 
 const FILTROS: readonly Filtro[] = ['Todos', 'Tacos', 'Guisados', 'Bebidas', 'Extras'];

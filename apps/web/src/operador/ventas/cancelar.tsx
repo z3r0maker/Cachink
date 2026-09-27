@@ -10,8 +10,7 @@ import { DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
 import * as m from '../ui/mostrador.css';
 import { Aviso, Motivos, Nip, Nota, type Motivo } from './cancelar-campos';
 import * as c from './cancelar.css';
-import { consecuencia } from './detalle/copy';
-import type { VentaTurno } from './types';
+import { consecuencia, type VentaTurno } from '@xangarro/caja/ventas';
 
 export { MOTIVOS, type Motivo } from './cancelar-campos';
 

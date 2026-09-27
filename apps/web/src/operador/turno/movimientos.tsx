@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 import { formatMoney, type Money } from '@xangarro/domain';
 
-import { OPERADOR_BASE } from '../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import { Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import * as r from './rows.css';
-import type { Movimiento, MovimientoTipo } from './types';
+import type { Movimiento, MovimientoTipo } from '@xangarro/caja/turno';
 
 const KIND: Record<MovimientoTipo, { tint: string; icon: string }> = {
   venta: {

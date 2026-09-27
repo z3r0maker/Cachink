@@ -6,13 +6,11 @@ import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 
 import { Don, type DonPose } from '../../components/don/don';
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
-import { aDueno } from '../ui/dueno';
-import { conSigno, DIF, lineaCerrado } from './copy';
+import { OPERADOR_BASE, aDueno } from '@xangarro/caja';
+import { conSigno, DIF, lineaCerrado, type CierreData } from '@xangarro/caja/cierre';
 import { Corte, fechaCorta } from './corte';
 import { Entrega } from './entrega';
 import * as h from './hecho.css';
-import type { CierreData } from './types';
 import type { Cierre } from './use-cierre';
 
 const CHECK = 'M20 6 9 17l-5-5';

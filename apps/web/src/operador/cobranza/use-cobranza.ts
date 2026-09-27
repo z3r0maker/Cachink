@@ -5,10 +5,16 @@ import type { Money } from '@xangarro/domain';
 
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { abonarEnVivo, comoCuenta, hoyLocal, leerCuentas } from './vivo';
-import { nuevoAbono, toastAbono, vistaAbono } from './cliente/abono';
-import { estadoCuenta } from './cliente/derive';
-import type { CuentaCliente } from './cliente/types';
-import type { CobranzaData, FiltroCobranza, MetodoAbono } from './types';
+import {
+  nuevoAbono,
+  toastAbono,
+  vistaAbono,
+  estadoCuenta,
+  type CuentaCliente,
+  type CobranzaData,
+  type FiltroCobranza,
+  type MetodoAbono,
+} from '@xangarro/caja/cobranza';
 
 /**
  * The accounts, filters, the open abono and the toast. An abono is appended to

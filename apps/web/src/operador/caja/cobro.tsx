@@ -6,7 +6,7 @@ import { Icon } from '../../shell/icon';
 import * as p from './cobro-panel.css';
 import { Credito } from './credito';
 import { Efectivo } from './efectivo';
-import type { CajaData } from './types';
+import type { CajaData } from '@xangarro/caja/caja';
 import type { Caja, MetodoCobro } from './use-caja';
 
 const METODOS: readonly MetodoCobro[] = ['Efectivo', 'Tarjeta', 'Transferencia', 'Fiado'];

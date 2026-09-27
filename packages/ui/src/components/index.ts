@@ -16,6 +16,7 @@ export * from './BottomTabBar/index';
 export * from './TopBar/index';
 export * from './Scanner/index';
 export * from './Icon/index';
+export * from './Don/index';
 export * from './RoleIllustration/index';
 export * from './SegmentedToggle/index';
 export * from './Combobox/index';

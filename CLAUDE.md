@@ -70,6 +70,7 @@ pnpm workspaces + Turborepo. `apps/*` and `packages/*`; `archive/` is excluded f
 | ------------------------ | -------------------------------------------------------------------------- |
 | `domain`                 | Pure business logic — NIF, KPIs, money, entities. No React, no IO.         |
 | `application`            | Use cases. Orchestrates domain + repositories. No UI, no direct DB access. |
+| `caja`                   | The caja's read models and derivations, shared by web caja and phone (ADR-118). |
 | `data-pg`                | **Postgres** (Drizzle pg-core) — cloud schema, RLS, queries, migrations.   |
 | `data`                   | **SQLite** repository interfaces + Drizzle implementations (the device).   |
 | `contracts`              | API + wire contracts shared by phone and cloud (zod). No transport, no IO. |

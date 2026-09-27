@@ -157,6 +157,7 @@ Links to discussion, docs, prior art.
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
 | [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
+| [118](#adr-118) | 2026-09-27 | The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone | Accepted |
 | [119](#adr-119) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 | [120](#adr-120) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
@@ -5679,6 +5680,40 @@ stock.
 
 ---
 
+## ADR-082
+
+**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
+
+**Context**
+
+`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
+«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
+(626), so a tenant with a valid RFC still fell through to the global CFDI, and
+«Otro» cannot be turned into a code at all.
+
+**Decision**
+
+1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
+   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
+   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
+   completar» until the owner picks.
+2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
+   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
+   other → Otro), so phones that read the bucket for ISR keep working.
+3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
+   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
+   suggested ISR rate behind a switch, never silently.
+
+**Consequences**
+
+- Track A: the phone's BusinessForm should write the code too (via
+  `regimenPatch`), not the bucket.
+- The CFDI port should read `regimen_sat` instead of mapping the bucket.
+
 ## ADR-083
 
 **Title:** Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner
@@ -5733,40 +5768,6 @@ here with the option Track O recommended, and marked provisional.
 
 - The design amendments list (plan §4b) gains the files' side of D2 and D7.
 - D3 and D6 bind O-06's writers; D4 binds the Gastos writer.
-
-## ADR-082
-
-**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
-
-**Date:** 2026-09-18
-
-**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
-
-**Context**
-
-`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
-«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
-(626), so a tenant with a valid RFC still fell through to the global CFDI, and
-«Otro» cannot be turned into a code at all.
-
-**Decision**
-
-1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
-   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
-   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
-   completar» until the owner picks.
-2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
-   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
-   other → Otro), so phones that read the bucket for ISR keep working.
-3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
-   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
-   suggested ISR rate behind a switch, never silently.
-
-**Consequences**
-
-- Track A: the phone's BusinessForm should write the code too (via
-  `regimenPatch`), not the bucket.
-- The CFDI port should read `regimen_sat` instead of mapping the bucket.
 
 ## ADR-084
 
@@ -5991,56 +5992,6 @@ budget O-7 has not confirmed, for content that needs no scheduler.
 - A page load may write rows (upserts of a handful of notices) — an acceptable side effect of a
   read path, and the reason the seed's `/asesor` visits in e2e are covered by the routes sweep.
 - «Próximamente» still gates only the model-backed Diagnóstico/catálogo paths (ADR-059).
-
----
-
-## ADR-099
-
-**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
-
-### One SVG renderer for the receipt templates; PDF is a page of that raster
-
-#### Context
-
-N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
-the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
-from one `Comprobante` contract, for the portal live preview now and the phone
-later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
-`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
-the two outputs would drift.
-
-#### Decision
-
-1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
-   pure string builders with no DOM, no measurement — the fichas size by
-   character counts («24 px si pasa de 24 caracteres»), so wrapping and
-   truncation are count-based and deterministic. Snapshots (12 artboards) are
-   the transcription contract.
-2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
-   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
-3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
-   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
-   Linux resolves them through a fontconfig conf generated at render time
-   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
-   darwin rasterizes through CoreText, so dev machines install the same files
-   via `apps/web/scripts/fuentes-comprobantes.sh`.
-4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
-   informe's Blob pattern) wraps the print-destination PNG in one
-   `@react-pdf/renderer` page sized to the template's paper. One layout, two
-   salidas; the phone can reuse both halves as-is.
-5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
-   off-white with its hard shadow; `impresion` fills the page flat and pads
-   Clásico/Moderno to the media-carta proportion.
-
-#### Consequences
-
-- A design change is one SVG edit; both outputs move together.
-- The PDF is a high-density raster (1500 px wide), not vector text — accepted
-  for receipts; the informe keeps its native-text PDF.
-- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
-  value in the transcription (no artboard shows it).
-- The `direccion` block renders only when an address source exists; C-15's
-  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -6551,52 +6502,6 @@ by luck rather than by assertion.
   of monthly ventas — about five weeks on hand, which is what a taquería that
   buys weekly actually looks like.
 
-## ADR-097
-
-**Title:** One sidebar entry per destination; the duplicated pairs merge
-
-**Date:** 2026-09-22
-
-**Status:** Accepted — owner decision; the design files are to follow
-
-**Context**
-
-The portal's design files draw thirteen sidebar entries, two pairs of which
-point at the same screen with a different tab preselected: Ventas and Gastos
-both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
-code copied that verbatim (ADR-058: the files are the specification).
-
-Two rows for one destination cannot answer "where am I". The sidebar's active
-state is a path match, so opening `/movimientos` lit **both** Ventas and
-Gastos, and the screen's own tabs showed the real answer underneath. The owner
-saw the double highlight and asked for one entry (2026-09-22).
-
-**Decision**
-
-1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
-   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
-   inside each screen keep doing the switching, and the old
-   `?tab=` links still work — the screens read the parameter.
-2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
-   place now that Dispositivos is gone as a row.
-3. The design files are **behind** the code on this point until they are
-   amended in Claude Design (the §4b process). Recorded in
-   `docs/plan/10-operador-design-changes.md`.
-4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
-   in normal flow but **stretches** inside a flex column — every tab bar in the
-   portal ran the page's width, leaving the last tab short of the right border
-   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
-   on the component fix it everywhere; Cortes' local wrapper is gone.
-
-**Consequences**
-
-- One question for the design: the merged entry reads «Ventas y gastos» while
-  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
-  gastos" but titles the page "Movimientos"). One of the two should move; the
-  owner decides which.
-- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
-  the Cortes breadcrumb now carries the same words.
-
 ## ADR-096
 
 **Title:** The console measures the business and can look over a tenant's shoulder — two amendments to ADR-063 row 3
@@ -6666,6 +6571,52 @@ those four gaps.
 
 ---
 
+## ADR-097
+
+**Title:** One sidebar entry per destination; the duplicated pairs merge
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — owner decision; the design files are to follow
+
+**Context**
+
+The portal's design files draw thirteen sidebar entries, two pairs of which
+point at the same screen with a different tab preselected: Ventas and Gastos
+both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
+code copied that verbatim (ADR-058: the files are the specification).
+
+Two rows for one destination cannot answer "where am I". The sidebar's active
+state is a path match, so opening `/movimientos` lit **both** Ventas and
+Gastos, and the screen's own tabs showed the real answer underneath. The owner
+saw the double highlight and asked for one entry (2026-09-22).
+
+**Decision**
+
+1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
+   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
+   inside each screen keep doing the switching, and the old
+   `?tab=` links still work — the screens read the parameter.
+2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
+   place now that Dispositivos is gone as a row.
+3. The design files are **behind** the code on this point until they are
+   amended in Claude Design (the §4b process). Recorded in
+   `docs/plan/10-operador-design-changes.md`.
+4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
+   in normal flow but **stretches** inside a flex column — every tab bar in the
+   portal ran the page's width, leaving the last tab short of the right border
+   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
+   on the component fix it everywhere; Cortes' local wrapper is gone.
+
+**Consequences**
+
+- One question for the design: the merged entry reads «Ventas y gastos» while
+  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
+  gastos" but titles the page "Movimientos"). One of the two should move; the
+  owner decides which.
+- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
+  the Cortes breadcrumb now carries the same words.
+
 ## ADR-098
 
 **Title:** The alta wizard asks how you work, not what your papers say — superseding the design's four steps
@@ -6727,6 +6678,56 @@ unavailable later, and nothing it skips is asked twice.
 - Three answers still have no write path — tipoNegocio, WhatsApp and logo —
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
+
+---
+
+## ADR-099
+
+**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
+
+### One SVG renderer for the receipt templates; PDF is a page of that raster
+
+#### Context
+
+N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
+the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
+from one `Comprobante` contract, for the portal live preview now and the phone
+later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
+`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
+the two outputs would drift.
+
+#### Decision
+
+1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
+   pure string builders with no DOM, no measurement — the fichas size by
+   character counts («24 px si pasa de 24 caracteres»), so wrapping and
+   truncation are count-based and deterministic. Snapshots (12 artboards) are
+   the transcription contract.
+2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
+   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
+3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
+   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
+   Linux resolves them through a fontconfig conf generated at render time
+   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
+   darwin rasterizes through CoreText, so dev machines install the same files
+   via `apps/web/scripts/fuentes-comprobantes.sh`.
+4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
+   informe's Blob pattern) wraps the print-destination PNG in one
+   `@react-pdf/renderer` page sized to the template's paper. One layout, two
+   salidas; the phone can reuse both halves as-is.
+5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
+   off-white with its hard shadow; `impresion` fills the page flat and pads
+   Clásico/Moderno to the media-carta proportion.
+
+#### Consequences
+
+- A design change is one SVG edit; both outputs move together.
+- The PDF is a high-density raster (1500 px wide), not vector text — accepted
+  for receipts; the informe keeps its native-text PDF.
+- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
+  value in the transcription (no artboard shows it).
+- The `direccion` block renders only when an address source exists; C-15's
+  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -8333,6 +8334,66 @@ example names or amounts. The rules, in short (the full guide is
   are updated to match. Code that still breaks a rule (yellow-filled chips,
   hard-coded «Caja 1», the `ProximamenteState` component) is debt to remove, not
   precedent.
+
+## ADR-118
+
+**Title:** The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone
+
+**Date:** 2026-09-27
+
+**Status:** Accepted
+
+**Context**
+
+Track M (M-04) rebuilds the phone as the same register as the web caja. The web
+caja's numbers come from pure functions in `apps/web/src/operador/`: the turno's
+headline figures, «Para hoy», the fiado states, the stock rules, the queue's
+wording, the ticket math, and the read-model shapes the Worker hands the
+screens. The phone cannot import an app, and a second copy of those rules would
+be the duplication CLAUDE.md §2.3 calls a bug: the two surfaces would drift
+into showing different numbers for the same turno.
+
+None of the existing packages fits. `domain` holds business rules with no
+presentation (NIF, KPIs, money); these functions word Spanish copy, pick token
+colours and build routes. `application` holds use cases that orchestrate
+repositories; these are read-side view models with no IO. `ui` is the phone's
+Tamagui body and cannot be imported by the portal.
+
+**Decision**
+
+A new workspace package, `packages/caja` (`@xangarro/caja`), holds the caja's
+framework-free logic: the per-screen types, derivations, copy, fixtures and the
+runtime read-model shapes and mappers. It depends on `@xangarro/domain` and
+`@xangarro/tokens` only: no React, DOM, storage, Worker, Drizzle or SQLite.
+Each screen is a subpath (`@xangarro/caja/inicio`, `/turno`, `/cierre`,
+`/ventas`, `/cobranza`, `/inventario`, `/gastos`, `/pendientes`, `/avisos`,
+`/caja`, `/lectura` for the read models); the root export holds what they
+share (clock, owner wording, routes and icons, the shared states).
+
+`apps/web` keeps what is web: screens, hooks, vanilla-extract, the Worker,
+OPFS, the protocol and the Drizzle readers. `packages/ui` and the phone import
+the package for the same figures.
+
+ESLint's boundaries get a `caja` element that may import `domain` only; `app`
+and `ui` may import it.
+
+**Alternatives considered**
+
+- *Put it in `packages/application`.* Rejected: application is use cases over
+  repositories, and a read model with Spanish copy and token colours would
+  blur that layer.
+- *Put it in `packages/domain`.* Rejected: domain must stay free of routes,
+  tints and screen wording.
+- *Copy the functions into the phone.* Rejected by CLAUDE.md §2.3.
+
+**Consequences**
+
+- A number the caja shows is computed in one place; a rule change reaches
+  both surfaces, and its unit tests live with it in `packages/caja/tests`.
+- The package carries web routes (`OPERADOR_BASE`) inside the hrefs of «Para
+  hoy» and the avisos. The phone maps them to its own screens until a route
+  key replaces the href.
+- CLAUDE.md §3 lists the package.
 
 ---
 

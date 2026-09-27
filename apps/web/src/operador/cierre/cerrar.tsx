@@ -1,6 +1,6 @@
 import { Icon } from '../../shell/icon';
 import * as c from './cerrar.css';
-import { cerrarHint, cerrarLabel } from './copy';
+import { cerrarHint, cerrarLabel } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
 const CANDADO = 'M5 11h14v10H5V11Zm2 0V7a5 5 0 0 1 10 0v4';

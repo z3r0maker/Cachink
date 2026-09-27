@@ -4,10 +4,14 @@ import { useState } from 'react';
 
 import { useDueno } from '../ui/use-dueno';
 import { Lateral } from '../ui/lateral';
-import { conUnidad } from './derive';
+import {
+  conUnidad,
+  type Existencia,
+  type MotivoMerma,
+  type TipoMovimiento,
+} from '@xangarro/caja/inventario';
 import { Articulo, Cantidad, Motivos, Opcional, Tipos } from './mover-campos';
 import * as s from './mover-pie.css';
-import type { Existencia, MotivoMerma, TipoMovimiento } from './types';
 
 export interface NuevoMovimiento {
   readonly tipo: TipoMovimiento;
