@@ -132,3 +132,29 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 > **Registros por enviar — each row in retry.** Second line in gray: «Último intento: hace 3 min
 > · Próximo: en 2 min». When the server rejected the row, keep the existing rejection sentence
 > instead.
+
+## Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
+
+### DS-08 Caja — already open in another tab
+
+- [ ] Status · Send to the operador project; pull; wire the Web Lock (audit DB3-CAJA-01).
+
+**Why.** Two tabs of the caja each keep their own copy of the local database, and the last one to
+save erases the other's unsent sales. The fix lets one tab hold the register; the second tab needs
+a screen.
+
+> **Caja — second tab.** Full-screen notice in place of the register: «La caja ya está abierta en
+> otra pestaña.» Secondary line: «Para no perder ventas, usa una sola pestaña.» Primary button
+> «Usar esta pestaña» (takes the register over once the other tab closes); link «Cerrar esta
+> pestaña».
+
+### DS-09 Estados — the custom range has a limit
+
+- [ ] Status · Send to the portal project; pull; enforce the cap server-side (audit DB3-EST-01).
+
+**Why.** «Personalizado» accepted any range, and a multi-year range loads the whole history into
+memory. The range is capped at 13 months.
+
+> **Estados — Personalizado.** The date picker allows at most 13 months. Past that, the second date
+> shows the inline error «Elige un periodo de hasta 13 meses.» and «Aplicar» stays disabled. For
+> longer periods, a help link: «¿Necesitas más? Exporta tus movimientos.»

@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xangarro DB Audit R3</title>
+<style>
+:root{
+  --bg:#fbfaf7; --panel:#ffffff; --ink:#1d1d1b; --muted:#5f5e58; --line:#e4e1d8;
+  --crit:#b3261e; --crit-bg:#fbe9e7; --high:#b45309; --high-bg:#fdf1e2;
+  --med:#1d4ed8; --med-bg:#e8eefc; --low:#4b5563; --low-bg:#eef0f2;
+  --ok:#1f7a3d; --ok-bg:#e6f4ea; --accent:#DBB80A; --code:#f3f1ea;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151513; --panel:#1e1e1b; --ink:#ecebe6; --muted:#a8a69d; --line:#34332e;
+    --crit:#f2877f; --crit-bg:#3a1b19; --high:#f0b060; --high-bg:#3a2a14;
+    --med:#8fb0ff; --med-bg:#1a2340; --low:#b7bcc4; --low-bg:#2a2d31;
+    --ok:#7fd49a; --ok-bg:#16301f; --code:#2a2925;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151513; --panel:#1e1e1b; --ink:#ecebe6; --muted:#a8a69d; --line:#34332e;
+  --crit:#f2877f; --crit-bg:#3a1b19; --high:#f0b060; --high-bg:#3a2a14;
+  --med:#8fb0ff; --med-bg:#1a2340; --low:#b7bcc4; --low-bg:#2a2d31;
+  --ok:#7fd49a; --ok-bg:#16301f; --code:#2a2925;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px}
+h2{font-size:21px;margin:44px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:26px 0 8px}
+p,li{max-width:78ch}
+.sub{color:var(--muted);margin:0 0 20px}
+code{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+.verdict{border-left:4px solid var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:24px;line-height:1.2}
+.stat span{color:var(--muted);font-size:13px}
+.tbl{overflow-x:auto;margin:10px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--panel)}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--bg)}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sev{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.crit{color:var(--crit);background:var(--crit-bg)} .high{color:var(--high);background:var(--high-bg)}
+.med{color:var(--med);background:var(--med-bg)} .low{color:var(--low);background:var(--low-bg)}
+.ok{color:var(--ok);background:var(--ok-bg)}
+.good{color:var(--ok);font-weight:600} .bad{color:var(--crit);font-weight:600}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:10px 0}
+summary{cursor:pointer;padding:12px 16px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+summary::-webkit-details-marker{display:none}
+summary .id{font:600 13px ui-monospace,Menlo,monospace;color:var(--muted)}
+summary .t{font-weight:600}
+details .body{padding:2px 18px 14px}
+details .body dl{display:grid;grid-template-columns:120px 1fr;gap:6px 14px;margin:6px 0}
+details .body dt{color:var(--muted);font-size:13px}
+details .body dd{margin:0}
+nav.toc{columns:2;column-gap:28px;font-size:14px}
+nav.toc a{color:var(--ink)}
+.note{color:var(--muted);font-size:13px}
+@media (max-width:640px){nav.toc{columns:1} details .body dl{grid-template-columns:1fr} h1{font-size:23px}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Xangarro Postgres: round 3, auditing the optimizations</h1>
+<p class="sub">2026-09-26 · branch <code>perf/db-scale</code> @ <code>bfc8a6d7</code> (after the round-2 fixes) · previous rounds: <code>db-2026-09-17.md</code>, <code>db-2026-09-26.html</code></p>
+
+<div class="card verdict">
+<p><strong>Verdict.</strong> The optimizations hold up. The batched push is correct on every main path. Seqs come out in delta order and in commit order, last-write-wins works row by row, a re-push is idempotent, a foreign id is isolated by splitting the batch, and no push overflows the subtransaction cache. It measured again at 47–67 ms per 500 rows. Across 203 tenants on an 8 GB dataset, every portal read at month scale has a p95 under 70 ms. The new indexes cost storage (+23%), but no measurable write throughput.</p>
+<p>A second pass over <strong>the new code and what it now makes possible</strong> found <strong>31 new findings</strong>: 7 high (2 of them critical), 13 medium, 11 low. <strong>Two of them would stop a business from working at all.</strong></p>
+<ol>
+<li><strong>A phone or caja cannot be linked once a heavy tenant has about a month of stock movements.</strong> The bootstrap sends every movement ever recorded in one response, and Vercel caps a response at 4.5 MB (DB3-BOOT-01).</li>
+<li><strong>One bad row can stop a device syncing, forever.</strong> Examples: a NUL character in a text field, or a batch the server refuses as a whole (DB3-SYNC-01).</li>
+</ol>
+<p>Two more lose or hide data on the browser caja: two open tabs overwrite each other's unsent sales, and cierre counts the wrong rows. One export and one Estados range can exhaust a Vercel function's memory. Finally, <strong>two of the round-2 migrations need editing before they reach the hosted database</strong>, or they will fail or briefly stall tables during the day.</p>
+</div>
+
+<div class="grid">
+<div class="stat"><b class="bad">4.6 MB</b><span>bootstrap for a heavy tenant after one month of movements. The limit is 4.5 MB, so a new phone can no longer be linked.</span></div>
+<div class="stat"><b class="bad">1 NUL → 500 forever</b><span>a single <code>\u0000</code> in a text field fails every retry of that push, reproduced on Postgres</span></div>
+<div class="stat"><b class="bad">2.7 GB</b><span>memory to export one year of a whale's sales to xlsx. It's built in memory, and 1.1 M rows needs 5.4 GB.</span></div>
+<div class="stat"><b class="bad">19.5 s</b><span>month revenue on a whale when stale statistics flip the cancelled-tickets plan. 45 ms with a partial index.</span></div>
+</div>
+
+<nav class="toc card">
+<a href="#peak">1. The 17:00–20:00 peak, remodelled</a><br>
+<a href="#findings">2. Findings (31)</a><br>
+<a href="#index">3. Index census</a><br>
+<a href="#ok">4. Verified correct</a><br>
+<a href="#order">5. What to fix, in order</a><br>
+<a href="#azure">6. The Azure note (O-29)</a><br>
+<a href="#method">7. Method</a>
+</nav>
+
+<h2 id="peak">1. The 17:00–20:00 peak, remodelled</h2>
+<p>The model uses the code's real parameters:</p>
+<ul>
+<li>push debounce 2 s; jittered 12–18 min phone tick; caja pull at most every 45 s</li>
+<li>500 rows per push; 5,000 entries per pull page</li>
+<li>2 connections per Vercel instance; a Supabase Nano pooler with about 15 server connections for the app role (an assumption)</li>
+<li>the busiest 15 minutes run at 3× the window's average</li>
+</ul>
+<p>Device timings come from this round's real-code measurements. Batched push, 15 clients, no network delay:</p>
+<ul>
+<li><strong>Backlog:</strong> 500 rows per push, 20,830 rows/s, p95 415 ms</li>
+<li><strong>Live capture:</strong> 5 rows per push, 717 pushes/s, p95 25 ms</li>
+</ul>
+<div class="tbl"><table>
+<tr><th></th><th class="n">100 tenants</th><th class="n">1,000</th><th class="n">5,000</th><th class="n">5,000 × 30K cap</th></tr>
+<tr><td>Devices</td><td class="n">150</td><td class="n">1,500</td><td class="n">7,500</td><td class="n">15,000</td></tr>
+<tr><td>Rows pushed/s</td><td class="n">5</td><td class="n">51</td><td class="n">256</td><td class="n">3,694</td></tr>
+<tr><td>Rows pulled/s (fan-out, includes a device's own echoes)</td><td class="n">4</td><td class="n">36</td><td class="n">178</td><td class="n">3,208</td></tr>
+<tr><td>Requests/s (push + pull, caja worst case)</td><td class="n">2.2</td><td class="n">22</td><td class="n">110</td><td class="n">1,220</td></tr>
+<tr><td>DB statements/s</td><td class="n">45</td><td class="n">450</td><td class="n">2,240</td><td class="n">25,900</td></tr>
+<tr><td>Connections busy at 1 / 3 ms round trip</td><td class="n">0.05 / 0.1</td><td class="n">0.5 / 1.2</td><td class="n">2.6 / 6.2</td><td class="n bad">30 / 72</td></tr>
+<tr><td>What breaks first</td><td>Bootstrap size, not load</td><td>Bootstrap; caja local DB growth</td><td>Bootstrap. Load is at 17–41% of the pool.</td><td>The pooler (2–5× over), then DB CPU (about 2.3× over at 4 vCPU)</td></tr>
+</table></div>
+<p><strong>A 10-minute outage at 20:00, 5,000 tenants.</strong></p>
+<ul>
+<li><strong>The good news:</strong> the new client backoff works. Automatic triggers wait, and pulls are skipped while pushes fail.</li>
+<li><strong>At the start of the outage:</strong> retries peak at about 310 req/s in the first 1–2 minutes. That is 2.8× normal and above what the pool serves at a 3 ms round trip.</li>
+<li><strong>During it:</strong> if it's the database that's down, every request waits the 10 s connect timeout. That is about 3,000 Vercel functions running at once.</li>
+<li><strong>A gap in the backoff:</strong> cashiers pressing «Reintentar envío» skip it, and a 5xx carries no <code>Retry-After</code>.</li>
+<li><strong>At recovery:</strong> about +66 req/s for roughly 5 minutes, within the pool.</li>
+<li><strong>The fix (DB3-SYNC-05):</strong> answer 503 with <code>Retry-After</code> when getting a connection takes more than about 2 s.</li>
+</ul>
+<p><strong>Payload sizes:</strong></p>
+<ul>
+<li>A 500-row push is about 220–285 KB, which is fine.</li>
+<li>A 5,000-entry pull page is about 2.1 MB of movements. A page of product changes would cross 4.5 MB if <code>atributos</code> averages more than about 250 B.</li>
+<li>The bootstrap: see DB3-BOOT-01.</li>
+</ul>
+
+<h2 id="findings">2. Findings</h2>
+<p class="note">Sources: R1 = push and sync server, R2 = migrations and schema, R3 = portal reads, R4 = device client and peak model. "Mine" = measured on the 8 GB scale dataset. Every high finding was reproduced or measured, not just inferred.</p>
+
+<h3>High: fix before launch</h3>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB3-BOOT-01</span><span class="t">After about a month of stock movements, a heavy tenant can no longer link a phone or caja</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><code>server/device/bootstrap.ts:58</code> selects every live <code>inventory_movements</code> row for activation and for <code>since=0</code>, as one JSON body with no paging.</li>
+<li>Measured: about 400–425 B per movement, so 4.5 MB is about 11K movements. That is roughly 1 month for a heavy tenant (10K tickets/month), 3.4 months for a mid one, 10 days at the 30K cap.</li>
+<li>On the scale dataset: a heavy tenant at 1 month was 4.6 MB; the one-year whale was <strong>159 MB</strong>.</li>
+<li>The caja also discards <code>bootstrap.serverSeq</code> when it links (<code>acceso/vincular.tsx:92-103</code>), so its first pull is a <em>second</em> full bootstrap.</li>
+<li>Activation parses the bootstrap with zod while holding <code>businesses FOR UPDATE</code>.</li>
+<li>On the device, <code>forgetEchoes</code> builds an <code>IN (…)</code> list that goes past SQLite's 32,766-variable limit at about 33K movements.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<p>This is round 2's open DB2-QRY-05, now confirmed to break activation:</p>
+<ol>
+<li>Bootstrap from a per-product stock baseline plus recent movements, paged through the seq stream (at most 5,000 rows or 2 MB per page). This amends ADR-081 and the pull contract.</li>
+<li>Store the activation's <code>serverSeq</code> on the caja.</li>
+<li>Do the zod parse and the signing outside the transaction.</li>
+<li>Chunk <code>forgetEchoes</code>.</li>
+</ol></dd>
+<dt>Source</dt><dd>R1-05, R4-01, R4-06, mine</dd></dl></div></details>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB3-SYNC-01</span><span class="t">One bad row or batch can stop a device syncing forever</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><strong>(a) A NUL character.</strong> The row write fails (22021) and is isolated as INTERNAL. Then <code>saveRejections</code> casts its payload <code>::jsonb</code>, which fails (22P05) outside any savepoint. The transaction rolls back and the server answers 500. The phone keeps its cursor and sends the same batch forever. Reproduced: 3 good rows plus 1 with <code>'Refresco\u0000'</code> → 0 rows stored.</li>
+<li><strong>(b) A batch refused as a whole.</strong> A 400 (stricter schema against an old app or caja tab), a 413 (unbounded <code>products.atributos</code>) or a deterministic 500 leaves the outbox cursor where it was, so every later capture queues behind it. Reproduced with two drains → 400, cursor unchanged.</li>
+<li><strong>(c) Deterministic errors reported as retryable.</strong> <code>store-error.ts:45-49</code> maps every non-transient error to INTERNAL (retryable). That includes 23505 on <code>idx_tickets_device_folio</code> and 22xxx data errors, so they are retried forever.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<ul>
+<li>Refuse NUL (and lone surrogates) in the contract, as a terminal VALIDATION.</li>
+<li>Map 22021/22P05/22P02 and non-id 23505 to terminal codes.</li>
+<li>Run <code>reject</code> in a savepoint, with a fallback that stores the rejection without its payload.</li>
+<li>On the client, on a 400/413 (or N identical 5xx), halve the batch down to one row, mark that row rejected locally, and advance.</li>
+<li>Cap <code>atributos</code>.</li>
+</ul></dd>
+<dt>Source</dt><dd>R1-01, R1-07, R4-02</dd></dl></div></details>
+
+<details open><summary><span class="sev high">high</span><span class="id">DB3-CAJA-01</span><span class="t">Two tabs of the caja silently erase each other's unsent sales</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>Each tab starts its own Worker with its own in-memory sql.js copy of the same OPFS file, and there is no lock or BroadcastChannel. Both write the whole database back after every sale, so the last write wins. Captures from the other tab that weren't pushed yet are lost, outbox entries included (<code>runtime/client.ts:195</code>, <code>db.worker.ts:37-65</code>, <code>opfs.ts:22-28</code>).</dd>
+<dt>Fix</dt><dd><code>navigator.locks.request('xangarro-register', {ifAvailable: true})</code>. A second tab shows «La caja está abierta en otra pestaña». The UI state goes in DS-08.</dd>
+<dt>Source</dt><dd>R4-04</dd></dl></div></details>
+
+<details open><summary><span class="sev high">high</span><span class="id">DB3-CAJA-02</span><span class="t">The cierre gate and the pill count the wrong rows</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>They count only <code>status='pending'</code>.
+<ul>
+<li>Sales captured offline have no status row, so they count as <strong>0</strong> and the cashier can close with unsent sales.</li>
+<li>Rows from one failed push become <code>pending</code> and <strong>block</strong> cierre until the network comes back, against ADR-053 §5.</li>
+<li>Before the first flush after a page load, the gate shows the fixture's 3 phantom records.</li>
+<li>The phone counts pending + retrying, so the two surfaces disagree.</li>
+</ul>
+<p>Reproduced: 3 offline sales → <code>pending: 0</code>; one failed push → <code>pending: 6</code>.</p></dd>
+<dt>Fix</dt><dd>One <code>unsentCount()</code> in <code>StatusStore</code> (change-log entries above the push high-water mark + pending + rejected), used on both surfaces. Decide the cierre rule by ADR; that is owner decision 1 in DS-06.</dd>
+<dt>Source</dt><dd>R4-03</dd></dl></div></details>
+
+<details open><summary><span class="sev high">high</span><span class="id">DB3-EXP-01</span><span class="t">Exports are built in memory: a one-year whale needs 2.7 GB</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>The ExcelJS workbook is built fully in memory: 100K rows take 829 MB, 477K rows <strong>2.7 GB</strong>, 1.1 M rows 5.4 GB. Past 1,048,576 rows the file exceeds Excel's own limit.</li>
+<li>Each 5,000-row batch hash-joins all of the tenant's tickets (22 of 47 ms per batch).</li>
+<li>No <code>maxDuration</code>, no rate limit, and a viewer can trigger it.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Stream with <code>ExcelJS.stream.xlsx.WorkbookWriter</code> into a streamed Response, and bound each batch's ticket side by its date span. Above Excel's limit, split by year or fall back to CSV. Add <code>maxDuration</code> and a per-tenant rate limit.</dd>
+<dt>Source</dt><dd>R3-01, R3-08</dd></dl></div></details>
+
+<details open><summary><span class="sev high">high</span><span class="id">DB3-EST-01</span><span class="t">Estados «Personalizado» has no range cap and loads raw rows into Node</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd><code>?p=personalizado&amp;desde=2000-01-01&amp;hasta=2099-12-31</code> reads the whole history. On the whale: <code>periodLedger</code> returns 375K <code>SELECT *</code> rows, plus 224K tickets, which is 1.2 s and <strong>+530 MB</strong> before any domain work. Several years is multiple GB. A viewer can trigger it.</dd>
+<dt>Fix</dt><dd>Cap the custom range at 13 months, select only the columns the domain needs, and push per-category and per-ticket sums into SQL.</dd>
+<dt>Source</dt><dd>R3-02</dd></dl></div></details>
+
+<details open><summary><span class="sev high">high</span><span class="id">DB3-MIG-01</span><span class="t">Two round-2 migrations must be edited before they reach the hosted database</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><strong>0043: the concurrent builds fail on a live database.</strong> It sets <code>lock_timeout = 3s</code>, so each <code>CREATE INDEX CONCURRENTLY</code> fails whenever <em>any</em> transaction in the database holds a snapshot for more than 3 s (metering has a 60 s timeout, admin 15 s). Each failure leaves an INVALID index behind: writes still maintain it, and a unique one still enforces uniqueness. Reproduced both ways: an open writer, and a snapshot held on a different table.</li>
+<li><strong>0045 and 0044: they stall traffic while they wait.</strong> <code>ALTER POLICY</code> takes ACCESS EXCLUSIVE on 29 tables, including <code>sales</code>, <code>sync_log</code> and <code>devices</code>. While it waits up to 3 s for the lock, every reader queues behind it. Reproduced: a plain <code>count(*)</code> on sales stalled for 2.5 s. 0044's <code>ALTER TABLE</code> on <code>api_latency_counters</code> does the same.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<ul>
+<li>In 0043, use <code>SET lock_timeout = 0</code> (or several minutes) before the CONCURRENTLY statements. They only take SHARE UPDATE EXCLUSIVE, so a long wait harms nobody.</li>
+<li>For ACCESS EXCLUSIVE DDL, use 100–250 ms with a retry-and-backoff loop in the runner, and run it in the 00:00–06:00 trough.</li>
+<li>Teach <code>lint.ts</code> both rules.</li>
+</ul>
+<p>Safe to edit now: none of these files is in the hosted ledger yet.</p></dd>
+<dt>Source</dt><dd>R2-01, R2-02</dd></dl></div></details>
+
+<h3>Medium</h3>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-QRY-01</span><span class="t">Excluding cancelled tickets scans every ticket the tenant has, and can flip to 19.5 s</span></summary><div class="body">
+<p>The <code>NOT EXISTS (tickets … cancelled_at IS NOT NULL)</code> in <code>totalsForRange</code> (Inicio ×2, metas ×2), <code>serieDiaria</code>, <code>periodLedger</code> and the Asesor (×2) hashes <em>all</em> of the tenant's tickets. It takes 77 ms on the whale and grows with years.</p>
+<p><strong>Measured:</strong> after a burst of cancellations, before autovacuum refreshed the statistics, the same month query flipped to a nested loop and took <strong>19,565 ms</strong>, past the 5 s timeout. With a partial index <code>tickets (business_id, id) WHERE cancelled_at IS NOT NULL</code> it takes <strong>45 ms</strong> whatever the history.</p>
+<p><strong>Fix:</strong> add that index CONCURRENTLY, plus the per-table analyze settings in DB3-OPS-01. (R2-05, R3-05, mine)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-SYNC-02</span><span class="t">A transient failure on a product or client permanently rejects its children</span></summary><div class="body">
+<p>If a HYBRID product or client in a push comes back INTERNAL, its sales and movements in the same push come back <code>FK_*_MISSING</code>, which is terminal. The batching widens this: a lock timeout now fails the whole products write, and the savepoint-budget spill makes innocent products INTERNAL.</p>
+<p><strong>Reproduced:</strong> a product INTERNAL left its movement terminally rejected. In memory, 67 bad products out of 200 left 123 sales terminally rejected.</p>
+<p><strong>Fix:</strong> answer INTERNAL (retryable) when the referenced row appears earlier in the same push. (R1-02, R4-08)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-SYNC-03</span><span class="t">A retry that overlaps its original push gets terminal rejections for rows that were stored</span></summary><div class="body">
+<p>Receipts are read at the start of a segment. A retry whose insert waited on the original's row lock then sees <code>exists</code> with no receipt, and answers <code>DUPLICATE_CONFLICT</code> (plus <code>FK_*_MISSING</code> for dependent rows).</p>
+<p><strong>Reproduced:</strong> the original push accepted its rows, and the overlapping retry got 2 false terminal rejections. The phone's 30 s timeout under a slow pool (DB3-SYNC-05) or two tabs (DB3-CAJA-01) triggers it.</p>
+<p><strong>Fix:</strong> for rows that come back <code>exists</code> or <code>stale</code> without a receipt, look the receipts up again after the write, and count them as written for references. (R1-03, R4-07)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-SYNC-04</span><span class="t">INTERNAL rejections stay open after the retry succeeds</span></summary><div class="body">
+<p><code>accept</code> never resolves earlier rejections for the same row, so the portal badge and the staff digest keep counting them. Batching produces more INTERNAL rows than before.</p>
+<p><strong>Fix:</strong> one <code>UPDATE sync_rejections SET resolved_at = now()</code> for the accepted keys, pipelined with the receipts. (R1-04)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-SYNC-05</span><span class="t">No bound on waiting for a pool connection, and no load shedding</span></summary><div class="body">
+<p>postgres.js queues without an acquire timeout. With 2 connections per instance:</p>
+<ul>
+<li>A slow holder (export, Asesor, a yearly Estados) stalls every other request on the same instance.</li>
+<li>A push can outlive the phone's 30 s timeout, and that is exactly what triggers DB3-SYNC-03.</li>
+<li>A database outage turns into thousands of in-flight functions (§1).</li>
+</ul>
+<p>There is no deadlock: no path holds a connection while waiting for another.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>Race the tenant transaction against a 10–15 s timer, and answer 503 with <code>Retry-After</code>.</li>
+<li>Give exports their own pool.</li>
+<li>Fold the device-auth read into the push transaction. Today it is 4 round trips and 3 separate connection checkouts.</li>
+</ul>
+<p>(R1-06, R3-17, R4 outage model)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-CAJA-03</span><span class="t">An idle caja never pulls, so a deactivated operator's NIP keeps working</span></summary><div class="body">
+<p>The caja pulls only after a capture, on the <code>online</code> event, or on a manual retry. There is no timer and no pull on boot. NIPs are checked locally, so a deactivated operator's NIP works on an idle caja until the next sale, and that sale uses the old prices.</p>
+<p><strong>Fix:</strong> pull every 5 min ±20% while the tab is visible, on <code>visibilitychange</code> and on boot, behind the same backoff. (R4-05)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-CAJA-04</span><span class="t">The caja rewrites its whole database after every sale, and the database only grows</span></summary><div class="body">
+<p>It runs <code>sql.export()</code> plus a full OPFS file rewrite twice per sale. Pulled rows are never purged. The heavy-tenant estimate after a year is 40–60 MB, about 150 MB of transient memory, and hundreds of ms per sale, a risk on an iPad (speculative). Two overlapping writes can also finish out of order.</p>
+<p><strong>Fix:</strong> serialise and debounce the writes, then move to an OPFS VFS (wa-sqlite or the official sqlite-wasm), which needs an ADR-071 decision. Fold old pulled movements into a stock baseline. (R4-10, round-2 note)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-QRY-02</span><span class="t">The Asesor reads full history on every GET, and the GET also writes</span></summary><div class="body">
+<p>It takes 3.35 s on the whale. <code>primer_dia</code> is a hash anti-join over all lines (339 ms; 28 ms as <code>ORDER BY … LIMIT 1</code>). The page is about 16 transactions, and a GET upserts insights. At 5 years on Nano it passes the 5 s timeout.</p>
+<p><strong>Fix:</strong> compute in the existing cron and make the page read-only; cap the counts at their thresholds. (R3-04)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-QRY-03</span><span class="t">The Movimientos summary, paging and search still grow with range and history</span></summary><div class="body">
+<ul>
+<li><strong>Summary:</strong> <code>resumenMovimientos</code> joins all of the tenant's tickets and spills <code>count(DISTINCT)</code> to disk: month 82–124 ms, year 690 ms, open range 890 ms, about 5 s at 5 years. It runs again on every page flip.</li>
+<li><strong>Paging:</strong> OFFSET reaches 163–260 ms on deep pages, and pages shift when rows are inserted.</li>
+<li><strong>Search:</strong> ILIKE has no index (295 ms per statement over full history, run 3 times).</li>
+</ul>
+<p><strong>Fix:</strong> pre-aggregate sales per ticket, then join tickets over the same date range (tested 124 → 42 ms). Use keyset pages; the index already exists. Add a <code>pg_trgm</code> index on <code>concepto</code>, or require a period for search, which matches DS-01's hint. (R3-06, R3-09, R3-10)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-QRY-04</span><span class="t">Screens can disagree for the same period</span></summary><div class="body">
+<ul>
+<li><code>ticketsConTotal</code> (<code>estados.ts</code>) uses <code>between</code>, not <code>fechaEnDias</code>, keeps deleted tickets, and runs in a second transaction.</li>
+<li>Sale lines whose ticket was rejected are orphans. <code>ticketId</code> isn't in <code>PUSH_REFERENCES</code>, so Inicio and Estados count those lines but Movimientos drops them. Tested: a $999 gap.</li>
+<li>Deleted lines inflate fiado in Revisión and Cortes.</li>
+<li><code>2026-02-30</code> passes validation and rolls over into March.</li>
+<li>Portal stock movements are stamped with the UTC date, which is tomorrow between 18:00 and 24:00 CDMX, right in the peak window.</li>
+</ul>
+<p>(R3-03, R3-07, R3-13, R3-14, R3-15)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-IDX-01</span><span class="t">The index set needs a second pass</span></summary><div class="body">
+<p>See §3. In short:</p>
+<ul>
+<li>Drop <code>sales_business_idx</code> and <code>expenses_business_idx</code>. The live partial indexes serve every date query, and on <code>sales</code> the current set doubled insert time (1.20 → 2.43 s per 300K rows).</li>
+<li>Drop <code>business_members_business_idx</code>, a prefix of the new unique index.</li>
+<li>Replace <code>portal_sessions (business_id, last_seen_at)</code> with <code>(business_id)</code>. Indexing the column the session touch updates makes every touch a non-HOT update, which partly undoes 0046.</li>
+<li>Make <code>tickets_business_cliente_idx</code> partial on <code>cliente_id IS NOT NULL</code>.</li>
+<li>Add the cancelled-tickets partial index (DB3-QRY-01).</li>
+<li>Add <code>INCLUDE (ticket_id)</code> and <code>INCLUDE (origen)</code> to the usage indexes: the recount reads 2,124 heap blocks against 95 index blocks.</li>
+</ul>
+<p>(R2-03/04/06/07/18, mine)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-OPS-01</span><span class="t">No per-table storage or autovacuum settings anywhere</span></summary><div class="body">
+<p><code>reloptions</code> are empty. The index-only scans 0043 relies on showed heap fetches only until a VACUUM ran, and stale statistics produced DB3-QRY-01's 19.5 s plan flip.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>Fillfactor 70–80 on the hot-update rows: <code>devices</code>, <code>sync_cursors</code>, <code>throttle</code>, <code>api_latency_counters</code>, <code>portal_sessions</code>.</li>
+<li>On the append-heavy tables (<code>sales</code>, <code>tickets</code>, <code>expenses</code>, <code>inventory_movements</code>, <code>sync_log</code>, <code>sync_receipts</code>): <code>autovacuum_vacuum_insert_scale_factor</code> ≈ 0.01–0.02 and <code>autovacuum_analyze_scale_factor</code> ≈ 0.02.</li>
+<li>Batch <code>security_prune</code> for its first run.</li>
+</ul>
+<p>Measured as fine: <code>devices</code> and <code>sync_cursors</code> stayed over 99% HOT under 42K updates. (R2-17, R2-19, mine)</p></div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB3-SEC-01</span><span class="t">SECURITY DEFINER functions search <code>public</code> before <code>pg_catalog</code></span></summary><div class="body">
+<p><code>negocios_for_user</code>, <code>memberships_for_user</code>, <code>redeem_*</code> and <code>tenant_plan_*</code> use <code>search_path = public, pg_catalog</code>, and <code>verify.ts</code> accepts that as pinned. <code>negocios_for_user</code> also returns any user's memberships for whatever id the app role passes; it isn't bound to the session.</p>
+<p><strong>Fix:</strong> <code>SET search_path = pg_catalog</code> (the bodies are already fully qualified), and derive the user from the session token hash. Hand this to the separate security audit, together with the device_id attribution note from round 2. (R2-09)</p></div></details>
+
+<h3>Low</h3>
+<div class="tbl"><table>
+<tr><th>ID</th><th>Finding</th><th>Source</th></tr>
+<tr><td>DB3-L-01</td><td>Every device re-downloads its own movements: <code>sync_log</code> isn't filtered by who sent the entry. That is 25–40% of pulled rows, and 100% for single-device tenants.</td><td>R4-15</td></tr>
+<tr><td>DB3-L-02</td><td>Pull ignores <code>Retry-After</code>. A failed network or 5xx batch adds an attempt to innocent retry rows. An HTTP-date <code>Retry-After</code> is measured against the device clock. The phone pulls on every return to the app, with no throttle.</td><td>R4-11..14</td></tr>
+<tr><td>DB3-L-03</td><td>Due retries whose local row is gone can starve the real retries: there's no ORDER BY, and 10 empty rounds run. No trigger reaches it today.</td><td>R4-09</td></tr>
+<tr><td>DB3-L-04</td><td>Every pull UPDATEs <code>devices.last_pull_at</code>: about 330 updates/s at the cap. They stay HOT, but it's still a write in the read path.</td><td>R1-08</td></tr>
+<tr><td>DB3-L-05</td><td>The usage debounce leaves the last minute of pushes uncounted until the next push, or the 03:00 job. The metering pool has 1 connection, so recounts and pull usage reads queue on it.</td><td>R1-09</td></tr>
+<tr><td>DB3-L-06</td><td>A push that repeats a row splits into segments. Accepting per segment holds the cursor lock across segments, which inverts the portal's lock order. The phone always dedupes.</td><td>R1-10</td></tr>
+<tr><td>DB3-L-07</td><td>Bind-parameter headroom: the widest insert is 14,000 parameters (<code>caja_turnos</code> × 500). Nothing chunks it if <code>MAX_PUSH_DELTAS</code> ever rises above about 2,340.</td><td>R1-11</td></tr>
+<tr><td>DB3-L-08</td><td><code>session_resolve</code>'s 60 s touch threshold is hard-coded, which would break any idle limit under 60 s (the portal uses 7 days). Transactional files use session-level <code>SET lock_timeout</code>. <code>dropInvalidIndexes</code> ignores the schema. The SQL splitter mishandles <code>CREATE RULE … DO ALSO (a; b)</code> and <code>BEGIN ATOMIC</code>. The lint misses <code>ABORT</code>, non-concurrent <code>REINDEX</code>, and a <code>SET lock_timeout</code> placed late.</td><td>R2-10..13</td></tr>
+<tr><td>DB3-L-09</td><td>The drizzle journal is frozen at 0013 and the declared indexes drift, for example the missing INCLUDE columns. There's no index-drift test.</td><td>R2-15</td></tr>
+<tr><td>DB3-L-10</td><td><code>lowStock</code> returns an unbounded list (1,400 rows, for a count and a few names). The layout makes about 23 sequential round trips; <code>loadShellLogo</code> rereads what <code>currentSession</code> already fetched. <code>listRejections</code> and <code>listNotices</code> are unbounded, and rejections carry jsonb payloads.</td><td>R3-11/12/16</td></tr>
+<tr><td>DB3-L-11</td><td>Integrity is still enforced only in application code: no CHECKs, no FKs, text <code>fecha</code>. The stock formulas disagree for any <code>tipo</code> other than entrada/salida (the Asesor counts it negative, the rest positive). ADR-068's S2 needs <code>(business_id, id)</code> keys, and <code>sync_receipts</code> needs a time key before it can be partitioned.</td><td>R2-14/16</td></tr>
+</table></div>
+
+<h2 id="index">3. Index census</h2>
+<p>How I measured it:</p>
+<ul>
+<li>Reset the statistics.</li>
+<li>Ran every real portal read function for 203 tenants, plus 60 s of real pushes, on the 8 GB dataset.</li>
+<li>Read <code>pg_stat_user_indexes</code>.</li>
+<li>Dropped the 11 indexes added in round 2 and re-ran the same push load, to compare write throughput.</li>
+</ul>
+<div class="tbl"><table>
+<tr><th>Index</th><th class="n">Size</th><th class="n">Scans</th><th>Verdict</th></tr>
+<tr><td><code>sales_business_fecha_id_live_idx</code></td><td class="n">644 MB</td><td class="n">406</td><td>Keep. The key serves the lists and exports. It's 12× the plain <code>fecha</code> index because <code>id</code> defeats de-duplication.</td></tr>
+<tr><td><code>sales_business_idx</code> (bid, fecha)</td><td class="n">54 MB</td><td class="n">812</td><td><strong>Drop</strong>. Every date query already filters <code>deleted_at IS NULL</code>, and the planner picks the live index (R2-04).</td></tr>
+<tr><td><code>inventory_movements_business_producto_idx</code> (covering)</td><td class="n">448 MB</td><td class="n">609</td><td>Keep until a stock rollup exists, then drop.</td></tr>
+<tr><td><code>*_business_created_idx</code> (3 tables)</td><td class="n">511 MB</td><td class="n">203 / 0</td><td>Keep, and add INCLUDE. Only the usage recount uses them. Incremental counters would free all 511 MB.</td></tr>
+<tr><td><code>sales_business_producto_idx</code>, <code>tickets_business_cliente_idx</code></td><td class="n">54 / 24 MB</td><td class="n">0 / 812</td><td>Revisión only. Make the cliente one partial.</td></tr>
+<tr><td><code>sync_receipts</code> PK + <code>received_idx</code></td><td class="n">1.7 GB + 378 MB</td><td class="n">3.5 M / 203</td><td>Keep. Retention (DB2-SYNC-03) is the lever: this table is still the largest.</td></tr>
+<tr><td><code>idx_tickets_device_folio</code> (unique)</td><td class="n">293 MB</td><td class="n">0</td><td>Keep. It enforces folio uniqueness.</td></tr>
+<tr><td><em>(missing)</em> <code>tickets (bid, id) WHERE cancelled_at IS NOT NULL</code></td><td class="n">tiny</td><td class="n">—</td><td><strong>Add</strong> (DB3-QRY-01).</td></tr>
+</table></div>
+<p><strong>Write cost of the 11 round-2 indexes:</strong> none measurable at this size.</p>
+<ul>
+<li>Backlog push: 20,830 vs 20,769 rows/s.</li>
+<li>Live push: 717 vs 684 pushes/s.</li>
+<li>Their cost is storage (+23%, 8.2 → 10.1 GB) and WAL.</li>
+</ul>
+
+<h2 id="ok">4. Verified correct</h2>
+<ul>
+<li><strong>Batched push.</strong>
+<ul>
+<li>Seqs are consecutive in delta order across the products-first writes and across segments. The cursor lock lasts until commit. In a one-segment push it's taken only for the last 4 round trips.</li>
+<li>Last-write-wins works row by row in the multi-row upsert. Grouping rows by shape never nulls a field a row leaves out.</li>
+<li>A re-push is answered from receipts at millisecond precision. One foreign id is found by splitting, and a newer foreign row is answered DUPLICATE_CONFLICT without an error.</li>
+<li>The savepoint budget (60 + 1) stays under the 64-entry cache.</li>
+<li>Throughput: 47–67 ms per 500 rows, 20.8K rows/s with 15 clients, and 3 devices of one shop finish in 114 ms together.</li>
+</ul></li>
+<li><strong>Pull.</strong> It reads the cursor before the tables, and a truncated page's cursor is its last entry, so there are no gaps. The metering read is started with <code>.catch</code> attached, so no unhandled rejection. No request holds a connection while waiting for another, so a 2-connection pool can't deadlock.</li>
+<li><strong>Device client.</strong>
+<ul>
+<li>The cursor advances only after every row's outcome is recorded, and a lost response is answered from receipts.</li>
+<li>Stale-pending recovery can't re-send a batch that is still in flight within one engine.</li>
+<li>A batch never exceeds 500 rows.</li>
+<li>No hot loops. The backoff math stays within its bounds, and the fetch timeout covers reading the body.</li>
+<li>Rows the device just received aren't pushed back. The retention purge deletes only acknowledged rows.</li>
+</ul></li>
+<li><strong>Migrations.</strong>
+<ul>
+<li>0043's duplicate guard refuses before building. The INVALID-index sweep plus <code>IF NOT EXISTS</code> make re-runs idempotent.</li>
+<li>0044 doesn't rewrite the table.</li>
+<li>0045 leaves 0 unwrapped policies, and every ALL policy has WITH CHECK.</li>
+<li>0046's CTE always touches and always returns the row.</li>
+<li>Admin 0020–0022 are correct.</li>
+<li>The runner selftest passes 10/10.</li>
+<li>Role settings (JIT, timeouts) are in place.</li>
+</ul></li>
+<li><strong>Portal reads.</strong>
+<ul>
+<li><code>fechaEnDias</code> is inclusive at both ends and handles the sentinel and timestamped values.</li>
+<li>Cancelled and deleted rows are excluded consistently across the totals, the daily series, the ledger and the summary, apart from the orphan lines in DB3-QRY-04.</li>
+<li>ILIKE escaping works, and the export keyset has no ties or gaps.</li>
+<li><code>cache()</code> is request-scoped, so no tenant data leaks between requests.</li>
+<li><code>historialSync</code>'s seq/<code>created_at</code> assumption holds, because both are stamped under the cursor lock.</li>
+<li>Month-scale screens: p95 under 70 ms across 203 tenants.</li>
+</ul></li>
+<li><strong>Hot rows.</strong> <code>devices</code> and <code>sync_cursors</code> stayed over 99% HOT under 42K updates, and autovacuum kept up.</li>
+</ul>
+
+<h2 id="order">5. What to fix, in order</h2>
+<div class="tbl"><table>
+<tr><th>When</th><th>Fix</th></tr>
+<tr><td><strong>Before merging <code>perf/db-scale</code></strong></td><td>
+<ul>
+<li>DB3-MIG-01: edit 0043, 0044 and 0045 while they're still unapplied on the hosted database.</li>
+<li>The index corrections in DB3-IDX-01 that belong in the same files: the <code>portal_sessions</code> index and the two redundant <code>business_id</code> prefixes.</li>
+<li>DB3-SYNC-01 (a) and (c) on the server: the NUL/jsonb failure and the error mapping.</li>
+<li>DB3-SYNC-04 (resolve rejections).</li>
+</ul>
+These are small, all in files this branch already owns, and each is a bug the branch introduced or widened.</td></tr>
+<tr><td><strong>Before launch</strong></td><td>
+<ul>
+<li>DB3-BOOT-01, a contract change and an ADR-081 amendment. <strong>No heavy tenant can pass its first month without it.</strong></li>
+<li>DB3-SYNC-01 (b), the client batch splitting.</li>
+<li>DB3-CAJA-01, 02 and 03.</li>
+<li>DB3-EXP-01, DB3-EST-01, DB3-QRY-01.</li>
+<li>DB3-SYNC-02, 03 and 05.</li>
+<li>DB3-OPS-01.</li>
+</ul></td></tr>
+<tr><td><strong>Before about 1,000 tenants</strong></td><td>
+<ul>
+<li>DB3-QRY-02, 03 and 04.</li>
+<li>DB3-CAJA-04.</li>
+<li>DB3-L-01 (cuts pulled rows by 25–40%).</li>
+<li>DB3-SEC-01, as part of the security audit.</li>
+<li>Round 2's still-open items: retention, integrity constraints, the stock rollup and incremental counters.</li>
+</ul></td></tr>
+<tr><td><strong>Before about 5,000, and at the cap</strong></td><td>
+<ul>
+<li>Pool and compute sized from the measured 17:00–20:00 p95.</li>
+<li>Load shedding.</li>
+<li>The ADR-068 S2 partitioning ADR.</li>
+<li>At the 30K cap: a larger pooler, and a longer device debounce at peak.</li>
+</ul></td></tr>
+</table></div>
+
+<h2 id="azure">6. The Azure note (O-29)</h2>
+<p>The note is on the branch as owner row O-29 in <code>docs/plan/11-pre-launch-and-deferred.md</code>. It appears in <code>PENDIENTES.md</code>. This round adds three sizing facts to it:</p>
+<ol>
+<li><strong>Size the peak on connections, not CPU.</strong> 5,000 realistic tenants need about 3–6 busy connections at a 1–3 ms round trip. That is 17–41% of a Nano-class pooler. At the 30K cap it is 30–72, which is 2–5× over.</li>
+<li><strong>Shed load with 503 + <code>Retry-After</code></strong> instead of queueing, so an outage at 20:00 doesn't turn into thousands of waiting functions.</li>
+<li><strong>Autovacuum and analyze need headroom at the peak,</strong> or plans flip (DB3-QRY-01). Schedule manual VACUUM/ANALYZE and any lock-taking DDL in the 00:00–06:00 trough.</li>
+</ol>
+
+<h2 id="method">7. Method</h2>
+<ul>
+<li><strong>Review:</strong> four read-only reviewers (R1–R4) covered the full <code>origin/main…perf/db-scale</code> diff by area, each on a private Postgres container. Every high finding was reproduced on real Postgres, or measured.</li>
+<li><strong>My measurements:</strong> the same 1,003-tenant, 8 GB dataset as round 2, rebuilt on the branch schema (0000–0046 plus back office). The container was 4 vCPU / 4 GB, with JIT off and a 5 s statement timeout on the app role. I ran the real data-pg query functions for 203 tenants and the real <code>ApplyPushUseCase</code> + <code>PgPushStore</code> under load, then the index census, the index write-cost A/B, payload sizes from <code>row_to_json</code>, and dead-tuple and HOT ratios on the hot rows.</li>
+<li><strong>Cleanup:</strong> every container was removed, and the worktree is clean.</li>
+<li><strong>Not verified:</strong>
+<ul>
+<li>The hosted Supabase ledger and pooler size.</li>
+<li>Vercel's real body limit and concurrency behaviour.</li>
+<li>iPad memory limits for DB3-CAJA-04.</li>
+<li>Maestro phone flows.</li>
+</ul></li>
+</ul>
+</main>
+</body>
+</html>
