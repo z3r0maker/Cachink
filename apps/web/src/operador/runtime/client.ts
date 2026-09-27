@@ -8,7 +8,7 @@
  */
 
 import type { RegistrarTicketInput } from '@xangarro/application';
-import type { ReferenceTables } from '@xangarro/contracts';
+import type { Bootstrap } from '@xangarro/contracts';
 import type { SyncRunResult } from '@xangarro/sync';
 
 import type {
@@ -101,8 +101,8 @@ export class RegisterRuntime {
   }
 
   /** O-12 · Vincular: the activation bootstrap becomes the local database. */
-  vincular(tables: ReferenceTables, businessId: string): Promise<void> {
-    return this.#call(calls.vincular(tables, businessId));
+  vincular(bootstrap: Bootstrap, businessId: string): Promise<void> {
+    return this.#call(calls.vincular(bootstrap, businessId));
   }
 
   operadores(businessId: string, deviceId: string): Promise<readonly OperadorPara[]> {

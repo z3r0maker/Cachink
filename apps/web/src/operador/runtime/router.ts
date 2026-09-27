@@ -28,7 +28,7 @@ type AccesoBasicoRequest = Extract<
 
 function accesoBasico(request: AccesoBasicoRequest, rt: Rt): Promise<unknown> {
   if (request.method === 'vincular') {
-    return access.vincularBootstrap(rt.db, request.tables, request.businessId as never);
+    return access.vincularBootstrap(rt.db, request.bootstrap, request.businessId as never);
   }
   if (request.method === 'autenticar') {
     return access.autenticar(

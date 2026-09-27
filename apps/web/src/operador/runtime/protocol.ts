@@ -5,7 +5,7 @@
  */
 
 import type { RegistrarTicketInput } from '@xangarro/application';
-import type { ReferenceTables } from '@xangarro/contracts';
+import type { Bootstrap } from '@xangarro/contracts';
 
 export type {
   AbonoCuentaPara,
@@ -79,7 +79,7 @@ export type WorkerRequest =
   | {
       readonly id: number;
       readonly method: 'vincular';
-      readonly tables: ReferenceTables;
+      readonly bootstrap: Bootstrap;
       readonly businessId: string;
     }
   | {

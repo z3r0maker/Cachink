@@ -3,7 +3,7 @@
  * are one line each and the payloads live beside their protocol (O-34).
  */
 
-import type { ReferenceTables } from '@xangarro/contracts';
+import type { Bootstrap } from '@xangarro/contracts';
 import type { TicketPara, VentaPara, WorkerRequest } from './protocol';
 
 /** A request minus its RPC id — kept derived so it can never drift. */
@@ -46,9 +46,9 @@ export interface AbonoInput {
   readonly fecha: string;
 }
 
-export const vincular = (tables: ReferenceTables, businessId: string): Call => ({
+export const vincular = (bootstrap: Bootstrap, businessId: string): Call => ({
   method: 'vincular',
-  tables,
+  bootstrap,
   businessId,
 });
 
