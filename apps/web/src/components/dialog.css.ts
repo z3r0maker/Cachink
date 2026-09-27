@@ -21,6 +21,7 @@ const pop = keyframes({
  */
 const panel = {
   position: 'fixed',
+  zIndex: 51,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
