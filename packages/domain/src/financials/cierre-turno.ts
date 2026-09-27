@@ -4,7 +4,8 @@
  *   esperado = fondo + ventas en efectivo + abonos en efectivo − gastos de caja
  *
  * Fiado is excluded by construction: only cash inputs exist. The count is per
- * denomination (the JSON column on `caja_turnos`), in whole pieces.
+ * denomination (the JSON column on `caja_turnos`), in whole pieces, keyed
+ * by `clave` (billete-20 and moneda-20 apart); totals are exact centavos.
  */
 
 import { CorteInvalidoError } from '../errors/caja-errors.js';
@@ -107,29 +108,74 @@ function ventasEfectivoDelTurno(
   return lineas.filter((l) => ids.has(l.ticketId) && l.deletedAt === null).map((l) => l.monto);
 }
 
+/**
+ * Mexico's cash, bills first. The $20 exists as a bill AND a coin, and the
+ * count reaches the centavos, so each denomination has its own key and every
+ * value is in centavos: the total is exact, never a float of pesos.
+ */
 export const DENOMINACIONES_MXN = [
-  { pesos: 1000, valor: 1000_00n, tipo: 'billete' },
-  { pesos: 500, valor: 500_00n, tipo: 'billete' },
-  { pesos: 200, valor: 200_00n, tipo: 'billete' },
-  { pesos: 100, valor: 100_00n, tipo: 'billete' },
-  { pesos: 50, valor: 50_00n, tipo: 'billete' },
-  { pesos: 20, valor: 20_00n, tipo: 'billete' },
-  { pesos: 10, valor: 10_00n, tipo: 'moneda' },
-  { pesos: 5, valor: 5_00n, tipo: 'moneda' },
-  { pesos: 2, valor: 2_00n, tipo: 'moneda' },
-  { pesos: 1, valor: 1_00n, tipo: 'moneda' },
+  { clave: 'billete-1000', valor: 1000_00n, tipo: 'billete', etiqueta: '$1000' },
+  { clave: 'billete-500', valor: 500_00n, tipo: 'billete', etiqueta: '$500' },
+  { clave: 'billete-200', valor: 200_00n, tipo: 'billete', etiqueta: '$200' },
+  { clave: 'billete-100', valor: 100_00n, tipo: 'billete', etiqueta: '$100' },
+  { clave: 'billete-50', valor: 50_00n, tipo: 'billete', etiqueta: '$50' },
+  { clave: 'billete-20', valor: 20_00n, tipo: 'billete', etiqueta: '$20' },
+  { clave: 'moneda-20', valor: 20_00n, tipo: 'moneda', etiqueta: '$20' },
+  { clave: 'moneda-10', valor: 10_00n, tipo: 'moneda', etiqueta: '$10' },
+  { clave: 'moneda-5', valor: 5_00n, tipo: 'moneda', etiqueta: '$5' },
+  { clave: 'moneda-2', valor: 2_00n, tipo: 'moneda', etiqueta: '$2' },
+  { clave: 'moneda-1', valor: 1_00n, tipo: 'moneda', etiqueta: '$1' },
+  { clave: 'moneda-0.50', valor: 50n, tipo: 'moneda', etiqueta: '50¢' },
+  { clave: 'moneda-0.20', valor: 20n, tipo: 'moneda', etiqueta: '20¢' },
+  { clave: 'moneda-0.10', valor: 10n, tipo: 'moneda', etiqueta: '10¢' },
 ] as const;
 
-export type PesosDenominacion = (typeof DENOMINACIONES_MXN)[number]['pesos'];
+export type Denominacion = (typeof DENOMINACIONES_MXN)[number];
+export type ClaveDenominacion = Denominacion['clave'];
 
-/** Pieces per denomination, keyed by its value in pesos; missing means none. */
-export type ConteoDenominaciones = Readonly<Partial<Record<PesosDenominacion, number>>>;
+/** Pieces per denomination, keyed by its `clave`; missing means none. */
+export type ConteoDenominaciones = Readonly<Partial<Record<ClaveDenominacion, number>>>;
 
+/**
+ * Counts saved before the $20 coin and the centavos were keyed by pesos, and
+ * back then «20» could only be the bill.
+ */
+const CLAVE_ANTERIOR: Readonly<Record<string, ClaveDenominacion>> = {
+  '1000': 'billete-1000',
+  '500': 'billete-500',
+  '200': 'billete-200',
+  '100': 'billete-100',
+  '50': 'billete-50',
+  '20': 'billete-20',
+  '10': 'moneda-10',
+  '5': 'moneda-5',
+  '2': 'moneda-2',
+  '1': 'moneda-1',
+};
+
+const CLAVES = new Set<string>(DENOMINACIONES_MXN.map((d) => d.clave));
+
+/**
+ * A stored count (the JSON column) as a `ConteoDenominaciones`: current keys
+ * pass, old pesos keys are translated, anything else (an unknown key, a
+ * negative or fractional count) is dropped.
+ */
+export function normalizarConteo(raw: Readonly<Record<string, unknown>>): ConteoDenominaciones {
+  const out: Partial<Record<ClaveDenominacion, number>> = {};
+  for (const [k, n] of Object.entries(raw)) {
+    const clave = CLAVES.has(k) ? (k as ClaveDenominacion) : CLAVE_ANTERIOR[k];
+    if (clave === undefined || typeof n !== 'number' || !Number.isInteger(n) || n < 0) continue;
+    out[clave] = (out[clave] ?? 0) + n;
+  }
+  return out;
+}
+
+/** The counted cash in centavos: whole pieces times each denomination's value. */
 export function totalContado(conteo: ConteoDenominaciones): Money {
   return sum(
     DENOMINACIONES_MXN.map((d) => {
-      const n = conteo[d.pesos] ?? 0;
-      if (n < 0 || !Number.isInteger(n)) throw new CorteInvalidoError(`conteo de $${d.pesos}`);
+      const n = conteo[d.clave] ?? 0;
+      if (n < 0 || !Number.isInteger(n)) throw new CorteInvalidoError(`conteo de ${d.clave}`);
       return d.valor * BigInt(n);
     }),
   );

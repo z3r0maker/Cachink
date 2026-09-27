@@ -6,7 +6,15 @@ import { puertaOperador } from './puerta-operador';
  * O-11 (Track O, fase 10): the operator shell. The design's gate for a shell is
  * that navigating between screens keeps the active item and moves nothing.
  */
-const DESTINOS = ['Caja', 'Turno', 'Ventas', 'Gastos', 'Inventario', 'Cobranza', 'Inicio'];
+const DESTINOS = [
+  'Cobrar',
+  'Mi turno',
+  'Ventas',
+  'Gastos',
+  'Inventario',
+  'Fiado y abonos',
+  'Inicio',
+];
 
 test.beforeEach(() => test.setTimeout(120_000));
 
@@ -50,7 +58,7 @@ test.describe('phone', () => {
     await page.goto('/operador/ventas');
     await expect(page.locator('aside').filter({ hasText: 'XANGARRO!' })).toBeHidden();
     const bar = page.getByRole('navigation', { name: 'Navegación de la caja' }).last();
-    await expect(bar.getByRole('link')).toHaveText(['Inicio', 'Caja', 'Ventas', 'Turno']);
+    await expect(bar.getByRole('link')).toHaveText(['Inicio', 'Cobrar', 'Ventas', 'Mi turno']);
     await expect(bar.getByRole('link', { name: 'Ventas' })).toHaveAttribute('aria-current', 'page');
   });
 });

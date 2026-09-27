@@ -36,6 +36,7 @@ export function filtrar(
   filtro: FiltroCortes,
   estado: (c: Corte) => EstadoCorte,
   query: string,
+  caja: string | null = null,
 ): readonly Corte[] {
   return cortes
     .filter((c) => {
@@ -44,8 +45,13 @@ export function filtrar(
       if (filtro === 'Con diferencia') return diferencia(c).tipo !== 'cuadra';
       return c.caja === filtro;
     })
+    .filter((c) => caja === null || c.caja === caja)
     .filter((c) => matches(query, `${c.operador} ${c.caja} ${c.dia} · ${c.horario}`));
 }
+
+/** «Dos cajas», «Una caja». */
+const cuantas = (n: number, cosa: string, una: string): string =>
+  n === 1 ? `${una} ${cosa}` : `${enPalabras(n)} ${cosa}s`;
 
 /** The four KPIs: count, pending review, the month's net difference, and how many balanced. */
 export function resumen(cortes: readonly Corte[], estado: (c: Corte) => EstadoCorte) {
@@ -59,7 +65,7 @@ export function resumen(cortes: readonly Corte[], estado: (c: Corte) => EstadoCo
   const personas = new Set(cortes.map((c) => c.operador)).size;
   return {
     cortes: cortes.length,
-    equipo: `${enPalabras(cajas)} cajas, ${enPalabras(personas).toLowerCase()} personas`,
+    equipo: `${cuantas(cajas, 'caja', 'Una')}, ${cuantas(personas, 'persona', 'Una').toLowerCase()}`,
     porAclarar: cortes.filter((c) => estado(c) === 'Por aclarar').length,
     neto,
     cuadraron: cortes.filter((c) => diferencia(c).tipo === 'cuadra').length,
@@ -72,9 +78,15 @@ export const netoTexto = (neto: Money): string =>
 export const aclarado = (c: Corte) =>
   `El corte de ${c.operador} del ${c.dia} queda cerrado. La diferencia se registra como ajuste de caja.`;
 
-/** «Pedir aclaración» sends the operator a message they read in Avisos (ADR-075). */
+/** «Ana», for «Preguntarle a Ana» and «Lo que explicó Ana». */
+export const primerNombre = (c: Corte): string => c.operador.split(' ')[0] ?? c.operador;
+
+/** «15:04», the close: the end of «09:00 a 15:04». */
+export const horaCierre = (c: Corte): string => c.horario.split(' a ').at(-1) ?? c.horario;
+
+/** «Preguntarle a Ana» sends the operator a message at her caja (ADR-075). */
 export const aclaracion = (c: Corte) =>
-  `A ${c.operador.split(' ')[0] ?? c.operador} le llega el detalle del corte en sus Avisos. Cuando responda, su respuesta aparece en los tuyos.`;
+  `A ${primerNombre(c)} le llega el detalle del corte a su caja. Cuando conteste, lo ves en tus Avisos.`;
 
 /** «Qué más pasó en el turno»: a zero reads «Ninguna» / «Ninguno» on white. */
 export function eventos(c: Corte): readonly Evento[] {

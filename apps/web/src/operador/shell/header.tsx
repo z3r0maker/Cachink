@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { Icon } from '../../shell/icon';
@@ -25,28 +26,48 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
             {mode.back.label}
           </Link>
         ) : (
-          <BizPill data={data} />
+          <>
+            <BizPill data={data} />
+            <Fecha />
+          </>
         )}
         <div className={h.right}>
           {mode.status === 'none' ? null : <SyncPill data={data} asLink={mode.status === 'full'} />}
           {mode.status === 'full' && mode.bell !== false ? (
             <Bell unread={data.avisosSinLeer} />
           ) : null}
-          <div id={HEADER_ACTION_ID} style={{ display: 'contents' }} />
+          <div id={HEADER_ACTION_ID} className={h.actionSlot} />
         </div>
       </div>
     </header>
   );
 }
 
+/**
+ * On a wide screen the caja lives in the sidebar, so the header says the day.
+ * Read after mount: the server and the counter can sit in different zones.
+ */
+function Fecha() {
+  const [hoy, setHoy] = useState('');
+  useEffect(() => {
+    const f = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    const t = f.format(new Date());
+    setHoy(t.charAt(0).toUpperCase() + t.slice(1));
+  }, []);
+  return <span className={h.fecha}>{hoy}</span>;
+}
+
+/** On a phone there is no sidebar: one white bar carries the caja and its business. */
 function BizPill({ data }: { readonly data: OperadorShellData }) {
   return (
     <div className={h.bizPill}>
-      <div className={h.bizTile}>{data.negocio.iniciales}</div>
-      <div style={{ minWidth: 0 }}>
-        <div className={h.bizName}>{data.negocio.nombre}</div>
-        <div className={h.bizSub}>{data.caja} · Operativo</div>
-      </div>
+      <span className={h.bizTile}>
+        <Icon path={ICONS.caja} size={18} strokeWidth={2.2} />
+      </span>
+      <span className={h.bizText}>
+        <span className={h.bizName}>{data.caja}</span>
+        <span className={h.bizSub}>{data.negocio.nombre}</span>
+      </span>
     </div>
   );
 }
@@ -66,6 +87,7 @@ function SyncPill({
       <span className={h.syncLabel}>
         {offline ? `Sin conexión · ${data.pendientes} por enviar` : 'Todo enviado'}
       </span>
+      <span className={h.syncCorto}>{offline ? `${data.pendientes} sin enviar` : 'Enviado'}</span>
     </>
   );
   const flag = offline ? '' : undefined;

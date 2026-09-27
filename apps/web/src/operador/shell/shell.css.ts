@@ -106,23 +106,7 @@ export const navLabel = style({
   whiteSpace: 'nowrap',
 });
 
-/* Sidebar footer: who holds the turno, lock and close. */
-
-export const foot = style({
-  padding: '14px 12px',
-  borderTop: `2.5px solid ${colors.black}`,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-});
-
-export const eyebrow = style({
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  letterSpacing: typography.letterSpacing.wider,
-  textTransform: 'uppercase',
-  color: colors.gray600,
-});
+/* Who holds the turno (the card lives in sidebar.css). */
 
 export const who = style({ display: 'flex', alignItems: 'center', gap: 10 });
 
@@ -152,32 +136,3 @@ export const whoSub = style({
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
 });
-
-export const footActions = style({ display: 'flex', gap: 8 });
-
-const footButton = {
-  ...contentBox,
-  height: 42,
-  display: 'grid',
-  placeItems: 'center',
-  border: `2px solid ${colors.black}`,
-  borderRadius: radii[2],
-  background: colors.white,
-  boxShadow: shadows.small,
-  color: colors.black,
-} as const;
-
-export const lockButton = style([pressable, { ...footButton, flex: 'none', width: 42 }]);
-
-export const closeLink = style([
-  pressable,
-  {
-    ...footButton,
-    flex: 1,
-    fontSize: portalFontSizes.xs,
-    fontWeight: typography.weights.bold,
-    letterSpacing: typography.letterSpacing.wider,
-    textTransform: 'uppercase',
-    textDecoration: 'none',
-  },
-]);

@@ -21,7 +21,7 @@
 import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const businessOnboarding = pgTable('business_onboarding', {
-  // The primary key is the tenant index (0043 dropped its duplicate).
+  // The primary key is the tenant index (0044 dropped its duplicate).
   businessId: text('business_id').primaryKey(),
   answers: jsonb('answers').notNull().default({}),
   /** Items the owner ticked by hand; auto-detected items are computed, not stored. */

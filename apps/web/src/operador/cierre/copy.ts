@@ -13,7 +13,7 @@ export const DIF = {
     label: 'Falta',
     bg: colors.redSoft,
     color: colors.redText,
-    hint: 'Hay menos efectivo del esperado. Cuenta otra vez antes de explicar la diferencia.',
+    hint: 'Cuenta otra vez antes de explicar. Pasa seguido.',
   },
   sobra: {
     label: 'Sobra',
@@ -23,20 +23,27 @@ export const DIF = {
   },
 } as const;
 
-export function cerrarHint(pendientes: number, faltaNota: boolean): string {
-  if (pendientes > 0) return 'Primero se tienen que enviar los registros pendientes.';
-  if (faltaNota) return 'Elige un motivo y escribe la nota para poder cerrar.';
+/** While records wait, a shortfall is not final: the expected cash can still move. */
+export const FALTA_PENDIENTE =
+  'Hay menos efectivo del esperado. Cuenta otra vez antes de explicar. Cuando se envíen los registros, la diferencia se vuelve a calcular.';
+
+/** «Cerrar turno», or with the difference in the button itself. */
+export function cerrarLabel(d: DiferenciaCorte): string {
+  if (d.tipo === 'cuadra') return 'Cerrar turno';
+  const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
+  return `Cerrar turno con ${que} de ${formatMoney(d.monto)}`;
+}
+
+export function cerrarHint(faltaMotivo: boolean, faltaNota: boolean): string {
+  if (faltaMotivo) return 'Elige un motivo para poder cerrar.';
+  if (faltaNota) return 'Escribe la nota para poder cerrar.';
   return 'Al cerrar se guarda el conteo con tu nombre y ya no puedes capturar en esta caja.';
 }
 
-/** The band's second line: offline it asks to reconnect, online to wait. */
-export function bandaCuerpo(connection: 'en-linea' | 'sin-conexion'): string {
-  const base =
-    'No puedes cerrar el turno todavía: el efectivo esperado se calcula con esas ventas.';
-  return connection === 'sin-conexion'
-    ? `${base} Conéctate y espera a que suban.`
-    : `${base} Espera a que terminen de subir.`;
-}
+/** The band's second line, and what a failed retry says. */
+export const BANDA_CUERPO =
+  'Para cerrar, primero se tienen que enviar: el efectivo esperado se calcula con ellos.';
+export const BANDA_SIN_RED = 'Todavía no hay internet. Lo volvemos a intentar solos en un momento.';
 
 export function lineaCerrado(d: DiferenciaCorte, motivo: string | null, dueno: string): string {
   if (d.tipo === 'cuadra')

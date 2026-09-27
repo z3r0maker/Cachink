@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -33,11 +34,7 @@ test('an offline sale lands exactly once when the wire comes back', async ({ pag
     .getByRole('button', { name: /Taco al pastor/ })
     .first()
     .click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const modal = page.getByRole('dialog');
-  await modal.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await modal.getByLabel('Con cuánto paga').fill('30');
-  await modal.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, '30');
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   // Nothing reached Postgres while offline.

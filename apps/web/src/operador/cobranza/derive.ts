@@ -12,12 +12,19 @@ export const saldo = (c: CuentaCliente): Money => estadoCuenta(c).saldo;
 
 export const estado = (c: CuentaCliente): EstadoCliente => estadoCliente(c, estadoCuenta(c));
 
-/** «3 ventas abiertas · la más antigua V-0361 · 8 may», or when the last one was settled. */
+/** «del 8 may», «de hoy». */
+const delDia = (dia: string) => (dia.startsWith('hoy') ? 'de hoy' : `del ${dia}`);
+
+/** «3 ventas abiertas · la más antigua V-0361 del 8 may», or when the last one was settled. */
 export function resumenCliente(c: CuentaCliente): string {
   const vivas = abiertas(c, estadoCuenta(c));
   const vieja = vivas[0];
-  if (!vieja) return `No debe nada. Última venta liquidada el ${ultimoAbono(c)?.dia ?? ''}.`;
-  return `${vivas.length} ventas abiertas · la más antigua ${vieja.venta.folio} · ${vieja.venta.dia}`;
+  if (!vieja) {
+    const dia = ultimoAbono(c)?.dia ?? '';
+    return `No debe nada. Liquidó su última venta ${dia.startsWith('hoy') ? 'hoy' : `el ${dia}`}.`;
+  }
+  const n = vivas.length === 1 ? '1 venta abierta' : `${vivas.length} ventas abiertas`;
+  return `${n} · la más antigua ${vieja.venta.folio} ${delDia(vieja.venta.dia)}`;
 }
 
 export function filtrar(
@@ -80,9 +87,8 @@ export function resumen(cuentas: readonly CuentaCliente[], hoy: string) {
   };
 }
 
-/** The whole balance first, then $100, $200 and $500 while they fit: at most four. */
+/** The whole balance first, then $500 and $200 while they are less than it. */
 export function rapidos(total: Money): readonly Money[] {
-  return [...new Set([total, 100_00n, 200_00n, 500_00n])]
-    .filter((v) => v > 0n && v <= total)
-    .slice(0, 4);
+  if (total <= 0n) return [];
+  return [total, ...[500_00n, 200_00n].filter((v) => v < total)];
 }

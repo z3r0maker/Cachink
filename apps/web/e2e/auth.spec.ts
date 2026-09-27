@@ -50,7 +50,7 @@ test('the caja door leads to the register, never to the member form', async ({ p
   // An unlinked browser lands on the register's own gate: the linking
   // ceremony, not a password form.
   await expect(page).toHaveURL(/\/operador$/);
-  await expect(page.getByRole('heading', { name: 'Vincula esta caja' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Conecta esta caja' })).toBeVisible();
   await expect(page.getByTestId('login-email')).toHaveCount(0);
 });
 

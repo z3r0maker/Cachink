@@ -3,6 +3,7 @@ import { clients as clientsTable } from '@xangarro/data-pg';
 
 import { saldosActuales } from '@/server/actions/apertura';
 import { requireMember } from '@/server/auth';
+import { hoy } from '@/server/clock';
 import { withTenant } from '@/server/db';
 
 import { SaldosScreen, type ClienteOpcion } from './parts';
@@ -27,6 +28,7 @@ export default async function SaldosInicialesPage() {
     <SaldosScreen
       mayWrite={session.member_role !== 'viewer'}
       lockedAt={header?.lockedAt ?? null}
+      hoy={hoy()}
       clientes={clientes}
       form={{
         fechaApertura: header?.fechaApertura ?? '',

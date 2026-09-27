@@ -1,5 +1,13 @@
 import { keyframes, style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  portalFontSizes,
+  radii,
+  shadows,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
 import { PHONE } from '../shell/shell.css';
@@ -9,7 +17,11 @@ const pop = keyframes({
   to: { opacity: 1, transform: 'none' },
 });
 
-/** The confirmation card every operator screen shows after an action (xg-pop, 140 ms). */
+/**
+ * The quick notice every operator screen shows after an action (OpEstados
+ * «Aviso rápido»): tinted head with the icon, the title and the X; the detail
+ * below. The X or Esc closes it.
+ */
 export const toast = style({
   position: 'fixed',
   right: 32,
@@ -17,11 +29,11 @@ export const toast = style({
   zIndex: 70,
   width: 'min(380px, calc(100vw - 32px))',
   overflow: 'hidden',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
+  border: borders.thin,
+  borderRadius: radii[4],
   background: colors.white,
-  boxShadow: shadows.hero,
-  animation: `${pop} 140ms cubic-bezier(0.2, 0.8, 0.2, 1)`,
+  boxShadow: shadows.card,
+  animation: `${pop} 220ms cubic-bezier(0.2, 0.8, 0.3, 1)`,
   '@media': {
     [PHONE]: { right: 16, bottom: 84 },
     '(prefers-reduced-motion: reduce)': { animation: 'none' },
@@ -32,43 +44,55 @@ export const head = style({
   display: 'flex',
   alignItems: 'center',
   gap: 10,
-  padding: '12px 16px',
-  borderBottom: `2px solid ${colors.black}`,
+  minHeight: 52,
+  padding: '4px 14px',
+  borderBottom: borders.thin,
+});
+
+export const icon = style({
+  width: 28,
+  height: 28,
+  flex: 'none',
+  display: 'grid',
+  placeItems: 'center',
+  border: borders.thin,
+  borderRadius: shapeRadii.pill,
+  background: colors.white,
 });
 
 export const title = style({
-  fontSize: portalFontSizes.md,
+  flex: 1,
+  minWidth: 0,
+  fontSize: portalFontSizes.body,
+  lineHeight: 1.3,
   fontWeight: typography.weights.extraBold,
+  fontVariantNumeric: 'tabular-nums',
   color: colors.black,
 });
 
-export const body = style({
-  padding: '14px 16px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 12,
-});
-
-export const text = style({
-  fontSize: portalFontSizes.md,
-  fontWeight: typography.weights.bold,
-  color: colors.black,
-  textWrap: 'pretty',
-});
-
-export const ok = style([
+export const close = style([
   pressable,
   {
+    width: 44,
     height: 44,
-    border: `2px solid ${colors.black}`,
-    borderRadius: radii[2],
-    background: colors.white,
-    boxShadow: shadows.small,
-    fontFamily: 'inherit',
-    fontSize: portalFontSizes.xs,
-    fontWeight: typography.weights.bold,
-    letterSpacing: typography.letterSpacing.wider,
-    textTransform: 'uppercase',
+    flex: 'none',
+    marginRight: -10,
+    display: 'grid',
+    placeItems: 'center',
+    border: 'none',
+    borderRadius: radii[1],
+    background: 'none',
     color: colors.black,
   },
 ]);
+
+export const body = style({
+  margin: 0,
+  padding: '12px 14px 14px',
+  fontSize: portalFontSizes.md,
+  lineHeight: 1.45,
+  fontWeight: typography.weights.semibold,
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.ink,
+  textWrap: 'pretty',
+});

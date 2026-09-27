@@ -1,5 +1,5 @@
 /**
- * Dangling-reference checks for a push, batched (contract §4; ADR-112).
+ * Dangling-reference checks for a push, batched (contract §4; ADR-115).
  *
  * One lookup per referenced table per segment, for the ids not already seen to
  * exist — nothing a push does can make a row stop existing, so a hit is kept for

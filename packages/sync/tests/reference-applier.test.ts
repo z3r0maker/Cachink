@@ -79,7 +79,8 @@ describe('applyReferenceTables', () => {
     const untouched = await new DrizzleBusinessesRepository(plain, 'DEV' as never).findById(
       FIXTURE_BUSINESS_ID as BusinessId,
     );
-    assert.equal(untouched?.receiptTemplate, 'clasico');
+    // The domain default is the yellow ticket (Postgres 0043).
+    assert.equal(untouched?.receiptTemplate, 'ticket');
     assert.equal(untouched?.addressPrint, false);
     assert.equal(untouched?.socialLinks, '{}');
   });

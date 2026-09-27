@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
-import { page, title } from './activar.css';
+import { MarcoPublico } from '../_publico/marco';
+import { ancho, bajada, cabeza, ceja, titulo, zona } from '../_publico/publico.css';
+import { Paneles, Vence } from './paneles';
+import { Pasos } from './pasos';
 
 /**
  * `/activar` — where a pairing QR lands (C-14, SEC-MOB-04).
@@ -9,7 +12,8 @@ import { page, title } from './activar.css';
  * this server never sees it and nothing here redeems anything: a WhatsApp
  * link preview fetching the page consumes nothing. On a phone with Xangarro
  * installed the verified app link opens the app instead of this page (N-25);
- * this is what everyone else sees.
+ * this is what everyone else sees. For the same reason the page cannot name
+ * the business: nothing here knows which one the link is for.
  */
 export const metadata: Metadata = {
   title: 'Vincular un teléfono · Xangarro',
@@ -19,20 +23,24 @@ export const metadata: Metadata = {
 
 export default function ActivarPage() {
   return (
-    <main className={page}>
-      <h1 className={title}>Vincula este teléfono a tu negocio</h1>
-      <p>
-        Abre este enlace en el teléfono donde está instalada la app Xangarro: se abrirá la app y te
-        pedirá confirmar el negocio antes de vincularlo.
-      </p>
-      <p>
-        ¿Todavía no tienes la app? Descárgala desde la tienda de tu teléfono y vuelve a escanear el
-        código QR que te muestra el portal. El enlace vence a los 15 minutos y sirve una sola vez.
-      </p>
-      <p>
-        ¿Prefieres escribirlo? En la app elige «Escribir código» y captura el código de 8 letras con
-        el correo del dueño.
-      </p>
-    </main>
+    <MarcoPublico
+      pose="senalando"
+      titulo="Una caja más, en un minuto."
+      bajada="Conecta el teléfono con tu negocio y empieza a cobrar. Tus ventas llegan solitas a tu portal."
+    >
+      <div className={`${zona} ${ancho.amplio}`}>
+        <header className={cabeza}>
+          <span className={ceja}>Vincular un teléfono</span>
+          <h1 className={titulo}>Vincula este teléfono a tu negocio</h1>
+          <p className={bajada}>
+            La app te pedirá confirmar el negocio antes de vincularlo. Nada se conecta solo con
+            abrir esta página.
+          </p>
+        </header>
+        <Pasos />
+        <Vence />
+        <Paneles />
+      </div>
+    </MarcoPublico>
   );
 }

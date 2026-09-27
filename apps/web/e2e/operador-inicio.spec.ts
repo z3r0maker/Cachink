@@ -13,16 +13,18 @@ test('Inicio leads with one action and lists what is pending today', async ({ pa
   await puertaOperador(page);
   await page.goto('/operador');
 
-  await expect(page.getByRole('heading', { level: 1, name: 'Buenas tardes, Ana' })).toBeVisible();
-  await expect(page.getByText('La caja está lista')).toBeVisible();
-  for (const label of ['Ventas de tu turno', 'Cobrado', 'Efectivo esperado', 'Fiado de hoy']) {
+  await expect(
+    page.getByRole('heading', { level: 1, name: '¡Buenas tardes, Ana! La caja está lista.' }),
+  ).toBeVisible();
+  await expect(page.getByText('La caja está lista', { exact: true })).toBeVisible();
+  for (const label of ['Ventas del turno', 'Cobrado', 'Efectivo esperado', 'Fiado de hoy']) {
     await expect(page.getByText(label, { exact: true })).toBeVisible();
   }
   await expect(page.getByText('$2,710.00')).toBeVisible();
   await expect(page.getByText('Una cancelada a las 12:58')).toBeVisible();
   await expect(page.getByText('Registrar el gas de la semana')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Cobrar', exact: true }).click();
+  await page.locator('main').getByRole('link', { name: 'Cobrar', exact: true }).click();
   await expect(page).toHaveURL(/\/operador\/caja$/);
 });
 

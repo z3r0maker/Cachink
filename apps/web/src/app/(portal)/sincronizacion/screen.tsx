@@ -1,64 +1,55 @@
 'use client';
 
-import { Banner, PendingButton, ScreenBody } from '@/components';
-import { useSession } from '@/session/provider';
+import { ScreenBody } from '@/components';
 import type { SincronizacionData } from '@/server/screens';
-import { canWrite, isOwner, resolveScreenState } from '@/session/gating';
+import { canWrite, resolveScreenState } from '@/session/gating';
+import { useSession } from '@/session/provider';
 
+import { MiNegocioHead } from '../negocio/hub';
+import { SyncHero } from './hero';
 import { HistorialCard } from './historial';
-import { RechazosTable } from './rechazos';
-import { Resumen } from './resumen';
-import { pageSubtitle, pageTitle } from './sincronizacion.css';
+import { PorRevisar } from './rechazos';
+import { Cajas } from './resumen';
+import * as s from './sincronizacion.css';
+import { useRechazos } from './use-rechazos';
 
 /**
- * Sincronización (P-11): read-only sync health (ADR-058 §1) — refused rows,
- * per-device state and the recent history. Refused rows are never dropped;
- * resolving one is saved, and a refused retry reopens it.
+ * Mi negocio · Sincronización (CfgSincronizacion, P-11): read-only sync health
+ * (ADR-058 §1). The cajas send on their own, so there is no «Sincronizar
+ * ahora»: the portal shows what is waiting for review, each caja and the
+ * recent history. Refused rows are never dropped; resolving one is saved.
  */
-function Heading() {
-  const session = useSession();
+function Contenido({ data }: { readonly data: SincronizacionData }) {
+  const mayWrite = canWrite(useSession().role);
+  const { abiertos, items, resolver, resueltos } = useRechazos(data.rechazos);
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-      <div>
-        <h1 className={pageTitle}>Sincronización</h1>
-        <p className={pageSubtitle}>Qué falta por enviar</p>
-      </div>
-      {isOwner(session.role) ? (
-        <div style={{ marginLeft: 'auto' }}>
-          <PendingButton reason="La sincronización la inicia el dispositivo; el portal la observa.">
-            Sincronizar ahora
-          </PendingButton>
+    <>
+      <SyncHero
+        pendientes={abiertos.length}
+        cajas={data.dispositivos.filter((d) => d.revokedAt === null).length}
+        mayWrite={mayWrite}
+      />
+      <div className={s.columnas}>
+        <PorRevisar items={items} mayWrite={mayWrite} resolver={resolver} />
+        <div className={s.columna}>
+          <Cajas dispositivos={data.dispositivos} abiertos={abiertos} />
+          <HistorialCard eventos={data.historial} resueltos={resueltos} />
         </div>
-      ) : null}
-    </div>
+      </div>
+    </>
   );
 }
 
 export function SincronizacionScreen({ data }: { readonly data: SincronizacionData | null }) {
-  const mayWrite = canWrite(useSession().role);
-  const rows = data?.rechazos ?? [];
   return (
     <>
-      <Heading />
-      {rows.length > 0 ? (
-        <Banner
-          tone="warning"
-          title={`${rows.length} registros no se pudieron enviar.`}
-          body="Siguen guardados en el dispositivo. Nada se pierde."
-        />
-      ) : null}
-      <Resumen rows={rows} dispositivos={data?.dispositivos ?? []} />
+      <MiNegocioHead activo="sincronizacion" />
       <ScreenBody
-        state={resolveScreenState({ error: data === null, isEmpty: rows.length === 0 })}
+        state={resolveScreenState({ error: data === null })}
         onRetry={() => window.location.reload()}
-        empty={{
-          title: 'Todo sincronizado',
-          body: 'No hay registros pendientes. Tus números están completos.',
-        }}
       >
-        <RechazosTable rows={rows} mayWrite={mayWrite} />
+        {data === null ? null : <Contenido data={data} />}
       </ScreenBody>
-      {data === null ? null : <HistorialCard eventos={data.historial} />}
     </>
   );
 }

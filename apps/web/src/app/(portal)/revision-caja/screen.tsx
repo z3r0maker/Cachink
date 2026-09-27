@@ -66,7 +66,7 @@ function Nota() {
         Mientras no lo revises, el producto se vende sin costo y no calcula margen, y el cliente
         fiado no tiene límite. Puedes quitarle el permiso de crear en caja a un operador desde{' '}
         <Link href="/equipo?tab=operadores" className={s.enlace}>
-          Operadores y dispositivos
+          Equipo y nómina
         </Link>
         .
       </div>

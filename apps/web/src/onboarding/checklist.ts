@@ -93,7 +93,7 @@ const ITEMS: readonly ItemDef[] = [
     key: 'codigo',
     group: 'requerido',
     title: 'Genera el código de tu caja',
-    hint: 'Ocho letras para conectar tu caja —teléfono o computadora— a tu negocio.',
+    hint: 'Ocho letras para conectar tu caja (teléfono o computadora) a tu negocio.',
     href: '/equipo?tab=dispositivos',
     isDone: (s) => s.codigoGenerado || s.dispositivosActivos > 0,
   },
@@ -118,7 +118,7 @@ const ITEMS: readonly ItemDef[] = [
     group: 'opcional',
     title: 'Revisa tus tipos de pago',
     hint: 'Efectivo, transferencia y tarjeta. Si los tres te sirven, déjalo así.',
-    href: '/negocio',
+    href: '/negocio/cobros',
     isDone: (s) => s.pagosRevisados,
   },
   {
@@ -134,7 +134,7 @@ const ITEMS: readonly ItemDef[] = [
     group: 'opcional',
     title: 'Sube tu logo',
     hint: 'Aparece en tus comprobantes.',
-    href: '/negocio',
+    href: '/negocio/comprobantes',
     isDone: (s) => s.tieneLogo,
   },
 ];

@@ -2,128 +2,68 @@
 
 import { parseCsv } from '@/lib/csv';
 
-import { TablaFilas } from './tabla';
-import { portalFontSizes } from '@xangarro/tokens';
-
 /** One grid row while the owner edits it. */
 export interface Fila {
   readonly productoId: string;
   readonly nombre: string;
+  readonly sku: string;
+  readonly unidad: string;
+  readonly icono: string | null;
   readonly cantidad: string;
   readonly costo: string;
 }
 
 /**
- * The editable grid (N-17): cantidad + costo per catalogue product, prefillable
- * from a .csv of producto, cantidad, costo. Rows without match are reported,
- * never invented.
+ * The CSV prefill (N-17): cantidad + costo per catalogue product, from a .csv
+ * of producto, cantidad, costo. Rows without match are reported, never
+ * invented.
  */
-async function prellenarCsv(
+export async function prellenarCsv(
   file: File,
   filas: readonly Fila[],
   porNombre: ReadonlyMap<string, string>,
-): Promise<{ filas: Fila[]; sinMatch: string[] }> {
+): Promise<{ filas: Fila[]; sinMatch: string[]; prellenados: number }> {
   const tabla = parseCsv(await file.text());
   const [head = [], ...body] = tabla;
   const idx = (h: string) => head.findIndex((x) => String(x).trim().toLowerCase() === h);
   const set = new Map(filas.map((f) => [f.productoId, f]));
   const sinMatch: string[] = [];
+  let prellenados = 0;
   body.forEach((row) => {
     const nombre = String(row[idx('producto') ?? 0] ?? '').trim();
     const id = porNombre.get(nombre.toLowerCase());
-    if (id === undefined) {
+    const actual = id === undefined ? undefined : set.get(id);
+    if (id === undefined || actual === undefined) {
       if (nombre !== '') sinMatch.push(nombre);
       return;
     }
-    set.set(id, filaDesdeCsv(set.get(id), id, row, idx));
+    prellenados += 1;
+    set.set(id, filaDesdeCsv(actual, row, idx));
   });
-  return { filas: [...set.values()], sinMatch };
+  return { filas: [...set.values()], sinMatch, prellenados };
 }
 
-function filaDesdeCsv(
-  actual: Fila | undefined,
-  id: string,
-  row: readonly unknown[],
-  idx: (h: string) => number,
-): Fila {
+function filaDesdeCsv(actual: Fila, row: readonly unknown[], idx: (h: string) => number): Fila {
   const costo = String(row[idx('costo') ?? 2] ?? '').trim();
   return {
-    productoId: id,
-    nombre: actual?.nombre ?? '',
+    ...actual,
     cantidad: String(row[idx('cantidad') ?? 1] ?? '').trim(),
-    costo: costo === '' ? (actual?.costo ?? '0') : costo,
+    costo: costo === '' ? actual.costo : costo,
   };
 }
 
-export function GridInventario({
-  filas,
-  setFilas,
-  editable,
-  porNombre,
-  onBanner,
-}: {
-  readonly filas: readonly Fila[];
-  readonly setFilas: (fn: (fs: Fila[]) => Fila[]) => void;
-  readonly editable: boolean;
-  readonly porNombre: ReadonlyMap<string, string>;
-  readonly onBanner: (tone: 'success' | 'critical', text: string) => void;
-}) {
-  const alPrelLenar = async (file: File | null) => {
-    if (file === null) return;
-    const r = await prellenarCsv(file, filas, porNombre);
-    setFilas(() => r.filas);
-    onBanner(
-      r.sinMatch.length > 0 ? 'critical' : 'success',
-      r.sinMatch.length > 0
-        ? `Sin match en tu catálogo: ${r.sinMatch.slice(0, 3).join(', ')}…`
-        : 'Grid prellenado; revisa antes de capturar.',
-    );
+/** The banner a prefill leaves: what matched, what did not, from which file. */
+export function avisoPrellenado(
+  archivo: string,
+  r: { sinMatch: readonly string[]; prellenados: number },
+): { tono: 'success' | 'warning'; texto: string } {
+  const base = `Prellené ${r.prellenados} ${r.prellenados === 1 ? 'producto' : 'productos'} desde ${archivo}.`;
+  if (r.sinMatch.length === 0)
+    return { tono: 'success', texto: `${base} Revisa antes de guardar.` };
+  const lista = r.sinMatch.slice(0, 3).join(', ');
+  const mas = r.sinMatch.length > 3 ? ` y ${r.sinMatch.length - 3} más` : '';
+  return {
+    tono: 'warning',
+    texto: `${base} Sin match en tu catálogo: ${lista}${mas}. Revisa antes de guardar.`,
   };
-
-  return (
-    <>
-      <BarraPrelLenado editable={editable} onPrelLenar={alPrelLenar} />
-      <TablaFilas filas={filas} editable={editable} setFilas={setFilas} />
-    </>
-  );
-}
-
-function BarraPrelLenado({
-  editable,
-  onPrelLenar,
-}: {
-  readonly editable: boolean;
-  readonly onPrelLenar: (f: File | null) => void;
-}) {
-  return (
-    <div
-      style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '16px 0', flexWrap: 'wrap' }}
-    >
-      {editable ? (
-        <label
-          style={{
-            display: 'inline-flex',
-            gap: 8,
-            alignItems: 'center',
-            border: '2px solid var(--black)',
-            borderRadius: 10,
-            padding: '8px 14px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          Prellenar desde .csv
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            style={{ display: 'none' }}
-            onChange={(e) => onPrelLenar(e.target.files?.[0] ?? null)}
-          />
-        </label>
-      ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
-        columnas: producto, cantidad, costo
-      </span>
-    </div>
-  );
 }

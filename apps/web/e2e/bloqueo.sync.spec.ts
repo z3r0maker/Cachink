@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -30,11 +31,11 @@ test('two operators alternate on one register without losing the ticket', async 
   await page.getByRole('button', { name: 'Bloquear caja' }).click();
   const dialog = page.getByTestId('caja-bloqueada');
   await expect(dialog).toBeVisible();
-  await expect(page.getByTestId('bloqueo-nota')).toContainText(
-    'El ticket de Ana queda guardado con 2 artículos',
-  );
+  await expect(page.getByTestId('bloqueo-nota')).toContainText('El ticket de Ana quedó guardado');
+  await expect(page.getByTestId('bloqueo-nota')).toContainText('2 piezas');
 
-  // A wrong NIP is refused; Luis's opens it as him.
+  // Someone else comes in: «No soy Ana». A wrong NIP is refused; Luis's opens it as him.
+  await dialog.getByRole('button', { name: 'No soy Ana, cambiar de persona' }).click();
   const luis = page.getByTestId('bloqueo-operador').filter({ hasText: 'Luis Ortega' });
   await luis.click();
   for (const k of '9999') await page.getByTestId(`bloqueo-tecla-${k}`).click();
@@ -54,11 +55,7 @@ test('two operators alternate on one register without losing the ticket', async 
   expect(unidades).toBe(1);
 
   // Sell it; the sale that reaches Postgres is Luis's.
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill('60');
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, '60');
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   // The queue pushes asynchronously; poll until Luis's ticket lands.

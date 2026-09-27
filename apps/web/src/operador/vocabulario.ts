@@ -37,21 +37,19 @@ const ETIQUETA: Record<ExpenseCategory, CategoriaGasto> = {
 export const categoriaOperador = (c: ExpenseCategory): CategoriaGasto => ETIQUETA[c];
 
 /**
- * Five close-out reasons onto six stored values. `gasto-no-registrado` has no
+ * Four close-out reasons onto six stored values. `gasto-no-registrado` has no
  * reason on the close (the expense screen captures those); the enum mixes cause
- * and direction, so «Venta no registrada», «Propinas» and «No sé» resolve by
- * whether cash was short or over.
+ * and direction, so «Venta no registrada» and «Otra razón» resolve by whether
+ * cash was short or over (the note carries the operator's own words).
  */
 export function motivoDominio(m: MotivoDiferencia, tipo: 'falta' | 'sobra'): DiscrepancyReason {
   switch (m) {
     case 'Cambio mal dado':
       return 'error-en-cambio';
-    case 'Vale de empleado':
+    case 'Salió un vale':
       return 'retiro-autorizado';
-    case 'No sé':
-      return tipo === 'falta' ? 'faltante-sin-explicacion' : 'sobrante';
     case 'Venta no registrada':
-    case 'Propinas':
+    case 'Otra razón':
       return tipo === 'sobra' ? 'sobrante' : 'otro';
   }
 }

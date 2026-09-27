@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import postgres from 'postgres';
 
-import { filledAll } from './interact';
+import { clickUntil, filledAll } from './interact';
 import { asTenant } from './sync-phone';
 
 /**
@@ -70,17 +70,20 @@ test('captured opening cash is the Balance’s Efectivo, and the checklist ticks
   await expect(row).toHaveAttribute('data-done', 'false');
 
   await page.goto('/saldos-iniciales');
-  // Day one of the seed's month (PORTAL_TODAY is 2026-05-12). Filled as one
-  // form and read back as one: the fecha used to go blank when the caja's fill
-  // woke the component up, and the save answered «Revisa estos datos:
-  // fechaApertura» about a field this test had typed.
+  // Day one of the seed's month (PORTAL_TODAY is 2026-05-12, so the picker
+  // opens on May). The picker's click is what proves hydration; the amounts
+  // are then filled as one form and read back as one (see `filledAll`).
+  const fecha = page.getByRole('button', { name: /^Fecha de apertura/ });
+  await clickUntil(fecha, page.getByRole('dialog', { name: 'Elige la fecha de apertura' }));
+  await page.getByRole('button', { name: '1 de mayo de 2026', exact: true }).click();
+  await expect(fecha).toContainText('1 de mayo de 2026');
   await filledAll([
-    [page.getByLabel('Fecha de apertura'), '2026-05-01'],
-    [page.getByLabel('Caja (efectivo)'), '5000'],
-    [page.getByLabel('Bancos'), '12000'],
+    [page.getByLabel('Efectivo en caja'), '5000'],
+    [page.getByLabel('En bancos'), '12000'],
   ]);
+  await expect(fecha).toContainText('1 de mayo de 2026');
   await page.getByRole('button', { name: 'Guardar saldos' }).click();
-  await expect(page.getByText('Saldos guardados.')).toBeVisible();
+  await expect(page.getByText('Saldos guardados')).toBeVisible();
 
   await page.goto('/estados');
   await page.getByRole('button', { name: 'Posición' }).click();

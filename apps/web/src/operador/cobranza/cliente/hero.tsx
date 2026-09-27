@@ -84,7 +84,7 @@ function indicadores(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly
     },
     {
       label: 'Último abono',
-      value: ultimo ? formatMoney(ultimo.monto) : '—',
+      value: ultimo ? formatMoney(ultimo.monto) : 'Ninguno',
       color: colors.black,
       hint: ultimo ? `${ultimo.dia} · ${ultimo.metodo.toLowerCase()}` : 'Todavía no ha abonado',
     },

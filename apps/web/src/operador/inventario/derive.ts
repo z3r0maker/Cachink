@@ -51,6 +51,27 @@ export function aplicar(items: readonly Existencia[], m: Movimiento): readonly E
   );
 }
 
+const UNA: Readonly<Record<string, string>> = { piezas: 'pieza', litros: 'litro' };
+
+/** «8 kg», «1 pieza», «220 piezas»: the unit agrees with the amount. */
+export const conUnidad = (n: number, unidad: string): string =>
+  `${n} ${n === 1 ? (UNA[unidad] ?? unidad) : unidad}`;
+
 /** «+15 kg», «−2 litros». */
 export const delta = (m: Movimiento, unidad: string): string =>
-  `${m.tipo === 'Entrada' ? '+' : '−'}${m.cantidad} ${unidad}`;
+  `${m.tipo === 'Entrada' ? '+' : '−'}${conUnidad(m.cantidad, unidad)}`;
+
+/** The stock bar's fill: the threshold sits at half, twice the threshold fills it. */
+export const nivel = (e: Existencia): number =>
+  e.umbral <= 0 ? 100 : Math.round(Math.min(e.existencias / (e.umbral * 2), 1) * 100);
+
+/** «Pastor, bistec, queso oaxaca y agua»: the short names of what to restock. */
+export function paraReponer(items: readonly Existencia[]): string {
+  const nombres = items.filter(porReponer).map((i) => i.corto);
+  if (nombres.length === 0) return 'Todo está arriba de su aviso';
+  const texto =
+    nombres.length < 2
+      ? (nombres[0] ?? '')
+      : `${nombres.slice(0, -1).join(', ')} y ${nombres.at(-1)}`;
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}

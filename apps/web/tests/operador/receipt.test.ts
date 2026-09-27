@@ -5,6 +5,7 @@ import { formatMoney } from '@xangarro/domain';
 import {
   digits,
   GRACIAS,
+  HECHO_CON,
   leerTelefono,
   receiptText,
   recordarTelefono,
@@ -30,7 +31,7 @@ const venta = {
   nota: '',
 } as unknown as Comprobante['venta'];
 
-const c: Comprobante = { negocio: 'Taquería Don Pedro', folio: 'T-0042', venta };
+const c: Comprobante = { negocio: 'Taquería Don Pedro', folio: 'T-0042', venta, hora: '14:52' };
 
 class MemoryStorage {
   readonly items = new Map<string, string>();
@@ -51,13 +52,20 @@ afterEach(() => {
 });
 
 describe('receiptText and whatsappUrl', () => {
-  it('names the business and folio, each line at its importe, the total and the thanks', () => {
-    assert.deepEqual(receiptText(c).split('\n'), [
-      'Taquería Don Pedro · T-0042',
-      `3× Taco de pastor ${formatMoney(75_00n as never)}`,
-      `1× Gringa ${formatMoney(45_00n as never)}`,
-      `Total ${formatMoney(120_00n as never)} · Efectivo`,
+  it('names the business, folio and when, each line at its importe, the total, how, the thanks', () => {
+    const lines = receiptText(c).split('\n');
+    assert.equal(lines[0], 'Taquería Don Pedro');
+    assert.match(lines[1] ?? '', /^Venta T-0042 · \d{1,2} de \S+ de \d{4}, 14:52 h$/);
+    assert.deepEqual(lines.slice(2), [
+      '',
+      `3 x Taco de pastor ${formatMoney(75_00n as never)}`,
+      `1 x Gringa ${formatMoney(45_00n as never)}`,
+      '',
+      `Total: ${formatMoney(120_00n as never)}`,
+      `Efectivo: ${formatMoney(120_00n as never)}`,
+      '',
       GRACIAS,
+      HECHO_CON,
     ]);
   });
 
@@ -65,6 +73,12 @@ describe('receiptText and whatsappUrl', () => {
     assert.equal(digits('(55) 1234-5678'), '5512345678');
     const url = new URL(whatsappUrl('55 1234 5678', c));
     assert.equal(url.origin + url.pathname, 'https://wa.me/525512345678');
+    assert.equal(url.searchParams.get('text'), receiptText(c));
+  });
+
+  it('without a number, WhatsApp opens to pick the contact', () => {
+    const url = new URL(whatsappUrl('', c));
+    assert.equal(url.origin + url.pathname, 'https://wa.me/');
     assert.equal(url.searchParams.get('text'), receiptText(c));
   });
 });

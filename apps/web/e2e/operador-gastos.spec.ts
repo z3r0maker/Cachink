@@ -15,10 +15,10 @@ async function registrar(
   categoria: string,
 ): Promise<void> {
   await page.getByRole('button', { name: 'Registrar gasto' }).first().click();
-  const modal = page.getByRole('dialog');
-  const save = modal.getByRole('button', { name: 'Registrar gasto', exact: true });
-  await modal.getByLabel('Monto').fill(monto);
-  await modal.getByLabel('Concepto').fill(concepto);
+  const modal = page.getByRole('dialog', { name: 'Registrar gasto' });
+  const save = modal.getByRole('button', { name: /^Registrar gasto de / });
+  await modal.getByLabel('¿Cuánto?').fill(monto);
+  await modal.getByLabel('¿Qué compraste?').fill(concepto);
   await modal.getByRole('button', { name: categoria, exact: true }).click();
   await save.click();
 }
@@ -44,10 +44,10 @@ test('registering needs amount, concept and category before the save', async ({ 
   await puertaOperador(page);
   await page.goto('/operador/gastos');
   await page.getByRole('button', { name: 'Registrar gasto' }).first().click();
-  const modal = page.getByRole('dialog', { name: 'Registrar gasto de caja chica' });
-  const save = modal.getByRole('button', { name: 'Registrar gasto', exact: true });
-  await modal.getByLabel('Monto').fill('120');
-  await modal.getByLabel('Concepto').fill('Hielo');
+  const modal = page.getByRole('dialog', { name: 'Registrar gasto' });
+  const save = modal.getByRole('button', { name: 'Registrar gasto de $120.00' });
+  await modal.getByLabel('¿Cuánto?').fill('120');
+  await modal.getByLabel('¿Qué compraste?').fill('Hielo');
   await expect(save).toBeDisabled();
   await modal.getByRole('button', { name: 'Insumos' }).click();
   await save.click();
@@ -70,7 +70,7 @@ test('a receipt photo is attached, and a tap removes it', async ({ page }) => {
   const card = page.getByRole('button', { name: /Comprobante adjunto/ });
   await expect(card).toContainText('ticket-14-52.jpg · toca para quitarlo');
   await card.click();
-  await expect(page.getByRole('button', { name: /Tomar foto del comprobante/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Tomar foto del ticket/ })).toBeVisible();
 });
 
 test('search and category filters narrow the list', async ({ page }) => {

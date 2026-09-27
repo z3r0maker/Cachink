@@ -1,6 +1,7 @@
 import { requireSession } from '@/server/auth';
 import { listarCortes } from '@/server/cortes';
 
+import { motivoLegible } from './motivo';
 import { CortesScreen } from './screen';
 import type { Corte, FiltroCortes } from './types';
 
@@ -26,7 +27,11 @@ export default async function CortesPage({
   const filas = await listarCortes(session.business_id);
   const cortes: readonly Corte[] = filas.map((f) => {
     const { motivo, nota, ...rest } = f;
-    return { ...rest, ...(motivo === null ? {} : { motivo }), ...(nota === null ? {} : { nota }) };
+    return {
+      ...rest,
+      ...(motivo === null ? {} : { motivo: motivoLegible(motivo, nota) }),
+      ...(nota === null ? {} : { nota }),
+    };
   });
   return <CortesScreen cortes={cortes} filtro={filtro} />;
 }

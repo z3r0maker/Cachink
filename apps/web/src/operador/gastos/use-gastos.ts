@@ -9,6 +9,13 @@ import type { CategoriaGasto, GastoTurno } from './types';
 const hhmm = (d: Date) =>
   `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
+/** «Gas Express · con foto», or just «Sin comprobante» when nobody was named. */
+function detalleDe(n: NuevoGasto): string {
+  const prueba = n.foto ? 'con foto' : 'sin comprobante';
+  if (n.proveedor === null) return prueba.charAt(0).toUpperCase() + prueba.slice(1);
+  return `${n.proveedor} · ${prueba}`;
+}
+
 /**
  * The list, its filters, the form and the toast. A new expense goes on top of
  * this device's list until the capture use case is wired (O-06).
@@ -23,7 +30,7 @@ export function useGastos(inicial: readonly GastoTurno[], registrarVivo?: (n: Nu
     const nuevo: GastoTurno = {
       id: `g-${Date.now()}`,
       concepto: n.concepto,
-      detalle: n.foto ? 'Con foto' : 'Sin comprobante',
+      detalle: detalleDe(n),
       monto: n.monto,
       categoria: n.categoria,
       hora: hhmm(new Date()),

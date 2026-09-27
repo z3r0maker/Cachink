@@ -1,131 +1,52 @@
 'use client';
 
-import { parseFeatureFlags, REGIMEN_NOMBRE } from '@xangarro/domain';
-import Link from 'next/link';
-
-import { Banner, Button, ScreenBody } from '@/components';
-import { useSession } from '@/session/provider';
+import { ScreenBody } from '@/components';
 import type { NegocioData } from '@/server/screens';
+import { useSession } from '@/session/provider';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
 import { ArchivarNegocio } from './archivar';
-import { AtributosCard } from './edicion/atributos';
 import type { Business } from './edicion/draft';
-import { FiscalesEdit } from './edicion/fiscales';
-import { GeneralesEdit } from './edicion/generales';
-import { PagosCard } from './edicion/pagos';
-import { SaveBar } from './edicion/save-bar';
-import { useEdicion, type Edicion } from './edicion/use-edicion';
-import { FuncionesCard } from './funciones';
-import { CapabilitiesCard, SectionCard } from './parts';
-import { pageSubtitle, pageTitle, sectionGrid } from './negocio.css';
+import { EdicionDrawer } from './edicion/drawer';
+import { useEdicion, type Seccion } from './edicion/use-edicion';
+import { AtributosCard, AvisoFiscal, VolverCard } from './extras';
+import { MiNegocioHead } from './hub';
+import { faltanFiscales, FiscalesCard, GeneralesCard } from './lectura';
+import * as n from './negocio.css';
 
 /**
- * Negocio (P-08). Read mode shows the cards; «Editar negocio» (owner only)
- * turns them into inputs at once, with one sticky «Guardar cambios» for all of
- * it — one validated patch, one change for the phones.
+ * Mi negocio · General (P-08, CfgNegocio). Read mode shows the panels; each
+ * «Editar» (owner only) opens its section in a drawer, saved as one validated
+ * patch, one change for the phones.
  */
-function Heading({ owner, e }: { readonly owner: boolean; readonly e: Edicion | null }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-      <div>
-        <h1 className={pageTitle}>Negocio</h1>
-        <p className={pageSubtitle}>Los datos con los que armamos tus estados y tus comprobantes</p>
-      </div>
-      {owner && e !== null && e.draft === null ? (
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
-          {/* Re-run the onboarding wizard (N-15): answers change, features follow. */}
-          <Link href="/bienvenida/revisar">Volver a configurar mi negocio</Link>
-          {/* N-19: logo, colour and the receipt fields. */}
-          <Link href="/negocio/comprobantes">Comprobantes</Link>
-          <Button variant="secondary" onClick={e.start}>
-            Editar negocio
-          </Button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/** P-36.4: no régimen is a choice («Ninguno por ahora»), not something missing. */
-const regimenLabel = (code: string | null): string =>
-  code === null ? 'Ninguno por ahora' : `${code} · ${REGIMEN_NOMBRE[code] ?? code}`;
-
-/**
- * The read-mode rows. A `null` value renders «Falta por completar» in amber —
- * a thing to do, not an absence — and the banner reads the same data.
- */
-function buildSections(business: Business) {
-  return [
-    {
-      title: 'Datos generales',
-      tone: 'hero' as const,
-      fields: [
-        { label: 'Nombre del negocio', value: business.nombre },
-        // «Falta» when the old «Otro» could not be mapped to a code (ADR-082).
-        { label: 'Régimen fiscal', value: regimenLabel(business.regimenSat) },
-        { label: 'Tasa de ISR', value: `${(business.isrTasa ?? 0) / 100}%` },
-        { label: 'Tipo de negocio', value: business.tipoNegocio ?? 'Sin especificar' },
-      ],
-    },
-    {
-      title: 'Datos fiscales',
-      tone: 'info' as const,
-      fields: [
-        { label: 'RFC', value: business.rfc },
-        { label: 'Razón social', value: business.razonSocial },
-        { label: 'Código postal fiscal', value: business.codigoPostal },
-        // An empty uso is not missing: invoices use G03 until the owner picks.
-        {
-          label: 'Uso de CFDI',
-          value: business.usoCfdi ?? 'G03 · Gastos en general (predeterminado)',
-        },
-      ],
-    },
-  ];
-}
-
-function Cards({ business, e }: { readonly business: Business; readonly e: Edicion }) {
-  const sections = buildSections(business);
-  return (
-    <div className={sectionGrid}>
-      {e.draft === null ? (
-        sections.map((s) => <SectionCard key={s.title} section={s} />)
-      ) : (
-        <>
-          <GeneralesEdit e={e} business={business} />
-          <FiscalesEdit e={e} />
-        </>
-      )}
-      <PagosCard e={e} business={business} />
-      <AtributosCard e={e} business={business} />
-    </div>
-  );
-}
-
 function Loaded({ business, owner }: { readonly business: Business; readonly owner: boolean }) {
   const e = useEdicion(business);
-  const incomplete = buildSections(business)
-    .filter((s) => s.title === 'Datos fiscales')
-    .some((s) => s.fields.some((f) => f.value === null));
+  const abrir = owner ? e.start : null;
+  const abrirEn = (s: Seccion) => (abrir === null ? null : () => abrir(s));
   return (
-    <>
-      <Heading owner={owner} e={e} />
-      {incomplete && e.draft === null ? (
-        <Banner
-          tone="info"
-          title="Sin datos fiscales."
-          body="Solo los necesitas si quieres factura de tu suscripción a Xangarro."
-        />
+    <div className={n.pila}>
+      <MiNegocioHead activo="general" />
+      {faltanFiscales(business) ? <AvisoFiscal onCompletar={abrirEn('fiscales')} /> : null}
+      {e.draft === null && e.note !== null ? (
+        <p role="status" className={n.nota}>
+          {e.note}
+        </p>
       ) : null}
-      {e.draft === null && e.note !== null ? <p role="status">{e.note}</p> : null}
-      {/* P-36.5: the bar leads the edit, under the header, not after the cards. */}
-      <SaveBar e={e} />
-      <Cards business={business} e={e} />
-      <FuncionesCard flags={parseFeatureFlags(business.featureFlags ?? '{}')} />
-      <CapabilitiesCard />
-      {owner && e.draft === null ? <ArchivarNegocio nombre={business.nombre} /> : null}
-    </>
+      <div className={n.dosColumnas}>
+        <GeneralesCard b={business} abrir={abrir} />
+        <FiscalesCard b={business} abrir={abrir} />
+      </div>
+      <div className={n.dosColumnas}>
+        <AtributosCard business={business} onEditar={abrirEn('atributos')} />
+        <VolverCard />
+      </div>
+      {owner ? (
+        <>
+          <ArchivarNegocio nombre={business.nombre} />
+          <EdicionDrawer e={e} business={business} />
+        </>
+      ) : null}
+    </div>
   );
 }
 
@@ -134,14 +55,14 @@ export function NegocioScreen({
   failed,
 }: {
   readonly business: NegocioData | null;
-  /** The read threw — as opposed to returning no row, which is `empty`. */
+  /** The read threw, as opposed to returning no row, which is `empty`. */
   readonly failed: boolean;
 }) {
   const owner = isOwner(useSession().role);
   if (business === null || business === undefined) {
     return (
-      <>
-        <Heading owner={false} e={null} />
+      <div className={n.pila}>
+        <MiNegocioHead activo="general" />
         <ScreenBody
           state={resolveScreenState({ error: failed, isEmpty: !failed })}
           onRetry={() => window.location.reload()}
@@ -149,7 +70,7 @@ export function NegocioScreen({
         >
           {null}
         </ScreenBody>
-      </>
+      </div>
     );
   }
   return <Loaded business={business} owner={owner} />;

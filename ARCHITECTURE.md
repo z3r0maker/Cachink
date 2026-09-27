@@ -150,8 +150,11 @@ Links to discussion, docs, prior art.
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
 | [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
 | [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
-| [111](#adr-111) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [112](#adr-112) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [111](#adr-111) | 2026-09-26 | The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it | Accepted |
+| [112](#adr-112) | 2026-09-26 | What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked | Accepted |
+| [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
+| [114](#adr-114) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [115](#adr-115) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7572,7 +7575,354 @@ which is a guarantee SQL gives for free and a prompt only promises.
   resources per business (`usage_counters`, the metering role, the over-limit
   notices), and an import is a counted resource like any other.
 
+---
+
 ## ADR-111
+
+**Title:** The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes P-30's open role question; extends ADR-056 (the daily job) and ADR-065 (the metering role)
+
+**Context:**
+
+ADR-056 said «a daily job selects the businesses that are due». P-30 built the
+unit of work — one business, `POST /api/cron/asesor` — and stopped there,
+because selecting *which* businesses needs a read no tenant connection can
+make: RLS scopes `xangarro_app` to a single `business_id`, which is the whole
+point of ADR-053 §7.
+
+The task recorded three candidates and called the choice «a Track B decision
+with a migration behind it»:
+
+1. A new privileged function, `xangarro.asesor_due()`, with its grants.
+2. Reuse `xangarro_metering`, the role the nightly usage recompute runs as.
+3. The admin console's service role.
+
+Option 3 was never eligible and should not have been on the list. CLAUDE.md §3
+makes `apps/backoffice` **the only** project that may hold the service-role
+key. Choosing it would have meant either putting that key in the portal or
+moving a portal cron into the console — spending the one boundary the console
+exists to keep, to save a grant.
+
+Between 1 and 2, the deciding fact turned out to already be in the schema.
+`0010_usage_counts.sql` grants `xangarro_metering`:
+
+```sql
+GRANT SELECT (id, deleted_at) ON public.businesses TO xangarro_metering;
+CREATE POLICY metering_read ON public.businesses FOR SELECT TO xangarro_metering USING (true);
+```
+
+It grants that because `usage_counts(NULL, …)` **already enumerates every live
+business** — `p_business_ids NULL = every live business` — in order to count
+it. The cross-tenant enumeration the fan-out was blocked on had been in
+production since N-02 shipped, spelled as a side effect of counting.
+
+**Decision**
+
+1. **The fan-out enumerates on the `xangarro_metering` connection**, through
+   `liveBusinessIds` — `SELECT id FROM businesses WHERE deleted_at IS NULL
+   ORDER BY id`, the two columns 0010 already grants. **No migration, no new
+   role, no new secret**: the portal has held `METERING_DATABASE_URL` since
+   N-02. The privilege surface a scheduled fan-out adds is zero.
+
+2. **The general rule this sets.** A portal job that must read across tenants
+   uses `xangarro_metering` and states the columns it needs; a new column means
+   a narrow `GRANT SELECT (cols)` beside the existing `metering_read` policy,
+   not a new role and not a definer function. Two reasons. `usage_counts` is
+   `SECURITY INVOKER` on purpose — 0001 FORCEs RLS on the owner, so a definer
+   function sees no tenant at all — which makes «a new privileged function» a
+   function plus the same grants, strictly more moving parts for the same
+   reach. And a fourth connection string is a fourth secret to rotate and a
+   fourth answer to «which connection does this query use».
+
+   The line this rule does not cross: **the metering role reads; it does not
+   become a general-purpose admin role.** Cross-tenant *writes* outside
+   `usage_counters` / `usage_notices` are not covered by this ADR and want
+   their own.
+
+3. **`GET /api/cron/asesor` is the schedule; `POST` stays the unit of work.**
+   The old note said there could be no `vercel.json` entry «since the unit of
+   work is a POST with a body and Vercel Cron sends neither». Right about the
+   POST, wrong in its conclusion: the fan-out is a different endpoint on the
+   same path. `0 8 * * *`, 02:00 in Mexico City.
+
+4. **One tenant's failure is one tenant's failure.** Each business is caught,
+   reported under its own id, tallied in `fallidos`; the sweep continues and
+   answers 200, as the usage recompute does. A scheduled job that 500s on the
+   first bad tenant hides every tenant behind it.
+
+5. **The sweep carries an explicit deadline** — it stops starting tenants at
+   240 s, inside Vercel's 300 s, and returns `restantes`, reported as an error.
+   This is a **freshness** bound and not a correctness one, because
+   `loadAsesorPage` materialises the same deterministic pipeline on read
+   (ADR-088): a tenant the deadline cut off still sees correct insights the
+   moment it opens the Asesor. When `restantes` first goes non-zero the fix is
+   sharding by id range, which needs no new state because the enumeration is
+   ordered by id.
+
+**Alternatives considered**
+
+- *A new `xangarro.asesor_due()` function.* The shape to reach for once the
+  monthly Diagnóstico needs the tier and the last-active timestamp in one
+  query, because those live in `subscriptions` and `xangarro.portal_sessions`
+  and neither is granted to metering today. For enumerating live businesses it
+  is a migration to obtain a grant that exists.
+- *The console's service role.* Rejected on CLAUDE.md §3, above.
+- *A bounded worker pool instead of a sequential sweep.* `generarParaNegocio`
+  opens three `withTenant` transactions per business, so N-way concurrency is
+  3N pooled connections from a serverless function. Rejected until a measured
+  sweep needs it; the deadline makes the day it does visible.
+
+**Consequences**
+
+- P-30 is no longer blocked by B-02/B-03 — the role decision was the only
+  reason they were named. What remains of P-30 is the model call, held on P-28
+  because generated prose has nowhere a screen reads it.
+- **The monthly Diagnóstico fan-out is a different query and is still blocked.**
+  ADR-109 requires the tier and «was this business active in the period», and
+  the activity gate needs `xangarro.portal_sessions.last_seen_at` plus a venta;
+  neither `subscriptions` nor `portal_sessions` is granted to metering. It also
+  cannot be idempotent until P-28 defines where a report is stored. That work
+  follows the rule in §2: narrow grants, or the `asesor_due()` function if one
+  query is cleaner than three.
+- The deterministic pass now runs nightly for every tenant in production, which
+  it never did. Its cost is one SQL read plus an upsert per business; the model
+  spend is unchanged, because there is still no model call.
+
+---
+
+## ADR-112
+
+**Title:** What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; answers the question ADR-109 deferred to P-28
+
+**Context:**
+
+ADR-109 gave Xangarro a monthly Diagnóstico and deliberately did not say what
+distinguishes it from Xangarrote's, calling that «P-28's to settle with the
+design» and «now the deciding question of that task rather than a detail of
+it»: a taste that reads as a truncated full report sells nothing, and one that
+is merely shorter teaches the reader that the paid one is padding.
+
+The design answers most of it already, and answers it twice. Mapping every
+numbered section in `Xangarro Portal - Asesor.dc.html` to the `sc-if` that
+wraps it gives ten sections, of which **1 Tu meta** and **2 Resumen del mes**
+sit under `diagReport` and **3–9** under `diagFull`. But `lockedSections` —
+the hand-written teaser copy the `diagTeaser` state renders — has only **six**
+entries: 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing from it**, so as the file
+stands a Xangarro reader loses that section with no card in its place. The two
+halves of the design disagree by exactly one section.
+
+`diagTeaser` itself was drawn for a paid tier that is not Xangarrote — which
+did not exist under ADR-059's tiering and, after ADR-109, is exactly Xangarro.
+
+**Decision**
+
+1. **Sections 1, 2 and 7 are real on both tiers; 3, 4, 5, 6, 8 and 9 are
+   teaser cards for Xangarro.** Where the design contradicted itself, the
+   `lockedSections` array wins and `diagFull` loses Cobranza: the array is
+   deliberate per-section copywriting, while the `diagFull` wrapper is
+   structural markup repeated verbatim across 3–9, so a stray copy-paste is
+   the likelier slip. This also makes the design self-consistent — `diagFull`
+   then covers exactly the six sections that have teaser copy — and it gives
+   the taste a third real section, which it needs.
+
+   The month tiles belong to **section 2**, so they are real on both tiers.
+   The price-suggestion table belongs to **section 3**, so it is Xangarrote's.
+
+2. **Section 10, Plan de acción, is truncated rather than locked.** Xangarro
+   reads **movimiento 1 in full, with its peso impact**, under «los otros dos
+   llegan con Xangarrote». Xangarrote reads all three.
+
+   Two things were wrong to assume here and are worth writing down. First,
+   **`strategyLocked` is not this flag**: `plan !== 'pro'` is right, but its
+   single use sits inside the **Metas** tab guarding «Estrategia personalizada
+   — Disponible en Xangarrote», and section 10 sits under `isDiag >
+   diagReport` with **no tier gate at all**. As drawn, both tiers read all
+   three movimientos, so this decision *narrows* the design rather than
+   relaxing it, and the Diagnóstico needs its own `planTruncado` flag.
+
+   Second, **the design does not order the movimientos by impact.** Its own
+   fixture runs `+$3,100.00`, `+$1,450.00`, `+$6,300.00` — the largest is
+   third. «The first movimiento» out of an unordered list would hand a
+   Xangarro shopkeeper the $1,450 move as its sample of what the paid report
+   is worth. **Section 10 is therefore ordered by impact, descending**, which
+   makes «movimiento 1» the best of the three by construction. The ordering
+   cost nothing before the truncation and is load-bearing after it.
+
+3. **Tier is not the only axis, and maturity wins when both apply.**
+   `calcularCapacidades` (P-26, already built) gates six capabilities on data
+   volume, and they map onto the same sections: **2** wants 30 días de
+   registros, **3** 60 días de ventas + 2 compras, **6** 60 días de ventas,
+   **8** 3 meses con gastos, **4** and **5** 90 días de ventas, **9** 20
+   cortes de día. So a section can be withheld for two unrelated reasons that
+   need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de
+   60 días» must not — showing the first to a Xangarrote three weeks in sells
+   them what they already bought. The design has one whole-report
+   `diagNotEnough` state and no per-section equivalent, so P-28 builds a
+   per-section three-way — real · still gathering data · not in your plan —
+   and **maturity is checked first**.
+
+   Two sections have no maturity rule and must not acquire one: **1 Tu meta**
+   (the owner sets it) and **7 Cobranza** (fiado balances are current state,
+   not a trend).
+
+**Alternatives considered**
+
+- *Give Xangarro a genuinely different, shorter report rather than the same
+  report with sections withheld.* The honest reading of ADR-109's warning, and
+  rejected on cost: two report shapes is two prompts, two renderers and two
+  sets of states, for a tier whose purpose is to make the reader want the
+  other one. The teaser cards already name what is missing in the reader's own
+  numbers («4 insumos se acaban antes de la quincena»), which is a sharper
+  upsell than a different document.
+- *Lock section 10 entirely for Xangarro,* as the six teaser cards do. This is
+  what «the taste reads as a paywall» looks like: two real sections, six
+  padlocks, and the one part that demonstrates the value of a written reading
+  removed.
+- *Leave section 10 whole on both tiers,* which is what the design literally
+  draws. Rejected because it leaves the Diagnóstico nothing to sell: the
+  estrategia is the reason to upgrade, and giving it away in full makes the
+  extra sections the only difference, which is exactly the «paid one is
+  padding» failure.
+
+**Consequences**
+
+- P-28 gains a `planTruncado` flag, an impact-descending sort on section 10,
+  and a per-section availability three-way. `strategyLocked` keeps the Metas
+  tab and is not reused.
+- `diagFull` must stop wrapping section 7. A Playwright spec asserting that a
+  Xangarro session reads Cobranza — and does **not** read the price table — is
+  what keeps this from silently reverting, because both tiers render the same
+  component tree.
+- ADR-109's «not `semanal`» gate still needs implementing:
+  `asesorShowsDiagnostico` is `c.asesor === 'completo'` today, and the locked
+  card reads «El Diagnóstico llega con Xangarrote» when it now belongs to
+  Xangarrito and should name Xangarro.
+- The per-section maturity copy needs the counts `calcularCapacidades` already
+  computes to reach the Diagnóstico, which reads them from the same
+  `inputs.cuenta` the Asesor page does. No new query.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates
+  until P-28 builds it, and production still renders «Próximamente».
+
+---
+
+## ADR-113
+
+**Title:** In the Diagnóstico, tier withholds visibly and maturity withholds silently
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; refines ADR-112 §3, which called for a per-section three-way
+
+**Context:**
+
+ADR-112 settled which sections each paying tier reads and noted that tier is
+not the only axis: `calcularCapacidades` (P-26) also gates six of the same
+sections on data volume — 30 días de registros for **2**, 60 días + 2 compras
+for **3**, 60 días for **6**, 3 meses con gastos for **8**, 90 días for **4**
+and **5**, 20 cortes for **9**. It left the resolution as «a per-section
+three-way — real · still gathering data · not in your plan — with maturity
+checked first», which is the shape but not the behaviour.
+
+Work it through for a Xangarro business at 31 days. Only **2** is mature; **1**,
+**7** and **10** have no maturity rule; **3**, **4**, **5**, **6**, **8** and
+**9** are all short of data. Rendering the immature ones as cards gives four
+real sections behind six padlocks — the exact failure ADR-112 removed for
+tiers, re-introduced through the other axis, and this time with nothing to
+sell, because a maturity lock has no upgrade attached.
+
+The design does not settle it either, but it does rule out the simplest
+alternative. Its `readiness` list renders twice — in the capacidades panel and
+inside `diagNotEnough` («Necesitamos un mes completo de registros para no darte
+números a medias. Esto es lo que falta:») — so the whole-report gate was only
+ever the 30-day one. The other five were always meant to be per-section; that
+state was simply never drawn.
+
+**Decision**
+
+1. **Not in your plan → the teaser card.** Visible, named, carrying the real
+   finding and «Disponible en Xangarrote», exactly as ADR-112 settled.
+
+2. **Data not ready → the section is not rendered at all.** No padlock, no
+   progress bar, no mention in place. The report closes with **one aggregate
+   line** — «N secciones más se abren solas conforme captures → Ver
+   capacidades» — and the per-capability detail stays where it already lives,
+   the capacidades panel on «Para ti».
+
+   The asymmetry is the point: **a tier gate is actionable right now**, so it
+   earns space; **a maturity gate resolves itself** by doing what the
+   shopkeeper is already doing, so it earns a line. Giving both the same
+   treatment optimises for our internal symmetry over the reader's attention.
+
+3. **Maturity is checked first, and the reason is not the one ADR-112 gave.**
+   That ADR argued «33 de 60 días» must not sell an upgrade to someone who
+   already bought it, which is true and secondary. The real reason is that the
+   teaser cards carry **real computed findings** — «Detectamos 3 productos con
+   margen en riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes
+   del mes tienen un patrón». When a section's capability is locked **that
+   finding does not exist**, so showing its teaser would invent a conclusion,
+   which P-26's compuerta forbids outright. Maturity-first is the only ordering
+   that cannot fabricate.
+
+   A welcome consequence: the Xangarro teasers sharpen as the business matures,
+   because each is a true statement about numbers the reader cannot see.
+
+4. **Section numbers are names, not positions.** A hidden section leaves a gap —
+   a 31-day Xangarro reads 1, 2, 7, 10 — and the numbers are not re-flowed.
+   «3 · Precios y márgenes» must mean the same section every month or the report
+   stops being comparable month to month, and P-34's printable variant stops
+   being comparable at all. The closing line is what explains the gaps.
+
+5. **`diagNotEnough` keeps only its 30-day trigger.** Extending it to all six
+   capabilities would make a new business wait on 90 días de ventas and 20
+   cortes before reading anything at all.
+
+**Alternatives considered**
+
+- *An inline progress card per immature section,* reusing the teaser card shape
+  with «67 de 90 días» in place of «Disponible en Xangarrote». Rejected per §2:
+  it is a wall of «not yet» for exactly the businesses whose first Diagnóstico
+  this is, and it duplicates the capacidades panel inside the report.
+- *Raise the whole-report gate until every capability is ready.* One state and
+  no per-section anything, and the design's own `diagNotEnough` copy invites it.
+  Rejected on §5 — roughly three months of silence for a new business.
+- *Re-flow the numbering so a short report reads 1–4.* Contiguous and tidier,
+  and rejected on §4: the number is part of the section's identity, and a
+  «4 · Plan de acción» that becomes «10 · Plan de acción» two months later is
+  worse than a gap.
+
+**Consequences**
+
+- P-28 renders sections from a per-section availability of exactly three
+  values — `real`, `teaser`, `absent` — where `absent` contributes to a count
+  and nothing else. Maturity is resolved before tier, so `teaser` is reachable
+  only for a mature section.
+- The aggregate line needs a count, not copy, so it does not depend on the
+  `lockedCopy` gap below.
+- **P-26 is reopened as a defect** by the same reading. `calcularCapacidades`
+  drifted from the design's `readinessDefs`, and two of the four differences
+  are behaviour rather than wording: `compras` is
+  `count(*) … tipo = 'entrada'` tenant-wide where the design says «2 compras
+  **del producto**», so two purchases of one product unlock margins for the
+  whole catalogue; and `meses_con_gasto` is `count(DISTINCT left(fecha, 7))`
+  over all egresos where the design says «3 meses **por categoría**», so three
+  months of rent alone passes. Each needs its own decision before the string is
+  changed to match. `Capacidad` also has no field for the design's `lockedCopy`
+  («Disponible en 31 días», «Registra el costo de tus productos para
+  activarlo»), so the panel can only ever show a count — and two of the six
+  blockers are «do something», not «wait longer».
+- **Still open:** section **10 Plan de acción** has no maturity rule, but it has
+  an empty case — a month in which nothing is worth recommending. That is not
+  the same as «we could not look», so it cannot use the aggregate line, and it
+  is the one section whose emptiness the reader will notice.
+
+## ADR-114
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -7609,7 +7959,7 @@ database, so the two orders silently differed.
 3. **A pending file that sorts below the last applied file of its set is
    refused**, naming both: renumber it above. Hosted and fresh databases then
    always apply the same sequence.
-4. **Every migration from data-pg 0043 and admin 0020 on sets `lock_timeout`**
+4. **Every migration from data-pg 0044 and admin 0020 on sets `lock_timeout`**
    (3 s), so a statement queued behind the evening peak fails fast and is run
    again in the trough rather than stalling every request behind its lock.
 5. **Old → new for such files runs on a throwaway database** migrated to the
@@ -7617,11 +7967,11 @@ database, so the two orders silently differed.
    a concurrent build cannot run inside the test transaction the older
    migration tests use.
 
-The first files to use it are data-pg 0043 (the audit's index set, the
+The first files to use it are data-pg 0044 (the audit's index set, the
 `business_members (business_id, user_id)` uniqueness, and the drop of seven
-indexes that repeated a `business_id` primary key) and 0045 (every tenant
+indexes that repeated a `business_id` primary key) and 0046 (every tenant
 policy wraps `current_business_id()` in a sub-select). In the same change:
-0044 spreads `api_latency_counters` over 16 slots per key, summed on read;
+0045 spreads `api_latency_counters` over 16 slots per key, summed on read;
 the console's `admin_user_email` casts its parameter, not the key; the
 digest reads stored `usage_counters` instead of recounting, and runs
 `security_prune()` daily.
@@ -7643,7 +7993,7 @@ digest reads stored `usage_counters` instead of recounting, and runs
 - A no-transaction file cannot be rolled back as a whole; reviewers check
   that each statement is safe to repeat, and the lint checks what it can.
 - `tenant-indexes.test.ts` now counts a single-column `business_id` primary
-  key as the tenant index, which is what let 0043 drop its duplicates.
+  key as the tenant index, which is what let 0044 drop its duplicates.
 - Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
   decided here; it needs its own ADR.
 
@@ -7664,9 +8014,9 @@ otherwise. `hosted/lint.ts` enforces it: a no-transaction file sets
 statement never under a long or zero timeout, and `REINDEX` only
 `CONCURRENTLY`. The INVALID-index sweep now matches schema and name.
 `db-local.sh` applies each transactional file in one transaction, as hosted
-does. data-pg 0043–0046 and admin 0020–0022 were corrected in place, never
+does. data-pg 0044–0047 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
-## ADR-112
+## ADR-115
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 

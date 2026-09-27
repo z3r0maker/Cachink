@@ -37,10 +37,13 @@ function Diagnostico() {
         /* No `empty` yet: "necesita 90 días de registros" is the model's own
            precondition, and the model is still behind `proximamente`. The copy
            ships with the rule that can reach it, not before (S-2). */
+        /* ADR-109 §3: this card is Xangarrito's now, and it names Xangarro —
+           the cheapest plan that reads a Diagnóstico. Xangarro's own report is
+           the teased one (ADR-112), which is not a locked state. */
         locked={{
-          title: 'El Diagnóstico llega con Xangarrote',
-          body: 'Cada mes, una lectura completa de tu negocio y un plan para tu meta.',
-          plan: 'Xangarrote',
+          title: 'El Diagnóstico llega con Xangarro',
+          body: 'Cada mes, una lectura escrita de tu negocio y el primer movimiento para tu meta.',
+          plan: 'Xangarro',
         }}
         proximamente={{
           title: 'El Diagnóstico llega pronto',

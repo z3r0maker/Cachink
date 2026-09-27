@@ -60,8 +60,8 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
 
   await page.goto('/inventario-inicial');
   // Real rows: this tenant's two products, their catalogue cost prefilled.
-  await expect(page.getByLabel(`Costo de ${TORTILLA}`)).toHaveValue('12.50');
-  await expect(page.getByLabel(`Costo de ${SALSA}`)).toHaveValue('3.00');
+  await expect(page.getByLabel(`Costo unitario de ${TORTILLA}`)).toHaveValue('12.50');
+  await expect(page.getByLabel(`Costo unitario de ${SALSA}`)).toHaveValue('3.00');
 
   // A .csv fills what matches the catalogue and names what does not. The grid
   // sits under the portal's loading boundary and can hydrate after the root
@@ -72,7 +72,7 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
     buffer: Buffer.from(`producto,cantidad,costo\n${TORTILLA},4,\nChile fantasma,9,1\n`),
   };
   await expect(async () => {
-    await page.getByLabel('Prellenar desde .csv').setInputFiles(csv);
+    await page.getByLabel('Prellenar desde CSV').setInputFiles(csv);
     await expect(page.getByLabel(`Cantidad de ${TORTILLA}`)).toHaveValue('4', { timeout: 1_000 });
   }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
   await expect(page.getByText('Sin match en tu catálogo: Chile fantasma')).toBeVisible();
@@ -80,7 +80,7 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
   await page.getByLabel(`Cantidad de ${SALSA}`).fill('10');
   // 4 × $12.50 + 10 × $3.00, computed before anything is written.
   await expect(page.getByTestId('valuacion-inicial')).toContainText('$80.00');
-  await page.getByRole('button', { name: 'Capturar 2 productos' }).click();
+  await page.getByRole('button', { name: 'Guardar inventario inicial' }).click();
   // The confirmation survives the capture's own revalidation, which swaps the
   // grid for the done state: both are on screen together.
   await expect(page.getByText('Capturado: 2 productos, valuación $80.00.')).toBeVisible();
@@ -101,5 +101,5 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
   await page.reload();
   await expect(page.getByText('Ya está capturado')).toBeVisible();
   await expect(page.getByText(/^Capturado:/)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Capturar/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Guardar inventario/ })).toHaveCount(0);
 });

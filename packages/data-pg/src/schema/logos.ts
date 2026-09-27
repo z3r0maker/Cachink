@@ -13,7 +13,7 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   },
 });
 
-/** The primary key is the tenant index (0043 dropped its duplicate). */
+/** The primary key is the tenant index (0044 dropped its duplicate). */
 export const businessLogos = pgTable('business_logos', {
   businessId: text('business_id').primaryKey(),
   mime: text('mime').notNull(),

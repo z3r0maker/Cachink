@@ -1,78 +1,110 @@
 'use client';
 
-import { colors } from '@xangarro/tokens';
+import { Don } from '@/components/don/don';
 
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import { Note } from '../ui/note';
+import { PageHead } from '../ui/panel';
+import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
-import { heroe, intro, type Fase } from './derive';
+import { heroe, intro } from './derive';
 import { ListaCola } from './lista';
 import * as s from './pendientes.css';
 import type { PendientesScreenProps } from './types';
 import { usePendientes } from './use-pendientes';
 
-const SYNC = 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5';
-const FONDO: Record<Fase, string> = {
-  espera: colors.warningSoft,
-  enviando: colors.blueSoft,
-  enviado: colors.greenSoft,
-};
+const SYNC =
+  'M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16M16 16h5v5';
+const CHECK = 'M20 6 9 17l-5-5';
 
 /** Operador · Registros por enviar: the local queue, its retry, and the rule not to lose it. */
 export function PendientesScreen({ state, cola: inicial }: PendientesScreenProps) {
   const x = usePendientes(inicial);
   return (
-    <OpMain top={22} narrow>
-      <div>
-        <h1 className={s.titulo}>Registros por enviar</h1>
-        <p className={s.intro}>{intro(x.cola.length === 0)}</p>
+    <OpMain top={24}>
+      <PageHead title="Registros por enviar" sub={intro(x.cola.length === 0)} />
+      <div className={s.column}>
+        <HeroeCola x={x} />
+        {state === 'happy' ? (
+          <ListaCola cola={x.cola} fase={x.fase} offline={x.offline} />
+        ) : (
+          <OperadorEstado
+            mode={state}
+            icon={SYNC}
+            emptyTitle="Nada pendiente"
+            emptyBody="Todo lo que capturaste ya está en el portal de Pedro."
+            errorTitle="No pudimos leer la cola de este navegador"
+          />
+        )}
+        <NadaSePierde />
       </div>
-      <HeroeCola x={x} />
-      {state === 'happy' ? (
-        <ListaCola cola={x.cola} fase={x.fase} offline={x.offline} />
-      ) : (
-        <OperadorEstado
-          mode={state}
-          icon={SYNC}
-          emptyTitle="Nada pendiente"
-          emptyBody="Todo lo que capturaste ya está en el portal de Pedro."
-          errorTitle="No pudimos leer la cola de este navegador"
-        />
-      )}
-      <Note bg={colors.yellowSoft} padding="14px 16px" textColor={colors.ink}>
-        Nada se pierde: lo capturado vive en este navegador hasta que suba. No cierres la pestaña ni
-        borres los datos del sitio. El turno no se puede cerrar mientras haya algo en la cola,
-        porque el efectivo esperado se calcula con estas ventas.
-      </Note>
     </OpMain>
+  );
+}
+
+/** Money figures inside a sentence, set bold and tabular. */
+function ConCifras({ text }: { readonly text: string }) {
+  const parts = text.split(/(\$[\d,]+\.\d{2})/);
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className={s.cifra}>
+            {p}
+          </span>
+        ) : (
+          p
+        ),
+      )}
+    </>
   );
 }
 
 /** The hero changes with the phase: amber waiting, blue sending (spinning), green sent. */
 function HeroeCola({ x }: { readonly x: ReturnType<typeof usePendientes> }) {
   const h = heroe(x.fase, x.cola, x.enCola);
+  const enviando = x.fase === 'enviando';
   return (
-    <div className={s.heroe} style={{ background: FONDO[x.fase] }}>
-      <span className={s.heroeTile}>
-        <span className={x.fase === 'enviando' ? s.girando : undefined} style={{ display: 'grid' }}>
-          <Icon path={SYNC} size={24} strokeWidth={2.4} />
+    <section aria-labelledby="pend-t" className={`${s.heroe} ${s.fase[x.fase]}`}>
+      <span className={`${s.heroeTile} ${s.faseTexto[x.fase]}`}>
+        <span className={enviando ? s.girando : undefined} style={{ display: 'grid' }}>
+          <Icon path={x.fase === 'enviado' ? CHECK : SYNC} size={34} strokeWidth={2.2} />
         </span>
       </span>
-      <div style={{ flex: 1, minWidth: 200 }}>
-        <div className={s.heroeTitulo}>{h.titulo}</div>
-        <div className={s.heroeCuerpo}>{h.cuerpo}</div>
+      <div className={s.heroeText}>
+        <span className={`${s.eyebrow} ${s.faseTexto[x.fase]}`}>{h.eyebrow}</span>
+        <h2 id="pend-t" className={s.heroeTitulo}>
+          {h.titulo}
+        </h2>
+        <p className={s.heroeCuerpo}>
+          <ConCifras text={h.cuerpo} />
+        </p>
       </div>
       <button
         type="button"
-        className={s.reintentar}
-        data-onyellow=""
-        data-enviando={x.fase === 'enviando' ? '' : undefined}
-        aria-busy={x.fase === 'enviando'}
+        className={`${pc.primaryBtn} ${s.reintentarVivo}`}
+        data-enviando={enviando ? '' : undefined}
+        aria-busy={enviando}
         onClick={x.reintentar}
       >
         {h.boton}
       </button>
-    </div>
+    </section>
+  );
+}
+
+/** Don Cuentas with his book: nothing is lost, and why the close waits. */
+function NadaSePierde() {
+  return (
+    <section aria-label="Nada se pierde" className={s.nota}>
+      <Don pose="ayuda" size={90} />
+      <div className={s.notaBurbuja}>
+        <span className={s.notaTitulo}>Nada se pierde</span>
+        <span className={s.notaTexto}>
+          Lo que capturas vive en esta caja hasta que suba. No borres los datos del navegador. No
+          podrás cerrar el turno hasta que se envíe.
+        </span>
+      </div>
+    </section>
   );
 }

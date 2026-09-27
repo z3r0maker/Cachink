@@ -1,39 +1,33 @@
 'use client';
 
-/**
- * Detalle de venta's writes and shares (O-34): the linked register's cancel
- * — the same door Ventas uses — and the comprobante the share dialog takes.
- */
+/** Detalle de venta's comprobante: the ticket as the share dialog takes it (O-34). */
 
-import { registerRuntime } from '../../runtime/client';
-import { readDevice } from '../../runtime/device-store';
-import { readSesion } from '../../runtime/session-store';
-import { desencolar } from '../../shell/cola';
-import type { DetalleData, VentaDetalle } from './types';
+import type { Comprobante } from '../../caja/receipt';
+import { totalDe } from './copy';
+import type { VentaDetalle } from './types';
 
-/** The linked register's cancel write — same use case, PIN and all. */
-export async function cancelarEnVivo(ticketId: string, motivo: string, nip: string): Promise<void> {
-  const device = readDevice();
-  const sesion = readSesion();
-  if (device === null || sesion === null) return;
-  await registerRuntime().cancelar({
-    businessId: device.businessId,
-    deviceId: device.deviceId,
-    userId: sesion.userId,
-    ticketId,
-    pin: nip,
-    motivo,
-  });
-  if (navigator.onLine) await desencolar();
-}
-
-export function comprobante(data: DetalleData, v: VentaDetalle, total: bigint) {
-  const cambio = v.recibido === undefined ? null : v.recibido - total;
+export function comprobante(negocio: string, v: VentaDetalle, caja: string): Comprobante {
+  const total = totalDe(v);
+  const hora = /\d{1,2}:\d{2}/.exec(v.cuando)?.[0];
   return {
-    negocio: data.negocio,
+    negocio,
     folio: v.folio,
-    venta: { lines: v.lineas, total, metodo: v.metodo, cambio, nota: '' },
+    caja,
+    ...(hora === undefined ? {} : { hora }),
+    venta: {
+      // A line known only by pieces carries no price; the receipt leaves its amount blank.
+      lines: v.lineas.map((l) => ({
+        productoId: l.productoId,
+        nombre: l.nombre,
+        cantidad: l.cantidad,
+        precio: l.precio ?? 0n,
+      })),
+      total,
+      metodo: v.metodo,
+      cambio: v.recibido === undefined ? null : v.recibido - total,
+      nota: '',
+    },
     // On a linked register this id fetches the branded N-20 PNG (N-21).
-    ticketId: v.id,
+    ...(v.id === undefined ? {} : { ticketId: v.id }),
   };
 }

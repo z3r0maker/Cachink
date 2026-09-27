@@ -9,7 +9,7 @@ import { openSession, resolveSession } from '../src/security';
 import { integrationSuite } from './support/db';
 
 /**
- * 0046 (audit DB2-PAGE-01): what every portal navigation costs the database.
+ * 0047 (audit DB2-PAGE-01): what every portal navigation costs the database.
  *
  * - `session_resolve` used to UPDATE `last_seen_at` on every request. It now
  *   touches the row only when the stored stamp is older than a minute (or
@@ -25,7 +25,7 @@ const suffix = Date.now().toString().slice(-4);
 const MEMBER = `01HZ8XQN9GZJXV8AKQ5XPRC${suffix}`.replace(/[ILOU]/g, 'A');
 const MEMBER_ARCHIVED = `01HZ8XQN9GZJXV8AKQ5XPRD${suffix}`.replace(/[ILOU]/g, 'A');
 
-describe('0046 — the portal’s per-request cost', () => {
+describe('0047 — the portal’s per-request cost', () => {
   let db: Db;
   let owner: Db;
   const userId = randomUUID();

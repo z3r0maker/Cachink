@@ -10,7 +10,7 @@ import { cajaTurnos, users } from '@xangarro/data-pg';
 
 import { leerFiguras, type Figuras } from './cortes-figuras';
 import { withTenant } from './db';
-import type { ConteoDenominaciones } from '@xangarro/domain';
+import { normalizarConteo, type ConteoDenominaciones } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 /** The screen's `Corte`, in centavos, ready to render. */
@@ -137,7 +137,9 @@ function safeConteo(json: string | null): ConteoDenominaciones {
   if (json === null) return {};
   try {
     const parsed: unknown = JSON.parse(json);
-    return typeof parsed === 'object' && parsed !== null ? (parsed as ConteoDenominaciones) : {};
+    return typeof parsed === 'object' && parsed !== null
+      ? normalizarConteo(parsed as Record<string, unknown>)
+      : {};
   } catch {
     return {};
   }

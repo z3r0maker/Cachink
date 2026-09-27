@@ -5,7 +5,7 @@ import { loadSuscripcion } from '@/server/suscripcion';
 import { SuscripcionScreen } from './screen';
 
 /**
- * Suscripción — the plan, the consumption and the receipts (P-10).
+ * Mi negocio · Plan y pagos: the plan, the consumption and the receipts (P-10).
  *
  * The pricing is **real**: every pitch, price, CTA and feature line is
  * transcribed verbatim from the design, not paraphrased (ADR-059). The status,

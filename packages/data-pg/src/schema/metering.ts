@@ -33,7 +33,7 @@ export const usageCounters = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.businessId, t.period] }),
-    // `usageCountersOf` reads a few months across every business (0043).
+    // `usageCountersOf` reads a few months across every business (0044).
     index('usage_counters_period_idx').on(t.period, t.businessId),
   ],
 );

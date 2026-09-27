@@ -31,13 +31,13 @@ export const businesses = pgTable(
     usoCfdi: text('uso_cfdi'),
     isrTasa: integer('isr_tasa').notNull(),
     logoUrl: text('logo_url'),
-    /** Branding and receipts (C-15, N-19/N-20; migration 0023). */
+    /** Branding and receipts (C-15, N-19/N-20; migration 0023; «Ticket» default since 0043). */
     brandColor: text('brand_color'),
     receiptTemplate: text('receipt_template', {
       enum: ['clasico', 'moderno', 'ticket', 'minimal'],
     })
       .notNull()
-      .default('clasico'),
+      .default('ticket'),
     receiptLeyenda: text('receipt_leyenda'),
     addressPrint: boolean('address_print').notNull().default(false),
     whatsapp: text('whatsapp'),

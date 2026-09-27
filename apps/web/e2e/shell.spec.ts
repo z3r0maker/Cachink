@@ -81,11 +81,11 @@ test('the sidebar and header borders form one line', async ({ page }) => {
 test('the sync pill agrees with Sincronización', async ({ page }) => {
   await page.goto('/sincronizacion');
 
-  // The KPI card renders `<span>{label}</span><p>{value}</p>`, so the figure is
-  // the first paragraph beside its own label — not "the first number on the
-  // page", which would silently latch onto whichever card rendered first.
-  const label = page.locator('main').getByText('Registros rechazados', { exact: true });
-  const figure = await label.locator('..').locator('p').first().innerText();
+  // The status hero carries the open count it words («2 registros no se
+  // pudieron guardar»), so the figure is read from the hero itself, not from
+  // "the first number on the page".
+  const hero = page.locator('main').getByTestId('sync-estado');
+  const figure = (await hero.getAttribute('data-pendientes')) ?? '';
   const pending = Number(figure);
   expect(Number.isInteger(pending), `expected a count, got "${figure}"`).toBe(true);
 

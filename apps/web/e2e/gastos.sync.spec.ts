@@ -22,7 +22,7 @@ test("a gasto of the open turno is the register's own, end to end", async ({ pag
   await pasarAcceso(page, code);
 
   await page.getByRole('link', { name: 'Gastos' }).click();
-  await expect(page.getByRole('heading', { name: 'Gastos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Gastos', exact: true })).toBeVisible();
   await expect(page.getByText('Sin gastos en este turno')).toBeVisible();
 
   // Register one: gas for the grill, $150, Insumos.
@@ -30,11 +30,11 @@ test("a gasto of the open turno is the register's own, end to end", async ({ pag
     .getByRole('button', { name: /Registrar gasto/ })
     .first()
     .click();
-  const modal = page.getByRole('dialog');
-  await modal.getByLabel('Monto').fill('150');
-  await modal.getByLabel('Concepto').fill('Gas para la parrilla');
+  const modal = page.getByRole('dialog', { name: 'Registrar gasto' });
+  await modal.getByLabel('¿Cuánto?').fill('150');
+  await modal.getByLabel('¿Qué compraste?').fill('Gas para la parrilla');
   await modal.getByRole('button', { name: 'Insumos', exact: true }).click();
-  await modal.getByRole('button', { name: 'Registrar gasto', exact: true }).click();
+  await modal.getByRole('button', { name: 'Registrar gasto de $150.00' }).click();
 
   await expect(page.getByRole('status')).toContainText(
     '−$150.00 · Gas para la parrilla · Insumos · sin comprobante.',

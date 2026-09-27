@@ -74,7 +74,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     emphasis: true,
     features: [
       on('Dueño + 2 empleados (2 dispositivos)'),
-      on('Catálogo de hasta 1 000 productos'),
+      on('Catálogo de hasta 1,000 productos'),
       on('Escaneo de código de barras'),
       on('Estados financieros NIF (B-2, B-3, B-6)'),
       on('Informe mensual para tu contador'),
@@ -93,7 +93,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
       on('Dueño + 5 empleados (5 dispositivos)'),
       on('Hasta 30 000 transacciones al mes'),
       on('Catálogo de hasta 5 000 productos'),
-      on('Multi-sucursal (próximamente)'),
+      on('Multi-sucursal'),
       on('Reportes avanzados y comparativos'),
       on('Exportación a PDF y Excel'),
       on('Soporte prioritario por WhatsApp'),

@@ -1,118 +1,176 @@
 'use client';
 
-import { Banner, Button, ConfirmDialog, Input } from '@/components';
+import type { ReactNode } from 'react';
 
-import { pageSubtitle, pageTitle } from '../productos/productos.css';
+import { ConfirmDialog } from '@/components';
 
-/** The saldos screen's presentational pieces, split out for size. */
+import { FechaPicker } from '../_primeros/fecha';
+import { soloMonto } from '../_primeros/formato';
+import * as p from '../_primeros/primeros.css';
+import type { Saldos } from './use-saldos';
+import * as r from './resumen.css';
+import * as s from './saldos.css';
 
-export interface CamposForm {
-  readonly fecha: string;
-  readonly setFecha: (v: string) => void;
-  readonly caja: string;
-  readonly setCaja: (v: string) => void;
-  readonly bancos: string;
-  readonly setBancos: (v: string) => void;
-}
-
+/** The fecha de apertura and the two money cards (caja, bancos). */
 export function CamposApertura({
   f,
+  hoy,
   editable,
 }: {
-  readonly f: CamposForm;
+  readonly f: Saldos;
+  readonly hoy: string;
   readonly editable: boolean;
 }) {
   return (
-    <div style={{ display: 'grid', gap: 14, maxWidth: 380, marginTop: 16 }}>
-      <Input
-        labelText="Fecha de apertura"
-        value={f.fecha}
-        disabled={!editable}
-        onChange={(e) => f.setFecha(e.target.value)}
-        placeholder="2026-09-01"
-        hintText="YYYY-MM-DD"
+    <>
+      <div className={s.fechaFila}>
+        <FechaPicker
+          id="fecha-apertura"
+          label="Fecha de apertura"
+          dialogo="Elige la fecha de apertura"
+          valor={f.fecha}
+          hoy={hoy}
+          disabled={!editable}
+          onChange={f.setFecha}
+        />
+        <p className={`${p.nota} ${s.fechaNota}`}>
+          El día desde el que Xangarro lleva tus cuentas. Tus estados financieros empiezan aquí.
+        </p>
+      </div>
+      <Tarjetas f={f} editable={editable} />
+    </>
+  );
+}
+
+function Tarjetas({ f, editable }: { readonly f: Saldos; readonly editable: boolean }) {
+  return (
+    <div className={s.dosTarjetas}>
+      <Monto
+        id="caja"
+        label="Efectivo en caja"
+        hint="Lo que había en el cajón ese día."
+        tono="verde"
+        icono={<IconoBillete />}
+        valor={f.caja}
+        editable={editable}
+        onChange={f.setCaja}
       />
-      <Input
-        labelText="Caja (efectivo)"
-        value={f.caja}
-        disabled={!editable}
-        onChange={(e) => f.setCaja(e.target.value)}
-        placeholder="1500"
-        numeric
-      />
-      <Input
-        labelText="Bancos"
-        value={f.bancos}
-        disabled={!editable}
-        onChange={(e) => f.setBancos(e.target.value)}
-        placeholder="20000"
-        numeric
+      <Monto
+        id="bancos"
+        label="En bancos"
+        hint="La suma de las cuentas del negocio."
+        tono="azul"
+        icono={<IconoBanco />}
+        valor={f.bancos}
+        editable={editable}
+        onChange={f.setBancos}
       />
     </div>
   );
 }
 
-export function AccionesSaldos({
-  pending,
-  onGuardar,
-  onBloquear,
-}: {
-  readonly pending: boolean;
-  readonly onGuardar: () => void;
-  readonly onBloquear: () => void;
+function Monto(props: {
+  readonly id: string;
+  readonly label: string;
+  readonly hint: string;
+  readonly tono: 'verde' | 'azul';
+  readonly icono: ReactNode;
+  readonly valor: string;
+  readonly editable: boolean;
+  readonly onChange: (v: string) => void;
 }) {
   return (
-    <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
-      <Button variant="primary" disabled={pending} onClick={onGuardar}>
-        {pending ? 'Guardando…' : 'Guardar saldos'}
-      </Button>
-      <Button variant="secondary" disabled={pending} onClick={onBloquear}>
-        Bloquear saldos iniciales
-      </Button>
+    <div className={s.tarjeta}>
+      <div className={s.tarjetaCabeza}>
+        <span className={s.mosaicoTono[props.tono]} aria-hidden="true">
+          {props.icono}
+        </span>
+        <label htmlFor={props.id} className={s.tarjetaLabel}>
+          {props.label}
+        </label>
+      </div>
+      <div className={s.monto} data-quieto={props.editable ? undefined : ''}>
+        <span className={s.montoSigno} aria-hidden="true">
+          $
+        </span>
+        <input
+          id={props.id}
+          className={s.montoInput}
+          inputMode="decimal"
+          placeholder="0.00"
+          value={props.valor}
+          disabled={!props.editable}
+          onChange={(e) => props.onChange(soloMonto(e.target.value))}
+        />
+      </div>
+      <span className={p.nota}>{props.hint}</span>
     </div>
   );
 }
 
 export function ConfirmarBloqueo({
+  abierto,
+  resumen,
   onCerrar,
   onBloquear,
 }: {
+  readonly abierto: boolean;
+  readonly resumen: string;
   readonly onCerrar: () => void;
   readonly onBloquear: () => void;
 }) {
   return (
     <ConfirmDialog
-      open
+      open={abierto}
       onOpenChange={(o) => !o && onCerrar()}
       title="¿Bloquear los saldos iniciales?"
-      body="Se vuelven de solo lectura: los estados que emitiste dejan de poder cambiar por atrás. No se deshace."
+      body="Ya no los vas a poder cambiar. Tus estados financieros parten de aquí."
       confirmLabel="Bloquear"
+      cancelLabel="Mejor no"
       destructive
       onConfirm={() => {
         onCerrar();
         onBloquear();
       }}
-    />
+    >
+      <div className={r.advertencia}>
+        <svg viewBox="0 0 24 24" width={20} height={20} fill="none" aria-hidden="true">
+          <path
+            d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"
+            stroke="currentColor"
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className={r.advertenciaTexto}>{resumen}</span>
+      </div>
+    </ConfirmDialog>
   );
 }
 
-export function EncabezadoSaldos({
-  banner,
-  lockedAt,
-}: {
-  readonly banner: { tone: 'success' | 'critical'; text: string } | null;
-  readonly lockedAt: string | null;
-}) {
+const TRAZO = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const;
+
+function IconoBillete() {
   return (
-    <>
-      <h1 className={pageTitle}>Saldos iniciales</h1>
-      <p className={pageSubtitle}>
-        Lo que tu negocio tenía el día uno: caja, bancos y cuentas por cobrar
-      </p>
-      {banner !== null ? <Banner tone={banner.tone} title={banner.text} /> : null}
-      {lockedAt !== null ? (
-        <Banner tone="info" title={`Bloqueados el ${lockedAt.slice(0, 10)}. Ya no se editan.`} />
-      ) : null}
-    </>
+    <svg viewBox="0 0 24 24" width={18} height={18} {...TRAZO}>
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
+    </svg>
+  );
+}
+
+function IconoBanco() {
+  return (
+    <svg viewBox="0 0 24 24" width={18} height={18} {...TRAZO}>
+      <path d="M10 18v-7M14 18v-7M18 18v-7M6 18v-7M3 22h18M12 2 3 7h18z" />
+    </svg>
   );
 }

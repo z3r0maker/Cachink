@@ -86,6 +86,7 @@ function Capas({
       ) : null}
       {x.modal === 'recordar' ? (
         <Recordar
+          nombre={c.nombre}
           telefono={c.telefono}
           mensaje={recordatorio(c, x.e, data.negocio)}
           onClose={() => x.setModal(null)}

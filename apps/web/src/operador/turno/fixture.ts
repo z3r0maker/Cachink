@@ -3,7 +3,7 @@ import type { TurnoData } from './types';
 
 /**
  * The design's open turno (`Operador Turno.dc.html`), in centavos:
- * $800 + $1,980 + $550 − $620 = $2,710 expected. Replaced in O-06.
+ * $800 + $1,980 + $550 - $620 = $2,710 expected. Replaced in O-06.
  */
 export const TURNO_FIXTURE: TurnoData = {
   operador: 'Ana Robledo',
@@ -23,6 +23,12 @@ export const TURNO_FIXTURE: TurnoData = {
   canceladas: 1,
   ultimaCancelada: '12:58',
   cobrado: 312_000n,
+  porMetodo: [
+    { metodo: 'Efectivo', monto: 198_000n, nota: 'entra a la caja' },
+    { metodo: 'Tarjeta', monto: 63_800n, nota: 'en la terminal' },
+    { metodo: 'Transferencia', monto: 32_000n, nota: 'a la cuenta de Pedro' },
+    { metodo: 'Fiado', monto: 18_200n, nota: 'Doña Mari y otro cliente' },
+  ],
   fiado: 18_200n,
   clientesFiados: 2,
   gastos: 62_000n,

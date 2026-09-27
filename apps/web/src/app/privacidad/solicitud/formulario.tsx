@@ -1,81 +1,62 @@
 'use client';
 
-import { Ban, Eye, PencilLine, ShieldOff, Trash2 } from 'lucide-react';
-import { useState, useTransition } from 'react';
-import { portalFontSizes } from '@xangarro/tokens';
+import { IdCard } from 'lucide-react';
 
-import { Banner, Button, Input, OptionCards } from '@/components';
-import { enviarSolicitudArco, type ArcoResult } from '@/server/actions/arco';
+import { Banner, Button, Card, Input } from '@/components';
+import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
 
-const DERECHOS = [
-  {
-    value: 'acceso',
-    title: 'Acceso',
-    description: 'Saber qué datos tuyos tenemos y cómo los usamos.',
-    icon: <Eye size={20} aria-hidden="true" />,
-  },
-  {
-    value: 'rectificacion',
-    title: 'Rectificación',
-    description: 'Corregir datos inexactos o incompletos.',
-    icon: <PencilLine size={20} aria-hidden="true" />,
-  },
-  {
-    value: 'cancelacion',
-    title: 'Cancelación',
-    description: 'Que borremos tus datos de nuestros sistemas.',
-    icon: <Trash2 size={20} aria-hidden="true" />,
-  },
-  {
-    value: 'oposicion',
-    title: 'Oposición',
-    description: 'Que dejemos de usar tus datos para un fin.',
-    icon: <Ban size={20} aria-hidden="true" />,
-  },
-  {
-    value: 'revocacion',
-    title: 'Revocar consentimiento',
-    description: 'Retirar un permiso que nos diste.',
-    icon: <ShieldOff size={20} aria-hidden="true" />,
-  },
-] as const;
+import { dos, pila } from '../../_publico/publico.css';
+import * as s from './arco.css';
+import { Derechos } from './derechos';
+import type { ArcoForm } from './use-arco';
 
-const textarea = {
-  border: '2px solid var(--black)',
-  borderRadius: 10,
-  padding: '10px 12px',
-  fontFamily: 'inherit',
-  fontSize: portalFontSizes.md,
-  resize: 'vertical',
-} as const;
-
-/** Form state and the send action, apart so the component stays presentational. */
-function useArcoForm() {
-  const [nombre, setNombre] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [derecho, setDerecho] = useState<string | null>(null);
-  const [descripcion, setDescripcion] = useState('');
-  const [result, setResult] = useState<ArcoResult | null>(null);
-  const [pending, start] = useTransition();
-  const enviar = () =>
-    start(async () => {
-      setResult(await enviarSolicitudArco({ nombre, correo, derecho, descripcion }));
-    });
-  return {
-    ...{ nombre, setNombre, correo, setCorreo, derecho, setDerecho },
-    ...{ descripcion, setDescripcion, result, pending, enviar },
-  };
+function Descripcion(props: { readonly value: string; readonly onChange: (v: string) => void }) {
+  return (
+    <div className={s.campo}>
+      <div className={s.etiquetaFila}>
+        <label htmlFor="arco-descripcion" className={s.etiqueta}>
+          Qué datos y qué necesitas
+        </label>
+        <span className={s.contador} aria-hidden="true">
+          {props.value.length.toLocaleString('es-MX')} / 4,000
+        </span>
+      </div>
+      <textarea
+        id="arco-descripcion"
+        className={s.texto}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        rows={4}
+        maxLength={4000}
+        placeholder="Por ejemplo: quiero saber qué datos de mi negocio tienen guardados y con quién los comparten."
+      />
+    </div>
+  );
 }
 
-/** The ARCO form: who you are, which right, what exactly; then the folio. */
-export function FormularioArco() {
-  const f = useArcoForm();
-  if (f.result?.ok) return <Recibida folio={f.result.folio} responderA={f.result.responderA} />;
+function Identidad() {
   return (
-    <div style={{ display: 'grid', gap: 14, marginTop: 16 }}>
-      {f.result && !f.result.ok ? <Banner tone="critical" title={f.result.message} /> : null}
+    <p className={s.identidad}>
+      <IdCard size={20} className={s.identidadIcono} aria-hidden="true" />
+      <span>
+        Para proteger tus datos, antes de actuar te pediremos por correo una identificación. Aviso
+        de privacidad completo:{' '}
+        <a className={s.enlace} href={AVISO_INTEGRAL_URL}>
+          xangarro.mx/privacidad
+        </a>
+        .
+      </span>
+    </p>
+  );
+}
+
+function Quien({ f }: { readonly f: ArcoForm }) {
+  return (
+    <div className={dos}>
       <Input
         labelText="Nombre completo"
+        autoComplete="name"
+        placeholder="Como en tu identificación"
         value={f.nombre}
         onChange={(e) => f.setNombre(e.target.value)}
         maxLength={120}
@@ -83,56 +64,48 @@ export function FormularioArco() {
       <Input
         labelText="Correo para la respuesta"
         type="email"
+        autoComplete="email"
+        placeholder="tucorreo@ejemplo.mx"
         value={f.correo}
         onChange={(e) => f.setCorreo(e.target.value)}
         maxLength={200}
       />
-      <OptionCards
-        options={DERECHOS}
-        value={f.derecho}
-        onValueChange={f.setDerecho}
-        ariaLabel="Qué derecho quieres ejercer"
-      />
-      <Descripcion value={f.descripcion} onChange={f.setDescripcion} />
-      <div>
-        <Button variant="primary" disabled={f.pending} onClick={f.enviar}>
-          {f.pending ? 'Enviando…' : 'Enviar solicitud'}
-        </Button>
-      </div>
     </div>
   );
 }
 
-function Descripcion(props: { readonly value: string; readonly onChange: (v: string) => void }) {
+function Envio({ f }: { readonly f: ArcoForm }) {
   return (
-    <label style={{ display: 'grid', gap: 6, fontWeight: 600 }}>
-      Qué datos y qué necesitas
-      <textarea
-        aria-label="Qué datos y qué necesitas"
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-        rows={6}
-        maxLength={4000}
-        style={textarea}
-      />
-    </label>
+    <div className={s.enviar}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={f.pending}
+        aria-describedby={f.falta ? 'arco-falta' : undefined}
+      >
+        {f.pending ? 'Enviando…' : 'Enviar solicitud'}
+      </Button>
+      {f.falta ? (
+        <p id="arco-falta" className={s.faltaIzq}>
+          {f.falta}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
-function Recibida({ folio, responderA }: { readonly folio: string; readonly responderA: string }) {
-  const dia = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long', timeZone: 'UTC' }).format(
-    new Date(`${responderA}T12:00:00Z`),
-  );
+/** The ARCO form: who you are, which right, what exactly; then the folio. */
+export function FormularioArco({ f }: { readonly f: ArcoForm }) {
   return (
-    <div data-testid="arco-recibida" style={{ marginTop: 16 }}>
-      <Banner tone="success" title="Recibimos tu solicitud." />
-      <p>
-        Tu folio es <strong data-testid="arco-folio">{folio}</strong>. Guárdalo: te lo pediremos al
-        responderte.
-      </p>
-      <p>
-        Te respondemos por correo a más tardar el <strong data-testid="arco-plazo">{dia}</strong>.
-      </p>
-    </div>
+    <Card emphasis="hero">
+      <form onSubmit={f.enviar} noValidate className={pila}>
+        {f.result && !f.result.ok ? <Banner tone="critical" title={f.result.message} /> : null}
+        <Quien f={f} />
+        <Derechos value={f.derecho} onChange={f.setDerecho} />
+        <Descripcion value={f.descripcion} onChange={f.setDescripcion} />
+        <Identidad />
+        <Envio f={f} />
+      </form>
+    </Card>
   );
 }

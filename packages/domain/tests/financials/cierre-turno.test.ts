@@ -7,6 +7,7 @@ import {
   diferenciaCorte,
   efectivoEsperado,
   esperadoDelTurno,
+  normalizarConteo,
   totalContado,
 } from '../../src/financials/cierre-turno.js';
 
@@ -51,19 +52,66 @@ describe('efectivoEsperado (ADR-074 §3: one calculator per turno)', () => {
 });
 
 describe('totalContado and diferenciaCorte', () => {
-  it('counts bills and coins from $1,000 down to $1', () => {
+  it('counts bills from $1,000 to $20 and coins from $20 to 10 centavos', () => {
     assert.deepEqual(
       DENOMINACIONES_MXN.map((d) => d.valor),
-      [1000_00n, 500_00n, 200_00n, 100_00n, 50_00n, 20_00n, 10_00n, 5_00n, 2_00n, 1_00n],
+      [
+        1000_00n,
+        500_00n,
+        200_00n,
+        100_00n,
+        50_00n,
+        20_00n,
+        20_00n,
+        10_00n,
+        5_00n,
+        2_00n,
+        1_00n,
+        50n,
+        20n,
+        10n,
+      ],
     );
-    const conteo = { 1000: 1, 500: 2, 200: 4, 100: 6, 50: 3, 20: 5, 10: 8, 5: 6, 2: 5, 1: 10 };
+    assert.equal(new Set(DENOMINACIONES_MXN.map((d) => d.clave)).size, DENOMINACIONES_MXN.length);
+    const conteo = {
+      'billete-1000': 1,
+      'billete-500': 2,
+      'billete-200': 4,
+      'billete-100': 6,
+      'billete-50': 3,
+      'billete-20': 5,
+      'moneda-10': 8,
+      'moneda-5': 6,
+      'moneda-2': 5,
+      'moneda-1': 10,
+    };
     assert.equal(totalContado(conteo), 3_780_00n);
     assert.equal(totalContado({}), 0n);
   });
 
+  it('keeps the $20 bill and the $20 coin apart, and counts centavos exactly', () => {
+    assert.equal(totalContado({ 'billete-20': 2, 'moneda-20': 3 }), 100_00n);
+    // 3 × 0.10 is 0.30 exactly, not 0.30000000000000004.
+    assert.equal(totalContado({ 'moneda-0.10': 3 }), 30n);
+    assert.equal(totalContado({ 'moneda-0.50': 1, 'moneda-0.20': 2, 'moneda-0.10': 1 }), 1_00n);
+  });
+
   it('rejects a negative or fractional count', () => {
-    assert.throws(() => totalContado({ 100: -1 }), CorteInvalidoError);
-    assert.throws(() => totalContado({ 100: 1.5 }), CorteInvalidoError);
+    assert.throws(() => totalContado({ 'billete-100': -1 }), CorteInvalidoError);
+    assert.throws(() => totalContado({ 'moneda-0.50': 1.5 }), CorteInvalidoError);
+  });
+
+  it('reads old pesos-keyed counts, where «20» was the bill', () => {
+    assert.deepEqual(normalizarConteo({ 1000: 2, 20: 1, 10: 1 }), {
+      'billete-1000': 2,
+      'billete-20': 1,
+      'moneda-10': 1,
+    });
+    assert.deepEqual(normalizarConteo({ 'moneda-20': 2, 'moneda-0.50': 1 }), {
+      'moneda-20': 2,
+      'moneda-0.50': 1,
+    });
+    assert.deepEqual(normalizarConteo({ 3: 1, 'billete-50': -1, 'moneda-5': 1.5, x: 'a' }), {});
   });
 
   it('says cuadra, falta or sobra with the amount', () => {

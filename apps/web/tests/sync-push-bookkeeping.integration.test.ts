@@ -12,7 +12,7 @@ import { PUSH_T1, PUSH_TOUCHED, pushFixtures, pushId as id } from './support/pus
 
 /**
  * What no row can do to a push on real Postgres (audit DB3-SYNC-01, -03, -04;
- * ADR-112 amendment): a NUL cannot fail it, a payload `jsonb` refuses cannot
+ * ADR-115 amendment): a NUL cannot fail it, a payload `jsonb` refuses cannot
  * fail it, a duplicate folio is answered terminally, an overlapping retry is
  * answered from the original's receipts, and a retry that succeeds closes the
  * rejection the portal was counting. Same database contract as

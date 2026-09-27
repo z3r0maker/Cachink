@@ -97,8 +97,8 @@ test(
     const pageB = await context.newPage();
     await page.goto('/negocio');
     await pageB.goto('/negocio');
-    await page.getByRole('button', { name: 'Editar negocio' }).click();
-    await pageB.getByRole('button', { name: 'Editar negocio' }).click();
+    await page.getByRole('button', { name: 'Editar datos generales' }).click();
+    await pageB.getByRole('button', { name: 'Editar datos generales' }).click();
 
     const nameA = `Negocio A ${Date.now()}`;
     const nameB = `Negocio B ${Date.now()}`;

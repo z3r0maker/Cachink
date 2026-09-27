@@ -71,7 +71,7 @@ describe('tenant indexes in the database (DB-IDX-01)', () => {
     assert.equal(rows.length, 5, `expected the §2.2 set, got ${rows.map((r) => r.indexname)}`);
   });
 
-  it('0043 replaced the three prefixes round 3 found redundant (DB3-IDX-01)', async () => {
+  it('0044 replaced the three prefixes round 3 found redundant (DB3-IDX-01)', async () => {
     const rows = await sql<{ indexname: string }[]>`
       SELECT indexname FROM pg_indexes
        WHERE indexname IN ('sales_business_idx', 'expenses_business_idx',

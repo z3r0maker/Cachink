@@ -1,76 +1,81 @@
-import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
-import * as l from '../turno/lists.css';
-import * as u from '../ui/ui.css';
+import * as r from '../ui/resumen.css';
 import * as c from './cobranza.css';
 import { estado, resumenCliente, saldo, type EstadoCliente } from './derive';
 import type { CuentaCliente } from './cliente/types';
 
-const CHEVRON = 'M9 6l6 6-6 6';
+const CHEVRON = 'm9 18 6-6-6-6';
 
-const ESTADO: Record<EstadoCliente, { bg: string; color: string }> = {
-  'Al día': { bg: colors.gray100, color: colors.gray600 },
-  Atrasado: { bg: colors.warningSoft, color: colors.warningText },
-  'Sin saldo': { bg: colors.greenSoft, color: colors.greenText },
+export const TONO: Record<EstadoCliente, r.ChipTone> = {
+  'Al día': 'gray',
+  Atrasado: 'red',
+  'Sin saldo': 'green',
 };
 
-/** A client: avatar, state, balance in 30 px, age of the debt, abono and history. */
-export function Tarjeta({
-  x,
-  onAbonar,
-}: {
+/** The client's state chip: «Atrasado» red, «Al día» quiet, «Sin saldo» green. */
+export function EstadoChip({ x }: { readonly x: CuentaCliente }) {
+  const e = estado(x);
+  return <span className={r.chip[TONO[e]]}>{e}</span>;
+}
+
+/** A client: avatar, state, balance, the age of the debt, «Recibir abono» and «Ver cuenta». */
+export function Tarjeta(p: {
   readonly x: CuentaCliente;
+  readonly abierta: boolean;
   readonly onAbonar: () => void;
+  readonly onVer: () => void;
 }) {
-  const debe = saldo(x) > 0n;
+  const debe = saldo(p.x) > 0n;
   return (
-    <div className={c.card}>
-      <Cabeza x={x} />
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-        <span className={u.eyebrow}>Saldo</span>
-        <span className={c.saldo}>{formatMoney(saldo(x))}</span>
+    <article className={c.card} data-sel={p.abierta ? '' : undefined}>
+      <div className={c.cabeza}>
+        <span className={c.avatar} style={{ background: p.x.tint }} aria-hidden="true">
+          {p.x.iniciales}
+        </span>
+        <span className={c.quien}>
+          <span className={c.nombre}>{p.x.nombre}</span>
+          <span className={c.tel}>{p.x.telefono}</span>
+        </span>
+        <EstadoChip x={p.x} />
       </div>
-      <div className={c.texto}>{resumenCliente(x)}</div>
-      <div style={{ display: 'flex', gap: 9 }}>
-        <button
-          type="button"
-          className={c.cta}
-          data-onyellow=""
-          aria-disabled={debe ? undefined : true}
-          onClick={debe ? onAbonar : undefined}
-        >
-          {debe ? 'Recibir abono' : 'Sin saldo por cobrar'}
-        </button>
-        <Link
-          href={`${OPERADOR_BASE}/cobranza/${x.id}`}
-          className={c.historial}
-          title="Ver historial"
-        >
-          <Icon path={CHEVRON} size={17} strokeWidth={2.5} />
-        </Link>
+      <div className={c.saldoRow}>
+        <span className={r.eyebrow}>Saldo</span>
+        <span className={c.saldo} style={{ color: debe ? colors.warningText : colors.black }}>
+          {formatMoney(saldo(p.x))}
+        </span>
       </div>
-    </div>
+      <span className={c.linea}>{resumenCliente(p.x)}</span>
+      <Botones debe={debe} nombre={p.x.nombre} onAbonar={p.onAbonar} onVer={p.onVer} />
+    </article>
   );
 }
 
-function Cabeza({ x }: { readonly x: CuentaCliente }) {
-  const e = estado(x);
+function Botones(p: {
+  readonly debe: boolean;
+  readonly nombre: string;
+  readonly onAbonar: () => void;
+  readonly onVer: () => void;
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span className={c.avatar} style={{ background: x.tint }}>
-        {x.iniciales}
-      </span>
-      <div style={{ minWidth: 0 }}>
-        <div className={c.nombre}>{x.nombre}</div>
-        <div className={l.detail}>{x.telefono}</div>
-      </div>
-      <span className={c.estado} style={{ background: ESTADO[e].bg, color: ESTADO[e].color }}>
-        {e}
-      </span>
+    <div className={c.botones}>
+      {p.debe ? (
+        <button type="button" className={c.abonar} onClick={p.onAbonar}>
+          Recibir abono
+        </button>
+      ) : null}
+      <button
+        type="button"
+        className={c.ver}
+        data-solo={p.debe ? undefined : ''}
+        aria-label={`Ver cuenta de ${p.nombre}`}
+        onClick={p.onVer}
+      >
+        Ver cuenta
+        <Icon path={CHEVRON} size={16} strokeWidth={2.4} />
+      </button>
     </div>
   );
 }

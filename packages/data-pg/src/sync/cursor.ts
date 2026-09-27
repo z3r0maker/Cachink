@@ -23,7 +23,7 @@ export function allocateSeq(tx: Tx, businessId: string): Promise<number> {
 
 /**
  * Hand out `n` consecutive seqs in **one** statement and return the first
- * (audit DB2-SYNC-01; ADR-112 — the "block of seqs per batch" ADR-078
+ * (audit DB2-SYNC-01; ADR-115 — the "block of seqs per batch" ADR-078
  * anticipated). Same lock, same commit-order guarantee as one at a time; a
  * push holds it for one round trip instead of one per row.
  */

@@ -17,7 +17,7 @@ import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/p
 import { auditColumns, centavos } from './_columns';
 
 /**
- * Indexes from 0043_scale_indexes.sql (DB2-IDX-01, DB3-IDX-01), built
+ * Indexes from 0044_scale_indexes.sql (DB2-IDX-01, DB3-IDX-01), built
  * CONCURRENTLY there; `created_at` serves the usage recount, the partial
  * `(fecha DESC, id DESC)` the keyset lists and every date range (all of them
  * say `deleted_at IS NULL`, so the plain `(business_id, fecha)` index went),

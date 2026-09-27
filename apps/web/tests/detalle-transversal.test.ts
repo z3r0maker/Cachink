@@ -21,31 +21,21 @@ const lee = (...p: readonly string[]) => readFileSync(join(SRC, ...p), 'utf8');
 describe('D-1 — every Negocio tile carries a glyph', () => {
   const parts = lee('app', '(portal)', 'negocio', 'parts.tsx');
 
-  it('every tone with a background also has an icon', () => {
-    const tonos = (bloque: string) => (bloque.match(/^\s{2}(\w+):/gm) ?? []).map((l) => l.trim());
-    const fondos = parts.slice(parts.indexOf('const TILE_BG'), parts.indexOf('const TILE_ICON'));
-    const iconos = parts.slice(parts.indexOf('const TILE_ICON'));
-    assert.deepEqual(
-      tonos(fondos),
-      tonos(iconos.slice(0, iconos.indexOf('} as const;'))),
-      'a tone with a fill and no glyph is the blank square D-1 found',
-    );
-  });
-
   it('the tile renders the icon rather than closing on itself', () => {
     // `<span className={sectionTile} … />` — self-closing — was the defect.
-    assert.ok(parts.includes('<Icon path={TILE_ICON[props.tone]}'), 'the tile draws nothing');
+    const tile = parts.slice(parts.indexOf('export function Tile'));
+    assert.ok(tile.includes('<Icon path={path}'), 'the tile draws nothing');
   });
 });
 
-describe('D-2 — the save bar wears the dark button', () => {
-  it('«Guardar cambios» is not yellow on yellow', () => {
-    const bar = lee('app', '(portal)', 'negocio', 'edicion', 'save-bar.tsx');
-    const guardar = bar.slice(
-      bar.indexOf('onClick={e.save}') - 200,
-      bar.indexOf('onClick={e.save}'),
+describe('D-2 — the edit drawer saves with the primary button', () => {
+  it('«Guardar cambios» is the drawer’s primary action', () => {
+    const drawer = lee('app', '(portal)', 'negocio', 'edicion', 'drawer.tsx');
+    const guardar = drawer.slice(
+      drawer.indexOf('onClick={e.save}') - 200,
+      drawer.indexOf('onClick={e.save}'),
     );
-    assert.ok(guardar.includes('variant="dark"'), 'the primary must be the dark variant');
+    assert.ok(guardar.includes('variant="primary"'), 'the save must be the primary variant');
   });
 });
 

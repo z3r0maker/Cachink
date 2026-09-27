@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { colors, portalFontSizes } from '@xangarro/tokens';
+import { colors } from '@xangarro/tokens';
 
-import { Icon } from '../../shell/icon';
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
-import { ListCard, TintBox } from '../ui/parts';
-import * as u from '../ui/ui.css';
-import { corteChip, cortesNota } from './copy';
+import { Chip, Panel, Tile } from '../ui/panel';
+import * as p from '../ui/panel.css';
+import { corteChip } from './copy';
 import * as s from './inicio.css';
 import * as l from './lists.css';
 import type { CorteReciente, MensajeDueno, Tarea, TareaTipo } from './types';
@@ -17,13 +16,13 @@ const TAREA: Record<TareaTipo, { icon: string; tint: string; cta: string; slug: 
   gasto: { icon: ICONS.gastos, tint: colors.redSoft, cta: 'Registrar', slug: 'gastos' },
   reponer: {
     icon: ICONS.inventario,
-    tint: colors.warningSoft,
+    tint: colors.yellowSoft,
     cta: 'Ver stock',
     slug: 'inventario',
   },
   cobrar: {
     icon: ICONS.cobranza,
-    tint: colors.blueSoft,
+    tint: colors.warningSoft,
     cta: 'Recibir abono',
     slug: 'cobranza',
   },
@@ -36,76 +35,84 @@ const TAREA: Record<TareaTipo, { icon: string; tint: string; cta: string; slug: 
 };
 
 /** «Para hoy»: what nobody on this register has done yet; «Hoy no» hides a row for today. */
-export function ParaHoy({ tareas }: { readonly tareas: readonly Tarea[] }) {
+export function ParaHoy({
+  tareas,
+  cerrado,
+}: {
+  readonly tareas: readonly Tarea[];
+  /** With no turno open, the list waits for it. */
+  readonly cerrado: boolean;
+}) {
   const [hechas, setHechas] = useState<readonly string[]>([]);
-  const shown = tareas.filter((t) => !hechas.includes(t.id));
+  const shown = cerrado ? [] : tareas.filter((t) => !hechas.includes(t.id));
+  if (cerrado) return <ParaHoyCerrado />;
+  const verTodas =
+    hechas.length > 0 ? (
+      <button type="button" className={s.verTodas} onClick={() => setHechas([])}>
+        Ver todas
+      </button>
+    ) : null;
   return (
-    <ListCard
+    <Panel
       label="Para hoy"
-      headBg={colors.gray100}
       count={shown.length}
-      note="Lo que nadie ha hecho todavía en tu caja."
+      note="Lo que nadie ha hecho todavía en tu caja"
+      action={verTodas}
     >
       {shown.map((t) => (
         <TareaRow key={t.id} t={t} onSkip={() => setHechas((h) => [...h, t.id])} />
       ))}
-      {shown.length === 0 ? <TodoAlDia /> : null}
-    </ListCard>
+      {shown.length === 0 ? (
+        <div className={s.nada}>
+          <span className={s.nadaTitle}>Nada más para hoy</span>
+          <span className={p.rowDetail}>Lo que dejaste para después vuelve a salir mañana.</span>
+        </div>
+      ) : null}
+    </Panel>
+  );
+}
+
+function ParaHoyCerrado() {
+  return (
+    <Panel label="Para hoy">
+      <div className={s.nada}>
+        <span className={s.nadaTitle}>Tus pendientes salen al abrir el turno</span>
+        <span className={p.rowDetail}>
+          Gastos que se repiten, stock bajo y clientes por cobrar.
+        </span>
+      </div>
+    </Panel>
   );
 }
 
 function TareaRow({ t, onSkip }: { readonly t: Tarea; readonly onSkip: () => void }) {
   const k = TAREA[t.tipo];
   return (
-    <div
-      className={`${u.row} ${u.rowWrap}`}
-      data-hover=""
-      style={{ gap: 13, padding: '14px 18px' }}
-    >
-      <div className={u.rowMain} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-        <TintBox icon={k.icon} tint={k.tint} size={40} glyph={19} />
-        <div style={{ flex: '1 1 0', minWidth: 0 }}>
-          <div
-            className={s.rowTitle}
-            style={{ fontSize: portalFontSizes.body, letterSpacing: '-0.015em' }}
-          >
-            {t.titulo}
-          </div>
-          <div className={s.rowDetail}>{t.detalle}</div>
-        </div>
-      </div>
-      <div style={{ flex: 'none', display: 'flex', gap: 9 }}>
-        <Link href={`${OPERADOR_BASE}/${k.slug}`} className={s.rowCta}>
+    <div className={s.tarea}>
+      <Tile icon={k.icon} tint={k.tint} />
+      <span className={s.tareaText}>
+        <span className={p.rowTitle}>{t.titulo}</span>
+        <span className={p.rowDetail}>{t.detalle}</span>
+      </span>
+      <span className={s.tareaActions}>
+        <Link href={`${OPERADOR_BASE}/${k.slug}`} className={p.outlineBtn}>
           {k.cta}
         </Link>
         <button
           type="button"
-          className={s.hoyNo}
+          className={p.quietBtn}
           title="Quitar de la lista de hoy"
+          aria-label={`Hoy no: ${t.titulo}`}
           onClick={onSkip}
         >
           Hoy no
         </button>
-      </div>
+      </span>
     </div>
   );
 }
 
-const CHECK = 'M20 6 9 17l-5-5';
-
-function TodoAlDia() {
-  return (
-    <div className={l.alDia}>
-      <div className={l.alDiaTile}>
-        <Icon path={CHECK} size={26} strokeWidth={2.7} />
-      </div>
-      <div className={l.alDiaTitle}>Todo al día</div>
-      <div className={l.alDiaBody}>No hay nada pendiente en tu caja. Sigue cobrando.</div>
-    </div>
-  );
-}
-
-/** «De parte de …»: the owner's latest messages; the dot carries severity. */
+/** «De parte de …»: the owner's latest messages; the urgent one is tinted red. */
 export function DeParteDe({
   dueno,
   mensajes,
@@ -113,60 +120,55 @@ export function DeParteDe({
   readonly dueno: string;
   readonly mensajes: readonly MensajeDueno[];
 }) {
+  const avisos = `${OPERADOR_BASE}/avisos`;
+  const link = (
+    <Link href={avisos} className={p.headLink}>
+      Ver todos
+    </Link>
+  );
   return (
-    <ListCard
-      label={`De parte de ${dueno}`}
-      headBg={colors.blueSoft}
-      link={{ label: 'Ver todos', href: `${OPERADOR_BASE}/avisos` }}
-    >
-      {mensajes.map((m) => (
-        <div
-          key={m.id}
-          className={u.row}
-          data-hover=""
-          style={{ alignItems: 'flex-start', gap: 12, padding: '14px 18px' }}
-        >
-          <span
-            className={s.dot}
-            style={{ background: m.severidad === 'alta' ? colors.red : colors.yellow }}
-          />
-          <div style={{ minWidth: 0 }}>
-            <div
-              className={s.rowTitle}
-              style={{ fontSize: portalFontSizes.md, letterSpacing: '-0.01em' }}
-            >
-              {m.titulo}
-            </div>
-            <div className={l.msgBody}>{m.cuerpo}</div>
-            <div className={l.msgTime}>{m.hora}</div>
-          </div>
-        </div>
-      ))}
-    </ListCard>
+    <Panel label={`De parte de ${dueno}`} action={link}>
+      <div className={l.mensajes}>
+        {mensajes.map((m) => (
+          <Link
+            key={m.id}
+            href={avisos}
+            className={m.severidad === 'alta' ? `${l.mensaje} ${l.mensajeAlta}` : l.mensaje}
+          >
+            <span className={`${l.dotBase} ${l.dot[m.severidad]}`} aria-hidden="true" />
+            <span className={l.mensajeText}>
+              <span className={p.rowTitle}>{m.titulo}</span>
+              <span className={p.rowDetail}>{m.cuerpo}</span>
+              <span className={l.mensajeHora} data-alta={m.severidad === 'alta' ? '' : undefined}>
+                {m.hora}
+              </span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </Panel>
   );
 }
 
 export function UltimosCortes({ cortes }: { readonly cortes: readonly CorteReciente[] }) {
+  const link = (
+    <Link href={`${OPERADOR_BASE}/cierre`} className={p.headLink}>
+      Cerrar turno
+    </Link>
+  );
   return (
-    <ListCard
-      label="Tus últimos cortes"
-      headBg={colors.gray100}
-      link={{ label: 'Cerrar turno', href: `${OPERADOR_BASE}/cierre` }}
-    >
+    <Panel label="Tus últimos cortes" action={link}>
       <div className={l.cortes}>
         {cortes.map((c) => {
           const chip = corteChip(c);
           return (
-            <div key={c.etiqueta} className={l.corteRow}>
+            <div key={c.etiqueta} className={l.corte}>
               <span className={l.corteFecha}>{c.etiqueta}</span>
-              <span className={s.chip} style={{ background: chip.bg, color: chip.color }}>
-                {chip.label}
-              </span>
+              <Chip label={chip.label} color={chip.color} bg={chip.bg} />
             </div>
           );
         })}
-        <div className={l.cortesNota}>{cortesNota(cortes)}</div>
       </div>
-    </ListCard>
+    </Panel>
   );
 }

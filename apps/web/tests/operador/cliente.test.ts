@@ -81,7 +81,7 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
     );
     assert.match(
       recordatorio(chuy, e, 'Taquería Don Pedro'),
-      /tiene \$860\.00 pendiente en Taquería Don Pedro/,
+      /^Hola, Taller de Chuy\. Te escribimos de Taquería Don Pedro\. Tu saldo es de \$860\.00 \(2 ventas, la más antigua del 28 de abril\)/,
     );
   });
 

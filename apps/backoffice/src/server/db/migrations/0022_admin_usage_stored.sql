@@ -1,5 +1,5 @@
 -- The digest reads usage from `usage_counters`, not from source rows
--- (DB2-CRON-01; ADR-111).
+-- (DB2-CRON-01; ADR-114).
 --
 -- The digest's «Negocios sobre su límite» section pages tenants through
 -- `admin_tenant_usage` (0009), which recounts three months of every tenant's
@@ -20,7 +20,7 @@
 
 -- `SET LOCAL`: the timeout dies with this file's transaction instead of
 -- staying on the runner's session (R2-13). 200 ms, and the runner retries the
--- whole file with backoff when it expires (DB3-MIG-01; ADR-111 amendment).
+-- whole file with backoff when it expires (DB3-MIG-01; ADR-114 amendment).
 SET LOCAL lock_timeout = '200ms';
 
 DO $$

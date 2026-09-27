@@ -9,7 +9,8 @@ import { asTenant } from './sync-phone';
 /**
  * P-32's acceptance on a throwaway member (the contador role — the matrix is
  * personal, so even Solo lectura sets theirs): toggling a channel persists
- * across a reload, critical rows have no switch, WhatsApp is «Próximamente».
+ * across a reload, critical rows show a lock («Siempre») instead of a switch,
+ * and WhatsApp, not delivered yet, has no column.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -59,6 +60,7 @@ test('a channel switch persists; critical avisos cannot be switched off', async 
   await open();
   await expect(page.getByRole('switch', { name: 'Stock bajo por correo' })).toBeChecked();
   await expect(page.getByRole('switch', { name: /Discrepancia en caja/ })).toHaveCount(0);
-  await expect(page.getByText('Obligatorio')).toHaveCount(2);
-  await expect(page.getByText('Próximamente')).toHaveCount(6);
+  await expect(page.getByText('Siempre', { exact: true })).toHaveCount(4);
+  await expect(page.getByText('Próximamente')).toHaveCount(0);
+  await expect(page.getByRole('switch', { name: /por WhatsApp/ })).toHaveCount(0);
 });

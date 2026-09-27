@@ -2,7 +2,7 @@ import { expect, test } from './test';
 import sharp from 'sharp';
 
 /**
- * Negocio → Comprobantes (N-19): the owner uploads a logo (a solid brand-red
+ * Mi negocio · Comprobantes (N-19): the owner uploads a logo (a solid brand-red
  * PNG), the brand colour is extracted into the picker, the fields save, and
  * the sidebar brand block swaps the wordmark for the logo. A viewer sees the
  * fields with no controls. Desktop only — the surface is Director-side.
@@ -46,8 +46,8 @@ test('the owner brands the business: logo, colour, fields, sidebar', async ({ pa
   const escrita = 'Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.';
   await expect(async () => {
     await direccion.fill(escrita);
-    await page.getByRole('button', { name: 'Guardar comprobantes' }).click();
-    await expect(page.getByText('Guardado.')).toBeVisible({ timeout: 5_000 });
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+    await expect(page.getByText(/^Guardado\./)).toBeVisible({ timeout: 5_000 });
     await page.reload();
     await expect(direccion).toHaveValue(escrita, { timeout: 5_000 });
   }).toPass({ timeout: 45_000, intervals: [500, 1_000, 2_000] });
@@ -76,26 +76,30 @@ test('a viewer reads the fields without controls', async ({ browser }) => {
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/negocio/comprobantes');
   await expect(page.getByText('Plantilla')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Guardar comprobantes' })).toHaveCount(0);
-  await expect(page.getByText('Subir logo')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Guardar cambios' })).toHaveCount(0);
+  await expect(page.getByText('Arrastra tu logo aquí o elígelo')).toHaveCount(0);
   await context.close();
 });
 
 test('the live preview follows the template and serves real files (N-20)', async ({ page }) => {
   await page.goto('/negocio/comprobantes');
-  const previa = page.getByTestId('comprobante-preview-img');
-  await expect(previa).toBeVisible();
+  // The preview paints the draft in the page (CfgComprobantes); the downloads
+  // are the renderer's real files.
+  const previa = page.getByTestId('comprobante-vista-previa');
+  await expect(previa.getByRole('img')).toBeVisible();
+  const descarga = page.getByTestId('comprobante-descarga-png');
 
   // The route behind it answers with a real PNG of the business's branding.
-  const src = await previa.getAttribute('src');
+  const src = await descarga.getAttribute('href');
   expect(src).toContain('plantilla=');
   const png = await page.request.get(src as string);
   expect(png.status()).toBe(200);
   expect(png.headers()['content-type']).toBe('image/png');
 
-  // Choosing another template retargets the preview to it.
+  // Choosing another template repaints the preview and retargets the files.
   await page.getByRole('radio', { name: /Moderno/ }).click();
-  await expect(previa).toHaveAttribute('src', /plantilla=moderno/);
+  await expect(previa.getByText('Moderno', { exact: true })).toBeVisible();
+  await expect(descarga).toHaveAttribute('href', /plantilla=moderno/);
 
   // And the PDF salida comes out of the same renderer.
   const pdf = await page.request.get('/api/comprobantes/muestra?plantilla=moderno&formato=pdf');
