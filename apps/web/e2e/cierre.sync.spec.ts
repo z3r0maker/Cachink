@@ -102,3 +102,72 @@ test("the close counts against the turno's real expected cash", async ({ page })
     )
     .toBe('42000|42000|0');
 });
+
+/**
+ * ADR-121 (DB3-CAJA-02, DS-06 option (a)): records still to send never block
+ * the close. With the server out of reach the sale waits in the outbox; the
+ * close shows how many are waiting, stays enabled, closes, and the sale and
+ * the closed turno reach Postgres once the connection comes back.
+ */
+test('the close goes ahead with records still to send, and they go up later', async ({
+  page,
+  context,
+}) => {
+  const code = 'CERRAR7B';
+  await mintCode(code);
+  await page.goto('/operador/caja');
+  await pasarAcceso(page, code);
+  const antes = await ticketsDelNegocio();
+
+  // The server is unreachable (the pages still load): the sale stays queued.
+  await context.route('**/api/v1/sync/**', (route) => route.abort('internetdisconnected'));
+  const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
+  await taco.click();
+  await taco.click();
+  await venderEfectivo(page, '50');
+  await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
+
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
+  const banda = page.getByTestId('cierre-por-enviar');
+  await expect(banda).toContainText(/Tienes \d+ registros? por enviar/);
+  await expect(banda).toContainText('Puedes cerrar; se enviarán cuando vuelva la conexión.');
+
+  // $500 fondo + $50 in cash: one $500 bill and one $50 bill. Not blocked.
+  await page.getByLabel('Cuántos billetes de $500', { exact: true }).fill('1');
+  await page.getByLabel('Cuántos billetes de $50', { exact: true }).fill('1');
+  const cerrar = page.getByRole('button', { name: 'Cerrar turno', exact: true });
+  await expect(cerrar).toBeEnabled();
+  await cerrar.click();
+  await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
+  await expect(
+    page.getByText('Pedro lo verá en su portal cuando se envíen los registros.'),
+  ).toBeVisible();
+  expect(await ticketsDelNegocio()).toBe(antes);
+
+  // The connection comes back: the queue goes up by itself.
+  await context.unroute('**/api/v1/sync/**');
+  await context.setOffline(true);
+  await context.setOffline(false);
+  await expect.poll(ticketsDelNegocio, { timeout: 30_000 }).toBe(antes + 1);
+  await expect
+    .poll(
+      async () =>
+        asTenant(BIZ, async (sql) => {
+          const [row] = await sql<{ n: number }[]>`
+            SELECT count(*)::int AS n FROM caja_turnos t
+            JOIN devices d ON d.id = t.device_id AND d.revoked_at IS NULL
+            WHERE t.business_id = ${BIZ} AND t.cierre_at IS NOT NULL
+              AND t.monto_cierre_centavos = 55000 AND t.diferencia_centavos = 0`;
+          return row?.n ?? 0;
+        }),
+      { timeout: 30_000 },
+    )
+    .toBeGreaterThan(0);
+});
+
+async function ticketsDelNegocio(): Promise<number> {
+  return asTenant(BIZ, async (sql) => {
+    const [row] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM tickets`;
+    return row?.n ?? 0;
+  });
+}

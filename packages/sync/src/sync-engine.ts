@@ -53,6 +53,8 @@ export interface SyncCounts {
   readonly pending: number;
   readonly rejected: number;
   readonly retrying: number;
+  /** Everything not accepted yet: never tried, in flight or retrying (DB3-CAJA-02). */
+  readonly unsent: number;
 }
 
 /** A rejected row plus its current local data (null if the row is gone locally). */
@@ -97,8 +99,8 @@ export class SyncEngine {
     return this.#afterWrite('capture', opts.manual ?? false);
   }
 
-  counts(): Promise<SyncCounts> {
-    return this.#status.countByStatus();
+  async counts(): Promise<SyncCounts> {
+    return { ...(await this.#status.countByStatus()), unsent: await this.#status.unsentCount() };
   }
 
   /** Rows the server refused, with their local data for a human summary (A-08). */

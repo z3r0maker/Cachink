@@ -126,7 +126,12 @@ async function sync(request: SyncRequest): Promise<SyncRunResult> {
 }
 
 /** The queue's counters, as Registros por enviar and the header pill show them. */
-async function counts(): Promise<{ pending: number; rejected: number; retrying: number }> {
+async function counts(): Promise<{
+  pending: number;
+  rejected: number;
+  retrying: number;
+  unsent: number;
+}> {
   if (runtime === null) throw new Error('runtime not booted');
   return runtime.engine.counts();
 }

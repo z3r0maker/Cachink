@@ -44,6 +44,7 @@ export interface RuntimeCounts {
   readonly pending: number;
   readonly rejected: number;
   readonly retrying: number;
+  readonly unsent: number;
 }
 
 interface Pending {

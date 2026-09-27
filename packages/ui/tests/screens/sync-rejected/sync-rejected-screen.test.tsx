@@ -16,7 +16,7 @@ vi.mock('../../../src/app/cloud-sync-bridge', () => ({
   useCloudSync: () => ({
     state: {
       phase: 'idle',
-      counts: { pending: 0, rejected: 2, retrying: 0 },
+      counts: { pending: 0, rejected: 2, retrying: 0, unsent: 0 },
       lastSyncAt: null,
     },
     syncNow: mockSyncNow,

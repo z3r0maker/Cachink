@@ -25,7 +25,11 @@ vi.mock('../../src/app/cloud-sync-bridge', () => ({
   useCloudSync: () => mockSync,
 }));
 let mockSync = {
-  state: { phase: 'idle', counts: { pending: 0, rejected: 0, retrying: 0 }, lastSyncAt: null },
+  state: {
+    phase: 'idle',
+    counts: { pending: 0, rejected: 0, retrying: 0, unsent: 0 },
+    lastSyncAt: null,
+  },
   syncNow: vi.fn(),
 };
 
@@ -42,7 +46,10 @@ const DEVICE: DeviceSettings = {
 async function mount(opts: { rejected?: number } = {}) {
   mockSync = {
     ...mockSync,
-    state: { ...mockSync.state, counts: { pending: 0, rejected: opts.rejected ?? 0, retrying: 0 } },
+    state: {
+      ...mockSync.state,
+      counts: { pending: 0, rejected: opts.rejected ?? 0, retrying: 0, unsent: 0 },
+    },
   };
   const appConfig = new InMemoryAppConfigRepository();
   await seedTestEntitlement(appConfig, 'xangarro');

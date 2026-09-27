@@ -47,11 +47,4 @@ export const hint = style({
   color: colors.gray600,
   textAlign: 'center',
   textWrap: 'pretty',
-  selectors: {
-    '&[data-espera]': {
-      fontSize: portalFontSizes.md,
-      fontWeight: typography.weights.extraBold,
-      color: colors.warningText,
-    },
-  },
 });

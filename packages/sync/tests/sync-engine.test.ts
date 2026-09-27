@@ -147,11 +147,11 @@ describe('SyncEngine', () => {
     assert.equal(row?.retryable, false);
     assert.equal(row?.row?.['concepto'], 'Tacos');
     await engine.requeue('sales', saleId);
-    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 0, retrying: 1 });
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 0, retrying: 1, unsent: 1 });
     assert.equal((await engine.rejected())[0]?.retryable, true);
     // Still missing on the server: the retry is refused again and waits for a human.
     await engine.syncNow();
-    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 1, retrying: 0 });
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 1, retrying: 0, unsent: 0 });
     // The portal restores the product: the next manual retry is accepted.
     await fetch(`${mock.url}/__mock/restore`, {
       method: 'POST',

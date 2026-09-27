@@ -10,12 +10,17 @@
  *   - back online        → `completa`, manual, after 0–3 s of jitter so a
  *                          shop's registers do not reconnect in the same instant;
  *   - after a failure    → one retry when the engine's backoff ends (`retryAt`).
+ *
+ * The counts are the queue as Registros por enviar lists it (`colaPendiente`,
+ * one definition with the phone: DB3-CAJA-02). A count that cannot be read
+ * keeps the last one instead of inventing a number.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
+import type { PendienteCrudo } from '../runtime/cola-shapes';
 import type { SyncMode } from '../runtime/protocol';
 
 /** The upper bound of the random wait before flushing on `online`. */
@@ -23,7 +28,17 @@ const ONLINE_JITTER_MS = 3_000;
 
 export interface Reales {
   readonly pendientes: number;
+  readonly reintentando: number;
   readonly enLinea: boolean;
+}
+
+/** The queue's two numbers: every unsent record, and those already retrying. */
+export function contarCola(cola: readonly PendienteCrudo[]): Omit<Reales, 'enLinea'> {
+  return { pendientes: cola.length, reintentando: cola.filter((p) => p.reintento === true).length };
+}
+
+async function leerCola(): Promise<Omit<Reales, 'enLinea'>> {
+  return contarCola(await registerRuntime().colaPendiente());
 }
 
 export type Flush = (mode: SyncMode, manual: boolean) => Promise<void>;
@@ -82,10 +97,9 @@ export function useFlusher(linked: boolean): {
         else reintento.clear();
         // The queue as Registros por enviar lists it: everything not yet
         // accepted, including what was captured and never tried (O-27).
-        const cola = await registerRuntime().colaPendiente();
-        setReales({ pendientes: cola.length, enLinea: navigator.onLine });
+        setReales({ ...(await leerCola()), enLinea: navigator.onLine });
       } catch {
-        setReales({ pendientes: -1, enLinea: navigator.onLine });
+        setReales((r) => ({ pendientes: 0, reintentando: 0, ...r, enLinea: navigator.onLine }));
       } finally {
         enCurso.current -= 1;
         setEnviando(enCurso.current > 0);
@@ -106,9 +120,8 @@ function useCuentaInicial(
 ): void {
   useEffect(() => {
     if (!linked) return;
-    void registerRuntime()
-      .colaPendiente()
-      .then((cola) => setReales((r) => r ?? { pendientes: cola.length, enLinea: navigator.onLine }))
+    void leerCola()
+      .then((c) => setReales((r) => r ?? { ...c, enLinea: navigator.onLine }))
       .catch(() => undefined);
   }, [linked, setReales]);
 }
@@ -123,7 +136,7 @@ function useConexion(
   useEffect(() => {
     if (!linked) return;
     const mark = (enLinea: boolean): void =>
-      setReales((r) => ({ pendientes: r?.pendientes ?? -1, enLinea }));
+      setReales((r) => ({ pendientes: 0, reintentando: 0, ...r, enLinea }));
     const onLine = (): void => {
       mark(true);
       espera.set(() => void flush('completa', true), Math.random() * ONLINE_JITTER_MS);

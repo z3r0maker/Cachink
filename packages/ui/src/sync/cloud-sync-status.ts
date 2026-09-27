@@ -1,7 +1,8 @@
 /**
  * Cloud sync status as the UI sees it, and the pure mapping to the pill
  * (A-07). Rejected rows win over pending ones: they need a human; pending
- * ones resolve on their own.
+ * ones resolve on their own. «Pending» is everything not accepted yet —
+ * captures never tried included — the caja's definition too (DB3-CAJA-02).
  */
 
 import type { SyncCounts } from '@xangarro/sync';
@@ -17,7 +18,7 @@ export interface CloudSyncState {
 
 export const INITIAL_CLOUD_SYNC_STATE: CloudSyncState = {
   phase: 'idle',
-  counts: { pending: 0, rejected: 0, retrying: 0 },
+  counts: { pending: 0, rejected: 0, retrying: 0, unsent: 0 },
   lastSyncAt: null,
 };
 
@@ -46,7 +47,7 @@ export function pillView(state: CloudSyncState): PillView {
   if (state.counts.rejected > 0) {
     return { labelKey: 'syncPill.rejected', count: state.counts.rejected, tone: 'danger' };
   }
-  const waiting = state.counts.pending + state.counts.retrying;
+  const waiting = state.counts.unsent;
   if (state.phase === 'offline')
     return { labelKey: 'syncPill.offline', count: waiting, tone: 'warn' };
   if (waiting > 0) return { labelKey: 'syncPill.pending', count: waiting, tone: 'warn' };
