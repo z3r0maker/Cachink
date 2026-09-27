@@ -129,6 +129,48 @@ describe('Movimientos: bounded pages and their summary', () => {
     );
   });
 
+  it('sums per ticket before the ticket join, and keeps a line whose ticket has another day (DB3-QRY-03)', async () => {
+    const biz = testId('Q');
+    const now = new Date('2026-05-12T14:00:00Z');
+    const fila = { business_id: biz, device_id: fx.dev, created_at: now, updated_at: now };
+    const [prod, viejo, nuevo] = [testId('P'), testId('T'), testId('T')];
+    await owner`INSERT INTO businesses ${owner({ id: biz, nombre: 'Q', regimen_fiscal: 'RESICO', isr_tasa: 125, ...fila })}`;
+    await owner`INSERT INTO products ${owner({ id: prod, nombre: 'Taco', categoria: 'Producto Terminado', costo_unit_centavos: 100, unidad: 'pza', ...fila })}`;
+    const ticket = (id: string, folio: number, fecha: string, metodo: string) =>
+      owner`INSERT INTO tickets ${owner({ id, folio, fecha, hora: '12:00:00', concepto: 'Venta', metodo, estado_pago: 'pagado', ...fila })}`;
+    await ticket(viejo, 801, '2026-04-20', 'Transferencia');
+    await ticket(nuevo, 802, '2026-05-05', 'Efectivo');
+    const linea = (ticketId: string, fecha: string, monto: number) => ({
+      id: testId('S'),
+      ticket_id: ticketId,
+      fecha,
+      concepto: 'Taco',
+      categoria: 'Producto',
+      monto_centavos: monto,
+      producto_id: prod,
+      ...fila,
+    });
+    await owner`INSERT INTO sales ${owner([
+      linea(viejo, '2026-05-02', 700),
+      linea(nuevo, '2026-05-05', 100),
+      linea(nuevo, '2026-05-05', 200),
+      linea(testId('T'), '2026-05-06', 999),
+    ])}`;
+    try {
+      const g = await withBusiness(app, biz, (tx) => resumenMovimientos(tx, 'venta', MAYO));
+      assert.deepEqual(
+        g.map((x) => [x.clasificacion, x.filas, x.total, x.tickets]),
+        [
+          ['Efectivo', 2, 300n, 1],
+          ['Transferencia', 1, 700n, 1],
+        ],
+        'the April ticket still names its May line; the ticketless line is left out',
+      );
+    } finally {
+      await owner`DELETE FROM businesses WHERE id = ${biz}`;
+    }
+  });
+
   it('the count agrees with the rows the summary lists', async () => {
     const [n, g, ng] = await as(
       async (tx) =>
