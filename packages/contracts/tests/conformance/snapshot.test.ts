@@ -137,7 +137,10 @@ describe('snapshot bootstrap (C-23)', () => {
       pages.map((p) => p.snapshot?.first),
       pages.map((_, i) => i === 0),
     );
-    const ids = pages.flatMap((p) => Object.values(p.tables).flat() as { id?: string }[]);
+    // Only the row arrays: `feature_flags` and `dueno_nombre` (maybe null) ride beside them.
+    const ids = pages.flatMap(
+      (p) => Object.values(p.tables).filter(Array.isArray).flat() as { id?: string }[],
+    );
     const keyed = ids.filter((r) => typeof r.id === 'string').map((r) => r.id);
     assert.equal(new Set(keyed).size, keyed.length, 'no row twice');
     const after = await pull(`since=${seq}`);
