@@ -5,13 +5,8 @@ import { sql } from 'drizzle-orm';
 
 import { createDb, withBusiness, type Db } from '../src/client';
 import { allocateSeqs, committedCursor, logChanges } from '../src/sync/cursor';
-import {
-  finishPush,
-  receiptsOf,
-  receiptsQuery,
-  saveReceipts,
-  saveRejections,
-} from '../src/sync/push';
+import { finishPush, receiptsOf, receiptsQuery, saveReceipts } from '../src/sync/push';
+import { resolveRejections, saveRejections } from '../src/sync/rejections';
 import { existingIds, writeSyncedRows } from '../src/sync/push-rows';
 import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
@@ -239,6 +234,39 @@ describe('batched push SQL', () => {
       rows.map((r) => r['code']),
       ['FK_CLIENT_MISSING'],
     );
+  });
+
+  it('closes only this device’s open rejections of the accepted rows (DB3-SYNC-04)', async () => {
+    const [kept, closed, other] = [testId('Y'), testId('Y'), testId('Y')];
+    const OTHER_DEVICE = testId('Y');
+    const rejection = (rowId: string, payload: string | null = null) => ({
+      tableName: 'expenses',
+      rowId,
+      clientSeq: 1,
+      code: 'INTERNAL',
+      message: 'retry',
+      payload,
+    });
+    await inA((tx) =>
+      saveRejections(tx, A, DEVICE, [rejection(kept), rejection(closed, '{"preview":"Gasto"}')]),
+    );
+    await inA((tx) => saveRejections(tx, A, OTHER_DEVICE, [rejection(closed)]));
+    await inA((tx) =>
+      resolveRejections(tx, A, DEVICE, [
+        { table: 'expenses', rowId: closed },
+        { table: 'sales', rowId: kept }, // same id, another table: not this rejection
+        { table: 'expenses', rowId: other }, // no rejection at all
+      ]),
+    );
+    const rows = await owner`
+      SELECT row_id, device_id, payload, resolved_at IS NOT NULL AS resolved
+      FROM sync_rejections WHERE row_id = ANY(${[kept, closed]}) ORDER BY row_id, device_id`;
+    const state = (rowId: string, device: string) =>
+      rows.find((r) => r['row_id'] === rowId && r['device_id'] === device);
+    assert.equal(state(closed, DEVICE)?.['resolved'], true);
+    assert.equal(state(closed, OTHER_DEVICE)?.['resolved'], false, 'another device’s stays open');
+    assert.equal(state(kept, DEVICE)?.['resolved'], false);
+    assert.equal(state(kept, DEVICE)?.['payload'], null, 'a rejection may keep no payload');
   });
 
   it('records the acknowledgement and returns the cursor, never moving it back', async () => {

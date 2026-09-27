@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { storableText } from '@xangarro/application';
 import type { PushableTable } from '@xangarro/contracts';
 import { encodeJson } from '@xangarro/contracts';
 
@@ -7,7 +8,9 @@ import type { Row } from './codec';
 
 /**
  * What a rejection keeps: a line the shopkeeper can recognise on
- * Sincronización (`preview`), and the row itself for whoever fixes it.
+ * Sincronización (`preview`), and the row itself for whoever fixes it —
+ * **storable**: NULs dropped and unpaired surrogates replaced, which `jsonb`
+ * refuses (22P05) and which used to fail the whole push (audit DB3-SYNC-01 a).
  */
 const NOUN: Record<PushableTable, string> = {
   tickets: 'Venta',
@@ -29,5 +32,5 @@ const NOUN: Record<PushableTable, string> = {
 
 export function rejectionPayload(table: PushableTable, row: Row): string {
   const what = row['concepto'] ?? row['nombre'] ?? row['texto'] ?? row['id'];
-  return encodeJson({ preview: `${NOUN[table]} · ${String(what)}`, row });
+  return encodeJson(storableText({ preview: `${NOUN[table]} · ${String(what)}`, row }));
 }
