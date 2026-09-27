@@ -150,6 +150,7 @@ Links to discussion, docs, prior art.
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
 | [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
 | [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
+| [111](#adr-111) | 2026-09-26 | The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7569,3 +7570,119 @@ which is a guarantee SQL gives for free and a prompt only promises.
   Worth noting it does not need a bespoke limiter: N-07 already counts metered
   resources per business (`usage_counters`, the metering role, the over-limit
   notices), and an import is a counted resource like any other.
+
+---
+
+## ADR-111
+
+**Title:** The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes P-30's open role question; extends ADR-056 (the daily job) and ADR-065 (the metering role)
+
+**Context:**
+
+ADR-056 said «a daily job selects the businesses that are due». P-30 built the
+unit of work — one business, `POST /api/cron/asesor` — and stopped there,
+because selecting *which* businesses needs a read no tenant connection can
+make: RLS scopes `xangarro_app` to a single `business_id`, which is the whole
+point of ADR-053 §7.
+
+The task recorded three candidates and called the choice «a Track B decision
+with a migration behind it»:
+
+1. A new privileged function, `xangarro.asesor_due()`, with its grants.
+2. Reuse `xangarro_metering`, the role the nightly usage recompute runs as.
+3. The admin console's service role.
+
+Option 3 was never eligible and should not have been on the list. CLAUDE.md §3
+makes `apps/backoffice` **the only** project that may hold the service-role
+key. Choosing it would have meant either putting that key in the portal or
+moving a portal cron into the console — spending the one boundary the console
+exists to keep, to save a grant.
+
+Between 1 and 2, the deciding fact turned out to already be in the schema.
+`0010_usage_counts.sql` grants `xangarro_metering`:
+
+```sql
+GRANT SELECT (id, deleted_at) ON public.businesses TO xangarro_metering;
+CREATE POLICY metering_read ON public.businesses FOR SELECT TO xangarro_metering USING (true);
+```
+
+It grants that because `usage_counts(NULL, …)` **already enumerates every live
+business** — `p_business_ids NULL = every live business` — in order to count
+it. The cross-tenant enumeration the fan-out was blocked on had been in
+production since N-02 shipped, spelled as a side effect of counting.
+
+**Decision**
+
+1. **The fan-out enumerates on the `xangarro_metering` connection**, through
+   `liveBusinessIds` — `SELECT id FROM businesses WHERE deleted_at IS NULL
+   ORDER BY id`, the two columns 0010 already grants. **No migration, no new
+   role, no new secret**: the portal has held `METERING_DATABASE_URL` since
+   N-02. The privilege surface a scheduled fan-out adds is zero.
+
+2. **The general rule this sets.** A portal job that must read across tenants
+   uses `xangarro_metering` and states the columns it needs; a new column means
+   a narrow `GRANT SELECT (cols)` beside the existing `metering_read` policy,
+   not a new role and not a definer function. Two reasons. `usage_counts` is
+   `SECURITY INVOKER` on purpose — 0001 FORCEs RLS on the owner, so a definer
+   function sees no tenant at all — which makes «a new privileged function» a
+   function plus the same grants, strictly more moving parts for the same
+   reach. And a fourth connection string is a fourth secret to rotate and a
+   fourth answer to «which connection does this query use».
+
+   The line this rule does not cross: **the metering role reads; it does not
+   become a general-purpose admin role.** Cross-tenant *writes* outside
+   `usage_counters` / `usage_notices` are not covered by this ADR and want
+   their own.
+
+3. **`GET /api/cron/asesor` is the schedule; `POST` stays the unit of work.**
+   The old note said there could be no `vercel.json` entry «since the unit of
+   work is a POST with a body and Vercel Cron sends neither». Right about the
+   POST, wrong in its conclusion: the fan-out is a different endpoint on the
+   same path. `0 8 * * *`, 02:00 in Mexico City.
+
+4. **One tenant's failure is one tenant's failure.** Each business is caught,
+   reported under its own id, tallied in `fallidos`; the sweep continues and
+   answers 200, as the usage recompute does. A scheduled job that 500s on the
+   first bad tenant hides every tenant behind it.
+
+5. **The sweep carries an explicit deadline** — it stops starting tenants at
+   240 s, inside Vercel's 300 s, and returns `restantes`, reported as an error.
+   This is a **freshness** bound and not a correctness one, because
+   `loadAsesorPage` materialises the same deterministic pipeline on read
+   (ADR-088): a tenant the deadline cut off still sees correct insights the
+   moment it opens the Asesor. When `restantes` first goes non-zero the fix is
+   sharding by id range, which needs no new state because the enumeration is
+   ordered by id.
+
+**Alternatives considered**
+
+- *A new `xangarro.asesor_due()` function.* The shape to reach for once the
+  monthly Diagnóstico needs the tier and the last-active timestamp in one
+  query, because those live in `subscriptions` and `xangarro.portal_sessions`
+  and neither is granted to metering today. For enumerating live businesses it
+  is a migration to obtain a grant that exists.
+- *The console's service role.* Rejected on CLAUDE.md §3, above.
+- *A bounded worker pool instead of a sequential sweep.* `generarParaNegocio`
+  opens three `withTenant` transactions per business, so N-way concurrency is
+  3N pooled connections from a serverless function. Rejected until a measured
+  sweep needs it; the deadline makes the day it does visible.
+
+**Consequences**
+
+- P-30 is no longer blocked by B-02/B-03 — the role decision was the only
+  reason they were named. What remains of P-30 is the model call, held on P-28
+  because generated prose has nowhere a screen reads it.
+- **The monthly Diagnóstico fan-out is a different query and is still blocked.**
+  ADR-109 requires the tier and «was this business active in the period», and
+  the activity gate needs `xangarro.portal_sessions.last_seen_at` plus a venta;
+  neither `subscriptions` nor `portal_sessions` is granted to metering. It also
+  cannot be idempotent until P-28 defines where a report is stored. That work
+  follows the rule in §2: narrow grants, or the `asesor_due()` function if one
+  query is cleaner than three.
+- The deterministic pass now runs nightly for every tenant in production, which
+  it never did. Its cost is one SQL read plus an upsert per business; the model
+  spend is unchanged, because there is still no model call.
