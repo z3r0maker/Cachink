@@ -1144,6 +1144,15 @@ never invented text.
   - **Still to do:** everything behind the gate — the ten report sections, the price-suggestion
     table, the estrategia list, and the six diagnostic states. Needs P-30 and the credential.
 
+  - **2026-09-26 (owner, ADR-109): the Diagnóstico is two reports, not one.** Xangarro gets a
+    monthly _short read_ so a shopkeeper tastes what a written reading of their own numbers is
+    worth; Xangarrote gets the full report — more metrics, the detail behind them, the estrategia.
+    **Deciding what they differ by is now this task's central question, not a detail of it:** a
+    taste that reads as a truncated full report sells nothing, and one that is merely shorter
+    teaches the reader that the paid version is padding. Also changes here: the gate becomes «not
+    `semanal`» (`asesorShowsDiagnostico` is `=== 'completo'` today) and the locked card, which reads
+    «El Diagnóstico llega con Xangarrote», belongs to Xangarrito now and should name Xangarro.
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
 - **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
@@ -1157,6 +1166,14 @@ never invented text.
   instruction text) does not alter the output structure.
 
 ### P-29 Catálogo desde una foto — **«Próximamente» in production**
+
+> **2026-09-26 (ADR-110): the only unbounded model call left.** After P-38 went deterministic and
+> P-39 moved to the monthly run, this is the one user-triggered model call in the product, and it
+> is vision, which is the expensive kind. The owner's first shape: one catalogue import per new
+> business, about five attempts, a byte ceiling and a cap on images — numbers still to set. It does
+> not need a bespoke limiter: N-07 already counts metered resources per business
+> (`usage_counters`, the metering role, the over-limit notices), so an import is a counted resource
+> like any other.
 
 - [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
@@ -1588,7 +1605,12 @@ WhatsApp).
 
 ### P-37 Ticket printing from the caja
 
-- [ ] Status · **Blocked by:** — · **Blocks:** —
+- [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
+  printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
+  58 mm printer» — cannot be met or verified. It stays written down rather than deleted: the
+  caja already shares the comprobante by WhatsApp, and the designs hide the Imprimir button
+  until this ships, so nothing regresses by waiting. Re-open when a printer exists.
+- **Blocked by:** a physical 58/80 mm printer · **Blocks:** —
 - **Steps:** the caja sends the comprobante by WhatsApp today; add printing to a ticket printer
   (58/80 mm) from the «¡Listo!» dialog and from a sale's detail, using the «Ticket» template.
   Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
@@ -1597,7 +1619,14 @@ WhatsApp).
 
 ### P-38 Don Cuentas explains a cash difference
 
-- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+      **2026-09-26 (owner, ADR-110): fully deterministic — no model.** The causes this proposes are
+      named in its own Steps: cancelled sales, fiado, gastos without comprobante. Those are three
+      queries over one turno, ranked by amount. Its acceptance — «cites only that turno's rows» —
+      is then free rather than something a prompt has to be trusted for; it works on every plan,
+      Xangarrito included; and it costs nothing on a shop that cashes up daily, which was the most
+      frequent model call in the product. **No longer blocked by P-30:** it needed the generation
+      runtime only because it was going to be generated.
 - **Steps:** on a corte with a faltante or sobrante, Don Cuentas proposes the likely causes from
   the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
   and in Revisión de caja.
@@ -1605,7 +1634,16 @@ WhatsApp).
 
 ### P-39 Don Cuentas conclusions in Estados financieros
 
-- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
+      **2026-09-26 (owner, ADR-110): written once a month, shown on Estados, and announced.**
+      Not per statement view — that was a per-view bill nobody had costed — and not folded into the
+      Diagnóstico either, because the value is a line _where the numbers are_. Generated with the
+      monthly run, stored for that period, rendered on Estados financieros. The same run writes a
+      notice naming what was generated, with links to Diagnóstico and to Estados, so a shopkeeper
+      who does not open the right tab still learns it exists. That notice is **`source='sistema'`,
+      not `'asesor'`** — ADR-060 keeps the bell clear of Asesor insights on purpose, so an `asesor`
+      row would be written and never ring; «your report is ready» is a system event, not an insight.
+      Needs somewhere to keep one conclusion per period per statement, which P-28's output defines.
 - **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.

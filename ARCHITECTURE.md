@@ -148,6 +148,8 @@ Links to discussion, docs, prior art.
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
+| [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
+| [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
 | [111](#adr-111) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 | [112](#adr-112) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
@@ -7369,6 +7371,206 @@ enum refuses, so a QR sale there failed its parse and was only logged.
 
 - Column defaults and seeds still carry QR/CoDi; they are harmless because every
   reader filters, and changing them would be a migration for nothing.
+
+---
+
+## ADR-109
+
+**Title:** The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; amends ADR-056 (what the scheduled job does) and ADR-059's tiering (the Diagnóstico is no longer Xangarrote-only)
+
+**Context:**
+
+P-30 built the scheduled generation as «a daily job». Read alongside the plan
+table, that reads as though every tier gets a model call on a schedule, and
+the owner's question was the right one: *why would an LLM run daily, and why
+would we pay to generate a report for someone who has not opened the app?*
+
+The first half was a naming problem, not a design one. Don Cuentas has three
+tabs and only **Diagnóstico** is model-backed (`llmBacked: true`, one place in
+`asesor/screen.tsx`). «Para ti» and «Metas» are SQL and arithmetic over the
+tenant's own rows, which is why their footer reads «Calculado a partir de tus
+registros» — deterministic output must not claim AI authorship.
+
+And `capabilities.asesor` never reached a model at all. Its whole effect is
+`filtrarPorCadencia`: `semanal` keeps the two most urgent insights, `diario`
+and `completo` keep them all. It decides **how many deterministic rows a tier
+sees**, not how often anything is generated.
+
+| plan | cadencia | deterministic «Para ti» | Diagnóstico (model) |
+| --- | --- | --- | --- |
+| Xangarrito | `semanal` | top 2 insights | no |
+| Xangarro | `diario` | every insight | **monthly, the short read** |
+| Xangarrote | `completo` | every insight | **monthly, the full report** |
+
+The second half was a real gap. Nothing in the Asesor runtime looks at whether
+a business is being used — no `last_push_at`, no session check. As written the
+job would, once the model call lands, write a monthly report for a Xangarrote
+who has not opened the app since spring, and bill us for it.
+
+**Decision**
+
+1. **The daily pass stays universal and stays deterministic.** It is one SQL
+   read per business and it costs effectively nothing, and its point is that
+   the insights are already waiting the moment someone does log in. Running it
+   only for active tenants would make the Asesor emptiest exactly when a
+   returning shopkeeper first looks at it.
+
+2. **The Diagnóstico is generated only for a business that used the system in
+   the period it covers** — a venta synced from a device, or a portal session.
+   The model call is the only part that costs money, so it is the only part
+   with an activity gate. A dormant tenant's Diagnóstico is not queued, not
+   generated and not paid for; it is generated for the next period they are
+   active in. This holds for both paying tiers.
+
+3. **Xangarro gets a Diagnóstico too — a shorter one.** The owner's intent
+   (2026-09-26) is that a Xangarro shopkeeper should *taste* what a written
+   reading of their own numbers is worth, and upgrade because they wanted more
+   of it rather than because a card told them it exists. Xangarrote's is the
+   same monthly report with the depth that justifies the price: more metrics,
+   the detail behind them, and the estrategia.
+
+   This needs no new capability. `asesor` already separates the two paying
+   tiers as `diario` and `completo`, so the gate becomes «not `semanal`» and
+   the *depth* is what the value selects. A third enum member would have been
+   a second way to say what the first already says.
+
+   `asesorShowsDiagnostico` is `c.asesor === 'completo'` today and the locked
+   card reads «El Diagnóstico llega con Xangarrote» — both change, and the
+   locked card now belongs to Xangarrito, naming Xangarro.
+
+4. **`capabilities.asesor` is documented as what it is** — the tiering of the
+   deterministic feed. A future «how often do we generate» knob, if one is
+   ever needed, is a separate field and not this one.
+
+**Alternatives considered**
+
+- *Gate the deterministic pass too.* Cheaper by an amount that does not
+  matter, and it trades away the property the schedule exists for: a
+  shopkeeper who comes back after two weeks sees their insights immediately
+  rather than after the next nightly run.
+- *Generate the Diagnóstico on demand, when a Xangarrote opens the tab and a
+  month has passed.* Spends nothing on dormant tenants by construction, and
+  the design already draws a `generating` state. Rejected for now because it
+  makes a model call user-triggered, which needs its own per-business rate
+  limit to be safe, and because it puts the shopkeeper in front of a spinner
+  for a report that could have been ready. Worth revisiting if activity turns
+  out to be a poor predictor of who reads the report.
+
+**Consequences**
+
+- The fan-out needs one more input per business — when it was last active —
+  alongside which tier it is on. That is the same cross-tenant read P-30 is
+  already blocked on, so the two land together.
+- «Activity» needs one definition, written once: a synced venta or a portal
+  session inside the period. Two definitions of active is how the «last seen»
+  rule ended up in three places (B-16 note).
+- **P-28 owns what the two reports differ by**, and it is now the deciding
+  question of that task rather than a detail of it: a taste that reads as a
+  truncated full report sells nothing, and one that is merely shorter teaches
+  the reader that the paid one is padding. The split is a product decision and
+  is deliberately not made here.
+- The monthly model spend is now two tiers wide rather than one, bounded by
+  the activity gate above. Worth a number against N-07's capacity card once
+  there is real traffic, since the cost per report is not yet known.
+- Nothing changes today: no model call exists yet, the Diagnóstico is a
+  placeholder behind two gates until P-28, and the deterministic pass already
+  behaves as decided.
+
+---
+
+## ADR-110
+
+**Title:** Two of the three remaining model touchpoints stop being model touchpoints
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; follows ADR-109, amends P-38 and P-39
+
+**Context:**
+
+ADR-109 settled the Diagnóstico. The other three model-backed items on the
+board — P-38, P-39, P-29 — had one line of Steps each and no cadence, no
+caching rule and no limit, and two of them would have billed **per event**
+rather than per month: P-38 on every corte with a difference, P-39 on every
+statement view. For a shop that cashes up daily, P-38 alone would have been
+more model calls than its own Diagnóstico.
+
+The owner's question — «P-38 can be deterministic right?» — is the right one,
+and the answer is yes. Its own Steps name the causes it proposes: cancelled
+sales, fiado, gastos without comprobante. Those are three queries over one
+turno. Its acceptance is «an explanation that cites only that turno's rows»,
+which is a guarantee SQL gives for free and a prompt only promises.
+
+**Decision**
+
+1. **P-38 is fully deterministic — no model.** The candidate causes are
+   computed from the turno's own rows and ranked by amount. This is ADR-056's
+   rule applied rather than an exception to it: the domain computes, and here
+   there is nothing left for a model to add that is worth a call on every
+   cash-up. It also means the explanation works on **every** plan, Xangarrito
+   included, and costs nothing.
+
+   **Consequence: P-38 is no longer blocked by P-30.** It needed the
+   generation runtime only because it was going to be generated; computed from
+   a corte on read, it needs nothing that does not already exist.
+
+2. **P-39 is generated once a month and shown on Estados.** Not per view —
+   which was the billing shape nobody had noticed — and not folded into the
+   Diagnóstico either, because its value is a line *where the numbers are*,
+   and moving it into the report would take it off the screen it was designed
+   for. Written with the monthly run, stored for that period, rendered on
+   Estados financieros.
+
+3. **The monthly run announces itself.** When a period's Diagnóstico and
+   conclusions are written, the business gets a notice saying what was
+   generated, with links to Diagnóstico and to Estados — otherwise the work
+   sits there and a shopkeeper who does not happen to open the right tab never
+   learns it exists.
+
+   That notice is **`source='sistema'`, not `'asesor'`**, and the distinction
+   is load-bearing: ADR-060 keeps the bell clear of Asesor insights on
+   purpose, so an `asesor` row would be written and never ring. «Your report
+   is ready» is a system event about the product, not an insight about the
+   business, so it belongs on the side of that line that rings.
+
+4. **The Xangarro / Xangarrote split stays open**, deliberately. The
+   capability list in `calcularCapacidades` is one candidate axis — the six
+   are already ordered by the history they need — but the owner wants to look
+   at what is genuinely worth paying for, including model calls that only
+   Xangarrote would get, rather than dividing a fixed report in two. It is
+   P-28's to settle with the design.
+
+**Alternatives considered**
+
+- *P-38 deterministic, model writes the sentence.* Warmer, and it matches Don
+  Cuentas's voice. Rejected on frequency: one call per corte with a difference
+  is the most frequent model call in the product, for a sentence wrapping a
+  list the reader can already see.
+- *P-39 folded into the Diagnóstico.* Simplest and needs no per-period
+  storage. Rejected because Estados would show nothing and the two free tiers
+  would never see a conclusion at all.
+- *P-39 templated from the figures, no model.* Free on every plan. Kept as the
+  fallback if the monthly prose turns out not to be worth its cost — the
+  figures are deterministic either way, so only the phrasing is at stake.
+
+**Consequences**
+
+- The model touchpoints in the product are now: the Diagnóstico (two tiers,
+  monthly, activity-gated), its per-period statement conclusions on the same
+  run, and P-29's vision extraction. Two of five became free.
+- P-39 needs somewhere to keep a conclusion per period per statement. It is
+  one row keyed by business and period, and the obvious home is beside the
+  Diagnóstico's own output, which P-28 has to define anyway.
+- **P-29 is still unspecified and is now the only unbounded one.** The owner
+  proposed a first shape — one catalogue import per new business, about five
+  attempts, a byte ceiling and an image count — which is not yet numbers.
+  Worth noting it does not need a bespoke limiter: N-07 already counts metered
+  resources per business (`usage_counters`, the metering role, the over-limit
+  notices), and an import is a counted resource like any other.
 
 ## ADR-111
 

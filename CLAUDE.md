@@ -116,6 +116,7 @@ pnpm design:contract   # regenerate DESIGN_CONTRACT.md from @xangarro/tokens
 pnpm plan:board        # regenerate docs/plan/PENDIENTES.md
 pnpm adr:index         # regenerate the ARCHITECTURE.md index
 pnpm deps:check        # latest stable versions (§2.7)
+pnpm mock:api          # the contracts' mock server — the phone's wire without a backend
 ```
 
 **E2E** (Playwright, portal + backoffice) needs a live database:
@@ -136,6 +137,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - **`as const`** for constant objects, to preserve literal types.
 - **Workspace imports** — `@xangarro/domain`, never a relative path across packages.
 - **Migrations, never hand-written SQL** against a live schema. Postgres: `packages/data-pg/drizzle/`. SQLite: `packages/data/drizzle/migrations/`. Both keep a journal.
+- **`serverSeq` is the cloud's; a device only ever sends `clientSeq`.** A push proposes rows with its own sequence and the server answers with the `serverSeq` each row was accepted at (`sync_receipts`) — which is what makes a re-push idempotent («same row, same serverSeq») and what the pull is ordered by. Nothing on a device may assign it.
 - **Tests:** Vitest + `node:assert/strict`. No Jest, Mocha or external assertion libraries.
 - **React:** functional + hooks, no class components. Portal styling is vanilla-extract over tokens; the phone is Tamagui.
 - **Design tokens only** in the portal — no hex literal, `rgba()`, radius, border width or font size written inline. `pnpm lint:design` fails on all five, and `DESIGN_CONTRACT.md` is generated, never hand-edited.
