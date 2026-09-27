@@ -2,11 +2,18 @@ import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
 import { Glyph } from '../ui/parts';
-import { PRODUCT_ICONS } from '../ui/product-icons';
+import { PRODUCT_ICONS } from '@xangarro/caja';
 import * as r from '../ui/resumen.css';
-import { conUnidad, delta, nivel, porReponer } from './derive';
+import {
+  conUnidad,
+  delta,
+  nivel,
+  porReponer,
+  type Existencia,
+  type Movimiento,
+  type TipoMovimiento,
+} from '@xangarro/caja/inventario';
 import * as s from './listas.css';
-import type { Existencia, Movimiento, TipoMovimiento } from './types';
 
 const PLUS = 'M12 5v14M5 12h14';
 

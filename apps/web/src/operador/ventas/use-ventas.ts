@@ -10,14 +10,18 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
-import type { EstadoMode } from '../estado';
+import type { EstadoMode } from '@xangarro/caja';
 import { desencolar } from '../shell/cola';
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import type { VentaPara } from '../runtime/protocol';
-import { comoMetodo } from './derive';
-import type { Abierta } from './detalle/types';
-import type { MetodoVenta, VentasData, VentaTurno } from './types';
+import {
+  comoMetodo,
+  type Abierta,
+  type MetodoVenta,
+  type VentasData,
+  type VentaTurno,
+} from '@xangarro/caja/ventas';
 
 export type FiltroVenta = 'Todos' | MetodoVenta;
 

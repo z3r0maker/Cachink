@@ -3,10 +3,15 @@ import { colors } from '@xangarro/tokens';
 
 import { KpiRow, type KpiItem } from '../../ui/parts';
 import * as u from '../../ui/ui.css';
-import type { EstadoCliente } from '../derive';
+import {
+  type EstadoCliente,
+  abiertas,
+  estadoCliente,
+  libre,
+  ultimoAbono,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
 import * as s from './cliente.css';
-import { abiertas, estadoCliente, libre, ultimoAbono } from './derive';
-import type { CuentaCliente } from './types';
 
 const TONO: Record<EstadoCliente, { hero: string; bg: string; color: string }> = {
   'Al día': { hero: colors.white, bg: colors.gray100, color: colors.gray600 },

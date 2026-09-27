@@ -2,9 +2,8 @@ import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
-import { abiertas, estadoCuenta } from './cliente/derive';
-import type { CuentaCliente } from './cliente/types';
+import { OPERADOR_BASE } from '@xangarro/caja';
+import { abiertas, estadoCuenta, type CuentaCliente } from '@xangarro/caja/cobranza';
 import * as k from './cuenta.css';
 
 const CHECK = 'M20 6 9 17l-5-5';

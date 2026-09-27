@@ -1,6 +1,5 @@
-import { TURNO_FIXTURE } from '@/operador/turno/fixture';
+import { TURNO_FIXTURE, type TurnoScreenProps } from '@xangarro/caja/turno';
 import { TurnoViva } from '@/operador/turno/viva';
-import type { TurnoScreenProps } from '@/operador/turno/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

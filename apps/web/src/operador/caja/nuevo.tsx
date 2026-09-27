@@ -4,13 +4,11 @@ import { useState } from 'react';
 
 import { Icon } from '../../shell/icon';
 import { DialogoCerrar, DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
-import type { ProductIcon } from '../ui/product-icons';
+import type { ProductIcon } from '@xangarro/caja';
 import * as m from '../ui/mostrador.css';
-import { iconoPorNombre } from './nuevo-icono';
+import { iconoPorNombre, parseRecibido, type Categoria, type Producto } from '@xangarro/caja/caja';
 import * as n from './nuevo-dialogo.css';
 import { Muestra, Preguntas } from './nuevo-partes';
-import { parseRecibido } from './ticket';
-import type { Categoria, Producto } from './types';
 
 const PLUS = 'M12 5v14M5 12h14';
 

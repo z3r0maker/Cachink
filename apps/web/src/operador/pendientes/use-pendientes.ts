@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useCola } from '../shell/cola';
-import { fase } from './derive';
-import type { EnvioVivo, RegistroEnCola } from './types';
+import { fase, type EnvioVivo, type RegistroEnCola } from '@xangarro/caja/pendientes';
 
 /** Opening the screen online with something queued sends it, once. */
 function useEnvioAlAbrir(vivo: EnvioVivo | undefined, hay: boolean, enviar: () => void): void {

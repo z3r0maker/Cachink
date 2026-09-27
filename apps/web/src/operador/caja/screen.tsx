@@ -15,7 +15,7 @@ import type { Comprobante } from './receipt';
 import { Share } from './share';
 import { TicketBar } from './barra';
 import { TicketPanel } from './ticket-panel';
-import type { CajaScreenProps, Producto } from './types';
+import type { CajaScreenProps, Producto } from '@xangarro/caja/caja';
 import { useCaja } from './use-caja';
 import { VentaHechaCard } from './venta-hecha';
 

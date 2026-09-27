@@ -11,12 +11,10 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
-import { primerNombreDueno } from '../ui/dueno';
+import { primerNombreDueno, type EstadoMode } from '@xangarro/caja';
 import { desencolar, useCola } from '../shell/cola';
-import type { EstadoMode } from '../estado';
 import { PendientesScreen } from './screen';
-import type { EnvioVivo, RegistroEnCola } from './types';
-import { comoRegistro } from './vivo';
+import { type EnvioVivo, type RegistroEnCola, comoRegistro } from '@xangarro/caja/pendientes';
 
 interface Vivo {
   readonly state: 'happy' | EstadoMode;

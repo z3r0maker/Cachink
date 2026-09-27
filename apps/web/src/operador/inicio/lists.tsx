@@ -3,15 +3,20 @@
 import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 
-import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { ICONS, OPERADOR_BASE } from '@xangarro/caja';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import { useHoyNo } from '../ui/hoy-no';
-import { corteChip } from './copy';
-import { MAX_TAREAS } from './para-hoy';
+import {
+  corteChip,
+  MAX_TAREAS,
+  type CorteReciente,
+  type MensajeDueno,
+  type Tarea,
+  type TareaTipo,
+} from '@xangarro/caja/inicio';
 import * as s from './inicio.css';
 import * as l from './lists.css';
-import type { CorteReciente, MensajeDueno, Tarea, TareaTipo } from './types';
 
 const TAREA: Record<TareaTipo, { icon: string; tint: string; cta: string; slug: string }> = {
   gasto: { icon: ICONS.gastos, tint: colors.redSoft, cta: 'Registrar', slug: 'gastos' },

@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { formatMoney, toPesosString, type Money } from '@xangarro/domain';
 
-import { parseRecibido } from '../caja/ticket';
-import { vistaAbono } from './cliente/abono';
-import { estadoCuenta } from './cliente/derive';
-import type { CuentaCliente } from './cliente/types';
+import { parseRecibido } from '@xangarro/caja/caja';
+import {
+  vistaAbono,
+  estadoCuenta,
+  type CuentaCliente,
+  rapidos,
+  METODOS_ABONO,
+  type MetodoAbono,
+} from '@xangarro/caja/cobranza';
 import * as a from './cuenta-abono.css';
-import { rapidos } from './derive';
-import { METODOS_ABONO, type MetodoAbono } from './types';
 
 /** The amount being typed, how it is paid, and where it would land (oldest first). */
 export function useAbonoCuenta(c: CuentaCliente) {

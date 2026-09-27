@@ -15,11 +15,16 @@ import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { desencolar } from '../shell/cola';
 import type { GastoPara } from '../runtime/protocol';
-import type { EstadoMode } from '../estado';
+import { type EstadoMode, OPERADOR_BASE } from '@xangarro/caja';
 import { GastosScreen } from './screen';
-import { OPERADOR_BASE } from '../shell/nav';
-import type { NuevoGasto, PrefillGasto } from './registrar';
-import { CATEGORIAS, type CategoriaGasto, type GastoTurno, type GastosData } from './types';
+import {
+  type NuevoGasto,
+  type PrefillGasto,
+  CATEGORIAS,
+  type CategoriaGasto,
+  type GastoTurno,
+  type GastosData,
+} from '@xangarro/caja/gastos';
 
 interface Vivo {
   readonly state: 'happy' | EstadoMode;

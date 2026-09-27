@@ -6,7 +6,7 @@
 
 import { sql } from 'drizzle-orm';
 
-import type { PendienteCrudo } from './cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import { OTROS, otro } from './cola-otros';
 import { filas, movimiento, porId, porLotes, type Lector } from './cola-sql';
 

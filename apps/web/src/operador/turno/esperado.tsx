@@ -3,10 +3,10 @@ import { colors } from '@xangarro/tokens';
 import { formatMoney, sum } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import { Panel } from '../ui/panel';
 import * as m from './mi-turno.css';
-import type { CobroPorMetodo, TurnoData } from './types';
+import type { CobroPorMetodo, TurnoData } from '@xangarro/caja/turno';
 
 const CANDADO =
   'M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2ZM7 11V7a5 5 0 0 1 10 0v4';

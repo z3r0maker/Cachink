@@ -12,7 +12,7 @@ import { BloqueoCaja } from '../caja/bloqueo';
 import { bloquear } from '../caja/ticket-store';
 import { OperadorTabbar } from './tabbar';
 import * as s from './shell.css';
-import type { Connection, OperadorShellData } from './types';
+import type { Connection, OperadorShellData } from '@xangarro/caja';
 
 /**
  * Development-only: `?connection=sin-conexion` forces the offline header, the

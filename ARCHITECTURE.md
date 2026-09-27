@@ -157,6 +157,7 @@ Links to discussion, docs, prior art.
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
 | [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
+| [118](#adr-118) | 2026-09-27 | The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8328,3 +8329,63 @@ example names or amounts. The rules, in short (the full guide is
   are updated to match. Code that still breaks a rule (yellow-filled chips,
   hard-coded «Caja 1», the `ProximamenteState` component) is debt to remove, not
   precedent.
+
+## ADR-118
+
+**Title:** The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone
+
+**Date:** 2026-09-27
+
+**Status:** Accepted
+
+**Context**
+
+Track M (M-04) rebuilds the phone as the same register as the web caja. The web
+caja's numbers come from pure functions in `apps/web/src/operador/`: the turno's
+headline figures, «Para hoy», the fiado states, the stock rules, the queue's
+wording, the ticket math, and the read-model shapes the Worker hands the
+screens. The phone cannot import an app, and a second copy of those rules would
+be the duplication CLAUDE.md §2.3 calls a bug: the two surfaces would drift
+into showing different numbers for the same turno.
+
+None of the existing packages fits. `domain` holds business rules with no
+presentation (NIF, KPIs, money); these functions word Spanish copy, pick token
+colours and build routes. `application` holds use cases that orchestrate
+repositories; these are read-side view models with no IO. `ui` is the phone's
+Tamagui body and cannot be imported by the portal.
+
+**Decision**
+
+A new workspace package, `packages/caja` (`@xangarro/caja`), holds the caja's
+framework-free logic: the per-screen types, derivations, copy, fixtures and the
+runtime read-model shapes and mappers. It depends on `@xangarro/domain` and
+`@xangarro/tokens` only: no React, DOM, storage, Worker, Drizzle or SQLite.
+Each screen is a subpath (`@xangarro/caja/inicio`, `/turno`, `/cierre`,
+`/ventas`, `/cobranza`, `/inventario`, `/gastos`, `/pendientes`, `/avisos`,
+`/caja`, `/lectura` for the read models); the root export holds what they
+share (clock, owner wording, routes and icons, the shared states).
+
+`apps/web` keeps what is web: screens, hooks, vanilla-extract, the Worker,
+OPFS, the protocol and the Drizzle readers. `packages/ui` and the phone import
+the package for the same figures.
+
+ESLint's boundaries get a `caja` element that may import `domain` only; `app`
+and `ui` may import it.
+
+**Alternatives considered**
+
+- *Put it in `packages/application`.* Rejected: application is use cases over
+  repositories, and a read model with Spanish copy and token colours would
+  blur that layer.
+- *Put it in `packages/domain`.* Rejected: domain must stay free of routes,
+  tints and screen wording.
+- *Copy the functions into the phone.* Rejected by CLAUDE.md §2.3.
+
+**Consequences**
+
+- A number the caja shows is computed in one place; a rule change reaches
+  both surfaces, and its unit tests live with it in `packages/caja/tests`.
+- The package carries web routes (`OPERADOR_BASE`) inside the hrefs of «Para
+  hoy» and the avisos. The phone maps them to its own screens until a route
+  key replaces the href.
+- CLAUDE.md §3 lists the package.

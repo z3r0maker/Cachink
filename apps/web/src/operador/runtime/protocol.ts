@@ -6,8 +6,7 @@
 
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { ReferenceTables } from '@xangarro/contracts';
-import type { ColaRequest } from './cola-shapes';
-import type { InventarioRequest } from './inventario-mapa';
+import type { ColaRequest, InventarioRequest } from '@xangarro/caja/lectura';
 import type { RecurrenteRequest } from './recurrentes';
 
 export type {
@@ -19,7 +18,7 @@ export type {
   TicketPara,
   VentaCuentaPara,
   VentaPara,
-} from './shapes';
+} from '@xangarro/caja/lectura';
 
 export interface RegistrarContext {
   readonly deviceId: string;

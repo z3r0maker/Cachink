@@ -8,7 +8,7 @@ import { Icon } from '../../shell/icon';
 import * as c from './cobro.css';
 import { MontoInput } from '../ui/monto';
 import * as e from './efectivo.css';
-import { cambio as calcCambio, parseRecibido } from './ticket';
+import { cambio as calcCambio, parseRecibido } from '@xangarro/caja/caja';
 import type { Caja } from './use-caja';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'] as const;

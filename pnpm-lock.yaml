@@ -399,6 +399,9 @@ importers:
       '@xangarro/auth-core':
         specifier: workspace:*
         version: link:../../packages/auth-core
+      '@xangarro/caja':
+        specifier: workspace:*
+        version: link:../../packages/caja
       '@xangarro/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -555,6 +558,28 @@ importers:
       '@types/node':
         specifier: ^22.19.17
         version: 22.19.17
+      '@vitest/coverage-v8':
+        specifier: ^4.1.6
+        version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
+  packages/caja:
+    dependencies:
+      '@xangarro/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@xangarro/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+    devDependencies:
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
@@ -954,6 +979,9 @@ importers:
       '@xangarro/application':
         specifier: workspace:*
         version: link:../application
+      '@xangarro/caja':
+        specifier: workspace:*
+        version: link:../caja
       '@xangarro/contracts':
         specifier: workspace:*
         version: link:../contracts

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { formatMoney, toPesosString, type Money } from '@xangarro/domain';
 import { colors, portalFontSizes } from '@xangarro/tokens';
 
-import { parseRecibido } from '../caja/ticket';
+import { parseRecibido } from '@xangarro/caja/caja';
 import { rule } from '../caja/share.css';
 import { ModalBotones } from '../ui/botones';
 import { ChoiceChips } from '../ui/choice';
@@ -12,8 +12,7 @@ import { OpModal } from '../ui/modal';
 import { MontoInput } from '../ui/monto';
 import * as u from '../ui/ui.css';
 import * as a from './abono.css';
-import { rapidos } from './derive';
-import { METODOS_ABONO, type MetodoAbono } from './types';
+import { rapidos, METODOS_ABONO, type MetodoAbono } from '@xangarro/caja/cobranza';
 
 /** Where an amount would land: the domain's allocation, worded by the caller. */
 export interface Vista {

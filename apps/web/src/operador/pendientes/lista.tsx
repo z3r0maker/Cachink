@@ -2,12 +2,11 @@ import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { OPERADOR_BASE } from '../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
-import { estadoFila, type Fase } from './derive';
+import { estadoFila, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
 import * as s from './pendientes.css';
-import type { RegistroEnCola } from './types';
 
 const RECIBO =
   'M4 3v18l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V3l-2 1-2-1-2 1-2-1-2 1-2-1-2 1zM12 17V7M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8';

@@ -35,9 +35,14 @@ import type {
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
 import type { RecurrenteGastoPara } from './recurrentes';
-import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
-import type { TurnoVivoPara } from './turno-shapes';
-import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
+import type {
+  AvisosPara,
+  PendienteCrudo,
+  ResponderAvisoCall,
+  TurnoVivoPara,
+  InventarioPara,
+  MoverInventarioCall,
+} from '@xangarro/caja/lectura';
 
 export interface RuntimeCounts {
   readonly pending: number;

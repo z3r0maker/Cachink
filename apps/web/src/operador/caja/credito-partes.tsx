@@ -5,7 +5,7 @@ import { formatMoney, type Money } from '@xangarro/domain';
 import { Icon } from '../../shell/icon';
 import * as m from '../ui/mostrador.css';
 import * as k from './credito.css';
-import type { ClienteFiado } from './types';
+import type { ClienteFiado } from '@xangarro/caja/caja';
 
 const PLUS = 'M12 5v14M5 12h14';
 

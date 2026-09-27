@@ -1,6 +1,6 @@
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
-import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { ICONS, OPERADOR_BASE } from '@xangarro/caja';
 import { PageHead, StatRow } from '../ui/panel';
 import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
@@ -9,7 +9,7 @@ import * as m from './mi-turno.css';
 import { Movimientos } from './movimientos';
 import { kpis } from './parts';
 import { PendientesRecurrentes } from './pendientes';
-import type { TurnoScreenProps } from './types';
+import type { TurnoScreenProps } from '@xangarro/caja/turno';
 
 /** Operador · Mi turno: the cash that must be there, today's figures, and what is due. */
 export function TurnoScreen({ state, data }: TurnoScreenProps) {

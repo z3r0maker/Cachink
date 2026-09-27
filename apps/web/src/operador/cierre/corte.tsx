@@ -2,8 +2,7 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import * as k from './corte.css';
-import { conSigno, DIF } from './copy';
-import type { CierreData } from './types';
+import { conSigno, DIF, type CierreData } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
 /** «14 may», the day the turno closed. */

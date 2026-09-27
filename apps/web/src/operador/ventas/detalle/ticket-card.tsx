@@ -1,12 +1,11 @@
 import { formatMoney } from '@xangarro/domain';
 
-import { iconoPorNombre } from '../../caja/nuevo-icono';
-import { TINT } from '../../caja/categorias';
+import { iconoPorNombre, TINT } from '@xangarro/caja/caja';
 import { Glyph } from '../../ui/parts';
-import { PRODUCT_ICONS } from '../../ui/product-icons';
+import { PRODUCT_ICONS } from '@xangarro/caja';
 import * as m from '../../ui/mostrador.css';
 import * as s from './side.css';
-import type { LineaDetalle } from './types';
+import type { LineaDetalle } from '@xangarro/caja/ventas';
 
 /** «Lo que llevó»: each line with its tinted icon, and its price when the ticket has it. */
 export function Lineas({ lineas }: { readonly lineas: readonly LineaDetalle[] }) {

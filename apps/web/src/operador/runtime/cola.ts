@@ -11,7 +11,7 @@ import { DrizzleAppConfigRepository } from '@xangarro/data';
 import { coalesce, readChangeSlice, SYNC_CONFIG_KEYS } from '@xangarro/sync';
 
 import { agrupar, type Entrada } from './cola-filas';
-import type { PendienteCrudo } from './cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 
 /** A register never holds this many unsent changes; the pusher sends 10 batches a run. */

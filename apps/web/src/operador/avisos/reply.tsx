@@ -3,7 +3,7 @@
 import { Icon } from '../../shell/icon';
 import * as p from '../ui/panel.css';
 import * as r from './reply.css';
-import { aDueno } from './vivo';
+import { aDueno } from '@xangarro/caja/avisos';
 
 /** Quick answers: a short label, the sentence it writes for the operator. */
 const RAPIDAS: readonly (readonly [string, string])[] = [

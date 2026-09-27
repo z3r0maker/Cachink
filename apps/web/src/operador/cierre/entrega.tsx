@@ -3,7 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 
 import { Icon } from '../../shell/icon';
-import { aDueno, mayuscula } from '../ui/dueno';
+import { aDueno, mayuscula } from '@xangarro/caja';
 import * as u from './corte.css';
 import * as e from './entrega.css';
 

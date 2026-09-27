@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { formatMoney, toPesosString } from '@xangarro/domain';
 import { fontSizes, typography } from '@xangarro/tokens';
 
-import { parseRecibido } from '@/operador/caja/ticket';
+import { parseRecibido } from '@xangarro/caja/caja';
 import { ChoiceChips } from '@/operador/ui/choice';
 import { eyebrow } from '@/styles/text.css';
 

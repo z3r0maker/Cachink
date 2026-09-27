@@ -2,7 +2,7 @@
 
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '../ui/dueno';
+import { mayuscula } from '@xangarro/caja';
 import { useDueno } from '../ui/use-dueno';
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
@@ -10,11 +10,16 @@ import { OpMain } from '../ui/parts';
 import { Buscador, Resumenes } from '../ui/resumen';
 import * as t from '../ui/title.css';
 import { Toast } from '../ui/toast';
-import { buscar, enLista, paraReponer, resumen } from './derive';
+import {
+  buscar,
+  enLista,
+  paraReponer,
+  resumen,
+  type InventarioScreenProps,
+} from '@xangarro/caja/inventario';
 import * as s from './inventario.css';
 import { ListaExistencias, ListaMovimientos } from './listas';
 import { MoverExistencia } from './mover';
-import type { InventarioScreenProps } from './types';
 import { useInventario, type Inventario } from './use-inventario';
 
 const CAJA_ICON = 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4';

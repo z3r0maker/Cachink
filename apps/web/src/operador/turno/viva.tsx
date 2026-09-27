@@ -8,14 +8,13 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { OperadorEstado, type EstadoMode } from '../estado';
-import { ICONS } from '../shell/nav';
+import { OperadorEstado } from '../estado';
+import { type EstadoMode, ICONS } from '@xangarro/caja';
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { OpMain } from '../ui/parts';
 import { TurnoScreen } from './screen';
-import type { TurnoData } from './types';
-import { comoTurno } from './vivo';
+import { type TurnoData, comoTurno } from '@xangarro/caja/turno';
 
 /** No name for the device yet: the caja is «Caja 1», as Cierre and Gastos say. */
 const CAJA = 'Caja 1';
