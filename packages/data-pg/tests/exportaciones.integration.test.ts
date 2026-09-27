@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
 
 import { createDb, withBusiness, type Db } from '../src/client';
 import {
+  enTransaccion,
   exportarGastos,
   exportarMovimientosInventario,
   exportarVentas,
@@ -68,7 +69,7 @@ describe('exports read everything, in keyset batches', () => {
       fx.biz,
       async (tx) =>
         [
-          await todas(exportarMovimientosInventario(tx, 10)),
+          await todas(exportarMovimientosInventario(enTransaccion(tx), 10)),
           await listMovimientosInventario(tx),
           // The count the export has to match, read the plain way.
           await tx.execute<{ n: number }>(
@@ -95,7 +96,10 @@ describe('exports read everything, in keyset batches', () => {
       app,
       fx.biz,
       async (tx) =>
-        [await todas(exportarVentas(tx, 2)), await todas(exportarGastos(tx, 2))] as const,
+        [
+          await todas(exportarVentas(enTransaccion(tx), 2)),
+          await todas(exportarGastos(enTransaccion(tx), 2)),
+        ] as const,
     );
     // Seven live lines in the fixture (the deleted one is out), cancelled kept.
     assert.equal(ventas.length, 7);
@@ -106,10 +110,67 @@ describe('exports read everything, in keyset batches', () => {
     assert.deepEqual(new Set(gastos.map((g) => g.clasificacion)), new Set(['Nómina', 'Renta']));
   });
 
+  it('reads each batch in a transaction of its own, and still every row once', async () => {
+    let transacciones = 0;
+    const ventas = await todas(
+      exportarVentas((fn) => {
+        transacciones += 1;
+        return withBusiness(app, fx.biz, fn);
+      }, 2),
+    );
+    assert.equal(ventas.length, 7);
+    assert.equal(new Set(ventas.map((v) => v.id)).size, 7);
+    // 7 rows in batches of 2: four full-or-short reads, each its own transaction.
+    assert.equal(transacciones, 4);
+  });
+
+  it("bounds the ticket read by the batch's days, and never loses a line for it", async () => {
+    // A line dated months after its ticket (an edit, an old client), and a
+    // line whose ticket never arrived: the first keeps its method via the
+    // by-id fallback; the second is left out, as the inner join always did.
+    const biz = testId('Y');
+    const now = new Date('2026-05-12T14:00:00Z');
+    const fila = { business_id: biz, device_id: fx.dev, created_at: now, updated_at: now };
+    const ticket = testId('T');
+    const prod = testId('P');
+    await owner`INSERT INTO businesses ${owner({ id: biz, nombre: 'Fechas', regimen_fiscal: 'RESICO', isr_tasa: 125, ...fila })}`;
+    await owner`INSERT INTO products ${owner({ id: prod, nombre: 'Taco', categoria: 'Producto Terminado', costo_unit_centavos: 100, unidad: 'pza', ...fila })}`;
+    await owner`INSERT INTO tickets ${owner({ id: ticket, folio: 900, fecha: '2026-01-15', hora: '12:00:00', concepto: 'Venta', metodo: 'Transferencia', estado_pago: 'pagado', ...fila })}`;
+    const linea = (fecha: string, ticketId: string, concepto: string) => ({
+      id: testId('S'),
+      ticket_id: ticketId,
+      fecha,
+      concepto,
+      categoria: 'Producto',
+      monto_centavos: 100,
+      producto_id: prod,
+      ...fila,
+    });
+    await owner`INSERT INTO sales ${owner([
+      linea('2026-05-20', ticket, 'Movida'),
+      linea('2026-05-21', testId('T'), 'Huérfana'),
+    ])}`;
+    try {
+      // Batches of one: the ticketless line fills a whole batch on its own,
+      // and the walk must carry on past it rather than read it as the end.
+      const ventas = await withBusiness(app, biz, (tx) =>
+        todas(exportarVentas(enTransaccion(tx), 1)),
+      );
+      assert.deepEqual(
+        ventas.map((v) => [v.concepto, v.clasificacion]),
+        [['Movida', 'Transferencia']],
+      );
+    } finally {
+      await owner`DELETE FROM businesses WHERE id = ${biz}`;
+    }
+  });
+
   it('another tenant exports nothing', async () => {
     const other = testId('O');
     assert.deepEqual(
-      await withBusiness(app, other, (tx) => todas(exportarMovimientosInventario(tx))),
+      await withBusiness(app, other, (tx) =>
+        todas(exportarMovimientosInventario(enTransaccion(tx))),
+      ),
       [],
     );
   });

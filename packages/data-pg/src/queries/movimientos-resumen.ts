@@ -3,6 +3,7 @@ import { and, asc, inArray, isNull, sql } from 'drizzle-orm';
 import { sales } from '../schema/ledger.js';
 import type { Db } from '../client.js';
 import { condiciones, type FiltroMovimientos } from './movimientos-filtro.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -20,6 +21,14 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
  * category of the period, and the caller narrows the groups to the one
  * selected. A cancelled venta is listed (`filas`) but adds nothing to
  * `total` or `tickets` — money that did not happen.
+ *
+ * Ventas are summed **per ticket first**, and only those sums meet `tickets`,
+ * read over the same days (audit DB3-QRY-03): joining every line to every
+ * ticket the tenant ever had, then `count(DISTINCT)`, spilled to disk and grew
+ * with history (124 ms a month, about 5 s at five years). A line whose ticket
+ * carries another day is looked up by id, so the bound narrows the read and
+ * never the totals; a line with no ticket at all is left out, as the join
+ * always did.
  */
 export interface GrupoMovimientos {
   readonly clasificacion: string;
@@ -33,6 +42,30 @@ export interface GrupoMovimientos {
 
 type Raw = { clasificacion: string | null; filas: string; total: string; tickets: string };
 
+/** A bound as the filter means it: blank is open on that side. */
+const dia = (v: string | null | undefined): string | null => {
+  const t = v?.trim() ?? '';
+  return t === '' ? null : t;
+};
+
+function ventasPorMetodo(filtro: FiltroMovimientos) {
+  const diasDelTicket = fechaEnDias(sql`t.fecha`, dia(filtro.desde), dia(filtro.hasta));
+  return sql`
+    SELECT coalesce(t.metodo, x.metodo) AS clasificacion,
+           sum(pt.filas)::text AS filas,
+           coalesce(sum(pt.total) FILTER (WHERE coalesce(t.cancelled_at, x.cancelled_at) IS NULL), 0)::text AS total,
+           (count(*) FILTER (WHERE coalesce(t.cancelled_at, x.cancelled_at) IS NULL))::text AS tickets
+      FROM (SELECT s.ticket_id, count(*) AS filas, sum(s.monto_centavos) AS total
+              FROM sales s
+             WHERE ${condiciones('venta', filtro, false)}
+             GROUP BY s.ticket_id) pt
+      LEFT JOIN tickets t ON t.id = pt.ticket_id AND ${diasDelTicket}
+      LEFT JOIN LATERAL (SELECT t2.id, t2.metodo, t2.cancelled_at FROM tickets t2
+                          WHERE t.id IS NULL AND t2.id = pt.ticket_id) x ON true
+     WHERE t.id IS NOT NULL OR x.id IS NOT NULL
+     GROUP BY 1`;
+}
+
 export async function resumenMovimientos(
   tx: Tx,
   kind: 'venta' | 'gasto',
@@ -41,14 +74,7 @@ export async function resumenMovimientos(
   const where = condiciones(kind, filtro, false);
   const rows =
     kind === 'venta'
-      ? await tx.execute<Raw>(sql`
-          SELECT t.metodo AS clasificacion,
-                 count(*)::text AS filas,
-                 coalesce(sum(s.monto_centavos) FILTER (WHERE t.cancelled_at IS NULL), 0)::text AS total,
-                 (count(DISTINCT s.ticket_id) FILTER (WHERE t.cancelled_at IS NULL))::text AS tickets
-            FROM sales s JOIN tickets t ON t.id = s.ticket_id
-           WHERE ${where}
-           GROUP BY t.metodo`)
+      ? await tx.execute<Raw>(ventasPorMetodo(filtro))
       : await tx.execute<Raw>(sql`
           SELECT e.categoria AS clasificacion, count(*)::text AS filas,
                  coalesce(sum(e.monto_centavos), 0)::text AS total, count(*)::text AS tickets

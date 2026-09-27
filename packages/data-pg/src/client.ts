@@ -63,18 +63,21 @@ export async function withBusiness<T>(
   db: Db,
   businessId: string,
   fn: (tx: Parameters<Parameters<Db['transaction']>[0]>[0]) => Promise<T>,
+  deadline?: Deadline,
 ): Promise<T> {
-  return db.transaction(async (tx) => {
-    await tx.execute(
-      // `true` scopes the setting to this transaction, so a pooled connection
-      // never leaks one tenant's claim into the next request.
-      sqlSetConfig(businessId),
-    );
+  const run = async (tx: Parameters<Parameters<Db['transaction']>[0]>[0]) => {
+    // `true` scopes the setting to this transaction, so a pooled connection
+    // never leaks one tenant's claim into the next request.
+    await tx.execute(sqlSetConfig(businessId));
     return fn(tx);
-  });
+  };
+  // A deadline turns «wait for the pool» into «busy, retry» (DB3-SYNC-05).
+  return deadline === undefined ? db.transaction(run) : transactionWithDeadline(db, deadline, run);
 }
 
 import { sql } from 'drizzle-orm';
+
+import { transactionWithDeadline, type Deadline } from './deadline.js';
 
 function sqlSetConfig(businessId: string) {
   return sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`;
