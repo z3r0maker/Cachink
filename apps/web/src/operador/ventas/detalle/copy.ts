@@ -83,10 +83,15 @@ function primeras(v: VentaDetalle, desde: string): readonly Ficha[] {
 }
 
 /** The cancel dialog's consequence line, by how the sale was paid. */
-export function consecuencia(metodo: MetodoVenta, monto: Money, cliente?: string): string {
+export function consecuencia(
+  metodo: MetodoVenta,
+  monto: Money,
+  cliente?: string,
+  dueno = 'Pedro',
+): string {
   if (metodo === 'Fiado' && cliente !== undefined)
     return `Al cancelarla, el saldo de ${cliente} baja ${formatMoney(monto)}. Si ya abonó contra esta venta, ese dinero queda como saldo a favor suyo para su siguiente compra.`;
   if (metodo === 'Efectivo')
-    return `Se regresan ${formatMoney(monto)} del efectivo esperado y Pedro lo ve en su portal.`;
-  return 'Sale de tus ventas del turno y Pedro lo ve en su portal. Si hay que devolver el dinero, se hace por el mismo medio.';
+    return `Se regresan ${formatMoney(monto)} del efectivo esperado y ${dueno} lo ve en su portal.`;
+  return `Sale de tus ventas del turno y ${dueno} lo ve en su portal. Si hay que devolver el dinero, se hace por el mismo medio.`;
 }

@@ -7,7 +7,7 @@ import {
   MAX_PULL_ROWS_PER_TABLE,
   type PullableTable,
 } from '@xangarro/contracts';
-import { SYNCED_TABLES, syncLog } from '@xangarro/data-pg';
+import { ownerNombre, SYNCED_TABLES, syncLog } from '@xangarro/data-pg';
 import { and, asc, gt, inArray, lte } from 'drizzle-orm';
 import type { AnyPgColumn, PgTable } from 'drizzle-orm/pg-core';
 
@@ -60,6 +60,11 @@ export async function changesSince(tx: Tx, since: number, cursor: number, pageSi
   );
   return {
     serverSeq,
-    tables: { ...Object.fromEntries(loaded), feature_flags: await tenantFeatureFlags(tx) },
+    tables: {
+      ...Object.fromEntries(loaded),
+      feature_flags: await tenantFeatureFlags(tx),
+      // Every pull, not only on a change: a renamed owner reaches the caja (no sync_log row).
+      dueno_nombre: await ownerNombre(tx),
+    },
   };
 }

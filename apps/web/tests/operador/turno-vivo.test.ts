@@ -235,6 +235,7 @@ describe('Inicio over the live read', () => {
       tipo: 'gasto',
       titulo: 'Registrar renta del local',
       detalle: 'Se repite cada mes · día 15',
+      href: '/operador/gastos?recurrente=r1',
     });
   });
 
@@ -247,6 +248,9 @@ describe('Inicio over the live read', () => {
       pendientes: 0,
       porCobrar: { monto: 0n, clientes: 0 },
       ahora: new Date('2026-09-26T20:36:00.000Z'),
+      dueno: 'Pedro Ramírez',
+      stock: [],
+      cuentas: [],
     });
     assert.equal(d.nombre, 'Luis');
     assert.equal(d.situacion, 'vendiendo');
@@ -254,7 +258,9 @@ describe('Inicio over the live read', () => {
     assert.equal(d.turno?.ultimaVentaHace, '6 minutos');
     assert.deepEqual(d.mensajes, []);
     assert.equal(d.cortes[0]?.resultado.tipo, 'falto');
-    assert.equal(saludo(d), '¡Buenas tardes, Luis! La caja está lista.');
+    const hola = { dia: 'Buenos días', tarde: 'Buenas tardes', noche: 'Buenas noches' };
+    assert.equal(saludo(d), `¡${hola[d.momento ?? 'tarde']}, Luis! La caja está lista.`);
+    assert.equal(d.dueno, 'Pedro');
     assert.equal(heroFor(d).body, 'Llevas 1 venta en este turno. La última fue hace 6 minutos.');
   });
 

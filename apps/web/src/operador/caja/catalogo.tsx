@@ -3,6 +3,8 @@
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
+import { mayuscula } from '../ui/dueno';
+import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
 import { ICONS } from '../shell/nav';
@@ -27,6 +29,7 @@ export function Catalogo(p: {
   readonly state: State;
   readonly onNuevo: () => void;
 }) {
+  const dueno = useDueno();
   return (
     <div className={c.left}>
       <div className={t.titleRow}>
@@ -40,7 +43,7 @@ export function Catalogo(p: {
           mode={p.state}
           icon={ICONS.ventas}
           emptyTitle="Todavía no hay catálogo"
-          emptyBody="Pedro tiene que dar de alta los productos con su precio. Mientras, puedes crear lo que vendas desde «No está en el catálogo»."
+          emptyBody={`${mayuscula(dueno)} tiene que dar de alta los productos con su precio. Mientras, puedes crear lo que vendas desde «No está en el catálogo».`}
           errorTitle="No pudimos cargar el catálogo"
         />
       )}

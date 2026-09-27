@@ -34,9 +34,11 @@ async function readSeq(appConfig: AppConfigRepository): Promise<number> {
 type PulledPage = Extract<Awaited<ReturnType<ApiClient['pull']>>, { ok: true }>['data'];
 
 function countRows(tables: PulledPage['tables']): number {
-  return Object.entries(tables)
-    .filter(([k]) => k !== 'feature_flags')
-    .reduce((n, [, rows]) => n + (rows as readonly unknown[]).length, 0);
+  // Only the row arrays: `feature_flags` and `dueno_nombre` ride beside them.
+  return Object.values(tables).reduce<number>(
+    (n, rows) => n + (Array.isArray(rows) ? rows.length : 0),
+    0,
+  );
 }
 
 async function storePage(deps: PullDeps, page: PulledPage): Promise<void> {

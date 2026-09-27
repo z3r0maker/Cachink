@@ -62,6 +62,8 @@ export interface InventarioScreenProps {
   readonly data: InventarioData;
   /** Linked caja: the move goes through the use case (whole quantities only). */
   readonly registrarVivo?: (m: NuevoMovimientoVivo) => void;
+  /** A product to restock now: its «Llegó mercancía» opens (Inicio's «Para hoy»). */
+  readonly reponer?: string | null;
 }
 
 /** A move as the runtime records it (mirrors the panel's `NuevoMovimiento`). */

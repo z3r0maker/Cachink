@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
+import { useHoyNo } from '../ui/hoy-no';
 import { corteChip } from './copy';
+import { MAX_TAREAS } from './para-hoy';
 import * as s from './inicio.css';
 import * as l from './lists.css';
 import type { CorteReciente, MensajeDueno, Tarea, TareaTipo } from './types';
@@ -43,15 +44,15 @@ export function ParaHoy({
   /** With no turno open, the list waits for it. */
   readonly cerrado: boolean;
 }) {
-  const [hechas, setHechas] = useState<readonly string[]>([]);
-  const shown = cerrado ? [] : tareas.filter((t) => !hechas.includes(t.id));
+  const hoyNo = useHoyNo();
+  // The most urgent few still standing: a row put off makes room for the next.
+  const shown = tareas.filter((t) => !hoyNo.ocultos.includes(t.id)).slice(0, MAX_TAREAS);
   if (cerrado) return <ParaHoyCerrado />;
-  const verTodas =
-    hechas.length > 0 ? (
-      <button type="button" className={s.verTodas} onClick={() => setHechas([])}>
-        Ver todas
-      </button>
-    ) : null;
+  const verTodas = tareas.some((t) => hoyNo.ocultos.includes(t.id)) ? (
+    <button type="button" className={s.verTodas} onClick={hoyNo.mostrarTodo}>
+      Ver todas
+    </button>
+  ) : null;
   return (
     <Panel
       label="Para hoy"
@@ -60,7 +61,7 @@ export function ParaHoy({
       action={verTodas}
     >
       {shown.map((t) => (
-        <TareaRow key={t.id} t={t} onSkip={() => setHechas((h) => [...h, t.id])} />
+        <TareaRow key={t.id} t={t} onSkip={() => hoyNo.ocultar(t.id)} />
       ))}
       {shown.length === 0 ? (
         <div className={s.nada}>
@@ -95,7 +96,7 @@ function TareaRow({ t, onSkip }: { readonly t: Tarea; readonly onSkip: () => voi
         <span className={p.rowDetail}>{t.detalle}</span>
       </span>
       <span className={s.tareaActions}>
-        <Link href={`${OPERADOR_BASE}/${k.slug}`} className={p.outlineBtn}>
+        <Link href={t.href ?? `${OPERADOR_BASE}/${k.slug}`} className={p.outlineBtn}>
           {k.cta}
         </Link>
         <button

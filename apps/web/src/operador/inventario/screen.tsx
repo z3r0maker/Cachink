@@ -2,6 +2,8 @@
 
 import { colors } from '@xangarro/tokens';
 
+import { mayuscula } from '../ui/dueno';
+import { useDueno } from '../ui/use-dueno';
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
 import { OpMain } from '../ui/parts';
@@ -18,8 +20,15 @@ import { useInventario, type Inventario } from './use-inventario';
 const CAJA_ICON = 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4';
 
 /** Operador · Inventario: stock, and this turno's deliveries and write-offs. */
-export function InventarioScreen({ state, tab, data, registrarVivo }: InventarioScreenProps) {
-  const x = useInventario(data, tab, registrarVivo);
+export function InventarioScreen({
+  state,
+  tab,
+  data,
+  registrarVivo,
+  reponer,
+}: InventarioScreenProps) {
+  const x = useInventario(data, tab, registrarVivo, reponer ?? null);
+  const dueno = useDueno();
   return (
     <OpMain top={24}>
       <NuevaVenta />
@@ -36,7 +45,7 @@ export function InventarioScreen({ state, tab, data, registrarVivo }: Inventario
           mode={state}
           icon={CAJA_ICON}
           emptyTitle="Sin productos con existencias"
-          emptyBody="Cuando Pedro dé de alta el catálogo con sus existencias, aquí podrás registrar lo que llega y lo que se echa a perder."
+          emptyBody={`Cuando ${mayuscula(dueno)} dé de alta el catálogo con sus existencias, aquí podrás registrar lo que llega y lo que se echa a perder.`}
           errorTitle="No pudimos cargar el inventario"
         />
       )}
@@ -114,6 +123,7 @@ function Pestanas({ x }: { readonly x: Inventario }) {
 }
 
 function Cuerpo({ x }: { readonly x: Inventario }) {
+  const dueno = useDueno();
   if (x.tab === 'movimientos') return <ListaMovimientos movs={x.movs} items={x.items} />;
   return (
     <>
@@ -124,8 +134,7 @@ function Cuerpo({ x }: { readonly x: Inventario }) {
         onMover={x.mover}
       />
       <p className={s.regla}>
-        Las ventas descuentan existencias solas. Tú registras lo que llega y lo que se echa a
-        perder; el ajuste libre de existencias lo hace Pedro desde el portal.
+        {`Las ventas descuentan existencias solas. Tú registras lo que llega y lo que se echa a perder; el ajuste libre de existencias lo hace ${dueno} desde el portal.`}
       </p>
     </>
   );

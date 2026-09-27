@@ -39,6 +39,23 @@ function useDatos(data: InventarioData) {
 }
 
 /**
+ * `?reponer=<id>` (Inicio's «Para hoy»): open that product's «Llegó
+ * mercancía» once, as soon as it is in the list.
+ */
+function useReponer(
+  reponer: string | null,
+  items: readonly { readonly id: string }[],
+  setForm: (f: { tipo: TipoMovimiento; id: string }) => void,
+) {
+  const [hecho, setHecho] = useState(false);
+  useEffect(() => {
+    if (hecho || reponer === null || !items.some((i) => i.id === reponer)) return;
+    setHecho(true);
+    setForm({ tipo: 'Entrada', id: reponer });
+  }, [hecho, reponer, items, setForm]);
+}
+
+/**
  * Stock, this turno's movements, the open form and the toast. A movement moves
  * the stock on this device at once; on a linked caja it also goes through the
  * use case (`registrarVivo`), whose reload hands back fresh `data`.
@@ -47,11 +64,13 @@ export function useInventario(
   data: InventarioData,
   tabInicial: Pestana,
   registrarVivo?: (m: NuevoMovimientoVivo) => void,
+  reponer: string | null = null,
 ) {
   const { items, setItems, movs, setMovs } = useDatos(data);
   const [tab, setTab] = useState(tabInicial);
   const [query, setQuery] = useState('');
   const [form, setForm] = useState<{ tipo: TipoMovimiento; id: string } | null>(null);
+  useReponer(reponer, items, setForm);
   const [toast, setToast] = useState<Toast | null>(null);
   const registrar = (n: NuevoMovimiento) => {
     const m: Movimiento = { ...n, id: `m-${Date.now()}`, hora: hhmm(new Date()) };

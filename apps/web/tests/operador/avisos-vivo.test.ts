@@ -12,6 +12,7 @@ import {
   partir,
   sinLeer,
 } from '../../src/operador/avisos/vivo';
+import { nombreDueno, primerNombreDueno } from '../../src/operador/ui/dueno';
 
 const HOY = '2026-05-14';
 /** Noon local on a day, as a UTC stamp: safe from any device's offset. */
@@ -23,6 +24,7 @@ const BASE: AvisosPara = {
   cola: { cuantos: 0, desde: null },
   rechazados: 0,
   stockBajo: [],
+  dueno: null,
 };
 
 describe('avisos, vivos', () => {
@@ -135,5 +137,13 @@ describe('avisos, vivos', () => {
     assert.equal(mayuscula(deDueno('el dueño')), 'Del dueño');
     assert.equal(mayuscula(deDueno('Pedro')), 'De Pedro');
     assert.deepEqual(partir('Sin punto final'), { titulo: 'Sin punto final', resto: '' });
+  });
+
+  it('names the owner by the first name the pull sent, «el dueño» until then', () => {
+    assert.equal(avisosVivos({ ...BASE, dueno: 'Pedro Ramírez' }, HOY).dueno, 'Pedro');
+    assert.equal(avisosVivos({ ...BASE, dueno: '   ' }, HOY).dueno, 'el dueño');
+    assert.equal(nombreDueno(null), 'el dueño');
+    assert.equal(primerNombreDueno('  Lupita  '), 'Lupita');
+    assert.equal(primerNombreDueno(null), null);
   });
 });

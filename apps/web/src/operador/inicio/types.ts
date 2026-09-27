@@ -12,6 +12,8 @@ export interface Tarea {
   readonly tipo: TareaTipo;
   readonly titulo: string;
   readonly detalle: string;
+  /** Where its action goes; the kind's screen when absent (the fixture). */
+  readonly href?: string;
 }
 
 export interface MensajeDueno {
@@ -58,8 +60,13 @@ export interface UltimoTurno {
   readonly clientesConSaldo: number;
 }
 
+/** The greeting's time of day: before 12:00, until 18:59, from 19:00. */
+export type Momento = 'dia' | 'tarde' | 'noche';
+
 export interface InicioData {
   readonly nombre: string;
+  /** Live only: the local time of day; the fixture keeps the design's wording. */
+  readonly momento?: Momento;
   readonly fecha: string;
   readonly dueno: string;
   readonly situacion: Situacion;
