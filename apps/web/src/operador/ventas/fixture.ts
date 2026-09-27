@@ -6,6 +6,7 @@ import type { VentasData } from './types';
  * in cash, $182.00 on credit; V-0405 ($60.00) is cancelled and out of every total.
  */
 export const VENTAS_FIXTURE: VentasData = {
+  negocio: 'Taquería Don Pedro',
   operador: 'Ana Robledo',
   caja: 'Caja 1',
   desde: '08:15',
@@ -57,7 +58,7 @@ export const VENTAS_FIXTURE: VentasData = {
       folio: 'V-0406',
       concepto: '6 campechano · 2 horchata',
       monto: 232_00n,
-      metodo: 'QR / CoDi',
+      metodo: 'Transferencia',
       hora: '13:12',
     },
     {

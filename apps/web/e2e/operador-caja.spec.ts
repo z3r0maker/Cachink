@@ -9,7 +9,7 @@ test.beforeEach(() => test.setTimeout(120_000));
 async function ticket(page: Page) {
   const panel = page.getByRole('complementary', { name: 'Ticket' });
   if ((page.viewportSize()?.width ?? 1440) < 1240) {
-    await page.locator('button', { hasText: /^\d+Cobrar/ }).click();
+    await page.getByRole('button', { name: 'Cobrar, ver el ticket' }).click();
   }
   return panel;
 }
@@ -63,12 +63,13 @@ test('a credit sale needs a client, then adds to their balance', async ({ page }
     .first()
     .click();
   const cobro = await cobrarCon(page, 'Fiado');
-  await expect(cobro.getByRole('button', { name: 'Elige un cliente' })).toBeDisabled();
+  await expect(cobro.getByRole('button', { name: 'Elige a quién se lo anotas' })).toBeDisabled();
   await cobro
-    .getByRole('button', { name: /Raúl Contreras/ })
+    .getByRole('radio', { name: /Raúl Contreras/ })
     .first()
     .click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await expect(cobro.getByText(/^Quedaría debiendo \$/)).toBeVisible();
+  await cobro.getByRole('button', { name: /^Anotar \$[\d,.]+ a Raúl Contreras$/ }).click();
   await expect(page.getByRole('status')).toContainText('Se sumó al saldo de Raúl Contreras.');
 });
 

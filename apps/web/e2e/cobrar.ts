@@ -11,7 +11,7 @@ export type MetodoCobro = 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
  */
 export async function cobrarCon(page: Page, metodo: MetodoCobro): Promise<Locator> {
   if ((page.viewportSize()?.width ?? 1440) < 1240) {
-    const bar = page.locator('button', { hasText: /^\d+Cobrar/ });
+    const bar = page.getByRole('button', { name: 'Cobrar, ver el ticket' });
     if (await bar.isVisible()) await bar.click();
   }
   const ticket = page.getByRole('complementary', { name: 'Ticket' });
@@ -30,6 +30,6 @@ export async function venderEfectivo(page: Page, recibido: string): Promise<void
 /** A fiado sale on `cliente`'s account. */
 export async function venderFiado(page: Page, cliente: string | RegExp): Promise<void> {
   const cobro = await cobrarCon(page, 'Fiado');
-  await cobro.getByRole('button', { name: cliente }).first().click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await cobro.getByRole('radio', { name: cliente }).first().click();
+  await cobro.getByRole('button', { name: /^Anotar \$/ }).click();
 }

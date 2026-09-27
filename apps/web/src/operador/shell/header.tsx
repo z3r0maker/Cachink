@@ -36,7 +36,7 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
           {mode.status === 'full' && mode.bell !== false ? (
             <Bell unread={data.avisosSinLeer} />
           ) : null}
-          <div id={HEADER_ACTION_ID} style={{ display: 'contents' }} />
+          <div id={HEADER_ACTION_ID} className={h.actionSlot} />
         </div>
       </div>
     </header>
@@ -57,15 +57,17 @@ function Fecha() {
   return <span className={h.fecha}>{hoy}</span>;
 }
 
-/** On a phone there is no sidebar: the header carries the business and the caja. */
+/** On a phone there is no sidebar: one white bar carries the caja and its business. */
 function BizPill({ data }: { readonly data: OperadorShellData }) {
   return (
     <div className={h.bizPill}>
-      <div className={h.bizTile}>{data.negocio.iniciales}</div>
-      <div style={{ minWidth: 0 }}>
-        <div className={h.bizName}>{data.negocio.nombre}</div>
-        <div className={h.bizSub}>{data.caja} · Operativo</div>
-      </div>
+      <span className={h.bizTile}>
+        <Icon path={ICONS.caja} size={18} strokeWidth={2.2} />
+      </span>
+      <span className={h.bizText}>
+        <span className={h.bizName}>{data.caja}</span>
+        <span className={h.bizSub}>{data.negocio.nombre}</span>
+      </span>
     </div>
   );
 }
@@ -85,6 +87,7 @@ function SyncPill({
       <span className={h.syncLabel}>
         {offline ? `Sin conexión · ${data.pendientes} por enviar` : 'Todo enviado'}
       </span>
+      <span className={h.syncCorto}>{offline ? `${data.pendientes} sin enviar` : 'Enviado'}</span>
     </>
   );
   const flag = offline ? '' : undefined;

@@ -3,20 +3,19 @@ import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/t
 
 import { pressable } from '../../styles/press.css';
 
-/** The big yellow confirm at the foot of each step (58 px, a native button). */
+/** The big yellow confirm at the foot of each step (60 px, a native button). */
 export const confirm = style([
   pressable,
   {
-    height: 58,
+    minHeight: 60,
+    padding: '0 16px',
     border: `2.5px solid ${colors.black}`,
     borderRadius: radii[3],
     background: colors.yellow,
     boxShadow: shadows.card,
     fontFamily: 'inherit',
-    fontSize: portalFontSizes.md,
-    fontWeight: typography.weights.bold,
-    letterSpacing: typography.letterSpacing.widest,
-    textTransform: 'uppercase',
+    fontSize: portalFontSizes.lg,
+    fontWeight: typography.weights.extraBold,
     color: colors.black,
     selectors: {
       '&:hover:not(:disabled)': { background: colors.yellowDeep },

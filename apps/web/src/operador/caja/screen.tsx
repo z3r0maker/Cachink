@@ -13,7 +13,8 @@ import { Catalogo } from './catalogo';
 import { NuevoProducto } from './nuevo';
 import type { Comprobante } from './receipt';
 import { Share } from './share';
-import { TicketBar, TicketPanel } from './ticket-panel';
+import { TicketBar } from './barra';
+import { TicketPanel } from './ticket-panel';
 import type { CajaScreenProps, Producto } from './types';
 import { useCaja } from './use-caja';
 import { VentaHechaCard } from './venta-hecha';
@@ -30,7 +31,8 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
   const [compartir, setCompartir] = useState<Comprobante | null>(null);
   const comprobante = () => {
     const venta = caja.toast.venta;
-    if (venta) setCompartir({ negocio: data.negocio, folio: data.siguienteFolio, venta });
+    if (venta)
+      setCompartir({ negocio: data.negocio, caja: data.caja, folio: data.siguienteFolio, venta });
     caja.toast.dismiss();
   };
   const agregar = (p: Producto) => {

@@ -12,6 +12,7 @@ describe('ventas del turno', () => {
     assert.equal(r.activas, 12);
     assert.equal(r.cobrado, 3120_00n);
     assert.equal(r.efectivo, 1980_00n);
+    assert.equal(r.canceladas, 1);
   });
 
   it('filters by method and searches folio, concept and client without accents', () => {
@@ -28,7 +29,7 @@ describe('ventas del turno', () => {
   });
 
   it('counts an empty turno as zero', () => {
-    assert.deepEqual(resumen([]), { activas: 0, cobrado: 0n, efectivo: 0n });
+    assert.deepEqual(resumen([]), { activas: 0, cobrado: 0n, efectivo: 0n, canceladas: 0 });
   });
 });
 
@@ -39,7 +40,8 @@ describe('el método como lo dice el operador', () => {
     assert.equal(comoMetodo('Tarjeta'), 'Tarjeta');
   });
 
-  it('a ticket taken with QR/CoDi before ADR-108 still reads with its own label', () => {
-    assert.equal(comoMetodo('QR/CoDi'), 'QR / CoDi');
+  it('a ticket taken with QR/CoDi before ADR-108 reads as the transfer it was', () => {
+    assert.equal(comoMetodo('QR/CoDi'), 'Transferencia');
+    assert.equal(comoMetodo('QR / CoDi'), 'Transferencia');
   });
 });

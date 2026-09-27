@@ -31,24 +31,25 @@ test("the turno's folio opens the real ticket, shares it, and cancels it", async
 
   // From the list, into the ticket.
   await page.getByRole('link', { name: 'Ventas' }).click();
-  await page.getByTitle('Ver el ticket').first().click();
-  await expect(page.getByText('Venta V-0001')).toBeVisible();
+  await page.getByRole('button', { name: /^Ver venta V-0001/ }).click();
+  const cajon = page.getByRole('dialog');
+  await expect(cajon.getByText('Venta · V-0001')).toBeVisible();
 
   // The ticket as the register stored it: lines, cash, change, who captured it.
-  await expect(page.getByText('Taco al pastor')).toBeVisible();
-  await expect(page.getByText('$25.00 cada uno')).toBeVisible();
-  await expect(page.getByText('Recibido en efectivo')).toBeVisible();
-  await expect(page.getByText('$60.00').first()).toBeVisible();
-  await expect(page.getByText('Cambio que se entregó')).toBeVisible();
-  await expect(page.getByText('$10.00').first()).toBeVisible();
-  await expect(page.getByRole('main').getByText('Ana Robledo')).toBeVisible();
-  await expect(page.getByText('Venta registrada y enviada')).toBeVisible();
+  await expect(cajon.getByText('Taco al pastor')).toBeVisible();
+  await expect(cajon.getByText('2 × $25.00')).toBeVisible();
+  await expect(cajon.getByText('Recibiste')).toBeVisible();
+  await expect(cajon.getByText('$60.00').first()).toBeVisible();
+  await expect(cajon.getByText('Cambio que diste')).toBeVisible();
+  await expect(cajon.getByText('$10.00').first()).toBeVisible();
+  await expect(cajon.getByText('Ana Robledo')).toBeVisible();
+  await expect(cajon.getByText('Enviada', { exact: true })).toBeVisible();
 
   // The comprobante carries the real ticket — and its image is the branded
   // N-20 render: the register is linked and online, so «Guardar imagen»
   // fetches /api/v1/comprobante and downloads the business's template.
-  await page.getByRole('button', { name: 'Compartir comprobante' }).click();
-  const dialogo = page.getByRole('dialog', { name: 'Compartir V-0001' });
+  await cajon.getByRole('button', { name: 'Mandar comprobante' }).click();
+  const dialogo = page.getByRole('dialog', { name: 'Mandar comprobante · V-0001' });
   await expect(dialogo).toBeVisible();
   const descarga = page.waitForEvent('download');
   await dialogo.getByRole('button', { name: 'Guardar imagen' }).click();
@@ -57,13 +58,16 @@ test("the turno's folio opens the real ticket, shares it, and cancels it", async
   await page.keyboard.press('Escape');
 
   // Cancelling asks for the NIP (the domain's rule) and marks the ticket.
-  await page.getByRole('button', { name: 'Cancelar venta' }).click();
-  const modal = page.getByRole('dialog');
-  await modal.getByRole('button', { name: 'Cobro duplicado' }).click();
+  // Esc closed the comprobante back to the side panel.
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar venta' }).click();
+  const modal = page.getByRole('alertdialog');
+  await modal.getByRole('radio', { name: 'Me equivoqué al cobrar' }).click();
   await modal.getByTestId('cancelar-nip').fill('2580');
-  await modal.getByRole('button', { name: 'Cancelar la venta' }).click();
-  await expect(page.getByText('Venta cancelada')).toBeVisible();
-  await expect(page.getByText('Cobro duplicado')).toBeVisible();
+  await modal.getByRole('button', { name: 'Cancelar venta' }).click();
+  await expect(page.getByRole('dialog').getByText('Cancelada', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('dialog').getByText('Me equivoqué al cobrar', { exact: true }),
+  ).toBeVisible();
 
   // The queue carries it up: the audit log and the marked ticket in Postgres.
   await expect
@@ -79,5 +83,5 @@ test("the turno's folio opens the real ticket, shares it, and cancels it", async
         }),
       { timeout: 15_000 },
     )
-    .toBe('Cobro duplicado');
+    .toBe('Me equivoqué al cobrar');
 });

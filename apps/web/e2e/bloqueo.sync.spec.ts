@@ -31,11 +31,11 @@ test('two operators alternate on one register without losing the ticket', async 
   await page.getByRole('button', { name: 'Bloquear caja' }).click();
   const dialog = page.getByTestId('caja-bloqueada');
   await expect(dialog).toBeVisible();
-  await expect(page.getByTestId('bloqueo-nota')).toContainText(
-    'El ticket de Ana queda guardado con 2 artículos',
-  );
+  await expect(page.getByTestId('bloqueo-nota')).toContainText('El ticket de Ana quedó guardado');
+  await expect(page.getByTestId('bloqueo-nota')).toContainText('2 piezas');
 
-  // A wrong NIP is refused; Luis's opens it as him.
+  // Someone else comes in: «No soy Ana». A wrong NIP is refused; Luis's opens it as him.
+  await dialog.getByRole('button', { name: 'No soy Ana, cambiar de persona' }).click();
   const luis = page.getByTestId('bloqueo-operador').filter({ hasText: 'Luis Ortega' });
   await luis.click();
   for (const k of '9999') await page.getByTestId(`bloqueo-tecla-${k}`).click();

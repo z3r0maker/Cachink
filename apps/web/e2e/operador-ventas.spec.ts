@@ -33,13 +33,17 @@ test('the turno figures exclude the cancelled sale', async ({ page }) => {
   await expect(page.getByText('$130.00').first()).toBeVisible();
   await expect(page.getByText('Cancelada', { exact: true })).toHaveCount(0);
 
-  await page.getByTitle('Cancelar venta').first().click();
-  const modal = page.getByRole('dialog');
-  await expect(modal.getByRole('button', { name: 'Cancelar la venta' })).toBeDisabled();
-  await modal.getByRole('button', { name: 'Cobro duplicado' }).click();
+  // The row opens the ticket's side panel; cancelling happens from there.
+  await page.getByRole('button', { name: /^Ver venta V-0002/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar venta' }).click();
+  const modal = page.getByRole('alertdialog', { name: '¿Cancelar la venta V-0002?' });
+  await expect(modal.getByRole('button', { name: 'Cancelar venta' })).toBeDisabled();
+  await modal.getByRole('radio', { name: 'Cobré de más' }).click();
   await modal.getByTestId('cancelar-nip').fill('2580');
-  await modal.getByRole('button', { name: 'Cancelar la venta' }).click();
-  await expect(page.getByRole('status')).toContainText('V-0002 cancelada · Cobro duplicado.');
+  await modal.getByRole('button', { name: 'Cancelar venta' }).click();
+  const cajon = page.getByRole('dialog');
+  await expect(cajon.getByRole('status')).toContainText('V-0002 cancelada · Cobré de más.');
+  await cajon.getByRole('button', { name: 'Listo' }).click();
   await expect(page.getByText('Cancelada', { exact: true })).toHaveCount(1);
   await expect(page.getByText('$50.00').first()).toBeVisible();
 });
@@ -50,13 +54,13 @@ test('search and method filters narrow the list', async ({ page }) => {
   await venderEfectivo(page, /Orden del día/, '100');
 
   await page.getByRole('link', { name: 'Ventas' }).click();
-  await page.getByRole('button', { name: 'Efectivo', exact: true }).click();
+  await page.getByRole('radio', { name: 'Efectivo', exact: true }).click();
   await expect(page.getByText('V-0001')).toBeVisible();
-  await page.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await expect(page.getByText('Sin resultados')).toBeVisible();
+  await page.getByRole('radio', { name: 'Fiado', exact: true }).click();
+  await expect(page.getByText('No hay ventas con ese filtro')).toBeVisible();
   await page.getByLabel('Buscar venta').fill('orden');
-  await page.getByRole('button', { name: 'Todos', exact: true }).click();
+  await page.getByRole('radio', { name: 'Todas', exact: true }).click();
   await expect(page.getByText('V-0001')).toBeVisible();
   await page.getByLabel('Buscar venta').fill('nada así');
-  await expect(page.getByText('Sin resultados')).toBeVisible();
+  await expect(page.getByText('No hay ventas con ese filtro')).toBeVisible();
 });

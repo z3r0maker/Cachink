@@ -1,150 +1,107 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
-import { colors, portalFontSizes } from '@xangarro/tokens';
 
-import * as l from '../turno/lists.css';
-import { ModalBotones } from '../ui/botones';
-import { ChoiceChips } from '../ui/choice';
-import * as f from '../ui/field.css';
-import { OpModal } from '../ui/modal';
-import { Note } from '../ui/note';
-import * as u from '../ui/ui.css';
+import { Don } from '@/components/don/don';
+
+import { DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
+import * as m from '../ui/mostrador.css';
+import { Aviso, Motivos, Nip, Nota, type Motivo } from './cancelar-campos';
+import * as c from './cancelar.css';
+import { consecuencia } from './detalle/copy';
 import type { VentaTurno } from './types';
-import * as v from './ventas.css';
 
-export const MOTIVOS = [
-  'Error de captura',
-  'El cliente se arrepintió',
-  'Producto equivocado',
-  'Cobro duplicado',
-] as const;
-export type Motivo = (typeof MOTIVOS)[number];
+export { MOTIVOS, type Motivo } from './cancelar-campos';
 
 /**
- * Cancel a sale of the open turno (rule 6): a reason is required, nothing is
- * deleted. Rendered only while a sale is chosen, so each opening starts clean.
- * Ventas opens it with the sale's summary and a note; Detalle de venta with a
- * sentence, since the ticket is already on screen.
+ * Cancel a sale of the open turno (rule 6, OpCancelarVenta): a reason is
+ * required, a note for the owner is optional, nothing is deleted. Rendered
+ * only while a sale is chosen, so each opening starts clean.
  *
- * Design amendment (O-32, recorded in the plan): a linked register also asks
- * for the operator's NIP — the domain's CancelarTicketUseCase verifies it, and
- * it is the control against cancelling cash sales on an unlocked caja. The
- * fixture path renders the file's dialog unchanged.
+ * Design amendment (O-32): a linked register also asks for the operator's
+ * NIP; the domain's CancelarTicketUseCase verifies it, the control against
+ * cancelling cash sales on an unlocked caja. A refusal stays in the dialog.
  */
 export function CancelarVenta(p: {
-  readonly titulo: string;
-  readonly intro: ReactNode;
-  readonly aviso: string;
-  readonly conNip?: boolean;
-  readonly onClose: () => void;
-  readonly onConfirm: (motivo: Motivo, nip: string, nota: string) => void;
-}) {
-  const [motivo, setMotivo] = useState<Motivo | null>(null);
-  const [nip, setNip] = useState('');
-  const [nota, setNota] = useState('');
-  const nipValido = p.conNip !== true || /^\d{4}$/.test(nip);
-  return (
-    <OpModal
-      open
-      onClose={p.onClose}
-      title={p.titulo}
-      titleSize={portalFontSizes.lgx}
-      width={480}
-      headBg={colors.redSoft}
-    >
-      {p.intro}
-      <ChoiceChips label="Motivo" options={MOTIVOS} value={motivo} onChange={setMotivo} />
-      <NotaOpcional value={nota} onChange={setNota} />
-      {p.conNip ? <CampoNip value={nip} onChange={setNip} /> : null}
-      <Note bg={colors.warningSoft} textColor={colors.ink}>
-        {p.aviso}
-      </Note>
-      <ModalBotones
-        volver="Volver"
-        confirmar="Cancelar la venta"
-        listo={motivo !== null && nipValido}
-        tint={colors.redSoft}
-        onBack={p.onClose}
-        onConfirm={() => motivo && p.onConfirm(motivo, nip, nota)}
-      />
-    </OpModal>
-  );
-}
-
-/** The amendment's field: four digits, the operator signing the cancellation. */
-function CampoNip(p: { readonly value: string; readonly onChange: (v: string) => void }) {
-  return (
-    <div>
-      <label htmlFor="vc-nip" className={f.label}>
-        Tu NIP
-      </label>
-      <input
-        id="vc-nip"
-        type="password"
-        inputMode="numeric"
-        maxLength={4}
-        className={f.text}
-        placeholder="4 dígitos"
-        value={p.value}
-        onChange={(e) => p.onChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-        data-testid="cancelar-nip"
-      />
-    </div>
-  );
-}
-
-/** Ventas' version: the list row does not show the lines, so the modal sums them up. */
-export function CancelarDeLista(p: {
   readonly venta: VentaTurno;
   readonly conNip?: boolean;
   readonly onClose: () => void;
-  readonly onConfirm: (motivo: Motivo, nip: string, nota: string) => void;
+  readonly onConfirm: (motivo: Motivo, nip: string, nota: string) => Promise<string | null>;
+}) {
+  const f = useCancelar(p);
+  const { venta } = p;
+  return (
+    <DialogoMostrador open onClose={p.onClose} width={540} alerta conDon>
+      <div className={c.cuerpo}>
+        <span className={c.don} aria-hidden="true">
+          <Don pose="preocupado" size={104} />
+        </span>
+        <div className={c.titulos}>
+          <DialogoTitulo className={c.titulo}>¿Cancelar la venta {venta.folio}?</DialogoTitulo>
+          <p className={c.resumen}>
+            <span className={c.monto}>{formatMoney(venta.monto)}</span> ·{' '}
+            {venta.concepto.split(' · ').join(', ')} · {venta.metodo.toLowerCase()}
+          </p>
+        </div>
+        <Motivos value={f.motivo} onChange={f.setMotivo} />
+        <Nota value={f.nota} onChange={f.setNota} />
+        {p.conNip ? <Nip value={f.nip} onChange={f.setNip} /> : null}
+        <Aviso texto={consecuencia(venta.metodo, venta.monto, venta.cliente)} />
+        {f.error ? <Aviso texto={f.error} error /> : null}
+        <Pie f={f} onClose={p.onClose} />
+      </div>
+    </DialogoMostrador>
+  );
+}
+
+function Pie({
+  f,
+  onClose,
+}: {
+  readonly f: ReturnType<typeof useCancelar>;
+  readonly onClose: () => void;
 }) {
   return (
-    <CancelarVenta
-      titulo={`Cancelar venta ${p.venta.folio}`}
-      intro={<Resumen venta={p.venta} />}
-      conNip={p.conNip}
-      aviso="La venta queda visible como cancelada con tu nombre. Si fue en efectivo, el monto sale de lo esperado en caja."
-      onClose={p.onClose}
-      onConfirm={p.onConfirm}
-    />
-  );
-}
-
-function Resumen({ venta }: { readonly venta: VentaTurno }) {
-  return (
-    <div className={v.resumen}>
-      <div className={l.name} style={{ letterSpacing: 'normal' }}>
-        {venta.concepto}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 6 }}>
-        <span className={u.eyebrow}>
-          {venta.metodo} · {venta.hora}
-        </span>
-        <span className={v.resumenAmount}>{formatMoney(venta.monto)}</span>
-      </div>
+    <div className={c.pie}>
+      {f.pista ? <span className={c.pista}>{f.pista}</span> : null}
+      <button type="button" className={m.boton.secundario} onClick={onClose}>
+        Mejor no
+      </button>
+      <button
+        type="button"
+        className={m.boton.peligroLleno}
+        disabled={f.pista !== null || f.enviando}
+        onClick={f.confirmar}
+      >
+        {f.enviando ? 'Cancelando…' : 'Cancelar venta'}
+      </button>
     </div>
   );
 }
 
-function NotaOpcional(p: { readonly value: string; readonly onChange: (v: string) => void }) {
-  return (
-    <div>
-      <label htmlFor="vc-nota" className={f.label}>
-        Nota (opcional)
-      </label>
-      <input
-        id="vc-nota"
-        type="text"
-        className={f.text}
-        placeholder="Se cobró de más"
-        value={p.value}
-        onChange={(e) => p.onChange(e.target.value)}
-        data-testid="cancelar-nota"
-      />
-    </div>
-  );
+function useCancelar(p: Parameters<typeof CancelarVenta>[0]) {
+  const [motivo, setMotivo] = useState<Motivo | null>(null);
+  const [nip, setNip] = useState('');
+  const [nota, setNota] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const pista =
+    motivo === null
+      ? 'Elige un motivo para cancelar.'
+      : p.conNip === true && !/^\d{4}$/.test(nip)
+        ? 'Escribe tu NIP para cancelar.'
+        : null;
+  const confirmar = (): void => {
+    if (motivo === null || pista !== null) return;
+    setEnviando(true);
+    setError(null);
+    void p.onConfirm(motivo, nip, nota).then((e) => {
+      setEnviando(false);
+      if (e === null) return;
+      setError(e);
+      setNip('');
+    });
+  };
+  return { motivo, setMotivo, nip, setNip, nota, setNota, error, enviando, pista, confirmar };
 }

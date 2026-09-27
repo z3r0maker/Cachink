@@ -134,21 +134,3 @@ function TicketVacio() {
     </div>
   );
 }
-
-/** Narrow band: the yellow bar that opens the sheet. */
-export function TicketBar({ caja }: { readonly caja: Caja }) {
-  const show = caja.count > 0 && !caja.sheetOpen;
-  return (
-    <button
-      type="button"
-      className={f.bar}
-      data-show={show ? '' : undefined}
-      data-onyellow=""
-      onClick={() => caja.setSheetOpen(true)}
-    >
-      <span className={f.barCount}>{caja.count}</span>
-      <span className={f.barLabel}>Cobrar</span>
-      <span className={f.barTotal}>{formatMoney(caja.total)}</span>
-    </button>
-  );
-}

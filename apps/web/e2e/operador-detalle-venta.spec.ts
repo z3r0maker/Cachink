@@ -30,31 +30,34 @@ test('a ticket from the list shows its lines, cash received and change', async (
   await page.goto('/operador/caja');
   await venderEfectivo(page, /Quesadilla/, '100');
   await page.getByRole('link', { name: 'Ventas' }).click();
-  await page.getByTitle('Ver el ticket').first().click();
-  await expect(page).toHaveURL(/\/operador\/ventas\/V-0001$/);
-  await expect(page.getByText('Venta V-0001')).toBeVisible();
-  await expect(page.getByText('Quesadilla')).toBeVisible();
-  await expect(page.getByText('Recibido en efectivo')).toBeVisible();
-  await expect(page.getByText('$20.00')).toBeVisible();
-  await expect(page.getByText('Venta registrada y enviada')).toBeVisible();
+  // The row opens the ticket in a side panel over the list (OpVentas).
+  await page.getByRole('button', { name: /^Ver venta V-0001/ }).click();
+  const cajon = page.getByRole('dialog');
+  await expect(cajon.getByText('Venta · V-0001')).toBeVisible();
+  await expect(cajon.getByText('Quesadilla')).toBeVisible();
+  await expect(cajon.getByText('Recibiste')).toBeVisible();
+  await expect(cajon.getByText('$20.00')).toBeVisible();
+  await expect(cajon.getByText('Enviada', { exact: true })).toBeVisible();
 });
 
 test('cancelling needs the NIP and a reason, and never deletes it', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/caja');
   await venderEfectivo(page, /Quesadilla/, '100');
+  // The folio's route opens the list with that ticket's side panel.
   await page.goto('/operador/ventas/V-0001');
-  await page.getByRole('button', { name: 'Cancelar venta' }).click();
-  const modal = page.getByRole('dialog', { name: 'Cancelar V-0001' });
-  await expect(modal.getByRole('button', { name: 'Cancelar la venta' })).toBeDisabled();
-  await modal.getByRole('button', { name: 'Producto equivocado' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar venta' }).click();
+  const modal = page.getByRole('alertdialog', { name: '¿Cancelar la venta V-0001?' });
+  await expect(modal.getByRole('button', { name: 'Cancelar venta' })).toBeDisabled();
+  await modal.getByRole('radio', { name: 'Me equivoqué al cobrar' }).click();
   await modal.getByTestId('cancelar-nip').fill('2580');
-  await modal.getByRole('button', { name: 'Cancelar la venta' }).click();
+  await modal.getByRole('button', { name: 'Cancelar venta' }).click();
 
-  await expect(page.getByText('Venta cancelada')).toBeVisible();
-  await expect(page.getByText('Producto equivocado')).toBeVisible();
-  await expect(page.getByText('Sí, con su cancelación')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Cancelar venta' })).toBeDisabled();
+  const cajon = page.getByRole('dialog');
+  await expect(cajon.getByText('Cancelada', { exact: true })).toBeVisible();
+  await expect(cajon.getByText('Me equivoqué al cobrar', { exact: true })).toBeVisible();
+  await expect(cajon.getByRole('button', { name: 'Cancelar venta' })).toHaveCount(0);
+  await expect(cajon.getByRole('button', { name: 'Listo' })).toBeVisible();
 });
 
 test('a fiado ticket shows the client, and cancelling explains the saldo a favor', async ({
@@ -66,35 +69,39 @@ test('a fiado ticket shows the client, and cancelling explains the saldo a favor
   await page.goto('/operador/caja');
   await fiar(page, /Orden del detalle/, /Doña Mari de la tienda/);
   await page.goto('/operador/ventas/V-0001');
-  await expect(page.getByText('Esta venta quedó fiada')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Recibir un abono' })).toHaveAttribute(
+  const cajon = page.getByRole('dialog');
+  await expect(cajon).toContainText('Esta venta se fue a la cuenta de Doña Mari de la tienda');
+  await expect(cajon.getByRole('link', { name: 'Recibir un abono' })).toHaveAttribute(
     'href',
     '/operador/cobranza',
   );
-  await page.getByRole('button', { name: 'Cancelar venta' }).click();
-  await expect(page.getByRole('dialog')).toContainText(
+  await cajon.getByRole('button', { name: 'Cancelar venta' }).click();
+  await expect(page.getByRole('alertdialog')).toContainText(
     'el saldo de Doña Mari de la tienda baja $120.00',
   );
-  await expect(page.getByRole('dialog')).toContainText('saldo a favor');
+  await expect(page.getByRole('alertdialog')).toContainText('saldo a favor');
 });
 
-test('sharing by WhatsApp waits for a ten-digit phone', async ({ page }) => {
+test('sharing by WhatsApp takes no number or a whole ten-digit one', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/caja');
   await venderEfectivo(page, /Quesadilla/, '100');
   await page.goto('/operador/ventas/V-0001');
-  await page.getByRole('button', { name: 'Compartir comprobante' }).click();
-  const modal = page.getByRole('dialog', { name: 'Compartir V-0001' });
+  await page.getByRole('dialog').getByRole('button', { name: 'Mandar comprobante' }).click();
+  const modal = page.getByRole('dialog', { name: 'Mandar comprobante · V-0001' });
   const wa = modal.getByRole('button', { name: /Enviar por WhatsApp/ });
+  // Empty: WhatsApp opens and asks for the contact.
+  await expect(wa).toBeEnabled();
+  await modal.getByLabel(/Número del cliente/).fill('55 12');
   await expect(wa).toBeDisabled();
-  await modal.getByLabel('Teléfono del cliente').fill('55 1234 5678');
+  await modal.getByLabel(/Número del cliente/).fill('55 1234 5678');
   await expect(wa).toBeEnabled();
 });
 
 test('a folio that is not in the turno says so and points back to the list', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/ventas/V-9999');
-  await expect(page.getByText('Esta venta ya no existe')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Esta venta ya no existe')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ver mis ventas' })).toHaveAttribute(
     'href',
     '/operador/ventas',

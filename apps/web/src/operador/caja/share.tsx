@@ -1,23 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { colors, portalFontSizes } from '@xangarro/tokens';
+import { formatMoney } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
-import * as l from '../turno/lists.css';
-import { OpModal } from '../ui/modal';
-import * as u from '../ui/ui.css';
-import * as e from './efectivo.css';
+import { DialogoCerrar, DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
+import * as m from '../ui/mostrador.css';
 import { leerTelefono, type Comprobante } from './receipt';
-import * as s from './share.css';
-import { opciones, VARIANTS, type Opcion, type ShareVariant, type Variant } from './share-options';
-import { Preview } from './preview';
+import * as s from './share-dialogo.css';
+import { Lado } from './share-lado';
+import type { ShareVariant } from './share-options';
+import { Recibo } from './share-recibo';
 
 const CHECK = 'M20 6 9 17l-5-5';
 
 /**
- * Compartir comprobante. WhatsApp opens a `wa.me` text receipt (no API, Track N
- * row 13); «Guardar imagen» and «Copiar texto» work on this device.
+ * «Mandar comprobante» (OpComprobante): the receipt as the customer gets it,
+ * beside WhatsApp (a `wa.me` link, no API: Track N row 13), «Guardar imagen»
+ * and «Copiar texto». There is no printing. After a sale (`caja`) it also
+ * says what was charged and closes into the next sale.
  */
 export function Share({
   comprobante,
@@ -28,96 +29,79 @@ export function Share({
   readonly comprobante: Comprobante | null;
   readonly onClose: () => void;
   readonly variant?: ShareVariant;
-  /** The cliente this venta went to — their phone is the one remembered. */
+  /** The cliente this venta went to: their phone is the one remembered. */
   readonly cliente?: string;
 }) {
   const [tel, setTel] = useState(() => (comprobante === null ? '' : leerTelefono(cliente)));
-  const [sent, setSent] = useState<string | null>(null);
+  const [hecho, setHecho] = useState<string | null>(null);
   if (!comprobante) return null;
-  const v = VARIANTS[variant];
   return (
-    <OpModal
-      open
-      onClose={onClose}
-      title={v.title(comprobante.folio)}
-      titleSize={portalFontSizes.lg}
-      width={v.width}
-      headBg={colors.yellow}
-      bodyGap={v.gap}
-    >
-      {v.preview ? <Preview c={comprobante} /> : null}
-      <Telefono tel={tel} setTel={setTel} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {opciones(comprobante, tel, cliente).map((o) => (
-          <OpcionButton key={o.label} o={o} v={v} onDone={setSent} />
-        ))}
+    <DialogoMostrador open onClose={onClose} width={900}>
+      <Cabeza c={comprobante} variant={variant} />
+      <div className={s.cuerpo}>
+        <section aria-labelledby="sh-muestra" className={s.muestra}>
+          <span id="sh-muestra" className={m.eyebrow}>
+            Así le llega al cliente
+          </span>
+          <Recibo c={comprobante} cliente={cliente} />
+        </section>
+        <Lado
+          c={comprobante}
+          cliente={cliente}
+          tel={tel}
+          setTel={setTel}
+          hecho={hecho}
+          onHecho={setHecho}
+        />
       </div>
-      {sent ? <Hecho text={sent} /> : null}
-    </OpModal>
+      <Pie variant={variant} onClose={onClose} />
+    </DialogoMostrador>
   );
 }
 
-function OpcionButton({
-  o,
-  v,
-  onDone,
+function Pie({
+  variant,
+  onClose,
 }: {
-  readonly o: Opcion;
-  readonly v: Variant;
-  readonly onDone: (text: string) => void;
+  readonly variant: ShareVariant;
+  readonly onClose: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className={s.option}
-      style={{ background: o.bg, minHeight: v.option }}
-      disabled={o.disabled}
-      onClick={() => void Promise.resolve(o.run()).then(onDone)}
-    >
-      <span
-        className={u.tintBox}
-        style={{ width: v.tile, height: v.tile, background: colors.white }}
-      >
-        <Icon path={o.icon} size={v.icon} strokeWidth={2.3} />
+    <div className={s.pie}>
+      <span className={s.pieNota}>
+        {variant === 'caja'
+          ? 'La venta ya quedó guardada en la caja.'
+          : 'Puedes mandarlo las veces que quieras.'}
       </span>
-      <span style={{ minWidth: 0 }}>
-        <span className={l.name} style={{ display: 'block', letterSpacing: v.labelSpacing }}>
-          {o.label}
-        </span>
-        <span className={s.optionHint}>{o.hint}</span>
-      </span>
-    </button>
-  );
-}
-
-function Hecho({ text }: { readonly text: string }) {
-  return (
-    <div className={s.sent}>
-      <span style={{ color: colors.greenText, display: 'grid' }}>
-        <Icon path={CHECK} size={20} strokeWidth={2.7} />
-      </span>
-      <div className={s.lineText} style={{ fontSize: portalFontSizes.md }}>
-        {text}
-      </div>
+      <button type="button" className={`${m.boton.primario} ${s.listo}`} onClick={onClose}>
+        {variant === 'caja' ? 'Listo, siguiente venta' : 'Listo'}
+      </button>
     </div>
   );
 }
 
-function Telefono({ tel, setTel }: { readonly tel: string; readonly setTel: (t: string) => void }) {
+/** After a sale: the green check and what was charged; from Ventas: the sale's method. */
+function Cabeza({ c, variant }: { readonly c: Comprobante; readonly variant: ShareVariant }) {
+  const { venta } = c;
+  const cambio = venta.cambio === null ? '' : ` · Cambio ${formatMoney(venta.cambio)}`;
   return (
-    <div>
-      <label htmlFor="sh-tel" className={e.label}>
-        Teléfono del cliente
-      </label>
-      <input
-        id="sh-tel"
-        className={s.tel}
-        type="tel"
-        inputMode="tel"
-        placeholder="55 1234 5678"
-        value={tel}
-        onChange={(ev) => setTel(ev.target.value.replace(/[^0-9 ]/g, ''))}
-      />
+    <div className={s.cabeza}>
+      {variant === 'caja' ? (
+        <span className={s.check} aria-hidden="true">
+          <Icon path={CHECK} size={22} strokeWidth={3} />
+        </span>
+      ) : null}
+      <span className={s.titulos}>
+        <span className={`${m.eyebrow} ${variant === 'caja' ? s.verde : ''}`}>
+          {variant === 'caja'
+            ? `¡Listo! Cobraste ${formatMoney(venta.total)}${cambio}`
+            : `Venta · ${venta.metodo}`}
+        </span>
+        <DialogoTitulo className={s.titulo}>Mandar comprobante · {c.folio}</DialogoTitulo>
+      </span>
+      <span className={s.cerrar}>
+        <DialogoCerrar label="Cerrar" />
+      </span>
     </div>
   );
 }
