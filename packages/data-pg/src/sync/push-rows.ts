@@ -19,7 +19,7 @@ import { SYNCED_TABLES } from './tables.js';
  *   insert-only row just comes back unwritten and unseen: `invisible`.
  *
  * All rows or none: a failed statement throws, and the caller runs this inside
- * a savepoint. The ids must be distinct — Postgres refuses to upsert a row twice
+ * a savepoint (a write past the parameter budget is several statements in it). The ids must be distinct — Postgres refuses to upsert a row twice
  * in one command.
  */
 export type RowWrite = 'written' | 'kept' | 'invisible';
@@ -51,17 +51,36 @@ export async function existingIds(
   return new Set(rows.map((r) => String(r.id)));
 }
 
+/**
+ * Bind parameters one statement may carry: Postgres's limit is 65,535. The
+ * widest push today is about 14,000 (caja_turnos × 500), so this only bites if
+ * the push limit ever rises (audit DB3-L-07).
+ */
+export const PARAM_BUDGET = 65_000;
+
+/** `rows` cut so no statement binds more than `budget` parameters at `columns` a row. */
+export function chunkByParams<T>(rows: readonly T[], columns: number, budget: number): T[][] {
+  const size = Math.max(1, Math.floor(budget / Math.max(1, columns)));
+  const out: T[][] = [];
+  for (let i = 0; i < rows.length; i += size) out.push(rows.slice(i, i + size));
+  return out;
+}
+
 export async function writeSyncedRows(
   tx: Tx,
   table: PushableTable,
   rows: readonly Row[],
   insertOnly: boolean,
+  paramBudget = PARAM_BUDGET,
 ): Promise<RowWrite[]> {
   const t = tableOf(table);
+  const columns = Object.keys(getTableColumns(t)).length;
   const written = new Set<string>();
   for (const group of byShape(rows)) {
-    const ids = insertOnly ? await insertNew(tx, t, group) : await upsertNewer(tx, t, group);
-    for (const id of ids) written.add(id);
+    for (const chunk of chunkByParams(group, columns, paramBudget)) {
+      const ids = insertOnly ? await insertNew(tx, t, chunk) : await upsertNewer(tx, t, chunk);
+      for (const id of ids) written.add(id);
+    }
   }
   const unwritten = rows.map(idOf).filter((id) => !written.has(id));
   const visible = await existingIds(tx, table, unwritten);
