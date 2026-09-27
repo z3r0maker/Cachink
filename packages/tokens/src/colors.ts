@@ -22,11 +22,14 @@ export const colors = {
   white: '#FFFFFF',
 
   // Surfaces
-  offwhite: '#F7F7F5', // App background
+  offwhite: '#F7F7F5', // Soft fill inside a panel; NOT the page background
   gray100: '#F2F2F0',
+  // The page background of every surface (El Mostrador, ADR-109), and the
+  // quiet panel edge (`borders.quiet`). Muted text on it is gray600: textMuted
+  // is only 3.96:1 here and fails AA.
   gray200: '#E4E4E0',
   gray400: '#9E9E9A', // Fills, dividers, chart series — NOT text (see textMuted)
-  gray600: '#5A5A56', // Label text
+  gray600: '#5A5A56', // Label text; the muted text on the gray200 page (5.43:1)
 
   // Semantic — surfaces and fills. These are chosen for presence on a
   // background; they are NOT legible as text. Use the *Text pair below
@@ -45,15 +48,17 @@ export const colors = {
    *
    * Every value here clears WCAG AA (4.5:1) against *all four* grounds it can
    * land on — white, offwhite, gray100, and its own `*Soft` background — so a
-   * caller never has to know which surface it sits on. Each was derived by
-   * holding the original token's hue and saturation and darkening only until
-   * the worst-case ground passed; that keeps the palette recognisably the
-   * same while making it readable.
+   * caller never has to know which panel it sits on. The gray200 page is NOT
+   * one of those grounds: every token here falls to 3.96–4.20:1 on it, so text
+   * set directly on the page is gray600 or ink. Each was derived by holding
+   * the original token's hue and saturation and darkening only until the
+   * worst-case ground passed; that keeps the palette recognisably the same
+   * while making it readable.
    *
    * `tests/theme.test.ts` recomputes these ratios on every run. Do not
    * hand-edit a value here without letting that test re-verify it.
    */
-  textMuted: '#6F6F6B', // replaces gray400 for secondary text — 4.50:1 worst case
+  textMuted: '#6F6F6B', // secondary text on panels, 4.50:1 worst case; fails on gray200
   greenText: '#007E5E', // 4.52:1 worst case
   redText: '#DA0013', // 4.51:1 worst case
   blueText: '#1D59FF', // 4.53:1 worst case

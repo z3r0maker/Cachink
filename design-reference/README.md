@@ -1,7 +1,15 @@
 # design-reference/ — read-only
 
-A mirror of the Claude Design project `5dd266f3-42e7-403f-b941-95c8e6551dc6` (ADR-058). The
-`.dc.html` files are the **specification**; code that disagrees with them is wrong.
+A mirror of the Claude Design project `5dd266f3-42e7-403f-b941-95c8e6551dc6` (ADR-058): the
+**Concha** look the portal and the caja were first built from. It is kept for history and for the
+screens not yet redesigned; it is **no longer the specification**.
+
+**The spec is the canvas (ADR-109).** The El Mostrador boards on the design canvas
+(https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt), approved by the owner board by board, are the
+specification for every surface. Code translates them into `@xangarro/tokens` and the shared
+components, following [`docs/design/el-mostrador.md`](../docs/design/el-mostrador.md). Where a
+board and a file here disagree, the board wins; where code and an approved board disagree, the
+code is wrong. Example names and amounts on a board or a `.dc.html` never reach a live screen.
 
 - **Never hand-edit anything here.** A visual change lands in the design project first, then is
   pulled.
