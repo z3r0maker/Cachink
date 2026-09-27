@@ -6,6 +6,7 @@ import { formatMoney } from '@xangarro/domain';
 import { Icon } from '../../shell/icon';
 import { DialogoCerrar, DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
 import * as m from '../ui/mostrador.css';
+import { conMarca, useMarcaDelNegocio } from './marca';
 import { leerTelefono, type Comprobante } from './receipt';
 import * as s from './share-dialogo.css';
 import { Lado } from './share-lado';
@@ -34,7 +35,33 @@ export function Share({
 }) {
   const [tel, setTel] = useState(() => (comprobante === null ? '' : leerTelefono(cliente)));
   const [hecho, setHecho] = useState<string | null>(null);
+  const marca = useMarcaDelNegocio();
   if (!comprobante) return null;
+  return (
+    <Dialogo
+      c={conMarca(comprobante, marca)}
+      onClose={onClose}
+      variant={variant}
+      cliente={cliente}
+      tel={tel}
+      setTel={setTel}
+      hecho={hecho}
+      setHecho={setHecho}
+    />
+  );
+}
+
+function Dialogo(p: {
+  readonly c: Comprobante;
+  readonly onClose: () => void;
+  readonly variant: ShareVariant;
+  readonly cliente?: string;
+  readonly tel: string;
+  readonly setTel: (t: string) => void;
+  readonly hecho: string | null;
+  readonly setHecho: (h: string | null) => void;
+}) {
+  const { c: comprobante, onClose, variant, cliente, tel, setTel, hecho, setHecho } = p;
   return (
     <DialogoMostrador open onClose={onClose} width={900}>
       <Cabeza c={comprobante} variant={variant} />

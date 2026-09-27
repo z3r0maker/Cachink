@@ -3,16 +3,19 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
+import { initials } from '../../shell/initials';
 import {
   fechaLarga,
-  GRACIAS,
   HECHO_CON,
   horaDe,
   importeTexto,
+  leyendaDe,
+  NO_FISCAL,
   pagoFilas,
   piezas,
   type Comprobante,
 } from './receipt';
+import * as k from './share-marca.css';
 import * as r from './share-recibo.css';
 
 /** Xangarro's mark (the X of the coin), as the board draws it. */
@@ -38,14 +41,7 @@ export function Recibo({ c, cliente }: { readonly c: Comprobante; readonly clien
         <polygon points={DIENTES} />
       </svg>
       <div className={r.hoja}>
-        <div className={r.banda}>
-          <span className={r.moneda}>
-            <svg viewBox="281 271 460 460" width={16} height={16} aria-hidden="true">
-              <path d={X} fill={colors.yellow} />
-            </svg>
-          </span>
-          <span className={r.negocio}>{c.negocio}</span>
-        </div>
+        <Banda c={c} />
         <Cuerpo c={c} total={total} cliente={cliente} />
       </div>
       <svg aria-hidden="true" viewBox="0 0 340 8" preserveAspectRatio="none" className={r.borde}>
@@ -65,7 +61,7 @@ function Cuerpo(p: { readonly c: Comprobante; readonly total: string; readonly c
       {c.caja ? <Fila k="Caja" v={c.caja} /> : null}
       <div className={r.corte} />
       {c.venta.lines.map((l) => (
-        <Fila key={l.productoId} k={`${l.cantidad} x ${l.nombre}`} v={importeTexto(l)} fuerte />
+        <Linea key={l.productoId} l={l} />
       ))}
       <div className={r.corte} />
       <Fila k="Artículos" v={String(piezas(c))} />
@@ -77,7 +73,7 @@ function Cuerpo(p: { readonly c: Comprobante; readonly total: string; readonly c
         <Fila key={k} k={k} v={v} />
       ))}
       <div className={r.corte} />
-      <span className={r.centro}>{GRACIAS}</span>
+      <Pie c={c} />
       <div className={r.corte} />
       <span className={`${r.centro} ${r.marca}`}>
         <span className={r.monedita}>
@@ -87,6 +83,44 @@ function Cuerpo(p: { readonly c: Comprobante; readonly total: string; readonly c
         </span>
         {HECHO_CON}
       </span>
+    </div>
+  );
+}
+
+/** The business on top: its logo (or initials) and, if the owner chose, its address. */
+function Banda({ c }: { readonly c: Comprobante }) {
+  const logo = c.marca?.logoUrl;
+  return (
+    <div className={r.banda}>
+      <span className={k.logo}>
+        {logo ? <img src={logo} alt="" className={k.logoImg} /> : initials(c.negocio)}
+      </span>
+      <span className={k.nombreBloque}>
+        <span className={r.negocio}>{c.negocio}</span>
+        {c.marca?.direccion ? <span className={k.direccion}>{c.marca.direccion}</span> : null}
+      </span>
+    </div>
+  );
+}
+
+function Linea({ l }: { readonly l: Comprobante['venta']['lines'][number] }) {
+  return (
+    <>
+      <Fila k={`${l.cantidad} x ${l.nombre}`} v={importeTexto(l)} fuerte />
+      {l.cantidad > 1 && l.precio > 0n ? (
+        <span className={k.unidad}>{formatMoney(l.precio)} c/u</span>
+      ) : null}
+    </>
+  );
+}
+
+/** The owner's leyenda (or the thank-you), their WhatsApp, and the fiscal note. */
+function Pie({ c }: { readonly c: Comprobante }) {
+  return (
+    <div className={k.pie}>
+      <span className={k.leyenda}>{leyendaDe(c)}</span>
+      {c.marca?.whatsapp ? <span className={k.whatsapp}>WhatsApp {c.marca.whatsapp}</span> : null}
+      <span className={k.fiscal}>{NO_FISCAL}</span>
     </div>
   );
 }

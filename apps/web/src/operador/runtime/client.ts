@@ -33,6 +33,7 @@ import type {
   TicketVivo,
   VentasTurno,
 } from './calls';
+import type { MarcaDelNegocio } from './negocio';
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -119,6 +120,11 @@ export class RegisterRuntime {
 
   turnoAbierto(businessId: string, deviceId: string): Promise<SesionAbierta | null> {
     return this.#call(calls.turnoAbierto(businessId, deviceId));
+  }
+
+  /** The business as its receipts print it (Mi negocio › Comprobantes). */
+  negocio(businessId: string, deviceId: string): Promise<MarcaDelNegocio | null> {
+    return this.#call(calls.negocio(businessId, deviceId));
   }
 
   productos(businessId: string, deviceId: string): Promise<readonly ProductoPara[]> {
