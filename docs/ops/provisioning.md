@@ -121,8 +121,8 @@ What it does, in order (`packages/data-pg/scripts/migrate-hosted.ts`):
    that file back and stops. An applied file whose bytes changed, or that
    disappeared, is a hard error: never edit an applied migration, add one.
    So is a pending file that sorts below one already applied in its set:
-   renumber it above (ADR-117).
-   A file whose first line is `-- xangarro:no-transaction` (ADR-117) runs
+   renumber it above (ADR-118).
+   A file whose first line is `-- xangarro:no-transaction` (ADR-118) runs
    statement by statement instead, so it can `CREATE INDEX CONCURRENTLY`
    without blocking writes; its ledger row is written after the last
    statement. If one fails, the ones before it stay applied and the next run

@@ -16,7 +16,7 @@ const DERECHA = 'm9 18 6-6-6-6';
 
 /**
  * «Tienes 3 registros por enviar (1 se reintentará solo).» — a warning, not a
- * block (DS-06 (a), ADR-121): the close stays enabled; a retry and the way to
+ * block (DS-06 (a), ADR-122): the close stays enabled; a retry and the way to
  * see which stay at hand.
  */
 export function Banda({ x }: { readonly x: Cierre }) {

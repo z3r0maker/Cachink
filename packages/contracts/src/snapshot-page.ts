@@ -1,5 +1,5 @@
 /**
- * How a snapshot page is filled (C-23, ADR-119) — one implementation for the
+ * How a snapshot page is filled (C-23, ADR-120) — one implementation for the
  * portal and the mock, so both cut pages by the same rules. Reading is the
  * caller's: `read(section, after, limit)` returns up to `limit` live rows of
  * a section with keys greater than `after`, in key order. No IO here.

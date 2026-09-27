@@ -35,7 +35,7 @@ describe('cierre de turno', () => {
     assert.equal(cerrarLabel({ tipo: 'sobra', monto: 5n }), 'Cerrar turno con sobrante de $0.05');
   });
 
-  it('lets the turno close with records to send, and says how many retry by themselves (ADR-121)', () => {
+  it('lets the turno close with records to send, and says how many retry by themselves (ADR-122)', () => {
     assert.equal(bandaTitulo(3, 2), 'Tienes 3 registros por enviar (2 se reintentarán solos).');
     assert.equal(bandaTitulo(1, 1), 'Tienes 1 registro por enviar (1 se reintentará solo).');
     assert.equal(bandaTitulo(4, 0), 'Tienes 4 registros por enviar.');

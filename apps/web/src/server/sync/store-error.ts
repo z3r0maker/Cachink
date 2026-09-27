@@ -4,7 +4,7 @@ import { ForeignRowError, RowRefusedError, TransientWriteError } from '@xangarro
 import type { Delta, PushableTable } from '@xangarro/contracts';
 
 /**
- * A failed push write, as the use case understands it (ADR-118).
+ * A failed push write, as the use case understands it (ADR-119).
  *
  * - **42501** — RLS refused an upsert because an id belongs to another business
  *   (audit DB-SYNC-05). It is the signal, not a crash: `ForeignRowError`, and

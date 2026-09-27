@@ -37,7 +37,7 @@ import { storeError } from './store-error';
 /**
  * `PushStore` over Postgres, for one device inside one tenant transaction.
  * The rules are `ApplyPushUseCase`'s; this only stores what it decides, a
- * batch per statement (ADR-118).
+ * batch per statement (ADR-119).
  */
 const HYBRID: ReadonlySet<string> = new Set(HYBRID_TABLES);
 

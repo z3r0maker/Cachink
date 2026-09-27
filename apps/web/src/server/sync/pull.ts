@@ -21,7 +21,7 @@ import { changesSince } from './changes';
  * `GET /sync/pull` (B-09; contract §5).
  *
  * Three reads, one shape. `?snapshot=` is a page of the snapshot bootstrap
- * (C-23, ADR-119). `since=0` without it is the legacy full bootstrap an older
+ * (C-23, ADR-120). `since=0` without it is the legacy full bootstrap an older
  * device asks for, refused with 426 once the tenant outgrows one body.
  * Anything else is the change stream after `since`.
  *

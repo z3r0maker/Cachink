@@ -156,11 +156,11 @@ Links to discussion, docs, prior art.
 | [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
-| [117](#adr-117) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [118](#adr-118) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
-| [119](#adr-119) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
-| [120](#adr-120) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
-| [121](#adr-121) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [118](#adr-118) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [119](#adr-119) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [120](#adr-120) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
+| [121](#adr-121) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
+| [122](#adr-122) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8237,7 +8237,7 @@ number.
   work. CI's `portal-e2e` job seeds fresh and is a required check, so that is
   where it is proven.
 
-## ADR-117
+## ADR-118
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -8331,7 +8331,7 @@ statement never under a long or zero timeout, and `REINDEX` only
 `db-local.sh` applies each transactional file in one transaction, as hosted
 does. data-pg 0045–0048 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
-## ADR-118
+## ADR-119
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 
@@ -8453,7 +8453,7 @@ on evidence — a 413 alone, or the server accepting another part of the same
 batch; a lone row and its lone neighbour both refused with nothing accepted is
 the server refusing everything alike, and nothing is marked. (3) Network,
 timeout, 429, 503 and anything carrying `Retry-After` never split: they keep
-the engine's backoff (ADR-120 sheds load with 503). (4) The cursor advances
+the engine's backoff (ADR-121 sheds load with 503). (4) The cursor advances
 only over change-log entries whose rows were answered or refused, so a
 halving cut short never skips an unsent row; accepted rows past the cursor
 are resent and answered from their receipts. (5) `@xangarro/contracts` gains
@@ -8468,7 +8468,7 @@ instead of the whole push. (6) `writeSyncedRows` cuts a write at
 `floor(65,000 / columns)` rows a statement (DB3-L-07); one statement for any
 push the contract allows today.
 
-## ADR-119
+## ADR-120
 
 **Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history
 
@@ -8583,7 +8583,7 @@ autocommitting statement at a time.
   asynchronous driver would need a device-wide write queue first.
 - Not done here: DB3-L-01 (a device re-downloading its own movements). It is
   independent of the bootstrap.
-## ADR-120
+## ADR-121
 
 **Title:** Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued
 
@@ -8689,7 +8689,7 @@ in-flight functions.
 
 ---
 
-## ADR-121
+## ADR-122
 
 **Title:** The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle
 

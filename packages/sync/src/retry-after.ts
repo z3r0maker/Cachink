@@ -1,6 +1,6 @@
 /**
  * `Retry-After` (RFC 9110 §10.2.3): delay-seconds or an HTTP-date. The
- * server sends it with 429 (`rateLimited`, B-17) and with 503 (ADR-120); the
+ * server sends it with 429 (`rateLimited`, B-17) and with 503 (ADR-121); the
  * engine backs off by it (DB2-DEV-02). Unparseable → undefined.
  *
  * An HTTP-date is a moment on the server's clock, so it is measured against

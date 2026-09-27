@@ -1,5 +1,5 @@
 /**
- * When an idle caja pulls (DB3-CAJA-03, ADR-121 §3). Without a capture the
+ * When an idle caja pulls (DB3-CAJA-03, ADR-122 §3). Without a capture the
  * register used to pull never: a new price, a catalogue change, an operator's
  * new NIP or deactivation (NIPs are checked on the device) reached it only
  * with the next sale. Now it also pulls

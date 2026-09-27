@@ -1,5 +1,5 @@
 /**
- * One pulled page, applied atomically (audit DB3-BOOT-01, ADR-119).
+ * One pulled page, applied atomically (audit DB3-BOOT-01, ADR-120).
  *
  * The rows, a snapshot's baseline and the cursors that record how far the
  * device got commit together or not at all: a page that fails halfway leaves

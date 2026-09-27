@@ -55,7 +55,7 @@ export const BUSY_RETRY_AFTER_S = 15;
  * 503 + `Retry-After`: the server is up but could not serve this request in
  * time. `INTERNAL` is the catalog's retryable server-side code, answered with
  * 503 instead of its 500 so the status says «busy», not «broken», and
- * nothing was written — the transaction rolled back (ADR-120).
+ * nothing was written — the transaction rolled back (ADR-121).
  */
 export function serviceBusy(retryAfter: number = BUSY_RETRY_AFTER_S): Response {
   const response = fail('INTERNAL', 'El servidor está ocupado. Reintenta en unos segundos.', 503);

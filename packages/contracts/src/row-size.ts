@@ -17,7 +17,7 @@ export const MAX_PUSH_ROW_BYTES = 16_384;
 /**
  * Rows whose payload is a list by design: an inventory count carries a line
  * per product (about 200 B each), a credit delivery the ids of the sales it
- * settles. Below the 1.9 MB snapshot page (ADR-119), so one row always fits.
+ * settles. Below the 1.9 MB snapshot page (ADR-120), so one row always fits.
  */
 const BY_TABLE: Readonly<Partial<Record<PushableTable, number>>> = {
   auditorias_inventario: 1_048_576,

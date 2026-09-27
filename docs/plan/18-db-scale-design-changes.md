@@ -18,7 +18,7 @@ decisions** first: they change the copy of DS-01 and DS-06.
    Rows in automatic retry, and sales captured offline and never attempted, do not block it. Should
    cierre (a) stay open and say the rows will be sent later, which keeps the register offline-first,
    or (b) block until everything is sent, which means an offline register cannot close?
-   **Recommendation: (a).** **Answered 2026-09-26: (a)** — recorded in ADR-121.
+   **Recommendation: (a).** **Answered 2026-09-26: (a)** — recorded in ADR-122.
 2. **Search scope in Ventas y gastos (DS-01).** The placeholder promises «concepto, folio u
    operador», but search has only ever matched the concepto. Should folio and operador become
    searchable (a small server change), or should the copy shrink to «Buscar por concepto»?
@@ -114,7 +114,7 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-06 Cierre — rows still to send
 
-- [ ] Status · Owner decision 1 answered: (a) (ADR-121). Minimal version shipped (DB3-CAJA-02): the
+- [ ] Status · Owner decision 1 answered: (a) (ADR-122). Minimal version shipped (DB3-CAJA-02): the
       amber band with the copy below, «Reintentar envío» and «Ver cuáles» kept, the close enabled;
       the blocked design's «Puede cambiar» chip, its «Espera a que se envíen…» hint and the
       «la diferencia se vuelve a calcular» line are gone. The closed screen says «Pedro lo verá en su
@@ -141,7 +141,7 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ### DS-08 Caja — already open in another tab
 
-- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-121): Acceso's frame
+- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-122): Acceso's frame
       (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
       («Esperando a que se cierre la otra pestaña…»). No «Cerrar esta pestaña» link: a script can
       only close a tab it opened. Still to do: send the block below; pull; align.
@@ -169,7 +169,7 @@ memory. The range is capped at 13 months.
 ### DS-10 Linking a big business — the first download comes in pages
 
 - [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
-      caja» and the phone's activation (audit DB3-BOOT-01, ADR-119).
+      caja» and the phone's activation (audit DB3-BOOT-01, ADR-120).
 
 **Why.** Linking used to download the business's whole movement history in one response, which
 stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at

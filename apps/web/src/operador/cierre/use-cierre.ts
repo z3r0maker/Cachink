@@ -25,7 +25,7 @@ export interface CerrarVivo {
 
 /**
  * The count, the explanation and the close. Records still to send do not
- * block it (ADR-121, DS-06 (a)): the expected cash is this caja's own rows,
+ * block it (ADR-122, DS-06 (a)): the expected cash is this caja's own rows,
  * and the queue goes up by itself. With a difference, closing waits for a
  * reason (and, for «Otra razón», a note). The count is in centavos end to
  * end: each piece times its denomination's value.
