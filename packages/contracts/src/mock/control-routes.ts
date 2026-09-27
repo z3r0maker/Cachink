@@ -12,6 +12,8 @@
  *   POST /__mock/scenario {scenario, transactionsPerMonth?} default scenario for
  *                                  requests without the header, and an
  *                                  optional record-limit override (A-10)
+ *   POST /__mock/snapshot-budget {rows, bytes?} a smaller snapshot page, so a
+ *                                  small fixture pages (C-23); {} restores it
  */
 
 import type { MockRequest, MockResponse } from './handler.js';
@@ -61,6 +63,19 @@ function setScenario(state: MockState, body: unknown): MockResponse {
   };
 }
 
+function setSnapshotBudget(state: MockState, body: unknown): MockResponse {
+  const { rows, bytes } = (body ?? {}) as Record<string, unknown>;
+  const positive = (v: unknown) => typeof v === 'number' && Number.isInteger(v) && v > 0;
+  if (rows === undefined) state.snapshotBudget = undefined;
+  else if (positive(rows) && (bytes === undefined || positive(bytes)))
+    state.snapshotBudget = {
+      rows: rows as number,
+      bytes: (bytes as number | undefined) ?? 2_000_000,
+    };
+  else return BAD_BODY;
+  return { status: 200, body: { snapshotBudget: state.snapshotBudget ?? 'contract default' } };
+}
+
 export function controlRoute(state: MockState, req: MockRequest): MockResponse | null {
   if (req.method !== 'POST') return null;
   switch (req.path) {
@@ -79,6 +94,8 @@ export function controlRoute(state: MockState, req: MockRequest): MockResponse |
       return restore(state, req.body);
     case '/__mock/scenario':
       return setScenario(state, req.body);
+    case '/__mock/snapshot-budget':
+      return setSnapshotBudget(state, req.body);
     default:
       return null;
   }

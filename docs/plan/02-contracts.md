@@ -74,6 +74,14 @@ Response `200`:
 
 Rows inside `tables` are domain entities in camelCase (`ReferenceTablesSchema`); `users` rows never carry `email`.
 
+**Snapshot bootstrap (C-23, ADR-119).** A device that sends `"bootstrap": "snapshot"` gets the
+first page of a paged snapshot instead of the whole history: `bootstrap.snapshot` =
+`{ cutoff, first: true, next, stockBaseline: [{ productoId, cantidad }] }`, movements created since
+`cutoff` (90 days) as rows, older ones folded into the per-product baseline. `next` non-null → the
+device continues with `GET /sync/pull?snapshot=<next>` (§5). Without the field (an older device) the
+legacy full bootstrap is sent while the tenant has at most 5,000 live movements, and
+`426 PROTOCOL_UNSUPPORTED` past that — refused before the code is spent.
+
 ```json
 
 ```
@@ -125,7 +133,8 @@ Response `200`:
   "acknowledgedThrough": 5001 }
 ```
 
-Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
+Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap (legacy; `426 PROTOCOL_UNSUPPORTED` past 5,000 live movements).
+`?snapshot=start` = the first page of a snapshot bootstrap, `?snapshot=<next>` the following ones (C-23, ADR-119): each page is at most 5,000 rows and 1.9 MB of row JSON, carries `snapshot: { cutoff, first, next, stockBaseline }` and the snapshot's cursor as `serverSeq` on every page; `next: null` ends it and the device pulls `since=serverSeq` from there. Stock = `stockBaseline` + the movements the device holds. An unknown token → `400 VALIDATION`. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
 
 ## §6 Entitlement payload
 
@@ -515,3 +524,21 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
       linking. Additive at protocol 1: an older app omits it and still links. The portal keeps it on
       the device row with the SHA-256 of the text it knows for that version (data-pg `0041`). Test:
       `endpoints.test.ts` «carries the aviso version».
+
+### C-23 Snapshot bootstrap: a stock baseline and 90 days of movements, paged
+
+- [x] Status · **Surfaced by:** audit DB3-BOOT-01 (2026-09-26), round 2's DB2-QRY-05 · **ADR:** 119
+      Done: 2026-09-26 · Additive at protocol 1. `packages/contracts/src/snapshot.ts` (schemas,
+      constants, the opaque token) and `snapshot-page.ts` (`fillSnapshotPage`, the one pager the
+      portal and the mock share): `ActivateRequest.bootstrap?: 'snapshot'`, `PullQuery.snapshot?`,
+      `Bootstrap.snapshot?` / `PullResponse.snapshot?` = `{ cutoff, first, next, stockBaseline }`.
+      Sections in foreign-key order (`businesses` … `products`, `stock_baseline`, … recent
+      `inventory_movements` last); ≤ 5,000 rows and ≤ 1.9 MB of row JSON a page; keyset by id per
+      section; every page at the first page's cursor. The baseline is the live movements created
+      before the cutoff whose `sync_log` entry is at or below that cursor, so it agrees with the
+      pull that follows. Old device → legacy bootstrap, `426` past 5,000 live movements; new device
+      and old server → a response without `snapshot` is a complete legacy bootstrap. Mock: same
+      pager over `MockState`, `/__mock/snapshot-budget` to force small pages. Tests:
+      `tests/snapshot.test.ts` (token, pager, old↔new compatibility), conformance
+      `snapshot.test.ts` (baseline + rows = every movement; pages chain at one cursor; forged
+      token → 400), green against the mock and the portal.

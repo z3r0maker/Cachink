@@ -11,6 +11,8 @@ export * from './tokens.js';
 export * from './scope.js';
 export * from './wire.js';
 export * from './entitlement.js';
+export * from './snapshot.js';
+export * from './snapshot-page.js';
 export * from './activate.js';
 export * from './sync-push.js';
 export * from './sync-pull.js';
