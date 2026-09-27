@@ -1,5 +1,5 @@
 import { INICIO_FIXTURE } from '@/operador/inicio/fixture';
-import { InicioScreen } from '@/operador/inicio/screen';
+import { InicioViva } from '@/operador/inicio/viva';
 import type { InicioData, InicioScreenProps, Situacion } from '@/operador/inicio/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -38,12 +38,15 @@ function forced(q: Query): { state: InicioScreenProps['state']; data: InicioData
   };
 }
 
-/** Operador · Inicio (O-14). Fixture data until the register runtime (O-06). */
+/**
+ * Operador · Inicio (O-14, real data O-39). Fixture for an unlinked browser; a
+ * linked register reads its own open turno.
+ */
 export default async function OperadorInicioPage({
   searchParams,
 }: {
   readonly searchParams: Promise<Query>;
 }) {
   const { state, data } = forced(await searchParams);
-  return <InicioScreen state={state} data={data} />;
+  return <InicioViva fixture={data} forzado={state} />;
 }

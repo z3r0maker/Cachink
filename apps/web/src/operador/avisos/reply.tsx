@@ -3,6 +3,7 @@
 import { Icon } from '../../shell/icon';
 import * as p from '../ui/panel.css';
 import * as r from './reply.css';
+import { aDueno } from './vivo';
 
 /** Quick answers: a short label, the sentence it writes for the operator. */
 const RAPIDAS: readonly (readonly [string, string])[] = [
@@ -37,7 +38,7 @@ export function Reply({ id, dueno, draft, onDraft, onSend, onRead }: ReplyProps)
         id={inputId}
         className={r.input}
         rows={3}
-        placeholder={`Cuéntale a ${dueno} lo que recuerdas`}
+        placeholder={`Cuéntale ${aDueno(dueno)} lo que recuerdas`}
         value={draft}
         onChange={(e) => onDraft(e.target.value)}
       />
@@ -91,7 +92,7 @@ function Rapidas({
 export function Enviada({ dueno, texto }: { readonly dueno: string; readonly texto: string }) {
   return (
     <div className={r.enviado}>
-      <span className={r.enviadoTitle}>Le mandaste tu respuesta a {dueno}</span>
+      <span className={r.enviadoTitle}>{`Le mandaste tu respuesta ${aDueno(dueno)}`}</span>
       <span className={r.enviadoText}>“{texto}”</span>
       <span className={r.enviadoNota}>Si te contesta, lo ves aquí mismo.</span>
     </div>

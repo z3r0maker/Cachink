@@ -53,8 +53,10 @@ function useFlusher(linked: boolean): {
     setEnviando(true);
     try {
       await registerRuntime().sync(credentials.deviceToken);
-      const counts = await registerRuntime().counts();
-      setReales({ pendientes: counts.pending, enLinea: navigator.onLine });
+      // The queue as Registros por enviar lists it: everything not yet
+      // accepted, including what was captured and never tried (O-27).
+      const cola = await registerRuntime().colaPendiente();
+      setReales({ pendientes: cola.length, enLinea: navigator.onLine });
     } catch {
       setReales({ pendientes: -1, enLinea: navigator.onLine });
     } finally {
@@ -71,8 +73,28 @@ function useFlusher(linked: boolean): {
   }, [linked, flush]);
 
   useConexion(linked, flush, setReales);
+  useCuentaInicial(linked, setReales);
 
   return { reales, enviando, flush };
+}
+
+/** A linked caja's pill starts from its real queue, never the fixture's count. */
+function useCuentaInicial(
+  linked: boolean,
+  setReales: (
+    fn: (r: { pendientes: number; enLinea: boolean } | null) => {
+      pendientes: number;
+      enLinea: boolean;
+    },
+  ) => void,
+): void {
+  useEffect(() => {
+    if (!linked) return;
+    void registerRuntime()
+      .colaPendiente()
+      .then((cola) => setReales((r) => r ?? { pendientes: cola.length, enLinea: navigator.onLine }))
+      .catch(() => undefined);
+  }, [linked, setReales]);
 }
 
 /** Online/offline moves the pill; coming back online flushes what queued. */

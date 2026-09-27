@@ -5,6 +5,7 @@
  */
 
 import {
+  DrizzleBusinessesRepository,
   DrizzleCajaTurnosRepository,
   DrizzleCancelacionLogsRepository,
   DrizzleClientsRepository,
@@ -16,12 +17,24 @@ import {
 } from '@xangarro/data';
 import { CancelarTicketUseCase, RegistrarTicketUseCase } from '@xangarro/application';
 import type { RegistrarTicketInput } from '@xangarro/application';
-import type { BusinessId, TicketId, UserId } from '@xangarro/domain';
+import { parseFeatureFlags, type BusinessId, type TicketId, type UserId } from '@xangarro/domain';
 
 import { cuentasDelNegocio } from './cuentas';
 import { hhmmLocal } from './fechas';
 import type { Db } from './db-types';
 import type { LineaPara, RegistrarContext, TicketPara, VentaPara } from './protocol';
+
+/**
+ * Whether sales and cancellations move stock: the business's own «Inventario
+ * y stock» switch (Mi negocio › Funciones), read here in the Worker so the
+ * screen can't get it wrong. Products that don't track stock never move.
+ */
+async function stockDelNegocio(db: Db, businessId: BusinessId, deviceId: string): Promise<boolean> {
+  const b = await new DrizzleBusinessesRepository(db as never, deviceId as never).findById(
+    businessId,
+  );
+  return b !== null && parseFeatureFlags(b.featureFlags).stock;
+}
 
 /** Record a sale exactly as the phone does — the atomic use case (ADR-073). */
 export async function registrarTicket(
@@ -36,7 +49,10 @@ export async function registrarTicket(
     new DrizzleProductsRepository(db as never, ctx.deviceId as never),
     new DrizzleInventoryMovementsRepository(db as never, ctx.deviceId as never),
     new DrizzleCajaTurnosRepository(db as never, ctx.deviceId as never),
-    { stockEnabled: ctx.stockEnabled, userId: (ctx.userId as never) ?? null },
+    {
+      stockEnabled: await stockDelNegocio(db, input.ticket.businessId, ctx.deviceId),
+      userId: (ctx.userId as never) ?? null,
+    },
   );
   const result = await useCase.execute(input);
   return { folio: result.ticket.folio };
@@ -187,6 +203,7 @@ export async function cancelarTicket(
     new DrizzleInventoryMovementsRepository(db as never, p.deviceId as never),
     new DrizzleCancelacionLogsRepository(db as never, p.deviceId as never, p.userId as never),
   );
-  const r = await useCase.execute({ ...p, stockEnabled: false });
+  const stockEnabled = await stockDelNegocio(db, p.businessId, p.deviceId);
+  const r = await useCase.execute({ ...p, stockEnabled });
   return { folio: r.ticket.folio, cashToReturnCentavos: r.cashToReturn?.toString() ?? null };
 }

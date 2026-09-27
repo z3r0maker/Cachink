@@ -25,10 +25,12 @@ const INICIAL: Record<TipoMovimiento, string> = { Merma: '1', Entrada: '5' };
 export function MoverExistencia(p: {
   readonly tipo: TipoMovimiento;
   readonly item: Existencia;
+  /** Whole quantities only (a linked caja: the domain counts in integers). */
+  readonly enteros?: boolean;
   readonly onClose: () => void;
   readonly onSave: (m: NuevoMovimiento) => void;
 }) {
-  const x = useMover(p.tipo, p.item, p.onSave);
+  const x = useMover(p.tipo, p.item, p.onSave, p.enteros === true);
   return (
     <Lateral
       onClose={p.onClose}
@@ -53,6 +55,7 @@ function Campos({ x, it }: { readonly x: Mover; readonly it: Existencia }) {
         raw={x.raw}
         unidad={conUnidad(x.cantidad, it.unidad).replace(/^\S+ /, '')}
         quedan={x.quedan}
+        enteros={x.enteros}
         onChange={x.setRaw}
       />
       {x.merma ? (
@@ -95,7 +98,12 @@ function Pie({ x, onClose }: { readonly x: Mover; readonly onClose: () => void }
   );
 }
 
-function useMover(inicial: TipoMovimiento, it: Existencia, onSave: (m: NuevoMovimiento) => void) {
+function useMover(
+  inicial: TipoMovimiento,
+  it: Existencia,
+  onSave: (m: NuevoMovimiento) => void,
+  enteros: boolean,
+) {
   const [tipo, setTipo] = useState(inicial);
   const [raw, setRaw] = useState(INICIAL[inicial]);
   const [motivo, setMotivo] = useState<MotivoMerma | null>(null);
@@ -104,7 +112,8 @@ function useMover(inicial: TipoMovimiento, it: Existencia, onSave: (m: NuevoMovi
   const merma = tipo === 'Merma';
   const cantidad = Number.parseFloat(raw) || 0;
   const alcanza = !merma || cantidad <= it.existencias;
-  const listo = cantidad > 0 && alcanza && (!merma || motivo !== null);
+  const entera = !enteros || Number.isInteger(cantidad);
+  const listo = cantidad > 0 && entera && alcanza && (!merma || motivo !== null);
   const save = () => {
     if (!listo) return;
     const partes = merma ? [motivo ?? '', nota.trim()] : [proveedor.trim(), nota.trim()];
@@ -119,12 +128,16 @@ function useMover(inicial: TipoMovimiento, it: Existencia, onSave: (m: NuevoMovi
     setNota,
     merma,
     cantidad,
+    enteros,
     listo,
     save,
-    quedan: quedan(it, merma, cantidad, alcanza),
+    quedan: entera ? quedan(it, merma, cantidad, alcanza) : SOLO_ENTEROS,
     cta: `Registrar ${merma ? 'merma' : 'entrada'} de ${conUnidad(cantidad, it.unidad)}`,
   };
 }
+
+/** A linked caja counts whole units: a decimal is refused, and said so. */
+export const SOLO_ENTEROS = 'Escribe una cantidad entera, sin decimales.';
 
 /** «Te van a quedar 6 kg», «Vas a tener 13 kg, abajo del aviso». */
 function quedan(it: Existencia, merma: boolean, cantidad: number, alcanza: boolean): string {

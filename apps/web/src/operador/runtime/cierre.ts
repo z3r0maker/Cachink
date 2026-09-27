@@ -19,15 +19,20 @@ import type { BusinessId, CajaTurnoId, DiscrepancyReason } from '@xangarro/domai
 
 import type { Db } from './db-types';
 import { resumenDelTurno } from './cierre-resumen';
+import { movimientosDelTurno } from './inventario';
+import { contar } from './inventario-mapa';
 import type { CierrePara } from './protocol';
 
-/** The open turno's close figures: the four parts, the esperado, the resumen. */
-export async function cierreDelTurno(
+/**
+ * The open turno's rows, read once: Cierre and Mi turno / Inicio (O-39) see
+ * the same tickets, lines, abonos and gastos.
+ */
+export async function filasDelTurno(
   db: Db,
   businessId: BusinessId,
   deviceId: string,
   turnoId: string,
-): Promise<CierrePara> {
+) {
   const turnos = new DrizzleCajaTurnosRepository(db as never, deviceId as never);
   const tickets = new DrizzleTicketsRepository(db as never, deviceId as never);
   const sales = new DrizzleSalesRepository(db as never, deviceId as never);
@@ -44,7 +49,14 @@ export async function cierreDelTurno(
     businessId as never,
   );
   const gastos = await expenses.findByCajaTurno(turnoId as never);
+  return { turno, delTurno, lineas, abonos, gastos };
+}
 
+export type FilasDelTurno = Awaited<ReturnType<typeof filasDelTurno>>;
+
+/** The close figures over the turno's rows: the four parts, the esperado, the resumen. */
+export function cierreDeFilas(f: FilasDelTurno): CierrePara {
+  const { turno, delTurno, lineas, abonos, gastos } = f;
   const esperado = esperadoDelTurno(turno, delTurno, lineas, abonos, gastos);
   const partes = partesDelTurno(turno, delTurno, lineas, abonos, gastos);
   return {
@@ -57,6 +69,19 @@ export async function cierreDelTurno(
     esperadoCentavos: esperado.toString(),
     resumen: resumenDelTurno(delTurno, lineas),
   };
+}
+
+/** The open turno's close figures: the four parts, the esperado, the resumen. */
+export async function cierreDelTurno(
+  db: Db,
+  businessId: BusinessId,
+  deviceId: string,
+  turnoId: string,
+): Promise<CierrePara> {
+  const c = cierreDeFilas(await filasDelTurno(db, businessId, deviceId, turnoId));
+  // The inventory band counts this turno's manual movements (O-24 live).
+  const inv = contar(await movimientosDelTurno(db, businessId, deviceId, turnoId));
+  return { ...c, resumen: { ...c.resumen, ...inv } };
 }
 
 /** The calculator's four inputs, so the screen can show how it was formed. */

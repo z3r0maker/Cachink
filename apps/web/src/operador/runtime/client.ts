@@ -34,6 +34,9 @@ import type {
   VentasTurno,
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
+import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
+import type { TurnoVivoPara } from './turno-shapes';
+import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -155,6 +158,11 @@ export class RegisterRuntime {
     return this.#call(calls.gastar(p));
   }
 
+  /** O-39 · Mi turno and Inicio: the open turno, live. */
+  turnoVivo(businessId: string, deviceId: string, turnoId: string): Promise<TurnoVivoPara> {
+    return this.#call(calls.turnoVivo(businessId, deviceId, turnoId));
+  }
+
   /** O-36 · Cierre: the open turno's expected cash and figures. */
   cierre(businessId: string, deviceId: string, turnoId: string): Promise<CierrePara> {
     return this.#call(calls.cierre(businessId, deviceId, turnoId));
@@ -178,6 +186,34 @@ export class RegisterRuntime {
   /** O-33: record an abono through the real use case (whole; D5 a favor). */
   abonar(p: AbonoInput): Promise<{ id: string; fecha: string }> {
     return this.#call(calls.abonar(p));
+  }
+
+  /** O-24 · Inventario: stocked products and this turno's manual movements. */
+  inventario(businessId: string, deviceId: string, turnoId: string): Promise<InventarioPara> {
+    return this.#call({ method: 'inventario', businessId, deviceId, turnoId });
+  }
+
+  /** O-24: an entrada or a merma through the real use case. */
+  moverInventario(p: Omit<MoverInventarioCall, 'method'>): Promise<{ readonly id: string }> {
+    return this.#call({ ...p, method: 'moverInventario' });
+  }
+
+  /** O-27 · Registros por enviar: the outbox, grouped as the operator captured it. */
+  colaPendiente(): Promise<readonly PendienteCrudo[]> {
+    return this.#call({ method: 'colaPendiente' });
+  }
+
+  /** O-16 · Avisos: the owner's messages to this operator and the caja's own notices. */
+  avisos(businessId: string, deviceId: string, operadorId: string): Promise<AvisosPara> {
+    return this.#call({ method: 'avisos', businessId, deviceId, operadorId });
+  }
+
+  avisosLeidos(ids: readonly string[]): Promise<void> {
+    return this.#call({ method: 'avisosLeidos', ids });
+  }
+
+  responderAviso(p: Omit<ResponderAvisoCall, 'method'>): Promise<{ readonly id: string }> {
+    return this.#call({ ...p, method: 'responderAviso' });
   }
 
   terminate(): void {
