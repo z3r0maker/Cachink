@@ -355,9 +355,7 @@ if should_run "B"; then
   echo "📂  Phase 3: Product management"
   run_flow "$FLOWS_DIR/producto-entrada-stock.yaml"
   run_flow "$FLOWS_DIR/producto-movimientos.yaml"
-  run_flow "$FLOWS_DIR/stock-kpi-strip.yaml"                # C1 — Phase 15
   run_flow "$FLOWS_DIR/stock-buscar.yaml"                   # C2 — Phase 15
-  run_flow "$FLOWS_DIR/stock-bajo-ver-link.yaml"            # C3 — Phase 15
 fi
 
 if should_run "A"; then
@@ -383,35 +381,14 @@ run_flow "$FLOWS_DIR/venta-ciclo-completo.yaml"        # Must run first — dete
 run_flow "$FLOWS_DIR/venta-efectivo.yaml"
 
 if should_run "B"; then
-  run_flow "$FLOWS_DIR/venta-manual.yaml"
   run_flow "$FLOWS_DIR/venta-otros-metodos.yaml"
 fi
-
-# run_flow "$FLOWS_DIR/venta-credito.yaml"                   # (parked-mvp)
-
-# PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
-#   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
-# run_flow "$FLOWS_DIR/venta-comprobante.yaml"
 
 if should_run "C"; then
   run_flow "$FLOWS_DIR/venta-cantidad-multiple.yaml"
   run_flow "$FLOWS_DIR/venta-search-product.yaml"
-  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
-  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
-  # run_flow "$FLOWS_DIR/venta-detail-popover-inspect.yaml" # Audit — previously excluded
   run_flow "$FLOWS_DIR/checkout-method-picker.yaml"        # NEW — uncovered screen
   run_flow "$FLOWS_DIR/venta-stock-insuficiente.yaml"      # Edge — VEN-16
-  # run_flow "$FLOWS_DIR/venta-credito-flag-off.yaml"        # Edge — CXC-08 (parked-mvp)
-fi
-
-if should_run "A"; then
-  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
-  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
-  # run_flow "$FLOWS_DIR/editar-venta.yaml"
-  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
-  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
-  # run_flow "$FLOWS_DIR/editar-venta-full-form.yaml"         # Gap 2 — Phase 16
-  run_flow "$FLOWS_DIR/ventas-total-y-fecha.yaml"           # Gap 1 — Phase 16
 fi
 
 # ──────────────── Phase 5: Egresos ─────────────────────────────
@@ -419,8 +396,6 @@ CURRENT_PHASE="Phase 5: Egresos"
 echo ""
 echo "📂  Phase 5: Egresos"
 run_flow "$FLOWS_DIR/egreso-gasto.yaml"
-run_flow "$FLOWS_DIR/egreso-nomina.yaml"
-run_flow "$FLOWS_DIR/egreso-nomina-field-assertions.yaml"   # Gap 13 — Phase 16
 run_flow "$FLOWS_DIR/egreso-inventario.yaml"
 run_flow "$FLOWS_DIR/egreso-recurrente.yaml"
 run_flow "$FLOWS_DIR/egreso-gasto-full-form.yaml"           # B1 — Phase 15
@@ -432,14 +407,11 @@ if should_run "C"; then
   run_flow "$FLOWS_DIR/egreso-recurrente-semanal.yaml"
   run_flow "$FLOWS_DIR/egreso-gasto-via-fab.yaml"         # Audit — previously excluded
   run_flow "$FLOWS_DIR/egreso-inventario-empty-state.yaml" # Audit — previously excluded
-  run_flow "$FLOWS_DIR/egreso-nomina-periodo.yaml"        # Audit — previously excluded
   run_flow "$FLOWS_DIR/egreso-recurrente-descartar.yaml"  # Audit — previously excluded
   run_flow "$FLOWS_DIR/egreso-recurrente-quincenal.yaml"  # Edge — EGR-15
 fi
 
 if should_run "A"; then
-  run_flow "$FLOWS_DIR/editar-egreso.yaml"
-  run_flow "$FLOWS_DIR/editar-egreso-full-form.yaml"        # Gap 3 — Phase 16
   run_flow "$FLOWS_DIR/nuevo-egreso-cancel.yaml"            # Gap 21 — Phase 16
 fi
 
@@ -459,10 +431,8 @@ echo "📂  Phase 7: Clientes + CxC"
 # run_flow "$FLOWS_DIR/cliente-buscar.yaml"                   # A2 — Phase 15 (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-detail-screen.yaml"            # A1 — Phase 15 (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-editar.yaml"                   # A3 — Phase 15 (parked-mvp)
-# run_flow "$FLOWS_DIR/registrar-pago-full-form.yaml"         # H3 — Phase 15 (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-pago-parcial.yaml"             # (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-pago-completo.yaml"            # (parked-mvp)
-# run_flow "$FLOWS_DIR/pago-sobrepago-rechazado.yaml"           # Edge — CXC-07 (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-detail-empty-state.yaml"       # Gap 22 — Phase 16 (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-crear-via-fab.yaml"            # Audit (parked-mvp)
 
@@ -470,9 +440,6 @@ echo "📂  Phase 7: Clientes + CxC"
 CURRENT_PHASE="Phase 8: Corte de día"
 echo ""
 echo "📂  Phase 8: Corte de día"
-run_flow "$FLOWS_DIR/corte-de-dia.yaml"
-run_flow "$FLOWS_DIR/corte-de-dia-detail-cards.yaml"        # Gap 5 — Phase 16
-run_flow "$FLOWS_DIR/corte-con-diferencia.yaml"             # Audit — previously excluded
 run_flow "$FLOWS_DIR/corte-historial-director.yaml"         # Audit — previously excluded
 
 # ──────────────── Phase 9: Director features ───────────────────
@@ -494,7 +461,6 @@ if should_run "D"; then
   run_flow "$FLOWS_DIR/director-home-stock-bajo.yaml"
   run_flow "$FLOWS_DIR/director-home-actividad.yaml"
   # run_flow "$FLOWS_DIR/director-home-cxc-strip.yaml"        # Audit (parked-mvp)
-  run_flow "$FLOWS_DIR/director-to-ventas.yaml"             # Audit — previously excluded
 fi
 
 if should_run "B"; then
@@ -507,7 +473,6 @@ if should_run "B"; then
   run_flow "$FLOWS_DIR/balance-general-pasivo.yaml"         # Gap 9 — Phase 16
   run_flow "$FLOWS_DIR/estados-flujo-efectivo.yaml"
   run_flow "$FLOWS_DIR/flujo-efectivo-all-rows.yaml"        # Gap 8 — Phase 16
-  run_flow "$FLOWS_DIR/egresos-por-categoria-donut.yaml"    # B4 — Phase 15
   run_flow "$FLOWS_DIR/indicadores-screen.yaml"
 fi
 
@@ -525,10 +490,6 @@ if should_run "B"; then
   run_flow "$FLOWS_DIR/usuario-crear.yaml"
   run_flow "$FLOWS_DIR/caja-abrir-cerrar.yaml"
   # MVP-parked: merma flows moved to parked-mvp/
-  # run_flow "$FLOWS_DIR/merma-registro.yaml"
-  # run_flow "$FLOWS_DIR/merma-cancel-y-nota.yaml"
-  # run_flow "$FLOWS_DIR/merma-stock-insuficiente.yaml"
-  # run_flow "$FLOWS_DIR/merma-flag-off.yaml"
 fi
 
 if should_run "C"; then
@@ -548,7 +509,6 @@ if should_run "A"; then
   # run_flow "$FLOWS_DIR/funciones-conversion-auto-chain.yaml"
   # run_flow "$FLOWS_DIR/funciones-ventas-credito-toggle.yaml" # (parked-mvp)
   # run_flow "$FLOWS_DIR/otros-conversion-nav.yaml"
-  # run_flow "$FLOWS_DIR/conversion-stock-insuficiente.yaml"
   # run_flow "$FLOWS_DIR/otros-auditoria-nav.yaml"
   run_flow "$FLOWS_DIR/otros-caja-reportes-nav.yaml"        # F3 — Phase 15
   # run_flow "$FLOWS_DIR/otros-ventas-credito-nav.yaml"       # Gap 14 — Phase 16 (parked-mvp)
@@ -580,7 +540,6 @@ if should_run "C"; then
   run_flow "$FLOWS_DIR/caja-cierre-discrepancia.yaml"
   run_flow "$FLOWS_DIR/caja-handoff.yaml"                   # Audit — previously excluded
   run_flow "$FLOWS_DIR/caja-movimiento-turno-cerrado.yaml"  # Edge — CAJ-13
-  run_flow "$FLOWS_DIR/corte-duplicado-mismo-dia.yaml"      # Edge — CAJ-14
 fi
 
 # ──────────────── Phase 13.7: Error paths ─────────────────────
@@ -609,7 +568,6 @@ if should_run "B"; then
   run_flow "$FLOWS_DIR/settings-hub-nav.yaml"
   run_flow "$FLOWS_DIR/settings-negocio-editar.yaml"
   run_flow "$FLOWS_DIR/settings-edit-business-isr.yaml"     # Gap 17 — Phase 16
-  run_flow "$FLOWS_DIR/settings-sistema-cards.yaml"         # Gap 12 — Phase 16
   # run_flow "$FLOWS_DIR/otros-empleados-empty.yaml"         # Gap 18 — Phase 16 (parked-mvp)
   run_flow "$FLOWS_DIR/settings-funciones-nav.yaml"         # Audit — previously excluded
   run_flow "$FLOWS_DIR/settings-tipos-de-pago.yaml"         # NEW — uncovered screen
@@ -620,7 +578,6 @@ if should_run "E"; then
   echo ""
   echo "📂  Phase 10.5: Settings deep flows"
   run_flow "$FLOWS_DIR/settings-tasas-isr.yaml"
-  run_flow "$FLOWS_DIR/settings-export-datos.yaml"
   run_flow "$FLOWS_DIR/advanced-backend-screen.yaml"        # H1 — Phase 15
   run_flow "$FLOWS_DIR/wizard-confirm-mode-change.yaml"     # H2 — Phase 15
   run_flow "$FLOWS_DIR/settings-check-updates.yaml"         # Audit — previously excluded
@@ -632,7 +589,6 @@ if should_run "C"; then
   CURRENT_PHASE="Phase 11: Validation"
   echo ""
   echo "📂  Phase 11: Validation"
-  run_flow "$FLOWS_DIR/validation-venta.yaml"
   run_flow "$FLOWS_DIR/validation-producto.yaml"
 fi
 
@@ -652,11 +608,6 @@ if should_run "A"; then
   CURRENT_PHASE="Phase 12: Deletions"
   echo ""
   echo "📂  Phase 12: Deletions (state-destroying — run last)"
-  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
-  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
-  # run_flow "$FLOWS_DIR/eliminar-venta.yaml"
-  run_flow "$FLOWS_DIR/eliminar-egreso.yaml"
-  run_flow "$FLOWS_DIR/eliminar-egreso-via-popover.yaml"    # Audit — previously excluded
   run_flow "$FLOWS_DIR/eliminar-producto.yaml"
 fi
 

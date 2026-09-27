@@ -1,18 +1,11 @@
 /**
- * Storybook catalog for `<TextField>` + `<RhfTextField>`.
- *
- * The plain field is a controlled `useState` primitive. The RHF
- * wrapper takes a `control` + `name` and renders a `<Controller>`
- * internally so call sites collapse a form row to one component.
+ * Storybook catalog for `<TextField>`, a controlled `useState` primitive.
  * Audit Round 2 G2.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { View } from '@tamagui/core';
-import { Btn } from '../Btn/index';
 import { TextField } from './text-field';
-import { RhfTextField } from './controlled';
 
 const meta: Meta<typeof TextField> = {
   title: 'Phase 1A / Fields / TextField',
@@ -35,30 +28,6 @@ export const Controlled: Story = {
           onChange={setValue}
           placeholder="Ej. María González"
         />
-      </View>
-    );
-  },
-};
-
-interface ClienteForm {
-  readonly nombre: string;
-}
-
-/** RHF + Zod wrapper — `<RhfTextField control={control} name="nombre" />`. */
-export const RhfControlled: Story = {
-  render: () => {
-    const { control, handleSubmit } = useForm<ClienteForm>({
-      defaultValues: { nombre: '' },
-    });
-    return (
-      <View padding={16} width={360} gap={12}>
-        <RhfTextField
-          control={control}
-          name="nombre"
-          label="Nombre del cliente"
-          placeholder="Ej. María González"
-        />
-        <Btn onPress={handleSubmit(() => {})}>GUARDAR</Btn>
       </View>
     );
   },

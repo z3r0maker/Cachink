@@ -70,9 +70,10 @@ async function mount(opts: { rejected?: number } = {}) {
 describe('SettingsScreen (A-12)', () => {
   it('shows only device sections and never a plan name (ADR-069)', async () => {
     await mount();
-    for (const id of ['settings-account', 'settings-sync', 'settings-device', 'settings-data']) {
+    for (const id of ['settings-account', 'settings-sync', 'settings-device']) {
       expect(screen.getByTestId(id)).toBeInTheDocument();
     }
+    expect(screen.queryByTestId('settings-data')).toBeNull();
     expect(screen.queryByTestId('settings-plan')).toBeNull();
     expect(screen.queryByTestId('settings-re-run-wizard')).toBeNull();
   });

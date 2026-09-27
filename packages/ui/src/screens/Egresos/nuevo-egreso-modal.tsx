@@ -1,10 +1,10 @@
 /**
- * NuevoEgresoModal — single modal with 3 tabs (Gasto / Nómina /
- * Inventario), per ADR-020.
+ * NuevoEgresoModal — single modal with 2 tabs (Gasto / Inventario), per
+ * ADR-020. Nómina left the register: payroll is the owner's, in the portal.
  *
  * Tab state is per-modal (resets on close). Each tab renders its own
  * form; submit routes to the tab's dedicated hook (useRegistrarEgreso
- * for Gasto, useRegistrarNomina for Nómina, useRegistrarInventarioPurchase
+ * for Gasto, useRegistrarInventarioPurchase
  * for Inventario — wired in Commits 3, 4, 5 respectively).
  *
  * This commit (C2) ships the scaffold + tab-switcher + placeholder tab
@@ -18,14 +18,13 @@ import { Btn, Modal, SegmentedToggle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
 
-export type EgresoTab = 'gasto' | 'nomina' | 'inventario';
+export type EgresoTab = 'gasto' | 'inventario';
 
 export interface NuevoEgresoModalProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly initialTab?: EgresoTab;
   readonly renderGastoTab?: (onDone: () => void) => ReactNode;
-  readonly renderNominaTab?: (onDone: () => void) => ReactNode;
   readonly renderInventarioTab?: (onDone: () => void) => ReactNode;
   readonly testID?: string;
 }
@@ -41,7 +40,7 @@ interface TabBarProps {
  * (paddingY:8, opacity-only press style) to the brand
  * `<SegmentedToggle>`. The new component carries the §8.3 press
  * transform + 48-pt effective tap target. E2E selectors
- * `egreso-tab-{gasto,nomina,inventario}` are preserved via
+ * `egreso-tab-{gasto,inventario}` are preserved via
  * `testIDPrefix`.
  */
 function TabBar({ active, onChange, t }: TabBarProps): ReactElement {
@@ -53,7 +52,6 @@ function TabBar({ active, onChange, t }: TabBarProps): ReactElement {
         onChange={onChange}
         options={[
           { key: 'gasto', label: t('nuevoEgreso.tabGasto') },
-          { key: 'nomina', label: t('nuevoEgreso.tabNomina') },
           { key: 'inventario', label: t('nuevoEgreso.tabInventario') },
         ]}
       />
@@ -83,8 +81,6 @@ export function NuevoEgresoModal(props: NuevoEgresoModalProps): ReactElement {
   const body = ((): ReactNode => {
     if (activeTab === 'gasto')
       return props.renderGastoTab?.(props.onClose) ?? <PlaceholderBody tab="gasto" />;
-    if (activeTab === 'nomina')
-      return props.renderNominaTab?.(props.onClose) ?? <PlaceholderBody tab="nomina" />;
     return props.renderInventarioTab?.(props.onClose) ?? <PlaceholderBody tab="inventario" />;
   })();
 

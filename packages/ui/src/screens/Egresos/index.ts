@@ -9,10 +9,5 @@ export {
   type GastoSubmitPayload,
   GASTO_CATEGORIAS,
 } from './tabs/gasto-tab';
-export { NominaTab, type NominaTabProps } from './tabs/nomina-tab';
-export { NuevoEmpleadoModal, type NuevoEmpleadoModalProps } from './tabs/nuevo-empleado-modal';
 export { InventarioTab, type InventarioTabProps } from './tabs/inventario-tab';
 export { PendientesCard, type PendientesCardProps } from './pendientes-card';
-export { EgresoDetailPopover, type EgresoDetailPopoverProps } from './egreso-detail-popover';
-// Audit Round 2 J2 — partial-edit modal for swipe-to-edit (Phase K).
-export { EditarEgresoModal, type EditarEgresoModalProps } from './editar-egreso-modal';

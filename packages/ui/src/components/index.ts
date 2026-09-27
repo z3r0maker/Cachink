@@ -5,23 +5,17 @@
  * Both `apps/mobile` and `apps/desktop` import by name from `@xangarro/ui`
  * (via `.` entry) or from `@xangarro/ui/components` (this file).
  */
-export * from './HelloBadge/index';
 export * from './Btn/index';
 export * from './Input/index';
 export * from './Tag/index';
 export * from './Modal/index';
-export * from './Callout/index';
 export * from './EmptyState/index';
 export * from './SectionTitle/index';
 export * from './Card/index';
-export * from './Kpi/index';
-export * from './Gauge/index';
 export * from './BottomTabBar/index';
 export * from './TopBar/index';
 export * from './Scanner/index';
-export * from './PeriodPicker/index';
 export * from './Icon/index';
-export * from './InitialsAvatar/index';
 export * from './RoleIllustration/index';
 export * from './SegmentedToggle/index';
 export * from './Combobox/index';
@@ -38,20 +32,13 @@ export * from './SafeAreaSpacer/index';
 export * from './fields/index';
 export * from './ProductoCard/index';
 export * from './ProductoCardGrid/index';
-export * from './AtributosForm/index';
 export * from './FloatingCoinsBackground/index';
-export * from './ColorSwatchPicker/index';
 export * from './ActivityTracker/index';
 export * from './PinCodeInput/index';
 export * from './OptionCardGroup/index';
 export * from './Spinner/index';
 export * from './LoadingOverlay/index';
 export * from './SaleBurst/index';
-export * from './HelpAccordion/index';
-export * from './HealthIndicator/index';
-export * from './DeltaIndicator/index';
-export * from './NotificationBadge/index';
-export * from './KeyboardAwareForm/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

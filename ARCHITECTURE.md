@@ -156,6 +156,7 @@ Links to discussion, docs, prior art.
 | [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
+| [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8231,3 +8232,99 @@ number.
   from a parallel session), and `db:reset` would have destroyed that session's
   work. CI's `portal-e2e` job seeds fresh and is a required check, so that is
   where it is proven.
+
+---
+
+## ADR-117
+
+**Title:** «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens
+
+**Date:** 2026-09-27
+
+**Status:** Accepted — owner decision of 2026-09-27, after the portal and the web
+caja were redesigned; supersedes the parts of ADR-058, ADR-059, ADR-107 and
+ADR-108 named under Consequences
+
+**Context**
+
+The portal and the web caja were built from the «Concha» look: every card with a
+black 2.5 px border and a hard shadow, a yellow hero wherever the handoff drew
+one, and screens copied literally from the Claude Design project, example names
+and amounts included. ADR-107 opened the door to a calmer surface for the portal;
+since then both web surfaces have been redesigned against the El Mostrador
+boards on the design canvas (https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt),
+which the owner approved board by board. The rules those boards follow were
+spread across ADR-107, code comments and review threads, and parts of the older
+contract (DESIGN_CONTRACT.md, the tokens' comments, README §6) still described
+the old look. The phone app is next to be rebuilt in the same language.
+
+**Decision**
+
+The approved canvas boards are the specification. Code translates them into
+`@xangarro/tokens` and the shared components; it never copies a board's pixels,
+example names or amounts. The rules, in short (the full guide is
+`docs/design/el-mostrador.md`):
+
+- **Surfaces.** The page is `gray200`. Everything sits on quiet panels: white,
+  `borders.quiet`, radius 20, no shadow. **One hero per screen** (thick black
+  border and hard shadow); heroes never nest.
+- **Black means "you can act on this"** (ADR-107): buttons, inputs, selected
+  options, dialogs and panels keep the black edge.
+- **Selection.** A selected filter chip is black with yellow text; a selected
+  tab or segmented option is yellow. A yellow-filled chip is not a selection
+  style.
+- **Buttons.** Primary yellow with a black border and hard shadow; secondary
+  white with a 2 px black border; quiet; destructive red. Every action is a
+  button, never a bare text link or a raw URL.
+- **Panels and dialogs.** Details and forms open in a side panel (web) or a
+  bottom sheet (phone); confirmations are centred dialogs. Each surface keeps
+  one z-index ladder.
+- **Don Cuentas** appears only at key moments, once per screen, and never gives
+  the operator business advice.
+- **Motion.** Press, panel slide, dialog pop and Don's idle, all stopped under
+  `prefers-reduced-motion`.
+- **Contrast.** 4.5:1 minimum. Muted text on the `gray200` page is `gray600`;
+  `textMuted` fails there (3.96:1).
+- **Data states.** A live screen never shows fixture data; loading, empty and
+  error come from the shared components. **Nothing is labelled «Pronto» or
+  «Próximamente»**: a feature that is not built is omitted.
+- **Copy.** Spanish (México), tú, no em dashes in visible text (the «—» empty
+  placeholder excepted), payment methods exactly Efectivo, Tarjeta,
+  Transferencia and Fiado.
+- **Workflow.** A visual change is drawn on the canvas first, approved by the
+  owner, then translated to tokens; `pnpm lint:design` must pass.
+
+**Alternatives considered**
+
+- *Keep the Claude Design project as the spec and amend it upstream (ADR-058).*
+  Rejected: the owner reviews and approves on the canvas, and two design sources
+  drift.
+- *Keep «Próximamente» cards for unbuilt features.* Rejected by the owner: a
+  promise on screen is a feature the customer cannot use, and it ages badly.
+- *A separate language for the phone.* Rejected: one product, one language;
+  only the navigation pattern (tabs, sheets) differs.
+
+**Consequences**
+
+- **ADR-058:** the Claude Design project `5dd266f3-…` and `design-reference/` stop
+  being the specification; they are the historical Concha reference. The
+  condition that copy, amounts and example names are copied literally from the
+  design no longer holds: example data never reaches a live screen. The rule
+  «the design is the spec, code that disagrees is wrong» stands, pointed at the
+  canvas boards.
+- **ADR-059:** the production «Próximamente» gate (`ProximamenteState`, the
+  `proximamente` screen state) is replaced by omission: a surface whose model
+  call is off is not shown. The rest of ADR-059 (plans, `capabilities`, the
+  locked state) stands.
+- **ADR-107:** «motion elsewhere stays press-only» is superseded by the four
+  motions above. The quiet edge now applies to every panel, not only read-only
+  ones, and the canvas link it names becomes the spec for every surface.
+- **ADR-108:** the enum and the `CHECK`s keep QR/CoDi as ADR-108 decided, but a
+  historical QR/CoDi ticket now reads «Transferencia» on screen, and the
+  `Crédito` method is shown as «Fiado» everywhere.
+- The phone app follows the same language: four tabs (Inicio, Cobrar, Ventas,
+  Mi turno), bottom sheets, and the tablet breakpoints in the guide.
+- DESIGN_CONTRACT.md, CLAUDE.md §§1, 6 and 7, README §6 and the tokens' comments
+  are updated to match. Code that still breaks a rule (yellow-filled chips,
+  hard-coded «Caja 1», the `ProximamenteState` component) is debt to remove, not
+  precedent.

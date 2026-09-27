@@ -1,6 +1,6 @@
 /**
  * Text-overflow + Dynamic Type guard tests — Phase B4
- * (audit M-1 9.3 + 9.4 follow-through across 7 components beyond `<Btn>`).
+ * (audit M-1 9.3 + 9.4 follow-through across the text primitives beyond `<Btn>`).
  *
  * The audit's 9.3 / 9.4 work shipped on `<BtnLabel>` in PR 2.5 (T05 + T06).
  * Phase B4 extends the same `numberOfLines` + `ellipsizeMode` +
@@ -8,12 +8,10 @@
  * that can be exposed to long Spanish strings or Dynamic Type scaling:
  *
  *   - `<SectionTitle>` — eyebrow label
- *   - `<Kpi>` — label, value, hint
  *   - `<Tag>` — pill chip
  *   - `<EmptyState>` — title + description
  *   - `<TopBar>` — title + subtitle
  *   - `<ModalHeader>` — title + subtitle
- *   - `<InitialsAvatar>` — initials text
  *
  * **Why a single perf-style test** — these props are tiny, the bug
  * surface is "did someone forget the prop on a new component", and
@@ -30,15 +28,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  EmptyState,
-  InitialsAvatar,
-  Kpi,
-  Modal,
-  SectionTitle,
-  Tag,
-  TopBar,
-} from '../../src/components/index';
+import { EmptyState, Modal, SectionTitle, Tag, TopBar } from '../../src/components/index';
 import { renderWithProviders, screen } from '../test-utils';
 
 /** One-line clamp shape: `numberOfLines={1}` + `ellipsizeMode="tail"`. */
@@ -50,25 +40,12 @@ function multiLineClampMatcher(n: number): RegExp {
   return new RegExp(`_WebkitLineClamp-${n}`);
 }
 
-describe('Text overflow + clamp props (audit 9.3) across 7 primitives', () => {
+describe('Text overflow + clamp props (audit 9.3) across the text primitives', () => {
   it('SectionTitle.title clamps at 1 line', () => {
     renderWithProviders(<SectionTitle title="Cuentas por Cobrar pendientes" />);
     const node = screen.getByTestId('section-title-text');
     expect(node.className).toMatch(ONE_LINE_CLAMP);
     expect(node.className).toMatch(NOWRAP);
-  });
-
-  it('Kpi.label clamps at 1 line and Kpi.value clamps at 1 line', () => {
-    renderWithProviders(<Kpi label="Margen Operativo" value="$1,250,000.00" />);
-    expect(screen.getByTestId('kpi-label').className).toMatch(ONE_LINE_CLAMP);
-    expect(screen.getByTestId('kpi-value').className).toMatch(ONE_LINE_CLAMP);
-  });
-
-  it('Kpi.hint clamps at 2 lines', () => {
-    renderWithProviders(
-      <Kpi label="Stock bajo" value="3" hint="3 productos por debajo del umbral configurado" />,
-    );
-    expect(screen.getByTestId('kpi-hint').className).toMatch(multiLineClampMatcher(2));
   });
 
   it('Tag clamps at 1 line', () => {
@@ -120,14 +97,5 @@ describe('Text overflow + clamp props (audit 9.3) across 7 primitives', () => {
     expect(screen.getByTestId('modal-subtitle').className).toMatch(
       /_textOverflow-ellipsis|_WebkitLineClamp/,
     );
-  });
-
-  it('InitialsAvatar text clamps at 1 line (clip mode)', () => {
-    renderWithProviders(<InitialsAvatar value="Pedro Espinoza" />);
-    // `numberOfLines={1}` → same `_ws-nowrap` shape as
-    // `ellipsizeMode="tail"`; `ellipsizeMode="clip"` differs only in
-    // not adding `_textOverflow-ellipsis`. We assert nowrap as the
-    // robust shared marker.
-    expect(screen.getByTestId('initials-avatar-text').className).toMatch(NOWRAP);
   });
 });

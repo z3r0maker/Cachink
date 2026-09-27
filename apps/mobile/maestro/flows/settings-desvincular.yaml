@@ -25,10 +25,6 @@ env:
     id: 'settings-sync-now'
 - scrollUntilVisible:
     element:
-      id: 'settings-data'
-    direction: DOWN
-- scrollUntilVisible:
-    element:
       id: 'settings-unlink'
     direction: UP
 - tapOn:

@@ -84,7 +84,7 @@ function shape(): readonly string[] {
     '',
     `**Off-ladder shapes** (data-viz marks and full pills): ${pairsTickKey(shapeRadii)}.`,
     '',
-    `**Borders** — only two widths exist: \`thin\` ${borders.thin}, \`thick\` ${borders.thick}.`,
+    `**Borders** — three, and no others: \`thin\` ${borders.thin} (what you act on), \`thick\` ${borders.thick} (the hero, dialogs), \`quiet\` ${borders.quiet} (panels). Nothing dashed.`,
     '',
     '**Shadows** — hard drops, zero blur, zero alpha:',
     '',

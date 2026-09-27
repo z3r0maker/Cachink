@@ -29,7 +29,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
 - **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
 
-## Lanzamiento (92)
+## Lanzamiento (94)
 
 Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
 
@@ -74,19 +74,21 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:33`
 - [ ] **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:34`
 - [ ] **O-11** `gh auth login` on the dev machine · `11-pre-launch-and-deferred.md:35`
-- [ ] **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:41`
-- [ ] **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:42`
-- [ ] **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:48`
-- [ ] **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:49`
-- [ ] **O-16** Until `live`: issue CFDIs manually in the SAT portal from the backoffice "Pagos sin CFDI" list; mark each pay… · `11-pre-launch-and-deferred.md:50`
-- [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:51`
-- [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:52`
-- [ ] **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:53`
-- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:54`
-- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:55`
-- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:56`
-- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:64`
-- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:65`
+- [ ] **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:36`
+- [ ] **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:37`
+- [ ] **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:43`
+- [ ] **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:44`
+- [ ] **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:50`
+- [ ] **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:51`
+- [ ] **O-16** Until `live`: issue CFDIs manually in the SAT portal from the backoffice "Pagos sin CFDI" list; mark each pay… · `11-pre-launch-and-deferred.md:52`
+- [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:53`
+- [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:54`
+- [ ] **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:55`
+- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:56`
+- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:57`
+- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:58`
+- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:66`
+- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:67`
 
 ### `../launch/production-readiness.md` · 0. The one thing everything waits on
 
@@ -215,7 +217,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (18)
+## Colas de tracks (29)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -264,6 +266,20 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
 - [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
 
+### `19-movil-mostrador.md` · Phases
+
+- [ ] **M-02** Owner approves the phone and tablet boards. · `19-movil-mostrador.md:25`
+- [ ] **M-03** Tokens without the fork. · `19-movil-mostrador.md:26`
+- [ ] **M-04** Shared caja logic. · `19-movil-mostrador.md:27`
+- [ ] **M-05** Shell. · `19-movil-mostrador.md:28`
+- [ ] **M-06** Entrar y empezar. · `19-movil-mostrador.md:29`
+- [ ] **M-07** Cobrar. · `19-movil-mostrador.md:30`
+- [ ] **M-08** Dinero del turno. · `19-movil-mostrador.md:31`
+- [ ] **M-09** Mi turno y cierre. · `19-movil-mostrador.md:32`
+- [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
+- [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
+- [ ] **M-12** Leftovers from M-01. · `19-movil-mostrador.md:35`
+
 ## Por archivo
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 20 hechos)
@@ -274,6 +290,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
-- `11-pre-launch-and-deferred.md` — 23 abiertos (0 en curso, 0 bloqueados, 7 hechos)
+- `11-pre-launch-and-deferred.md` — 25 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
+- `19-movil-mostrador.md` — 11 abiertos (0 en curso, 0 bloqueados, 1 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)
