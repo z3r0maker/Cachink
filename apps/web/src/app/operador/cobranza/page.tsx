@@ -1,7 +1,6 @@
-import { CUENTAS } from '@/operador/cobranza/cuentas';
-import { HOY } from '@/operador/fixtures';
+import { CUENTAS, type CobranzaScreenProps } from '@xangarro/caja/cobranza';
+import { HOY } from '@xangarro/caja';
 import { CobranzaScreen } from '@/operador/cobranza/screen';
-import type { CobranzaScreenProps } from '@/operador/cobranza/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

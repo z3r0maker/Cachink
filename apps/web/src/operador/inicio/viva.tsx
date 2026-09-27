@@ -9,17 +9,15 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { OperadorEstado, type EstadoMode } from '../estado';
-import { ICONS } from '../shell/nav';
+import { OperadorEstado } from '../estado';
+import { type EstadoMode, ICONS, hoyLocal } from '@xangarro/caja';
 import { registerRuntime } from '../runtime/client';
 import { comoCuenta } from '../cobranza/vivo';
-import { hoyLocal } from '../runtime/fechas';
 import type { CuentaPara } from '../runtime/protocol';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { OpMain } from '../ui/parts';
 import { InicioScreen } from './screen';
-import type { InicioData } from './types';
-import { comoInicio, type Entorno } from './vivo';
+import { type InicioData, comoInicio, type Entorno } from '@xangarro/caja/inicio';
 
 /** No name for the device yet: the caja is «Caja 1», as Cierre and Gastos say. */
 const CAJA = 'Caja 1';

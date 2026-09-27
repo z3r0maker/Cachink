@@ -1,11 +1,10 @@
-import { resumen as resumenInventario } from '@/operador/inventario/derive';
-import { INVENTARIO_FIXTURE } from '@/operador/inventario/fixture';
+import { resumen as resumenInventario, INVENTARIO_FIXTURE } from '@xangarro/caja/inventario';
 import { CierreViva } from '@/operador/cierre/viva';
-import type { CierreData, CierreScreenProps } from '@/operador/cierre/types';
-import { TURNO_FIXTURE as T } from '@/operador/turno/fixture';
-import { VENTAS_FIXTURE } from '@/operador/ventas/fixture';
+import type { CierreData, CierreScreenProps } from '@xangarro/caja/cierre';
+import { TURNO_FIXTURE as T } from '@xangarro/caja/turno';
+import { VENTAS_FIXTURE } from '@xangarro/caja/ventas';
 import { sum } from '@xangarro/domain';
-import { SHELL_FIXTURE } from '@/operador/fixtures';
+import { SHELL_FIXTURE } from '@xangarro/caja';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

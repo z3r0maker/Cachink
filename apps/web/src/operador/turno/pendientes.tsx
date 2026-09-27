@@ -4,15 +4,13 @@ import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
-import { HOY } from '../fixtures';
-import { hrefRecurrente } from '../inicio/para-hoy';
-import { ICONS } from '../shell/nav';
-import { sumarDias, textoVence } from '../ui/frases';
+import { HOY, ICONS, sumarDias, textoVence } from '@xangarro/caja';
+import { hrefRecurrente } from '@xangarro/caja/inicio';
 import { useHoyNo } from '../ui/hoy-no';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import * as r from './rows.css';
-import type { PendienteRecurrente } from './types';
+import type { PendienteRecurrente } from '@xangarro/caja/turno';
 
 /** «Vence hoy» and late in red, the rest in amber; the due ones get the yellow button. */
 function dueChip(vence: number): { label: string; bg: string; color: string } {

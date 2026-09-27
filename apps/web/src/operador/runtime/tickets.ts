@@ -20,7 +20,7 @@ import type { RegistrarTicketInput } from '@xangarro/application';
 import { parseFeatureFlags, type BusinessId, type TicketId, type UserId } from '@xangarro/domain';
 
 import { cuentasDelNegocio } from './cuentas';
-import { hhmmLocal } from './fechas';
+import { hhmmLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
 import type { LineaPara, RegistrarContext, TicketPara, VentaPara } from './protocol';
 

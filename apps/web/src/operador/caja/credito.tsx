@@ -7,7 +7,7 @@ import * as m from '../ui/mostrador.css';
 import * as c from './cobro.css';
 import * as k from './credito.css';
 import { ClienteRadio, ClienteNuevo, filtrar } from './credito-partes';
-import type { ClienteFiado } from './types';
+import type { ClienteFiado } from '@xangarro/caja/caja';
 import type { Caja } from './use-caja';
 
 export interface CreditoProps {

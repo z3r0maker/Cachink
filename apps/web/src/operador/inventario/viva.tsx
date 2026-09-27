@@ -12,10 +12,15 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { desencolar } from '../shell/cola';
-import type { EstadoMode } from '../estado';
+import type { EstadoMode } from '@xangarro/caja';
 import { InventarioScreen } from './screen';
-import type { InventarioData, NuevoMovimientoVivo, Pestana } from './types';
-import { INVENTARIO_VACIO, comoInventario } from './vivo';
+import {
+  type InventarioData,
+  type NuevoMovimientoVivo,
+  type Pestana,
+  INVENTARIO_VACIO,
+  comoInventario,
+} from '@xangarro/caja/inventario';
 
 interface Vivo {
   readonly state: 'happy' | EstadoMode;

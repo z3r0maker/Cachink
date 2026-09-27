@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
-import { DUENO_GENERICO, nombreDueno } from './dueno';
+import { DUENO_GENERICO, nombreDueno } from '@xangarro/caja';
 
 /** The design fixture's owner. */
 export const DUENO_FIXTURE = 'Pedro';

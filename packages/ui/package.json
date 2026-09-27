@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@xangarro/application": "workspace:*",
+    "@xangarro/caja": "workspace:*",
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/observability": "workspace:*",

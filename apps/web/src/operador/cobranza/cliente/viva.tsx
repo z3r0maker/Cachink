@@ -11,9 +11,12 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useCredenciales, type Credenciales } from '../../runtime/use-credenciales';
 import { comoCuenta, hoyLocal, leerCuentas } from '../vivo';
 import { DetalleClienteScreen } from './screen';
-import type { DetalleClienteData, DetalleClienteProps } from './types';
-import type { EstadoMode } from '../../estado';
-import type { CuentaCliente } from './types';
+import type {
+  DetalleClienteData,
+  DetalleClienteProps,
+  CuentaCliente,
+} from '@xangarro/caja/cobranza';
+import type { EstadoMode } from '@xangarro/caja';
 
 type Carga =
   | { readonly state: 'happy'; readonly cuenta: CuentaCliente | null }

@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '../ui/dueno';
+import { mayuscula } from '@xangarro/caja';
 import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import * as k from './comprobante.css';

@@ -13,13 +13,9 @@ import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { desencolar } from '../shell/cola';
 import type { CierrePara } from '../runtime/protocol';
-import type { EstadoMode } from '../estado';
+import { type EstadoMode, horaLocal, nombreDueno } from '@xangarro/caja';
 import { CierreScreen } from './screen';
-import type { CerrarVivo } from './use-cierre';
-import type { CierreData, CierreScreenProps } from './types';
-
-import { horaLocal } from '../runtime/fechas';
-import { nombreDueno } from '../ui/dueno';
+import type { CerrarVivo, CierreData, CierreScreenProps } from '@xangarro/caja/cierre';
 
 /** The Worker's figures as the screen's data; the count starts at zero. */
 function comoCierre(c: CierrePara, sesion: { nombre: string }, dueno: string): CierreData {

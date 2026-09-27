@@ -2,8 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import type { Aviso, AvisoGrupo, AvisosData, AvisosVivo } from './types';
-import { mayuscula } from './vivo';
+import {
+  type Aviso,
+  type AvisoGrupo,
+  type AvisosData,
+  type AvisosVivo,
+  mayuscula,
+} from '@xangarro/caja/avisos';
 
 interface Envio {
   readonly draft: string;

@@ -7,7 +7,7 @@ import { Icon } from '../../shell/icon';
 import * as p from '../ui/panel.css';
 import * as a from './avisos.css';
 import { Enviada, Reply } from './reply';
-import type { Aviso } from './types';
+import type { Aviso } from '@xangarro/caja/avisos';
 
 export interface AvisoCardProps {
   readonly aviso: Aviso;

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 
-import { SHELL_FIXTURE } from '@/operador/fixtures';
+import { SHELL_FIXTURE } from '@xangarro/caja';
 import { AccesoGate } from '@/operador/acceso/gate';
 import { OperadorShell } from '@/operador/shell/shell';
 

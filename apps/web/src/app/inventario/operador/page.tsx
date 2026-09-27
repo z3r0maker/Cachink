@@ -1,4 +1,5 @@
-import { OperadorEstado, type EstadoMode } from '@/operador/estado';
+import { OperadorEstado } from '@/operador/estado';
+import type { EstadoMode } from '@xangarro/caja';
 
 const MODES: readonly EstadoMode[] = ['loading', 'empty', 'error'];
 

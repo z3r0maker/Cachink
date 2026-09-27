@@ -1,6 +1,11 @@
-import { DETALLE_VENTAS, detalleFixture, ventaPorFolio } from '@/operador/ventas/detalle/fixture';
+import {
+  DETALLE_VENTAS,
+  detalleFixture,
+  ventaPorFolio,
+  type DetalleScreenProps,
+  type VentaDetalle,
+} from '@xangarro/caja/ventas';
 import { DetalleVentaViva } from '@/operador/ventas/detalle/viva';
-import type { DetalleScreenProps, VentaDetalle } from '@/operador/ventas/detalle/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

@@ -1,10 +1,15 @@
 import { Icon } from '../../shell/icon';
 import { Glyph } from '../ui/parts';
-import { PRODUCT_ICONS } from '../ui/product-icons';
-import { conUnidad } from './derive';
+import { PRODUCT_ICONS } from '@xangarro/caja';
+import {
+  conUnidad,
+  MOTIVOS_MERMA,
+  type Existencia,
+  type MotivoMerma,
+  type TipoMovimiento,
+} from '@xangarro/caja/inventario';
 import { EstadoChip } from './listas';
 import * as s from './mover.css';
-import { MOTIVOS_MERMA, type Existencia, type MotivoMerma, type TipoMovimiento } from './types';
 
 const MENOS = 'M5 12h14';
 const MAS = 'M12 5v14M5 12h14';

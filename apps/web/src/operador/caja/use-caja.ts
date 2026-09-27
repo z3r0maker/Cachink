@@ -2,9 +2,15 @@
 
 import { useRef, useState } from 'react';
 
-import { matches } from '../ui/search';
-import { contar, total } from './ticket';
-import type { CajaData, Categoria, CobroPaso, LineaTicket } from './types';
+import { matches, hoyLocal, horaLocal } from '@xangarro/caja';
+import {
+  contar,
+  total,
+  type CajaData,
+  type Categoria,
+  type CobroPaso,
+  type LineaTicket,
+} from '@xangarro/caja/caja';
 
 /** The four ways a sale is paid (ADR-108: no QR/CoDi). */
 export type MetodoCobro = 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
@@ -14,7 +20,6 @@ import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './t
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 import { readSesion } from '../runtime/session-store';
-import { hoyLocal, horaLocal } from '../runtime/fechas';
 
 export type Filtro = 'Todos' | Categoria;
 

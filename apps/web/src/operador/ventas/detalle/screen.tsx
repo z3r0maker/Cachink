@@ -5,15 +5,21 @@ import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 import type { ReactNode } from 'react';
 
-import { OPERADOR_BASE } from '../../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import { DialogoCerrar } from '../../ui/dialogo-mostrador';
 import * as m from '../../ui/mostrador.css';
-import { ESTADO_ENVIO, estadoDe, subtitulo, totalDe } from './copy';
+import {
+  ESTADO_ENVIO,
+  estadoDe,
+  subtitulo,
+  totalDe,
+  type CargaTicket,
+  type VentaDetalle,
+} from '@xangarro/caja/ventas';
 import * as d from './detalle.css';
 import { Fichas, Hecho, Notas } from './side';
 import * as s from './side.css';
 import { Lineas } from './ticket-card';
-import type { CargaTicket, VentaDetalle } from './types';
 
 const WHATSAPP =
   'M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719';

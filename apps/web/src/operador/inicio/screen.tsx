@@ -1,15 +1,19 @@
 import { Don } from '@/components/don/don';
 
 import { OperadorEstado } from '../estado';
-import { ICONS } from '../shell/nav';
+import { ICONS } from '@xangarro/caja';
 import { StatRow } from '../ui/panel';
 import { OpMain } from '../ui/parts';
-import { heroFor, saludo } from './copy';
+import {
+  heroFor,
+  saludo,
+  kpisFor,
+  type InicioData,
+  type InicioScreenProps,
+} from '@xangarro/caja/inicio';
 import { HeroCard } from './hero';
 import * as s from './inicio.css';
-import { kpisFor } from './kpis';
 import { DeParteDe, ParaHoy, UltimosCortes } from './lists';
-import type { InicioData, InicioScreenProps } from './types';
 
 /**
  * Operador · Inicio: not a dashboard, it answers «what do I do now».

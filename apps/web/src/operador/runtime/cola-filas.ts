@@ -9,7 +9,7 @@ import { sql } from 'drizzle-orm';
 
 import { LECTORES } from './cola-lectores';
 import { filas, porLotes, type Lector } from './cola-sql';
-import type { PendienteCrudo } from './cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 
 export interface Entrada {
