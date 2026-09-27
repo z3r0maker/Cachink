@@ -3,7 +3,7 @@ import type { Db } from './client.js';
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 /**
- * Load shedding for the pool (audit DB3-SYNC-05, ADR-121).
+ * Load shedding for the pool (audit DB3-SYNC-05, ADR-122).
  *
  * postgres.js queues a transaction that finds every connection busy and has no
  * acquire timeout of its own. With two connections per serverless instance, one

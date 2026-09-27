@@ -74,7 +74,7 @@ Response `200`:
 
 Rows inside `tables` are domain entities in camelCase (`ReferenceTablesSchema`); `users` rows never carry `email`.
 
-**Snapshot bootstrap (C-23, ADR-120).** A device that sends `"bootstrap": "snapshot"` gets the
+**Snapshot bootstrap (C-23, ADR-121).** A device that sends `"bootstrap": "snapshot"` gets the
 first page of a paged snapshot instead of the whole history: `bootstrap.snapshot` =
 `{ cutoff, first: true, next, stockBaseline: [{ productoId, cantidad }] }`, movements created since
 `cutoff` (90 days) as rows, older ones folded into the per-product baseline. `next` non-null → the
@@ -134,7 +134,7 @@ Response `200`:
 ```
 
 Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap (legacy; `426 PROTOCOL_UNSUPPORTED` past 5,000 live movements).
-`?snapshot=start` = the first page of a snapshot bootstrap, `?snapshot=<next>` the following ones (C-23, ADR-120): each page is at most 5,000 rows and 1.9 MB of row JSON, carries `snapshot: { cutoff, first, next, stockBaseline }` and the snapshot's cursor as `serverSeq` on every page; `next: null` ends it and the device pulls `since=serverSeq` from there. Stock = `stockBaseline` + the movements the device holds. An unknown token → `400 VALIDATION`. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant. `dueno_nombre` (optional, additive) is the owner's display name, sent on the bootstrap, every snapshot page and every pull (`xangarro.owner_nombre()`, data-pg 0044); `null` when the owner set none, absent from older servers (the device keeps what it has, in `app_config`).
+`?snapshot=start` = the first page of a snapshot bootstrap, `?snapshot=<next>` the following ones (C-23, ADR-121): each page is at most 5,000 rows and 1.9 MB of row JSON, carries `snapshot: { cutoff, first, next, stockBaseline }` and the snapshot's cursor as `serverSeq` on every page; `next: null` ends it and the device pulls `since=serverSeq` from there. Stock = `stockBaseline` + the movements the device holds. An unknown token → `400 VALIDATION`. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant. `dueno_nombre` (optional, additive) is the owner's display name, sent on the bootstrap, every snapshot page and every pull (`xangarro.owner_nombre()`, data-pg 0044); `null` when the owner set none, absent from older servers (the device keeps what it has, in `app_config`).
 
 ## §6 Entitlement payload
 

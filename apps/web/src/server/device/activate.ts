@@ -28,7 +28,7 @@ import { emptyFirstPage, snapshotPage } from './snapshot';
  * the check, so two concurrent redemptions yield exactly one success. If
  * anything in it throws, the claim rolls back with it: burning a code for a
  * phone that never got its token would strand the shopkeeper. The bootstrap
- * is read after that commit, in its own transaction (C-23, ADR-120), so the
+ * is read after that commit, in its own transaction (C-23, ADR-121), so the
  * business lock is held for the slot count and the insert alone.
  */
 export type ActivateErrorCode = keyof typeof ERROR_CATALOG;

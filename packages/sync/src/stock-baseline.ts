@@ -1,5 +1,5 @@
 /**
- * The device half of the snapshot's stock baseline (C-23, ADR-120).
+ * The device half of the snapshot's stock baseline (C-23, ADR-121).
  *
  * `__stock_baseline` is the table the A-11 retention purge already folds old
  * movements into; `sumStock` adds it to the movements on the device. A

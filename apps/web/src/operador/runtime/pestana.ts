@@ -1,5 +1,5 @@
 /**
- * One tab owns the register (DB3-CAJA-01, ADR-122 §1). sql.js keeps the whole
+ * One tab owns the register (DB3-CAJA-01, ADR-123 §1). sql.js keeps the whole
  * database in memory and writes it back to one OPFS file after each write, so
  * two tabs are two copies, and the last to save erases the other's unsent
  * sales — outbox included. The Worker that opens the database first takes the

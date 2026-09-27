@@ -6,7 +6,7 @@
  * `lastServerTime` and `lastPullAt` (entitlement staleness, retention) and
  * `acknowledgedThrough` (the retention purge bound, A-11).
  *
- * A device with no cursor bootstraps by **snapshot** (C-23, ADR-120): pages
+ * A device with no cursor bootstraps by **snapshot** (C-23, ADR-121): pages
  * of reference rows, recent movements and a stock baseline, followed to the
  * last one through `bootstrapNext`, then the ordinary pull from the
  * snapshot's cursor. An unfinished snapshot resumes where it stopped. Each

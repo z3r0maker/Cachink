@@ -5,7 +5,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { Deadline } from '@xangarro/data-pg';
 
 /**
- * The device routes' database deadlines (audit DB3-SYNC-05, ADR-121).
+ * The device routes' database deadlines (audit DB3-SYNC-05, ADR-122).
  *
  * The device routes run inside {@link withDbDeadlines}; every `withTenant`
  * under them — the device-auth read, the push, the pull — picks the policy up

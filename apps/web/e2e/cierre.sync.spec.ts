@@ -104,7 +104,7 @@ test("the close counts against the turno's real expected cash", async ({ page })
 });
 
 /**
- * ADR-122 (DB3-CAJA-02, DS-06 option (a)): records still to send never block
+ * ADR-123 (DB3-CAJA-02, DS-06 option (a)): records still to send never block
  * the close. With the server out of reach the sale waits in the outbox; the
  * close shows how many are waiting, stays enabled, closes, and the sale and
  * the closed turno reach Postgres once the connection comes back.

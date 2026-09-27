@@ -16,7 +16,7 @@ import { tenantFeatureFlags } from './bootstrap';
 import { snapshotReader } from './snapshot-reads';
 
 /**
- * One page of a snapshot bootstrap (C-23, ADR-120; contract §3, §5), inside
+ * One page of a snapshot bootstrap (C-23, ADR-121; contract §3, §5), inside
  * the caller's tenant transaction.
  *
  * `start` reads the committed cursor **first**, as the legacy bootstrap did

@@ -8,7 +8,7 @@ import type * as RouteModule from '../src/server/api/device-route';
 
 /**
  * A saturated pool answers a device 503 + Retry-After, not a hang (audit
- * DB3-SYNC-05, ADR-121). The real `db.ts` pool on real Postgres, cut to one
+ * DB3-SYNC-05, ADR-122). The real `db.ts` pool on real Postgres, cut to one
  * connection, held by a slow transaction; the device route's `withTenant`
  * must give up at the acquire deadline and say so in the contract's terms.
  *

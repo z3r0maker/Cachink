@@ -6,7 +6,7 @@ import { PassThrough, Readable, type Writable } from 'node:stream';
 import { loadExcelJs, type Column } from './workbook';
 
 /**
- * An .xlsx written as it is read (audit DB3-EXP-01, ADR-121).
+ * An .xlsx written as it is read (audit DB3-EXP-01, ADR-122).
  *
  * The in-memory `Workbook` held every cell as an object until the end: 100K
  * rows took 829 MB and a one-year whale 2.7 GB, past any function's memory.

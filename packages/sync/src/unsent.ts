@@ -1,6 +1,6 @@
 /**
  * What this device captured and the server has not accepted yet — the one
- * definition of «por enviar» (DB3-CAJA-02, ADR-122). The caja's pill, its
+ * definition of «por enviar» (DB3-CAJA-02, ADR-123). The caja's pill, its
  * Registros por enviar and its cierre banner, and the phone's pill, all read
  * it; before, the caja counted `pending` rows only, so a sale captured
  * offline (no status row at all) counted as nothing.

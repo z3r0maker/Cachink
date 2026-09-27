@@ -23,7 +23,7 @@ import { pull, type PullRefusal } from '../src/server/sync/pull';
 import { pushFixtures } from './support/push-fixtures';
 
 /**
- * The snapshot bootstrap on real Postgres under RLS (C-23, ADR-120; audit
+ * The snapshot bootstrap on real Postgres under RLS (C-23, ADR-121; audit
  * DB3-BOOT-01): a tenant with 30,000 live movements links a device in pages
  * that each stay under 2 MB, and the stock a device sums from them — baseline
  * plus rows — equals the sum of every movement, including ones pushed while

@@ -1,5 +1,5 @@
 /**
- * The lock-wait half of the migration lint (DB3-MIG-01; ADR-118 amendment).
+ * The lock-wait half of the migration lint (DB3-MIG-01; ADR-119 amendment).
  * Pure; unit-tested in `tests/migrate-hosted-statements.test.ts`.
  *
  * Two kinds of statement wait for locks very differently:

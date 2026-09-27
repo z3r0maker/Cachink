@@ -1,5 +1,5 @@
 /**
- * The device half of the snapshot bootstrap (C-23, ADR-120): baseline +
+ * The device half of the snapshot bootstrap (C-23, ADR-121): baseline +
  * recent movements = full-history stock, echoes forgotten in chunks, a page
  * applied all or nothing, and a re-link that never counts a movement twice.
  */

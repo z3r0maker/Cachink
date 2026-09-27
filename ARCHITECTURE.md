@@ -157,11 +157,11 @@ Links to discussion, docs, prior art.
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
 | [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
-| [118](#adr-118) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [119](#adr-119) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
-| [120](#adr-120) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
-| [121](#adr-121) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
-| [122](#adr-122) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [119](#adr-119) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [120](#adr-120) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
+| [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
+| [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8336,7 +8336,7 @@ example names or amounts. The rules, in short (the full guide is
 
 ---
 
-## ADR-118
+## ADR-119
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -8433,7 +8433,7 @@ having been applied to the hosted database.
 
 ---
 
-## ADR-119
+## ADR-120
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 
@@ -8555,7 +8555,7 @@ on evidence — a 413 alone, or the server accepting another part of the same
 batch; a lone row and its lone neighbour both refused with nothing accepted is
 the server refusing everything alike, and nothing is marked. (3) Network,
 timeout, 429, 503 and anything carrying `Retry-After` never split: they keep
-the engine's backoff (ADR-121 sheds load with 503). (4) The cursor advances
+the engine's backoff (ADR-122 sheds load with 503). (4) The cursor advances
 only over change-log entries whose rows were answered or refused, so a
 halving cut short never skips an unsent row; accepted rows past the cursor
 are resent and answered from their receipts. (5) `@xangarro/contracts` gains
@@ -8572,7 +8572,7 @@ push the contract allows today.
 
 ---
 
-## ADR-120
+## ADR-121
 
 **Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history
 
@@ -8690,7 +8690,7 @@ autocommitting statement at a time.
 
 ---
 
-## ADR-121
+## ADR-122
 
 **Title:** Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued
 
@@ -8796,7 +8796,7 @@ in-flight functions.
 
 ---
 
-## ADR-122
+## ADR-123
 
 **Title:** The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle
 

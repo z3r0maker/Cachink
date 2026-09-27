@@ -39,7 +39,7 @@ export function cerrarHint(faltaMotivo: boolean, faltaNota: boolean): string {
 }
 
 /**
- * The band while records wait (DS-06 option (a), ADR-122): the close stays
+ * The band while records wait (DS-06 option (a), ADR-123): the close stays
  * open — the expected cash comes from this caja's own rows, all of them here —
  * and the queue goes up by itself when the connection comes back.
  */

@@ -15,7 +15,7 @@ import type { Tx } from '../db';
 import { rowToWire, type Row } from '../sync/codec';
 
 /**
- * What a snapshot page reads, section by section (C-23, ADR-120): keyset by
+ * What a snapshot page reads, section by section (C-23, ADR-121): keyset by
  * id, live rows only, inside the caller's tenant transaction — RLS scopes
  * every statement, nothing filters by business here.
  *

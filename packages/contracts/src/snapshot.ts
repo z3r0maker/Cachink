@@ -1,5 +1,5 @@
 /**
- * The snapshot bootstrap (C-23, ADR-120; docs/plan/02-contracts.md §3, §5).
+ * The snapshot bootstrap (C-23, ADR-121; docs/plan/02-contracts.md §3, §5).
  *
  * A device that opts in (`bootstrap: 'snapshot'` on `/activate`,
  * `?snapshot=start` on `/sync/pull`) no longer receives every movement the
