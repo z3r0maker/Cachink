@@ -10,6 +10,7 @@ export * from './stock-baseline.js';
 export * from './sync-keys.js';
 export * from './outbox-reader.js';
 export * from './status-store.js';
+export * from './unsent.js';
 export * from './push.js';
 export * from './pull.js';
 export * from './entitlement.js';

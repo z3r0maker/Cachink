@@ -9,7 +9,7 @@
 
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { Bootstrap } from '@xangarro/contracts';
-import type { SyncRunResult } from '@xangarro/sync';
+import type { SyncCounts, SyncRunResult } from '@xangarro/sync';
 
 import type {
   BootInfo,
@@ -36,15 +36,13 @@ import type {
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
 import type { RecurrenteGastoPara } from './recurrentes';
+import type { Reclamo } from './pestana';
 import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
 import type { TurnoVivoPara } from './turno-shapes';
 import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
 
-export interface RuntimeCounts {
-  readonly pending: number;
-  readonly rejected: number;
-  readonly retrying: number;
-}
+/** The engine's own counts, as the Worker returns them: one shape, defined in `@xangarro/sync`. */
+export type RuntimeCounts = SyncCounts;
 
 interface Pending {
   readonly resolve: (v: unknown) => void;
@@ -77,6 +75,11 @@ export class RegisterRuntime {
     const request: WorkerRequest = { ...call, id } as WorkerRequest;
     this.#worker.postMessage(request);
     return promise;
+  }
+
+  /** DB3-CAJA-01: does this tab own the register? `esperar` queues until it does. */
+  reclamar(esperar: boolean): Promise<Reclamo> {
+    return this.#call<Reclamo>({ method: 'reclamar', esperar });
   }
 
   boot(): Promise<BootInfo> {

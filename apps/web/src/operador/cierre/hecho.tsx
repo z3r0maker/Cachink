@@ -63,7 +63,9 @@ export function Hecho({ x, data }: { readonly x: Cierre; readonly data: CierreDa
           <br />
           {segundaLinea(x.dif)}
         </h1>
-        <p className={h.texto}>{`${lineaCerrado(x.dif, x.motivo, data.dueno)}${gracias}`}</p>
+        <p
+          className={h.texto}
+        >{`${lineaCerrado(x.dif, x.motivo, data.dueno, x.pendientes)}${gracias}`}</p>
         <Pasos x={x} data={data} />
       </div>
       <Corte x={x} data={data} />

@@ -16,6 +16,7 @@ import type { XangarroDatabase } from '@xangarro/data';
 import { syncRowStatus } from '@xangarro/data';
 import { equalJitter, type Random } from './backoff.js';
 import type { CoalescedChange } from './outbox-reader.js';
+import { unsentRows } from './unsent.js';
 
 const BASE_BACKOFF_MS = 60_000;
 /** Far beyond any request timeout: a row pending this long is not in flight. */
@@ -206,6 +207,11 @@ export class StatusStore {
       .set({ retryable: true, retryAfter: now.toISOString() })
       .where(byRow(tableName, rowId))
       .run();
+  }
+
+  /** Everything not accepted yet, terminal rejections apart (DB3-CAJA-02, `unsent.ts`). */
+  async unsentCount(): Promise<number> {
+    return (await unsentRows(this.#db)).length;
   }
 
   async countByStatus(): Promise<{ pending: number; rejected: number; retrying: number }> {

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   BANDA_CUERPO,
+  bandaTitulo,
   cerrarHint,
   cerrarLabel,
   conSigno,
@@ -25,14 +26,21 @@ describe('cierre de turno', () => {
     assert.match(cerrarHint(false, false), /^Al cerrar se guarda el conteo/);
   });
 
-  it('puts the difference in the close button, and says why records block it', () => {
+  it('puts the difference in the close button', () => {
     assert.equal(cerrarLabel({ tipo: 'cuadra', monto: 0n }), 'Cerrar turno');
     assert.equal(
       cerrarLabel({ tipo: 'falta', monto: 70_00n }),
       'Cerrar turno con faltante de $70.00',
     );
     assert.equal(cerrarLabel({ tipo: 'sobra', monto: 5n }), 'Cerrar turno con sobrante de $0.05');
-    assert.match(BANDA_CUERPO, /el efectivo esperado se calcula con ellos\.$/);
+  });
+
+  it('lets the turno close with records to send, and says how many retry by themselves (ADR-121)', () => {
+    assert.equal(bandaTitulo(3, 2), 'Tienes 3 registros por enviar (2 se reintentarán solos).');
+    assert.equal(bandaTitulo(1, 1), 'Tienes 1 registro por enviar (1 se reintentará solo).');
+    assert.equal(bandaTitulo(4, 0), 'Tienes 4 registros por enviar.');
+    assert.equal(BANDA_CUERPO, 'Puedes cerrar; se enviarán cuando vuelva la conexión.');
+    assert.doesNotMatch(BANDA_CUERPO, /primero/i);
   });
 
   it('words the difference and the closed line', () => {
@@ -45,5 +53,9 @@ describe('cierre de turno', () => {
       'Quedó un faltante explicado como «Salió un vale».',
     );
     assert.match(lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro'), /Pedro ya lo tiene/);
+    assert.match(
+      lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro', 2),
+      /Pedro lo verá en su portal cuando se envíen los registros\.$/,
+    );
   });
 });

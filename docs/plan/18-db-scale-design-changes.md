@@ -18,7 +18,7 @@ decisions** first: they change the copy of DS-01 and DS-06.
    Rows in automatic retry, and sales captured offline and never attempted, do not block it. Should
    cierre (a) stay open and say the rows will be sent later, which keeps the register offline-first,
    or (b) block until everything is sent, which means an offline register cannot close?
-   **Recommendation: (a).**
+   **Recommendation: (a).** **Answered 2026-09-26: (a)** — recorded in ADR-121.
 2. **Search scope in Ventas y gastos (DS-01).** The placeholder promises «concepto, folio u
    operador», but search has only ever matched the concepto. Should folio and operador become
    searchable (a small server change), or should the copy shrink to «Buscar por concepto»?
@@ -114,7 +114,11 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-06 Cierre — rows still to send
 
-- [ ] Status · Blocked by: owner decision 1 · Send the matching block; pull; align `operador/cierre/*`.
+- [ ] Status · Owner decision 1 answered: (a) (ADR-121). Minimal version shipped (DB3-CAJA-02): the
+      amber band with the copy below, «Reintentar envío» and «Ver cuáles» kept, the close enabled;
+      the blocked design's «Puede cambiar» chip, its «Espera a que se envíen…» hint and the
+      «la diferencia se vuelve a calcular» line are gone. The closed screen says «Pedro lo verá en su
+      portal cuando se envíen los registros.» Still to do: send option (a)'s block; pull; align.
 
 > **Cierre — option (a), recommended.** Banner (warning tone): «Tienes N registros por enviar (M se
 > reintentarán solos). Puedes cerrar; se enviarán cuando vuelva la conexión.» Cierre stays enabled.
@@ -137,7 +141,10 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ### DS-08 Caja — already open in another tab
 
-- [ ] Status · Send to the operador project; pull; wire the Web Lock (audit DB3-CAJA-01).
+- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-121): Acceso's frame
+      (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
+      («Esperando a que se cierre la otra pestaña…»). No «Cerrar esta pestaña» link: a script can
+      only close a tab it opened. Still to do: send the block below; pull; align.
 
 **Why.** Two tabs of the caja each keep their own copy of the local database, and the last one to
 save erases the other's unsent sales. The fix lets one tab hold the register; the second tab needs

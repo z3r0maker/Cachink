@@ -24,10 +24,11 @@ export interface CerrarVivo {
 }
 
 /**
- * The count, the explanation and the close. Closing is blocked while the queue
- * holds records (the expected cash depends on them) and, with a difference,
- * until a reason is picked (and, for «Otra razón», a note written). The count
- * is in centavos end to end: each piece times its denomination's value.
+ * The count, the explanation and the close. Records still to send do not
+ * block it (ADR-121, DS-06 (a)): the expected cash is this caja's own rows,
+ * and the queue goes up by itself. With a difference, closing waits for a
+ * reason (and, for «Otra razón», a note). The count is in centavos end to
+ * end: each piece times its denomination's value.
  */
 export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
   const cola = useCola();
@@ -35,7 +36,7 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
   const [motivo, setMotivo] = useState<MotivoDiferencia | null>(null);
   const [nota, setNota] = useState('');
   const [cerrado, setCerrado] = useState(false);
-  const d = derivados(conteo, data, motivo, nota, cola);
+  const d = derivados(conteo, data, motivo, nota);
   const { contado, dif, puede } = d;
   const poner = ponerEn(setConteo);
   return {
@@ -51,10 +52,8 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
     setMotivo,
     nota,
     setNota,
-    pendientes: cola.pendientes,
-    connection: cola.connection,
-    enviando: cola.enviando,
-    enviar: cola.enviar,
+    // The queue as the pill counts it: pendientes, reintentando, connection, enviar.
+    ...cola,
     cerrado,
     cerrar: () =>
       alCerrar({
@@ -78,7 +77,6 @@ function derivados(
   data: CierreData,
   motivo: MotivoDiferencia | null,
   nota: string,
-  cola: ReturnType<typeof useCola>,
 ) {
   const contado = totalContado(conteo);
   const dif = diferenciaCorte(contado, esperadoDe(data.partes));
@@ -90,7 +88,7 @@ function derivados(
     dif,
     faltaMotivo,
     faltaNota,
-    puede: cola.pendientes === 0 && !faltaMotivo && !faltaNota,
+    puede: !faltaMotivo && !faltaNota,
   };
 }
 

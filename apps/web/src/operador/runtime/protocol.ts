@@ -69,6 +69,7 @@ export type WorkerRequest =
   | InventarioRequest
   | RecurrenteRequest
   | { readonly id: number; readonly method: 'boot' }
+  | { readonly id: number; readonly method: 'reclamar'; readonly esperar: boolean }
   | {
       readonly id: number;
       readonly method: 'registrar';

@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 
 import { useFlusher } from './cola-flusher';
@@ -21,8 +22,10 @@ const ENVIO_MS = 1400;
 
 export interface Cola {
   readonly connection: Connection;
-  /** Records captured here and not yet accepted by the server. */
+  /** Records captured here and not yet accepted by the server (`unsentRows`). */
   readonly pendientes: number;
+  /** Of those, the ones already tried once and retrying by themselves. */
+  readonly reintentando: number;
   readonly enviando: boolean;
   /** «Reintentar envío», from Registros por enviar or the close's banner. */
   readonly enviar: () => void;
@@ -39,6 +42,26 @@ export function desencolar(): Promise<void> {
   return desencolarAhora?.() ?? Promise.resolve();
 }
 
+/** The linked shell's full sync (push and pull), when mounted; the pill follows it. */
+let refrescarAhora: (() => Promise<void>) | null = null;
+
+/**
+ * A background pull (DB3-CAJA-03): through the shell's flusher when it is
+ * mounted, straight to the runtime at the door. Automatic, so the engine's
+ * backoff holds; a failure waits for the next one.
+ */
+export function refrescar(): Promise<void> {
+  if (refrescarAhora !== null) return refrescarAhora();
+  const device = readDevice();
+  if (device === null) return Promise.resolve();
+  return registerRuntime()
+    .sync(device.deviceToken, { mode: 'completa' })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}
+
 /** The flusher, published for `desencolar` while a linked provider is mounted. */
 function useLinkedQueue(linked: boolean): ReturnType<typeof useFlusher> {
   const real = useFlusher(linked);
@@ -46,8 +69,10 @@ function useLinkedQueue(linked: boolean): ReturnType<typeof useFlusher> {
   useEffect(() => {
     if (!linked) return;
     desencolarAhora = () => flush('captura', false);
+    refrescarAhora = () => flush('completa', false);
     return () => {
       desencolarAhora = null;
+      refrescarAhora = null;
     };
   }, [linked, flush]);
   return real;
@@ -80,7 +105,8 @@ function useFixtureQueue(): {
 /**
  * The register's send queue as every screen sees it. One state, so the header
  * pill, Registros por enviar and Cierre never disagree. Linked: the outbox
- * flusher drives it; not linked yet: the fixture, until O-12's linking screen.
+ * flusher drives it — never the fixture's count, not even before the first
+ * read (DB3-CAJA-02); not linked yet: the fixture, until O-12's linking screen.
  */
 export function ColaProvider(p: {
   readonly connection: Connection;
@@ -92,16 +118,18 @@ export function ColaProvider(p: {
   const fixture = useFixtureQueue();
   const value = useMemo<Cola>(
     () =>
-      linked && real.reales !== null
+      linked
         ? {
-            connection: real.reales.enLinea ? 'en-linea' : 'sin-conexion',
-            pendientes: real.reales.pendientes < 0 ? p.pendientes : real.reales.pendientes,
+            connection: (real.reales?.enLinea ?? navigator.onLine) ? 'en-linea' : 'sin-conexion',
+            pendientes: real.reales?.pendientes ?? 0,
+            reintentando: real.reales?.reintentando ?? 0,
             enviando: real.enviando,
             enviar: () => void real.flush('completa', true),
           }
         : {
             connection: fixture.vacia ? 'en-linea' : p.connection,
             pendientes: fixture.vacia ? 0 : p.pendientes,
+            reintentando: 0,
             enviando: fixture.enviando,
             enviar: fixture.enviar,
           },
