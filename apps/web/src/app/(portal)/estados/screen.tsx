@@ -165,7 +165,7 @@ function Statements({
       empty={excedido ? EXCEDIDO : VACIO}
       locked={{
         title: 'Los estados financieros llegan con Xangarro',
-        body: 'Tu plan Xangarrito registra ventas y gastos. Los estados NIF — resultados, balance y flujo — vienen incluidos desde Xangarro.',
+        body: 'Tu plan Xangarrito registra ventas y gastos. Los estados NIF (resultados, balance y flujo) vienen incluidos desde Xangarro.',
         plan: 'Xangarro',
       }}
     >

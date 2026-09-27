@@ -1,5 +1,14 @@
 import { style } from '@vanilla-extract/css';
-import { colors, fontSizes, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shadows,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 /**
  * The four data states, as one shape.
@@ -60,6 +69,20 @@ export const stateBody = style({
 });
 
 export const stateAction = style({ marginTop: 22 });
+
+/** Plan gating: Don points at what the next plan brings (no lock glyph). */
+export const lockedDon = style({ marginBottom: 12 });
+
+export const lockedChip = style({
+  marginBottom: 12,
+  padding: '4px 12px',
+  border: borders.thin,
+  borderRadius: shapeRadii.pill,
+  background: colors.yellowSoft,
+  fontSize: fontSizes.xs,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
 
 /** Loading: the real borders and shadows, filled with grey. No shimmer. */
 export const loadingBlock = style({

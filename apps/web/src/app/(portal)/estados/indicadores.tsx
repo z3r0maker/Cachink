@@ -35,11 +35,11 @@ const VEREDICTO: Record<
 > = {
   healthy: { texto: 'Saludable.', tinta: colors.greenText, punto: colors.green },
   warning: {
-    texto: 'Bajo — vale la pena revisarlo.',
+    texto: 'Bajo: vale la pena revisarlo.',
     tinta: colors.warningText,
     punto: colors.warning,
   },
-  critical: { texto: 'Crítico — atiéndelo pronto.', tinta: colors.redText, punto: colors.red },
+  critical: { texto: 'Crítico: atiéndelo pronto.', tinta: colors.redText, punto: colors.red },
 };
 
 const pct = (v: number | null): string => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);

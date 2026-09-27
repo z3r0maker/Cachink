@@ -12,6 +12,7 @@ import { cierreDelTurno, cerrarCaja } from './cierre';
 import { gastosDelTurno, registrarGasto } from './gastos';
 import { porCola } from './avisos';
 import { porInventario } from './inventario';
+import { porRecurrente } from './recurrentes';
 import { cancelarTicket, ticketPorFolio, ventasDelTurno } from './tickets';
 import { leerTurnoVivo } from './turno';
 import type { Db } from './db-types';
@@ -171,6 +172,8 @@ const POR_METODO: Readonly<Record<string, Handler>> = {
   responderAviso: estrecho(porCola),
   inventario: estrecho(porInventario),
   moverInventario: estrecho(porInventario),
+  gastoRecurrente: estrecho(porRecurrente),
+  pagarRecurrente: estrecho(porRecurrente),
   turnoVivo: estrecho(leerTurnoVivo),
   cierre: estrecho(leerCierre),
   cerrar: estrecho(leerCierre),

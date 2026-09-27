@@ -19,15 +19,16 @@ import type { CerrarVivo } from './use-cierre';
 import type { CierreData, CierreScreenProps } from './types';
 
 import { horaLocal } from '../runtime/fechas';
+import { nombreDueno } from '../ui/dueno';
 
 /** The Worker's figures as the screen's data; the count starts at zero. */
-function comoCierre(c: CierrePara, sesion: { nombre: string }): CierreData {
+function comoCierre(c: CierrePara, sesion: { nombre: string }, dueno: string): CierreData {
   return {
     operador: sesion.nombre,
     caja: 'Caja 1',
     desde: c.desde,
     hasta: horaLocal(),
-    dueno: 'Pedro',
+    dueno,
     partes: {
       fondo: BigInt(c.fondoCentavos),
       ventasEfectivo: BigInt(c.ventasEfectivoCentavos),
@@ -50,8 +51,12 @@ function comoCierre(c: CierrePara, sesion: { nombre: string }): CierreData {
 async function leerCierre(cred: Credenciales): Promise<CierreData> {
   const { device, sesion } = cred;
   if (device === null || sesion === null) throw new Error('sin sesión');
-  const c = await registerRuntime().cierre(device.businessId, device.deviceId, sesion.turnoId);
-  return comoCierre(c, { nombre: sesion.nombre });
+  const rt = registerRuntime();
+  const [c, negocio] = await Promise.all([
+    rt.cierre(device.businessId, device.deviceId, sesion.turnoId),
+    rt.negocio(device.businessId, device.deviceId).catch(() => null),
+  ]);
+  return comoCierre(c, { nombre: sesion.nombre }, nombreDueno(negocio?.dueno));
 }
 
 /** Close through the use case, then let the queue carry it up. */

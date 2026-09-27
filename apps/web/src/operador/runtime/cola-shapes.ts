@@ -89,6 +89,8 @@ export interface AvisosPara {
   /** Rows the server refused for good (not retried by itself). */
   readonly rechazados: number;
   readonly stockBajo: readonly StockBajoPara[];
+  /** The owner's display name as the last pull sent it; null when unknown. */
+  readonly dueno: string | null;
 }
 
 export interface ResponderAvisoCall {

@@ -24,5 +24,5 @@ export function changeLine(change: ConfigurationChange): string {
   const label = FLAG_LABEL[change.key];
   if (change.enabled) return `Se activará ${label}`;
   const keeps = KEEPS_DATA[change.key];
-  return keeps === undefined ? `Se desactivará ${label}` : `Se desactivará ${label} — ${keeps}`;
+  return keeps === undefined ? `Se desactivará ${label}` : `Se desactivará ${label}: ${keeps}`;
 }

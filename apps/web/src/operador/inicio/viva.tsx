@@ -1,9 +1,10 @@
 'use client';
 
 /**
- * Inicio for real (O-39): a linked register greets its operator and answers
- * «what now» from its own open turno, the recurring expenses already due and
- * its last closes. An unlinked browser keeps the design fixture.
+ * Inicio for real (O-39): a linked register greets its operator by the time
+ * of day and answers «what now» from its own open turno, «Para hoy» (the
+ * recurring expenses already due, low stock, overdue fiado) and its last
+ * closes. An unlinked browser keeps the design fixture.
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
@@ -11,7 +12,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { OperadorEstado, type EstadoMode } from '../estado';
 import { ICONS } from '../shell/nav';
 import { registerRuntime } from '../runtime/client';
-import type { TurnoVivoPara } from '../runtime/turno-shapes';
+import { comoCuenta } from '../cobranza/vivo';
+import { hoyLocal } from '../runtime/fechas';
+import type { CuentaPara } from '../runtime/protocol';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { OpMain } from '../ui/parts';
 import { InicioScreen } from './screen';
@@ -35,34 +38,47 @@ async function pendientesCola(): Promise<number> {
   }
 }
 
-/** Fiado still owed, only needed once the turno is closed. */
-async function porCobrar(
-  v: TurnoVivoPara,
-  device: { businessId: string; deviceId: string },
-): Promise<Entorno['porCobrar']> {
-  if (!v.cierre.cerrado) return { monto: 0n, clientes: 0 };
-  const cuentas = await registerRuntime().cuentas(device.businessId, device.deviceId);
+/** Fiado still owed across the business, for the closed turno's figures. */
+function porCobrar(cuentas: readonly CuentaPara[]): Entorno['porCobrar'] {
   const saldos = cuentas.map((c) => BigInt(c.saldoCentavos)).filter((s) => s > 0n);
   return { monto: saldos.reduce((a, b) => a + b, 0n), clientes: saldos.length };
+}
+
+/** «Para hoy»'s other two kinds: tracked stock and the accounts. Empty when unreadable. */
+async function stockYCuentas(
+  device: { businessId: string; deviceId: string },
+  turnoId: string,
+): Promise<{ stock: Entorno['stock']; cuentas: readonly CuentaPara[] }> {
+  const rt = registerRuntime();
+  const [inv, cuentas] = await Promise.all([
+    rt.inventario(device.businessId, device.deviceId, turnoId).catch(() => null),
+    rt.cuentas(device.businessId, device.deviceId).catch(() => []),
+  ]);
+  return { stock: inv?.existencias ?? [], cuentas };
 }
 
 async function leerInicio(cred: Credenciales): Promise<InicioData> {
   const { device, sesion } = cred;
   if (device === null || sesion === null) throw new Error('sin sesión');
   const rt = registerRuntime();
-  const [v, negocio, pendientes] = await Promise.all([
+  const [v, negocio, pendientes, otros] = await Promise.all([
     rt.turnoVivo(device.businessId, device.deviceId, sesion.turnoId),
     rt.negocio(device.businessId, device.deviceId).catch(() => null),
     pendientesCola(),
+    stockYCuentas(device, sesion.turnoId),
   ]);
+  const hoy = hoyLocal();
   return comoInicio(v, {
     nombre: sesion.nombre,
     negocio: negocio?.nombre ?? null,
     caja: CAJA,
     offline: !navigator.onLine,
     pendientes,
-    porCobrar: await porCobrar(v, device),
+    porCobrar: porCobrar(otros.cuentas),
     ahora: new Date(),
+    dueno: negocio?.dueno ?? null,
+    stock: otros.stock,
+    cuentas: otros.cuentas.map((c) => comoCuenta(c, hoy)),
   });
 }
 

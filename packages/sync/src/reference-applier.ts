@@ -15,6 +15,7 @@ import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import type { ReferenceTables } from '@xangarro/contracts';
 import type { XangarroDatabase } from '@xangarro/data';
 import {
+  DrizzleAppConfigRepository,
   businesses,
   clients,
   conversionRecetas,
@@ -27,8 +28,9 @@ import {
   recurringExpenses,
   users,
 } from '@xangarro/data';
+import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
-type RefTableName = Exclude<keyof ReferenceTables, 'feature_flags'>;
+type RefTableName = Exclude<keyof ReferenceTables, 'feature_flags' | 'dueno_nombre'>;
 
 /**
  * Every reference table now has a device home (C-20's saldos iniciales landed
@@ -123,7 +125,23 @@ export async function applyReferenceTables(
     .where(eq(businesses.id, businessId))
     .run();
   await forgetEchoes(db, businesses, [{ id: businessId }], floor);
+  await storeDuenoNombre(db, tables.dueno_nombre);
   return { applied };
+}
+
+/**
+ * The owner's display name goes to `app_config` (device-local, no change-log
+ * trigger): absent means an older server, so the stored name stays.
+ */
+async function storeDuenoNombre(
+  db: XangarroDatabase,
+  nombre: string | null | undefined,
+): Promise<void> {
+  if (nombre === undefined) return;
+  const config = new DrizzleAppConfigRepository(db);
+  const limpio = nombre?.trim() ?? '';
+  if (limpio === '') await config.delete(SYNC_CONFIG_KEYS.duenoNombre);
+  else await config.set(SYNC_CONFIG_KEYS.duenoNombre, limpio);
 }
 
 async function changeLogHighWater(db: XangarroDatabase): Promise<number> {

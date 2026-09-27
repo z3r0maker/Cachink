@@ -44,6 +44,27 @@ describe('ProcesarGastoRecurrenteUseCase', () => {
     expect(result.egreso?.gastoRecurrenteId).toBe(template.id);
   });
 
+  it('records what the caja captured (amount, concept, turno) and still advances', async () => {
+    const template = await seedTemplate(recurring, {
+      frecuencia: 'semanal',
+      proximoDisparo: '2026-04-20' as IsoDate,
+    });
+    const turno = '01HZ8XQN9GZJXV8AKQ5X0C7TRN' as never;
+    const result = await useCase.execute({
+      template,
+      today: '2026-04-23' as IsoDate,
+      captura: { concepto: 'Gas del local', monto: 65_000n, proveedor: null, cajaTurnoId: turno },
+    });
+    expect(result.processed).toBe(true);
+    expect(result.nextProximoDisparo).toBe('2026-04-27');
+    expect(result.egreso?.concepto).toBe('Gas del local');
+    expect(result.egreso?.monto).toBe(65_000n);
+    expect(result.egreso?.categoria).toBe(template.categoria);
+    expect(result.egreso?.cajaTurnoId).toBe(turno);
+    expect(result.egreso?.proveedor ?? null).toBe(null);
+    expect(result.egreso?.gastoRecurrenteId).toBe(template.id);
+  });
+
   it('mensual: clamps 31 → end of shorter month', async () => {
     const template = await seedTemplate(recurring, {
       frecuencia: 'mensual',

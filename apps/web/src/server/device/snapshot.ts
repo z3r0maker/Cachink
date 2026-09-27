@@ -9,7 +9,7 @@ import {
   SNAPSHOT_START,
   type SnapshotInfo,
 } from '@xangarro/contracts';
-import { committedCursor } from '@xangarro/data-pg';
+import { committedCursor, ownerNombre } from '@xangarro/data-pg';
 
 import type { Tx } from '../db';
 import { tenantFeatureFlags } from './bootstrap';
@@ -29,6 +29,7 @@ export interface SnapshotPage {
   readonly serverSeq: number;
   readonly tables: ReturnType<typeof pageTables>['tables'] & {
     readonly feature_flags: Record<string, boolean>;
+    readonly dueno_nombre: string | null;
   };
   readonly snapshot: SnapshotInfo;
 }
@@ -42,7 +43,13 @@ export async function snapshotPage(tx: Tx, token: string, now: Date): Promise<Sn
   const { tables, stockBaseline } = pageTables(page.sections);
   return {
     serverSeq: cursor.c,
-    tables: { ...tables, feature_flags: await tenantFeatureFlags(tx) },
+    // Every page names the owner, as every pull does (changes.ts): a caja
+    // linked through the snapshot says «Pedro», not «el dueño», from page one.
+    tables: {
+      ...tables,
+      feature_flags: await tenantFeatureFlags(tx),
+      dueno_nombre: await ownerNombre(tx),
+    },
     snapshot: {
       cutoff: cursor.cutoff,
       first,

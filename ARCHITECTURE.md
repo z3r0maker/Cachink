@@ -8273,7 +8273,7 @@ database, so the two orders silently differed.
 3. **A pending file that sorts below the last applied file of its set is
    refused**, naming both: renumber it above. Hosted and fresh databases then
    always apply the same sequence.
-4. **Every migration from data-pg 0044 and admin 0020 on sets `lock_timeout`**
+4. **Every migration from data-pg 0045 and admin 0020 on sets `lock_timeout`**
    (3 s), so a statement queued behind the evening peak fails fast and is run
    again in the trough rather than stalling every request behind its lock.
 5. **Old → new for such files runs on a throwaway database** migrated to the
@@ -8281,11 +8281,11 @@ database, so the two orders silently differed.
    a concurrent build cannot run inside the test transaction the older
    migration tests use.
 
-The first files to use it are data-pg 0044 (the audit's index set, the
+The first files to use it are data-pg 0045 (the audit's index set, the
 `business_members (business_id, user_id)` uniqueness, and the drop of seven
-indexes that repeated a `business_id` primary key) and 0046 (every tenant
+indexes that repeated a `business_id` primary key) and 0047 (every tenant
 policy wraps `current_business_id()` in a sub-select). In the same change:
-0045 spreads `api_latency_counters` over 16 slots per key, summed on read;
+0046 spreads `api_latency_counters` over 16 slots per key, summed on read;
 the console's `admin_user_email` casts its parameter, not the key; the
 digest reads stored `usage_counters` instead of recounting, and runs
 `security_prune()` daily.
@@ -8307,7 +8307,7 @@ digest reads stored `usage_counters` instead of recounting, and runs
 - A no-transaction file cannot be rolled back as a whole; reviewers check
   that each statement is safe to repeat, and the lint checks what it can.
 - `tenant-indexes.test.ts` now counts a single-column `business_id` primary
-  key as the tenant index, which is what let 0044 drop its duplicates.
+  key as the tenant index, which is what let 0045 drop its duplicates.
 - Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
   decided here; it needs its own ADR.
 
@@ -8328,7 +8328,7 @@ otherwise. `hosted/lint.ts` enforces it: a no-transaction file sets
 statement never under a long or zero timeout, and `REINDEX` only
 `CONCURRENTLY`. The INVALID-index sweep now matches schema and name.
 `db-local.sh` applies each transactional file in one transaction, as hosted
-does. data-pg 0044–0047 and admin 0020–0022 were corrected in place, never
+does. data-pg 0045–0048 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
 ## ADR-118
 

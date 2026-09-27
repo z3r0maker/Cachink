@@ -32,3 +32,4 @@ export * from './movimientos-resumen.js';
 export * from './rango-fechas.js';
 export * from './exportaciones.js';
 export * from './estados-periodo.js';
+export * from './owner-nombre.js';

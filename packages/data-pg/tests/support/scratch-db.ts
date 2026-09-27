@@ -60,7 +60,7 @@ export async function createScratchDb(superUrl: string): Promise<ScratchDb> {
 
 /**
  * `local/`, then every data-pg file that sorts before `before` (e.g.
- * `'0044'`), then — when `adminBefore` is given — the console's files before
+ * `'0045'`), then — when `adminBefore` is given — the console's files before
  * it: the order hosted applies them in.
  */
 export async function migrateUpTo(

@@ -8,6 +8,7 @@ import type { RegistrarTicketInput } from '@xangarro/application';
 import type { Bootstrap } from '@xangarro/contracts';
 import type { ColaRequest } from './cola-shapes';
 import type { InventarioRequest } from './inventario-mapa';
+import type { RecurrenteRequest } from './recurrentes';
 
 export type {
   AbonoCuentaPara,
@@ -66,6 +67,7 @@ export type SyncMode = 'captura' | 'completa';
 export type WorkerRequest =
   | ColaRequest
   | InventarioRequest
+  | RecurrenteRequest
   | { readonly id: number; readonly method: 'boot' }
   | {
       readonly id: number;

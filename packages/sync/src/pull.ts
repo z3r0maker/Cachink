@@ -51,9 +51,11 @@ async function nextRequest(appConfig: AppConfigRepository): Promise<Request> {
 }
 
 function countRows(page: PullResponse): number {
-  const rows = Object.entries(page.tables)
-    .filter(([k]) => k !== 'feature_flags')
-    .reduce((n, [, list]) => n + (list as readonly unknown[]).length, 0);
+  // Only the row arrays: `feature_flags` and `dueno_nombre` ride beside them.
+  const rows = Object.values(page.tables).reduce<number>(
+    (n, list) => n + (Array.isArray(list) ? list.length : 0),
+    0,
+  );
   return rows + (page.snapshot?.stockBaseline.length ?? 0);
 }
 

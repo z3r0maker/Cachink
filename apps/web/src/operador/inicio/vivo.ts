@@ -1,12 +1,17 @@
 /**
  * Inicio over the register's own rows (O-39): the same live read as Mi turno,
  * said the way Inicio says it. Pure, so the mapping is tested without a
- * Worker. The owner's messages are Avisos' (hidden here while live).
+ * Worker. The owner's messages are Avisos' (hidden here while live); «Para
+ * hoy» is `para-hoy.ts`.
  */
 
-import type { CortePara, RecurrentePara, TurnoVivoPara } from '../runtime/turno-shapes';
-import { detalleRecurrente } from '../turno/vivo';
-import type { CorteReciente, InicioData, ResultadoCorte, Situacion, Tarea } from './types';
+import type { CuentaCliente } from '../cobranza/cliente/types';
+import type { CortePara, TurnoVivoPara } from '../runtime/turno-shapes';
+import { nombreDueno } from '../ui/dueno';
+import { tareasParaHoy, type StockTarea } from './para-hoy';
+import type { CorteReciente, InicioData, Momento, ResultadoCorte, Situacion } from './types';
+
+export { comoTarea } from './para-hoy';
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const MESES = [
@@ -73,15 +78,11 @@ export const comoCorte = (c: CortePara, ahora: Date, caja: string): CorteRecient
   resultado: resultadoDe(BigInt(c.diferenciaCentavos)),
 });
 
-const minuscula = (s: string): string => `${s.charAt(0).toLowerCase()}${s.slice(1)}`;
-
-/** «Registrar gas · Se repite cada semana» from a recurring expense already due. */
-export const comoTarea = (r: RecurrentePara): Tarea => ({
-  id: r.id,
-  tipo: 'gasto',
-  titulo: `Registrar ${minuscula(r.concepto)}`,
-  detalle: `Se repite ${minuscula(detalleRecurrente(r))}`,
-});
+/** «Buenos días» before 12:00, «Buenas tardes» until 18:59, «Buenas noches» from 19:00. */
+export function momentoDe(hora: number): Momento {
+  if (hora < 12) return 'dia';
+  return hora < 19 ? 'tarde' : 'noche';
+}
 
 export function situacionDe(v: TurnoVivoPara, ahora: Date): Situacion {
   if (v.cierre.cerrado) return 'turno-cerrado';
@@ -97,6 +98,11 @@ export interface Entorno {
   /** Fiado still owed across the business, for the closed turno's figures. */
   readonly porCobrar: { readonly monto: bigint; readonly clientes: number };
   readonly ahora: Date;
+  /** The owner's display name as the last pull sent it; null: «el dueño». */
+  readonly dueno: string | null;
+  /** Tracked products' stock and the business's accounts, for «Para hoy». */
+  readonly stock: readonly StockTarea[];
+  readonly cuentas: readonly CuentaCliente[];
 }
 
 /** The live read as Inicio's data. */
@@ -105,8 +111,9 @@ export function comoInicio(v: TurnoVivoPara, e: Entorno): InicioData {
   const cortes = v.cortes.map((x) => comoCorte(x, e.ahora, e.caja));
   return {
     nombre: primerNombre(e.nombre),
+    momento: momentoDe(e.ahora.getHours()),
     fecha: fechaInicio(e.ahora, e.negocio, e.caja),
-    dueno: 'el dueño',
+    dueno: nombreDueno(e.dueno),
     situacion: situacionDe(v, e.ahora),
     offline: e.offline,
     pendientes: e.pendientes,
@@ -133,7 +140,7 @@ export function comoInicio(v: TurnoVivoPara, e: Entorno): InicioData {
     },
     // Only the «corte-por-aclarar» situation reads it, and live data never picks it.
     corteAclarar: { dia: '', caja: e.caja, monto: 0n, hora: '' },
-    tareas: v.recurrentes.map(comoTarea),
+    tareas: tareasParaHoy(v.recurrentes, e.stock, e.cuentas),
     mensajes: [],
     cortes,
   };

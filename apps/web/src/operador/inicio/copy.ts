@@ -134,10 +134,17 @@ export function heroFor(d: InicioData): Hero {
   return d.offline ? sinConexion(d) : vendiendo(t);
 }
 
-/** Don Cuentas' greeting: the time of day, plus «La caja está lista.» when it is. */
+const SALUDOS = { dia: 'Buenos días', tarde: 'Buenas tardes', noche: 'Buenas noches' } as const;
+
+/**
+ * Don Cuentas' greeting: the time of day, plus «La caja está lista.» when it
+ * is. Live data says the local hour (`momento`); the design's fixture keeps
+ * its «Buenas tardes» / «Buen día».
+ */
 export function saludo(d: InicioData): string {
   const abierto = d.situacion !== 'turno-cerrado' && d.turno !== null;
-  const hola = abierto ? `¡Buenas tardes, ${d.nombre}!` : `¡Buen día, ${d.nombre}!`;
+  const fijo = abierto ? 'Buenas tardes' : 'Buen día';
+  const hola = `¡${d.momento === undefined ? fijo : SALUDOS[d.momento]}, ${d.nombre}!`;
   return heroFor(d).tono === 'listo' ? `${hola} La caja está lista.` : hola;
 }
 

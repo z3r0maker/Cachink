@@ -115,7 +115,7 @@ describe('tenant indexes (DB-IDX-01)', () => {
   });
 
   it('a business_id primary key counts, so its duplicate index could go (DB2-IDX-01)', () => {
-    // These lost their plain business_id index in 0044; the key must still
+    // These lost their plain business_id index in 0045; the key must still
     // satisfy the guard, or the drop quietly made them seq-scan targets.
     const byName = new Map(tenantTables().map((t) => [t.name, t]));
     for (const name of [

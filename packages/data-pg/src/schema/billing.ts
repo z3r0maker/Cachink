@@ -25,7 +25,7 @@ export const COLLECTION_METHODS = ['charge_automatically', 'send_invoice'] as co
 
 /** One Stripe customer per business. */
 export const billingCustomers = pgTable('billing_customers', {
-  // The primary key is the tenant index (0044 dropped its duplicate).
+  // The primary key is the tenant index (0045 dropped its duplicate).
   businessId: text('business_id').primaryKey(),
   stripeCustomerId: text('stripe_customer_id').notNull().unique(),
   createdAt: at('created_at').notNull().defaultNow(),

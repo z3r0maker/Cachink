@@ -30,7 +30,7 @@ const at = (name: string) => timestamp(name, { withTimezone: true, mode: 'string
 
 /** One row per tenant: the last seq handed out. */
 export const syncCursors = pgTable('sync_cursors', {
-  // The primary key is the tenant index (0044 dropped its duplicate).
+  // The primary key is the tenant index (0045 dropped its duplicate).
   businessId: text('business_id').primaryKey(),
   lastSeq: seq('last_seq').notNull().default(0),
 });
@@ -70,7 +70,7 @@ export const syncReceipts = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.businessId, t.tableName, t.rowId] }),
-    // /sincronizacion's recent history (0044, which also dropped the plain
+    // /sincronizacion's recent history (0045, which also dropped the plain
     // business_id index the primary key already covers).
     index('sync_receipts_business_received_idx').on(t.businessId, t.receivedAt),
   ],

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 import { formatMoney } from '@xangarro/domain';
 
 import { HOY } from '../fixtures';
-import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { hrefRecurrente } from '../inicio/para-hoy';
+import { ICONS } from '../shell/nav';
 import { sumarDias, textoVence } from '../ui/frases';
+import { useHoyNo } from '../ui/hoy-no';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import * as r from './rows.css';
@@ -30,19 +31,21 @@ function dueChip(vence: number): { label: string; bg: string; color: string } {
 
 /**
  * «Pendientes de registrar»: recurring expenses nobody has captured today.
- * «Hoy no» hides one for the rest of the day on this register (device-local).
+ * «Registrar» opens Gastos' drawer filled from the template; saving it
+ * advances the schedule, so the row leaves this list and Inicio's «Para hoy».
+ * «Hoy no» hides one for the rest of the day on this register (`ui/hoy-no`).
  */
 export function PendientesRecurrentes({
   items,
 }: {
   readonly items: readonly PendienteRecurrente[];
 }) {
-  const [skipped, setSkipped] = useState<readonly string[]>([]);
-  const shown = items.filter((x) => !skipped.includes(x.id));
+  const hoyNo = useHoyNo();
+  const shown = items.filter((x) => !hoyNo.ocultos.includes(x.id));
   if (items.length === 0) return null;
   const verTodos =
-    skipped.length > 0 ? (
-      <button type="button" className={r.verTodos} onClick={() => setSkipped([])}>
+    shown.length < items.length ? (
+      <button type="button" className={r.verTodos} onClick={hoyNo.mostrarTodo}>
         Ver todos
       </button>
     ) : null;
@@ -54,7 +57,7 @@ export function PendientesRecurrentes({
       action={verTodos}
     >
       {shown.map((x) => (
-        <Row key={x.id} p={x} onSkip={() => setSkipped((s) => [...s, x.id])} />
+        <Row key={x.id} p={x} onSkip={() => hoyNo.ocultar(x.id)} />
       ))}
       {shown.length === 0 ? <div className={r.nada}>No hay gastos por registrar hoy.</div> : null}
     </Panel>
@@ -76,7 +79,7 @@ function Row({ p: x, onSkip }: { readonly p: PendienteRecurrente; readonly onSki
       <span className={r.monto}>{formatMoney(x.monto)}</span>
       <span className={r.actions}>
         <Link
-          href={`${OPERADOR_BASE}/gastos`}
+          href={hrefRecurrente(x.id)}
           className={x.vence <= 0 ? `${p.outlineBtn} ${p.outlineYellow}` : p.outlineBtn}
         >
           Registrar

@@ -1,6 +1,18 @@
-import { Button } from './button';
+import Link from 'next/link';
+
+import { button } from './button.css';
+import { Don } from './don/don';
 import { Tag } from './tag';
-import { stateAction, stateBody, stateCard, stateTitle, tile, tileEmpty } from './states.css';
+import {
+  lockedChip,
+  lockedDon,
+  stateAction,
+  stateBody,
+  stateCard,
+  stateTitle,
+  tile,
+  tileEmpty,
+} from './states.css';
 
 export interface LockedStateProps {
   readonly title: string;
@@ -18,23 +30,20 @@ export interface LockedStateProps {
 export function LockedState({ title, body, plan }: LockedStateProps) {
   return (
     <div className={stateCard}>
-      <div className={`${tile} ${tileEmpty}`} aria-hidden="true">
-        <svg
-          width={34}
-          height={34}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.2}
-          strokeLinecap="round"
-        >
-          <path d="M4 10h16v11H4V10Zm4 0V7a4 4 0 0 1 8 0v3" />
-        </svg>
+      <div className={lockedDon}>
+        <Don pose="senalando" size={132} />
       </div>
+      <span className={lockedChip}>Incluido desde {plan}</span>
       <h2 className={stateTitle}>{title}</h2>
       <p className={stateBody}>{body}</p>
       <div className={stateAction}>
-        <Button>Conoce {plan}</Button>
+        <Link
+          href="/suscripcion#planes"
+          className={button({ variant: 'primary', size: 'md' })}
+          data-onyellow="1"
+        >
+          Conoce {plan}
+        </Link>
       </div>
     </div>
   );

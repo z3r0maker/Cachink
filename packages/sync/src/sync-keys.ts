@@ -22,4 +22,6 @@ export const SYNC_CONFIG_KEYS = {
   lastPullAt: 'lastPullAt',
   /** Server time of the last retention purge (A-11) — runs at most daily. */
   lastPurgeAt: 'lastPurgeAt',
+  /** The owner's display name as the last pull sent it (absent: unknown). */
+  duenoNombre: 'duenoNombre',
 } as const;

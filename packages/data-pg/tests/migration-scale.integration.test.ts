@@ -17,7 +17,7 @@ import {
 /**
  * Old → new for the scale audit's migrations (CLAUDE.md §2.9; DB2-MIG-01,
  * DB2-IDX-01, DB2-HOT-01, DB2-RLS-01; ADR-117), on a throwaway database
- * migrated through 0043 and filled with rows in the old shape. 0044 and 0046 run
+ * migrated through 0044 and filled with rows in the old shape. 0045 and 0047 run
  * through the hosted runner itself (`applyMigration`), because they are its
  * first no-transaction files: that is the path production takes.
  */
@@ -71,7 +71,7 @@ const indexDef = async (sql: postgres.Sql, name: string) =>
     await sql<{ def: string }[]>`SELECT indexdef AS def FROM pg_indexes WHERE indexname = ${name}`
   )[0]?.def ?? '';
 
-/** The per-table storage options 0044 sets (DB3-OPS-01), as `pg_class` has them. */
+/** The per-table storage options 0045 sets (DB3-OPS-01), as `pg_class` has them. */
 const reloptions = async (sql: postgres.Sql) =>
   Object.fromEntries(
     (
@@ -129,14 +129,14 @@ const REDUNDANT = [
   'expenses_business_idx',
 ];
 
-describe('scale migrations 0044–0046, old → new', () => {
+describe('scale migrations 0045–0047, old → new', () => {
   let db: ScratchDb;
   let sql: postgres.Sql;
 
   beforeAll(async () => {
     db = await createScratchDb(process.env.DATABASE_SUPER_URL as string);
     sql = db.sql;
-    await migrateUpTo(sql, '0044');
+    await migrateUpTo(sql, '0045');
     await seedOldRows(sql);
     await ensureLedger(sql);
   }, 120_000);
@@ -145,25 +145,25 @@ describe('scale migrations 0044–0046, old → new', () => {
     await db?.drop();
   });
 
-  it('before 0044 the redundant indexes exist and no table has storage options', async () => {
+  it('before 0045 the redundant indexes exist and no table has storage options', async () => {
     assert.equal((await indexState(sql, REDUNDANT)).length, REDUNDANT.length);
     const opts = await reloptions(sql);
     assert.equal(Object.keys(opts).length, 11);
     assert.ok(Object.values(opts).every((o) => o.length === 0));
   });
 
-  it('0044 refuses duplicate memberships before building anything', async () => {
+  it('0045 refuses duplicate memberships before building anything', async () => {
     await sql`INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
               VALUES ('bm-dup', ${USER}, 'viewer', ${A}, ${T}, ${T})`;
     await assert.rejects(
-      () => applyMigration(sql, fileNamed('0044_scale_indexes.sql')),
+      () => applyMigration(sql, fileNamed('0045_scale_indexes.sql')),
       /duplicate/,
     );
     assert.deepEqual(await indexState(sql, NEW), [], 'nothing was built');
     assert.equal((await readApplied(sql)).length, 0, 'no ledger row');
   });
 
-  it('0044 sweeps the INVALID index an interrupted build left, and rebuilds it', async () => {
+  it('0045 sweeps the INVALID index an interrupted build left, and rebuilds it', async () => {
     // What a lock_timeout half-way through a unique build leaves behind.
     await assert.rejects(
       () => sql`CREATE UNIQUE INDEX CONCURRENTLY business_members_business_user_uq
@@ -181,7 +181,7 @@ describe('scale migrations 0044–0046, old → new', () => {
                   ON scale_other.bm (business_id, user_id)`,
     );
     await sql`DELETE FROM business_members WHERE id = 'bm-dup'`;
-    await applyMigration(sql, fileNamed('0044_scale_indexes.sql'));
+    await applyMigration(sql, fileNamed('0045_scale_indexes.sql'));
     const [other] = await sql<{ valid: boolean }[]>`
       SELECT i.indisvalid AS valid FROM pg_index i
        WHERE i.indexrelid = 'scale_other.business_members_business_user_uq'::regclass`;
@@ -203,11 +203,11 @@ describe('scale migrations 0044–0046, old → new', () => {
     );
     assert.deepEqual(
       (await readApplied(sql)).map((r) => r.name),
-      ['data-pg/0044_scale_indexes.sql'],
+      ['data-pg/0045_scale_indexes.sql'],
     );
   });
 
-  it('0044 builds the round-3 shapes: INCLUDE, partial, business_id alone (DB3-IDX-01)', async () => {
+  it('0045 builds the round-3 shapes: INCLUDE, partial, business_id alone (DB3-IDX-01)', async () => {
     assert.match(await indexDef(sql, 'sales_business_created_idx'), /INCLUDE \(ticket_id\)/);
     assert.match(
       await indexDef(sql, 'inventory_movements_business_created_idx'),
@@ -228,7 +228,7 @@ describe('scale migrations 0044–0046, old → new', () => {
     );
   });
 
-  it('0044 sets fillfactor on the hot-update rows and faster autovacuum on the append tables (DB3-OPS-01)', async () => {
+  it('0045 sets fillfactor on the hot-update rows and faster autovacuum on the append tables (DB3-OPS-01)', async () => {
     const hot = ['fillfactor=80'];
     const append = [
       'autovacuum_analyze_scale_factor=0.02',
@@ -282,7 +282,7 @@ describe('scale migrations 0044–0046, old → new', () => {
     }
   });
 
-  it('0044 keeps every row, enforces one membership per person, and repeats as a no-op', async () => {
+  it('0045 keeps every row, enforces one membership per person, and repeats as a no-op', async () => {
     const [n] = await sql<{ s: number; e: number; m: number; t: number }[]>`
       SELECT (SELECT count(*) FROM sales)::int AS s, (SELECT count(*) FROM expenses)::int AS e,
              (SELECT count(*) FROM inventory_movements)::int AS m, (SELECT count(*) FROM tickets)::int AS t`;
@@ -293,11 +293,11 @@ describe('scale migrations 0044–0046, old → new', () => {
       /business_members_business_user_uq/,
     );
     // `psql -f` (db-local.sh, CI) re-applies the file the same way.
-    await applyFile(sql, join(DATA_PG_DIR, '0044_scale_indexes.sql'));
+    await applyFile(sql, join(DATA_PG_DIR, '0045_scale_indexes.sql'));
     assert.equal((await indexState(sql, NEW)).length, NEW.length);
   });
 
-  it('0045 keeps the old counts in slot 0, and the p95 reads them unchanged', async () => {
+  it('0046 keeps the old counts in slot 0, and the p95 reads them unchanged', async () => {
     const p95 = async () =>
       (await sql<{ ms: number | null }[]>`SELECT xangarro.admin_sync_p95(1) AS ms`)[0]?.ms;
     assert.equal(await p95(), 700, 'before: 90 at ≤50 ms, 10 at ≤700 ms');
@@ -305,7 +305,7 @@ describe('scale migrations 0044–0046, old → new', () => {
       (await sql<{ v: string }[]>`SELECT current_setting('lock_timeout') AS v`)[0]?.v;
     const before = await timeout();
     assert.equal(typeof before, 'string');
-    await applyMigration(sql, fileNamed('0045_api_latency_slots.sql'));
+    await applyMigration(sql, fileNamed('0046_api_latency_slots.sql'));
     assert.equal(await timeout(), before, 'SET LOCAL: nothing leaks onto the session (R2-13)');
     const rows = await sql<{ slot: number; hits: number }[]>`
       SELECT slot, hits FROM xangarro.api_latency_counters ORDER BY bucket_ms`;
@@ -330,9 +330,9 @@ describe('scale migrations 0044–0046, old → new', () => {
     );
   });
 
-  it('0046 wraps all 29 bare policies, and tenant isolation still binds', async () => {
+  it('0047 wraps all 29 bare policies, and tenant isolation still binds', async () => {
     assert.equal((await unwrapped(sql)).length, 29, 'the audit counted 29');
-    await applyMigration(sql, fileNamed('0046_rls_wrapped.sql'));
+    await applyMigration(sql, fileNamed('0047_rls_wrapped.sql'));
     assert.deepEqual(await unwrapped(sql), []);
     const u = new URL(db.url);
     u.username = 'xangarro_app';

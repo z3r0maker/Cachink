@@ -58,6 +58,14 @@ export const capRow = style({
   borderBottom: `2px solid ${colors.gray200}`,
 });
 
+/**
+ * The capacidad's text takes whatever the row can spare: the bar and the
+ * progress tag («52 de 60 días · 2 de 2 compras») keep their width, and the
+ * name and requirement wrap instead of pushing the page sideways on laptop
+ * and tablet widths.
+ */
+export const capText = style({ minWidth: 0, flex: '1 1 0' });
+
 export const capName = style({ fontWeight: typography.weights.extraBold, color: colors.black });
 
 export const capReq = style({

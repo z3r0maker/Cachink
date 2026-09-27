@@ -63,7 +63,7 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
 
   await expect(
     page.getByRole('heading', {
-      name: 'Tu plan ideal: Xangarro — porque manejas inventario, vendes a crédito y cobran varias personas',
+      name: 'Tu plan ideal: Xangarro, porque manejas inventario, vendes a crédito y cobran varias personas',
     }),
   ).toBeVisible();
   await expect(page.getByTestId('plan-price')).toHaveText('$199 al mes + IVA');

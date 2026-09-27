@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
-import type { NuevoGasto } from './registrar';
+import type { NuevoGasto, PrefillGasto } from './registrar';
 import type { CategoriaGasto, GastoTurno } from './types';
 
 const hhmm = (d: Date) =>
@@ -16,30 +16,57 @@ function detalleDe(n: NuevoGasto): string {
   return `${n.proveedor} · ${prueba}`;
 }
 
+/** The row a new gasto shows until the live read hands it back. */
+const optimista = (n: NuevoGasto): GastoTurno => ({
+  id: `g-${Date.now()}`,
+  concepto: n.concepto,
+  detalle: detalleDe(n),
+  monto: n.monto,
+  categoria: n.categoria,
+  hora: hhmm(new Date()),
+  comprobante: n.foto !== null,
+});
+
+/**
+ * The drawer: a due recurring gasto to pay opens it filled; once closed, the
+ * «Registrar gasto» button opens an empty one again.
+ */
+function useCajon(prefill: PrefillGasto | null) {
+  const [open, setOpen] = useState(false);
+  const [pendiente, setPendiente] = useState<PrefillGasto | null>(null);
+  useEffect(() => {
+    if (prefill === null) return;
+    setPendiente(prefill);
+    setOpen(true);
+  }, [prefill]);
+  const abrir = useCallback((o: boolean) => {
+    setOpen(o);
+    if (!o) setPendiente(null);
+  }, []);
+  return { open, abrir, pendiente };
+}
+
 /**
  * The list, its filters, the form and the toast. A new expense goes on top of
  * this device's list until the capture use case is wired (O-06).
  */
-export function useGastos(inicial: readonly GastoTurno[], registrarVivo?: (n: NuevoGasto) => void) {
+export function useGastos(
+  inicial: readonly GastoTurno[],
+  registrarVivo?: (n: NuevoGasto) => void,
+  prefill: PrefillGasto | null = null,
+) {
   const [gastos, setGastos] = useState(inicial);
+  // A (live) read hands back new rows: they replace the optimistic list.
+  useEffect(() => setGastos(inicial), [inicial]);
   const [filtro, setFiltro] = useState<'Todos' | CategoriaGasto>('Todos');
   const [query, setQuery] = useState('');
-  const [open, setOpen] = useState(false);
+  const { open, abrir, pendiente } = useCajon(prefill);
   const [toast, setToast] = useState<string | null>(null);
   const registrar = (n: NuevoGasto) => {
-    const nuevo: GastoTurno = {
-      id: `g-${Date.now()}`,
-      concepto: n.concepto,
-      detalle: detalleDe(n),
-      monto: n.monto,
-      categoria: n.categoria,
-      hora: hhmm(new Date()),
-      comprobante: n.foto !== null,
-    };
-    setGastos((all) => [nuevo, ...all]);
+    setGastos((all) => [optimista(n), ...all]);
     const prueba = n.foto ? 'con comprobante' : 'sin comprobante';
     setToast(`−${formatMoney(n.monto)} · ${n.concepto} · ${n.categoria} · ${prueba}.`);
-    setOpen(false);
+    abrir(false);
     // Linked (O-35): the optimistic row stands in for the use case's write.
     registrarVivo?.(n);
   };
@@ -51,7 +78,8 @@ export function useGastos(inicial: readonly GastoTurno[], registrarVivo?: (n: Nu
     query,
     setQuery,
     open,
-    setOpen,
+    setOpen: abrir,
+    prefill: pendiente,
     toast,
     registrar,
     closeToast,
