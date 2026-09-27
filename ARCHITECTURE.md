@@ -149,6 +149,7 @@ Links to discussion, docs, prior art.
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
 | [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
+| [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7476,3 +7477,95 @@ who has not opened the app since spring, and bill us for it.
 - Nothing changes today: no model call exists yet, the Diagnóstico is a
   placeholder behind two gates until P-28, and the deterministic pass already
   behaves as decided.
+
+---
+
+## ADR-110
+
+**Title:** Two of the three remaining model touchpoints stop being model touchpoints
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; follows ADR-109, amends P-38 and P-39
+
+**Context:**
+
+ADR-109 settled the Diagnóstico. The other three model-backed items on the
+board — P-38, P-39, P-29 — had one line of Steps each and no cadence, no
+caching rule and no limit, and two of them would have billed **per event**
+rather than per month: P-38 on every corte with a difference, P-39 on every
+statement view. For a shop that cashes up daily, P-38 alone would have been
+more model calls than its own Diagnóstico.
+
+The owner's question — «P-38 can be deterministic right?» — is the right one,
+and the answer is yes. Its own Steps name the causes it proposes: cancelled
+sales, fiado, gastos without comprobante. Those are three queries over one
+turno. Its acceptance is «an explanation that cites only that turno's rows»,
+which is a guarantee SQL gives for free and a prompt only promises.
+
+**Decision**
+
+1. **P-38 is fully deterministic — no model.** The candidate causes are
+   computed from the turno's own rows and ranked by amount. This is ADR-056's
+   rule applied rather than an exception to it: the domain computes, and here
+   there is nothing left for a model to add that is worth a call on every
+   cash-up. It also means the explanation works on **every** plan, Xangarrito
+   included, and costs nothing.
+
+   **Consequence: P-38 is no longer blocked by P-30.** It needed the
+   generation runtime only because it was going to be generated; computed from
+   a corte on read, it needs nothing that does not already exist.
+
+2. **P-39 is generated once a month and shown on Estados.** Not per view —
+   which was the billing shape nobody had noticed — and not folded into the
+   Diagnóstico either, because its value is a line *where the numbers are*,
+   and moving it into the report would take it off the screen it was designed
+   for. Written with the monthly run, stored for that period, rendered on
+   Estados financieros.
+
+3. **The monthly run announces itself.** When a period's Diagnóstico and
+   conclusions are written, the business gets a notice saying what was
+   generated, with links to Diagnóstico and to Estados — otherwise the work
+   sits there and a shopkeeper who does not happen to open the right tab never
+   learns it exists.
+
+   That notice is **`source='sistema'`, not `'asesor'`**, and the distinction
+   is load-bearing: ADR-060 keeps the bell clear of Asesor insights on
+   purpose, so an `asesor` row would be written and never ring. «Your report
+   is ready» is a system event about the product, not an insight about the
+   business, so it belongs on the side of that line that rings.
+
+4. **The Xangarro / Xangarrote split stays open**, deliberately. The
+   capability list in `calcularCapacidades` is one candidate axis — the six
+   are already ordered by the history they need — but the owner wants to look
+   at what is genuinely worth paying for, including model calls that only
+   Xangarrote would get, rather than dividing a fixed report in two. It is
+   P-28's to settle with the design.
+
+**Alternatives considered**
+
+- *P-38 deterministic, model writes the sentence.* Warmer, and it matches Don
+  Cuentas's voice. Rejected on frequency: one call per corte with a difference
+  is the most frequent model call in the product, for a sentence wrapping a
+  list the reader can already see.
+- *P-39 folded into the Diagnóstico.* Simplest and needs no per-period
+  storage. Rejected because Estados would show nothing and the two free tiers
+  would never see a conclusion at all.
+- *P-39 templated from the figures, no model.* Free on every plan. Kept as the
+  fallback if the monthly prose turns out not to be worth its cost — the
+  figures are deterministic either way, so only the phrasing is at stake.
+
+**Consequences**
+
+- The model touchpoints in the product are now: the Diagnóstico (two tiers,
+  monthly, activity-gated), its per-period statement conclusions on the same
+  run, and P-29's vision extraction. Two of five became free.
+- P-39 needs somewhere to keep a conclusion per period per statement. It is
+  one row keyed by business and period, and the obvious home is beside the
+  Diagnóstico's own output, which P-28 has to define anyway.
+- **P-29 is still unspecified and is now the only unbounded one.** The owner
+  proposed a first shape — one catalogue import per new business, about five
+  attempts, a byte ceiling and an image count — which is not yet numbers.
+  Worth noting it does not need a bespoke limiter: N-07 already counts metered
+  resources per business (`usage_counters`, the metering role, the over-limit
+  notices), and an import is a counted resource like any other.
