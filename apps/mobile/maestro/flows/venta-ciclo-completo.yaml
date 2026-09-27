@@ -113,7 +113,7 @@ appId: mx.xangarro.mobile
 # Step 2: Sell Tortilla ($15, Efectivo)
 # ══════════════════════════════════════════════════════════════════
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
@@ -265,7 +265,7 @@ appId: mx.xangarro.mobile
 # Step 7: Verify KPI adjusts — back to Ventas, total = $15.00
 # ══════════════════════════════════════════════════════════════════
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

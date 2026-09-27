@@ -6,13 +6,12 @@
  */
 
 import type { ReactElement } from 'react';
-import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { useQuery } from '@tanstack/react-query';
 import { formatMoney, today, type BusinessId } from '@xangarro/domain';
 import { fontSizes, useCajaMovimientosRepository, useCurrentBusinessId } from '@xangarro/ui';
-import { AppShellWrapper } from '../shell/app-shell-wrapper';
+import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
 
 interface CajaMovimiento {
   id: string;
@@ -25,7 +24,7 @@ function MovimientoCard({ mov }: { mov: CajaMovimiento }): ReactElement {
   return (
     <View
       key={mov.id}
-      backgroundColor="$background"
+      backgroundColor="$white"
       borderRadius={8}
       borderWidth={2}
       borderColor="$borderColor"
@@ -65,11 +64,11 @@ function useMovimientosQuery(): readonly CajaMovimiento[] {
 }
 
 export default function CajaMovimientosRoute(): ReactElement {
-  const router = useRouter();
   const movimientos = useMovimientosQuery();
+  const back = useBackTo('/turno');
 
   return (
-    <AppShellWrapper activeTabKey="otros" onBack={() => router.back()}>
+    <AppShellWrapper title="Mi turno" onBack={back}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         <Text fontWeight="900" fontSize={fontSizes.xl4} color="$color">
           Movimientos de Caja

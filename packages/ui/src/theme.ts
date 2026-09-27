@@ -33,6 +33,7 @@ export {
   pressTransform,
   type Radius,
   breakpoints,
+  cajaBreakpoints,
   type BreakpointKey,
   theme,
   type Theme,

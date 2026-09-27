@@ -11,8 +11,10 @@
 #   - runFlow: shared/create-product-operativo.yaml
 appId: mx.xangarro.mobile
 ---
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: 'stock-nuevo-producto'
 

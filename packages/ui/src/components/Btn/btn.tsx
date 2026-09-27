@@ -1,10 +1,11 @@
 /**
  * Btn — the Xangarro primary button primitive.
  *
- * Implements the 6 variants from CLAUDE.md §8.4 (primary / dark / ghost /
- * green / danger / soft) with the hard-border + hard-drop-shadow +
- * press-transform interaction that defines the neobrutalist brand feel
- * described in §8.3.
+ * El Mostrador's four buttons (docs/design/el-mostrador.md §3: primary,
+ * secondary, quiet, destructive, plus the filled destructive confirm) beside
+ * the older variants the pre-Track-M screens still use; the tables live in
+ * `./btn-variants.ts`. The hard edge, the hard shadow and the press stamp
+ * (translate 2/2, shadow to `pressed`) are shared by all of them.
  *
  * All visual values come from `../../theme` — no inline hex codes, no
  * invented radii, no soft shadows. This is the reference pattern every
@@ -34,18 +35,25 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text } from '@tamagui/core';
-import { colors, fontSizes, radii, shadows, typography } from '../../theme';
+import { radii, shadows, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import { Spinner } from '../Spinner/index';
+import {
+  DISABLED_MOSTRADOR,
+  SIZES,
+  VARIANTS,
+  type BtnSize,
+  type BtnVariant,
+  type SizeStyle,
+  type VariantStyle,
+} from './btn-variants';
 
-export type BtnVariant = 'primary' | 'dark' | 'ghost' | 'green' | 'danger' | 'soft' | 'outline';
-
-export type BtnSize = 'sm' | 'md' | 'lg';
+export type { BtnSize, BtnVariant } from './btn-variants';
 
 interface BtnBaseProps {
   /** Variant token from CLAUDE.md §8.4. Defaults to `primary`. */
   readonly variant?: BtnVariant;
-  /** Tap-target height: sm 36 / md 44 / lg 52 px. Defaults to `md`. */
+  /** Tap-target height: sm 40 / md 44 / lg 52 / xl 56 px. Defaults to `md`. */
   readonly size?: BtnSize;
   /** Fires on press/tap. No-op when `disabled` is true. */
   readonly onPress?: () => void;
@@ -71,6 +79,12 @@ interface BtnBaseProps {
    * Audit Round 2 G1.
    */
   readonly ariaChecked?: boolean;
+  /**
+   * Sentence-case, extra-bold label (El Mostrador §3). On by default for the
+   * El Mostrador variants and for `size="xl"`; pass it to a `primary` that
+   * sits among them.
+   */
+  readonly sentence?: boolean;
 }
 
 /**
@@ -108,40 +122,9 @@ interface BtnIconOnlyProps extends BtnBaseProps {
 
 export type BtnProps = BtnWithLabelProps | BtnIconOnlyProps;
 
-interface VariantStyle {
-  readonly background: string;
-  readonly color: string;
-  readonly shadow: string;
-}
-
-const VARIANTS: Record<BtnVariant, VariantStyle> = {
-  primary: { background: colors.yellow, color: colors.black, shadow: shadows.card },
-  dark: { background: colors.black, color: colors.white, shadow: shadows.card },
-  ghost: { background: 'transparent', color: colors.black, shadow: 'none' },
-  green: { background: colors.green, color: colors.black, shadow: shadows.card },
-  // Black label, not white: white on the brand red is 3.34:1 and fails WCAG
-  // AA, and darkening the red would break §8.1. Black on that same red is
-  // 5.82:1 — and `primary`, `green`, `soft` and `outline` already use black
-  // labels, so `danger` was the outlier. `tests/theme.test.ts` pins both
-  // ratios. Audit 2026-09.
-  danger: { background: colors.red, color: colors.black, shadow: shadows.card },
-  soft: { background: colors.yellowSoft, color: colors.black, shadow: shadows.small },
-  // `outline` is the white-with-hard-border companion to `primary` —
-  // used as the CANCELAR slot next to a primary GUARDAR (mock 3,
-  // April 2026 design review). Keeps the §8.3 hard shadow so the
-  // press transform still feels tactile.
-  outline: { background: colors.white, color: colors.black, shadow: shadows.card },
-};
-
-const SIZES: Record<BtnSize, { height: number; paddingX: number; fontSize: number }> = {
-  // `sm` bumped 36 → 40 + hitSlop on root pushes the effective tap-target
-  // over the 44×44 iOS HIG / Android Material target floor (P1C-M12-T04).
-  sm: { height: 40, paddingX: 14, fontSize: fontSizes.xs },
-  md: { height: 44, paddingX: 18, fontSize: fontSizes.md },
-  lg: { height: 52, paddingX: 22, fontSize: fontSizes.lg },
-};
-
 const BTN_RADIUS = radii[1]; // 10 — per CLAUDE.md §8.3 scale.
+/** El Mostrador buttons round at 14 (`mostrador.css.ts` `boton`). */
+const MOSTRADOR_RADIUS = radii[3];
 
 /**
  * Per CLAUDE.md §8.3: on press, shift 2px and shrink the shadow to 1×1.
@@ -160,18 +143,20 @@ function BtnLabel({
   text,
   color,
   fontSize,
+  sentence,
 }: {
   text: string;
   color: string;
   fontSize: number;
+  sentence: boolean;
 }): ReactElement {
   return (
     <Text
       color={color}
       fontFamily={typography.fontFamily}
-      fontWeight={typography.weights.bold}
+      fontWeight={sentence ? typography.weights.extraBold : typography.weights.bold}
       fontSize={fontSize}
-      letterSpacing={typography.letterSpacing.widest}
+      letterSpacing={sentence ? typography.letterSpacing.normal : typography.letterSpacing.widest}
       // Audit 9.3 — Spanish strings are typically 30 % longer than
       // English. Without `numberOfLines={1}` long labels like
       // "REGISTRAR PAGO" or "COMPARTIR COMPROBANTE" wrap the button on
@@ -184,7 +169,7 @@ function BtnLabel({
       // higher scales. Cap at 1.3× — in line with iOS HIG's "support
       // larger sizes but don't break layouts" guidance.
       maxFontSizeMultiplier={1.3}
-      style={{ textTransform: 'uppercase' }}
+      style={sentence ? undefined : { textTransform: 'uppercase' }}
     >
       {text}
     </Text>
@@ -193,7 +178,8 @@ function BtnLabel({
 
 interface ResolvedBtn {
   readonly v: VariantStyle;
-  readonly s: { height: number; paddingX: number; fontSize: number };
+  readonly s: SizeStyle;
+  readonly sentence: boolean;
   readonly disabled: boolean;
   readonly loading: boolean;
   readonly handlePress: (() => void) | undefined;
@@ -204,9 +190,14 @@ function resolve(props: BtnProps): ResolvedBtn {
   const size = props.size ?? 'md';
   const loading = props.loading ?? false;
   const disabled = (props.disabled ?? false) || loading;
+  const base = VARIANTS[variant];
+  const sentence = props.sentence ?? (base.mostrador || size === 'xl');
+  // A disabled El Mostrador confirm turns gray rather than fading (§3).
+  const v = disabled && !loading && sentence ? DISABLED_MOSTRADOR : base;
   return {
-    v: VARIANTS[variant],
+    v,
     s: SIZES[size],
+    sentence,
     disabled,
     loading,
     handlePress: disabled
@@ -228,17 +219,14 @@ function resolve(props: BtnProps): ResolvedBtn {
  * but react-native-web forwards both to inline CSS. Native platforms
  * ignore them — there is no runtime branch.
  */
-function buildBaseStyle(
-  v: VariantStyle,
-  s: { height: number; paddingX: number; fontSize: number },
-  disabled: boolean,
-  fullWidth: boolean,
-): ViewStyle {
+function buildBaseStyle(r: ResolvedBtn, fullWidth: boolean): ViewStyle {
+  const { v, s, disabled } = r;
+  const grayed = v === DISABLED_MOSTRADOR;
   return {
     backgroundColor: v.background,
-    borderColor: colors.black,
-    borderWidth: 2,
-    borderRadius: BTN_RADIUS,
+    borderColor: v.borderColor,
+    borderWidth: v.borderWidth,
+    borderRadius: r.sentence ? MOSTRADOR_RADIUS : BTN_RADIUS,
     height: s.height,
     paddingHorizontal: s.paddingX,
     alignItems: 'center',
@@ -246,7 +234,7 @@ function buildBaseStyle(
     flexDirection: 'row',
     gap: 8,
     width: fullWidth ? '100%' : undefined,
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled && !grayed ? 0.5 : 1,
     cursor: disabled ? 'not-allowed' : 'pointer',
     userSelect: 'none',
     boxShadow: v.shadow,
@@ -258,8 +246,9 @@ function buildBaseStyle(
  * full variant matrix and press-state preview.
  */
 export function Btn(props: BtnProps): ReactElement {
-  const { v, s, disabled, loading, handlePress } = resolve(props);
-  const baseStyle = buildBaseStyle(v, s, disabled, props.fullWidth === true);
+  const r = resolve(props);
+  const { v, s, disabled, loading, handlePress } = r;
+  const baseStyle = buildBaseStyle(r, props.fullWidth === true);
   // We forward the modern ARIA props (`aria-disabled`,
   // `aria-checked`, `role`) directly. react-native-web's Pressable
   // would otherwise omit `aria-disabled="false"` / `aria-checked="false"`
@@ -290,7 +279,12 @@ export function Btn(props: BtnProps): ReactElement {
         <>
           {props.icon}
           {props.children !== undefined && (
-            <BtnLabel text={props.children} color={v.color} fontSize={s.fontSize} />
+            <BtnLabel
+              text={props.children}
+              color={v.color}
+              fontSize={r.sentence ? s.mostradorFontSize : s.fontSize}
+              sentence={r.sentence}
+            />
           )}
         </>
       )}

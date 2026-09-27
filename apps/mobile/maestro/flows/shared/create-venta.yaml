@@ -6,7 +6,7 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

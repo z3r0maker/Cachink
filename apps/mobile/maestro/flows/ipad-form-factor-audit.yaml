@@ -31,7 +31,7 @@ appId: mx.xangarro.mobile
 # On iPhone the grid renders 2 columns. On iPad ($gtMd) it renders
 # 3 columns. The testID on the container must still be present.
 - tapOn:
-    id: "tab-ventas"
+    id: "rail-cobrar"
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
@@ -63,8 +63,10 @@ appId: mx.xangarro.mobile
     id: "top-bar-back"
 
 # ── 3. NuevoEgreso modal ─────────────────────────────────────────
-- tapOn:
-    id: "tab-gastos"
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 - tapOn:
     id: "egresos-nuevo"
 - extendedWaitUntil:
@@ -81,8 +83,10 @@ appId: mx.xangarro.mobile
     id: "top-bar-back"
 
 # ── 4. NuevoProducto modal ───────────────────────────────────────
-- tapOn:
-    id: "tab-productos"
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: "stock-nuevo-producto"
 - extendedWaitUntil:
@@ -106,9 +110,7 @@ appId: mx.xangarro.mobile
 # On iPhone the strip is horizontally scrollable and KPIs may be
 # off-screen. On iPad ($gtMd) all KPIs should be visible without
 # scrolling. Assert each KPI testID is directly visible.
-- tapOn:
-    id: "top-bar-role-chip"
-    optional: true
+- runFlow: shared/lock-caja.yaml
 - tapOn:
     id: "role-director-select"
     optional: true

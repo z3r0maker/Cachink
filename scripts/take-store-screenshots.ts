@@ -45,7 +45,7 @@ const FLOWS: readonly Flow[] = [
     target: 'mobile',
     role: 'operativo',
     run: async (page) => {
-      await page.getByTestId('tab-ventas').click();
+      await page.getByTestId('tab-cobrar').click();
       await page.getByTestId('ventas-new-cta').click();
       await page.waitForSelector('[data-testid="nueva-venta-modal"]');
     },

@@ -15,7 +15,7 @@ tags:
 
 # Navigate to Ventas tab — should show caja gate (product exists, no turno).
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - assertVisible:
     id: 'caja-gate-banner'
 - assertVisible:

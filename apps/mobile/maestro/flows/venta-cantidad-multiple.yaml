@@ -15,7 +15,7 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

@@ -1,19 +1,11 @@
 /**
- * Expo Router entry for /cancelaciones — sale cancellation management.
- *
- * Thin wrapper around CancelacionesScreen (packages/ui).
+ * /cancelaciones became the Ventas tab (Track M, M-05). Kept so an old link
+ * still lands on the sales list.
  */
 
 import type { ReactElement } from 'react';
-import { useRouter } from 'expo-router';
-import { CancelacionesScreen } from '@xangarro/ui';
-import { AppShellWrapper } from '../shell/app-shell-wrapper';
+import { Redirect } from 'expo-router';
 
-export default function CancelacionesRoute(): ReactElement {
-  const router = useRouter();
-  return (
-    <AppShellWrapper activeTabKey="otros" onBack={() => router.back()}>
-      <CancelacionesScreen testID="mobile-cancelaciones" />
-    </AppShellWrapper>
-  );
+export default function CancelacionesRedirect(): ReactElement {
+  return <Redirect href="/ventas" />;
 }

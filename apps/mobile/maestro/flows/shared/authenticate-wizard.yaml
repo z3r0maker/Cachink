@@ -34,5 +34,5 @@ appId: mx.xangarro.mobile
 # Director lands on the estados tab.
 - extendedWaitUntil:
     visible:
-      id: 'tab-caja'
+      id: 'tab-turno'
     timeout: 10000

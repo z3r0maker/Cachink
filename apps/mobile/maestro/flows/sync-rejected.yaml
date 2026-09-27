@@ -13,7 +13,7 @@ env:
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - runScript:
     file: shared/mock-row.js
     env:

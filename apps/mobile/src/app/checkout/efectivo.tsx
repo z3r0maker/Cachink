@@ -17,7 +17,7 @@ export default function CheckoutEfectivoRoute(): ReactElement {
   const s = useEfectivoState();
 
   return (
-    <AppShellWrapper activeTabKey="ventas" title="Cobrar" onBack={() => router.back()}>
+    <AppShellWrapper onBack={() => router.back()}>
       <CheckoutEfectivo
         totalCentavos={s.totalCentavos}
         onConfirm={s.handleConfirm}

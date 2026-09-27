@@ -16,7 +16,7 @@ export default function CheckoutConfirmRoute(): ReactElement {
   const s = useConfirmState();
 
   return (
-    <AppShellWrapper activeTabKey="ventas" onBack={() => router.back()}>
+    <AppShellWrapper onBack={() => router.back()}>
       <CheckoutConfirm
         totalCentavos={s.totalCentavos}
         metodo={s.metodo}

@@ -1,11 +1,12 @@
 /**
- * Root index inside the (tabs) group. The app is single-role (ADR-053):
- * every Operator lands on Ventas. The Director dashboard lives in the portal.
+ * Root index inside the (tabs) group. The operator lands on Cobrar, as the
+ * register always has, until Inicio is built (M-06: «Para hoy»); then Inicio
+ * becomes the landing and this redirect goes.
  */
 
 import type { ReactElement } from 'react';
 import { Redirect } from 'expo-router';
 
 export default function HomeIndex(): ReactElement {
-  return <Redirect href="/ventas" />;
+  return <Redirect href="/cobrar" />;
 }

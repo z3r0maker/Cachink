@@ -24,7 +24,7 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 
 # Verify the product grid is visible.
 - assertVisible:

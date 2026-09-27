@@ -6,7 +6,7 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       notVisible:
-        id: 'tab-caja'
+        id: 'tab-turno'
     commands:
       - extendedWaitUntil:
           visible:
@@ -26,5 +26,5 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'numpad-6' }
 - extendedWaitUntil:
     visible:
-      id: 'tab-caja'
+      id: 'tab-turno'
     timeout: 15000

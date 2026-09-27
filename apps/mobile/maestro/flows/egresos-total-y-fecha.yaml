@@ -22,8 +22,10 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 # Navigate to the Egresos tab.
-- tapOn:
-    id: 'tab-gastos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 
 # Verify the total card is visible with a formatted negative amount.
 - assertVisible:

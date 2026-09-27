@@ -1,22 +1,11 @@
 /**
- * Expo Router entry for /caja — cash drawer management.
- *
- * Thin wrapper around `CajaContent`, which also hosts the shift tools
- * (movimientos de caja, cancelaciones) below the turn (ADR-052).
+ * /caja is Mi turno now (Track M, M-05). Kept so an old link or a
+ * notification that still names /caja lands in the right place.
  */
 
 import type { ReactElement } from 'react';
-import { useRouter } from 'expo-router';
-import { CajaContent, operativoCajaToolItems, useFeatureFlags } from '@xangarro/ui';
+import { Redirect } from 'expo-router';
 
-export default function CajaTabRoute(): ReactElement {
-  const router = useRouter();
-  const flags = useFeatureFlags();
-  return (
-    <CajaContent
-      testID="mobile-caja-tab"
-      toolItems={operativoCajaToolItems(flags)}
-      onNavigateTool={(path) => router.push(path as never)}
-    />
-  );
+export default function CajaRedirect(): ReactElement {
+  return <Redirect href="/turno" />;
 }

@@ -18,8 +18,10 @@ tags:
 - runFlow: shared/authenticate.yaml
 
 # Navigate to Egresos via Operativo tab.
-- tapOn:
-    id: 'tab-gastos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 
 # Create a new gasto with recurrente toggle.
 - tapOn:

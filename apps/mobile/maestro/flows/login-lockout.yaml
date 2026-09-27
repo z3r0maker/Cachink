@@ -9,10 +9,9 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: 'tab-caja'
+        id: 'tab-turno'
     commands:
-      - tapOn:
-          id: 'top-bar-left'
+      - runFlow: shared/lock-caja.yaml
 - extendedWaitUntil:
     visible:
       id: 'quick-switch'

@@ -34,5 +34,5 @@ appId: mx.xangarro.mobile
 
 - extendedWaitUntil:
     visible:
-      id: 'tab-caja'
+      id: 'tab-turno'
     timeout: 15000

@@ -7,8 +7,10 @@
 appId: mx.xangarro.mobile
 ---
 - runFlow: shared/login-operator.yaml
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: 'stock-nuevo-producto'
 - extendedWaitUntil:

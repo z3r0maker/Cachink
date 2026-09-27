@@ -2,26 +2,38 @@
  * AppShellWrapper — mobile-only thin adapter around the shared
  * `<AppShellRouteWrapper>` from `@xangarro/ui`.
  *
- * Injects Expo Router's `router.push` as the `navigate` prop so the
- * shared wrapper never imports from `expo-router`. App-shell code per
- * CLAUDE.md §5.6 — belongs here, not in `packages/ui`.
+ * Injects Expo Router: `router.navigate` for every destination (it switches
+ * tabs in place and pops back to a screen already on the stack instead of
+ * piling copies), and the pathname, which lights the current destination in
+ * the tab bar, the rail and the sidebar. App-shell code per CLAUDE.md §5.6.
  */
 
 import type { ReactElement } from 'react';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { AppShellRouteWrapper, type AppShellRouteWrapperProps } from '@xangarro/ui';
 
-// Re-export the props type under the legacy name so existing route
-// files that import `AppShellWrapperProps` don't need updating.
-export type AppShellWrapperProps = Omit<AppShellRouteWrapperProps, 'navigate' | 'replaceRoute'>;
+export type AppShellWrapperProps = Omit<
+  AppShellRouteWrapperProps,
+  'navigate' | 'replaceRoute' | 'activeTabKey'
+>;
 
 export function AppShellWrapper(props: AppShellWrapperProps): ReactElement | null {
   const router = useRouter();
+  const pathname = usePathname();
+  const go = (path: string): void => router.navigate(path as never);
   return (
-    <AppShellRouteWrapper
-      {...props}
-      navigate={(path) => router.push(path as never)}
-      replaceRoute={(path) => router.replace(path as never)}
-    />
+    <AppShellRouteWrapper {...props} activeTabKey={pathname} navigate={go} replaceRoute={go} />
   );
+}
+
+/**
+ * The back action of a stack route: pop when there is somewhere to pop to,
+ * otherwise land on `fallback` (a deep link or a notification opened it).
+ */
+export function useBackTo(fallback: string): () => void {
+  const router = useRouter();
+  return () => {
+    if (router.canGoBack()) router.back();
+    else router.replace(fallback as never);
+  };
 }

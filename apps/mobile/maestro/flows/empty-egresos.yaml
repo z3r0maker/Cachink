@@ -23,8 +23,10 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate-wizard.yaml
 
 # Navigate to the Egresos tab.
-- tapOn:
-    id: 'tab-gastos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 
 # No egresos yet → empty state should render.
 - assertVisible:

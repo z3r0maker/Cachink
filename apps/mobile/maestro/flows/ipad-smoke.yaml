@@ -55,47 +55,49 @@ appId: mx.xangarro.mobile
 # On iPad the tab bar remains at the bottom (Expo Router default).
 # Assert every tab target is in the accessibility tree.
 - assertVisible:
-    id: 'tab-ventas'
+    id: 'rail-cobrar'
 - assertVisible:
-    id: 'tab-gastos'
+    id: 'rail-gastos'
 - assertVisible:
-    id: 'tab-productos'
+    id: 'rail-inventario'
 - assertVisible:
     id: 'tab-estados'
 
 # ── 3. Ventas tab (Operativo context) ────────────────────────────
 # Switch to Operativo to exercise the POS grid on iPad.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'rail-cobrar'
 
 # The ventas screen renders — even on empty state the screen shell
 # is visible. We do not assert the product grid here (it requires
 # data); that is covered by ipad-form-factor-audit.yaml.
 - extendedWaitUntil:
     visible:
-      id: 'tab-ventas'
+      id: 'rail-cobrar'
     timeout: 5000
 
 # ── 4. Egresos tab ───────────────────────────────────────────────
-- tapOn:
-    id: 'tab-gastos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 - extendedWaitUntil:
     visible:
-      id: 'tab-gastos'
+      id: 'rail-gastos'
     timeout: 5000
 
 # ── 5. Productos tab ─────────────────────────────────────────────
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - extendedWaitUntil:
     visible:
-      id: 'tab-productos'
+      id: 'rail-inventario'
     timeout: 5000
 
 # ── 6. Switch back to Director for Estados + Otros ───────────────
-- tapOn:
-    id: 'top-bar-role-chip'
-    optional: true
+- runFlow: shared/lock-caja.yaml
 - tapOn:
     id: 'role-director-select'
     optional: true

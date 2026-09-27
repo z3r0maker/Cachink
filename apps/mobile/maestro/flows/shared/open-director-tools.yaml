@@ -1,50 +1,30 @@
-# Reusable subflow: open the tool grid, whatever the role.
+# Reusable subflow: open Mi turno's rows («Lo de tu turno», Track M M-05).
 #
-# Review item #7 removed the "Otros" tab from BOTH bars. The grid
-# itself did not go away — it renders with the *same* `otros-<key>`
-# testIDs it always had, just in the place each role can reach fastest:
-#
-#   Director  → Configuración (top-bar cog), above the category cards
-#   Operativo → inside the Caja tab, below the turn
-#
-# So a caller that used to do
-#
-#   - tapOn: { id: "tab-otros" }
-#   - tapOn: { id: "otros-usuarios" }
-#
-# now does
-#
-#   - runFlow: shared/open-director-tools.yaml
-#   - tapOn: { id: "otros-usuarios" }
-#
-# Role detection: only the Operativo bar has a Caja tab (Director is
-# Inicio | Ventas | Gastos | Estados), so `tab-caja` is the discriminator.
+# The name is historical: the Operativo tool grid ("Otros") became Mi
+# turno's big rows, and the rows keep their `otros-<key>` testIDs:
+# otros-gastos, otros-inventario, otros-caja-movimientos, otros-no-enviados,
+# otros-configuracion. Callers scroll to the row they need and tap it.
 #
 # Precondition: user is authenticated and on any tab.
 appId: mx.xangarro.mobile
 ---
-# Operativo: the tools live inside Caja.
+# Phone: the Mi turno tab. Tablet: the rail's or the sidebar's item.
 - runFlow:
     when:
       visible:
-        id: 'tab-caja'
+        id: 'tab-turno'
     commands:
       - tapOn:
-          id: 'tab-caja'
-      - extendedWaitUntil:
-          visible:
-            id: 'settings-nav-section'
-          timeout: 5000
-
-# Director: no Caja tab → the cog opens Configuración, which hosts the grid.
+          id: 'tab-turno'
 - runFlow:
     when:
       notVisible:
-        id: 'tab-caja'
+        id: 'tab-turno'
     commands:
       - tapOn:
-          id: 'top-bar-open-settings'
-      - extendedWaitUntil:
-          visible:
-            id: 'settings-nav-section'
-          timeout: 5000
+          id: 'rail-turno|sidebar-turno'
+- scrollUntilVisible:
+    element:
+      id: 'turno-rows'
+    direction: DOWN
+    timeout: 5000

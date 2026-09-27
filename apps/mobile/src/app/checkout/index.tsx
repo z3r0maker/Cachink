@@ -16,7 +16,7 @@ export default function CheckoutRoute(): ReactElement {
   const cart = useCheckoutStore((s) => s.cart);
 
   return (
-    <AppShellWrapper activeTabKey="ventas" onBack={() => router.back()}>
+    <AppShellWrapper title="Cobrar" onBack={() => router.back()}>
       <CheckoutMethodPicker
         items={cart?.items ?? []}
         totalCentavos={cart?.totalCentavos ?? 0n}

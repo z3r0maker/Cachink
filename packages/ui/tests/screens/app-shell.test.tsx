@@ -1,11 +1,19 @@
 /**
- * AppShell component tests.
- *
- * Single role (ADR-053): one 4-tab bar, operator avatar locks the screen.
+ * AppShell — the caja's frame (Track M, M-05). Single role (ADR-053).
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import { AppShell, appTabs } from '../../src/screens/index';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ReactElement } from 'react';
+import * as RN from 'react-native';
+import {
+  AppShell,
+  appTabs,
+  cajaLayoutFor,
+  inicialesDe,
+  navGroups,
+  navKeyFor,
+  tabKeyFor,
+} from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,110 +23,163 @@ initI18n();
 
 const noop = (): void => {};
 
-describe('appTabs', () => {
-  // Single role (ADR-053) and no "Otros" slot (ADR-052): always 4 tabs.
-  it('returns the register bar: Ventas, Caja, Gastos, Productos', () => {
-    expect(appTabs().map((tab) => tab.key)).toEqual(['ventas', 'caja', 'gastos', 'productos']);
+describe('the caja navigation model', () => {
+  it('the phone has exactly four tabs: Inicio, Cobrar, Ventas, Mi turno', () => {
+    expect(appTabs().map((tab) => tab.key)).toEqual(['inicio', 'cobrar', 'ventas', 'turno']);
   });
 
-  it('never exposes the retired Director tabs', () => {
-    const keys = appTabs().map((tab) => tab.key);
-    for (const retired of ['home', 'estados', 'otros']) expect(keys).not.toContain(retired);
+  it('the rail and the sidebar group the rest like the web sidebar', () => {
+    expect(navGroups().map((g) => g.items.map((i) => i.key))).toEqual([
+      ['inicio', 'cobrar'],
+      ['ventas', 'gastos'],
+      ['turno', 'inventario'],
+    ]);
+  });
+
+  it('lights a detail route under its destination', () => {
+    expect(navKeyFor('/cobrar')).toBe('cobrar');
+    expect(navKeyFor('/checkout/efectivo')).toBe('cobrar');
+    expect(navKeyFor('/productos/p-1')).toBe('inventario');
+    expect(navKeyFor('/egresos')).toBe('gastos');
+    expect(navKeyFor('/cancelaciones')).toBe('ventas');
+    expect(navKeyFor('/settings')).toBe('turno');
+    expect(navKeyFor('/')).toBe('inicio');
+  });
+
+  it('on the phone, Gastos and Inventario live under Mi turno', () => {
+    expect(tabKeyFor('gastos')).toBe('turno');
+    expect(tabKeyFor('inventario')).toBe('turno');
+    expect(tabKeyFor('ventas')).toBe('ventas');
+  });
+
+  it('switches frame at 760 and 1280 px', () => {
+    expect(cajaLayoutFor(390)).toBe('phone');
+    expect(cajaLayoutFor(759)).toBe('phone');
+    expect(cajaLayoutFor(760)).toBe('rail');
+    expect(cajaLayoutFor(1279)).toBe('rail');
+    expect(cajaLayoutFor(1280)).toBe('sidebar');
+  });
+
+  it('turns a name into its initials', () => {
+    expect(inicialesDe('Ana Robledo')).toBe('AR');
+    expect(inicialesDe('  María de la Luz Pérez ')).toBe('MP');
+    expect(inicialesDe('Toni')).toBe('TO');
+    expect(inicialesDe('')).toBe('');
   });
 });
 
-describe('AppShell', () => {
-  function mount(overrides?: {
-    onNavigate?: (p: string) => void;
-    onSwitchOperator?: () => void;
-    onOpenSettings?: () => void;
-  }) {
-    // The plan banner reads app_config through the repository provider.
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
-    return renderWithProviders(
-      <QueryClientProvider client={qc}>
-        <MockRepositoryProvider>
-          <AppShell
-            activeTabKey="ventas"
-            onNavigate={overrides?.onNavigate ?? noop}
-            onSwitchOperator={overrides?.onSwitchOperator ?? noop}
-            onOpenSettings={overrides?.onOpenSettings ?? noop}
-            mode="local"
-            title="Ventas"
-            subtitle="jueves, 24 abril"
-          >
-            <span data-testid="shell-body">hello</span>
-          </AppShell>
-        </MockRepositoryProvider>
-      </QueryClientProvider>,
-    );
-  }
+function Providers({ children }: { children: ReactElement }): ReactElement {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
+  return (
+    <QueryClientProvider client={qc}>
+      <MockRepositoryProvider>{children}</MockRepositoryProvider>
+    </QueryClientProvider>
+  );
+}
 
-  it('renders the 4 tabs (Ventas, Caja, Gastos, Productos) and no Director tabs', () => {
+function mount(overrides?: Partial<Parameters<typeof AppShell>[0]>) {
+  return renderWithProviders(
+    <Providers>
+      <AppShell activeTabKey="/cobrar" onNavigate={noop} mode="local" {...overrides}>
+        <span data-testid="shell-body">hola</span>
+      </AppShell>
+    </Providers>,
+  );
+}
+
+function setWidth(width: number): void {
+  vi.spyOn(RN, 'useWindowDimensions').mockReturnValue({
+    width,
+    height: 900,
+    scale: 2,
+    fontScale: 1,
+  });
+}
+
+afterEach(() => vi.restoreAllMocks());
+
+describe('AppShell on a phone', () => {
+  it('renders the four tabs, the current one selected, and no retired tab', () => {
     mount();
-    for (const key of ['ventas', 'caja', 'gastos', 'productos']) {
+    for (const key of ['inicio', 'cobrar', 'ventas', 'turno']) {
       expect(screen.getByTestId(`tab-${key}`)).toBeInTheDocument();
     }
-    for (const key of ['otros', 'home', 'estados']) {
+    for (const key of ['caja', 'gastos', 'productos', 'otros']) {
       expect(screen.queryByTestId(`tab-${key}`)).toBeNull();
     }
+    expect(screen.getByTestId('tab-cobrar').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('shell-body')).toBeInTheDocument();
   });
 
-  it("fires onNavigate with the tapped tab's path", () => {
+  it("navigates to the tapped tab's path", () => {
     const onNavigate = vi.fn();
     mount({ onNavigate });
-    fireEvent.click(screen.getByTestId('tab-gastos'));
-    expect(onNavigate).toHaveBeenCalledWith('/egresos');
+    fireEvent.click(screen.getByTestId('tab-turno'));
+    expect(onNavigate).toHaveBeenCalledWith('/turno');
   });
 
-  it('fires onSwitchOperator when the avatar is tapped', () => {
-    const onSwitchOperator = vi.fn();
-    mount({ onSwitchOperator });
-    fireEvent.click(screen.getAllByTestId('top-bar-role-chip')[0]!);
-    expect(onSwitchOperator).toHaveBeenCalledTimes(1);
+  it('lights Mi turno on a route opened from it', () => {
+    mount({ activeTabKey: '/egresos' });
+    expect(screen.getByTestId('tab-turno').getAttribute('aria-selected')).toBe('true');
   });
 
-  it('fires onOpenSettings when the settings cog is tapped', () => {
-    const onOpenSettings = vi.fn();
-    mount({ onOpenSettings });
-    fireEvent.click(screen.getAllByTestId('top-bar-open-settings')[0]!);
-    expect(onOpenSettings).toHaveBeenCalled();
-  });
-
-  it('renders the operator avatar with an illustration', () => {
+  it('shows the caja badge and the sync pill in the 64 px header', () => {
     mount();
-    const chip = screen.getByTestId('top-bar-role-chip');
-    expect(chip.getAttribute('aria-label')).toBe('Cambiar');
-    expect(screen.getByTestId('role-illustration')).toBeInTheDocument();
+    const header = screen.getByTestId('app-header');
+    expect(getComputedStyle(header).height).toBe('64px');
+    expect(screen.getByTestId('caja-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('cloud-sync-pill')).toBeInTheDocument();
   });
 
-  it('renders no sync badge in local mode', () => {
+  it('shows no bell without a count source, and the bell with one', () => {
     mount();
-    expect(screen.queryByTestId('sync-status-badge')).toBeNull();
+    expect(screen.queryByTestId('avisos-bell')).toBeNull();
+    const onPress = vi.fn();
+    mount({ avisos: { count: 2, onPress } });
+    const bell = screen.getByTestId('avisos-bell');
+    expect(bell.getAttribute('aria-label')).toBe('Avisos, 2 sin leer');
+    fireEvent.click(bell);
+    expect(onPress).toHaveBeenCalled();
   });
 
-  it('renders the back button instead of the avatar when onBack is set', () => {
+  it('swaps the caja badge for the way back on a detail route', () => {
     const onBack = vi.fn();
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
-    renderWithProviders(
-      <QueryClientProvider client={qc}>
-        <MockRepositoryProvider>
-          <AppShell
-            activeTabKey="ventas"
-            onNavigate={noop}
-            onSwitchOperator={noop}
-            onOpenSettings={noop}
-            onBack={onBack}
-            mode="local"
-            title="Ajustes"
-          >
-            <span />
-          </AppShell>
-        </MockRepositoryProvider>
-      </QueryClientProvider>,
-    );
-    expect(screen.queryByTestId('top-bar-role-chip')).toBeNull();
-    fireEvent.click(screen.getByTestId('top-bar-back'));
+    mount({ onBack, title: 'Mi turno', activeTabKey: '/settings' });
+    expect(screen.queryByTestId('caja-badge')).toBeNull();
+    const back = screen.getByTestId('top-bar-back');
+    expect(back).toHaveTextContent('Mi turno');
+    fireEvent.click(back);
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('never prints a hard-coded caja name', () => {
+    mount();
+    expect(screen.queryByText('Caja 1')).toBeNull();
+  });
+});
+
+describe('AppShell on a tablet', () => {
+  it('from 760 px shows the icon rail and the top bar instead of the tabs', () => {
+    setWidth(1180);
+    const onNavigate = vi.fn();
+    const onLock = vi.fn();
+    mount({ onNavigate, onLock });
+    expect(screen.getByTestId('nav-rail')).toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-tab-bar')).toBeNull();
+    expect(getComputedStyle(screen.getByTestId('app-header')).height).toBe('72px');
+    expect(screen.getByTestId('rail-cobrar').getAttribute('aria-current')).toBe('page');
+    fireEvent.click(screen.getByTestId('rail-gastos'));
+    expect(onNavigate).toHaveBeenCalledWith('/egresos');
+    fireEvent.click(screen.getByTestId('rail-bloquear'));
+    expect(onLock).toHaveBeenCalledTimes(1);
+  });
+
+  it('from 1280 px shows the full sidebar with its groups', () => {
+    setWidth(1366);
+    mount();
+    expect(screen.getByTestId('nav-sidebar')).toBeInTheDocument();
+    expect(screen.queryByTestId('nav-rail')).toBeNull();
+    expect(screen.getByText('Dinero del turno')).toBeInTheDocument();
+    expect(screen.getByTestId('sidebar-inventario')).toBeInTheDocument();
   });
 });
