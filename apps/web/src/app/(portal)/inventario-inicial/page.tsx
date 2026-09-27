@@ -17,7 +17,14 @@ export default async function InventarioInicialPage() {
   const yaCapturado = await inventarioInicialYaCapturado(session.business_id);
   const productos = await withTenant(session.business_id, (tx) =>
     tx
-      .select({ id: products.id, nombre: products.nombre, costo: products.costoUnitCentavos })
+      .select({
+        id: products.id,
+        nombre: products.nombre,
+        sku: products.sku,
+        unidad: products.unidad,
+        icono: products.icono,
+        costo: products.costoUnitCentavos,
+      })
       .from(products)
       .where(isNull(products.deletedAt))
       .orderBy(products.nombre),
@@ -31,6 +38,9 @@ export default async function InventarioInicialPage() {
       productos={productos.map((p) => ({
         id: p.id,
         nombre: p.nombre,
+        sku: p.sku ?? '',
+        unidad: p.unidad,
+        icono: p.icono,
         costo: `${p.costo / 100n}.${(p.costo % 100n).toString().padStart(2, '0')}`,
       }))}
     />

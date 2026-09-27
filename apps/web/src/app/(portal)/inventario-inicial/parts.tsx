@@ -1,25 +1,26 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Banner, Button, Input } from '@/components';
-import { capturarInventarioInicial } from '@/server/actions/apertura';
+import { EmptyState } from '@/components';
 
-import { GridInventario, type Fila } from './grid';
-import { pageSubtitle, pageTitle } from '../productos/productos.css';
+import { Aviso } from '../_primeros/aviso';
+import { Encabezado } from '../_primeros/encabezado';
+import * as p from '../_primeros/primeros.css';
+import { Barra, Cabecera, Pie } from './barra';
+import { Capturado, SUBTITULO } from './capturado';
+import { Resumen } from './resumen';
+import { TablaFilas } from './tabla';
+import { useInventario, type Inventario, type ProductoGrid } from './use-inventario';
+
+export type { ProductoGrid };
 
 /**
- * «Captura tu inventario inicial» (N-17): one-time. The grid writes apertura
- * movements — excluded from the monthly limit, feeding the opening Balance's
- * inventory line. A second visit shows the done state, never a re-capture.
+ * «Inventario inicial» (N-17, `CfgInventarioInicial.dc.html`): one-time. The
+ * grid writes apertura movements (excluded from the monthly limit, feeding
+ * the opening Balance's inventory line). A second visit shows the done
+ * state, never a re-capture.
  */
-
-export interface ProductoGrid {
-  readonly id: string;
-  readonly nombre: string;
-  readonly costo: string;
-}
-
 export interface InventarioView {
   readonly mayWrite: boolean;
   readonly yaCapturado: boolean;
@@ -27,155 +28,70 @@ export interface InventarioView {
   readonly productos: readonly ProductoGrid[];
 }
 
-const pesos = (v: string): bigint => {
-  const parts = v.split('.');
-  const whole = parts[0] === '' ? '0' : parts[0];
-  const cents = (parts[1] ?? '0').padEnd(2, '0').slice(0, 2);
-  return BigInt(`${whole}${cents}`);
-};
-
 export function InventarioInicialScreen(view: InventarioView) {
-  const [fecha, setFecha] = useState(view.hoy);
-  const [filas, setFilas] = useState<Fila[]>(() => filasDe(view.productos));
-  const [banner, setBanner] = useState<{ tone: 'success' | 'critical'; text: string } | null>(null);
-  const [pendiente, start] = useTransition();
-
-  // The capture's own revalidation re-renders this with `yaCapturado`, which
-  // used to swap the screen before its «Capturado: …» banner was ever seen.
-  if (view.yaCapturado) return <Capturado banner={banner} />;
-
-  const validas = filas.filter((f) => f.cantidad.trim() !== '' && Number(f.cantidad) > 0);
-
+  const inv = useInventario(view.productos, view.hoy);
+  // The capture's own revalidation re-renders this with `yaCapturado`; the
+  // confirmation must survive that swap, so the done state carries it.
+  if (view.yaCapturado) {
+    return <Capturado confirmacion={inv.aviso?.tono === 'success' ? inv.aviso.texto : null} />;
+  }
+  if (view.productos.length === 0) return <SinProductos />;
   return (
     <>
-      <EncabezadoInventario banner={banner} />
-      <div style={{ width: 170, marginTop: 16 }}>
-        <Input
-          labelText="Fecha"
-          value={fecha}
-          disabled={!view.mayWrite}
-          onChange={(e) => setFecha(e.target.value)}
-          placeholder="2026-09-01"
+      <Encabezado aqui="Inventario inicial" titulo="Inventario inicial" subtitulo={SUBTITULO} />
+      <div className={p.dosColumnas}>
+        <Trabajo inv={inv} view={view} />
+        <Resumen
+          total={inv.total}
+          fecha={inv.fecha}
+          contados={inv.validas.length}
+          productos={inv.filas.length}
+          mayWrite={view.mayWrite}
+          pendiente={inv.pendiente}
+          onGuardar={inv.capturar}
         />
       </div>
+    </>
+  );
+}
 
-      <GridInventario
-        filas={filas}
-        setFilas={setFilas}
+function Trabajo({ inv, view }: { readonly inv: Inventario; readonly view: InventarioView }) {
+  return (
+    <div className={p.columna}>
+      <Barra
+        fecha={inv.fecha}
+        hoy={view.hoy}
         editable={view.mayWrite}
-        porNombre={new Map(view.productos.map((p) => [p.nombre.trim().toLowerCase(), p.id]))}
-        onBanner={(t, x) => setBanner({ tone: t, text: x })}
+        onFecha={inv.setFecha}
+        onArchivo={(f) => void inv.alArchivo(f)}
       />
-
-      <BarraCaptura
-        fecha={fecha}
-        validas={validas}
-        mayWrite={view.mayWrite}
-        pendiente={pendiente}
-        onCapturar={capturar(fecha, validas, start, setBanner)}
-      />
-    </>
-  );
-}
-
-function EncabezadoInventario({
-  banner,
-}: {
-  readonly banner: { tone: 'success' | 'critical'; text: string } | null;
-}) {
-  return (
-    <>
-      <h1 className={pageTitle}>Inventario inicial</h1>
-      <p className={pageSubtitle}>
-        Cuánto había de cada producto el día uno — una sola vez, sin contar al límite
-      </p>
-      {banner !== null ? <Banner tone={banner.tone} title={banner.text} /> : null}
-    </>
-  );
-}
-
-function Capturado({
-  banner,
-}: {
-  readonly banner: { tone: 'success' | 'critical'; text: string } | null;
-}) {
-  return (
-    <>
-      <h1 className={pageTitle}>Inventario inicial</h1>
-      <p className={pageSubtitle}>Ya está capturado</p>
-      {banner !== null ? <Banner tone={banner.tone} title={banner.text} /> : null}
-      <Banner
-        tone="info"
-        title="El inventario inicial ya se capturó. Ajusta existencias con un movimiento."
-      />
-    </>
-  );
-}
-
-function capturar(
-  fecha: string,
-  validas: readonly Fila[],
-  start: (fn: () => Promise<void>) => void,
-  setBanner: (b: { tone: 'success' | 'critical'; text: string } | null) => void,
-) {
-  return () =>
-    start(async () => {
-      const r = await capturarInventarioInicial(
-        fecha,
-        validas.map((f) => ({
-          productoId: f.productoId,
-          cantidad: Math.trunc(Number(f.cantidad)),
-          costo: f.costo,
-        })),
-      );
-      setBanner(
-        r.ok
-          ? {
-              tone: 'success',
-              text: `Capturado: ${r.movimientos} productos, valuación $${r.total}.`,
-            }
-          : { tone: 'critical', text: r.message },
-      );
-    });
-}
-
-function BarraCaptura({
-  validas,
-  mayWrite,
-  pendiente,
-  onCapturar,
-}: {
-  readonly fecha: string;
-  readonly validas: readonly Fila[];
-  readonly mayWrite: boolean;
-  readonly pendiente: boolean;
-  readonly onCapturar: () => void;
-}) {
-  if (!mayWrite) return null;
-  const valuacion = validas.reduce(
-    (t, f) => t + pesos(f.costo) * BigInt(Math.trunc(Number(f.cantidad))),
-    0n,
-  );
-  return (
-    <div
-      style={{ display: 'flex', gap: 14, alignItems: 'center', marginTop: 20, flexWrap: 'wrap' }}
-    >
-      <Button variant="primary" disabled={pendiente || validas.length === 0} onClick={onCapturar}>
-        {pendiente ? 'Capturando…' : `Capturar ${validas.length} productos`}
-      </Button>
-      <strong data-testid="valuacion-inicial">
-        Valuación: ${(valuacion / 100n).toLocaleString('es-MX')}.
-        {(valuacion % 100n).toString().padStart(2, '0')}
-      </strong>
+      {inv.aviso !== null ? (
+        <Aviso tono={inv.aviso.tono} onCerrar={() => inv.setAviso(null)}>
+          {inv.aviso.texto}
+        </Aviso>
+      ) : null}
+      <section className={p.panel} aria-label="Productos a contar">
+        <Cabecera />
+        <TablaFilas filas={inv.filas} editable={view.mayWrite} setFilas={inv.setFilas} />
+        <Pie total={inv.total} />
+      </section>
     </div>
   );
 }
 
-function filasDe(productos: readonly { id: string; nombre: string; costo: string }[]): Fila[] {
-  return productos.map((p) => ({
-    productoId: p.id,
-    nombre: p.nombre,
-    cantidad: '',
-    costo: p.costo,
-  }));
+function SinProductos() {
+  const router = useRouter();
+  return (
+    <>
+      <Encabezado aqui="Inventario inicial" titulo="Inventario inicial" subtitulo={SUBTITULO} />
+      <EmptyState
+        title="Primero agrega tus productos"
+        body="El inventario inicial se cuenta sobre tu catálogo. Agrégalos uno por uno o impórtalos desde Excel."
+        action={{
+          label: 'Importar productos',
+          onClick: () => router.push('/importar?plantilla=productos'),
+        }}
+      />
+    </>
+  );
 }

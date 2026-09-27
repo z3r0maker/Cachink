@@ -1,4 +1,4 @@
-import { expect, type Locator } from './test';
+import { expect, type Locator, type Page } from './test';
 
 /**
  * Click something and prove it landed — clicking again if it did not.
@@ -65,4 +65,21 @@ export async function filled(field: Locator, value: string): Promise<void> {
     await field.page().waitForTimeout(400);
     await expect(field).toHaveValue(value, { timeout: 1_000 });
   }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
+}
+
+/**
+ * /importar reviews a file the moment it is chosen (no «Revisar» button), so
+ * a file set before hydration is simply dropped. Set it until the review
+ * shows up; the input resets after each pick, so setting it again is safe.
+ */
+export async function subirParaRevisar(
+  page: Page,
+  file: { name: string; mimeType: string; buffer: Buffer },
+): Promise<void> {
+  const resumen = page.getByTestId('import-resumen');
+  await expect(async () => {
+    if (await resumen.isVisible()) return;
+    await page.getByTestId('import-archivo').setInputFiles(file);
+    await expect(resumen).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 30_000, intervals: [250, 500, 1_000] });
 }
