@@ -7,12 +7,8 @@ import { pedirEnlace, type LinkKind } from '@/server/actions/auth-links';
 
 import { AuthCard } from './auth-card';
 
+/** Only the sign-in link lives here now: /login/recuperar has its own form. */
 const COPY = {
-  reset: {
-    title: 'Recupera tu contraseña',
-    body: 'Te mandamos un enlace para crear una nueva. Dura 30 minutos.',
-    cta: 'Mandar enlace',
-  },
   magic: {
     title: 'Entra sin contraseña',
     body: 'Te mandamos un enlace para entrar con un toque. Dura 15 minutos.',
@@ -21,11 +17,11 @@ const COPY = {
 } as const;
 
 /**
- * Ask for a reset or sign-in link (ADR-080). The confirmation reads the same
+ * Ask for a sign-in link (ADR-080). The confirmation reads the same
  * whether or not the address has an account — that is the action's promise,
  * and the screen does not undo it.
  */
-function useLinkRequest(kind: LinkKind) {
+function useLinkRequest(kind: 'magic') {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -45,7 +41,7 @@ function useLinkRequest(kind: LinkKind) {
   return { email, onEmail, error, sent, pending, submit };
 }
 
-export function LinkRequestForm({ kind }: { readonly kind: LinkKind }) {
+export function LinkRequestForm({ kind }: { readonly kind: Extract<LinkKind, 'magic'> }) {
   const f = useLinkRequest(kind);
   const copy = COPY[kind];
   return (
