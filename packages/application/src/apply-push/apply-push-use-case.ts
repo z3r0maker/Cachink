@@ -10,7 +10,7 @@
  * receipt — same serverSeq, no second write — which is what lets the phone
  * retry a batch whose response it never received.
  *
- * **Batched** (audit DB2-SYNC-01; ADR-117): the push is cut into segments of
+ * **Batched** (audit DB2-SYNC-01; ADR-118): the push is cut into segments of
  * distinct rows, and each segment costs one receipt lookup, one reference
  * lookup per referenced table, one write per table and one `accept` — a
  * constant number of statements, however many rows it carries. Products and
