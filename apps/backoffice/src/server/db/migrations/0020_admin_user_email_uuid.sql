@@ -1,4 +1,4 @@
--- `admin_user_email` finds the user by its primary key (DB2-CRON-01; ADR-116).
+-- `admin_user_email` finds the user by its primary key (DB2-CRON-01; ADR-117).
 --
 -- 0010 compared `u.id::text = p_user_id`: casting the column hides the
 -- auth.users primary key from the planner, so every call scanned the whole
@@ -14,7 +14,7 @@
 
 -- `SET LOCAL`: the timeout dies with this file's transaction instead of
 -- staying on the runner's session (R2-13). 200 ms, and the runner retries the
--- whole file with backoff when it expires (DB3-MIG-01; ADR-116 amendment).
+-- whole file with backoff when it expires (DB3-MIG-01; ADR-117 amendment).
 SET LOCAL lock_timeout = '200ms';
 
 CREATE OR REPLACE FUNCTION xangarro.admin_user_email(p_user_id text)

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Delta } from '@xangarro/contracts';
 
 /**
- * Pushed rows for the Postgres push suites (ADR-117): one device, a default
+ * Pushed rows for the Postgres push suites (ADR-118): one device, a default
  * business, and the tables those suites exercise. Each delta takes the next
  * clientSeq, as a phone's outbox would.
  */

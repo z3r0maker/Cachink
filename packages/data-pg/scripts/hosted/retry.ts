@@ -1,5 +1,5 @@
 /**
- * Retry a migration step that lost the race for a lock (DB3-MIG-01; ADR-116
+ * Retry a migration step that lost the race for a lock (DB3-MIG-01; ADR-117
  * amendment). Pure; unit-tested in `tests/migrate-hosted-retry.test.ts`.
  *
  * A statement that needs ACCESS EXCLUSIVE (`ALTER TABLE`, `ALTER POLICY`, …)
