@@ -72,6 +72,11 @@
 ## 4. Subscriptions (LFPC art. 76 Bis VIII–IX, in force 2025-12-13)
 
 - [ ] **BLOCKER — Cancel in one click** from Configuración → Suscripción.
+      **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
+      directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
+      plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
+      «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
+      copy, the confirmation and the edge cases (already cancelled, past due).
 - [ ] **BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge**, with a one-click
       cancel link (tokenised).
 - [ ] Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance.

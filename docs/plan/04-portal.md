@@ -1144,6 +1144,15 @@ never invented text.
   - **Still to do:** everything behind the gate — the ten report sections, the price-suggestion
     table, the estrategia list, and the six diagnostic states. Needs P-30 and the credential.
 
+  - **2026-09-26 (owner, ADR-109): the Diagnóstico is two reports, not one.** Xangarro gets a
+    monthly _short read_ so a shopkeeper tastes what a written reading of their own numbers is
+    worth; Xangarrote gets the full report — more metrics, the detail behind them, the estrategia.
+    **Deciding what they differ by is now this task's central question, not a detail of it:** a
+    taste that reads as a truncated full report sells nothing, and one that is merely shorter
+    teaches the reader that the paid version is padding. Also changes here: the gate becomes «not
+    `semanal`» (`asesorShowsDiagnostico` is `=== 'completo'` today) and the locked card, which reads
+    «El Diagnóstico llega con Xangarrote», belongs to Xangarrito now and should name Xangarro.
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
 - **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
@@ -1588,7 +1597,12 @@ WhatsApp).
 
 ### P-37 Ticket printing from the caja
 
-- [ ] Status · **Blocked by:** — · **Blocks:** —
+- [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
+  printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
+  58 mm printer» — cannot be met or verified. It stays written down rather than deleted: the
+  caja already shares the comprobante by WhatsApp, and the designs hide the Imprimir button
+  until this ships, so nothing regresses by waiting. Re-open when a printer exists.
+- **Blocked by:** a physical 58/80 mm printer · **Blocks:** —
 - **Steps:** the caja sends the comprobante by WhatsApp today; add printing to a ticket printer
   (58/80 mm) from the «¡Listo!» dialog and from a sale's detail, using the «Ticket» template.
   Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
