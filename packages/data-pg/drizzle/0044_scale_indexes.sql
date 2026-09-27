@@ -1,7 +1,7 @@
 -- xangarro:no-transaction
 --
 -- The indexes the 2026-09-26 scale audit measured (DB2-IDX-01, DB2-USE-01;
--- ADR-114), as round 3 corrected them before any database applied the file
+-- ADR-115), as round 3 corrected them before any database applied the file
 -- (DB3-MIG-01, DB3-IDX-01, DB3-QRY-01, DB3-OPS-01). The first file to use
 -- the runner's no-transaction mode: each statement below commits on its own,
 -- so every build is CONCURRENTLY and never blocks the writes of a table

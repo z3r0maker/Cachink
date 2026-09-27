@@ -1,5 +1,5 @@
 -- The latency histogram stops being one hot row for the whole platform
--- (DB2-HOT-01; ADR-114).
+-- (DB2-HOT-01; ADR-115).
 --
 -- 0042 counts every push, pull, entitlement and comprobante call with
 -- `ON CONFLICT (day, endpoint, bucket_ms) DO UPDATE SET hits = hits + 1`.

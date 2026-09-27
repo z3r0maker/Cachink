@@ -7,7 +7,7 @@ import { SYNCED_TABLES } from './tables.js';
 
 /**
  * Pushed rows into their table, **one statement per table** (B-08; audit
- * DB2-SYNC-01; ADR-115).
+ * DB2-SYNC-01; ADR-116).
  *
  * - An UP row is upserted, last write wins by the row's own clock: an older
  *   push keeps the newer row (`kept`).
