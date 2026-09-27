@@ -109,14 +109,14 @@ function Conteo({ c }: { readonly c: Corte }) {
       <div className={eyebrow}>Conteo que capturó</div>
       <div className={s.denoms}>
         {DENOMINACIONES_MXN.map((d) => {
-          const n = c.conteo[d.pesos] ?? 0;
+          const n = c.conteo[d.clave] ?? 0;
           return (
             <div
-              key={d.pesos}
+              key={d.clave}
               className={s.denom}
               style={{ background: n === 0 ? colors.gray100 : colors.white }}
             >
-              {`$${d.pesos}`}
+              {d.clave === 'moneda-20' ? '$20 moneda' : d.etiqueta}
               <span style={{ marginLeft: 'auto', color: colors.gray600 }}>{`×${n}`}</span>
             </div>
           );
