@@ -18,8 +18,8 @@ import { useInventario, type Inventario } from './use-inventario';
 const CAJA_ICON = 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4';
 
 /** Operador · Inventario: stock, and this turno's deliveries and write-offs. */
-export function InventarioScreen({ state, tab, data }: InventarioScreenProps) {
-  const x = useInventario(data, tab);
+export function InventarioScreen({ state, tab, data, registrarVivo }: InventarioScreenProps) {
+  const x = useInventario(data, tab, registrarVivo);
   return (
     <OpMain top={24}>
       <NuevaVenta />
@@ -140,6 +140,7 @@ function Capas({ x }: { readonly x: Inventario }) {
           key={`${item.id}-${x.form.tipo}`}
           tipo={x.form.tipo}
           item={item}
+          enteros={x.enteros}
           onClose={() => x.setForm(null)}
           onSave={x.registrar}
         />

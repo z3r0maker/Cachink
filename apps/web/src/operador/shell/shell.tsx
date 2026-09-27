@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { ColaProvider, useCola } from './cola';
+import { useAvisosSinLeer } from '../avisos/sin-leer';
 import { useRegisterRuntime } from '../runtime/hooks';
 import { OperadorHeader, HEADER_ACTION_ID } from './header';
 import { OperadorSidebar } from './sidebar';
@@ -57,7 +58,14 @@ function Frame({
   readonly children: ReactNode;
 }) {
   const cola = useCola();
-  const shown = { ...data, connection: cola.connection, pendientes: cola.pendientes };
+  // The bell counts the live unread avisos on a linked caja (O-16).
+  const avisosSinLeer = useAvisosSinLeer(data.avisosSinLeer, `${cola.pendientes}:${cola.enviando}`);
+  const shown = {
+    ...data,
+    connection: cola.connection,
+    pendientes: cola.pendientes,
+    avisosSinLeer,
+  };
   return (
     <div className={s.frame}>
       <OperadorSidebar data={shown} onLock={bloquear} />

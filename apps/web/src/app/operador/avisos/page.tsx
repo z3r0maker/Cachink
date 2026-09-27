@@ -1,5 +1,5 @@
 import { AVISOS_FIXTURE } from '@/operador/avisos/fixture';
-import { AvisosScreen } from '@/operador/avisos/screen';
+import { AvisosViva } from '@/operador/avisos/viva';
 import type { AvisoGrupo, AvisosScreenProps } from '@/operador/avisos/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -15,12 +15,15 @@ function forced(q: Query): { state: AvisosScreenProps['state']; tab: AvisoGrupo 
   };
 }
 
-/** Operador · Avisos (O-16). Fixture data until C-19 and the register runtime (O-06). */
+/**
+ * Operador · Avisos (O-16). The design's notices for an unlinked browser; a
+ * linked caja reads its owner's messages and its own state (C-19, O-06).
+ */
 export default async function OperadorAvisosPage({
   searchParams,
 }: {
   readonly searchParams: Promise<Query>;
 }) {
   const { state, tab } = forced(await searchParams);
-  return <AvisosScreen state={state} data={AVISOS_FIXTURE} tab={tab} />;
+  return <AvisosViva fixture={AVISOS_FIXTURE} forzado={state} tab={tab} />;
 }

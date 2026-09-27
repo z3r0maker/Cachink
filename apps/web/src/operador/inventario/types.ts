@@ -1,7 +1,16 @@
 import type { EstadoMode } from '../estado';
 import type { ProductIcon } from '../ui/product-icons';
 
-export type Unidad = 'kg' | 'piezas' | 'litros';
+/** The screen's unit words; a linked caja maps the domain's units onto them. */
+export type Unidad =
+  | 'kg'
+  | 'piezas'
+  | 'litros'
+  | 'metros'
+  | 'cajas'
+  | 'bolsas'
+  | 'rollos'
+  | 'pares';
 
 /** A stocked item: what the sales draw down, and what the operator restocks or writes off. */
 export interface Existencia {
@@ -51,4 +60,14 @@ export interface InventarioScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly tab: Pestana;
   readonly data: InventarioData;
+  /** Linked caja: the move goes through the use case (whole quantities only). */
+  readonly registrarVivo?: (m: NuevoMovimientoVivo) => void;
+}
+
+/** A move as the runtime records it (mirrors the panel's `NuevoMovimiento`). */
+export interface NuevoMovimientoVivo {
+  readonly tipo: TipoMovimiento;
+  readonly existenciaId: string;
+  readonly cantidad: number;
+  readonly detalle: string;
 }

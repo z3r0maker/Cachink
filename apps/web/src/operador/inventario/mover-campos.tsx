@@ -60,10 +60,13 @@ export function Cantidad(p: {
   readonly raw: string;
   readonly unidad: string;
   readonly quedan: string;
+  /** Whole units only: the stepper rounds, and the keypad is numeric. */
+  readonly enteros?: boolean;
   readonly onChange: (raw: string) => void;
 }) {
   const n = Number.parseFloat(p.raw) || 0;
-  const set = (v: number) => p.onChange(String(Math.max(1, Math.round(v * 100) / 100)));
+  const redondeo = (v: number) => (p.enteros ? Math.round(v) : Math.round(v * 100) / 100);
+  const set = (v: number) => p.onChange(String(Math.max(1, redondeo(v))));
   return (
     <div className={s.campo}>
       <label htmlFor="mov-cant" className={s.label}>
@@ -77,7 +80,7 @@ export function Cantidad(p: {
           <input
             id="mov-cant"
             type="text"
-            inputMode="decimal"
+            inputMode={p.enteros ? 'numeric' : 'decimal'}
             className={s.cantidadInput}
             value={p.raw}
             onChange={(e) => p.onChange(e.target.value.replace(/[^0-9.]/g, ''))}
