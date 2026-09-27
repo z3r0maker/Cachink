@@ -17,7 +17,7 @@ import { SNAPSHOT_START, type PullResponse } from '@xangarro/contracts';
 import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
 import { applyPulledPage, cursorWrites, type CursorWrites } from './page-applier.js';
-import type { SyncError } from './push.js';
+import { toSyncError, type SyncError } from './push-batch.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
 export interface PullDeps {
@@ -73,7 +73,7 @@ type Step =
 async function pullOnce(deps: PullDeps): Promise<Step> {
   const req = await nextRequest(deps.appConfig);
   const res = await deps.client.pull(deps.token, req.since, req.snapshot ?? undefined);
-  if (!res.ok) return { error: { code: res.code, status: res.status } };
+  if (!res.ok) return { error: toSyncError(res) };
   const page = res.data;
   await applyPulledPage(deps.db, page, page.entitlement.payload.businessId, pageWrites(page));
   const rows = countRows(page);

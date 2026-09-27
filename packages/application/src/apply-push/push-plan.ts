@@ -7,6 +7,8 @@
 import {
   ERROR_CATALOG,
   isPushable,
+  maxPushRowBytes,
+  pushRowBytes,
   type Delta,
   type ErrorCode,
   type PushableTable,
@@ -48,9 +50,10 @@ export const accepted = (d: Delta, serverSeq: number): Outcome => ({
 });
 
 /**
- * What a row fails before any lookup: its table and op, its business, and text
- * Postgres cannot store — refused here, terminally, before it can fail a write
- * or the rejection that would keep it (DB3-SYNC-01).
+ * What a row fails before any lookup: its table and op, its business, text
+ * Postgres cannot store, and a size past the row limit — refused here,
+ * terminally, before it can fail a write or the rejection that would keep it,
+ * or grow a pull page past the response limit (DB3-SYNC-01 a, b).
  */
 export function precheck(d: Delta, businessId: string): Outcome | null {
   if (!isPushable(d.table, d.op)) {
@@ -63,6 +66,11 @@ export function precheck(d: Delta, businessId: string): Outcome | null {
   const bad = unstorableText(d.rowId, 'rowId') ?? unstorableText(d.row, 'row');
   if (bad !== null) {
     return rejected(d, 'VALIDATION', `${bad}: a NUL character or an unpaired surrogate`);
+  }
+  const bytes = pushRowBytes(d.row);
+  const limit = maxPushRowBytes(d.table);
+  if (bytes > limit) {
+    return rejected(d, 'VALIDATION', `row is ${bytes} bytes; ${d.table} allows ${limit}`);
   }
   return null;
 }

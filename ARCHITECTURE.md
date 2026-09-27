@@ -8436,6 +8436,37 @@ at the segment's start has its receipt looked up again after the write — an
 overlapping retry that waited on the original's lock — and counts as written
 for later references (DB3-SYNC-03).
 
+**Amendment (2026-09-27) — the device halves a batch refused as a whole; a
+row has a size limit.** DB3-SYNC-01 (b): a 400 (a stricter schema reaching an
+older app or caja tab), a 413, or a 5xx that repeats for the same first batch
+left the device's push high-water mark in place, so every later capture queued
+behind one row. (1) On a 400 or 413 — or on the third 5xx running for the same
+first batch (`pushStrikes` in app_config) — the device halves the batch: it
+sends the first half of the part known to fail; a half that passes is
+answered and the fault is in the rest, one that fails holds it. One poison row
+among n costs at most ⌈log2 n⌉ + 1 further requests, at most 22 a drain. (2) A
+row still refused alone is kept locally as rejected with the terminal
+**client** code `SERVER_REFUSED` (never sent by a server; the wire catalog is
+unchanged) and «No enviados» shows it with its manual retry. It is blamed only
+on evidence — a 413 alone, or the server accepting another part of the same
+batch; a lone row and its lone neighbour both refused with nothing accepted is
+the server refusing everything alike, and nothing is marked. (3) Network,
+timeout, 429, 503 and anything carrying `Retry-After` never split: they keep
+the engine's backoff (ADR-120 sheds load with 503). (4) The cursor advances
+only over change-log entries whose rows were answered or refused, so a
+halving cut short never skips an unsent row; accepted rows past the cursor
+are resent and answered from their receipts. (5) `@xangarro/contracts` gains
+an additive row-size limit, `maxPushRowBytes` — 16 KB, 1 MB for an
+`auditorias_inventario` row (a line per product) and 256 KB for an
+`entregas_credito` row (the sales it settles), measured as the UTF-8 bytes of
+the row's wire JSON. `precheck` refuses a bigger row as terminal
+`VALIDATION`, before any write; the device refuses it before sending and fits
+each push under 2 MB of row JSON. Rows already stored are untouched; an older
+app whose product carries a runaway `atributos` gets that one row refused
+instead of the whole push. (6) `writeSyncedRows` cuts a write at
+`floor(65,000 / columns)` rows a statement (DB3-L-07); one statement for any
+push the contract allows today.
+
 ## ADR-119
 
 **Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history

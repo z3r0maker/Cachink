@@ -10,6 +10,7 @@ export * from './transport.js';
 export * from './tokens.js';
 export * from './scope.js';
 export * from './wire.js';
+export * from './row-size.js';
 export * from './entitlement.js';
 export * from './snapshot.js';
 export * from './snapshot-page.js';

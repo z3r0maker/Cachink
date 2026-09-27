@@ -182,6 +182,31 @@ describe('POST /sync/push', () => {
     for (const x of body.rejected) assert.equal(x.retryable, false);
   });
 
+  it('refuses a row past the size limit as terminal VALIDATION and keeps the rest (DB3-SYNC-01 b)', async () => {
+    const small = sale('01JSA0000000000000000000C1');
+    const product = act.bootstrap.tables.products[0];
+    if (!product) throw new Error('fixture has no products');
+    // atributos is a free-form record: the one unbounded field a phone writes.
+    const huge = {
+      ...product,
+      id: '01JPRD000000000000000000BG',
+      sku: null,
+      atributos: { nota: 'x'.repeat(20_000) },
+      updatedAt: ts,
+    };
+    const r = await push([delta(small, 1), delta(huge, 2, 'insert', 'products')]);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const body = PushResponseSchema.parse(r.body);
+    assert.deepEqual(
+      body.accepted.map((a) => a.rowId),
+      [small.id],
+    );
+    assert.deepEqual(
+      body.rejected.map((x) => [x.rowId, x.code, x.retryable]),
+      [[huge.id, 'VALIDATION', false]],
+    );
+  });
+
   it('is idempotent: re-pushing an accepted row returns the same serverSeq', async () => {
     const row = sale('01JSA0000000000000000000B1');
     const first = PushResponseSchema.parse((await push([delta(row, 10)])).body);

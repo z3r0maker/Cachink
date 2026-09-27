@@ -105,6 +105,42 @@ describe('batched push SQL', () => {
     assert.equal(row?.['concepto'], 'nuevo');
   });
 
+  it('cuts a write past the bind-parameter budget into several statements, same answers (DB3-L-07)', async () => {
+    const ids = Array.from({ length: 7 }, () => testId('Y'));
+    const tiny = 40; // two expense rows a statement
+    const first = await inA((tx) =>
+      writeSyncedRows(
+        tx,
+        'expenses',
+        ids.map((id) => expense(A, id, T2, 'troceado')),
+        false,
+        tiny,
+      ),
+    );
+    assert.deepEqual(first, Array(7).fill('written'));
+    const older = await inA((tx) =>
+      writeSyncedRows(
+        tx,
+        'expenses',
+        ids.map((id) => expense(A, id, T1)),
+        false,
+        tiny,
+      ),
+    );
+    assert.deepEqual(older, Array(7).fill('kept'));
+    const moves = [testId('Y'), testId('Y'), testId('Y')];
+    const inserted = await inA((tx) =>
+      writeSyncedRows(
+        tx,
+        'inventory_movements',
+        moves.map((id) => movement(A, id)),
+        true,
+        tiny,
+      ),
+    );
+    assert.deepEqual(inserted, ['written', 'written', 'written']);
+  });
+
   it('leaves out a field a row does not carry, rather than nulling it', async () => {
     const id = testId('Y');
     await inA((tx) =>
