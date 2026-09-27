@@ -3,7 +3,7 @@
  *
  * Everything about the business (negocio, ISR, empleados, operadores,
  * productos) is managed in the portal; the phone keeps only what belongs to
- * it: Cuenta, Sincronización, Dispositivo and Datos.
+ * it: Cuenta, Sincronización and Dispositivo.
  */
 
 import type { ReactElement, ReactNode } from 'react';
@@ -12,11 +12,7 @@ import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import { SettingsAccountSection } from './settings-account-section';
-import {
-  SettingsDataSection,
-  SettingsDeviceSection,
-  type DeviceSettings,
-} from './settings-device-section';
+import { SettingsDeviceSection, type DeviceSettings } from './settings-device-section';
 import { SettingsSyncSection } from './settings-sync-section';
 
 export interface SettingsScreenProps {
@@ -39,7 +35,6 @@ export function SettingsScreen(props: SettingsScreenProps): ReactElement {
       <SettingsAccountSection />
       <SettingsSyncSection onOpenRejected={props.onOpenRejected} />
       <SettingsDeviceSection device={props.device} />
-      <SettingsDataSection />
       {props.footer}
     </ScrollView>
   );

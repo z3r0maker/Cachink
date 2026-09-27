@@ -5,7 +5,6 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import { AppShell, appTabs } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
@@ -15,26 +14,15 @@ import { fireEvent, renderWithProviders, screen } from '../test-utils';
 initI18n();
 
 const noop = (): void => {};
-const defaultFlags = DEFAULT_FEATURE_FLAGS;
 
 describe('appTabs', () => {
   // Single role (ADR-053) and no "Otros" slot (ADR-052): always 4 tabs.
-  it('returns the v1 bar without flags: Ventas, Caja, Gastos, Productos', () => {
+  it('returns the register bar: Ventas, Caja, Gastos, Productos', () => {
     expect(appTabs().map((tab) => tab.key)).toEqual(['ventas', 'caja', 'gastos', 'productos']);
   });
 
-  it('swaps the 4th tab to merma when the flag is on', () => {
-    const tabs = appTabs({ ...defaultFlags, merma: true });
-    expect(tabs).toHaveLength(4);
-    expect(tabs[3]!.key).toBe('merma');
-  });
-
-  it('keeps productos when merma is off', () => {
-    expect(appTabs({ ...defaultFlags, merma: false })[3]!.key).toBe('productos');
-  });
-
   it('never exposes the retired Director tabs', () => {
-    const keys = appTabs({ ...defaultFlags, merma: true }).map((tab) => tab.key);
+    const keys = appTabs().map((tab) => tab.key);
     for (const retired of ['home', 'estados', 'otros']) expect(keys).not.toContain(retired);
   });
 });
@@ -58,7 +46,6 @@ describe('AppShell', () => {
             mode="local"
             title="Ventas"
             subtitle="jueves, 24 abril"
-            flags={defaultFlags}
           >
             <span data-testid="shell-body">hello</span>
           </AppShell>
@@ -124,7 +111,6 @@ describe('AppShell', () => {
             onBack={onBack}
             mode="local"
             title="Ajustes"
-            flags={defaultFlags}
           >
             <span />
           </AppShell>

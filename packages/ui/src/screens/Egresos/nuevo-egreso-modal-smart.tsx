@@ -1,9 +1,10 @@
 /**
  * NuevoEgresoModalSmart — smart wrapper around the render-prop
- * NuevoEgresoModal that owns the three tabs + all mutation hooks.
+ * NuevoEgresoModal that owns the two tabs (Gasto, Inventario) + all
+ * mutation hooks. Nómina is the owner's, in the portal.
  *
  * Before this component existed, each route adapter had to manually
- * wire `renderGastoTab` / `renderNominaTab` / `renderInventarioTab`.
+ * wire `renderGastoTab` / `renderInventarioTab`.
  * The Round 2 audit found both mobile + desktop routes were mounting
  * `<NuevoEgresoModal open onClose>` with no render props — meaning
  * every tab rendered a `<PlaceholderBody>` debug stub. This smart
@@ -11,11 +12,10 @@
  * (CLAUDE.md §2.3: code lives in exactly one place).
  *
  * Contract: mobile + desktop routes just drop `<NuevoEgresoModalSmart
- * open onClose fecha />` in place of the old dumb modal. All three
+ * open onClose fecha />` in place of the old dumb modal. Both
  * tabs become fully functional — gasto fires `useRegistrarEgreso`
  * (and `useCrearGastoRecurrente` when the recurrente toggle is on),
- * nómina fires `useCrearEmpleado` + `useRegistrarEgreso`, and
- * inventario-purchase fires `useRegistrarMovimiento` (which
+ * and inventario-purchase fires `useRegistrarMovimiento` (which
  * dual-writes the Egreso per ADR-021).
  *
  * Mutation plumbing lives in `./nuevo-egreso-smart-hooks.ts` so this
@@ -26,12 +26,10 @@ import type { ReactElement, ReactNode } from 'react';
 import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { NuevoEgresoModal, type EgresoTab } from './nuevo-egreso-modal';
 import { GastoTab } from './tabs/gasto-tab';
-import { NominaTab } from './tabs/nomina-tab';
 import { InventarioTab } from './tabs/inventario-tab';
 import { useCurrentBusinessId } from '../../app-config/index';
-import { useEmpleadosForBusiness } from '../../hooks/use-empleados-for-business';
 import { useProductos } from '../../hooks/use-productos';
-import { useGastoSubmit, useInventarioSubmit, useNominaSubmit } from './nuevo-egreso-smart-hooks';
+import { useGastoSubmit, useInventarioSubmit } from './nuevo-egreso-smart-hooks';
 
 export interface NuevoEgresoModalSmartProps {
   readonly open: boolean;
@@ -56,15 +54,12 @@ interface TabRenderArgs {
 
 interface TabRenderers {
   readonly renderGastoTab: () => ReactNode;
-  readonly renderNominaTab: () => ReactNode;
   readonly renderInventarioTab: () => ReactNode;
 }
 
 function useTabRenderers(args: TabRenderArgs): TabRenderers {
   const gasto = useGastoSubmit(args.onClose);
-  const nomina = useNominaSubmit(args.onClose);
   const inventario = useInventarioSubmit(args.onClose);
-  const empleadosQ = useEmpleadosForBusiness();
   const productosQ = useProductos();
 
   return {
@@ -74,16 +69,6 @@ function useTabRenderers(args: TabRenderArgs): TabRenderers {
         fecha={args.fecha}
         onSubmit={gasto.handle}
         submitting={gasto.submitting}
-      />
-    ),
-    renderNominaTab: () => (
-      <NominaTab
-        businessId={args.businessId}
-        fecha={args.fecha}
-        empleados={empleadosQ.data ?? []}
-        onSubmit={nomina.handle}
-        onCrearEmpleado={nomina.crearEmpleado}
-        submitting={nomina.submitting}
       />
     ),
     renderInventarioTab: () => (
@@ -130,7 +115,6 @@ export function NuevoEgresoModalSmart(props: NuevoEgresoModalSmartProps): ReactE
       onClose={props.onClose}
       initialTab={props.initialTab}
       renderGastoTab={renderers.renderGastoTab}
-      renderNominaTab={renderers.renderNominaTab}
       renderInventarioTab={renderers.renderInventarioTab}
       testID={props.testID}
     />

@@ -56,6 +56,8 @@ Read these before touching code:
    before any decision that would be painful to reverse.
 4. **[DESIGN_CONTRACT.md](./DESIGN_CONTRACT.md)** — the portal's visual specification.
    Generated from `@xangarro/tokens`; never edited by hand.
+5. **[docs/design/el-mostrador.md](./docs/design/el-mostrador.md)** — the El Mostrador style
+   guide for every surface: surfaces, selection, buttons, panels, Don Cuentas, copy.
 
 ---
 
@@ -176,8 +178,10 @@ Studio (Android).
 3. **Code lives in exactly one place.** Duplication is a bug.
 4. **TDD is mandatory** for domain and application layers.
 5. **Money is integer centavos, parsed and never asserted** across a driver boundary.
-6. **The design is the specification.** If the code and the design disagree, the code
-   is wrong.
+6. **The design is the specification.** The El Mostrador boards on the design canvas,
+   approved by the owner, are the spec; code translates them into tokens. If the code and
+   an approved board disagree, the code is wrong. Style guide:
+   [docs/design/el-mostrador.md](./docs/design/el-mostrador.md) (ADR-117).
 
 Full contract in [CLAUDE.md](./CLAUDE.md).
 

@@ -22,7 +22,6 @@ import { KeyboardAvoidingView } from 'react-native';
 import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
-import type { FeatureFlags } from '@xangarro/domain';
 import type { AppMode } from '../../app-config/index';
 import { appTabs } from './tab-definitions';
 import { CloudSyncPill } from './cloud-sync-pill';
@@ -37,8 +36,6 @@ export interface AppShellProps {
   readonly title?: string;
   readonly subtitle?: string;
   readonly mode: AppMode | null;
-  /** Feature flags for tab visibility (Phase 4). */
-  readonly flags?: FeatureFlags;
   readonly children: ReactNode;
   /**
    * @deprecated No longer used. The role avatar now renders an
@@ -110,7 +107,7 @@ function useLeftSlot(
 
 export function AppShell(props: AppShellProps): ReactElement {
   const { t } = useTranslation();
-  const tabs = appTabs(props.flags);
+  const tabs = appTabs();
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),

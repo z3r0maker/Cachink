@@ -11,7 +11,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import { AppShell } from '../../screens/AppShell/index';
 import { useCurrentBusiness } from '../../hooks/use-current-business';
-import { useFeatureFlags } from '../../hooks/use-feature-flags';
 import { useMode, useSetUserId } from '../../app-config/use-app-config';
 
 export interface AppShellRouteWrapperProps {
@@ -37,7 +36,6 @@ export interface AppShellRouteWrapperProps {
 
 export function AppShellRouteWrapper(props: AppShellRouteWrapperProps): ReactElement {
   const mode = useMode();
-  const flags = useFeatureFlags();
   const business = useCurrentBusiness().data ?? null;
   const setUserId = useSetUserId();
   const tabNavigate = props.replaceRoute ?? props.navigate;
@@ -45,7 +43,6 @@ export function AppShellRouteWrapper(props: AppShellRouteWrapperProps): ReactEle
     <AppShell
       activeTabKey={props.activeTabKey}
       mode={mode}
-      flags={flags}
       title={props.title ?? business?.nombre ?? undefined}
       onBack={props.onBack}
       backLabel={props.backLabel}

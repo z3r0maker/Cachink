@@ -1,18 +1,16 @@
 /**
- * Dispositivo + Datos (A-12): the settings that belong to this phone —
- * sale sound, notifications, crash reports, reporting a problem, checking
- * for updates — and exporting what the device holds.
+ * Dispositivo (A-12): the settings that belong to this phone — sale sound,
+ * notifications, crash reports, reporting a problem, checking for updates.
+ * Exporting the business's data is the owner's, in the portal.
  */
 
 import type { ReactElement } from 'react';
 import { Btn } from '../../components/index';
-import { useCurrentBusiness } from '../../hooks/use-current-business';
 import { useTranslation } from '../../i18n/index';
 import { SaleSoundToggle } from './sale-sound-toggle';
 import { CrashReportingToggle } from './crash-reporting-toggle';
-import { ExportarDatosAction } from './exportar-datos-action';
 import { NotificationsToggle } from './notifications-toggle';
-import { SettingsNote, SettingsSection } from './settings-section';
+import { SettingsSection } from './settings-section';
 
 export interface DeviceSettings {
   readonly soundEnabled: boolean;
@@ -50,17 +48,6 @@ export function SettingsDeviceSection(props: { readonly device: DeviceSettings }
           {updatesLabel}
         </Btn>
       )}
-    </SettingsSection>
-  );
-}
-
-export function SettingsDataSection(): ReactElement {
-  const { t } = useTranslation();
-  const business = useCurrentBusiness().data;
-  return (
-    <SettingsSection title={t('settings.datos')} testID="settings-data">
-      <ExportarDatosAction businessName={business?.nombre} />
-      <SettingsNote text={t('settings.exportHint')} />
     </SettingsSection>
   );
 }

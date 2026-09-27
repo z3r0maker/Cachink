@@ -1,37 +1,22 @@
 /**
- * Sub-components for the /ventas route overlays and gate.
+ * Sub-components for the /ventas route: the two gates and the POS view.
  * Underscore prefix → Expo Router ignores this file.
  */
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import type { PaymentMethod, Product, Sale } from '@xangarro/domain';
-import {
-  SaleBurst,
-  CajaGateBanner,
-  CorteHomeCard,
-  ProductosGateBanner,
-  VentaCheckoutSheet,
-  VentasScreen,
-  type CartState,
-  type EliminarVentaResult,
-} from '@xangarro/ui';
+import type { Product } from '@xangarro/domain';
+import { CajaGateBanner, ProductosGateBanner, VentasScreen, type CartState } from '@xangarro/ui';
 import type { CartAction } from './_ventas-hooks';
-import { DetailSlot, SwipeSlots } from '../../shell/ventas-slots';
 
 export function VentasProductosGate(): ReactElement {
   const router = useRouter();
   return <ProductosGateBanner onGoToProductos={() => router.replace('/productos' as never)} />;
 }
 
-export function VentasCajaGate(props: { setShowCorte: (v: boolean) => void }): ReactElement {
+export function VentasCajaGate(): ReactElement {
   const router = useRouter();
-  return (
-    <>
-      <CajaGateBanner onGoToCaja={() => router.replace('/caja' as never)} />
-      <CorteHomeCard hideCard onShowChange={props.setShowCorte} testID="corte-hidden" />
-    </>
-  );
+  return <CajaGateBanner onGoToCaja={() => router.replace('/caja' as never)} />;
 }
 
 interface MainViewProps {
@@ -46,8 +31,6 @@ interface MainViewProps {
   onCheckout: () => void;
   total: bigint;
   ventaCount: number;
-  showCorte: boolean;
-  onCorteOpen: () => void;
 }
 
 export function VentasMainView(props: MainViewProps): ReactElement {
@@ -68,93 +51,6 @@ export function VentasMainView(props: MainViewProps): ReactElement {
       onCheckout={props.onCheckout}
       total={props.total}
       ventaCount={props.ventaCount}
-      showCorte={props.showCorte}
-      onCorteOpen={props.onCorteOpen}
-    />
-  );
-}
-
-interface SwipeData {
-  editing: Sale | null;
-  setEditing: (v: Sale | null) => void;
-  confirmDelete: Sale | null;
-  setConfirmDelete: (v: Sale | null) => void;
-}
-
-interface OverlayProps {
-  showCorte: boolean;
-  setShowCorte: (v: boolean) => void;
-  corteOpen: boolean;
-  setCorteOpen: (v: boolean) => void;
-  checkoutOpen: boolean;
-  setCheckoutOpen: (v: boolean) => void;
-  cartItems: CartState['items'];
-  totalCentavos: bigint;
-  handleCheckoutSubmit: (m: PaymentMethod) => Promise<void>;
-  submitting: boolean;
-  checkoutError: Error | null;
-  selected: Sale | null;
-  setSelected: (v: Sale | null) => void;
-  handleShare: () => void;
-  eliminar: EliminarVentaResult;
-  swipe: SwipeData;
-  showSaleBurst: boolean;
-  setShowSaleBurst: (v: boolean) => void;
-}
-
-export function VentasOverlays(p: OverlayProps): ReactElement {
-  return (
-    <>
-      <VentasCorteSlot
-        showCorte={p.showCorte}
-        setShowCorte={p.setShowCorte}
-        corteOpen={p.corteOpen}
-        setCorteOpen={p.setCorteOpen}
-      />
-      <VentaCheckoutSheet
-        open={p.checkoutOpen}
-        onClose={() => p.setCheckoutOpen(false)}
-        items={p.cartItems}
-        totalCentavos={p.totalCentavos}
-        onSubmit={p.handleCheckoutSubmit}
-        submitting={p.submitting}
-        error={p.checkoutError}
-      />
-      <DetailSlot
-        selected={p.selected}
-        setSelected={p.setSelected}
-        handleShare={p.handleShare}
-        eliminar={p.eliminar}
-      />
-      <SwipeSlots
-        editing={p.swipe.editing}
-        setEditing={p.swipe.setEditing}
-        confirmDelete={p.swipe.confirmDelete}
-        setConfirmDelete={p.swipe.setConfirmDelete}
-        eliminar={p.eliminar}
-      />
-      <SaleBurst
-        visible={p.showSaleBurst}
-        onComplete={() => p.setShowSaleBurst(false)}
-        testID="sale-burst"
-      />
-    </>
-  );
-}
-
-function VentasCorteSlot(props: {
-  showCorte: boolean;
-  setShowCorte: (v: boolean) => void;
-  corteOpen: boolean;
-  setCorteOpen: (v: boolean) => void;
-}): ReactElement {
-  return (
-    <CorteHomeCard
-      hideCard
-      onShowChange={props.setShowCorte}
-      openExternal={props.corteOpen}
-      onModalClose={() => props.setCorteOpen(false)}
-      testID="corte-home-card-ventas"
     />
   );
 }
