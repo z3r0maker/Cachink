@@ -19,7 +19,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryCajaTurnosRepository,
-  InMemoryDayClosesRepository,
   InMemoryExpensesRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
@@ -35,7 +34,6 @@ import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useRegistrarVenta } from '../../src/hooks/use-registrar-venta';
 import { useRegistrarEgreso } from '../../src/hooks/use-registrar-egreso';
 import { useRegistrarMovimiento } from '../../src/hooks/use-registrar-movimiento';
-import { useCerrarCorteDeDia } from '../../src/hooks/use-cerrar-corte-de-dia';
 import { useCrearProducto } from '../../src/hooks/use-crear-producto';
 import { tamaguiConfig } from '../../src/tamagui.config';
 
@@ -170,28 +168,6 @@ describe('estados invalidation after money mutations', () => {
         costoUnitCentavos: 1500n,
         motivo: 'Compra',
         businessId: BIZ,
-      });
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const swept = harness.invalidated();
-    for (const prefix of ESTADOS_PREFIXES) {
-      expect(swept).toContain(prefix);
-    }
-  });
-
-  it('cerrar corte de día sweeps every estados surface, not just balance-general', async () => {
-    const dayCloses = new InMemoryDayClosesRepository(TEST_DEVICE_ID);
-    const harness = makeHarness({ sales, expenses, dayCloses });
-
-    const { result } = renderHook(() => useCerrarCorteDeDia(), { wrapper: harness.wrapper });
-    await act(async () => {
-      result.current.mutate({
-        fecha: currentIsoDate(),
-        businessId: BIZ,
-        deviceId: TEST_DEVICE_ID,
-        efectivoContadoCentavos: 0n,
-        cerradoPor: 'operativo',
       });
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

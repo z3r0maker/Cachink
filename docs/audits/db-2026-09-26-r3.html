@@ -94,7 +94,7 @@ nav.toc a{color:var(--ink)}
 <a href="#index">3. Index census</a><br>
 <a href="#ok">4. Verified correct</a><br>
 <a href="#order">5. What to fix, in order</a><br>
-<a href="#azure">6. The Azure note (O-29)</a><br>
+<a href="#azure">6. The Azure note (O-32)</a><br>
 <a href="#method">7. Method</a>
 </nav>
 
@@ -439,8 +439,8 @@ These are small, all in files this branch already owns, and each is a bug the br
 </ul></td></tr>
 </table></div>
 
-<h2 id="azure">6. The Azure note (O-29)</h2>
-<p>The note is on the branch as owner row O-29 in <code>docs/plan/11-pre-launch-and-deferred.md</code>. It appears in <code>PENDIENTES.md</code>. This round adds three sizing facts to it:</p>
+<h2 id="azure">6. The Azure note (O-32)</h2>
+<p>The note is on the branch as owner row O-32 in <code>docs/plan/11-pre-launch-and-deferred.md</code>. It appears in <code>PENDIENTES.md</code>. This round adds three sizing facts to it:</p>
 <ol>
 <li><strong>Size the peak on connections, not CPU.</strong> 5,000 realistic tenants need about 3–6 busy connections at a 1–3 ms round trip. That is 17–41% of a Nano-class pooler. At the 30K cap it is 30–72, which is 2–5× over.</li>
 <li><strong>Shed load with 503 + <code>Retry-After</code></strong> instead of queueing, so an outage at 20:00 doesn't turn into thousands of waiting functions.</li>

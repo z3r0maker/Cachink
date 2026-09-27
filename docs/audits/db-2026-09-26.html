@@ -98,7 +98,7 @@ nav.toc a{color:var(--ink)}
 <a href="#normal">5. Normalization and structure</a><br>
 <a href="#prior">6. Status of the 2026-09-17 findings</a><br>
 <a href="#roadmap">7. What to do, in order</a><br>
-<a href="#azure">8. Load curve and the Azure note (O-29)</a><br>
+<a href="#azure">8. Load curve and the Azure note (O-32)</a><br>
 <a href="#method">9. Method and limits</a><br>
 <a href="#after">10. After <code>perf/db-scale</code>: measured again</a>
 </nav>
@@ -531,7 +531,7 @@ nav.toc a{color:var(--ink)}
 <li>Execute the S2 partitioning</li>
 <li>DB2-KEY-01 at the same rebuild</li>
 <li>Monthly or daily financial rollups for Estados and the Asesor, so year-long statements are constant time</li>
-<li>Apply the O-29 balance strategy on Azure</li>
+<li>Apply the O-32 balance strategy on Azure</li>
 </ul></td><td>About 28 GB a month, 340 GB a year.</td></tr>
 <tr><td>If tenants actually reach the <strong>30K cap</strong></td><td>ADR-068 S3: Citus or tenant sharding on <code>business_id</code>, which the hash partitioning above prepares for.</td><td>About 410 GB a month and ~3,700 rows/s at peak is beyond a comfortable single node.</td></tr>
 </table></div>
@@ -544,7 +544,7 @@ nav.toc a{color:var(--ink)}
 </ul>
 <p>Today's scheduled jobs already sit mostly in the trough: usage at 03:00, the CFDI close at 01:00 on the 1st, trial emails at 09:00 and the digest at 08:00. The Asesor fan-out, once it is built, must be scheduled there too.</p>
 <p>Scaling compute up for the peak only pays off after DB2-SYNC-01. Until then the peak is bound by round trips (see the 3 ms row in §2), and a bigger SKU does not help.</p>
-<p>I added the note you asked for as owner row <strong>O-29</strong> in <code>docs/plan/11-pre-launch-and-deferred.md</code>, and regenerated <code>PENDIENTES.md</code>, where it now appears. It covers:</p>
+<p>I added the note you asked for as owner row <strong>O-32</strong> in <code>docs/plan/11-pre-launch-and-deferred.md</code>, and regenerated <code>PENDIENTES.md</code>, where it now appears. It covers:</p>
 <ol>
 <li>Keep batch work in the trough.</li>
 <li>Scale down overnight and up before 17:00, only if the p95 (ADR-068's 800 ms trigger) and CPU call for it. A compute change restarts the server, so schedule it, and check whether near-zero-downtime scaling is available on the chosen SKU.</li>
@@ -554,7 +554,7 @@ nav.toc a{color:var(--ink)}
 <li>Use the built-in PgBouncer in transaction mode.</li>
 <li>Precondition: batch the push first.</li>
 </ol>
-<p class="note">I used the id O-29, not O-6c: the board parser only accepts <code>O-&lt;digits&gt;</code>. For the same reason the existing <strong>O-6b</strong> Azure note has never appeared on the board.</p>
+<p class="note">I used the id O-32, not O-6c: the board parser only accepts <code>O-&lt;digits&gt;</code>. For the same reason the existing <strong>O-6b</strong> Azure note has never appeared on the board.</p>
 
 <h2 id="method">9. Method and limits</h2>
 <p><strong>Environment.</strong> A disposable <code>postgres:17-alpine</code> container, <code>xangarro-audit-scale</code>, port 55498, capped at 4 vCPU / 4 GB (<code>shared_buffers=1GB</code>). All 53 real migrations were applied with <code>db-local.sh apply</code>. The shared <code>xangarro-pg*</code> containers were not touched.</p>

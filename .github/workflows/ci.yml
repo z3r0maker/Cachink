@@ -360,7 +360,7 @@ jobs:
       - run: pnpm --filter @xangarro/data-pg db:apply
       - run: pnpm --filter @xangarro/data-pg db:seed
 
-      # The portal's own Postgres suites (the batched push, ADR-118), with the
+      # The portal's own Postgres suites (the batched push, ADR-119), with the
       # REQUIRE_DB fuse: a missing database fails here instead of skipping.
       - name: Integration (portal ↔ Postgres)
         run: pnpm --filter @xangarro/web test:db

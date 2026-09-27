@@ -15,24 +15,24 @@ describe('NuevoEgresoModal', () => {
     expect(screen.queryByTestId('nuevo-egreso-modal')).toBeNull();
   });
 
-  it('renders all three tabs when open', () => {
+  it('renders both tabs when open', () => {
     renderWithProviders(<NuevoEgresoModal open onClose={vi.fn()} />);
     expect(screen.getByTestId('egreso-tab-gasto')).toBeInTheDocument();
-    expect(screen.getByTestId('egreso-tab-nomina')).toBeInTheDocument();
     expect(screen.getByTestId('egreso-tab-inventario')).toBeInTheDocument();
+    expect(screen.queryByTestId('egreso-tab-nomina')).toBeNull();
   });
 
   it('defaults to the gasto tab', () => {
     renderWithProviders(<NuevoEgresoModal open onClose={vi.fn()} />);
     expect(screen.getByTestId('egreso-tab-body-gasto')).toBeInTheDocument();
-    expect(screen.queryByTestId('egreso-tab-body-nomina')).toBeNull();
+    expect(screen.queryByTestId('egreso-tab-body-inventario')).toBeNull();
   });
 
   it('switches tab on tap', () => {
     renderWithProviders(<NuevoEgresoModal open onClose={vi.fn()} />);
-    const nominaTab = screen.getAllByTestId('egreso-tab-nomina')[0]!;
-    fireEvent.click(nominaTab);
-    expect(screen.getByTestId('egreso-tab-body-nomina')).toBeInTheDocument();
+    const inventarioTab = screen.getAllByTestId('egreso-tab-inventario')[0]!;
+    fireEvent.click(inventarioTab);
+    expect(screen.getByTestId('egreso-tab-body-inventario')).toBeInTheDocument();
     expect(screen.queryByTestId('egreso-tab-body-gasto')).toBeNull();
   });
 

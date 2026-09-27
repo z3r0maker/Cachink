@@ -38,7 +38,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # `local/` before `drizzle/`: the compat layer creates the roles the migrations
 # grant to. CI calls this against its own service container, so both sides run
 # byte-identical SQL in the same order from one place (CLAUDE.md §2.3).
-# Like the hosted runner (ADR-117), each file runs in one transaction unless
+# Like the hosted runner (ADR-118), each file runs in one transaction unless
 # its first line is `-- xangarro:no-transaction`; so a file's `SET LOCAL
 # lock_timeout` means here what it means in production.
 apply_sql() {
