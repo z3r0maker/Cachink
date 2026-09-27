@@ -7,7 +7,7 @@ import { asTenant } from './sync-phone';
 
 /**
  * P-11 on a throwaway tenant: a refused row names its device and says why in a
- * sentence, the Historial records it, and «Marcar como resuelto» is saved —
+ * sentence, the Historial records it, and «Ya lo resolví» is saved:
  * the row stays gone after a reload, with `resolved_at` set.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -51,21 +51,21 @@ test('a refused row reads as a sentence, is in the history, and stays resolved',
   await page.goto('/sincronizacion');
 
   const main = page.locator('main');
-  const row = main.locator('tr', { hasText: 'Venta · Pan ×2' });
-  await expect(row.getByText('Caja norte')).toBeVisible();
+  const row = main.getByRole('article', { name: 'Venta · Pan ×2' });
+  await expect(row.getByText('Caja norte').first()).toBeVisible();
   await expect(
     row.getByText('El producto de este registro ya no existe en el portal.'),
   ).toBeVisible();
   await expect(
     page
       .getByRole('list', { name: 'Historial de sincronización' })
-      .getByText('Se rechazaron 1 registro de Caja norte.'),
+      .getByText('No entró 1 registro de Caja norte.'),
   ).toBeVisible();
 
-  await row.getByRole('button', { name: 'Marcar como resuelto' }).click();
-  await expect(main.getByText('Todo sincronizado')).toBeVisible();
+  await row.getByRole('button', { name: 'Ya lo resolví' }).click();
+  await expect(main.getByText('Todo al día. Tus números están completos.')).toBeVisible();
   await page.reload();
-  await expect(main.getByText('Todo sincronizado')).toBeVisible();
+  await expect(main.getByText('Todo al día. Tus números están completos.')).toBeVisible();
   const [r] = await asTenant(
     biz,
     (sql) =>

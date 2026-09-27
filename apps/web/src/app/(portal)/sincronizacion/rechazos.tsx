@@ -1,70 +1,59 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
-
-import { Button, DataTable, type ColumnDef } from '@/components';
-import { motivoDeRechazo } from '@/lib/sync-motivos';
-import { marcarRechazoResuelto } from '@/server/actions/rechazos';
-import type { SincronizacionData } from '@/server/screens';
+import { IconoCheck } from '../suscripcion/iconos';
+import { RechazoCard } from './rechazo-card';
+import { tituloDe, type Rechazo } from './rechazo-texto';
+import * as s from './sincronizacion.css';
+import type { Item } from './use-rechazos';
 
 /**
- * «Registros no enviados» (P-11): what was refused, from which device, why —
- * a sentence, never a code — and «Marcar como resuelto», which is saved
- * (`resolved_at`), not just hidden. Owner and admin only; hidden for Solo
- * lectura, and the action refuses regardless.
+ * «Por revisar» (P-11): what a caja sent that did not enter. Refused rows are
+ * never dropped; resolving one is saved, and a refused retry reopens it.
+ * Owner and admin resolve; Solo lectura reads, and the action refuses anyway.
  */
-type Rejection = SincronizacionData['rechazos'][number];
-
-const preview = (payload: unknown): string =>
-  (payload as { preview?: string } | null)?.preview ?? '—';
-
-function ResolverButton({ id }: { readonly id: string }) {
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
-  const resolver = () =>
-    startTransition(async () => {
-      const r = await marcarRechazoResuelto(id);
-      if (!r.ok) return setError(r.message);
-      router.refresh();
-    });
+function Listo({ r }: { readonly r: Rechazo }) {
   return (
-    <>
-      <Button size="sm" variant="secondary" onClick={resolver} disabled={pending}>
-        Marcar como resuelto
-      </Button>
-      {error === null ? null : <span role="alert">{error}</span>}
-    </>
+    <div className={`${s.listo} ${s.fade}`} role="status">
+      <span className={s.listoIcono}>
+        <IconoCheck size={18} grosor={2.6} />
+      </span>
+      <span>Listo: marcaste «{tituloDe(r)}» como resuelto.</span>
+    </div>
   );
 }
 
-const columns = (mayWrite: boolean): readonly ColumnDef<Rejection>[] => [
-  { key: 'tipo', header: 'Tipo de registro', render: (r) => r.tableName },
-  {
-    key: 'dispositivo',
-    header: 'Dispositivo',
-    render: (r) => r.dispositivo ?? 'Dispositivo desvinculado',
-  },
-  { key: 'motivo', header: 'Motivo', render: (r) => motivoDeRechazo(r.code) },
-  { key: 'preview', header: 'Vista previa', render: (r) => preview(r.payload) },
-  ...(mayWrite
-    ? [{ key: 'accion', header: '', render: (r: Rejection) => <ResolverButton id={r.id} /> }]
-    : []),
-];
-
-export function RechazosTable(props: {
-  readonly rows: readonly Rejection[];
+export function PorRevisar(props: {
+  readonly items: readonly Item[];
   readonly mayWrite: boolean;
+  readonly resolver: (r: Rechazo) => Promise<string | null>;
 }) {
+  const primero = props.items.find((i) => !i.hecho)?.r.id;
   return (
-    <DataTable
-      caption="Registros no enviados"
-      columns={columns(props.mayWrite)}
-      rows={props.rows}
-      rowKey={(r) => r.id}
-      minWidth={980}
-      footer={<span>Mostrando {props.rows.length} registros rechazados</span>}
-    />
+    <section className={s.columna} aria-labelledby="por-revisar">
+      <div className={s.colHead}>
+        <h2 id="por-revisar" className={s.eyebrow}>
+          Por revisar
+        </h2>
+        <span className={s.nota}>
+          Si una caja lo vuelve a mandar y otra vez no entra, regresa aquí.
+        </span>
+      </div>
+      {props.items.length === 0 ? (
+        <p className={s.vacio}>No hay nada por revisar. Todo lo que mandaron tus cajas entró.</p>
+      ) : null}
+      {props.items.map(({ r, hecho }) =>
+        hecho ? (
+          <Listo key={r.id} r={r} />
+        ) : (
+          <RechazoCard
+            key={r.id}
+            r={r}
+            abierto={r.id === primero}
+            mayWrite={props.mayWrite}
+            onResolver={() => props.resolver(r)}
+          />
+        ),
+      )}
+    </section>
   );
 }

@@ -18,8 +18,8 @@ describe('estadoCopy', () => {
   });
 
   it('active and trialing name the date on the business clock', () => {
-    assert.equal(estadoCopy(snap('active')).linea, 'Siguiente cobro: 1 jun 2026.');
-    assert.equal(estadoCopy(snap('trialing')).linea, 'Prueba gratis hasta el 1 jun 2026.');
+    assert.equal(estadoCopy(snap('active')).linea, 'Siguiente cobro: 1 de junio de 2026.');
+    assert.equal(estadoCopy(snap('trialing')).linea, 'Prueba gratis hasta el 1 de junio de 2026.');
     assert.equal(estadoCopy(snap('active')).aviso, null);
   });
 

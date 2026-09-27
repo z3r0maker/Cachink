@@ -1,86 +1,80 @@
 'use client';
 
-import { colors } from '@xangarro/tokens';
-
-import { Card, DonCuentasAvatar } from '@/components';
-import { eyebrow, planLabel } from '@/styles/text.css';
+import { Don } from '@/components';
 import type { AsesorTier } from '@/data/planes';
 import { administrarSuscripcion } from '@/server/billing/actions';
+import { useSession } from '@/session/provider';
+import { PLAN_NOMBRE } from '@xangarro/domain';
 
 import { BotonStripe } from './acciones';
+import * as a from './asesor.css';
+import { IconoCheck } from './iconos';
+import * as p from './planes.css';
+import { check } from './resumen.css';
+import * as s from './suscripcion.css';
 
-import { featureMark, featureRow, planCard, planGrid } from './suscripcion.css';
-
-function AsesorTierCard({ t }: { readonly t: AsesorTier }) {
+function AsesorTierCard({ t, tuyo }: { readonly t: AsesorTier; readonly tuyo: boolean }) {
   return (
-    <div className={t.emphasis ? planCard.emphasis : planCard.plain}>
-      <div className={planLabel} style={{ color: t.emphasis ? colors.yellow : colors.gray600 }}>
-        {t.name}
-      </div>
-      <p
-        style={{
-          margin: '10px 0 18px',
-          fontWeight: 700,
-          color: t.emphasis ? colors.white : colors.black,
-        }}
-      >
-        {t.oneLiner}
-      </p>
-      {t.items.map((item) => (
-        <div key={item} className={featureRow}>
-          <span
-            className={featureMark}
-            style={{ color: t.emphasis ? colors.yellow : colors.greenText }}
-            aria-hidden="true"
-          >
-            ✓
-          </span>
-          <span style={{ color: t.emphasis ? colors.gray200 : colors.ink }}>{item}</span>
-        </div>
-      ))}
-    </div>
+    <article className={tuyo ? a.donCartaTuya : a.donCarta}>
+      <span className={a.donNombre}>
+        <span className={s.eyebrow}>{t.name}</span>
+        {tuyo ? <span className={a.tuPlanChico}>Tu plan</span> : null}
+      </span>
+      <span className={a.donLinea}>{t.oneLiner}</span>
+      <ul className={p.lista}>
+        {t.items.map((item) => (
+          <li key={item} className={p.rasgo}>
+            <span className={`${p.marca} ${check}`}>
+              <IconoCheck />
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
   );
 }
 
 /** The Asesor is sold as its own block, separate from the plan feature lists. */
 export function AsesorBlock({ tiers }: { readonly tiers: readonly AsesorTier[] }) {
+  const tuyo = PLAN_NOMBRE[useSession().planId];
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <span className={eyebrow} style={{ color: colors.gray600 }}>
+    <section className={s.seccion} aria-labelledby="don-t">
+      <div className={a.donHead}>
+        <Don pose="hola" size={44} />
+        <h2 id="don-t" className={s.seccionTitulo}>
           Don Cuentas en cada plan
-        </span>
-        <DonCuentasAvatar size="sm" />
+        </h2>
+        <span className={s.notaDerecha}>Sus avisos y su análisis con IA crecen con tu plan.</span>
       </div>
-      <div className={planGrid}>
+      <div className={p.grid}>
         {tiers.map((t) => (
-          <AsesorTierCard key={t.name} t={t} />
+          <AsesorTierCard key={t.name} t={t} tuyo={t.name === tuyo} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
 export function PauseRow() {
   return (
-    <Card>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-        <div style={{ minWidth: 0 }}>
-          <strong>¿Quieres pausar tu suscripción?</strong>
-          <div style={{ color: colors.textMuted, fontWeight: 600 }}>
-            Bajas al plan Xangarrito y conservas tus registros. Puedes volver cuando quieras.
-          </div>
-        </div>
-        <span style={{ marginLeft: 'auto' }}>
-          {/* Pausing is a cancel in Stripe's Customer Portal; the plan ends at period end. */}
-          <BotonStripe
-            variant="danger"
-            size="sm"
-            label="Cambiar a Xangarrito"
-            accion={() => administrarSuscripcion()}
-          />
+    <section className={s.pausa} aria-labelledby="pausa-t">
+      <span className={s.pausaTexto}>
+        <h2 id="pausa-t" className={s.pausaTitulo}>
+          ¿Quieres pausar tu suscripción?
+        </h2>
+        <span className={s.nota}>
+          Bajas a Xangarrito y conservas tus registros. Vuelves cuando quieras.
         </span>
-      </div>
-    </Card>
+      </span>
+      <span>
+        {/* Pausing is a cancel in Stripe's Customer Portal; the plan ends at period end. */}
+        <BotonStripe
+          estilo="peligro"
+          label="Cambiar a Xangarrito"
+          accion={() => administrarSuscripcion()}
+        />
+      </span>
+    </section>
   );
 }
