@@ -5,7 +5,7 @@ import type { Delta } from '@xangarro/contracts';
 
 import { storeError } from '../src/server/sync/store-error';
 
-/** How a failed batched write reaches `ApplyPushUseCase` (ADR-110). */
+/** How a failed batched write reaches `ApplyPushUseCase` (ADR-112). */
 const one = [{ table: 'sales', rowId: 'S1' }] as unknown as Delta[];
 const two = [...one, { table: 'sales', rowId: 'S2' }] as unknown as Delta[];
 // Drizzle wraps the driver's error; the code is on `cause`.

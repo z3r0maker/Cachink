@@ -1,6 +1,6 @@
 /**
  * Writes a push's rows one statement per table, and keeps one bad row from
- * failing the rest (B-08; audit DB2-SYNC-01/-02; ADR-110).
+ * failing the rest (B-08; audit DB2-SYNC-01/-02; ADR-112).
  *
  * The happy path is one isolated write per table. When that write fails, the
  * rows are split in half and each half tried again, down to the single row that

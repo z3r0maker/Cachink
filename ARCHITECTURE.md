@@ -148,8 +148,8 @@ Links to discussion, docs, prior art.
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
-| [109](#adr-109) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [110](#adr-110) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [111](#adr-111) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [112](#adr-112) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -7370,7 +7370,7 @@ enum refuses, so a QR sale there failed its parse and was only logged.
 - Column defaults and seeds still carry QR/CoDi; they are harmless because every
   reader filters, and changing them would be a migration for nothing.
 
-## ADR-109
+## ADR-111
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -7464,7 +7464,7 @@ statement never under a long or zero timeout, and `REINDEX` only
 `db-local.sh` applies each transactional file in one transaction, as hosted
 does. data-pg 0043–0046 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
-## ADR-110
+## ADR-112
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 

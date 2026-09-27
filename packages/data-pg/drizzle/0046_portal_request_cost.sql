@@ -16,7 +16,7 @@
 --    caller's own memberships.
 -- `SET LOCAL`: the timeout dies with this file's transaction instead of
 -- staying on the runner's session (R2-13). 200 ms, and the runner retries the
--- whole file with backoff when it expires (DB3-MIG-01; ADR-109 amendment).
+-- whole file with backoff when it expires (DB3-MIG-01; ADR-111 amendment).
 SET LOCAL lock_timeout = '200ms';
 
 CREATE OR REPLACE FUNCTION xangarro.session_resolve(p_hash text, p_idle integer)
