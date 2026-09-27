@@ -16,7 +16,7 @@ import {
 
 /**
  * Old → new for the scale audit's migrations (CLAUDE.md §2.9; DB2-MIG-01,
- * DB2-IDX-01, DB2-HOT-01, DB2-RLS-01; ADR-115), on a throwaway database
+ * DB2-IDX-01, DB2-HOT-01, DB2-RLS-01; ADR-116), on a throwaway database
  * migrated through 0043 and filled with rows in the old shape. 0044 and 0046 run
  * through the hosted runner itself (`applyMigration`), because they are its
  * first no-transaction files: that is the path production takes.

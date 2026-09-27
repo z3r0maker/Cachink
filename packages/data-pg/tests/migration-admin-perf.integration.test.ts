@@ -14,7 +14,7 @@ import {
 
 /**
  * Old → new for the console's DB2-CRON-01 migrations (admin 0020–0022;
- * ADR-115), on a throwaway database carrying every data-pg file and the
+ * ADR-116), on a throwaway database carrying every data-pg file and the
  * console's files up to 0019 — the order hosted applies them in. Each check
  * runs as `xangarro_admin`, the role the console connects as.
  */

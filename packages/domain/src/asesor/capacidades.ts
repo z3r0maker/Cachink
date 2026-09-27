@@ -13,13 +13,24 @@ export interface CapacidadRows {
   readonly hoy: IsoDate;
   /** Days with at least one venta, ever. */
   readonly diasConVenta: number;
+  /** Days with at least one inventory movement, ever. */
+  readonly diasConMovimiento: number;
   /** Days between the first record (venta o egreso) and hoy; 0 when none. */
   readonly diasDeHistorial: number;
-  /** Purchase entries (inventory_movements tipo entrada), ever. */
+  /**
+   * Purchase entries of the **best-stocked single product**, ever — not every
+   * entrada in the tenant. `costosQueSubieron` compares a product against its
+   * own previous entrada, so two purchases spread over two products predict
+   * nothing (ADR-115).
+   */
   readonly compras: number;
   /** Cortes de día, ever. */
   readonly cortes: number;
-  /** Months with at least one egreso, ever. */
+  /**
+   * Prior months of the **best-established single category** — not months in
+   * which any egreso exists, and never counting the current month.
+   * `gastosFueraDeLoNormal` averages one category's previous months (ADR-115).
+   */
   readonly mesesConGasto: number;
 }
 
@@ -47,18 +58,20 @@ export function calcularCapacidades(rows: CapacidadRows): readonly Capacidad[] {
     progress: `${Math.min(rows.diasConVenta, 60)} de 60 días · ${Math.min(rows.compras, 2)} de 2 compras`,
     pct: Math.min(Math.round((rows.diasConVenta / 60) * 100), Math.round((rows.compras / 2) * 100)),
   };
-  const inventario = cuenta(rows.diasConVenta, 60, 'días de ventas');
-  const gastos = cuenta(rows.mesesConGasto, 3, 'meses con gastos');
-  const pronostico = cuenta(rows.diasConVenta, 90, 'días de ventas');
+  const inventario = cuenta(rows.diasConMovimiento, 60, 'días de movimientos');
+  const gastos = cuenta(rows.mesesConGasto, 3, 'meses');
+  // «90 días de registros» is history since the first record, not days that
+  // happen to carry a venta — a business closed on Sundays still accrues them.
+  const pronostico = cuenta(rows.diasDeHistorial, 90, 'días de registros');
   const cortes = cuenta(rows.cortes, 20, 'cortes');
 
   const defs: readonly (readonly [string, string, ReturnType<typeof cuenta> | typeof margenes])[] =
     [
       ['Resumen del mes', '1 mes completo de registros', resumen],
-      ['Precios y márgenes', '60 días de ventas + 2 compras', margenes],
-      ['Inventario', '60 días de ventas', inventario],
-      ['Gastos fuera de lo normal', '3 meses con gastos', gastos],
-      ['Pronóstico', '90 días de ventas', pronostico],
+      ['Precios y márgenes', '60 días de ventas + 2 compras del producto', margenes],
+      ['Inventario', '60 días de movimientos', inventario],
+      ['Gastos fuera de lo normal', '3 meses por categoría', gastos],
+      ['¿Me alcanza? (pronóstico)', '90 días de registros', pronostico],
       ['Corte de caja', '20 cortes de día', cortes],
     ];
   return defs.map(([name, requirement, p]) => ({
@@ -68,11 +81,6 @@ export function calcularCapacidades(rows: CapacidadRows): readonly Capacidad[] {
     progress: p.pct < 100 ? p.progress : 'Activo',
     pct: p.pct,
   }));
-}
-
-/** Months with at least one egreso — helper for the portal's counts. */
-export function mesesConGastoDe(fechas: readonly IsoDate[]): number {
-  return new Set(fechas.map((f) => f.slice(0, 7))).size;
 }
 
 export { mesAnterior };

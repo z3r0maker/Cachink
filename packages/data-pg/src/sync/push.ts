@@ -7,7 +7,7 @@ import { excluded, textArray } from './push-rows.js';
 
 /**
  * A push's bookkeeping, one statement per kind for the whole batch (B-08;
- * audit DB2-SYNC-01; ADR-116): the receipts it is answered from, the receipts
+ * audit DB2-SYNC-01; ADR-117): the receipts it is answered from, the receipts
  * and rejections it leaves, and the device's acknowledgement. Every function
  * takes the tenant transaction; RLS scopes every statement.
  */

@@ -1,5 +1,5 @@
 /**
- * The parts of a push decision that need no storage (B-08; ADR-116): the
+ * The parts of a push decision that need no storage (B-08; ADR-117): the
  * per-row answers, the checks a row fails before anything is looked up, and
  * how a batch is cut into segments that can each be written in one go.
  */

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { LOGIN_PER_EMAIL } from '@xangarro/auth-core';
-import { describe, it } from 'vitest';
+import { afterEach, describe, it, vi } from 'vitest';
 
 import { loginRefusalMessage } from '@/server/auth/login-message';
 import type { RefusedSignIn } from '@/server/auth/login-message';
@@ -67,6 +67,12 @@ describe('loginRefusalMessage', () => {
 });
 
 describe('dbFingerprint', () => {
+  // The fallback reads `process.env.DATABASE_URL`, which is set whenever the
+  // suite runs against a database — pin it per test instead of inheriting it.
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('reads user, host and database — never the password', () => {
     const url =
       'postgres://user%40x.sfx:se-cr-et@aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require';
@@ -75,7 +81,13 @@ describe('dbFingerprint', () => {
     assert.ok(!fp.includes('se-cr-et'));
   });
 
+  it('falls back to DATABASE_URL when no URL is passed', () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://admin:pw@localhost:55432/xangarro');
+    assert.equal(dbFingerprint(), 'admin@localhost:55432/xangarro');
+  });
+
   it('says so when the URL is missing or unparseable', () => {
+    vi.stubEnv('DATABASE_URL', '');
     assert.equal(dbFingerprint(undefined), 'sin DATABASE_URL');
     assert.equal(dbFingerprint('not a url'), 'DATABASE_URL no parseable');
   });

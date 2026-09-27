@@ -12,7 +12,7 @@ import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
 /**
- * The batched push's SQL (audit DB2-SYNC-01; ADR-116), on real Postgres under
+ * The batched push's SQL (audit DB2-SYNC-01; ADR-117), on real Postgres under
  * RLS: one statement per table, the cursor taken as a block, receipts matched on
  * their primary key, and another tenant's id refused rather than overwritten.
  */

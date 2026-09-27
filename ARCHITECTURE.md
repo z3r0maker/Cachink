@@ -154,8 +154,9 @@ Links to discussion, docs, prior art.
 | [112](#adr-112) | 2026-09-26 | What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked | Accepted |
 | [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
 | [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
-| [115](#adr-115) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
-| [116](#adr-116) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
+| [116](#adr-116) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [117](#adr-117) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8033,7 +8034,114 @@ tus registros`.
 - Nothing ships yet: the Diagnóstico stays a placeholder behind two gates until
   P-28 builds it, and production still renders «Próximamente».
 
+---
+
 ## ADR-115
+
+**Title:** An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — fixes a live defect in P-26; closes the drift ADR-113 recorded
+
+**Context:**
+
+ADR-113 made the capacidades thresholds load-bearing for the first time: a
+Diagnóstico section is rendered, or not, according to whether its capability is
+unlocked, and an unlocked capability is what permits a teaser card to assert a
+finding. Checking `calcularCapacidades` against the design's own `readinessDefs`
+to confirm the wording turned up something larger.
+
+`gastosFueraDeLoNormal` compared **a monthly total against a per-row average**.
+The current month was accumulated per category — a sum — while prior months
+pushed each egreso's amount into a flat list whose mean became the baseline. The
+two agree only when a category is logged exactly once a month, which is what
+every fixture in the suite happens to do, so 890 passing tests said nothing
+about it.
+
+The consequences scale with how often a shopkeeper records:
+
+- A category logged twice a month, on perfectly flat spending, reads «van 100%
+  arriba». Ten times a month reads «900% arriba». Every month, for ever.
+- Measured on the seeded tenant at 2026-09-26: «Tus gastos de materia prima van
+  **330%** arriba … contra un promedio de **$980.00** en los últimos tres»,
+  where that tenant has **two** prior months averaging $1,960. Wrong figure,
+  wrong percentage, and «los últimos tres» false.
+
+The gate had the same shape of error: `if (previos.length < 3)` counts **rows**,
+so three egresos inside one April are «tres meses», and the body says so.
+
+Two capacidad counts were wrong in the mirror image — estate-wide where the
+insight they promise is per-group. `compras` was
+`count(*) … tipo = 'entrada'` across the tenant, but `costosQueSubieron`
+compares a product against **its own** previous entrada, so two purchases spread
+over two products unlock «Precios y márgenes» while the insight computes
+nothing. `meses_con_gasto` was `count(DISTINCT left(fecha, 7))` over all
+egresos, including the current month, where the baseline averages **one
+category's** previous months.
+
+**Decision**
+
+1. **Both sides of the comparison are monthly totals.** The baseline sums each
+   prior month per category and averages those sums. Averaging egreso rows is
+   dimensional nonsense against a figure that is a month's total.
+
+2. **`MESES_BASE` counts distinct prior months, not rows.** «Los últimos tres»
+   is then true when the body says it.
+
+3. **A capacidad count predicts its own insight.** `compras` is the maximum
+   entrada count over products; `meses_con_gasto` is the maximum prior-month
+   count over categories, excluding the current month. Both are
+   `coalesce(max(n), 0)` over a `GROUP BY`. A capacidad that unlocks before its
+   insight can compute is worse than one that unlocks late, because after
+   ADR-113 it licenses a teaser card to claim a finding that does not exist.
+
+4. **Inventario and Pronóstico read what the design says they read.**
+   Inventario gets a new `diasConMovimiento` — distinct days with an inventory
+   movement — in place of `diasConVenta`; Pronóstico reads `diasDeHistorial`
+   under the design's own name, «¿Me alcanza? (pronóstico) · 90 días de
+   registros», because history accrues for a business closed on Sundays and
+   «días de ventas» does not.
+
+5. **`mesesConGastoDe` is deleted.** Its only caller was its own test, and its
+   semantics — any category, current month included — are now the wrong ones.
+   A helper that is exported, unused and misleading is worse than no helper.
+
+**Alternatives considered**
+
+- *Change only the requirement strings to match the design.* What the task
+  originally asked for, and it would have left the 330% warning in place while
+  making the panel's wording describe it more accurately.
+- *Keep `previos` as rows but require more of them.* Tuning a threshold to hide
+  a dimensional error. The false positive rate would still track how often a
+  shopkeeper records rather than how much they spend.
+- *Count `compras` per product but leave `meses_con_gasto` estate-wide.* The two
+  errors are the same error, and fixing one would leave the panel's two halves
+  disagreeing about what «per» means.
+
+**Consequences**
+
+- **Insights that were firing falsely will stop.** `materializarInsights` closes
+  an insight that no longer computes as «listo», so existing spurious
+  `gasto-fuera` notices resolve themselves into «Anteriores» on the next run
+  rather than needing a migration. That is the intended behaviour of ADR-088's
+  upsert, used here for the first time to retract a claim.
+- **Capacidades will appear to regress for existing tenants.** The seeded tenant
+  goes from `compras` 64 to 13 and `meses_con_gasto` 3 to 2, so «Gastos fuera de
+  lo normal» moves from «Activo» to «2 de 3 meses». That is the panel becoming
+  correct, not a loss: the insight it promised could not compute at 2.
+- `packages/data-pg/src/queries/asesor.ts` was over the §2.6 line ceiling once
+  the counts grew, so the counting half moved to `asesor-conteos.ts`.
+- **Still open: `lockedCopy`.** `Capacidad` has no field for the design's
+  actionable line, so «Registra el costo de tus productos para activarlo»
+  cannot be shown and the panel can only ever give a count. Two of the six
+  blockers are «do something», not «wait longer». ADR-113's aggregate line needs
+  only a count, so nothing is blocked; the panel is what stays poorer.
+- The lesson worth keeping: **a fixture that logs one row per period hides every
+  per-period aggregation bug there is.** Both halves of this defect survived a
+  suite of 890 tests for that one reason.
+
+## ADR-116
 
 **Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
 
@@ -8127,7 +8235,7 @@ statement never under a long or zero timeout, and `REINDEX` only
 `db-local.sh` applies each transactional file in one transaction, as hosted
 does. data-pg 0044–0047 and admin 0020–0022 were corrected in place, never
 having been applied to the hosted database.
-## ADR-116
+## ADR-117
 
 **Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
 

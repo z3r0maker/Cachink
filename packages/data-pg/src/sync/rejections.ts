@@ -8,7 +8,7 @@ import { excluded, textArray } from './push-rows.js';
 
 /**
  * The rows a push refused, as the portal keeps them for the owner (ADR-053 Q4;
- * ADR-116): one open rejection per device and row, which a later answer
+ * ADR-117): one open rejection per device and row, which a later answer
  * replaces and a later acceptance closes.
  */
 

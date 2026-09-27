@@ -125,7 +125,7 @@ describe('ApplyPushUseCase', () => {
   });
 });
 
-/** Audit DB2-SYNC-01 / -02 (ADR-116): a push costs statements per table, not per row. */
+/** Audit DB2-SYNC-01 / -02 (ADR-117): a push costs statements per table, not per row. */
 describe('ApplyPushUseCase — batched', () => {
   const sales = (n: number, over: Record<string, unknown> = {}) =>
     Array.from({ length: n }, (_, i) => delta('sales', `S${i}`, { productoId: 'P1', ...over }));

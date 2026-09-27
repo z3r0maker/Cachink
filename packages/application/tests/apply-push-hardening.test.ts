@@ -7,7 +7,7 @@ import { InMemoryPushStore } from './support/in-memory-push-store.js';
 import { BIZ, T1, T2, delta } from './support/push-deltas.js';
 
 /**
- * Audit DB3-SYNC-01..04 (ADR-116 amendment): no row, and no bookkeeping, can
+ * Audit DB3-SYNC-01..04 (ADR-117 amendment): no row, and no bookkeeping, can
  * fail a whole push; a deterministic failure is terminal; a retryable one never
  * makes its dependants terminal; an overlapping retry is answered from receipts.
  */
