@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { beforeEach, describe, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, it, vi, type MockedFunction } from 'vitest';
+
+import type * as billingActions from '../../src/server/billing/actions';
+import type { recordGeo } from '../../src/server/geo/record';
+import type { reportError } from '../../src/server/observability/report';
 
 /**
  * The billing server functions the Suscripción screen calls (P-10).
@@ -50,26 +54,45 @@ vi.mock('../../src/server/billing/origin', () => ({
 }));
 vi.mock('../../src/server/billing/config', () => ({ publishableKey: () => 'pk_test_x' }));
 
-async function load() {
-  const actions = await import('../../src/server/billing/actions');
-  const geo = await import('../../src/server/geo/record');
-  const report = await import('../../src/server/observability/report');
-  return {
-    actions,
-    recordGeo: vi.mocked(geo.recordGeo),
-    reportError: vi.mocked(report.reportError),
-  };
+/**
+ * Imported **once**, in `beforeAll`. It used to be per test, behind a
+ * `vi.resetModules()`, which bought nothing: the only env this file stubs is
+ * `BILLING_BETA_NO_CHARGE`, and `betaNoCharge()` reads `process.env` when it is
+ * called, not when its module loads (`src/server/billing/beta.ts`). What it did
+ * cost was eight full re-imports of the actions' transitive graph — 5–10 s
+ * each — so under parallel load a test would hit the 5 s default timeout and be
+ * killed inside `load()`. The symptom was «Cannot read properties of undefined
+ * (reading 'calls')» on a mock the import had not reached yet, which reads like
+ * a broken mock and is really a stopwatch.
+ */
+interface Loaded {
+  readonly actions: typeof billingActions;
+  readonly recordGeo: MockedFunction<typeof recordGeo>;
+  readonly reportError: MockedFunction<typeof reportError>;
 }
 
+let loaded: Loaded;
+const load = (): Loaded => loaded;
+
 describe('billing actions', () => {
+  beforeAll(async () => {
+    const actions = await import('../../src/server/billing/actions');
+    const geo = await import('../../src/server/geo/record');
+    const report = await import('../../src/server/observability/report');
+    loaded = {
+      actions,
+      recordGeo: vi.mocked(geo.recordGeo),
+      reportError: vi.mocked(report.reportError),
+    };
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.resetModules();
     vi.unstubAllEnvs();
   });
 
   it('opens Checkout with the session’s business, and counts the purchase', async () => {
-    const { actions, recordGeo } = await load();
+    const { actions, recordGeo } = load();
     const r = await actions.iniciarPrueba('xangarro', 'month');
 
     assert.deepEqual(r, { ok: true, url: 'https://checkout.stripe.test/c/1' });
@@ -82,7 +105,7 @@ describe('billing actions', () => {
 
   it('during the beta no Checkout opens at all', async () => {
     vi.stubEnv('BILLING_BETA_NO_CHARGE', '1');
-    const { actions, recordGeo } = await load();
+    const { actions, recordGeo } = load();
 
     const checkout = await actions.iniciarPrueba('xangarro', 'month');
     const transfer = await actions.pagarAnualPorSpei('xangarro');
@@ -104,7 +127,7 @@ describe('billing actions', () => {
     // so this asserts the shopkeeper sees that sentence — not the code, and
     // not the generic apology.
     const { BillingError } = await import('@xangarro/application/billing');
-    const { actions, reportError } = await load();
+    const { actions, reportError } = load();
     trial.mockRejectedValueOnce(new BillingError('NOT_A_PAID_PLAN'));
 
     const r = await actions.iniciarPrueba('xangarrito', 'month');
@@ -117,7 +140,7 @@ describe('billing actions', () => {
   });
 
   it('hides an unexpected failure behind one sentence, and reports it', async () => {
-    const { actions, reportError } = await load();
+    const { actions, reportError } = load();
     const boom = new Error('connect ECONNREFUSED 10.0.0.1:443');
     spei.mockRejectedValueOnce(boom);
 
@@ -135,7 +158,7 @@ describe('billing actions', () => {
   });
 
   it('a refused permission answers its own message, not the generic one', async () => {
-    const { actions, reportError } = await load();
+    const { actions, reportError } = load();
     portal.mockRejectedValueOnce(
       Object.assign(new Error('Inicia sesión para continuar.'), { code: 'NOT_PERMITTED' }),
     );
@@ -147,7 +170,7 @@ describe('billing actions', () => {
   });
 
   it('the customer portal returns to Suscripción', async () => {
-    const { actions } = await load();
+    const { actions } = load();
     const r = await actions.administrarSuscripcion();
 
     assert.equal(r.ok, true);
@@ -156,12 +179,12 @@ describe('billing actions', () => {
   });
 
   it('the free plan reads as null, and any member may look', async () => {
-    const { actions } = await load();
+    const { actions } = load();
     assert.equal(await actions.estadoSuscripcion(), null);
   });
 
   it('exposes the publishable key for P-10', async () => {
-    const { actions } = await load();
+    const { actions } = load();
     assert.equal(await actions.stripePublishableKey(), 'pk_test_x');
   });
 });
