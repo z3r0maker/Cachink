@@ -1,33 +1,23 @@
 import 'server-only';
 
-import { conTotales } from '@xangarro/domain';
 import {
   calculateBalanceGeneral,
   calculateEstadoDeResultados,
   calculateFlujoDeEfectivo,
   calculateIndicadores,
+  conTotales,
   desgloseDeResultados,
   sum,
   type ClientPayment,
   type DayClose,
-  type Expense,
   type InventoryMovement,
-  type Sale,
+  type TicketConTotal,
 } from '@xangarro/domain';
+import type { periodBalanceInputs } from '@xangarro/data-pg';
 
-import {
-  getBusiness,
-  openingBalanceClientsOf,
-  openingBalanceOf,
-  periodBalanceInputs,
-  periodLedger,
-  tickets as ticketsTable,
-  valuacionApertura,
-} from '@xangarro/data-pg';
+import { leerPeriodo, type AperturaFacts } from './estados-lectura';
 
-import { between } from 'drizzle-orm';
-import type { Ticket, TicketConTotal } from '@xangarro/domain';
-import { withTenant, type Tx } from './db';
+export { RangoExcedidoError } from './estados-lectura';
 
 /**
  * The NIF statements, computed from **real ledger rows** by the existing
@@ -35,7 +25,8 @@ import { withTenant, type Tx } from './db';
  *
  * The container fetches; the domain computes; the screen renders. Nothing here
  * reimplements an accounting rule, which is what `tests/estados.test.ts`
- * asserts by recomputing and requiring identity.
+ * asserts by recomputing and requiring identity. The reads — summed in SQL,
+ * one transaction, a period of at most 13 months — are `estados-lectura.ts`.
  */
 export interface EstadosModel {
   readonly resultados: ReturnType<typeof calculateEstadoDeResultados>;
@@ -115,41 +106,6 @@ function indicadoresDe(
   });
 }
 
-/** The period's tickets with derived totals (ADR-073), for method-level views. */
-async function ticketsConTotal(
-  businessId: string,
-  from: string,
-  to: string,
-  ventas: readonly Sale[],
-): Promise<readonly TicketConTotal[]> {
-  return withTenant(businessId, async (tx) => {
-    const tk = await tx
-      .select()
-      .from(ticketsTable)
-      .where(between(ticketsTable.fecha, from, to));
-    return conTotales(tk as unknown as readonly Ticket[], ventas);
-  });
-}
-
-type AperturaFacts = {
-  readonly header: {
-    readonly cajaCentavos: bigint;
-    readonly bancosCentavos: bigint;
-  };
-  readonly lines: readonly { clienteId: string; saldoCentavos: bigint }[];
-  readonly valuacionInventario: bigint;
-};
-
-async function loadApertura(tx: Tx, businessId: string): Promise<AperturaFacts | null> {
-  const header = await openingBalanceOf(tx, businessId);
-  if (header === null) return null;
-  return {
-    header,
-    lines: await openingBalanceClientsOf(tx, businessId),
-    valuacionInventario: await valuacionApertura(tx, businessId),
-  };
-}
-
 /**
  * N-17: the day-one facts as the calculator wants them — efectivo = caja +
  * bancos, the CxC lines, and capitalInicial = everything the owner imported
@@ -172,15 +128,6 @@ function aperturaDe(apertura: AperturaFacts | null) {
   };
 }
 
-/** The cloud schema keys `monto_centavos` as `monto`, like the device and the
- * domain (drift.test.ts holds the keys equal). */
-function aDominio(rows: Awaited<ReturnType<typeof periodLedger>>) {
-  return {
-    ventas: rows.ventas.map((r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Sale),
-    egresos: rows.egresos.map((r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Expense),
-  };
-}
-
 /**
  * Nothing happened in the window — no venta, no egreso, no pago de cliente, no
  * corte. Four sources, because any one of them alone moves the statements: a
@@ -195,34 +142,20 @@ function sinMovimiento(
   return ventas.length === 0 && egresos.length === 0 && pagos.length === 0 && cortes.length === 0;
 }
 
-/**
- * One tenant transaction: the period's ledger, the balance's real inputs (F-1),
- * the apertura facts, and the régime + rate that decide the ISR estimate
- * (ADR-089).
- */
-function leerPeriodo(businessId: string, from: string, to: string) {
-  return withTenant(businessId, async (tx) => {
-    const rows = await periodLedger(tx, from, to);
-    const inputs = await periodBalanceInputs(tx, from, to);
-    // One read of the business for both fields — it was two (DB2-PAGE-01).
-    const negocio = await getBusiness(tx);
-    return {
-      rows,
-      inputs,
-      isrTasa: negocio?.isrTasa ?? 0,
-      regimenSat: negocio?.regimenSat ?? null,
-      apertura: await loadApertura(tx, businessId),
-    };
-  });
-}
-
 export async function loadEstadosModel(
   businessId: string,
   from: string,
   to: string,
 ): Promise<EstadosModel> {
-  const { rows, inputs, isrTasa, regimenSat, apertura } = await leerPeriodo(businessId, from, to);
-  const { ventas, egresos } = aDominio(rows);
+  const {
+    ventas,
+    egresos,
+    tickets: tk,
+    inputs,
+    isrTasa,
+    regimenSat,
+    apertura,
+  } = await leerPeriodo(businessId, from, to);
   const resultados = calculateEstadoDeResultados({
     ventas,
     egresos,
@@ -232,7 +165,8 @@ export async function loadEstadosModel(
     mesesEnPeriodo: mesesEntre(from, to),
   });
   const pagosClientes = inputs.pagos as unknown as readonly ClientPayment[];
-  const tickets = await ticketsConTotal(businessId, from, to, ventas);
+  // The period's tickets with derived totals (ADR-073), for method-level views.
+  const tickets = conTotales(tk, ventas);
   const balance = calculateBalanceGeneral({
     cortesDelDia: inputs.cortes as unknown as readonly DayClose[],
     inventarioStock: inputs.stock,

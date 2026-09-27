@@ -25,6 +25,8 @@ export default async function EstadosPage({
 }) {
   const session = await requireSession();
   const periodo = periodoDe(hoy(), await searchParams);
+  // Past the 13-month cap nothing is read: the picker says why (DS-09).
+  if (periodo.excedido) return <EstadosScreen model={null} periodo={periodo} />;
   try {
     const { desde, hasta } = periodo.rango;
     const model = await loadEstadosModel(session.business_id, desde, hasta);
