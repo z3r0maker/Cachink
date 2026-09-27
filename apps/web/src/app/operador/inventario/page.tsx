@@ -1,5 +1,5 @@
 import { INVENTARIO_FIXTURE } from '@/operador/inventario/fixture';
-import { InventarioScreen } from '@/operador/inventario/screen';
+import { InventarioViva } from '@/operador/inventario/viva';
 import type { InventarioScreenProps } from '@/operador/inventario/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -16,11 +16,15 @@ function forced(q: Query): Pick<InventarioScreenProps, 'state' | 'tab'> {
   };
 }
 
-/** Operador · Inventario (O-24). Fixture data until the register runtime (O-06). */
+/**
+ * Operador · Inventario (O-24). Fixtures for an unlinked browser; a linked
+ * caja reads and writes its own database.
+ */
 export default async function OperadorInventarioPage({
   searchParams,
 }: {
   readonly searchParams: Promise<Query>;
 }) {
-  return <InventarioScreen {...forced(await searchParams)} data={INVENTARIO_FIXTURE} />;
+  const f = forced(await searchParams);
+  return <InventarioViva fixture={INVENTARIO_FIXTURE} forzado={f.state} tab={f.tab} />;
 }

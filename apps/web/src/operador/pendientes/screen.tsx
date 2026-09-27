@@ -7,7 +7,7 @@ import { OperadorEstado } from '../estado';
 import { PageHead } from '../ui/panel';
 import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
-import { heroe, intro } from './derive';
+import { heroe, intro, portalDe } from './derive';
 import { ListaCola } from './lista';
 import * as s from './pendientes.css';
 import type { PendientesScreenProps } from './types';
@@ -18,21 +18,28 @@ const SYNC =
 const CHECK = 'M20 6 9 17l-5-5';
 
 /** Operador · Registros por enviar: the local queue, its retry, and the rule not to lose it. */
-export function PendientesScreen({ state, cola: inicial }: PendientesScreenProps) {
-  const x = usePendientes(inicial);
+export function PendientesScreen({
+  state,
+  cola: inicial,
+  dueno = 'Pedro',
+  vivo,
+}: PendientesScreenProps) {
+  const x = usePendientes(inicial, vivo);
+  // A linked caja shows no hero until its queue is read: an empty list is not «Todo enviado».
+  const conHeroe = vivo === undefined || state === 'happy';
   return (
     <OpMain top={24}>
-      <PageHead title="Registros por enviar" sub={intro(x.cola.length === 0)} />
+      <PageHead title="Registros por enviar" sub={intro(x.cola.length === 0, dueno)} />
       <div className={s.column}>
-        <HeroeCola x={x} />
+        {conHeroe ? <HeroeCola x={x} /> : null}
         {state === 'happy' ? (
-          <ListaCola cola={x.cola} fase={x.fase} offline={x.offline} />
+          <ListaCola cola={x.cola} fase={x.fase} offline={x.offline} portal={portalDe(dueno)} />
         ) : (
           <OperadorEstado
             mode={state}
             icon={SYNC}
             emptyTitle="Nada pendiente"
-            emptyBody="Todo lo que capturaste ya está en el portal de Pedro."
+            emptyBody={`Todo lo que capturaste ya está en ${portalDe(dueno)}.`}
             errorTitle="No pudimos leer la cola de este navegador"
           />
         )}

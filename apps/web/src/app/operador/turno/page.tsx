@@ -1,5 +1,5 @@
 import { TURNO_FIXTURE } from '@/operador/turno/fixture';
-import { TurnoScreen } from '@/operador/turno/screen';
+import { TurnoViva } from '@/operador/turno/viva';
 import type { TurnoScreenProps } from '@/operador/turno/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -10,12 +10,15 @@ function forcedState(q: string | undefined): TurnoScreenProps['state'] {
   return STATES.find((s) => s === q) ?? 'happy';
 }
 
-/** Operador · Turno (O-15). Fixture data until the register runtime (O-06). */
+/**
+ * Operador · Turno (O-15, real data O-39). Fixture for an unlinked browser; a
+ * linked register reads its own open turno.
+ */
 export default async function OperadorTurnoPage({
   searchParams,
 }: {
   readonly searchParams: Promise<{ readonly dataState?: string }>;
 }) {
   const { dataState } = await searchParams;
-  return <TurnoScreen state={forcedState(dataState)} data={TURNO_FIXTURE} />;
+  return <TurnoViva fixture={TURNO_FIXTURE} forzado={forcedState(dataState)} />;
 }

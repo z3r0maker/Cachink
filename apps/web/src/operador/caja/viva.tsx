@@ -6,6 +6,7 @@ import { CajaScreen } from './screen';
 import type { CajaData, CajaScreenProps, ClienteFiado, CobroPaso, Producto } from './types';
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
+import { stockDeCaja } from '../runtime/inventario-mapa';
 
 /**
  * Caja for real (O-06): a linked register sells the products its own database
@@ -29,15 +30,15 @@ function comoProducto(r: {
   nombre: string;
   precio: string;
   categoria: string;
+  existencias: number | null;
+  umbral: number | null;
 }): Producto {
   return {
     id: r.id,
     nombre: r.nombre,
     precio: BigInt(r.precio),
     categoria: categoriaDe(r.categoria),
-    // Stock chips arrive with the inventario screen's real data (O-14+).
-    existencias: 99,
-    umbral: 0,
+    ...stockDeCaja(r.existencias, r.umbral),
     icono: 'flame',
   };
 }

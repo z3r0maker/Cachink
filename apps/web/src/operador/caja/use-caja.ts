@@ -147,8 +147,7 @@ async function registrarSiVinculado(
           cantidad: l.cantidad,
         })),
       },
-      // stockEnabled arrives with the screens' feature-flag wiring (O-14+);
-      // a linked register today sells without moving stock in the same breath.
+      // The Worker reads the business's stock switch itself (runtime/tickets.ts).
       { deviceId: device.deviceId, userId: sesion.userId, stockEnabled: false },
     );
     if (navigator.onLine) await desencolar();

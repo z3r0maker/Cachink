@@ -1,5 +1,5 @@
 import { COLA_FIXTURE } from '@/operador/pendientes/fixture';
-import { PendientesScreen } from '@/operador/pendientes/screen';
+import { PendientesViva } from '@/operador/pendientes/viva';
 import type { PendientesScreenProps } from '@/operador/pendientes/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -10,12 +10,15 @@ function forced(dataState: string | undefined): PendientesScreenProps['state'] {
   return STATES.find((s) => s === dataState) ?? 'happy';
 }
 
-/** Operador · Registros por enviar (O-27). Fixture queue until the outbox (O-06). */
+/**
+ * Operador · Registros por enviar (O-27). The design's queue for an unlinked
+ * browser; a linked caja lists and sends its own outbox.
+ */
 export default async function OperadorPendientesPage({
   searchParams,
 }: {
   readonly searchParams: Promise<{ readonly dataState?: string }>;
 }) {
   const { dataState } = await searchParams;
-  return <PendientesScreen state={forced(dataState)} cola={COLA_FIXTURE} />;
+  return <PendientesViva fixture={COLA_FIXTURE} forzado={forced(dataState)} />;
 }

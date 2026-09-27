@@ -25,8 +25,15 @@ export interface AvisosData {
   readonly avisos: readonly Aviso[];
 }
 
+/** A linked caja: read marks and replies persist in its database. */
+export interface AvisosVivo {
+  readonly marcar: (ids: readonly string[]) => void;
+  readonly responder: (mensajeId: string, texto: string) => Promise<void>;
+}
+
 export interface AvisosScreenProps {
   readonly state: 'happy' | 'loading' | 'empty' | 'error';
   readonly data: AvisosData;
   readonly tab: AvisoGrupo;
+  readonly vivo?: AvisosVivo;
 }

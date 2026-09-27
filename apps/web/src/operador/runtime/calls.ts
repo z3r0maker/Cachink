@@ -15,6 +15,9 @@ export interface ProductoPara {
   readonly nombre: string;
   readonly precio: string;
   readonly categoria: string;
+  /** Null when the product doesn't track stock (no «Quedan N» chip). */
+  readonly existencias: number | null;
+  readonly umbral: number | null;
 }
 
 export interface VentasTurno {
@@ -141,6 +144,13 @@ export interface GastoInput {
 
 export const gastos = (businessId: string, deviceId: string, turnoId: string): Call => ({
   method: 'gastos',
+  businessId,
+  deviceId,
+  turnoId,
+});
+
+export const turnoVivo = (businessId: string, deviceId: string, turnoId: string): Call => ({
+  method: 'turnoVivo',
   businessId,
   deviceId,
   turnoId,
