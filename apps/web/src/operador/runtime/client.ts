@@ -35,6 +35,7 @@ import type {
   VentasTurno,
 } from './calls';
 import type { MarcaDelNegocio } from './negocio';
+import type { Reclamo } from './pestana';
 import type { AvisosPara, PendienteCrudo, ResponderAvisoCall } from './cola-shapes';
 import type { TurnoVivoPara } from './turno-shapes';
 import type { InventarioPara, MoverInventarioCall } from './inventario-mapa';
@@ -76,6 +77,11 @@ export class RegisterRuntime {
     const request: WorkerRequest = { ...call, id } as WorkerRequest;
     this.#worker.postMessage(request);
     return promise;
+  }
+
+  /** DB3-CAJA-01: does this tab own the register? `esperar` queues until it does. */
+  reclamar(esperar: boolean): Promise<Reclamo> {
+    return this.#call<Reclamo>({ method: 'reclamar', esperar });
   }
 
   boot(): Promise<BootInfo> {

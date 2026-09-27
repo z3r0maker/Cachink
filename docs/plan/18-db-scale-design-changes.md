@@ -137,7 +137,10 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ### DS-08 Caja — already open in another tab
 
-- [ ] Status · Send to the operador project; pull; wire the Web Lock (audit DB3-CAJA-01).
+- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-121): Acceso's frame
+      (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
+      («Esperando a que se cierre la otra pestaña…»). No «Cerrar esta pestaña» link: a script can
+      only close a tab it opened. Still to do: send the block below; pull; align.
 
 **Why.** Two tabs of the caja each keep their own copy of the local database, and the last one to
 save erases the other's unsent sales. The fix lets one tab hold the register; the second tab needs

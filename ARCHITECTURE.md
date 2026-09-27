@@ -160,6 +160,7 @@ Links to discussion, docs, prior art.
 | [118](#adr-118) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
 | [119](#adr-119) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [120](#adr-120) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
+| [121](#adr-121) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8654,3 +8655,111 @@ in-flight functions.
   them into the push transaction is the device work's.
 - Movimientos pages still use OFFSET; keyset paging needs cursor URLs and a
   pager without page numbers, a design change left to DB3-QRY-03's follow-up.
+
+---
+
+## ADR-121
+
+**Title:** The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-CAJA-01, DB3-CAJA-02 and DB3-CAJA-03, and the ordering half of DB3-CAJA-04; amends ADR-071 (its consequence «the turno-close block on unsent records (rule 7) is what keeps cash honest») with the owner's decision of 2026-09-26 on DS-06 (option (a))
+
+**Context**
+
+Round 3 of the DB audit found three ways the browser caja (ADR-071) loses or
+misreports data:
+
+- **Two tabs erase each other's sales.** Every tab starts its own Worker with
+  its own in-memory sql.js copy of the one OPFS file and writes the whole
+  database back after each operation. The last write wins, so a tab that
+  saved after another erased that tab's unpushed captures, outbox included.
+- **The queue was counted three ways.** The cierre gate and the header pill
+  counted `__sync_row_status = 'pending'`, so three sales captured offline (no
+  status row yet) counted as 0 and a failed push counted as 6, and the phone
+  counted `pending + retrying`. The rule itself — «a turno cannot close while
+  records are unsent» (the handoff's rule 7, recorded in ADR-071) — meant an
+  offline caja could not close its turno at all, against ADR-053 §5
+  («offline never blocks capture»). The live-data work (`colaPendiente`)
+  already fixed the caja's count; the rule and the phone remained.
+- **An idle caja never pulled.** It pulled after a capture, on `online` or on
+  a manual retry. NIPs are checked on the device, so an operator the owner
+  deactivated kept a working NIP on a caja nobody sold on, and a price change
+  arrived with the next sale — the one that should have used it.
+
+**Decision**
+
+1. **One tab owns the register (Web Locks).** Before anything opens the
+   database, the tab's Worker requests the lock `xangarro-register` with
+   `ifAvailable` and, when granted, holds it for its lifetime (the callback
+   returns a promise that never settles; the browser frees the lock when the
+   tab, and so the Worker, goes away). The Worker's `boot` refuses to open the
+   database without it (`CAJA_EN_OTRA_PESTANA`), whoever calls it. A second
+   tab renders DS-08's notice instead of the register — «La caja ya está
+   abierta en otra pestaña.» / «Para no perder ventas, usa una sola pestaña.»
+   — and «Usar esta pestaña» queues a plain lock request, so it takes over the
+   moment the first tab closes and reads the file as that tab left it. The
+   lock lives in the Worker, not the page, because the Worker is what owns the
+   database. Browsers without `navigator.locks` (none the caja supports) keep
+   the old behaviour, with a `BroadcastChannel` probe that shows the same
+   notice when another tab answers.
+2. **One definition of «por enviar», in `@xangarro/sync`.** `unsentRows()`
+   is everything the server has not accepted: rows attempted and not accepted
+   (`pending`, and `rejected` + retryable — these are «retrying») plus the
+   change log past the push cursor, coalesced and limited to pushable tables
+   exactly as `drainPush` reads it, each row once. Terminal rejections are not
+   in it; they need a person and each surface shows them apart (the caja's
+   Avisos and the owner's Sincronización; the phone's pill and No enviados).
+   `StatusStore.unsentCount()` and `SyncEngine.counts().unsent` expose it; the
+   phone's pill counts `unsent`; the caja's pill, Registros por enviar and
+   cierre all read `colaPendiente()`, which groups `unsentRows()` per record
+   and marks a record retrying when any of its rows is.
+3. **Cierre stays enabled with records still to send (DS-06 option (a)).**
+   The expected cash is computed from this caja's own rows, all of which are
+   on the device, so the unsent ones cannot change it. The cierre shows a
+   warning band — «Tienes N registros por enviar (M se reintentarán solos).
+   Puedes cerrar; se enviarán cuando vuelva la conexión.» — with «Reintentar
+   envío» and «Ver cuáles»; the close button waits only for a reason when
+   there is a difference. The closed screen says the owner will see the close
+   once the records go up. The «Puede cambiar» chip and the «the difference is
+   recalculated when they are sent» line of the blocked design go with the
+   block. This supersedes rule 7 as ADR-071 recorded it.
+4. **An idle caja pulls.** Besides the capture triggers, the caja runs a full
+   sync on boot, when the tab becomes visible (unless it pulled in the last
+   45 s) and every 5 min ±20 % while visible. The scheduler lives at the gate,
+   so it runs at the door as well as inside, and goes through the shell's
+   flusher when it is mounted (the pill follows); every one of these runs is
+   automatic, so the engine's backoff still holds. At the door the gate also
+   syncs on `online`, so a turno closed offline goes up without a new turno.
+5. **The Worker's OPFS writes queue.** Each persist waits for the previous one
+   and exports when its turn comes, so two overlapping writes can never land
+   out of order and the file ends at the latest state. Every caller still
+   awaits its own write: no debounce, durability unchanged. A second `boot`
+   joins the first instead of opening a second copy.
+
+**Alternatives considered**
+
+- *Option (b) of DS-06: block cierre until every record is sent, counting all
+  of them.* Honest about the queue but makes an offline caja unable to close,
+  which ADR-053 §5 forbids; the owner chose (a).
+- *The lock on the page instead of the Worker.* Simpler to show, but anything
+  that reached the Worker without the gate could still open a second copy.
+- *A SharedWorker owning one database for every tab.* The real fix for
+  multi-tab, but Safari's support and OPFS's sync access handles make it an
+  ADR-071 storage decision (with the OPFS VFS of DB3-CAJA-04), not a launch fix.
+- *Keep the phone on `pending + retrying`.* Leaves offline captures invisible
+  on the phone's pill, the same bug the caja had.
+
+**Consequences**
+
+- Two tabs of the caja can no longer run at once; a cashier who opens a second
+  one sees why and can hand the register over by closing the first.
+- A closed turno can reach the portal later than it was closed, as any
+  offline capture does.
+- The phone's pill now counts rows never tried; its number is rows, the caja's
+  is records (a sale with its lines is one).
+- The idle caja costs one pull per 5 min per visible tab; the caja's capture
+  mode still limits pulls after sales to one per 45 s.
+- DB3-CAJA-04's other halves stay open: the full `export()` per write and the
+  move to an OPFS VFS.

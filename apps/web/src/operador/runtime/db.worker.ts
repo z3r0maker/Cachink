@@ -13,6 +13,7 @@ import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
 import { POR_METODO } from './router';
 import { opfsRead, opfsWrite } from './opfs';
+import { EN_OTRA_PESTANA, reclamador, type Candados } from './pestana';
 import { registrarTicket } from './tickets';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
@@ -33,9 +34,30 @@ interface Runtime {
 
 let runtime: Runtime | null = null;
 let deviceToken: string | null = null;
+/** Opening, once: a second `boot` while the first reads OPFS joins it (never two copies). */
+let arranque: Promise<boolean> | null = null;
+
+/** One tab owns the register (DB3-CAJA-01): the lock is this Worker's, for its lifetime. */
+const candado = reclamador((navigator as { locks?: Candados }).locks);
+
+type SqlJs = Awaited<ReturnType<typeof initSqlJs>>;
+let motor: Promise<SqlJs> | null = null;
+
+/**
+ * The SQLite engine, loaded once. A tab waiting for the register loads it
+ * while it waits (no database is opened), so it can take over even if the
+ * connection drops before the other tab closes.
+ */
+function cargarMotor(): Promise<SqlJs> {
+  motor ??= initSqlJs({ locateFile: () => WASM_URL });
+  motor.catch(() => {
+    motor = null;
+  });
+  return motor;
+}
 
 async function openRuntime(): Promise<Runtime> {
-  const SQL = await initSqlJs({ locateFile: () => WASM_URL });
+  const SQL = await cargarMotor();
   const persisted = await opfsRead();
   const sql = persisted ? new SQL.Database(persisted) : new SQL.Database();
   const db = drizzle(sql, { schema }) as Db;
@@ -51,13 +73,25 @@ async function openRuntime(): Promise<Runtime> {
   return { sql, db, engine };
 }
 
+/** True when the database was created now (a first boot). */
+async function abrir(): Promise<boolean> {
+  const hadDb = (await opfsRead()) !== null;
+  runtime = await openRuntime();
+  return !hadDb;
+}
+
+/** Open the register — only in the tab that owns it; another tab's copy would erase this one's sales. */
 async function boot(): Promise<{ fresh: boolean }> {
-  if (runtime === null) {
-    const hadDb = (await opfsRead()) !== null;
-    runtime = await openRuntime();
-    return { fresh: !hadDb };
+  if ((await candado.reclamar(false)) === 'ocupada') throw new Error(EN_OTRA_PESTANA);
+  if (arranque !== null) {
+    await arranque;
+    return { fresh: false };
   }
-  return { fresh: false };
+  arranque = abrir();
+  arranque.catch(() => {
+    arranque = null;
+  });
+  return { fresh: await arranque };
 }
 
 async function persist(): Promise<void> {
@@ -113,6 +147,9 @@ async function handle(request: WorkerRequest): Promise<unknown> {
   switch (request.method) {
     case 'boot':
       return boot();
+    case 'reclamar':
+      void cargarMotor().catch(() => undefined);
+      return candado.reclamar(request.esperar);
     case 'registrar':
       return registrar(request.input, request.ctx);
     case 'sync':
