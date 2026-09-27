@@ -36,6 +36,8 @@ let runtime: Runtime | null = null;
 let deviceToken: string | null = null;
 /** Opening, once: a second `boot` while the first reads OPFS joins it (never two copies). */
 let arranque: Promise<boolean> | null = null;
+/** The tail of the OPFS writes: each waits for the one before (DB3-CAJA-04, partial). */
+let escritura: Promise<void> = Promise.resolve();
 
 /** One tab owns the register (DB3-CAJA-01): the lock is this Worker's, for its lifetime. */
 const candado = reclamador((navigator as { locks?: Candados }).locks);
@@ -94,8 +96,18 @@ async function boot(): Promise<{ fresh: boolean }> {
   return { fresh: await arranque };
 }
 
-async function persist(): Promise<void> {
-  if (runtime !== null) await opfsWrite(runtime.sql.export());
+/**
+ * Write the database back to OPFS. The writes queue: each exports the bytes
+ * when its turn comes, so two overlapping writes can never land out of order
+ * and the file always ends at the latest state. Every caller still awaits its
+ * own write (no debounce: durability is unchanged).
+ */
+function persist(): Promise<void> {
+  const rt = runtime;
+  if (rt === null) return Promise.resolve();
+  const turno = escritura.then(() => opfsWrite(rt.sql.export()));
+  escritura = turno.catch(() => undefined);
+  return turno;
 }
 
 /** Record a sale (O-06); every access-shaped op persists afterwards. */
