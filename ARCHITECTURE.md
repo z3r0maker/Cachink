@@ -7538,3 +7538,34 @@ savepoint and a savepoint that wrote keeps its XID until commit.
   bookkeeping, so such a failure is the database's, not a row's.
 - A push with dozens of rows that fail at the database can leave good rows
   INTERNAL for one round; they succeed on the next push.
+
+**Amendment (2026-09-26) — bookkeeping cannot fail a push; deterministic errors
+are terminal; an accepted retry closes its rejection.** Audit round 3
+(DB3-SYNC-01..04) found one NUL character failing a whole push forever: the row
+was isolated as INTERNAL, then its rejection's payload failed the `::jsonb` cast
+outside any savepoint, the transaction rolled back, and the phone resent the
+same batch indefinitely with nothing stored. Four changes, with the wire
+contract unchanged. (1) The use case refuses a row carrying a NUL or an
+unpaired UTF-16 surrogate in any string (id included) as terminal
+`VALIDATION`, before any write; the rejection payload, id and message are
+cleaned before they are stored. (2) Rejections are kept through `isolated` —
+one savepoint, on top of the 60 the writer may keep, still below 64 — and when
+that fails, again without their payloads; a failure of both is logged and the
+push still answers. This supersedes the consequence above that a `reject`
+failure fails the whole push; an `accept` failure still does. (3) The store
+maps a deterministic database refusal to `RowRefusedError`, which the writer
+narrows to its row like any failure: class 22, NOT NULL and CHECK are
+`VALIDATION`, a 23505 on a unique key other than the primary key
+(`idx_tickets_device_folio`) is `DUPLICATE_CONFLICT` — both terminal and
+logged — while timeouts, locks, deadlocks, connection and resource classes stay
+`INTERNAL`, as does anything unclassified. (4) `accept` closes this device's
+open rejections of the rows it accepts (`resolved_at = now()`, one
+`unnest`-based UPDATE on the rejections' unique key, pipelined with the
+receipts), so a retried INTERNAL row stops counting on the portal's badge and
+in the staff digest. Two further rules follow from decision 7 and the
+receipts: a row pointing at a product or client that failed **retryably**
+earlier in the same push is `INTERNAL`, not `FK_*_MISSING` (DB3-SYNC-02); and a
+row whose write comes back already stored (`exists`/`stale`) without a receipt
+at the segment's start has its receipt looked up again after the write — an
+overlapping retry that waited on the original's lock — and counts as written
+for later references (DB3-SYNC-03).

@@ -4,21 +4,7 @@ import type { Delta } from '@xangarro/contracts';
 
 import { ApplyPushUseCase } from '../src/apply-push/index.js';
 import { InMemoryPushStore } from './support/in-memory-push-store.js';
-
-const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-const T1 = '2026-09-11T18:30:00.000Z';
-const T2 = '2026-09-11T19:30:00.000Z';
-
-function delta(
-  table: Delta['table'],
-  id: string,
-  over: Record<string, unknown> = {},
-  op: Delta['op'] = 'insert',
-  clientSeq = 1,
-): Delta {
-  const row = { id, businessId: BIZ, updatedAt: T1, createdByUserId: null, ...over };
-  return { table, rowId: id, op, clientSeq, row } as unknown as Delta;
-}
+import { BIZ, T1, T2, delta } from './support/push-deltas.js';
 
 let store: InMemoryPushStore;
 let errors: unknown[];
@@ -235,7 +221,10 @@ describe('ApplyPushUseCase — batched', () => {
     const deltas = sales(200);
     for (let i = 0; i < 200; i += 3) store.failOn.add(`S${i}`);
     const r = await push(deltas);
-    assert.ok(store.isolatedCommits <= 60, `${store.isolatedCommits} savepoints kept`);
+    assert.ok(
+      store.isolatedCommits <= 61,
+      `${store.isolatedCommits} kept: 60 for writes, 1 for rejections`,
+    );
     assert.equal(r.accepted.length + r.rejected.length, 200, 'every row still gets an answer');
     assert.ok(r.rejected.every((x) => x.code === 'INTERNAL' && x.retryable));
     assert.ok(r.accepted.length > 0);

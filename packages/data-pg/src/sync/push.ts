@@ -1,8 +1,7 @@
-import { newUlid } from '@xangarro/domain';
 import { eq, sql, type SQL } from 'drizzle-orm';
 
 import { devices } from '../schema/portal.js';
-import { syncReceipts, syncRejections } from '../schema/sync.js';
+import { syncReceipts } from '../schema/sync.js';
 import { committedCursor, type Tx } from './cursor.js';
 import { excluded, textArray } from './push-rows.js';
 
@@ -91,66 +90,6 @@ export async function saveReceipts(
       },
     });
 }
-
-/** A rejected row as the portal keeps it; `payload` is JSON text. */
-export interface RejectionRow {
-  readonly tableName: string;
-  readonly rowId: string;
-  readonly clientSeq: number;
-  readonly code: string;
-  readonly message: string;
-  readonly payload: string;
-}
-
-/**
- * Keep a push's rejections, in one statement. A retry of the same row updates
- * its rejection rather than adding one — and so does the same row twice in one
- * push, where the later answer wins, as it did one row at a time.
- */
-export async function saveRejections(
-  tx: Tx,
-  businessId: string,
-  deviceId: string,
-  rejections: readonly RejectionRow[],
-): Promise<void> {
-  const latest = new Map(rejections.map((r) => [`${r.tableName}/${r.rowId}`, r]));
-  if (latest.size === 0) return;
-  const now = new Date().toISOString();
-  await tx
-    .insert(syncRejections)
-    .values(
-      [...latest.values()].map(({ payload, ...r }) => ({
-        ...r,
-        payload: sql`${payload}::jsonb`,
-        id: newUlid(),
-        businessId,
-        deviceId,
-        receivedAt: now,
-        resolvedAt: null,
-        createdAt: now,
-        updatedAt: now,
-      })),
-    )
-    .onConflictDoUpdate({ target: REJECTION_KEY, set: REJECTION_UPDATE });
-}
-
-const REJECTION_KEY = [
-  syncRejections.businessId,
-  syncRejections.deviceId,
-  syncRejections.tableName,
-  syncRejections.rowId,
-];
-
-/** A retried row's rejection takes the new answer and is open again. */
-const REJECTION_UPDATE = {
-  code: excluded(syncRejections.code),
-  message: excluded(syncRejections.message),
-  clientSeq: excluded(syncRejections.clientSeq),
-  payload: excluded(syncRejections.payload),
-  receivedAt: excluded(syncRejections.receivedAt),
-  resolvedAt: sql`NULL`,
-  updatedAt: excluded(syncRejections.updatedAt),
-};
 
 /**
  * Record what the device may purge through and when it last pushed, and return

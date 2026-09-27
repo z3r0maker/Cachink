@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import { sql } from 'drizzle-orm';
@@ -9,6 +8,7 @@ import { committedCursor, createDb, withBusiness, type Db } from '@xangarro/data
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { PgPushStore } from '../src/server/sync/pg-push-store';
+import { PUSH_T1, PUSH_TOUCHED, pushFixtures, pushId } from './support/push-fixtures';
 
 /**
  * The batched push end to end — `ApplyPushUseCase` over `PgPushStore` on real
@@ -18,80 +18,12 @@ import { PgPushStore } from '../src/server/sync/pg-push-store';
  */
 const { url, describe: suite } = integrationSuite();
 
-const id = () => `01PUSH${randomUUID().replaceAll('-', '').slice(0, 20).toUpperCase()}`;
+const id = pushId;
 const A = id();
 const B = id();
 const DEVICE = id();
-const T1 = '2026-09-26T10:00:00.000Z';
-const TOUCHED = [
-  'expenses',
-  'inventory_movements',
-  'products',
-  'sync_log',
-  'sync_receipts',
-  'sync_rejections',
-  'sync_cursors',
-  'devices',
-];
-let clientSeq = 0;
-
-function delta(table: Delta['table'], row: Record<string, unknown>, biz = A): Delta {
-  const full = {
-    businessId: biz,
-    deviceId: DEVICE,
-    createdByUserId: null,
-    createdAt: T1,
-    updatedAt: T1,
-    ...row,
-  };
-  clientSeq += 1;
-  return {
-    table,
-    rowId: String(row['id']),
-    op: 'insert',
-    clientSeq,
-    row: full,
-  } as unknown as Delta;
-}
-const expense = (rowId: string, over: Record<string, unknown> = {}, biz = A) =>
-  delta(
-    'expenses',
-    {
-      id: rowId,
-      fecha: '2026-09-26',
-      concepto: 'Renta',
-      categoria: 'Renta',
-      monto: 150000,
-      ...over,
-    },
-    biz,
-  );
-const product = (rowId: string, biz = A) =>
-  delta(
-    'products',
-    {
-      id: rowId,
-      nombre: 'Café',
-      categoria: 'Producto Terminado',
-      costoUnitCentavos: 1000,
-      unidad: 'pza',
-    },
-    biz,
-  );
-const movement = (rowId: string, productoId: string, biz = A) =>
-  delta(
-    'inventory_movements',
-    {
-      id: rowId,
-      productoId,
-      fecha: '2026-09-26',
-      tipo: 'salida',
-      cantidad: 1,
-      costoUnitCentavos: 1000,
-      motivo: 'Venta',
-    },
-    biz,
-  );
+const T1 = PUSH_T1;
+const { expense, product, movement } = pushFixtures(A, DEVICE);
 
 suite('batched push on Postgres', () => {
   let db: Db;
@@ -121,7 +53,7 @@ suite('batched push on Postgres', () => {
 
   // Fresh tenants, removed after: nothing is left for suites that count rows.
   afterAll(async () => {
-    for (const table of TOUCHED) {
+    for (const table of PUSH_TOUCHED) {
       await owner?.unsafe(`DELETE FROM ${table} WHERE business_id = ANY($1::text[])`, [[A, B]]);
     }
     await db?.$client.end({ timeout: 5 });
@@ -184,7 +116,7 @@ suite('batched push on Postgres', () => {
     assert.deepEqual(
       r.rejected.map((x) => [x.rowId, x.code]),
       [
-        [bad.rowId, 'INTERNAL'],
+        [bad.rowId, 'VALIDATION'],
         [theirExpense, 'DUPLICATE_CONFLICT'],
         [dangling.rowId, 'FK_PRODUCT_MISSING'],
         [theirMovement, 'FK_PRODUCT_MISSING'],

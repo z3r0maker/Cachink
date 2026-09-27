@@ -5,7 +5,8 @@
  * The happy path is one isolated write per table. When that write fails, the
  * rows are split in half and each half tried again, down to the single row that
  * fails — a handful of extra statements for one bad row in 500, instead of 500
- * savepoints for every push.
+ * savepoints for every push. That row's answer is terminal when the database
+ * refused it for good (`RowRefusedError`, DB3-SYNC-01 c), retryable otherwise.
  *
  * **The savepoint budget.** Postgres caches 64 open subtransactions per
  * transaction; past that, every snapshot in the cluster reads `pg_subtrans`
@@ -20,13 +21,17 @@ import type { PushableTable } from '@xangarro/contracts';
 import type { Item } from './push-plan.js';
 import {
   ForeignRowError,
+  RowRefusedError,
   TransientWriteError,
   type PushStore,
   type WriteOutcome,
 } from './push-store.js';
 
-/** What a row's write came to: a store outcome, or `internal` — retry later. */
-export type WriteResult = WriteOutcome | 'internal';
+/**
+ * What a row's write came to: a store outcome, `internal` — retry later — or
+ * refused for good: `invalid` values, or a `duplicate` of another row's unique key.
+ */
+export type WriteResult = WriteOutcome | 'internal' | RowRefusedError['reason'];
 
 export const MAX_KEPT_SAVEPOINTS = 60;
 
@@ -66,6 +71,11 @@ export class PushWriter {
     const [only] = items;
     if (only !== undefined && items.length === 1 && error instanceof ForeignRowError) {
       out.set(only.index, 'foreign');
+      return;
+    }
+    if (only !== undefined && items.length === 1 && error instanceof RowRefusedError) {
+      this.logError(error);
+      out.set(only.index, error.reason);
       return;
     }
     if (items.length === 1 || error instanceof TransientWriteError) {

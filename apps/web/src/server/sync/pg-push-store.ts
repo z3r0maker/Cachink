@@ -2,9 +2,11 @@ import 'server-only';
 
 import {
   rowKey,
+  storableString,
   type PushReceipt,
   type PushStore,
   type Rejection,
+  type RejectOptions,
   type RowKey,
   type WriteOutcome,
 } from '@xangarro/application';
@@ -20,6 +22,7 @@ import {
   finishPush,
   logChanges,
   receiptsOf,
+  resolveRejections,
   saveReceipts,
   saveRejections,
   writeSyncedRows,
@@ -82,9 +85,10 @@ export class PgPushStore implements PushStore {
   }
 
   /**
-   * One cursor bump for the batch, then its log entries and receipts together:
-   * postgres.js pipelines the two inserts, so accepting 500 rows is two round
-   * trips, with the tenant's cursor lock held from the first to commit.
+   * One cursor bump for the batch, then its log entries, its receipts and the
+   * closing of these rows' open rejections (DB3-SYNC-04) together: postgres.js
+   * pipelines the three statements, so accepting 500 rows is two round trips,
+   * with the tenant's cursor lock held from the first to commit.
    */
   async accept(deltas: readonly Delta[]): Promise<readonly number[]> {
     const { tx, businessId, deviceId } = this;
@@ -111,22 +115,33 @@ export class PgPushStore implements PushStore {
           rowUpdatedAt: String((d.row as Row)['updatedAt']),
         })),
       ),
+      resolveRejections(
+        tx,
+        businessId,
+        deviceId,
+        deltas.map((d) => ({ table: d.table, rowId: d.rowId })),
+      ),
     ]);
     return seqs;
   }
 
-  reject(rejections: readonly Rejection[]): Promise<void> {
+  /**
+   * Text columns refuse a NUL, so the id and the message are cleaned too: the
+   * use case keeps rejections in a savepoint, then `withoutPayload`, and a
+   * failure here must not be the row's own id (DB3-SYNC-01).
+   */
+  reject(rejections: readonly Rejection[], options: RejectOptions = {}): Promise<void> {
     return saveRejections(
       this.tx,
       this.businessId,
       this.deviceId,
       rejections.map(({ delta: d, rejection: r }) => ({
         tableName: d.table,
-        rowId: d.rowId,
+        rowId: storableString(d.rowId),
         clientSeq: r.clientSeq,
         code: r.code,
-        message: r.message,
-        payload: rejectionPayload(d.table, d.row as Row),
+        message: storableString(r.message),
+        payload: options.withoutPayload === true ? null : rejectionPayload(d.table, d.row as Row),
       })),
     );
   }
