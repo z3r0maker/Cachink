@@ -20,12 +20,15 @@ test('a write-off from the row needs a reason, lowers the stock and is listed', 
 }) => {
   await puertaOperador(page);
   await page.goto('/operador/inventario');
-  await page.getByTitle('Registrar merma').first().click();
-  const modal = page.getByRole('dialog', { name: 'Registrar merma' });
-  const save = modal.getByRole('button', { name: 'Registrar merma' });
-  await modal.getByLabel('Cantidad').fill('3');
+  await page.getByRole('button', { name: 'Se echó a perder o se dañó Carne de pastor' }).click();
+  const panel = page.getByRole('dialog', { name: '¿Qué pasó con la mercancía?' });
+  await expect(
+    panel.getByRole('radio', { name: 'Se echó a perder o se dañó (merma)' }),
+  ).toHaveAttribute('aria-checked', 'true');
+  await panel.getByLabel('¿Cuánto se echó a perder?').fill('3');
+  const save = panel.getByRole('button', { name: 'Registrar merma de 3 kg' });
   await expect(save).toBeDisabled();
-  await modal.getByRole('button', { name: 'Se rompió' }).click();
+  await panel.getByRole('radio', { name: 'Se rompió' }).click();
   await save.click();
 
   await expect(page.getByRole('status')).toContainText('−3 de Carne de pastor · Se rompió.');
@@ -33,15 +36,17 @@ test('a write-off from the row needs a reason, lowers the stock and is listed', 
   await expect(page.getByText('−3 kg')).toBeAttached();
 });
 
-test('an entry needs a product and a quantity; the supplier is optional', async ({ page }) => {
+test('a delivery from the row needs a quantity; who brought it is optional', async ({ page }) => {
   await puertaOperador(page);
   await page.goto('/operador/inventario');
-  await page.getByRole('button', { name: 'Entrada de mercancía' }).click();
-  const modal = page.getByRole('dialog', { name: 'Entrada de mercancía' });
-  await modal.getByLabel('Buscar en el catálogo').fill('aguacate');
-  await modal.getByRole('button', { name: /Aguacate/ }).click();
-  await modal.getByLabel('Cantidad').fill('4');
-  await modal.getByRole('button', { name: 'Registrar entrada' }).click();
+  await page.getByRole('button', { name: 'Llegó mercancía de Aguacate' }).click();
+  const panel = page.getByRole('dialog', { name: '¿Qué pasó con la mercancía?' });
+  await expect(panel.getByRole('radio', { name: 'Llegó mercancía' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await panel.getByLabel('¿Cuánto llegó?').fill('4');
+  await panel.getByRole('button', { name: 'Registrar entrada de 4 kg' }).click();
   await expect(page.getByRole('status')).toContainText('+4 de Aguacate. Queda en tu turno.');
 });
 

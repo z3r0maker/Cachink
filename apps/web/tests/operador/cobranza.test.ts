@@ -32,9 +32,9 @@ describe('cobranza: one account history (D7)', () => {
   });
 
   it('derives each card from tickets and abonos', () => {
-    assert.equal(resumenCliente(mari!), '3 ventas abiertas · la más antigua V-0361 · 8 may');
-    assert.equal(resumenCliente(chuy!), '2 ventas abiertas · la más antigua V-0288 · 28 abr');
-    assert.equal(resumenCliente(delgado!), 'No debe nada. Última venta liquidada el 9 may.');
+    assert.equal(resumenCliente(mari!), '3 ventas abiertas · la más antigua V-0361 del 8 may');
+    assert.equal(resumenCliente(chuy!), '2 ventas abiertas · la más antigua V-0288 del 28 abr');
+    assert.equal(resumenCliente(delgado!), 'No debe nada. Liquidó su última venta el 9 may.');
     assert.deepEqual(CUENTAS.map(estado), ['Al día', 'Atrasado', 'Al día', 'Sin saldo']);
   });
 
@@ -63,8 +63,9 @@ describe('cobranza: one account history (D7)', () => {
     );
   });
 
-  it('offers the whole balance and the round amounts that fit', () => {
-    assert.deepEqual(rapidos(340_00n), [340_00n, 100_00n, 200_00n]);
+  it('offers the whole balance and the round amounts under it', () => {
+    assert.deepEqual(rapidos(860_00n), [860_00n, 500_00n, 200_00n]);
+    assert.deepEqual(rapidos(340_00n), [340_00n, 200_00n]);
     assert.deepEqual(rapidos(0n), []);
   });
 

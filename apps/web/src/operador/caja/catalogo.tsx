@@ -10,6 +10,7 @@ import { Glyph } from '../ui/parts';
 import { PRODUCT_ICONS } from '../ui/product-icons';
 import * as t from '../ui/title.css';
 import * as c from './catalogo.css';
+import { BUSCAR_ID } from './atajos';
 import { TINT } from './categorias';
 import type { Producto } from './types';
 import type { Caja, Filtro } from './use-caja';
@@ -29,7 +30,7 @@ export function Catalogo(p: {
   return (
     <div className={c.left}>
       <div className={t.titleRow}>
-        <h1 className={t.pageTitle}>Caja</h1>
+        <h1 className={t.pageTitle}>Cobrar</h1>
         <span className={t.pageSub}>Toca lo que pidió el cliente</span>
       </div>
       <Buscador caja={p.caja} />
@@ -74,9 +75,10 @@ function Buscador({ caja }: { readonly caja: Caja }) {
         <Icon path={SEARCH} size={18} strokeWidth={2.4} />
       </span>
       <input
+        id={BUSCAR_ID}
         type="search"
         aria-label="Buscar producto"
-        placeholder="Buscar producto"
+        placeholder="Busca un producto"
         className={c.searchInput}
         value={caja.query}
         onChange={(e) => caja.buscar(e.target.value)}
@@ -97,7 +99,7 @@ function Rejilla(p: {
       <button
         type="button"
         className={c.tile}
-        style={{ background: colors.gray100 }}
+        style={{ background: colors.offwhite }}
         onClick={p.onNuevo}
       >
         <span className={c.tileIcon}>
@@ -113,22 +115,22 @@ function Rejilla(p: {
 function Tile({ p, caja }: { readonly p: Producto; readonly caja: Caja }) {
   const line = caja.lines.find((l) => l.productoId === p.id);
   return (
-    <button
-      type="button"
-      className={c.tile}
-      style={{ background: TINT[p.categoria] }}
-      title={p.nombre}
-      onClick={() => caja.add(p)}
-    >
-      <span className={c.tileIcon}>
-        <Glyph paths={PRODUCT_ICONS[p.icono]} size={22} stroke={2.3} />
+    <button type="button" className={c.tile} title={p.nombre} onClick={() => caja.add(p)}>
+      <span className={c.tileIcon} style={{ background: TINT[p.categoria] }}>
+        <Glyph paths={PRODUCT_ICONS[p.icono]} size={24} stroke={2.3} />
       </span>
       <span className={c.tileText}>
         <span className={c.tileName}>{p.nombre}</span>
-        {p.existencias <= p.umbral ? <span className={c.low}>Quedan {p.existencias}</span> : null}
+        <span className={c.priceRow}>
+          <span className={c.price}>{formatMoney(p.precio)}</span>
+          {p.existencias <= p.umbral ? <span className={c.low}>Quedan {p.existencias}</span> : null}
+        </span>
       </span>
-      <span className={c.price}>{formatMoney(p.precio)}</span>
-      {line ? <span className={c.qty}>{line.cantidad}</span> : null}
+      {line ? (
+        <span className={c.qty} aria-label={`${line.cantidad} en el ticket`}>
+          {line.cantidad}
+        </span>
+      ) : null}
     </button>
   );
 }

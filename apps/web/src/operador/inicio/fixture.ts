@@ -14,6 +14,7 @@ export const INICIO_FIXTURE: InicioData = {
   offline: false,
   pendientes: 3,
   turno: {
+    desde: TURNO_FIXTURE.desde,
     ventas: 12,
     canceladas: 1,
     ultimaCancelada: '12:58',
@@ -33,7 +34,7 @@ export const INICIO_FIXTURE: InicioData = {
     porCobrar: 178_000n,
     clientesConSaldo: 3,
   },
-  corteAclarar: { dia: '13', caja: 'Caja 2', monto: 6_000n },
+  corteAclarar: { dia: '13', caja: 'Caja 2', monto: 6_000n, hora: '09:12' },
   tareas: [
     {
       id: 'gas',

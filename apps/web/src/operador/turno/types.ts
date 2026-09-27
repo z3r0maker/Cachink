@@ -24,6 +24,14 @@ export interface PendienteRecurrente {
   readonly vence: number;
 }
 
+/** «Cobrado por método»: the four ways a sale is paid, with where the money went. */
+export interface CobroPorMetodo {
+  readonly metodo: 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
+  readonly monto: Money;
+  /** «entra a la caja», «en la terminal»… */
+  readonly nota: string;
+}
+
 export interface TurnoData {
   readonly operador: string;
   readonly caja: string;
@@ -38,6 +46,7 @@ export interface TurnoData {
   readonly canceladas: number;
   readonly ultimaCancelada: string | null;
   readonly cobrado: Money;
+  readonly porMetodo: readonly CobroPorMetodo[];
   readonly fiado: Money;
   readonly clientesFiados: number;
   readonly gastos: Money;

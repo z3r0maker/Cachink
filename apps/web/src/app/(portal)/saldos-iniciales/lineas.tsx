@@ -1,15 +1,24 @@
 'use client';
 
-import { portalFontSizes } from '@xangarro/tokens';
+import Link from 'next/link';
+import { useState } from 'react';
 
 import { parseClientSheet } from '@/lib/import-clientes';
 
+import { Aviso, type AvisoTono } from '../_primeros/aviso';
+import { dinero } from '../_primeros/formato';
+import * as p from '../_primeros/primeros.css';
+import { BotonCsv, PieLineas } from './pie-lineas';
 import { TablaLineas } from './tabla-lineas';
+import { lineaDe, type ClienteOpcion } from './use-saldos';
+import * as s from './cxc.css';
 
-/** One CxC line while the owner edits it. */
+/** One CxC line while the owner edits it; `clienteId` is '' until a cliente is chosen. */
 export interface Linea {
+  readonly clave: string;
   readonly clienteId: string;
   readonly nombre: string;
+  readonly telefono: string;
   readonly saldo: string;
 }
 
@@ -18,13 +27,12 @@ export interface Linea {
  * Clientes import plus a saldo column (nombre, teléfono, saldo). A row whose
  * cliente does not exist is reported, never silently created.
  */
-
-/** Prefill from the Clientes-import shape + saldo column; never invents clientes. */
 async function prellenarLineas(
   file: File,
-  porNombre: ReadonlyMap<string, { id: string; nombre: string }>,
+  clientes: readonly ClienteOpcion[],
 ): Promise<{ lineas: Linea[]; sinMatch: string[] }> {
   const { parseCsv } = await import('@/lib/csv');
+  const porNombre = new Map(clientes.map((c) => [c.nombre.trim().toLowerCase(), c]));
   const tabla = parseCsv(await file.text());
   const parsed = parseClientSheet(tabla);
   if (!parsed.ok) throw new Error(parsed.message);
@@ -39,99 +47,105 @@ async function prellenarLineas(
       continue;
     }
     const celda = tabla[row.line - 1] as readonly unknown[] | undefined;
-    nuevas.push({
-      clienteId: match.id,
-      nombre: match.nombre,
-      saldo: String(celda?.[2] ?? '').trim(),
-    });
+    nuevas.push(lineaDe(match, match.id, String(celda?.[2] ?? '').trim()));
   }
   return { lineas: nuevas, sinMatch };
 }
 
-export function LineasCxC({
-  lineas,
-  setLineas,
-  editable,
-  porNombre,
-  onBanner,
-}: {
+/** The file's lines replace the same cliente's line; the rest stay. */
+function mezclar(actuales: readonly Linea[], nuevas: readonly Linea[]): Linea[] {
+  const ids = new Set(nuevas.map((l) => l.clienteId));
+  return [...actuales.filter((l) => l.clienteId !== '' && !ids.has(l.clienteId)), ...nuevas];
+}
+
+function textoPrellenado(n: number, sinMatch: readonly string[]): string {
+  const base = `Prellené ${n} ${n === 1 ? 'saldo' : 'saldos'}.`;
+  if (sinMatch.length === 0) return `${base} Revísalos antes de guardar.`;
+  const lista = sinMatch.slice(0, 3).join(', ') + (sinMatch.length > 3 ? '…' : '');
+  return `${base} ${sinMatch.length} sin match: ${lista} no ${sinMatch.length === 1 ? 'está' : 'están'} en tus clientes.`;
+}
+
+export interface LineasProps {
   readonly lineas: readonly Linea[];
   readonly setLineas: (fn: (ls: Linea[]) => Linea[]) => void;
   readonly editable: boolean;
-  readonly porNombre: ReadonlyMap<string, { id: string; nombre: string }>;
-  readonly onBanner: (tone: 'success' | 'critical', text: string) => void;
-}) {
+  readonly clientes: readonly ClienteOpcion[];
+  readonly cxc: bigint;
+}
+
+export function LineasCxC(props: LineasProps) {
+  const [aviso, setAviso] = useState<AvisoCsvEstado | null>(null);
   const prellenar = async (file: File | null) => {
     if (file === null) return;
     try {
-      const r = await prellenarLineas(file, porNombre);
-      setLineas(() => r.lineas);
-      if (r.sinMatch.length > 0) {
-        onBanner(
-          'critical',
-          `${r.sinMatch.length} sin match (impórtalos primero en Clientes): ${r.sinMatch.slice(0, 3).join(', ')}…`,
-        );
-      } else {
-        onBanner('success', `${r.lineas.length} saldos listos para revisar.`);
-      }
+      const r = await prellenarLineas(file, props.clientes);
+      props.setLineas((ls) => mezclar(ls, r.lineas));
+      const hay = r.sinMatch.length > 0;
+      setAviso({
+        tono: hay ? 'warning' : 'success',
+        texto: textoPrellenado(r.lineas.length, r.sinMatch),
+        sinMatch: hay,
+      });
     } catch (error) {
-      onBanner('critical', (error as Error).message);
+      setAviso({ tono: 'critical', texto: (error as Error).message, sinMatch: false });
     }
   };
-
   return (
-    <>
-      <BarraSubida editable={editable} onPrelLenar={prellenar} />
-      <TablaLineas lineas={lineas} editable={editable} setLineas={setLineas} />
-    </>
+    <section className={p.panel} aria-labelledby="cxc-t">
+      <Cabeza editable={props.editable} onArchivo={(f) => void prellenar(f)} />
+      {aviso !== null && props.editable ? (
+        <AvisoCsv aviso={aviso} onCerrar={() => setAviso(null)} />
+      ) : null}
+      <TablaLineas {...props} />
+      <PieLineas {...props} total={dinero(props.cxc)} />
+    </section>
   );
 }
 
-const LABEL_CSV = {
-  display: 'inline-flex',
-  gap: 8,
-  alignItems: 'center',
-  border: '2px solid var(--black)',
-  borderRadius: 10,
-  padding: '6px 12px',
-  fontWeight: 700,
-  cursor: 'pointer',
-} as const;
+type AvisoCsvEstado = { tono: AvisoTono; texto: string; sinMatch: boolean };
 
-function BarraSubida({
-  editable,
-  onPrelLenar,
+function AvisoCsv({
+  aviso,
+  onCerrar,
 }: {
-  readonly editable: boolean;
-  readonly onPrelLenar: (f: File | null) => void;
+  readonly aviso: AvisoCsvEstado;
+  readonly onCerrar: () => void;
 }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 10,
-        alignItems: 'center',
-        margin: '24px 0 10px',
-        flexWrap: 'wrap',
-      }}
-    >
-      <h2 style={{ fontSize: portalFontSizes.sectionTitle, fontWeight: 800, margin: 0 }}>
-        Cuentas por cobrar iniciales
-      </h2>
-      {editable ? (
-        <label style={LABEL_CSV}>
-          Prellenar desde .csv
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            style={{ display: 'none' }}
-            onChange={(e) => onPrelLenar(e.target.files?.[0] ?? null)}
-          />
-        </label>
-      ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
-        columnas: nombre, teléfono, saldo
-      </span>
+    <div className={s.aviso}>
+      <Aviso
+        tono={aviso.tono}
+        onCerrar={onCerrar}
+        accion={
+          aviso.sinMatch ? (
+            <Link href="/importar?plantilla=clientes">Impórtalos primero</Link>
+          ) : undefined
+        }
+      >
+        {aviso.texto}
+      </Aviso>
+    </div>
+  );
+}
+
+function Cabeza({
+  editable,
+  onArchivo,
+}: {
+  readonly editable: boolean;
+  readonly onArchivo: (f: File | null) => void;
+}) {
+  return (
+    <div className={s.cabeza}>
+      <div className={s.cabezaTexto}>
+        <h2 id="cxc-t" className={s.titulo}>
+          Cuentas por cobrar iniciales
+        </h2>
+        <span className={p.nota}>
+          Lo que tus clientes te debían ese día. Columnas del CSV: nombre, teléfono, saldo.
+        </span>
+      </div>
+      {editable ? <BotonCsv onArchivo={onArchivo} /> : null}
     </div>
   );
 }

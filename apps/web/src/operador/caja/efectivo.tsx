@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { formatMoney, type Money } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
@@ -40,8 +40,20 @@ export function Efectivo({ caja }: { readonly caja: Caja }) {
   const [registrando, setRegistrando] = useState(false);
   const diff = calcCambio(parseRecibido(raw), caja.total);
   const ok = diff !== null && diff >= 0n && caja.total > 0n;
+  // The amount is typed first: a PC keyboard lands straight in the field.
+  useEffect(() => document.getElementById('cx-recibido')?.focus(), []);
+  const registrar = () => {
+    if (!ok || registrando) return;
+    setRegistrando(true);
+    caja.vender({ metodo: 'Efectivo', cambio: diff, nota: '' });
+  };
+  const alEnter = (ev: KeyboardEvent<HTMLDivElement>) => {
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault();
+    registrar();
+  };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }} onKeyDown={alEnter}>
       <Monto raw={raw} setRaw={setRaw} />
       <div className={e.quick}>
         {quickAmounts(caja.total).map((v) => (
@@ -57,16 +69,7 @@ export function Efectivo({ caja }: { readonly caja: Caja }) {
       </div>
       <Teclado onKey={(k) => setRaw((cur) => press(cur, k))} />
       <Cambio diff={diff} />
-      <button
-        type="button"
-        className={c.confirm}
-        disabled={!ok || registrando}
-        onClick={() => {
-          if (registrando) return;
-          setRegistrando(true);
-          caja.vender({ metodo: 'Efectivo', cambio: diff, nota: '' });
-        }}
-      >
+      <button type="button" className={c.confirm} disabled={!ok || registrando} onClick={registrar}>
         Registrar venta
       </button>
     </div>
@@ -115,7 +118,7 @@ function Cambio({ diff }: { readonly diff: Money | null }) {
     <div className={e.change} style={{ background: bg }}>
       <span className={e.changeLabel}>{falta ? 'Falta' : 'Cambio'}</span>
       <span className={e.changeValue}>
-        {diff === null ? '—' : formatMoney(falta ? -diff : diff)}
+        {diff === null ? '$0.00' : formatMoney(falta ? -diff : diff)}
       </span>
     </div>
   );

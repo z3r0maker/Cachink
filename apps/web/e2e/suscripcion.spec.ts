@@ -34,12 +34,12 @@ test('the annual switch shows annual prices and offers SPEI', async ({ page }) =
   await expect(main.getByRole('button', { name: /Cambiar a anual/ })).toBeVisible();
 
   await main
-    .getByRole('group', { name: 'Periodo de pago' })
-    .getByRole('button', { name: /Anual/ })
+    .getByRole('radiogroup', { name: 'Periodo de pago' })
+    .getByRole('radio', { name: /Anual/ })
     .click();
   await expect(main.getByTestId('precio-xangarro')).toContainText('1,990');
   await expect(main.getByTestId('precio-xangarrote')).toContainText('3,990');
-  await expect(main.getByText('MXN / año + IVA').first()).toBeVisible();
+  await expect(main.getByText('MXN al año + IVA').first()).toBeVisible();
   // Xangarro is Taquería's own plan, so only Xangarrote gets the SPEI button.
   await expect(main.getByRole('button', { name: /Pagar por transferencia/ })).toHaveCount(1);
 });

@@ -4,6 +4,7 @@ import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 import { API_PATHS, deviceHeaders, encodeJson } from '@xangarro/contracts';
 
+import { subirParaRevisar } from './interact';
 import { asTenant } from './sync-phone';
 
 /**
@@ -78,7 +79,7 @@ test('signup → wizard → operator → import → code → activate → push �
   // sat on /signup — which no run saw, because a failure in the viewport phase
   // had been skipping this project entirely.
   await page.getByTestId('signup-acepto').check();
-  await page.getByRole('button', { name: 'Crear cuenta' }).click();
+  await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
   await wizardMinimo(page);
 
   // Free plan: no checkout — the plan screen only confirms, then the checklist.
@@ -106,12 +107,11 @@ test('signup → wizard → operator → import → code → activate → push �
   // 3 · Three products, imported.
   await page.goto('/productos');
   await page.getByRole('button', { name: 'Importar desde Excel' }).click();
-  await page.getByTestId('import-archivo').setInputFiles({
+  await subirParaRevisar(page, {
     name: 'productos.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     buffer: await xlsx([HEAD, ...filas]),
   });
-  await page.getByRole('button', { name: 'Revisar archivo' }).click();
   await page.getByRole('button', { name: 'Importar 3 productos' }).click();
   await expect(page.getByTestId('import-listo')).toContainText('3 nuevos');
   await page.keyboard.press('Escape');

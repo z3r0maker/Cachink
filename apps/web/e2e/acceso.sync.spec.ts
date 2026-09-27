@@ -28,7 +28,7 @@ test.describe('Operador · Acceso (O-12)', () => {
     // The gate: Acceso, never the register.
     const card = page.getByTestId('acceso-card');
     await expect(card).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Vincula esta caja' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Conecta esta caja' })).toBeVisible();
 
     // Paso 1 · correo + código (the code ignores case, spaces and hyphens).
     await page.getByTestId('vincular-correo').fill(EMAIL);
@@ -38,7 +38,7 @@ test.describe('Operador · Acceso (O-12)', () => {
     await page.getByTestId('vincular-continuar').click();
 
     // Paso 2 · the operator picker came from the activation bootstrap.
-    await expect(page.getByRole('heading', { name: '¿Quién abre turno?' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '¿Quién va a cobrar?' })).toBeVisible();
     await expectAvisoOnNewestDevice();
     await page.getByTestId('acceso-operador').filter({ hasText: 'Ana Robledo' }).click();
 
@@ -52,14 +52,14 @@ test.describe('Operador · Acceso (O-12)', () => {
     await page.getByTestId('nip-tecla-→').click();
 
     // Paso 3 · the fondo opens the turno — and the register appears.
-    await expect(page.getByRole('heading', { name: '¿Con cuánto abres la caja?' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /¿Con cuánto empiezas\?/ })).toBeVisible();
     await page.getByTestId('fondo-input').fill('500');
     await page.getByTestId('fondo-abrir').click();
-    await expect(page.getByRole('heading', { name: 'Caja', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cobrar', exact: true })).toBeVisible();
 
     // The link survives a reload, and an open turno walks straight in.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Caja', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cobrar', exact: true })).toBeVisible();
   });
 
   test('a wrong code does not link, and the register stays gated', async ({ page }) => {

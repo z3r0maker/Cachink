@@ -18,5 +18,10 @@ export default async function OperadorCobranzaPage({
   readonly searchParams: Promise<{ readonly dataState?: string }>;
 }) {
   const { dataState } = await searchParams;
-  return <CobranzaScreen state={forced(dataState)} data={{ cuentas: CUENTAS, hoy: HOY }} />;
+  return (
+    <CobranzaScreen
+      state={forced(dataState)}
+      data={{ cuentas: CUENTAS, hoy: HOY, negocio: 'Taquería Don Pedro' }}
+    />
+  );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 
-import { Button } from '@/components';
 import type { BillingInterval } from '@xangarro/application/billing';
 
 import {
@@ -12,10 +11,12 @@ import {
   type BillingActionResult,
 } from '@/server/billing/actions';
 
+import { btn, errorTexto, lleno } from './suscripcion.css';
+
 /**
  * The owner's billing buttons (P-10). Each asks the server for a Stripe URL
  * (Checkout or the Customer Portal) and sends the browser there; a refusal
- * shows its sentence. Rendered for the owner only — the actions check again.
+ * shows its sentence. Rendered for the owner only; the actions check again.
  */
 function useIr() {
   const [error, setError] = useState<string | null>(null);
@@ -29,26 +30,26 @@ function useIr() {
   return { error, pending, ir };
 }
 
+export type EstiloBoton = keyof typeof btn;
+
 export function BotonStripe(props: {
   readonly label: string;
   readonly accion: () => Promise<BillingActionResult>;
-  readonly variant?: 'primary' | 'secondary' | 'danger' | 'dark';
+  readonly estilo?: EstiloBoton;
   readonly full?: boolean;
-  readonly size?: 'sm' | 'md';
 }) {
   const { error, pending, ir } = useIr();
+  const clase = `${btn[props.estilo ?? 'secundario']}${props.full ? ` ${lleno}` : ''}`;
   return (
     <>
-      <Button
-        variant={props.variant ?? 'secondary'}
-        full={props.full}
-        size={props.size}
-        disabled={pending}
-        onClick={() => ir(props.accion)}
-      >
+      <button type="button" className={clase} disabled={pending} onClick={() => ir(props.accion)}>
         {pending ? 'Abriendo…' : props.label}
-      </Button>
-      {error === null ? null : <p role="alert">{error}</p>}
+      </button>
+      {error === null ? null : (
+        <p role="alert" className={errorTexto}>
+          {error}
+        </p>
+      )}
     </>
   );
 }
@@ -59,6 +60,6 @@ export const accionDePlan = (planId: string, interval: BillingInterval = 'month'
 
 /**
  * The annual plan by bank transfer (N-01, ADR-067): Stripe issues a CLABE on a
- * hosted invoice. Annual only — SPEI never pays a monthly plan.
+ * hosted invoice. Annual only: SPEI never pays a monthly plan.
  */
 export const speiDePlan = (planId: string) => () => pagarAnualPorSpei(planId);

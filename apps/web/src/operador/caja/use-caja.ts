@@ -5,6 +5,9 @@ import { useRef, useState } from 'react';
 import { matches } from '../ui/search';
 import { contar, total } from './ticket';
 import type { CajaData, Categoria, CobroPaso, LineaTicket } from './types';
+
+/** The four ways a sale is paid (ADR-108: no QR/CoDi). */
+export type MetodoCobro = 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
 import { useSaleToast, type VentaHecha } from './use-sale-toast';
 import { desencolar } from '../shell/cola';
 import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './ticket-store';
@@ -44,11 +47,17 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
   const toast = useSaleToast();
   const count = contar(lines);
   const vendida = useRef<readonly LineaTicket[] | null>(null);
-  const cobrar = (): void => {
-    if (count === 0) return;
-    setPaso('metodo');
+  const { metodo, setMetodo, cobrar, venderRef } = useCobrar(count, setPaso, setSheetOpen);
+  function vender(v: Omit<VentaHecha, 'lines' | 'total'>): void {
+    if (vendida.current === lines) return;
+    vendida.current = lines;
+    toast.show({ ...v, lines, total: total(lines) });
+    reemplazar([]);
+    setPaso('catalogo');
     setSheetOpen(false);
-  };
+    void registrarSiVinculado(lines, v);
+  }
+  venderRef.current = vender;
   return {
     ...useCatalogo(data.catalogo),
     lines,
@@ -67,16 +76,10 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
      *  this several times with the same render's `lines` — one ticket, one
      *  sale; a new ticket is always a different array. Linked (O-06), the
      *  sale also lands in the register's own database through the atomic
-     *  ticket use case — offline-safe, flushed by the queue when online. */
-    vender: (v: Omit<VentaHecha, 'lines' | 'total'>) => {
-      if (vendida.current === lines) return;
-      vendida.current = lines;
-      toast.show({ ...v, lines, total: total(lines) });
-      reemplazar([]);
-      setPaso('catalogo');
-      setSheetOpen(false);
-      void registrarSiVinculado(lines, v);
-    },
+     *  ticket use case, offline-safe and flushed by the queue when online. */
+    vender,
+    metodo,
+    setMetodo,
     deshacer: () => deshacer(toast),
   };
 }
@@ -85,6 +88,28 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
 function deshacer(toast: ReturnType<typeof useSaleToast>): void {
   if (toast.venta) reemplazar(toast.venta.lines);
   toast.dismiss();
+}
+
+/** The method picked in the ticket, and what «Cobrar» does with it: cash and
+ *  fiado take a step in the ticket itself (ADR-107); card and transfer are
+ *  done at once. */
+function useCobrar(
+  count: number,
+  setPaso: (p: CobroPaso) => void,
+  setSheetOpen: (v: boolean) => void,
+) {
+  const [metodo, setMetodo] = useState<MetodoCobro>('Efectivo');
+  const venderRef = useRef<(v: Omit<VentaHecha, 'lines' | 'total'>) => void>(() => undefined);
+  const cobrar = (): void => {
+    if (count === 0) return;
+    if (metodo === 'Efectivo' || metodo === 'Fiado') {
+      setPaso(metodo === 'Efectivo' ? 'efectivo' : 'credito');
+      setSheetOpen(true);
+      return;
+    }
+    venderRef.current({ metodo, cambio: null, nota: `Pago recibido por ${metodo.toLowerCase()}.` });
+  };
+  return { metodo, setMetodo, cobrar, venderRef };
 }
 
 export type Caja = ReturnType<typeof useCaja>;

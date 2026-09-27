@@ -1,16 +1,16 @@
-import { DENOMINACIONES_MXN, formatMoney } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { Button, Drawer } from '@/components';
+import { Button, Don, Drawer } from '@/components';
 import { DIF } from '@/operador/cierre/copy';
-import { desglose } from '@/operador/turno/desglose';
-import { eyebrow } from '@/styles/text.css';
 
-import * as s from './cortes.css';
-import { contado, diferencia, esperado, eventos } from './derive';
+import { EstadoPill } from './columnas';
+import { Conteo } from './conteo';
+import { contado, diferencia, esperado, eventos, horaCierre, primerNombre } from './derive';
+import * as s from './panel.css';
 import type { Corte, EstadoCorte, Evento } from './types';
 
-const PASADO = { cuadra: 'Cuadró', falta: 'Faltó', sobra: 'Sobró' } as const;
+const DICE = { cuadra: 'Cuadró', falta: 'Falta', sobra: 'Sobra' } as const;
 const TONO: Record<Evento['tone'], string> = {
   plain: colors.white,
   danger: colors.redSoft,
@@ -18,7 +18,7 @@ const TONO: Record<Evento['tone'], string> = {
   soft: colors.yellowSoft,
 };
 
-/** The 560 px side panel: the difference, the note, how the expected cash was formed, the count, the rest. */
+/** The corte's side panel: the three figures, the explanation, how the cash was formed, the count, the rest. */
 export function Panel(p: {
   readonly c: Corte | null;
   readonly estado: EstadoCorte;
@@ -32,8 +32,9 @@ export function Panel(p: {
       open={c !== null}
       onOpenChange={(o) => (o ? undefined : p.onClose())}
       eyebrow="Corte de turno"
+      status={c ? <EstadoPill estado={p.estado} /> : null}
       heading={c?.operador ?? ''}
-      headerTone={c?.tint}
+      subtitle={c ? `${c.caja} · ${c.dia} · ${c.horario}` : undefined}
       width={560}
       description={c ? `${c.caja} · ${c.dia} · ${c.horario}` : undefined}
       actions={
@@ -46,99 +47,118 @@ export function Panel(p: {
 }
 
 function Cuerpo({ c }: { readonly c: Corte }) {
-  const d = diferencia(c);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <div className={eyebrow}>{`${c.caja} · ${c.dia} · ${c.horario}`}</div>
-      <div className={s.grande} style={{ background: DIF[d.tipo].bg }}>
-        <div className={eyebrow}>{PASADO[d.tipo]}</div>
-        <div className={s.cifra}>{formatMoney(d.monto)}</div>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 4 }}>
-          <span className={s.linea}>{`Esperado ${formatMoney(esperado(c))}`}</span>
-          <span className={s.linea}>{`Contado ${formatMoney(contado(c))}`}</span>
-        </div>
-      </div>
-      {c.nota ? (
-        <div className={s.nota}>
-          <div
-            className={eyebrow}
-          >{`Nota de ${c.operador.split(' ')[0] ?? ''} · ${c.motivo ?? ''}`}</div>
-          <div className={s.notaTexto}>{`«${c.nota}»`}</div>
-        </div>
-      ) : null}
+    <div className={s.cuerpo}>
+      <Cifras c={c} />
+      {c.motivo || c.nota ? <Explicacion c={c} /> : null}
       <Formacion c={c} />
-      <Conteo c={c} />
+      <Conteo conteo={c.conteo} />
       <Eventos eventos={eventos(c)} />
     </div>
   );
 }
 
-function Formacion({ c }: { readonly c: Corte }) {
-  const filas = [
-    ...desglose({ ...c, gastosEfectivo: c.gastosCaja }),
-    ['Esperado', formatMoney(esperado(c))] as const,
-  ];
+/** Esperado · Contado · the difference, its cell tinted by direction. */
+function Cifras({ c }: { readonly c: Corte }) {
+  const d = diferencia(c);
+  const tinta = { color: DIF[d.tipo].color };
   return (
-    <div className={s.seccion}>
-      <div className={eyebrow}>Cómo se formó lo esperado</div>
+    <div className={s.cifras}>
+      <div className={s.cifraCelda}>
+        <span className={s.cifraEtiqueta}>Esperado</span>
+        <span className={s.cifraValor}>{formatMoney(esperado(c))}</span>
+      </div>
+      <div className={s.cifraCelda}>
+        <span className={s.cifraEtiqueta}>Contado</span>
+        <span className={s.cifraValor}>{formatMoney(contado(c))}</span>
+      </div>
+      <div className={s.cifraCelda} style={{ background: DIF[d.tipo].bg }}>
+        <span className={s.cifraEtiqueta} style={tinta}>
+          {DICE[d.tipo]}
+        </span>
+        <span className={s.cifraValor} style={tinta}>
+          {formatMoney(d.monto)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** The reason the operator picked at close and, when she wrote one, her note. */
+function Explicacion({ c }: { readonly c: Corte }) {
+  const quien = primerNombre(c);
+  return (
+    <>
+      <section className={s.seccion}>
+        <h3 className={s.ceja}>{`Lo que explicó ${quien}`}</h3>
+        <div className={s.nota}>
+          {c.motivo ? <span className={s.motivo}>{c.motivo}</span> : null}
+          {c.nota ? <p className={s.notaTexto}>{`«${c.nota}»`}</p> : null}
+          <span className={s.meta}>{`Lo dejó al cerrar, a las ${horaCierre(c)}`}</span>
+        </div>
+      </section>
+      {diferencia(c).tipo === 'cuadra' ? null : (
+        <div className={s.don}>
+          <Don pose="preocupado" size={44} />
+          <span>{`${quien} ya explicó qué pasó. Si se repite, platíquenlo.`}</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** The four parts of the expected cash, as the owner reads them. */
+const formacion = (c: Corte): readonly (readonly [string, string])[] => [
+  ['Fondo con el que abrió', formatMoney(c.fondo)],
+  ['Ventas en efectivo', formatMoney(c.ventasEfectivo)],
+  ['Abonos de fiado en efectivo', formatMoney(c.abonosEfectivo)],
+  ['Gastos pagados de la caja', `${c.gastosCaja > 0n ? '−' : ''}${formatMoney(c.gastosCaja)}`],
+];
+
+function Formacion({ c }: { readonly c: Corte }) {
+  return (
+    <section className={s.seccion}>
+      <h3 className={s.ceja}>Cómo se formó lo esperado</h3>
       <div className={s.tabla}>
-        {filas.map(([label, value]) => (
+        {formacion(c).map(([label, value]) => (
           <div key={label} className={s.renglon}>
-            {label}
+            <span>{label}</span>
             <span
-              className={s.valor}
-              style={{ color: label.startsWith('Gastos') ? colors.redText : colors.black }}
+              className={s.monto}
+              style={{ color: value.startsWith('−') ? colors.redText : colors.black }}
             >
               {value}
             </span>
           </div>
         ))}
+        <div className={s.total}>
+          <span>Esperado en caja</span>
+          <span className={s.monto}>{formatMoney(esperado(c))}</span>
+        </div>
       </div>
-    </div>
-  );
-}
-
-/**
- * Every denomination; the ones not counted sit on gray. The file also grays
- * their «×0» (gray-400, 2.4:1 on gray-100, under AA), so the count keeps
- * gray-600 and the tile alone marks the zero (plan §4b).
- */
-function Conteo({ c }: { readonly c: Corte }) {
-  return (
-    <div className={s.seccion}>
-      <div className={eyebrow}>Conteo que capturó</div>
-      <div className={s.denoms}>
-        {DENOMINACIONES_MXN.map((d) => {
-          const n = c.conteo[d.pesos] ?? 0;
-          return (
-            <div
-              key={d.pesos}
-              className={s.denom}
-              style={{ background: n === 0 ? colors.gray100 : colors.white }}
-            >
-              {`$${d.pesos}`}
-              <span style={{ marginLeft: 'auto', color: colors.gray600 }}>{`×${n}`}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    </section>
   );
 }
 
 function Eventos({ eventos }: { readonly eventos: readonly Evento[] }) {
   return (
-    <div className={s.seccion}>
-      <div className={eyebrow}>Qué más pasó en el turno</div>
+    <section className={s.seccion}>
+      <h3 className={s.ceja}>Qué más pasó en el turno</h3>
       {eventos.map((e) => (
         <div key={e.label} className={s.evento} style={{ background: TONO[e.tone] }}>
-          <span style={{ flex: 1, minWidth: 0 }}>{e.label}</span>
-          <span className={s.eventoValor}>{e.value}</span>
+          <span>{e.label}</span>
+          <span className={s.monto}>{e.value}</span>
         </div>
       ))}
-    </div>
+    </section>
   );
 }
+
+const ETIQUETA: Record<EstadoCorte, string> = {
+  Cuadró: 'Sin nada que aclarar',
+  Aclarado: 'Ya está aclarado',
+  'Por aclarar': 'Marcar como aclarado',
+};
 
 function Acciones(p: {
   readonly c: Corte;
@@ -146,20 +166,21 @@ function Acciones(p: {
   readonly onPedir: (c: Corte) => void;
   readonly onAclarar: (c: Corte) => void;
 }) {
-  const label =
-    p.estado === 'Cuadró'
-      ? 'Sin nada que aclarar'
-      : p.estado === 'Aclarado'
-        ? 'Ya está aclarado'
-        : 'Marcar como aclarado';
   return (
-    <>
-      <Button variant="secondary" onClick={() => p.onPedir(p.c)}>
-        Pedir aclaración
-      </Button>
-      <Button disabled={p.estado !== 'Por aclarar'} onClick={() => p.onAclarar(p.c)}>
-        {label}
-      </Button>
-    </>
+    <div className={s.pie}>
+      <div className={s.botones}>
+        <span style={{ flex: 1, display: 'flex', minWidth: 200 }}>
+          <Button full disabled={p.estado !== 'Por aclarar'} onClick={() => p.onAclarar(p.c)}>
+            {ETIQUETA[p.estado]}
+          </Button>
+        </span>
+        <Button variant="secondary" onClick={() => p.onPedir(p.c)}>
+          {`Preguntarle a ${primerNombre(p.c)}`}
+        </Button>
+      </div>
+      <p className={s.pieNota}>
+        Tu pregunta le llega a su caja como aviso. Lo que conteste aparece en tus Avisos.
+      </p>
+    </div>
   );
 }

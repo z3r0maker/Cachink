@@ -1,4 +1,5 @@
 import { expect, test, type Page } from './test';
+import { venderEfectivo } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -21,11 +22,7 @@ async function venderTaco(page: Page, efectivo: string): Promise<void> {
     .getByRole('button', { name: /Taco al pastor/ })
     .first()
     .click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  const cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill(efectivo);
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, efectivo);
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 }
 
@@ -54,22 +51,24 @@ test("the turno's real tickets, and a cancellation that asks for the NIP", async
   await expect(fila2).toContainText('$25.00');
   await expect(page.getByText('$75.00').first()).toBeVisible();
 
-  // A wrong NIP is refused — the use case verifies it on the device.
-  await fila2.getByTitle('Cancelar venta').click();
-  await page.getByRole('button', { name: 'Error de captura' }).click();
-  await page.getByTestId('cancelar-nip').fill('9999');
-  await page.getByRole('button', { name: 'Cancelar la venta' }).click();
-  await expect(page.getByText(/No se pudo cancelar/)).toBeVisible();
+  // A wrong NIP is refused (the use case verifies it on the device); the dialog stays.
+  await fila2.click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar venta' }).click();
+  const modal = page.getByRole('alertdialog');
+  await modal.getByRole('radio', { name: 'El cliente se arrepintió' }).click();
+  await modal.getByTestId('cancelar-nip').fill('9999');
+  await modal.getByRole('button', { name: 'Cancelar venta' }).click();
+  await expect(modal.getByText(/No se pudo cancelar/)).toBeVisible();
 
   // The right NIP cancels: the ticket stays, marked, with the cash to return.
-  await fila2.getByTitle('Cancelar venta').click();
-  await page.getByRole('button', { name: 'Error de captura' }).click();
-  await page.getByTestId('cancelar-nip').fill('2580');
-  await page.getByRole('button', { name: 'Cancelar la venta' }).click();
+  await modal.getByTestId('cancelar-nip').fill('2580');
+  await modal.getByRole('button', { name: 'Cancelar venta' }).click();
+  const cajon = page.getByRole('dialog');
   await expect(
-    page.getByText(/V-0002 cancelada · Error de captura\. Devuelve \$25\.00\./),
+    cajon.getByText(/V-0002 cancelada · El cliente se arrepintió\. Devuelve \$25\.00\./),
   ).toBeVisible();
-  await expect(fila2).toContainText('Cancelada · Error de captura');
+  await cajon.getByRole('button', { name: 'Listo' }).click();
+  await expect(fila2).toContainText('Cancelada');
 
   // The queue carries it up: the audit log and the marked ticket in Postgres.
   await expect
@@ -78,7 +77,7 @@ test("the turno's real tickets, and a cancellation that asks for the NIP", async
         asTenant(BIZ, async (sql) => {
           // The register numbers its own tickets from 1, and the seeded ledger
           // has folios of its own — including a 2, cancelled elsewhere in the
-          // run («Cobro duplicado»). So: the newest cancellation of a folio 2,
+          // run («Cobré de más»). So: the newest cancellation of a folio 2,
           // which is the one this test just made.
           const [row] = await sql<{ motivo: string; cancelado: string }[]>`
             SELECT cl.motivo, t.cancelled_at::text AS cancelado
@@ -89,5 +88,5 @@ test("the turno's real tickets, and a cancellation that asks for the NIP", async
         }),
       { timeout: 15_000 },
     )
-    .toBe('Error de captura');
+    .toBe('El cliente se arrepintió');
 });

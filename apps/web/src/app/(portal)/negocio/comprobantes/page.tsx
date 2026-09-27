@@ -1,14 +1,14 @@
-import type { BusinessId, Business } from '@xangarro/domain';
+import { monograma, type BusinessId, type Business } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { requireMember } from '@/server/auth';
 import { withTenant } from '@/server/db';
 import { pgBusinessesRepository } from '@/server/repositories/businesses';
 
-import { ComprobantesScreen, type ComprobantesView } from './parts';
+import { ComprobantesScreen, type ComprobantesView } from './screen';
 
 /**
- * Negocio → Comprobantes (N-19). Owner and admin edit; a viewer reads the
+ * Mi negocio · Comprobantes (N-19). Owner and admin edit; a viewer reads the
  * fields without the controls.
  */
 export const dynamic = 'force-dynamic';
@@ -29,13 +29,18 @@ function viewOf(
   return {
     mayWrite: session.member_role !== 'viewer',
     businessId: session.business_id,
+    nombre: business?.nombre ?? 'Tu negocio',
+    iniciales: monograma(business?.nombre ?? 'Tu negocio'),
     logoUrl: business?.logoUrl ?? null,
     form: formOf(business),
   };
 }
 
 const SIN_MARCA = {
-  receiptTemplate: 'clasico',
+  // «Ticket» is the default (CfgComprobantes): it is how the caja shares the
+  // receipt. The column still defaults to 'clasico' (migration 0023), so a
+  // stored row keeps its own value until the owner picks.
+  receiptTemplate: 'ticket',
   receiptLeyenda: '',
   addressPrint: false,
   direccion: '',

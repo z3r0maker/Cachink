@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { venderEfectivo, venderFiado } from './cobrar';
 
 import { mintCode, pasarAcceso } from './acceso-flow';
 import { asTenant, BIZ } from './sync-phone';
@@ -26,19 +27,11 @@ test("the close counts against the turno's real expected cash", async ({ page })
   const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
   await taco.click();
   await taco.click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  let cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await cobro.getByLabel('Con cuánto paga').fill('60');
-  await cobro.getByRole('button', { name: 'Registrar venta' }).click();
+  await venderEfectivo(page, '60');
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   await taco.click();
-  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
-  cobro = page.getByRole('dialog');
-  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
-  await cobro.getByRole('button', { name: 'Doña Mari de la tienda' }).click();
-  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await venderFiado(page, 'Doña Mari de la tienda');
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
 
   await page.getByRole('link', { name: 'Gastos' }).click();
@@ -46,23 +39,23 @@ test("the close counts against the turno's real expected cash", async ({ page })
     .getByRole('button', { name: /Registrar gasto/ })
     .first()
     .click();
-  const gasto = page.getByRole('dialog');
-  await gasto.getByLabel('Monto').fill('150');
-  await gasto.getByLabel('Concepto').fill('Gas para la parrilla');
+  const gasto = page.getByRole('dialog', { name: 'Registrar gasto' });
+  await gasto.getByLabel('¿Cuánto?').fill('150');
+  await gasto.getByLabel('¿Qué compraste?').fill('Gas para la parrilla');
   await gasto.getByRole('button', { name: 'Insumos', exact: true }).click();
-  await gasto.getByRole('button', { name: 'Registrar gasto', exact: true }).click();
+  await gasto.getByRole('button', { name: 'Registrar gasto de $150.00' }).click();
   await expect(page.getByText('Gas para la parrilla').first()).toBeVisible();
 
-  await page.getByRole('link', { name: 'Cobranza' }).click();
-  await expect(page.getByText('1 ventas abiertas').first()).toBeVisible();
+  await page.getByRole('link', { name: 'Fiado y abonos' }).click();
+  await expect(page.getByText('1 venta abierta').first()).toBeVisible();
   await page.getByRole('button', { name: 'Recibir abono' }).click();
   const abono = page.getByRole('dialog');
   await abono.getByLabel('Cuánto abona').fill('20');
-  await abono.getByRole('button', { name: 'Registrar abono' }).click();
+  await abono.getByRole('button', { name: 'Recibir abono de $20.00' }).click();
   await expect(page.getByRole('status')).toContainText('$20.00 de Doña Mari');
 
   // The close: the calculator's answer over the turno's own rows.
-  await page.getByRole('link', { name: 'Cerrar turno' }).click();
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
   await expect(page.getByRole('heading', { name: 'Cierre de turno' })).toBeVisible();
   await expect(page.getByText('Efectivo esperado')).toBeVisible();
   await expect(page.getByText('$420.00').first()).toBeVisible();
@@ -72,18 +65,19 @@ test("the close counts against the turno's real expected cash", async ({ page })
   await expect(page.getByText('$50.00').first()).toBeVisible();
   await expect(page.getByText('Abonos en efectivo')).toBeVisible();
   await expect(page.getByText('Gastos de caja chica')).toBeVisible();
-  await expect(page.getByText('Cobrado (todos los métodos)')).toBeVisible();
-  await expect(page.getByText('$75.00').first()).toBeVisible();
-  await expect(page.getByText('Ventas fiadas')).toBeVisible();
-  await expect(page.getByText('$25.00').first()).toBeVisible();
+  const resumen = page.getByRole('region', { name: 'Resumen del turno' });
+  await expect(resumen).toContainText('Fiado $25.00');
 
-  // Count exactly the expected: two $200 and one $20.
-  await page.getByLabel('Cantidad de $200').fill('2');
-  await page.getByLabel('Cantidad de $20', { exact: true }).fill('1');
+  // Count exactly the expected: two $200 bills and one $20 coin.
+  await page.getByLabel('Cuántos billetes de $200').fill('2');
+  await page.getByLabel('Cuántas monedas de $20', { exact: true }).fill('1');
   const cerrar = page.getByRole('button', { name: 'Cerrar turno', exact: true });
   await expect(cerrar).toBeEnabled();
   await cerrar.click();
-  await expect(page.getByText('Turno cerrado')).toBeVisible();
+  await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
+  const corte = page.getByRole('region', { name: 'Corte de caja' });
+  await expect(corte).toContainText('Cobrado');
+  await expect(corte).toContainText('$75.00');
 
   // The closed turno reaches Postgres, figures and all.
   await expect

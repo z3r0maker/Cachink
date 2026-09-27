@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { colors } from '@xangarro/tokens';
 
 import { Button } from './button';
-import { overlay } from './drawer.css';
+import { overlayDialogo as overlay } from './drawer.css';
 import { Seal, type SealLevel } from './seal';
 import { Tag } from './tag';
 import { confettiPiece, streakRow, takeover, takeoverBody, takeoverTitle } from './celebration.css';

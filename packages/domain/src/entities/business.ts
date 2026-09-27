@@ -78,7 +78,7 @@ export const BusinessSchema = z
       .regex(/^#[0-9a-fA-F]{6}$/)
       .nullable()
       .default(null),
-    receiptTemplate: ReceiptTemplateEnum.default('clasico'),
+    receiptTemplate: ReceiptTemplateEnum.default('ticket'),
     receiptLeyenda: z.string().max(280).nullable().default(null),
     addressPrint: z.boolean().default(false),
     whatsapp: z

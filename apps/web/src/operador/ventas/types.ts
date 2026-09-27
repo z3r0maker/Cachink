@@ -1,16 +1,17 @@
 import type { Money } from '@xangarro/domain';
 
 import type { EstadoMode } from '../estado';
+import type { Abierta } from './detalle/types';
 
 /**
  * The operator's words for the ticket's method; «Fiado» is `Crédito` in the
- * domain. «QR / CoDi» is only ever read back from a ticket taken before
- * ADR-108 retired it; the register no longer offers it.
+ * domain. A ticket taken before ADR-108 retired QR/CoDi reads back as
+ * «Transferencia» (see `comoMetodo`), so the screens only ever know four.
  */
-export type MetodoVenta = 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR / CoDi' | 'Fiado';
+export type MetodoVenta = 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
 
 export interface VentaTurno {
-  /** The ticket's id — present on a linked register, where cancel goes through the use case. */
+  /** The ticket's id: present on a linked register, where cancel goes through the use case. */
   readonly id?: string;
   readonly folio: string;
   readonly concepto: string;
@@ -23,6 +24,8 @@ export interface VentaTurno {
 }
 
 export interface VentasData {
+  /** The comprobante's header; the fixture's business when absent. */
+  readonly negocio?: string;
   readonly operador: string;
   readonly caja: string;
   readonly desde: string;
@@ -33,4 +36,6 @@ export interface VentasScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly data: VentasData;
   readonly filtro: 'Todos' | MetodoVenta;
+  /** Open with this ticket's drawer (the `/ventas/[folio]` route). */
+  readonly abierta?: Abierta;
 }

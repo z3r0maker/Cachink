@@ -1,12 +1,14 @@
 'use client';
 
 import { OperadorEstado } from '../estado';
+import { PageHead } from '../ui/panel';
 import { OpMain } from '../ui/parts';
-import * as t from '../ui/title.css';
+import { Banda } from './banda';
+import { Cerrar } from './cerrar';
 import * as s from './cierre.css';
 import { Conteo } from './conteo';
-import { Banda, Hecho } from './hecho';
-import { Diferencia, Esperado, Explica } from './lado';
+import { Hecho } from './hecho';
+import { Diferencia, Esperado } from './lado';
 import { Resumen } from './resumen';
 import type { CierreData, CierreScreenProps } from './types';
 import { useCierre, type Cierre } from './use-cierre';
@@ -17,15 +19,20 @@ const CARTERA = 'M3 7h18v10H3V7Zm9 2.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5';
 /** Operador · Cierre de turno: count by denomination against the expected cash, explain, close. */
 export function CierreScreen({ state, data, cerrarVivo }: CierreScreenProps) {
   const x = useCierre(data, cerrarVivo);
+  if (state === 'happy' && x.cerrado) {
+    return (
+      <OpMain top={22}>
+        <Hecho x={x} data={data} />
+      </OpMain>
+    );
+  }
   return (
     <OpMain top={22}>
-      <div className={t.titleRow}>
-        <h1 className={t.pageTitle}>Cierre de turno</h1>
-        <span
-          className={t.pageSub}
-        >{`${data.operador} · ${data.caja} · ${data.desde} a ${data.hasta}`}</span>
-      </div>
-      {x.pendientes > 0 && !x.cerrado ? <Banda x={x} /> : null}
+      <PageHead
+        title="Cierre de turno"
+        sub={`${data.operador}, ${data.caja}, de ${data.desde} a ${data.hasta}`}
+      />
+      {x.pendientes > 0 ? <Banda x={x} /> : null}
       {state === 'happy' ? (
         <Cuerpo x={x} data={data} />
       ) : (
@@ -42,18 +49,17 @@ export function CierreScreen({ state, data, cerrarVivo }: CierreScreenProps) {
 }
 
 function Cuerpo({ x, data }: { readonly x: Cierre; readonly data: CierreData }) {
-  if (x.cerrado) return <Hecho x={x} data={data} />;
   return (
-    <div className={s.grid}>
-      <div className={s.columna}>
+    <>
+      <Resumen x={x} t={data.resumen} />
+      <div className={s.grid}>
         <Conteo x={x} />
+        <div className={s.columna}>
+          <Esperado x={x} data={data} />
+          <Diferencia x={x} dueno={data.dueno} />
+          <Cerrar x={x} />
+        </div>
       </div>
-      <div className={s.columna}>
-        <Esperado x={x} data={data} />
-        <Diferencia x={x} />
-        {x.dif.tipo === 'cuadra' ? null : <Explica x={x} dueno={data.dueno} />}
-        <Resumen x={x} r={data.resumen} />
-      </div>
-    </div>
+    </>
   );
 }

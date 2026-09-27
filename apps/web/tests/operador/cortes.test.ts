@@ -13,6 +13,7 @@ import {
   netoTexto,
   resumen,
 } from '../../src/app/(portal)/cortes/derive';
+import { motivoLegible } from '../../src/app/(portal)/cortes/motivo';
 
 const estado = (c: (typeof CORTES_FIXTURE)[number]) => c.estado;
 const luis = CORTES_FIXTURE[1]!;
@@ -45,11 +46,22 @@ describe('cortes de turno', () => {
     );
   });
 
-  it('asks for a clarification through Avisos, not WhatsApp', () => {
+  it('asks through the operator’s caja, and the answer comes back in Avisos', () => {
     assert.equal(
       aclaracion(luis),
-      'A Luis le llega el detalle del corte en sus Avisos. Cuando responda, su respuesta aparece en los tuyos.',
+      'A Luis le llega el detalle del corte a su caja. Cuando conteste, lo ves en tus Avisos.',
     );
+  });
+
+  it('reads the stored reason in the operator’s words', () => {
+    assert.equal(motivoLegible('error-en-cambio', null), 'Cambio mal dado');
+    assert.equal(motivoLegible('retiro-autorizado', null), 'Salió un vale');
+    // «Otra razón» always carries a note; «Venta no registrada» never does.
+    assert.equal(motivoLegible('otro', 'Se cayó un billete'), 'Otra razón');
+    assert.equal(motivoLegible('otro', null), 'Venta no registrada');
+    assert.equal(motivoLegible('sobrante', null), 'Venta no registrada');
+    assert.equal(motivoLegible('Salió un vale', null), 'Salió un vale');
+    assert.equal(motivoLegible('faltante-sin-explicacion', null), 'Sin explicación');
   });
 
   it('sums the month: −$80.00 net, three balanced, two to clarify', () => {

@@ -1,9 +1,10 @@
 'use client';
 
-import { link } from '@/onboarding/ui/onboarding.css';
+import { ShieldCheck } from 'lucide-react';
+
 import { AVISO_INTEGRAL_URL, AVISO_PARRAFOS, TERMINOS_URL } from '@/legal/aviso-simplificado';
 
-import { aviso, avisoTitle, box, check } from './consent.css';
+import * as s from './consent.css';
 
 export interface ConsentState {
   /** The express act on aviso + términos: unticked by default, required. */
@@ -12,45 +13,64 @@ export interface ConsentState {
   readonly novedades: boolean;
 }
 
-/** The aviso simplificado (art. 16 II LFPDPPP), shown in full above the button. */
-function AvisoBlock() {
+/**
+ * «Qué datos usamos: …» → the lead before the colon in bold. Presentation
+ * only: the words are exactly the ones the ledger hashes.
+ */
+function Parrafo({ texto }: { readonly texto: string }) {
+  const corte = texto.indexOf(': ');
+  if (corte < 0 || corte > 30) return <p className={s.parrafo}>{texto}</p>;
   return (
-    <div className={aviso} data-testid="signup-aviso" role="note">
-      <p className={avisoTitle}>Aviso de privacidad simplificado</p>
-      {AVISO_PARRAFOS.map((p) => (
-        <p key={p.slice(0, 24)}>{p}</p>
-      ))}
-      <p>
-        Aviso integral y derechos ARCO:{' '}
-        <a className={link} href={AVISO_INTEGRAL_URL} target="_blank" rel="noreferrer">
-          xangarro.mx/privacidad
-        </a>
-      </p>
-    </div>
+    <p className={s.parrafo}>
+      <strong className={s.lead}>{texto.slice(0, corte + 1)}</strong>
+      {texto.slice(corte + 1)}
+    </p>
   );
 }
 
-function Check({
-  checked,
-  onChange,
-  testId,
-  children,
-}: {
+/** The aviso simplificado (art. 16 II LFPDPPP), shown in full above the button. */
+function AvisoBlock() {
+  return (
+    <section className={s.aviso} data-testid="signup-aviso" aria-labelledby="signup-aviso-t">
+      <div className={s.avisoCabeza}>
+        <span className={s.escudo} aria-hidden="true">
+          <ShieldCheck size={18} />
+        </span>
+        <h2 id="signup-aviso-t" className={s.avisoTitle}>
+          Aviso de privacidad simplificado
+        </h2>
+      </div>
+      <div className={s.avisoTexto} role="region" aria-label="Texto del aviso" tabIndex={0}>
+        {AVISO_PARRAFOS.map((p) => (
+          <Parrafo key={p.slice(0, 24)} texto={p} />
+        ))}
+        <p className={s.parrafo}>
+          <strong className={s.lead}>Aviso integral y derechos ARCO:</strong>{' '}
+          <a className={s.enlace} href={AVISO_INTEGRAL_URL} target="_blank" rel="noreferrer">
+            xangarro.mx/privacidad
+          </a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function Check(props: {
   readonly checked: boolean;
   readonly onChange: (checked: boolean) => void;
   readonly testId: string;
   readonly children: React.ReactNode;
 }) {
   return (
-    <label className={check}>
+    <label className={s.check}>
       <input
         type="checkbox"
-        className={box}
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        data-testid={testId}
+        className={s.box}
+        checked={props.checked}
+        onChange={(e) => props.onChange(e.target.checked)}
+        data-testid={props.testId}
       />
-      <span>{children}</span>
+      <span>{props.children}</span>
     </label>
   );
 }
@@ -70,25 +90,28 @@ export function Consent({
   return (
     <>
       <AvisoBlock />
-      <Check
-        checked={value.acepto}
-        onChange={(acepto) => onChange({ acepto })}
-        testId="signup-acepto"
-      >
-        Leí el aviso de privacidad y acepto los{' '}
-        <a className={link} href={TERMINOS_URL} target="_blank" rel="noreferrer">
-          Términos
-        </a>
-        . Consiento expresamente el tratamiento de mis datos, incluidos los patrimoniales y
-        financieros, para las finalidades necesarias.
-      </Check>
-      <Check
-        checked={value.novedades}
-        onChange={(novedades) => onChange({ novedades })}
-        testId="signup-novedades"
-      >
-        Quiero recibir novedades y consejos de Xangarro.
-      </Check>
+      <div className={s.checks}>
+        <Check
+          checked={value.acepto}
+          onChange={(acepto) => onChange({ acepto })}
+          testId="signup-acepto"
+        >
+          Leí el aviso de privacidad y acepto los{' '}
+          <a className={s.enlace} href={TERMINOS_URL} target="_blank" rel="noreferrer">
+            Términos
+          </a>
+          . Consiento expresamente el tratamiento de mis datos, incluidos los patrimoniales y
+          financieros, para las finalidades necesarias.
+        </Check>
+        <Check
+          checked={value.novedades}
+          onChange={(novedades) => onChange({ novedades })}
+          testId="signup-novedades"
+        >
+          Quiero recibir novedades y consejos de Xangarro.{' '}
+          <span className={s.opcional}>Opcional.</span>
+        </Check>
+      </div>
     </>
   );
 }

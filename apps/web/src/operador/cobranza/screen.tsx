@@ -6,56 +6,59 @@ import { colors } from '@xangarro/tokens';
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
 import { ICONS } from '../shell/nav';
-import { FilterChips, SearchBox, SinResultados } from '../ui/filters';
-import * as fc from '../ui/filters.css';
-import { KpiRow, OpMain } from '../ui/parts';
+import { SinResultados } from '../ui/filters';
+import { OpMain } from '../ui/parts';
+import { Buscador, Filtros, Resumenes } from '../ui/resumen';
 import * as t from '../ui/title.css';
 import { Toast } from '../ui/toast';
-import * as u from '../ui/ui.css';
-import { RecibirAbono } from './abono';
 import { AbonosHoy } from './abonos-hoy';
 import * as c from './cobranza.css';
-import { vistaAbono } from './cliente/abono';
-import { estadoCuenta } from './cliente/derive';
-import { abonosDeHoy, filtrar, resumen, saldo } from './derive';
+import { CuentaLateral } from './cuenta';
+import { abonosDeHoy, filtrar, resumen } from './derive';
 import { Tarjeta } from './tarjeta';
 import type { CobranzaScreenProps } from './types';
 import { useCobranza, type Cobranza } from './use-cobranza';
 
 const FILTROS = ['Todos', 'Con saldo', 'Atrasados'] as const;
 
-/** Operador · Cobranza: who owes, abonos from the oldest ticket, and today's abonos. */
+/** Operador · Fiado y abonos: who owes, the account in a side panel, and today's abonos. */
 export function CobranzaScreen({ state, data }: CobranzaScreenProps) {
   const x = useCobranza(data);
+  const modo = x.cargando ? 'loading' : state;
   return (
-    <OpMain top={22}>
+    <OpMain top={24}>
       <NuevaVenta />
       <div className={t.titleRow}>
-        <h1 className={t.pageTitle}>Cobranza</h1>
-        <span className={t.pageSub}>Quién debe y quién abonó en tu turno</span>
+        <h1 className={t.pageTitle}>Fiado y abonos</h1>
+        <span className={t.pageSub}>Quién te debe y quién ya abonó</span>
       </div>
       <Kpis x={x} />
-      <div className={fc.bar}>
-        <SearchBox
+      <div className={c.barra}>
+        <Buscador
           label="Buscar cliente"
-          placeholder="Buscar cliente por nombre o teléfono"
+          placeholder="Busca por nombre o teléfono"
           value={x.query}
           onChange={x.setQuery}
         />
-        <FilterChips options={FILTROS} value={x.filtro} onChange={x.setFiltro} />
+        <Filtros
+          label="Filtrar clientes"
+          options={FILTROS}
+          value={x.filtro}
+          onChange={x.setFiltro}
+        />
       </div>
-      {state === 'happy' ? (
+      {modo === 'happy' ? (
         <Cuerpo x={x} />
       ) : (
         <OperadorEstado
-          mode={state}
+          mode={modo}
           icon={ICONS.cobranza}
           emptyTitle="Nadie te debe nada"
           emptyBody="Cuando cobres una venta fiada, el cliente aparece aquí con su saldo y podrás recibirle abonos."
-          errorTitle="No pudimos cargar tu cobranza"
+          errorTitle="No pudimos cargar el fiado"
         />
       )}
-      <Capas x={x} />
+      <Capas x={x} negocio={data.negocio} />
     </OpMain>
   );
 }
@@ -63,14 +66,13 @@ export function CobranzaScreen({ state, data }: CobranzaScreenProps) {
 function Kpis({ x }: { readonly x: Cobranza }) {
   const r = resumen(x.cuentas, x.hoy);
   return (
-    <KpiRow
-      min={220}
-      valueSize={32}
+    <Resumenes
+      label="Resumen de fiado"
       items={[
         {
           label: 'Por cobrar',
           value: formatMoney(r.porCobrar),
-          color: colors.black,
+          color: colors.warningText,
           hint: r.conSaldo,
         },
         {
@@ -83,7 +85,7 @@ function Kpis({ x }: { readonly x: Cobranza }) {
           label: 'En efectivo',
           value: formatMoney(r.efectivo),
           color: colors.black,
-          hint: 'Entró a tu caja y cuenta al cerrar',
+          hint: 'Entró a tu caja y se cuenta al cerrar',
         },
       ]}
     />
@@ -96,12 +98,18 @@ function Cuerpo({ x }: { readonly x: Cobranza }) {
     <>
       <div className={c.cards}>
         {visibles.map((cl) => (
-          <Tarjeta key={cl.id} x={cl} onAbonar={() => x.setSel(cl.id)} />
+          <Tarjeta
+            key={cl.id}
+            x={cl}
+            abierta={x.cliente?.id === cl.id}
+            onAbonar={() => x.abrir(cl.id, true)}
+            onVer={() => x.abrir(cl.id)}
+          />
         ))}
       </div>
       {visibles.length === 0 ? (
-        <div className={u.listCard}>
-          <SinResultados body="Ningún cliente coincide con lo que buscas." />
+        <div className={c.hoy}>
+          <SinResultados body="No hay clientes con ese filtro." />
         </div>
       ) : null}
       <AbonosHoy abonos={abonosDeHoy(x.cuentas, x.hoy)} />
@@ -109,17 +117,19 @@ function Cuerpo({ x }: { readonly x: Cobranza }) {
   );
 }
 
-function Capas({ x }: { readonly x: Cobranza }) {
+function Capas({ x, negocio }: { readonly x: Cobranza; readonly negocio: string }) {
   const cl = x.cliente;
   return (
     <>
       {cl ? (
-        <RecibirAbono
-          nombre={cl.nombre}
-          total={saldo(cl)}
-          vista={(m) => vistaAbono(cl, estadoCuenta(cl), m, true)}
-          variante="cobranza"
-          onClose={() => x.setSel(null)}
+        <CuentaLateral
+          key={cl.id}
+          c={cl}
+          negocio={negocio}
+          foco={x.abonar}
+          recordar={x.recordar}
+          setRecordar={x.setRecordar}
+          onClose={() => x.abrir(null)}
           onSave={x.registrar}
         />
       ) : null}

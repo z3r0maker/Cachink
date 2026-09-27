@@ -18,13 +18,18 @@ const slideIn = keyframes({
 });
 
 /** Flat scrim — the only translucent value in the product. */
+/** Above the sticky portal header (z 30), so the drawer's head is never covered. */
 export const overlay = style({
   position: 'fixed',
   inset: 0,
+  zIndex: 40,
   background: colors.scrim,
   animation: `${fadeIn} 160ms cubic-bezier(0.2, 0.8, 0.2, 1)`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });
+
+/** A dialog's backdrop: over the drawer too, since a confirm can open from one. */
+export const overlayDialogo = style([overlay, { zIndex: 50 }]);
 
 /**
  * Detail drawer — full height, flush right, `min(460px, 100vw)`.
@@ -35,6 +40,7 @@ export const overlay = style({
  */
 export const panel = style({
   position: 'fixed',
+  zIndex: 41,
   top: 0,
   right: 0,
   height: '100vh',

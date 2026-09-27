@@ -1,112 +1,102 @@
 'use client';
 
-import { colors, portalFontSizes } from '@xangarro/tokens';
+import { useState } from 'react';
 
-import { Input } from '@/components';
+import { Icon } from '@/shell/icon';
 
-/** The logo upload row and the colour picker (N-19), split out for size. */
+import * as k from './controles.css';
+import * as c from './comprobantes.css';
 
-export function LogoCard({
-  logoUrl,
-  mayWrite,
-  subiendo,
-  onFile,
-}: {
+/** The logo drop zone (N-19, CfgComprobantes): a click or a dropped file. */
+const SUBIR = 'M12 3v12M17 8l-5-5-5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4';
+const ACEPTA = 'image/png,image/jpeg,image/svg+xml';
+
+interface LogoProps {
   readonly logoUrl: string | null;
+  readonly iniciales: string;
   readonly mayWrite: boolean;
   readonly subiendo: boolean;
   readonly onFile: (f: File | null) => void;
-}) {
+}
+
+function Archivo({ p }: { readonly p: LogoProps }) {
   return (
-    <div
-      style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginTop: 16 }}
-    >
-      {logoUrl !== null ? (
-        <img
-          src={logoUrl}
-          alt="Tu logo"
-          data-testid="comprobantes-logo"
-          style={{ maxHeight: 72, maxWidth: 220, objectFit: 'contain' }}
-        />
-      ) : (
-        <span style={{ fontWeight: 800, fontSize: portalFontSizes.cardTitle }}>
-          Sin logo todavía
-        </span>
-      )}
-      {mayWrite ? (
-        <SubirLogoLabel subiendo={subiendo} hasLogo={logoUrl !== null} onFile={onFile} />
-      ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
-        PNG, JPG o SVG · hasta 2 MB
-      </span>
-    </div>
+    <input
+      type="file"
+      accept={ACEPTA}
+      className={k.oculto}
+      disabled={p.subiendo}
+      onChange={(e) => p.onFile(e.target.files?.[0] ?? null)}
+    />
   );
 }
 
-export function ColorRow({
-  value,
-  disabled,
-  onPick,
-}: {
-  readonly value: string;
-  readonly disabled: boolean;
-  readonly onPick: (v: string) => void;
-}) {
-  return (
-    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-      <input
-        type="color"
-        aria-label="Color de la marca"
-        disabled={disabled}
-        value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : colors.yellow}
-        onChange={(e) => onPick(e.target.value)}
-        style={{
-          width: 44,
-          height: 44,
-          border: '2px solid var(--black)',
-          borderRadius: 10,
-          padding: 2,
-        }}
-      />
-      <Input
-        labelText="Color de la marca"
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onPick(e.target.value)}
-      />
-    </div>
-  );
-}
-
-function SubirLogoLabel({
-  subiendo,
-  hasLogo,
-  onFile,
-}: {
-  readonly subiendo: boolean;
-  readonly hasLogo: boolean;
-  readonly onFile: (f: File | null) => void;
-}) {
+/** No logo yet: the whole zone takes a click or a dropped file. */
+function Soltar({ p }: { readonly p: LogoProps }) {
+  const [encima, setEncima] = useState(false);
   return (
     <label
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        border: '2px solid var(--black)',
-        borderRadius: 10,
-        padding: '8px 14px',
-        fontWeight: 700,
-        cursor: 'pointer',
+      className={k.soltar}
+      data-encima={encima ? '' : undefined}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setEncima(true);
+      }}
+      onDragLeave={() => setEncima(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setEncima(false);
+        p.onFile(e.dataTransfer.files[0] ?? null);
       }}
     >
-      {subiendo ? 'Subiendo…' : hasLogo ? 'Cambiar logo' : 'Subir logo'}
-      <input
-        type="file"
-        accept="image/png,image/jpeg,image/svg+xml"
-        style={{ display: 'none' }}
-        onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-      />
+      <span className={k.soltarIcono} aria-hidden="true">
+        <Icon path={SUBIR} size={20} />
+      </span>
+      <span className={k.soltarTexto}>
+        <span className={k.fuerte}>
+          {p.subiendo ? 'Subiendo tu logo…' : 'Arrastra tu logo aquí o elígelo'}
+        </span>
+        <span className={c.nota}>PNG, JPG o SVG hasta 2 MB. Mientras, usamos tus iniciales.</span>
+      </span>
+      <Archivo p={p} />
     </label>
+  );
+}
+
+function Cambiar({ p }: { readonly p: LogoProps }) {
+  return (
+    <div className={k.soltar} style={{ cursor: 'default' }}>
+      <span className={k.soltarTexto} style={{ flex: 1 }}>
+        <span className={k.fuerte}>Tu logo sale en tus comprobantes</span>
+        <span className={c.nota}>Si tu logo trae color, lo proponemos como color de tu marca.</span>
+      </span>
+      <label className={k.cambiar}>
+        {p.subiendo ? 'Subiendo…' : 'Cambiar'}
+        <Archivo p={p} />
+      </label>
+    </div>
+  );
+}
+
+export function LogoBloque(p: LogoProps) {
+  return (
+    <div className={c.bloque}>
+      <span className={c.rotulo}>Tu logo</span>
+      <div className={k.logoFila}>
+        <span className={k.logoTile}>
+          {p.logoUrl !== null ? (
+            <img
+              src={p.logoUrl}
+              alt="Tu logo"
+              data-testid="comprobantes-logo"
+              className={k.logoImg}
+            />
+          ) : (
+            <span>{p.iniciales}</span>
+          )}
+        </span>
+        {!p.mayWrite ? null : p.logoUrl === null ? <Soltar p={p} /> : <Cambiar p={p} />}
+      </div>
+    </div>
   );
 }

@@ -62,5 +62,5 @@ test('an account in two businesses switches from the sidebar', async ({ page }) 
   await page.goto('/negocio');
   await expect(page.locator('main').getByText(B.nombre)).toBeVisible();
   // Read-only there: the owner's controls are gone.
-  await expect(page.getByRole('button', { name: 'Editar negocio' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Editar datos generales' })).toHaveCount(0);
 });

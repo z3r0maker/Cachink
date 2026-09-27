@@ -12,6 +12,7 @@ const fall = keyframes({
 
 export const takeover = style({
   position: 'fixed',
+  zIndex: 51,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',

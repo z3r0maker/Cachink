@@ -1,52 +1,79 @@
 'use client';
 
-import { formatFechaHora } from '@xangarro/domain';
+import Link from 'next/link';
 
-import { Card, KpiCard, StatusPill, kpiGrid } from '@/components';
 import type { SincronizacionData } from '@/server/screens';
 
-/**
- * The summary tiles and one card per device. A device with refused rows says
- * so; the others are «Al día». Times are on the business's clock.
- */
-type Rejection = SincronizacionData['rechazos'][number];
+import { fechaHoraLarga } from '../suscripcion/fecha';
+import * as k from './cajas.css';
+import { IconoCaja, IconoWifi } from './iconos';
+import type { Rechazo } from './rechazo-texto';
+import * as s from './sincronizacion.css';
 
-export function Resumen({
-  rows,
-  dispositivos,
-}: {
-  readonly rows: readonly Rejection[];
-  readonly dispositivos: SincronizacionData['dispositivos'];
+/**
+ * «Tus cajas»: one row per linked device, with when it last sent and whether
+ * it has records waiting for review. Times are on the business's clock.
+ */
+type Dispositivo = SincronizacionData['dispositivos'][number];
+type Estado = 'alDia' | 'revisar' | 'fuera';
+
+function estadoDe(d: Dispositivo, pendientes: number): readonly [Estado, string] {
+  if (d.revokedAt !== null) return ['fuera', 'Desvinculada'];
+  if (pendientes === 0) return ['alDia', 'Al día'];
+  const n = pendientes === 1 ? '1 registro' : `${pendientes} registros`;
+  return ['revisar', `Con ${n} por revisar`];
+}
+
+function Caja({ d, pendientes }: { readonly d: Dispositivo; readonly pendientes: number }) {
+  const [tono, label] = estadoDe(d, pendientes);
+  return (
+    <div className={k.caja}>
+      <span className={k.cajaIcono}>
+        <IconoCaja />
+      </span>
+      <span className={k.cajaTexto}>
+        <span className={k.cajaNombre}>{d.nombre}</span>
+        <span className={k.cajaCuando}>
+          {d.lastPushAt === null
+            ? 'Todavía no envía nada.'
+            : `Envió por última vez el ${fechaHoraLarga(d.lastPushAt)}`}
+        </span>
+      </span>
+      <span className={k.pillTono[tono]}>
+        <span className={k.puntoTono[tono]} aria-hidden="true" />
+        {label}
+      </span>
+    </div>
+  );
+}
+
+export function Cajas(props: {
+  readonly dispositivos: readonly Dispositivo[];
+  readonly abiertos: readonly Rechazo[];
 }) {
-  const conRechazos = new Set(rows.map((r) => r.deviceId));
+  const por = (id: string) => props.abiertos.filter((r) => r.deviceId === id).length;
   return (
     <>
-      <div className={kpiGrid}>
-        <KpiCard
-          label="Registros rechazados"
-          value={`${rows.length}`}
-          tone={rows.length > 0 ? 'warning' : 'neutral'}
-          hint="Esperando revisión"
-        />
-        <KpiCard label="Dispositivos conectados" value={`${dispositivos.length}`} />
+      <div className={s.colHead}>
+        <h2 className={s.eyebrow}>Tus cajas</h2>
+        <span className={s.nota}>
+          <IconoWifi />
+          Las cajas envían solas en cuanto tienen internet.
+        </span>
       </div>
-      <div className={kpiGrid}>
-        {dispositivos.map((d) => (
-          <Card key={d.id}>
-            <strong>{d.nombre}</strong>
-            <div style={{ marginTop: 8 }}>
-              {conRechazos.has(d.id) ? (
-                <StatusPill tone="warning">Con registros rechazados</StatusPill>
-              ) : (
-                <StatusPill tone="success">Al día</StatusPill>
-              )}
-            </div>
-            <p style={{ marginTop: 10, color: 'var(--text-muted)' }}>
-              Última sincronización: {formatFechaHora(d.lastPushAt)}
-            </p>
-          </Card>
-        ))}
-      </div>
+      {props.dispositivos.length === 0 ? (
+        <p className={s.vacio}>
+          <span>
+            Todavía no vinculas ninguna caja.{' '}
+            <Link href="/equipo" className={k.vincular}>
+              Vincular una caja
+            </Link>
+          </span>
+        </p>
+      ) : null}
+      {props.dispositivos.map((d) => (
+        <Caja key={d.id} d={d} pendientes={por(d.id)} />
+      ))}
     </>
   );
 }

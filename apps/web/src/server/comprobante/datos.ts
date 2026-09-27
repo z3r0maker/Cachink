@@ -30,14 +30,15 @@ const METODO_DISPLAY: Record<string, MetodoPagoComprobante> = {
   Efectivo: 'Efectivo',
   Transferencia: 'Transferencia',
   Tarjeta: 'Tarjeta',
-  'QR/CoDi': 'QR · CoDi',
+  // Retired as a method (ADR-108): old tickets read as a transfer.
+  'QR/CoDi': 'Transferencia',
   Crédito: 'Crédito',
 };
 
 export async function plantillaDelNegocio(tx: Tx): Promise<PlantillaComprobante> {
   const b = await getBusiness(tx);
-  const t = b?.receiptTemplate ?? 'clasico';
-  return t === 'moderno' || t === 'ticket' || t === 'minimal' ? t : 'clasico';
+  const t = b?.receiptTemplate ?? 'ticket';
+  return t === 'moderno' || t === 'clasico' || t === 'minimal' ? t : 'ticket';
 }
 
 export async function negocioParaComprobante(tx: Tx): Promise<NegocioComprobante> {

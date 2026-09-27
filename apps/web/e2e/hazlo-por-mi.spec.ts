@@ -51,6 +51,7 @@ test(
       mimeType: 'text/csv',
       buffer: Buffer.from('nombre,telefono\nDoña Mary,5512345678\n'),
     });
+    await page.getByRole('button', { name: 'Mandar solicitud' }).click();
     await expect(
       page.getByText('Solicitud enviada. Te avisamos por correo.', { exact: true }),
     ).toBeVisible();
@@ -62,13 +63,14 @@ test(
 test('an empty sistema is refused with the reason', { tag: SERIAL_TAG }, async ({ page }) => {
   await limpiaSolicitud(page);
   await page.getByLabel('Qué datos migrar').fill('Lo que sea');
-  // The submit button stays disabled without a sistema (client guard), but
-  // choosing a file auto-submits — that path reaches the server validation.
+  // Files attach first and «Mandar solicitud» sends; without a sistema the
+  // form refuses and says why.
   await page.getByTestId('hazlo-por-mi-archivo').setInputFiles({
     name: 'respaldo.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from('nombre,telefono\nDoña Mary,5512345678\n'),
   });
+  await page.getByRole('button', { name: 'Mandar solicitud' }).click();
   await expect(page.locator('[role=alert]', { hasText: /sistema actual/i })).toBeVisible();
 });
 

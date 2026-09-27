@@ -44,13 +44,22 @@ function comoVenta(v: CuentaPara['ventas'][number], hoy: string): VentaCuenta {
   };
 }
 
+/**
+ * The wire's method as an abono's. An abono taken before ADR-108 may read back
+ * as «QR/CoDi»: CoDi is a bank transfer, so the screens say «Transferencia».
+ */
+function metodoDe(metodo: string): MetodoAbono {
+  const m = comoMetodo(metodo);
+  return m === 'Efectivo' || m === 'Tarjeta' ? m : 'Transferencia';
+}
+
 function comoAbono(a: CuentaPara['abonos'][number], hoy: string): AbonoCuenta {
   return {
     id: a.id,
     fecha: a.fecha,
     dia: diaDe(a.fecha, hoy),
     monto: BigInt(a.montoCentavos),
-    metodo: comoMetodo(a.metodo) as MetodoAbono,
+    metodo: metodoDe(a.metodo),
     ...(a.nota === null ? {} : { nota: a.nota }),
   };
 }

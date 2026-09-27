@@ -63,7 +63,7 @@ async function gastarEnVivo(cred: Credenciales, n: NuevoGasto): Promise<void> {
     concepto: n.concepto,
     categoria: n.categoria,
     montoCentavos: n.monto,
-    proveedor: null,
+    proveedor: n.proveedor,
   });
   if (navigator.onLine) await desencolar();
 }

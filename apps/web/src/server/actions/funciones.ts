@@ -46,7 +46,7 @@ export async function cambiarFuncion(key: FeatureFlagKey, on: boolean): Promise<
         allowed: allowedKeys((await tenantEntitlement(tx, businessId, new Date())).features),
       }),
     );
-    revalidatePath('/negocio');
+    revalidatePath('/negocio', 'layout');
     return { ok: true, flags };
   } catch (error) {
     return failure(error, 'cambiarFuncion', {

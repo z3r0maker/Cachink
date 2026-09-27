@@ -120,7 +120,7 @@ test(
     const renamed = `Taquería Don Pedro ${Date.now()}`;
 
     await page.goto('/negocio');
-    await page.getByRole('button', { name: 'Editar negocio' }).click();
+    await page.getByRole('button', { name: 'Editar datos generales' }).click();
     await page.getByTestId('negocio-nombre').fill(renamed);
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
 

@@ -34,21 +34,23 @@ export async function pasarAcceso(
   await page.getByTestId('vincular-codigo').fill(code);
   await page.getByTestId('vincular-continuar').click();
   await page.getByTestId('acceso-operador').filter({ hasText: operador }).click();
-  // A cold build can drop a keypad tap to hydration; the boxes say what
-  // actually landed — re-tap until the digit we meant is there.
-  for (const k of '2580') {
+  // A cold build can drop a keypad tap to hydration; the dots say how many
+  // digits actually landed: tap again only while this one is missing.
+  const puntos = page.getByTestId('nip-cajas');
+  for (const [i, k] of [...'2580'].entries()) {
     await expect
       .poll(
         async () => {
-          await page.getByTestId(`nip-tecla-${k}`).click();
-          return (await page.getByTestId('nip-cajas').textContent()) ?? '';
+          const antes = Number(await puntos.getAttribute('data-llenos'));
+          if (antes <= i) await page.getByTestId(`nip-tecla-${k}`).click();
+          return Number(await puntos.getAttribute('data-llenos'));
         },
         { timeout: 3000 },
       )
-      .toContain(k);
+      .toBe(i + 1);
   }
   await page.getByTestId('nip-tecla-→').click();
   await page.getByTestId('fondo-input').fill('500');
   await page.getByTestId('fondo-abrir').click();
-  await page.getByRole('heading', { name: 'Caja', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Cobrar', exact: true }).waitFor();
 }

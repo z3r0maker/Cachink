@@ -111,6 +111,9 @@ export default defineConfig({
       DATABASE_SUPER_URL: superDatabaseUrl(),
       // The seed's day (seed-data.ts `TODAY`): its May rows are "this month".
       PORTAL_TODAY: process.env.PORTAL_TODAY ?? '2026-05-12',
+      // The local build keeps the dev galleries (/inventario) for visual.spec;
+      // any other production build answers 404 there.
+      DEV_PAGES: '1',
       // /activate signs a device token and an entitlement. The entitlement key
       // is the contract's published TEST key, passed explicitly: the portal has
       // no default for it on purpose (server/device/credentials.ts).

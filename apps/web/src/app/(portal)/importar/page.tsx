@@ -5,9 +5,9 @@ import { requireMember } from '@/server/auth';
 import type { TemplateId } from '@/server/import/templates';
 
 /**
- * `/importar` (N-16): the multi-template import screen, plus N-18's «Hazlo
- * por mí» card under the chooser. Bare, it opens on the template chooser;
- * `?plantilla=productos|clientes` starts in that template's flow.
+ * `/importar` (N-16): the multi-template import screen, with N-18's «Hazlo
+ * por mí» card in its aside. Bare, it opens on Productos;
+ * `?plantilla=productos|clientes` preselects that template.
  */
 export default async function ImportarPage({
   searchParams,
@@ -25,14 +25,16 @@ export default async function ImportarPage({
   ]);
 
   return (
-    <>
-      <ImportarScreen inicial={inicial} />
-      <HazloPorMi
-        paid={plan !== 'xangarrito'}
-        mayWrite={session.member_role !== 'viewer'}
-        status={asistida?.status ?? null}
-        fileCount={asistida?.files.length ?? 0}
-      />
-    </>
+    <ImportarScreen
+      inicial={inicial}
+      aside={
+        <HazloPorMi
+          paid={plan !== 'xangarrito'}
+          mayWrite={session.member_role !== 'viewer'}
+          status={asistida?.status ?? null}
+          fileCount={asistida?.files.length ?? 0}
+        />
+      }
+    />
   );
 }

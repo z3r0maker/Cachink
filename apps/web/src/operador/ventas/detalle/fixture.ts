@@ -1,8 +1,10 @@
-import type { DetalleData, VentaDetalle } from './types';
+import type { Categoria } from '../../caja/types';
+import type { VentaTurno } from '../types';
+import type { DetalleData, LineaDetalle, VentaDetalle } from './types';
 
 /**
- * The two tickets of `Operador Detalle de venta.dc.html`, in centavos. V-0412
- * ($160.00) is the same ticket as in the Ventas list.
+ * The two tickets with every line priced (`Operador Detalle de venta`), in
+ * centavos. V-0412 ($160.00) is the same ticket as in the Ventas list.
  */
 export const DETALLE_VENTAS: Readonly<Record<'efectivo' | 'fiado', VentaDetalle>> = {
   efectivo: {
@@ -10,27 +12,9 @@ export const DETALLE_VENTAS: Readonly<Record<'efectivo' | 'fiado', VentaDetalle>
     cuando: 'Hoy 14:52',
     metodo: 'Efectivo',
     lineas: [
-      {
-        productoId: 'taco-de-pastor',
-        nombre: 'Taco de pastor',
-        precio: 25_00n,
-        cantidad: 3,
-        categoria: 'Tacos',
-      },
-      {
-        productoId: 'gringa',
-        nombre: 'Gringa',
-        precio: 60_00n,
-        cantidad: 1,
-        categoria: 'Guisados',
-      },
-      {
-        productoId: 'agua-de-horchata',
-        nombre: 'Agua de horchata',
-        precio: 25_00n,
-        cantidad: 1,
-        categoria: 'Bebidas',
-      },
+      linea('taco-de-pastor', 'Taco de pastor', 3, 'Tacos', 25_00n),
+      linea('gringa', 'Gringa', 1, 'Guisados', 60_00n),
+      linea('agua-de-horchata', 'Agua de horchata', 1, 'Bebidas', 25_00n),
     ],
     recibido: 200_00n,
   },
@@ -39,24 +23,22 @@ export const DETALLE_VENTAS: Readonly<Record<'efectivo' | 'fiado', VentaDetalle>
     cuando: 'Hoy 14:04',
     metodo: 'Fiado',
     lineas: [
-      {
-        productoId: 'volcan',
-        nombre: 'Volcán',
-        precio: 55_00n,
-        cantidad: 1,
-        categoria: 'Guisados',
-      },
-      {
-        productoId: 'consome',
-        nombre: 'Consomé',
-        precio: 35_00n,
-        cantidad: 1,
-        categoria: 'Extras',
-      },
+      linea('volcan', 'Volcán', 1, 'Guisados', 55_00n),
+      linea('consome', 'Consomé', 1, 'Extras', 35_00n),
     ],
     fiado: { cliente: 'Doña Mari de la tienda', saldo: 340_00n },
   },
 };
+
+function linea(
+  productoId: string,
+  nombre: string,
+  cantidad: number,
+  categoria: Categoria,
+  precio?: bigint,
+): LineaDetalle {
+  return { productoId, nombre, cantidad, categoria, ...(precio === undefined ? {} : { precio }) };
+}
 
 export function detalleFixture(venta: VentaDetalle | null): DetalleData {
   return {
@@ -68,7 +50,50 @@ export function detalleFixture(venta: VentaDetalle | null): DetalleData {
   };
 }
 
-/** The folio in the path picks the ticket; any other folio is «ya no existe». */
+/** The folio in the path picks the ticket; any other folio is looked up in the list. */
 export function ventaPorFolio(folio: string): VentaDetalle | null {
   return Object.values(DETALLE_VENTAS).find((v) => v.folio === folio) ?? null;
+}
+
+/** The list's short words for the catalogue's products. */
+const NOMBRES: Readonly<Record<string, readonly [string, Categoria]>> = {
+  pastor: ['Taco de pastor', 'Tacos'],
+  suadero: ['Taco de suadero', 'Tacos'],
+  bistec: ['Taco de bistec', 'Tacos'],
+  chorizo: ['Taco de chorizo', 'Tacos'],
+  campechano: ['Taco campechano', 'Tacos'],
+  tripa: ['Taco de tripa', 'Tacos'],
+  gringa: ['Gringa', 'Guisados'],
+  quesadilla: ['Quesadilla', 'Guisados'],
+  volcán: ['Volcán', 'Guisados'],
+  'orden de pastor': ['Orden de pastor', 'Guisados'],
+  horchata: ['Agua de horchata', 'Bebidas'],
+  jamaica: ['Agua de jamaica', 'Bebidas'],
+  refresco: ['Refresco 600 ml', 'Bebidas'],
+  agua: ['Agua embotellada', 'Bebidas'],
+  consomé: ['Consomé', 'Extras'],
+  cebollitas: ['Cebollitas asadas', 'Extras'],
+  guacamole: ['Guacamole', 'Extras'],
+  'salsa extra': ['Salsa extra', 'Extras'],
+};
+
+/**
+ * A fixture row without its priced ticket: the lines come from the list's
+ * summary («3 pastor · 1 gringa»), with pieces and no prices.
+ */
+export function detalleDeFila(v: VentaTurno): VentaDetalle {
+  const lineas = v.concepto.split(' · ').map((parte) => {
+    const cantidad = Number.parseInt(parte, 10) || 1;
+    const corto = parte.replace(/^\d+\s+/, '');
+    const [nombre, categoria] = NOMBRES[corto] ?? [corto, 'Extras'];
+    return linea(corto, nombre, cantidad, categoria);
+  });
+  return {
+    folio: v.folio,
+    cuando: `Hoy ${v.hora}`,
+    metodo: v.metodo,
+    lineas,
+    total: v.monto,
+    ...(v.cliente === undefined ? {} : { fiado: { cliente: v.cliente } }),
+  };
 }

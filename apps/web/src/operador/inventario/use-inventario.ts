@@ -23,7 +23,7 @@ export function useInventario(data: InventarioData, tabInicial: Pestana) {
   const [movs, setMovs] = useState(data.movimientos);
   const [tab, setTab] = useState(tabInicial);
   const [query, setQuery] = useState('');
-  const [form, setForm] = useState<{ tipo: TipoMovimiento; inicial: string | null } | null>(null);
+  const [form, setForm] = useState<{ tipo: TipoMovimiento; id: string } | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
   const registrar = (n: NuevoMovimiento) => {
     const m: Movimiento = { ...n, id: `m-${Date.now()}`, hora: hhmm(new Date()) };
@@ -38,7 +38,7 @@ export function useInventario(data: InventarioData, tabInicial: Pestana) {
     });
     setForm(null);
   };
-  const mover = (tipo: TipoMovimiento, inicial: string | null = null) => setForm({ tipo, inicial });
+  const mover = (tipo: TipoMovimiento, id: string) => setForm({ tipo, id });
   const closeToast = useCallback(() => setToast(null), []);
   return {
     items,

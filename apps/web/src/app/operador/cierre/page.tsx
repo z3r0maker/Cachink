@@ -5,6 +5,7 @@ import type { CierreData, CierreScreenProps } from '@/operador/cierre/types';
 import { TURNO_FIXTURE as T } from '@/operador/turno/fixture';
 import { VENTAS_FIXTURE } from '@/operador/ventas/fixture';
 import { sum } from '@xangarro/domain';
+import { SHELL_FIXTURE } from '@/operador/fixtures';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 
@@ -28,17 +29,19 @@ function datos(): CierreData {
     desde: T.desde,
     hasta: '21:04',
     dueno: 'Pedro',
+    negocio: SHELL_FIXTURE.negocio.nombre,
     partes: T,
     resumen: {
       ventas: T.ventas,
       cobrado: T.cobrado,
       canceladas: canceladas.length,
       cancelado: sum(canceladas.map((v) => v.monto)),
+      ...(canceladas.length === 1 && canceladas[0] ? { canceladaHora: canceladas[0].hora } : {}),
       fiado: T.fiado,
       entradas: inv.entradas,
       mermas: inv.mermas,
     },
-    conteo: { 1000: 0, 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0, 5: 0, 2: 0, 1: 0 },
+    conteo: {},
   };
 }
 

@@ -2,53 +2,73 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
-import * as l from '../turno/lists.css';
 import { SinResultados } from '../ui/filters';
-import * as u from '../ui/ui.css';
-import * as v from '../ventas/ventas.css';
 import * as g from './gastos.css';
-import { CAT_ICON, CAT_TINT } from './icons';
+import { CAT_ICON, CAT_TINT, CAT_TINTA } from './icons';
 import type { GastoTurno } from './types';
 
 /** The turno's expenses, newest first; the amount in red because it left the drawer. */
-export function ListaGastos({ gastos }: { readonly gastos: readonly GastoTurno[] }) {
+export function ListaGastos(p: {
+  readonly gastos: readonly GastoTurno[];
+  readonly buscando: boolean;
+}) {
   return (
-    <div className={u.listCard}>
-      {gastos.map((x) => (
+    <section aria-label="Gastos" className={g.tabla}>
+      <div className={g.encabezado} aria-hidden="true">
+        <span />
+        <span>Qué compraste</span>
+        <span>Categoría</span>
+        <span>Comprobante</span>
+        <span>Hora</span>
+        <span style={{ textAlign: 'right' }}>Salió</span>
+      </div>
+      {p.gastos.map((x) => (
         <Fila key={x.id} x={x} />
       ))}
-      {gastos.length === 0 ? (
-        <SinResultados body="Ningún gasto de tu turno coincide con lo que buscas." />
+      {p.gastos.length === 0 ? (
+        <SinResultados
+          body={
+            p.buscando
+              ? 'Ningún gasto de tu turno coincide con lo que buscas.'
+              : 'En tu turno no ha salido dinero para esto.'
+          }
+        />
       ) : null}
-    </div>
+    </section>
   );
 }
 
 function Fila({ x }: { readonly x: GastoTurno }) {
-  const tint = CAT_TINT[x.categoria];
+  const tinta = CAT_TINTA[x.categoria];
+  const comp = x.comprobante
+    ? { background: colors.greenSoft, color: colors.greenText, borderColor: colors.greenText }
+    : {
+        background: colors.warningSoft,
+        color: colors.warningText,
+        borderColor: colors.warningText,
+      };
   return (
-    <div className={`${v.row} ${u.rowWrap}`}>
-      <div className={u.rowMain} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <span className={g.tile} style={{ background: tint }}>
-          <Icon path={CAT_ICON[x.categoria]} size={20} strokeWidth={2.3} />
+    <div className={g.fila}>
+      <span className={g.tile} style={{ background: CAT_TINT[x.categoria] }}>
+        <Icon path={CAT_ICON[x.categoria]} size={20} strokeWidth={2} />
+      </span>
+      <span className={g.que}>
+        <span className={g.concepto}>{x.concepto}</span>
+        <span className={g.detalle}>{x.detalle}</span>
+      </span>
+      <span className={g.chips}>
+        <span
+          className={g.chip}
+          style={{ background: CAT_TINT[x.categoria], color: tinta, borderColor: tinta }}
+        >
+          {x.categoria}
         </span>
-        <div style={{ flex: '1 1 0', minWidth: 0 }}>
-          <div className={l.name}>{x.concepto}</div>
-          <div className={l.detail}>{x.detalle}</div>
-        </div>
-      </div>
-      <span className={v.method} style={{ background: tint }}>
-        {x.categoria}
+        <span className={g.chip} style={comp}>
+          {x.comprobante ? 'Con foto' : 'Sin comprobante'}
+        </span>
+        <span className={g.hora}>{x.hora}</span>
       </span>
-      <span className={g.proof} data-sin={x.comprobante ? undefined : ''}>
-        {x.comprobante ? 'Con comprobante' : 'Sin comprobante'}
-      </span>
-      <span className={v.time} style={{ minWidth: 56 }}>
-        {x.hora}
-      </span>
-      <span className={v.amount} style={{ color: colors.redText, marginLeft: 'auto' }}>
-        {`−${formatMoney(x.monto)}`}
-      </span>
+      <span className={g.monto}>{`−${formatMoney(x.monto)}`}</span>
     </div>
   );
 }

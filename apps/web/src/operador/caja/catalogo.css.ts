@@ -15,6 +15,8 @@ export const left = style({
   display: 'flex',
   flexDirection: 'column',
   gap: 16,
+  selectors: { [`${layout}[data-cobrando] &`]: { opacity: 0.45, pointerEvents: 'none' } },
+  '@media': { [NARROW]: { paddingBottom: 96 }, [PHONE]: { gap: 12 } },
 });
 
 export const search = style({
@@ -27,6 +29,7 @@ export const search = style({
   border: `2px solid ${colors.black}`,
   borderRadius: radii[3],
   background: colors.white,
+  '@media': { [PHONE]: { height: 44 } },
 });
 
 export const searchInput = style({
@@ -41,7 +44,21 @@ export const searchInput = style({
   color: colors.ink,
 });
 
-export const chips = style({ display: 'flex', gap: 8, flexWrap: 'wrap' });
+/** One row that scrolls sideways on a phone, so the catalogue starts higher. */
+export const chips = style({
+  display: 'flex',
+  gap: 8,
+  flexWrap: 'wrap',
+  '@media': {
+    [PHONE]: {
+      flexWrap: 'nowrap',
+      overflowX: 'auto',
+      margin: '0 -16px',
+      padding: '2px 16px 4px',
+      scrollbarWidth: 'none',
+    },
+  },
+});
 
 export const chip = style([
   pressable,
@@ -59,8 +76,9 @@ export const chip = style([
     fontWeight: typography.weights.extraBold,
     letterSpacing: '-0.01em',
     color: colors.black,
+    flex: 'none',
     selectors: {
-      '&[aria-pressed="true"]': { background: colors.yellow, boxShadow: shadows.small },
+      '&[aria-pressed="true"]': { background: colors.black, color: colors.yellow },
     },
   },
 ]);
@@ -68,23 +86,28 @@ export const chip = style([
 export const grid = style({
   display: 'grid',
   gap: 10,
-  gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
   '@media': {
-    [NARROW]: { gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' },
-    [PHONE]: { gridTemplateColumns: 'repeat(auto-fill, minmax(100%, 1fr))' },
+    [NARROW]: { gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))' },
+    [PHONE]: { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' },
   },
 });
 
-/** A 76 px tile: hover lifts, press stamps (the design's `data-tile`). */
+/**
+ * A white tile (ADR-107): the product's colour lives in its icon square, so a
+ * full catalogue reads calm. Hover lifts, press stamps.
+ */
 export const tile = style({
-  minHeight: 76,
-  padding: '0 13px',
+  position: 'relative',
+  minHeight: 84,
+  padding: '0 14px',
+  background: colors.white,
   display: 'flex',
   alignItems: 'center',
   gap: 12,
   border: `2px solid ${colors.black}`,
-  borderRadius: radii[3],
-  boxShadow: shadows.card,
+  borderRadius: radii[4],
+  boxShadow: shadows.small,
   cursor: 'pointer',
   textAlign: 'left',
   fontFamily: 'inherit',
@@ -96,20 +119,32 @@ export const tile = style({
     '&:hover': { transform: 'translate(-1px, -1px)', boxShadow: `5px 5px 0 ${colors.black}` },
     '&:active': { transform: 'translate(2px, 2px)', boxShadow: shadows.pressed },
   },
-  '@media': { '(prefers-reduced-motion: reduce)': { transitionDuration: '0ms' } },
+  '@media': {
+    '(prefers-reduced-motion: reduce)': { transitionDuration: '0ms' },
+    [PHONE]: {
+      height: 108,
+      minHeight: 0,
+      padding: '10px 12px',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 6,
+    },
+  },
 });
 
 export const tileIcon = style({
   boxSizing: 'content-box',
   flex: 'none',
-  width: 42,
-  height: 42,
+  width: 46,
+  height: 46,
   display: 'grid',
   placeItems: 'center',
   border: `2px solid ${colors.black}`,
-  borderRadius: radii[2],
+  borderRadius: radii[3],
   background: colors.white,
   color: colors.black,
+  '@media': { [PHONE]: { width: 36, height: 36, borderRadius: radii[2] } },
 });
 
 export const tileText = style({
@@ -118,6 +153,7 @@ export const tileText = style({
   display: 'flex',
   flexDirection: 'column',
   gap: 3,
+  '@media': { [PHONE]: { flex: 'none', width: '100%', gap: 1 } },
 });
 
 export const tileName = style({
@@ -127,6 +163,9 @@ export const tileName = style({
   lineHeight: 1.15,
   color: colors.black,
   textWrap: 'pretty',
+  '@media': {
+    [PHONE]: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  },
 });
 
 export const low = style({
@@ -136,36 +175,42 @@ export const low = style({
   padding: '0 8px',
   border: `2px solid ${colors.black}`,
   borderRadius: shapeRadii.pill,
-  background: colors.white,
+  background: colors.redSoft,
   fontSize: portalFontSizes.tag,
-  fontWeight: typography.weights.bold,
+  fontWeight: typography.weights.extraBold,
   whiteSpace: 'nowrap',
   color: colors.redText,
 });
 
+export const priceRow = style({ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' });
+
 export const price = style({
   flex: 'none',
-  fontSize: portalFontSizes.xl,
-  fontWeight: typography.weights.extraBold,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.bold,
   fontVariantNumeric: 'tabular-nums',
   letterSpacing: typography.letterSpacing.tight,
-  color: colors.black,
+  color: colors.gray600,
 });
 
+/** How many are in the ticket: a black badge on the tile's corner. */
 export const qty = style({
-  flex: 'none',
-  minWidth: 28,
-  height: 28,
+  position: 'absolute',
+  top: -10,
+  right: -10,
+  minWidth: 30,
+  height: 30,
+  boxSizing: 'border-box',
   padding: '0 7px',
   display: 'grid',
   placeItems: 'center',
-  border: `2px solid ${colors.black}`,
+  border: `2px solid ${colors.white}`,
   borderRadius: shapeRadii.pill,
-  background: colors.yellow,
+  background: colors.black,
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.extraBold,
   fontVariantNumeric: 'tabular-nums',
-  color: colors.ink,
+  color: colors.yellow,
 });
 
 export const nuevo = style({

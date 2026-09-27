@@ -21,7 +21,7 @@ test('the corte is answered in place with a suggested phrase', async ({ page }) 
   await expect(page.getByRole('status')).toContainText(
     'Pedro ya tiene tu respuesta sobre el corte del 13 de mayo.',
   );
-  await expect(corte.getByText('«Cobré y no capturé»')).toBeVisible();
+  await expect(corte.getByText('“Cobré una venta y no la capturé en la caja.”')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('status')).toBeHidden();
 });
