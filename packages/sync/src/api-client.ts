@@ -62,7 +62,11 @@ interface CallSpec<S extends z.ZodType> {
 }
 
 function failure(res: Response, body: unknown): ApiResult<never> {
-  const retryAfterMs = parseRetryAfter(res.headers.get('Retry-After'), Date.now());
+  const retryAfterMs = parseRetryAfter(
+    res.headers.get('Retry-After'),
+    Date.now(),
+    res.headers.get('Date'),
+  );
   const wait = retryAfterMs === undefined ? {} : { retryAfterMs };
   const env = ErrorEnvelopeSchema.safeParse(body);
   if (env.success)

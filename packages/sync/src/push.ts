@@ -87,9 +87,13 @@ async function prepare(
   const rows = await readRows(deps.db, changes);
   const deltas: Prepared['deltas'][number][] = [];
   const sent: CoalescedChange[] = [];
+  const gone: CoalescedChange[] = [];
   for (const [i, c] of changes.entries()) {
     const row = rows.get(rowKey(c.tableName, c.rowId));
-    if (!row) continue;
+    if (!row) {
+      gone.push(c);
+      continue;
+    }
     const checked = invalid(c, i, row);
     if ('success' in checked) {
       deltas.push(checked.data);
@@ -99,6 +103,7 @@ async function prepare(
     const rejection = { code: 'VALIDATION', message: checked.message, retryable: false };
     await store.markRejected(c.tableName, c.rowId, rejection, deps.now());
   }
+  await store.forget(gone);
   return { deltas, sent };
 }
 
@@ -167,7 +172,9 @@ async function drainRound(d: Drain, r: Round): Promise<SyncError | 'stop' | null
   const next = nextHwm(r, [...result.unsettled, ...leftOut(all, fitted)]);
   if (next !== r.hwm) await d.deps.appConfig.set(SYNC_CONFIG_KEYS.pushHwm, String(next));
   if (result.error) return result.error;
-  const drained = r.slice.length === 0 && r.retries.length < r.retryLimit;
+  // Only retries, and none of them left to send (their rows are gone): stop (DB3-L-03).
+  const drained =
+    r.slice.length === 0 && (r.retries.length < r.retryLimit || all.sent.length === 0);
   return result.halted || drained ? 'stop' : null;
 }
 

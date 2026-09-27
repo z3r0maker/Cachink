@@ -50,11 +50,12 @@ describe('SyncScheduler', () => {
   });
 
   it('does not stack intervals when foregrounded repeatedly', () => {
-    const { runSync, s } = make();
+    const { runPush, runSync, s } = make();
     s.onForeground();
-    s.onForeground();
+    s.onForeground(); // within 45 s of the first: push only (DB3-L-02)
+    expect(runPush).toHaveBeenCalledTimes(1);
     vi.advanceTimersByTime(PULL_INTERVAL_MS);
-    expect(runSync).toHaveBeenCalledTimes(3);
+    expect(runSync).toHaveBeenCalledTimes(2);
   });
 });
 
