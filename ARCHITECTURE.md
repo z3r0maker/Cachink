@@ -157,6 +157,7 @@ Links to discussion, docs, prior art.
 | [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
 | [116](#adr-116) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
 | [117](#adr-117) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [120](#adr-120) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8340,3 +8341,107 @@ row whose write comes back already stored (`exists`/`stale`) without a receipt
 at the segment's start has its receipt looked up again after the write — an
 overlapping retry that waited on the original's lock — and counts as written
 for later references (DB3-SYNC-03).
+
+## ADR-120
+
+**Title:** Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-EXP-01, DB3-EST-01, DB3-SYNC-05 (the pool half) and the Estados half of DB3-QRY-04; addresses DB3-QRY-03's summary
+
+**Context**
+
+Round 3 of the DB audit measured three ways one heavy read takes a serverless
+instance — and, with two pooled connections per instance, every device request
+on it — down with it. The portal's «Exportar» built the whole ExcelJS workbook
+in memory (829 MB for 100K rows, 2.7 GB for a one-year whale, 5.4 GB for 1.1 M
+rows, past Excel's own 1,048,576-row sheet limit), with no duration ceiling and
+no rate limit, and every 5,000-row batch hash-joined all of the tenant's
+tickets. Estados «Personalizado» accepted any range and shipped every sale line
+and egreso of it to Node (`?desde=2000-01-01&hasta=2099-12-31`: 375K rows and
++530 MB on the whale). And postgres.js has no acquire timeout: a request that
+finds the pool busy waits until the function dies, so a slow holder stalls a
+push past the phone's 30 s timeout, and a database outage becomes thousands of
+in-flight functions.
+
+**Decision**
+
+1. **Exports stream.** `ExcelJS.stream.xlsx.WorkbookWriter` writes into a
+   `PassThrough` handed to the `Response` as a web stream; rows are committed
+   as each keyset batch arrives, and the next batch is read only when the zip's
+   input and the response have drained (ExcelJS pipes its sheet buffer into
+   archiver ignoring backpressure; without the pacing 1.1 M rows held 250 MB of
+   buffers). The first batch is read before the response starts, so a failure
+   there is still an HTTP error; a later failure aborts the body, and the
+   browser saves nothing. Measured on synthetic rows: 100K rows +742 MB → +68
+   MB RSS; 1.1 M rows +105 MB RSS, 32 MB of buffers.
+2. **Past Excel's limit the file gets another sheet** («Ventas», «Ventas (2)»,
+   …, 1,048,575 data rows each, each with its header), rather than CSV: a CSV
+   opens in Excel with the same truncation, and the contador opens it in Excel.
+3. **Each export batch is its own short transaction on a pool of its own** (one
+   connection per instance), so an export streaming to a slow connection never
+   holds an idle transaction (the role's 10 s idle-in-transaction timeout) nor a
+   connection a device is waiting for. The keyset cursor, not a snapshot, keeps
+   the walk exact. Each ventas batch reads its tickets by id over the batch's
+   own days, then by id alone for any it missed — the bound narrows the read,
+   never the file.
+4. **Exports are rate-limited per business** — 5 per 10 minutes through
+   `xangarro.throttle_take`, 429 with `Retry-After` — and the route declares
+   `maxDuration = 300`. `EXPORTS_PER_TENANT` overrides the count (E2E).
+5. **The export button fetches the file itself** (DS-02): «Preparando tu
+   archivo…» with a spinner, disabled until the file is in hand; a failure or a
+   429 is a toast; a 401 reloads the page so its gate sends the person to sign
+   in.
+6. **Estados computes at most 13 months** (`TOPE_MESES_ESTADOS` in the domain,
+   `cabeEnMeses`). The page refuses a longer Personalizado before reading
+   anything and shows why (DS-09: inline «Elige un periodo de hasta 13 meses.»,
+   «Aplicar» disabled, a link to export instead); `leerPeriodo` refuses it too,
+   whatever the caller.
+7. **Estados reads sums.** Ventas arrive summed per ticket and egresos per
+   category, in SQL, and tickets with only the columns the domain reads — all in
+   the one transaction that reads the rest of the period (the tickets used to be
+   a second one, with `between` instead of `fechaEnDias` and deleted tickets
+   kept). They are handed to the unchanged domain functions in its own shapes;
+   `estados-periodo.integration.test.ts` holds the statements identical to the
+   raw-row path. `periodLedger` stays for the monthly informe.
+8. **`parseIsoDate` round-trips.** A day that does not exist (`2026-02-30`) is
+   refused instead of rolling into March; `esIsoDate` is the predicate the
+   portal's URL parsers use.
+9. **Device requests carry database deadlines.** `deviceRoute` runs
+   authentication and handler under `withDbDeadlines`; every `withTenant` under
+   it picks the policy up through `AsyncLocalStorage` and runs
+   `transactionWithDeadline`: at most 3 s to get a connection, and
+   `DEVICE_DB_DEADLINE_MS` (default 10 s) for the transaction. The clock starts
+   per transaction, not per request, so a push body arriving slowly over a
+   phone's connection never uses up the database's time. Past either the route
+   answers **503 with `Retry-After: 15`** (code `INTERNAL`, the catalog's
+   retryable server code — the contract gains no code), and the transaction
+   **rolls back instead of committing** behind the answer, so a 503 always means
+   nothing was written. Portal pages keep waiting as before: they have no client
+   timing out underneath them.
+
+**Alternatives considered**
+
+- *CSV for big exports.* Streams trivially, but Excel truncates it at the same
+  row, and it loses column widths and number cells.
+- *One transaction for the whole export, `REPEATABLE READ`.* A consistent
+  snapshot, at the price of an idle transaction and a held connection for as
+  long as the slowest client downloads.
+- *Clamp an over-long Estados range to 13 months.* Shows numbers for a period
+  nobody asked for, under the label of the one they did.
+- *A pool-level acquire timeout* (a different driver, or a semaphore around
+  `db()`). The deadline also has to stop the late transaction from committing,
+  which only the transaction itself can do.
+
+**Consequences**
+
+- A dropped download stops reading at the next batch; nothing is left running.
+- Ventas lines whose ticket is missing are still left out of the export and of
+  the Movimientos summary, as the joins always did; Estados counts them in
+  ingresos, as it always did (DB3-QRY-04's orphan note stays open).
+- Device-auth reads outside `withTenant` (the throttle) are bounded by the
+  request deadline but still check a connection out of the shared pool; folding
+  them into the push transaction is the device work's.
+- Movimientos pages still use OFFSET; keyset paging needs cursor URLs and a
+  pager without page numbers, a design change left to DB3-QRY-03's follow-up.
