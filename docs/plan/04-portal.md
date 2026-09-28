@@ -1728,6 +1728,25 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
     under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
     Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
+  - 2026-09-28 · **Main red on the gate since #32 — the floor outran CI, coverage never fell.**
+    Last green gate: `ec1a5995` (run 36375457279), 91.7 lines against the then-floor 90. The #32
+    merge brought the four local raises (92.5 → 93.4), and every CI run since measures the same
+    code at 92.7 / 89.9 / 85.6 / 76.6: per-file, CI's merged summary _rose_ from `ec1a5995` to
+    `faf0dc1a` on every file that moved (the phone merges and the `@xangarro/caja` move changed
+    nothing the portal counts). A CI-mode run locally (Node 22, `CI=1`, private Postgres) gives
+    CI's numbers to ±0.15; the raises came from non-CI local runs, and the extra is in their
+    E2E half (Node 26 vs 22 on the unit half is not it). **Rule from here: `--raise` only on
+    numbers a `portal-e2e` CI run printed.** Restored with tests, floor untouched: unit —
+    `cfdi-wiring` (the CFDI composition root: refund → charge → invoice lookup, the monthly
+    close), `cron-routes` (all four crons behind the real guard), `facturas-actions` (the
+    billing row answers only for its own business), `usage-live`, `import-plantillas` (a
+    downloaded template parses clean), `pestana` (the BroadcastChannel fallback); E2E — the
+    CxC lines by hand in `saldos-iniciales.spec` (rows asserted in Postgres, read back after a
+    reload) and `asesor-metas-cierre.sync.spec` (the missed-goal month-end dialog). That spec
+    found a bug: «Cambiar» in the dialog did nothing (`Metas` returned the dialog before
+    reading `editando`); fixed. Note: `asesor-metas.sync.spec`'s title promises the lograda
+    dialog, but the takeover consumes that load, so the dialog never renders there. CI-mode
+    measurement after: **94.2 / 91.4 / 87.9 / 77.6.**
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.

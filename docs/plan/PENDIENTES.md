@@ -248,15 +248,15 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
 
 - [ ] **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1626`
-- [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1746`
+- [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1765`
 
 ### `04-portal.md` · Fase 10 — Beta: lo que el diseño ya muestra como listo
 
-- [!] **P-37** Ticket printing from the caja · `04-portal.md:1834`
-- [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: — · `04-portal.md:1848`
-- [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30, P-28 · `04-portal.md:1863`
-- [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1879`
-- [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1892`
+- [!] **P-37** Ticket printing from the caja · `04-portal.md:1853`
+- [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: — · `04-portal.md:1867`
+- [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30, P-28 · `04-portal.md:1882`
+- [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1898`
+- [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1911`
 
 ### `05-app.md`
 
