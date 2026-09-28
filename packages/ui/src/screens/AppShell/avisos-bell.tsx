@@ -1,8 +1,8 @@
 /**
  * The avisos bell (the web caja's header `Bell`): a 44 px square with the
  * black edge and the small shadow, the unread count in a yellow badge. Shown
- * only when the frame has a count to show; the phone has no avisos source
- * until M-09 brings Avisos.
+ * when the frame is given an avisos source: the phone's route wrapper passes
+ * the owner's unread messages (`useAvisosSinLeer`) and opens Avisos (M-09).
  */
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';

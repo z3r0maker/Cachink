@@ -61,7 +61,7 @@ appId: mx.xangarro.mobile
 
 - extendedWaitUntil:
     visible:
-      id: 'caja-status-card'
+      id: 'mi-turno-esperado'
     timeout: 10000
 
 # ══════════════════════════════════════════════════════════════════

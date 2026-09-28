@@ -218,7 +218,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (32)
+## Colas de tracks (31)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -288,7 +288,6 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `19-movil-mostrador.md` · Phases
 
-- [ ] **M-09** Mi turno y cierre. · `19-movil-mostrador.md:32`
 - [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
 - [ ] **M-12** Leftovers from M-01. · `19-movil-mostrador.md:35`
@@ -306,5 +305,5 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
-- `19-movil-mostrador.md` — 4 abiertos (0 en curso, 0 bloqueados, 8 hechos)
+- `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)

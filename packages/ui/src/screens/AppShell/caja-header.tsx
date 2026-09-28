@@ -34,14 +34,15 @@ export interface CajaHeaderProps {
   readonly back?: HeaderBack;
   readonly status: HeaderStatus;
   readonly avisos?: AvisosSource;
-  readonly onOpenRejected: () => void;
+  /** Registros por enviar, where the pill leads. */
+  readonly onOpenPendientes: () => void;
 }
 
 function Right(p: CajaHeaderProps): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
       {p.status === 'none' ? null : (
-        <CloudSyncPill onOpenRejected={p.onOpenRejected} interactive={p.status === 'full'} />
+        <CloudSyncPill onOpenPendientes={p.onOpenPendientes} interactive={p.status === 'full'} />
       )}
       {p.status === 'full' && p.avisos ? <AvisosBell {...p.avisos} /> : null}
     </View>

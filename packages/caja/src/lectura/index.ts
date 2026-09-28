@@ -16,6 +16,7 @@ export {
   // Mi turno's `MovimientoPara` (turno-shapes) keeps the plain name.
   type MovimientoPara as MovimientoInventarioPara,
 } from './inventario-mapa';
+export * from './partes-turno';
 export * from './shapes';
 export * from './turno-detalle';
 export * from './turno-shapes';

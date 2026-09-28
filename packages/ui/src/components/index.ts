@@ -50,6 +50,7 @@ export * from './BottomSheet/index';
 export * from './Dialog/index';
 export * from './Toast/index';
 export * from './OfflineBanner/index';
+export * from './CajaEstado/index';
 export * from './Bloqueo/index';
 export * from './NavRows/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in

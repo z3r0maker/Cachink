@@ -35,7 +35,8 @@ export function inicioKey(
   return [...cajaKeys.byBusiness(businessId), 'inicio', userId];
 }
 
-function useDueno(): string | null {
+/** The owner's name from the last pull (Inicio's greeting, Cierre's «Mandar el corte a …»). */
+export function useDueno(): string | null {
   const { appConfig } = useRepositories();
   const q = useQuery({
     queryKey: ['inicio', 'dueno'],

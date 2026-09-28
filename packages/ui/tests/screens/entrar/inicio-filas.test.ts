@@ -115,7 +115,7 @@ function filas(p: Partial<FilasInicio> = {}): FilasInicio {
     ],
     lineas: [linea('A', 16_000n), linea('B', 9_000n), linea('C', 5_000n)],
     gastos: [],
-    movimientos: [],
+    abonos: [],
     turnos: [
       turno({
         id: 'T0',
@@ -168,7 +168,10 @@ describe('inicioMovil', () => {
     expect(d.tareas.map((t) => t.tipo)).toEqual(['gasto', 'reponer']);
     expect(d.tareas[0]?.titulo).toBe('Registrar gas de la semana');
     expect(d.tareas[1]?.detalle).toBe('Quedan 6 · el umbral es 15');
-    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/egresos', '/productos']);
+    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual([
+      '/egresos',
+      '/inventario?reponer=P9',
+    ]);
   });
 
   it('reads fiado from the accounts: «Por cobrar» and «Cobrar a …» when overdue', () => {
@@ -255,10 +258,13 @@ describe('helpers', () => {
   it('maps the web hrefs to the phone routes, or none', () => {
     expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/egresos');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
-    expect(rutaMovil('/operador/cierre')).toBe('/turno');
+    expect(rutaMovil('/operador/cierre')).toBe('/cierre');
     expect(rutaMovil('/operador/cobranza/C1')).toBe('/cobranza/C1?abonar=1');
     expect(rutaMovil('/operador/cobranza')).toBe('/cobranza');
-    expect(rutaMovil('/operador/avisos')).toBeNull();
+    expect(rutaMovil('/operador/avisos')).toBe('/avisos');
+    expect(rutaMovil('/operador/pendientes')).toBe('/pendientes');
+    expect(rutaMovil('/operador/inventario?reponer=P9')).toBe('/inventario?reponer=P9');
+    expect(rutaMovil('/operador/acceso')).toBeNull();
   });
   it('splits the greeting from «La caja está lista.»', () => {
     expect(partirSaludo('¡Buenas tardes, Ana! La caja está lista.')).toEqual([

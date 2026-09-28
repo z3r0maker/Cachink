@@ -46,7 +46,7 @@ export const NAV: Readonly<Record<NavKey, TabDefinition>> = {
   gastos: def('gastos', ICONS.gastos, '/egresos'),
   cobranza: def('cobranza', ICONS.fiado, '/cobranza'),
   turno: def('turno', ICONS.turno, '/turno'),
-  inventario: def('inventario', ICONS.inventario, '/productos'),
+  inventario: def('inventario', ICONS.inventario, '/inventario'),
 };
 
 /** The phone's bottom tabs: exactly four. */
@@ -71,32 +71,30 @@ export function navGroups(): readonly NavGroup[] {
 
 /**
  * The destination a pathname belongs to: a detail route lights its parent
- * (`/productos/p1` → Inventario, `/checkout/efectivo` → Cobrar). Unknown
- * paths (settings, no-enviados, caja-movimientos) belong to Mi turno, where
- * they are opened from.
+ * (`/productos/p1` → Inventario, `/checkout/efectivo` → Cobrar). Avisos
+ * lights Inicio and Registros por enviar lights Cobrar, as their boards do
+ * (MvAvisos, MvPendientes). Unknown paths (settings, caja-movimientos) belong
+ * to Mi turno, where they are opened from.
  */
+const DESTINO: Readonly<Record<string, NavKey>> = {
+  '': 'inicio',
+  inicio: 'inicio',
+  avisos: 'inicio',
+  cobrar: 'cobrar',
+  checkout: 'cobrar',
+  'nuevo-producto': 'cobrar',
+  pendientes: 'cobrar',
+  ventas: 'ventas',
+  cancelaciones: 'ventas',
+  egresos: 'gastos',
+  cobranza: 'cobranza',
+  inventario: 'inventario',
+  productos: 'inventario',
+};
+
 export function navKeyFor(pathname: string): NavKey {
   const first = pathname.replace(/^\/+/, '').split('/')[0] ?? '';
-  switch (first) {
-    case 'inicio':
-    case '':
-      return 'inicio';
-    case 'cobrar':
-    case 'checkout':
-    case 'nuevo-producto':
-      return 'cobrar';
-    case 'ventas':
-    case 'cancelaciones':
-      return 'ventas';
-    case 'egresos':
-      return 'gastos';
-    case 'cobranza':
-      return 'cobranza';
-    case 'productos':
-      return 'inventario';
-    default:
-      return 'turno';
-  }
+  return DESTINO[first] ?? 'turno';
 }
 
 /** On the phone, the tab a destination lives under (Gastos, Fiado y abonos, Inventario → Mi turno). */

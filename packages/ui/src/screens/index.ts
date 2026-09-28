@@ -26,9 +26,14 @@ export * from './Activation/index';
 export * from './Inicio/index';
 export * from './AbrirTurno/index';
 export * from './Bloqueo/index';
-export * from './Caja/index';
+export * from './MiTurno/index';
+export * from './Cierre/index';
 // Phase Caja Completa — Checkout; Track M, M-08 — Ventas del turno
 export * from './Checkout/index';
 export * from './Cobranza/index';
 export * from './VentasTurno/index';
 export * from './SyncRejected/index';
+// Track M, M-09 — Inventario, Avisos, Registros por enviar
+export * from './Inventario/index';
+export * from './Avisos/index';
+export * from './Pendientes/index';

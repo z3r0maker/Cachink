@@ -1,0 +1,21 @@
+# Avisos (Track M, M-09; MvAvisos): the header bell opens it; «De Pedro» lists
+# the owner's messages and «De tu caja» what the caja flags, each notice with
+# the button to the screen that deals with it.
+#
+# Precondition: signed in (any tab).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow: shared/login-operator.yaml
+- tapOn:
+    id: 'avisos-bell'
+- extendedWaitUntil:
+    visible:
+      id: 'avisos'
+    timeout: 10000
+- assertVisible:
+    id: 'avisos-tabs-dueno'
+- tapOn:
+    id: 'avisos-tabs-caja'
+- assertVisible:
+    id: 'avisos-tabs-caja'

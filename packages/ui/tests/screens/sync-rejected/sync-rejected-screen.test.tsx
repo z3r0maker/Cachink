@@ -49,7 +49,7 @@ describe('SyncRejectedScreen', () => {
     expect(screen.getByTestId('no-enviado-reason-sales:S1')).toHaveTextContent(
       'El producto de este registro ya no existe en el portal.',
     );
-    expect(screen.getByText(/regístrala con otro producto/)).toBeInTheDocument();
+    expect(screen.getByText(/Regístrala con otro producto/)).toBeInTheDocument();
   });
 
   it('retries the tapped row and never offers delete', () => {
@@ -90,5 +90,16 @@ describe('CloudSyncPill with rejected rows', () => {
     fireEvent.click(screen.getByTestId('cloud-sync-pill'));
     expect(onOpenRejected).toHaveBeenCalled();
     expect(mockSyncNow).not.toHaveBeenCalled();
+  });
+
+  it('opens Registros por enviar whenever the frame gives it (M-09)', () => {
+    const onOpenPendientes = vi.fn();
+    const onOpenRejected = vi.fn();
+    renderWithProviders(
+      <CloudSyncPill onOpenPendientes={onOpenPendientes} onOpenRejected={onOpenRejected} />,
+    );
+    fireEvent.click(screen.getByTestId('cloud-sync-pill'));
+    expect(onOpenPendientes).toHaveBeenCalled();
+    expect(onOpenRejected).not.toHaveBeenCalled();
   });
 });

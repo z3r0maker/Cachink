@@ -9,7 +9,14 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { ICONS } from '@xangarro/caja';
-import { Btn, GLYPHS, NavRows, PathIcon, type NavRowItem } from '../../components/index';
+import {
+  Btn,
+  GLYPHS,
+  NavRows,
+  PathIcon,
+  type NavRowChipTone,
+  type NavRowItem,
+} from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { borderColors, borderWidths, colors } from '../../theme';
 import { NAV } from './tab-definitions';
@@ -21,21 +28,27 @@ export const TURNO_ROUTES = {
   cobranza: NAV.cobranza.path,
   inventario: NAV.inventario.path,
   movimientos: '/caja-movimientos',
-  pendientes: '/no-enviados',
+  pendientes: '/pendientes',
   ajustes: '/settings',
 } as const;
 
-function useRows(onNavigate: (path: string) => void): NavRowItem[] {
+export type TurnoRowKey = keyof typeof TURNO_ROUTES;
+
+/** What Mi turno knows live about a row (M-09): a detail line and a status chip. */
+export interface TurnoRowVivo {
+  readonly detail?: string;
+  readonly chip?: { readonly label: string; readonly tone: NavRowChipTone };
+}
+
+export type TurnoRowsVivas = Partial<Record<TurnoRowKey, TurnoRowVivo>>;
+
+function useRows(onNavigate: (path: string) => void, vivas: TurnoRowsVivas = {}): NavRowItem[] {
   const { t } = useTranslation();
-  const row = (
-    key: keyof typeof TURNO_ROUTES,
-    testKey: string,
-    icon: string,
-    tint: string,
-  ): NavRowItem => ({
+  const row = (key: TurnoRowKey, testKey: string, icon: string, tint: string): NavRowItem => ({
     key,
     title: t(`shell.turno.${key}`),
-    detail: t(`shell.turno.${key}Detalle`),
+    detail: vivas[key]?.detail ?? t(`shell.turno.${key}Detalle`),
+    ...(vivas[key]?.chip ? { chip: vivas[key].chip } : {}),
     icon,
     tint,
     onPress: () => onNavigate(TURNO_ROUTES[key]),
@@ -51,10 +64,18 @@ function useRows(onNavigate: (path: string) => void): NavRowItem[] {
   ];
 }
 
-export function TurnoRows(props: { readonly onNavigate: (path: string) => void }): ReactElement {
+export function TurnoRows(props: {
+  readonly onNavigate: (path: string) => void;
+  /** Live detail lines and chips (Mi turno); the static details otherwise. */
+  readonly vivas?: TurnoRowsVivas;
+}): ReactElement {
   const { t } = useTranslation();
   return (
-    <NavRows testID="turno-rows" label={t('shell.turno.rows')} items={useRows(props.onNavigate)} />
+    <NavRows
+      testID="turno-rows"
+      label={t('shell.turno.rows')}
+      items={useRows(props.onNavigate, props.vivas)}
+    />
   );
 }
 

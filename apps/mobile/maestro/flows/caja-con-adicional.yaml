@@ -1,80 +1,66 @@
-# Open caja with larger amount (replaces old "adicional" field).
-#
-# Caja Overhaul: The separate `caja-adicional-monto` field no longer
-# exists. The AbrirCajaModal now takes a single amount via numpad.
-# This flow enters a larger total (700) that previously would have
-# been 500 base + 200 adicional.
+# Open with a larger fondo and close with it counted by denomination
+# (Track M, M-09). The old «adicional» field is gone: the fondo sheet takes
+# one amount (M-06); Cierre counts it bill by bill.
 #
 # Verifies:
-#   1. Navigate to Caja → enter 700 via numpad → submit
-#   2. Status card shows correct open turn
-#   3. Close caja with matching count (cleanup)
+#   1. Open turno with $700 via the fondo sheet
+#   2. Mi turno's «Efectivo que debe haber» and its parts
+#   3. Cierre: one $500 and one $200 bill cuadra; close
 #
-# Precondition: wizard + director-setup complete, caja feature flag ON.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
-#   maestro test apps/mobile/maestro/flows/caja-con-adicional.yaml
-# x-entrypoint: wizard
+# Precondition: demo mode seeded, the operator's turno not yet open.
+# x-entrypoint: demo
 appId: mx.xangarro.mobile
+tags:
+  - caja
+  - cierre
 ---
 - launchApp
-
-# Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Otros → Caja.
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-- scrollUntilVisible:
-    element:
-      id: 'otros-caja'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
 - tapOn:
-    id: 'otros-caja'
-
-# The abrir-caja-modal should appear.
+    id: 'tab-turno'
+- tapOn:
+    id: 'inicio-hero-accion'
 - extendedWaitUntil:
     visible:
       id: 'abrir-caja-modal'
     timeout: 5000
-
-# Enter total opening amount (700) via numpad.
-# Previously this was 500 base + 200 adicional; now it's a single entry.
 - tapOn: { id: 'numpad-7' }
 - tapOn: { id: 'numpad-0' }
 - tapOn: { id: 'numpad-0' }
-
-# Submit the apertura.
 - tapOn:
     id: 'caja-abrir-submit'
 
-# Status card should be visible showing the turn is open.
-- assertVisible:
-    id: 'caja-status-card'
-
-# Close the caja for cleanup (2-step blind count).
+- extendedWaitUntil:
+    visible:
+      id: 'mi-turno-esperado'
+    timeout: 8000
 - tapOn:
-    id: 'caja-cerrar-btn'
-
-# Step 1: BlindCountStep — enter matching count of 700.
+    id: 'mi-turno-desglose'
 - assertVisible:
-    id: 'cerrar-caja-step-1'
-- tapOn: { id: 'numpad-7' }
-- tapOn: { id: 'numpad-0' }
-- tapOn: { id: 'numpad-0' }
-- tapOn:
-    id: 'blind-count-continue'
+    id: 'esperado-desglose'
 
-# Step 2: CountResultStep — no discrepancy, close immediately.
-- assertVisible:
-    id: 'cerrar-caja-step-2'
 - tapOn:
-    id: 'count-result-close'
+    id: 'turno-cerrar'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-esperado'
+    timeout: 8000
+- tapOn:
+    id: 'conteo-billete-500-mas'
+- tapOn:
+    id: 'conteo-billete-200-mas'
+- assertVisible:
+    id: 'cierre-diferencia-cuadra'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar'
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: 'cierre-cerrar'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 8000

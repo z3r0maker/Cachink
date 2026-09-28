@@ -702,6 +702,7 @@ export const esMX = {
     intro: 'Estos registros siguen guardados en este dispositivo, pero el servidor no los aceptó.',
     empty: 'Todo se envió. No hay registros pendientes de revisar.',
     retry: 'Reintentar',
+    retryAll: 'Reintentar todos ({{count}})',
     retrying: 'Reintentando automáticamente',
     kinds: {
       venta: 'Venta',
@@ -717,8 +718,8 @@ export const esMX = {
       otro: 'Registro',
     },
     hints: {
-      productMissing: 'El producto fue eliminado — regístrala con otro producto.',
-      clientMissing: 'El cliente fue eliminado — regístrala sin cliente o con otro.',
+      productMissing: 'El producto fue eliminado. Regístrala con otro producto.',
+      clientMissing: 'El cliente fue eliminado. Regístrala sin cliente o con otro.',
       userMissing: 'El operador fue eliminado en el portal.',
     },
   },
@@ -743,6 +744,7 @@ export const esMX = {
     never: 'Sin enviar',
     tapToUpdate: 'Toca para enviar ahora',
     openRejected: 'Toca para ver los no enviados',
+    openPendientes: 'Toca para ver los registros por enviar',
     update: 'Actualizar',
   },
   // The caja's frame (Track M, M-05): tabs, rail, sidebar, header, overlays.
