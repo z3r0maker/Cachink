@@ -34,7 +34,7 @@ export type ChecklistKey =
   | 'fiscales'
   | 'logo';
 
-/** «Para vender» gates the portal until done (P-36 D-2); «Cuando quieras» never does. */
+/** «Para vender» is what selling needs; «Cuando quieras» is extra. Neither gates the portal. */
 export type ChecklistGroup = 'requerido' | 'opcional';
 
 export interface ChecklistItem {
