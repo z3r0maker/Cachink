@@ -1532,8 +1532,15 @@ critical avisos cannot be switched off.
     leaked listener from a double mount was found owning the keyboard while the fresh one never
     fired). `tests/cortes-exportar.test.ts` pins the CSV export: header, quote-aware cells,
     the minus only a shortfall earns, empty-not-«undefined» motivo. Remaining from the
-    worklist: `saldos-iniciales/lineas.tsx`, `server/billing/cfdi.ts`,
+    worklist: `saldos-iniciales/lineas.tsx` ✦ done, `server/billing/cfdi.ts`,
     `cobranza/cliente/recordar.tsx`, `asesor/cierre.tsx`, `operador/caja/nuevo-partes.tsx`.
+  - 2026-09-27 (late) · **Fourth raise: 93.4 / 90.7 / 87.1 / 77.2, committed and pushed**
+    (`feat/movil-mostrador`, beside the de-gating and the coverage push). `saldos-iniciales/
+lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (jsdom): name
+    matching, line replacement, the unknown-cliente report and the no-nombre sheet. Enabler for
+    every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
+    under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
+    Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
