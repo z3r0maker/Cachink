@@ -9,10 +9,10 @@ that work implies. Portal requests go to the portal's Claude Design project (mir
 files are pulled again with `pnpm design:pull`. `design-reference/` is never edited by hand
 (ADR-058).
 
-Each quoted block can be pasted into Claude Design as it stands. Answer the three **owner
-decisions** first: they change the copy of DS-01 and DS-06.
+Each quoted block can be pasted into Claude Design as it stands. All three **owner decisions**
+are answered, and the copy below already follows them.
 
-## Owner decisions (answer before sending)
+## Owner decisions
 
 1. **Cierre and unsent rows (DS-06).** Today cierre is blocked only by rows in state `pending`.
    Rows in automatic retry, and sales captured offline and never attempted, do not block it. Should
@@ -22,9 +22,14 @@ decisions** first: they change the copy of DS-01 and DS-06.
 2. **Search scope in Ventas y gastos (DS-01).** The placeholder promises «concepto, folio u
    operador», but search has only ever matched the concepto. Should folio and operador become
    searchable (a small server change), or should the copy shrink to «Buscar por concepto»?
+   **Answered 2026-09-27: widen it.** A number («412», «#412», «folio 412») finds that venta's
+   folio exactly, any part of the operator's name finds the rows captured on their shifts, and the
+   concepto still matches as before. Server side done in `movimientos-filtro.ts` (branch
+   `feat/busqueda-folio-operador`); the page, its counts, the KPIs and the chips all follow it.
 3. **Tab counts (DS-01).** «Ventas N / Gastos N» used to count the whole history. They now count
    the selected period plus the search. Should that stay, with a caption, or go back to the
    history-wide count (one more query per page)?
+   **Answered 2026-09-27: they stay per period**, with the caption DS-01 asks for.
 
 ## Portal
 
@@ -49,7 +54,7 @@ updates when the answer arrives.
 
 > **Ventas y gastos — the period is always visible.** Under the KPI row add a caption «Periodo:
 > 1–31 may» (or «Hoy», «Esta semana»). The KPIs and tab counts refer to that period, and to the
-> search when there is one: «Ventas 1,284 · en este periodo». _(Depends on owner decision 3.)_
+> search when there is one: «Ventas 1,284 · en este periodo».
 
 > **Ventas y gastos — paging a long period.** The pager «Mostrando 11–20 de N movimientos» with
 > Anterior / Siguiente stays. With a year selected, N can mean thousands of pages, so add «Ir a
@@ -58,7 +63,8 @@ updates when the answer arrives.
 
 > **Ventas y gastos — search.** Search runs 300 ms after typing stops. With «Personalizado» and no
 > dates, show the hint «Elige un periodo para buscar más rápido» under the field. Placeholder:
-> «Buscar por concepto» _(or keep «…folio u operador» if owner decision 2 widens the search)_.
+> «Buscar por concepto, folio u operador». A number searches the folio exactly («412», «#412»),
+> so an empty result for a folio reads «No hay ninguna venta con el folio 412 en este periodo.»
 
 > **Ventas y gastos — detail drawer, «Lo que llevó».** The drawer lists every line of the ticket,
 > including lines the search filtered out or the page cut off. Confirm this. The ticket is the unit
