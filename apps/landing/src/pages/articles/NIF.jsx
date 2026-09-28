@@ -1,5 +1,5 @@
 import { buildHowToSchema } from '../../schema-pages.js';
-import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
+import { A, ArticleCta, ArticleHeader, H2, P, RelatedGuides, articleSchema } from './shared.jsx';
 
 /** How to get the three statements out of a caja, step by step (also the HowTo schema). */
 const PASOS = [
@@ -32,30 +32,6 @@ const schema = articleSchema('nif', [
     steps: PASOS.map((s) => ({ name: s.t, text: s.d })),
   }),
 ]);
-
-const H2 = ({ children }) => (
-  <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '36px 0 14px' }}>
-    {children}
-  </h2>
-);
-const P = ({ children }) => (
-  <p
-    style={{
-      fontSize: 16,
-      lineHeight: 1.7,
-      margin: '0 0 16px',
-      color: 'var(--ink)',
-      fontWeight: 500,
-    }}
-  >
-    {children}
-  </p>
-);
-const A = ({ href, children }) => (
-  <a href={href} style={{ color: 'var(--black)' }}>
-    {children}
-  </a>
-);
 
 /** A statement as a ledger: label / value rows, totals highlighted. */
 function Tabla({ rows, caption }) {
