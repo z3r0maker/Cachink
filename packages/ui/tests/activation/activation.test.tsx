@@ -1,22 +1,29 @@
 /**
  * Activation (A-04): pure helpers, error mapping, persistence against a real
- * SQLite + the contracts mock, and the screen's submit wiring.
+ * SQLite + the contracts mock. The screen: tests/screens/entrar.
  */
 
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { MOCK_CODES, startMockServer, type RunningMock } from '@xangarro/contracts/mock';
-import { DrizzleAppConfigRepository, DrizzleUsersRepository } from '@xangarro/data';
+import {
+  DrizzleAppConfigRepository,
+  DrizzleProductsRepository,
+  DrizzleUsersRepository,
+} from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
-import { ApiClient, DrizzleReferenceDataRepository } from '@xangarro/sync';
+import {
+  ApiClient,
+  DrizzleReferenceDataRepository,
+  pullAll,
+  SYNC_CONFIG_KEYS,
+} from '@xangarro/sync';
 import { makeFreshDb } from '../../../data/tests/helpers/fresh-db';
 import { APP_CONFIG_KEYS } from '../../src/app-config/index';
 import { activationErrorKey } from '../../src/activation/activation-errors';
 import { memoryTokenStore, parseActivationRecord } from '../../src/activation/activation-config';
 import { persistActivation } from '../../src/activation/use-activate';
-import { ActivationScreen } from '../../src/screens/Activation/activation-screen';
 import { canSubmitActivation, sanitizeCode } from '../../src/screens/Activation/activation-form';
 import { initI18n } from '../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../test-utils';
 
 initI18n();
 
@@ -73,34 +80,34 @@ describe('persistActivation (real SQLite + mock server)', () => {
     const ops = await users.findAllByBusiness(res.data.businessId as BusinessId);
     expect(ops.map((u) => u.nombre).sort()).toEqual(['Ana', 'Toni']);
   });
-});
 
-function typeInto(testID: string, value: string): void {
-  const host = screen.getByTestId(testID);
-  const input = host.tagName === 'INPUT' ? host : (host.querySelector('input') ?? host);
-  fireEvent.change(input, { target: { value } });
-}
-
-describe('ActivationScreen', () => {
-  it('keeps Vincular inert until both fields are valid, then submits normalised input', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(<ActivationScreen onSubmit={onSubmit} submitting={false} />);
-    fireEvent.click(screen.getAllByTestId('activation-submit')[0]!);
-    expect(onSubmit).not.toHaveBeenCalled();
-    typeInto('activation-email', ' dueno@tacos.mx ');
-    typeInto('activation-code', 'k7m3p9rw');
-    fireEvent.click(screen.getAllByTestId('activation-submit')[0]!);
-    expect(onSubmit).toHaveBeenCalledWith({ email: 'dueno@tacos.mx', code: 'K7M3P9RW' });
-  });
-
-  it('renders the translated error when one is provided', () => {
-    renderWithProviders(
-      <ActivationScreen
-        onSubmit={vi.fn()}
-        submitting={false}
-        errorKey="activate.errors.codeUsed"
-      />,
+  it('keeps an opted-in snapshot open after the first page, and the first sync finishes it (C-23)', async () => {
+    mock.api.state.snapshotBudget = { rows: 5, bytes: 1_000_000 };
+    const client = new ApiClient({ baseUrl: mock.url });
+    const res = await client.activate({
+      email: 'dueno@tacoslaesquina.mx',
+      code: mock.api.state.issueCode(),
+      device: { name: 'Test', platform: 'ios', appVersion: '0.1.0', osVersion: '18' },
+      bootstrap: 'snapshot',
+    });
+    mock.api.state.snapshotBudget = undefined;
+    if (!res.ok) throw new Error(res.code);
+    const db = makeFreshDb();
+    const appConfig = new DrizzleAppConfigRepository(db);
+    const referenceData = new DrizzleReferenceDataRepository(db);
+    await persistActivation({ referenceData, appConfig, tokenStore: memoryTokenStore() }, res.data);
+    expect(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext)).toBe(
+      res.data.bootstrap.snapshot?.next,
     );
-    expect(screen.getByTestId('activation-error').textContent).toContain('ya se usó');
+    expect(res.data.bootstrap.snapshot?.next).toBeTruthy();
+    const out = await pullAll({ db, appConfig, client, token: res.data.deviceToken });
+    expect(out.error).toBeNull();
+    expect(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext)).toBeNull();
+    const products = await new DrizzleProductsRepository(db, 'DEV' as never).listForBusiness(
+      res.data.businessId as BusinessId,
+    );
+    expect(products).toHaveLength(20);
   });
 });
+
+// ActivationScreen (Vincular, M-06) is covered in tests/screens/entrar/pantallas.test.tsx.

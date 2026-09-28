@@ -1,2 +1,4 @@
-export { QuickSwitchScreen, type QuickSwitchScreenProps } from './quick-switch-screen';
-export { PinPrompt, type PinPromptProps } from './pin-prompt';
+export { AccesoScreen, preseleccion, type AccesoScreenProps } from './acceso-screen';
+export type { AccesoOperador } from './acceso-partes';
+export { NipPad, type NipPadProps } from './nip-pad';
+export { nipCompleto, primerNombreDe, teclearNip, type TeclaNip } from './nip';

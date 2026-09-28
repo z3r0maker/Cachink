@@ -5,12 +5,19 @@
  * Stores the server-anchored clocks the rest of the app depends on:
  * `lastServerTime` and `lastPullAt` (entitlement staleness, retention) and
  * `acknowledgedThrough` (the retention purge bound, A-11).
+ *
+ * A device with no cursor bootstraps by **snapshot** (C-23, ADR-121): pages
+ * of reference rows, recent movements and a stock baseline, followed to the
+ * last one through `bootstrapNext`, then the ordinary pull from the
+ * snapshot's cursor. An unfinished snapshot resumes where it stopped. Each
+ * page is applied, cursors included, in one transaction.
  */
 
+import { SNAPSHOT_START, type PullResponse } from '@xangarro/contracts';
 import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
-import type { SyncError } from './push.js';
-import { applyReferenceTables } from './reference-applier.js';
+import { applyPulledPage, cursorWrites, type CursorWrites } from './page-applier.js';
+import { toSyncError, type SyncError } from './push-batch.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
 export interface PullDeps {
@@ -27,42 +34,70 @@ export interface PullOutcome {
   readonly error: SyncError | null;
 }
 
-async function readSeq(appConfig: AppConfigRepository): Promise<number> {
-  return Number((await appConfig.get(SYNC_CONFIG_KEYS.pullSeq)) ?? '0') || 0;
+/** Snapshot pages one run may fetch — 1 M rows; an unfinished snapshot resumes next run. */
+export const MAX_SNAPSHOT_PAGES_PER_RUN = 200;
+
+interface Request {
+  readonly since: number;
+  /** `start`, a token to continue, or `null` for an ordinary pull. */
+  readonly snapshot: string | null;
 }
 
-type PulledPage = Extract<Awaited<ReturnType<ApiClient['pull']>>, { ok: true }>['data'];
+async function nextRequest(appConfig: AppConfigRepository): Promise<Request> {
+  const since = Number((await appConfig.get(SYNC_CONFIG_KEYS.pullSeq)) ?? '0') || 0;
+  const open = await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext);
+  if (open) return { since, snapshot: open };
+  return { since, snapshot: since === 0 ? SNAPSHOT_START : null };
+}
 
-function countRows(tables: PulledPage['tables']): number {
+function countRows(page: PullResponse): number {
   // Only the row arrays: `feature_flags` and `dueno_nombre` ride beside them.
-  return Object.values(tables).reduce<number>(
-    (n, rows) => n + (Array.isArray(rows) ? rows.length : 0),
+  const rows = Object.values(page.tables).reduce<number>(
+    (n, list) => n + (Array.isArray(list) ? list.length : 0),
     0,
   );
+  return rows + (page.snapshot?.stockBaseline.length ?? 0);
 }
 
-async function storePage(deps: PullDeps, page: PulledPage): Promise<void> {
-  const c = deps.appConfig;
-  await c.set(SYNC_CONFIG_KEYS.entitlement, JSON.stringify(page.entitlement));
-  await c.set(SYNC_CONFIG_KEYS.lastServerTime, page.serverTime);
-  await c.set(SYNC_CONFIG_KEYS.lastPullAt, page.serverTime);
-  await c.set(SYNC_CONFIG_KEYS.acknowledgedThrough, String(page.acknowledgedThrough));
-  await c.set(SYNC_CONFIG_KEYS.pullSeq, String(page.serverSeq));
+function pageWrites(page: PullResponse): CursorWrites {
+  return {
+    ...cursorWrites(page),
+    [SYNC_CONFIG_KEYS.entitlement]: JSON.stringify(page.entitlement),
+    [SYNC_CONFIG_KEYS.lastPullAt]: page.serverTime,
+    [SYNC_CONFIG_KEYS.acknowledgedThrough]: String(page.acknowledgedThrough),
+  };
+}
+
+type Step =
+  | { readonly rows: number; readonly snapshot: boolean; readonly more: boolean }
+  | { readonly error: SyncError };
+
+async function pullOnce(deps: PullDeps): Promise<Step> {
+  const req = await nextRequest(deps.appConfig);
+  const res = await deps.client.pull(deps.token, req.since, req.snapshot ?? undefined);
+  if (!res.ok) return { error: toSyncError(res) };
+  const page = res.data;
+  await applyPulledPage(deps.db, page, page.entitlement.payload.businessId, pageWrites(page));
+  const rows = countRows(page);
+  if (req.snapshot === null) {
+    return { rows, snapshot: false, more: rows > 0 && page.serverSeq > req.since };
+  }
+  // A finished snapshot goes on with the ordinary pull from its cursor, which
+  // brings what changed while it was paged — unless there is no cursor yet.
+  return { rows, snapshot: true, more: Boolean(page.snapshot?.next) || page.serverSeq > 0 };
 }
 
 export async function pullAll(deps: PullDeps, maxPages = 10): Promise<PullOutcome> {
   let pages = 0;
+  let snapshots = 0;
   let applied = 0;
-  while (pages < maxPages) {
-    const since = await readSeq(deps.appConfig);
-    const res = await deps.client.pull(deps.token, since);
-    if (!res.ok) return { pages, applied, error: { code: res.code, status: res.status } };
-    pages += 1;
-    const rows = countRows(res.data.tables);
-    await applyReferenceTables(deps.db, res.data.tables, res.data.entitlement.payload.businessId);
-    await storePage(deps, res.data);
-    applied += rows;
-    if (rows === 0 || res.data.serverSeq <= since) break;
+  while (pages < maxPages && snapshots < MAX_SNAPSHOT_PAGES_PER_RUN) {
+    const step = await pullOnce(deps);
+    if ('error' in step) return { pages: pages + snapshots, applied, error: step.error };
+    applied += step.rows;
+    if (step.snapshot) snapshots += 1;
+    else pages += 1;
+    if (!step.more) break;
   }
-  return { pages, applied, error: null };
+  return { pages: pages + snapshots, applied, error: null };
 }

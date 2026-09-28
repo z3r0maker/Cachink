@@ -13,14 +13,42 @@ import * as schema from './schema/index.js';
  */
 export type Db = ReturnType<typeof createDb>;
 
-export function createDb(url: string) {
+export interface DbOptions {
+  /** Connections this pool may open. Default: `DATABASE_POOL_MAX`, else 2. */
+  readonly max?: number;
+}
+
+/**
+ * The pool size per process (audit DB2-CONN-01). A serverless instance serves
+ * a request or two at a time and there may be dozens warm, each with its own
+ * pools, against the ~15 server connections Supavisor gives a role on Nano —
+ * so the default is 2, and a long-lived server (E2E, a benchmark) raises it
+ * with `DATABASE_POOL_MAX`. An unusable value falls back to the default.
+ */
+export function poolMax(value: string | undefined = process.env.DATABASE_POOL_MAX): number {
+  const n = Number(value);
+  return value !== undefined && value.trim() !== '' && Number.isInteger(n) && n >= 1 ? n : 2;
+}
+
+export function createDb(url: string, options: DbOptions = {}) {
   // `prepare: false` (audit DB-CONN-01): Supabase's transaction pooler (6543)
   // hands each transaction a different server connection, where a named
   // prepared statement from the last one does not exist. Safe here because
   // every piece of per-request state — the tenant claim, the JWT claims — is
   // set with `set_config(..., true)`, i.e. transaction-local, never on the
   // session. Direct and session-pooler connections lose nothing that matters.
-  const sql = postgres(url, { max: 5, prepare: false, onnotice: () => undefined });
+  //
+  // `idle_timeout` (DB2-CONN-01): a warm instance that goes quiet gives its
+  // connections back after 20 s instead of holding a pooler slot until it is
+  // frozen. `connect_timeout`: a saturated pooler fails the request in 10 s
+  // rather than hanging it to the function's limit.
+  const sql = postgres(url, {
+    max: options.max ?? poolMax(),
+    idle_timeout: 20,
+    connect_timeout: 10,
+    prepare: false,
+    onnotice: () => undefined,
+  });
   return drizzle(sql, { schema });
 }
 
@@ -35,18 +63,21 @@ export async function withBusiness<T>(
   db: Db,
   businessId: string,
   fn: (tx: Parameters<Parameters<Db['transaction']>[0]>[0]) => Promise<T>,
+  deadline?: Deadline,
 ): Promise<T> {
-  return db.transaction(async (tx) => {
-    await tx.execute(
-      // `true` scopes the setting to this transaction, so a pooled connection
-      // never leaks one tenant's claim into the next request.
-      sqlSetConfig(businessId),
-    );
+  const run = async (tx: Parameters<Parameters<Db['transaction']>[0]>[0]) => {
+    // `true` scopes the setting to this transaction, so a pooled connection
+    // never leaks one tenant's claim into the next request.
+    await tx.execute(sqlSetConfig(businessId));
     return fn(tx);
-  });
+  };
+  // A deadline turns «wait for the pool» into «busy, retry» (DB3-SYNC-05).
+  return deadline === undefined ? db.transaction(run) : transactionWithDeadline(db, deadline, run);
 }
 
 import { sql } from 'drizzle-orm';
+
+import { transactionWithDeadline, type Deadline } from './deadline.js';
 
 function sqlSetConfig(businessId: string) {
   return sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`;

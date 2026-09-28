@@ -3,15 +3,21 @@ import { formatMoney, type EstadoCuenta } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../../shell/icon';
-import { OPERADOR_BASE } from '../../shell/nav';
+import { OPERADOR_BASE } from '@xangarro/caja';
 import * as l from '../../turno/lists.css';
 import * as f from '../../ui/filters.css';
 import * as u from '../../ui/ui.css';
 import * as v from '../../ventas/ventas.css';
 import * as c from '../cobranza.css';
 import * as s from './cliente.css';
-import { abiertas, historial, vence, type Abierta, type Vence } from './derive';
-import type { CuentaCliente } from './types';
+import {
+  abiertas,
+  historial,
+  vence,
+  type Abierta,
+  type Vence,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
 
 const CHEVRON = 'M9 6l6 6-6 6';
 const CHECK = 'M20 6 9 17l-5-5';

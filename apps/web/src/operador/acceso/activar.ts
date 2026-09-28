@@ -1,4 +1,4 @@
-import { deviceHeaders } from '@xangarro/contracts';
+import { deviceHeaders, type Bootstrap } from '@xangarro/contracts';
 import { AVISO_VINCULACION_VERSION } from '@xangarro/domain';
 
 /** POST /api/v1/activate as a browser device (ADR-071 §1), and its answers. */
@@ -7,7 +7,8 @@ export interface Vinculo {
   readonly deviceToken: string;
   readonly deviceId: string;
   readonly businessId: string;
-  readonly tables: object;
+  /** The first snapshot page and its cursor (C-23); the rest follows by pull. */
+  readonly bootstrap: Bootstrap;
 }
 
 /** Uppercased; spaces, dots and hyphens ignored, as the design says. */
@@ -60,6 +61,7 @@ function peticion(email: string, codigo: string): Request {
         osVersion: navigator.platform || 'web',
       },
       avisoVersion: AVISO_VINCULACION_VERSION,
+      bootstrap: 'snapshot',
     }),
   });
 }
@@ -92,12 +94,13 @@ function vinculoDe(body: unknown): Vinculo {
   const data = body as {
     deviceToken: string;
     deviceId: string;
-    bootstrap: { tables: { businesses: { id: string }[] } };
+    businessId: string;
+    bootstrap: Bootstrap;
   };
   return {
     deviceToken: data.deviceToken,
     deviceId: data.deviceId,
-    businessId: data.bootstrap.tables.businesses[0]?.id ?? '',
-    tables: data.bootstrap.tables as object,
+    businessId: data.businessId,
+    bootstrap: data.bootstrap,
   };
 }

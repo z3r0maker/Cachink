@@ -1,70 +1,12 @@
 /**
- * Expo Router entry for /ventas — tap-to-cart POS surface («Cobrar»).
- *
- * Logic in _ventas-hooks.ts; sub-components in _ventas-overlays.tsx.
- * (Expo Router ignores underscore-prefixed files as routes.) Payment runs
- * in /checkout; past sales are only cancelled, from Caja → Cancelaciones.
+ * Expo Router entry for /ventas: the turno's sales, each cancellable with a
+ * reason and never edited or deleted (Track M decision of 2026-09-27). Today
+ * this is the Cancelaciones list; M-08 redraws it with the sale sheet.
  */
-import { useCallback, useState, type ReactElement } from 'react';
-import { useRouter } from 'expo-router';
-import type { IsoDate } from '@xangarro/domain';
-import { todayIso } from './_ventas-helpers';
-import {
-  useCartHelpers,
-  useOpenCajaTurno,
-  useVentasCartState,
-  useVentasQueries,
-} from './_ventas-hooks';
-import { VentasCajaGate, VentasMainView, VentasProductosGate } from './_ventas-overlays';
 
-function useVentasRouteState() {
-  const router = useRouter();
-  const [fecha] = useState<IsoDate>(todayIso);
-  const [search, setSearch] = useState('');
-  const { openTurno, isLoading: turnoLoading } = useOpenCajaTurno();
-  const q = useVentasQueries(fecha);
-  const { cart, dispatch, setCheckoutCart } = useVentasCartState();
-  const { cartQuantities, handleAddToCart } = useCartHelpers(dispatch, q.stockMap, cart.items);
-  const onCheckout = useCallback(() => {
-    setCheckoutCart(cart);
-    router.push('/checkout' as never);
-  }, [cart, setCheckoutCart, router]);
-  return {
-    search,
-    setSearch,
-    openTurno,
-    turnoLoading,
-    q,
-    cart,
-    dispatch,
-    cartQuantities,
-    handleAddToCart,
-    onCheckout,
-  };
-}
+import type { ReactElement } from 'react';
+import { CancelacionesScreen } from '@xangarro/ui';
 
-export default function VentasRoute(): ReactElement {
-  const s = useVentasRouteState();
-  if (!s.turnoLoading && s.openTurno === null) {
-    // Products gate takes priority: no products → nothing to sell
-    if (s.q.productosData !== undefined && s.q.productos.length === 0) {
-      return <VentasProductosGate />;
-    }
-    return <VentasCajaGate />;
-  }
-  return (
-    <VentasMainView
-      productos={s.q.productos}
-      stockMap={s.q.stockMap}
-      search={s.search}
-      setSearch={s.setSearch}
-      cart={s.cart}
-      dispatch={s.dispatch}
-      cartQuantities={s.cartQuantities}
-      handleAddToCart={s.handleAddToCart}
-      onCheckout={s.onCheckout}
-      total={s.q.total}
-      ventaCount={s.q.ventas.length}
-    />
-  );
+export default function VentasTabRoute(): ReactElement {
+  return <CancelacionesScreen testID="mobile-cancelaciones" />;
 }

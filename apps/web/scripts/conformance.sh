@@ -56,6 +56,7 @@ suite() {
 suite tests/conformance/activate.test.ts
 suite tests/conformance/activate-scan.test.ts
 suite tests/conformance/sync.test.ts
+suite tests/conformance/snapshot.test.ts
 
 # B-18's other acceptance, on the log this very run produced: every push wrote
 # one structured line with its counts, and no email reached the log at all.

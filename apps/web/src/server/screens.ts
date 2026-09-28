@@ -5,7 +5,6 @@ import {
   listDispositivos,
   liveActivationCode,
   listEmpleados,
-  listMovimientos,
   listMovimientosInventario,
   listNotices,
   listOperadores,
@@ -26,10 +25,9 @@ import { withTenant } from './db';
  *
  * A thrown error is the container's signal to render the screen's `error`
  * state — never a blank page, and never a partial render that looks like data.
+ *
+ * Ventas y gastos has its own, filter-bounded loader in `./movimientos`.
  */
-export const loadMovimientos = (biz: string, kind: 'venta' | 'gasto') =>
-  withTenant(biz, (tx) => listMovimientos(tx, kind));
-
 export const loadProductos = (biz: string) =>
   withTenant(biz, async (tx) => ({
     catalogo: await listProductos(tx),
@@ -60,7 +58,6 @@ export const loadAvisos = (biz: string) => withTenant(biz, (tx) => listNotices(t
 
 export const loadAsesor = (biz: string) => withTenant(biz, (tx) => listNotices(tx, 'asesor'));
 
-export type MovimientosData = Awaited<ReturnType<typeof loadMovimientos>>;
 export type ProductosData = Awaited<ReturnType<typeof loadProductos>>;
 export type EquipoData = Awaited<ReturnType<typeof loadEquipo>>;
 export type EmpleadosData = Awaited<ReturnType<typeof loadEmpleados>>;

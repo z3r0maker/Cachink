@@ -3,23 +3,24 @@
  * from the BottomTabBar barrel; consumers compose tabs via the
  * `BottomTabBarItem` items array on the parent.
  *
- * Per ADR-040 the active state is a 4-px yellow strip pinned to the
- * top of the cell (mocks 1/2/4) instead of a full-cell yellow fill.
- * Inactive icons + labels render at 0.55 opacity so the active cell
- * pops without needing icon recoloring at the BottomTabBar level —
- * consumers can pass any ReactNode and the visual hierarchy still reads.
+ * El Mostrador (the phone boards, MvTurno): the current tab is filled
+ * yellow with a black edge on either side; the others are white with a
+ * gray600 label. The label is 12 px, sentence case.
  *
- * ## Same fix as Btn (F0-T04) — `<Pressable>` over `<View onPress>`
- *
- * Tamagui `<View onPress>` does not fire on Maestro/iOS synthetic
- * taps (no native gesture recognizer wired). The root is now RN
- * `<Pressable>`, which registers a real gesture on iOS/Android and
- * emits a `<div role="button">` via react-native-web on desktop.
+ * The root is RN `<Pressable>`, not Tamagui `<View onPress>`: Tamagui's
+ * handler does not fire on Maestro/iOS synthetic taps (same fix as Btn).
  */
 import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { colors, fontSizes, shapeRadii, typography } from '../../theme';
+import {
+  borderWidths,
+  colors,
+  fontSizes,
+  portalFontSizes,
+  shapeRadii,
+  typography,
+} from '../../theme';
 import { impactLight } from '../../haptics/index';
 
 export interface TabItemProps {
@@ -29,24 +30,6 @@ export interface TabItemProps {
   readonly onPress: () => void;
   readonly badge?: number;
   readonly testID?: string;
-}
-
-const INACTIVE_OPACITY = 0.55;
-
-function ActiveStrip(): ReactElement {
-  return (
-    <View
-      testID="tab-item-active-strip"
-      position="absolute"
-      top={0}
-      left="20%"
-      right="20%"
-      height={4}
-      backgroundColor={colors.yellow}
-      borderBottomLeftRadius={4}
-      borderBottomRightRadius={4}
-    />
-  );
 }
 
 function Badge({ count }: { count: number }): ReactElement {
@@ -81,10 +64,8 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
       testID="tab-item-label"
       color={active ? colors.black : colors.gray600}
       fontFamily={typography.fontFamily}
-      fontWeight={typography.weights.bold}
-      fontSize={fontSizes.xs}
-      letterSpacing={typography.letterSpacing.wide}
-      style={{ textTransform: 'uppercase' }}
+      fontWeight={active ? typography.weights.extraBold : typography.weights.bold}
+      fontSize={portalFontSizes.xs}
       numberOfLines={1}
       ellipsizeMode="tail"
     >
@@ -98,17 +79,28 @@ const BASE_STYLE: ViewStyle = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'transparent',
+  gap: 3,
+  minHeight: 44,
+  backgroundColor: colors.white,
   position: 'relative',
 };
 
-const PRESSED_STYLE: ViewStyle = { ...BASE_STYLE, opacity: 0.7 };
+const ACTIVE_STYLE: ViewStyle = {
+  ...BASE_STYLE,
+  backgroundColor: colors.yellow,
+  borderLeftWidth: borderWidths.thin,
+  borderRightWidth: borderWidths.thin,
+  borderColor: colors.black,
+};
 
-/**
- * Renders one tab cell. Active = yellow top-strip + full-opacity icon
- * + bold black label. Inactive = transparent + 0.55 opacity + gray
- * label.
- */
+const PRESSED_STYLE: ViewStyle = { ...BASE_STYLE, backgroundColor: colors.yellowSoft };
+
+function cellStyle(active: boolean, pressed: boolean): ViewStyle {
+  if (active) return ACTIVE_STYLE;
+  return pressed ? PRESSED_STYLE : BASE_STYLE;
+}
+
+/** Renders one tab cell: yellow with black sides when current, white otherwise. */
 export function TabItem(props: TabItemProps): ReactElement {
   return (
     <Pressable
@@ -121,7 +113,7 @@ export function TabItem(props: TabItemProps): ReactElement {
               props.onPress();
             }
       }
-      style={({ pressed }) => (pressed && !props.active ? PRESSED_STYLE : BASE_STYLE)}
+      style={({ pressed }) => cellStyle(props.active, pressed)}
       role="tab"
       aria-label={props.label}
       aria-selected={props.active}
@@ -129,9 +121,8 @@ export function TabItem(props: TabItemProps): ReactElement {
       accessibilityLabel={props.label}
       accessibilityState={{ selected: props.active }}
     >
-      {props.active && <ActiveStrip />}
       {props.icon !== undefined && (
-        <View testID="tab-item-icon" marginBottom={4} opacity={props.active ? 1 : INACTIVE_OPACITY}>
+        <View testID="tab-item-icon">
           {/**
            * Wrap string icons in `<Text>` — Tamagui's `<View>` rejects
            * direct text-node children on both platforms. Consumers

@@ -1,4 +1,4 @@
-# Auto-lock smoke test — verifies QuickSwitch re-appears after timeout.
+# Auto-lock smoke test — verifies Bloqueo (MvBloqueo) appears after timeout.
 #
 # NOTE: This test relies on the app's inactivity timer. In a real
 # scenario the timer is 5 minutes. For E2E purposes, this flow
@@ -7,7 +7,7 @@
 # this flow will complete faster.
 #
 # Verifies:
-#   1. Login → wait for inactivity timeout → QuickSwitch re-appears
+#   1. Login → wait for inactivity timeout → Bloqueo for the same operator
 #
 # Precondition: wizard + director-setup complete, app relaunched.
 # Chain flows:
@@ -24,11 +24,11 @@ appId: mx.xangarro.mobile
 
 # Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-director.yaml
+- runFlow: shared/login-operator.yaml
 
 # Verify we're logged in and tabs are visible.
 - assertVisible:
-    id: 'tab-estados'
+    id: 'tab-turno'
 
 # Wait for the inactivity timeout to fire.
 # Default is 5min (300s). If E2E reduces it to 10s, this works faster.
@@ -38,9 +38,9 @@ appId: mx.xangarro.mobile
     duration: 100
 - extendedWaitUntil:
     visible:
-      id: 'quick-switch'
+      id: 'bloqueo'
     timeout: 320000
 
-# QuickSwitch re-appeared — auto-lock fired.
+# Bloqueo appeared for the same person (M-06): auto-lock fired, turno kept.
 - assertVisible:
-    id: 'quick-switch'
+    id: 'bloqueo-cambiar'

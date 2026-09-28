@@ -27,7 +27,13 @@ let apertura: {
 } | null;
 
 vi.mock('@xangarro/data-pg', () => ({
-  periodLedger: async () => ledger,
+  // DB3-QRY-04/DB3-EST-01 (landed on main): the period's ventas arrive summed
+  // per ticket and its egresos per category, in place of the single
+  // `periodLedger` read this suite was written against. The fixtures already
+  // carry the per-ticket shape, so they feed the new queries unchanged.
+  ventasPorTicket: async () => ledger.ventas,
+  egresosPorCategoria: async () => ledger.egresos,
+  ticketsDelPeriodo: async () => [],
   periodBalanceInputs: async () => inputs,
   getBusiness: async () => business,
   openingBalanceOf: async () => apertura?.header ?? null,

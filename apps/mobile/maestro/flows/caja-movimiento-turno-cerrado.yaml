@@ -16,7 +16,7 @@ tags:
 
 # Open caja.
 - tapOn:
-    id: 'tab-caja'
+    id: 'tab-turno'
 - tapOn:
     id: 'numpad-5'
     optional: true

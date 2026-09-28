@@ -87,6 +87,69 @@ describe('calcularInsights', () => {
     assert.deepEqual(calcularInsights(rows), []);
   });
 
+  /**
+   * The baseline is **three months**, averaged as months — not three expense
+   * rows averaged as rows. The two coincide only when a category is logged
+   * exactly once a month, which is what every fixture above happens to do, so
+   * these two cases are where the difference lives.
+   */
+  it('says nothing about a category whose spending is flat, however often it is logged', () => {
+    const quincenal = (mes: string) => [
+      gasto(`2026-${mes}-03`, 'Despensa', 500n, 'Despensa'),
+      gasto(`2026-${mes}-17`, 'Despensa', 500n, 'Despensa'),
+    ];
+    const rows: InsightRows = {
+      ...base,
+      // $5.00 twice a month, every month, for four months. Nothing is anomalous.
+      egresos: [...quincenal('02'), ...quincenal('03'), ...quincenal('04'), ...quincenal('05')],
+    };
+    assert.deepEqual(
+      calcularInsights(rows),
+      [],
+      'a monthly total compared against a per-row average reports every ' +
+        'twice-a-month category as 100% over, every month',
+    );
+  });
+
+  it('counts three baseline *months*, not three baseline rows', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        // Three rows, all inside April: one month of history, not three.
+        gasto('2026-04-03', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-04-10', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-04-17', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-05-03', 'Despensa', 700n, 'Despensa'),
+      ],
+    };
+    assert.deepEqual(
+      calcularInsights(rows),
+      [],
+      'one month of history must not be described as «los últimos tres»',
+    );
+  });
+
+  it('averages the baseline by month, so the body quotes a monthly figure', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        // $10.00 a month in two halves, then a month at $20.00.
+        gasto('2026-02-03', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-02-17', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-03-03', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-03-17', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-04-03', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-04-17', 'Despensa', 500n, 'Despensa'),
+        gasto('2026-05-03', 'Despensa', 2_000n, 'Despensa'),
+      ],
+    };
+    const [insight] = calcularInsights(rows);
+    assert.equal(insight?.kind, 'gasto-fuera');
+    // 100% over a $10.00 monthly baseline — not 300% over a $5.00 row average.
+    assert.match(insight?.title ?? '', /100% arriba/);
+    assert.match(insight?.body ?? '', /promedio de \$10\.00/);
+  });
+
   it('flags stock still on the shelf after 45 days without movement', () => {
     const rows: InsightRows = {
       ...base,

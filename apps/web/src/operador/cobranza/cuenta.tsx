@@ -6,14 +6,17 @@ import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
 import { Lateral } from '../ui/lateral';
-import { estadoCuenta, recordatorio } from './cliente/derive';
+import {
+  estadoCuenta,
+  recordatorio,
+  type CuentaCliente,
+  type MetodoAbono,
+} from '@xangarro/caja/cobranza';
 import { Recordar } from './cliente/recordar';
-import type { CuentaCliente } from './cliente/types';
 import { AbonoCaja, RecibirBoton, useAbonoCuenta, type AbonoCuenta } from './cuenta-abono';
 import { Abiertas, Abonos } from './cuenta-listas';
 import * as k from './cuenta.css';
 import { EstadoChip } from './tarjeta';
-import type { MetodoAbono } from './types';
 
 const WA =
   'M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719';

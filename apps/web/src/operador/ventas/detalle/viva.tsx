@@ -9,9 +9,8 @@
 
 import type { ReactNode } from 'react';
 
-import { VENTAS_FIXTURE } from '../fixture';
+import { VENTAS_FIXTURE, type DetalleScreenProps } from '@xangarro/caja/ventas';
 import { VentasScreen } from '../screen';
-import type { DetalleScreenProps } from './types';
 
 export function DetalleVentaViva({
   folio,

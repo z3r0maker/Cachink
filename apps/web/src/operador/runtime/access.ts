@@ -9,10 +9,10 @@
 import { AbrirCajaUseCase, AutenticarUsuarioUseCase } from '@xangarro/application';
 import { DrizzleCajaTurnosRepository, DrizzleUsersRepository } from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
-import { applyReferenceTables } from '@xangarro/sync';
-import type { ReferenceTables } from '@xangarro/contracts';
+import { applyBootstrap } from '@xangarro/sync';
+import type { Bootstrap } from '@xangarro/contracts';
 
-import { hoyLocal } from './fechas';
+import { hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
 
 export interface OperadorPara {
@@ -26,13 +26,17 @@ export interface SesionAbierta {
   readonly turnoId: string;
 }
 
-/** The activation's reference tables become the register's local database. */
+/**
+ * The activation's first page becomes the register's local database, with
+ * its pull cursor in the same transaction (C-23): the first pull continues
+ * the bootstrap instead of repeating it (audit DB3-BOOT-01).
+ */
 export async function vincularBootstrap(
   db: Db,
-  tables: ReferenceTables,
+  bootstrap: Bootstrap,
   businessId: BusinessId,
 ): Promise<void> {
-  await applyReferenceTables(db as never, tables, businessId);
+  await applyBootstrap(db as never, bootstrap, businessId);
 }
 
 /** The operator picker: «¿Quién abre turno?» */

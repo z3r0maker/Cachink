@@ -1,45 +1,19 @@
 /**
- * Persistent tab layout. Single role (ADR-053): one tab bar for every
- * Operator. Tapping the avatar locks the screen (clears userId) so
- * GatedNavigation shows QuickSwitch for the next Operator.
+ * The caja's four tabs (Track M, M-05): Inicio, Cobrar, Ventas, Mi turno.
+ * Single role (ADR-053). The frame (header, tab bar, or the rail and the
+ * sidebar on a tablet) is `AppShell`; Expo Router's own tab bar is hidden.
+ * Gastos, Inventario, Movimientos, No enviados and Ajustes are stack routes
+ * opened from Mi turno.
  */
 
 import type { ReactElement } from 'react';
-import { Tabs, usePathname, useRouter } from 'expo-router';
-import { AppShell, useCurrentBusiness, useMode, useSetUserId } from '@xangarro/ui';
-
-/** Map the current pathname to the matching BottomTabBar `activeKey`. */
-function deriveActiveTab(pathname: string): string {
-  const segment = pathname.replace(/^\/+/, '');
-  switch (segment) {
-    case 'ventas':
-    case 'productos':
-    case 'caja':
-      return segment;
-    case 'egresos':
-    case 'gastos':
-      return 'gastos';
-    default:
-      return 'ventas';
-  }
-}
+import { Tabs } from 'expo-router';
+import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 export default function TabsLayout(): ReactElement {
-  const mode = useMode();
-  const router = useRouter();
-  const pathname = usePathname();
-  const business = useCurrentBusiness().data ?? null;
-  const setUserId = useSetUserId();
   return (
-    <AppShell
-      activeTabKey={deriveActiveTab(pathname)}
-      mode={mode}
-      title={business?.nombre ?? undefined}
-      onNavigate={(path) => router.replace(path as never)}
-      onSwitchOperator={() => setUserId(null)}
-      onOpenSettings={() => router.push('/settings' as never)}
-    >
+    <AppShellWrapper>
       <Tabs screenOptions={{ headerShown: false }} tabBar={() => null} />
-    </AppShell>
+    </AppShellWrapper>
   );
 }

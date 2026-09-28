@@ -1,11 +1,11 @@
 /**
- * Root index inside the (tabs) group. The app is single-role (ADR-053):
- * every Operator lands on Ventas. The Director dashboard lives in the portal.
+ * Root index inside the (tabs) group: the caja lands on Inicio (Track M,
+ * M-06), which answers «what do I do now» and opens Cobrar from its card.
  */
 
 import type { ReactElement } from 'react';
 import { Redirect } from 'expo-router';
 
 export default function HomeIndex(): ReactElement {
-  return <Redirect href="/ventas" />;
+  return <Redirect href="/inicio" />;
 }

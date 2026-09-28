@@ -12,6 +12,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { AccesoScreen } from './screen';
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
+import { programarPulls } from '../runtime/pull-periodico';
+import { refrescar } from '../shell/cola';
 
 type Estado = 'decidiendo' | 'acceso' | 'adentro';
 
@@ -33,8 +35,30 @@ export function AccesoGate(p: { readonly children: ReactNode }) {
       .then((sesion) => setEstado(sesion === null ? 'acceso' : 'adentro'))
       .catch(() => setEstado('acceso'));
   }, []);
+  usePullsDeFondo(estado);
 
   if (estado === 'decidiendo') return null;
   if (estado === 'acceso') return <AccesoScreen onListo={() => setEstado('adentro')} />;
   return p.children;
+}
+
+/**
+ * An idle linked caja still pulls (DB3-CAJA-03): on boot, back in view and
+ * every 5 min ±20 %, at the door (a deactivated operator's NIP stops working)
+ * and inside alike. Only once the runtime is booted: the gate decided. At the
+ * door no shell flushes on reconnect, so a turno closed offline goes up here.
+ */
+function usePullsDeFondo(estado: Estado): void {
+  useEffect(() => {
+    if (estado === 'decidiendo' || readDevice() === null) return;
+    const parar = programarPulls(() => void refrescar(), { doc: document });
+    const enLinea = (): void => {
+      if (estado === 'acceso') void refrescar();
+    };
+    addEventListener('online', enLinea);
+    return () => {
+      parar();
+      removeEventListener('online', enLinea);
+    };
+  }, [estado]);
 }

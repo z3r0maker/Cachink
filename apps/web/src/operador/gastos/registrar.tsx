@@ -5,35 +5,18 @@ import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
-import { parseRecibido } from '../caja/ticket';
+import { parseRecibido } from '@xangarro/caja/caja';
 import { Campos } from './campos';
 import { Comprobante, type Prueba } from './comprobante';
-import { montoCrudo } from './derive';
+import {
+  montoCrudo,
+  type CategoriaGasto,
+  type NuevoGasto,
+  type PrefillGasto,
+} from '@xangarro/caja/gastos';
 import * as d from './drawer.css';
-import type { CategoriaGasto } from './types';
 
 const X = 'M18 6 6 18M6 6l12 12';
-
-export interface NuevoGasto {
-  readonly monto: bigint;
-  readonly concepto: string;
-  readonly categoria: CategoriaGasto;
-  /** Who was paid, when the operator said («La tienda, el gasero»). */
-  readonly proveedor: string | null;
-  /** The receipt photo's file name; `null` means «sin comprobante». */
-  readonly foto: string | null;
-  /** Set when the drawer was opened to pay a due recurring gasto. */
-  readonly recurrenteId?: string;
-}
-
-/** A due recurring gasto the drawer opens filled with (Mi turno and Inicio's «Registrar»). */
-export interface PrefillGasto {
-  readonly recurrenteId: string;
-  readonly concepto: string;
-  readonly monto: bigint;
-  readonly categoria: CategoriaGasto;
-  readonly proveedor: string | null;
-}
 
 /**
  * «Registrar gasto» in the right drawer: what, how much and the category are

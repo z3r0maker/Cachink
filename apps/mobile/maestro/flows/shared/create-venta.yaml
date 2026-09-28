@@ -1,38 +1,19 @@
-# Reusable subflow: create one cash sale via the POS so a venta exists in today's
-# ventas-list (the seeded sales are past-dated and don't show in the day view).
+# Reusable subflow: create one cash sale on Cobrar so a venta exists in today's
+# sales (the seeded sales are past-dated and don't show in the day view).
 #
 # Precondition: authenticated Operativo + caja open (shared/ensure-caja-open.yaml).
-# Leaves the app on the ventas POS with the new sale in `ventas-list`.
+# Leaves the app on Cobrar with an empty ticket.
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 8000
 
-# Add a product to the cart and check out (Efectivo, $50 tendered).
-- tapOn:
-    text: 'Taco al Pastor.*'
+# Add a product to the ticket and charge it (Efectivo, «Exacto»).
+- tapOn: 'Agregar Taco al Pastor.*'
 - assertVisible:
-    id: 'cart-strip'
-- tapOn:
-    id: 'cart-checkout-btn'
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 8000
-- tapOn:
-    id: 'checkout-method-continue'
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 8000
-- tapOn: "\\$50"
-- tapOn:
-    id: 'checkout-efectivo-submit'
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 8000
+    id: 'cobrar-bar'
+- runFlow: cobrar-ticket.yaml

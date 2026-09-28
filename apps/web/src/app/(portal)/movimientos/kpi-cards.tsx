@@ -5,7 +5,7 @@ import { formatMoney } from '@xangarro/domain';
 import { KpiCard, kpiGrid } from '@/components';
 
 import { kpisDeGastos, kpisDeVentas } from './kpis';
-import type { Row } from './parts';
+import type { MovimientosVista } from '@/server/movimientos';
 
 /**
  * The KPI row the screen had none of (B-1).
@@ -17,8 +17,8 @@ import type { Row } from './parts';
  * cash position and the open balance: both are other screens' numbers, so
  * these say what this table can answer for instead.
  */
-export function KpisVentas({ rows }: { readonly rows: readonly Row[] }) {
-  const k = kpisDeVentas(rows);
+export function KpisVentas({ grupos }: { readonly grupos: MovimientosVista['grupos'] }) {
+  const k = kpisDeVentas(grupos);
   return (
     <div className={kpiGrid}>
       <KpiCard
@@ -43,8 +43,8 @@ export function KpisVentas({ rows }: { readonly rows: readonly Row[] }) {
   );
 }
 
-export function KpisGastos({ rows }: { readonly rows: readonly Row[] }) {
-  const k = kpisDeGastos(rows);
+export function KpisGastos({ grupos }: { readonly grupos: MovimientosVista['grupos'] }) {
+  const k = kpisDeGastos(grupos);
   return (
     <div className={kpiGrid}>
       <KpiCard

@@ -17,51 +17,45 @@ tags:
 - runFlow: shared/authenticate.yaml
 - runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to Ventas.
+# Navigate to Cobrar.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
 
-# Tap a product and set high quantity (exceeding stock).
-- tapOn: 'Quesadilla'
-- assertVisible:
-    id: 'cart-strip'
-
-# Set cantidad to a large number by tapping the quantity control.
-- tapOn:
-    id: 'cart-qty-increase'
-    optional: true
-- tapOn:
-    id: 'cart-qty-increase'
-    optional: true
-- tapOn:
-    id: 'cart-qty-increase'
-    optional: true
-- tapOn:
-    id: 'cart-qty-increase'
-    optional: true
-
-# Checkout — should succeed even with high qty.
+# One Quesadilla, then four more from the ticket's stepper.
+- tapOn: 'Agregar Quesadilla,.*'
 - tapOn:
     id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: 'checkout-method-picker'
+      id: 'ticket-sheet'
     timeout: 5000
+- tapOn: 'Agregar uno de Quesadilla'
+- tapOn: 'Agregar uno de Quesadilla'
+- tapOn: 'Agregar uno de Quesadilla'
+- tapOn: 'Agregar uno de Quesadilla'
+- assertVisible: '.*5 piezas.*'
+
+# Charge it: the sale goes through even past the stock.
 - tapOn:
-    id: 'checkout-method-continue'
+    id: 'ticket-cobrar'
 - extendedWaitUntil:
     visible:
-      id: 'checkout-efectivo'
+      id: 'checkout-cobro'
     timeout: 5000
-- tapOn: "\\$500"
 - tapOn:
-    id: 'checkout-efectivo-submit'
-
-# Returns to Ventas — sale completed (negative stock allowed).
+    id: 'cobro-rapido-0'
+- tapOn:
+    id: 'cobro-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- tapOn:
+    id: 'venta-hecha-nueva'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

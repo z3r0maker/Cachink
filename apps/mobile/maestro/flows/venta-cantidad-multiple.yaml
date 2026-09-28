@@ -1,7 +1,7 @@
 # Sell multiple units by tapping the same product 3 times.
 #
 # Verifies:
-#   1. Tap product 3x → cart shows qty=3
+#   1. Tap product 3x → the tile badge and the bar show 3
 #   2. Checkout → sale recorded with qty=3
 #
 # Precondition: demo mode seeded (products + users exist).
@@ -15,41 +15,24 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
 
 # Tap the same product 3 times to set qty=3.
-- tapOn: 'Quesadilla'
-- tapOn: 'Quesadilla'
-- tapOn: 'Quesadilla'
+- tapOn: 'Agregar Quesadilla,.*'
+- tapOn: 'Agregar Quesadilla,.*'
+- tapOn: 'Agregar Quesadilla,.*'
 
-# Cart strip should show the item.
+# The bar shows the three pieces.
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cobrar-bar'
+- assertVisible: '3 piezas ·'
+- runFlow: shared/cobrar-ticket.yaml
 
-# Checkout with Efectivo (default).
-- tapOn:
-    id: 'cart-checkout-btn'
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 5000
-- tapOn:
-    id: 'checkout-method-continue'
-
-# Cash entry screen — tap a quick amount and submit.
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 5000
-- tapOn: "\\$100"
-- tapOn:
-    id: 'checkout-efectivo-submit'
-
-# Returns to Ventas — sale appears.
+# Back on Cobrar with an empty ticket.
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

@@ -111,7 +111,7 @@ What it does, in order (`packages/data-pg/scripts/migrate-hosted.ts`):
    `xangarro_metering`, `xangarro_admin` as LOGIN roles with your passwords
    (sent as SCRAM verifiers, so no password lands in Supabase's DDL log), and
    sets DB-CONN-01's bounds: `statement_timeout` 5 s / 10 s / 60 s / 15 s,
-   `idle_in_transaction_session_timeout` 10 s. Re-running rotates nothing
+   `idle_in_transaction_session_timeout` 10 s, and `jit = off` on every role but metering (RLS inflates cost estimates past the JIT threshold; audit DB2-PAGE-01). Re-running rotates nothing
    unless you changed a password.
 4. **Migrations** — ledger table `xangarro_ops.migrations` (name, checksum,
    applied_at); applies, in order, only the files it lacks:
@@ -120,6 +120,17 @@ What it does, in order (`packages/data-pg/scripts/migrate-hosted.ts`):
    commit in one transaction (`lock_timeout` 10 s); the first error rolls
    that file back and stops. An applied file whose bytes changed, or that
    disappeared, is a hard error: never edit an applied migration, add one.
+   So is a pending file that sorts below one already applied in its set:
+   renumber it above (ADR-119).
+   A file whose first line is `-- xangarro:no-transaction` (ADR-119) runs
+   statement by statement instead, so it can `CREATE INDEX CONCURRENTLY`
+   without blocking writes; its ledger row is written after the last
+   statement. If one fails, the ones before it stay applied and the next run
+   repeats the file — which is why such files may only hold repeatable
+   statements (`hosted/lint.ts` refuses the rest before anything runs), and
+   why the runner first drops the INVALID index an interrupted concurrent
+   build leaves. A run that stops on `lock_timeout` during the evening peak
+   (17:00–20:00) is simply run again in the trough.
 5. **Posture** — `WARNING` lines: SECURITY DEFINER owners without BYPASSRLS or
    without a pinned `search_path`, definer functions executable by
    `anon`/`authenticated`, login roles that can't log in, have dangerous
@@ -133,8 +144,10 @@ owner moves it behind a SECURITY DEFINER function or approves the grants
 
 Proven locally with `pnpm --filter @xangarro/data-pg db:migrate:hosted:selftest`
 (throwaway `postgres:17` container shaped like Supabase: dry run, fresh run,
-SCRAM logins and timeouts, idempotent re-run, new file, rollback of a failing
-file, preflight blocker, checksum drift). Every later migration: run
+SCRAM logins and timeouts, idempotent re-run, new file, a no-transaction
+file's concurrent index, an out-of-order file, rollback of a failing file,
+preflight blocker, checksum drift). `XG_SELFTEST_NAME` / `XG_SELFTEST_PORT`
+move its container off the default. Every later migration: run
 `db:migrate:hosted` **before** deploying the code that needs it.
 
 ## 4. What the hosted run applies from `local/` — and what it does not
@@ -210,14 +223,11 @@ transaction mode does not support prepared statements, and
 for all four: correct, but each warm function holds its connections, so the
 Nano pool fills sooner. Switch to 6543 once the change is on main.
 
-The change, in `createDb`:
-
-```ts
-const sql = postgres(url, { max: 5, prepare: false, onnotice: () => undefined });
-```
-
-(`prepare: false` is safe on every URL — local, Session and Transaction
-pooler. Consider `max: 1`–`2` per serverless instance on Nano.)
+`createDb` now sets `prepare: false` (safe on every URL — local, Session and
+Transaction pooler), a pool of `DATABASE_POOL_MAX` connections (default **2**
+per process; the metering pool uses 1), `idle_timeout: 20` and
+`connect_timeout: 10` (audit DB2-CONN-01). Leave `DATABASE_POOL_MAX` unset on
+Vercel; raise it only for a long-lived server.
 
 ## 6. First staff member, Stripe, entitlement key
 
@@ -243,6 +253,40 @@ pooler. Consider `max: 1`–`2` per serverless instance on Nano.)
 - **Entitlement key** — §2.
 
 ## 7. Vercel
+
+### The commit author has to be allowed to deploy
+
+Vercel attaches HEAD's git author to a CLI deploy and refuses when that
+identity may not deploy the project:
+
+> The deployment was blocked because the commit author doesn't have permission
+> to create deployments for this project.
+
+The deployment then sits **Blocked** — not Error. Nothing is built, nothing
+ships, and the previous build keeps serving, so the site looks healthy and is
+simply stale. That is how it went unnoticed for an afternoon on 2026-09-26:
+the morning's release worked because HEAD was a GitHub merge commit by
+`z3r0maker`, and the evening's was refused because HEAD had become a commit
+authored `eduardo.torres@unosquare.com`.
+
+So this repository sets **its own** identity, which beats the global one and
+cannot collide with another project worked on at the same time:
+
+```bash
+git config --local user.name  "z3r0maker"
+git config --local user.email "61766229+z3r0maker@users.noreply.github.com"
+```
+
+`.git/config` is not committed, so a fresh clone falls back to the global
+identity. `.husky/pre-push` checks HEAD's author for that reason and refuses
+the push with the two commands above; re-author what you already committed
+with `git commit --amend --reset-author --no-edit`.
+
+The durable alternative is on Vercel's side — add the other address to the
+account's emails, or turn off Git Fork/Author Protection on the three
+projects — at which point this repo-local identity stops mattering.
+
+### Project settings
 
 Both projects: Settings → General → Root Directory as in the facts table;
 Settings → Functions shows **pdx1** (from `vercel.json`). Set variables for

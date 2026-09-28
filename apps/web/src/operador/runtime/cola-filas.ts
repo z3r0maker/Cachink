@@ -9,12 +9,14 @@ import { sql } from 'drizzle-orm';
 
 import { LECTORES } from './cola-lectores';
 import { filas, porLotes, type Lector } from './cola-sql';
-import type { PendienteCrudo } from './cola-shapes';
+import type { PendienteCrudo } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 
 export interface Entrada {
   readonly tabla: string;
   readonly id: string;
+  /** Tried at least once and on automatic retry (`unsentRows`' `retrying`). */
+  readonly reintento?: boolean;
 }
 
 /** Rows that belong to a ticket, and the column that says which. */
@@ -35,6 +37,8 @@ async function ticketsDe(db: Db, entradas: readonly Entrada[]): Promise<Map<stri
   }
   return out;
 }
+
+export const clave = (e: Entrada): string => `${e.tabla}:${e.id}`;
 
 /** Where a row is read from: its own table, its ticket, or the inventory fold. */
 export function destino(e: Entrada, tickets: ReadonlyMap<string, string>): Entrada {
@@ -64,11 +68,23 @@ export function ordenar(
   return { orden, ids };
 }
 
+/** The records already retrying: any of their rows is (a ticket whose line failed). */
+export function reintentosDe(
+  entradas: readonly Entrada[],
+  tickets: ReadonlyMap<string, string>,
+): ReadonlySet<string> {
+  return new Set(
+    entradas.filter((e) => e.reintento === true).map((e) => clave(destino(e, tickets))),
+  );
+}
+
 export async function agrupar(
   db: Db,
   entradas: readonly Entrada[],
 ): Promise<readonly PendienteCrudo[]> {
-  const { orden, ids } = ordenar(entradas, await ticketsDe(db, entradas));
+  const tickets = await ticketsDe(db, entradas);
+  const { orden, ids } = ordenar(entradas, tickets);
+  const reintentos = reintentosDe(entradas, tickets);
   const leidos = new Map<string, ReadonlyMap<string, PendienteCrudo>>();
   for (const [tabla, lista] of ids) {
     const lector: Lector | undefined = LECTORES[tabla];
@@ -77,7 +93,7 @@ export async function agrupar(
   const out: PendienteCrudo[] = [];
   for (const d of orden) {
     const p = leidos.get(d.tabla)?.get(d.id);
-    if (p !== undefined) out.push(p);
+    if (p !== undefined) out.push(reintentos.has(clave(d)) ? { ...p, reintento: true } : p);
   }
   return out;
 }

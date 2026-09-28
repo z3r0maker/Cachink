@@ -10,6 +10,7 @@ import { store } from '../inbox/errors';
 import type { SupportItemRepository } from '../inbox/port';
 import { secretMatches } from '../ingest/secret';
 import { buildDailyDigest } from './digest';
+import { housekeeping, type HousekeepingDeps } from './housekeeping';
 import { digestWindow } from './mx-day';
 import type { Mailer } from './email';
 import { OVER_LIMIT_UNAVAILABLE, type OverLimitSource, type OverLimitSummary } from './over-limit';
@@ -21,22 +22,12 @@ import {
   type RejectionSummary,
 } from './rejections';
 
-export interface DigestCronDeps {
+/** The housekeeping sweeps (`housekeeping.ts`) ride on the same daily call. */
+export interface DigestCronDeps extends HousekeepingDeps {
   /** `CRON_SECRET`. */
   readonly secret: string | undefined;
   readonly now: () => Date;
   readonly repo: SupportItemRepository;
-  /** N-05's follow-up: expired-session pruning, run after the mail so a
-   * prune failure never costs the digest. Its count goes to the log only. */
-  readonly pruneSessions?: () => Promise<number>;
-  /** N-61: drop geographic counters past their retention. */
-  readonly pruneGeo?: () => Promise<number>;
-  readonly pruneLatency?: () => Promise<number>;
-  /** N-18: expire approvals the tenant ignored for 14 days, and purge the
-   * files of rows resolved 30+ days ago (LFPDPPP). Same rule as the
-   * sessions: housekeeping never costs the digest. */
-  readonly expireAssisted?: () => Promise<number>;
-  readonly purgeAssistedFiles?: () => Promise<number>;
   /** B-18's rejection digest; a failed read renders «no disponible», it does not stop the email. */
   readonly rejections: RejectionSource;
   /** N-10: tenants over a plan limit; a failed read renders «no disponible». */
@@ -123,77 +114,4 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
     counts: digest.counts,
     ...sweeps,
   });
-}
-
-/** Retention and expiry steps; each logs its own failure and never costs the digest. */
-async function housekeeping(deps: DigestCronDeps, log: NonNullable<DigestCronDeps['log']>) {
-  const prunedSessions = await pruneSessions(deps, log);
-  const prunedGeo = await pruneGeo(deps, log);
-  const prunedLatency = await pruneLatency(deps, log);
-  const assisted = await assistedSweeps(deps, log);
-  return {
-    prunedSessions,
-    prunedGeo,
-    prunedLatency,
-    expiredAssisted: assisted.expired,
-    purgedAssistedFiles: assisted.purgedFiles,
-  };
-}
-
-/** N-05's prune; null when the step is not wired, failures only log. */
-async function pruneSessions(
-  deps: DigestCronDeps,
-  log: NonNullable<DigestCronDeps['log']>,
-): Promise<number | null> {
-  if (deps.pruneSessions === undefined) return null;
-  try {
-    return await deps.pruneSessions();
-  } catch (error) {
-    log('digest: pruning staff sessions failed', error);
-    return null;
-  }
-}
-
-/** N-61's retention sweep; same contract as the one above. */
-async function pruneGeo(
-  deps: DigestCronDeps,
-  log: NonNullable<DigestCronDeps['log']>,
-): Promise<number | null> {
-  if (deps.pruneGeo === undefined) return null;
-  try {
-    return await deps.pruneGeo();
-  } catch (error) {
-    log('digest: pruning geo counters failed', error);
-    return null;
-  }
-}
-
-/** N-07's retention sweep; same contract as the two above. */
-async function pruneLatency(
-  deps: DigestCronDeps,
-  log: NonNullable<DigestCronDeps['log']>,
-): Promise<number | null> {
-  if (deps.pruneLatency === undefined) return null;
-  try {
-    return await deps.pruneLatency();
-  } catch (error) {
-    log('digest: pruning latency counters failed', error);
-    return null;
-  }
-}
-
-/** N-18's housekeeping pair; failures log, never cost the digest. */
-async function assistedSweeps(
-  deps: DigestCronDeps,
-  log: NonNullable<DigestCronDeps['log']>,
-): Promise<{ readonly expired: number; readonly purgedFiles: number }> {
-  try {
-    return {
-      expired: deps.expireAssisted ? await deps.expireAssisted() : 0,
-      purgedFiles: deps.purgeAssistedFiles ? await deps.purgeAssistedFiles() : 0,
-    };
-  } catch (error) {
-    log('digest: assisted-import sweeps failed', error);
-    return { expired: 0, purgedFiles: 0 };
-  }
 }

@@ -13,19 +13,22 @@ env:
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - runScript:
     file: shared/mock-row.js
     env:
       ACTION: forget
       TABLE: products
       ROW_ID: 01JPRD00000000000000000007
-- tapOn: 'Agua de horchata'
+- tapOn: 'Agregar Agua de horchata,.*'
 - tapOn:
     id: 'cart-checkout-btn'
-- tapOn: 'Transferencia'
-- tapOn: 'CONTINUAR'
-- tapOn: 'TRANSFERENCIA RECIBIDA'
+- tapOn:
+    id: 'ticket-cobrar'
+- tapOn:
+    id: 'cobro-metodo-Transferencia'
+- tapOn:
+    id: 'cobro-submit'
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-rejected'

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { ScreenBody, SegmentedTabs } from '@/components';
+import { ExportButton, ScreenBody, SegmentedTabs } from '@/components';
 import { useSession } from '@/session/provider';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
@@ -48,6 +48,15 @@ function Tabs({
   );
 }
 
+/** Productos › Movimientos' header action: the whole history, not the 50 listed (DS-02). */
+function ExportarMovimientos() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <ExportButton dataset="movimientos" label="Exportar movimientos" />
+    </div>
+  );
+}
+
 function Controls({
   tab,
   setTab,
@@ -85,7 +94,7 @@ function Controls({
       ) : null}
       <Tabs tab={tab} onChange={onTab} catalogCount={catalogo.length} movCount={movCount} />
       {isCatalogo ? <Kpis rows={catalogo} /> : <KpisMovimientos rows={movimientos} />}
-      {isCatalogo ? <Chips filter={filter} setFilter={setFilter} /> : null}
+      {isCatalogo ? <Chips filter={filter} setFilter={setFilter} /> : <ExportarMovimientos />}
     </>
   );
 }

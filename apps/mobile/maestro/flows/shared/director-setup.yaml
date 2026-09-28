@@ -61,5 +61,5 @@ appId: mx.xangarro.mobile
 # Wait for the app shell (tabs) to render.
 - extendedWaitUntil:
     visible:
-      id: 'tab-caja'
+      id: 'tab-turno'
     timeout: 10000

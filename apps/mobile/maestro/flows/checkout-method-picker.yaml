@@ -1,4 +1,5 @@
-# Verify the multi-step checkout flow renders the method picker.
+# «¿Cómo paga?» (Track M, M-07; MvCobro): the three methods, Fiado as its own
+# row, never QR/CoDi, and each method's panel.
 # Precondition: demo mode seeded (products + users exist).
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
@@ -12,35 +13,45 @@ tags:
 - runFlow: shared/authenticate.yaml
 - runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to Ventas tab and tap a product to add to cart.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
-- tapOn: 'Quesadilla'
-
-# Cart strip appears — tap checkout.
-- assertVisible:
-    id: 'cart-strip'
+- tapOn: 'Agregar Quesadilla.*'
 - tapOn:
     id: 'cart-checkout-btn'
-
-# The checkout method picker screen should appear.
+- tapOn:
+    id: 'ticket-cobrar'
 - extendedWaitUntil:
     visible:
-      id: 'checkout-method-picker'
+      id: 'checkout-cobro'
     timeout: 5000
 
-# Verify payment method options are visible.
 - assertVisible:
-    id: 'checkout-payment-method'
-
-# Verify the continue button exists.
+    id: 'cobro-metodo-Efectivo'
 - assertVisible:
-    id: 'checkout-method-continue'
+    id: 'cobro-efectivo'
+- assertVisible:
+    id: 'cobro-fiado'
+- assertNotVisible: 'QR/CoDi'
 
-# ── MVP: Crédito must NOT appear in the payment picker ──
-- assertNotVisible:
-    id: 'option-card-Crédito'
+- tapOn:
+    id: 'cobro-metodo-Tarjeta'
+- assertVisible:
+    id: 'cobro-panel-Tarjeta'
+- tapOn:
+    id: 'cobro-metodo-Transferencia'
+- assertVisible:
+    id: 'cobro-panel-Transferencia'
+
+# Fiado goes on to choose the client.
+- tapOn:
+    id: 'cobro-fiado'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-fiado'
+    timeout: 5000
+- assertVisible: 'Anótalo a su cuenta'
+- assertVisible: 'Elige a quién se lo anotas'

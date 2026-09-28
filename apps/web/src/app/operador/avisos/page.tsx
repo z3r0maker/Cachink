@@ -1,6 +1,5 @@
-import { AVISOS_FIXTURE } from '@/operador/avisos/fixture';
+import { AVISOS_FIXTURE, type AvisoGrupo, type AvisosScreenProps } from '@xangarro/caja/avisos';
 import { AvisosViva } from '@/operador/avisos/viva';
-import type { AvisoGrupo, AvisosScreenProps } from '@/operador/avisos/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 

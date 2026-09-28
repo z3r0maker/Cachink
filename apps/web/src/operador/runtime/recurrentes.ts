@@ -12,9 +12,8 @@ import { ProcesarGastoRecurrenteUseCase } from '@xangarro/application';
 import { DrizzleExpensesRepository, DrizzleRecurringExpensesRepository } from '@xangarro/data';
 import type { BusinessId, CajaTurnoId, UserId } from '@xangarro/domain';
 
-import { categoriaDominio, categoriaOperador } from '../vocabulario';
+import { categoriaDominio, categoriaOperador, hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
-import { hoyLocal } from './fechas';
 import { registrarGasto } from './gastos';
 
 /** A due template as the drawer fills itself: money as centavos, the operator's category. */

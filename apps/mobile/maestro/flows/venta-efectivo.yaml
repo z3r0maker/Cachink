@@ -1,4 +1,5 @@
-# Create a cash venta via the inline POS and verify sale appears.
+# Create a cash venta on Cobrar (Track M, M-07; MvCobrar → MvTicket → MvCobro
+# → MvVentaHecha) and check the change is shown.
 #
 # Precondition: demo mode seeded (products + users exist).
 # x-entrypoint: demo
@@ -9,58 +10,61 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 - runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to the Ventas tab.
 - tapOn:
-    id: 'tab-ventas'
-
-# Review item #8: the screen must read as "make a sale", not "list of
-# sales". Assert the unmistakable CTA and the hint before touching the
-# grid — if either regresses, this fails here rather than silently.
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-nueva-venta-cta'
-    timeout: 5000
-- assertVisible: 'Nueva venta'
-- assertVisible: 'Toca un producto para agregarlo a la venta'
-
-# The product grid should show demo products.
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
+- assertVisible: 'Toca lo que pidió el cliente'
+- assertVisible: 'Toca un producto para empezar'
 
-# Tap a demo product to add to cart.
-- tapOn: 'Quesadilla'
-
-# Cart strip should appear.
+# Tap a product: the bar shows pieces and total.
+- tapOn: 'Agregar Quesadilla.*'
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cobrar-bar'
+- assertVisible: '1 pieza ·'
 
-# Tap checkout.
+# Review the ticket and go on to the cobro.
 - tapOn:
     id: 'cart-checkout-btn'
-
-# Checkout screen appears — confirm with Efectivo (default).
 - extendedWaitUntil:
     visible:
-      id: 'checkout-method-picker'
+      id: 'ticket-sheet'
     timeout: 5000
+- assertVisible: 'Revisa el ticket'
 - tapOn:
-    id: 'checkout-method-continue'
-
-# Cash entry screen — tap a quick amount to fill the received field.
+    id: 'ticket-cobrar'
 - extendedWaitUntil:
     visible:
-      id: 'checkout-efectivo'
+      id: 'checkout-cobro'
     timeout: 5000
-- tapOn: "\\$50"
+- assertVisible: '¿Cómo paga?'
 
-# Submit the sale.
+# Nothing typed yet: the button says what is missing.
+- assertVisible: 'Falta.*'
+
+# Pay with $500 on the keypad: 5, 0, 0.
 - tapOn:
-    id: 'checkout-efectivo-submit'
+    id: 'cobro-tecla-5'
+- tapOn:
+    id: 'cobro-tecla-0'
+- tapOn:
+    id: 'cobro-tecla-0'
+- assertVisible: 'Cobrar y dar.*'
+- tapOn:
+    id: 'cobro-submit'
 
-# Returns to Ventas after sale is registered.
+# «Venta hecha» with the change, back on Cobrar with «Nueva venta».
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- assertVisible: 'Dale de cambio'
+- tapOn:
+    id: 'venta-hecha-nueva'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
+- assertVisible: 'Toca un producto para empezar'

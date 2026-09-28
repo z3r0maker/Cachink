@@ -1,20 +1,18 @@
 import { formatMoney } from '@xangarro/domain';
 
 import { Don } from '../../components/don/don';
-import { desglose } from '../turno/desglose';
+import { desglose } from '@xangarro/caja/turno';
 import * as s from './cierre.css';
-import { DIF, FALTA_PENDIENTE } from './copy';
+import { DIF, MOTIVOS_DIFERENCIA, type CierreData } from '@xangarro/caja/cierre';
 import * as d from './don.css';
-import { MOTIVOS_DIFERENCIA, type CierreData } from './types';
 import type { Cierre } from './use-cierre';
 
-/** The yellow card: expected cash and its four parts; «Puede cambiar» while records wait. */
+/** The yellow card: expected cash and its four parts (this caja's own rows: final even while records wait). */
 export function Esperado({ x, data }: { readonly x: Cierre; readonly data: CierreData }) {
   return (
     <section aria-label="Efectivo esperado" className={s.esperado}>
       <div className={s.esperadoHead}>
         <span className={s.eyebrow}>Efectivo esperado</span>
-        {x.pendientes > 0 ? <span className={s.puedeCambiar}>Puede cambiar</span> : null}
         <span className={s.esperadoCifra}>{formatMoney(x.esperado)}</span>
       </div>
       <div style={{ marginTop: 8 }}>
@@ -63,8 +61,6 @@ function SinContar() {
 
 /** On a shortfall Don worries (once the count is final); otherwise one line. */
 function Aviso({ x }: { readonly x: Cierre }) {
-  if (x.dif.tipo === 'falta' && x.pendientes > 0)
-    return <p className={s.texto}>{FALTA_PENDIENTE}</p>;
   if (x.dif.tipo !== 'falta') return <p className={s.texto}>{DIF[x.dif.tipo].hint}</p>;
   return (
     <div className={d.dice}>

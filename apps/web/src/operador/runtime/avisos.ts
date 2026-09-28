@@ -17,7 +17,7 @@ import {
 import type { BusinessId, MensajeOperador } from '@xangarro/domain';
 
 import { colaPendiente } from './cola';
-import type { AvisosPara, ColaRequest, MensajePara, StockBajoPara } from './cola-shapes';
+import type { AvisosPara, ColaRequest, MensajePara, StockBajoPara } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 import { stockPorProducto } from './inventario';
 import { duenoNombre } from './negocio';

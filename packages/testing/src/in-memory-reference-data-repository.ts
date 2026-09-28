@@ -3,11 +3,17 @@
  * assert what the activation/pull flow handed to the database layer.
  */
 
-import type { ReferenceTables } from '@xangarro/contracts';
+import type { Bootstrap, ReferenceTables } from '@xangarro/contracts';
 import type { ApplyReferenceResult, ReferenceDataRepository } from '@xangarro/sync';
 
 export class InMemoryReferenceDataRepository implements ReferenceDataRepository {
   readonly applied: { tables: ReferenceTables; businessId: string }[] = [];
+  readonly bootstraps: { bootstrap: Bootstrap; businessId: string }[] = [];
+
+  async applyBootstrap(bootstrap: Bootstrap, businessId: string): Promise<ApplyReferenceResult> {
+    this.bootstraps.push({ bootstrap, businessId });
+    return this.apply(bootstrap.tables, businessId);
+  }
 
   async apply(tables: ReferenceTables, businessId: string): Promise<ApplyReferenceResult> {
     this.applied.push({ tables, businessId });

@@ -3,13 +3,12 @@
 import { formatMoney } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
-import { ICONS } from '../shell/nav';
+import { ICONS } from '@xangarro/caja';
 import * as u from '../ui/ui.css';
 import * as f from './ticket-foot.css';
 import * as t from './ticket.css';
-import { importe } from './ticket';
+import { importe, type CajaData, type LineaTicket } from '@xangarro/caja/caja';
 import { Metodos, PasoCobro } from './cobro';
-import type { CajaData, LineaTicket } from './types';
 import type { Caja } from './use-caja';
 
 const MINUS = 'M5 12h14';

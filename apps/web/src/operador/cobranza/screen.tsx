@@ -5,7 +5,7 @@ import { colors } from '@xangarro/tokens';
 
 import { OperadorEstado } from '../estado';
 import { NuevaVenta } from '../shell/actions';
-import { ICONS } from '../shell/nav';
+import { ICONS } from '@xangarro/caja';
 import { SinResultados } from '../ui/filters';
 import { OpMain } from '../ui/parts';
 import { Buscador, Filtros, Resumenes } from '../ui/resumen';
@@ -14,9 +14,8 @@ import { Toast } from '../ui/toast';
 import { AbonosHoy } from './abonos-hoy';
 import * as c from './cobranza.css';
 import { CuentaLateral } from './cuenta';
-import { abonosDeHoy, filtrar, resumen } from './derive';
+import { abonosDeHoy, filtrar, resumen, type CobranzaScreenProps } from '@xangarro/caja/cobranza';
 import { Tarjeta } from './tarjeta';
-import type { CobranzaScreenProps } from './types';
 import { useCobranza, type Cobranza } from './use-cobranza';
 
 const FILTROS = ['Todos', 'Con saldo', 'Atrasados'] as const;

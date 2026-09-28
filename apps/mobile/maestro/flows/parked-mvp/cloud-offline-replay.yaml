@@ -36,22 +36,12 @@ env:
 - repeat:
     times: 3
     commands:
-      - tapOn: { id: 'tab-ventas' }
+      - tapOn: { id: 'tab-cobrar' }
       - extendedWaitUntil:
           visible: { id: 'ventas-product-grid' }
           timeout: 5000
-      - tapOn: 'Offline producto'
-      - assertVisible: { id: 'cart-strip' }
-      - tapOn: { id: 'cart-checkout-btn' }
-      - extendedWaitUntil:
-          visible: { id: 'checkout-method-picker' }
-          timeout: 5000
-      - tapOn: { id: 'checkout-method-continue' }
-      - extendedWaitUntil:
-          visible: { id: 'checkout-efectivo' }
-          timeout: 5000
-      - tapOn: "\\$50"
-      - tapOn: { id: 'checkout-efectivo-submit' }
+      - tapOn: 'Agregar Offline producto,.*'
+      - runFlow: ../shared/cobrar-ticket.yaml
       - extendedWaitUntil:
           visible: { id: 'ventas-product-grid' }
           timeout: 10000

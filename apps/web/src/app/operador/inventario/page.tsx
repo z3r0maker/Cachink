@@ -1,6 +1,5 @@
-import { INVENTARIO_FIXTURE } from '@/operador/inventario/fixture';
+import { INVENTARIO_FIXTURE, type InventarioScreenProps } from '@xangarro/caja/inventario';
 import { InventarioViva } from '@/operador/inventario/viva';
-import type { InventarioScreenProps } from '@/operador/inventario/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 const TABS = ['existencias', 'movimientos'] as const;

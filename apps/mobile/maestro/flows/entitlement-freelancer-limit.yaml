@@ -24,13 +24,16 @@ env:
     timeout: 20000
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-ventas'
-- tapOn: 'Agua de jamaica'
+    id: 'tab-cobrar'
+- tapOn: 'Agregar Agua de jamaica,.*'
 - tapOn:
     id: 'cart-checkout-btn'
-- tapOn: 'Transferencia'
-- tapOn: 'CONTINUAR'
-- tapOn: 'TRANSFERENCIA RECIBIDA'
+- tapOn:
+    id: 'ticket-cobrar'
+- tapOn:
+    id: 'cobro-metodo-Transferencia'
+- tapOn:
+    id: 'cobro-submit'
 - extendedWaitUntil:
     visible:
       id: 'plan-limit-sheet'

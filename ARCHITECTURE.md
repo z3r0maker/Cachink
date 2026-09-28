@@ -148,7 +148,21 @@ Links to discussion, docs, prior art.
 | [106](#adr-106) | 2026-09-24 | Each plan is «dueño + N empleados»: N linked devices and N + 1 operators | Accepted |
 | [107](#adr-107) | 2026-09-25 | El Mostrador — the portal's calmer surface, and Don Cuentas in motion | Accepted |
 | [108](#adr-108) | 2026-09-25 | QR/CoDi retired from every picker; the enum keeps it for history | Accepted |
-| [109](#adr-109) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
+| [109](#adr-109) | 2026-09-26 | The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system | Accepted |
+| [110](#adr-110) | 2026-09-26 | Two of the three remaining model touchpoints stop being model touchpoints | Accepted |
+| [111](#adr-111) | 2026-09-26 | The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it | Accepted |
+| [112](#adr-112) | 2026-09-26 | What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked | Accepted |
+| [113](#adr-113) | 2026-09-26 | In the Diagnóstico, tier withholds visibly and maturity withholds silently | Accepted |
+| [114](#adr-114) | 2026-09-26 | Section 10 inherits its availability from the findings that feed it, and says so when a month is clean | Accepted |
+| [115](#adr-115) | 2026-09-26 | An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight | Accepted |
+| [116](#adr-116) | 2026-09-26 | A capacidad promises a date only where the calendar alone gets there | Accepted |
+| [117](#adr-117) | 2026-09-27 | «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens | Accepted |
+| [118](#adr-118) | 2026-09-27 | The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone | Accepted |
+| [119](#adr-119) | 2026-09-26 | Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files | Accepted |
+| [120](#adr-120) | 2026-09-26 | The push is batched: statements per table, not per row, and a bad row is found by splitting | Accepted |
+| [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
+| [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
+| [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -5666,6 +5680,40 @@ stock.
 
 ---
 
+## ADR-082
+
+**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
+
+**Context**
+
+`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
+«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
+(626), so a tenant with a valid RFC still fell through to the global CFDI, and
+«Otro» cannot be turned into a code at all.
+
+**Decision**
+
+1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
+   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
+   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
+   completar» until the owner picks.
+2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
+   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
+   other → Otro), so phones that read the bucket for ISR keep working.
+3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
+   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
+   suggested ISR rate behind a switch, never silently.
+
+**Consequences**
+
+- Track A: the phone's BusinessForm should write the code too (via
+  `regimenPatch`), not the bucket.
+- The CFDI port should read `regimen_sat` instead of mapping the bucket.
+
 ## ADR-083
 
 **Title:** Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner
@@ -5720,40 +5768,6 @@ here with the option Track O recommended, and marked provisional.
 
 - The design amendments list (plan §4b) gains the files' side of D2 and D7.
 - D3 and D6 bind O-06's writers; D4 binds the Gastos writer.
-
-## ADR-082
-
-**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
-
-**Date:** 2026-09-18
-
-**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
-
-**Context**
-
-`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
-«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
-(626), so a tenant with a valid RFC still fell through to the global CFDI, and
-«Otro» cannot be turned into a code at all.
-
-**Decision**
-
-1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
-   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
-   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
-   completar» until the owner picks.
-2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
-   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
-   other → Otro), so phones that read the bucket for ISR keep working.
-3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
-   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
-   suggested ISR rate behind a switch, never silently.
-
-**Consequences**
-
-- Track A: the phone's BusinessForm should write the code too (via
-  `regimenPatch`), not the bucket.
-- The CFDI port should read `regimen_sat` instead of mapping the bucket.
 
 ## ADR-084
 
@@ -5978,56 +5992,6 @@ budget O-7 has not confirmed, for content that needs no scheduler.
 - A page load may write rows (upserts of a handful of notices) — an acceptable side effect of a
   read path, and the reason the seed's `/asesor` visits in e2e are covered by the routes sweep.
 - «Próximamente» still gates only the model-backed Diagnóstico/catálogo paths (ADR-059).
-
----
-
-## ADR-099
-
-**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
-
-### One SVG renderer for the receipt templates; PDF is a page of that raster
-
-#### Context
-
-N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
-the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
-from one `Comprobante` contract, for the portal live preview now and the phone
-later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
-`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
-the two outputs would drift.
-
-#### Decision
-
-1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
-   pure string builders with no DOM, no measurement — the fichas size by
-   character counts («24 px si pasa de 24 caracteres»), so wrapping and
-   truncation are count-based and deterministic. Snapshots (12 artboards) are
-   the transcription contract.
-2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
-   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
-3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
-   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
-   Linux resolves them through a fontconfig conf generated at render time
-   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
-   darwin rasterizes through CoreText, so dev machines install the same files
-   via `apps/web/scripts/fuentes-comprobantes.sh`.
-4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
-   informe's Blob pattern) wraps the print-destination PNG in one
-   `@react-pdf/renderer` page sized to the template's paper. One layout, two
-   salidas; the phone can reuse both halves as-is.
-5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
-   off-white with its hard shadow; `impresion` fills the page flat and pads
-   Clásico/Moderno to the media-carta proportion.
-
-#### Consequences
-
-- A design change is one SVG edit; both outputs move together.
-- The PDF is a high-density raster (1500 px wide), not vector text — accepted
-  for receipts; the informe keeps its native-text PDF.
-- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
-  value in the transcription (no artboard shows it).
-- The `direccion` block renders only when an address source exists; C-15's
-  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -6538,52 +6502,6 @@ by luck rather than by assertion.
   of monthly ventas — about five weeks on hand, which is what a taquería that
   buys weekly actually looks like.
 
-## ADR-097
-
-**Title:** One sidebar entry per destination; the duplicated pairs merge
-
-**Date:** 2026-09-22
-
-**Status:** Accepted — owner decision; the design files are to follow
-
-**Context**
-
-The portal's design files draw thirteen sidebar entries, two pairs of which
-point at the same screen with a different tab preselected: Ventas and Gastos
-both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
-code copied that verbatim (ADR-058: the files are the specification).
-
-Two rows for one destination cannot answer "where am I". The sidebar's active
-state is a path match, so opening `/movimientos` lit **both** Ventas and
-Gastos, and the screen's own tabs showed the real answer underneath. The owner
-saw the double highlight and asked for one entry (2026-09-22).
-
-**Decision**
-
-1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
-   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
-   inside each screen keep doing the switching, and the old
-   `?tab=` links still work — the screens read the parameter.
-2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
-   place now that Dispositivos is gone as a row.
-3. The design files are **behind** the code on this point until they are
-   amended in Claude Design (the §4b process). Recorded in
-   `docs/plan/10-operador-design-changes.md`.
-4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
-   in normal flow but **stretches** inside a flex column — every tab bar in the
-   portal ran the page's width, leaving the last tab short of the right border
-   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
-   on the component fix it everywhere; Cortes' local wrapper is gone.
-
-**Consequences**
-
-- One question for the design: the merged entry reads «Ventas y gastos» while
-  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
-  gastos" but titles the page "Movimientos"). One of the two should move; the
-  owner decides which.
-- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
-  the Cortes breadcrumb now carries the same words.
-
 ## ADR-096
 
 **Title:** The console measures the business and can look over a tenant's shoulder — two amendments to ADR-063 row 3
@@ -6653,6 +6571,52 @@ those four gaps.
 
 ---
 
+## ADR-097
+
+**Title:** One sidebar entry per destination; the duplicated pairs merge
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — owner decision; the design files are to follow
+
+**Context**
+
+The portal's design files draw thirteen sidebar entries, two pairs of which
+point at the same screen with a different tab preselected: Ventas and Gastos
+both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
+code copied that verbatim (ADR-058: the files are the specification).
+
+Two rows for one destination cannot answer "where am I". The sidebar's active
+state is a path match, so opening `/movimientos` lit **both** Ventas and
+Gastos, and the screen's own tabs showed the real answer underneath. The owner
+saw the double highlight and asked for one entry (2026-09-22).
+
+**Decision**
+
+1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
+   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
+   inside each screen keep doing the switching, and the old
+   `?tab=` links still work — the screens read the parameter.
+2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
+   place now that Dispositivos is gone as a row.
+3. The design files are **behind** the code on this point until they are
+   amended in Claude Design (the §4b process). Recorded in
+   `docs/plan/10-operador-design-changes.md`.
+4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
+   in normal flow but **stretches** inside a flex column — every tab bar in the
+   portal ran the page's width, leaving the last tab short of the right border
+   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
+   on the component fix it everywhere; Cortes' local wrapper is gone.
+
+**Consequences**
+
+- One question for the design: the merged entry reads «Ventas y gastos» while
+  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
+  gastos" but titles the page "Movimientos"). One of the two should move; the
+  owner decides which.
+- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
+  the Cortes breadcrumb now carries the same words.
+
 ## ADR-098
 
 **Title:** The alta wizard asks how you work, not what your papers say — superseding the design's four steps
@@ -6714,6 +6678,56 @@ unavailable later, and nothing it skips is asked twice.
 - Three answers still have no write path — tipoNegocio, WhatsApp and logo —
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
+
+---
+
+## ADR-099
+
+**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
+
+### One SVG renderer for the receipt templates; PDF is a page of that raster
+
+#### Context
+
+N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
+the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
+from one `Comprobante` contract, for the portal live preview now and the phone
+later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
+`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
+the two outputs would drift.
+
+#### Decision
+
+1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
+   pure string builders with no DOM, no measurement — the fichas size by
+   character counts («24 px si pasa de 24 caracteres»), so wrapping and
+   truncation are count-based and deterministic. Snapshots (12 artboards) are
+   the transcription contract.
+2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
+   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
+3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
+   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
+   Linux resolves them through a fontconfig conf generated at render time
+   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
+   darwin rasterizes through CoreText, so dev machines install the same files
+   via `apps/web/scripts/fuentes-comprobantes.sh`.
+4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
+   informe's Blob pattern) wraps the print-destination PNG in one
+   `@react-pdf/renderer` page sized to the template's paper. One layout, two
+   salidas; the phone can reuse both halves as-is.
+5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
+   off-white with its hard shadow; `impresion` fills the page flat and pads
+   Clásico/Moderno to the media-carta proportion.
+
+#### Consequences
+
+- A design change is one SVG edit; both outputs move together.
+- The PDF is a high-density raster (1500 px wide), not vector text — accepted
+  for receipts; the informe keeps its native-text PDF.
+- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
+  value in the transcription (no artboard shows it).
+- The `direccion` block renders only when an address source exists; C-15's
+  `address_print` is stored but nothing feeds it yet.
 
 ---
 
@@ -7383,6 +7397,862 @@ enum refuses, so a QR sale there failed its parse and was only logged.
 
 ## ADR-109
 
+**Title:** The Asesor's cadencia is not a model dial, and the Diagnóstico is only generated for a business that used the system
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; amends ADR-056 (what the scheduled job does) and ADR-059's tiering (the Diagnóstico is no longer Xangarrote-only)
+
+**Context:**
+
+P-30 built the scheduled generation as «a daily job». Read alongside the plan
+table, that reads as though every tier gets a model call on a schedule, and
+the owner's question was the right one: *why would an LLM run daily, and why
+would we pay to generate a report for someone who has not opened the app?*
+
+The first half was a naming problem, not a design one. Don Cuentas has three
+tabs and only **Diagnóstico** is model-backed (`llmBacked: true`, one place in
+`asesor/screen.tsx`). «Para ti» and «Metas» are SQL and arithmetic over the
+tenant's own rows, which is why their footer reads «Calculado a partir de tus
+registros» — deterministic output must not claim AI authorship.
+
+And `capabilities.asesor` never reached a model at all. Its whole effect is
+`filtrarPorCadencia`: `semanal` keeps the two most urgent insights, `diario`
+and `completo` keep them all. It decides **how many deterministic rows a tier
+sees**, not how often anything is generated.
+
+| plan | cadencia | deterministic «Para ti» | Diagnóstico (model) |
+| --- | --- | --- | --- |
+| Xangarrito | `semanal` | top 2 insights | no |
+| Xangarro | `diario` | every insight | **monthly, the short read** |
+| Xangarrote | `completo` | every insight | **monthly, the full report** |
+
+The second half was a real gap. Nothing in the Asesor runtime looks at whether
+a business is being used — no `last_push_at`, no session check. As written the
+job would, once the model call lands, write a monthly report for a Xangarrote
+who has not opened the app since spring, and bill us for it.
+
+**Decision**
+
+1. **The daily pass stays universal and stays deterministic.** It is one SQL
+   read per business and it costs effectively nothing, and its point is that
+   the insights are already waiting the moment someone does log in. Running it
+   only for active tenants would make the Asesor emptiest exactly when a
+   returning shopkeeper first looks at it.
+
+2. **The Diagnóstico is generated only for a business that used the system in
+   the period it covers** — a venta synced from a device, or a portal session.
+   The model call is the only part that costs money, so it is the only part
+   with an activity gate. A dormant tenant's Diagnóstico is not queued, not
+   generated and not paid for; it is generated for the next period they are
+   active in. This holds for both paying tiers.
+
+3. **Xangarro gets a Diagnóstico too — a shorter one.** The owner's intent
+   (2026-09-26) is that a Xangarro shopkeeper should *taste* what a written
+   reading of their own numbers is worth, and upgrade because they wanted more
+   of it rather than because a card told them it exists. Xangarrote's is the
+   same monthly report with the depth that justifies the price: more metrics,
+   the detail behind them, and the estrategia.
+
+   This needs no new capability. `asesor` already separates the two paying
+   tiers as `diario` and `completo`, so the gate becomes «not `semanal`» and
+   the *depth* is what the value selects. A third enum member would have been
+   a second way to say what the first already says.
+
+   `asesorShowsDiagnostico` is `c.asesor === 'completo'` today and the locked
+   card reads «El Diagnóstico llega con Xangarrote» — both change, and the
+   locked card now belongs to Xangarrito, naming Xangarro.
+
+4. **`capabilities.asesor` is documented as what it is** — the tiering of the
+   deterministic feed. A future «how often do we generate» knob, if one is
+   ever needed, is a separate field and not this one.
+
+**Alternatives considered**
+
+- *Gate the deterministic pass too.* Cheaper by an amount that does not
+  matter, and it trades away the property the schedule exists for: a
+  shopkeeper who comes back after two weeks sees their insights immediately
+  rather than after the next nightly run.
+- *Generate the Diagnóstico on demand, when a Xangarrote opens the tab and a
+  month has passed.* Spends nothing on dormant tenants by construction, and
+  the design already draws a `generating` state. Rejected for now because it
+  makes a model call user-triggered, which needs its own per-business rate
+  limit to be safe, and because it puts the shopkeeper in front of a spinner
+  for a report that could have been ready. Worth revisiting if activity turns
+  out to be a poor predictor of who reads the report.
+
+**Consequences**
+
+- The fan-out needs one more input per business — when it was last active —
+  alongside which tier it is on. That is the same cross-tenant read P-30 is
+  already blocked on, so the two land together.
+- «Activity» needs one definition, written once: a synced venta or a portal
+  session inside the period. Two definitions of active is how the «last seen»
+  rule ended up in three places (B-16 note).
+- **P-28 owns what the two reports differ by**, and it is now the deciding
+  question of that task rather than a detail of it: a taste that reads as a
+  truncated full report sells nothing, and one that is merely shorter teaches
+  the reader that the paid one is padding. The split is a product decision and
+  is deliberately not made here.
+- The monthly model spend is now two tiers wide rather than one, bounded by
+  the activity gate above. Worth a number against N-07's capacity card once
+  there is real traffic, since the cost per report is not yet known.
+- Nothing changes today: no model call exists yet, the Diagnóstico is a
+  placeholder behind two gates until P-28, and the deterministic pass already
+  behaves as decided.
+
+---
+
+## ADR-110
+
+**Title:** Two of the three remaining model touchpoints stop being model touchpoints
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; follows ADR-109, amends P-38 and P-39
+
+**Context:**
+
+ADR-109 settled the Diagnóstico. The other three model-backed items on the
+board — P-38, P-39, P-29 — had one line of Steps each and no cadence, no
+caching rule and no limit, and two of them would have billed **per event**
+rather than per month: P-38 on every corte with a difference, P-39 on every
+statement view. For a shop that cashes up daily, P-38 alone would have been
+more model calls than its own Diagnóstico.
+
+The owner's question — «P-38 can be deterministic right?» — is the right one,
+and the answer is yes. Its own Steps name the causes it proposes: cancelled
+sales, fiado, gastos without comprobante. Those are three queries over one
+turno. Its acceptance is «an explanation that cites only that turno's rows»,
+which is a guarantee SQL gives for free and a prompt only promises.
+
+**Decision**
+
+1. **P-38 is fully deterministic — no model.** The candidate causes are
+   computed from the turno's own rows and ranked by amount. This is ADR-056's
+   rule applied rather than an exception to it: the domain computes, and here
+   there is nothing left for a model to add that is worth a call on every
+   cash-up. It also means the explanation works on **every** plan, Xangarrito
+   included, and costs nothing.
+
+   **Consequence: P-38 is no longer blocked by P-30.** It needed the
+   generation runtime only because it was going to be generated; computed from
+   a corte on read, it needs nothing that does not already exist.
+
+2. **P-39 is generated once a month and shown on Estados.** Not per view —
+   which was the billing shape nobody had noticed — and not folded into the
+   Diagnóstico either, because its value is a line *where the numbers are*,
+   and moving it into the report would take it off the screen it was designed
+   for. Written with the monthly run, stored for that period, rendered on
+   Estados financieros.
+
+3. **The monthly run announces itself.** When a period's Diagnóstico and
+   conclusions are written, the business gets a notice saying what was
+   generated, with links to Diagnóstico and to Estados — otherwise the work
+   sits there and a shopkeeper who does not happen to open the right tab never
+   learns it exists.
+
+   That notice is **`source='sistema'`, not `'asesor'`**, and the distinction
+   is load-bearing: ADR-060 keeps the bell clear of Asesor insights on
+   purpose, so an `asesor` row would be written and never ring. «Your report
+   is ready» is a system event about the product, not an insight about the
+   business, so it belongs on the side of that line that rings.
+
+4. **The Xangarro / Xangarrote split stays open**, deliberately. The
+   capability list in `calcularCapacidades` is one candidate axis — the six
+   are already ordered by the history they need — but the owner wants to look
+   at what is genuinely worth paying for, including model calls that only
+   Xangarrote would get, rather than dividing a fixed report in two. It is
+   P-28's to settle with the design.
+
+**Alternatives considered**
+
+- *P-38 deterministic, model writes the sentence.* Warmer, and it matches Don
+  Cuentas's voice. Rejected on frequency: one call per corte with a difference
+  is the most frequent model call in the product, for a sentence wrapping a
+  list the reader can already see.
+- *P-39 folded into the Diagnóstico.* Simplest and needs no per-period
+  storage. Rejected because Estados would show nothing and the two free tiers
+  would never see a conclusion at all.
+- *P-39 templated from the figures, no model.* Free on every plan. Kept as the
+  fallback if the monthly prose turns out not to be worth its cost — the
+  figures are deterministic either way, so only the phrasing is at stake.
+
+**Consequences**
+
+- The model touchpoints in the product are now: the Diagnóstico (two tiers,
+  monthly, activity-gated), its per-period statement conclusions on the same
+  run, and P-29's vision extraction. Two of five became free.
+- P-39 needs somewhere to keep a conclusion per period per statement. It is
+  one row keyed by business and period, and the obvious home is beside the
+  Diagnóstico's own output, which P-28 has to define anyway.
+- **P-29 is still unspecified and is now the only unbounded one.** The owner
+  proposed a first shape — one catalogue import per new business, about five
+  attempts, a byte ceiling and an image count — which is not yet numbers.
+  Worth noting it does not need a bespoke limiter: N-07 already counts metered
+  resources per business (`usage_counters`, the metering role, the over-limit
+  notices), and an import is a counted resource like any other.
+
+---
+
+## ADR-111
+
+**Title:** The portal's cross-tenant fan-out runs on the metering role, and needed no migration to do it
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes P-30's open role question; extends ADR-056 (the daily job) and ADR-065 (the metering role)
+
+**Context:**
+
+ADR-056 said «a daily job selects the businesses that are due». P-30 built the
+unit of work — one business, `POST /api/cron/asesor` — and stopped there,
+because selecting *which* businesses needs a read no tenant connection can
+make: RLS scopes `xangarro_app` to a single `business_id`, which is the whole
+point of ADR-053 §7.
+
+The task recorded three candidates and called the choice «a Track B decision
+with a migration behind it»:
+
+1. A new privileged function, `xangarro.asesor_due()`, with its grants.
+2. Reuse `xangarro_metering`, the role the nightly usage recompute runs as.
+3. The admin console's service role.
+
+Option 3 was never eligible and should not have been on the list. CLAUDE.md §3
+makes `apps/backoffice` **the only** project that may hold the service-role
+key. Choosing it would have meant either putting that key in the portal or
+moving a portal cron into the console — spending the one boundary the console
+exists to keep, to save a grant.
+
+Between 1 and 2, the deciding fact turned out to already be in the schema.
+`0010_usage_counts.sql` grants `xangarro_metering`:
+
+```sql
+GRANT SELECT (id, deleted_at) ON public.businesses TO xangarro_metering;
+CREATE POLICY metering_read ON public.businesses FOR SELECT TO xangarro_metering USING (true);
+```
+
+It grants that because `usage_counts(NULL, …)` **already enumerates every live
+business** — `p_business_ids NULL = every live business` — in order to count
+it. The cross-tenant enumeration the fan-out was blocked on had been in
+production since N-02 shipped, spelled as a side effect of counting.
+
+**Decision**
+
+1. **The fan-out enumerates on the `xangarro_metering` connection**, through
+   `liveBusinessIds` — `SELECT id FROM businesses WHERE deleted_at IS NULL
+   ORDER BY id`, the two columns 0010 already grants. **No migration, no new
+   role, no new secret**: the portal has held `METERING_DATABASE_URL` since
+   N-02. The privilege surface a scheduled fan-out adds is zero.
+
+2. **The general rule this sets.** A portal job that must read across tenants
+   uses `xangarro_metering` and states the columns it needs; a new column means
+   a narrow `GRANT SELECT (cols)` beside the existing `metering_read` policy,
+   not a new role and not a definer function. Two reasons. `usage_counts` is
+   `SECURITY INVOKER` on purpose — 0001 FORCEs RLS on the owner, so a definer
+   function sees no tenant at all — which makes «a new privileged function» a
+   function plus the same grants, strictly more moving parts for the same
+   reach. And a fourth connection string is a fourth secret to rotate and a
+   fourth answer to «which connection does this query use».
+
+   The line this rule does not cross: **the metering role reads; it does not
+   become a general-purpose admin role.** Cross-tenant *writes* outside
+   `usage_counters` / `usage_notices` are not covered by this ADR and want
+   their own.
+
+3. **`GET /api/cron/asesor` is the schedule; `POST` stays the unit of work.**
+   The old note said there could be no `vercel.json` entry «since the unit of
+   work is a POST with a body and Vercel Cron sends neither». Right about the
+   POST, wrong in its conclusion: the fan-out is a different endpoint on the
+   same path. `0 8 * * *`, 02:00 in Mexico City.
+
+4. **One tenant's failure is one tenant's failure.** Each business is caught,
+   reported under its own id, tallied in `fallidos`; the sweep continues and
+   answers 200, as the usage recompute does. A scheduled job that 500s on the
+   first bad tenant hides every tenant behind it.
+
+5. **The sweep carries an explicit deadline** — it stops starting tenants at
+   240 s, inside Vercel's 300 s, and returns `restantes`, reported as an error.
+   This is a **freshness** bound and not a correctness one, because
+   `loadAsesorPage` materialises the same deterministic pipeline on read
+   (ADR-088): a tenant the deadline cut off still sees correct insights the
+   moment it opens the Asesor. When `restantes` first goes non-zero the fix is
+   sharding by id range, which needs no new state because the enumeration is
+   ordered by id.
+
+**Alternatives considered**
+
+- *A new `xangarro.asesor_due()` function.* The shape to reach for once the
+  monthly Diagnóstico needs the tier and the last-active timestamp in one
+  query, because those live in `subscriptions` and `xangarro.portal_sessions`
+  and neither is granted to metering today. For enumerating live businesses it
+  is a migration to obtain a grant that exists.
+- *The console's service role.* Rejected on CLAUDE.md §3, above.
+- *A bounded worker pool instead of a sequential sweep.* `generarParaNegocio`
+  opens three `withTenant` transactions per business, so N-way concurrency is
+  3N pooled connections from a serverless function. Rejected until a measured
+  sweep needs it; the deadline makes the day it does visible.
+
+**Consequences**
+
+- P-30 is no longer blocked by B-02/B-03 — the role decision was the only
+  reason they were named. What remains of P-30 is the model call, held on P-28
+  because generated prose has nowhere a screen reads it.
+- **The monthly Diagnóstico fan-out is a different query and is still blocked.**
+  ADR-109 requires the tier and «was this business active in the period», and
+  the activity gate needs `xangarro.portal_sessions.last_seen_at` plus a venta;
+  neither `subscriptions` nor `portal_sessions` is granted to metering. It also
+  cannot be idempotent until P-28 defines where a report is stored. That work
+  follows the rule in §2: narrow grants, or the `asesor_due()` function if one
+  query is cleaner than three.
+- The deterministic pass now runs nightly for every tenant in production, which
+  it never did. Its cost is one SQL read plus an upsert per business; the model
+  spend is unchanged, because there is still no model call.
+
+---
+
+## ADR-112
+
+**Title:** What the two Diagnósticos differ by: seven teased sections, and a Plan de acción truncated rather than locked
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decisions of 2026-09-26; answers the question ADR-109 deferred to P-28
+
+**Context:**
+
+ADR-109 gave Xangarro a monthly Diagnóstico and deliberately did not say what
+distinguishes it from Xangarrote's, calling that «P-28's to settle with the
+design» and «now the deciding question of that task rather than a detail of
+it»: a taste that reads as a truncated full report sells nothing, and one that
+is merely shorter teaches the reader that the paid one is padding.
+
+The design answers most of it already, and answers it twice. Mapping every
+numbered section in `Xangarro Portal - Asesor.dc.html` to the `sc-if` that
+wraps it gives ten sections, of which **1 Tu meta** and **2 Resumen del mes**
+sit under `diagReport` and **3–9** under `diagFull`. But `lockedSections` —
+the hand-written teaser copy the `diagTeaser` state renders — has only **six**
+entries: 3, 4, 5, 6, 8, 9. **Cobranza (7) is missing from it**, so as the file
+stands a Xangarro reader loses that section with no card in its place. The two
+halves of the design disagree by exactly one section.
+
+`diagTeaser` itself was drawn for a paid tier that is not Xangarrote — which
+did not exist under ADR-059's tiering and, after ADR-109, is exactly Xangarro.
+
+**Decision**
+
+1. **Sections 1, 2 and 7 are real on both tiers; 3, 4, 5, 6, 8 and 9 are
+   teaser cards for Xangarro.** Where the design contradicted itself, the
+   `lockedSections` array wins and `diagFull` loses Cobranza: the array is
+   deliberate per-section copywriting, while the `diagFull` wrapper is
+   structural markup repeated verbatim across 3–9, so a stray copy-paste is
+   the likelier slip. This also makes the design self-consistent — `diagFull`
+   then covers exactly the six sections that have teaser copy — and it gives
+   the taste a third real section, which it needs.
+
+   The month tiles belong to **section 2**, so they are real on both tiers.
+   The price-suggestion table belongs to **section 3**, so it is Xangarrote's.
+
+2. **Section 10, Plan de acción, is truncated rather than locked.** Xangarro
+   reads **movimiento 1 in full, with its peso impact**, under «los otros dos
+   llegan con Xangarrote». Xangarrote reads all three.
+
+   Two things were wrong to assume here and are worth writing down. First,
+   **`strategyLocked` is not this flag**: `plan !== 'pro'` is right, but its
+   single use sits inside the **Metas** tab guarding «Estrategia personalizada
+   — Disponible en Xangarrote», and section 10 sits under `isDiag >
+   diagReport` with **no tier gate at all**. As drawn, both tiers read all
+   three movimientos, so this decision *narrows* the design rather than
+   relaxing it, and the Diagnóstico needs its own `planTruncado` flag.
+
+   Second, **the design does not order the movimientos by impact.** Its own
+   fixture runs `+$3,100.00`, `+$1,450.00`, `+$6,300.00` — the largest is
+   third. «The first movimiento» out of an unordered list would hand a
+   Xangarro shopkeeper the $1,450 move as its sample of what the paid report
+   is worth. **Section 10 is therefore ordered by impact, descending**, which
+   makes «movimiento 1» the best of the three by construction. The ordering
+   cost nothing before the truncation and is load-bearing after it.
+
+3. **Tier is not the only axis, and maturity wins when both apply.**
+   `calcularCapacidades` (P-26, already built) gates six capabilities on data
+   volume, and they map onto the same sections: **2** wants 30 días de
+   registros, **3** 60 días de ventas + 2 compras, **6** 60 días de ventas,
+   **8** 3 meses con gastos, **4** and **5** 90 días de ventas, **9** 20
+   cortes de día. So a section can be withheld for two unrelated reasons that
+   need different copy: «Disponible en Xangarrote» sells an upgrade and «33 de
+   60 días» must not — showing the first to a Xangarrote three weeks in sells
+   them what they already bought. The design has one whole-report
+   `diagNotEnough` state and no per-section equivalent, so P-28 builds a
+   per-section three-way — real · still gathering data · not in your plan —
+   and **maturity is checked first**.
+
+   Two sections have no maturity rule and must not acquire one: **1 Tu meta**
+   (the owner sets it) and **7 Cobranza** (fiado balances are current state,
+   not a trend).
+
+**Alternatives considered**
+
+- *Give Xangarro a genuinely different, shorter report rather than the same
+  report with sections withheld.* The honest reading of ADR-109's warning, and
+  rejected on cost: two report shapes is two prompts, two renderers and two
+  sets of states, for a tier whose purpose is to make the reader want the
+  other one. The teaser cards already name what is missing in the reader's own
+  numbers («4 insumos se acaban antes de la quincena»), which is a sharper
+  upsell than a different document.
+- *Lock section 10 entirely for Xangarro,* as the six teaser cards do. This is
+  what «the taste reads as a paywall» looks like: two real sections, six
+  padlocks, and the one part that demonstrates the value of a written reading
+  removed.
+- *Leave section 10 whole on both tiers,* which is what the design literally
+  draws. Rejected because it leaves the Diagnóstico nothing to sell: the
+  estrategia is the reason to upgrade, and giving it away in full makes the
+  extra sections the only difference, which is exactly the «paid one is
+  padding» failure.
+
+**Consequences**
+
+- P-28 gains a `planTruncado` flag, an impact-descending sort on section 10,
+  and a per-section availability three-way. `strategyLocked` keeps the Metas
+  tab and is not reused.
+- `diagFull` must stop wrapping section 7. A Playwright spec asserting that a
+  Xangarro session reads Cobranza — and does **not** read the price table — is
+  what keeps this from silently reverting, because both tiers render the same
+  component tree.
+- ADR-109's «not `semanal`» gate still needs implementing:
+  `asesorShowsDiagnostico` is `c.asesor === 'completo'` today, and the locked
+  card reads «El Diagnóstico llega con Xangarrote» when it now belongs to
+  Xangarrito and should name Xangarro.
+- The per-section maturity copy needs the counts `calcularCapacidades` already
+  computes to reach the Diagnóstico, which reads them from the same
+  `inputs.cuenta` the Asesor page does. No new query.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates
+  until P-28 builds it, and production still renders «Próximamente».
+
+---
+
+## ADR-113
+
+**Title:** In the Diagnóstico, tier withholds visibly and maturity withholds silently
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; refines ADR-112 §3, which called for a per-section three-way
+
+**Context:**
+
+ADR-112 settled which sections each paying tier reads and noted that tier is
+not the only axis: `calcularCapacidades` (P-26) also gates six of the same
+sections on data volume — 30 días de registros for **2**, 60 días + 2 compras
+for **3**, 60 días for **6**, 3 meses con gastos for **8**, 90 días for **4**
+and **5**, 20 cortes for **9**. It left the resolution as «a per-section
+three-way — real · still gathering data · not in your plan — with maturity
+checked first», which is the shape but not the behaviour.
+
+Work it through for a Xangarro business at 31 days. Only **2** is mature; **1**,
+**7** and **10** have no maturity rule; **3**, **4**, **5**, **6**, **8** and
+**9** are all short of data. Rendering the immature ones as cards gives four
+real sections behind six padlocks — the exact failure ADR-112 removed for
+tiers, re-introduced through the other axis, and this time with nothing to
+sell, because a maturity lock has no upgrade attached.
+
+The design does not settle it either, but it does rule out the simplest
+alternative. Its `readiness` list renders twice — in the capacidades panel and
+inside `diagNotEnough` («Necesitamos un mes completo de registros para no darte
+números a medias. Esto es lo que falta:») — so the whole-report gate was only
+ever the 30-day one. The other five were always meant to be per-section; that
+state was simply never drawn.
+
+**Decision**
+
+1. **Not in your plan → the teaser card.** Visible, named, carrying the real
+   finding and «Disponible en Xangarrote», exactly as ADR-112 settled.
+
+2. **Data not ready → the section is not rendered at all.** No padlock, no
+   progress bar, no mention in place. The report closes with **one aggregate
+   line** — «N secciones más se abren solas conforme captures → Ver
+   capacidades» — and the per-capability detail stays where it already lives,
+   the capacidades panel on «Para ti».
+
+   The asymmetry is the point: **a tier gate is actionable right now**, so it
+   earns space; **a maturity gate resolves itself** by doing what the
+   shopkeeper is already doing, so it earns a line. Giving both the same
+   treatment optimises for our internal symmetry over the reader's attention.
+
+3. **Maturity is checked first, and the reason is not the one ADR-112 gave.**
+   That ADR argued «33 de 60 días» must not sell an upgrade to someone who
+   already bought it, which is true and secondary. The real reason is that the
+   teaser cards carry **real computed findings** — «Detectamos 3 productos con
+   margen en riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes
+   del mes tienen un patrón». When a section's capability is locked **that
+   finding does not exist**, so showing its teaser would invent a conclusion,
+   which P-26's compuerta forbids outright. Maturity-first is the only ordering
+   that cannot fabricate.
+
+   A welcome consequence: the Xangarro teasers sharpen as the business matures,
+   because each is a true statement about numbers the reader cannot see.
+
+4. **Section numbers are names, not positions.** A hidden section leaves a gap —
+   a 31-day Xangarro reads 1, 2, 7, 10 — and the numbers are not re-flowed.
+   «3 · Precios y márgenes» must mean the same section every month or the report
+   stops being comparable month to month, and P-34's printable variant stops
+   being comparable at all. The closing line is what explains the gaps.
+
+5. **`diagNotEnough` keeps only its 30-day trigger.** Extending it to all six
+   capabilities would make a new business wait on 90 días de ventas and 20
+   cortes before reading anything at all.
+
+**Alternatives considered**
+
+- *An inline progress card per immature section,* reusing the teaser card shape
+  with «67 de 90 días» in place of «Disponible en Xangarrote». Rejected per §2:
+  it is a wall of «not yet» for exactly the businesses whose first Diagnóstico
+  this is, and it duplicates the capacidades panel inside the report.
+- *Raise the whole-report gate until every capability is ready.* One state and
+  no per-section anything, and the design's own `diagNotEnough` copy invites it.
+  Rejected on §5 — roughly three months of silence for a new business.
+- *Re-flow the numbering so a short report reads 1–4.* Contiguous and tidier,
+  and rejected on §4: the number is part of the section's identity, and a
+  «4 · Plan de acción» that becomes «10 · Plan de acción» two months later is
+  worse than a gap.
+
+**Consequences**
+
+- P-28 renders sections from a per-section availability of exactly three
+  values — `real`, `teaser`, `absent` — where `absent` contributes to a count
+  and nothing else. Maturity is resolved before tier, so `teaser` is reachable
+  only for a mature section.
+- The aggregate line needs a count, not copy, so it does not depend on the
+  `lockedCopy` gap below.
+- **P-26 is reopened as a defect** by the same reading. `calcularCapacidades`
+  drifted from the design's `readinessDefs`, and two of the four differences
+  are behaviour rather than wording: `compras` is
+  `count(*) … tipo = 'entrada'` tenant-wide where the design says «2 compras
+  **del producto**», so two purchases of one product unlock margins for the
+  whole catalogue; and `meses_con_gasto` is `count(DISTINCT left(fecha, 7))`
+  over all egresos where the design says «3 meses **por categoría**», so three
+  months of rent alone passes. Each needs its own decision before the string is
+  changed to match. `Capacidad` also has no field for the design's `lockedCopy`
+  («Disponible en 31 días», «Registra el costo de tus productos para
+  activarlo»), so the panel can only ever show a count — and two of the six
+  blockers are «do something», not «wait longer».
+- **Still open:** section **10 Plan de acción** has no maturity rule, but it has
+  an empty case — a month in which nothing is worth recommending. That is not
+  the same as «we could not look», so it cannot use the aggregate line, and it
+  is the one section whose emptiness the reader will notice.
+
+---
+
+## ADR-114
+
+**Title:** Section 10 inherits its availability from the findings that feed it, and says so when a month is clean
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — owner decision of 2026-09-26; completes ADR-113, which left section 10's empty case open
+
+**Context:**
+
+ADR-113 settled that a section without mature data is not rendered and is
+counted in one closing line. It flagged section **10 Plan de acción** as the
+exception it could not resolve: the section has no maturity rule of its own,
+but it has an empty case, and «we could not look» is not «we looked and there
+is nothing».
+
+Reading the design's section 10 settles more than the empty case.
+
+**The movimientos are a selection of the findings, not an independent
+analysis.** Each of the three fixture entries traces to a section — quesadilla
+pricing to §3 Precios y márgenes, «Pide 30 refrescos» to §6 Inventario, «Cobra
+las tres notas con más de 30 días» to §7 Cobranza — and P-28's own rule, that
+every figure is computed by `@xangarro/domain` and the model never derives a
+number, means `+$3,100.00` cannot originate in section 10. It is a section's
+computation, re-phrased as an action.
+
+Three further things in that markup are hardcoded where they cannot be: the
+heading is the literal `Tres cosas para octubre`, count and month both; there
+is no upsell markup in section 10 at all, so ADR-112's «los otros dos llegan
+con Xangarrote» is new; and the card's footer is `Generado con IA a partir de
+tus registros`.
+
+**Decision**
+
+1. **Section 10 needs no maturity rule. It inherits.** Availability follows the
+   sections that feed it, which makes the empty case determinate rather than a
+   judgement call:
+
+   - **Every contributing section absent** → section 10 is `absent` and joins
+     ADR-113's aggregate count. There was nothing to look at.
+   - **Mature sections, no finding** → section 10 **renders**, with «Este mes no
+     hay nada que cambiar» and «Leímos tus números y no encontramos un
+     movimiento que te acerque más a tu meta. Sigue como vas.»
+
+   The second is a real result. A shopkeeper cannot learn «a month's worth of my
+   own numbers contains nothing that needs fixing» from anywhere else in the
+   product, and hiding section 10 would make that indistinguishable from a
+   report that stopped early.
+
+2. **The empty card's footer is «Calculado a partir de tus registros».** Not the
+   design's «Generado con IA a partir de tus registros», because no model wrote
+   it — the card is the *absence* of model output. `asesor.css.ts` already
+   states the rule and its symmetry: «Deterministic output says "Calculado";
+   only model-written text may say "Generado con IA" (ADR-059). Getting this
+   backwards would be a false claim in either direction.» The populated card
+   keeps «Generado con IA», and keeps «Revisa antes de decidir».
+
+3. **The heading is derived from the count and the period**, not the literal
+   «Tres cosas para octubre»: «Una cosa para octubre» · «Dos cosas para
+   octubre» · «Tres cosas para octubre». Under ADR-112 Xangarro reads one
+   movimiento, so the hardcoded three is already wrong for the tier that sees
+   the report most often.
+
+4. **Xangarro's upsell line is count-aware.** Three findings → «los otros dos
+   llegan con Xangarrote»; two → «el otro llega con Xangarrote»; one or none →
+   **no line at all**, because nothing is being withheld. A fixed «los otros
+   dos» becomes a false statement the first month a business has two findings,
+   and the taste being *complete* on a quiet month is honest, not a bug.
+
+5. **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and
+   that is deliberate.** A Xangarro reader gets «Sube la quesadilla a $46.00 y
+   la gringa a $65.00 · +$3,100.00» in full while §3 stays a teaser card. This
+   is written down so it is not later tidied away as an inconsistency: a
+   concrete, peso-quantified move out of the half they cannot read is the
+   sharpest form the taste takes, and combined with ADR-112's impact-descending
+   sort it means Xangarro reads the single most valuable conclusion in the
+   report.
+
+**Alternatives considered**
+
+- *«Sigue así» plus the metric that improved,* turning an empty plan into
+  positive reinforcement in the register the celebraciones and trophies already
+  use. Warmer, and rejected for now on two counts: it is a new computation
+  section 10 does not otherwise need, and on a flat month — no finding *and* no
+  improvement — it has nothing true to say and falls back to the plain state
+  anyway. Worth revisiting once there is a real corpus of clean months.
+- *One empty state for both cases.* One fewer branch, and it says the same
+  sentence to a 31-day business and to a three-year-old one having a good
+  month. That is the conflation ADR-113 was written to avoid.
+- *Guarantee at least one movimiento,* falling back to a generic suggestion so
+  section 10 is never empty. Rejected outright: it fabricates, which P-26's
+  compuerta and ADR-056's «the model never derives a number» both forbid.
+
+**Consequences**
+
+- Section 10 has three renderings, not two: populated, clean-month empty, and
+  absent. Only the first carries «Generado con IA».
+- The upsell line and the heading both need the finding **count**, so the
+  component takes the total number of findings alongside the movimientos it is
+  allowed to show. For Xangarro those differ by design; for Xangarrote they are
+  equal.
+- A Playwright spec on a Xangarro session should assert the count-aware line —
+  two findings reading «el otro» and one reading nothing — because the failure
+  mode is a plausible-looking sentence with a wrong number in it, which no
+  smoke test catches.
+- Nothing ships yet: the Diagnóstico stays a placeholder behind two gates until
+  P-28 builds it, and production still renders «Próximamente».
+
+---
+
+## ADR-115
+
+**Title:** An anomaly is a month against months: the gastos baseline, and capacidad counts that predict their own insight
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — fixes a live defect in P-26; closes the drift ADR-113 recorded
+
+**Context:**
+
+ADR-113 made the capacidades thresholds load-bearing for the first time: a
+Diagnóstico section is rendered, or not, according to whether its capability is
+unlocked, and an unlocked capability is what permits a teaser card to assert a
+finding. Checking `calcularCapacidades` against the design's own `readinessDefs`
+to confirm the wording turned up something larger.
+
+`gastosFueraDeLoNormal` compared **a monthly total against a per-row average**.
+The current month was accumulated per category — a sum — while prior months
+pushed each egreso's amount into a flat list whose mean became the baseline. The
+two agree only when a category is logged exactly once a month, which is what
+every fixture in the suite happens to do, so 890 passing tests said nothing
+about it.
+
+The consequences scale with how often a shopkeeper records:
+
+- A category logged twice a month, on perfectly flat spending, reads «van 100%
+  arriba». Ten times a month reads «900% arriba». Every month, for ever.
+- Measured on the seeded tenant at 2026-09-26: «Tus gastos de materia prima van
+  **330%** arriba … contra un promedio de **$980.00** en los últimos tres»,
+  where that tenant has **two** prior months averaging $1,960. Wrong figure,
+  wrong percentage, and «los últimos tres» false.
+
+The gate had the same shape of error: `if (previos.length < 3)` counts **rows**,
+so three egresos inside one April are «tres meses», and the body says so.
+
+Two capacidad counts were wrong in the mirror image — estate-wide where the
+insight they promise is per-group. `compras` was
+`count(*) … tipo = 'entrada'` across the tenant, but `costosQueSubieron`
+compares a product against **its own** previous entrada, so two purchases spread
+over two products unlock «Precios y márgenes» while the insight computes
+nothing. `meses_con_gasto` was `count(DISTINCT left(fecha, 7))` over all
+egresos, including the current month, where the baseline averages **one
+category's** previous months.
+
+**Decision**
+
+1. **Both sides of the comparison are monthly totals.** The baseline sums each
+   prior month per category and averages those sums. Averaging egreso rows is
+   dimensional nonsense against a figure that is a month's total.
+
+2. **`MESES_BASE` counts distinct prior months, not rows.** «Los últimos tres»
+   is then true when the body says it.
+
+3. **A capacidad count predicts its own insight.** `compras` is the maximum
+   entrada count over products; `meses_con_gasto` is the maximum prior-month
+   count over categories, excluding the current month. Both are
+   `coalesce(max(n), 0)` over a `GROUP BY`. A capacidad that unlocks before its
+   insight can compute is worse than one that unlocks late, because after
+   ADR-113 it licenses a teaser card to claim a finding that does not exist.
+
+4. **Inventario and Pronóstico read what the design says they read.**
+   Inventario gets a new `diasConMovimiento` — distinct days with an inventory
+   movement — in place of `diasConVenta`; Pronóstico reads `diasDeHistorial`
+   under the design's own name, «¿Me alcanza? (pronóstico) · 90 días de
+   registros», because history accrues for a business closed on Sundays and
+   «días de ventas» does not.
+
+5. **`mesesConGastoDe` is deleted.** Its only caller was its own test, and its
+   semantics — any category, current month included — are now the wrong ones.
+   A helper that is exported, unused and misleading is worse than no helper.
+
+**Alternatives considered**
+
+- *Change only the requirement strings to match the design.* What the task
+  originally asked for, and it would have left the 330% warning in place while
+  making the panel's wording describe it more accurately.
+- *Keep `previos` as rows but require more of them.* Tuning a threshold to hide
+  a dimensional error. The false positive rate would still track how often a
+  shopkeeper records rather than how much they spend.
+- *Count `compras` per product but leave `meses_con_gasto` estate-wide.* The two
+  errors are the same error, and fixing one would leave the panel's two halves
+  disagreeing about what «per» means.
+
+**Consequences**
+
+- **Insights that were firing falsely will stop.** `materializarInsights` closes
+  an insight that no longer computes as «listo», so existing spurious
+  `gasto-fuera` notices resolve themselves into «Anteriores» on the next run
+  rather than needing a migration. That is the intended behaviour of ADR-088's
+  upsert, used here for the first time to retract a claim.
+- **Capacidades will appear to regress for existing tenants.** The seeded tenant
+  goes from `compras` 64 to 13 and `meses_con_gasto` 3 to 2, so «Gastos fuera de
+  lo normal» moves from «Activo» to «2 de 3 meses». That is the panel becoming
+  correct, not a loss: the insight it promised could not compute at 2.
+- `packages/data-pg/src/queries/asesor.ts` was over the §2.6 line ceiling once
+  the counts grew, so the counting half moved to `asesor-conteos.ts`.
+- **Still open: `lockedCopy`.** `Capacidad` has no field for the design's
+  actionable line, so «Registra el costo de tus productos para activarlo»
+  cannot be shown and the panel can only ever give a count. Two of the six
+  blockers are «do something», not «wait longer». ADR-113's aggregate line needs
+  only a count, so nothing is blocked; the panel is what stays poorer.
+- The lesson worth keeping: **a fixture that logs one row per period hides every
+  per-period aggregation bug there is.** Both halves of this defect survived a
+  suite of 890 tests for that one reason.
+
+---
+
+## ADR-116
+
+**Title:** A capacidad promises a date only where the calendar alone gets there
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — completes P-26's capacidades panel; the last item ADR-113 and ADR-115 left open
+
+**Context:**
+
+The design's `readinessDefs` gives every locked capacidad two strings: the count
+(`shortStatus`, «33 de 60 días») and an actionable line (`lockedCopy`). `Capacidad`
+only ever had the count, so the panel could say how far along a shopkeeper was and
+never what to do about it.
+
+The design's four locked examples are not one shape but three:
+
+| Capacidad | `lockedCopy` | Shape |
+| --- | --- | --- |
+| Precios y márgenes | `Registra el costo de tus productos para activarlo` | an instruction |
+| Gastos fuera de lo normal | `Disponible en 31 días` | a date |
+| ¿Me alcanza? (pronóstico) | `Disponible en 23 días` | a date |
+| Corte de caja | `Llevas 8 de 20 cortes` | the count restated |
+
+The arithmetic behind the two dates is `objetivo − actual`, in the counter's own
+unit, rendered as days: Pronóstico is 90 − 67 = 23, and Gastos is one month
+rendered as ~31. That projection assumes the counter advances on its own.
+
+Only one counter does. `diasDeHistorial` is days since the first record and grows
+every day whether or not anything else is ever captured. `mesesConGasto` gains a
+month only when an egreso lands in that category in a new month; `cortes`,
+`compras`, `diasConVenta` and `diasConMovimiento` move only when the shopkeeper
+records something. «Disponible en 31 días» for Gastos is therefore a promise a
+quiet month breaks — and a broken promise about the shopkeeper's own data is the
+failure P-26's compuerta exists to prevent, in a subtler form than an invented
+number.
+
+**Decision**
+
+1. **`Capacidad` gains `lockedCopy: string`**, empty once the capability is
+   active so nothing stale can render, shown in the panel under `requirement`
+   (`capAccion`, weighted above it because it is the thing to act on rather than
+   the rule being quoted).
+
+2. **A date is promised only where the calendar alone gets there.** That is
+   `diasDeHistorial`: «Resumen del mes» and «¿Me alcanza? (pronóstico)» read
+   «Disponible en N días», singular «1 día» on the last one. Two helpers make the
+   distinction structural rather than a matter of remembering —
+   `porCalendario` emits a date, `porRegistro` emits «Llevas X de Y …» — so a
+   capability added later has to pick one.
+
+3. **«Gastos fuera de lo normal» diverges from the design** and reads «Llevas 2
+   de 3 meses». This is the one place we knowingly contradict the mock, for the
+   reason in the Context.
+
+4. **«Precios y márgenes» names the blocker still standing.** «Registra el costo
+   de tus productos para activarlo» while `compras < 2`, and the días count once
+   the compras are there, because repeating the instruction after it has been
+   followed is advice already taken — and the copy would then be describing a
+   blocker that no longer exists.
+
+**Alternatives considered**
+
+- *Follow the design exactly, Gastos included.* One fewer divergence to explain,
+  at the price of a date the product cannot honour. A shopkeeper who stops
+  recording expenses for a month watches «Disponible en 31 días» tick to 31 again.
+- *Give every locked row a date, projecting from the tenant's own rate.* «At your
+  current pace, about 40 days» is honest in aggregate and unfalsifiable in the
+  particular, and it invites the reader to treat a regression line as a
+  commitment. Rejected for the same reason ADR-114 rejected a fabricated
+  movimiento.
+- *Drop the count and keep only the actionable line.* Loses the progress the Fase
+  6 compuerta is built on — «33 de 60 días» is the thing that is never a
+  conclusion.
+
+**Consequences**
+
+- The panel now answers «what do I do about it», which it never could. Two of the
+  six blockers are «do something» rather than «wait longer», and those two were
+  previously indistinguishable from the others.
+- `porCalendario` / `porRegistro` encode the distinction in the type of helper
+  chosen, so the next capability cannot silently acquire a date it has not earned.
+- Every open item from ADR-113 and ADR-115 is now closed. What remains of the
+  Diagnóstico is P-28 building it, and P-30's model call behind that.
+- The E2E assertion for this shipped unverified locally: the shared dev database
+  was not in a seeded state (24 products for Taquería against the sentinel's 8,
+  from a parallel session), and `db:reset` would have destroyed that session's
+  work. CI's `portal-e2e` job seeds fresh and is a required check, so that is
+  where it is proven.
+
+---
+
+## ADR-117
+
 **Title:** «El Mostrador» is the design language of every surface; the canvas boards are the spec and code translates them into tokens
 
 **Date:** 2026-09-27
@@ -7474,3 +8344,631 @@ example names or amounts. The rules, in short (the full guide is
   are updated to match. Code that still breaks a rule (yellow-filled chips,
   hard-coded «Caja 1», the `ProximamenteState` component) is debt to remove, not
   precedent.
+
+## ADR-118
+
+**Title:** The caja's read models and derivations live in `@xangarro/caja`, shared by the web caja and the phone
+
+**Date:** 2026-09-27
+
+**Status:** Accepted
+
+**Context**
+
+Track M (M-04) rebuilds the phone as the same register as the web caja. The web
+caja's numbers come from pure functions in `apps/web/src/operador/`: the turno's
+headline figures, «Para hoy», the fiado states, the stock rules, the queue's
+wording, the ticket math, and the read-model shapes the Worker hands the
+screens. The phone cannot import an app, and a second copy of those rules would
+be the duplication CLAUDE.md §2.3 calls a bug: the two surfaces would drift
+into showing different numbers for the same turno.
+
+None of the existing packages fits. `domain` holds business rules with no
+presentation (NIF, KPIs, money); these functions word Spanish copy, pick token
+colours and build routes. `application` holds use cases that orchestrate
+repositories; these are read-side view models with no IO. `ui` is the phone's
+Tamagui body and cannot be imported by the portal.
+
+**Decision**
+
+A new workspace package, `packages/caja` (`@xangarro/caja`), holds the caja's
+framework-free logic: the per-screen types, derivations, copy, fixtures and the
+runtime read-model shapes and mappers. It depends on `@xangarro/domain` and
+`@xangarro/tokens` only: no React, DOM, storage, Worker, Drizzle or SQLite.
+Each screen is a subpath (`@xangarro/caja/inicio`, `/turno`, `/cierre`,
+`/ventas`, `/cobranza`, `/inventario`, `/gastos`, `/pendientes`, `/avisos`,
+`/caja`, `/lectura` for the read models); the root export holds what they
+share (clock, owner wording, routes and icons, the shared states).
+
+`apps/web` keeps what is web: screens, hooks, vanilla-extract, the Worker,
+OPFS, the protocol and the Drizzle readers. `packages/ui` and the phone import
+the package for the same figures.
+
+ESLint's boundaries get a `caja` element that may import `domain` only; `app`
+and `ui` may import it.
+
+**Alternatives considered**
+
+- *Put it in `packages/application`.* Rejected: application is use cases over
+  repositories, and a read model with Spanish copy and token colours would
+  blur that layer.
+- *Put it in `packages/domain`.* Rejected: domain must stay free of routes,
+  tints and screen wording.
+- *Copy the functions into the phone.* Rejected by CLAUDE.md §2.3.
+
+**Consequences**
+
+- A number the caja shows is computed in one place; a rule change reaches
+  both surfaces, and its unit tests live with it in `packages/caja/tests`.
+- The package carries web routes (`OPERADOR_BASE`) inside the hrefs of «Para
+  hoy» and the avisos. The phone maps them to its own screens until a route
+  key replaces the href.
+- CLAUDE.md §3 lists the package.
+
+---
+
+## ADR-119
+
+**Title:** Migrations may run outside a transaction to build indexes concurrently; the runner refuses out-of-order files
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — scale audit 2026-09-26 (`docs/audits/db-2026-09-26.html`), findings DB2-MIG-01, DB2-IDX-01, DB2-USE-01, DB2-HOT-01, DB2-RLS-01, DB2-CRON-01; amends B-01's runner
+
+**Context**
+
+The hosted runner (B-01) sent every file inside one transaction, so
+`CREATE INDEX CONCURRENTLY` could not run, and a plain index build on a table
+of millions of rows blocks its writes for minutes — the audit built six in
+41 s on 5 M-row tables. Every index the audit asks for waits on this. The
+runner also applied pending files in file order even when they sorted below
+files already applied: two late additions (`0033_geo_prune`,
+`0023_business_branding`) ran last on hosted and in the middle on a fresh
+database, so the two orders silently differed.
+
+**Decision**
+
+1. **A file whose first line is `-- xangarro:no-transaction` runs statement by
+   statement**, each autocommitting on one reserved connection, the way
+   `psql -f` already applies files for `db-local.sh` and CI. Its ledger row is
+   written after the last statement succeeds; checksums are unchanged.
+2. **Such files must be repeatable**, because a failure half-way leaves the
+   earlier statements applied and the next run repeats the file. Before
+   anything runs, `hosted/lint.ts` refuses a pending file that lacks
+   `SET lock_timeout`, has a `CREATE INDEX` that is not
+   `CONCURRENTLY IF NOT EXISTS` or a `DROP INDEX` that is not
+   `CONCURRENTLY IF EXISTS`, or opens a transaction; and a transactional file
+   that says `CONCURRENTLY`. The runner drops the INVALID index an interrupted
+   concurrent build leaves behind — which `IF NOT EXISTS` would otherwise skip
+   forever — before repeating the file.
+3. **A pending file that sorts below the last applied file of its set is
+   refused**, naming both: renumber it above. Hosted and fresh databases then
+   always apply the same sequence.
+4. **Every migration from data-pg 0045 and admin 0020 on sets `lock_timeout`**
+   (3 s), so a statement queued behind the evening peak fails fast and is run
+   again in the trough rather than stalling every request behind its lock.
+5. **Old → new for such files runs on a throwaway database** migrated to the
+   file before (`tests/support/scratch-db.ts`), through the runner itself —
+   a concurrent build cannot run inside the test transaction the older
+   migration tests use.
+
+The first files to use it are data-pg 0045 (the audit's index set, the
+`business_members (business_id, user_id)` uniqueness, and the drop of seven
+indexes that repeated a `business_id` primary key) and 0047 (every tenant
+policy wraps `current_business_id()` in a sub-select). In the same change:
+0046 spreads `api_latency_counters` over 16 slots per key, summed on read;
+the console's `admin_user_email` casts its parameter, not the key; the
+digest reads stored `usage_counters` instead of recounting, and runs
+`security_prune()` daily.
+
+**Alternatives considered**
+
+- *A separate out-of-band script for concurrent indexes.* Rejected: a second
+  path to production with no ledger and no drift check is how the two
+  environments diverge.
+- *Plain `CREATE INDEX` in a transaction, run in the trough.* Rejected: it
+  still blocks writes for the whole build, and the trough shrinks as tenants
+  in other time zones arrive.
+- *Accept out-of-order files with a warning.* Rejected: nobody reads a
+  warning in a deploy log, and the difference is invisible until a migration
+  depends on the order.
+
+**Consequences**
+
+- A no-transaction file cannot be rolled back as a whole; reviewers check
+  that each statement is safe to repeat, and the lint checks what it can.
+- `tenant-indexes.test.ts` now counts a single-column `business_id` primary
+  key as the tenant index, which is what let 0045 drop its duplicates.
+- Changing ids, collation or partitioning (DB2-KEY-01, DB2-PART-01) is not
+  decided here; it needs its own ADR.
+
+**Amendment 2026-09-26 — lock timeouts by lock, and the runner retries.**
+Round 3 of the audit (`docs/audits/db-2026-09-26-r3.html`, DB3-MIG-01) found
+decision 4's flat 3 s wrong both ways. A concurrent index build waits for every
+transaction holding an older snapshot, anywhere in the database, so 3 s failed
+the builds and left INVALID indexes; while an `ALTER` waits for ACCESS
+EXCLUSIVE, every reader of its table queues behind it, so 3 s stalled traffic.
+Statements that take SHARE UPDATE EXCLUSIVE at most (`… CONCURRENTLY`,
+`ALTER TABLE … SET (storage options)`) now run with `lock_timeout = 0`;
+anything heavier waits at most 500 ms (200 ms in practice), and the runner
+retries a lock timeout (55P03) up to 20 times, 250 ms doubling to 5 s with
+jitter — the statement alone in a no-transaction file, the whole transaction
+otherwise. `hosted/lint.ts` enforces it: a no-transaction file sets
+`lock_timeout` as its first statement, a transactional file only with
+`SET LOCAL` (the value used to stay on the runner's session), a heavy
+statement never under a long or zero timeout, and `REINDEX` only
+`CONCURRENTLY`. The INVALID-index sweep now matches schema and name.
+`db-local.sh` applies each transactional file in one transaction, as hosted
+does. data-pg 0045–0048 and admin 0020–0022 were corrected in place, never
+having been applied to the hosted database.
+
+---
+
+## ADR-120
+
+**Title:** The push is batched: statements per table, not per row, and a bad row is found by splitting
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB2-SYNC-01 and DB2-SYNC-02; amends ADR-078 decision 4
+
+**Context**
+
+ADR-078 wrote each pushed row in its own savepoint: a reference check per
+field, a receipt lookup, the upsert, a cursor bump, a `sync_log` entry and a
+receipt — about eight statements a row, all while holding the tenant's
+`sync_cursors` lock. The DB audit of 2026-09-26 measured a 500-row push at
+8.0 s at a 1 ms round trip (68 ms batched), 67 lock timeouts a minute when a
+shop's phones flush their evening backlog together, and every app backend past
+Postgres's 64-entry subtransaction cache, because postgres.js never releases a
+savepoint and a savepoint that wrote keeps its XID until commit.
+
+**Decision**
+
+1. **The `PushStore` port takes batches.** `receipts(keys)`, `existing(table,
+   ids)`, `write(table, deltas)`, `accept(deltas)`, `reject(rejections)`. The
+   rules stay in `ApplyPushUseCase`; the store only runs statements.
+2. **A push is cut into segments of distinct rows.** A row pushed twice (a turno
+   opened then closed) starts a new segment, which sees the first one stored and
+   accepted. Each segment costs one receipt lookup, one reference lookup per
+   referenced table, one write per table (plus one visibility read for rows it
+   did not write) and one `accept` (cursor, log, receipts): at most
+   `S·(4 + R + 3T) + 3` statements for S segments, R referenced tables and T
+   tables, whatever the row count — 14 for the 500-row, 3-table test push
+   (54 ms locally), against ~4,200 before.
+3. **Receipts are matched on `(table_name, row_id)`**, the primary key with
+   `business_id`, through `unnest($tables, $ids)`. Ids travel as one `text[]`
+   parameter (`= ANY($1)`), never as a list of placeholders.
+4. **Writes are multi-row.** UP: `INSERT … ON CONFLICT (id) DO UPDATE … WHERE
+   updated_at < excluded.updated_at RETURNING id`, with `SET` naming only the
+   fields a row carries (rows are grouped by shape). HYBRID: `ON CONFLICT DO
+   NOTHING RETURNING id`. Unreturned ids are read back: visible means stale or
+   already here, invisible means another tenant's id (DUPLICATE_CONFLICT).
+5. **One cursor bump per segment**: `last_seq = last_seq + n RETURNING`, seqs
+   handed out consecutively in delta order — the "block of seqs per batch"
+   ADR-078 anticipated. The row lock still lasts to commit, so seqs still commit
+   in order. `sync_log` and `sync_receipts` get one insert each, pipelined.
+6. **Failure isolation by splitting.** Each table's write runs in one savepoint.
+   When it fails, the rows are halved and retried down to the row at fault:
+   42501 there is DUPLICATE_CONFLICT, anything else INTERNAL (retryable,
+   logged once). Timeouts, lock waits, deadlocks and lost connections are not
+   split — every row of that write is INTERNAL. At most 60 savepoints that wrote
+   are kept per push (a rolled-back one frees its slot); rows still unresolved
+   after that are INTERNAL and the phone resends them.
+7. **A product or client stored earlier in the same push satisfies a later
+   row's reference, and only then** — the answers one-by-one processing gave.
+
+**Alternatives considered**
+
+- *Cap the push at 64 rows* (the audit's stopgap). It bounds the subtransaction
+  damage but keeps eight round trips a row inside the lock.
+- *Probe halves and roll them back, then write the good rows once.* One
+  savepoint whatever the failures, but every row is written twice on the failure
+  path and a probe that passes alone can still fail together.
+- *Change the conflict target to `(business_id, id)`.* Worth doing with
+  partitioning, but it needs a migration of every pushable table's primary key;
+  left to that work.
+
+**Consequences**
+
+- The response contract is unchanged, row for row; the conformance suite and
+  `apps/web/tests/sync-push.integration.test.ts` hold it.
+- An `accept` or `reject` failure now fails the whole push (the transaction
+  rolls back and the phone retries it) instead of one row: they touch only sync
+  bookkeeping, so such a failure is the database's, not a row's.
+- A push with dozens of rows that fail at the database can leave good rows
+  INTERNAL for one round; they succeed on the next push.
+
+**Amendment (2026-09-26) — bookkeeping cannot fail a push; deterministic errors
+are terminal; an accepted retry closes its rejection.** Audit round 3
+(DB3-SYNC-01..04) found one NUL character failing a whole push forever: the row
+was isolated as INTERNAL, then its rejection's payload failed the `::jsonb` cast
+outside any savepoint, the transaction rolled back, and the phone resent the
+same batch indefinitely with nothing stored. Four changes, with the wire
+contract unchanged. (1) The use case refuses a row carrying a NUL or an
+unpaired UTF-16 surrogate in any string (id included) as terminal
+`VALIDATION`, before any write; the rejection payload, id and message are
+cleaned before they are stored. (2) Rejections are kept through `isolated` —
+one savepoint, on top of the 60 the writer may keep, still below 64 — and when
+that fails, again without their payloads; a failure of both is logged and the
+push still answers. This supersedes the consequence above that a `reject`
+failure fails the whole push; an `accept` failure still does. (3) The store
+maps a deterministic database refusal to `RowRefusedError`, which the writer
+narrows to its row like any failure: class 22, NOT NULL and CHECK are
+`VALIDATION`, a 23505 on a unique key other than the primary key
+(`idx_tickets_device_folio`) is `DUPLICATE_CONFLICT` — both terminal and
+logged — while timeouts, locks, deadlocks, connection and resource classes stay
+`INTERNAL`, as does anything unclassified. (4) `accept` closes this device's
+open rejections of the rows it accepts (`resolved_at = now()`, one
+`unnest`-based UPDATE on the rejections' unique key, pipelined with the
+receipts), so a retried INTERNAL row stops counting on the portal's badge and
+in the staff digest. Two further rules follow from decision 7 and the
+receipts: a row pointing at a product or client that failed **retryably**
+earlier in the same push is `INTERNAL`, not `FK_*_MISSING` (DB3-SYNC-02); and a
+row whose write comes back already stored (`exists`/`stale`) without a receipt
+at the segment's start has its receipt looked up again after the write — an
+overlapping retry that waited on the original's lock — and counts as written
+for later references (DB3-SYNC-03).
+
+**Amendment (2026-09-27) — the device halves a batch refused as a whole; a
+row has a size limit.** DB3-SYNC-01 (b): a 400 (a stricter schema reaching an
+older app or caja tab), a 413, or a 5xx that repeats for the same first batch
+left the device's push high-water mark in place, so every later capture queued
+behind one row. (1) On a 400 or 413 — or on the third 5xx running for the same
+first batch (`pushStrikes` in app_config) — the device halves the batch: it
+sends the first half of the part known to fail; a half that passes is
+answered and the fault is in the rest, one that fails holds it. One poison row
+among n costs at most ⌈log2 n⌉ + 1 further requests, at most 22 a drain. (2) A
+row still refused alone is kept locally as rejected with the terminal
+**client** code `SERVER_REFUSED` (never sent by a server; the wire catalog is
+unchanged) and «No enviados» shows it with its manual retry. It is blamed only
+on evidence — a 413 alone, or the server accepting another part of the same
+batch; a lone row and its lone neighbour both refused with nothing accepted is
+the server refusing everything alike, and nothing is marked. (3) Network,
+timeout, 429, 503 and anything carrying `Retry-After` never split: they keep
+the engine's backoff (ADR-122 sheds load with 503). (4) The cursor advances
+only over change-log entries whose rows were answered or refused, so a
+halving cut short never skips an unsent row; accepted rows past the cursor
+are resent and answered from their receipts. (5) `@xangarro/contracts` gains
+an additive row-size limit, `maxPushRowBytes` — 16 KB, 1 MB for an
+`auditorias_inventario` row (a line per product) and 256 KB for an
+`entregas_credito` row (the sales it settles), measured as the UTF-8 bytes of
+the row's wire JSON. `precheck` refuses a bigger row as terminal
+`VALIDATION`, before any write; the device refuses it before sending and fits
+each push under 2 MB of row JSON. Rows already stored are untouched; an older
+app whose product carries a runaway `atributos` gets that one row refused
+instead of the whole push. (6) `writeSyncedRows` cuts a write at
+`floor(65,000 / columns)` rows a statement (DB3-L-07); one statement for any
+push the contract allows today.
+
+---
+
+## ADR-121
+
+**Title:** The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-BOOT-01 and the bootstrap half of DB2-QRY-05; amends ADR-081 decision 1 (and its consequence "page the bootstrap through `/sync/pull`"); contract task C-23
+
+**Context**
+
+ADR-081 made the bootstrap (`/activate` and `GET /sync/pull?since=0`) send
+every live `inventory_movements` row, because a phone's stock is their sum.
+The round-3 DB audit measured about 400–425 B a movement, so Vercel's 4.5 MB
+response limit is reached at about 11K movements: a heavy tenant (10K tickets
+a month) could no longer link a phone or a caja after about a month, and the
+one-year whale's bootstrap was 159 MB. Around it: activation parsed that body
+with zod while holding `businesses FOR UPDATE`; the caja dropped
+`bootstrap.serverSeq`, so its first pull was a second full bootstrap; the
+device's `forgetEchoes` built one `IN (…)` list per table, past SQLite's
+32,766 variables at about 33K rows; and pulled rows were applied one
+autocommitting statement at a time.
+
+**Decision**
+
+1. **A snapshot, not the history.** An opted-in device receives the tenant as
+   of one cursor `c` (the committed cursor, read before anything else): every
+   live reference row, the movements created in the last 90 days (ADR-053 §8's
+   local window) as rows, and one **stock baseline** row per product — the net
+   units of the older ones. Stock stays "the sum of the movements": baseline +
+   rows.
+2. **The baseline lives in the device's existing `__stock_baseline`.** A-11's
+   retention purge already folds purged movements into it and `sumStock`
+   already adds it, so no device migration and no reader changes. The
+   alternative — a synthetic `inventory_movements` row per product with an
+   `apertura`-like origen — would have worked on old devices unchanged, but it
+   collides with the real `origen = 'apertura'` (N-17's opening stock), would
+   show in every movement list, would need excluding from usage counts and
+   pushes forever, and double-counts on a re-link. The first page of a
+   snapshot **resets** the baseline to minus the old movements the device
+   already holds that the server counts (so a re-link over a kept database,
+   A-12, counts nothing twice; unpushed and refused rows stay the device's
+   own); every page then **adds** its baseline rows.
+3. **The baseline is defined by the cursor, not by the clock:** the live
+   movements created before the cutoff whose `sync_log` entry is at or below
+   `c`. A movement is inserted once and never edited (ADR-081, and the push
+   refuses HYBRID updates), so its one log entry is its insert: a movement
+   landing after `c` — a phone pushing a week-old sale late — is left out of
+   the baseline whenever the page is read, and reaches the device through the
+   ordinary pull from `c`. Pages therefore need no shared snapshot
+   transaction, and agree with each other and with the stream after them.
+   **This makes movement immutability load-bearing**: editing or deleting a
+   movement after it is logged would desynchronise every baseline that
+   counted it. Corrections stay new, compensating movements.
+4. **Paged and bounded.** Sections go in foreign-key order — `businesses`,
+   `users`, `employees`, `products`, `stock_baseline`, `clients`, …, recent
+   `inventory_movements` last — keyset by id within each; a page holds at most
+   5,000 rows and 1.9 MB of row JSON, so a whole response stays under 2 MB,
+   whatever the tenant. The continuation token is opaque to devices
+   (base64url of `{c, cutoff, section, after}`). One pager,
+   `fillSnapshotPage` in `@xangarro/contracts`, serves the portal and the mock.
+   Every page reports `serverSeq = c`; the last has `next: null` and the device
+   continues with `since = c` through the unchanged ordered stream
+   (`changes.ts`), whose no-gap guarantee is untouched. Paging *through* the
+   seq stream, as the audit sketched, was rejected: replaying the log from a
+   seq resends every reference-table edit since it, and a baseline "as of a
+   seq" would need a `sync_log` lookup per movement.
+5. **Compatible at protocol 1.** A device opts in with `bootstrap: 'snapshot'`
+   on `/activate` and `?snapshot=start|<next>` on the pull; responses gain an
+   optional `snapshot: {cutoff, first, next, stockBaseline}`. An older device
+   still gets the legacy all-history bootstrap while the tenant has at most
+   5,000 live movements (the old contract's per-table page) and
+   `426 PROTOCOL_UNSUPPORTED` — «Actualiza la app» — past it, refused before
+   the code is spent. A new device talking to an older server gets a response
+   without `snapshot`, which it applies as a complete legacy bootstrap.
+6. **Every pulled page is applied atomically on the device**: rows, baseline
+   and cursors (`pullSeq`, `bootstrapNext`, clocks) in one SQLite transaction,
+   so a failure half-way leaves nothing behind and the same page is fetched
+   again; an unfinished snapshot resumes from `bootstrapNext`, at most 200
+   pages a run. `forgetEchoes` deletes 500 ids per statement.
+7. **Activation holds the business lock only for the slot count and the
+   insert.** The claim, the slot check and the device row commit first; the
+   first page is read in its own tenant transaction; the token, the
+   entitlement signature and the response's zod parse come after. The signing
+   keys are checked before the claim, so a misconfigured server never spends
+   a code. If reading the first page fails after the commit, activation still
+   hands over the token with an empty first page whose `next` is `start`.
+8. **The caja keeps its cursor.** It stores the activation's `serverSeq` with
+   the first page (`applyBootstrap`) and pulls the remaining pages before the
+   NIP step, «Conectando…» held on the button. The phone applies the first
+   page and cursor with `applyBootstrap`; the rest arrives on the engine's
+   first sync, which activation already triggers.
+
+**Consequences**
+
+- Measured on real Postgres (`snapshot-bootstrap.integration.test.ts`), a
+  tenant with 30,000 live movements: the legacy body was 14.3 MB; the
+  snapshot is 4 pages, the largest 1.91 MB (7.2 MB in all, about 50 ms a
+  page to read). A one-year whale (375,000 movements): 178 MB legacy against
+  24 pages, the largest 1.91 MB (44 MB in all, about 45 ms a page).
+  Activation with the first page: 50–95 ms. Both hold baseline + rows =
+  every movement, including movements pushed while the snapshot was paged.
+- A whale's phone opens after the first page; for a few seconds its stock can
+  read low until the last movements page lands. The progress state for a
+  multi-page link is design request DS-10.
+- Pulled rows (other devices' movements) are still never purged by A-11 —
+  only this device's accepted rows are — so a device's movement table still
+  grows after the bootstrap. Left to the retention work (DB2-SYNC-03).
+- One transaction per page is safe because both device drivers are
+  synchronous (expo-sqlite's `openDatabaseSync`, sql.js in the caja's
+  Worker): between `BEGIN` and `COMMIT` there is no macrotask boundary, so no
+  sale can interleave its statements into a page that might roll back, and
+  the caja's `export()` (which closes the database) cannot run mid-page. An
+  asynchronous driver would need a device-wide write queue first.
+- Not done here: DB3-L-01 (a device re-downloading its own movements). It is
+  independent of the bootstrap.
+
+---
+
+## ADR-122
+
+**Title:** Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-EXP-01, DB3-EST-01, DB3-SYNC-05 (the pool half) and the Estados half of DB3-QRY-04; addresses DB3-QRY-03's summary
+
+**Context**
+
+Round 3 of the DB audit measured three ways one heavy read takes a serverless
+instance — and, with two pooled connections per instance, every device request
+on it — down with it. The portal's «Exportar» built the whole ExcelJS workbook
+in memory (829 MB for 100K rows, 2.7 GB for a one-year whale, 5.4 GB for 1.1 M
+rows, past Excel's own 1,048,576-row sheet limit), with no duration ceiling and
+no rate limit, and every 5,000-row batch hash-joined all of the tenant's
+tickets. Estados «Personalizado» accepted any range and shipped every sale line
+and egreso of it to Node (`?desde=2000-01-01&hasta=2099-12-31`: 375K rows and
++530 MB on the whale). And postgres.js has no acquire timeout: a request that
+finds the pool busy waits until the function dies, so a slow holder stalls a
+push past the phone's 30 s timeout, and a database outage becomes thousands of
+in-flight functions.
+
+**Decision**
+
+1. **Exports stream.** `ExcelJS.stream.xlsx.WorkbookWriter` writes into a
+   `PassThrough` handed to the `Response` as a web stream; rows are committed
+   as each keyset batch arrives, and the next batch is read only when the zip's
+   input and the response have drained (ExcelJS pipes its sheet buffer into
+   archiver ignoring backpressure; without the pacing 1.1 M rows held 250 MB of
+   buffers). The first batch is read before the response starts, so a failure
+   there is still an HTTP error; a later failure aborts the body, and the
+   browser saves nothing. Measured on synthetic rows: 100K rows +742 MB → +68
+   MB RSS; 1.1 M rows +105 MB RSS, 32 MB of buffers.
+2. **Past Excel's limit the file gets another sheet** («Ventas», «Ventas (2)»,
+   …, 1,048,575 data rows each, each with its header), rather than CSV: a CSV
+   opens in Excel with the same truncation, and the contador opens it in Excel.
+3. **Each export batch is its own short transaction on a pool of its own** (one
+   connection per instance), so an export streaming to a slow connection never
+   holds an idle transaction (the role's 10 s idle-in-transaction timeout) nor a
+   connection a device is waiting for. The keyset cursor, not a snapshot, keeps
+   the walk exact. Each ventas batch reads its tickets by id over the batch's
+   own days, then by id alone for any it missed — the bound narrows the read,
+   never the file.
+4. **Exports are rate-limited per business** — 5 per 10 minutes through
+   `xangarro.throttle_take`, 429 with `Retry-After` — and the route declares
+   `maxDuration = 300`. `EXPORTS_PER_TENANT` overrides the count (E2E).
+5. **The export button fetches the file itself** (DS-02): «Preparando tu
+   archivo…» with a spinner, disabled until the file is in hand; a failure or a
+   429 is a toast; a 401 reloads the page so its gate sends the person to sign
+   in.
+6. **Estados computes at most 13 months** (`TOPE_MESES_ESTADOS` in the domain,
+   `cabeEnMeses`). The page refuses a longer Personalizado before reading
+   anything and shows why (DS-09: inline «Elige un periodo de hasta 13 meses.»,
+   «Aplicar» disabled, a link to export instead); `leerPeriodo` refuses it too,
+   whatever the caller.
+7. **Estados reads sums.** Ventas arrive summed per ticket and egresos per
+   category, in SQL, and tickets with only the columns the domain reads — all in
+   the one transaction that reads the rest of the period (the tickets used to be
+   a second one, with `between` instead of `fechaEnDias` and deleted tickets
+   kept). They are handed to the unchanged domain functions in its own shapes;
+   `estados-periodo.integration.test.ts` holds the statements identical to the
+   raw-row path. `periodLedger` stays for the monthly informe.
+8. **`parseIsoDate` round-trips.** A day that does not exist (`2026-02-30`) is
+   refused instead of rolling into March; `esIsoDate` is the predicate the
+   portal's URL parsers use.
+9. **Device requests carry database deadlines.** `deviceRoute` runs
+   authentication and handler under `withDbDeadlines`; every `withTenant` under
+   it picks the policy up through `AsyncLocalStorage` and runs
+   `transactionWithDeadline`: at most 3 s to get a connection, and
+   `DEVICE_DB_DEADLINE_MS` (default 10 s) for the transaction. The clock starts
+   per transaction, not per request, so a push body arriving slowly over a
+   phone's connection never uses up the database's time. Past either the route
+   answers **503 with `Retry-After: 15`** (code `INTERNAL`, the catalog's
+   retryable server code — the contract gains no code), and the transaction
+   **rolls back instead of committing** behind the answer, so a 503 always means
+   nothing was written. Portal pages keep waiting as before: they have no client
+   timing out underneath them.
+
+**Alternatives considered**
+
+- *CSV for big exports.* Streams trivially, but Excel truncates it at the same
+  row, and it loses column widths and number cells.
+- *One transaction for the whole export, `REPEATABLE READ`.* A consistent
+  snapshot, at the price of an idle transaction and a held connection for as
+  long as the slowest client downloads.
+- *Clamp an over-long Estados range to 13 months.* Shows numbers for a period
+  nobody asked for, under the label of the one they did.
+- *A pool-level acquire timeout* (a different driver, or a semaphore around
+  `db()`). The deadline also has to stop the late transaction from committing,
+  which only the transaction itself can do.
+
+**Consequences**
+
+- A dropped download stops reading at the next batch; nothing is left running.
+- Ventas lines whose ticket is missing are still left out of the export and of
+  the Movimientos summary, as the joins always did; Estados counts them in
+  ingresos, as it always did (DB3-QRY-04's orphan note stays open).
+- Device-auth reads outside `withTenant` (the throttle) are bounded by the
+  request deadline but still check a connection out of the shared pool; folding
+  them into the push transaction is the device work's.
+- Movimientos pages still use OFFSET; keyset paging needs cursor URLs and a
+  pager without page numbers, a design change left to DB3-QRY-03's follow-up.
+
+---
+
+## ADR-123
+
+**Title:** The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle
+
+**Date:** 2026-09-26
+
+**Status:** Accepted — closes audit DB3-CAJA-01, DB3-CAJA-02 and DB3-CAJA-03, and the ordering half of DB3-CAJA-04; amends ADR-071 (its consequence «the turno-close block on unsent records (rule 7) is what keeps cash honest») with the owner's decision of 2026-09-26 on DS-06 (option (a))
+
+**Context**
+
+Round 3 of the DB audit found three ways the browser caja (ADR-071) loses or
+misreports data:
+
+- **Two tabs erase each other's sales.** Every tab starts its own Worker with
+  its own in-memory sql.js copy of the one OPFS file and writes the whole
+  database back after each operation. The last write wins, so a tab that
+  saved after another erased that tab's unpushed captures, outbox included.
+- **The queue was counted three ways.** The cierre gate and the header pill
+  counted `__sync_row_status = 'pending'`, so three sales captured offline (no
+  status row yet) counted as 0 and a failed push counted as 6, and the phone
+  counted `pending + retrying`. The rule itself — «a turno cannot close while
+  records are unsent» (the handoff's rule 7, recorded in ADR-071) — meant an
+  offline caja could not close its turno at all, against ADR-053 §5
+  («offline never blocks capture»). The live-data work (`colaPendiente`)
+  already fixed the caja's count; the rule and the phone remained.
+- **An idle caja never pulled.** It pulled after a capture, on `online` or on
+  a manual retry. NIPs are checked on the device, so an operator the owner
+  deactivated kept a working NIP on a caja nobody sold on, and a price change
+  arrived with the next sale — the one that should have used it.
+
+**Decision**
+
+1. **One tab owns the register (Web Locks).** Before anything opens the
+   database, the tab's Worker requests the lock `xangarro-register` with
+   `ifAvailable` and, when granted, holds it for its lifetime (the callback
+   returns a promise that never settles; the browser frees the lock when the
+   tab, and so the Worker, goes away). The Worker's `boot` refuses to open the
+   database without it (`CAJA_EN_OTRA_PESTANA`), whoever calls it. A second
+   tab renders DS-08's notice instead of the register — «La caja ya está
+   abierta en otra pestaña.» / «Para no perder ventas, usa una sola pestaña.»
+   — and «Usar esta pestaña» queues a plain lock request, so it takes over the
+   moment the first tab closes and reads the file as that tab left it. The
+   lock lives in the Worker, not the page, because the Worker is what owns the
+   database. Browsers without `navigator.locks` (none the caja supports) keep
+   the old behaviour, with a `BroadcastChannel` probe that shows the same
+   notice when another tab answers.
+2. **One definition of «por enviar», in `@xangarro/sync`.** `unsentRows()`
+   is everything the server has not accepted: rows attempted and not accepted
+   (`pending`, and `rejected` + retryable — these are «retrying») plus the
+   change log past the push cursor, coalesced and limited to pushable tables
+   exactly as `drainPush` reads it, each row once. Terminal rejections are not
+   in it; they need a person and each surface shows them apart (the caja's
+   Avisos and the owner's Sincronización; the phone's pill and No enviados).
+   `StatusStore.unsentCount()` and `SyncEngine.counts().unsent` expose it; the
+   phone's pill counts `unsent`; the caja's pill, Registros por enviar and
+   cierre all read `colaPendiente()`, which groups `unsentRows()` per record
+   and marks a record retrying when any of its rows is.
+3. **Cierre stays enabled with records still to send (DS-06 option (a)).**
+   The expected cash is computed from this caja's own rows, all of which are
+   on the device, so the unsent ones cannot change it. The cierre shows a
+   warning band — «Tienes N registros por enviar (M se reintentarán solos).
+   Puedes cerrar; se enviarán cuando vuelva la conexión.» — with «Reintentar
+   envío» and «Ver cuáles»; the close button waits only for a reason when
+   there is a difference. The closed screen says the owner will see the close
+   once the records go up. The «Puede cambiar» chip and the «the difference is
+   recalculated when they are sent» line of the blocked design go with the
+   block. This supersedes rule 7 as ADR-071 recorded it.
+4. **An idle caja pulls.** Besides the capture triggers, the caja runs a full
+   sync on boot, when the tab becomes visible (unless it pulled in the last
+   45 s) and every 5 min ±20 % while visible. The scheduler lives at the gate,
+   so it runs at the door as well as inside, and goes through the shell's
+   flusher when it is mounted (the pill follows); every one of these runs is
+   automatic, so the engine's backoff still holds. At the door the gate also
+   syncs on `online`, so a turno closed offline goes up without a new turno.
+5. **The Worker's OPFS writes queue.** Each persist waits for the previous one
+   and exports when its turn comes, so two overlapping writes can never land
+   out of order and the file ends at the latest state. Every caller still
+   awaits its own write: no debounce, durability unchanged. A second `boot`
+   joins the first instead of opening a second copy.
+
+**Alternatives considered**
+
+- *Option (b) of DS-06: block cierre until every record is sent, counting all
+  of them.* Honest about the queue but makes an offline caja unable to close,
+  which ADR-053 §5 forbids; the owner chose (a).
+- *The lock on the page instead of the Worker.* Simpler to show, but anything
+  that reached the Worker without the gate could still open a second copy.
+- *A SharedWorker owning one database for every tab.* The real fix for
+  multi-tab, but Safari's support and OPFS's sync access handles make it an
+  ADR-071 storage decision (with the OPFS VFS of DB3-CAJA-04), not a launch fix.
+- *Keep the phone on `pending + retrying`.* Leaves offline captures invisible
+  on the phone's pill, the same bug the caja had.
+
+**Consequences**
+
+- Two tabs of the caja can no longer run at once; a cashier who opens a second
+  one sees why and can hand the register over by closing the first.
+- A closed turno can reach the portal later than it was closed, as any
+  offline capture does.
+- The phone's pill now counts rows never tried; its number is rows, the caja's
+  is records (a sale with its lines is one).
+- The idle caja costs one pull per 5 min per visible tab; the caja's capture
+  mode still limits pulls after sales to one per 45 s.
+- DB3-CAJA-04's other halves stay open: the full `export()` per write and the
+  move to an OPFS VFS.

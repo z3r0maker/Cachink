@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xangarro DB Scale Audit</title>
+<style>
+:root{
+  --bg:#fbfaf7; --panel:#ffffff; --ink:#1d1d1b; --muted:#5f5e58; --line:#e4e1d8;
+  --crit:#b3261e; --crit-bg:#fbe9e7; --high:#b45309; --high-bg:#fdf1e2;
+  --med:#1d4ed8; --med-bg:#e8eefc; --low:#4b5563; --low-bg:#eef0f2;
+  --ok:#1f7a3d; --ok-bg:#e6f4ea; --accent:#DBB80A; --code:#f3f1ea;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151513; --panel:#1e1e1b; --ink:#ecebe6; --muted:#a8a69d; --line:#34332e;
+    --crit:#f2877f; --crit-bg:#3a1b19; --high:#f0b060; --high-bg:#3a2a14;
+    --med:#8fb0ff; --med-bg:#1a2340; --low:#b7bcc4; --low-bg:#2a2d31;
+    --ok:#7fd49a; --ok-bg:#16301f; --code:#2a2925;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151513; --panel:#1e1e1b; --ink:#ecebe6; --muted:#a8a69d; --line:#34332e;
+  --crit:#f2877f; --crit-bg:#3a1b19; --high:#f0b060; --high-bg:#3a2a14;
+  --med:#8fb0ff; --med-bg:#1a2340; --low:#b7bcc4; --low-bg:#2a2d31;
+  --ok:#7fd49a; --ok-bg:#16301f; --code:#2a2925;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px}
+h2{font-size:21px;margin:44px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:26px 0 8px}
+p,li{max-width:78ch}
+.sub{color:var(--muted);margin:0 0 20px}
+code{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+.verdict{border-left:4px solid var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:24px;line-height:1.2}
+.stat span{color:var(--muted);font-size:13px}
+.tbl{overflow-x:auto;margin:10px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--panel)}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--bg)}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sev{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.crit{color:var(--crit);background:var(--crit-bg)} .high{color:var(--high);background:var(--high-bg)}
+.med{color:var(--med);background:var(--med-bg)} .low{color:var(--low);background:var(--low-bg)}
+.ok{color:var(--ok);background:var(--ok-bg)}
+.good{color:var(--ok);font-weight:600} .bad{color:var(--crit);font-weight:600}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:10px 0}
+summary{cursor:pointer;padding:12px 16px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+summary::-webkit-details-marker{display:none}
+summary .id{font:600 13px ui-monospace,Menlo,monospace;color:var(--muted)}
+summary .t{font-weight:600}
+details .body{padding:2px 18px 14px}
+details .body dl{display:grid;grid-template-columns:120px 1fr;gap:6px 14px;margin:6px 0}
+details .body dt{color:var(--muted);font-size:13px}
+details .body dd{margin:0}
+nav.toc{columns:2;column-gap:28px;font-size:14px}
+nav.toc a{color:var(--ink)}
+.note{color:var(--muted);font-size:13px}
+@media (max-width:640px){nav.toc{columns:1} details .body dl{grid-template-columns:1fr} h1{font-size:23px}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Xangarro Postgres: scale and performance audit</h1>
+<p class="sub">Round 2 of N-27 · 2026-09-26 · branch <code>feat/landing-mostrador</code> @ <code>4c1c837b</code> · baseline: <code>docs/audits/db-2026-09-17.md</code></p>
+
+<div class="card verdict">
+<p><strong>Verdict.</strong> The schema's foundation is right for a multi-tenant SaaS. It uses one shared schema with RLS, and every tenant table has a <code>business_id</code>-leading index. Money is stored as <code>bigint</code> centavos. The per-tenant sync cursor is correct. Pull is one cheap ordered stream: 0.8&nbsp;ms per 5,000 entries on a whale. <strong>You do not need a new database design to reach 5,000 tenants.</strong></p>
+<p>What will fail is <strong>four code paths</strong>, and all of them were measured failing on a disposable copy of the real schema:</p>
+<ol>
+<li><strong>A usage recount after every push does a full-table scan across all tenants.</strong> Its cost grows with the whole database, not the tenant.</li>
+<li><strong>The push is written row by row.</strong> A 500-row evening backlog takes 8.0&nbsp;s and holds a connection and the tenant's lock the whole time. Batched, the same push takes 68&nbsp;ms.</li>
+<li><strong>Pushes of more than 64 rows overflow Postgres's subtransaction cache.</strong> That slows every session in the cluster, not just the pushing one.</li>
+<li><strong>Portal reads grow with a tenant's history.</strong> For example, Inicio's daily series takes 8.1&nbsp;s on a one-year heavy tenant. That is past the production 5&nbsp;s timeout, so the page errors.</li>
+</ol>
+<p>Each has a measured fix, 20–100× faster, that stays inside the current architecture. Storage is the second issue. At 5,000 realistic tenants you add about 28&nbsp;GB a month, which trips ADR-068's S2 trigger in the first month. 43% of that is <code>sync_receipts</code>, which can be pruned.</p>
+</div>
+
+<div class="grid">
+<div class="stat"><b class="bad">8.0 s → 68 ms</b><span>one 500-row push, today's row-by-row code vs batched (1 ms round trip)</span></div>
+<div class="stat"><b class="bad">0.6–1.2 s</b><span>usage recount per push, <em>any</em> tenant size: a parallel full scan of <code>inventory_movements</code></span></div>
+<div class="stat"><b class="bad">8,094 → 107 ms</b><span>Inicio <code>serieDiaria</code> on a 1-year, 30K/mo tenant; the production role times out at 5 s</span></div>
+<div class="stat"><b>~2.7 KB</b><span>stored per ticket today (all rows + indexes); <code>sync_receipts</code> is 43% of the database</span></div>
+</div>
+
+<nav class="toc card">
+<a href="#load">1. Load model: 100 / 1,000 / 5,000 tenants</a><br>
+<a href="#peak">2. The 17:00–20:00 peak, measured</a><br>
+<a href="#reads">3. Portal reads, measured before and after</a><br>
+<a href="#findings">4. Findings (24)</a><br>
+<a href="#normal">5. Normalization and structure</a><br>
+<a href="#prior">6. Status of the 2026-09-17 findings</a><br>
+<a href="#roadmap">7. What to do, in order</a><br>
+<a href="#azure">8. Load curve and the Azure note (O-32)</a><br>
+<a href="#method">9. Method and limits</a><br>
+<a href="#after">10. After <code>perf/db-scale</code>: measured again</a>
+</nav>
+
+<h2 id="load">1. Load model</h2>
+<p>The plan limits are 300 / 10,000 / 30,000 transactions a month (Xangarrito / Xangarro / Xangarrote, <code>packages/domain/src/entities/plan.ts</code>). They are advisory (ADR-065), so 30K is the top plan's cap, not a hard ceiling. One "transaction" is one ticket. Measured on the benchmark data, a ticket produces:</p>
+<ul>
+<li>1 <code>tickets</code> row</li>
+<li>1.6 <code>sales</code> lines</li>
+<li>1.1 stock movements</li>
+<li>0.1 expenses</li>
+<li><strong>3.8 <code>sync_receipts</code></strong> (one per pushed row)</li>
+<li>1.1 <code>sync_log</code> entries (movements are HYBRID, so every other phone pulls them)</li>
+</ul>
+<p>That is about <strong>8.7 rows and 2.7 KB per ticket</strong>. "Realistic" assumes 60% of tenants on Xangarrito (300 a month), 30% on Xangarro at 3,000 a month, and 10% on Xangarrote at 10,000 a month.</p>
+<div class="tbl"><table>
+<tr><th>Scenario</th><th class="n">Tickets / month</th><th class="n">Rows / month</th><th class="n">Storage / month</th><th class="n">Storage / year</th><th class="n">Evening peak (rows/s)</th><th>Where it breaks today</th></tr>
+<tr><td>100 tenants, realistic</td><td class="n">0.21 M</td><td class="n">1.8 M</td><td class="n">0.6 GB</td><td class="n">7 GB</td><td class="n">~5</td><td>Heavy tenants' Inicio and lists, after a few months of history</td></tr>
+<tr><td>1,000 tenants, realistic</td><td class="n">2.1 M</td><td class="n">18 M</td><td class="n">5.7 GB</td><td class="n">68 GB</td><td class="n">~50</td><td>Per-push recount (full scans), same-tenant lock timeouts, subtransaction overflow on backlogs</td></tr>
+<tr><td>5,000 tenants, realistic</td><td class="n">10.4 M</td><td class="n">90 M</td><td class="n">28 GB</td><td class="n">340 GB</td><td class="n">~260</td><td>All of the above, plus ADR-068 S2 in month 1 (<code>sync_receipts</code> passes 50 M rows in about 5 weeks)</td></tr>
+<tr><td>5,000 × 30K (plan cap)</td><td class="n">150 M</td><td class="n">1.3 B</td><td class="n">410 GB</td><td class="n">~4.9 TB</td><td class="n">~3,700</td><td>Row-by-row push tops out at about 1,100 rows/s. This scenario needs S3 (Citus or sharding) plus sync-table retention</td></tr>
+</table></div>
+<p class="note">Peak assumption: 70% of a day's pushed rows arrive between 17:00 and 20:00, and the busiest 15 minutes run at 3× that window's average. Storage is linear in rows, so these figures are direct extrapolations of measured bytes per row. The 5,000 × 30K row is a ceiling, not a forecast: it would be about 190 tickets a day for every tenant.</p>
+
+<h2 id="peak">2. The 17:00–20:00 peak, measured</h2>
+<p>I replayed <code>POST /api/v1/sync/push</code> with the repo's own postgres.js 3.4.9, using the exact statement sequence of <code>ApplyPushUseCase</code> + <code>PgPushStore</code>:</p>
+<ul>
+<li>the device-route auth transaction, the throttle and the latency counter</li>
+<li>then, per row: the reference checks, the receipt lookup, a SAVEPOINT, the upsert, the cursor bump, the <code>sync_log</code> entry and the receipt</li>
+</ul>
+<p>Each statement waits a simulated 1&nbsp;ms round trip, the Vercel pdx1 ↔ Supavisor ↔ Postgres hop. The 15 clients match about what Supabase Nano's pooler gives the app role. The server had 4 vCPU and 4 GB, and the production role timeouts were set (5&nbsp;s statement, 10&nbsp;s idle in transaction).</p>
+<div class="tbl"><table>
+<tr><th>Scenario (60 s runs)</th><th class="n">Pushes/s</th><th class="n">Rows/s</th><th class="n">p50</th><th class="n">p95</th><th>Errors</th></tr>
+<tr><td>Live capture, 1 sale/push, <strong>today</strong></td><td class="n">178</td><td class="n">891</td><td class="n">83 ms</td><td class="n">95 ms</td><td>0</td></tr>
+<tr><td>Live capture, 1 sale/push, batched</td><td class="n">390</td><td class="n">1,950</td><td class="n">36 ms</td><td class="n">55 ms</td><td>0</td></tr>
+<tr><td>Evening backlog, 500 rows/push, <strong>today</strong></td><td class="n">2.2</td><td class="n bad">1,117</td><td class="n bad">7.2 s</td><td class="n bad">7.7 s</td><td>1 statement timeout; <strong>15/15 backends overflowed the subtransaction cache</strong></td></tr>
+<tr><td>Evening backlog, 500 rows/push, batched</td><td class="n">65</td><td class="n good">32,578</td><td class="n">226 ms</td><td class="n">321 ms</td><td>0</td></tr>
+<tr><td>Same-tenant contention: 3 devices each on 3 busy tenants, 500 rows, <strong>today</strong></td><td class="n">0.3</td><td class="n bad">142</td><td class="n bad">13.5 s</td><td class="n bad">16.1 s</td><td class="bad">67 lock-wait timeouts (57014)</td></tr>
+<tr><td>Same-tenant contention, batched</td><td class="n">34</td><td class="n">16,975</td><td class="n">193 ms</td><td class="n">682 ms</td><td>0 (18 harness folio collisions, not real)</td></tr>
+<tr><td>Live capture, <strong>today</strong>, 3 ms round trip</td><td class="n">69</td><td class="n">343</td><td class="n">208 ms</td><td class="n">290 ms</td><td>0</td></tr>
+<tr><td>Live capture, batched, 60 clients (CPU-bound, 410% of 4 vCPU)</td><td class="n">523</td><td class="n">2,616</td><td class="n">95 ms</td><td class="n">244 ms</td><td>0</td></tr>
+</table></div>
+<p><strong>How to read this for your peak:</strong></p>
+<ul>
+<li><strong>Raw volume is not what breaks at 5,000 realistic tenants.</strong> About 260 rows/s is within today's 890–1,117 rows/s.</li>
+<li><strong>The shape of the peak is.</strong> At closing time a shop's two or three phones reconnect together and flush the day's backlog. That is exactly the same-tenant contention row: today's code serialises them behind the tenant's <code>sync_cursors</code> lock and hits the 5&nbsp;s timeout, and each timeout becomes a retryable <code>INTERNAL</code> row. That feeds a device-side bug that leaves those rows stuck (DB2-DEV-01).</li>
+<li><strong>The per-push usage recount rides on top.</strong> It is a full-table scan per push, on a second connection pool (DB2-USE-01).</li>
+<li><strong>At the 30K plan cap</strong> (~3,700 rows/s), only the batched push has headroom.</li>
+</ul>
+<p>Profiling the batched run with <code>pg_stat_statements</code> put <code>xangarro.api_latency_record</code> at <strong>65.8% of all statement time</strong>, with a mean of 30&nbsp;ms. That is mostly lock wait: every call from every tenant increments the same few <code>(day, endpoint, bucket)</code> rows (DB2-HOT-01).</p>
+
+<h2 id="reads">3. Portal reads, measured before and after</h2>
+<p>All runs are as <code>xangarro_app</code> with the tenant claim set, exactly as <code>withTenant</code> does, warm cache, second run. "Whale" means 12 months at 30K tickets a month (360K tickets, 576K lines). "After" is the fix proposed in the matching finding, applied on the same data.</p>
+<div class="tbl"><table>
+<tr><th>Query (file)</th><th>Runs on</th><th class="n">Whale, today</th><th class="n">After</th><th>Fix</th></tr>
+<tr><td><code>serieDiaria</code> (serie.ts:23)</td><td>Every Inicio load</td><td class="n bad">8,094 ms</td><td class="n good">107 ms</td><td>One <code>GROUP BY fecha</code> over a sargable range, instead of 60 correlated scans</td></tr>
+<tr><td><code>listVentas</code> (movimientos.ts:82)</td><td>/movimientos, exports</td><td class="n bad">3,628 ms, 576K rows</td><td class="n good">0.5 ms, 50 rows</td><td>Keyset page, paginate <code>sales</code> in a subquery <em>before</em> joining, device from <code>s.device_id</code></td></tr>
+<tr><td><code>recentActivity</code> (dashboard.ts:76)</td><td>Inicio</td><td class="n bad">953 ms</td><td class="n good">1.3 ms</td><td><code>(business_id, created_at DESC)</code> + <code>LIMIT</code> inside each UNION branch</td></tr>
+<tr><td><code>historialSync</code> (historial.ts:35)</td><td>/sincronizacion</td><td class="n bad">897 ms</td><td class="n good">127 ms</td><td>Bound to 30 days + <code>(business_id, received_at)</code>; the old anti-join had no <code>seq</code> index</td></tr>
+<tr><td><code>usage_counts</code> for one tenant (0035)</td><td>After <strong>every push</strong></td><td class="n bad">600–1,190 ms at any size</td><td class="n good">17 / 30 / 148 ms (mid / heavy / whale)</td><td><code>(business_id, created_at)</code> indexes. The real fix is to increment counters inside the push</td></tr>
+<tr><td><code>listProductos</code> / <code>lowStock</code></td><td>/productos, Inicio</td><td class="n">350–374 ms</td><td class="n">114 ms</td><td>Covering <code>(business_id, producto_id) INCLUDE (tipo, cantidad)</code>; a <code>product_stock</code> rollup makes it constant</td></tr>
+<tr><td><code>periodLedger</code>, one month (entities.ts:85)</td><td>/estados, informe</td><td class="n">280 ms</td><td class="n good">48 ms</td><td><code>fecha BETWEEN</code> instead of <code>left(fecha,10) BETWEEN</code> (grows with every month of history)</td></tr>
+<tr><td><code>totalsForRange</code>, one month</td><td>Inicio, metas</td><td class="n">50 ms</td><td class="n">—</td><td>Fine; already sargable</td></tr>
+<tr><td>Pull page, 5,000 entries + <code>rowsById</code></td><td>Every pull</td><td class="n good">0.8 + 16 ms</td><td class="n">—</td><td>Fine</td></tr>
+<tr><td>Bootstrap: all live movements</td><td>Activation, <code>since=0</code></td><td class="n">136 ms, <strong>396K rows</strong></td><td class="n">—</td><td>Unbounded JSON against Vercel's 4.5 MB body limit: send a stock snapshot</td></tr>
+<tr><td>Nightly <code>usage_counts(NULL)</code>, all tenants</td><td>Cron 03:00</td><td class="n">6.2–7.2 s at 1,003 tenants</td><td class="n">—</td><td>Full scans, linear in total rows; hits the metering role's 60 s timeout long before 5,000 tenants × 1 year</td></tr>
+</table></div>
+
+<h2 id="findings">4. Findings</h2>
+<p class="note">New IDs are <code>DB2-*</code>. Carried-over items from the first audit are marked. Severity reflects the 5,000-tenant target. Each finding lists its evidence, the fix, and the effort.</p>
+
+<h3>Critical: breaks the evening peak or a core screen</h3>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB2-USE-01</span><span class="t">The usage recount after every push does a full scan of every tenant's movements</span></summary><div class="body"><dl>
+<dt>Where</dt><dd><code>apps/web/src/app/api/v1/sync/push/route.ts:37</code> → <code>refreshUsageAfterPush</code> (<code>server/usage/live.ts:58</code>) → <code>xangarro.usage_counts</code> (<code>drizzle/0035_usage_counts_tickets.sql</code>)</dd>
+<dt>Evidence</dt><dd>
+<ul>
+<li>The function filters on <code>created_at</code>, but the only index is <code>(business_id, fecha)</code>. The planner picks a <strong>Parallel Seq Scan on <code>inventory_movements</code></strong> (885 ms) even for a 16K-row tenant.</li>
+<li>Measured per call: 0.60 s (mid), 0.89 s (heavy), 1.19 s (whale). The cost is set by the size of the <em>whole</em> database, and it runs after every accepted push, including one per sale while a phone is online.</li>
+<li>With <code>(business_id, created_at)</code> indexes it drops to 17 / 30 / 148 ms.</li>
+<li>The nightly all-tenant run takes 6–7 s at 1,003 tenants and grows with the total row count.</li>
+<li><code>saveUsageCounters</code> (<code>queries/metering.ts:61</code>) writes one INSERT with 5 parameters per counter row. It breaks postgres.js's 65,534-parameter limit at about 6,550 tenants.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<ol>
+<li><strong>Now:</strong> add <code>(business_id, created_at)</code> on <code>sales</code>, <code>expenses</code> and <code>inventory_movements</code>, created <code>CONCURRENTLY</code>.</li>
+<li><strong>Proper:</strong> increment <code>usage_counters</code> inside the push transaction (<code>ON CONFLICT … SET transactions = transactions + n</code>). Keep the nightly recount as reconciliation only.</li>
+<li>Chunk <code>saveUsageCounters</code> into batches of 1,000.</li>
+</ol></dd>
+<dt>Effort</dt><dd>Index: S. Incremental counter: M (touches the push store and the domain rule "one ticket = one transaction").</dd>
+</dl></div></details>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB2-SYNC-01</span><span class="t">The push runs about 8 sequential statements per row, all inside the tenant's lock</span></summary><div class="body"><dl>
+<dt>Where</dt><dd><code>packages/application/src/apply-push/apply-push-use-case.ts:55-90</code>, <code>apps/web/src/server/sync/pg-push-store.ts</code>, <code>upsert-row.ts</code>, <code>packages/data-pg/src/sync/cursor.ts:20</code></dd>
+<dt>Evidence</dt><dd>
+<ul>
+<li>One sale is 54 statements. A 500-row push is 4,212, and the old audit's recommended batching (DB-SYNC-05) was not done.</li>
+<li>A 500-row push takes <strong>8.0 s</strong> alone (68 ms batched) and 7.2 s p50 under load. It holds a pooled connection and the tenant's <code>sync_cursors</code> row lock for all of it.</li>
+<li>Backlog throughput: 1,117 rows/s today vs 32,578 batched.</li>
+<li>Same-tenant contention: 67 statement timeouts a minute today, 0 batched.</li>
+<li>A 3 ms round trip cuts live throughput by 2.6×. Today's design is bound by round trips, not by the database.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<p>Batch per table in one transaction:</p>
+<ol>
+<li>Check references with one <code>= ANY($ids)</code> per referenced table.</li>
+<li>Look up receipts with <strong><code>JOIN unnest($tables, $ids)</code> on <code>(table_name, row_id)</code></strong>. My first batched attempt left out <code>table_name</code>, missed the primary key and burned 86% of CPU; that is a trap to test against.</li>
+<li>Upsert each table with one multi-row <code>INSERT … ON CONFLICT … RETURNING id</code>.</li>
+<li>Take the seqs with one cursor bump, <code>last_seq = last_seq + n RETURNING</code>, and assign them in order (ADR-078 already anticipates "allocate a block of seqs per batch").</li>
+<li>Write <code>sync_log</code> and receipts with one bulk insert each.</li>
+<li>If the batch fails, bisect the batch or fall back to row by row, capped at 64 rows.</li>
+</ol>
+<p>Keep the response contract, one outcome per row.</p></dd>
+<dt>Effort</dt><dd>M–L. Needs the C-10 conformance suite and an old→new test. This is the single highest-leverage change.</dd>
+</dl></div></details>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB2-SYNC-02</span><span class="t">Pushes of more than 64 rows overflow the subtransaction cache, slowing every session</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>postgres.js 3.4.9 <code>savepoint()</code> never sends <code>RELEASE</code> (<code>node_modules/postgres/src/index.js:258-281</code>). Even released, a savepoint that wrote keeps its subtransaction XID until commit.</li>
+<li>Postgres caches 64 of these per backend. During the backlog run, <code>pg_stat_get_backend_subxact</code> showed <strong>15 of 15 app backends overflowed</strong>.</li>
+<li>Once a backend overflows, every snapshot in the cluster, for every tenant, has to consult <code>pg_subtrans</code>. This is a well-known cliff (SLRU contention) that shows up as load-dependent slowdowns nobody can attribute.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Comes free with DB2-SYNC-01, because there are no per-row savepoints. Until then, cap <code>MAX_PUSH_DELTAS</code> at 64. That also shortens lock holds.</dd>
+<dt>Effort</dt><dd>S as a stopgap (one constant in the contract, device side too).</dd>
+</dl></div></details>
+
+<details open><summary><span class="sev crit">critical</span><span class="id">DB2-QRY-01</span><span class="t">Inicio's daily series makes 60 full-history scans and times out for big tenants</span></summary><div class="body"><dl>
+<dt>Where</dt><dd><code>packages/data-pg/src/queries/serie.ts:23</code>, called on every Inicio load (<code>apps/web/src/server/inicio.ts:52</code>)</dd>
+<dt>Evidence</dt><dd>It makes 30 days × 2 correlated subqueries, each with <code>left(fecha,10) = day</code>, which cannot use the index. That is <strong>8,094 ms</strong> on the whale, against the app role's 5 s <code>statement_timeout</code> in production, so Inicio errors for a year-old heavy tenant. It is 107 ms rewritten.</dd>
+<dt>Fix</dt><dd>One <code>GROUP BY fecha</code> with <code>fecha BETWEEN $desde AND $hasta</code>, plus the ticket-cancel anti-join, and a UNION with expenses. Later, move it to a daily rollup.</dd>
+<dt>Effort</dt><dd>S.</dd>
+</dl></div></details>
+
+<h3>High: fails or degrades before 1,000 tenants</h3>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-DEV-01</span><span class="t">Retried rows can be stranded as <code>pending</code> forever, which blocks cierre</span></summary><div class="body"><dl>
+<dt>Where</dt><dd><code>packages/sync/src/push.ts:103</code> (<code>markPending</code> before sending), <code>status-store.ts:119</code> (<code>dueRetries</code> selects only <code>status='rejected'</code>)</dd>
+<dt>Evidence</dt><dd>
+<ul>
+<li>When a batch that carries retry rows fails as a whole (5xx, 429, network, timeout), the slice rows are re-read from the high-water mark. The retry rows stay <code>pending</code> and nothing ever reselects them.</li>
+<li>On the caja, cierre requires <code>pendientes === 0</code>, so it stays blocked permanently.</li>
+<li>A slice of 401–500 rows plus up to 100 retries also exceeds <code>MAX_PUSH_DELTAS=500</code>, so the server answers 400 and the same stranding happens.</li>
+<li>The evening peak manufactures exactly these failures.</li>
+</ul></dd>
+<dt>Fix</dt><dd>On a whole-batch failure, return the sent retry rows to <code>rejected</code> with their old <code>retryAfter</code>, or have <code>dueRetries</code> also pick up stale <code>pending</code> rows. Size the slice as <code>500 − retries.length</code>. Add a unit test for both cases.</dd>
+<dt>Effort</dt><dd>S.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-HOT-01</span><span class="t"><code>api_latency_counters</code> is one hot row shared by every tenant</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>Every push, pull, entitlement and comprobante call runs <code>INSERT … ON CONFLICT (day, endpoint, bucket_ms) DO UPDATE hits = hits + 1</code> (<code>drizzle/0042_api_latency.sql</code>). Traffic concentrates on about 3 rows a day.</li>
+<li>Measured: 65.8% of statement time, 30 ms mean, mostly lock wait.</li>
+<li>It is fire-and-forget (<code>observability/latency.ts:21</code>) but still takes a pooled connection while it waits.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Add a <code>slot smallint</code> (random 0–15) to the key and sum the slots on read. Or aggregate in process and flush once a minute. Or send it to the logs pipeline instead of Postgres.</dd>
+<dt>Effort</dt><dd>S.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-QRY-02</span><span class="t">Lists and exports load a tenant's entire history (carries DB-QRY-02)</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><code>listVentas</code> returns 576K rows in 3.6 s on the whale, with a correlated <code>sync_receipts</code>→<code>devices</code> lookup per row.</li>
+<li><code>listGastos</code>, <code>listProductos</code>, <code>listRejections</code>, <code>listNotices</code>, <code>ventasPorProducto</code> / <code>fiadoPorCliente</code> (<code>server/revision.ts:111,150</code>) and all exports are unbounded. Exports are built fully in memory in a Vercel function.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Use keyset pagination on <code>(fecha DESC, id DESC)</code> with a partial index <code>(business_id, fecha DESC, id DESC) WHERE deleted_at IS NULL</code>. Default to the current month. Read the device from the row's own <code>device_id</code>, not from receipts. Stream exports by cursor.</dd>
+<dt>Effort</dt><dd>M (screens need a "cargar más" or a date filter).</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-QRY-03</span><span class="t">RLS trap: a join placed before <code>LIMIT</code> makes the planner walk the whole history</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>With the right index, a 50-row keyset page on <code>sales</code> alone takes <strong>0.1 ms</strong>. The same page joined to <code>tickets</code> takes <strong>1,395–2,649 ms</strong>.</li>
+<li>RLS predicates give the planner no per-tenant row estimate. So it drives from <code>tickets</code>, nested-loops 420K rows, re-parses the JWT JSON as a per-row filter on the unwrapped <code>sales</code> policy, then sorts 567K rows to keep 50.</li>
+<li>Neither an explicit <code>business_id</code> predicate (2.1 s) nor wrapped policies (1.3 s) fixes it.</li>
+<li>Paginating <code>sales</code> in a subquery and then joining takes <strong>0.5 ms</strong>.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Make it a coding rule, with a lint or code-review checklist item: in tenant queries, <code>ORDER BY … LIMIT</code> the driving table in a subquery first, then join the lookups.</dd>
+<dt>Effort</dt><dd>S per query.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-QRY-04</span><span class="t"><code>left(fecha,10)</code> defeats the <code>(business_id, fecha)</code> index everywhere (supersedes the "fixed" DB-QRY-01)</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>Used by <code>periodLedger</code>, <code>balance.ts</code> (<code>enRango</code>), <code>serieDiaria</code> and the Asesor windows.</li>
+<li>One month on the whale: 280 ms, against 48 ms sargable. The cost grows with every month of history.</li>
+<li>N-27's board says DB-QRY-01 is fixed. It is not: the filter moved into SQL but still reads every row the tenant has.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Normalise any timestamped <code>fecha</code> once (data migration), add <code>CHECK (fecha ~ '^\d{4}-\d{2}-\d{2}$')</code> <code>NOT VALID</code> then <code>VALIDATE</code>, and use plain <code>fecha BETWEEN</code>. Aggregate the statements in SQL instead of shipping rows to JavaScript.</dd>
+<dt>Effort</dt><dd>S–M.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-QRY-05</span><span class="t">Stock is summed from all movements ever, in 7 places, and the bootstrap ships them all</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>The seven places: <code>lowStock</code>, <code>listProductos</code>, <code>stockACosto</code>, the Asesor, <code>sumStock</code>, the product export and the bootstrap.</li>
+<li><code>inventory_movements</code> has <strong>no <code>producto_id</code> index</strong>.</li>
+<li>Whale: 350–374 ms (114 ms with a covering index).</li>
+<li>The bootstrap sends 396K movement rows for the whale in one response, while Vercel caps bodies at 4.5 MB.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Add a <code>product_stock(business_id, producto_id, stock, updated_at)</code> rollup, maintained in the same transaction as every movement write (push, portal, cancellation, conversion). Reconcile it nightly. Bootstrap from the snapshot plus the last N days of movements. As an interim step, add the covering index <code>(business_id, producto_id) INCLUDE (tipo, cantidad, deleted_at)</code>.</dd>
+<dt>Effort</dt><dd>M (a new table on the Postgres side only; the device keeps deriving its own stock).</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-SYNC-03</span><span class="t"><code>sync_receipts</code> is 43% of the database and nothing prunes it or <code>sync_log</code></span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li>3.54 GB of 8.2 GB, the largest table: 12 M rows against 5 M sales. It has one row per pushed row, forever.</li>
+<li>Its long-term readers are only the per-row device lookup (<code>movimientos.ts:61</code>) and <code>historialSync</code>. The row's own <code>device_id</code> column already answers the first.</li>
+<li><code>sync_log</code> keeps one entry per stocked sale line, also forever.</li>
+</ul></dd>
+<dt>Fix</dt><dd>
+<ol>
+<li>Stop reading receipts for "which device": use <code>device_id</code>.</li>
+<li>Keep receipts for the idempotent re-push window only, for example 90 days past <code>devices.acknowledged_through</code>. Range-partition them by <code>received_at</code> month and drop old partitions, which is free and generates no vacuum work.</li>
+<li>Record each device's pull cursor server-side (<code>devices.pulled_through</code>). Prune <code>sync_log</code> below the minimum across active devices and older than N days. A device behind that horizon gets a <code>RESYNC</code> and re-bootstraps.</li>
+</ol></dd>
+<dt>Effort</dt><dd>M. Needs an ADR, since it amends ADR-078's retention assumptions.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-CONN-01</span><span class="t">Connection budget: two pools per instance, no idle timeout, and pull waits on the second pool inside a transaction</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><code>createDb</code> uses <code>max: 5</code> and no <code>idle_timeout</code> (<code>packages/data-pg/src/client.ts:23</code>). There is one pool for the app and another for metering on each warm instance.</li>
+<li>Supabase Nano gives the app role about 15 pooled server connections (check the dashboard). <code>docs/ops/provisioning.md:220</code> itself suggests 1–2 per instance.</li>
+<li>Pull awaits <code>usageFor()</code> on the metering pool while its app transaction is open (<code>server/sync/pull.ts:38</code>). If DB2-USE-01 saturates the metering pool, pulls hold app connections and risk the 10 s <code>idle_in_transaction</code> kill.</li>
+<li>Each device call also opens 3 separate checkouts before its real work: the auth transaction, the throttle and the latency write.</li>
+</ul></dd>
+<dt>Fix</dt><dd>Set <code>max: 2</code> and <code>idle_timeout: 20</code> per instance behind Supavisor. Read usage before opening the tenant transaction, or inside it on the same connection. Fold the revoked-device check into the tenant transaction.</dd>
+<dt>Effort</dt><dd>S.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-OPS-01</span><span class="t">No backups, no PITR, no restore drill (carries DB-OPS-01 / O-3)</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd><code>docs/ops/provisioning.md:47-51</code>; the project is on Nano with "No backups". The cursor-rewind procedure the old audit asked for is unwritten.</dd>
+<dt>Fix</dt><dd>Move to a paid plan with PITR and run the drill in the 2026-09-17 audit §5 before the first paying customer. It matters more now, because a restore that rewinds <code>sync_cursors</code> must force re-bootstrap on devices holding higher cursors.</dd>
+<dt>Effort</dt><dd>Owner action + S.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-MIG-01</span><span class="t">The migration pipeline can't ship the fixes above safely</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd>
+<ul>
+<li><code>drizzle/meta/_journal.json</code> has 8 entries, and its snapshots stop at 0007: 35 tables against 45 in the schema. The next <code>db:generate</code> would re-emit existing objects.</li>
+<li>The hosted runner wraps every file in a transaction, so <strong><code>CREATE INDEX CONCURRENTLY</code> is impossible</strong>. At 5,000 tenants a plain index build on <code>sales</code> blocks writes for minutes: this run built 6 indexes in 41 s on 5 M-row tables.</li>
+<li>Ten duplicated numeric prefixes. Two late additions (<code>0033_geo_prune</code>, <code>0023_business_branding</code>) sort before files that were applied earlier, so hosted and fresh databases apply them in different orders.</li>
+<li><code>NOT VALID</code>/<code>VALIDATE</code> is never used.</li>
+</ul></dd>
+<dt>Fix</dt><dd>This is the never-created task B-20:
+<ol>
+<li>Rebuild the drizzle snapshot, or declare drizzle-kit generate retired.</li>
+<li>Support non-transactional migration files, for example with a <code>-- no-transaction</code> header, so <code>CONCURRENTLY</code> can run.</li>
+<li>Refuse pending files that sort below the last applied file.</li>
+<li>Add a migration lint: <code>lock_timeout</code>, <code>CONCURRENTLY</code> on large tables, <code>NOT VALID</code> constraints.</li>
+</ol></dd>
+<dt>Effort</dt><dd>M. A prerequisite for every index in this report once real data exists.</dd>
+</dl></div></details>
+
+<details><summary><span class="sev high">high</span><span class="id">DB2-EXP-01</span><span class="t">«Exportar movimientos» silently stops at 50 rows</span></summary><div class="body"><dl>
+<dt>Evidence</dt><dd><code>server/export/datasets.ts:76</code> reuses <code>listMovimientosInventario</code>, which has <code>.limit(50)</code> (<code>queries/lists.ts:107</code>). That contradicts CLAUDE.md §2.2 ("never held hostage … plus export").</dd>
+<dt>Fix</dt><dd>Give the export its own streamed query. Add an E2E test that asserts the exported row count equals the database count on the seed.</dd>
+<dt>Effort</dt><dd>S.</dd>
+</dl></div></details>
+
+<h3>Medium: needed on the way to 5,000</h3>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-IDX-01</span><span class="t">Index set: what to add and what to drop</span></summary><div class="body">
+<p><strong>Add</strong> (each <code>CONCURRENTLY</code>, after DB2-MIG-01):</p>
+<ul>
+<li><code>sales</code>, <code>expenses</code>, <code>inventory_movements</code>: <code>(business_id, created_at)</code>. For usage (DB2-USE-01) and recent activity.</li>
+<li><code>inventory_movements</code>: <code>(business_id, producto_id) INCLUDE (tipo, cantidad, deleted_at)</code>. For stock and <code>sumStock</code>.</li>
+<li><code>sales</code>: <code>(business_id, fecha DESC, id DESC) WHERE deleted_at IS NULL</code>. For keyset lists.</li>
+<li><code>tickets</code>, <code>expenses</code>: <code>(business_id, caja_turno_id)</code>. For /cortes, which today scans all tickets 3× per request.</li>
+<li><code>tickets</code>: <code>(business_id, cliente_id)</code>. <code>sales</code>: <code>(business_id, producto_id)</code>. For revisión merges and fiado.</li>
+<li><code>sync_receipts</code>: <code>(business_id, received_at)</code>, or partition by it (DB2-SYNC-03).</li>
+<li><code>business_members (user_id)</code> + unique <code>(business_id, user_id)</code>. The login path, carried from DB-IDX-02.</li>
+<li><code>portal_sessions (business_id, last_seen_at)</code>. For the console's last login.</li>
+</ul>
+<p><strong>Drop</strong> (each duplicates its primary key or a prefix of it, and adds write cost):</p>
+<ul>
+<li><code>sync_receipts_business_idx</code> (79 MB on the largest, hottest table)</li>
+<li><code>sync_cursors_business_idx</code></li>
+<li><code>billing_customers_business_idx</code></li>
+<li><code>business_logos_business_idx</code></li>
+<li><code>business_onboarding_business_idx</code></li>
+<li><code>notice_preferences_business_idx</code></li>
+<li><code>usage_counters_business_idx</code></li>
+</ul>
+<p>Rewrite <code>idx_sales_ticket</code> and <code>idx_client_payments_cliente</code> as <code>business_id</code>-leading, per ADR-053 §7's shard rule. The drop list is safe because the <code>tenant-indexes</code> test is satisfied by the primary key.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-DEV-02</span><span class="t">Client behaviour at the peak: synchronised retries, and the caja pulls after every sale</span></summary><div class="body">
+<ul>
+<li>The 15-minute tick, the <code>online</code> flush and the row backoff have no jitter.</li>
+<li><code>Retry-After</code> is ignored (<code>api-client.ts:60</code>), and there is no fetch timeout.</li>
+<li>A whole-batch failure retries on the next trigger with no backoff.</li>
+<li>The caja PWA runs push <em>and</em> pull on every sale, with no debounce, and the cashier waits (<code>operador/shell/cola.tsx</code>).</li>
+<li>A reconnect flushes up to 10 × 500 rows back to back.</li>
+</ul>
+<p><strong>Fix:</strong> add ±20% jitter, honour <code>Retry-After</code>, and use exponential backoff with full jitter on batch failure. The caja should push per sale but pull at most once every 30–60 s. <strong>Effort:</strong> S.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-CRON-01</span><span class="t">Nightly and console jobs scan everything and grow with the database</span></summary><div class="body">
+<ul>
+<li><strong>The usage cron at 03:00</strong> does full scans (see DB2-USE-01).</li>
+<li><strong>The digest's over-limit check</strong> recomputes usage from source rows for up to 1,000 tenants, then reports <code>partial</code> above that. It should read <code>usage_counters</code>.</li>
+<li><strong><code>xangarro.admin_user_email</code></strong> compares <code>u.id::text = p_user_id</code>, which defeats the <code>auth.users</code> primary key: one sequential scan per owner on the tenants list.</li>
+<li><strong><code>security_prune()</code> only runs manually</strong>, so <code>portal_sessions</code> and <code>throttle</code> grow forever.</li>
+<li><strong>The CFDI close</strong> runs 2 sequential primary-key queries per payment in one invocation.</li>
+</ul>
+<p><strong>Fix:</strong> read the counters, cast the parameter instead of the column, and schedule the prune. Keep all of these in the 00:00–06:00 trough (see §8). <strong>Effort:</strong> S.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-PAGE-01</span><span class="t">Every portal navigation costs about 8 transactions, one of them a full <code>count(*)</code> of sales</span></summary><div class="body">
+<ul>
+<li>The session is UPDATEd on every request.</li>
+<li><code>loadChecklistSignals</code> runs <code>count(*) FROM sales</code> for the whole tenant on <em>every</em> page (layout <code>guiaPrimero</code>) and again on Inicio.</li>
+<li><code>loadShellCounts</code> runs twice on Inicio.</li>
+<li><code>negociosOf</code> runs one transaction per membership.</li>
+</ul>
+<p><strong>Fix:</strong> use <code>EXISTS</code> instead of <code>count(*)</code>, persist "checklist complete", wrap loaders in React <code>cache()</code>, and throttle the session UPDATE to once a minute. <strong>Effort:</strong> S.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-CHK-01</span><span class="t">Integrity is enforced only in application code (carries DB-CHK-01/02, DB-FK-01, DB-TYPE-02)</span></summary><div class="body">
+<ul>
+<li>41 of 45 enum columns have no CHECK.</li>
+<li>There is no <code>cantidad &gt; 0</code>, no <code>fecha</code> format check, and no non-negative money check.</li>
+<li><code>business_members (business_id, user_id)</code> is not unique.</li>
+<li>There are no foreign keys on the ledger, and the two foreign keys that were added use <code>ON DELETE CASCADE</code>.</li>
+<li>The proposed task B-19 was never created.</li>
+</ul>
+<p>The push path validates with Zod, but portal actions, imports, the admin console and seeds do not all go through it. <strong>Fix:</strong> generate the CHECKs from the same <code>as const</code> arrays, add them <code>NOT VALID</code> then <code>VALIDATE</code>, and add an equality test so the two cannot drift. <strong>Effort:</strong> M.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-KEY-01</span><span class="t">Keys are 26-character text under <code>en_US.utf8</code> collation</span></summary><div class="body">
+<ul>
+<li>Every id, <code>business_id</code>, <code>device_id</code> and foreign-key column is collation-aware text. The primary key indexes average about 60 bytes per row.</li>
+<li>On 3 M ids, <code>COLLATE "C"</code> sorted in <strong>1.4 s vs 2.8 s</strong>. That was on this Alpine/musl image; glibc hosts such as Supabase usually show a larger gap.</li>
+<li>ULIDs are uppercase Crockford base32, so C order equals the intended time order. Nothing changes semantically.</li>
+</ul>
+<p><strong>Fix:</strong> first check the database collation on the host with <code>SELECT datcollate FROM pg_database</code>. If it is not <code>C</code>/<code>C.UTF-8</code>, declare <code>COLLATE "C"</code> on key columns when their indexes are next rebuilt, or at the S2 partitioning migration. Do <em>not</em> change the id type; the device mints ULIDs. <strong>Effort:</strong> M, done opportunistically.</p>
+</div></details>
+
+<details><summary><span class="sev med">medium</span><span class="id">DB2-NORM-01</span><span class="t">Normalization: mostly intentional, three real defects</span></summary><div class="body"><p>See §5.</p></div></details>
+
+<h3>Low and decisions</h3>
+
+<details><summary><span class="sev low">low</span><span class="id">DB2-RLS-01</span><span class="t">Wrapped vs unwrapped policies: measured, and it barely matters (downgrades DB-RLS-02)</span></summary><div class="body">
+<p>29 of 40 tenant policies still call <code>current_business_id()</code> unwrapped, including <code>sales</code>, <code>sync_log</code> and <code>sync_receipts</code>. On indexed access the whale's <code>count(*)</code> was 240 ms unwrapped and 272 ms wrapped, which is noise. It only helps plans that mix tables (DB2-QRY-03 went from 2.6 s to 1.3 s, but the real fix there is the query shape). Wrap them all in one migration, for consistency and cheaper sequential scans, but not urgently.</p>
+</div></details>
+
+<details><summary><span class="sev low">low</span><span class="id">DB2-PART-01</span><span class="t">Partitioning for ADR-068 S2: decide the key before you need it</span></summary><div class="body">
+<p>At 5,000 realistic tenants, S2 triggers in month 1. My recommendation, to be settled in an ADR:</p>
+<ul>
+<li><strong>Sync bookkeeping</strong> (<code>sync_receipts</code>, and <code>sync_log</code> once its horizon exists): <strong>range by time</strong>, so retention is <code>DROP PARTITION</code>.</li>
+<li><strong>Ledger tables</strong> (<code>sales</code>, <code>tickets</code>, <code>inventory_movements</code>, <code>expenses</code>): <strong>hash by <code>business_id</code></strong>, 16–32 partitions. Every query is tenant-scoped, so pruning is automatic, per-partition vacuum and index builds get small, and it is the same distribution key Citus uses for S3.</li>
+</ul>
+<p>Month partitions on <code>fecha</code> would help reports but not tenant scoping. <code>fecha</code> is also device-supplied and text.</p>
+<p><strong>The prerequisite either way:</strong> the primary key must include the partition key. <code>(business_id, id)</code> means push's <code>ON CONFLICT (id)</code> becomes <code>ON CONFLICT (business_id, id)</code>. That is cheap to change now, inside DB2-SYNC-01, and expensive later.</p>
+</div></details>
+
+<h2 id="normal">5. Normalization and structure</h2>
+<p>The schema reads as a ledger. That is the right model for a NIF system, and most of its apparent denormalization is correct. <strong>Intentional and correct:</strong></p>
+<ul>
+<li><code>sales.concepto</code>, <code>categoria</code> and <code>monto</code> are copied from the product at capture time. A ledger must not change when the catalogue does.</li>
+<li><code>sales.fecha</code> is copied from its ticket, which lets it be filtered without a join.</li>
+<li><code>caja_turnos.total_*</code> and <code>efectivo_esperado</code> are a closing snapshot.</li>
+<li>Receivables are derived from facts (ADR-074), not stored.</li>
+<li>Stock is derived from movements. That is correct as the source of truth, but it needs a server-side rollup for reads (DB2-QRY-05).</li>
+</ul>
+<p><strong>Real defects:</strong></p>
+<ol>
+<li><strong><code>entregas_credito.sale_ids</code> is a text list</strong> (breaks first normal form). The server can't join, index or constrain it. If the portal ever needs "which delivery contained this sale", use a join table <code>(business_id, entrega_id, sale_id)</code>.</li>
+<li><strong>Cancellation is stored twice.</strong> <code>tickets.cancel_motivo</code>, <code>cancelled_by_user_id</code> and <code>cancelled_at</code> duplicate <code>cancelacion_logs</code>. Queries read <code>tickets.cancelled_at</code> (the <code>NOT EXISTS</code> anti-join in every revenue query), so decide which one is authoritative and derive the other. As an aside, a boolean or partial index on cancelled tickets would let revenue queries skip the per-line anti-join.</li>
+<li><strong>Enum lists are repeated.</strong> The payment method appears in <code>tickets</code>, <code>client_payments</code> and <code>cancelacion_logs</code>; the expense category in <code>expenses</code> and <code>recurring_expenses</code>. There is also no database CHECK. Generate one CHECK per column from one <code>as const</code> (DB2-CHK-01).</li>
+</ol>
+<p><strong>Acceptable, and should stay as it is:</strong></p>
+<ul>
+<li>JSON stored as text (<code>feature_flags</code>, <code>permissions</code>, <code>atributos*</code>, <code>lineas</code>, <code>denominaciones</code>) is fine for device parity. Move a column to <code>jsonb</code> only when the server starts querying inside it.</li>
+<li><code>businesses.business_id</code> duplicating <code>id</code> is a side effect of the shared audit columns. It is harmless and keeps RLS uniform.</li>
+</ul>
+
+<h2 id="prior">6. Status of the 2026-09-17 findings</h2>
+<p>The N-27 line on the board says "fixed: SYNC-01, IDX-01, QRY-01, MIG-01, RLS-01, MIG-02; open: OPS-01, SYNC-02 (unverified)". <strong>That line is inaccurate:</strong> QRY-01 and MIG-01 are only partly done, SYNC-02 is actually done, and it doesn't mention ten other findings. Checked against the code today, 25 findings in all:</p>
+<div class="tbl"><table>
+<tr><th>Status</th><th>Findings</th></tr>
+<tr><td><span class="sev ok">fixed (9)</span></td><td>SYNC-01 (per-tenant cursor, tested), SYNC-02 (via <code>sync_receipts</code>), IDX-01 (0033, 40 indexes + CI guard), MIG-02, RLS-01 (0036 revoke DELETE), RLS-03 (preflight/verify), TYPE-01, CONN-01 (<code>prepare:false</code>, role timeouts), SYNC-03 (UP rows not logged)</td></tr>
+<tr><td><span class="sev high">partial (9)</span></td><td>MIG-01 (hosted ledger, but stale journal), MIG-03 (7 ad-hoc old→new tests; no generic harness, no <code>CONCURRENTLY</code>), <strong>RLS-02 (29/40 unwrapped; now low)</strong>, <strong>QRY-01 (still <code>left()</code> → DB2-QRY-04)</strong>, CHK-02, FK-01, SYNC-04 (one stream, but no <code>hasMore</code>, unbounded bootstrap), SYNC-05 (42501 mapped; still row by row → DB2-SYNC-01), plus the DB-IDX-01 deviations (no <code>producto_id</code> / <code>created_at</code>)</td></tr>
+<tr><td><span class="sev crit">open (6)</span></td><td>OPS-01 (PITR), CHK-01, QRY-02, TYPE-02, TYPE-03 (accepted), IDX-02</td></tr>
+<tr><td><span class="sev low">obsolete (1)</span></td><td>INFO-02 (N-07 capacity card done)</td></tr>
+</table></div>
+<p>The tasks B-19 (integrity constraints) and B-20 (migration pipeline) were proposed but <strong>never created</strong>, so seven open findings have no owner.</p>
+
+<h2 id="roadmap">7. What to do, in order</h2>
+<div class="tbl"><table>
+<tr><th>When</th><th>Do</th><th>Why then</th></tr>
+<tr><td><strong>Before launch</strong> (X-10)</td><td>
+<ul>
+<li>DB2-USE-01: at least the indexes; plus the counter chunking</li>
+<li>DB2-SYNC-02 stopgap: cap the push at 64 rows</li>
+<li>DB2-QRY-01 (<code>serieDiaria</code>)</li>
+<li>DB2-DEV-01 (stranded rows)</li>
+<li>DB2-EXP-01 (the 50-row export)</li>
+<li>DB2-HOT-01</li>
+<li>DB2-CONN-01 pool settings</li>
+<li>DB2-OPS-01 PITR + drill (O-3)</li>
+<li>DB2-MIG-01: <code>CONCURRENTLY</code> support, because every later index depends on it</li>
+</ul></td><td>Each is small, and each fails with the <em>first</em> heavy tenant or the first bad evening, not the thousandth.</td></tr>
+<tr><td><strong>Before ~500 tenants</strong></td><td>
+<ul>
+<li>DB2-SYNC-01: the batched push, with a <code>(business_id, id)</code> conflict target</li>
+<li>DB2-USE-01: incremental counters</li>
+<li>DB2-QRY-02/03/04 (pagination, query shape, sargable dates)</li>
+<li>DB2-IDX-01</li>
+<li>DB2-DEV-02</li>
+<li>DB2-PAGE-01</li>
+<li>Create B-19 and B-20</li>
+</ul></td><td>Tenants reach 6–12 months of history, and several devices per shop flush together at closing time.</td></tr>
+<tr><td><strong>Before ~2,000 tenants</strong></td><td>
+<ul>
+<li>DB2-QRY-05 (<code>product_stock</code> rollup + snapshot bootstrap)</li>
+<li>DB2-SYNC-03 (receipt and log retention)</li>
+<li>DB2-CRON-01</li>
+<li>DB2-CHK-01</li>
+<li>An ADR for DB2-PART-01</li>
+<li>A read replica for portal reports and the Asesor</li>
+<li>Compute sized from the measured 17:00–20:00 p95</li>
+</ul></td><td>Storage passes 25 GB and the largest table approaches 50 M rows (ADR-068 S2).</td></tr>
+<tr><td><strong>Before 5,000 tenants</strong></td><td>
+<ul>
+<li>Execute the S2 partitioning</li>
+<li>DB2-KEY-01 at the same rebuild</li>
+<li>Monthly or daily financial rollups for Estados and the Asesor, so year-long statements are constant time</li>
+<li>Apply the O-32 balance strategy on Azure</li>
+</ul></td><td>About 28 GB a month, 340 GB a year.</td></tr>
+<tr><td>If tenants actually reach the <strong>30K cap</strong></td><td>ADR-068 S3: Citus or tenant sharding on <code>business_id</code>, which the hash partitioning above prepares for.</td><td>About 410 GB a month and ~3,700 rows/s at peak is beyond a comfortable single node.</td></tr>
+</table></div>
+
+<h2 id="azure">8. Load curve and the Azure note</h2>
+<p>The traffic has one daily peak and one daily trough:</p>
+<ul>
+<li><strong>Peak, 17:00–20:00 CDMX.</strong> Phones reach home Wi-Fi, flush the day's outbox and pull. Portal traffic (owners checking the day) lands in the same window.</li>
+<li><strong>Trough, 00:00–06:00.</strong></li>
+</ul>
+<p>Today's scheduled jobs already sit mostly in the trough: usage at 03:00, the CFDI close at 01:00 on the 1st, trial emails at 09:00 and the digest at 08:00. The Asesor fan-out, once it is built, must be scheduled there too.</p>
+<p>Scaling compute up for the peak only pays off after DB2-SYNC-01. Until then the peak is bound by round trips (see the 3 ms row in §2), and a bigger SKU does not help.</p>
+<p>I added the note you asked for as owner row <strong>O-32</strong> in <code>docs/plan/11-pre-launch-and-deferred.md</code>, and regenerated <code>PENDIENTES.md</code>, where it now appears. It covers:</p>
+<ol>
+<li>Keep batch work in the trough.</li>
+<li>Scale down overnight and up before 17:00, only if the p95 (ADR-068's 800 ms trigger) and CPU call for it. A compute change restarts the server, so schedule it, and check whether near-zero-downtime scaling is available on the chosen SKU.</li>
+<li>Add a read replica before any vertical step.</li>
+<li>Compare against reserved capacity, which makes a scale-down worthless.</li>
+<li>Storage only grows; size it separately.</li>
+<li>Use the built-in PgBouncer in transaction mode.</li>
+<li>Precondition: batch the push first.</li>
+</ol>
+<p class="note">I used the id O-32, not O-6c: the board parser only accepts <code>O-&lt;digits&gt;</code>. For the same reason the existing <strong>O-6b</strong> Azure note has never appeared on the board.</p>
+
+<h2 id="method">9. Method and limits</h2>
+<p><strong>Environment.</strong> A disposable <code>postgres:17-alpine</code> container, <code>xangarro-audit-scale</code>, port 55498, capped at 4 vCPU / 4 GB (<code>shared_buffers=1GB</code>). All 53 real migrations were applied with <code>db-local.sh apply</code>. The shared <code>xangarro-pg*</code> containers were not touched.</p>
+<p><strong>One incident to report.</strong> My first load filled the Docker VM's 58 GB disk for about a minute. I removed my container at once, which freed 21.5 GB, and checked that all eight other Postgres containers still accepted connections. The reload used a 1 GB WAL cap.</p>
+<p><strong>Data.</strong> 1,003 synthetic tenants: 600 × 300, 300 × 3,000, 100 × 10,000 for one month, plus 3 whales × 30,000 a month for 12 months. That is 3.16 M tickets, 5.06 M sale lines, 3.48 M movements, 316K expenses, 12.0 M receipts, 3.48 M <code>sync_log</code> rows and 8.2 GB. It is 1:5 on tenant count. Storage and row counts extrapolate linearly. Per-tenant query cost depends on the tenant's own history (the whale), <em>except</em> where a query scans whole tables (DB2-USE-01), which is why that one is critical.</p>
+<p><strong>Queries.</strong> Run as <code>xangarro_app</code> with <code>request.jwt.claims</code> set, <code>EXPLAIN (ANALYZE, BUFFERS)</code>, warm cache, second run.</p>
+<p><strong>Push.</strong> A Node replay with the repo's postgres.js 3.4.9 (<code>prepare:false</code>, as production), a 1 ms simulated round trip per statement, and production role timeouts. Throughput varied ±10% between identical runs.</p>
+<p><strong>Not verified.</strong></p>
+<ul>
+<li>Hosted Supavisor overhead, TLS, and Supabase disk I/O and compute. Absolute numbers will differ; the before/after ratios hold.</li>
+<li>Real traffic in <code>pg_stat_statements</code>: there is still none.</li>
+<li>The subtransaction-overflow damage to <em>other</em> sessions. I observed the overflow, but my reader comparison was confounded by CPU load, so no number is claimed.</li>
+<li>Vercel cold starts and the real 4.5 MB body limit behaviour.</li>
+<li>Azure pricing and SKU behaviour, which is written as items to check.</li>
+</ul>
+<p>The benchmark scripts (<code>push.mjs</code>, generators, harness) are in the session scratchpad next to this file.</p>
+
+<h2 id="after">10. After <code>perf/db-scale</code>: measured again</h2>
+<p>Same generator, same 1,003 tenants plus 3 whales, same 4 vCPU / 4 GB container, now on the merged branch: migrations through 0046, production role settings (5&nbsp;s statement timeout, JIT off). These times are wall-clock for the <strong>real</strong> code: data-pg's exported query functions under the tenant context, and <code>ApplyPushUseCase</code> + <code>PgPushStore</code>. They include local round trips but no simulated network delay.</p>
+<div class="tbl"><table>
+<tr><th>What</th><th class="n">Before (§2–3)</th><th class="n">After, whale</th><th class="n">After, heavy / mid</th></tr>
+<tr><td><code>serieDiaria</code>, 30 days</td><td class="n bad">8,094 ms</td><td class="n good">43 ms</td><td class="n">5.6 / 3.0 ms</td></tr>
+<tr><td>Ventas list</td><td class="n bad">3,628 ms, 576K rows</td><td class="n good">2.3 ms, one page (page 400: 3.3 ms)</td><td class="n">1.9 / 1.8 ms</td></tr>
+<tr><td>Ventas KPIs for the month (<code>resumenMovimientos</code>)</td><td class="n">computed in JS from the full list</td><td class="n">94 ms</td><td class="n">17 / 5.4 ms</td></tr>
+<tr><td><code>recentActivity</code></td><td class="n bad">953 ms</td><td class="n good">1.3 ms</td><td class="n">1.6 / 1.6 ms</td></tr>
+<tr><td><code>historialSync</code></td><td class="n bad">897 ms</td><td class="n good">120 ms (30 days)</td><td class="n">38 / 12 ms</td></tr>
+<tr><td><code>lowStock</code> / <code>listProductos</code></td><td class="n">374 / 350 ms</td><td class="n">66 / 87 ms</td><td class="n">3.4 / 4.6 · 1.8 / 2.1 ms</td></tr>
+<tr><td>Usage recount per push (and now at most once a minute per tenant)</td><td class="n bad">600–1,190 ms at any size</td><td class="n good">40 ms</td><td class="n">12 / 5.8 ms</td></tr>
+<tr><td>One 500-row push</td><td class="n bad">8.0 s (1 ms round trip)</td><td class="n good">52–67 ms, about 14 statements</td><td class="n">—</td></tr>
+<tr><td>3 devices of one shop, 500 rows each, at once</td><td class="n bad">p50 13.5 s, 67 timeouts/min</td><td class="n good">114 ms wall, 0 errors</td><td class="n">—</td></tr>
+<tr><td>15 clients, 500-row pushes, random tenants</td><td class="n bad">1,117 rows/s</td><td class="n good">22,362 rows/s</td><td class="n">—</td></tr>
+</table></div>
+<p><strong>The cost:</strong> the new indexes grow the benchmark database from 8.2 GB to <strong>10.1 GB (+23%)</strong>. Most of that is the three <code>(business_id, created_at)</code> indexes and the covering stock index. That is the trade for per-push recounts that no longer scan every tenant. Retention of <code>sync_receipts</code> (DB2-SYNC-03, still open) would give back more than that.</p>
+<p><strong>Gates run on the merged branch:</strong></p>
+<ul>
+<li>typecheck, unit tests, lint, format and design-lint: green</li>
+<li><code>test:scripts</code>: 133/133</li>
+<li>data-pg <code>test:db</code>: 364/364</li>
+<li>web <code>test:db</code>: 3/3, and the portal's unit tests with a database: 561/561</li>
+<li>back office: 370/371. The one failure is an existing test that fails whenever <code>DATABASE_URL</code> is set.</li>
+<li>device conformance: all green</li>
+<li>full portal Playwright suite: 536 passed, 25 skipped, 0 failed</li>
+</ul>
+<p><strong>Still open:</strong></p>
+<ul>
+<li>DB2-OPS-01 (PITR)</li>
+<li>DB2-QRY-05 (stock rollup and snapshot bootstrap)</li>
+<li>DB2-SYNC-03 (retention)</li>
+<li>DB2-CHK-01 (constraints)</li>
+<li>DB2-KEY-01</li>
+<li>DB2-PART-01</li>
+<li>the drizzle journal half of DB2-MIG-01</li>
+<li>incremental usage counters</li>
+<li>the browser caja writing its whole local database after every sale (<code>operador/runtime/db.worker.ts</code>, needs an ADR-071 decision)</li>
+<li>a device stuck behind a batch the server rejects with 400. Splitting that batch is a follow-up.</li>
+</ul>
+
+</main>
+</body>
+</html>

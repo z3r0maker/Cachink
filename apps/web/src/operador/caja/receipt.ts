@@ -2,7 +2,7 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { readDevice } from '../runtime/device-store';
-import { importe } from './ticket';
+import { importe } from '@xangarro/caja/caja';
 import type { VentaHecha } from './use-sale-toast';
 
 /**

@@ -14,10 +14,10 @@ describe('SyncScheduler', () => {
     vi.useRealTimers();
   });
 
-  function make() {
+  function make(random: () => number = () => 0.5) {
     const runPush = vi.fn();
     const runSync = vi.fn();
-    return { runPush, runSync, s: new SyncScheduler({ runPush, runSync }) };
+    return { runPush, runSync, s: new SyncScheduler({ runPush, runSync, random }) };
   }
 
   it('collapses a burst of writes into one push after the debounce', () => {
@@ -50,11 +50,57 @@ describe('SyncScheduler', () => {
   });
 
   it('does not stack intervals when foregrounded repeatedly', () => {
-    const { runSync, s } = make();
+    const { runPush, runSync, s } = make();
     s.onForeground();
-    s.onForeground();
+    s.onForeground(); // within 45 s of the first: push only (DB3-L-02)
+    expect(runPush).toHaveBeenCalledTimes(1);
     vi.advanceTimersByTime(PULL_INTERVAL_MS);
-    expect(runSync).toHaveBeenCalledTimes(3);
+    expect(runSync).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('SyncScheduler · the evening peak (DB2-DEV-02)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('spreads the foreground tick by ±20 % so devices do not sync in step', () => {
+    for (const [random, factor] of [
+      [0, 0.8],
+      [1, 1.2],
+    ] as const) {
+      const runSync = vi.fn();
+      const s = new SyncScheduler({ runPush: vi.fn(), runSync, random: () => random });
+      s.onForeground();
+      vi.advanceTimersByTime(PULL_INTERVAL_MS * factor - 1);
+      expect(runSync).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(1);
+      expect(runSync).toHaveBeenCalledTimes(2);
+      s.dispose();
+    }
+  });
+
+  it('retries once when the engine says, the latest request winning', () => {
+    const runSync = vi.fn();
+    const s = new SyncScheduler({ runPush: vi.fn(), runSync, random: () => 0.5 });
+    s.retryIn(30_000);
+    s.retryIn(10_000);
+    vi.advanceTimersByTime(9_999);
+    expect(runSync).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(30_000);
+    expect(runSync).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops a scheduled retry on background', () => {
+    const runSync = vi.fn();
+    const s = new SyncScheduler({ runPush: vi.fn(), runSync });
+    s.retryIn(5_000);
+    s.onBackground();
+    vi.advanceTimersByTime(60_000);
+    expect(runSync).not.toHaveBeenCalled();
   });
 });
 
@@ -63,10 +109,11 @@ describe('pillView', () => {
     ...INITIAL_CLOUD_SYNC_STATE,
     ...over,
   });
-  const counts = (pending: number, rejected: number, retrying: number) => ({
+  const counts = (pending: number, rejected: number, retrying: number, unsent = 0) => ({
     pending,
     rejected,
     retrying,
+    unsent,
   });
 
   it('shows rejected rows above everything except an active sync', () => {
@@ -76,15 +123,23 @@ describe('pillView', () => {
     );
   });
 
-  it('counts pending plus retrying as waiting, and shows offline when the last attempt had no network', () => {
-    expect(pillView(at({ counts: counts(2, 0, 1) }))).toEqual({
+  it('counts everything unsent as waiting, and shows offline when the last attempt had no network', () => {
+    expect(pillView(at({ counts: counts(2, 0, 1, 3) }))).toEqual({
       labelKey: 'syncPill.pending',
       count: 3,
       tone: 'warn',
     });
-    expect(pillView(at({ phase: 'offline', counts: counts(1, 0, 0) })).labelKey).toBe(
+    expect(pillView(at({ phase: 'offline', counts: counts(1, 0, 0, 1) })).labelKey).toBe(
       'syncPill.offline',
     );
+  });
+
+  it('counts sales captured offline and never tried, which have no pending row (DB3-CAJA-02)', () => {
+    expect(pillView(at({ phase: 'offline', counts: counts(0, 0, 0, 6) }))).toEqual({
+      labelKey: 'syncPill.offline',
+      count: 6,
+      tone: 'warn',
+    });
   });
 
   it('shows the last sync time when everything is up to date, and "never" before the first sync', () => {

@@ -14,8 +14,10 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 # Productos tab -> add product (header button; FAB is iPhone-only).
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: 'stock-nuevo-producto'
 

@@ -3,7 +3,7 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '../ui/dueno';
+import { mayuscula } from '@xangarro/caja';
 import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
@@ -12,11 +12,10 @@ import * as fc from '../ui/filters.css';
 import { PageHead } from '../ui/panel';
 import { OpMain } from '../ui/parts';
 import { Toast } from '../ui/toast';
-import { filtrar, resumen } from './derive';
+import { filtrar, resumen, CATEGORIAS, type GastosScreenProps } from '@xangarro/caja/gastos';
 import * as g from './gastos.css';
 import { ListaGastos } from './lista';
 import { RegistrarGasto } from './registrar';
-import { CATEGORIAS, type GastosScreenProps } from './types';
 import { useGastos, type Gastos } from './use-gastos';
 
 const PLUS = 'M12 5v14M5 12h14';

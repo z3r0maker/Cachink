@@ -396,7 +396,6 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `caja-abrir-cerrar.yaml`        | Open → status → close         |
 | `caja-con-adicional.yaml`       | Additional deposits           |
 | `caja-cierre-discrepancia.yaml` | Cierre with discrepancy       |
-| `caja-handoff.yaml`             | Caja handoff between shifts   |
 | `caja-movimientos-nav.yaml`     | **NEW** Caja movements screen |
 
 ### Cancelaciones
@@ -419,20 +418,21 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 ### Auth + Feature Flags
 
-| Flow                                   | What it proves                     |
-| -------------------------------------- | ---------------------------------- |
-| `quick-switch-login.yaml`              | QuickSwitch correct/wrong password |
-| `role-switch.yaml`                     | Director ↔ Operativo switch        |
-| `change-password.yaml`                 | Forced password change             |
-| `recovery-back-and-factory-reset.yaml` | Recovery + factory reset           |
-| `recovery-pin.yaml`                    | PIN recovery                       |
-| `funciones-toggle.yaml`                | Toggle feature flags               |
-| `funciones-stock-disabled.yaml`        | Stock OFF → no stock UI            |
-| `funciones-cascade-disable.yaml`       | Flag cascade disable               |
-| `funciones-cant-enable-child.yaml`     | Child flag requires parent         |
-| `funciones-conversion-auto-chain.yaml` | Conversion auto-chain              |
-| `funciones-ventas-credito-toggle.yaml` | Ventas crédito toggle              |
-| `auto-lock-smoke.yaml`                 | Inactivity → QuickSwitch           |
+| Flow                                   | What it proves                        |
+| -------------------------------------- | ------------------------------------- |
+| `quick-switch-login.yaml`              | Acceso: wrong NIP, then the right one |
+| `inicio-entrar.yaml`                   | Inicio landing, abrir turno, Bloqueo  |
+| `role-switch.yaml`                     | Director ↔ Operativo switch           |
+| `change-password.yaml`                 | Forced password change                |
+| `recovery-back-and-factory-reset.yaml` | Recovery + factory reset              |
+| `recovery-pin.yaml`                    | PIN recovery                          |
+| `funciones-toggle.yaml`                | Toggle feature flags                  |
+| `funciones-stock-disabled.yaml`        | Stock OFF → no stock UI               |
+| `funciones-cascade-disable.yaml`       | Flag cascade disable                  |
+| `funciones-cant-enable-child.yaml`     | Child flag requires parent            |
+| `funciones-conversion-auto-chain.yaml` | Conversion auto-chain                 |
+| `funciones-ventas-credito-toggle.yaml` | Ventas crédito toggle                 |
+| `auto-lock-smoke.yaml`                 | Inactivity → QuickSwitch              |
 
 ### User Management
 

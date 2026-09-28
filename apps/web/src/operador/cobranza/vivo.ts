@@ -12,13 +12,19 @@ import { registerRuntime } from '../runtime/client';
 import { desencolar } from '../shell/cola';
 import type { Credenciales } from '../runtime/use-credenciales';
 import type { CuentaPara } from '../runtime/protocol';
-import { abiertas, estadoCuenta, vence } from './cliente/derive';
-import type { AbonoCuenta, CuentaCliente, VentaCuenta } from './cliente/types';
-import { comoMetodo } from '../ventas/derive';
-import type { MetodoAbono } from './types';
+import {
+  abiertas,
+  estadoCuenta,
+  vence,
+  type AbonoCuenta,
+  type CuentaCliente,
+  type VentaCuenta,
+  type MetodoAbono,
+} from '@xangarro/caja/cobranza';
+import { comoMetodo } from '@xangarro/caja/ventas';
 
 const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;
-export { hoyLocal } from '../runtime/fechas';
+export { hoyLocal } from '@xangarro/caja';
 
 function iniciales(nombre: string): string {
   const parts = nombre.trim().split(/\s+/);

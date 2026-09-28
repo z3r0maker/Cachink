@@ -4,7 +4,7 @@ import { Don } from '@/components/don/don';
 
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import { ICONS } from '../shell/nav';
+import { ICONS } from '@xangarro/caja';
 import { PageHead } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
@@ -13,9 +13,8 @@ import * as a from './avisos.css';
 import { AvisoCard } from './card';
 import * as r from './reply.css';
 import { AvisoSistema } from './sistema';
-import type { AvisoGrupo, AvisosScreenProps } from './types';
+import { type AvisoGrupo, type AvisosScreenProps, deDueno, mayuscula } from '@xangarro/caja/avisos';
 import { useAvisos } from './use-avisos';
-import { deDueno, mayuscula } from './vivo';
 
 const TABS: readonly [AvisoGrupo, string][] = [
   ['dueno', 'De Pedro'],

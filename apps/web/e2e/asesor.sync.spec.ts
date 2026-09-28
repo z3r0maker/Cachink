@@ -24,6 +24,20 @@ test('visiting Para ti materialises insights and real capacidades', async ({ pag
   await expect(main.getByText('Lo que Don Cuentas ya puede ver')).toBeVisible();
   await expect(main.getByText(/de 60 días · \d+ de 2 compras/)).toBeVisible();
 
+  // ADR-116's actionable line reaches the page and names the blocker still
+  // standing. The seed records many entradas per product, so «Precios y
+  // márgenes» is past its 2 compras and blocked on days of sales; the
+  // «Registra el costo…» branch is the domain test's (capacidades.test.ts).
+  await expect(main.getByText(/^Llevas \d+ de 60 días de ventas$/)).toBeVisible();
+
+  // A date is promised only where the calendar alone gets there, so the two
+  // `diasDeHistorial` rows carry one and no other row may.
+  const fechas = main.getByText(/^Disponible en \d+ días?$/);
+  for (const fecha of await fechas.all()) await expect(fecha).toBeVisible();
+  // A count-only row restates the count instead: the seed is past 20 cortes
+  // (that row reads «Activo»), so the check is on gastos, still short of 3 months.
+  await expect(main.getByText(/^Llevas \d+ de 3 meses$/)).toBeVisible();
+
   // The provenance line never claims AI authorship for computed output.
   await expect(main.getByText('Calculado a partir de tus registros.')).toBeVisible();
 });

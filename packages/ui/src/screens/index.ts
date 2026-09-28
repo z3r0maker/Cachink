@@ -22,6 +22,10 @@ export {
 // Phase 1-12 new screens
 export * from './Login/index';
 export * from './Activation/index';
+// Track M, M-06 — Entrar y empezar
+export * from './Inicio/index';
+export * from './AbrirTurno/index';
+export * from './Bloqueo/index';
 export * from './Caja/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';

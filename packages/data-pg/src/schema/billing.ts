@@ -24,16 +24,13 @@ export const BILLING_STATUSES = ['trialing', 'active', 'past_due', 'lapsed'] as 
 export const COLLECTION_METHODS = ['charge_automatically', 'send_invoice'] as const;
 
 /** One Stripe customer per business. */
-export const billingCustomers = pgTable(
-  'billing_customers',
-  {
-    businessId: text('business_id').primaryKey(),
-    stripeCustomerId: text('stripe_customer_id').notNull().unique(),
-    createdAt: at('created_at').notNull().defaultNow(),
-    updatedAt: at('updated_at').notNull().defaultNow(),
-  },
-  (t) => [index('billing_customers_business_idx').on(t.businessId)],
-);
+export const billingCustomers = pgTable('billing_customers', {
+  // The primary key is the tenant index (0045 dropped its duplicate).
+  businessId: text('business_id').primaryKey(),
+  stripeCustomerId: text('stripe_customer_id').notNull().unique(),
+  createdAt: at('created_at').notNull().defaultNow(),
+  updatedAt: at('updated_at').notNull().defaultNow(),
+});
 
 export const subscriptions = pgTable(
   'subscriptions',

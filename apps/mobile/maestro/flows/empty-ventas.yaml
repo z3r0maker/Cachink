@@ -1,6 +1,6 @@
-# Verify the productos gate blocks Ventas when no products exist.
-# With the productos gate, fresh state renders ProductosGateBanner
-# ("Registra tus productos") instead of the old empty-state component.
+# Cobrar with no products (Track M, M-07): the catalogue says there is
+# nothing yet and offers «Producto nuevo» right there. (Product management
+# left the phone in M-01; the old «Registra tus productos» gate went with it.)
 #
 # Precondition: fresh install with wizard complete but NO products.
 # Chain flows:
@@ -12,23 +12,17 @@
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate-wizard.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to the Ventas tab.
 - tapOn:
-    id: 'tab-ventas'
-
-# No products registered yet — the productos gate renders.
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-vacio'
+    timeout: 5000
+- assertVisible: 'Todavía no hay productos'
 - assertVisible:
-    id: 'productos-gate-banner'
-
-# The CTA button to navigate to Productos should be visible.
-- assertVisible:
-    id: 'productos-gate-go-to-productos'
-
-# Product grid should NOT be visible.
-- assertNotVisible:
-    id: 'ventas-product-grid'
+    id: 'cobrar-vacio-nuevo'
+- assertVisible: 'Toca un producto para empezar'

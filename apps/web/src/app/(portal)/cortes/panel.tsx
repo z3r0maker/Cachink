@@ -2,7 +2,7 @@ import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import { Button, Don, Drawer } from '@/components';
-import { DIF } from '@/operador/cierre/copy';
+import { DIF } from '@xangarro/caja/cierre';
 
 import { EstadoPill } from './columnas';
 import { Conteo } from './conteo';

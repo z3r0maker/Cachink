@@ -31,7 +31,7 @@ async function contar(page: Page, piezas: Record<string, string>) {
  * O-28 (Track O, fase 12; real door O-38): Cierre de turno over this test's
  * own turno — a fondo of $500 and one cash sale of $80, counted, explained,
  * closed. The queue is the engine's real one: online, it is always empty
- * (the register flushes after each sale), so the blocking band never shows.
+ * (the register flushes after each sale), so the «por enviar» band never shows.
  */
 test('the count starts at zero, with no verdict until something is counted', async ({ page }) => {
   await puertaOperador(page, PRODUCTOS);

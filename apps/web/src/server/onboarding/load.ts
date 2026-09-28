@@ -18,7 +18,8 @@ import {
   type WizardAnswers,
   type WizardConfiguration,
 } from '@xangarro/domain';
-import { count, isNull } from 'drizzle-orm';
+import { sql, type SQL } from 'drizzle-orm';
+import { cache } from 'react';
 
 import type { ChecklistSignals } from '@/onboarding/checklist';
 
@@ -69,35 +70,80 @@ export async function loadRecommendation(
   return answersToConfiguration(answers, currentPlan);
 }
 
-const n = (rows: { n: number }[]) => rows[0]?.n ?? 0;
-
 /** The stored list differs from the full offered set, in any order: someone chose. */
 function pagosRevisados(json: string | null | undefined): boolean {
   const chosen = parseMetodosPago(json);
   return chosen.length !== METODOS_CONFIGURABLES.length;
 }
 
-export function loadChecklistSignals(businessId: string): Promise<ChecklistSignals> {
-  return withTenant(businessId, async (tx) => {
-    const c = { n: count() };
-    const [biz] = await tx
-      .select({
-        logo: businesses.logoUrl,
-        rfc: businesses.rfc,
-        pagos: businesses.enabledPaymentMethods,
-      })
-      .from(businesses);
-    return {
-      operadores: n(await tx.select(c).from(users)),
-      productos: n(await tx.select(c).from(products).where(isNull(products.deletedAt))),
-      saldosIniciales:
-        n(await tx.select(c).from(openingBalances).where(isNull(openingBalances.deletedAt))) > 0,
-      codigoGenerado: n(await tx.select(c).from(activationCodes)) > 0,
-      dispositivosActivos: n(await tx.select(c).from(devices).where(isNull(devices.revokedAt))),
-      ventasSincronizadas: n(await tx.select(c).from(sales).where(isNull(sales.deletedAt))),
-      tieneLogo: biz?.logo != null && biz.logo !== '',
-      tieneRfc: biz?.rfc != null && biz.rfc !== '',
-      pagosRevisados: pagosRevisados(biz?.pagos),
-    };
-  });
+/**
+ * Whether any row matches, as 0 or 1: the checklist only asks «is there one?»,
+ * and the layout asks on **every** navigation — for the sidebar's «Primeros
+ * pasos» card (ADR-107), since nothing redirects to the guía any more. It was
+ * `count(*)` — over `sales`, the whole tenant history on every page
+ * (DB2-PAGE-01). `EXISTS` stops at the first row.
+ */
+const hay = (tabla: SQL, filtro: SQL = sql`true`): SQL =>
+  sql`(SELECT CASE WHEN EXISTS (SELECT 1 FROM ${tabla} WHERE ${filtro}) THEN 1 ELSE 0 END)`;
+
+type Senales = {
+  operadores: number;
+  productos: number;
+  saldos: number;
+  codigos: number;
+  dispositivos: number;
+  ventas: number;
+  logo: string | null;
+  rfc: string | null;
+  pagos: string | null;
+};
+
+const SIN_SENALES: Senales = {
+  operadores: 0,
+  productos: 0,
+  saldos: 0,
+  codigos: 0,
+  dispositivos: 0,
+  ventas: 0,
+  logo: null,
+  rfc: null,
+  pagos: null,
+};
+
+function aSenales(r: Senales): ChecklistSignals {
+  return {
+    operadores: Number(r.operadores),
+    productos: Number(r.productos),
+    saldosIniciales: Number(r.saldos) > 0,
+    codigoGenerado: Number(r.codigos) > 0,
+    dispositivosActivos: Number(r.dispositivos),
+    ventasSincronizadas: Number(r.ventas),
+    tieneLogo: (r.logo ?? '') !== '',
+    tieneRfc: (r.rfc ?? '') !== '',
+    pagosRevisados: pagosRevisados(r.pagos),
+  };
 }
+
+/**
+ * The checklist's signals in one statement. The counts are 0 or 1 — every
+ * reader asks `> 0` — so each is an EXISTS rather than a count.
+ *
+ * `cache()`: the layout's «Primeros pasos» and Inicio's card read the same
+ * signals in one request; they cost one round trip, not two.
+ */
+export const loadChecklistSignals = cache(
+  (businessId: string): Promise<ChecklistSignals> =>
+    withTenant(businessId, async (tx) => {
+      const [r = SIN_SENALES] = await tx.execute<Senales>(sql`
+      SELECT ${hay(sql`${users}`)} AS operadores,
+             ${hay(sql`${products}`, sql`deleted_at IS NULL`)} AS productos,
+             ${hay(sql`${openingBalances}`, sql`deleted_at IS NULL`)} AS saldos,
+             ${hay(sql`${activationCodes}`)} AS codigos,
+             ${hay(sql`${devices}`, sql`revoked_at IS NULL`)} AS dispositivos,
+             ${hay(sql`${sales}`, sql`deleted_at IS NULL`)} AS ventas,
+             b.logo_url AS logo, b.rfc, b.enabled_payment_methods AS pagos
+        FROM (SELECT 1) uno
+        LEFT JOIN ${businesses} b ON true`);
+      return aSenales(r);
+    }),
+);

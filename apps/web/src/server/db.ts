@@ -3,6 +3,8 @@ import 'server-only';
 import { sql } from 'drizzle-orm';
 import { createDb, withBusiness, type Db } from '@xangarro/data-pg';
 
+import { currentDeadline } from './db-deadline';
+
 /**
  * The portal's database handle.
  *
@@ -19,9 +21,9 @@ let cached: Db | undefined;
 /**
  * **One pool per process, not per module evaluation.**
  *
- * `createDb` opens a pool of 5. Under `next dev` every route bundle and RSC
- * layer evaluates this module again, and a module-level cache is scoped to the
- * evaluation, so each one got its own pool: after a full Playwright run one
+ * `createDb` opens a pool (`DATABASE_POOL_MAX`, default 2). Under `next dev`
+ * every route bundle and RSC layer evaluates this module again, and a
+ * module-level cache is scoped to the evaluation, so each one got its own pool: after a full Playwright run one
  * `next-server` held 97 idle connections against a 100-slot local Postgres and
  * global-setup died on "remaining connection slots are reserved". In
  * development the handle therefore lives on `globalThis`, which survives
@@ -30,9 +32,11 @@ let cached: Db | undefined;
  * is hung off the global.
  */
 const GLOBAL_KEY = '__xangarroDb';
+const EXPORT_KEY = '__xangarroExportDb';
 
 interface DbGlobal {
   [GLOBAL_KEY]?: Db;
+  [EXPORT_KEY]?: Db;
 }
 
 function devGlobal(): DbGlobal {
@@ -61,10 +65,39 @@ export function db(): Db {
   return g[GLOBAL_KEY];
 }
 
+let cachedExport: Db | undefined;
+
+/**
+ * The exports' own pool, of one connection (audit DB3-SYNC-05). An export
+ * reads for as long as the file takes; on the shared pool of two it would
+ * hold half of what every device push on the instance waits for. Here a busy
+ * export queues behind other exports and nothing else.
+ */
+function exportDb(): Db {
+  const url = requireDatabaseUrl();
+  if (process.env.NODE_ENV === 'production') {
+    cachedExport ??= createDb(url, { max: 1 });
+    return cachedExport;
+  }
+  const g = devGlobal();
+  g[EXPORT_KEY] ??= createDb(url, { max: 1 });
+  return g[EXPORT_KEY];
+}
+
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
+/**
+ * A tenant transaction. Inside a device route it carries a deadline
+ * (`db-deadline.ts`): past it, the caller gets a `ServiceBusyError` and the
+ * transaction rolls back rather than commit behind a 503.
+ */
 export function withTenant<T>(businessId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
-  return withBusiness(db(), businessId, fn);
+  return withBusiness(db(), businessId, fn, currentDeadline());
+}
+
+/** `withTenant` on the exports' pool — one short transaction per batch. */
+export function withExportTenant<T>(businessId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return withBusiness(exportDb(), businessId, fn, currentDeadline());
 }
 
 /**

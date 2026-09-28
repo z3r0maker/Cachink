@@ -58,8 +58,22 @@ export function hasStatements(c: Capabilities): boolean {
   return c.estadosFinancieros;
 }
 
-/** The Asesor's cadence decides how much of its surface is live. */
+/**
+ * Who reads a Diagnóstico at all: **any paying tier** (ADR-109 §3). Xangarro
+ * gets the short read so a shopkeeper tastes what a written reading of their
+ * own numbers is worth; Xangarrote gets the full report. The gate is «not
+ * `semanal`» rather than a third enum member, because `asesor` already
+ * separates the two paying tiers as `diario` and `completo`.
+ *
+ * *How much* of the report each one reads is a different question, answered
+ * per section by ADR-112 — not by this boolean.
+ */
 export function asesorShowsDiagnostico(c: Capabilities): boolean {
+  return c.asesor !== 'semanal';
+}
+
+/** Does this tier read the full report, or the teased one (ADR-112)? */
+export function asesorDiagnosticoCompleto(c: Capabilities): boolean {
   return c.asesor === 'completo';
 }
 

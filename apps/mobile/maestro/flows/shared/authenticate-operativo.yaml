@@ -30,5 +30,5 @@ appId: mx.xangarro.mobile
 # Operativo lands on the ventas tab.
 - extendedWaitUntil:
     visible:
-      id: 'tab-ventas'
+      id: 'tab-cobrar'
     timeout: 10000

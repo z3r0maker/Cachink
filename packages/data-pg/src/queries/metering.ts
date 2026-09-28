@@ -57,35 +57,47 @@ export async function usageCounts(
   }));
 }
 
-/** Insert or overwrite each `(business, period)` counter. */
+/**
+ * Rows per INSERT. Each row binds 5 parameters and postgres.js refuses more
+ * than 65,534 in one statement, so one INSERT for every counter broke at
+ * about 6,550 tenants (DB2-USE-01). 1,000 rows is 5,000 parameters.
+ */
+export const USAGE_COUNTER_CHUNK = 1000;
+
+/** Insert or overwrite each `(business, period)` counter, in chunks. */
 export async function saveUsageCounters(
   db: Conn,
   rows: readonly UsageCountRow[],
   computedAt: string,
 ): Promise<void> {
-  if (rows.length === 0) return;
-  await db
-    .insert(usageCounters)
-    .values(
-      rows.map((r) => ({
-        businessId: r.businessId,
-        period: r.period,
-        transactions: r.transactions,
-        products: r.activeProducts,
-        computedAt,
-      })),
-    )
-    .onConflictDoUpdate({
-      target: [usageCounters.businessId, usageCounters.period],
-      set: {
-        transactions: sql`excluded.transactions`,
-        products: sql`excluded.products`,
-        computedAt: sql`excluded.computed_at`,
-      },
-    });
+  for (let i = 0; i < rows.length; i += USAGE_COUNTER_CHUNK) {
+    await db
+      .insert(usageCounters)
+      .values(
+        rows.slice(i, i + USAGE_COUNTER_CHUNK).map((r) => ({
+          businessId: r.businessId,
+          period: r.period,
+          transactions: r.transactions,
+          products: r.activeProducts,
+          computedAt,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [usageCounters.businessId, usageCounters.period],
+        set: {
+          transactions: sql`excluded.transactions`,
+          products: sql`excluded.products`,
+          computedAt: sql`excluded.computed_at`,
+        },
+      });
+  }
 }
 
-/** Stored counters for the given months (every business). */
+/**
+ * Stored counters for the given months (every business). Served by
+ * `usage_counters_period_idx` (0045): the primary key leads with business_id
+ * and cannot answer `period IN (…)` without reading every tenant's months.
+ */
 export async function usageCountersOf(
   db: Conn,
   periods: readonly string[],
@@ -173,4 +185,24 @@ export async function ownerEmailOf(db: Conn, businessId: string): Promise<string
     sql`SELECT xangarro.owner_email(${businessId}) AS email`,
   );
   return rows[0]?.email ?? null;
+}
+
+/**
+ * Every live business, oldest id first — the cross-tenant enumeration a
+ * scheduled fan-out needs (P-30, ADR-056 «a daily job selects the businesses
+ * that are due»).
+ *
+ * **No migration and no new role.** 0010 already grants the metering role
+ * `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read`
+ * policy, because `usage_counts(NULL, …)` enumerates the same set to count it.
+ * This reads those two columns and nothing else, so the privilege surface a
+ * fan-out adds is zero.
+ *
+ * A soft-deleted business is not live: it is excluded here exactly as
+ * `usage_counts` excludes it, so the two never disagree about who exists.
+ */
+export async function liveBusinessIds(db: Conn): Promise<string[]> {
+  const rows = await db.execute<{ id: string }>(sql`
+    SELECT b.id FROM public.businesses b WHERE b.deleted_at IS NULL ORDER BY b.id`);
+  return rows.map((r) => r.id);
 }

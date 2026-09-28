@@ -2,7 +2,7 @@
 #
 # Verifies:
 #   1. Navigate to Ventas
-#   2. Tap ventas-product-search input
+#   2. Tap cobrar-search input
 #   3. Type product name → filtered grid shows matching product
 #   4. Clear search → full grid returns
 #
@@ -22,9 +22,9 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Ventas tab.
+# Navigate to the Cobrar tab.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 
 # Verify the product grid is visible.
 - assertVisible:
@@ -32,7 +32,7 @@ appId: mx.xangarro.mobile
 
 # Tap the search input.
 - tapOn:
-    id: 'ventas-product-search'
+    id: 'cobrar-search'
 
 # Type a product name to filter.
 - inputText: 'Tortilla'
@@ -42,7 +42,7 @@ appId: mx.xangarro.mobile
 
 # Clear the search to restore full grid.
 - tapOn:
-    id: 'ventas-product-search'
+    id: 'cobrar-search'
 - eraseText
 
 # Full grid should be visible again.

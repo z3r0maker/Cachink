@@ -49,5 +49,5 @@ appId: mx.xangarro.mobile
 # Should land on Operativo tabs — verify Ventas tab is visible.
 - extendedWaitUntil:
     visible:
-      id: 'tab-ventas'
+      id: 'tab-cobrar'
     timeout: 10000

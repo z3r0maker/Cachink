@@ -3,6 +3,7 @@ import 'server-only';
 import {
   ActivateResponseSchema,
   isScanRequest,
+  SNAPSHOT_START,
   type ActivateRequest,
   type ActivateResponse,
   type ERROR_CATALOG,
@@ -13,18 +14,22 @@ import { sql } from 'drizzle-orm';
 
 import { hashPairingToken } from '../../lib/pairing-token';
 import { avisoDeVinculacion } from '../legal/aviso';
-import { db, type Tx } from '../db';
-import { entitlementFor, referenceTables } from './bootstrap';
-import { mintDeviceToken, signEntitlement } from './credentials';
+import { db, withTenant, type Tx } from '../db';
+import { reportError } from '../observability/report';
+import { entitlementFor, legacyBootstrapFits, referenceTables } from './bootstrap';
+import { assertCredentialsConfigured, mintDeviceToken, signEntitlement } from './credentials';
+import { emptyFirstPage, snapshotPage } from './snapshot';
 
 /**
  * A phone joining a business — everything after the HTTP layer.
  *
- * One transaction. The code is claimed first by
+ * Registration is one transaction. The code is claimed first by
  * `xangarro.redeem_activation_code`, a single UPDATE whose WHERE clause *is*
  * the check, so two concurrent redemptions yield exactly one success. If
- * anything after the claim throws, the claim rolls back with it: burning a code
- * for a phone that never got its token would strand the shopkeeper.
+ * anything in it throws, the claim rolls back with it: burning a code for a
+ * phone that never got its token would strand the shopkeeper. The bootstrap
+ * is read after that commit, in its own transaction (C-23, ADR-121), so the
+ * business lock is held for the slot count and the insert alone.
  */
 export type ActivateErrorCode = keyof typeof ERROR_CATALOG;
 
@@ -94,38 +99,93 @@ async function registerDevice(
   });
 }
 
+interface Registered {
+  readonly businessId: string;
+  readonly entitlement: Awaited<ReturnType<typeof entitlementFor>>;
+}
+
+/**
+ * The claim and the device row — the only work done under the business lock.
+ * An older device (no `bootstrap: 'snapshot'`) whose tenant has outgrown the
+ * legacy bootstrap is refused here, before anything is written (C-23).
+ */
+async function register(
+  tx: Tx,
+  input: ActivateRequest,
+  deviceId: string,
+  now: Date,
+): Promise<Registered> {
+  const businessId = await claim(tx, input, deviceId);
+  // Only now is there a tenant. Scope the rest by it, exactly as a request is.
+  await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
+  const entitlement = await entitlementFor(tx, businessId, now);
+  if (input.bootstrap !== 'snapshot' && !(await legacyBootstrapFits(tx))) {
+    throw new Refusal('PROTOCOL_UNSUPPORTED');
+  }
+  await assertSlotFree(tx, businessId, entitlement.limits.devices);
+  await registerDevice(
+    tx,
+    deviceId,
+    businessId,
+    input.device,
+    now.toISOString(),
+    input.avisoVersion,
+  );
+  return { businessId, entitlement };
+}
+
+/**
+ * What the device starts from, read in its own tenant transaction after the
+ * registration committed. The committed cursor is read BEFORE the tables: a
+ * write landing between the two is then sent twice (harmless) rather than
+ * never (DB-SYNC-01). An opted-in device gets the snapshot's first page; if
+ * reading it fails, an empty page pointing at `start` — the code is already
+ * spent, so the device must still get its token, and it pulls the snapshot.
+ */
+async function firstPage(businessId: string, snapshot: boolean, now: Date) {
+  const serverTime = now.toISOString();
+  if (!snapshot) {
+    return withTenant(businessId, async (tx) => {
+      const serverSeq = await committedCursor(tx);
+      return { serverSeq, serverTime, tables: await referenceTables(tx) };
+    });
+  }
+  try {
+    const page = await withTenant(businessId, (tx) => snapshotPage(tx, SNAPSHOT_START, now));
+    if (page === null) throw new Error('a snapshot always starts');
+    return { serverSeq: page.serverSeq, serverTime, tables: page.tables, snapshot: page.snapshot };
+  } catch (error) {
+    reportError(error, { endpoint: 'activate', businessId });
+    return emptyFirstPage(now);
+  }
+}
+
 export async function activate(input: ActivateRequest): Promise<ActivateResponse> {
   const deviceId = newUlid();
   const now = new Date();
-
-  return db().transaction(async (tx) => {
-    const businessId = await claim(tx, input, deviceId);
-    // Only now is there a tenant. Scope the rest by it, exactly as a request is.
-    await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
-    const entitlement = await entitlementFor(tx as Tx, businessId, now);
-    await assertSlotFree(tx, businessId, entitlement.limits.devices);
-    const at = now.toISOString();
-    await registerDevice(tx, deviceId, businessId, input.device, at, input.avisoVersion);
-    // The committed counter, read BEFORE the tables: a write landing between
-    // the two is then sent twice (harmless) rather than never (DB-SYNC-01).
-    // `max(seq)` was the bug — it could sit above a row still in flight.
-    const serverSeq = await committedCursor(tx as Tx);
-
-    // Parsed, not cast. The server validates its own response against the
-    // contract before sending it, so a future schema drift — a new JSON column,
-    // a renamed field — fails here with a precise error instead of shipping a
-    // payload the phone rejects. `wireSchema` accepts real bigints for exactly
-    // this in-process use.
-    return ActivateResponseSchema.parse({
-      deviceToken: await mintDeviceToken(businessId, deviceId),
-      deviceId,
-      businessId,
-      entitlement: await signEntitlement(entitlement),
-      bootstrap: {
-        serverSeq,
-        serverTime: now.toISOString(),
-        tables: await referenceTables(tx as Tx),
-      },
-    });
+  // A missing key fails here, before a code is spent on a phone that could
+  // never be handed its credentials.
+  assertCredentialsConfigured();
+  // The lock on the business row lasts from the slot count to this commit —
+  // no bootstrap read, no parse, no signature inside it (audit DB3-BOOT-01).
+  const { businessId, entitlement } = await db().transaction((tx) =>
+    register(tx as Tx, input, deviceId, now),
+  );
+  const [bootstrap, deviceToken, signed] = await Promise.all([
+    firstPage(businessId, input.bootstrap === 'snapshot', now),
+    mintDeviceToken(businessId, deviceId),
+    signEntitlement(entitlement),
+  ]);
+  // Parsed, not cast. The server validates its own response against the
+  // contract before sending it, so a future schema drift — a new JSON column,
+  // a renamed field — fails here with a precise error instead of shipping a
+  // payload the phone rejects. `wireSchema` accepts real bigints for exactly
+  // this in-process use.
+  return ActivateResponseSchema.parse({
+    deviceToken,
+    deviceId,
+    businessId,
+    entitlement: signed,
+    bootstrap,
   });
 }

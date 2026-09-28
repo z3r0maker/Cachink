@@ -1,0 +1,43 @@
+{
+  "name": "@xangarro/caja",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The caja's shared read models and derivations (ADR-118): the web caja and the phone compute the same figures from the same rows. Pure TS, no UI, no IO.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./avisos": "./src/avisos/index.ts",
+    "./caja": "./src/caja/index.ts",
+    "./cierre": "./src/cierre/index.ts",
+    "./cobranza": "./src/cobranza/index.ts",
+    "./gastos": "./src/gastos/index.ts",
+    "./inicio": "./src/inicio/index.ts",
+    "./inventario": "./src/inventario/index.ts",
+    "./lectura": "./src/lectura/index.ts",
+    "./pendientes": "./src/pendientes/index.ts",
+    "./turno": "./src/turno/index.ts",
+    "./ventas": "./src/ventas/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --config ../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@xangarro/domain": "workspace:*",
+    "@xangarro/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@xangarro/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.1.6",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}

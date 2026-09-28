@@ -1,5 +1,5 @@
 /**
- * ActivationGate — the first gate after hydration (A-04). An unactivated
+ * ActivationGate — the first gate after hydration (A-04; Vincular, M-06). An unactivated
  * device sees only the activation screen; an activated one falls through to
  * the rest of GatedNavigation (operator sign-in and the app).
  */
@@ -17,6 +17,7 @@ export function ActivationGate(props: { readonly children: ReactNode }): ReactEl
   return (
     <ActivationScreen
       onSubmit={(input) => activate.mutate(input)}
+      onScan={(qrToken) => activate.mutate({ qrToken })}
       submitting={activate.isPending}
       errorKey={activate.error?.key ?? null}
     />

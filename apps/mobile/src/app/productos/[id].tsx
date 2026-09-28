@@ -15,7 +15,7 @@ export default function ProductoDetailRoute(): ReactElement {
   const router = useRouter();
   const row = (useProductosConStock().data ?? []).find((r) => r.producto.id === id) ?? null;
   return (
-    <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
+    <AppShellWrapper title="Inventario" onBack={() => router.back()}>
       {row ? (
         <ProductoDetailSmart row={row} fecha={today()} onBack={() => router.back()} />
       ) : (

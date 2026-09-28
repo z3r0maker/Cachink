@@ -13,6 +13,7 @@ import { act } from 'react';
 import type { BusinessId, UserId } from '@xangarro/domain';
 import type { Repositories } from '../../src/app/repository-provider';
 import { GatedNavigation } from '../../src/app/index';
+import { useCajaLock } from '../../src/app/caja-lock';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { InMemoryAppConfigRepository, InMemoryUsersRepository } from '@xangarro/testing';
 import { APP_CONFIG_KEYS, useAppConfigStore } from '../../src/app-config/index';
@@ -113,8 +114,21 @@ describe('GatedNavigation', () => {
     setStore(signedOut());
     mountGate(<span data-testid="app-body">app</span>, { users, appConfig: await activatedRepo() });
     expect(await screen.findByTestId('quick-switch')).toBeInTheDocument();
-    expect(screen.getByText(/Toni/)).toBeInTheDocument();
+    expect(screen.getByText('Toni')).toBeInTheDocument();
+    expect(screen.getByTestId('nip-pad')).toBeInTheDocument();
     expect(screen.queryByTestId('app-body')).toBeNull();
+  });
+
+  it('a locked caja asks the same person for their NIP, and «No soy …» goes to Acceso', async () => {
+    const users = await usersWithOperator(true);
+    const [toni] = await users.findAllByBusiness(BIZ);
+    setStore(signedOut());
+    act(() => useCajaLock.setState({ bloqueadaPor: toni!.id }));
+    mountGate(<span data-testid="app-body">app</span>, { users, appConfig: await activatedRepo() });
+    expect(await screen.findByTestId('bloqueo')).toBeInTheDocument();
+    expect(screen.getByText('No soy Toni, cambiar de persona')).toBeInTheDocument();
+    act(() => useCajaLock.getState().soltar());
+    expect(await screen.findByTestId('quick-switch')).toBeInTheDocument();
   });
 
   it('explains where operators come from when none is active yet', async () => {

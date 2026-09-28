@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { aplicar } from './derive';
+import {
+  aplicar,
+  type InventarioData,
+  type Movimiento,
+  type NuevoMovimientoVivo,
+  type Pestana,
+  type TipoMovimiento,
+} from '@xangarro/caja/inventario';
 import type { NuevoMovimiento } from './mover';
-import type {
-  InventarioData,
-  Movimiento,
-  NuevoMovimientoVivo,
-  Pestana,
-  TipoMovimiento,
-} from './types';
 
 const hhmm = (d: Date) =>
   `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;

@@ -121,15 +121,17 @@ test(
   },
 );
 
-test('export with a dead session lands on the 401 body, visibly', async ({ page }) => {
+test('export with a dead session is refused, then the gate sends them to sign in', async ({
+  page,
+}) => {
   await page.goto('/estados');
   await page.context().clearCookies();
 
-  // Recovery state: the failure is observable (401 + body), never a silent
-  // no-op. The click is retried with the wait, because a click dropped in the
-  // hydration window fires no request at all and `waitForResponse` then sits
-  // there until the test times out — this test's own flake, before and after the
-  // serial projects landed. A 401 that never comes still fails.
+  // Recovery state: the export is refused (401), never saved as a file, and
+  // the button's reload hands the dead session to the page gate (DS-02). The
+  // click is retried with the wait, because a click dropped in the hydration
+  // window fires no request at all and `waitForResponse` then sits there until
+  // the test times out. A 401 that never comes still fails.
   await expect(async () => {
     const [response] = await Promise.all([
       page.waitForResponse((r) => r.url().includes('/api/export/ventas'), { timeout: 5_000 }),
@@ -137,5 +139,5 @@ test('export with a dead session lands on the 401 body, visibly', async ({ page 
     ]);
     expect(response.status()).toBe(401);
   }).toPass({ timeout: 20_000, intervals: [500, 1_000, 2_000] });
-  await expect(page.getByText('No autenticado')).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
 });

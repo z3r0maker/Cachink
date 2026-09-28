@@ -4,7 +4,7 @@ A mirror of the Claude Design project `5dd266f3-42e7-403f-b941-95c8e6551dc6` (AD
 **Concha** look the portal and the caja were first built from. It is kept for history and for the
 screens not yet redesigned; it is **no longer the specification**.
 
-**The spec is the canvas (ADR-109).** The El Mostrador boards on the design canvas
+**The spec is the canvas (ADR-117).** The El Mostrador boards on the design canvas
 (https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt), approved by the owner board by board, are the
 specification for every surface. Code translates them into `@xangarro/tokens` and the shared
 components, following [`docs/design/el-mostrador.md`](../docs/design/el-mostrador.md). Where a

@@ -1,6 +1,10 @@
-import { CAJA_FIXTURE } from '@/operador/caja/fixture';
+import {
+  CAJA_FIXTURE,
+  type CajaData,
+  type CajaScreenProps,
+  type CobroPaso,
+} from '@xangarro/caja/caja';
 import { CajaViva } from '@/operador/caja/viva';
-import type { CajaData, CajaScreenProps, CobroPaso } from '@/operador/caja/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 const PASOS: readonly CobroPaso[] = ['catalogo', 'metodo', 'efectivo', 'credito'];

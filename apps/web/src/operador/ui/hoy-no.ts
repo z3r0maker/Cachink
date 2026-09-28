@@ -10,26 +10,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { hoyLocal } from '../runtime/fechas';
+import { hoyLocal, vigentes } from '@xangarro/caja';
 
 const KEY = 'operador.hoyNo';
-
-interface Guardado {
-  readonly fecha: string;
-  readonly ids: readonly string[];
-}
-
-/** Today's put-off ids from what was stored; another day's list is stale. */
-export function vigentes(raw: string | null, hoy: string): readonly string[] {
-  if (raw === null) return [];
-  try {
-    const v = JSON.parse(raw) as Partial<Guardado>;
-    if (v.fecha !== hoy || !Array.isArray(v.ids)) return [];
-    return v.ids.filter((x): x is string => typeof x === 'string');
-  } catch {
-    return [];
-  }
-}
 
 function leer(): readonly string[] {
   try {

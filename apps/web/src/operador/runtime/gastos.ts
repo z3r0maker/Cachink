@@ -13,8 +13,7 @@ import {
 } from '@xangarro/data';
 import type { BusinessId, CajaTurnoId, ExpenseCategory, UserId } from '@xangarro/domain';
 
-import { categoriaDominio, categoriaOperador } from '../vocabulario';
-import { hoyLocal } from './fechas';
+import { categoriaDominio, categoriaOperador, hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
 import type { GastoPara } from './protocol';
 

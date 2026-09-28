@@ -62,16 +62,6 @@ export const esperadoCifra = style({
   '@media': { [PHONE]: { fontSize: portalFontSizes.xl5 } },
 });
 
-export const puedeCambiar = style({
-  padding: '2px 9px',
-  border: `2px solid ${colors.warningText}`,
-  borderRadius: shapeRadii.pill,
-  background: colors.white,
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.extraBold,
-  color: colors.warningText,
-});
-
 export const parte = style({
   display: 'flex',
   alignItems: 'center',

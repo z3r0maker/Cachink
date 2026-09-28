@@ -1,14 +1,17 @@
 import 'server-only';
 
 import {
+  exportarGastos,
+  exportarMovimientosInventario,
+  exportarVentas,
   listEmpleados,
-  listMovimientos,
-  listMovimientosInventario,
   listProductos,
+  type EnTx,
 } from '@xangarro/data-pg';
 
-import { withTenant } from '../db';
-import { buildSheet, centavosToPesos, type Column } from './workbook';
+import { withExportTenant } from '../db';
+import { streamWorkbook, type StreamOptions } from './stream';
+import { centavosToPesos, type Column } from './workbook';
 
 /**
  * What the portal can export, and how each becomes a sheet.
@@ -17,9 +20,16 @@ import { buildSheet, centavosToPesos, type Column } from './workbook';
  * so anything that is not on this list must fail before it reaches a query. It
  * also means adding an export is one entry here, not a new route.
  *
- * Every export reads through `withTenant`, so it is scoped by RLS exactly as
- * the screen it mirrors — an export is a read like any other, and the most
- * damaging place to accidentally widen one.
+ * Every export reads through `withExportTenant`, so it is scoped by RLS
+ * exactly as the screen it mirrors — an export is a read like any other, and
+ * the most damaging place to accidentally widen one — on a pool of its own, so
+ * a long one never holds a connection a device is waiting for (DB3-SYNC-05).
+ *
+ * Ledger exports are the **whole** history, read by their own keyset-batched
+ * queries (`exportar*`), never by a screen's list: «Exportar movimientos»
+ * once reused the Productos list and stopped at 50 rows (DB2-EXP-01). Each
+ * batch is its own short transaction, and is written to the response before
+ * the next is read (`stream.ts`, DB3-EXP-01).
  */
 export const DATASETS = ['ventas', 'gastos', 'productos', 'movimientos', 'empleados'] as const;
 export type Dataset = (typeof DATASETS)[number];
@@ -28,7 +38,7 @@ export const isDataset = (v: string): v is Dataset => (DATASETS as readonly stri
 
 interface Built {
   readonly filename: string;
-  readonly bytes: ArrayBuffer;
+  readonly body: ReadableStream<Uint8Array>;
 }
 
 type Row = Record<string, unknown>;
@@ -66,29 +76,43 @@ const EMPLEADO_COLUMNS: readonly Column<Row>[] = [
   { header: 'Periodo', value: (r) => text(r.periodo) },
 ];
 
-export async function buildExport(dataset: Dataset, businessId: string): Promise<Built> {
+/** A catalogue read (bounded by the catalogue's size) as a one-batch export. */
+async function* unLote(leer: Promise<readonly Row[]>): AsyncGenerator<readonly Row[]> {
+  yield await leer;
+}
+
+function lotesDe(dataset: Dataset, enTx: EnTx): AsyncIterable<readonly Row[]> {
+  if (dataset === 'ventas') return exportarVentas(enTx) as AsyncIterable<readonly Row[]>;
+  if (dataset === 'gastos') return exportarGastos(enTx) as AsyncIterable<readonly Row[]>;
+  if (dataset === 'movimientos') {
+    return exportarMovimientosInventario(enTx) as AsyncIterable<readonly Row[]>;
+  }
+  const leer = dataset === 'productos' ? listProductos : listEmpleados;
+  return unLote(enTx((tx) => leer(tx) as Promise<readonly Row[]>));
+}
+
+const COLUMNS: Record<Dataset, readonly Column<Row>[]> = {
+  ventas: MOVIMIENTO_COLUMNS,
+  gastos: MOVIMIENTO_COLUMNS,
+  productos: PRODUCTO_COLUMNS,
+  movimientos: INVENTARIO_COLUMNS,
+  empleados: EMPLEADO_COLUMNS,
+};
+
+export async function buildExport(
+  dataset: Dataset,
+  businessId: string,
+  options: StreamOptions = {},
+): Promise<Built> {
   const stamp = new Date().toISOString().slice(0, 10);
-
-  const rows = await withTenant(businessId, async (tx) => {
-    if (dataset === 'ventas') return listMovimientos(tx, 'venta');
-    if (dataset === 'gastos') return listMovimientos(tx, 'gasto');
-    if (dataset === 'productos') return listProductos(tx);
-    if (dataset === 'movimientos') return listMovimientosInventario(tx);
-    return listEmpleados(tx);
-  });
-
-  const columns =
-    dataset === 'ventas' || dataset === 'gastos'
-      ? MOVIMIENTO_COLUMNS
-      : dataset === 'productos'
-        ? PRODUCTO_COLUMNS
-        : dataset === 'movimientos'
-          ? INVENTARIO_COLUMNS
-          : EMPLEADO_COLUMNS;
-
-  const sheet = dataset.charAt(0).toUpperCase() + dataset.slice(1);
+  const enTx: EnTx = (fn) => withExportTenant(businessId, fn);
+  const name = dataset.charAt(0).toUpperCase() + dataset.slice(1);
   return {
     filename: `xangarro-${dataset}-${stamp}.xlsx`,
-    bytes: await buildSheet(sheet, columns, rows as readonly Row[]),
+    body: await streamWorkbook(
+      { name, columns: COLUMNS[dataset] },
+      lotesDe(dataset, enTx),
+      options,
+    ),
   };
 }

@@ -83,7 +83,7 @@ describe('ConfirmDialog', () => {
     );
 
     tap(screen.getAllByTestId('confirm-dialog-cancel')[0]!);
-    tap(screen.getAllByTestId('modal-close')[0]!);
+    tap(screen.getAllByTestId('confirm-dialog-close')[0]!);
 
     expect(onClose).toHaveBeenCalledTimes(2);
   });
@@ -151,7 +151,7 @@ describe('ConfirmDialog', () => {
     });
   });
 
-  it('uses the danger button styling when tone is danger', () => {
+  it('uses the filled destructive button when tone is danger', () => {
     renderWithProviders(
       <ConfirmDialog
         open
@@ -164,6 +164,7 @@ describe('ConfirmDialog', () => {
     );
 
     const confirmButton = screen.getAllByTestId('confirm-dialog-confirm')[0] as HTMLElement;
-    expect(window.getComputedStyle(confirmButton).backgroundColor).toBe('rgb(255, 71, 87)');
+    // colors.redText (#DA0013): El Mostrador's filled destructive confirm.
+    expect(window.getComputedStyle(confirmButton).backgroundColor).toBe('rgb(218, 0, 19)');
   });
 });

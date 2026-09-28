@@ -6,13 +6,11 @@ import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 
 import { Don, type DonPose } from '../../components/don/don';
 import { Icon } from '../../shell/icon';
-import { OPERADOR_BASE } from '../shell/nav';
-import { aDueno } from '../ui/dueno';
-import { conSigno, DIF, lineaCerrado } from './copy';
+import { OPERADOR_BASE, aDueno } from '@xangarro/caja';
+import { conSigno, DIF, lineaCerrado, type CierreData } from '@xangarro/caja/cierre';
 import { Corte, fechaCorta } from './corte';
 import { Entrega } from './entrega';
 import * as h from './hecho.css';
-import type { CierreData } from './types';
 import type { Cierre } from './use-cierre';
 
 const CHECK = 'M20 6 9 17l-5-5';
@@ -63,7 +61,9 @@ export function Hecho({ x, data }: { readonly x: Cierre; readonly data: CierreDa
           <br />
           {segundaLinea(x.dif)}
         </h1>
-        <p className={h.texto}>{`${lineaCerrado(x.dif, x.motivo, data.dueno)}${gracias}`}</p>
+        <p
+          className={h.texto}
+        >{`${lineaCerrado(x.dif, x.motivo, data.dueno, x.pendientes)}${gracias}`}</p>
         <Pasos x={x} data={data} />
       </div>
       <Corte x={x} data={data} />

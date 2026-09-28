@@ -1072,6 +1072,40 @@ never invented text.
 
 - [x] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
   - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{screen,para-ti}.tsx`, `e2e/asesor.sync.spec.ts`.
+  - **Fixed 2026-09-26 — ADR-115, and it was worse than drift.** Reading `calcularCapacidades` against
+    the design's `readinessDefs` turned up a live bug in `gastosFueraDeLoNormal`, not just wrong
+    strings. The current month was **summed per category** while the baseline averaged **individual
+    egreso rows**, so a monthly total was compared against a per-row mean. A business logging a
+    category twice a month on perfectly flat spending was told «van 100% arriba» — every month, for
+    ever — and ten times a month reads «900% arriba». Its «three months» gate counted **rows**, so
+    three egresos inside one April produced a warning whose body claimed «un promedio … en los últimos
+    tres». Measured on the seeded tenant at 2026-09-26: «Tus gastos de materia prima van **330%**
+    arriba … contra un promedio de **$980.00** en los últimos tres», where the tenant has **two** prior
+    months averaging $1,960 — wrong figure, wrong percentage, false «últimos tres». The existing tests
+    were blind to it because every fixture logs a category exactly once a month, the one shape where a
+    row mean equals a month mean.
+  - Both sides are monthly totals now, `MESES_BASE` counts distinct prior months per category, and the
+    two panel counts were changed to predict the insights they promise rather than count estate-wide:
+    `compras` is the **best single product's** entrada count (`costosQueSubieron` compares a product
+    against its own previous entrada) and `mesesConGasto` is the **best single category's** prior
+    months, never counting the current one. Inventario reads a new `diasConMovimiento` instead of
+    `diasConVenta`, and Pronóstico reads `diasDeHistorial` under the design's own name,
+    «¿Me alcanza? (pronóstico) · 90 días de registros». `mesesConGastoDe` was deleted: its only caller
+    was its own test, and its semantics were the wrong ones.
+  - **`lockedCopy` landed 2026-09-26 — ADR-116**, and it does not repeat the design everywhere. The
+    field carries the actionable line beside the count, empty once the capacidad is active so nothing
+    stale can render, and the panel shows it under the requirement (`capAccion`). **A date is promised
+    only where the calendar alone gets there**, which is `diasDeHistorial`: «Resumen del mes» and
+    «¿Me alcanza? (pronóstico)» read «Disponible en N días», and the design's own fixture confirms the
+    arithmetic (90 − 67 = «Disponible en 23 días»). Every other counter waits on the shopkeeper, so it
+    gets «Llevas X de Y …» instead — including **«Gastos fuera de lo normal», where the design says
+    «Disponible en 31 días» and we deliberately do not**: a month only counts once an egreso lands in
+    that category, so the calendar alone does not get there and the promise breaks on a quiet month.
+    «Precios y márgenes» has two blockers, so the line names the one still standing — «Registra el
+    costo de tus productos para activarlo» while `compras < 2`, the días count afterwards, because
+    repeating the instruction after the compras have landed is advice already taken.
+  - `porCalendario` / `porRegistro` make that distinction structural: a capacidad added later has to
+    pick one, so it cannot quietly acquire a date it has not earned.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never
@@ -1088,6 +1122,7 @@ never invented text.
     vanished insights auto-close as `listo`. The plan's cadence gates the set («semanal»
     keeps the two most urgent); the capacidades panel reports the tenant's real counts;
     Descartar/Listo write through `cerrarAvisoAsesor`. 18 tests + e2e on the seed.
+
 - **Steps:** Three tabs — Para ti / Metas / Diagnóstico. The feed reads `notices` where
   `source='asesor'` (ADR-060): a category tile, icon, title, body and an action link per card.
   **Every insight here is deterministic** — cost deltas, quincena seasonality, expense anomalies
@@ -1144,12 +1179,141 @@ never invented text.
   - **Still to do:** everything behind the gate — the ten report sections, the price-suggestion
     table, the estrategia list, and the six diagnostic states. Needs P-30 and the credential.
 
+  - **2026-09-26 (owner, ADR-109): the Diagnóstico is two reports, not one.** Xangarro gets a
+    monthly _short read_ so a shopkeeper tastes what a written reading of their own numbers is
+    worth; Xangarrote gets the full report — more metrics, the detail behind them, the estrategia.
+    **Deciding what they differ by is now this task's central question, not a detail of it:** a
+    taste that reads as a truncated full report sells nothing, and one that is merely shorter
+    teaches the reader that the paid version is padding. Also changes here: the gate becomes «not
+    `semanal`» (`asesorShowsDiagnostico` is `=== 'completo'` today) and the locked card, which reads
+    «El Diagnóstico llega con Xangarrote», belongs to Xangarrito now and should name Xangarro.
+
+  - **2026-09-26 (traced against the design): the design already answers this — and answers it
+    twice.** `Xangarro Portal - Asesor.dc.html` carries three independent flags, `diagTeaser`,
+    `lockedSections` and `strategyLocked`. Mapping every numbered section to the `sc-if` that wraps
+    it gives the split: **1 Tu meta** and **2 Resumen del mes** sit under `diagReport`, so both tiers
+    read them; **3 Precios y márgenes, 4 ¿Me alcanza?, 5 ¿Cuánto puedo sacar?, 6 Inventario,
+    7 Cobranza, 8 Gastos fuera de lo normal** and **9 Corte de caja** sit under `diagFull`; and
+    **10 Plan de acción** sits under `diagReport` with only its three-movimiento `strategy` list
+    gated by `strategyLocked`. So the shape is: two sections both tiers read, seven the full report
+    adds, and a section 10 whose heading both see and whose answers only Xangarrote does.
+    `diagTeaser` was drawn for a paid tier that is not Xangarrote — which under ADR-059 did not
+    exist, and under ADR-109 is exactly Xangarro.
+  - **Settled 2026-09-26 (owner) — ADR-112. The split is this table, and it is the spec.**
+
+    | §   | Sección                   | Xangarro (la probada)                          | Xangarrote (completo) |
+    | --- | ------------------------- | ---------------------------------------------- | --------------------- |
+    | 1   | Tu meta                   | real                                           | real                  |
+    | 2   | Resumen del mes           | real                                           | real                  |
+    | 3   | Precios y márgenes        | teaser                                         | real                  |
+    | 4   | ¿Me alcanza?              | teaser                                         | real                  |
+    | 5   | ¿Cuánto puedo sacar?      | teaser                                         | real                  |
+    | 6   | Inventario                | teaser                                         | real                  |
+    | 7   | Cobranza                  | **real**                                       | real                  |
+    | 8   | Gastos fuera de lo normal | teaser                                         | real                  |
+    | 9   | Corte de caja             | teaser                                         | real                  |
+    | 10  | Plan de acción            | **the first movimiento, with its peso impact** | all three             |
+
+    So `lockedSections` keeps its six entries — 3, 4, 5, 6, 8, 9 — and **`diagFull` loses Cobranza**,
+    which the design's own teaser array already implied by not having a card for it. The two halves
+    of the design disagreed by exactly that one section; the array won, because it is deliberate
+    per-section copywriting while the `diagFull` wrapper is markup repeated verbatim across 3–9.
+
+  - **Section 10 is truncated, not locked — and it needs a flag the design does not have.**
+    `strategyLocked` (`plan !== 'pro'`) is **not** this: its single use sits inside the **Metas** tab,
+    guarding «Estrategia personalizada — Disponible en Xangarrote». Section 10 and its `plan` list sit
+    under `isDiag > diagReport` with **no tier gate at all**, so as drawn both tiers read all three
+    movimientos. The owner's decision narrows that: Xangarro reads **movimiento 1 in full, with its
+    pesos**, then «los otros dos llegan con Xangarrote». A full plan on both tiers leaves the
+    Diagnóstico nothing to sell, and an empty section 10 removes the one thing that proves a written
+    reading is worth paying for — being told _what to do_. So P-28 introduces a **`planTruncado`**
+    flag for the Diagnóstico; `strategyLocked` keeps the Metas tab and is not reused here.
+  - **Which movimiento Xangarro reads now matters, and the design does not order them.** Its own
+    fixture runs `+$3,100.00`, `+$1,450.00`, `+$6,300.00` — the largest is **third**. Showing «the
+    first» out of an unordered list would hand a Xangarro shopkeeper the $1,450 move as its taste of
+    what the paid report is worth, which sells the opposite of the intent. **So P-28 orders section
+    10 by impact, descending**, and «movimiento 1» then means the best of the three by construction.
+    This was free before the truncation and is load-bearing after it.
+  - **Settled 2026-09-26 (owner) — the second axis: tier withholds visibly, maturity withholds
+    silently.** `calcularCapacidades` (P-26, built) gates six capabilities on data volume, and they
+    map onto the sections: **2** wants 30 días de registros, **3** 60 días de ventas + 2 compras,
+    **6** 60 días de ventas, **8** 3 meses con gastos, **4** and **5** 90 días de ventas
+    (Pronóstico), and **9** 20 cortes de día. So a section can be withheld for two unrelated reasons,
+    and the two behave differently:
+    - **Not in your plan → the teaser card.** Visible, named, with the real finding and «Disponible
+      en Xangarrote».
+    - **Data not ready → the section is not rendered at all.** No padlock, no progress bar, no
+      mention. The report ends with **one aggregate line** — «N secciones más se abren solas conforme
+      captures → Ver capacidades» — and the per-capability detail stays where it already lives, the
+      capacidades panel on «Para ti» (`Capacidades` in `para-ti.tsx`, rendered from
+      `data.capacidades`).
+
+    The rule behind the asymmetry: **a tier gate is actionable right now** (upgrade), so it earns
+    space; **a maturity gate resolves itself** by doing what the shopkeeper is already doing, so it
+    earns a line. Rendering both as padlocks is how a 31-day Xangarro ends up reading four real
+    sections behind six locks — the same failure ADR-112 just removed for tiers, re-introduced
+    through the other axis.
+
+  - **Maturity is checked first, and the reason is stronger than «don't upsell what they bought».**
+    The teaser cards carry **real computed findings** — «Detectamos 3 productos con margen en
+    riesgo», «4 insumos se acaban antes de la quincena», «3 faltantes del mes tienen un patrón». If
+    that section's capability is locked, **the finding does not exist**, so showing the tier teaser to
+    an immature business would invent a conclusion, which P-26 forbids outright. Maturity-first is the
+    only ordering that cannot fabricate. A pleasant consequence: the Xangarro teasers get sharper as
+    the business matures, because each one is a true statement about numbers they cannot read.
+  - **Section numbers are names, not positions.** A hidden section leaves a gap — a 31-day Xangarro
+    reads 1, 2, 7, 10 — and the numbers are **not** re-flowed. «3 · Precios y márgenes» must mean the
+    same section every month, or the report stops being comparable across months and P-34's printable
+    variant stops being comparable at all. The closing line is what explains the gaps.
+  - **The whole-report `diagNotEnough` keeps only its 30-day trigger.** The design already reuses the
+    same `readiness` list twice — in the capacidades panel and inside `diagNotEnough` («Necesitamos un
+    mes completo de registros para no darte números a medias. Esto es lo que falta:») — so the other
+    five capabilities were always meant to be per-section. Extending the whole-report gate to all six
+    would make a new business wait for 90 días de ventas and 20 cortes before reading anything.
+  - **Settled 2026-09-26 (owner) — ADR-114, section 10 and its empty month.** The movimientos are a
+    **selection of the findings, not an independent analysis**: each of the design's three fixture
+    entries traces to a section (quesadilla pricing → §3, refrescos → §6, notas de 30 días → §7), and
+    P-28's own rule — every figure computed by `@xangarro/domain`, the model never derives a number —
+    means `+$3,100.00` must come from a section's computation. So **section 10 needs no maturity rule
+    of its own; it inherits from the sections that feed it**, and its empty case splits in two:
+    - **Every contributing section absent** → section 10 is `absent` too and joins ADR-113's aggregate
+      count. We could not look.
+    - **Mature sections, no finding** → section 10 **renders**, with «Este mes no hay nada que
+      cambiar» / «Leímos tus números y no encontramos un movimiento que te acerque más a tu meta.
+      Sigue como vas.» That is a real result and the reader can get it nowhere else.
+  - **The empty card's footer is «Calculado a partir de tus registros», not «Generado con IA».** The
+    design hardcodes the latter on section 10, and copying it onto the empty state would be exactly
+    what `asesor.css.ts` warns against: «Deterministic output says "Calculado"; only model-written text
+    may say "Generado con IA" (ADR-059). Getting this backwards would be a false claim in either
+    direction.» The empty card is the _absence_ of model output.
+  - **The heading is derived, not the literal «Tres cosas para octubre».** Both the count and the month
+    are hardcoded in the design. Count and period both come from the report: «Una cosa para octubre» ·
+    «Dos cosas…» · «Tres cosas…».
+  - **Xangarro's upsell line inside section 10 is count-aware.** ADR-112 gives Xangarro movimiento 1,
+    and the design has **no** upsell markup in section 10 at all, so this is new: 3 findings → «los
+    otros dos llegan con Xangarrote», 2 → «el otro llega con Xangarrote», 0 or 1 → **no line**, because
+    there is nothing withheld. «Los otros dos» shipped unconditionally becomes a lie the first month a
+    business has two findings.
+  - **Movimiento 1 may derive from a section Xangarro only sees as a teaser, and that is deliberate.**
+    A Xangarro reader can get «Sube la quesadilla a $46.00 y la gringa a $65.00 · +$3,100.00» in full
+    while §3 Precios y márgenes stays a teaser card. It is not an inconsistency to be tidied away: a
+    concrete, peso-quantified move out of the half they cannot read is the sharpest form the taste
+    takes. Combined with the impact-descending sort (ADR-112), Xangarro reads the single most valuable
+    conclusion in the report.
+  - Two sections have no maturity rule and must not acquire one: **1 Tu meta** (the owner sets it) and
+    **7 Cobranza** (fiado balances are current state, not a trend).
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
-- **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
-  Costo antes → ahora · Precio actual · Margen · Precio sugerido, margin cells tinted by band), and
-  the estrategia list (move + impact) gated by `strategyLocked` to Xangarrote. Six states: report,
-  generating, notenough, free offer, teaser, error. The printable variant feeds P-34. **Every figure
+- **Steps:** The report's ten sections **per the ADR-112 table above** — sections 1, 2 and 7 real on
+  both tiers, 3–6 and 8–9 as `lockedSections` teaser cards for Xangarro, and section 10 **truncated**
+  rather than locked: `strategyLocked` now means «movimiento 1 with its pesos, then los otros dos
+  llegan con Xangarrote», not an empty section. The month tiles and the price-suggestion table
+  (Producto · Costo antes → ahora · Precio actual · Margen · Precio sugerido, margin cells tinted by
+  band) belong to **section 3**, so they are Xangarrote-only and Xangarro sees that section's teaser.
+  The **month tiles are section 2's**, not section 3's, so they are real on both tiers.
+  Six states: report, generating, notenough, free offer, teaser, error — plus the **per-section**
+  three-way noted above, which the design has no state for yet. The printable variant feeds P-34. **Every figure
   is computed by `@xangarro/domain` and passed to the model; the model never derives a number.**
   Footer: «Generado con IA a partir de tus registros».
 - **Acceptance:** with the production flag on, the tab renders «Próximamente» and no model call is
@@ -1157,6 +1321,24 @@ never invented text.
   instruction text) does not alter the output structure.
 
 ### P-29 Catálogo desde una foto — **«Próximamente» in production**
+
+> **2026-09-26 (ADR-110): the only unbounded model call left.** After P-38 went deterministic and
+> P-39 moved to the monthly run, this is the one user-triggered model call in the product, and it
+> is vision, which is the expensive kind. The owner's first shape: one catalogue import per new
+> business, about five attempts, a byte ceiling and a cap on images — numbers still to set. It does
+> not need a bespoke limiter: N-07 already counts metered resources per business
+> (`usage_counters`, the metering role, the over-limit notices), so an import is a counted resource
+> like any other.
+>
+> **Settled 2026-09-26 (owner).** A **one-time onboarding import per business**, with up to **5
+> extraction attempts** to get a usable photo — it is an accelerator for «start with your catalogue
+> already in», not a recurring tool; a shopkeeper adding one product later uses the normal form.
+> **8 MB per image, 5 images per import**, and the images are **downscaled server-side to the
+> model's working resolution before the call**. The generous byte cap costs nothing because the
+> bytes that reach the model are the resized ones, and P-07's 2 MB spreadsheet limit would have
+> rejected a normal phone photo — meeting an error before the feature ever works is the worst first
+> experience this can give. Still to decide: where the per-business count lives (`usage_counters`
+> needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
 - [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
@@ -1168,10 +1350,15 @@ never invented text.
 
 ### P-30 Asesor generation runtime
 
-- [~] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
-  - **Remaining (2026-09-24):** the **fan-out** and the **model call**. Everything else landed — see below. The `notices` line in the previous Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
-    - **Fan-out.** ADR-056's «a daily job selects the businesses that are due» needs a cross-tenant read of which businesses are live. No portal role has one: RLS scopes the app role to a single tenant, and the only privileged cross-tenant path today is `xangarro.usage_counts` on the metering role. Choosing between a new privileged function, reusing the metering role, or the console's service role is a **Track B decision with a migration behind it**. Until it is taken there is no `vercel.json` entry — and could not be, since the unit of work is a POST with a body and Vercel Cron sends neither.
+- [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
+  - **Remaining (2026-09-26):** the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
     - **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table.
+  - 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. **The metering role wins, and the answer was already in the schema:** 0010 grants `xangarro_metering` `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read USING (true)` policy, because `usage_counts(NULL, …)` enumerates the very same set in order to count it. So `liveBusinessIds` reads two already-granted columns — **no migration, no new role, no new secret**, and the portal already holds `METERING_DATABASE_URL` for the nightly recompute. The service role was never eligible: CLAUDE.md §3 makes the backoffice the only project that may hold it, so reaching for it would have moved either the key or the cron. This also un-blocks P-30 from B-02/B-03, which it was only waiting on for that decision.
+    - `server/asesor/fanout.ts` sweeps every live business **sequentially**, like the usage recompute — `generarParaNegocio` opens three transactions per business and a serverless pool is small. Per-tenant try/catch: one tenant failing is reported under its own id, tallied in `fallidos`, and the sweep continues to the next, because a scheduled job that 500s on the first bad tenant hides every tenant behind it.
+    - **Universal and unfiltered, per ADR-109 §1** — no tier gate and no activity gate. Both belong to the _monthly_ Diagnóstico, which is the only part that costs money and has nowhere to be stored until P-28.
+    - **The deadline is explicit.** The sweep stops starting tenants at 240 s (inside Vercel's 300 s) and returns `restantes`, reported as an error so a sweep that outgrew one invocation is loud rather than truncated in silence. It is a freshness bound, not a correctness one: `loadAsesorPage` materialises the same pipeline on read (ADR-088), so a tenant the deadline cut off still sees correct insights the moment it opens the page. **The fix when `restantes` first goes non-zero is sharding by id range** (`?shard=0/4`), which needs no new state because the enumeration is ordered by id.
+    - **`GET /api/cron/asesor` is the scheduled fan-out**; `POST` with `{"businessId"}` stays the on-demand unit of work. The GET is what finally allows a `vercel.json` entry — the old note («could not be, since the unit of work is a POST with a body and Vercel Cron sends neither») was right about the POST and wrong to conclude there could be no entry. Added: `0 8 * * *`, 02:00 in Mexico City, an hour ahead of the usage recompute.
+    - Tests: 6 hermetic (`apps/web/tests/asesor-fanout.test.ts` — the sweep, one tenant failing while the rest continue, a non-Error throw, the deadline, an empty estate, a failure to enumerate failing the whole run) and 3 against real Postgres (`packages/data-pg/tests/asesor-fanout.integration.test.ts` — the metering role sees every live business with no tenant claim, a soft-deleted one is not live, and **the app role running the same SQL sees only its own row**, which is why the fan-out could not be built on the tenant connection).
   - 2026-09-24 · **One business, on demand** (`ab519eb7`). `server/asesor/runtime.ts` composes the deterministic half in ADR-056's order — entitlement → cadencia → `calcularInsights` → `filtrarPorCadencia` → `materializarInsights` — and is idempotent by construction. `server/asesor/invocacion.ts` is the HTTP contract, split from the route so it tests without Next and without a database; `cron.ts` gained `cronAuth`/`cronRefusal` so it shares the guard with the three `handleCron` routes while answering 400 for a nameless request. `POST /api/cron/asesor`. **Verified against a real database and a real Next runtime:** the seeded tenant answered `{"ok":true,"cadencia":"diario","materializados":1,"cerrados":0}`, its asesor `notices` went 1 → 2, a second call left them at 2, a wrong secret got 401, an empty body 400, and an unknown business 200 with nothing written. 5 contract tests cover the same paths hermetically.
   - The Acceptance's «deterministic path, 1 happy + 3 unhappy against fixtures, no network» is met where it belongs: 11 tests in `packages/domain/tests/asesor/insights.test.ts` and 5 against real Postgres in `packages/data-pg/tests/asesor-insights.integration.test.ts`.
   - 2026-09-22 doc audit: shipped except the cron entry, the per-business route and the batch API.
@@ -1644,7 +1831,12 @@ WhatsApp).
 
 ### P-37 Ticket printing from the caja
 
-- [ ] Status · **Blocked by:** — · **Blocks:** —
+- [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
+  printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
+  58 mm printer» — cannot be met or verified. It stays written down rather than deleted: the
+  caja already shares the comprobante by WhatsApp, and the designs hide the Imprimir button
+  until this ships, so nothing regresses by waiting. Re-open when a printer exists.
+- **Blocked by:** a physical 58/80 mm printer · **Blocks:** —
 - **Steps:** the caja sends the comprobante by WhatsApp today; add printing to a ticket printer
   (58/80 mm) from the «¡Listo!» dialog and from a sale's detail, using the «Ticket» template.
   Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
@@ -1653,7 +1845,14 @@ WhatsApp).
 
 ### P-38 Don Cuentas explains a cash difference
 
-- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+      **2026-09-26 (owner, ADR-110): fully deterministic — no model.** The causes this proposes are
+      named in its own Steps: cancelled sales, fiado, gastos without comprobante. Those are three
+      queries over one turno, ranked by amount. Its acceptance — «cites only that turno's rows» —
+      is then free rather than something a prompt has to be trusted for; it works on every plan,
+      Xangarrito included; and it costs nothing on a shop that cashes up daily, which was the most
+      frequent model call in the product. **No longer blocked by P-30:** it needed the generation
+      runtime only because it was going to be generated.
 - **Steps:** on a corte with a faltante or sobrante, Don Cuentas proposes the likely causes from
   the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
   and in Revisión de caja.
@@ -1661,7 +1860,16 @@ WhatsApp).
 
 ### P-39 Don Cuentas conclusions in Estados financieros
 
-- [ ] Status · **Blocked by:** P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
+      **2026-09-26 (owner, ADR-110): written once a month, shown on Estados, and announced.**
+      Not per statement view — that was a per-view bill nobody had costed — and not folded into the
+      Diagnóstico either, because the value is a line _where the numbers are_. Generated with the
+      monthly run, stored for that period, rendered on Estados financieros. The same run writes a
+      notice naming what was generated, with links to Diagnóstico and to Estados, so a shopkeeper
+      who does not open the right tab still learns it exists. That notice is **`source='sistema'`,
+      not `'asesor'`** — ADR-060 keeps the bell clear of Asesor insights on purpose, so an `asesor`
+      row would be written and never ring; «your report is ready» is a system event, not an insight.
+      Needs somewhere to keep one conclusion per period per statement, which P-28's output defines.
 - **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
@@ -1669,9 +1877,15 @@ WhatsApp).
 ### P-40 First diagnóstico free at 90 days
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
-- **Steps:** a Xangarrito or Xangarro business that reaches 90 days of records gets one
+  - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
+    Diagnóstico was Xangarrote-only. Xangarro now gets one every month as part of the plan, so a
+    one-off free report is not an offer to them — **P-40 is Xangarrito's alone.** What it shows is
+    the _short read_ (Xangarro's shape, per P-28), not the full report: the point is to taste what a
+    written reading is worth, and a free full report would undercut both paid tiers at once. The
+    design already draws the state — `diagFreeOffer`, one of the Diagnóstico's six.
+- **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
-- **Acceptance:** the aviso fires once per business; the report opens once.
+- **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
 ### P-41 Advanced inventory functions
 

@@ -1,9 +1,10 @@
-import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 import { expenses, sales, tickets } from '../schema/ledger.js';
 import { dayCloses } from '../schema/caja.js';
 import { products, inventoryMovements } from '../schema/catalog.js';
 import type { Db } from '../client.js';
+import { fechaEnDias } from './rango-fechas.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -37,8 +38,7 @@ export async function totalsForRange(tx: Tx, from: string, to: string): Promise<
     .from(sales)
     .where(
       and(
-        gte(sales.fecha, from),
-        lte(sales.fecha, to),
+        fechaEnDias(sales.fecha, from, to),
         isNull(sales.deletedAt),
         sql`NOT EXISTS (SELECT 1 FROM tickets t WHERE t.id = ${sales.ticketId} AND t.cancelled_at IS NOT NULL)`,
       ),
@@ -50,7 +50,7 @@ export async function totalsForRange(tx: Tx, from: string, to: string): Promise<
       n: sql<string>`count(*)`,
     })
     .from(expenses)
-    .where(and(gte(expenses.fecha, from), lte(expenses.fecha, to), isNull(expenses.deletedAt)));
+    .where(and(fechaEnDias(expenses.fecha, from, to), isNull(expenses.deletedAt)));
 
   const ventas = toCentavos(v?.total);
   const gastos = toCentavos(g?.total);
@@ -72,7 +72,16 @@ export interface ActivityRow {
   readonly at: string;
 }
 
-/** The six most recent movements, ventas and gastos interleaved by time. */
+/**
+ * The six most recent movements, ventas and gastos interleaved by time.
+ *
+ * Each branch takes its own newest `limit` rows **before** the union and
+ * before the ticket join (audit DB2-QRY-03): a sort over the merged history
+ * read every row the tenant ever captured (953 ms on the audit's whale), and
+ * joining tickets ahead of the LIMIT lets an RLS-blind planner drive from the
+ * wrong table. With `(business_id, created_at)` each branch is an index walk
+ * of `limit` rows; without it, it is still one sort per table, not a join.
+ */
 export async function recentActivity(tx: Tx, limit = 6): Promise<readonly ActivityRow[]> {
   const rows = await tx.execute<{
     id: string;
@@ -82,14 +91,23 @@ export async function recentActivity(tx: Tx, limit = 6): Promise<readonly Activi
     amount: string;
     at: string;
   }>(sql`
-    SELECT s.id, 'venta' AS kind, s.concepto, t.metodo AS tag, s.monto_centavos::text AS amount, s.created_at::text AS at
-      FROM ${sales} s JOIN ${tickets} t ON t.id = s.ticket_id
-     WHERE s.deleted_at IS NULL
-    UNION ALL
-    SELECT id, 'gasto' AS kind, concepto, categoria AS tag, monto_centavos::text AS amount, created_at::text AS at
-      FROM ${expenses} WHERE deleted_at IS NULL
-    ORDER BY at DESC
-    LIMIT ${limit}`);
+    SELECT id, kind, concepto, tag, amount, created_at::text AS at
+      FROM (
+        SELECT s.id, 'venta' AS kind, s.concepto, t.metodo AS tag,
+               s.monto_centavos::text AS amount, s.created_at
+          FROM (SELECT id, ticket_id, concepto, monto_centavos, created_at
+                  FROM ${sales} WHERE deleted_at IS NULL
+                 ORDER BY created_at DESC LIMIT ${limit}) s
+          JOIN ${tickets} t ON t.id = s.ticket_id
+        UNION ALL
+        SELECT id, 'gasto' AS kind, concepto, categoria AS tag,
+               monto_centavos::text AS amount, created_at
+          FROM (SELECT id, concepto, categoria, monto_centavos, created_at
+                  FROM ${expenses} WHERE deleted_at IS NULL
+                 ORDER BY created_at DESC LIMIT ${limit}) e
+      ) u
+     ORDER BY created_at DESC
+     LIMIT ${limit}`);
 
   return [...rows].map((r) => ({ ...r, amount: toCentavos(r.amount) }));
 }
@@ -118,6 +136,9 @@ export interface LowStockRow {
  * The inner column is `stock_num`, not `stock`, for the same reason: a bare
  * `ORDER BY stock` resolves to the **output** alias — the text again — and
  * quietly restores the bug. A name the select list does not shadow cannot.
+ *
+ * The join spells out `business_id` so it is the `(business_id, producto_id)`
+ * prefix a covering index on movements serves (DB2-QRY-05, see `lists.ts`).
  */
 export async function lowStock(tx: Tx): Promise<readonly LowStockRow[]> {
   const rows = await tx.execute<{ producto: string; stock: string; umbral: number }>(sql`
@@ -128,7 +149,7 @@ export async function lowStock(tx: Tx): Promise<readonly LowStockRow[]> {
                p.umbral_stock_bajo AS umbral
           FROM ${products} p
           LEFT JOIN ${inventoryMovements} m
-            ON m.producto_id = p.id AND m.deleted_at IS NULL
+            ON m.business_id = p.business_id AND m.producto_id = p.id AND m.deleted_at IS NULL
          WHERE p.deleted_at IS NULL AND p.seguir_stock
          GROUP BY p.id, p.nombre, p.umbral_stock_bajo
       ) s

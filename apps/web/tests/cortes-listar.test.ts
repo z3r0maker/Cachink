@@ -89,22 +89,42 @@ function turno(over: Partial<TurnoFila> = {}): TurnoFila {
   };
 }
 
-/** The six result sets of a populated call: join, vivas, fiado, canceladas, gastos, abonos. */
+type Par = { readonly n: string; readonly monto: string };
+type FilaStats = { turno: string; vivas: Par; fiado: Par; canceladas: Par };
+const CERO: Par = { n: '0', monto: '0' };
+
+/**
+ * The **four** result sets of a populated call: join, stats, gastos, abonos.
+ *
+ * It was six. `statsPorTurno` (`cortes-figuras.ts`, landed on main) counts
+ * vivas, fiado and canceladas in **one** query with `FILTER (WHERE …)`
+ * aggregates instead of three, so the three arrays this helper still takes —
+ * which is how each test reads best — are merged into that one row set here.
+ */
 function poblado(
   turnos: readonly TurnoFila[],
   extras: {
-    vivas?: unknown[];
-    fiado?: unknown[];
-    canceladas?: unknown[];
+    vivas?: { turno: string; n: number; monto: string }[];
+    fiado?: { turno: string; n: number; monto: string }[];
+    canceladas?: { turno: string; n: number; monto: string }[];
     gastos?: unknown[];
     abonos?: unknown[];
   } = {},
 ): void {
+  const porTurno = new Map<string, FilaStats>();
+  const fila = (id: string): FilaStats => {
+    const actual = porTurno.get(id) ?? { turno: id, vivas: CERO, fiado: CERO, canceladas: CERO };
+    porTurno.set(id, actual);
+    return actual;
+  };
+  for (const clase of ['vivas', 'fiado', 'canceladas'] as const) {
+    for (const r of extras[clase] ?? []) {
+      fila(r.turno)[clase] = { n: String(r.n), monto: String(r.monto) };
+    }
+  }
   pendientes.push(
     turnos.map((t) => ({ t, nombre: 'Ana Robledo', color: null })),
-    extras.vivas ?? [],
-    extras.fiado ?? [],
-    extras.canceladas ?? [],
+    [...porTurno.values()],
     extras.gastos ?? [],
     extras.abonos ?? [],
   );
@@ -126,10 +146,10 @@ describe('listarCortes', () => {
         { turno: 't-1', monto: 3000n },
         { turno: null, monto: 999n },
       ],
-      abonos: [
-        { fecha: '2026-05-12', monto: 1500n },
-        { fecha: '2026-05-12', monto: 500n },
-      ],
+      // One row per día: the abonos query groups by `fecha` in SQL, so two rows
+      // for the same day is a shape it cannot return — and `new Map(rows)`
+      // would keep only the last. The sum is what arrives.
+      abonos: [{ fecha: '2026-05-12', monto: 2000n }],
     });
     const [corte] = await listarCortes('biz-1');
     assert.deepEqual(corte, {

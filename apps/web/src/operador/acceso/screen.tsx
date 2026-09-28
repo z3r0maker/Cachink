@@ -73,7 +73,7 @@ export function AccesoScreen(p: { readonly onListo: () => void }) {
       .catch((e: unknown) => setError(String(e)));
 
   if (paso.etapa === 'vincular') {
-    return <Vincular onVinculado={(r) => void onVinculado(r)} pie={pie} />;
+    return <Vincular onVinculado={onVinculado} pie={pie} />;
   }
   if (paso.etapa === 'nip') {
     return (

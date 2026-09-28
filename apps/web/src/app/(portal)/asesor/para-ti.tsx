@@ -14,8 +14,10 @@ import {
   barFill,
   barTrack,
   capName,
+  capAccion,
   capReq,
   capRow,
+  capText,
   feedBody,
   feedLink,
   feedRow,
@@ -97,9 +99,10 @@ export function Capacidades({ capacidades }: { readonly capacidades: readonly Ca
       <div className={eyebrow}>Lo que Don Cuentas ya puede ver</div>
       {capacidades.map((c) => (
         <div key={c.name} className={capRow}>
-          <span style={{ minWidth: 0 }}>
+          <span className={capText}>
             <span className={capName}>{c.name}</span>
             <span className={capReq}>{c.requirement}</span>
+            {c.lockedCopy !== '' && <span className={capAccion}>{c.lockedCopy}</span>}
           </span>
           <span className={barTrack} aria-hidden="true">
             <span

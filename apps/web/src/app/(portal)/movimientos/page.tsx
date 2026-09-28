@@ -1,8 +1,10 @@
 import { requireSession } from '@/server/auth';
 import { hoy } from '@/server/clock';
-import { loadMovimientos } from '@/server/screens';
+import { loadMovimientos } from '@/server/movimientos';
 
+import { rangoDe } from './periodo';
 import { MovimientosScreen } from './screen';
+import { leerEstado, type ParamsMovimientos } from './url';
 
 /**
  * Movimientos — the full ledger (P-09). **Reads Postgres.**
@@ -10,26 +12,30 @@ import { MovimientosScreen } from './screen';
  * Read-only: no "Nueva venta", no "Nuevo gasto", no "Cancelar". Those are phone
  * affordances — `sales` and `expenses` are UP tables with no down path
  * (ADR-058 §2).
+ *
+ * The filters live in the URL and the server answers for them: one page of
+ * ten rows and the period's summary (DB2-QRY-02), never the whole history.
  */
 export const dynamic = 'force-dynamic';
 
 export default async function MovimientosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<ParamsMovimientos>;
 }) {
   const session = await requireSession();
-  const { tab } = await searchParams;
-  const initialTab = tab === 'gastos' ? 'gastos' : 'ventas';
+  const estado = leerEstado(await searchParams);
+  const today = hoy();
+  const rango = rangoDe(estado.rango, today, { desde: estado.desde, hasta: estado.hasta });
   try {
-    const [ventas, gastos] = await Promise.all([
-      loadMovimientos(session.business_id, 'venta'),
-      loadMovimientos(session.business_id, 'gasto'),
-    ]);
-    return (
-      <MovimientosScreen initialTab={initialTab} hoy={hoy()} ventas={ventas} gastos={gastos} />
+    const vista = await loadMovimientos(
+      session.business_id,
+      estado.tab === 'gastos' ? 'gasto' : 'venta',
+      { ...rango, clasificacion: estado.cat, buscar: estado.q },
+      estado.pagina,
     );
+    return <MovimientosScreen estado={estado} hoy={today} vista={vista} />;
   } catch {
-    return <MovimientosScreen initialTab={initialTab} hoy={hoy()} ventas={null} gastos={null} />;
+    return <MovimientosScreen estado={estado} hoy={today} vista={null} />;
   }
 }

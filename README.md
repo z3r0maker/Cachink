@@ -181,7 +181,7 @@ Studio (Android).
 6. **The design is the specification.** The El Mostrador boards on the design canvas,
    approved by the owner, are the spec; code translates them into tokens. If the code and
    an approved board disagree, the code is wrong. Style guide:
-   [docs/design/el-mostrador.md](./docs/design/el-mostrador.md) (ADR-109).
+   [docs/design/el-mostrador.md](./docs/design/el-mostrador.md) (ADR-117).
 
 Full contract in [CLAUDE.md](./CLAUDE.md).
 

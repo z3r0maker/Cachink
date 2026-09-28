@@ -1,138 +1,172 @@
 /**
- * AppShell — the sticky chrome wrapping every post-wizard screen
- * (P1C-M1-T02, T03).
+ * AppShell — the caja's frame (Track M, M-05; El Mostrador §10), around every
+ * screen after sign-in:
  *
- * Layout: TopBar (operator avatar + title + settings cog + sync badge) →
- * children → BottomTabBar (`appTabs`, single role — ADR-053).
+ * - under 760 px: the 64 px header, the screen, the four-tab bar (Inicio,
+ *   Cobrar, Ventas, Mi turno);
+ * - 760 to 1279 px: the 88 px icon rail, the 72 px top bar, the screen;
+ * - from 1280 px: the full sidebar instead of the rail.
  *
- * Consumers pass:
- *   - activeTabKey — which tab is highlighted.
- *   - onNavigate(path) — called when a tab is tapped.
- *   - onSwitchOperator — called when the avatar is tapped; locks the
- *     screen so another Operator signs in with their PIN.
- *   - onOpenSettings — called when the settings cog is tapped.
- *   - title / subtitle — current screen's title.
- *   - mode — kept for callers; the top bar always shows the cloud sync pill.
+ * The page is `gray200`. While the caja is offline an amber banner sits
+ * under the header; it never blocks capture. Detail routes pass `onBack` and
+ * get the way back in place of the caja badge (the web's `headerFor`).
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { Platform } from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { View } from '@tamagui/core';
-import { KeyboardAvoidingView } from 'react-native';
-import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
+import { BottomTabBar, OfflineBanner, PathIcon } from '../../components/index';
+import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { AppMode } from '../../app-config/index';
-import { appTabs } from './tab-definitions';
-import { CloudSyncPill } from './cloud-sync-pill';
 import { EntitlementBanner } from '../../entitlement/entitlement-banner';
-import { BackButton, RoleAvatar } from './app-shell-left-slot';
+import type { AvisosSource } from './avisos-bell';
+import { CajaHeader, CajaTopbar, type CajaHeaderProps, type HeaderStatus } from './caja-header';
+import { NavRail, type NavMenuProps } from './nav-rail';
+import { NavSidebar } from './nav-sidebar';
+import { appTabs, navKeyFor, tabKeyFor, NAV, type NavKey } from './tab-definitions';
+import { useCajaLayout, type CajaLayout } from './use-caja-layout';
+import { useShellData, type ShellData } from './use-shell-data';
 
 export interface AppShellProps {
+  /** Which destination is current; a `NavKey`, or a path to derive it from. */
   readonly activeTabKey: string;
+  /** Tabs, rail and sidebar items call this with the destination's path. */
   readonly onNavigate: (path: string) => void;
-  readonly onSwitchOperator: () => void;
-  readonly onOpenSettings: () => void;
+  /** Locks the caja so the next person signs in with their NIP. */
+  readonly onLock?: () => void;
+  /** @deprecated Use `onLock`. */
+  readonly onSwitchOperator?: () => void;
+  /** @deprecated The cog left the header; Ajustes opens from Mi turno. */
+  readonly onOpenSettings?: () => void;
+  /** The back button's label on a detail route («Mi turno», «Ventas»). */
   readonly title?: string;
+  /** @deprecated The header no longer carries a subtitle. */
   readonly subtitle?: string;
   readonly mode: AppMode | null;
   readonly children: ReactNode;
-  /**
-   * @deprecated No longer used. The role avatar now renders an
-   * illustration (silhouette) instead of text initials. Kept
-   * temporarily so existing consumers don't break at compile time;
-   * will be removed in the next breaking-change sweep.
-   */
-  readonly avatarValue?: string;
-  /**
-   * Audit M-1 follow-up (UI-AUDIT-1, Issue 2): when provided, the
-   * TopBar's left slot renders a ghost icon-only back button (chevron)
-   * **instead of** the role avatar. Used on routes reached from a
-   * parent screen — Settings, Cuentas por Cobrar, etc. — so the user
-   * has a clear way to return where they came from.
-   *
-   * The role avatar's "Cambiar" affordance is still reachable from the
-   * Settings screen body, so collapsing it from the TopBar on detail
-   * pages doesn't lose discoverability.
-   */
+  /** Present on a detail route: the header shows the way back. */
   readonly onBack?: () => void;
-  /**
-   * Optional override for the back-button's accessible label. Defaults
-   * to `topBar.back` ("Atrás"). Pass when a route wants a more specific
-   * SR-friendly label (e.g. "Volver a Inicio").
-   */
+  /** The back button's accessible name when it says more than its label. */
   readonly backLabel?: string;
+  /** The header's right side, per the web's `headerFor`. Defaults to `full`. */
+  readonly headerStatus?: HeaderStatus;
+  /** The avisos bell appears only when there is a count to show. */
+  readonly avisos?: AvisosSource;
+  /** Forces a frame regardless of the window (Storybook, tests). */
+  readonly layout?: CajaLayout;
   readonly testID?: string;
 }
 
-interface RightSlotProps {
-  readonly onOpenSettings: () => void;
-  readonly onNavigate: (path: string) => void;
+const KNOWN: readonly string[] = Object.keys(NAV);
+
+function activeOf(value: string): NavKey {
+  return KNOWN.includes(value) ? (value as NavKey) : navKeyFor(value);
 }
 
-function RightSlot(props: RightSlotProps): ReactElement {
+function useTabs(props: AppShellProps, active: NavKey) {
   const { t } = useTranslation();
-  return (
-    <View flexDirection="row" alignItems="center" gap={8}>
-      <CloudSyncPill onOpenRejected={() => props.onNavigate('/no-enviados')} />
-      {/*
-       * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
-       * (children optional when icon is set, see PR 2.5). The ariaLabel
-       * was hardcoded "Ajustes" which violates CLAUDE.md §8.5
-       * (no hardcoded user-facing strings); pulled into the
-       * `topBar.openSettings` i18n key.
-       */}
-      <Btn
-        variant="ghost"
-        size="md"
-        onPress={props.onOpenSettings}
-        testID="top-bar-open-settings"
-        ariaLabel={t('topBar.openSettings')}
-        icon={<Icon name="settings" size={20} color={colors.black} />}
+  const current = tabKeyFor(active);
+  return appTabs().map((tab) => ({
+    key: tab.key,
+    label: t(tab.labelKey),
+    icon: (
+      <PathIcon
+        d={tab.icon}
+        size={22}
+        strokeWidth={tab.key === current ? 2.2 : 2}
+        color={tab.key === current ? colors.black : colors.gray600}
       />
+    ),
+    onPress: () => props.onNavigate(tab.path),
+    testID: `tab-${tab.key}`,
+  }));
+}
+
+function Body({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <View flex={1}>{children}</View>
+    </KeyboardAvoidingView>
+  );
+}
+
+export interface AppShellFrameProps extends AppShellProps {
+  readonly data: ShellData;
+  readonly layout: CajaLayout;
+  /** Strips under the header: the offline banner, the plan banner. */
+  readonly banners?: ReactNode;
+}
+
+function useFrame(props: AppShellFrameProps) {
+  const { t } = useTranslation();
+  const { data } = props;
+  const active = activeOf(props.activeTabKey);
+  const back = props.onBack
+    ? { label: props.title ?? t('shell.volver'), ariaLabel: props.backLabel, onPress: props.onBack }
+    : undefined;
+  const header: CajaHeaderProps = {
+    data,
+    back,
+    status: props.headerStatus ?? 'full',
+    avisos: props.avisos,
+    onOpenRejected: () => props.onNavigate('/no-enviados'),
+  };
+  const menu: NavMenuProps = {
+    activeKey: active,
+    data,
+    onNavigate: props.onNavigate,
+    onLock: props.onLock ?? props.onSwitchOperator,
+    onCloseTurno: () => props.onNavigate(NAV.turno.path),
+  };
+  return { active, header, menu };
+}
+
+function OfflineSlot(): ReactElement | null {
+  const { state } = useCloudSync();
+  if (state.phase !== 'offline') return null;
+  return <OfflineBanner pendientes={state.counts.pending + state.counts.retrying} />;
+}
+
+/** The frame itself, fed its data: what Storybook renders without a database. */
+export function AppShellFrame(props: AppShellFrameProps): ReactElement {
+  const { active, header, menu } = useFrame(props);
+  const tabs = useTabs(props, active);
+  const { layout } = props;
+  const phone = layout === 'phone';
+  return (
+    <View
+      testID={props.testID ?? 'app-shell'}
+      flex={1}
+      flexDirection="row"
+      backgroundColor={colors.gray200}
+    >
+      {layout === 'rail' ? <NavRail {...menu} /> : null}
+      {layout === 'sidebar' ? <NavSidebar {...menu} /> : null}
+      <View flex={1} minWidth={0}>
+        {phone ? <CajaHeader {...header} /> : <CajaTopbar {...header} />}
+        {props.banners}
+        <Body>{props.children}</Body>
+        {phone ? <BottomTabBar items={tabs} activeKey={tabKeyFor(active)} /> : null}
+      </View>
     </View>
   );
 }
 
-function useLeftSlot(
-  props: AppShellProps,
-  t: ReturnType<typeof useTranslation>['t'],
-): ReactElement {
-  const backLabel = props.backLabel ?? t('topBar.back');
-  if (props.onBack !== undefined) {
-    return <BackButton onPress={props.onBack} ariaLabel={backLabel} />;
-  }
-  return <RoleAvatar onChange={props.onSwitchOperator} ariaLabel={t('topBar.cambiarRol')} />;
-}
-
 export function AppShell(props: AppShellProps): ReactElement {
-  const { t } = useTranslation();
-  const tabs = appTabs();
-  const items = tabs.map((tab) => ({
-    key: tab.key,
-    label: t(tab.labelKey as 'tabs.ventas'),
-    icon: <Icon name={tab.icon} size={22} color={colors.black} />,
-    onPress: () => props.onNavigate(tab.path),
-    testID: `tab-${tab.key}`,
-  }));
-  const leftSlot = useLeftSlot(props, t);
-
-  return (
-    <View testID={props.testID ?? 'app-shell'} flex={1} backgroundColor={colors.offwhite}>
-      <TopBar
-        title={props.title}
-        subtitle={props.subtitle}
-        left={leftSlot}
-        right={<RightSlot onOpenSettings={props.onOpenSettings} onNavigate={props.onNavigate} />}
-      />
+  const measured = useCajaLayout();
+  const data = useShellData();
+  const banners = (
+    <>
+      <OfflineSlot />
       <EntitlementBanner />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <View flex={1}>{props.children}</View>
-      </KeyboardAvoidingView>
-      <BottomTabBar items={items} activeKey={props.activeTabKey} />
-    </View>
+    </>
+  );
+  return (
+    <AppShellFrame {...props} data={data} layout={props.layout ?? measured} banners={banners} />
   );
 }

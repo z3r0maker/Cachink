@@ -1,22 +1,16 @@
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 import assert from 'node:assert/strict';
-import { MOCK_CODES, startMockServer, type RunningMock } from '@xangarro/contracts/mock';
-import {
-  DrizzleAppConfigRepository,
-  DrizzleSalesRepository,
-  DrizzleTicketsRepository,
-  type XangarroDatabase,
-} from '@xangarro/data';
-import type { BusinessId, DeviceId, ProductId } from '@xangarro/domain';
+import { startMockServer, type RunningMock } from '@xangarro/contracts/mock';
+import type { ProductId } from '@xangarro/domain';
 import { makeFreshDb } from '../../data/tests/helpers/fresh-db.js';
 import { ApiClient } from '../src/api-client.js';
 import { coalesce } from '../src/outbox-reader.js';
 import { drainPush } from '../src/push.js';
 import { pullAll } from '../src/pull.js';
-import { applyReferenceTables } from '../src/reference-applier.js';
 import { StatusStore, backoffMs } from '../src/status-store.js';
 import { SyncEngine } from '../src/sync-engine.js';
 import { SYNC_CONFIG_KEYS } from '../src/sync-keys.js';
+import { activatedDevice, pushDeps, ringSale, type Device } from './helpers/device.js';
 
 let mock: RunningMock;
 beforeAll(async () => {
@@ -26,62 +20,8 @@ afterAll(async () => {
   await mock.close();
 });
 
-interface Device {
-  db: XangarroDatabase;
-  token: string;
-  businessId: BusinessId;
-  deviceId: DeviceId;
-  productId: ProductId;
-}
-
-async function activatedDevice(): Promise<Device> {
-  await fetch(`${mock.url}/__mock/reset`, { method: 'POST' });
-  const client = new ApiClient({ baseUrl: mock.url });
-  const act = await client.activate({
-    email: 'dueno@tacoslaesquina.mx',
-    code: MOCK_CODES.valid,
-    device: { name: 'Test', platform: 'ios', appVersion: '0.1.0', osVersion: '18' },
-  });
-  if (!act.ok) throw new Error(act.code);
-  const db = makeFreshDb();
-  await applyReferenceTables(db, act.data.bootstrap.tables, act.data.businessId);
-  return {
-    db,
-    token: act.data.deviceToken,
-    businessId: act.data.businessId as BusinessId,
-    deviceId: act.data.deviceId as DeviceId,
-    productId: act.data.bootstrap.tables.products[0]!.id as ProductId,
-  };
-}
-
-async function ringSale(d: Device, productId: ProductId = d.productId): Promise<string> {
-  const tickets = new DrizzleTicketsRepository(d.db, d.deviceId);
-  const ticket = await tickets.create({
-    folio: await tickets.nextFolio(d.businessId),
-    fecha: '2026-09-16',
-    concepto: 'Tacos',
-    metodo: 'Efectivo',
-    estadoPago: 'pagado',
-    businessId: d.businessId,
-  });
-  const sale = await new DrizzleSalesRepository(d.db, d.deviceId).create({
-    ticketId: ticket.id,
-    fecha: '2026-09-16',
-    concepto: 'Tacos',
-    categoria: 'Producto',
-    monto: 4500n,
-    productoId: productId,
-    cantidad: 3,
-    businessId: d.businessId,
-  } as never);
-  return sale.id;
-}
-
-function deps(d: Device, opts: { now?: Date; headers?: Record<string, string> } = {}) {
-  const client = new ApiClient({ baseUrl: mock.url, extraHeaders: opts.headers });
-  const appConfig = new DrizzleAppConfigRepository(d.db);
-  return { db: d.db, appConfig, client, token: d.token, now: () => opts.now ?? new Date() };
-}
+const deps = (d: Device, opts: { now?: Date; headers?: Record<string, string> } = {}) =>
+  pushDeps(d, mock.url, opts);
 
 describe('coalesce', () => {
   it('folds edits per row, keeps insert over later updates, and drops non-pushable changes', () => {
@@ -102,7 +42,7 @@ describe('coalesce', () => {
 describe('drainPush', () => {
   let d: Device;
   beforeEach(async () => {
-    d = await activatedDevice();
+    d = await activatedDevice(mock.url);
   });
 
   it('pushes a rung sale (ticket + line) once, marks both accepted, and advances the cursor', async () => {
@@ -151,7 +91,7 @@ describe('drainPush', () => {
 
 describe('pullAll', () => {
   it('stores entitlement, server clocks and acknowledgedThrough after a push', async () => {
-    const d = await activatedDevice();
+    const d = await activatedDevice(mock.url);
     await ringSale(d);
     await drainPush(deps(d));
     const out = await pullAll(deps(d));
@@ -165,7 +105,7 @@ describe('pullAll', () => {
 
 describe('SyncEngine', () => {
   it('shares one in-flight run between concurrent callers and reports revocation', async () => {
-    const d = await activatedDevice();
+    const d = await activatedDevice(mock.url);
     await ringSale(d);
     const engine = new SyncEngine({
       db: d.db,
@@ -185,7 +125,7 @@ describe('SyncEngine', () => {
   });
 
   it('lists rejected rows with their local data and requeues them for retry (A-08)', async () => {
-    const d = await activatedDevice();
+    const d = await activatedDevice(mock.url);
     // The product the device knows was purged on the server (mock control route).
     const forgot = await fetch(`${mock.url}/__mock/forget`, {
       method: 'POST',
@@ -207,11 +147,11 @@ describe('SyncEngine', () => {
     assert.equal(row?.retryable, false);
     assert.equal(row?.row?.['concepto'], 'Tacos');
     await engine.requeue('sales', saleId);
-    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 0, retrying: 1 });
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 0, retrying: 1, unsent: 1 });
     assert.equal((await engine.rejected())[0]?.retryable, true);
     // Still missing on the server: the retry is refused again and waits for a human.
     await engine.syncNow();
-    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 1, retrying: 0 });
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 1, retrying: 0, unsent: 0 });
     // The portal restores the product: the next manual retry is accepted.
     await fetch(`${mock.url}/__mock/restore`, {
       method: 'POST',
@@ -224,7 +164,7 @@ describe('SyncEngine', () => {
   });
 
   it('runs the retention purge after a clean pull, at most once per server day (A-11)', async () => {
-    const d = await activatedDevice();
+    const d = await activatedDevice(mock.url);
     const engine = new SyncEngine({
       db: d.db,
       client: new ApiClient({ baseUrl: mock.url }),

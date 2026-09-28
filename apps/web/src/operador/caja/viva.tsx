@@ -3,10 +3,16 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { CajaScreen } from './screen';
-import type { CajaData, CajaScreenProps, ClienteFiado, CobroPaso, Producto } from './types';
+import type {
+  CajaData,
+  CajaScreenProps,
+  ClienteFiado,
+  CobroPaso,
+  Producto,
+} from '@xangarro/caja/caja';
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
-import { stockDeCaja } from '../runtime/inventario-mapa';
+import { stockDeCaja } from '@xangarro/caja/lectura';
 
 /**
  * Caja for real (O-06): a linked register sells the products its own database

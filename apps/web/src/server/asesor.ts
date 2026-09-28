@@ -1,26 +1,20 @@
 import 'server-only';
 
-import {
-  calcularCapacidades,
-  calcularInsights,
-  filtrarPorCadencia,
-  type Capacidad,
-  type Insight,
-} from '@xangarro/domain';
+import { calcularCapacidades, type Capacidad, type Insight } from '@xangarro/domain';
 
-import { asesorInputs, listNotices, materializarInsights, notices } from '@xangarro/data-pg';
+import { listNotices, notices } from '@xangarro/data-pg';
 
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 
 import { withTenant, type Tx } from './db';
 import { hoy } from './clock';
+import { materializarParaNegocio, type Cadencia } from './asesor/pipeline';
 
 /**
- * The Asesor page's read model (P-26): compute the deterministic insights from
- * the tenant's own rows, keep only what the plan's cadence receives
- * («semanal» sees the two most urgent; ADR-059), materialise them into
- * `notices` (ADR-088 — the feed still reads the table; dismissals are state
- * transitions on real rows) and read the feed plus its history back.
+ * The Asesor page's read model (P-26): run the deterministic pipeline
+ * (`./asesor/pipeline.ts`, shared with the scheduled run so the two can never
+ * disagree), then read the feed plus its history back — ADR-088, the feed
+ * still reads the table and dismissals are state transitions on real rows.
  */
 export interface AsesorPageData {
   readonly feed: Awaited<ReturnType<typeof listNotices>>;
@@ -30,12 +24,9 @@ export interface AsesorPageData {
 
 export async function loadAsesorPage(
   businessId: string,
-  cadencia: 'semanal' | 'diario' | 'completo',
+  cadencia: Cadencia,
 ): Promise<AsesorPageData> {
-  const today = hoy();
-  const inputs = await withTenant(businessId, (tx) => asesorInputs(tx, today));
-  const visibles = filtrarPorCadencia(calcularInsights(inputs), cadencia);
-  await withTenant(businessId, (tx) => materializarInsights(tx, businessId, visibles));
+  const { inputs } = await materializarParaNegocio(businessId, cadencia, hoy());
 
   return withTenant(businessId, async (tx) => ({
     feed: await listNotices(tx, 'asesor'),

@@ -65,7 +65,7 @@ function Acciones(p: {
 
 type ErrorVinculo = { readonly mensaje: string; readonly delCodigo: boolean } | null;
 
-function useVincular(onVinculado: (r: Vinculo) => void) {
+function useVincular(onVinculado: (r: Vinculo) => void | Promise<void>) {
   const [email, setEmail] = useState('');
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState<ErrorVinculo>(null);
@@ -78,9 +78,11 @@ function useVincular(onVinculado: (r: Vinculo) => void) {
     setEnviando(true);
     setError(null);
     const r = await activar(email.trim(), codigo);
-    setEnviando(false);
-    if (r.ok) onVinculado(r.vinculo);
+    // «Conectando…» holds until the register's database is ready: a big
+    // business pulls more than one page first (C-23).
+    if (r.ok) await onVinculado(r.vinculo);
     else setError({ mensaje: r.mensaje, delCodigo: r.delCodigo });
+    setEnviando(false);
   }
   const onEmail = (x: string): void => {
     setEmail(x);
@@ -94,7 +96,7 @@ function useVincular(onVinculado: (r: Vinculo) => void) {
 }
 
 export function Vincular(p: {
-  readonly onVinculado: (r: Vinculo) => void;
+  readonly onVinculado: (r: Vinculo) => void | Promise<void>;
   readonly pie?: ReactNode;
 }) {
   const s = useVincular(p.onVinculado);

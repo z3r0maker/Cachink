@@ -1,48 +1,96 @@
 /**
- * Tab definitions for the bottom tab bar. The app is single-role (ADR-053):
- * every Operator sees the same bar: Ventas | Caja | Gastos | Productos.
+ * The caja's destinations on the phone and the tablet (Track M, M-05), in
+ * the web caja's order (`operador/shell/nav.ts`): Inicio · Cobrar, then the
+ * money of the turno, then the turno itself. The glyphs are the web's
+ * `ICONS` from `@xangarro/caja`.
  *
- * The phone is only the operator's register: merma is an inventory
- * movement (Salida · «Merma / daño»), not a tab. Caja hosts the shift tools
- * that used to live in "Otros" (ADR-052).
- *
- * "Gastos" is the UI label for the Egresos module (code identifiers stay
- * `expense`/`egreso` — review item #7).
+ * - Phone (< 760 px): exactly four tabs, Inicio, Cobrar, Ventas, Mi turno
+ *   (`appTabs()`); everything else opens from Inicio and Mi turno.
+ * - Rail and sidebar (≥ 760 px): the grouped menu (`navGroups()`), the web's
+ *   `SIDEBAR_GROUPS` without Fiado y abonos, which the phone does not have
+ *   yet (a feature that is not built is omitted, ADR-117).
  */
 
-import type { IconName } from '../../components/Icon/index';
+import { ICONS } from '@xangarro/caja';
+
+export type NavKey = 'inicio' | 'cobrar' | 'ventas' | 'gastos' | 'turno' | 'inventario';
 
 export interface TabDefinition {
-  /** Stable identifier used as BottomTabBar `activeKey`. */
-  readonly key: string;
-  /** i18n key under `tabs.*` (e.g. `ventas` → `t('tabs.ventas')`). */
-  readonly labelKey: string;
-  /** Vector glyph name from the curated `<Icon>` set (ADR-040). */
-  readonly icon: IconName;
-  /** Route path used by the app-shell router to navigate. */
+  /** Stable identifier: the tab's `activeKey` and its `tab-<key>` testID. */
+  readonly key: NavKey;
+  /** i18n key under `shell.nav.*`. */
+  readonly labelKey: `shell.nav.${NavKey}`;
+  /** SVG path data (a 24 × 24 box) from the caja's `ICONS`. */
+  readonly icon: string;
+  /** The Expo Router path. */
   readonly path: string;
 }
 
-const VENTAS: TabDefinition = {
-  key: 'ventas',
-  labelKey: 'tabs.ventas',
-  icon: 'dollar-sign',
-  path: '/ventas',
+const def = (key: NavKey, icon: string, path: string): TabDefinition => ({
+  key,
+  labelKey: `shell.nav.${key}`,
+  icon,
+  path,
+});
+
+export const NAV: Readonly<Record<NavKey, TabDefinition>> = {
+  inicio: def('inicio', ICONS.inicio, '/inicio'),
+  cobrar: def('cobrar', ICONS.caja, '/cobrar'),
+  ventas: def('ventas', ICONS.ventas, '/ventas'),
+  gastos: def('gastos', ICONS.gastos, '/egresos'),
+  turno: def('turno', ICONS.turno, '/turno'),
+  inventario: def('inventario', ICONS.inventario, '/productos'),
 };
-const CAJA: TabDefinition = { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' };
-const GASTOS: TabDefinition = {
-  key: 'gastos',
-  labelKey: 'tabs.gastos',
-  icon: 'file-text',
-  path: '/egresos',
-};
-const PRODUCTOS: TabDefinition = {
-  key: 'productos',
-  labelKey: 'tabs.productos',
-  icon: 'package',
-  path: '/productos',
-};
-/** The register's bottom tabs. */
+
+/** The phone's bottom tabs: exactly four. */
 export function appTabs(): readonly TabDefinition[] {
-  return [VENTAS, CAJA, GASTOS, PRODUCTOS];
+  return [NAV.inicio, NAV.cobrar, NAV.ventas, NAV.turno];
+}
+
+export interface NavGroup {
+  /** `null` for the ungrouped top pair; otherwise an i18n key. */
+  readonly labelKey: 'shell.nav.dinero' | 'shell.nav.turno' | null;
+  readonly items: readonly TabDefinition[];
+}
+
+/** The rail's and the sidebar's menu, grouped like the web's sidebar. */
+export function navGroups(): readonly NavGroup[] {
+  return [
+    { labelKey: null, items: [NAV.inicio, NAV.cobrar] },
+    { labelKey: 'shell.nav.dinero', items: [NAV.ventas, NAV.gastos] },
+    { labelKey: 'shell.nav.turno', items: [NAV.turno, NAV.inventario] },
+  ];
+}
+
+/**
+ * The destination a pathname belongs to: a detail route lights its parent
+ * (`/productos/p1` → Inventario, `/checkout/efectivo` → Cobrar). Unknown
+ * paths (settings, no-enviados, caja-movimientos) belong to Mi turno, where
+ * they are opened from.
+ */
+export function navKeyFor(pathname: string): NavKey {
+  const first = pathname.replace(/^\/+/, '').split('/')[0] ?? '';
+  switch (first) {
+    case 'inicio':
+    case '':
+      return 'inicio';
+    case 'cobrar':
+    case 'checkout':
+    case 'nuevo-producto':
+      return 'cobrar';
+    case 'ventas':
+    case 'cancelaciones':
+      return 'ventas';
+    case 'egresos':
+      return 'gastos';
+    case 'productos':
+      return 'inventario';
+    default:
+      return 'turno';
+  }
+}
+
+/** On the phone, the tab a destination lives under (Gastos, Inventario → Mi turno). */
+export function tabKeyFor(key: NavKey): NavKey {
+  return key === 'gastos' || key === 'inventario' ? 'turno' : key;
 }

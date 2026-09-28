@@ -1,0 +1,49 @@
+# The escáner (Track M, M-07; MvEscaner): typing an unknown code offers
+# «Darlo de alta», which opens Producto nuevo with the code filled in.
+# (The camera itself can't be driven from Maestro; the typed code is the
+# same path.)
+#
+# Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - escaner
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 5000
+- tapOn:
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+- assertVisible: 'Escanea el producto'
+- tapOn:
+    id: 'escaner-manual'
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: '7509999999999'
+- tapOn:
+    id: 'escaner-buscar'
+- assertVisible:
+    id: 'escaner-desconocido'
+- assertVisible: 'Ese código no está en tu catálogo'
+- tapOn:
+    id: 'escaner-alta'
+- extendedWaitUntil:
+    visible:
+      id: 'producto-nuevo-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'producto-nuevo-codigo'
+- assertVisible: '7509999999999'

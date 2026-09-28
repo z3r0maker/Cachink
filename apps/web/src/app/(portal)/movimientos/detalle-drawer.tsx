@@ -9,6 +9,8 @@ import { button } from '@/components/button.css';
 import * as s from './movimientos.css';
 import type { Row } from './parts';
 
+type Linea = Pick<Row, 'id' | 'concepto' | 'amount'> & { readonly ticketId: string };
+
 /**
  * The movement drawer (B-2). Rows were inert: the table was the whole screen,
  * and «Compartir comprobante» — a read-only action the design keeps for
@@ -19,8 +21,11 @@ import type { Row } from './parts';
  */
 export interface DetalleProps {
   readonly row: Row | null;
-  /** Every row on screen, so a venta can show the rest of its own ticket. */
-  readonly rows: readonly Row[];
+  /**
+   * The live lines of every ticket on the page, so a venta shows its whole
+   * ticket even when the page of ten cut it in two.
+   */
+  readonly rows: readonly Linea[];
   readonly onClose: () => void;
 }
 
@@ -35,10 +40,10 @@ function Ficha({ label, value }: { readonly label: string; readonly value: strin
 }
 
 /**
- * The other lines of the same ticket. They are already on screen — the table
- * lists every sale line — so the drawer groups rather than asking again.
+ * The lines of the same ticket, read with the page (`lineasDeTickets`) rather
+ * than picked from the table: the table holds ten rows, a ticket may not.
  */
-function Renglones({ row, rows }: { readonly row: Row; readonly rows: readonly Row[] }) {
+function Renglones({ row, rows }: { readonly row: Row; readonly rows: readonly Linea[] }) {
   if (row.ticketId === null) return null;
   const hermanas = rows.filter((r) => r.ticketId === row.ticketId);
   if (hermanas.length < 2) return null;

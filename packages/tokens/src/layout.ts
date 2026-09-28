@@ -48,3 +48,15 @@ export const breakpoints = {
 } as const;
 
 export type BreakpointKey = keyof typeof breakpoints;
+
+/**
+ * The caja's navigation breakpoints (El Mostrador §10, the canvas boards
+ * «Teléfono y tableta», Track M M-05): below `rail` the phone's four-tab bar;
+ * from `rail` the 88 px icon rail with the top bar (TbCobrar); from `sidebar`
+ * the full sidebar. The web caja's `PHONE` query (`max-width: 759px`) is the
+ * same `rail` edge. These are the caja's widths, not the Tamagui ladder above.
+ */
+export const cajaBreakpoints = {
+  rail: 760,
+  sidebar: 1280,
+} as const;

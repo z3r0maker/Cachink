@@ -24,7 +24,7 @@ export const colors = {
   // Surfaces
   offwhite: '#F7F7F5', // Soft fill inside a panel; NOT the page background
   gray100: '#F2F2F0',
-  // The page background of every surface (El Mostrador, ADR-109), and the
+  // The page background of every surface (El Mostrador, ADR-117), and the
   // quiet panel edge (`borders.quiet`). Muted text on it is gray600: textMuted
   // is only 3.96:1 here and fails AA.
   gray200: '#E4E4E0',

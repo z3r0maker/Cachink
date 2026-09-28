@@ -25,6 +25,12 @@ function required(name: string): string {
   return value;
 }
 
+/** Both signing keys are set — checked before activation spends a code on a phone. */
+export function assertCredentialsConfigured(): void {
+  required('DEVICE_TOKEN_SECRET');
+  required('ENTITLEMENT_PRIVATE_KEY');
+}
+
 /** The HS256 key device tokens are signed and verified with. */
 export function deviceTokenSecret(): Uint8Array {
   return new TextEncoder().encode(required('DEVICE_TOKEN_SECRET'));

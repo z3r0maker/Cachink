@@ -2,7 +2,7 @@
  * CajaContent — orchestrator for the cash-drawer screen.
  *
  * State machine (Caja Overhaul):
- *   turno == null                        → AbrirCaja (numpad)
+ *   turno == null                        → «Abrir turno» card + fondo sheet (M-06)
  *   turno.cierreAt == null &&
  *     turno.conteoCentavos == null        → Active turn (balance, deposit/withdraw)
  *   turno.cierreAt == null &&
@@ -10,9 +10,9 @@
  *   turno.cierreAt != null               → Closed (new turn needed)
  */
 
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { ScrollView } from 'react-native';
-import type { CajaMovimientoTipo, CajaTurno, Money, UserId } from '@xangarro/domain';
+import type { CajaMovimientoTipo, CajaTurno, Money } from '@xangarro/domain';
 import { CajaActiveTurnView } from './caja-active-turn';
 import { CajaOpenTurnView } from './caja-open-turn-view';
 import { MovimientoSheetWired } from './movimiento-sheet-wired';
@@ -33,6 +33,11 @@ export interface CajaContentProps {
   readonly toolItems?: readonly OtrosItem[];
   /** Required when `toolItems` is provided — receives the item `path`. */
   readonly onNavigateTool?: (path: string) => void;
+  /**
+   * Rendered at the end of the scroll, after the tools: the frame's rows to
+   * the rest of the caja (Mi turno's «Lo de tu turno», Track M M-05).
+   */
+  readonly footer?: ReactNode;
 }
 
 function hasBlindCountPending(turno: CajaTurno | null): boolean {
@@ -69,9 +74,7 @@ export function CajaContent(props: CajaContentProps): ReactElement {
 
   return (
     <ScrollView testID={props.testID} contentContainerStyle={{ padding: 16, gap: 16 }}>
-      {openTurno === null && !shouldShowCerrar && (
-        <CajaOpenTurnView userId={userId as UserId | null} />
-      )}
+      {openTurno === null && !shouldShowCerrar && <CajaOpenTurnView />}
       {openTurno !== null && !shouldShowCerrar && (
         <CajaActiveTurnView
           turno={openTurno}
@@ -95,6 +98,7 @@ export function CajaContent(props: CajaContentProps): ReactElement {
         />
       )}
       <CajaToolsSection items={props.toolItems} onNavigate={props.onNavigateTool} />
+      {props.footer}
     </ScrollView>
   );
 }
