@@ -54,7 +54,7 @@
 - **Steps:** "Crear cuenta gratis" → `/signup?plan=freelancer`; "Empezar ahora" → `/signup?plan=emprendedor`; "Probar 14 días gratis" → `/signup?plan=mipyme_pro`; hero CTA → emprendedor. UTM params passed through. No checkout on the landing.
 - **Acceptance:** clicking each lands on the portal with the plan preselected (manual + a link-check script).
 
-### L-04 Domain + DNS + email domain
+### L-04 Domain + DNS + email domain `[critica]` `[bloq]`
 
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
       **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
@@ -83,7 +83,7 @@
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
-### L-05 Store badges + legal pages `[tiendas]`
+### L-05 Store badges + legal pages `[tiendas]` `[alta]`
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
       **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); **Re-verified 2026-09-28:** the términos route _does_ exist — `/terminos/` is in `routes.js`, wired in `AppSSR.jsx` and `main.jsx`, and prerendered from `docs/legal/aviso/terminos-borrador.md`. What is still missing is the content, not the route: the published draft mentions neither the 7-day grace nor the downgrade, and `docs/legal/terms.md` is the pre-rebrand file the aviso work (O-17) is meant to retire. The store badges still wait for X-05's real URLs.
@@ -187,7 +187,7 @@
     `landing-lighthouse` uploads the reports. First run: SEO 1 · BP 1 · a11y ≥ 0.99 · perf ≥ 0.92 on
     all ten pages.
 
-### L-09 Comparison and alternatives pages against named competitors
+### L-09 Comparison and alternatives pages against named competitors `[baja]`
 
 - [ ] Status · **Blocked by:** owner — the competitor list and the facts about each that we are
       willing to publish
@@ -203,7 +203,7 @@
 - **Acceptance:** each page in the sitemap and `llms.txt`; the Lighthouse job green; no competitor
   claim without a source.
 
-### L-10 Off-site presence: Reddit and YouTube
+### L-10 Off-site presence: Reddit and YouTube `[baja]`
 
 - [ ] Status · **Blocked by:** owner — accounts and time
 - **Context:** Google and the AI answer engines weigh real mentions on Reddit and YouTube above

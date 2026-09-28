@@ -13,6 +13,14 @@
  */
 
 import { AREAS, AREA_BLURB, AREA_TITLES, areaOf, type Area } from './plan-board-areas.js';
+import {
+  PRIORIDADES,
+  PRIO_REGLA,
+  PRIO_TITULO,
+  esBloqueante,
+  ordenPrioridad,
+  prioridadDe,
+} from './plan-board-prioridad.js';
 import { nextUp } from './plan-board-next.js';
 import type { Item, Status } from './plan-board-parse.js';
 
@@ -42,6 +50,8 @@ export function categoryOf(item: Item): Category {
 
 function renderItem(item: Item): string {
   const id = item.id ? `**${item.id}** ` : '';
+  const prio = prioridadDe(item);
+  const marca = `${esBloqueante(item) ? '`⛔ bloquea prod` ' : ''}${prio ? `\`${PRIO_TITULO[prio]}\` ` : ''}`;
   const tail = [
     item.blockedBy ? `Blocked by: ${item.blockedBy}` : null,
     item.trigger ? `Trigger: ${item.trigger}` : null,
@@ -49,7 +59,7 @@ function renderItem(item: Item): string {
   ]
     .filter((s) => s !== null)
     .join(' · ');
-  return `- ${MARK[item.status]} ${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
+  return `- ${MARK[item.status]} ${marca}${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
 }
 
 /** Inside an area, the launch axis is what orders the work. */
@@ -58,7 +68,9 @@ function renderArea(area: Area, items: readonly Item[]): string[] {
   const out = [`## ${AREA_TITLES[area]} (${open.length})`, '', AREA_BLURB[area], ''];
   if (open.length === 0) return [...out, '_Nada abierto._', ''];
   for (const category of CATEGORIES) {
-    const rows = open.filter((i) => categoryOf(i) === category);
+    const rows = open
+      .filter((i) => categoryOf(i) === category)
+      .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b));
     if (rows.length === 0) continue;
     out.push(`### ${category} (${rows.length})`, '', ...rows.map(renderItem), '');
   }
@@ -81,6 +93,32 @@ function renderSummary(items: readonly Item[]): string[] {
     );
   }
   out.push('');
+  return out;
+}
+
+/** Everything tagged `bloq`, gathered before the areas: the shortest read of «what stops us». */
+function renderBloqueantes(items: readonly Item[]): string[] {
+  const rows = items
+    .filter((i) => OPEN.includes(i.status) && esBloqueante(i))
+    .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b));
+  const out = [
+    `## Bloquea producción (${rows.length})`,
+    '',
+    'Mientras cualquiera de estas siga abierta, no se sale a producción. La marca la pone una',
+    'etiqueta `` `[bloq]` `` en el track, no una regla sobre el texto: hay tareas que ningún documento',
+    'llama BLOCKER y que aun así tienen producción detenida hoy.',
+    '',
+  ];
+  for (const p of PRIORIDADES) {
+    const nivel = rows.filter((i) => prioridadDe(i) === p);
+    if (nivel.length === 0) continue;
+    out.push(
+      `### ${PRIO_TITULO[p]} (${nivel.length}) — ${PRIO_REGLA[p]}`,
+      '',
+      ...nivel.map(renderItem),
+      '',
+    );
+  }
   return out;
 }
 
@@ -129,6 +167,8 @@ export function renderBoard(items: readonly Item[]): string {
   for (const item of items) byArea.get(areaOf(item))?.push(item);
   const body = AREAS.flatMap((a) => renderArea(a, byArea.get(a) ?? []));
   return (
-    [...HEAD, ...renderNext(items), ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n'
+    [...HEAD, ...renderNext(items), ...renderBloqueantes(items), ...body, ...renderSummary(items)]
+      .join('\n')
+      .trimEnd() + '\n'
   );
 }

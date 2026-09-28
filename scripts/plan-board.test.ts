@@ -14,6 +14,13 @@ import { type Item, parseTrack } from './plan-board-parse.js';
 import { idsIn, nextUp } from './plan-board-next.js';
 import { categoryOf, renderBoard } from './plan-board-render.js';
 import { AREAS, AREA_TITLES, areaOf } from './plan-board-areas.js';
+import {
+  PRIORIDADES,
+  PRIO_TITULO,
+  esBloqueante,
+  ordenPrioridad,
+  prioridadDe,
+} from './plan-board-prioridad.js';
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -211,7 +218,7 @@ describe('areaOf', () => {
   const item = (over: Partial<Item>): Item => ({
     source: '09-next-features.md',
     line: 1,
-    area: null,
+    tags: [],
     id: 'N-01',
     title: 'x',
     status: 'open',
@@ -225,12 +232,12 @@ describe('areaOf', () => {
 
   it('takes the track\u2019s tag over what the file would have said', () => {
     assert.equal(areaOf(item({})), 'producto');
-    assert.equal(areaOf(item({ area: 'deuda' })), 'deuda');
+    assert.equal(areaOf(item({ tags: ['deuda'] })), 'deuda');
   });
 
   it('falls back to the file when the tag is not an area', () => {
     // A typo must not vanish an item from every list.
-    assert.equal(areaOf(item({ area: 'deudas' })), 'producto');
+    assert.equal(areaOf(item({ tags: ['deudas'] })), 'producto');
   });
 
   it('reads the owner actions and the legal checklist from their sections', () => {
@@ -259,8 +266,66 @@ describe('areaOf', () => {
     // change the area — this is why the parser owns it and not the renderer.
     const largo = `### T-9 \`[infra]\` ${'a'.repeat(200)}\n\n- [ ] Status · **Blocks:** T-1\n`;
     const [parsed] = parseTrack('07-launch.md', largo);
-    assert.equal(parsed?.area, 'infra');
+    assert.deepEqual(parsed?.tags, ['infra']);
     assert.equal(areaOf(parsed as Item), 'infra');
     assert.ok((parsed?.title.length ?? 0) <= 110);
+  });
+});
+
+describe('prioridad y bloqueo', () => {
+  const item = (tags: string[]): Item => ({
+    source: '09-next-features.md',
+    line: 1,
+    tags,
+    id: 'N-01',
+    title: 'x',
+    status: 'open',
+    section: '2. Launch blockers',
+    trigger: null,
+    blockedBy: null,
+    blocks: null,
+    remaining: null,
+  });
+
+  it('reads both axes off the same tag list', () => {
+    const it = item(['deuda', 'critica', 'bloq']);
+    assert.equal(areaOf(it), 'deuda');
+    assert.equal(prioridadDe(it), 'critica');
+    assert.equal(esBloqueante(it), true);
+  });
+
+  it('says «not judged» rather than guessing a level', () => {
+    // An item nobody has weighed is not a low one, and must not sort as if it were.
+    assert.equal(prioridadDe(item([])), null);
+    assert.equal(esBloqueante(item([])), false);
+    assert.ok(ordenPrioridad(item([])) > ordenPrioridad(item(['baja'])));
+  });
+
+  it('orders critical first', () => {
+    const orden = [...PRIORIDADES].map((p) => ordenPrioridad(item([p])));
+    assert.deepEqual(
+      orden,
+      [...orden].sort((a, b) => a - b),
+    );
+  });
+
+  it('every open item on the board carries a level', () => {
+    // The point of the axis is that nothing is unranked; a new task fails this
+    // until somebody judges it, which is the reminder.
+    const sin = collect(ROOT)
+      .filter((i) => i.status !== 'done' && prioridadDe(i) === null)
+      .map((i) => `${i.source}:${i.line}`);
+    assert.deepEqual(sin, [], `sin prioridad: ${sin.join(', ')}`);
+  });
+
+  it('the board prints the blocker list and every level it uses', () => {
+    const board = readFileSync(join(ROOT, BOARD), 'utf8');
+    assert.ok(board.includes('## Bloquea producción ('));
+    const items = collect(ROOT).filter((i) => i.status !== 'done');
+    for (const p of PRIORIDADES) {
+      if (!items.some((i) => prioridadDe(i) === p)) continue;
+      assert.ok(board.includes(`\`${PRIO_TITULO[p]}\``), PRIO_TITULO[p]);
+    }
+    assert.equal(board.includes('`⛔ bloquea prod`'), items.some(esBloqueante));
   });
 });

@@ -287,7 +287,7 @@
 - **Context:** Q9 — the phone may purge only rows the server has durably stored. `acknowledged_through` in pull (B-09) + `server_seq` per accepted row in push (B-08) already give this. This task adds the **integration test** proving a row acknowledged in push is ≤ `acknowledged_through` on the next pull, and that a row rejected is never acknowledged.
 - **Acceptance:** that test, green.
 
-### B-16 Back-office: Studio saved queries + support functions
+### B-16 Back-office: Studio saved queries + support functions `[media]`
 
 - [~] Status · **Blocked by:** B-03, B-11
   **Remaining (2026-09-23, verified against the code):** no «subscriptions by plan/status» saved query (unblocked now that `billing.subscriptions` exists); `billing.reissue_code` / `billing.resend_magic_link` do not exist. Studio-callable issuance is superseded by ADR-080 — drop that step. Runbook review is a human sign-off.

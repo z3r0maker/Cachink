@@ -191,7 +191,7 @@
 
 > **Added by A-09 (2026-09-16):** product flows still using the retired full form or detail edit fields (`producto-costo`, `producto-umbral`, `producto-unidad`, `detail-save`/`detail-delete`): `inventario-producto.yaml`, `producto-via-fab.yaml` (→ quick-add), `validation-producto.yaml`, `inventario-barcode.yaml`, `ipad-form-factor-audit.yaml`; parked `conversion-crear-receta`, `eliminar-venta`, `pago-sobrepago-rechazado`, `registrar-pago-full-form`, `venta-detail-popover-inspect`.
 
-- [ ] Status · **Blocked by:** A-04…A-10, A-15
+- [ ] Status · **Blocked by:** A-04…A-10, A-15 `[alta]` `[bloq]`
       **Remaining (2026-09-23, verified against the code):** 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause.
 
 - **Context:** 142 flows today. Shared subflows to rewrite: `authenticate*.yaml` (→ activation + operator PIN), delete `authenticate-director.yaml`, `authenticate-wizard.yaml`, `complete-first-run.yaml`, `first-run-onboarding.yaml`, `director-setup.yaml`, `open-director-tools.yaml`, `open-sync-wizard.yaml`, `select-operativo.yaml`. Ventas flows still test the removed SessionStrip→TotalBar UI (known) — **re-scope them to the inline POS** (tap product card → VentaConfirmSheet → submit), do not drop them.

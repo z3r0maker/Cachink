@@ -182,7 +182,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   acceptable: fall back to CSS Modules, and add a task for a CSS-parsing value auditor — do not
   defer that discovery to Fase 5.
 
-### P-21 `pnpm design:compare` capture harness `[deuda]`
+### P-21 `pnpm design:compare` capture harness `[deuda]` `[media]`
 
 - [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
   - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
@@ -248,7 +248,7 @@ including the press stamp.
   edits outside `theme.ts`; the contrast test runs from its new home; `pnpm lint:design` still
   reports `total: 0`; the emitted CSS contains every token in `colors`.
 
-### P-23 Primitives + Storybook inventory + visual-regression baselines `[deuda]`
+### P-23 Primitives + Storybook inventory + visual-regression baselines `[deuda]` `[media]`
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
   - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
@@ -1164,7 +1164,7 @@ never invented text.
 - **Acceptance:** pace arithmetic unit-tested (1 happy + 3 unhappy); all seven states in Storybook;
   viewer sees no wizard.
 
-### P-28 Diagnóstico + estrategia — **«Próximamente» in production**
+### P-28 Diagnóstico + estrategia — **«Próximamente» in production** `[media]`
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
   - **Remaining (2026-09-23, verified against the code):** only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt.
@@ -1340,7 +1340,7 @@ never invented text.
 > experience this can give. Still to decide: where the per-business count lives (`usage_counters`
 > needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
-- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** — `[baja]`
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
   (Nuevo / Actualizar / Error) → commit. Structured output (`strict: true` or
   `output_config.format`) validating against the domain `Producto` schema — extracted rows are never
@@ -1348,7 +1348,7 @@ never invented text.
 - **Acceptance:** fixture photographs produce schema-valid rows; a photograph with no products
   produces the error state, not an empty commit; production renders «Próximamente».
 
-### P-30 Asesor generation runtime
+### P-30 Asesor generation runtime `[media]`
 
 - [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
   - **Remaining (2026-09-26):** the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
@@ -1621,7 +1621,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102) `[deuda]`
+### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102) `[deuda]` `[alta]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
@@ -1760,7 +1760,7 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
   branches ≥ 85, on a `portal-e2e` run where every project ran. (85 / 75 until the owner
   raised the goal, 2026-09-26.)
 
-### P-36 First production walkthrough: the owner's findings (2026-09-25)
+### P-36 First production walkthrough: the owner's findings (2026-09-25) `[alta]`
 
 - [~] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
   `feat/don-cuentas-portal` landing for P-36.7
@@ -1848,7 +1848,7 @@ own task and are not repeated here: P-28 (Diagnóstico, estrategia, «¿Me alcan
 desde una foto), P-30 (the model call behind the monthly review), P-32 (avisos and Compartir por
 WhatsApp).
 
-### P-37 Ticket printing from the caja
+### P-37 Ticket printing from the caja `[baja]`
 
 - [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
   printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
@@ -1862,7 +1862,7 @@ WhatsApp).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
 
-### P-38 Don Cuentas explains a cash difference
+### P-38 Don Cuentas explains a cash difference `[media]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
       **2026-09-26 (owner, ADR-110): fully deterministic — no model.** The causes this proposes are
@@ -1877,7 +1877,7 @@ WhatsApp).
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
 
-### P-39 Don Cuentas conclusions in Estados financieros
+### P-39 Don Cuentas conclusions in Estados financieros `[baja]`
 
 - [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
       **2026-09-26 (owner, ADR-110): written once a month, shown on Estados, and announced.**
@@ -1893,7 +1893,7 @@ WhatsApp).
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
 
-### P-40 First diagnóstico free at 90 days
+### P-40 First diagnóstico free at 90 days `[baja]`
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
   - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
@@ -1906,7 +1906,7 @@ WhatsApp).
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
-### P-41 Advanced inventory functions
+### P-41 Advanced inventory functions `[baja]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
