@@ -619,7 +619,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-21 WhatsApp share `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-20 (done) · web half landed 2026-09-20
-  **Remaining (2026-09-23, verified against the code):** phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24.
+  **Remaining (2026-09-23, verified against the code):** phone half only. **Re-verified 2026-09-28:** `share-image.ts` no longer exists — `125d3688` («the phone app keeps only what the operator uses») deleted it, so the image hand-off is gone rather than partial. What the phone has is a **text** share of the corte, `Share.share({ message: textoDelCorte(h) })` in `cierre.tsx`, so «Enviar como texto» is met for that surface. Still missing: sharing the comprobante at all, an Android send to a preset number, the Maestro flow to the hand-off, and the Android-fallback unit test. Blocked on N-24.
 
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
@@ -722,7 +722,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Quality
 
-### N-26 Security audit `[LAUNCH]`
+### N-26 Security audit `[LAUNCH]` `[deuda]`
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
   **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). **Left:** flip `Content-Security-Policy-Report-Only` to enforcing in `src/proxy.ts` after a week of clean production logs. **SEC-SUP-01 done** — `permissions: contents: read` on every workflow, every action pinned to a commit SHA, a `supply-chain` job running `pnpm audit:gate` (fails on a high/critical advisory reachable at runtime; build-only routes and a dated allowlist in `security/audit-allowlist.json` are the only excuses; the two that shipped — `tmp`, `brace-expansion` under `exceljs` — are fixed by `pnpm.overrides`) and a gitleaks scan of each run's commits, plus a CodeQL workflow (the repo is public). The gitleaks step is unrun until CI's first pass. The hosted re-run needs X-01.
@@ -740,7 +740,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   SEC-AUTH-02, Data API exposure SEC-DATA-01) belong to Track B. **Still to do:** pre-launch re-run
   on hosted B-01 with the built sync, register and webhooks; live rate-limit and PostgREST tests.
 
-### N-27 Database audit `[LAUNCH]`
+### N-27 Database audit `[LAUNCH]` `[deuda]`
 
 - [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
   **Remaining (2026-09-26, round 2 — `docs/audits/db-2026-09-26.html`, branch `perf/db-scale`):** round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project.
@@ -754,7 +754,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   critical (pull cursor loses rows — reproduced), 7 high, 12 medium, 3 low. **Still to do:** pre-beta
   re-run on hosted Supabase with `pg_stat_statements`, and the timed PITR restore drill.
 
-### N-28 Performance audit `[LAUNCH]`
+### N-28 Performance audit `[LAUNCH]` `[deuda]`
 
 - [ ] Status · **Blocked by:** X-01 · **Blocks:** N-30
 - **Scope:** k6 load test on staging at 10× the beta's projected load (push, pull, portal reports);
@@ -762,7 +762,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   Android. Replace the broken `docs/archive/health-report-2026-04-30.md` with this report.
 - **Output:** `docs/audits/performance-YYYY-MM-DD.md` + the k6 scripts in the repo.
 
-### N-29 Deterministic full-stack E2E gate `[LAUNCH]`
+### N-29 Deterministic full-stack E2E gate `[LAUNCH]` `[deuda]`
 
 - [ ] Status · **Blocked by:** P-17, A-16, N-22, N-25 · **Blocks:** N-30, X-02
 - **What:** one scenario against a real local Supabase: signup → wizard → operator → import →
@@ -811,7 +811,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
   contract; if C-12 ever changes them, `planes.js` is the one place to update.
 
-### N-32 Store-compliance sweep `[LAUNCH]`
+### N-32 Store-compliance sweep `[LAUNCH]` `[tiendas]`
 
 - [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
   **Remaining (2026-09-23, verified against the code):** reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress).
@@ -838,7 +838,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   `pnpm lint:store` gates in `ci.yml` (job `ci`, after Lint). `entitlement-freelancer-limit.yaml`
   asserts the new copy. **main: 0 violations.** Still to do: reviewer checklist for X-05.
 
-### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
+### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]` `[legal]`
 
 - [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
   **Remaining (2026-09-23, after the work below):** the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending.
@@ -998,7 +998,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
 
 #### Phase 0 — Prove
 
-### N-40 Provider validation + Clip partnership + legal opinion
+### N-40 Provider validation + Clip partnership + legal opinion `[terceros]`
 
 - [~] Status · **Trigger:** N-30 exit criteria met. **The Clip conversation starts now** (owner action,
   not gated by the trigger).
@@ -1130,7 +1130,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   Tipos de pago. Never shown when no terminal is configured.
 - **Acceptance:** Maestro + Playwright: healthy (no badge), unreachable, token expired, recovered.
 
-### N-45 External penetration test
+### N-45 External penetration test `[deuda]`
 
 - [ ] Status · **Trigger:** N-42 and N-43 on staging. **Blocks:** turning `cobrosIntegrados` on in
       production. Then yearly.
@@ -1164,7 +1164,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### Other
 
-### N-49 GLM exploratory tester
+### N-49 GLM exploratory tester `[deuda]`
 
 - [ ] Status · **Trigger:** X-01 staging live and N-29 green.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
@@ -1177,13 +1177,13 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **What:** "Genera un logo con IA" in N-19 for businesses without one: style picker + name → 4
   options → pick → becomes the logo. Image model provider chosen at trigger time.
 
-### N-51 DB scaling — Stage 2 (ADR-068)
+### N-51 DB scaling — Stage 2 (ADR-068) `[infra]`
 
 - [ ] Status · **Trigger:** any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card).
 - **What:** monthly range partitioning of transactional tables (migration with old→new test,
   CLAUDE.md §2.9), a read replica for portal reports and the Asesor, next Supabase compute size.
 
-### N-52 DB scaling — Stage 3 (ADR-068)
+### N-52 DB scaling — Stage 3 (ADR-068) `[infra]`
 
 - [ ] Status · **Trigger:** DB > 500 GB or > 10 000 active tenants.
 - **What:** separate analytics read model; evaluate Citus or tenant sharding (new ADR).

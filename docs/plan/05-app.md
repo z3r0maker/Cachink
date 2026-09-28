@@ -183,7 +183,7 @@
   6. Placeholder icon/splash: keep current artwork until X-07; only text changes here.
 - **Acceptance:** `grep -rni "cachink" packages apps --include=*.ts --include=*.tsx --include=*.json --include=*.yaml -l | grep -v archive` → only the change-log table name (if kept) and nothing user-visible; full Maestro regression green.
 
-### A-16 Maestro suite for the new app
+### A-16 Maestro suite for the new app `[deuda]`
 
 > **Rework list left by A-01/A-03 (2026-09-16):** shared post-login waits already point at `tab-ventas`. These flows still reference Director-only surfaces (`tab-estados`, `otros-caja`/`otros-productos`/`otros-configuracion`, `user-avatar-role-director`, …) and must be rewritten or archived: `auto-lock-smoke.yaml`, `bug-report-sheet.yaml`, `caja-cierre-discrepancia.yaml`, `caja-con-adicional.yaml`, `caja-handoff.yaml`, `caja-movimientos-nav.yaml`, `demo-mode-setup.yaml`, `director-setup.yaml`, `egresos-por-categoria-donut.yaml`, `inventario-producto.yaml`, `ipad-form-factor-audit.yaml`, `ipad-smoke.yaml`, `nuevo-producto-icon-picker.yaml`, `parked-mvp/cliente-pago-completo.yaml`, `parked-mvp/cliente-pago-parcial.yaml`, `parked-mvp/cloud-signup-signin.yaml`, `parked-mvp/merma-cancel-y-nota.yaml`, `parked-mvp/merma-flag-off.yaml`, `producto-full-form.yaml`, `quick-switch-login.yaml`, `recovery-password.yaml`, `recovery-pin.yaml`, `shared/authenticate-director.yaml`, `shared/authenticate-wizard.yaml`, `shared/authenticate.yaml`, `shared/open-director-tools.yaml`, `venta-ciclo-completo.yaml`, `wizard-business-full-form.yaml`, `wizard-local-standalone.yaml`. Not re-run on a simulator in A-01 — the harness gotchas in this task come first.
 

@@ -5,7 +5,7 @@
 
 ---
 
-### X-01 Staging environment (Q17 "A later")
+### X-01 Staging environment (Q17 "A later") `[infra]`
 
 - [ ] Status · **Blocked by:** B-01…B-10 · **Blocks:** X-02
       **Remaining (2026-09-23, verified against the code):** the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo.
@@ -31,7 +31,7 @@
 - **Steps:** create business "Xangarro" on prod with a **paid** Emprendedor subscription (pay it — it exercises Stripe live + CFDI request); operators = the founders; record OpEx/CapEx as gastos with categories; monthly procedure in `docs/ops/finance.md`: Stripe payout report → one venta per payout (or per invoice if few) under categoría "Suscripciones" until Z-05 automates it; request your own factura via P-10 to rehearse the manual CFDI path (B-15/Q15).
 - **Acceptance:** first month closed in Xangarro; Estados Financieros (P-14) show real numbers.
 
-### X-05 Store listings + review readiness
+### X-05 Store listings + review readiness `[tiendas]`
 
 > **Amended 2026-09-17 by Track N:** submit under the business-employee framing of ADR-069 (3.1.3(c)); blocked by N-32 (store-compliance sweep); send an external TestFlight build early for a review signal (OQ-6).
 
