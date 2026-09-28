@@ -5,9 +5,9 @@
  * Replaces the cross-platform-broken `globalThis.confirm()` per
  * Audit M-1 PR1: native React Native silently no-ops the global,
  * so any `if (confirm(…))` branch shipped behaviour that diverged
- * between web and mobile. The primitive composes the brand `<Modal>`
- * + brand `<Btn>` so the confirmation flow stays inside the design
- * system's hard-shadow tactile vocabulary on both platforms.
+ * between web and mobile. Since Track M (M-05) it is El Mostrador's
+ * centred `<Dialog>` (§4: confirmations are dialogs, not sheets) with
+ * the §3 buttons: the confirm, then a secondary «Cancelar».
  *
  * Props:
  *   - `open` / `onClose` mirror `<Modal>`'s controlled API.
@@ -15,23 +15,22 @@
  *     confirm Btn while it's pending so users can't double-fire
  *     destructive actions during a slow round-trip (e.g. cliente
  *     deletion → repository → SQLite write).
- *   - `tone="danger"` swaps the primary Btn to the brand red variant
- *     (CLAUDE.md §8.4 `danger`) for delete / restablecer / wipe
- *     surfaces. Defaults to neutral `dark`.
+ *   - `tone="danger"` makes the confirm the filled destructive button
+ *     (`destructiveFilled`) for delete / restablecer / wipe surfaces;
+ *     otherwise it is the yellow primary.
  *   - `cancelLabel` defaults to the i18n `actions.cancel` ("Cancelar")
  *     so call sites only have to provide the affirmative copy
  *     ("Eliminar", "Restablecer", "Cerrar sesión").
  *
- * Accessibility (Audit Round 2 G1): the underlying `<Modal>` is a
- * `<Dialog>` — focus trap, ESC-to-close, and `role="dialog"` come
- * from `@tamagui/dialog` for free.
+ * Accessibility (Audit Round 2 G1): `<Dialog>` sits on `@tamagui/dialog`,
+ * so the focus trap, Escape and `role="dialog"` come for free.
  */
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn } from '../Btn';
-import { Modal } from '../Modal';
+import { Dialog } from '../Dialog';
 import { useTranslation } from '../../i18n/index';
-import { colors, fontSizes, typography } from '../../theme';
+import { colors, portalFontSizes, typography } from '../../theme';
 import { notificationSuccess } from '../../haptics/index';
 
 export interface ConfirmDialogProps {
@@ -49,10 +48,10 @@ function Description({ children }: { children: string }): ReactElement {
   return (
     <Text
       fontFamily={typography.fontFamily}
-      fontWeight={typography.weights.medium}
-      fontSize={fontSizes.md}
+      fontWeight={typography.weights.semibold}
+      fontSize={portalFontSizes.body}
+      lineHeight={21}
       color={colors.ink}
-      marginBottom={16}
     >
       {children}
     </Text>
@@ -86,7 +85,7 @@ function ActionButtons(props: {
   onClose: () => void;
   onConfirm: () => Promise<void>;
 }): ReactElement {
-  const confirmVariant = props.tone === 'danger' ? 'danger' : 'primary';
+  const confirmVariant = props.tone === 'danger' ? 'destructiveFilled' : 'primary';
 
   return (
     <View gap={8}>
@@ -97,15 +96,18 @@ function ActionButtons(props: {
         }}
         disabled={props.pending}
         fullWidth
+        size="lg"
+        sentence
         testID="confirm-dialog-confirm"
       >
         {props.confirmLabel}
       </Btn>
       <Btn
-        variant="outline"
+        variant="secondary"
         onPress={props.onClose}
         disabled={props.pending}
         fullWidth
+        size="lg"
         testID="confirm-dialog-cancel"
       >
         {props.cancelLabel}
@@ -121,16 +123,23 @@ export function ConfirmDialog(props: ConfirmDialogProps): ReactElement {
   const tone = props.tone ?? 'default';
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title={props.title} testID="confirm-dialog">
+    <Dialog
+      open={props.open}
+      onClose={props.onClose}
+      title={props.title}
+      testID="confirm-dialog"
+      footer={
+        <ActionButtons
+          confirmLabel={props.confirmLabel}
+          cancelLabel={cancelLabel}
+          tone={tone}
+          pending={pending}
+          onClose={props.onClose}
+          onConfirm={handleConfirm}
+        />
+      }
+    >
       {props.description ? <Description>{props.description}</Description> : null}
-      <ActionButtons
-        confirmLabel={props.confirmLabel}
-        cancelLabel={cancelLabel}
-        tone={tone}
-        pending={pending}
-        onClose={props.onClose}
-        onConfirm={handleConfirm}
-      />
-    </Modal>
+    </Dialog>
   );
 }

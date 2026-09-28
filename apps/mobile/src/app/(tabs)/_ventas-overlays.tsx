@@ -11,12 +11,12 @@ import type { CartAction } from './_ventas-hooks';
 
 export function VentasProductosGate(): ReactElement {
   const router = useRouter();
-  return <ProductosGateBanner onGoToProductos={() => router.replace('/productos' as never)} />;
+  return <ProductosGateBanner onGoToProductos={() => router.navigate('/productos' as never)} />;
 }
 
 export function VentasCajaGate(): ReactElement {
   const router = useRouter();
-  return <CajaGateBanner onGoToCaja={() => router.replace('/caja' as never)} />;
+  return <CajaGateBanner onGoToCaja={() => router.navigate('/turno' as never)} />;
 }
 
 interface MainViewProps {

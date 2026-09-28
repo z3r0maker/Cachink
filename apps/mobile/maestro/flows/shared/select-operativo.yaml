@@ -22,9 +22,7 @@ appId: mx.xangarro.mobile
     optional: true
 
 # If we're on Director Home and need to switch, tap the role chip first.
-- tapOn:
-    id: 'top-bar-role-chip'
-    optional: true
+- runFlow: lock-caja.yaml
 - tapOn:
     id: 'role-operativo-select'
     optional: true

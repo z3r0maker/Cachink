@@ -14,7 +14,7 @@ tags:
 
 # Navigate to Ventas tab — should show products gate (no products exist).
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - assertVisible:
     id: 'productos-gate-banner'
 - assertVisible:

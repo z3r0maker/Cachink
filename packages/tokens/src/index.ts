@@ -28,7 +28,7 @@ export {
   pressTransform,
   type Radius,
 } from './shape.js';
-export { breakpoints, type BreakpointKey } from './layout.js';
+export { breakpoints, cajaBreakpoints, type BreakpointKey } from './layout.js';
 export { brand } from './brand.js';
 export { consoleTheme, type ConsoleTheme } from './console.js';
 

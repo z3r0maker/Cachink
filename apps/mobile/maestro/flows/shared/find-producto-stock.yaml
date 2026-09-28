@@ -12,8 +12,10 @@
 # IS matchable by the `producto-card-.*` regex once the list is filtered to one row.
 appId: mx.xangarro.mobile
 ---
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: 'stock-buscar'
 - inputText: 'Tortilla'

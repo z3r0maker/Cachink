@@ -1,0 +1,37 @@
+# Reusable subflow: lock the caja (Track M, M-05). The header's avatar
+# chip is gone; on the phone «Bloquear la caja» sits at the foot of Mi turno,
+# on a tablet in the rail's or the sidebar's turno card.
+# Locking clears the signed-in operator, so the operator list comes back.
+#
+# Precondition: signed in, any tab.
+appId: mx.xangarro.mobile
+---
+# Phone: the Mi turno tab. Tablet: the rail's or the sidebar's item.
+- runFlow:
+    when:
+      visible:
+        id: 'tab-turno'
+    commands:
+      - tapOn:
+          id: 'tab-turno'
+- runFlow:
+    when:
+      notVisible:
+        id: 'tab-turno'
+    commands:
+      - tapOn:
+          id: 'rail-turno|sidebar-turno'
+- runFlow:
+    when:
+      visible:
+        id: 'turno-bloquear'
+    commands:
+      - tapOn:
+          id: 'turno-bloquear'
+- runFlow:
+    when:
+      notVisible:
+        id: 'turno-bloquear'
+    commands:
+      - tapOn:
+          id: 'rail-bloquear|sidebar-bloquear'

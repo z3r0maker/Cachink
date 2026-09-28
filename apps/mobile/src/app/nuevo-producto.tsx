@@ -13,7 +13,7 @@ export default function NuevoProductoRoute(): ReactElement {
   const crear = useCrearProducto();
   const stockEnabled = useFeatureFlag('stock');
   return (
-    <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
+    <AppShellWrapper onBack={() => router.back()}>
       <NuevoProductoScreen
         onSubmit={(input) => crear.mutate(input, { onSuccess: () => router.back() })}
         onBack={() => router.back()}

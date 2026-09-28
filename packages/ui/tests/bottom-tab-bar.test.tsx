@@ -36,7 +36,7 @@ describe('BottomTabBar', () => {
     }
   });
 
-  it('renders a yellow active strip pinned to the top of the active tab cell', () => {
+  it('fills the active tab yellow with black sides (El Mostrador)', () => {
     renderWithProviders(
       <BottomTabBar
         activeKey="ventas"
@@ -47,31 +47,13 @@ describe('BottomTabBar', () => {
       />,
     );
     const ventas = screen.getAllByTestId('tab-ventas')[0]!;
-    // The active cell itself stays transparent — the yellow surface
-    // moves to a 4-px strip that lives inside it (per ADR-040).
-    const cellBg = getComputedStyle(ventas).backgroundColor.toLowerCase();
-    expect(cellBg === 'transparent' || cellBg.includes('rgba(0, 0, 0, 0)') || cellBg === '').toBe(
-      true,
-    );
-    const strip = screen.getAllByTestId('tab-item-active-strip')[0]!;
-    expect(getComputedStyle(strip).backgroundColor.toLowerCase()).toContain('rgb(255, 214, 10)');
+    const s = getComputedStyle(ventas);
+    expect(s.backgroundColor).toBe('rgb(255, 214, 10)');
+    expect(s.borderLeftWidth).toBe('2px');
+    expect(s.borderRightColor).toBe('rgb(13, 13, 13)');
   });
 
-  it('does not render the active strip on inactive tabs', () => {
-    renderWithProviders(
-      <BottomTabBar
-        activeKey="ventas"
-        items={[
-          { key: 'ventas', label: 'Ventas', onPress: noop },
-          { key: 'egresos', label: 'Egresos', onPress: noop },
-        ]}
-      />,
-    );
-    // Exactly one strip on the active cell, none elsewhere.
-    expect(screen.getAllByTestId('tab-item-active-strip').length).toBe(1);
-  });
-
-  it('renders the inactive tab with a transparent background', () => {
+  it('renders the inactive tab white', () => {
     renderWithProviders(
       <BottomTabBar
         activeKey="ventas"
@@ -82,9 +64,14 @@ describe('BottomTabBar', () => {
       />,
     );
     const egresos = screen.getAllByTestId('tab-egresos')[0]!;
-    const bg = getComputedStyle(egresos).backgroundColor.toLowerCase();
-    // Tamagui resolves "transparent" to either "transparent" or "rgba(0, 0, 0, 0)".
-    expect(bg === 'transparent' || bg.includes('rgba(0, 0, 0, 0)') || bg === '').toBe(true);
+    expect(getComputedStyle(egresos).backgroundColor).toBe('rgb(255, 255, 255)');
+  });
+
+  it('is 64 px with a 2 px black rule on top', () => {
+    renderWithProviders(<BottomTabBar activeKey="tab0" items={makeItems(4)} />);
+    const bar = screen.getByTestId('bottom-tab-bar');
+    expect(getComputedStyle(bar).height).toBe('64px');
+    expect(getComputedStyle(bar).borderTopWidth).toBe('2px');
   });
 
   it('fires onPress when an inactive tab is pressed', () => {

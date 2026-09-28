@@ -14,7 +14,7 @@ tags:
 
 # Navigate to Ventas tab and tap a product to add to cart.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

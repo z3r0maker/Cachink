@@ -4,20 +4,15 @@
  */
 
 import type { ReactElement } from 'react';
-import { useRouter } from 'expo-router';
 import { SyncRejectedScreen, useRejectedRows, useTranslation } from '@xangarro/ui';
-import { AppShellWrapper } from '../shell/app-shell-wrapper';
+import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
 
 export default function NoEnviadosRoute(): ReactElement {
-  const router = useRouter();
   const { t } = useTranslation();
   const { rows, retry } = useRejectedRows();
-  const handleBack = (): void => {
-    if (router.canGoBack()) router.back();
-    else router.replace('/ventas' as never);
-  };
+  const handleBack = useBackTo('/turno');
   return (
-    <AppShellWrapper activeTabKey="caja" title={t('noEnviados.title')} onBack={handleBack}>
+    <AppShellWrapper title={t('shell.nav.turno')} onBack={handleBack} headerStatus="static">
       <SyncRejectedScreen rows={rows} onRetry={retry} />
     </AppShellWrapper>
   );

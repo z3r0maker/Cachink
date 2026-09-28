@@ -6,6 +6,6 @@ tags: [internal]
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - assertVisible:
     id: 'ventas-product-grid'

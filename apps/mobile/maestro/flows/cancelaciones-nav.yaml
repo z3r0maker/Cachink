@@ -1,5 +1,5 @@
 # Navigate to Cancelaciones screen and verify empty state renders.
-# Route: /cancelaciones (via Otros → cancelaciones card)
+# Route: /ventas (the Ventas tab; /cancelaciones redirects there)
 # Verifies: cancelaciones-screen testID, empty-state text.
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
@@ -12,19 +12,10 @@ tags:
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-
-- scrollUntilVisible:
-    element:
-      id: 'otros-cancelaciones'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
+# Track M (M-05): Cancelaciones became the Ventas tab (the turno's sales,
+# each cancellable with a reason).
 - tapOn:
-    id: 'otros-cancelaciones'
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
       id: 'mobile-cancelaciones'

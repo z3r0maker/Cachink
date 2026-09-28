@@ -40,6 +40,18 @@ export * from './OptionCardGroup/index';
 export * from './Spinner/index';
 export * from './LoadingOverlay/index';
 export * from './SaleBurst/index';
+// El Mostrador primitives (Track M, M-05).
+export * from './PathIcon/index';
+export * from './Mostrador/index';
+export * from './Panel/index';
+export * from './Chip/index';
+export * from './SegmentedTabs/index';
+export * from './BottomSheet/index';
+export * from './Dialog/index';
+export * from './Toast/index';
+export * from './OfflineBanner/index';
+export * from './Bloqueo/index';
+export * from './NavRows/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

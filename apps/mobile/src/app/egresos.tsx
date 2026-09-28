@@ -1,10 +1,10 @@
 /**
  * Expo Router entry for /egresos («Gastos», P1C-M4, S4-C1 route wire-up).
  *
- * The persistent `(tabs)/_layout.tsx` provides the AppShell; this file
- * renders ONLY the content area + overlays. The register records gastos and
- * the recurring ones due today; editing or deleting them is the owner's job
- * in the portal.
+ * A stack route opened from Mi turno (Track M, M-05: Gastos left the tab
+ * bar), so it wears the frame with the way back. The register records gastos
+ * and the recurring ones due today; editing or deleting them is the owner's
+ * job in the portal.
  */
 
 import { useState, type ReactElement } from 'react';
@@ -17,8 +17,10 @@ import {
   usePendientesGastosRecurrentes,
   useProcesarGastoRecurrente,
   useDescartarGastoRecurrente,
+  useTranslation,
 } from '@xangarro/ui';
 import type { IsoDate } from '@xangarro/domain';
+import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
 
 function todayIso(): IsoDate {
   const now = new Date();
@@ -64,12 +66,14 @@ function EgresosSlot(props: EgresosSlotProps): ReactElement {
 export default function EgresosRoute(): ReactElement {
   const [fecha, setFecha] = useState<IsoDate>(todayIso);
   const [modalOpen, setModalOpen] = useState(false);
+  const { t } = useTranslation();
+  const back = useBackTo('/turno');
 
   return (
-    <>
+    <AppShellWrapper title={t('shell.nav.turno')} onBack={back}>
       <PendientesSlot fecha={fecha} />
       <EgresosSlot fecha={fecha} onChangeFecha={setFecha} onOpen={() => setModalOpen(true)} />
       <NuevoEgresoModalSmart open={modalOpen} onClose={() => setModalOpen(false)} fecha={fecha} />
-    </>
+    </AppShellWrapper>
   );
 }

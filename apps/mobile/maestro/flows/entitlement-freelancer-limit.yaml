@@ -24,7 +24,7 @@ env:
     timeout: 20000
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - tapOn: 'Agua de jamaica'
 - tapOn:
     id: 'cart-checkout-btn'

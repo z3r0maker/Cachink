@@ -19,7 +19,7 @@ tags:
 
 # Navigate to Ventas.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

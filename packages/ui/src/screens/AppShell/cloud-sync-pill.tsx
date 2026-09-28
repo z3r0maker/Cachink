@@ -1,61 +1,100 @@
 /**
- * CloudSyncPill — top-bar sync status for an activated device (A-07).
- * Tapping it is "Actualizar" (push then pull now) — or, when the server
- * rejected rows, opens "No enviados" (A-08) where a human can act.
+ * CloudSyncPill — the header's sync state (A-07), in the web caja's words
+ * and look (`operador/shell/header.tsx`): a pill with the black edge and a
+ * dot, green «Enviado» when everything reached the server, amber «N sin
+ * enviar» while records wait (offline or queued), red «N no enviados» when
+ * the server refused some.
+ *
+ * Tapping it sends now («Actualizar»); with refused rows it opens «No
+ * enviados» (A-08) where a person can act. `interactive={false}` is the
+ * static pill the web shows on Pendientes and Cierre.
  */
 
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
-import { Text, View } from '@tamagui/core';
+import { View } from '@tamagui/core';
+import { MText } from '../../components/index';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useTranslation } from '../../i18n/index';
-import { pillView, type PillTone } from '../../sync/cloud-sync-status';
-import { colors, fontSizes, shapeRadii, typography } from '../../theme';
+import { pillView, type PillTone, type PillView } from '../../sync/cloud-sync-status';
+import { borderWidths, colors, shapeRadii } from '../../theme';
 
-const TONE_BG: Record<PillTone, string> = {
+const GROUND: Record<PillTone, string> = {
+  ok: colors.greenSoft,
+  busy: colors.gray100,
+  warn: colors.warningSoft,
+  danger: colors.redSoft,
+};
+
+const DOT: Record<PillTone, string> = {
   ok: colors.green,
-  busy: colors.gray600,
-  warn: colors.yellow,
+  busy: colors.gray400,
+  warn: colors.warning,
   danger: colors.red,
 };
 
-const TONE_FG: Record<PillTone, string> = {
-  ok: colors.white,
-  busy: colors.white,
-  warn: colors.black,
-  danger: colors.white,
-};
+export interface CloudSyncPillProps {
+  readonly onOpenRejected?: () => void;
+  readonly interactive?: boolean;
+}
 
-export function CloudSyncPill(props: { readonly onOpenRejected?: () => void }): ReactElement {
+function PillBody({ view, label }: { view: PillView; label: string }): ReactElement {
+  return (
+    <View
+      flexDirection="row"
+      alignItems="center"
+      gap={6}
+      height={32}
+      paddingHorizontal={10}
+      borderRadius={shapeRadii.pill}
+      borderWidth={borderWidths.thin}
+      borderColor={colors.black}
+      backgroundColor={GROUND[view.tone]}
+    >
+      <View
+        width={11}
+        height={11}
+        borderRadius={shapeRadii.pill}
+        borderWidth={borderWidths.thin}
+        borderColor={colors.black}
+        backgroundColor={DOT[view.tone]}
+      />
+      <MText
+        size="xs"
+        weight="extraBold"
+        numberOfLines={1}
+        testID={`cloud-sync-pill-${view.labelKey.split('.')[1]}`}
+      >
+        {label}
+      </MText>
+    </View>
+  );
+}
+
+export function CloudSyncPill(props: CloudSyncPillProps): ReactElement {
   const { t } = useTranslation();
   const { state, syncNow } = useCloudSync();
   const view = pillView(state);
   const label = t(view.labelKey as never, { count: view.count, time: view.time } as never);
-  const onPress =
-    view.labelKey === 'syncPill.rejected' && props.onOpenRejected ? props.onOpenRejected : syncNow;
+  const body = <PillBody view={view} label={label} />;
+  if (props.interactive === false) {
+    return (
+      <View testID="cloud-sync-pill" role="status" aria-label={label}>
+        {body}
+      </View>
+    );
+  }
+  const rejected = view.labelKey === 'syncPill.rejected' && props.onOpenRejected !== undefined;
+  const hint = rejected ? t('syncPill.openRejected') : t('syncPill.tapToUpdate');
   return (
     <Pressable
-      onPress={onPress}
+      onPress={rejected ? props.onOpenRejected : syncNow}
       testID="cloud-sync-pill"
-      accessibilityRole="button"
-      accessibilityLabel={`${label}. ${t('syncPill.tapToUpdate')}`}
+      role="button"
+      aria-label={`${label}. ${hint}`}
+      hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
     >
-      <View
-        backgroundColor={TONE_BG[view.tone]}
-        borderRadius={shapeRadii.pill}
-        paddingHorizontal={10}
-        paddingVertical={4}
-      >
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={fontSizes.xs}
-          color={TONE_FG[view.tone]}
-          testID={`cloud-sync-pill-${view.labelKey.split('.')[1]}`}
-        >
-          {label}
-        </Text>
-      </View>
+      {body}
     </Pressable>
   );
 }

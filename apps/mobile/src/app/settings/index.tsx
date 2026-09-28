@@ -25,7 +25,7 @@ import {
   type DeviceSettings,
 } from '@xangarro/ui';
 import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
-import { AppShellWrapper } from '../../shell/app-shell-wrapper';
+import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
 function reloadApp(): void {
@@ -101,14 +101,11 @@ const devFooter =
 export default function SettingsRoute(): ReactElement {
   const router = useRouter();
   const { t } = useTranslation();
+  const back = useBackTo('/turno');
   const [bugReportVisible, setBugReportVisible] = useState(false);
   const device = useDeviceSettings(() => setBugReportVisible(true));
   return (
-    <AppShellWrapper
-      activeTabKey="ajustes"
-      title={t('settings.hubTitle')}
-      onBack={() => router.back()}
-    >
+    <AppShellWrapper title={t('shell.nav.turno')} onBack={back}>
       <SettingsScreen
         device={device}
         onOpenRejected={() => router.push('/no-enviados' as never)}

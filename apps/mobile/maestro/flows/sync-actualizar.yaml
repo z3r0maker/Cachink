@@ -12,7 +12,7 @@ appId: mx.xangarro.mobile
       id: 'cloud-sync-pill-synced'
     timeout: 20000
 - tapOn:
-    id: 'tab-caja'
+    id: 'tab-turno'
 - runFlow:
     when:
       visible:

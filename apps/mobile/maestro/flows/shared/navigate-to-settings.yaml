@@ -1,25 +1,19 @@
-# Reusable subflow: navigate to the Settings Hub screen.
+# Reusable subflow: navigate to the device's Ajustes (Configuración).
 #
-# Review item #7 removed the "Otros" tab from BOTH bars, so the
-# role-branching this flow used to do is gone: the top-bar cog is now
-# the single way into Configuración for every role.
+# Track M (M-05): the header lost its cog. Ajustes is a stack route opened
+# from Mi turno's «Ajustes de la caja» row (`otros-configuracion`).
 #
-#   Director  → Inicio | Ventas | Gastos | Estados
-#   Operativo → Ventas | Caja | Gastos | Productos
-#
-# (The old Operativo branch went Otros grid → "Configuración" card.
-# That card only ever existed in the *Director* grid, so the branch was
-# dead weight even before the tab left.)
-#
-# Caveat that motivated the old branching: the Expo Dev Client's
-# floating gear can sit over the top bar. Disable "Tools button" in the
-# dev menu before running the suite — see E2E-SESSION-NOTES.md.
+# Caveat: the Expo Dev Client's floating gear can sit over the header.
+# Disable "Tools button" in the dev menu before running the suite — see
+# E2E-SESSION-NOTES.md.
 #
 # Precondition: user is authenticated and on any tab.
 appId: mx.xangarro.mobile
 ---
-- tapOn:
-    id: 'top-bar-open-settings'
+- runFlow:
+    file: open-turno-row.yaml
+    env:
+      ROW: 'otros-configuracion'
 
 - extendedWaitUntil:
     visible: 'Ajustes'

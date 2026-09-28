@@ -11,7 +11,7 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: 'tab-caja'
+    id: 'tab-turno'
 
 # State 2: Director already opened — confirm prompt visible.
 - tapOn:

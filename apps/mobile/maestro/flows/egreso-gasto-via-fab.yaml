@@ -20,8 +20,10 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 # Navigate to Egresos.
-- tapOn:
-    id: 'tab-gastos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 
 # Use the FAB instead of the egresos-nuevo header button.
 - assertVisible:

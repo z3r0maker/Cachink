@@ -21,8 +21,10 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 # Navigate to the Productos tab.
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 
 # Switch to the Movimientos sub-tab (SegmentedToggle chip `inventario-tab-<key>`).
 - tapOn:

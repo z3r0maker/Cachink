@@ -13,7 +13,7 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 import { View } from '@tamagui/core';
-import { colors } from '../../theme';
+import { borderWidths, colors } from '../../theme';
 import { TabItem } from './tab-item';
 
 export interface BottomTabBarItem {
@@ -58,10 +58,9 @@ function clampItems(items: readonly BottomTabBarItem[]): readonly BottomTabBarIt
  * Core bottom navigation strip — platform-agnostic. See
  * `bottom-tab-bar.stories.tsx` for the full variant catalog.
  *
- * Per ADR-040 the active state is a 4-px yellow strip pinned to the
- * top of the active cell (matches the April 2026 design mocks 1/2/4),
- * not a full-cell yellow background. Height bumped from 68 → 72 px so
- * the icons can sit at 22-24 px while still leaving label clearance.
+ * El Mostrador's phone tab bar (the boards' frame, MvTurno): 64 px, white,
+ * a 2 px black rule on top; the current tab is filled yellow with black
+ * sides (`TabItem`). The caja shows exactly four tabs (`appTabs()`).
  */
 export function BottomTabBarCore(props: BottomTabBarProps): ReactElement {
   const items = clampItems(props.items);
@@ -69,9 +68,10 @@ export function BottomTabBarCore(props: BottomTabBarProps): ReactElement {
     <View
       testID={props.testID ?? 'bottom-tab-bar'}
       flexDirection="row"
-      height={72}
+      role="tablist"
+      height={64}
       backgroundColor={colors.white}
-      borderTopWidth={2.5}
+      borderTopWidth={borderWidths.thin}
       borderTopColor={colors.black}
     >
       {items.map((item) => (

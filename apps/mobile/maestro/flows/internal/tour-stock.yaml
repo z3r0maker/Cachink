@@ -5,8 +5,10 @@ tags: [internal]
 - launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
-- tapOn:
-    id: 'tab-productos'
+- runFlow:
+    file: ../shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
 - tapOn:
     id: 'inventario-tab-stock'
 - assertVisible:

@@ -117,7 +117,9 @@ export const tamaguiConfig = createTamagui({
   tokens,
   themes: {
     light: {
-      background: colors.offwhite,
+      // The El Mostrador page (docs/design/el-mostrador.md §1): gray200, not
+      // offwhite. Panels sit on it in white with the quiet edge.
+      background: colors.gray200,
       color: colors.ink,
       borderColor: colors.black,
       /*

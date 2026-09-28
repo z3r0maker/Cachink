@@ -11,7 +11,7 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-cobrar'
 
 # Review item #8: the screen must read as "make a sale", not "list of
 # sales". Assert the unmistakable CTA and the hint before touching the
