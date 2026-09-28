@@ -1621,7 +1621,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Portal coverage to 85% (unit + E2E merged, ADR-102)
+### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102)
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
@@ -1673,6 +1673,61 @@ critical avisos cannot be switched off.
     coverage stopped being lost at each full navigation): lines 91.4%, statements 89.1%,
     functions 85.9%, branches 75.8%. Floor 90 / 88 / 84 / 74. Open: branches — mostly per-screen
     states (empty, error, viewer) no spec renders yet.
+  - 2026-09-26 · **Owner raised the target: 95 / 95 / 95, branches 85** (the ten-point spread
+    kept; ADR-102 amendment). Also this session: unit tests for states and refusals E2E cannot
+    reach — `server/metas.ts` 0 → 100% functions unit, `server/estados.ts` 0 → 81.8%,
+    `server/comprobante/datos.ts` 0 → 100% functions and branches — and two findings that block
+    a fresh merged measurement tonight: a warm `.next-e2e` build had been masking eight type
+    errors in an uncommitted `negocio/` redesign (a clean `next build` fails until it lands), and
+    a sandboxed shell exhausts its file table (ENFILE) mid-suite, losing the server's V8 flush —
+    full runs must be un-sandboxed. The floor stays 90 / 88 / 84 / 74 until a green full-suite
+    run re-measures and earns a `--raise`.
+  - 2026-09-27 · **Floor raised to 92.5 / 89.8 / 86.3 / 75.9** on the first green full-suite run
+    under the 95 goal (564 passed, every project to the end, server flush verified in the raw
+    data). The overnight Mostrador commits grew the app by ~540 functions; covered functions
+    grew with them. Still open toward 95 / 85: the gap is ~2.5 lines / ~5.2 statements / ~8.7
+    functions / ~9.1 branches. Two follow-ups found by the run: the repeated
+    `[MCR] … must be Array(V8) or Object(Istanbul)` warnings (worker-coverage entries MCR
+    rejects — may silently under-count, worth the next measurement pass), and the in-flight
+    `/como-empiezo` move (from 2026-09-27 00:30) breaks `onboarding.spec`'s tablet project —
+    it was set aside as a patch to take this measurement and restored after.
+  - 2026-09-27 (later) · **`/negocio/funciones` got its first spec** — `e2e/funciones.spec.ts`
+    (@serial, original `feature_flags` restored in an `afterAll` that runs on failure): the rows
+    render the tenant's real flags with the 2-de-7 count, a leaf switch saves through
+    `cambiarFuncion` and the write is asserted in Postgres, and turning Inventario off with merma
+    stored on asks first («Apagar las dos») and the cascade takes the dependent. Also: the
+    repeated `[MCR]` warnings were diagnosed — MCR reads an _empty_ array as invalid data, so
+    they fire on API-only tests that contribute nothing (log noise, not an under-count);
+    `addPageCoverage` now skips empty lists so a real rejection cannot hide among them.
+  - 2026-09-27 (evening) · **The como-empiezo blockage was a spec bug, and it is fixed.** The
+    tablet project runs at 768px, where the sidebar's «Primeros pasos» card is `wide` — hidden
+    under 1024px by design — and the spec's case-sensitive regex missed Inicio's «Ver mis
+    primeros pasos» link; the locator is now `/primeros pasos/i` (`.first()` takes the card
+    where both exist). With that, the in-flight de-gating work runs green **in** the tree — no
+    more setting it aside. Second raise of the day on a full green run (567 passed, every
+    project): after the first merge lines read 92.4 against the 92.5 floor (the de-gating had
+    removed more covered lines than it added), earned back with `tests/repo-clients.test.ts` —
+    the clients repository's not-found / no-row / optional-default branches, plus its sync-log
+    discipline. **Floor 92.6 / 90 / 86.5 / 76.2.** The real 95-worklist, from the merged
+    per-file gaps: `saldos-iniciales/lineas.tsx` (35 lines), `operador/caja/atajos.ts`
+    (33 lines, 51 branches), `server/billing/cfdi.ts`, `operador/cobranza/cliente/recordar.tsx`,
+    `repositories/clients.ts` ✦ done, `asesor/cierre.tsx`.
+  - 2026-09-27 (night) · **Third raise: 93 / 90.4 / 86.8 / 76.8** (unit half re-measured over
+    the same green E2E data — no rerun needed). `operador/caja/atajos.ts` — the register's
+    PC-keyboard layer, 51 dark branches — is now 100% functions / 96% branches via
+    `tests/operador/atajos.test.ts` (jsdom + React `act`; every root unmounted per test after a
+    leaked listener from a double mount was found owning the keyboard while the fresh one never
+    fired). `tests/cortes-exportar.test.ts` pins the CSV export: header, quote-aware cells,
+    the minus only a shortfall earns, empty-not-«undefined» motivo. Remaining from the
+    worklist: `saldos-iniciales/lineas.tsx` ✦ done, `server/billing/cfdi.ts`,
+    `cobranza/cliente/recordar.tsx`, `asesor/cierre.tsx`, `operador/caja/nuevo-partes.tsx`.
+  - 2026-09-27 (late) · **Fourth raise: 93.4 / 90.7 / 87.1 / 77.2, committed and pushed**
+    (`feat/movil-mostrador`, beside the de-gating and the coverage push). `saldos-iniciales/
+lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (jsdom): name
+    matching, line replacement, the unknown-cliente report and the no-nombre sheet. Enabler for
+    every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
+    under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
+    Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
@@ -1682,8 +1737,9 @@ critical avisos cannot be switched off.
      each 0% file is a route or drawer with no spec: a Playwright spec that asserts real
      data, or delete the dead file.
   4. `server/import` (5%) and `server/repositories` (53%).
-- **Acceptance:** `coverage-floor.json` at ≥ 85 for lines, statements and functions, and
-  branches ≥ 75, on a `portal-e2e` run where every project ran.
+- **Acceptance:** `coverage-floor.json` at ≥ 95 for lines, statements and functions, and
+  branches ≥ 85, on a `portal-e2e` run where every project ran. (85 / 75 until the owner
+  raised the goal, 2026-09-26.)
 
 ### P-36 First production walkthrough: the owner's findings (2026-09-25)
 

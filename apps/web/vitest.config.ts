@@ -8,6 +8,11 @@ import { UNIT_DIR, rawStage } from './scripts/coverage-gate/options';
 export default mergeConfig(
   base,
   defineConfig({
+    // The app tsconfig says `jsx: preserve` (Next), which vite's transform
+    // honors and leaves JSX untransformed — invalid JS to the test runner.
+    // Component tests (jsdom) need it compiled; `automatic` matches the app.
+    // (Vite 8: the option moved from `esbuild` to `oxc`.)
+    oxc: { jsx: 'automatic' },
     resolve: {
       alias: {
         // See tests/support/server-only.ts: the guard stays in the source.

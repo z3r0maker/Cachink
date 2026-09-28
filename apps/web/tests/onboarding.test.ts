@@ -4,7 +4,6 @@ import { REASON_CODES } from '@xangarro/domain';
 
 import { changeLine } from '../src/onboarding/change-copy';
 import { buildChecklist, type ChecklistSignals } from '../src/onboarding/checklist';
-import { debeIrALaGuia } from '../src/onboarding/guia';
 import {
   REASON_COPY,
   allowedFor,
@@ -177,12 +176,5 @@ describe('the checklist has a required list and an optional one (P-36 D-2)', () 
       [true, true, true],
     );
     assert.equal(c.complete, false);
-  });
-
-  it('sends only an owner with an unfinished required list to the guide, unless opted out', () => {
-    assert.equal(debeIrALaGuia({ role: 'owner', complete: false, omitida: false }), true);
-    assert.equal(debeIrALaGuia({ role: 'owner', complete: true, omitida: false }), false);
-    assert.equal(debeIrALaGuia({ role: 'owner', complete: false, omitida: true }), false);
-    assert.equal(debeIrALaGuia({ role: 'operador', complete: false, omitida: false }), false);
   });
 });

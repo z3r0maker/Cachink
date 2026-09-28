@@ -7038,6 +7038,16 @@ taking — any CDP call made inside a route handler waits on the navigation the
 handler holds, and never returns (it also aborted sign-in outright when the
 worker session was recreated there).
 
+**Amendment 2026-09-26 — the target is 95, not 85.** Owner decision: the
+floor's target rises to 95 for lines, statements and functions, 85 for
+branches (the ten-point spread kept; P-35's acceptance moves with it). The
+ratchet itself is unchanged — floors still move only with `--raise`, on a
+green run where every project ran. Two operational notes from the same
+session: a warm `.next-e2e` build can mask type errors in uncommitted work
+(a clean build is the only honest one to measure), and a sandboxed shell
+runs out of file descriptors mid-suite (ENFILE), losing the server's V8
+flush — full coverage runs must be un-sandboxed.
+
 ## ADR-103
 
 **Title:** The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial`

@@ -54,7 +54,8 @@ export function PasosHero({ c }: { readonly c: Checklist }) {
         <p className={s.sub}>
           {c.complete
             ? '¡Ya puedes vender! Lo que queda es opcional y se marca solo cuando lo haces.'
-            : `${c.total} pasos para vender con Xangarro. Se marcan solos conforme los haces.`}
+            : // The ring counts every step; say so, and which of them gate selling.
+              `${c.items.length} pasos; con los primeros ${c.total} ya vendes con Xangarro. Se marcan solos conforme los haces.`}
         </p>
       </div>
       {siguiente === undefined ? null : (
@@ -141,7 +142,7 @@ export function Camino(props: {
   );
 }
 
-/** «Para vender»'s own count: the required steps only, which gate the portal (P-36 D-2). */
+/** «Para vender»'s own count: the required steps only — what selling needs. */
 export function Cuenta({ c }: { readonly c: Checklist }) {
   return (
     <span className={c.complete ? s.countDone : s.countOpen}>
