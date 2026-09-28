@@ -1,8 +1,9 @@
 /**
  * useInicio — Inicio's data for the signed-in operator: the rows
  * (`leerFilasInicio`) said by `inicioMovil`, with the session around them
- * (their name, the caja, the business, the owner's name from the last pull)
- * and the sync state (offline, what waits to be sent). Keyed under the
+ * (their name, the caja, the business, the owner's name from the last pull),
+ * the sync state (offline, what waits to be sent) and the accounts behind
+ * «Por cobrar» and «Cobrar a …» (`useCuentasPara`, Fiado y abonos' read). Keyed under the
  * caja's queries, so opening or closing a turno refreshes it.
  */
 import { useCallback } from 'react';
@@ -17,6 +18,7 @@ import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config
 import { cajaKeys } from '../../hooks/query-keys';
 import { useTranslation } from '../../i18n/index';
 import { useShellData } from '../AppShell/use-shell-data';
+import { useCuentasPara } from '../Cobranza/use-cuentas';
 import { inicioMovil } from './inicio-filas';
 import { leerFilasInicio } from './inicio-lectura';
 
@@ -42,6 +44,15 @@ function useDueno(): string | null {
   return q.data ?? null;
 }
 
+/** The accounts; unreadable ones leave «Por cobrar» at zero rather than Inicio blank. */
+function useCuentasInicio() {
+  const cuentas = useCuentasPara();
+  return {
+    conCuentas: cuentas.data ?? (cuentas.isError ? [] : null),
+    refetchCuentas: cuentas.refetch,
+  };
+}
+
 export function useInicio(): InicioVivo {
   const { t } = useTranslation();
   const repos = useRepositories();
@@ -51,13 +62,14 @@ export function useInicio(): InicioVivo {
   const dueno = useDueno();
   const { state: sync } = useCloudSync();
   const hoy = hoyLocal();
+  const { conCuentas, refetchCuentas } = useCuentasInicio();
   const q = useQuery({
     queryKey: [...inicioKey(businessId, userId), hoy],
     queryFn: () => leerFilasInicio(repos, businessId as BusinessId, userId as UserId, hoy),
     enabled: businessId !== null && userId !== null,
   });
   const data =
-    q.data && shell.operador
+    q.data && shell.operador && conCuentas
       ? inicioMovil(
           q.data,
           {
@@ -70,10 +82,14 @@ export function useInicio(): InicioVivo {
             dueno,
           },
           hoy,
+          conCuentas,
         )
       : null;
   const state = q.isError ? 'error' : data === null ? 'loading' : 'happy';
   const { refetch } = q;
-  const recargar = useCallback(() => void refetch(), [refetch]);
+  const recargar = useCallback(() => {
+    void refetch();
+    void refetchCuentas();
+  }, [refetch, refetchCuentas]);
   return { state, data, refetch: recargar };
 }

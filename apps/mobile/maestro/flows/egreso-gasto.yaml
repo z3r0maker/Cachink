@@ -1,39 +1,34 @@
-# Create a cash gasto and verify Total de egresos updates.
-# Covers P1C-M4-T01 (list + date filter + total card) and
-# P1C-M4-T02 (NuevoEgreso modal, Gasto tab).
+# Record a gasto from the drawer and see it in the turno's list (Track M,
+# M-08; MvGastos): the amount on the keypad, what was bought, a category.
+# The gasto is scoped to the open turno, so «Salió de caja chica» counts it.
 #
-# Precondition: wizard complete, business set, Operativo role active.
+# Precondition: wizard complete, business set, a turno open.
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/abrir-registrar-gasto.yaml
 
-# Navigate to Egresos.
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-gastos'
-- tapOn:
-    id: 'egresos-nuevo'
-
-# Gasto tab is the default — fill concepto + monto.
-- assertVisible:
-    id: 'nuevo-egreso-modal'
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 - tapOn:
     id: 'gasto-concepto'
 - inputText: 'Renta del local'
 - tapOn:
-    id: 'gasto-monto'
-- inputText: '8000'
+    id: 'gasto-categoria-Servicios'
 - tapOn:
-    id: 'gasto-submit'
+    id: 'gasto-guardar'
 
-# Modal closes + Total de egresos reflects the new amount.
-- assertNotVisible:
-    id: 'nuevo-egreso-modal'
+# The sheet closes, the toast confirms and the row is on the list.
+- extendedWaitUntil:
+    notVisible:
+      id: 'registrar-gasto'
+    timeout: 5000
+- assertVisible:
+    id: 'gastos-resumen'
 - assertVisible: '−$8,000.00'
 - assertVisible: 'Renta del local'

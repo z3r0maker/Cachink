@@ -10,4 +10,4 @@ tags: [internal]
     env:
       ROW: 'otros-gastos'
 - assertVisible:
-    id: 'egresos-screen'
+    id: 'gastos'

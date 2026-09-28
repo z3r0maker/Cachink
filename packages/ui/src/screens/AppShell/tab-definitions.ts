@@ -7,13 +7,19 @@
  * - Phone (< 760 px): exactly four tabs, Inicio, Cobrar, Ventas, Mi turno
  *   (`appTabs()`); everything else opens from Inicio and Mi turno.
  * - Rail and sidebar (≥ 760 px): the grouped menu (`navGroups()`), the web's
- *   `SIDEBAR_GROUPS` without Fiado y abonos, which the phone does not have
- *   yet (a feature that is not built is omitted, ADR-117).
+ *   `SIDEBAR_GROUPS` (Fiado y abonos joined with M-08).
  */
 
 import { ICONS } from '@xangarro/caja';
 
-export type NavKey = 'inicio' | 'cobrar' | 'ventas' | 'gastos' | 'turno' | 'inventario';
+export type NavKey =
+  | 'inicio'
+  | 'cobrar'
+  | 'ventas'
+  | 'gastos'
+  | 'cobranza'
+  | 'turno'
+  | 'inventario';
 
 export interface TabDefinition {
   /** Stable identifier: the tab's `activeKey` and its `tab-<key>` testID. */
@@ -38,6 +44,7 @@ export const NAV: Readonly<Record<NavKey, TabDefinition>> = {
   cobrar: def('cobrar', ICONS.caja, '/cobrar'),
   ventas: def('ventas', ICONS.ventas, '/ventas'),
   gastos: def('gastos', ICONS.gastos, '/egresos'),
+  cobranza: def('cobranza', ICONS.fiado, '/cobranza'),
   turno: def('turno', ICONS.turno, '/turno'),
   inventario: def('inventario', ICONS.inventario, '/productos'),
 };
@@ -57,7 +64,7 @@ export interface NavGroup {
 export function navGroups(): readonly NavGroup[] {
   return [
     { labelKey: null, items: [NAV.inicio, NAV.cobrar] },
-    { labelKey: 'shell.nav.dinero', items: [NAV.ventas, NAV.gastos] },
+    { labelKey: 'shell.nav.dinero', items: [NAV.ventas, NAV.gastos, NAV.cobranza] },
     { labelKey: 'shell.nav.turno', items: [NAV.turno, NAV.inventario] },
   ];
 }
@@ -83,6 +90,8 @@ export function navKeyFor(pathname: string): NavKey {
       return 'ventas';
     case 'egresos':
       return 'gastos';
+    case 'cobranza':
+      return 'cobranza';
     case 'productos':
       return 'inventario';
     default:
@@ -90,7 +99,7 @@ export function navKeyFor(pathname: string): NavKey {
   }
 }
 
-/** On the phone, the tab a destination lives under (Gastos, Inventario → Mi turno). */
+/** On the phone, the tab a destination lives under (Gastos, Fiado y abonos, Inventario → Mi turno). */
 export function tabKeyFor(key: NavKey): NavKey {
-  return key === 'gastos' || key === 'inventario' ? 'turno' : key;
+  return key === 'gastos' || key === 'cobranza' || key === 'inventario' ? 'turno' : key;
 }

@@ -18,6 +18,7 @@ import { useCajaLayout } from './use-caja-layout';
 /** Where each row goes: the app's stack routes. */
 export const TURNO_ROUTES = {
   gastos: NAV.gastos.path,
+  cobranza: NAV.cobranza.path,
   inventario: NAV.inventario.path,
   movimientos: '/caja-movimientos',
   pendientes: '/no-enviados',
@@ -42,6 +43,7 @@ function useRows(onNavigate: (path: string) => void): NavRowItem[] {
   });
   return [
     row('gastos', 'gastos', ICONS.gastos, colors.redSoft),
+    row('cobranza', 'cobranza', ICONS.fiado, colors.warningSoft),
     row('inventario', 'inventario', ICONS.inventario, colors.blueSoft),
     row('movimientos', 'caja-movimientos', GLYPHS.movimientos, colors.yellowSoft),
     row('pendientes', 'no-enviados', GLYPHS.nube, colors.greenSoft),

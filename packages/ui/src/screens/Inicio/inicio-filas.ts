@@ -9,10 +9,13 @@
  */
 import { hhmmLocal } from '@xangarro/caja';
 import { comoInicio, type Entorno, type InicioData, type StockTarea } from '@xangarro/caja/inicio';
+import { comoCuenta } from '@xangarro/caja/cobranza';
 import {
   detalleDelTurno,
+  porCobrarDe,
   resumenDelTurno,
   type CierrePara,
+  type CuentaPara,
   type CortePara,
   type RecurrentePara,
   type TurnoVivoPara,
@@ -139,14 +142,20 @@ export function turnoVivoMovil(f: FilasInicio, hoy: string, ahora: Date): TurnoV
 export type EntornoMovil = Omit<Entorno, 'stock' | 'cuentas' | 'porCobrar'>;
 
 /**
- * Inicio's data. Fiado is not on the phone yet (M-08 builds Fiado y abonos),
- * so no «Cobrar a …» task and nothing «por cobrar».
+ * Inicio's data. The accounts (`leerCuentas`, the same read as Fiado y
+ * abonos) give «Por cobrar» and the «Cobrar a …» tasks, said by the caja
+ * package as the web says them (`porCobrarDe`, `comoCuenta`).
  */
-export function inicioMovil(f: FilasInicio, e: EntornoMovil, hoy: string): InicioData {
+export function inicioMovil(
+  f: FilasInicio,
+  e: EntornoMovil,
+  hoy: string,
+  cuentas: readonly CuentaPara[] = [],
+): InicioData {
   return comoInicio(turnoVivoMovil(f, hoy, e.ahora), {
     ...e,
-    porCobrar: { monto: 0n, clientes: 0 },
+    porCobrar: porCobrarDe(cuentas),
     stock: f.stock,
-    cuentas: [],
+    cuentas: cuentas.map((c) => comoCuenta(c, hoy)),
   });
 }

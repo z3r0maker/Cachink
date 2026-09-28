@@ -65,7 +65,7 @@ appId: mx.xangarro.mobile
     env:
       ROW: 'otros-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: "gastos-registrar"
 - extendedWaitUntil:
     visible:
       id: "gasto-concepto"
@@ -73,11 +73,11 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: "gasto-monto"
 - assertVisible:
-    id: "gasto-submit"
+    id: "gasto-guardar"
 
 # Dismiss without saving.
 - tapOn:
-    id: "top-bar-back"
+    id: "registrar-gasto-close"
 
 # ── 4. NuevoProducto modal ───────────────────────────────────────
 - runFlow:

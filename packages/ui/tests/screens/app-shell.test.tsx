@@ -31,7 +31,7 @@ describe('the caja navigation model', () => {
   it('the rail and the sidebar group the rest like the web sidebar', () => {
     expect(navGroups().map((g) => g.items.map((i) => i.key))).toEqual([
       ['inicio', 'cobrar'],
-      ['ventas', 'gastos'],
+      ['ventas', 'gastos', 'cobranza'],
       ['turno', 'inventario'],
     ]);
   });
@@ -41,13 +41,15 @@ describe('the caja navigation model', () => {
     expect(navKeyFor('/checkout/efectivo')).toBe('cobrar');
     expect(navKeyFor('/productos/p-1')).toBe('inventario');
     expect(navKeyFor('/egresos')).toBe('gastos');
+    expect(navKeyFor('/cobranza/c-1')).toBe('cobranza');
     expect(navKeyFor('/cancelaciones')).toBe('ventas');
     expect(navKeyFor('/settings')).toBe('turno');
     expect(navKeyFor('/')).toBe('inicio');
   });
 
-  it('on the phone, Gastos and Inventario live under Mi turno', () => {
+  it('on the phone, Gastos, Fiado y abonos and Inventario live under Mi turno', () => {
     expect(tabKeyFor('gastos')).toBe('turno');
+    expect(tabKeyFor('cobranza')).toBe('turno');
     expect(tabKeyFor('inventario')).toBe('turno');
     expect(tabKeyFor('ventas')).toBe('ventas');
   });

@@ -1,5 +1,6 @@
 export * from './cierre-resumen';
 export * from './cola-shapes';
+export * from './cuentas';
 export {
   MOTIVO_ENTRADA,
   MOTIVO_MERMA,
