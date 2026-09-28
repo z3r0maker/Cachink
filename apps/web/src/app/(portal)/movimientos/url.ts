@@ -23,6 +23,11 @@ export interface EstadoMovimientos {
   readonly q: string;
   /** 1-based. */
   readonly pagina: number;
+  /**
+   * «Ir a fecha» (DS-01): a day whose page the server opens, then drops from
+   * the URL — the page redirects to `?pagina=N`, so paging goes on from there.
+   */
+  readonly ir: string;
 }
 
 export interface ParamsMovimientos {
@@ -33,6 +38,7 @@ export interface ParamsMovimientos {
   readonly cat?: string;
   readonly q?: string;
   readonly pagina?: string;
+  readonly ir?: string;
 }
 
 const RANGOS: readonly RangoChip[] = ['hoy', 'semana', 'mes', 'personalizado'];
@@ -50,6 +56,7 @@ export function leerEstado(p: ParamsMovimientos): EstadoMovimientos {
     cat: cat === '' ? null : cat,
     q: corto(p.q, 80),
     pagina: Number.isFinite(pagina) && pagina > 0 ? pagina : 1,
+    ir: esIsoDate(p.ir) ? p.ir : '',
   };
 }
 
