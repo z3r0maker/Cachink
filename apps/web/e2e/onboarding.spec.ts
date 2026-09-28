@@ -83,8 +83,8 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
 
   await page.getByRole('button', { name: 'Seguir gratis' }).click();
   await expect(page.getByRole('heading', { name: 'Primeros pasos' })).toBeVisible();
-  // A brand-new business has ticked nothing. «Para vender» is what gates the
-  // portal (P-36 D-2); «Cuando quieras» is listed but never counts.
+  // A brand-new business has ticked nothing. «Para vender» is what selling
+  // needs; «Cuando quieras» is listed but never counts toward it.
   const requerido = page.getByTestId('checklist-requerido');
   const opcional = page.getByTestId('checklist-opcional');
   await expect(
@@ -95,15 +95,20 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await expect(requerido.locator('li[data-done="true"]')).toHaveCount(0);
   await expect(opcional.locator('li[data-done]')).toHaveCount(3);
 
-  // P-36 D-2: the portal sends the owner back here until «Para vender» is done…
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/como-empiezo$/);
-  // …unless the owner asks for the portal, which this browser then remembers.
-  await page.getByRole('link', { name: 'Ir a mi portal' }).click();
-  await expect(page.getByRole('heading', { name: /^Hola/ })).toBeVisible();
+  // The checklist sits inside the portal shell and nothing redirects to it:
+  // the owner moves freely, and the sidebar card leads back.
+  await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible();
   await page.goto('/');
   await expect(page).not.toHaveURL(/\/como-empiezo$/);
-  await page.goto('/como-empiezo');
+  await expect(page.getByRole('heading', { name: /^Hola/ })).toBeVisible();
+  // The way back is whichever link this viewport shows: the sidebar's card is
+  // `wide` (hidden under 1024px), so tablet gets Inicio's «Ver mis primeros
+  // pasos» — `.first()` takes the card where both exist.
+  await page
+    .getByRole('link', { name: /primeros pasos/i })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/como-empiezo$/);
 
   // N-15: re-running with the same answers changes nothing.
   await page.getByRole('link', { name: 'Volver a configurar mi negocio' }).click();

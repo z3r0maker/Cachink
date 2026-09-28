@@ -76,17 +76,10 @@ function pagosRevisados(json: string | null | undefined): boolean {
   return chosen.length !== METODOS_CONFIGURABLES.length;
 }
 
-/** Whether the business went through «Platícanos de ti» (the gate of P-36 D-2 applies only then). */
-export function wizardCompleted(businessId: string): Promise<boolean> {
-  return withTenant(businessId, async (tx) => {
-    const record = await pgOnboardingStore(tx, businessId).find();
-    return record?.completedAt != null;
-  });
-}
-
 /**
  * Whether any row matches, as 0 or 1: the checklist only asks «is there one?»,
- * and the layout asks on **every** navigation (P-36 D-2). It was
+ * and the layout asks on **every** navigation — for the sidebar's «Primeros
+ * pasos» card (ADR-107), since nothing redirects to the guía any more. It was
  * `count(*)` — over `sales`, the whole tenant history on every page
  * (DB2-PAGE-01). `EXISTS` stops at the first row.
  */
