@@ -1,41 +1,21 @@
-# Navigate to the Productos → Movimientos tab and verify that
-# the movement history renders.
+# Inventario's «Movimientos · N» (Track M, M-09; MvInventario): the turno's
+# entradas and mermas, newest first.
 #
-# Precondition: wizard + product + at least one movement exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
-#   maestro test apps/mobile/maestro/flows/producto-movimientos.yaml
-#
-# The producto-entrada-stock flow creates an entrada movement.
+# Precondition: signed in with an open turno and at least one movement in it
+# (producto-entrada-stock.yaml).
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Navigate to the Productos tab.
 - runFlow:
     file: shared/open-turno-row.yaml
     env:
       ROW: 'otros-inventario'
-
-# Switch to the Movimientos sub-tab (SegmentedToggle chip `inventario-tab-<key>`).
 - tapOn:
-    id: 'inventario-tab-movimientos'
-
-# Verify the Movimientos screen renders with at least one entry.
+    id: 'inventario-tabs-movimientos'
 - assertVisible:
-    id: 'movimientos-screen'
-- assertVisible:
-    id: 'movimientos-list'
-
-# Verify the list is NOT empty (no empty-state shown).
+    id: 'inventario-mov-.*'
 - assertNotVisible:
-    id: 'empty-movimientos'
+    id: 'inventario-sin-movs'

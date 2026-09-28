@@ -79,6 +79,28 @@ describe('useCerrarCaja', () => {
     expect(result.current.data?.diferenciaCentavos).toBe(0n);
   });
 
+  it('stores the count by denomination with the close (MvCierre)', async () => {
+    const turnoId = await openTurn();
+    const { result } = renderHook(() => useCerrarCaja(), {
+      wrapper: wrapper({ cajaTurnos, sales, expenses }),
+    });
+
+    await act(async () => {
+      result.current.mutate({
+        turnoId,
+        montoCierreCentavos: 5000n,
+        discrepancyReason: null,
+        explicacion: null,
+        denominaciones: { 'billete-50': 1 },
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const guardado = await cajaTurnos.findById(turnoId);
+    expect(guardado?.denominaciones).toEqual({ 'billete-50': 1 });
+    expect(guardado?.conteoCentavos).toBe(5000n);
+  });
+
   it('throws when no business is configured', async () => {
     useAppConfigStore.setState({ currentBusinessId: null });
     const { result } = renderHook(() => useCerrarCaja(), {

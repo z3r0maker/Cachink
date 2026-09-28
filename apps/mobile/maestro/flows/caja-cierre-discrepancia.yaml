@@ -1,96 +1,55 @@
-# Close caja with amount mismatch — requires reason + explanation.
+# Close with a faltante (Track M, M-09; MvCierre): the difference asks for a
+# motive before the close button works, and the closed screen says it.
 #
 # Verifies:
-#   1. Open caja with 500 via numpad
-#   2. Close with 400 via blind count → discrepancy of -100
-#   3. count-result-reason dropdown must be selected
-#   4. count-result-explicacion text field must be filled
-#   5. Submit → caja closes
+#   1. Open turno with $500; Cierre counts one $200 bill → Falta $300.00
+#   2. «Cerrar turno con faltante de $300.00» stays gray until a motive
+#   3. «Otra razón» asks for the note; with it the turno closes
+#   4. «Turno cerrado» with the faltante
 #
-# Caja Overhaul: Opening uses Numpad. Closing is a 2-step blind-count
-# flow (BlindCountStep → CountResultStep). Discrepancy reason and
-# explicacion now live in CountResultStep.
-#
-# Precondition: wizard + director-setup complete, caja feature flag ON.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
-#   maestro test apps/mobile/maestro/flows/caja-cierre-discrepancia.yaml
-# x-entrypoint: wizard
+# Precondition: demo mode seeded, the operator's turno not yet open or open
+# with no sales.
+# x-entrypoint: demo
 appId: mx.xangarro.mobile
+tags:
+  - caja
+  - cierre
 ---
 - launchApp
-
-# Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to Otros → Caja.
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-- scrollUntilVisible:
-    element:
-      id: 'otros-caja'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
 - tapOn:
-    id: 'otros-caja'
-
-# Open caja with 500 via numpad.
+    id: 'turno-cerrar'
 - extendedWaitUntil:
     visible:
-      id: 'abrir-caja-modal'
+      id: 'cierre-esperado'
+    timeout: 8000
+- tapOn:
+    id: 'conteo-billete-200-mas'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-diferencia-falta'
+    direction: DOWN
     timeout: 5000
-- tapOn: { id: 'numpad-5' }
-- tapOn: { id: 'numpad-0' }
-- tapOn: { id: 'numpad-0' }
-- tapOn:
-    id: 'caja-abrir-submit'
-
-# Status card visible.
 - assertVisible:
-    id: 'caja-status-card'
+    text: 'Elige un motivo para poder cerrar.'
 
-# --- Close with discrepancy ---
 - tapOn:
-    id: 'caja-cerrar-btn'
-
-# Step 1: BlindCountStep — enter 400 (expected was 500 → -100 discrepancy).
+    id: 'cierre-motivo-3'
 - assertVisible:
-    id: 'cerrar-caja-step-1'
-- tapOn: { id: 'numpad-4' }
-- tapOn: { id: 'numpad-0' }
-- tapOn: { id: 'numpad-0' }
+    text: 'Escribe la nota para poder cerrar.'
 - tapOn:
-    id: 'blind-count-continue'
+    id: 'cierre-nota'
+- inputText: 'Se pagó el gas sin registrar'
+- hideKeyboard
 
-# Step 2: CountResultStep — comparison shows discrepancy.
+- tapOn:
+    id: 'cierre-cerrar'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 8000
 - assertVisible:
-    id: 'cerrar-caja-step-2'
-- assertVisible:
-    id: 'comparison-card'
-
-# Try to close without reason — button should be disabled (diff ≠ 0).
-# Select a reason from the dropdown.
-- tapOn:
-    id: 'count-result-reason'
-- tapOn:
-    index: 0
-
-# Enter explanation text.
-- tapOn:
-    id: 'count-result-explicacion'
-- inputText: 'Error de cambio al cliente'
-
-# Now submit should succeed.
-- tapOn:
-    id: 'count-result-close'
-
-# Verify caja is closed.
-- assertVisible:
-    id: 'caja-status-card'
+    text: 'Con un faltante de $300.00.'

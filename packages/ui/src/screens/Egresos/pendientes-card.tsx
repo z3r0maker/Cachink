@@ -1,149 +1,131 @@
 /**
- * PendientesCard — Operativo home card showing recurring expense
- * templates whose proximoDisparo is today or earlier (Slice 2 C7,
- * M4-T04).
- *
- * One row per pendiente with Confirmar + Descartar Btns. Pure UI;
- * parent wires confirm → ProcesarGastoRecurrenteUseCase.
+ * «Pendientes de registrar» on Gastos (the phone kept it here; the web moved
+ * it to Mi turno): recurring gastos already due. «Registrar» opens the
+ * sheet filled from the template, as the web's link does; saving it pays it
+ * and advances the schedule. «Descartar» skips this time through
+ * `DescartarGastoRecurrenteUseCase`, as the phone always did.
  */
-
 import { useState, type ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
-import { formatMoney } from '@xangarro/domain';
-import type { RecurringExpense } from '@xangarro/domain';
-import { Btn, Card, SectionTitle, Tag } from '../../components/index';
-import { useTranslation } from '../../i18n/index';
-import { colors, fontSizes, typography } from '../../theme';
+import { View } from '@tamagui/core';
+import { formatMoney, type RecurringExpense } from '@xangarro/domain';
+import { ICONS } from '@xangarro/caja';
+import { comoPendiente } from '@xangarro/caja/turno';
+import { Btn } from '../../components/Btn/index';
+import { MText } from '../../components/Mostrador/index';
+import { QuietPanel } from '../../components/Panel/index';
+import { PathIcon } from '../../components/PathIcon/index';
+import { borderWidths, colors, radii } from '../../theme';
+import { Etiqueta } from '../VentasTurno/ventas-partes';
+import { recurrenteParaDe, venceTexto } from './gastos-lectura';
 
 export interface PendientesCardProps {
   readonly pendientes: readonly RecurringExpense[];
-  readonly onConfirmar: (pendiente: RecurringExpense) => void;
-  readonly onDescartar?: (pendiente: RecurringExpense) => void;
-  readonly confirming?: boolean;
+  readonly hoy: string;
+  readonly onRegistrar: (p: RecurringExpense) => void;
+  readonly onDescartar: (p: RecurringExpense) => void;
   readonly testID?: string;
 }
 
-type T = ReturnType<typeof useTranslation>['t'];
+type Pendiente = ReturnType<typeof comoPendiente>;
 
-function PendienteHeader({ pendiente, t }: { pendiente: RecurringExpense; t: T }): ReactElement {
+function Info({ x }: { readonly x: Pendiente }): ReactElement {
   return (
-    <View flexDirection="row" justifyContent="space-between" alignItems="center">
-      <View flex={1} paddingRight={12}>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={fontSizes.lg}
-          color={colors.black}
-        >
-          {pendiente.concepto}
-        </Text>
-        <View flexDirection="row" gap={6} marginTop={4}>
-          <Tag>{pendiente.frecuencia}</Tag>
-          <Tag variant="warning">{t('pendientes.due')}</Tag>
-        </View>
+    <View flexDirection="row" alignItems="center" gap={12}>
+      <View
+        width={40}
+        height={40}
+        alignItems="center"
+        justifyContent="center"
+        borderRadius={radii[2]}
+        borderWidth={borderWidths.thin}
+        borderColor={colors.black}
+        backgroundColor={colors.redSoft}
+        aria-hidden
+      >
+        <PathIcon d={ICONS.gastos} size={18} />
       </View>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={fontSizes.xl}
-        color={colors.redText}
-      >
-        −{formatMoney(pendiente.montoCentavos)}
-      </Text>
+      <View flex={1} minWidth={0} gap={3}>
+        <View flexDirection="row" alignItems="center" gap={8} flexWrap="wrap">
+          <MText size="body" weight="extraBold">
+            {x.nombre}
+          </MText>
+          <Etiqueta
+            label={venceTexto(x.vence)}
+            bg={colors.redSoft}
+            fg={colors.redText}
+            borde={colors.redText}
+          />
+        </View>
+        <MText size="sm" weight="semibold" color={colors.textMuted} numberOfLines={1}>
+          {x.detalle}
+        </MText>
+      </View>
+      <MText size="body" weight="extraBold" fontVariant={['tabular-nums']}>
+        {formatMoney(x.monto)}
+      </MText>
     </View>
   );
 }
 
-function PendienteActions({
-  pendienteId,
-  onConfirmar,
-  onDescartar,
-  confirming,
-  t,
-}: {
-  pendienteId: string;
-  onConfirmar: () => void;
-  onDescartar?: () => void;
-  confirming: boolean;
-  t: T;
+function Fila(p: {
+  readonly r: RecurringExpense;
+  readonly hoy: string;
+  readonly onRegistrar: () => void;
+  readonly onDescartar: () => void;
 }): ReactElement {
+  const x = comoPendiente(recurrenteParaDe(p.r, p.hoy));
   return (
-    <View flexDirection="row" gap={8} marginTop={10}>
-      <Btn
-        variant="green"
-        size="sm"
-        onPress={onConfirmar}
-        disabled={confirming}
-        testID={`pendiente-confirmar-${pendienteId}`}
-      >
-        {t('pendientes.confirmar')}
-      </Btn>
-      {onDescartar && (
-        <Btn
-          variant="ghost"
-          size="sm"
-          onPress={onDescartar}
-          testID={`pendiente-descartar-${pendienteId}`}
-        >
-          {t('pendientes.descartar')}
+    <View
+      testID={`pendiente-${x.id}`}
+      gap={10}
+      paddingVertical={12}
+      paddingHorizontal={16}
+      borderTopWidth={borderWidths.quiet}
+      borderTopColor={colors.gray100}
+    >
+      <Info x={x} />
+      <View flexDirection="row" gap={8} justifyContent="flex-end">
+        <Btn variant="quiet" onPress={p.onDescartar} testID={`pendiente-descartar-${x.id}`}>
+          Descartar
         </Btn>
-      )}
+        <Btn
+          variant="primary"
+          sentence
+          onPress={p.onRegistrar}
+          ariaLabel={`Registrar ${x.nombre}`}
+          testID={`pendiente-registrar-${x.id}`}
+        >
+          Registrar
+        </Btn>
+      </View>
     </View>
-  );
-}
-
-function PendienteRow(props: {
-  pendiente: RecurringExpense;
-  onConfirmar: () => void;
-  onDescartar?: () => void;
-  confirming: boolean;
-  t: T;
-}): ReactElement {
-  return (
-    <Card testID={`pendiente-${props.pendiente.id}`} padding="md" fullWidth>
-      <PendienteHeader pendiente={props.pendiente} t={props.t} />
-      <PendienteActions
-        pendienteId={props.pendiente.id}
-        onConfirmar={props.onConfirmar}
-        onDescartar={props.onDescartar}
-        confirming={props.confirming}
-        t={props.t}
-      />
-    </Card>
   );
 }
 
 export function PendientesCard(props: PendientesCardProps): ReactElement | null {
-  const { t } = useTranslation();
-  // Audit M-1 PR 4: optimistic removal — track removed IDs locally
-  // so re-tapping before the query cache refreshes doesn't fire twice.
-  const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
-
-  const handleConfirmar = (p: RecurringExpense): void => {
-    setRemovedIds((prev) => new Set([...prev, p.id]));
-    props.onConfirmar(p);
-  };
-
-  const handleDescartar = (p: RecurringExpense): void => {
-    setRemovedIds((prev) => new Set([...prev, p.id]));
-    props.onDescartar?.(p);
-  };
-
-  const visiblePendientes = props.pendientes.filter((p) => !removedIds.has(p.id));
-  if (visiblePendientes.length === 0) return null;
+  // A discarded row leaves at once, before the query comes back.
+  const [fuera, setFuera] = useState<ReadonlySet<string>>(new Set());
+  const visibles = props.pendientes.filter((p) => !fuera.has(p.id));
+  if (visibles.length === 0) return null;
   return (
-    <View testID={props.testID ?? 'pendientes-card'} gap={10}>
-      <SectionTitle title={t('pendientes.title')} />
-      {visiblePendientes.map((p) => (
-        <PendienteRow
-          key={p.id}
-          pendiente={p}
-          onConfirmar={() => handleConfirmar(p)}
-          onDescartar={props.onDescartar ? () => handleDescartar(p) : undefined}
-          confirming={props.confirming === true}
-          t={t}
+    <QuietPanel
+      label="Pendientes de registrar"
+      count={visibles.length}
+      note="Gastos que se repiten y ya tocan"
+      testID={props.testID ?? 'pendientes-card'}
+    >
+      {visibles.map((r) => (
+        <Fila
+          key={r.id}
+          r={r}
+          hoy={props.hoy}
+          onRegistrar={() => props.onRegistrar(r)}
+          onDescartar={() => {
+            setFuera((prev) => new Set([...prev, r.id]));
+            props.onDescartar(r);
+          }}
         />
       ))}
-    </View>
+    </QuietPanel>
   );
 }

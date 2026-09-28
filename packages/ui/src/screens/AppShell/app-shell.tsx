@@ -114,14 +114,14 @@ function useFrame(props: AppShellFrameProps) {
     back,
     status: props.headerStatus ?? 'full',
     avisos: props.avisos,
-    onOpenRejected: () => props.onNavigate('/no-enviados'),
+    onOpenPendientes: () => props.onNavigate('/pendientes'),
   };
   const menu: NavMenuProps = {
     activeKey: active,
     data,
     onNavigate: props.onNavigate,
     onLock: props.onLock ?? props.onSwitchOperator,
-    onCloseTurno: () => props.onNavigate(NAV.turno.path),
+    onCloseTurno: () => props.onNavigate('/cierre'),
   };
   return { active, header, menu };
 }
@@ -129,7 +129,8 @@ function useFrame(props: AppShellFrameProps) {
 function OfflineSlot(): ReactElement | null {
   const { state } = useCloudSync();
   if (state.phase !== 'offline') return null;
-  return <OfflineBanner pendientes={state.counts.pending + state.counts.retrying} />;
+  // The one «por enviar» count (DB3-CAJA-02): the pill's and Registros por enviar's.
+  return <OfflineBanner pendientes={state.counts.unsent} />;
 }
 
 /** The frame itself, fed its data: what Storybook renders without a database. */

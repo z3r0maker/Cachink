@@ -1,12 +1,19 @@
 /**
- * Expo Router entry for /ventas: the turno's sales, each cancellable with a
- * reason and never edited or deleted (Track M decision of 2026-09-27). Today
- * this is the Cancelaciones list; M-08 redraws it with the sale sheet.
+ * Expo Router entry for /ventas (MvVentas, MvCancelarVenta; Track M, M-08):
+ * the turno's sales, each opened in its sheet, sent as a comprobante or
+ * cancelled with a reason, never edited or deleted.
  */
 
 import type { ReactElement } from 'react';
-import { CancelacionesScreen } from '@xangarro/ui';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { VentasTurnoFlow } from '@xangarro/ui';
 
 export default function VentasTabRoute(): ReactElement {
-  return <CancelacionesScreen testID="mobile-cancelaciones" />;
+  const router = useRouter();
+  return (
+    <View style={{ flex: 1 }} testID="mobile-ventas-tab">
+      <VentasTurnoFlow onIrAInicio={() => router.navigate('/inicio' as never)} />
+    </View>
+  );
 }

@@ -4,38 +4,31 @@
  * ADR-118), so `comoInicio` from `@xangarro/caja/inicio` says them exactly
  * as the web does: the same greeting, «Lo primero», KPIs and «Para hoy».
  * The turno's figures come from the caja package's `resumenDelTurno` and
- * `detalleDelTurno`; the expected cash from the phone's own calculator
- * (`computeCajaBalance`, the one Mi turno and Cierre use). Pure.
+ * `detalleDelTurno`; the expected cash from `partesDelTurno`, the O-03 rule
+ * `CerrarCajaUseCase` stores (cash abonos included), the one Mi turno and
+ * Cierre use too. Pure.
  */
 import { hhmmLocal } from '@xangarro/caja';
 import { comoInicio, type Entorno, type InicioData, type StockTarea } from '@xangarro/caja/inicio';
+import { comoCuenta } from '@xangarro/caja/cobranza';
 import {
   detalleDelTurno,
+  partesDelTurno,
+  porCobrarDe,
   resumenDelTurno,
   type CierrePara,
+  type CuentaPara,
   type CortePara,
   type RecurrentePara,
   type TurnoVivoPara,
 } from '@xangarro/caja/lectura';
-import {
-  computeCajaBalance,
-  type CajaMovimiento,
-  type CajaTurno,
-  type Expense,
-  type RecurringExpense,
-  type Sale,
-  type Ticket,
-} from '@xangarro/domain';
-import { buildBalanceInput } from '../Caja/build-balance-input';
+import { esperadoDe } from '@xangarro/caja/turno';
+import type { CajaTurno, RecurringExpense } from '@xangarro/domain';
+import type { FilasDelTurno } from '../MiTurno/filas-del-turno';
 
-export interface FilasInicio {
+export interface FilasInicio extends FilasDelTurno {
   /** The operator's open turno, or else the newest one on this device (closed). */
   readonly turno: CajaTurno | null;
-  /** The turno day's tickets, lines, gastos, and the turno's cash movements. */
-  readonly tickets: readonly Ticket[];
-  readonly lineas: readonly Sale[];
-  readonly gastos: readonly Expense[];
-  readonly movimientos: readonly CajaMovimiento[];
   /** Recent turnos on this device, for «Tus últimos cortes». */
   readonly turnos: readonly CajaTurno[];
   /** Recurring gastos already due. */
@@ -86,19 +79,18 @@ const CERO: CierrePara['resumen'] = {
   mermas: 0,
 };
 
-function cierreDe(f: FilasInicio, t: CajaTurno): CierrePara {
-  const tickets = delTurno(f.tickets, t.id);
-  const gastos = delTurno(f.gastos, t.id);
-  const saldo = computeCajaBalance(buildBalanceInput(t, tickets, f.lineas, gastos, f.movimientos));
+/** The close figures: the four parts of the expected cash as the use case forms them. */
+export function cierreDe(f: FilasDelTurno, t: CajaTurno): CierrePara {
+  const partes = partesDelTurno(t, f);
   return {
     desde: hhmmLocal(t.aperturaAt),
     cerrado: t.cierreAt !== null,
-    fondoCentavos: t.montoAperturaCentavos.toString(),
-    ventasEfectivoCentavos: saldo.desglose.ventasEfectivo.toString(),
-    abonosEfectivoCentavos: '0',
-    gastosEfectivoCentavos: saldo.desglose.egresosEfectivo.toString(),
-    esperadoCentavos: saldo.efectivoEnCaja.toString(),
-    resumen: resumenDelTurno(tickets, f.lineas),
+    fondoCentavos: partes.fondo.toString(),
+    ventasEfectivoCentavos: partes.ventasEfectivo.toString(),
+    abonosEfectivoCentavos: partes.abonosEfectivo.toString(),
+    gastosEfectivoCentavos: partes.gastosEfectivo.toString(),
+    esperadoCentavos: esperadoDe(partes).toString(),
+    resumen: resumenDelTurno(delTurno(f.tickets, t.id), f.lineas),
   };
 }
 
@@ -121,7 +113,7 @@ export function turnoVivoMovil(f: FilasInicio, hoy: string, ahora: Date): TurnoV
     {
       delTurno: tickets,
       lineas: f.lineas,
-      abonos: [],
+      abonos: t === null ? [] : f.abonos.filter((a) => a.deletedAt === null),
       gastos: t === null ? [] : delTurno(f.gastos, t.id),
     },
     new Map(),
@@ -139,14 +131,20 @@ export function turnoVivoMovil(f: FilasInicio, hoy: string, ahora: Date): TurnoV
 export type EntornoMovil = Omit<Entorno, 'stock' | 'cuentas' | 'porCobrar'>;
 
 /**
- * Inicio's data. Fiado is not on the phone yet (M-08 builds Fiado y abonos),
- * so no «Cobrar a …» task and nothing «por cobrar».
+ * Inicio's data. The accounts (`leerCuentas`, the same read as Fiado y
+ * abonos) give «Por cobrar» and the «Cobrar a …» tasks, said by the caja
+ * package as the web says them (`porCobrarDe`, `comoCuenta`).
  */
-export function inicioMovil(f: FilasInicio, e: EntornoMovil, hoy: string): InicioData {
+export function inicioMovil(
+  f: FilasInicio,
+  e: EntornoMovil,
+  hoy: string,
+  cuentas: readonly CuentaPara[] = [],
+): InicioData {
   return comoInicio(turnoVivoMovil(f, hoy, e.ahora), {
     ...e,
-    porCobrar: { monto: 0n, clientes: 0 },
+    porCobrar: porCobrarDe(cuentas),
     stock: f.stock,
-    cuentas: [],
+    cuentas: cuentas.map((c) => comoCuenta(c, hoy)),
   });
 }

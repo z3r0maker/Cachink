@@ -1,0 +1,59 @@
+# Fiado y abonos (Track M, M-08; MvCobranza, MvRecordarSaldo): after a venta
+# fiada, Mi turno → Fiado y abonos lists the client with what they owe; their
+# account takes an abono of all of it on «Recibir abono», the toast says so,
+# and «Recordarle su saldo» opens the message sheet.
+#
+# Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
+appId: mx.xangarro.mobile
+tags:
+  - fiado
+  - abonos
+---
+- runFlow: venta-fiado.yaml
+
+- tapOn:
+    id: 'tab-turno'
+- tapOn:
+    id: 'otros-cobranza'
+- extendedWaitUntil:
+    visible:
+      id: 'cobranza'
+    timeout: 8000
+- assertVisible:
+    id: 'cobranza-resumen'
+- tapOn: 'Ver cuenta de Don Beto del puesto.*'
+
+- extendedWaitUntil:
+    visible:
+      id: 'cliente'
+    timeout: 5000
+- assertVisible:
+    id: 'cliente-saldo-monto'
+- tapOn:
+    id: 'cliente-abonar'
+- extendedWaitUntil:
+    visible:
+      id: 'abono-sheet'
+    timeout: 5000
+- tapOn: 'Todo lo que debe.*'
+- tapOn:
+    id: 'abono-metodo-Efectivo'
+- tapOn:
+    id: 'abono-recibir'
+- extendedWaitUntil:
+    visible:
+      id: 'cliente-toast'
+    timeout: 8000
+- assertVisible: 'Abono recibido'
+- assertVisible:
+    id: 'cliente-sin-saldo'
+
+- tapOn:
+    id: 'cliente-recordar'
+- extendedWaitUntil:
+    visible:
+      id: 'recordar-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'recordar-mensaje'
