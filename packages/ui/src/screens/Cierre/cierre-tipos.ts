@@ -13,7 +13,6 @@ export interface ColaCierre {
   /** Of those, the ones that retry by themselves. */
   readonly reintentando: number;
   readonly enviando: boolean;
-  readonly sinRed: boolean;
   readonly reintentar: () => void;
 }
 

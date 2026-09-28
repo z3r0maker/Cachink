@@ -6,13 +6,21 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { heroe, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
+import type { Reintento } from '@xangarro/caja';
+import {
+  ayudaReintento,
+  despuesDeReintentar,
+  heroe,
+  type Fase,
+  type RegistroEnCola,
+} from '@xangarro/caja/pendientes';
 import { GLYPHS, MText, PathIcon } from '../../components/index';
 import { borderWidths, colors, radii, shadows } from '../../theme';
 import { partesConCifras } from './pendientes-logica';
 
 const TONO: Readonly<Record<Fase, { fondo: string; tinta: string }>> = {
   espera: { fondo: colors.warningSoft, tinta: colors.warningText },
+  reintentando: { fondo: colors.warningSoft, tinta: colors.warningText },
   enviando: { fondo: colors.blueSoft, tinta: colors.blueText },
   enviado: { fondo: colors.greenSoft, tinta: colors.greenText },
 };
@@ -83,8 +91,12 @@ export function PendientesHeroe(p: {
   readonly cola: readonly RegistroEnCola[];
   /** A retry ran and the caja is still offline. */
   readonly sinInternet: boolean;
+  readonly reintento?: Reintento | null;
+  /** «Reintentar envío» ran and the engine still waits (DS-05). */
+  readonly intentado?: boolean;
 }): ReactElement {
   const h = heroe(p.fase, p.cola, p.cola.length);
+  const reintentando = p.fase === 'reintentando';
   return (
     <View
       testID={`pendientes-heroe-${p.fase}`}
@@ -95,7 +107,17 @@ export function PendientesHeroe(p: {
       style={{ boxShadow: shadows.hero }}
     >
       <Titulo fase={p.fase} eyebrow={h.eyebrow} titulo={h.titulo} />
+      {reintentando ? (
+        <MText size="md" weight="extraBold" color={colors.black} testID="pendientes-ayuda">
+          {ayudaReintento(p.reintento ?? null)}
+        </MText>
+      ) : null}
       <Cuerpo texto={p.fase === 'enviando' ? ENVIANDO : h.cuerpo} />
+      {reintentando ? (
+        <MText role="status" size="sm" weight="bold" color={colors.warningText}>
+          {p.intentado ? despuesDeReintentar(p.reintento ?? null) : ''}
+        </MText>
+      ) : null}
       {p.sinInternet && p.fase === 'espera' ? (
         <MText role="status" size="sm" color={colors.warningText} testID="pendientes-sin-internet">
           Todavía no hay internet. Lo volvemos a intentar solos en un momento.

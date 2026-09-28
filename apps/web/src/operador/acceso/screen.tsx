@@ -3,7 +3,8 @@
 import { useState, type ReactNode } from 'react';
 
 import { Fondo } from './fondo';
-import { abrirTurno, useReentrada, vincularYPasar } from './flujo';
+import type { Descarga } from './descarga';
+import { abrirTurno, reanudarDescarga, useReentrada, vincularYPasar } from './flujo';
 import { Marco } from './marco';
 import { Nip } from './nip';
 import { Vincular, type Vinculo } from './vincular';
@@ -54,6 +55,36 @@ function PasoNip(p: {
 }
 
 /**
+ * Linking and its download (DS-10): the progress while the snapshot comes in
+ * pages, «Reintentar» when it stopped short, the NIP step once it is all here.
+ */
+function useDescarga(
+  setOperadores: (o: readonly OperadorPara[]) => void,
+  onListo: () => void,
+  setError: (e: string) => void,
+) {
+  const [descarga, setDescarga] = useState<Descarga | null>(null);
+  const [vinculo, setVinculo] = useState<Vinculo | null>(null);
+  const seguir = (p: Promise<boolean>): Promise<void> =>
+    p
+      .then((ok) => {
+        if (ok) onListo();
+      })
+      .catch((e: unknown) => setError(String(e)));
+  return {
+    descarga,
+    onVinculado: (r: Vinculo): Promise<void> => {
+      setVinculo(r);
+      return seguir(vincularYPasar(r, setOperadores, setDescarga));
+    },
+    reintentar: (): void => {
+      if (vinculo === null) return;
+      void seguir(reanudarDescarga(vinculo, setOperadores, setDescarga));
+    },
+  };
+}
+
+/**
  * Operador · Acceso (O-12): the register's door. Vincular links the browser as
  * a device (the bootstrap becomes its database), the NIP picks who stands at
  * the counter, and the fondo opens the turno: without it, nothing sells.
@@ -67,13 +98,17 @@ export function AccesoScreen(p: { readonly onListo: () => void }) {
   const reentrada = useReentrada(p.onListo);
   const pie = <ErrorAcceso error={error ?? reentrada.error} />;
 
-  const onVinculado = (r: Vinculo): Promise<void> =>
-    vincularYPasar(r, reentrada.setOperadores)
-      .then(() => setPaso({ etapa: 'nip' }))
-      .catch((e: unknown) => setError(String(e)));
+  const d = useDescarga(reentrada.setOperadores, () => setPaso({ etapa: 'nip' }), setError);
 
   if (paso.etapa === 'vincular') {
-    return <Vincular onVinculado={onVinculado} pie={pie} />;
+    return (
+      <Vincular
+        onVinculado={d.onVinculado}
+        descarga={d.descarga}
+        onReintentar={d.reintentar}
+        pie={pie}
+      />
+    );
   }
   if (paso.etapa === 'nip') {
     return (

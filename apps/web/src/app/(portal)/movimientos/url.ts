@@ -70,6 +70,7 @@ export function urlDe(e: EstadoMovimientos): string {
   if (e.cat !== null) p.set('cat', e.cat);
   if (e.q !== '') p.set('q', e.q);
   if (e.pagina > 1) p.set('pagina', String(e.pagina));
+  if (e.ir !== '') p.set('ir', e.ir);
   const qs = p.toString();
   return qs === '' ? '/movimientos' : `/movimientos?${qs}`;
 }

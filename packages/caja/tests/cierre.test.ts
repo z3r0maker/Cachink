@@ -9,6 +9,8 @@ import {
   conSigno,
   DIF,
   lineaCerrado,
+  lineaPorEnviar,
+  BANDA_NO_SE_PUDO,
 } from '../src/cierre/copy';
 import { desglose, esperadoDe } from '../src/turno/desglose';
 import { TURNO_FIXTURE } from '../src/turno/fixture';
@@ -53,9 +55,18 @@ describe('cierre de turno', () => {
       'Quedó un faltante explicado como «Salió un vale».',
     );
     assert.match(lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro'), /Pedro ya lo tiene/);
-    assert.match(
+    // With records to send, the portal line stands apart (DS-06, EsCajaCierre).
+    assert.equal(
       lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro', 2),
-      /Pedro lo verá en su portal cuando se envíen los registros\.$/,
+      'El conteo cuadró con lo esperado.',
+    );
+    assert.equal(
+      lineaPorEnviar('pedro'),
+      'Pedro lo verá en su portal cuando se envíen los registros.',
+    );
+    assert.equal(
+      BANDA_NO_SE_PUDO,
+      'Todavía no se pudo. Lo volvemos a intentar solos en un momento.',
     );
   });
 });

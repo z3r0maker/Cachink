@@ -3,6 +3,7 @@ import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 
+import { clickUntil } from './interact';
 import { asTenant } from './sync-phone';
 
 /**
@@ -51,13 +52,17 @@ test.beforeAll(async () => {
   });
 });
 
-test('«Ir a fecha» opens the day’s page, and the pager goes on from it', async ({ page }) => {
+async function entrar(page: Page) {
   await page.goto('/login');
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('ir-fecha-1');
   await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+}
+
+test('«Ir a fecha» opens the day’s page, and the pager goes on from it', async ({ page }) => {
+  await entrar(page);
 
   await page.goto('/movimientos?ir=2026-05-03');
   await expect(page).toHaveURL(/\/movimientos\?pagina=3$/);
@@ -68,4 +73,41 @@ test('«Ir a fecha» opens the day’s page, and the pager goes on from it', asy
   await page.getByRole('button', { name: 'Anterior' }).click();
   await expect(counter(page)).toHaveText('Mostrando 11–20 de 25 movimientos');
   await expect(page.locator('main tbody')).toContainText('Venta del 13');
+});
+
+test('the pager’s «Ir a fecha» field lands on the day, and the period is named', async ({
+  page,
+}) => {
+  await entrar(page);
+  // The suite's today is 12 May 2026: the month chip is May, all 25 ventas.
+  await page.goto('/movimientos');
+  await expect(counter(page)).toHaveText('Mostrando 1–10 de 25 movimientos');
+  await expect(page.getByTestId('periodo-caption')).toHaveText('Periodo: 1–31 may');
+  await expect(page.locator('main').getByText('en este periodo', { exact: true })).toBeVisible();
+  const campo = page.getByLabel('Ir a fecha');
+  await expect(campo).toHaveAttribute('min', '2026-05-01');
+  await expect(campo).toHaveAttribute('max', '2026-05-31');
+
+  await campo.fill('2026-05-03');
+  await expect(page).toHaveURL(/\/movimientos\?pagina=3$/);
+  await expect(counter(page)).toHaveText('Mostrando 21–25 de 25 movimientos');
+  await expect(page.locator('main tbody')).toContainText('Venta del 3');
+});
+
+test('the drawer lists the whole ticket, and says it is the whole ticket', async ({ page }) => {
+  await entrar(page);
+  await page.goto('/movimientos?pagina=3');
+  await expect(counter(page)).toHaveText('Mostrando 21–25 de 25 movimientos');
+  await clickUntil(
+    page.locator('main tbody tr', { hasText: 'Venta del 3' }),
+    page.getByRole('dialog'),
+  );
+  const cajon = page.getByRole('dialog');
+  await expect(cajon.getByText('Lo que llevó')).toBeVisible();
+  // The seeded line itself: concepto and its $10.00, read from the database.
+  await expect(cajon.getByText('Venta del 3').last()).toBeVisible();
+  await expect(cajon.getByText('$10.00').last()).toBeVisible();
+  await expect(
+    cajon.getByText('Es el ticket completo: incluye las líneas que tu búsqueda dejó fuera.'),
+  ).toBeVisible();
 });

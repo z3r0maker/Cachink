@@ -11,6 +11,7 @@ import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import type { Pestana } from '@xangarro/caja/inventario';
 import { CajaEstado, Toast } from '../../components/index';
+import { InventarioBajando } from './inventario-bajando';
 import { InventarioCabeza } from './inventario-cabeza';
 import type { ExistenciaMovil, InventarioLeido } from './inventario-lectura';
 import { InventarioListas } from './inventario-listas';
@@ -30,22 +31,27 @@ export interface InventarioScreenProps {
   /** Opens a product's sheet on arrival (Inicio's «Reponer», an old product link). */
   readonly abrir?: Pedido | null;
   readonly tabInicial?: Pestana;
+  /** The first download is still open (DS-10): the band under the top bar. */
+  readonly bajando?: boolean;
 }
 
 function Estado(p: InventarioScreenProps & { state: 'loading' | 'error' | 'empty' }): ReactElement {
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <CajaEstado
-        mode={p.state}
-        emptyTitle={
-          p.sinInventario ? 'Esta caja no lleva inventario' : 'Sin productos con existencias'
-        }
-        emptyBody={`Cuando ${p.dueno} dé de alta el catálogo con sus existencias, aquí podrás registrar lo que llega y lo que se echa a perder.`}
-        errorTitle="No pudimos leer el inventario"
-        onRetry={p.onRetry}
-        testID="inventario"
-      />
-    </ScrollView>
+    <View flex={1}>
+      {p.bajando ? <InventarioBajando /> : null}
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <CajaEstado
+          mode={p.state}
+          emptyTitle={
+            p.sinInventario ? 'Esta caja no lleva inventario' : 'Sin productos con existencias'
+          }
+          emptyBody={`Cuando ${p.dueno} dé de alta el catálogo con sus existencias, aquí podrás registrar lo que llega y lo que se echa a perder.`}
+          errorTitle="No pudimos leer el inventario"
+          onRetry={p.onRetry}
+          testID="inventario"
+        />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -86,6 +92,7 @@ export function InventarioScreen(p: InventarioScreenProps): ReactElement {
   if (p.state !== 'happy') return <Estado {...p} state={p.state} />;
   return (
     <View flex={1} testID="inventario">
+      {p.bajando ? <InventarioBajando /> : null}
       <InventarioCabeza
         items={p.data.existencias}
         movs={p.data.movimientos}

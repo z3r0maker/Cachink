@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { borders, colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
+import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
 import { PHONE } from '../shell/shell.css';
 
@@ -60,11 +60,4 @@ export const sync = style({
   color: colors.greenText,
   selectors: { '&[data-pendiente]': { color: colors.warningText } },
   '@media': { [PHONE]: { marginLeft: 0 } },
-});
-
-export const punto = style({
-  width: 8,
-  height: 8,
-  borderRadius: shapeRadii.pill,
-  background: colors.warning,
 });

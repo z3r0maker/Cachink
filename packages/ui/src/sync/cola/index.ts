@@ -15,6 +15,13 @@ export async function colaPendiente(db: XangarroDatabase): Promise<readonly Pend
   const rows = await unsentRows(db);
   return agrupar(
     db,
-    rows.map((r) => ({ tabla: r.tableName, id: r.rowId, reintento: r.retrying })),
+    rows.map((r) => ({
+      tabla: r.tableName,
+      id: r.rowId,
+      reintento: r.retrying,
+      // DS-07: each record's last and next attempt.
+      ultimoIntento: r.lastAttemptAt,
+      proximoIntento: r.nextAttemptAt,
+    })),
   );
 }

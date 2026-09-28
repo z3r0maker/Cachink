@@ -2,11 +2,17 @@ import { formatMoney, sum, type Money } from '@xangarro/domain';
 
 import type { RegistroEnCola } from './types';
 
-export type Fase = 'espera' | 'enviando' | 'enviado';
+/** `reintentando`: the engine waits on a busy or slow server, or one that said when (DS-05). */
+export type Fase = 'espera' | 'reintentando' | 'enviando' | 'enviado';
 
-export const fase = (cola: readonly RegistroEnCola[], enviando: boolean): Fase => {
+export const fase = (
+  cola: readonly RegistroEnCola[],
+  enviando: boolean,
+  reintentando = false,
+): Fase => {
   if (enviando) return 'enviando';
-  return cola.length === 0 ? 'enviado' : 'espera';
+  if (cola.length === 0) return 'enviado';
+  return reintentando ? 'reintentando' : 'espera';
 };
 
 const conMonto = (rs: readonly RegistroEnCola[]): readonly Money[] =>
@@ -45,6 +51,14 @@ export function heroe(f: Fase, cola: readonly RegistroEnCola[], enCola: number):
       boton: 'Enviando…',
     };
   }
+  if (f === 'reintentando') {
+    return {
+      eyebrow: 'Reintentando',
+      titulo: `${cola.length === 1 ? '1 registro' : `${cola.length} registros`} por enviar`,
+      cuerpo: `${suman(cola)} Puedes seguir cobrando.`.trim(),
+      boton: 'Reintentar envío',
+    };
+  }
   if (f === 'enviado') {
     return {
       eyebrow: 'Al día',
@@ -72,11 +86,11 @@ export const portalDe = (dueno: string | null): string =>
 export const intro = (vacia: boolean, dueno: string | null = 'Pedro'): string =>
   vacia ? `Tu caja está al día con ${portalDe(dueno)}` : 'Lo que capturaste sin internet';
 
-/** Row chip: sending, waiting for a connection, or just queued. */
-export function estadoFila(
-  f: Fase,
-  offline: boolean,
-): 'Enviando' | 'Esperando conexión' | 'En cola' {
+export type EstadoFila = 'Enviando' | 'En reintento' | 'Esperando conexión' | 'En cola';
+
+/** Row chip: sending, already tried and retrying by itself, waiting for a connection, or queued. */
+export function estadoFila(f: Fase, offline: boolean, r?: RegistroEnCola): EstadoFila {
   if (f === 'enviando') return 'Enviando';
+  if (r?.reintento === true) return 'En reintento';
   return offline ? 'Esperando conexión' : 'En cola';
 }

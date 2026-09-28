@@ -147,4 +147,28 @@ describe('pillView', () => {
     expect(view).toEqual({ labelKey: 'syncPill.synced', time: '09:05', tone: 'ok' });
     expect(pillView(INITIAL_CLOUD_SYNC_STATE).labelKey).toBe('syncPill.never');
   });
+
+  it('counts down to the engine’s retry in the warning tone (DS-05)', () => {
+    const ahora = new Date(2026, 4, 14, 19, 30).getTime();
+    const error = { phase: 'error' as const, counts: counts(0, 0, 3, 3) };
+    expect(
+      pillView(at({ ...error, reintento: { en: ahora + 50_000, causa: 'ocupado' } }), ahora),
+    ).toEqual({ labelKey: 'syncPill.retrying', texto: 'Reintentando en 1 min', tone: 'retry' });
+    const siete42 = new Date(2026, 4, 14, 19, 42).getTime();
+    expect(
+      pillView(at({ ...error, reintento: { en: siete42, causa: 'esperar' } }), ahora).texto,
+    ).toBe('Reintento: 7:42 p. m.');
+    // Its time passed, or nothing waits: back to the count.
+    expect(
+      pillView(at({ ...error, reintento: { en: ahora - 1, causa: 'ocupado' } }), ahora).labelKey,
+    ).toBe('syncPill.pending');
+    // Offline and refused rows outrank the retry.
+    const r = { en: ahora + 60_000, causa: 'lenta' } as const;
+    expect(pillView(at({ ...error, phase: 'offline', reintento: r }), ahora).labelKey).toBe(
+      'syncPill.offline',
+    );
+    expect(
+      pillView(at({ ...error, counts: counts(0, 1, 3, 3), reintento: r }), ahora).labelKey,
+    ).toBe('syncPill.rejected');
+  });
 });

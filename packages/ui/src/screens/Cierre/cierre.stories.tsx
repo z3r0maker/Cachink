@@ -87,7 +87,6 @@ function Pantalla({ caso }: { caso: Caso }): ReactElement {
             porEnviar,
             reintentando: 1,
             enviando: false,
-            sinRed: false,
             reintentar: () => undefined,
           },
           cerrar: () => undefined,

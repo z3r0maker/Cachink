@@ -120,3 +120,14 @@ export const resultadosGrid = style({
   alignItems: 'start',
   '@media': { 'screen and (max-width: 1099px)': { gridTemplateColumns: 'minmax(0, 1fr)' } },
 });
+
+/** Personalizado's «¿Necesitas más? Exporta tus movimientos.» (DS-09): a 44 px link. */
+export const ayudaExportar = style({
+  minHeight: 44,
+  display: 'inline-flex',
+  alignItems: 'center',
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+  textUnderlineOffset: 3,
+});

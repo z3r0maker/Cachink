@@ -1,0 +1,53 @@
+# Registros por enviar while rows retry (DS-07, EsMvReintentando): a sale the
+# server refuses for a moment (the mock's `flaky` scenario refuses about a
+# third of rows, always the same ones) stays in «La cola» with the chip «En
+# reintento» and its gray line «Último intento: hace … · Próximo: en N min»;
+# Don says the turno can still close.
+#
+# Precondition: device activated against the mock on MOCK_API (activation.yaml).
+# Sells until one of the sale's rows is a flaky one (each sale has several
+# rows); restores the default scenario at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: flaky
+      RECORDS_PER_MONTH: ''
+- repeat:
+    times: 6
+    while:
+      notVisible:
+        id: 'pendientes-cola'
+    commands:
+      - runFlow: shared/create-venta.yaml
+      - tapOn:
+          id: 'cloud-sync-pill'
+      - extendedWaitUntil:
+          visible:
+            id: 'pendientes'
+          timeout: 10000
+      - extendedWaitUntil:
+          notVisible:
+            id: 'pendientes-heroe-enviando'
+          timeout: 30000
+      - runFlow:
+          when:
+            notVisible:
+              id: 'pendientes-cola'
+          commands:
+            - tapOn:
+                id: 'top-bar-back'
+- assertVisible: 'En reintento'
+- assertVisible: 'Último intento: hace .* · Próximo: .*'
+- assertVisible: '.*Puedes cerrar el turno; se envían cuando vuelva la conexión.*'
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: xangarro
+      RECORDS_PER_MONTH: ''

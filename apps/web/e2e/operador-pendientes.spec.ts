@@ -1,4 +1,4 @@
-import { expect, test, type Page } from './test';
+import { expect, test, type BrowserContext, type Page } from './test';
 import { venderEfectivo } from './cobrar';
 
 import { puertaOperador } from './puerta-operador';
@@ -112,4 +112,96 @@ test('after sending, the queue stays empty across screens', async ({ page }) => 
   await page.getByTitle('Ver registros pendientes').click();
   await expect(page.getByText('Nada pendiente')).toBeVisible({ timeout: 20_000 });
   await sinFixture(page);
+});
+
+/** The server answers every push busy (DS-05): 503, or 429 with Retry-After. */
+async function servidorOcupado(context: BrowserContext, retryAfter?: string): Promise<void> {
+  await context.route('**/api/v1/sync/push', (route) =>
+    route.fulfill({
+      status: retryAfter ? 429 : 503,
+      contentType: 'application/json',
+      headers: retryAfter ? { 'Retry-After': retryAfter } : {},
+      body: JSON.stringify({ error: { code: 'SERVER_BUSY', message: 'Ocupado' } }),
+    }),
+  );
+}
+
+async function venderYAbrirPendientes(page: Page): Promise<void> {
+  await page
+    .getByRole('button', { name: /Orden por enviar/ })
+    .first()
+    .click();
+  await venderEfectivo(page, '40');
+  await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
+  await page.getByTitle('Ver registros pendientes').click();
+}
+
+test('a busy server: the pill counts down, the rows say their last and next attempt (DS-05, DS-07)', async ({
+  page,
+  context,
+}) => {
+  await puertaOperador(page, PRODUCTOS);
+  const antes = await idsDeTickets();
+  await servidorOcupado(context);
+  await venderYAbrirPendientes(page);
+
+  // The hero: «Reintentando», the cause, and the manual override.
+  await expect(page.getByText('El servidor está ocupado; reintentamos solos.')).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.getByRole('heading', { name: '1 registro por enviar' })).toBeVisible();
+  await expect(page.getByText('Suman $40.00 de ventas. Puedes seguir cobrando.')).toBeVisible();
+  // The pill counts down to the engine's retryAt, in the warning state.
+  await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
+    'aria-label',
+    /^Estado del envío: Reintentando en \d+ min$/,
+  );
+  // The sale's own row: tried, and when it goes again.
+  await expect(page.getByText('En reintento')).toBeVisible();
+  await expect(
+    page.getByText(/^Último intento: hace un momento · Próximo: en \d+ min$/),
+  ).toBeVisible();
+  // Don no longer says the turno waits for the queue (DS-06).
+  await expect(
+    page.getByText('Puedes cerrar el turno; se envían cuando vuelva la conexión.', {
+      exact: false,
+    }),
+  ).toBeVisible();
+
+  // «Reintentar envío» still skips our wait: the server is back, the sale goes up.
+  await context.unroute('**/api/v1/sync/push');
+  await page.getByRole('button', { name: 'Reintentar envío' }).click();
+  await expect(page.getByRole('heading', { name: 'Todo enviado' })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect
+    .poll(async () => (await idsDeTickets()).length, { timeout: 15_000 })
+    .toBe(antes.length + 1);
+});
+
+test('a server that says when: the pill and the helper name the hour (DS-05)', async ({
+  page,
+  context,
+}) => {
+  await puertaOperador(page, PRODUCTOS);
+  await servidorOcupado(context, '120');
+  await venderYAbrirPendientes(page);
+
+  await expect(
+    page.getByText(/^El servidor pidió esperar hasta las \d{1,2}:\d{2} [ap]\. m\.$/),
+  ).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
+    'aria-label',
+    /^Estado del envío: Reintentando a las \d{1,2}:\d{2} [ap]\. m\.$/,
+  );
+  await expect(page.getByText(/· Próximo: a las \d{1,2}:\d{2} [ap]\. m\.$/)).toBeVisible();
+
+  // The manual retry never skips the server's wait: it says when it goes.
+  await page.getByRole('button', { name: 'Reintentar envío' }).click();
+  await expect(
+    page.getByText(/^Lo enviamos a las \d{1,2}:\d{2} [ap]\. m\., como pidió el servidor\.$/),
+  ).toBeVisible({ timeout: 20_000 });
+  await context.unroute('**/api/v1/sync/push');
 });

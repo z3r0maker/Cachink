@@ -18,6 +18,8 @@ export interface MarcoProps {
   /** Don's pose; `null` keeps the yellow half without him (a dialog has him). */
   readonly pose: DonPose | null;
   readonly mensaje: string | null;
+  /** The bubble is the page's heading (DS-08: «La caja ya está abierta en otra pestaña.»). */
+  readonly mensajeTitulo?: boolean;
   /** The chip at the bottom: «Caja 1» once linked, «Esta computadora» before. */
   readonly chip: string;
   readonly chipSub: string;
@@ -25,14 +27,19 @@ export interface MarcoProps {
   readonly children: ReactNode;
 }
 
-function Burbuja(p: { readonly pose: DonPose; readonly mensaje: string | null }): ReactNode {
+function Burbuja(p: {
+  readonly pose: DonPose;
+  readonly mensaje: string | null;
+  readonly titulo: boolean;
+}): ReactNode {
+  const Texto = p.titulo ? 'h1' : 'p';
   return (
     <div className={a.stage}>
       {p.mensaje === null ? null : (
-        <p className={a.bubble}>
+        <Texto className={a.bubble}>
           {p.mensaje}
           <span className={a.tail} aria-hidden="true" />
-        </p>
+        </Texto>
       )}
       <span className={a.don}>
         <Don pose={p.pose} size={300} />
@@ -56,7 +63,7 @@ export function Marco(p: MarcoProps) {
         {p.pose === null ? (
           <div className={a.stage} />
         ) : (
-          <Burbuja pose={p.pose} mensaje={p.mensaje} />
+          <Burbuja pose={p.pose} mensaje={p.mensaje} titulo={p.mensajeTitulo ?? false} />
         )}
         <div className={a.chip}>
           <span className={a.chipIcon}>

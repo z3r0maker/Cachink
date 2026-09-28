@@ -167,3 +167,22 @@ export const salir = style({
   color: colors.gray600,
   textDecoration: 'none',
 });
+
+/** «Pedro lo verá en su portal cuando se envíen los registros.» (DS-06, EsCajaCierre). */
+export const porEnviar = style({
+  margin: 0,
+  maxWidth: 520,
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 10,
+  padding: '12px 16px',
+  border: `2px solid ${colors.warningText}`,
+  borderRadius: radii[4],
+  background: colors.warningSoft,
+  lineHeight: 1.45,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.bold,
+  color: colors.black,
+});
+
+export const porEnviarIcono = style({ display: 'inline-flex', color: colors.warningText });

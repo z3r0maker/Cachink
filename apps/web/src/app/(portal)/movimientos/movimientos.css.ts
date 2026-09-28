@@ -38,9 +38,10 @@ export const cancelledAmount = style([
 export const toolbar = style({ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' });
 
 export const search = style({
+  // Its column (`buscador`, DS-01) owns the flex basis and the minimum width.
   height: 46,
-  minWidth: 280,
-  flex: '1 1 280px',
+  width: '100%',
+  boxSizing: 'border-box',
   padding: '0 14px',
   background: colors.offwhite,
   border: `2px solid ${colors.black}`,
@@ -147,4 +148,13 @@ export const renglon = style({
   fontWeight: typography.weights.bold,
   fontVariantNumeric: 'tabular-nums',
   selectors: { '& + &': { marginTop: 6 } },
+});
+
+/** Under «Lo que llevó»: the list is the whole ticket, whatever the search showed (DS-01). */
+export const notaTicket = style({
+  margin: '8px 0 0',
+  fontSize: portalFontSizes.sm,
+  lineHeight: 1.4,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
 });

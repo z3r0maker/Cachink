@@ -8,6 +8,7 @@ import type { ResumenTurno } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
 const CHECK = 'M20 6 9 17l-5-5';
+const RELOJ = 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2';
 
 function partes(t: ResumenTurno): readonly (readonly [string, ReactNode])[] {
   const canceladas = t.canceladas === 1 ? 'cancelada' : 'canceladas';
@@ -57,8 +58,8 @@ export function Resumen({ x, t }: { readonly x: Cierre; readonly t: ResumenTurno
       ))}
       {x.pendientes > 0 ? (
         <span className={r.sync} data-pendiente="">
-          <span className={r.punto} aria-hidden="true" />
-          {`${x.pendientes} sin enviar`}
+          <Icon path={RELOJ} size={16} strokeWidth={2.4} />
+          {`${x.pendientes} por enviar`}
         </span>
       ) : (
         <span className={r.sync}>

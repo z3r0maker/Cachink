@@ -92,3 +92,33 @@ test('a folio, a number and an operator each find their ventas', async ({ page }
   expect((await conceptos(page)).join(' ')).toContain('Pan de 7 granos');
   await expect(page).toHaveURL(/q=lupita/);
 });
+
+test('an empty folio search says so, and the caption carries the search (DS-01)', async ({
+  page,
+}) => {
+  await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
+  await page.getByTestId('login-email').fill(email);
+  await page.getByTestId('login-password').fill('busqueda-1');
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
+  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await page.goto('/movimientos');
+  await expect(counter(page)).toHaveText('Mostrando 1–3 de 3 movimientos');
+
+  await page.getByRole('textbox', { name: 'Buscar movimientos' }).fill('#412');
+  await expect(
+    page.getByText('No hay ninguna venta con el folio 412 en este periodo.'),
+  ).toBeVisible();
+  await expect(page.getByTestId('periodo-caption')).toHaveText(
+    'Periodo: 1–31 may · con la búsqueda «#412»',
+  );
+
+  // Personalizado with no dates reads the whole history: the field says so.
+  const pista = page.getByText('Elige un periodo para buscar más rápido');
+  await expect(pista).toHaveCount(0);
+  await page.getByRole('button', { name: 'Personalizado', exact: true }).click();
+  await expect(pista).toBeVisible();
+  await page.getByTestId('rango-desde').fill('2026-05-01');
+  await page.getByTestId('rango-hasta').fill('2026-05-31');
+  await expect(pista).toHaveCount(0);
+});

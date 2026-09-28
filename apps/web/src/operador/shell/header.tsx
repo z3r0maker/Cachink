@@ -8,6 +8,7 @@ import { Icon } from '../../shell/icon';
 import { back } from './back.css';
 import * as h from './header.css';
 import { headerFor, type HeaderMode } from './nav';
+import { SyncPill } from './pill';
 import { ICONS, OPERADOR_BASE, type OperadorShellData } from '@xangarro/caja';
 
 /** Screens portal their header action («Nueva venta», …) into this node. */
@@ -32,7 +33,7 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
           </>
         )}
         <div className={h.right}>
-          {mode.status === 'none' ? null : <SyncPill data={data} asLink={mode.status === 'full'} />}
+          {mode.status === 'none' ? null : <SyncPill asLink={mode.status === 'full'} />}
           {mode.status === 'full' && mode.bell !== false ? (
             <Bell unread={data.avisosSinLeer} />
           ) : null}
@@ -69,44 +70,6 @@ function BizPill({ data }: { readonly data: OperadorShellData }) {
         <span className={h.bizSub}>{data.negocio.nombre}</span>
       </span>
     </div>
-  );
-}
-
-/** Amber with the queue count when offline; a link to Registros por enviar on main screens. */
-function SyncPill({
-  data,
-  asLink,
-}: {
-  readonly data: OperadorShellData;
-  readonly asLink: boolean;
-}) {
-  const offline = data.connection === 'sin-conexion';
-  const body = (
-    <>
-      <span className={h.syncDot} />
-      <span className={h.syncLabel}>
-        {offline ? `Sin conexión · ${data.pendientes} por enviar` : 'Todo enviado'}
-      </span>
-      <span className={h.syncCorto}>{offline ? `${data.pendientes} sin enviar` : 'Enviado'}</span>
-    </>
-  );
-  const flag = offline ? '' : undefined;
-  if (!asLink) {
-    return (
-      <div className={h.syncStatic} data-offline={flag}>
-        {body}
-      </div>
-    );
-  }
-  return (
-    <Link
-      href={`${OPERADOR_BASE}/pendientes`}
-      className={h.syncPill}
-      title="Ver registros pendientes"
-      data-offline={flag}
-    >
-      {body}
-    </Link>
   );
 }
 

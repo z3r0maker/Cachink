@@ -7,7 +7,15 @@ import { OperadorEstado } from '../estado';
 import { PageHead } from '../ui/panel';
 import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
-import { heroe, intro, portalDe, type PendientesScreenProps } from '@xangarro/caja/pendientes';
+import {
+  ayudaReintento,
+  despuesDeReintentar,
+  heroe,
+  intro,
+  portalDe,
+  type PendientesScreenProps,
+} from '@xangarro/caja/pendientes';
+import * as i from './intentos.css';
 import { ListaCola } from './lista';
 import * as s from './pendientes.css';
 import { usePendientes } from './use-pendientes';
@@ -32,7 +40,14 @@ export function PendientesScreen({
       <div className={s.column}>
         {conHeroe ? <HeroeCola x={x} /> : null}
         {state === 'happy' ? (
-          <ListaCola cola={x.cola} fase={x.fase} offline={x.offline} portal={portalDe(dueno)} />
+          <ListaCola
+            cola={x.cola}
+            fase={x.fase}
+            offline={x.offline}
+            portal={portalDe(dueno)}
+            ahora={x.ahora}
+            reintento={x.reintento}
+          />
         ) : (
           <OperadorEstado
             mode={state}
@@ -82,9 +97,17 @@ function HeroeCola({ x }: { readonly x: ReturnType<typeof usePendientes> }) {
         <h2 id="pend-t" className={s.heroeTitulo}>
           {h.titulo}
         </h2>
+        {x.fase === 'reintentando' ? (
+          <p className={i.ayuda}>{ayudaReintento(x.reintento)}</p>
+        ) : null}
         <p className={s.heroeCuerpo}>
           <ConCifras text={h.cuerpo} />
         </p>
+        {x.fase === 'reintentando' ? (
+          <span role="status" className={i.estado}>
+            {x.intentado ? despuesDeReintentar(x.reintento) : ''}
+          </span>
+        ) : null}
       </div>
       <button
         type="button"
@@ -99,7 +122,7 @@ function HeroeCola({ x }: { readonly x: ReturnType<typeof usePendientes> }) {
   );
 }
 
-/** Don Cuentas with his book: nothing is lost, and why the close waits. */
+/** Don Cuentas with his book: nothing is lost, and the close need not wait (DS-06). */
 function NadaSePierde() {
   return (
     <section aria-label="Nada se pierde" className={s.nota}>
@@ -107,8 +130,8 @@ function NadaSePierde() {
       <div className={s.notaBurbuja}>
         <span className={s.notaTitulo}>Nada se pierde</span>
         <span className={s.notaTexto}>
-          Lo que capturas vive en esta caja hasta que suba. No borres los datos del navegador. No
-          podrás cerrar el turno hasta que se envíe.
+          Lo que capturas vive en esta caja hasta que suba. No borres los datos del navegador.
+          Puedes cerrar el turno; se envían cuando vuelva la conexión.
         </span>
       </div>
     </section>
