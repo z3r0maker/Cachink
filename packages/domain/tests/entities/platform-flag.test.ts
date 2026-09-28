@@ -85,6 +85,13 @@ describe('isPlatformAvailable', () => {
     assert.equal(isPlatformAvailable('stock', IN, flags, D), false);
   });
 
+  it('when two rows decide the same key, the newest stamp wins, whichever order they arrive in', () => {
+    const vieja = flag({ mode: 'off', updatedAt: '2026-09-10T12:00:00.000Z' });
+    const nueva = flag({ mode: 'on', updatedAt: '2026-09-17T12:00:00.000Z' });
+    assert.equal(isPlatformAvailable('merma', IN, [vieja, nueva], PLATFORM_FLAG_DEFAULTS), true);
+    assert.equal(isPlatformAvailable('merma', IN, [nueva, vieja], PLATFORM_FLAG_DEFAULTS), true);
+  });
+
   it('an unknown key is a typed error, not a silent false', () => {
     assert.throws(
       () => isPlatformAvailable('teleport', IN, [], D),

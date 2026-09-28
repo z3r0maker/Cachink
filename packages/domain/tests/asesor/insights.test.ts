@@ -142,6 +142,82 @@ describe('filtrarPorCadencia', () => {
   });
 });
 
+describe('calcularInsights · la segunda quincena y los gastos fuera de lo normal', () => {
+  it('flags a month concentrated in the SECOND quincena, with the other half’s share', () => {
+    const rows: InsightRows = {
+      ...base,
+      ventas: [venta('2026-04-03', 30_000n), venta('2026-04-20', 70_000n)],
+    };
+    const [insight] = calcularInsights(rows);
+    assert.equal(insight?.kind, 'quincena');
+    assert.match(insight?.title ?? '', /segunda quincena/);
+    assert.match(insight?.body ?? '', /El 70%/);
+  });
+
+  it('a balanced month is nobody’s business', () => {
+    const rows: InsightRows = {
+      ...base,
+      ventas: [venta('2026-04-05', 50_000n), venta('2026-04-20', 50_000n)],
+    };
+    assert.deepEqual(calcularInsights(rows), []);
+  });
+
+  it('flags a category 30% above its three-month average, with the excess', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        gasto('2026-02-10', 'luz', 100_00n),
+        gasto('2026-03-10', 'luz', 100_00n),
+        gasto('2026-04-10', 'luz', 100_00n),
+        gasto('2026-05-03', 'luz', 130_00n),
+      ],
+    };
+    const [insight] = calcularInsights(rows);
+    assert.equal(insight?.kind, 'gasto-fuera');
+    assert.match(insight?.title ?? '', /30% arriba/);
+    assert.equal(insight?.clave, 'gasto-fuera:Servicios:2026-05');
+    assert.equal(insight?.monto, 30_00n);
+  });
+
+  it('less than three months of history is not a baseline to judge against', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        gasto('2026-03-10', 'luz', 100_00n),
+        gasto('2026-04-10', 'luz', 100_00n),
+        gasto('2026-05-03', 'luz', 500_00n),
+      ],
+    };
+    assert.deepEqual(calcularInsights(rows), []);
+  });
+
+  it('a category that used to cost nothing has no average to exceed', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        gasto('2026-02-10', 'luz', 0n),
+        gasto('2026-03-10', 'luz', 0n),
+        gasto('2026-04-10', 'luz', 0n),
+        gasto('2026-05-03', 'luz', 90_00n),
+      ],
+    };
+    assert.deepEqual(calcularInsights(rows), []);
+  });
+
+  it('a rise below 30% over the average stays quiet', () => {
+    const rows: InsightRows = {
+      ...base,
+      egresos: [
+        gasto('2026-02-10', 'luz', 100_00n),
+        gasto('2026-03-10', 'luz', 100_00n),
+        gasto('2026-04-10', 'luz', 100_00n),
+        gasto('2026-05-03', 'luz', 120_00n),
+      ],
+    };
+    assert.deepEqual(calcularInsights(rows), []);
+  });
+});
+
 describe('mesAnterior', () => {
   it('crosses the year boundary', () => {
     assert.equal(mesAnterior('2026-01-15', 1), '2025-12');
