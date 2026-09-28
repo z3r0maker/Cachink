@@ -17,6 +17,15 @@ export interface Entrada {
   readonly id: string;
   /** Tried at least once and on automatic retry (`unsentRows`' `retrying`). */
   readonly reintento?: boolean;
+  /** `unsentRows`' `lastAttemptAt` / `nextAttemptAt` (DS-07). */
+  readonly ultimoIntento?: string | null;
+  readonly proximoIntento?: string | null;
+}
+
+/** A record's last and next attempt (DS-07); null where no row has one. */
+export interface Intento {
+  readonly ultimo: string | null;
+  readonly proximo: string | null;
 }
 
 /** Rows that belong to a ticket, and the column that says which. */
@@ -68,14 +77,38 @@ export function ordenar(
   return { orden, ids };
 }
 
-/** The records already retrying: any of their rows is (a ticket whose line failed). */
+const despues = (a: string | null, b: string | null | undefined): string | null =>
+  b == null ? a : a === null || b > a ? b : a;
+const antes = (a: string | null, b: string | null | undefined): string | null =>
+  b == null ? a : a === null || b < a ? b : a;
+
+/**
+ * The records already retrying — any of their rows is (a ticket whose line
+ * failed) — with the latest time one of their rows was sent and the earliest
+ * time one goes again (DS-07). ISO strings compare in time order.
+ */
+export function intentosDe(
+  entradas: readonly Entrada[],
+  tickets: ReadonlyMap<string, string>,
+): ReadonlyMap<string, Intento> {
+  const out = new Map<string, Intento>();
+  for (const e of entradas.filter((x) => x.reintento === true)) {
+    const k = clave(destino(e, tickets));
+    const prev = out.get(k) ?? { ultimo: null, proximo: null };
+    out.set(k, {
+      ultimo: despues(prev.ultimo, e.ultimoIntento),
+      proximo: antes(prev.proximo, e.proximoIntento),
+    });
+  }
+  return out;
+}
+
+/** The records already retrying (`intentosDe`' keys). */
 export function reintentosDe(
   entradas: readonly Entrada[],
   tickets: ReadonlyMap<string, string>,
 ): ReadonlySet<string> {
-  return new Set(
-    entradas.filter((e) => e.reintento === true).map((e) => clave(destino(e, tickets))),
-  );
+  return new Set(intentosDe(entradas, tickets).keys());
 }
 
 export async function agrupar(
@@ -84,7 +117,7 @@ export async function agrupar(
 ): Promise<readonly PendienteCrudo[]> {
   const tickets = await ticketsDe(db, entradas);
   const { orden, ids } = ordenar(entradas, tickets);
-  const reintentos = reintentosDe(entradas, tickets);
+  const intentos = intentosDe(entradas, tickets);
   const leidos = new Map<string, ReadonlyMap<string, PendienteCrudo>>();
   for (const [tabla, lista] of ids) {
     const lector: Lector | undefined = LECTORES[tabla];
@@ -93,7 +126,13 @@ export async function agrupar(
   const out: PendienteCrudo[] = [];
   for (const d of orden) {
     const p = leidos.get(d.tabla)?.get(d.id);
-    if (p !== undefined) out.push(reintentos.has(clave(d)) ? { ...p, reintento: true } : p);
+    const i = intentos.get(clave(d));
+    if (p === undefined) continue;
+    out.push(
+      i === undefined
+        ? p
+        : { ...p, reintento: true, ultimoIntento: i.ultimo, proximoIntento: i.proximo },
+    );
   }
   return out;
 }

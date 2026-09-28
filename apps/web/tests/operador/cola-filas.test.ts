@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import type { PendienteCrudo } from '@xangarro/caja/lectura';
 
-import { ordenar, reintentosDe } from '../../src/operador/runtime/cola-filas';
+import { intentosDe, ordenar, reintentosDe } from '../../src/operador/runtime/cola-filas';
 import { contarCola } from '../../src/operador/shell/cola-flusher';
 
 describe('la cola por enviar, en orden de envío', () => {
@@ -76,5 +76,41 @@ describe('registros por enviar · one count for the pill, the list and the cierr
       reintentando: 1,
     });
     assert.deepEqual(contarCola([]), { pendientes: 0, reintentando: 0 });
+  });
+});
+
+describe('registros por enviar · last and next attempt, per record (DS-07)', () => {
+  it('a sale shows its latest attempt and its earliest next one; a fresh record has none', () => {
+    const tickets = new Map([['sales:S1', 'T1']]);
+    const intentos = intentosDe(
+      [
+        {
+          tabla: 'tickets',
+          id: 'T1',
+          reintento: true,
+          ultimoIntento: '2026-05-12T20:00:00.000Z',
+          proximoIntento: '2026-05-12T20:10:00.000Z',
+        },
+        {
+          tabla: 'sales',
+          id: 'S1',
+          reintento: true,
+          ultimoIntento: '2026-05-12T20:03:00.000Z',
+          proximoIntento: '2026-05-12T20:05:00.000Z',
+        },
+        { tabla: 'gastos', id: 'G1' },
+      ],
+      tickets,
+    );
+    assert.deepEqual(intentos.get('tickets:T1'), {
+      ultimo: '2026-05-12T20:03:00.000Z',
+      proximo: '2026-05-12T20:05:00.000Z',
+    });
+    assert.equal(intentos.has('gastos:G1'), false);
+  });
+
+  it('a retrying record without times keeps nulls, never an invented time', () => {
+    const intentos = intentosDe([{ tabla: 'gastos', id: 'G1', reintento: true }], new Map());
+    assert.deepEqual(intentos.get('gastos:G1'), { ultimo: null, proximo: null });
   });
 });
