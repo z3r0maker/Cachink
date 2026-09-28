@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
 import type { RangoChip } from './periodo';
-import { urlDe, type EstadoMovimientos } from './url';
+import { urlDe, urlIrA, type EstadoMovimientos } from './url';
 
 /** How long typing pauses before the search goes to the server. */
 const ESPERA_BUSQUEDA_MS = 300;
@@ -65,7 +65,8 @@ export function useMovimientos(servido: EstadoMovimientos) {
     const next = { ...ultimo.current, pagina: 1, ir: '', ...cambio };
     ultimo.current = next;
     setEstado(next);
-    startTransition(() => router.replace(urlDe(next), { scroll: false }));
+    const url = next.ir === '' ? urlDe(next) : urlIrA(next, next.ir);
+    startTransition(() => router.replace(url, { scroll: false }));
   };
   const busqueda = useBusquedaDiferida(servido.q, (q) => ir({ q }));
 
