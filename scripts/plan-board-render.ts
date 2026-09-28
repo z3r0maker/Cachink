@@ -1,12 +1,18 @@
 /**
  * Renders `docs/plan/PENDIENTES.md` from parsed items (see `plan-board.ts`).
  *
- * The board is grouped by **category**, not by file — the owner's ask of
- * 2026-09-23: three lists instead of seven files. A category is decided from
- * the source file and its `## ` section, so a task never has to move to be
- * counted where it belongs.
+ * Two axes, because they answer different questions and a list of 175 needs
+ * both. **Area** is what kind of work it is and who can move it
+ * (`plan-board-areas.ts`) — the owner's ask of 2026-09-28, after a board that
+ * mixed «counsel reviews the aviso» with «build the ten Diagnóstico sections»
+ * turned out not to be plannable. **Category** is when it happens relative to
+ * the launch (`categoryOf`) — the owner's ask of 2026-09-23. Areas group, the
+ * category labels each row, and neither is stored on a task: both are decided
+ * from the file, the section and an optional tag, so a task never has to move
+ * to be counted where it belongs.
  */
 
+import { AREAS, AREA_BLURB, AREA_TITLES, areaOf, type Area } from './plan-board-areas.js';
 import { nextUp } from './plan-board-next.js';
 import type { Item, Status } from './plan-board-parse.js';
 
@@ -19,14 +25,6 @@ const MARK: Readonly<Record<Status, string>> = {
   progress: '[~]',
   blocked: '[!]',
   done: '[x]',
-};
-
-const BLURB: Readonly<Record<Category, string>> = {
-  Lanzamiento:
-    'Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.',
-  'Post-lanzamiento': 'Cada tarea tiene un disparador; no se empieza antes de que sea cierto.',
-  'Colas de tracks':
-    'Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.',
 };
 
 /** Which list an item belongs to. Keyed on file + section so specs stay put. */
@@ -54,25 +52,16 @@ function renderItem(item: Item): string {
   return `- ${MARK[item.status]} ${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
 }
 
-function groupKey(item: Item): string {
-  return item.section ? `\`${item.source}\` · ${item.section}` : `\`${item.source}\``;
-}
-
-function renderCategory(category: Category, items: readonly Item[]): string[] {
+/** Inside an area, the launch axis is what orders the work. */
+function renderArea(area: Area, items: readonly Item[]): string[] {
   const open = items.filter((i) => OPEN.includes(i.status));
-  const out = [`## ${category} (${open.length})`, '', BLURB[category], ''];
+  const out = [`## ${AREA_TITLES[area]} (${open.length})`, '', AREA_BLURB[area], ''];
   if (open.length === 0) return [...out, '_Nada abierto._', ''];
-  let key: string | null = null;
-  for (const item of open) {
-    const k = groupKey(item);
-    if (k !== key) {
-      key = k;
-      if (out.at(-1) !== '') out.push('');
-      out.push(`### ${k}`, '');
-    }
-    out.push(renderItem(item));
+  for (const category of CATEGORIES) {
+    const rows = open.filter((i) => categoryOf(i) === category);
+    if (rows.length === 0) continue;
+    out.push(`### ${category} (${rows.length})`, '', ...rows.map(renderItem), '');
   }
-  out.push('');
   return out;
 }
 
@@ -127,16 +116,18 @@ const HEAD = [
   '> `- [ ]` / `- [~]` / `- [!]` en un track de `docs/plan` (o de una fila `| O-n |` en',
   '> `11-pre-launch-and-deferred.md`). Para cambiar un estado, edita el track y regenera;',
   '> `pnpm test:scripts` falla cuando este archivo quedó viejo. Las especificaciones, los pasos y las',
-  '> líneas Done siguen en cada track: aquí sólo está lo que falta, en tres listas, con su disparador',
-  '> o bloqueo y la línea exacta de donde viene. «Siguiente» es el orden de trabajo, derivado de las',
-  '> dependencias.',
+  '> líneas Done siguen en cada track: aquí sólo está lo que falta, agrupado por **área** — qué clase',
+  '> de trabajo es y quién puede moverlo — y dentro de cada área por momento de lanzamiento, con su',
+  '> disparador o bloqueo y la línea exacta de donde viene. Un área se deduce del archivo y la',
+  '> sección; una etiqueta `` `[área]` `` en el track manda sobre esa deducción. «Siguiente» es el',
+  '> orden de trabajo, derivado de las dependencias.',
   '',
 ];
 
 export function renderBoard(items: readonly Item[]): string {
-  const byCategory = new Map<Category, Item[]>(CATEGORIES.map((c) => [c, []]));
-  for (const item of items) byCategory.get(categoryOf(item))?.push(item);
-  const body = CATEGORIES.flatMap((c) => renderCategory(c, byCategory.get(c) ?? []));
+  const byArea = new Map<Area, Item[]>(AREAS.map((a) => [a, []]));
+  for (const item of items) byArea.get(areaOf(item))?.push(item);
+  const body = AREAS.flatMap((a) => renderArea(a, byArea.get(a) ?? []));
   return (
     [...HEAD, ...renderNext(items), ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n'
   );

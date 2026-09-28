@@ -182,7 +182,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   acceptable: fall back to CSS Modules, and add a task for a CSS-parsing value auditor — do not
   defer that discovery to Fase 5.
 
-### P-21 `pnpm design:compare` capture harness
+### P-21 `pnpm design:compare` capture harness `[deuda]`
 
 - [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
   - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
@@ -248,7 +248,7 @@ including the press stamp.
   edits outside `theme.ts`; the contrast test runs from its new home; `pnpm lint:design` still
   reports `total: 0`; the emitted CSS contains every token in `colors`.
 
-### P-23 Primitives + Storybook inventory + visual-regression baselines
+### P-23 Primitives + Storybook inventory + visual-regression baselines `[deuda]`
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
   - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
@@ -1621,7 +1621,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102)
+### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102) `[deuda]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and

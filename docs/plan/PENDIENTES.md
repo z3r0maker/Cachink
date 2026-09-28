@@ -4,9 +4,11 @@
 > `- [ ]` / `- [~]` / `- [!]` en un track de `docs/plan` (o de una fila `| O-n |` en
 > `11-pre-launch-and-deferred.md`). Para cambiar un estado, edita el track y regenera;
 > `pnpm test:scripts` falla cuando este archivo quedó viejo. Las especificaciones, los pasos y las
-> líneas Done siguen en cada track: aquí sólo está lo que falta, en tres listas, con su disparador
-> o bloqueo y la línea exacta de donde viene. «Siguiente» es el orden de trabajo, derivado de las
-> dependencias.
+> líneas Done siguen en cada track: aquí sólo está lo que falta, agrupado por **área** — qué clase
+> de trabajo es y quién puede moverlo — y dentro de cada área por momento de lanzamiento, con su
+> disparador o bloqueo y la línea exacta de donde viene. Un área se deduce del archivo y la
+> sección; una etiqueta `` `[área]` `` en el track manda sobre esa deducción. «Siguiente» es el
+> orden de trabajo, derivado de las dependencias.
 
 ## Siguiente (15)
 
@@ -29,74 +31,35 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
 - **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
 
-## Lanzamiento (95)
+## Papeleo del dueño (8)
 
-Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
+Sólo el dueño las mueve: cuentas, llaves, DNS, KYC, firmas. Ninguna se destraba escribiendo código.
 
-### `07-launch.md`
+### Lanzamiento (8)
 
-- [ ] **X-01** Staging environment (Q17 "A later") — Blocked by: B-01…B-10 · Falta: the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo. · `07-launch.md:10`
-- [ ] **X-02** End-to-end integration run (real app ↔ real backend) — Blocked by: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
-- [ ] **X-03** Partner migration — Blocked by: X-02 · `07-launch.md:24`
-- [ ] **X-04** Xangarro as tenant #1 (dogfooding) — Blocked by: X-02 · `07-launch.md:30`
-- [ ] **X-05** Store listings + review readiness — Blocked by: F-01, A-15, X-07, B-04 · Falta: `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`. · `07-launch.md:38`
-- [ ] **X-07** Brand masters + derivatives (ADR-054 §6) — Blocked by: logo work (external) · Falta: the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest + the OG image). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`. · `07-launch.md:101`
-- [ ] **X-08** Repo + directory rename (optional, coordinate) — Blocked by: A-15 · `07-launch.md:108`
-- [ ] **X-09** ROADMAP.md reset — Blocked by: X-02 · `07-launch.md:114`
-- [ ] **X-10** Launch checklist gate — Blocked by: X-01…X-09 (except X-08) · `07-launch.md:120`
-
-### `09-next-features.md` · 2. Launch blockers
-
-- [~] **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:142`
-- [~] **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:399`
-- [~] **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:561`
-- [~] **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24. · `09-next-features.md:621`
-- [ ] **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:655`
-- [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:693`
-- [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:709`
-- [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:727`
-- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:745`
-- [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:759`
-- [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:767`
-- [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:777`
-- [~] **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:816`
-- [~] **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:843`
-
-### `11-pre-launch-and-deferred.md` · 1. Pre-launch actions (owner)
-
-- [ ] **O-2** Turn Data API off · `11-pre-launch-and-deferred.md:25`
-- [ ] **O-3** Backups / PITR on a paid plan · `11-pre-launch-and-deferred.md:26`
-- [ ] **O-4** Vercel project `xangarro-web`, Root Directory `apps/web`, domain `app.xangarro.mx`, region pdx1 · `11-pre-launch-and-deferred.md:27`
-- [ ] **O-5** Vercel project `xangarro-backoffice`, Root Directory `apps/backoffice`, domain `admin.xangarro.mx`, region pd… · `11-pre-launch-and-deferred.md:28`
-- [ ] **O-6** Vercel project `xangarro-landing`, Root Directory `apps/landing`, domain `xangarro.mx` · `11-pre-launch-and-deferred.md:29`
-- [ ] **O-32** Note for the Azure move (owner, 2026-09-26): when Postgres moves to Azure (Flexible Server), review a balance… · `11-pre-launch-and-deferred.md:31`
-- [ ] **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:32`
-- [ ] **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:33`
-- [ ] **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:34`
 - [ ] **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:35`
 - [ ] **O-11** `gh auth login` on the dev machine · `11-pre-launch-and-deferred.md:36`
-- [ ] **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:37`
-- [ ] **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:38`
 - [ ] **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:44`
 - [ ] **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:45`
+- [ ] BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
+- [ ] Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). · `../launch/production-readiness.md:123`
+- [ ] Cyber-liability insurance — business decision. · `../launch/production-readiness.md:124`
+- [ ] INDAUTOR software registration — optional. · `../launch/production-readiness.md:125`
+
+## Legal y cumplimiento (17)
+
+Textos, consentimiento y los derechos que el aviso promete. Varias esperan al abogado.
+
+### Lanzamiento (17)
+
+- [~] **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:843`
 - [ ] **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:51`
 - [ ] **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:52`
 - [ ] **O-16** Until `live`: issue CFDIs manually in the SAT portal from the backoffice "Pagos sin CFDI" list; mark each pay… · `11-pre-launch-and-deferred.md:53`
 - [ ] **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:54`
 - [ ] **O-18** Counsel opinion: a platform that never holds funds and takes no fee is outside Ley Fintech / Banxico aggregat… · `11-pre-launch-and-deferred.md:55`
 - [ ] **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:56`
-- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:57`
-- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:58`
-- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:59`
-- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
-- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:68`
-
-### `../launch/production-readiness.md` · 0. The one thing everything waits on
-
 - [ ] BLOCKER — Legal entity named. `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, · `../launch/production-readiness.md:10`
-
-### `../launch/production-readiness.md` · 1. Legal texts
-
 - [~] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based). · `../launch/production-readiness.md:18`
 - [~] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`. · `../launch/production-readiness.md:19`
 - [~] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`). · `../launch/production-readiness.md:20`
@@ -107,68 +70,145 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] Retire `docs/legal/privacy.md` and `docs/legal/terms.md` once the above are approved. · `../launch/production-readiness.md:26`
 - [ ] Fill the three `[PAÍS]` cells in aviso §6.1 (error monitoring, mail, messaging) and the · `../launch/production-readiness.md:27`
 
-### `../launch/production-readiness.md` · 2. Consent capture (PRIV-REG-01) — implemented 2026-09-22
+## Infraestructura y operación (16)
 
-- [ ] Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained · `../launch/production-readiness.md:46`
-- [ ] SOON — Nightly seal job: call `xangarro.privacy_consents_day_root(day)` and obtain a · `../launch/production-readiness.md:48`
-- [ ] Archive the full text of every `AVISO_VERSION` (a hash without its text proves nothing) — · `../launch/production-readiness.md:50`
-- [ ] Configuración → Privacidad: show accepted version, toggle novedades (writes a · `../launch/production-readiness.md:52`
-- [ ] Re-consent gate on login when a version adds a finalidad (art. 11); banner otherwise. · `../launch/production-readiness.md:54`
-- [ ] Decide checkbox vs. button-as-consent with the lawyer (OQ-N7); today: checkbox. · `../launch/production-readiness.md:55`
+Entornos, base de datos, regiones y respaldos. Se prueban en staging, no en local.
 
-### `../launch/production-readiness.md` · 3. Rights the aviso promises (must exist before the aviso is public)
+### Lanzamiento (14)
 
-- [ ] BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
-- [ ] In-app "Desvincular y borrar los datos de este dispositivo" (aviso §7 currently admits · `../launch/production-readiness.md:62`
-- [ ] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day · `../launch/production-readiness.md:64`
-- [ ] Retention calendar implemented per table (OQ-L13 numbers once confirmed); 72-month rule for · `../launch/production-readiness.md:66`
-- [ ] Breach protocol with the Reglamento art. 65 field list, a named person, and the 72 h clause to · `../launch/production-readiness.md:68`
-- [ ] Verify Sentry server-side captures no PII before the aviso says so. · `../launch/production-readiness.md:70`
+- [ ] **X-01** Staging environment (Q17 "A later") — Blocked by: B-01…B-10 · Falta: the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo. · `07-launch.md:10`
+- [ ] **O-2** Turn Data API off · `11-pre-launch-and-deferred.md:25`
+- [ ] **O-3** Backups / PITR on a paid plan · `11-pre-launch-and-deferred.md:26`
+- [ ] **O-4** Vercel project `xangarro-web`, Root Directory `apps/web`, domain `app.xangarro.mx`, region pdx1 · `11-pre-launch-and-deferred.md:27`
+- [ ] **O-5** Vercel project `xangarro-backoffice`, Root Directory `apps/backoffice`, domain `admin.xangarro.mx`, region pd… · `11-pre-launch-and-deferred.md:28`
+- [ ] **O-6** Vercel project `xangarro-landing`, Root Directory `apps/landing`, domain `xangarro.mx` · `11-pre-launch-and-deferred.md:29`
+- [ ] **O-32** Note for the Azure move (owner, 2026-09-26): when Postgres moves to Azure (Flexible Server), review a balance… · `11-pre-launch-and-deferred.md:31`
+- [ ] **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:32`
+- [ ] **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:33`
+- [ ] **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:34`
+- [ ] **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:37`
+- [ ] **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:38`
+- [ ] **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
+- [ ] **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:68`
 
-### `../launch/production-readiness.md` · 4. Subscriptions (LFPC art. 76 Bis VIII–IX, in force 2025-12-13)
+### Post-lanzamiento (2)
 
-- [ ] BLOCKER — Cancel in one click from Configuración → Suscripción. · `../launch/production-readiness.md:74`
-- [ ] BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:80`
-- [ ] Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:82`
-- [ ] Price increases: 30-day notice + express re-acceptance flow. · `../launch/production-readiness.md:83`
-- [ ] Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:84`
-- [ ] Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:85`
+- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1182`
+- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1188`
 
-### `../launch/production-readiness.md` · 5. Stores
+## Deuda técnica y auditorías (11)
 
+Auditorías, cobertura, arneses y reescrituras de prueba. Nada de esto es función nueva.
+
+### Lanzamiento (4)
+
+- [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:727`
+- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:745`
+- [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:759`
+- [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:767`
+
+### Post-lanzamiento (2)
+
+- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1135`
+- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1169`
+
+### Colas de tracks (5)
+
+- [ ] **P-21** `pnpm design:compare` capture harness — Blocked by: P-18 · Falta: the whole harness. The one verified in `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the `package.json` script and the ignore line. The sources are on no disk (worktree and main checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery. Restore the script entry when the harness lands. · `04-portal.md:187`
+- [~] **P-23** Primitives + Storybook inventory + visual-regression baselines — Blocked by: P-22 · Falta: the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed. 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance. In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed. · `04-portal.md:253`
+- [ ] **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1626`
+- [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
+- [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
+
+## Tiendas (App Store / Play) (8)
+
+Lo que Apple y Google exigen antes de la primera revisión.
+
+### Lanzamiento (7)
+
+- [ ] **X-05** Store listings + review readiness — Blocked by: F-01, A-15, X-07, B-04 · Falta: `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`. · `07-launch.md:38`
+- [~] **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:816`
 - [ ] BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest; Play Data Safety form — · `../launch/production-readiness.md:89`
 - [ ] BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:91`
 - [ ] BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:93`
 - [ ] Open-source licence notices screen generated from `pnpm licenses list --prod` (1,184 pkgs, no · `../launch/production-readiness.md:95`
 - [ ] Never add Sign in with Apple/Google to the mobile app (would trigger 5.1.1(v)). · `../launch/production-readiness.md:97`
 
-### `../launch/production-readiness.md` · 6. Third parties and contracts
+### Colas de tracks (1)
 
+- [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); · `06-landing.md:88`
+
+## Terceros y alianzas (8)
+
+Proveedores y alianzas: Clip, Mercado Pago, el PAC, los DPA.
+
+### Lanzamiento (7)
+
+- [ ] **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:57`
+- [ ] **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:58`
+- [ ] **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:59`
 - [ ] Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:101`
 - [ ] Foundry hosting option decided and configured (Hosted on Azure, US DataZone recommended); · `../launch/production-readiness.md:103`
 - [ ] `ASESOR_LLM_*` never pointed at a personal proxy with real tenant data (add a guard). · `../launch/production-readiness.md:105`
 - [ ] Rule: the Asesor's model boundary stays the only module that knows a model exists; the IA · `../launch/production-readiness.md:106`
 
-### `../launch/production-readiness.md` · 7. Product hygiene with legal weight
+### Post-lanzamiento (1)
 
+- [~] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:1003`
+
+## Coordinación de lanzamiento (7)
+
+Coordinación: integración de punta a punta, beta, dogfooding y la compuerta X-10.
+
+### Lanzamiento (7)
+
+- [ ] **X-02** End-to-end integration run (real app ↔ real backend) — Blocked by: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
+- [ ] **X-03** Partner migration — Blocked by: X-02 · `07-launch.md:24`
+- [ ] **X-04** Xangarro as tenant #1 (dogfooding) — Blocked by: X-02 · `07-launch.md:30`
+- [ ] **X-07** Brand masters + derivatives (ADR-054 §6) — Blocked by: logo work (external) · Falta: the icon kit is landed in `assets/brand/icons/` and wired into all four apps (mobile icon + adaptive + themed layers, portal/console favicons and touch icons, landing favicons + manifest + the OG image). Still missing: `logo.png`, `splash-mobile.png` (the shipped splash still reads «Cachink!»), and deleting the four `role-*.png`. · `07-launch.md:101`
+- [ ] **X-08** Repo + directory rename (optional, coordinate) — Blocked by: A-15 · `07-launch.md:108`
+- [ ] **X-09** ROADMAP.md reset — Blocked by: X-02 · `07-launch.md:114`
+- [ ] **X-10** Launch checklist gate — Blocked by: X-01…X-09 (except X-08) · `07-launch.md:120`
+
+## Producto (86)
+
+Función nueva o por terminar, en el portal, la app, el backend o la consola.
+
+### Lanzamiento (31)
+
+- [~] **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:142`
+- [~] **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:399`
+- [~] **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:561`
+- [~] **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only. · `09-next-features.md:621`
+- [ ] **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:655`
+- [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:693`
+- [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:709`
+- [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:777`
+- [ ] Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained · `../launch/production-readiness.md:46`
+- [ ] SOON — Nightly seal job: call `xangarro.privacy_consents_day_root(day)` and obtain a · `../launch/production-readiness.md:48`
+- [ ] Archive the full text of every `AVISO_VERSION` (a hash without its text proves nothing) — · `../launch/production-readiness.md:50`
+- [ ] Configuración → Privacidad: show accepted version, toggle novedades (writes a · `../launch/production-readiness.md:52`
+- [ ] Re-consent gate on login when a version adds a finalidad (art. 11); banner otherwise. · `../launch/production-readiness.md:54`
+- [ ] Decide checkbox vs. button-as-consent with the lawyer (OQ-N7); today: checkbox. · `../launch/production-readiness.md:55`
+- [ ] BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
+- [ ] In-app "Desvincular y borrar los datos de este dispositivo" (aviso §7 currently admits · `../launch/production-readiness.md:62`
+- [ ] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day · `../launch/production-readiness.md:64`
+- [ ] Retention calendar implemented per table (OQ-L13 numbers once confirmed); 72-month rule for · `../launch/production-readiness.md:66`
+- [ ] Breach protocol with the Reglamento art. 65 field list, a named person, and the 72 h clause to · `../launch/production-readiness.md:68`
+- [ ] Verify Sentry server-side captures no PII before the aviso says so. · `../launch/production-readiness.md:70`
+- [ ] BLOCKER — Cancel in one click from Configuración → Suscripción. · `../launch/production-readiness.md:74`
+- [ ] BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:80`
+- [ ] Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:82`
+- [ ] Price increases: 30-day notice + express re-acceptance flow. · `../launch/production-readiness.md:83`
+- [ ] Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:84`
+- [ ] Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:85`
 - [ ] Receipt (`comprobante`) carries "Este comprobante no es un CFDI" and the negocio's name as · `../launch/production-readiness.md:112`
 - [ ] Attribution retention rule for `signup_attribution` (geo has 400 days; propose the same). · `../launch/production-readiness.md:114`
 - [ ] Landing beacon disclosed in the aviso (done) and a footer link on `xangarro.mx` (open). · `../launch/production-readiness.md:115`
 - [ ] Marketing e-mail: opt-out honoured within the 5-day window; REPEP if phone/SMS ever used. · `../launch/production-readiness.md:116`
 - [ ] Advertising claims on the landing are demonstrable (LFPC art. 32). · `../launch/production-readiness.md:117`
 
-### `../launch/production-readiness.md` · 8. Intellectual property and governance
-
-- [ ] BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
-- [ ] Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). · `../launch/production-readiness.md:123`
-- [ ] Cyber-liability insurance — business decision. · `../launch/production-readiness.md:124`
-- [ ] INDAUTOR software registration — optional. · `../launch/production-readiness.md:125`
-
-## Post-lanzamiento (44)
-
-Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
-
-### `08-post-launch.md`
+### Post-lanzamiento (39)
 
 - [ ] **Z-01** `ventasCredito` — first portal-delivered feature (Q10) — Trigger: launch done; ≥ 1 customer asks for fiado, or 30 days after launch. · `08-post-launch.md:9`
 - [ ] **Z-02** Portal group-2 screens — Trigger: Z-01 or customer demand. · `08-post-launch.md:15`
@@ -178,10 +218,6 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **Z-08** Background sync (Android WorkManager / iOS BGTaskScheduler) — Trigger: telemetry shows > 10 % of sales reaching the cloud > 1 h after capture. · `08-post-launch.md:48`
 - [ ] **Z-11** Pro extras: audit history + per-operator permissions UI — Trigger: first Pro customer. · Falta: only the audit-history screen (from `sync_log` / `cancelacion_logs`); the per-operator permissions editor already exists as P-05 (`equipo/operador-actions.tsx`, plan-gated, single key `canCancelSales`). · `08-post-launch.md:63`
 - [ ] **Z-12** Sale-confirm sound: commission new audio (ADR-054 §7) — Trigger: brand work budget. · `08-post-launch.md:69`
-
-### `09-next-features.md` · 3. Post-launch
-
-- [~] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:1003`
 - [ ] **N-75** Reconciliation spike — can we see card payments from any reader? · `09-next-features.md:1023`
 - [ ] **N-41** `PaymentProvider` port — read side + Mercado Pago adapter — Blocked by: N-75, ADR-109 · `09-next-features.md:1039`
 - [ ] **N-43** Merchant account linking in Tipos de pago — Blocked by: N-41 · `09-next-features.md:1047`
@@ -192,14 +228,10 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-79** Terminal per caja — Blocked by: N-80, N-43, ADR-109 (D-1) · `09-next-features.md:1104`
 - [ ] **N-44** Cobrar en terminal (phone and web caja) — Blocked by: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1114`
 - [ ] **N-78** Terminal health at the caja — Blocked by: N-79 · `09-next-features.md:1125`
-- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1135`
 - [ ] **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:1142`
 - [ ] **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:1148`
 - [ ] **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:1154`
-- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1169`
 - [ ] **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1176`
-- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1182`
-- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1188`
 - [ ] **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1193`
 - [ ] **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go), N-75 (Clip go) · `09-next-features.md:1204`
 - [~] **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1242`
@@ -218,61 +250,24 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (22)
-
-Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
-
-### `02-contracts.md` · §8 Table scope
+### Colas de tracks (16)
 
 - [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:332`
 - [ ] **C-21** Kill switches on the wire · `02-contracts.md:503`
-
-### `03-backend.md`
-
 - [~] **B-16** Back-office: Studio saved queries + support functions — Blocked by: B-03, B-11 · Falta: no «subscriptions by plan/status» saved query (unblocked now that `billing.subscriptions` exists); `billing.reissue_code` / `billing.resend_magic_link` do not exist. Studio-callable issuance is superseded by ADR-080 — drop that step. Runbook review is a human sign-off. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:292`
-
-### `04-portal.md` · Fase 0 — Contrato y andamio
-
-- [ ] **P-21** `pnpm design:compare` capture harness — Blocked by: P-18 · Falta: the whole harness. The one verified in `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the `package.json` script and the ignore line. The sources are on no disk (worktree and main checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery. Restore the script entry when the harness lands. · `04-portal.md:187`
-
-### `04-portal.md` · Fase 1 — Tokens y primitivas
-
-- [~] **P-23** Primitives + Storybook inventory + visual-regression baselines — Blocked by: P-22 · Falta: the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed. 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance. In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed. · `04-portal.md:253`
-
-### `04-portal.md` · Fase 6 — Asesor
-
 - [~] **P-28** Diagnóstico + estrategia — «Próximamente» in production — Blocked by: P-26, P-30 · Falta: only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt. 2026-09-22 doc audit: shipped except the ten report sections and the price table. In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built. Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1169`
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» in production — Blocked by: P-07, P-30 · `04-portal.md:1343`
 - [~] **P-30** Asesor generation runtime — Blocked by: — · Falta: the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`. **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table. 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. · `04-portal.md:1353`
-
-### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
-
-- [ ] **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1626`
 - [~] **P-36** First production walkthrough: the owner's findings (2026-09-25) — Blocked by: ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1; `feat/don-cuentas-portal` landing for P-36.7 Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie) with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests: domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run). · Falta: P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para vender. N opcionales por hacer» once the required list is done. · `04-portal.md:1765`
-
-### `04-portal.md` · Fase 10 — Beta: lo que el diseño ya muestra como listo
-
 - [!] **P-37** Ticket printing from the caja · `04-portal.md:1853`
 - [ ] **P-38** Don Cuentas explains a cash difference — Blocked by: — · `04-portal.md:1867`
 - [ ] **P-39** Don Cuentas conclusions in Estados financieros — Blocked by: P-30, P-28 · `04-portal.md:1882`
 - [ ] **P-40** First diagnóstico free at 90 days — Blocked by: P-28 · `04-portal.md:1898`
 - [ ] **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1911`
-
-### `05-app.md`
-
-- [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
-
-### `06-landing.md`
-
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
-- [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
 - [ ] **L-09** Comparison and alternatives pages against named competitors — Blocked by: owner — the competitor list and the facts about each that we are willing to publish · `06-landing.md:192`
 - [ ] **L-10** Off-site presence: Reddit and YouTube — Blocked by: owner — accounts and time · `06-landing.md:208`
-
-### `19-movil-mostrador.md` · Phases
-
 - [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
-- [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
 
 ## Por archivo
 

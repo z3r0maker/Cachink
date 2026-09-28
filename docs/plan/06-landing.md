@@ -83,10 +83,10 @@
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
-### L-05 Store badges + legal pages
+### L-05 Store badges + legal pages `[tiendas]`
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
-      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs.
+      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); **Re-verified 2026-09-28:** the términos route _does_ exist — `/terminos/` is in `routes.js`, wired in `AppSSR.jsx` and `main.jsx`, and prerendered from `docs/legal/aviso/terminos-borrador.md`. What is still missing is the content, not the route: the published draft mentions neither the 7-day grace nor the downgrade, and `docs/legal/terms.md` is the pre-rebrand file the aviso work (O-17) is meant to retire. The store badges still wait for X-05's real URLs.
 
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.

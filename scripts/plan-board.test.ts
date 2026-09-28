@@ -13,6 +13,7 @@ import { describe, it } from 'vitest';
 import { type Item, parseTrack } from './plan-board-parse.js';
 import { idsIn, nextUp } from './plan-board-next.js';
 import { categoryOf, renderBoard } from './plan-board-render.js';
+import { AREAS, AREA_TITLES, areaOf } from './plan-board-areas.js';
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -181,15 +182,85 @@ describe('the committed board', () => {
     assert.equal(actual, expected);
   });
 
-  it('lists only open work, in the three categories, citing a line per item', () => {
+  it('lists only open work, grouped by area, citing a line per item', () => {
     const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    for (const c of ['## Siguiente', '## Lanzamiento', '## Post-lanzamiento', '## Colas de tracks'])
-      assert.ok(board.includes(c), c);
+    const h2 = board.split('\n').filter((l) => l.startsWith('## '));
+    // Anchored: `includes('## Lanzamiento')` also matches the `### Lanzamiento`
+    // sub-heading, so it passed while the board had no such H2 at all.
+    assert.ok(h2.some((l) => l.startsWith('## Siguiente')));
+    for (const area of AREAS)
+      assert.ok(
+        h2.some((l) => l.startsWith(`## ${AREA_TITLES[area]} (`)),
+        `no H2 for ${area}`,
+      );
     const lines = board.split('\n').filter((l) => /^- \[/.test(l));
     assert.ok(lines.length > 0);
     for (const line of lines) {
       assert.doesNotMatch(line, /^- \[x\]/);
       assert.match(line, /`[^`]+\.md:\d+`$/);
     }
+  });
+
+  it('never prints an area tag — it is structure, not prose', () => {
+    const board = readFileSync(join(ROOT, BOARD), 'utf8');
+    for (const area of AREAS) assert.ok(!board.includes(`\`[${area}]\``), area);
+  });
+});
+
+describe('areaOf', () => {
+  const item = (over: Partial<Item>): Item => ({
+    source: '09-next-features.md',
+    line: 1,
+    area: null,
+    id: 'N-01',
+    title: 'x',
+    status: 'open',
+    section: '2. Launch blockers',
+    trigger: null,
+    blockedBy: null,
+    blocks: null,
+    remaining: null,
+    ...over,
+  });
+
+  it('takes the track\u2019s tag over what the file would have said', () => {
+    assert.equal(areaOf(item({})), 'producto');
+    assert.equal(areaOf(item({ area: 'deuda' })), 'deuda');
+  });
+
+  it('falls back to the file when the tag is not an area', () => {
+    // A typo must not vanish an item from every list.
+    assert.equal(areaOf(item({ area: 'deudas' })), 'producto');
+  });
+
+  it('reads the owner actions and the legal checklist from their sections', () => {
+    assert.equal(
+      areaOf(
+        item({ source: '11-pre-launch-and-deferred.md', section: '1. Pre-launch actions (owner)' }),
+      ),
+      'papeleo',
+    );
+    const pr = '../launch/production-readiness.md';
+    assert.equal(areaOf(item({ source: pr, section: '1. Legal texts' })), 'legal');
+    assert.equal(areaOf(item({ source: pr, section: '5. Stores' })), 'tiendas');
+    assert.equal(
+      areaOf(item({ source: pr, section: '6. Third parties and contracts' })),
+      'terceros',
+    );
+    // Sections 2/3/4/7 are engineering with a legal deadline, not paperwork.
+    assert.equal(
+      areaOf(item({ source: pr, section: '4. Subscriptions (LFPC art. 76 Bis)' })),
+      'producto',
+    );
+  });
+
+  it('survives a title longer than the board\u2019s clamp', () => {
+    // The tag is stripped before the 110-char cut, so where it sits cannot
+    // change the area — this is why the parser owns it and not the renderer.
+    const largo = `### T-9 \`[infra]\` ${'a'.repeat(200)}\n\n- [ ] Status · **Blocks:** T-1\n`;
+    const [parsed] = parseTrack('07-launch.md', largo);
+    assert.equal(parsed?.area, 'infra');
+    assert.equal(areaOf(parsed as Item), 'infra');
+    assert.ok((parsed?.title.length ?? 0) <= 110);
   });
 });
