@@ -37,8 +37,12 @@ export function patronBusqueda(buscar: string): string {
 
 /** The folio a search names («412», «#412», «folio 412»), or null. Nine digits fit an int4. */
 export function folioBuscado(buscar: string): number | null {
-  const m = /^(?:folio\s*)?#?\s*(\d{1,9})$/i.exec(buscar.trim());
-  return m?.[1] === undefined ? null : Number(m[1]);
+  // Plain string steps, not one regex: `folio\s*#?\s*` let two runs of spaces
+  // compete, and a long one backtracked polynomially (CodeQL #22).
+  let t = buscar.trim().toLowerCase();
+  if (t.startsWith('folio')) t = t.slice('folio'.length).trimStart();
+  if (t.startsWith('#')) t = t.slice(1).trimStart();
+  return /^\d{1,9}$/.test(t) ? Number(t) : null;
 }
 
 /**
