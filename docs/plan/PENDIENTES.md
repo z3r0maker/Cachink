@@ -218,7 +218,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (31)
+## Colas de tracks (21)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -267,25 +267,6 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
 - [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
 
-### `18-db-scale-design-changes.md` · Portal
-
-- [ ] **DS-01** Ventas y gastos — filters answered by the server · `18-db-scale-design-changes.md:38`
-- [ ] **DS-02** Exportar — every row, with a preparing state · `18-db-scale-design-changes.md:75`
-- [ ] **DS-03** Sincronización › Historial — the last 30 days · `18-db-scale-design-changes.md:90`
-- [ ] **DS-04** Productos › Movimientos — the newest 50 · `18-db-scale-design-changes.md:100`
-
-### `18-db-scale-design-changes.md` · Caja (operador) and phone
-
-- [ ] **DS-05** Sync status — «Reintentando» · `18-db-scale-design-changes.md:109`
-- [ ] **DS-06** Cierre — rows still to send · `18-db-scale-design-changes.md:126`
-- [ ] **DS-07** Registros por enviar — last and next attempt · `18-db-scale-design-changes.md:140`
-
-### `18-db-scale-design-changes.md` · Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
-
-- [ ] **DS-08** Caja — already open in another tab · `18-db-scale-design-changes.md:156`
-- [ ] **DS-09** Estados — the custom range has a limit · `18-db-scale-design-changes.md:172`
-- [ ] **DS-10** Linking a big business — the first download comes in pages · `18-db-scale-design-changes.md:183`
-
 ### `19-movil-mostrador.md` · Phases
 
 - [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
@@ -304,6 +285,6 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
-- `18-db-scale-design-changes.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
+- `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)

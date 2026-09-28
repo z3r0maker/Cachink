@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { srOnly } from '../styles/global.css';
+import { atenuado, avisoCelda, barra, pista } from './table-carga.css';
 import {
   scroller,
   table,
@@ -33,6 +34,43 @@ export interface DataTableProps<Row> {
   /** Shown under the header row when `rows` is empty (an inset `EmptyState`). */
   readonly empty?: ReactNode;
   readonly caption: string;
+  /**
+   * Set by a table the server pages (DS-01): `true` while new rows are on the
+   * way — a bar under the header, the old rows dimmed. Left out, no track.
+   */
+  readonly busy?: boolean;
+  /** A full-width row under the header, above the rows — an error they stay under. */
+  readonly aviso?: ReactNode;
+}
+
+/** The loading track and the notice row, both under the header. */
+function Cabecera({
+  span,
+  busy,
+  aviso,
+}: {
+  readonly span: number;
+  readonly busy?: boolean;
+  readonly aviso?: ReactNode;
+}) {
+  return (
+    <>
+      {busy === undefined ? null : (
+        <tr aria-hidden="true">
+          <td colSpan={span} className={pista} data-busy={busy}>
+            {busy ? <span className={barra} /> : null}
+          </td>
+        </tr>
+      )}
+      {aviso ? (
+        <tr>
+          <td colSpan={span} className={avisoCelda}>
+            {aviso}
+          </td>
+        </tr>
+      ) : null}
+    </>
+  );
 }
 
 function HeaderRow<Row>({ columns }: { readonly columns: readonly ColumnDef<Row>[] }) {
@@ -86,6 +124,8 @@ export function DataTable<Row>({
   footer,
   empty,
   caption,
+  busy,
+  aviso,
 }: DataTableProps<Row>) {
   return (
     <div className={tableCard}>
@@ -95,16 +135,14 @@ export function DataTable<Row>({
           <caption className={srOnly}>{caption}</caption>
           <thead>
             <HeaderRow columns={columns} />
+            <Cabecera span={columns.length} busy={busy} aviso={aviso} />
           </thead>
-          <tbody>
+          <tbody className={atenuado} data-busy={busy === true}>
             {rows.map((row) => (
               <BodyRow
                 key={rowKey(row)}
                 row={row}
-                columns={columns}
-                rowKey={rowKey}
-                onRowClick={onRowClick}
-                selectedKey={selectedKey}
+                {...{ columns, rowKey, onRowClick, selectedKey }}
               />
             ))}
           </tbody>

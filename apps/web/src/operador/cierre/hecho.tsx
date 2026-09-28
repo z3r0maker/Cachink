@@ -7,13 +7,20 @@ import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 import { Don, type DonPose } from '../../components/don/don';
 import { Icon } from '../../shell/icon';
 import { OPERADOR_BASE, aDueno } from '@xangarro/caja';
-import { conSigno, DIF, lineaCerrado, type CierreData } from '@xangarro/caja/cierre';
+import {
+  conSigno,
+  DIF,
+  lineaCerrado,
+  lineaPorEnviar,
+  type CierreData,
+} from '@xangarro/caja/cierre';
 import { Corte, fechaCorta } from './corte';
 import { Entrega } from './entrega';
 import * as h from './hecho.css';
 import type { Cierre } from './use-cierre';
 
 const CHECK = 'M20 6 9 17l-5-5';
+const RELOJ = 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2';
 const BILLETE = 'M2 6h20v12H2V6Zm10 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4M6 12h.01M18 12h.01';
 const DERECHA = 'M9 6l6 6-6 6';
 const CHAT = 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z';
@@ -64,6 +71,14 @@ export function Hecho({ x, data }: { readonly x: Cierre; readonly data: CierreDa
         <p
           className={h.texto}
         >{`${lineaCerrado(x.dif, x.motivo, data.dueno, x.pendientes)}${gracias}`}</p>
+        {x.pendientes > 0 ? (
+          <p role="status" className={h.porEnviar}>
+            <span className={h.porEnviarIcono} aria-hidden="true">
+              <Icon path={RELOJ} size={20} strokeWidth={2.2} />
+            </span>
+            {lineaPorEnviar(data.dueno)}
+          </p>
+        ) : null}
         <Pasos x={x} data={data} />
       </div>
       <Corte x={x} data={data} />

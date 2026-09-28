@@ -9,7 +9,8 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import { intro, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
+import type { Reintento } from '@xangarro/caja';
+import { heroe, intro, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
 import type { RejectedRow } from '@xangarro/sync';
 import { Btn, CajaEstado, Don, GLYPHS, MText, PathIcon } from '../../components/index';
 import { borderColors, borderWidths, colors, radii } from '../../theme';
@@ -25,6 +26,12 @@ export interface PendientesScreenProps {
   readonly offline: boolean;
   /** A retry ran and the caja is still offline. */
   readonly sinInternet: boolean;
+  /** The engine's wait after a failed run, while it still lies ahead (DS-05). */
+  readonly reintento?: Reintento | null;
+  /** The clock the countdowns read. */
+  readonly ahora?: number;
+  /** «Reintentar envío» ran and the engine still waits. */
+  readonly intentado?: boolean;
   readonly onReintentar: () => void;
   readonly onReintentarRechazados: (rows: readonly RejectedRow[]) => void;
   readonly onRetryLeer: () => void;
@@ -54,8 +61,8 @@ function NadaSePierde(): ReactElement {
           Nada se pierde
         </MText>
         <MText size="sm" weight="semibold" color={colors.ink} lineHeight={19}>
-          Lo que capturas vive en esta caja hasta que suba. No borres los datos de la app. No podrás
-          cerrar el turno hasta que se envíe.
+          Lo que capturas vive en esta caja hasta que suba. No borres los datos de la app. Puedes
+          cerrar el turno; se envían cuando vuelva la conexión.
         </MText>
       </View>
     </View>
@@ -64,11 +71,7 @@ function NadaSePierde(): ReactElement {
 
 function Pie(p: PendientesScreenProps): ReactElement {
   const enviando = p.fase === 'enviando';
-  const label = enviando
-    ? 'Enviando…'
-    : p.fase === 'enviado'
-      ? 'Revisar de nuevo'
-      : 'Reintentar ahora';
+  const label = enviando ? 'Enviando…' : heroe(p.fase, p.cola, p.cola.length).boton;
   return (
     <View
       paddingHorizontal={16}
@@ -93,6 +96,31 @@ function Pie(p: PendientesScreenProps): ReactElement {
   );
 }
 
+/** The hero, «La cola» and the refused rows, once the queue is read. */
+function Contenido(p: PendientesScreenProps): ReactElement {
+  return (
+    <>
+      <PendientesHeroe
+        fase={p.fase}
+        cola={p.cola}
+        sinInternet={p.sinInternet}
+        reintento={p.reintento ?? null}
+        intentado={p.intentado ?? false}
+      />
+      {p.cola.length === 0 ? null : (
+        <ListaCola
+          cola={p.cola}
+          fase={p.fase}
+          offline={p.offline}
+          ahora={p.ahora ?? Date.now()}
+          reintento={p.reintento ?? null}
+        />
+      )}
+      <RechazadosLista rows={p.rechazados} onRetry={p.onReintentarRechazados} />
+    </>
+  );
+}
+
 export function PendientesScreen(p: PendientesScreenProps): ReactElement {
   const vacia = p.cola.length === 0;
   return (
@@ -107,11 +135,7 @@ export function PendientesScreen(p: PendientesScreenProps): ReactElement {
           </MText>
         </View>
         {p.state === 'happy' ? (
-          <>
-            <PendientesHeroe fase={p.fase} cola={p.cola} sinInternet={p.sinInternet} />
-            {vacia ? null : <ListaCola cola={p.cola} fase={p.fase} offline={p.offline} />}
-            <RechazadosLista rows={p.rechazados} onRetry={p.onReintentarRechazados} />
-          </>
+          <Contenido {...p} />
         ) : (
           <CajaEstado
             mode={p.state}

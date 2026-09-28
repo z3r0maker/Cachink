@@ -20,3 +20,5 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'pendientes-reintentar'
 - assertVisible: 'Todo enviado'
+# DS-06: Don no longer says the turno waits for the queue.
+- assertVisible: '.*Puedes cerrar el turno; se envían cuando vuelva la conexión.*'

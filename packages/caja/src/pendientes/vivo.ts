@@ -93,5 +93,12 @@ export function comoRegistro(p: PendienteCrudo): RegistroEnCola {
     detalle: detalle(p),
     monto: monto(p),
     hora: propia ?? hhmmLocal(p.en),
+    ...(p.reintento === true
+      ? {
+          reintento: true,
+          ultimoIntento: p.ultimoIntento ?? null,
+          proximoIntento: p.proximoIntento ?? null,
+        }
+      : {}),
   };
 }

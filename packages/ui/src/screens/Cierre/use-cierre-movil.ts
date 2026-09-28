@@ -65,7 +65,6 @@ function useCola(): ColaCierre {
     porEnviar: state.counts.unsent,
     reintentando: state.counts.retrying,
     enviando: state.phase === 'syncing',
-    sinRed: state.phase === 'offline',
     reintentar: syncNow,
   };
 }

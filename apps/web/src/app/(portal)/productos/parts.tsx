@@ -2,6 +2,7 @@
 
 import { formatMoney } from '@xangarro/domain';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -173,7 +174,14 @@ export function CatalogoTable({
   );
 }
 
-export function MovTable({ rows }: { readonly rows: readonly Movimiento[] }) {
+export function MovTable({
+  rows,
+  pie,
+}: {
+  readonly rows: readonly Movimiento[];
+  /** «Mostrando los 50 más recientes · Exportar todos» (DS-04). */
+  readonly pie: ReactNode;
+}) {
   return (
     <DataTable
       caption="Movimientos"
@@ -181,7 +189,7 @@ export function MovTable({ rows }: { readonly rows: readonly Movimiento[] }) {
       rows={rows}
       rowKey={(m) => m.id}
       minWidth={720}
-      footer={<span>Mostrando {rows.length} movimientos</span>}
+      footer={pie}
     />
   );
 }

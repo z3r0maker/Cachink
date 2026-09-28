@@ -1,17 +1,25 @@
 /**
  * «La cola» (MvPendientes): each record the caja still has to send, in the
  * order the pusher meets them, with its kind, time, what it was, its state
- * chip («En cola», «Esperando conexión», «Enviando») and its amount.
+ * chip («En cola», «Esperando conexión», «En reintento», «Enviando»), for a
+ * row in retry its last and next attempt in gray (DS-07), and its amount.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { estadoFila, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
+import type { Reintento } from '@xangarro/caja';
+import {
+  estadoFila,
+  lineaIntento,
+  type EstadoFila,
+  type Fase,
+  type RegistroEnCola,
+} from '@xangarro/caja/pendientes';
 import { formatMoney } from '@xangarro/domain';
 import { MText, PathIcon, QuietPanel } from '../../components/index';
 import { borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { TIPO } from './pendientes-logica';
 
-type Estado = ReturnType<typeof estadoFila>;
+type Estado = EstadoFila;
 
 function EstadoChip({ estado }: { readonly estado: Estado }): ReactElement {
   const enviando = estado === 'Enviando';
@@ -51,7 +59,7 @@ const TILE = {
   borderColor: colors.black,
 } as const;
 
-function Texto(p: { r: RegistroEnCola; estado: Estado }): ReactElement {
+function Texto(p: { r: RegistroEnCola; estado: Estado; linea: string | null }): ReactElement {
   return (
     <View flex={1} minWidth={0} gap={3}>
       <View flexDirection="row" alignItems="center" gap={8}>
@@ -68,6 +76,17 @@ function Texto(p: { r: RegistroEnCola; estado: Estado }): ReactElement {
         </MText>
       ) : null}
       <EstadoChip estado={p.estado} />
+      {p.linea === null ? null : (
+        <MText
+          size="sm"
+          weight="semibold"
+          color={colors.textMuted}
+          fontVariant={['tabular-nums']}
+          testID={`pendiente-intento-${p.r.id}`}
+        >
+          {p.linea}
+        </MText>
+      )}
     </View>
   );
 }
@@ -75,6 +94,7 @@ function Texto(p: { r: RegistroEnCola; estado: Estado }): ReactElement {
 function Fila(p: {
   readonly r: RegistroEnCola;
   readonly estado: Estado;
+  readonly linea: string | null;
   readonly ultima: boolean;
 }): ReactElement {
   const t = TIPO[p.r.tipo];
@@ -83,7 +103,9 @@ function Fila(p: {
     <View
       testID={`pendiente-${p.r.id}`}
       role="listitem"
-      aria-label={[p.r.titulo, p.r.hora, p.r.detalle, p.estado, monto].filter(Boolean).join(', ')}
+      aria-label={[p.r.titulo, p.r.hora, p.r.detalle, p.estado, p.linea, monto]
+        .filter(Boolean)
+        .join(', ')}
       flexDirection="row"
       alignItems="center"
       gap={12}
@@ -96,7 +118,7 @@ function Fila(p: {
       <View {...TILE} backgroundColor={t.tint} aria-hidden>
         <PathIcon d={t.icon} size={20} />
       </View>
-      <Texto r={p.r} estado={p.estado} />
+      <Texto r={p.r} estado={p.estado} linea={p.linea} />
       {monto ? (
         <MText size="lg" weight="extraBold" color={t.color} fontVariant={['tabular-nums']}>
           {monto}
@@ -110,8 +132,9 @@ export function ListaCola(p: {
   readonly cola: readonly RegistroEnCola[];
   readonly fase: Fase;
   readonly offline: boolean;
+  readonly ahora: number;
+  readonly reintento: Reintento | null;
 }): ReactElement {
-  const estado = estadoFila(p.fase, p.offline);
   return (
     <QuietPanel
       label="La cola"
@@ -121,7 +144,13 @@ export function ListaCola(p: {
     >
       <View role="list">
         {p.cola.map((r, i) => (
-          <Fila key={r.id} r={r} estado={estado} ultima={i === p.cola.length - 1} />
+          <Fila
+            key={r.id}
+            r={r}
+            estado={estadoFila(p.fase, p.offline, r)}
+            linea={lineaIntento(r, p.ahora, p.reintento)}
+            ultima={i === p.cola.length - 1}
+          />
         ))}
       </View>
     </QuietPanel>

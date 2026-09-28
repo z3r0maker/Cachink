@@ -35,10 +35,11 @@ are answered, and the copy below already follows them.
 
 ### DS-01 Ventas y gastos — filters answered by the server
 
-- [ ] Status · Send the blocks below to the portal project; pull; align `app/(portal)/movimientos/*`.
-      Backend for «Ir a fecha» done (branch `feat/ds-backend`): navigate to
-      `/movimientos?ir=YYYY-MM-DD` with the current filters; the server opens the page holding that
-      day and redirects to `?pagina=N` (`paginaDeFecha`, data-pg).
+- [x] Status · done 2026-09-28: `app/(portal)/movimientos/*` follows EsVentasFiltros — the old rows
+      stay dimmed under a bar while a filter is out (React transition; «Cargando movimientos…»), a
+      failed read keeps them under «No pudimos cargar los movimientos. Reintentar», «Periodo: …»
+      under the KPIs, «en este periodo» by the tab counts, the folio empty sentence, the
+      Personalizado hint, «Ir a fecha» in the pager (`?ir=`), and the drawer lists the whole ticket.
 
 **Why.** The screen used to load a tenant's whole history into the browser: 576K rows and 3.6 s
 for a one-year Xangarrote tenant, past the production 5 s timeout with a few more months of
@@ -72,7 +73,9 @@ updates when the answer arrives.
 
 ### DS-02 Exportar — every row, with a preparing state
 
-- [ ] Status · Send; pull; add the inventory export entry point.
+- [x] Status · done 2026-09-28: every `ExportButton` shows «Preparando tu archivo…» and fails with
+      the one-line toast «No pudimos generar el archivo. Intenta de nuevo.»; Productos › Movimientos
+      has «Exportar movimientos» (XLSX) in its header.
 
 **Why.** «Exportar movimientos» (inventory) was silently cut to 50 rows, and its «Cantidad» column
 was always 0. Both are fixed, and exports now read in batches of 5,000. A large tenant's export
@@ -87,7 +90,7 @@ takes a few seconds, and today no screen links to the inventory export at all.
 
 ### DS-03 Sincronización › Historial — the last 30 days
 
-- [ ] Status · Send; pull; align the historial card.
+- [x] Status · done 2026-09-28: the historial card says «Últimos 30 días» and has its empty state.
 
 **Why.** The history aggregated every receipt ever written (897 ms for a whale, and growing). It
 now reads the last 30 days.
@@ -97,7 +100,8 @@ now reads the last 30 days.
 
 ### DS-04 Productos › Movimientos — the newest 50
 
-- [ ] Status · Send; pull.
+- [x] Status · done 2026-09-28: the footer reads «Mostrando los 50 más recientes · Exportar
+      todos», the same export as the header button.
 
 > **Productos › Movimientos — footer.** Replace «Mostrando 50 movimientos» with «Mostrando los 50
 > más recientes · Exportar todos», where «Exportar todos» is the DS-02 export.
@@ -106,8 +110,13 @@ now reads the last 30 days.
 
 ### DS-05 Sync status — «Reintentando»
 
-- [ ] Status · Send to the operador project; pull; wire `retryAt` into the caja header pill,
-      Registros por enviar and the phone pill (`packages/ui/src/sync/cloud-sync-status.ts`).
+- [x] Status · done 2026-09-28: EsCajaReintentando and EsMvReintentando. One wording for both
+      (`pillEnvio`, `@xangarro/caja`): en línea · enviando · reintentando («Reintentando en 1 min»
+      counting down to the engine's `retryAt`; «Reintentando a las 7:42 p. m.», «Reintento: 7:42
+      p. m.» on the phone, when the server set Retry-After) · sin conexión (gray) · con rechazos,
+      on the caja's header pill (`operador/shell/pill.tsx`) and the phone's. Registros por enviar
+      turns «Reintentando» with the cause's line (ocupado / lenta / esperar) and, after «Reintentar
+      envío» (now a manual run on the caja too), what happens next.
 
 **Why.** At the evening peak the devices now back off instead of hammering the server. After a
 5xx, a 429 or a timeout the engine waits 5 s, doubling to at most 5 min, and it honours the
@@ -123,11 +132,11 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-06 Cierre — rows still to send
 
-- [ ] Status · Owner decision 1 answered: (a) (ADR-123). Minimal version shipped (DB3-CAJA-02): the
-      amber band with the copy below, «Reintentar envío» and «Ver cuáles» kept, the close enabled;
-      the blocked design's «Puede cambiar» chip, its «Espera a que se envíen…» hint and the
-      «la diferencia se vuelve a calcular» line are gone. The closed screen says «Pedro lo verá en su
-      portal cuando se envíen los registros.» Still to do: send option (a)'s block; pull; align.
+- [x] Status · done 2026-09-28: option (a) (ADR-123) as EsCajaCierre and EsMvCierre draw it: the
+      band with the sync tile, «Enviando…» / «Todavía no se pudo…» after a retry, «N por enviar»
+      in the summary, and «Pedro lo verá en su portal cuando se envíen los registros.» on its own
+      line of the closed screen. Don's card on Por enviar says «Puedes cerrar el turno; se envían
+      cuando vuelva la conexión.» (caja and phone).
 
 > **Cierre — option (a), recommended.** Banner (warning tone): «Tienes N registros por enviar (M se
 > reintentarán solos). Puedes cerrar; se enviarán cuando vuelva la conexión.» Cierre stays enabled.
@@ -137,10 +146,11 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-07 Registros por enviar — last and next attempt
 
-- [ ] Status · Send; pull. Backend done (branch `feat/ds-backend`): the caja's `PendienteCrudo`
-      carries `ultimoIntento` and `proximoIntento` (ISO, or null), per record; the phone's reader
-      (`packages/ui/src/sync/cola/`) can map `unsentRows`' `lastAttemptAt` / `nextAttemptAt` the
-      same way.
+- [x] Status · done 2026-09-28: each record in retry carries the chip «En reintento» and the gray
+      line «Último intento: hace 3 min · Próximo: en 2 min» (`lineaIntento`, `@xangarro/caja`;
+      «Próximo: a las 7:42 p. m.» when the server said when), on the caja and on the phone, whose
+      reader now maps `lastAttemptAt` / `nextAttemptAt` too. A row still `pending` goes with the
+      engine's next run, not its ten-minute sweep.
 
 **Why.** A row can no longer be stranded as «pendiente» (audit DB2-DEV-01). After a failed batch,
 or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff.
@@ -153,10 +163,11 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ### DS-08 Caja — already open in another tab
 
-- [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-123): Acceso's frame
-      (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
-      («Esperando a que se cierre la otra pestaña…»). No «Cerrar esta pestaña» link: a script can
-      only close a tab it opened. Still to do: send the block below; pull; align.
+- [x] Status · done 2026-09-28: EsCajaPestana's three states: aviso (the notice in Don's bubble,
+      the date, the two tabs, the rule), esperando (the busy button, «Esperando a que se cierre la
+      otra pestaña…») and sigue («La otra pestaña sigue abierta. Ciérrala y vuelve a intentar.»
+      after 3 s, the claim still queued). No «Cerrar esta pestaña»: a script can only close a tab
+      it opened.
 
 **Why.** Two tabs of the caja each keep their own copy of the local database, and the last one to
 save erases the other's unsent sales. The fix lets one tab hold the register; the second tab needs
@@ -169,7 +180,9 @@ a screen.
 
 ### DS-09 Estados — the custom range has a limit
 
-- [ ] Status · Send to the portal project; pull; enforce the cap server-side (audit DB3-EST-01).
+- [x] Status · done 2026-09-28: the cap is enforced server-side and in the picker: the inline error
+      on «Hasta», «Aplicar» disabled past 13 months or without both days in order, and the help link
+      «¿Necesitas más? Exporta tus movimientos.» always under Personalizado.
 
 **Why.** «Personalizado» accepted any range, and a multi-year range loads the whole history into
 memory. The range is capped at 13 months.
@@ -180,12 +193,12 @@ memory. The range is capped at 13 months.
 
 ### DS-10 Linking a big business — the first download comes in pages
 
-- [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
-      caja» and the phone's activation (audit DB3-BOOT-01, ADR-121). Backend done (branch
-      `feat/ds-backend`): the first page estimates `pages`; the device keeps `{ pagina, paginas }`
-      (`snapshotProgress`, `@xangarro/sync`; `paginas` null from an older server). The caja polls
-      `registerRuntime().progresoSnapshot()` while `vincularYPasar` runs; the phone reads
-      `snapshotProgress` over its `app_config`.
+- [x] Status · done 2026-09-28: EsCajaDescarga, EsMvDescarga, EsMvInventarioBajando. «Conectar
+      esta caja» and the phone's activation stay busy with «Descargando los datos de tu negocio…»,
+      «3 de 7» and a bar (aria-live, a progressbar) until the last page; a cut download keeps what
+      came and offers «Reintentar». The phone opens after the download; if it opened before (the
+      app closed mid-way), Inventario shows «Terminando de descargar el inventario…» until a sync
+      finishes the snapshot. Without an estimate (an older server) the count reads «Página 3».
 
 **Why.** Linking used to download the business's whole movement history in one response, which
 stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at

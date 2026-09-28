@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { ExportButton, ScreenBody, SegmentedTabs } from '@/components';
+import { ScreenBody, useExportar, type Exportacion } from '@/components';
 import { useSession } from '@/session/provider';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
@@ -10,6 +10,7 @@ import { canWrite, resolveScreenState } from '@/session/gating';
 import type { OnRowAction, RowAction } from './columns';
 import { ArchivarDialog } from './archivar-dialog';
 import { MovimientoDialog } from './movimiento-dialog';
+import { ExportarMovimientos, PieMovimientos, Tabs } from './movimientos-tab';
 import { EditarProductoSheet } from './sheet/sheet';
 import {
   CatalogoTable,
@@ -24,63 +25,18 @@ import {
   type Producto,
 } from './parts';
 
-function Tabs({
-  tab,
-  onChange,
-  catalogCount,
-  movCount,
-}: {
-  readonly tab: string;
-  readonly onChange: (v: string) => void;
-  readonly catalogCount: number;
-  readonly movCount: number;
-}) {
-  return (
-    <SegmentedTabs
-      ariaLabel="Productos"
-      value={tab}
-      onValueChange={onChange}
-      tabs={[
-        { value: 'catalogo', label: 'Catálogo', count: catalogCount },
-        { value: 'movimientos', label: 'Movimientos', count: movCount },
-      ]}
-    />
-  );
-}
-
-/** Productos › Movimientos' header action: the whole history, not the 50 listed (DS-02). */
-function ExportarMovimientos() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-      <ExportButton dataset="movimientos" label="Exportar movimientos" />
-    </div>
-  );
-}
-
 function Controls({
-  tab,
-  setTab,
-  filter,
-  setFilter,
-  catalogo,
+  c,
   movimientos,
-  movCount,
-  isCatalogo,
-  low,
 }: {
-  readonly tab: string;
-  readonly setTab: (v: string) => void;
-  readonly filter: string;
-  readonly setFilter: (v: string) => void;
-  readonly catalogo: readonly Producto[];
+  readonly c: Catalogo;
   readonly movimientos: readonly Movimiento[];
-  readonly movCount: number;
-  readonly isCatalogo: boolean;
-  readonly low: number;
 }) {
+  const { catalogo, isCatalogo, setFilter } = c;
+  const low = catalogo.filter(isLow).length;
   // Switching tabs resets the filter: the keys are not shared.
   const onTab = (v: string) => {
-    setTab(v);
+    c.setTab(v);
     setFilter('Todos');
   };
   return (
@@ -92,9 +48,18 @@ function Controls({
           onShow={() => setFilter('Stock bajo')}
         />
       ) : null}
-      <Tabs tab={tab} onChange={onTab} catalogCount={catalogo.length} movCount={movCount} />
+      <Tabs
+        tab={c.tab}
+        onChange={onTab}
+        catalogCount={catalogo.length}
+        movCount={movimientos.length}
+      />
       {isCatalogo ? <Kpis rows={catalogo} /> : <KpisMovimientos rows={movimientos} />}
-      {isCatalogo ? <Chips filter={filter} setFilter={setFilter} /> : <ExportarMovimientos />}
+      {isCatalogo ? (
+        <Chips filter={c.filter} setFilter={setFilter} />
+      ) : (
+        <ExportarMovimientos exp={c.exp} />
+      )}
     </>
   );
 }
@@ -105,12 +70,14 @@ function Body({
   movimientos,
   error,
   onAction,
+  exp,
 }: {
   readonly isCatalogo: boolean;
   readonly rows: readonly Producto[];
   readonly movimientos: readonly Movimiento[];
   readonly error: boolean;
   readonly onAction: OnRowAction;
+  readonly exp: Exportacion;
 }) {
   return (
     <ScreenBody
@@ -124,7 +91,10 @@ function Body({
       {isCatalogo ? (
         <CatalogoTable rows={rows} onAction={onAction} />
       ) : (
-        <MovTable rows={movimientos} />
+        <MovTable
+          rows={movimientos}
+          pie={<PieMovimientos total={movimientos.length} exp={exp} />}
+        />
       )}
     </ScreenBody>
   );
@@ -157,8 +127,12 @@ function useCatalogo(data: ProductosData | null, filtroInicial: 'todos' | 'bajo'
     () => (filter === 'Stock bajo' ? catalogo.filter(isLow) : catalogo),
     [catalogo, filter],
   );
-  return { tab, setTab, filter, setFilter, catalogo, rows, isCatalogo: tab === 'catalogo' };
+  // One export behind the header button and «Exportar todos» (DS-02, DS-04).
+  const exp = useExportar('movimientos');
+  return { tab, setTab, filter, setFilter, catalogo, rows, isCatalogo: tab === 'catalogo', exp };
 }
+
+type Catalogo = ReturnType<typeof useCatalogo>;
 
 export function ProductosScreen({
   data,
@@ -169,33 +143,22 @@ export function ProductosScreen({
   readonly filtroInicial?: 'todos' | 'bajo';
 }) {
   const session = useSession();
-  const { tab, setTab, filter, setFilter, catalogo, rows, isCatalogo } = useCatalogo(
-    data,
-    filtroInicial,
-  );
+  const c = useCatalogo(data, filtroInicial);
   const mayWrite = canWrite(session.role);
   const rowDialogs = useRowDialogs();
+  const movimientos = data?.movimientos ?? [];
 
   return (
     <>
       <Heading mayWrite={mayWrite} />
-      <Controls
-        tab={tab}
-        setTab={setTab}
-        filter={filter}
-        setFilter={setFilter}
-        catalogo={catalogo}
-        movimientos={data?.movimientos ?? []}
-        movCount={data?.movimientos.length ?? 0}
-        isCatalogo={isCatalogo}
-        low={catalogo.filter(isLow).length}
-      />
+      <Controls c={c} movimientos={movimientos} />
       <Body
-        isCatalogo={isCatalogo}
-        rows={rows}
-        movimientos={data?.movimientos ?? []}
+        isCatalogo={c.isCatalogo}
+        rows={c.rows}
+        movimientos={movimientos}
         error={data === null}
         onAction={mayWrite ? rowDialogs.onAction : null}
+        exp={c.exp}
       />
       {rowDialogs.dialogs}
     </>

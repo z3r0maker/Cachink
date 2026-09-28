@@ -73,3 +73,13 @@ export function urlDe(e: EstadoMovimientos): string {
   const qs = p.toString();
   return qs === '' ? '/movimientos' : `/movimientos?${qs}`;
 }
+
+/**
+ * The one-off «Ir a fecha» request (DS-01): the list's URL plus `ir=`. `urlDe`
+ * never writes `ir`, so no link on the page carries it; the server resolves
+ * the day to `?pagina=N` and redirects.
+ */
+export function urlIrA(e: EstadoMovimientos, dia: string): string {
+  const base = urlDe({ ...e, ir: '' });
+  return `${base}${base.includes('?') ? '&' : '?'}ir=${encodeURIComponent(dia)}`;
+}

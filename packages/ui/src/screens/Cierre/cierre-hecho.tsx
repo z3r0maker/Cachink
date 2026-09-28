@@ -9,10 +9,10 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import { aDueno } from '@xangarro/caja';
-import { CHIP_HECHO, DIF, lineaCerrado, tituloHecho } from '@xangarro/caja/cierre';
+import { CHIP_HECHO, DIF, lineaCerrado, lineaPorEnviar, tituloHecho } from '@xangarro/caja/cierre';
 import type { DiferenciaCorte } from '@xangarro/domain';
 import { Btn, Don, GLYPHS, MText, PathIcon, type DonPose } from '../../components/index';
-import { borderColors, borderWidths, colors, shapeRadii } from '../../theme';
+import { borderColors, borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { Corte } from './cierre-corte';
 import type { CierreHecho as Hecho } from './cierre-tipos';
 
@@ -85,6 +85,32 @@ function Pie(p: { dueno: string; onCompartir: () => void; onSalir: () => void })
   );
 }
 
+const RELOJ = 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2';
+
+/** «Pedro lo verá en su portal cuando se envíen los registros.» on its own line (DS-06). */
+function PorEnviar({ dueno }: { readonly dueno: string }): ReactElement {
+  return (
+    <View
+      role="status"
+      testID="cierre-hecho-por-enviar"
+      flexDirection="row"
+      alignItems="flex-start"
+      gap={10}
+      paddingHorizontal={14}
+      paddingVertical={12}
+      borderRadius={radii[4]}
+      borderWidth={borderWidths.thin}
+      borderColor={colors.warningText}
+      backgroundColor={colors.warningSoft}
+    >
+      <PathIcon d={RELOJ} size={20} strokeWidth={2.2} color={colors.warningText} />
+      <MText flex={1} size="md" weight="bold" color={colors.black}>
+        {lineaPorEnviar(dueno)}
+      </MText>
+    </View>
+  );
+}
+
 export function CierreHechoScreen(p: {
   h: Hecho;
   onCompartir: () => void;
@@ -111,6 +137,7 @@ export function CierreHechoScreen(p: {
           <MText size="body" weight="semibold" color={colors.ink} lineHeight={22}>
             {`${lineaCerrado(h.dif, h.motivo, h.data.dueno, h.porEnviar)}${gracias}`}
           </MText>
+          {h.porEnviar > 0 ? <PorEnviar dueno={h.data.dueno} /> : null}
         </View>
         <Corte h={h} />
       </ScrollView>

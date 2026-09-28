@@ -24,10 +24,15 @@ export const TIPO: Readonly<
   movimiento: { tint: colors.blueSoft, icon: MOVER, color: colors.blueText, signo: '' },
 };
 
-/** Sending while a sync runs; otherwise waiting, or everything sent. */
-export function faseDe(syncing: boolean, cola: readonly RegistroEnCola[]): Fase {
+/** Sending while a sync runs; otherwise retrying on a busy or slow server (DS-05), waiting, or everything sent. */
+export function faseDe(
+  syncing: boolean,
+  cola: readonly RegistroEnCola[],
+  reintentando = false,
+): Fase {
   if (syncing) return 'enviando';
-  return cola.length === 0 ? 'enviado' : 'espera';
+  if (cola.length === 0) return 'enviado';
+  return reintentando ? 'reintentando' : 'espera';
 }
 
 /** «Suman $283.00 de ventas…» → the plain and the money parts, in order. */

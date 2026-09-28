@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { folioBuscado } from '@xangarro/data-pg';
 
 import { requireSession } from '@/server/auth';
 import { hoy } from '@/server/clock';
@@ -37,10 +38,12 @@ export default async function MovimientosPage({
     const pagina = await paginaParaFecha(session.business_id, kind, filtro, estado.ir);
     redirect(urlDe({ ...estado, pagina, ir: '' }));
   }
+  // An empty search for a folio says so (DS-01); the server's own parse, not a copy.
+  const folio = folioBuscado(estado.q);
   try {
     const vista = await loadMovimientos(session.business_id, kind, filtro, estado.pagina);
-    return <MovimientosScreen estado={estado} hoy={today} vista={vista} />;
+    return <MovimientosScreen estado={estado} hoy={today} vista={vista} folio={folio} />;
   } catch {
-    return <MovimientosScreen estado={estado} hoy={today} vista={null} />;
+    return <MovimientosScreen estado={estado} hoy={today} vista={null} folio={folio} />;
   }
 }

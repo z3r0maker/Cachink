@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { primerNombreDueno, type EstadoMode } from '@xangarro/caja';
-import { desencolar, useCola } from '../shell/cola';
+import { enviarYa, useCola } from '../shell/cola';
 import { PendientesScreen } from './screen';
 import { type EnvioVivo, type RegistroEnCola, comoRegistro } from '@xangarro/caja/pendientes';
 
@@ -77,7 +77,8 @@ export function PendientesViva({
   const envio = useMemo<EnvioVivo>(
     () => ({
       listo: vivo.state === 'happy',
-      enviar: () => desencolar().then(recargar),
+      // A person asked: past the engine's own wait, never the server's (DS-05).
+      enviar: () => enviarYa().then(recargar),
     }),
     [vivo.state, recargar],
   );

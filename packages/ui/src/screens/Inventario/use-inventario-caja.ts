@@ -17,6 +17,7 @@ import { useFeatureFlag } from '../../hooks/use-feature-flags';
 import { useRegistrarMovimiento } from '../../hooks/use-registrar-movimiento';
 import { leerInventario, type ExistenciaMovil, type InventarioLeido } from './inventario-lectura';
 import { detalle, type Borrador } from './mover-logica';
+import { useSnapshotPendiente } from './use-snapshot-pendiente';
 
 export interface InventarioCaja {
   readonly state: 'loading' | 'error' | 'empty' | 'happy';
@@ -26,6 +27,8 @@ export interface InventarioCaja {
   readonly registrando: boolean;
   readonly registrar: (b: Borrador, e: ExistenciaMovil) => Promise<void>;
   readonly refetch: () => void;
+  /** The first download is still open (DS-10): «Terminando de descargar el inventario…». */
+  readonly bajando: boolean;
 }
 
 const VACIO: InventarioLeido = { existencias: [], movimientos: [] };
@@ -69,6 +72,7 @@ export function useInventarioCaja(): InventarioCaja {
       businessId: businessId as BusinessId,
     });
   };
+  const bajando = useSnapshotPendiente();
   return {
     state: stockOn ? estadoDe(q.isError, q.data) : 'empty',
     data: q.data ?? VACIO,
@@ -76,5 +80,6 @@ export function useInventarioCaja(): InventarioCaja {
     registrando: mover.isPending,
     registrar,
     refetch: () => void q.refetch(),
+    bajando,
   };
 }

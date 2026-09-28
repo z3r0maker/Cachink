@@ -35,6 +35,7 @@ export default function InventarioRoute(): ReactElement {
         onRegistrar={inv.registrar}
         onRetry={refetch}
         abrir={abrirDe(params)}
+        bajando={inv.bajando}
       />
     </AppShellWrapper>
   );

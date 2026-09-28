@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Button } from './button';
 
@@ -28,14 +28,24 @@ export function usePagina<T>(rows: readonly T[], size = 10) {
 
 export type Pagina<T> = ReturnType<typeof usePagina<T>>;
 
-export function Pager<T>({ p, noun }: { readonly p: Pagina<T>; readonly noun: string }) {
+export function Pager<T>({
+  p,
+  noun,
+  extra,
+}: {
+  readonly p: Pagina<T>;
+  readonly noun: string;
+  /** Before «Anterior», only when there is more than one page (Ventas y gastos' «Ir a fecha»). */
+  readonly extra?: ReactNode;
+}) {
   return (
     <>
       <span role="status">
         Mostrando {p.from}–{p.to} de {p.total} {noun}
       </span>
       {p.pages > 1 ? (
-        <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {extra}
           <Button size="sm" variant="secondary" onClick={p.prev} disabled={p.page === 0}>
             Anterior
           </Button>

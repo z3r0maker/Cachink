@@ -130,3 +130,33 @@ export const eventoCuando = style({
 });
 
 export const vincular = style({ fontWeight: typography.weights.extraBold, color: colors.black });
+
+/** Historial with nothing in the last 30 days (DS-03): a tile and one sentence, centred. */
+export const historialVacio = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 12,
+  padding: '16px 8px',
+  textAlign: 'center',
+});
+
+export const historialVacioIcono = style({
+  width: 52,
+  height: 52,
+  display: 'grid',
+  placeItems: 'center',
+  borderRadius: radii[3],
+  background: colors.gray100,
+  border: `2px solid ${colors.gray200}`,
+  color: colors.gray600,
+});
+
+export const historialVacioTexto = style({
+  margin: 0,
+  maxWidth: 300,
+  fontSize: portalFontSizes.body,
+  lineHeight: 1.4,
+  fontWeight: typography.weights.bold,
+  color: colors.gray600,
+});

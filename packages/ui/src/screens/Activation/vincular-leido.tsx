@@ -10,6 +10,8 @@ import { View } from '@tamagui/core';
 import { BottomSheet, Btn, MText } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
+import type { DescargaInicial } from '../../activation/use-descarga';
+import { BotonConectar, VincularDescarga } from './vincular-descarga';
 import { AvisoVinculacion } from './vincular-partes';
 
 export interface VincularLeidoProps {
@@ -18,22 +20,24 @@ export interface VincularLeidoProps {
   readonly onVolver: () => void;
   readonly submitting: boolean;
   readonly errorKey: string | null;
+  /** DS-10: a big business's pages after the first, once the code was accepted. */
+  readonly descarga?: DescargaInicial | null;
+  readonly onReintentar?: () => void;
 }
 
 function Acciones(p: VincularLeidoProps): ReactElement {
   const { t } = useTranslation();
   return (
     <View gap={8}>
-      <Btn
-        variant="primary"
-        size="xl"
-        fullWidth
-        loading={p.submitting}
-        onPress={p.onConectar}
+      <BotonConectar
+        label={t('entrar.vincular.conectar')}
+        submitting={p.submitting}
+        descarga={p.descarga ?? null}
+        onConectar={p.onConectar}
+        onReintentar={() => p.onReintentar?.()}
         testID="vincular-leido-conectar"
-      >
-        {t('entrar.vincular.conectar')}
-      </Btn>
+      />
+      {p.descarga ? <VincularDescarga d={p.descarga} /> : null}
       <Btn variant="quiet" size="lg" fullWidth onPress={p.onVolver} testID="vincular-leido-volver">
         {t('entrar.vincular.volverCamara')}
       </Btn>
