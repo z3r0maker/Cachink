@@ -64,7 +64,7 @@ function emitCajaAlerts(
       severity,
       titleKey: 'notificaciones.cajaDiscrepancia',
       message: `Diferencia de ${formatMoney(diff)} al cerrar turno.`,
-      actionRoute: '/caja-reportes',
+      actionRoute: '/turno',
       metadata: JSON.stringify({ turnoId: turno.id, diff: String(diff) }),
     });
   }

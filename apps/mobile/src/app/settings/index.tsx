@@ -108,7 +108,7 @@ export default function SettingsRoute(): ReactElement {
     <AppShellWrapper title={t('shell.nav.turno')} onBack={back}>
       <SettingsScreen
         device={device}
-        onOpenRejected={() => router.push('/no-enviados' as never)}
+        onOpenRejected={() => router.push('/pendientes' as never)}
         footer={devFooter}
       />
       <BugReportSheet

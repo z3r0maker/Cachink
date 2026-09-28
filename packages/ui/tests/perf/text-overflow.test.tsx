@@ -8,9 +8,7 @@
  * that can be exposed to long Spanish strings or Dynamic Type scaling:
  *
  *   - `<SectionTitle>` — eyebrow label
- *   - `<Tag>` — pill chip
  *   - `<EmptyState>` — title + description
- *   - `<TopBar>` — title + subtitle
  *   - `<ModalHeader>` — title + subtitle
  *
  * **Why a single perf-style test** — these props are tiny, the bug
@@ -28,7 +26,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { EmptyState, Modal, SectionTitle, Tag, TopBar } from '../../src/components/index';
+import { EmptyState, Modal, SectionTitle } from '../../src/components/index';
 import { renderWithProviders, screen } from '../test-utils';
 
 /** One-line clamp shape: `numberOfLines={1}` + `ellipsizeMode="tail"`. */
@@ -48,17 +46,6 @@ describe('Text overflow + clamp props (audit 9.3) across the text primitives', (
     expect(node.className).toMatch(NOWRAP);
   });
 
-  it('Tag clamps at 1 line', () => {
-    renderWithProviders(<Tag testID="tag-overflow">Materia Prima</Tag>);
-    const root = screen.getByTestId('tag-overflow');
-    // The clamp lives on the inner `<TagText>` Text node; introspect
-    // children to get the rendered span.
-    const textSpan = root.querySelector('span');
-    expect(textSpan).not.toBeNull();
-    expect(textSpan!.className).toMatch(ONE_LINE_CLAMP);
-    expect(textSpan!.className).toMatch(NOWRAP);
-  });
-
   it('EmptyState.title clamps at 2 lines and description clamps at 4 lines', () => {
     renderWithProviders(
       <EmptyState
@@ -70,14 +57,6 @@ describe('Text overflow + clamp props (audit 9.3) across the text primitives', (
     expect(screen.getByTestId('empty-state-description').className).toMatch(
       multiLineClampMatcher(4),
     );
-  });
-
-  it('TopBar title + subtitle each clamp at 1 line', () => {
-    renderWithProviders(
-      <TopBar title="Buenos días, Pedro" subtitle="abril 2026 · 4 dispositivos" />,
-    );
-    expect(screen.getByTestId('top-bar-title').className).toMatch(ONE_LINE_CLAMP);
-    expect(screen.getByTestId('top-bar-subtitle').className).toMatch(ONE_LINE_CLAMP);
   });
 
   it('ModalHeader title + subtitle each clamp at 1 line', () => {

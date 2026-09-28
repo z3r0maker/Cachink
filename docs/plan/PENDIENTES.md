@@ -96,7 +96,7 @@ Entornos, base de datos, regiones y respaldos. Se prueban en staging, no en loca
 - [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1182`
 - [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1188`
 
-## Deuda técnica y auditorías (12)
+## Deuda técnica y auditorías (11)
 
 Auditorías, cobertura, arneses y reescrituras de prueba. Nada de esto es función nueva.
 
@@ -112,14 +112,13 @@ Auditorías, cobertura, arneses y reescrituras de prueba. Nada de esto es funci�
 - [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1135`
 - [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1169`
 
-### Colas de tracks (6)
+### Colas de tracks (5)
 
 - [ ] **P-21** `pnpm design:compare` capture harness — Blocked by: P-18 · Falta: the whole harness. The one verified in `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the `package.json` script and the ignore line. The sources are on no disk (worktree and main checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery. Restore the script entry when the harness lands. · `04-portal.md:187`
 - [~] **P-23** Primitives + Storybook inventory + visual-regression baselines — Blocked by: P-22 · Falta: the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed. 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance. In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed. · `04-portal.md:253`
 - [ ] **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1626`
 - [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
 - [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
-- [ ] **M-12** Leftovers from M-01. · `19-movil-mostrador.md:35`
 
 ## Tiendas (App Store / Play) (8)
 
@@ -283,5 +282,5 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 10 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)
