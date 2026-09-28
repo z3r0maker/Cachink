@@ -119,6 +119,33 @@ describe('a push the tables refuse', () => {
   });
 });
 
+describe('control plumbing edges', () => {
+  it('an unknown control route falls through to the protocol gate', async () => {
+    const api = new MockApi();
+    const r = await api.handle({
+      method: 'POST',
+      path: '/__mock/nadie',
+      query: {},
+      headers: { 'x-xangarro-protocol': String(PROTOCOL_VERSION) },
+      body: {},
+    });
+    assert.equal((r.body as { error?: { code?: string } }).error?.code, 'UNAUTHENTICATED');
+  });
+
+  it('an upsert carrying a sequence advances the state to it, never back', () => {
+    const api = new MockApi();
+    const producto = api.state.rowsOf('products', 0)[0]?.row as Record<string, unknown>;
+    const grande = api.state.serverSeq + 50;
+    api.state.upsert('products', { ...producto, _seq: grande });
+    assert.equal(api.state.serverSeq, grande);
+    // A small _seq never drags the counter back — every upsert still steps
+    // it forward by one, and the _seq only floors it.
+    const trasGrande = api.state.serverSeq;
+    api.state.upsert('products', { ...producto, _seq: 1 });
+    assert.equal(api.state.serverSeq, trasGrande + 1);
+  });
+});
+
 describe('a push under flaky', () => {
   it('the chosen row is retryable and its neighbour is accepted', async () => {
     // Pick the pair from the hash itself, so the test says what it means.
