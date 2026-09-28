@@ -6,8 +6,15 @@ import { asTenant, BIZ } from './sync-phone';
  * P-14's period switcher and ISR, against the seed with the business's today
  * pinned to 2026-05-12. In the `sync` project because one test changes the
  * seeded tenant's ISR rate — and puts it back.
+ *
+ * **`afterEach`, not `afterAll`.** The régime test sets `regimen_sat = '616'`
+ * and the RESICO test below it reads `'626'`, so an `afterAll` restored the row
+ * only once both had run — and the second one always saw the first one's write.
+ * CLAUDE.md §6: whoever wrecks a seeded row restores it in a hook that runs on
+ * failure too, which is what makes the file re-runnable and its tests
+ * order-independent.
  */
-test.afterAll(async () => {
+test.afterEach(async () => {
   await asTenant(
     BIZ,
     (sql) => sql`UPDATE businesses SET isr_tasa = 125, regimen_sat = '626' WHERE id = ${BIZ}`,
