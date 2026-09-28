@@ -14,6 +14,7 @@ import { committedCursor, ownerNombre } from '@xangarro/data-pg';
 import type { Tx } from '../db';
 import { tenantFeatureFlags } from './bootstrap';
 import { snapshotReader } from './snapshot-reads';
+import { paginasDelSnapshot } from './snapshot-size';
 
 /**
  * One page of a snapshot bootstrap (C-23, ADR-121; contract §3, §5), inside
@@ -55,6 +56,7 @@ export async function snapshotPage(tx: Tx, token: string, now: Date): Promise<Sn
       first,
       next: page.next === null ? null : encodeSnapshotToken(page.next),
       stockBaseline: stockBaseline as SnapshotInfo['stockBaseline'],
+      ...(first && { pages: await paginasDelSnapshot(tx, cursor) }),
     },
   };
 }

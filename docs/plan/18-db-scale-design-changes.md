@@ -31,6 +31,9 @@ decisions** first: they change the copy of DS-01 and DS-06.
 ### DS-01 Ventas y gastos — filters answered by the server
 
 - [ ] Status · Send the blocks below to the portal project; pull; align `app/(portal)/movimientos/*`.
+      Backend for «Ir a fecha» done (branch `feat/ds-backend`): navigate to
+      `/movimientos?ir=YYYY-MM-DD` with the current filters; the server opens the page holding that
+      day and redirects to `?pagina=N` (`paginaDeFecha`, data-pg).
 
 **Why.** The screen used to load a tenant's whole history into the browser: 576K rows and 3.6 s
 for a one-year Xangarrote tenant, past the production 5 s timeout with a few more months of
@@ -128,7 +131,10 @@ and the caja shows only «en línea / sin conexión».
 
 ### DS-07 Registros por enviar — last and next attempt
 
-- [ ] Status · Send; pull.
+- [ ] Status · Send; pull. Backend done (branch `feat/ds-backend`): the caja's `PendienteCrudo`
+      carries `ultimoIntento` and `proximoIntento` (ISO, or null), per record; the phone's reader
+      (`packages/ui/src/sync/cola/`) can map `unsentRows`' `lastAttemptAt` / `nextAttemptAt` the
+      same way.
 
 **Why.** A row can no longer be stranded as «pendiente» (audit DB2-DEV-01). After a failed batch,
 or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff.
@@ -169,7 +175,11 @@ memory. The range is capped at 13 months.
 ### DS-10 Linking a big business — the first download comes in pages
 
 - [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
-      caja» and the phone's activation (audit DB3-BOOT-01, ADR-121).
+      caja» and the phone's activation (audit DB3-BOOT-01, ADR-121). Backend done (branch
+      `feat/ds-backend`): the first page estimates `pages`; the device keeps `{ pagina, paginas }`
+      (`snapshotProgress`, `@xangarro/sync`; `paginas` null from an older server). The caja polls
+      `registerRuntime().progresoSnapshot()` while `vincularYPasar` runs; the phone reads
+      `snapshotProgress` over its `app_config`.
 
 **Why.** Linking used to download the business's whole movement history in one response, which
 stopped working after about a month of a busy shop. It now downloads a snapshot in pages of at

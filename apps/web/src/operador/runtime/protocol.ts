@@ -83,6 +83,7 @@ export type WorkerRequest =
       readonly manual: boolean;
     }
   | { readonly id: number; readonly method: 'counts' }
+  | { readonly id: number; readonly method: 'progresoSnapshot' }
   | {
       readonly id: number;
       readonly method: 'vincular';

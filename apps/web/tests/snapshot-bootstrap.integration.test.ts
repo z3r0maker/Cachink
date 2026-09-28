@@ -180,6 +180,9 @@ suite('snapshot bootstrap on Postgres', () => {
         `${Math.round((performance.now() - started) / pages.length)} ms a page`,
     );
     assert.ok(pages.length >= 3, `${pages.length} pages`);
+    // DS-10: the first page's estimate, off by at most the baseline's upper bound.
+    const estimate = first.snapshot?.pages ?? 0;
+    assert.ok(Math.abs(estimate - pages.length) <= 1, `said ${estimate}, served ${pages.length}`);
     for (const b of sizes) assert.ok(b < 2_000_000, `a page of ${b} bytes`);
     assert.ok(MAX_SNAPSHOT_PAGE_BYTES < 2_000_000);
     const seq = pages[0]!.serverSeq;

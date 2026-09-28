@@ -12,6 +12,7 @@ import { sql } from 'drizzle-orm';
 import type { Bootstrap, ReferenceTables, SnapshotInfo } from '@xangarro/contracts';
 import { DrizzleAppConfigRepository, type XangarroDatabase } from '@xangarro/data';
 import { applyReferenceTables, type ApplyReferenceResult } from './reference-applier.js';
+import { progressWrites } from './snapshot-progress.js';
 import { addStockBaseline, resetStockBaseline } from './stock-baseline.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
@@ -57,7 +58,8 @@ async function applyInside(
   if (snapshot?.first) await resetStockBaseline(db, snapshot.cutoff, await pushHwm(db));
   const result = await applyReferenceTables(db, page.tables, businessId);
   if (snapshot) await addStockBaseline(db, snapshot.stockBaseline);
-  await writeConfig(db, writes);
+  const progreso = await progressWrites(new DrizzleAppConfigRepository(db), page);
+  await writeConfig(db, { ...progreso, ...writes });
   return result;
 }
 

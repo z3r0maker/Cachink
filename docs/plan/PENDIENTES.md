@@ -270,21 +270,21 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ### `18-db-scale-design-changes.md` · Portal
 
 - [ ] **DS-01** Ventas y gastos — filters answered by the server · `18-db-scale-design-changes.md:33`
-- [ ] **DS-02** Exportar — every row, with a preparing state · `18-db-scale-design-changes.md:66`
-- [ ] **DS-03** Sincronización › Historial — the last 30 days · `18-db-scale-design-changes.md:81`
-- [ ] **DS-04** Productos › Movimientos — the newest 50 · `18-db-scale-design-changes.md:91`
+- [ ] **DS-02** Exportar — every row, with a preparing state · `18-db-scale-design-changes.md:69`
+- [ ] **DS-03** Sincronización › Historial — the last 30 days · `18-db-scale-design-changes.md:84`
+- [ ] **DS-04** Productos › Movimientos — the newest 50 · `18-db-scale-design-changes.md:94`
 
 ### `18-db-scale-design-changes.md` · Caja (operador) and phone
 
-- [ ] **DS-05** Sync status — «Reintentando» · `18-db-scale-design-changes.md:100`
-- [ ] **DS-06** Cierre — rows still to send · `18-db-scale-design-changes.md:117`
-- [ ] **DS-07** Registros por enviar — last and next attempt · `18-db-scale-design-changes.md:131`
+- [ ] **DS-05** Sync status — «Reintentando» · `18-db-scale-design-changes.md:103`
+- [ ] **DS-06** Cierre — rows still to send · `18-db-scale-design-changes.md:120`
+- [ ] **DS-07** Registros por enviar — last and next attempt · `18-db-scale-design-changes.md:134`
 
 ### `18-db-scale-design-changes.md` · Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
 
-- [ ] **DS-08** Caja — already open in another tab · `18-db-scale-design-changes.md:144`
-- [ ] **DS-09** Estados — the custom range has a limit · `18-db-scale-design-changes.md:160`
-- [ ] **DS-10** Linking a big business — the first download comes in pages · `18-db-scale-design-changes.md:171`
+- [ ] **DS-08** Caja — already open in another tab · `18-db-scale-design-changes.md:150`
+- [ ] **DS-09** Estados — the custom range has a limit · `18-db-scale-design-changes.md:166`
+- [ ] **DS-10** Linking a big business — the first download comes in pages · `18-db-scale-design-changes.md:177`
 
 ### `19-movil-mostrador.md` · Phases
 
