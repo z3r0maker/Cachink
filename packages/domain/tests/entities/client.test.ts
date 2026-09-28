@@ -57,4 +57,65 @@ describe('NewClientSchema', () => {
       }),
     ).not.toThrow();
   });
+
+  it('leaves the credit line, term and fusion unsaid when omitted', () => {
+    const n = NewClientSchema.parse({ nombre: 'Pedro', businessId: BIZ_ID });
+    expect(n.limiteCentavos).toBeUndefined();
+    expect(n.plazoDias).toBeUndefined();
+    expect(n.fusionadoConId).toBeUndefined();
+  });
+
+  it('carries the owner-set credit line and term (ADR-074)', () => {
+    const n = NewClientSchema.parse({
+      nombre: 'Pedro',
+      businessId: BIZ_ID,
+      limiteCentavos: 500_00n,
+      plazoDias: 15,
+    });
+    expect(n.limiteCentavos).toBe(500_00n);
+    expect(n.plazoDias).toBe(15);
+  });
+
+  it('refuses a negative credit term', () => {
+    expect(() =>
+      NewClientSchema.parse({ nombre: 'Pedro', businessId: BIZ_ID, plazoDias: -1 }),
+    ).toThrow();
+  });
+
+  it('a client created at the register arrives pendiente de revisión (ADR-074)', () => {
+    const n = NewClientSchema.parse({
+      nombre: 'Pedro',
+      businessId: BIZ_ID,
+      estadoRevision: 'pendiente',
+    });
+    expect(n.estadoRevision).toBe('pendiente');
+  });
+
+  it('records which client a merge fused into, or none', () => {
+    const n = NewClientSchema.parse({
+      nombre: 'Pedro',
+      businessId: BIZ_ID,
+      fusionadoConId: CLI_ID,
+    });
+    expect(n.fusionadoConId).toBe(CLI_ID);
+    expect(() =>
+      NewClientSchema.parse({ nombre: 'Pedro', businessId: BIZ_ID, fusionadoConId: 'no-ulid' }),
+    ).toThrow();
+  });
+});
+
+describe('ClientSchema · RFC (N-16)', () => {
+  it('normalises a valid RFC to upper case', () => {
+    const c = ClientSchema.parse({ ...validClient, rfc: 'eku9003173c9' });
+    expect(c.rfc).toBe('EKU9003173C9');
+  });
+
+  it('keeps an absent RFC as unknown — every row the phone writes', () => {
+    const c = ClientSchema.parse({ ...validClient, rfc: undefined });
+    expect(c.rfc).toBeUndefined();
+  });
+
+  it('refuses an RFC that does not pass the fiscal check', () => {
+    expect(() => ClientSchema.parse({ ...validClient, rfc: 'NOPE1' })).toThrow();
+  });
 });

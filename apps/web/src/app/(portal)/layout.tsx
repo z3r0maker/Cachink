@@ -1,12 +1,8 @@
 import { PLAN_NOMBRE } from '@xangarro/domain';
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-
 import { buildChecklist } from '@/onboarding/checklist';
-import { GUIA_OMITIDA_COOKIE, debeIrALaGuia } from '@/onboarding/guia';
 import { currentSession } from '@/server/current-session';
-import { loadChecklistSignals, wizardCompleted } from '@/server/onboarding/load';
+import { loadChecklistSignals } from '@/server/onboarding/load';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
@@ -35,28 +31,17 @@ import { column, content, frame, main } from '@/shell/shell.css';
  * belongs to (P-02).
  */
 /**
- * P-36 D-2: a new business is walked through «¿Cómo empiezo?» before the
- * portal. A failing read never gates — the shell degrades, it does not lock.
- *
- * The same checklist feeds the sidebar's «Primeros pasos» card (ADR-107):
- * every step, optional ones included, until all are done; never for a
- * read-only role.
+ * The sidebar's «Primeros pasos» card (ADR-107): every step, optional ones
+ * included, until all are done; never for a read-only role. The checklist is
+ * a portal page like any other — nothing redirects to it (P-36 D-2 reversed:
+ * a new owner lands there from onboarding and moves freely from then on).
  */
 async function guiaPrimero(role: string, businessId: string): Promise<Pasos | null> {
-  const omitida = (await cookies()).get(GUIA_OMITIDA_COOKIE) !== undefined;
-  const [wizard, checklist] = await Promise.all([
-    wizardCompleted(businessId).catch(() => false),
-    loadChecklistSignals(businessId)
-      .then(buildChecklist)
-      .catch(() => null),
-  ]);
-  // Only a business that went through the wizard is sent to the guide; one
-  // that predates it (or a failed read) is never locked out of the portal.
-  const complete = !wizard || checklist === null || checklist.complete;
-  if (debeIrALaGuia({ role, complete, omitida })) redirect('/como-empiezo');
-  if (checklist === null || role === 'viewer') return null;
-  // The card counts optional steps too: it is the owner's to-do list, not a
-  // gate, so it shows whether or not the wizard ran — as Inicio's did.
+  if (role === 'viewer') return null;
+  const checklist = await loadChecklistSignals(businessId)
+    .then(buildChecklist)
+    .catch(() => null);
+  if (checklist === null) return null;
   const done = checklist.items.filter((i) => i.done).length;
   return done === checklist.items.length ? null : { done, total: checklist.items.length };
 }

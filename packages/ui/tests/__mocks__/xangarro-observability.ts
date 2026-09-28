@@ -6,6 +6,10 @@
  * needed by app-providers.tsx and the observability/ internal modules.
  */
 
+/** The real package exists now; everything it exports is the truth. The
+ * hand-written pieces below stay only where a test still leans on them. */
+export * from '../../../observability/src/index.js';
+
 export type AuditEvent = {
   operation: string;
   timestamp: string;

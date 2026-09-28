@@ -2,9 +2,21 @@
  * NotificationScheduler contract tests (ADR-026, S4-C10).
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InMemoryNotificationScheduler } from '../../src/notifications/notification-scheduler';
 import { millisUntilNextTrigger } from '../../src/notifications/notification-scheduler.web';
+
+const sendNotification = vi.fn();
+const isPermissionGranted = vi.fn();
+const pedirPermiso = vi.fn();
+vi.mock('@tauri-apps/plugin-notification', () => ({
+  sendNotification: (...args: unknown[]) => sendNotification(...args),
+  isPermissionGranted: () => isPermissionGranted(),
+  requestPermission: () => pedirPermiso(),
+}));
+
+const { TauriNotificationScheduler } =
+  await import('../../src/notifications/notification-scheduler.web');
 
 describe('InMemoryNotificationScheduler', () => {
   it('requestPermission returns granted on first call after default', async () => {
@@ -115,5 +127,62 @@ describe('millisUntilNextTrigger', () => {
     const now = new Date(2026, 3, 24, 20, 0, 0); // local 20:00
     const delta = millisUntilNextTrigger(19, 0, now);
     expect(delta).toBeGreaterThan(1000 * 60 * 60 * 22);
+  });
+});
+
+describe('TauriNotificationScheduler', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-27T12:00:00'));
+    sendNotification.mockClear();
+    isPermissionGranted.mockReset();
+    pedirPermiso.mockReset();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('permission: already granted, granted on request, denied, and anything else is undetermined', async () => {
+    const s = new TauriNotificationScheduler();
+    isPermissionGranted.mockResolvedValue(true);
+    expect(await s.requestPermission()).toBe('granted');
+
+    isPermissionGranted.mockResolvedValue(false);
+    pedirPermiso.mockResolvedValue('granted');
+    expect(await s.requestPermission()).toBe('granted');
+
+    pedirPermiso.mockResolvedValue('denied');
+    expect(await s.requestPermission()).toBe('denied');
+
+    pedirPermiso.mockResolvedValue('default');
+    expect(await s.requestPermission()).toBe('undetermined');
+  });
+
+  it('presentNow hands the title and body to the plugin', async () => {
+    const s = new TauriNotificationScheduler();
+    await s.presentNow({ title: 'Stock bajo', body: '3 productos' });
+    expect(sendNotification).toHaveBeenCalledWith({ title: 'Stock bajo', body: '3 productos' });
+  });
+
+  it('scheduleDaily fires at the next occurrence, reschedules for the next day, and a cancel stops it', async () => {
+    const s = new TauriNotificationScheduler();
+    await s.scheduleDaily({ id: 'stock-low', hour: 13, minute: 0, title: 'T', body: 'B' });
+
+    await vi.advanceTimersByTimeAsync(60 * 60 * 1000 + 5);
+    expect(sendNotification).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000 + 5);
+    expect(sendNotification).toHaveBeenCalledTimes(2);
+
+    await s.cancelById('stock-low');
+    await vi.advanceTimersByTimeAsync(3 * 24 * 60 * 60 * 1000);
+    expect(sendNotification).toHaveBeenCalledTimes(2);
+
+    // Scheduling again under the same id replaces the timer, and cancelAll clears the rest.
+    await s.scheduleDaily({ id: 'stock-low', hour: 13, minute: 0, title: 'T', body: 'B' });
+    await s.scheduleDaily({ id: 'otro', hour: 14, minute: 0, title: 'T', body: 'B' });
+    await s.cancelAll();
+    await vi.advanceTimersByTimeAsync(3 * 24 * 60 * 60 * 1000);
+    expect(sendNotification).toHaveBeenCalledTimes(2);
   });
 });
