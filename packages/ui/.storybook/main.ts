@@ -91,13 +91,6 @@ const config: StorybookConfig = {
         'react-native-web',
         '@tamagui/core',
         '@tamagui/web',
-        // `echarts-for-react` is CommonJS. Without pre-bundling, its default
-        // export arrives as a module namespace object rather than a component,
-        // and every chart story dies with "Element type is invalid ... got:
-        // object". Pre-bundling applies the CJS→ESM interop that fixes it.
-        'echarts',
-        'echarts-for-react',
-        'echarts-for-react/esm/core',
       ],
       /*
        * The dep scanner statically reads every `.tsx` under the package,

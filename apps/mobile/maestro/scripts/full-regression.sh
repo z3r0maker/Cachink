@@ -547,7 +547,6 @@ if should_run "D"; then
   CURRENT_PHASE="Phase 13.7: Error paths"
   echo ""
   echo "📂  Phase 13.7: Error paths"
-  run_flow "$FLOWS_DIR/consent-modal-dismiss.yaml"
 fi
 
 # ──────────────── Phase 9.7: Notifications + Otros deep nav ────

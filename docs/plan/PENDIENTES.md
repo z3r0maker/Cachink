@@ -218,7 +218,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
 
-## Colas de tracks (21)
+## Colas de tracks (22)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -266,12 +266,13 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
 - [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
+- [ ] **L-09** Comparison and alternatives pages against named competitors — Blocked by: owner — the competitor list and the facts about each that we are willing to publish · `06-landing.md:192`
+- [ ] **L-10** Off-site presence: Reddit and YouTube — Blocked by: owner — accounts and time · `06-landing.md:208`
 
 ### `19-movil-mostrador.md` · Phases
 
 - [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] **M-11** Maestro rework. · `19-movil-mostrador.md:34`
-- [ ] **M-12** Leftovers from M-01. · `19-movil-mostrador.md:35`
 
 ## Por archivo
 
@@ -279,12 +280,12 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
 - `04-portal.md` — 12 abiertos (4 en curso, 1 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
-- `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 5 hechos)
+- `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 10 hechos)
 - `../launch/production-readiness.md` — 46 abiertos (5 en curso, 0 bloqueados, 6 hechos)

@@ -976,9 +976,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@react-pdf/renderer':
-        specifier: ^4.5.1
-        version: 4.5.1(react@19.2.6)
       '@sentry/browser':
         specifier: ^10.53.1
         version: 10.53.1
@@ -1015,15 +1012,6 @@ importers:
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/sql.js@1.4.11)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(gel@2.2.0)(postgres@3.4.9)(sql.js@1.14.2)
-      exceljs:
-        specifier: ^4.4.0
-        version: 4.4.0
-      html2canvas:
-        specifier: ^1.4.1
-        version: 1.4.1
-      jspdf:
-        specifier: ^4.2.1
-        version: 4.2.1
       lucide-react-native:
         specifier: ^1.16.0
         version: 1.16.0(react-native-svg@15.15.4(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
@@ -1031,18 +1019,12 @@ importers:
         specifier: ^15.15.0
         version: 15.15.4(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
     devDependencies:
-      '@hookform/resolvers':
-        specifier: ^5.2.2
-        version: 5.2.2(react-hook-form@7.76.0(react@19.2.6))
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
       '@sentry/react-native':
         specifier: ^8.11.1
         version: 8.11.1(@expo/env@2.1.2)(dotenv@16.4.7)(expo@55.0.24)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
-      '@shopify/react-native-skia':
-        specifier: ~2.6.2
-        version: 2.6.2(react-native-reanimated@4.3.0(react-native-worklets@0.8.1(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
       '@storybook/addon-a11y':
         specifier: ^10.4.0
         version: 10.4.0(storybook@10.4.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@testing-library/dom@10.4.1)(@types/react@19.2.14)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
@@ -1106,12 +1088,6 @@ importers:
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
-      echarts:
-        specifier: ~6.0.0
-        version: 6.0.0
-      echarts-for-react:
-        specifier: ~3.0.6
-        version: 3.0.6(echarts@6.0.0)(react@19.2.6)
       expo-camera:
         specifier: ~55.0.18
         version: 55.0.18(@types/emscripten@1.41.5)(expo@55.0.24)(react-native-web@0.21.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
@@ -1139,9 +1115,6 @@ importers:
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
-      react-hook-form:
-        specifier: ^7.76.0
-        version: 7.76.0(react@19.2.6)
       react-i18next:
         specifier: ^17.0.8
         version: 17.0.8(i18next@26.2.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
@@ -1163,9 +1136,6 @@ importers:
       ulid:
         specifier: ^3.0.2
         version: 3.0.2
-      victory-native:
-        specifier: ~41.20.3
-        version: 41.20.3(e8c89d68f9b7505e97534ca84c702284)
       vite:
         specifier: ^8.0.13
         version: 8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)

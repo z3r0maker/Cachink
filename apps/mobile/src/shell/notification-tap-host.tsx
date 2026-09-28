@@ -21,6 +21,7 @@ import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useUserId, useMarkAlertRead } from '@xangarro/ui';
 import type { DirectorAlertId } from '@xangarro/domain';
+import { rutaDeAviso } from './ruta-de-aviso';
 
 // ── Foreground handler ─────────────────────────────────────────────
 // Show banner + badge + sound even when the app is open.
@@ -58,7 +59,7 @@ function useNotificationTapHandler(userId: string | null): TapHandler {
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
   const [pendingAlertId, setPendingAlertId] = useState<string | null>(null);
   const handleTap = (payload: NotificationPayload): void => {
-    const route = payload.actionRoute ?? '/productos';
+    const route = rutaDeAviso(payload.actionRoute);
     const alertId = payload.alertId ?? null;
     if (userId !== null) {
       if (alertId) markRead.mutate(alertId as DirectorAlertId);

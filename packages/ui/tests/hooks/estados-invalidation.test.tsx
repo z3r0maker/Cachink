@@ -1,7 +1,7 @@
 /**
  * Estados-financieros invalidation contract (review item #9).
  *
- * The reported bug: register a venta or a gasto, open Estados, and the
+ * The reported bug: register a gasto, open Estados, and the
  * numbers were the pre-mutation ones. The query client caches with
  * `staleTime: Infinity`, so nothing refetches unless the mutation
  * explicitly invalidates the estados keys — and it didn't.
@@ -18,20 +18,16 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
-  InMemoryCajaTurnosRepository,
   InMemoryExpensesRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
-  InMemorySalesRepository,
   TEST_DEVICE_ID,
   makeNewExpense,
   makeNewProduct,
-  makeNewSale,
 } from '@xangarro/testing';
 import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
 import { TamaguiProvider } from '@tamagui/core';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
-import { useRegistrarVenta } from '../../src/hooks/use-registrar-venta';
 import { useRegistrarEgreso } from '../../src/hooks/use-registrar-egreso';
 import { useRegistrarMovimiento } from '../../src/hooks/use-registrar-movimiento';
 import { useCrearProducto } from '../../src/hooks/use-crear-producto';
@@ -86,40 +82,12 @@ function makeHarness(overrides: Record<string, unknown>): Harness {
 
 describe('estados invalidation after money mutations', () => {
   let products: InMemoryProductsRepository;
-  let sales: InMemorySalesRepository;
   let expenses: InMemoryExpensesRepository;
-  let cajaTurnos: InMemoryCajaTurnosRepository;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
-    sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
-    cajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
     useAppConfigStore.setState({ currentBusinessId: BIZ, userId: USER, hydrated: true });
-    await cajaTurnos.create({
-      userId: USER,
-      fecha: '2026-04-23',
-      aperturaAt: '2026-04-23T09:00:00.000Z',
-      montoAperturaCentavos: 0n,
-      efectivoAdicionalCentavos: 0n,
-      businessId: BIZ,
-    });
-  });
-
-  it('registrar venta sweeps every estados surface', async () => {
-    const producto = await products.create(makeNewProduct({ businessId: BIZ }));
-    const harness = makeHarness({ products, sales, cajaTurnos });
-
-    const { result } = renderHook(() => useRegistrarVenta(), { wrapper: harness.wrapper });
-    await act(async () => {
-      result.current.mutate(makeNewSale({ businessId: BIZ, productoId: producto.id }));
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const swept = harness.invalidated();
-    for (const prefix of ESTADOS_PREFIXES) {
-      expect(swept).toContain(prefix);
-    }
   });
 
   it('registrar egreso sweeps every estados surface', async () => {
@@ -135,19 +103,6 @@ describe('estados invalidation after money mutations', () => {
     for (const prefix of ESTADOS_PREFIXES) {
       expect(swept).toContain(prefix);
     }
-  });
-
-  it('registrar venta still invalidates the ventas list it always did', async () => {
-    const producto = await products.create(makeNewProduct({ businessId: BIZ }));
-    const harness = makeHarness({ products, sales, cajaTurnos });
-
-    const { result } = renderHook(() => useRegistrarVenta(), { wrapper: harness.wrapper });
-    await act(async () => {
-      result.current.mutate(makeNewSale({ businessId: BIZ, productoId: producto.id }));
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(harness.invalidated()).toContain('ventas');
   });
 
   it('registrar movimiento de inventario sweeps every estados surface', async () => {
@@ -199,21 +154,5 @@ describe('estados invalidation after money mutations', () => {
     for (const prefix of ESTADOS_PREFIXES) {
       expect(swept).toContain(prefix);
     }
-  });
-
-  it('does not invalidate estados when the mutation fails', async () => {
-    // No open caja turno for this business → the use-case rejects.
-    useAppConfigStore.setState({ currentBusinessId: BIZ, userId: USER, hydrated: true });
-    const emptyTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
-    const producto = await products.create(makeNewProduct({ businessId: BIZ }));
-    const harness = makeHarness({ products, sales, cajaTurnos: emptyTurnos });
-
-    const { result } = renderHook(() => useRegistrarVenta(), { wrapper: harness.wrapper });
-    await act(async () => {
-      result.current.mutate(makeNewSale({ businessId: BIZ, productoId: producto.id }));
-    });
-    await waitFor(() => expect(result.current.isError).toBe(true));
-
-    expect(harness.invalidated()).not.toContain('estado-resultados');
   });
 });

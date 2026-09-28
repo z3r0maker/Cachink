@@ -66,7 +66,7 @@ async function pushIfNeeded(
       id: alert.id,
       title: deps.t(input.titleKey as never),
       body: input.message,
-      payload: { actionRoute: input.actionRoute ?? '/notificaciones', alertId: alert.id },
+      payload: { actionRoute: input.actionRoute ?? '/avisos', alertId: alert.id },
     });
   } catch {
     // Permission denied or notification API unavailable — the alert still
