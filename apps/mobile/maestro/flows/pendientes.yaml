@@ -1,0 +1,22 @@
+# Registros por enviar (Track M, M-09; MvPendientes): the sync pill opens it;
+# with nothing waiting it says «Todo enviado», and «Revisar de nuevo» sends
+# and reads again.
+#
+# Precondition: signed in, online, nothing queued.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow: shared/login-operator.yaml
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'pendientes'
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: 'pendientes-heroe-enviado'
+    timeout: 30000
+- tapOn:
+    id: 'pendientes-reintentar'
+- assertVisible: 'Todo enviado'

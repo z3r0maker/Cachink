@@ -4,12 +4,14 @@
 #   1. Create a 2nd product (Taco, $20)
 #   2. Generate 2 cash sales (Tortilla $15, Taco $20)
 #   3. Assert aggregate KPI (ventas-total-card = $35.00)
-#   4. Cancel the Taco sale via Cancelaciones flow (PIN → reason → cash)
+#   4. Cancel the Taco sale from the Ventas tab (sheet → motive, note, NIP)
 #   5. Verify KPI adjusts (total = $15.00) and cancelled badge appears
 #
 # Precondition: wizard + director-setup complete, Tortilla ($15) exists
 # (created by inventario-producto.yaml in Phase 2). No prior sales today.
-# Must run FIRST in Phase 4 for deterministic totals.
+# Must run FIRST in Phase 4 for deterministic totals. The NIP typed at the
+# cancel is the signed-in user's (four digits, ADR-072); adjust it to the
+# harness's user.
 #
 # Chain flows:
 #
@@ -59,7 +61,7 @@ appId: mx.xangarro.mobile
 
 - extendedWaitUntil:
     visible:
-      id: 'caja-status-card'
+      id: 'mi-turno-esperado'
     timeout: 10000
 
 # ══════════════════════════════════════════════════════════════════
@@ -154,80 +156,58 @@ appId: mx.xangarro.mobile
     id: 'ventas-list'
 
 # ══════════════════════════════════════════════════════════════════
-# Step 5: Cancel one sale — navigate to Cancelaciones via Otros
+# Step 5: Cancel one sale from the Ventas tab (Track M, M-08)
 # ══════════════════════════════════════════════════════════════════
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-- scrollUntilVisible:
-    element:
-      id: 'otros-cancelaciones'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
+# The newest row is the Taco ticket; its sheet offers «Cancelar venta»,
+# which asks for a motive and the operator's NIP (CancelarTicketUseCase).
 - tapOn:
-    id: 'otros-cancelaciones'
-
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: 'cancelaciones-screen'
+      id: 'ventas-lista'
     timeout: 5000
-
-# Tap the first "Cancelar" button (newest sale = Taco, $20).
-- tapOn: 'Cancelar'
-
-# ── PIN step ──
+- tapOn:
+    id: 'venta-fila-.*'
+    index: 0
 - extendedWaitUntil:
     visible:
-      id: 'cancellation-flow'
+      id: 'venta-sheet'
     timeout: 5000
-- assertVisible:
-    id: 'cancel-pin-input'
-# Enter PIN 123456 (Director Test PIN).
 - tapOn:
-    id: 'numpad-1'
-- tapOn:
-    id: 'numpad-2'
-- tapOn:
-    id: 'numpad-3'
-- tapOn:
-    id: 'numpad-4'
-- tapOn:
-    id: 'numpad-5'
-- tapOn:
-    id: 'numpad-6'
-
-# ── Reason step ──
+    id: 'venta-cancelar'
 - extendedWaitUntil:
     visible:
-      id: 'cancel-reason-input'
+      id: 'cancelar-venta'
     timeout: 5000
+- assertVisible: 'Elige un motivo para cancelar.'
 - tapOn:
-    id: 'cancel-reason-input'
+    id: 'cancelar-motivo-1'
+- tapOn:
+    id: 'cancelar-nota'
 - inputText: 'Prueba E2E'
 - tapOn:
-    id: 'cancel-reason-submit'
-
-# ── Cash confirm step (Taco was cash/Efectivo) ──
-- extendedWaitUntil:
-    visible:
-      id: 'cancel-cash-confirm'
-    timeout: 5000
+    id: 'cancelar-nip'
+- inputText: '1234'
 - tapOn:
-    id: 'cancel-cash-confirm'
+    id: 'cancelar-confirmar'
 
 # ══════════════════════════════════════════════════════════════════
-# Step 6: Verify cancellation — badge visible on cancelled sale
+# Step 6: Verify cancellation — back on the sheet, marked cancelled
 # ══════════════════════════════════════════════════════════════════
 - extendedWaitUntil:
     notVisible:
-      id: 'cancellation-flow'
+      id: 'cancelar-venta'
     timeout: 5000
-
-# The cancelled sale should show the badge text.
 - assertVisible:
-    text: '.*Cancelada.*Prueba E2E.*'
+    id: 'venta-aviso'
+- assertVisible:
+    id: 'venta-cancelada'
+- assertVisible:
+    text: '.*Me equivoqué al cobrar: Prueba E2E.*'
+- tapOn:
+    id: 'venta-listo'
+- assertVisible:
+    text: 'Cancelada'
 
 # ══════════════════════════════════════════════════════════════════
 # Step 7: Verify KPI adjusts — back to Ventas, total = $15.00

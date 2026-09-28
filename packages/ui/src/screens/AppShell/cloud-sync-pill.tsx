@@ -5,9 +5,11 @@
  * enviar» while records wait (offline or queued), red «N no enviados» when
  * the server refused some.
  *
- * Tapping it sends now («Actualizar»); with refused rows it opens «No
- * enviados» (A-08) where a person can act. `interactive={false}` is the
- * static pill the web shows on Pendientes and Cierre.
+ * In the caja's frame it opens Registros por enviar (MvPendientes, M-09):
+ * the queue, its «Reintentar ahora» and the refused rows. Without that
+ * destination it sends now («Actualizar»), or opens «No enviados» (A-08) when
+ * the server refused some. `interactive={false}` is the static pill the web
+ * shows on Pendientes and Cierre.
  */
 
 import type { ReactElement } from 'react';
@@ -34,6 +36,8 @@ const DOT: Record<PillTone, string> = {
 };
 
 export interface CloudSyncPillProps {
+  /** Registros por enviar: when present, the pill always opens it. */
+  readonly onOpenPendientes?: () => void;
   readonly onOpenRejected?: () => void;
   readonly interactive?: boolean;
 }
@@ -85,10 +89,15 @@ export function CloudSyncPill(props: CloudSyncPillProps): ReactElement {
     );
   }
   const rejected = view.labelKey === 'syncPill.rejected' && props.onOpenRejected !== undefined;
-  const hint = rejected ? t('syncPill.openRejected') : t('syncPill.tapToUpdate');
+  const abrir = props.onOpenPendientes ?? (rejected ? props.onOpenRejected : undefined);
+  const hint = props.onOpenPendientes
+    ? t('syncPill.openPendientes')
+    : rejected
+      ? t('syncPill.openRejected')
+      : t('syncPill.tapToUpdate');
   return (
     <Pressable
-      onPress={rejected ? props.onOpenRejected : syncNow}
+      onPress={abrir ?? syncNow}
       testID="cloud-sync-pill"
       role="button"
       aria-label={`${label}. ${hint}`}

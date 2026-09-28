@@ -18,6 +18,7 @@ import { useCredenciales, type Credenciales } from '../runtime/use-credenciales'
 import { OpMain } from '../ui/parts';
 import { InicioScreen } from './screen';
 import { type InicioData, comoInicio, type Entorno } from '@xangarro/caja/inicio';
+import { porCobrarDe } from '@xangarro/caja/lectura';
 
 /** No name for the device yet: the caja is «Caja 1», as Cierre and Gastos say. */
 const CAJA = 'Caja 1';
@@ -34,12 +35,6 @@ async function pendientesCola(): Promise<number> {
   } catch {
     return 0;
   }
-}
-
-/** Fiado still owed across the business, for the closed turno's figures. */
-function porCobrar(cuentas: readonly CuentaPara[]): Entorno['porCobrar'] {
-  const saldos = cuentas.map((c) => BigInt(c.saldoCentavos)).filter((s) => s > 0n);
-  return { monto: saldos.reduce((a, b) => a + b, 0n), clientes: saldos.length };
 }
 
 /** «Para hoy»'s other two kinds: tracked stock and the accounts. Empty when unreadable. */
@@ -72,7 +67,7 @@ async function leerInicio(cred: Credenciales): Promise<InicioData> {
     caja: CAJA,
     offline: !navigator.onLine,
     pendientes,
-    porCobrar: porCobrar(otros.cuentas),
+    porCobrar: porCobrarDe(otros.cuentas),
     ahora: new Date(),
     dueno: negocio?.dueno ?? null,
     stock: otros.stock,

@@ -1,7 +1,6 @@
 /**
- * Inicio's shortcut tiles (MvInicio «Atajos»): Gastos and Inventario, the
- * money and the stock of the turno a tap away. Fiado y abonos joins them
- * when the phone has it (M-08).
+ * Inicio's shortcut tiles (MvInicio «Atajos»): Gastos, Fiado y abonos and
+ * Inventario, the money and the stock of the turno a tap away.
  */
 import type { ReactElement } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
@@ -14,6 +13,7 @@ import { ATAJOS } from './inicio-rutas';
 
 const LOOK = {
   gastos: { icon: ICONS.gastos, tint: colors.redSoft },
+  cobranza: { icon: ICONS.fiado, tint: colors.warningSoft },
   inventario: { icon: ICONS.inventario, tint: colors.greenSoft },
 } as const;
 

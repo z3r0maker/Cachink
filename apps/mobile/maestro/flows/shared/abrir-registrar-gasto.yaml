@@ -1,0 +1,23 @@
+# Reusable subflow: open Gastos from Mi turno and its «Registrar gasto» sheet
+# (Track M, M-08; MvGastos).
+#
+# Usage:
+#   - runFlow: shared/abrir-registrar-gasto.yaml
+#
+# Precondition: signed in, any tab.
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    file: open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'gastos'
+    timeout: 5000
+- tapOn:
+    id: 'gastos-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'registrar-gasto'
+    timeout: 5000

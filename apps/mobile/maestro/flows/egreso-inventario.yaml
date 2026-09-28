@@ -1,28 +1,25 @@
-# Register an inventory purchase (entrada) via the Inventario tab.
-# Dual-writes: MovimientoInventario (stock up) + Egreso (money out)
-# per ADR-021.
+# «Compra de inventario» from Gastos (Track M, M-08; kept from the old Nuevo
+# egreso modal): product, quantity and unit cost; the stock entry and its
+# egreso are written together (ADR-021).
 #
-# Precondition: at least one producto exists (created via the flow
-# from P1C-M5, or seeded in e2e-seed.json).
+# Precondition: wizard complete, at least one product.
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
 - runFlow:
     file: shared/open-turno-row.yaml
     env:
       ROW: 'otros-gastos'
 - tapOn:
-    id: 'egresos-nuevo'
-- tapOn:
-    id: 'egreso-tab-inventario'
+    id: 'gastos-compra'
+- extendedWaitUntil:
+    visible:
+      id: 'compra-inventario'
+    timeout: 5000
 
-# Inventario tab — fill producto + cantidad + costo_unit.
 - tapOn:
     id: 'inventario-producto'
 - tapOn:
@@ -36,6 +33,8 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'inventario-submit'
 
-# Modal closes + egreso visible (50 × 12 = $600.00).
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: '−$600.00'
+- extendedWaitUntil:
+    notVisible:
+      id: 'compra-inventario'
+    timeout: 5000
+- assertVisible: '.*Entraron 50 de.*'

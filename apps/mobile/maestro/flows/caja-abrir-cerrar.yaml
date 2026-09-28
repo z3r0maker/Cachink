@@ -1,47 +1,53 @@
-# Caja open/close lifecycle E2E.
+# Mi turno → Cierre → Turno cerrado (Track M, M-09; MvTurno, MvCierre,
+# MvCierreHecho).
 #
 # Verifies:
-#   1. Caja opens (or confirms Director's opening) → status card visible
-#   2. Tap "Cerrar turno" → blind count step 1 → step 2 → close
+#   1. With a turno open (fondo $500), Mi turno shows «Efectivo que debe haber»
+#   2. «Cerrar turno» opens Cierre with the expected cash
+#   3. Counting one $500 bill cuadra; «Cerrar turno» closes
+#   4. «¡Turno cerrado!» with the corte, «Mandar el corte a …» and «Salir»
 #
-# Precondition: demo mode seeded.
+# Precondition: demo mode seeded, the operator's turno not yet open or open
+# with no sales (the count assumes the $500 fondo alone).
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
+tags:
+  - caja
+  - cierre
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Ensure caja is open (handles demo state where Director opened it).
 - runFlow: shared/ensure-caja-open.yaml
 
-# Status card should be visible showing the turn is open.
 - assertVisible:
-    id: 'caja-status-card'
-- assertVisible:
-    id: 'caja-balance-card'
-
-# --- Happy path: Close caja ---
+    id: 'mi-turno-esperado'
 - tapOn:
-    id: 'caja-cerrar-btn'
+    id: 'turno-cerrar'
 
-# Step 1: BlindCountStep — enter count without seeing expected.
 - extendedWaitUntil:
     visible:
-      id: 'cerrar-caja-step-1'
-    timeout: 5000
-
-# Enter 500 via numpad (matching amount).
-- tapOn: { id: 'numpad-5' }
-- tapOn: { id: 'numpad-0' }
-- tapOn: { id: 'numpad-0' }
+      id: 'cierre-esperado'
+    timeout: 8000
 - tapOn:
-    id: 'blind-count-continue'
+    id: 'conteo-billete-500-mas'
+- assertVisible:
+    id: 'cierre-diferencia-cuadra'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar'
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: 'cierre-cerrar'
 
-# Step 2: CountResultStep — comparison + close.
 - extendedWaitUntil:
     visible:
-      id: 'cerrar-caja-step-2'
-    timeout: 5000
+      id: 'cierre-hecho'
+    timeout: 8000
+- assertVisible:
+    id: 'cierre-corte'
+- assertVisible:
+    id: 'cierre-compartir'
 - tapOn:
-    id: 'count-result-close'
+    id: 'cierre-salir'
