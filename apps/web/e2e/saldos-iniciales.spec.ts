@@ -1,4 +1,4 @@
-import { expect, test } from './test';
+import { expect, test, type Page } from './test';
 import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { execFileSync } from 'node:child_process';
@@ -11,7 +11,8 @@ import { asTenant } from './sync-phone';
 /**
  * N-17's end-to-end acceptance on a throwaway owner with no sales: the
  * opening caja and bancos captured in /saldos-iniciales are exactly the
- * Balance's «Efectivo», and «¿Cómo empiezo?» ticks its saldos row by itself.
+ * Balance's «Efectivo», the cuentas por cobrar lines picked by hand are the
+ * rows Postgres keeps, and «¿Cómo empiezo?» ticks its saldos row by itself.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -23,6 +24,8 @@ test.use({ storageState: { cookies: [], origins: [] } });
 const sello = randomUUID();
 const email = `saldos-${sello}@test.mx`;
 const biz = newUlid();
+const lupe = newUlid();
+const beto = newUlid();
 
 test.beforeAll(async () => {
   const userId = randomUUID();
@@ -35,6 +38,15 @@ test.beforeAll(async () => {
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
+    // Two clientes to owe the opening CxC: one kept, one picked and removed.
+    for (const [id, nombre, telefono] of [
+      [lupe, 'Doña Lupe Ramírez', '55 1111 2222'],
+      [beto, 'Don Beto Salas', null],
+    ] as const) {
+      await sql`
+        INSERT INTO clients (id, nombre, telefono, business_id, device_id, created_at, updated_at)
+        VALUES (${id}, ${nombre}, ${telefono}, ${biz}, ${newUlid()}, now(), now())`;
+    }
   });
   // Estados is a paid-plan screen, so the tenant pays for Xangarro.
   const url =
@@ -82,8 +94,23 @@ test('captured opening cash is the Balance’s Efectivo, and the checklist ticks
     [page.getByLabel('En bancos'), '12000'],
   ]);
   await expect(fecha).toContainText('1 de mayo de 2026');
+  await capturarCxC(page);
   await page.getByRole('button', { name: 'Guardar saldos' }).click();
   await expect(page.getByText('Saldos guardados')).toBeVisible();
+
+  // The kept line is the one row Postgres holds, in centavos, and it is what
+  // the screen reads back after a reload.
+  const lineas = await asTenant(
+    biz,
+    (sql) =>
+      sql<{ cliente_id: string; saldo_centavos: string }[]>`
+      SELECT cliente_id, saldo_centavos::text FROM opening_balance_clients
+      WHERE business_id = ${biz} AND deleted_at IS NULL`,
+  );
+  expect(lineas).toEqual([{ cliente_id: lupe, saldo_centavos: '35000' }]);
+  await page.reload();
+  await expect(page.getByLabel('Saldo de Doña Lupe Ramírez')).toHaveValue(/^350(\.00)?$/);
+  await expect(page.getByLabel('Saldo de Don Beto Salas')).toHaveCount(0);
 
   await page.goto('/estados');
   await page.getByRole('button', { name: 'Posición' }).click();
@@ -96,3 +123,31 @@ test('captured opening cash is the Balance’s Efectivo, and the checklist ticks
   await page.goto('/como-empiezo');
   await expect(row).toHaveAttribute('data-done', 'true');
 });
+
+/**
+ * The CxC lines by hand: «Agregar cliente» opens one pick at a time, the
+ * picked cliente shows its phone, a line can be removed, and «Te deben» is
+ * the sum of what is left.
+ */
+async function capturarCxC(page: Page): Promise<void> {
+  const cxc = page.getByRole('region', { name: 'Cuentas por cobrar iniciales' });
+  await expect(cxc.getByText('Sin saldos por cliente todavía.')).toBeVisible();
+  const agregar = cxc.getByRole('button', { name: 'Agregar cliente' });
+
+  await agregar.click();
+  await expect(agregar).toBeHidden();
+  await cxc.getByLabel('Elige un cliente').selectOption({ label: 'Doña Lupe Ramírez' });
+  await expect(cxc.getByText('55 1111 2222')).toBeVisible();
+  await cxc.getByLabel('Saldo de Doña Lupe Ramírez').fill('350');
+
+  await agregar.click();
+  const elegir = cxc.getByLabel('Elige un cliente');
+  await expect(elegir.locator('option')).toHaveText(['Elige un cliente…', 'Don Beto Salas']);
+  await elegir.selectOption({ label: 'Don Beto Salas' });
+  await cxc.getByLabel('Saldo de Don Beto Salas').fill('120');
+  await expect(cxc.getByText(/Te deben/)).toContainText('$470.00');
+
+  await cxc.getByRole('button', { name: 'Quitar a Don Beto Salas' }).click();
+  await expect(cxc.getByLabel('Saldo de Don Beto Salas')).toHaveCount(0);
+  await expect(cxc.getByText(/Te deben/)).toContainText('$350.00');
+}
