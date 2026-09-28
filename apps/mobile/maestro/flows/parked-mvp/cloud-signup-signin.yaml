@@ -59,22 +59,12 @@ env:
 - assertVisible: 'Taco al pastor'
 
 # Record a venta via the cart checkout flow.
-- tapOn: { id: 'tab-ventas' }
+- tapOn: { id: 'tab-cobrar' }
 - extendedWaitUntil:
     visible: { id: 'ventas-product-grid' }
     timeout: 5000
-- tapOn: 'Taco al pastor'
-- assertVisible: { id: 'cart-strip' }
-- tapOn: { id: 'cart-checkout-btn' }
-- extendedWaitUntil:
-    visible: { id: 'checkout-method-picker' }
-    timeout: 5000
-- tapOn: { id: 'checkout-method-continue' }
-- extendedWaitUntil:
-    visible: { id: 'checkout-efectivo' }
-    timeout: 5000
-- tapOn: "\\$50"
-- tapOn: { id: 'checkout-efectivo-submit' }
+- tapOn: 'Agregar Taco al pastor,.*'
+- runFlow: ../shared/cobrar-ticket.yaml
 - extendedWaitUntil:
     visible: { id: 'ventas-product-grid' }
     timeout: 10000

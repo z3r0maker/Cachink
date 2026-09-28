@@ -1,9 +1,9 @@
 /**
  * Activation (A-04): pure helpers, error mapping, persistence against a real
- * SQLite + the contracts mock, and the screen's submit wiring.
+ * SQLite + the contracts mock. The screen: tests/screens/entrar.
  */
 
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { MOCK_CODES, startMockServer, type RunningMock } from '@xangarro/contracts/mock';
 import {
   DrizzleAppConfigRepository,
@@ -22,10 +22,8 @@ import { APP_CONFIG_KEYS } from '../../src/app-config/index';
 import { activationErrorKey } from '../../src/activation/activation-errors';
 import { memoryTokenStore, parseActivationRecord } from '../../src/activation/activation-config';
 import { persistActivation } from '../../src/activation/use-activate';
-import { ActivationScreen } from '../../src/screens/Activation/activation-screen';
 import { canSubmitActivation, sanitizeCode } from '../../src/screens/Activation/activation-form';
 import { initI18n } from '../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../test-utils';
 
 initI18n();
 
@@ -112,32 +110,4 @@ describe('persistActivation (real SQLite + mock server)', () => {
   });
 });
 
-function typeInto(testID: string, value: string): void {
-  const host = screen.getByTestId(testID);
-  const input = host.tagName === 'INPUT' ? host : (host.querySelector('input') ?? host);
-  fireEvent.change(input, { target: { value } });
-}
-
-describe('ActivationScreen', () => {
-  it('keeps Vincular inert until both fields are valid, then submits normalised input', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(<ActivationScreen onSubmit={onSubmit} submitting={false} />);
-    fireEvent.click(screen.getAllByTestId('activation-submit')[0]!);
-    expect(onSubmit).not.toHaveBeenCalled();
-    typeInto('activation-email', ' dueno@tacos.mx ');
-    typeInto('activation-code', 'k7m3p9rw');
-    fireEvent.click(screen.getAllByTestId('activation-submit')[0]!);
-    expect(onSubmit).toHaveBeenCalledWith({ email: 'dueno@tacos.mx', code: 'K7M3P9RW' });
-  });
-
-  it('renders the translated error when one is provided', () => {
-    renderWithProviders(
-      <ActivationScreen
-        onSubmit={vi.fn()}
-        submitting={false}
-        errorKey="activate.errors.codeUsed"
-      />,
-    );
-    expect(screen.getByTestId('activation-error').textContent).toContain('ya se usó');
-  });
-});
+// ActivationScreen (Vincular, M-06) is covered in tests/screens/entrar/pantallas.test.tsx.

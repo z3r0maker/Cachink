@@ -1,13 +1,12 @@
-export { VentasScreen, type VentasScreenProps } from './ventas-screen';
+// Cobrar (Track M, M-07): the catalogue, the ticket, the escáner, producto nuevo.
+export { CobrarScreen, type CobrarScreenProps } from './cobrar-screen';
+export { productosDeCaja, type ProductoCobrar } from './cobrar-catalogo';
+export { TicketSheet, type TicketSheetProps } from './ticket-sheet';
+export { TicketPanel, type TicketPanelProps } from './ticket-panel';
+export { EscanerSheet, type EscanerSheetProps } from './escaner-sheet';
+export { ProductoNuevoSheet, type ProductoNuevoSheetProps } from './producto-nuevo-sheet';
+export { useTicketEnCurso, resumenTicket, type ProductoParaTicket } from './ticket-en-curso';
 export { deriveVentaCategoria, buildQuickSellPayload, type QuickSellInput } from './quick-sell';
-export { VentasEmptyProductos, type VentasEmptyProductosProps } from './empty-productos';
-// Tap-to-Cart POS redesign
-export { VentaCheckoutSheet, type VentaCheckoutSheetProps } from './venta-checkout-sheet';
-export { CartStrip, type CartStripProps } from './cart-strip';
-export { CartFooter, type CartFooterProps } from './cart-footer';
-export { EmptyCartHint, type EmptyCartHintProps } from './empty-cart-hint';
-export { TotalBar, type TotalBarProps } from './total-bar';
-export { CheckoutSummary, type CheckoutSummaryProps } from './checkout-summary';
 // Caja Gate
 export { CajaGateBanner, type CajaGateBannerProps } from './caja-gate-banner';
 // Products Gate

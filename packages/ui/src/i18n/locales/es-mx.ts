@@ -16,7 +16,10 @@
  * the 200-line ceiling is waived for locales only.
  */
 /* eslint-disable max-lines */
+import { entrar } from './es-mx-entrar';
+
 export const esMX = {
+  entrar,
   actions: {
     save: 'Guardar',
     cancel: 'Cancelar',

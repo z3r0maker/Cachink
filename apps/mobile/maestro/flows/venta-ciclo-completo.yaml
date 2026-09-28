@@ -119,26 +119,10 @@ appId: mx.xangarro.mobile
       id: 'ventas-product-grid'
     timeout: 5000
 
-- tapOn: 'Tortilla'
+- tapOn: 'Agregar Tortilla,.*'
 - assertVisible:
-    id: 'cart-strip'
-- tapOn:
-    id: 'cart-checkout-btn'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 5000
-- tapOn:
-    id: 'checkout-method-continue'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 5000
-- tapOn: "\\$50"
-- tapOn:
-    id: 'checkout-efectivo-submit'
+    id: 'cobrar-bar'
+- runFlow: shared/cobrar-ticket.yaml
 
 - extendedWaitUntil:
     visible:
@@ -148,26 +132,10 @@ appId: mx.xangarro.mobile
 # ══════════════════════════════════════════════════════════════════
 # Step 3: Sell Taco ($20, Efectivo)
 # ══════════════════════════════════════════════════════════════════
-- tapOn: 'Taco'
+- tapOn: 'Agregar Taco,.*'
 - assertVisible:
-    id: 'cart-strip'
-- tapOn:
-    id: 'cart-checkout-btn'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 5000
-- tapOn:
-    id: 'checkout-method-continue'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 5000
-- tapOn: "\\$50"
-- tapOn:
-    id: 'checkout-efectivo-submit'
+    id: 'cobrar-bar'
+- runFlow: shared/cobrar-ticket.yaml
 
 - extendedWaitUntil:
     visible:
