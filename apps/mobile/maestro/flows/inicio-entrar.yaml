@@ -1,0 +1,63 @@
+# Entrar y empezar (Track M, M-06): the caja lands on Inicio, «Abrir turno»
+# opens the fondo sheet, the card turns to «La caja está lista», and locking
+# shows Bloqueo for the same person, who unlocks with their NIP.
+#
+# Precondition: device activated against the contracts mock (activation.yaml),
+# Toni (NIP 1234) with no turno open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Inicio is the landing.
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inicio-tab'
+    timeout: 10000
+- assertVisible:
+    id: 'inicio-hero-cerrado'
+- assertVisible: 'Tus pendientes salen al abrir el turno'
+
+# Abrir turno: a chip, then open.
+- tapOn:
+    id: 'inicio-hero-accion'
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 5000
+- tapOn:
+    id: 'fondo-rapido-500'
+- assertVisible: 'Abrir turno con \$500.00'
+- tapOn:
+    id: 'caja-abrir-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 10000
+- assertVisible:
+    id: 'inicio-turno-chip'
+
+# The shortcut tiles open Gastos.
+- tapOn:
+    id: 'inicio-atajo-gastos'
+- tapOn:
+    id: 'tab-inicio'
+
+# Lock: Bloqueo asks the same NIP.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'bloqueo'
+    timeout: 10000
+- assertVisible: 'No soy Toni, cambiar de persona'
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-2' }
+- tapOn: { id: 'numpad-3' }
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'tab-turno'
+    timeout: 10000

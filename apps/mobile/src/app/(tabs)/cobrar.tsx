@@ -1,71 +1,55 @@
 /**
- * Expo Router entry for /cobrar — the tap-to-cart register («Cobrar»; the
- * /ventas route until Track M M-05, where Ventas became the sales list).
+ * Expo Router entry for /cobrar (Track M, M-07; boards MvCobrar, MvTicket,
+ * MvEscaner, MvProductoNuevo, MvVentaHecha, TbCobrar, TbCobrarVertical): the
+ * catalogue and the ticket in progress, with the escáner and producto nuevo
+ * as sheets. Payment runs in /checkout; «Venta hecha» shows here when it
+ * closes. With no open turno the caja gate says to open one.
  *
- * Logic in _ventas-hooks.ts; sub-components in _ventas-overlays.tsx.
- * (Expo Router ignores underscore-prefixed files as routes.) Payment runs
- * in /checkout; past sales are only cancelled, from the Ventas tab.
+ * State in _cobrar-hooks.ts; sheets and dialogs in _cobrar-overlays.tsx.
  */
-import { useCallback, useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import type { IsoDate } from '@xangarro/domain';
-import { todayIso } from './_ventas-helpers';
-import {
-  useCartHelpers,
-  useOpenCajaTurno,
-  useVentasCartState,
-  useVentasQueries,
-} from './_ventas-hooks';
-import { VentasCajaGate, VentasMainView, VentasProductosGate } from './_ventas-overlays';
-
-function useVentasRouteState() {
-  const router = useRouter();
-  const [fecha] = useState<IsoDate>(todayIso);
-  const [search, setSearch] = useState('');
-  const { openTurno, isLoading: turnoLoading } = useOpenCajaTurno();
-  const q = useVentasQueries(fecha);
-  const { cart, dispatch, setCheckoutCart } = useVentasCartState();
-  const { cartQuantities, handleAddToCart } = useCartHelpers(dispatch, q.stockMap, cart.items);
-  const onCheckout = useCallback(() => {
-    setCheckoutCart(cart);
-    router.push('/checkout' as never);
-  }, [cart, setCheckoutCart, router]);
-  return {
-    search,
-    setSearch,
-    openTurno,
-    turnoLoading,
-    q,
-    cart,
-    dispatch,
-    cartQuantities,
-    handleAddToCart,
-    onCheckout,
-  };
-}
+import { CajaGateBanner, CobrarScreen } from '@xangarro/ui';
+import { useCatalogoCobrar, useCobrarContexto, useCobrarRuta } from './_cobrar-hooks';
+import { CobrarOverlays } from './_cobrar-overlays';
 
 export default function CobrarRoute(): ReactElement {
-  const s = useVentasRouteState();
-  if (!s.turnoLoading && s.openTurno === null) {
-    // Products gate takes priority: no products → nothing to sell
-    if (s.q.productosData !== undefined && s.q.productos.length === 0) {
-      return <VentasProductosGate />;
-    }
-    return <VentasCajaGate />;
+  const router = useRouter();
+  const c = useCatalogoCobrar();
+  const x = useCobrarContexto();
+  const r = useCobrarRuta();
+  if (!x.turno.isLoading && x.turno.openTurno === null) {
+    return <CajaGateBanner onGoToCaja={() => router.navigate('/turno' as never)} />;
   }
   return (
-    <VentasMainView
-      productos={s.q.productos}
-      stockMap={s.q.stockMap}
-      search={s.search}
-      setSearch={s.setSearch}
-      cart={s.cart}
-      dispatch={s.dispatch}
-      cartQuantities={s.cartQuantities}
-      handleAddToCart={s.handleAddToCart}
-      onCheckout={s.onCheckout}
-      total={s.q.total}
-      ventaCount={s.q.ventas.length}
-    />
+    <View style={{ flex: 1 }}>
+      <CobrarScreen
+        estado={c.estado}
+        onReintentar={c.reintentar}
+        productos={c.productos}
+        lines={r.ticket.lines}
+        folio={x.folio}
+        metodos={x.metodos}
+        metodo={r.metodo}
+        onMetodo={r.setMetodo}
+        onAdd={r.agregar}
+        onBump={r.ticket.bump}
+        onQuitar={r.ticket.quitar}
+        onVaciar={r.ticket.vaciar}
+        onAbrirTicket={() => r.setHoja('ticket')}
+        onCobrar={() => r.alCobro(r.metodo)}
+        onFiado={() => r.alCobro('Fiado')}
+        onEscanear={() => r.setHoja('escaner')}
+        onProductoNuevo={() => r.abrirNuevo(null)}
+      />
+      <CobrarOverlays
+        r={r}
+        productos={c.productos}
+        tipos={c.tipos}
+        folio={x.folio}
+        dueno={x.dueno}
+      />
+    </View>
   );
 }

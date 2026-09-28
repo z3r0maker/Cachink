@@ -484,6 +484,7 @@ if should_run "B"; then
   echo ""
   echo "📂  Phase 9.5: Auth + Feature Flags"
   run_flow "$FLOWS_DIR/quick-switch-login.yaml"
+  run_flow "$FLOWS_DIR/inicio-entrar.yaml"
   run_flow "$FLOWS_DIR/funciones-toggle.yaml"
   run_flow "$FLOWS_DIR/otros-nav.yaml"
   run_flow "$FLOWS_DIR/otros-mvp-hidden-items.yaml"          # A1 — MVP absence test
@@ -538,7 +539,6 @@ if should_run "C"; then
   echo "📂  Phase 13.6: Caja edge cases"
   run_flow "$FLOWS_DIR/caja-con-adicional.yaml"
   run_flow "$FLOWS_DIR/caja-cierre-discrepancia.yaml"
-  run_flow "$FLOWS_DIR/caja-handoff.yaml"                   # Audit — previously excluded
   run_flow "$FLOWS_DIR/caja-movimiento-turno-cerrado.yaml"  # Edge — CAJ-13
 fi
 

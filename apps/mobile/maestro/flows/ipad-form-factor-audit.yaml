@@ -27,36 +27,33 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate-director.yaml
 
-# ── 1. POS product grid ──────────────────────────────────────────
-# On iPhone the grid renders 2 columns. On iPad ($gtMd) it renders
-# 3 columns. The testID on the container must still be present.
+# ── 1. Cobrar: catalogue and ticket panel (TbCobrar) ─────────────
+# On a tablet the ticket sits beside the catalogue (landscape) or docks
+# under it (portrait); there is no black bar.
 - tapOn:
     id: "rail-cobrar"
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
     timeout: 8000
-
-# Assert a demo product card is visible.
-- assertVisible: "Quesadilla"
-
-# ── 2. Checkout method picker ────────────────────────────────────
-# On iPhone this renders as a full screen. On iPad, React Native
-# may render it as a centered popover/modal. The testID must still
-# be in the accessibility tree regardless of position.
-- tapOn: "Quesadilla"
 - assertVisible:
-    id: "cart-strip"
+    id: "ticket-panel"
+- assertVisible: "Agregar Quesadilla,.*"
+
+# ── 2. Cobro from the ticket panel ────────────────────────────────
+- tapOn: "Agregar Quesadilla,.*"
 - tapOn:
-    id: "cart-checkout-btn"
+    id: "ticket-metodo-Tarjeta"
+- tapOn:
+    id: "ticket-cobrar"
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: "checkout-cobro"
     timeout: 6000
-
-# Assert all interactive controls inside are reachable.
 - assertVisible:
-    id: "checkout-method-continue"
+    id: "cobro-panel-Tarjeta"
+- assertVisible:
+    id: "cobro-submit"
 
 # Go back without completing.
 - tapOn:

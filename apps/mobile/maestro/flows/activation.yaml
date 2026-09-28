@@ -10,6 +10,9 @@ appId: mx.xangarro.mobile
     visible:
       id: 'activation-screen'
     timeout: 60000
+# Vincular opens on the camera (MvVincular); the typed path is «Escribe el código».
+- tapOn:
+    id: 'vincular-escribir'
 # N-34: the aviso de privacidad at linking is on screen before anything is sent.
 - scrollUntilVisible:
     element:

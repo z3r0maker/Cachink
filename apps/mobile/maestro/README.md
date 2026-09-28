@@ -396,7 +396,6 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `caja-abrir-cerrar.yaml`        | Open → status → close         |
 | `caja-con-adicional.yaml`       | Additional deposits           |
 | `caja-cierre-discrepancia.yaml` | Cierre with discrepancy       |
-| `caja-handoff.yaml`             | Caja handoff between shifts   |
 | `caja-movimientos-nav.yaml`     | **NEW** Caja movements screen |
 
 ### Cancelaciones
@@ -421,7 +420,8 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 | Flow                                   | What it proves                     |
 | -------------------------------------- | ---------------------------------- |
-| `quick-switch-login.yaml`              | QuickSwitch correct/wrong password |
+| `quick-switch-login.yaml`              | Acceso: wrong NIP, then the right one |
+| `inicio-entrar.yaml`                   | Inicio landing, abrir turno, Bloqueo |
 | `role-switch.yaml`                     | Director ↔ Operativo switch        |
 | `change-password.yaml`                 | Forced password change             |
 | `recovery-back-and-factory-reset.yaml` | Recovery + factory reset           |

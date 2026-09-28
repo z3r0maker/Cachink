@@ -57,7 +57,9 @@ async function verifyPin(deps: AuthDeps, userId: UserId, pin: string): Promise<s
     const next = recordPinFailure(lockout, now);
     await deps.appConfig.set(APP_CONFIG_KEYS.pinLockout, JSON.stringify(next));
     const nowLocked = remainingLockMs(next, now);
-    return nowLocked > 0 ? deps.messages.lockedOut(nowLocked / 1000) : deps.messages.wrongPin;
+    return nowLocked > 0
+      ? deps.messages.lockedOut(Math.ceil(nowLocked / 1000))
+      : deps.messages.wrongPin;
   }
   await deps.appConfig.set(APP_CONFIG_KEYS.pinLockout, JSON.stringify(NO_LOCKOUT));
   deps.signIn(result.userId);
@@ -97,8 +99,8 @@ export function useQuickSwitchAuth(businessId: BusinessId): QuickSwitchAuthResul
     appConfig,
     businessId,
     messages: {
-      wrongPin: t('login.error'),
-      lockedOut: (seconds) => t('login.lockedOut', { seconds }),
+      wrongPin: t('entrar.nip.error'),
+      lockedOut: (seconds) => t('entrar.nip.esperando', { seconds }),
     },
     setSubmitting,
     setError,

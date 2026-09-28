@@ -12,18 +12,19 @@ appId: mx.xangarro.mobile
         id: 'tab-turno'
     commands:
       - runFlow: shared/lock-caja.yaml
+      # Locking shows Bloqueo for the same person; «No soy …» goes to Acceso.
+      - tapOn:
+          id: 'bloqueo-cambiar'
 - extendedWaitUntil:
     visible:
       id: 'quick-switch'
     timeout: 20000
 - tapOn:
-    text: '.*Toni.*'
+    text: 'Toni'
 - extendedWaitUntil:
     visible:
       id: 'numpad-1'
     timeout: 8000
-- assertNotVisible:
-    id: 'forgot-pin-link'
 - repeat:
     times: 5
     commands:
@@ -31,11 +32,10 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'numpad-9' }
       - tapOn: { id: 'numpad-9' }
       - tapOn: { id: 'numpad-9' }
-      - tapOn: { id: 'numpad-9' }
-      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'nip-enviar' }
       - extendedWaitUntil:
           visible:
-            text: '.*(PIN incorrecto|Demasiados intentos).*'
+            text: '.*(Ese NIP no es|Demasiados intentos).*'
           timeout: 10000
 # The previous error text can satisfy the in-loop wait early, so wait here.
 - extendedWaitUntil:

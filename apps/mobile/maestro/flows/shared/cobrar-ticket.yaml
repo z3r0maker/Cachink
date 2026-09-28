@@ -1,0 +1,47 @@
+# Reusable subflow (Track M, M-07): charge the ticket already on the Cobrar
+# tab. Opens «Revisa el ticket», goes on to «¿Cómo paga?», pays with the
+# method in ${METODO} (default Efectivo, «Exacto»), and closes «Venta hecha»
+# with «Nueva venta». Leaves the app on Cobrar with an empty ticket.
+#
+# Usage:
+#   - runFlow: shared/cobrar-ticket.yaml
+#   - runFlow:
+#       file: shared/cobrar-ticket.yaml
+#       env:
+#         METODO: Transferencia
+appId: mx.xangarro.mobile
+env:
+  METODO: Efectivo
+---
+- tapOn:
+    id: 'cart-checkout-btn'
+- extendedWaitUntil:
+    visible:
+      id: 'ticket-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'ticket-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-cobro'
+    timeout: 8000
+- tapOn:
+    id: 'cobro-metodo-${METODO}'
+- runFlow:
+    when:
+      true: ${METODO == 'Efectivo'}
+    commands:
+      - tapOn:
+          id: 'cobro-rapido-0'
+- tapOn:
+    id: 'cobro-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- tapOn:
+    id: 'venta-hecha-nueva'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000

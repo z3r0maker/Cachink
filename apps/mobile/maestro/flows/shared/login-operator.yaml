@@ -1,6 +1,6 @@
-# Operator sign-in on an activated device (A-05/A-07): pick Toni (mock
-# operator, PIN 123456) on QuickSwitch and land on the capture tabs.
-# No-op when someone is already signed in.
+# Operator sign-in on an activated device (A-05/A-07; Acceso, Track M M-06):
+# pick Toni (mock operator, NIP 1234), type the four digits and tap «Entrar»;
+# the caja lands on Inicio. No-op when someone is already signed in.
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -13,7 +13,7 @@ appId: mx.xangarro.mobile
             id: 'quick-switch'
           timeout: 60000
       - tapOn:
-          text: '.*Toni.*'
+          text: 'Toni'
       - extendedWaitUntil:
           visible:
             id: 'numpad-1'
@@ -22,8 +22,7 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'numpad-2' }
       - tapOn: { id: 'numpad-3' }
       - tapOn: { id: 'numpad-4' }
-      - tapOn: { id: 'numpad-5' }
-      - tapOn: { id: 'numpad-6' }
+      - tapOn: { id: 'nip-enviar' }
 - extendedWaitUntil:
     visible:
       id: 'tab-turno'

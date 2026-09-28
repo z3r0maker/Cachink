@@ -1,0 +1,62 @@
+# Venta fiada (Track M, M-07; MvFiado): from «¿Cómo paga?», Fiado, a new
+# client with name, «Anotar $X a la cuenta de …», and the confirmation with
+# what they owe now.
+#
+# Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - fiado
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 5000
+- tapOn: 'Agregar Quesadilla,.*'
+- tapOn:
+    id: 'cart-checkout-btn'
+- tapOn:
+    id: 'ticket-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-cobro'
+    timeout: 5000
+- tapOn:
+    id: 'cobro-fiado'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-fiado'
+    timeout: 5000
+- assertVisible: 'Elige a quién se lo anotas'
+
+# A new client: name only.
+- tapOn:
+    id: 'fiado-nuevo'
+- tapOn:
+    id: 'fiado-nuevo-nombre'
+- inputText: 'Don Beto del puesto'
+- assertVisible: 'Anotar .* a la cuenta de Don Beto del puesto'
+- tapOn:
+    id: 'fiado-anotar'
+
+# Back on Cobrar with the confirmation.
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- assertVisible: '¡Listo! Anotaste .* a Don Beto del puesto'
+- assertVisible: 'Ahora debe'
+- tapOn:
+    id: 'venta-hecha-nueva'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 5000

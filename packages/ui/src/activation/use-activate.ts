@@ -17,10 +17,10 @@ import type { ActivationRecord, DeviceTokenStore } from './activation-config';
 import { activationErrorKey, type ActivationErrorKey } from './activation-errors';
 import { ACTIVATION_QUERY_KEY } from './use-activation-state';
 
-export interface ActivateInput {
-  readonly email: string;
-  readonly code: string;
-}
+/** The typed path (the owner's correo and the code) or the scan path (C-14). */
+export type ActivateInput =
+  | { readonly email: string; readonly code: string }
+  | { readonly qrToken: string };
 
 export class ActivationError extends Error {
   readonly key: ActivationErrorKey;

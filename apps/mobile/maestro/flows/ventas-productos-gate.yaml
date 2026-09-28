@@ -1,6 +1,6 @@
-# Verify the Products gate blocks Ventas when no products exist.
-# On a fresh install, Ventas should show "Registra tus productos" instead of
-# the Caja gate, since there's nothing to sell yet.
+# Cobrar with no products (Track M, M-07; MvProductoNuevo): «Producto nuevo»
+# from the empty catalogue opens the sheet, and the new product goes straight
+# into the ticket.
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
 tags:
@@ -11,13 +11,33 @@ tags:
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to Ventas tab — should show products gate (no products exist).
 - tapOn:
     id: 'tab-cobrar'
-- assertVisible:
-    id: 'productos-gate-banner'
-- assertVisible:
-    text: 'Registra tus productos para empezar a vender'
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-vacio'
+    timeout: 5000
 - tapOn:
-    id: 'productos-gate-go-to-productos'
+    id: 'cobrar-vacio-nuevo'
+- extendedWaitUntil:
+    visible:
+      id: 'producto-nuevo-sheet'
+    timeout: 5000
+- assertVisible: 'Producto nuevo en caja'
+- assertVisible: 'Escribe el nombre y el precio'
+- tapOn:
+    id: 'producto-nuevo-nombre'
+- inputText: 'Jugo de mango'
+- tapOn:
+    id: 'producto-nuevo-precio'
+- inputText: '22'
+- tapOn:
+    id: 'producto-nuevo-agregar'
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-aviso'
+    timeout: 8000
+- assertVisible: 'Agregaste Jugo de mango, \$22.00'
+- assertVisible: '1 pieza ·'

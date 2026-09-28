@@ -1,12 +1,11 @@
 /**
- * Root index inside the (tabs) group. The operator lands on Cobrar, as the
- * register always has, until Inicio is built (M-06: «Para hoy»); then Inicio
- * becomes the landing and this redirect goes.
+ * Root index inside the (tabs) group: the caja lands on Inicio (Track M,
+ * M-06), which answers «what do I do now» and opens Cobrar from its card.
  */
 
 import type { ReactElement } from 'react';
 import { Redirect } from 'expo-router';
 
 export default function HomeIndex(): ReactElement {
-  return <Redirect href="/cobrar" />;
+  return <Redirect href="/inicio" />;
 }
