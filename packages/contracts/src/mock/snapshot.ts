@@ -8,7 +8,9 @@
 import {
   decodeSnapshotToken,
   encodeSnapshotToken,
+  snapshotPagesEstimate,
   snapshotStart,
+  SNAPSHOT_SECTIONS,
   SNAPSHOT_START,
   type SnapshotCursor,
   type SnapshotInfo,
@@ -79,7 +81,8 @@ export async function mockSnapshotPage(
     sectionItems(state, section, cursor)
       .filter((i) => after === null || i.key > after)
       .slice(0, limit);
-  const page = await fillSnapshotPage(read, cursor, state.snapshotBudget ?? SNAPSHOT_PAGE_BUDGET);
+  const budget = state.snapshotBudget ?? SNAPSHOT_PAGE_BUDGET;
+  const page = await fillSnapshotPage(read, cursor, budget);
   const { tables, stockBaseline } = pageTables(page.sections);
   return {
     serverSeq: cursor.c,
@@ -89,6 +92,13 @@ export async function mockSnapshotPage(
       first,
       next: page.next === null ? null : encodeSnapshotToken(page.next),
       stockBaseline: stockBaseline as SnapshotInfo['stockBaseline'],
+      // In memory the count is exact: every section, as the pager will walk it.
+      ...(first && {
+        pages: snapshotPagesEstimate(
+          SNAPSHOT_SECTIONS.reduce((n, s) => n + sectionItems(state, s, cursor).length, 0),
+          budget.rows,
+        ),
+      }),
     },
   };
 }

@@ -1,10 +1,12 @@
+import { redirect } from 'next/navigation';
+
 import { requireSession } from '@/server/auth';
 import { hoy } from '@/server/clock';
-import { loadMovimientos } from '@/server/movimientos';
+import { loadMovimientos, paginaParaFecha } from '@/server/movimientos';
 
 import { rangoDe } from './periodo';
 import { MovimientosScreen } from './screen';
-import { leerEstado, type ParamsMovimientos } from './url';
+import { leerEstado, urlDe, type ParamsMovimientos } from './url';
 
 /**
  * Movimientos — the full ledger (P-09). **Reads Postgres.**
@@ -27,13 +29,16 @@ export default async function MovimientosPage({
   const estado = leerEstado(await searchParams);
   const today = hoy();
   const rango = rangoDe(estado.rango, today, { desde: estado.desde, hasta: estado.hasta });
+  const kind = estado.tab === 'gastos' ? 'gasto' : 'venta';
+  const filtro = { ...rango, clasificacion: estado.cat, buscar: estado.q };
+  if (estado.ir !== '') {
+    // «Ir a fecha»: open the day's page under a plain `?pagina=N`, so the pager
+    // counts on from the page served. Outside the try: `redirect` throws.
+    const pagina = await paginaParaFecha(session.business_id, kind, filtro, estado.ir);
+    redirect(urlDe({ ...estado, pagina, ir: '' }));
+  }
   try {
-    const vista = await loadMovimientos(
-      session.business_id,
-      estado.tab === 'gastos' ? 'gasto' : 'venta',
-      { ...rango, clasificacion: estado.cat, buscar: estado.q },
-      estado.pagina,
-    );
+    const vista = await loadMovimientos(session.business_id, kind, filtro, estado.pagina);
     return <MovimientosScreen estado={estado} hoy={today} vista={vista} />;
   } catch {
     return <MovimientosScreen estado={estado} hoy={today} vista={null} />;

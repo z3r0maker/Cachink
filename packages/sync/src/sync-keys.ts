@@ -12,6 +12,10 @@ export const SYNC_CONFIG_KEYS = {
   pullSeq: 'pullSeq',
   /** The next page of an unfinished snapshot bootstrap (C-23); absent once it is complete. */
   bootstrapNext: 'bootstrapNext',
+  /** Snapshot pages applied so far (DS-10); absent once the snapshot is complete. */
+  bootstrapPage: 'bootstrapPage',
+  /** The first snapshot page's estimate of its pages (DS-10); absent if none or complete. */
+  bootstrapPages: 'bootstrapPages',
   /** Highest __xangarro_change_log.id already handed to the pusher. */
   pushHwm: 'pushHwm',
   /** JSON `{at, count}`: 5xx answers in a row to the same first push batch (DB3-SYNC-01 b). */

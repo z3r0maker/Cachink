@@ -6,6 +6,7 @@ export * from './api-client.js';
 export * from './reference-applier.js';
 export * from './reference-data-repository.js';
 export * from './page-applier.js';
+export * from './snapshot-progress.js';
 export * from './stock-baseline.js';
 export * from './sync-keys.js';
 export * from './outbox-reader.js';
