@@ -36,7 +36,8 @@ suite('a device request when the pool is saturated', () => {
     process.env.DEVICE_DB_DEADLINE_MS = '8000';
     mod = await import('../src/server/db');
     route = await import('../src/server/api/device-route');
-  });
+    // Importing the route's graph fresh overran the 10 s hook default on a loaded machine.
+  }, 30_000);
 
   afterAll(async () => {
     await mod?.db().$client.end({ timeout: 5 });
