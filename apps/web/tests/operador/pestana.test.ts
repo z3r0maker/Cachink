@@ -117,3 +117,21 @@ describe('reclamador · the Worker opens the database only when it owns it', () 
     assert.equal(r.puedeAbrir(), true);
   });
 });
+
+describe('the BroadcastChannel handshake · the no-Locks fallback (DB3-CAJA-01)', () => {
+  it('an open register answers a newcomer within the window', async () => {
+    const { hayOtraPestana, responderPresencia } =
+      await import('../../src/operador/runtime/pestana');
+    const parar = responderPresencia();
+    assert.equal(await hayOtraPestana(200), true);
+    parar();
+    assert.equal(await hayOtraPestana(100), false);
+  });
+
+  it('nobody home means no other tab, and the window is waited', async () => {
+    const { hayOtraPestana } = await import('../../src/operador/runtime/pestana');
+    const t0 = Date.now();
+    assert.equal(await hayOtraPestana(80), false);
+    assert.ok(Date.now() - t0 >= 70);
+  });
+});
