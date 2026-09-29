@@ -1728,6 +1728,15 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
     under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
     Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
+  - 2026-09-28 · **The merge put the floor underwater, and the ratchet earned it back.** The
+    perf/db-scale merge landed new untested screens (cobranza/recordar, runtime/pestana,
+    caja/nuevo-partes, estado blocks) and the portal read 92.9/90.0/86.2/76.5 against the
+    93.4/90.7/87.1/77.2 floor — exactly what ADR-102 is for. Eight suites lit the dark code
+    (the BroadcastChannel handshake, the door's runtime calls, the NIP state machine, the
+    one-tab gate, the WhatsApp reminder, the send queue, the estado blocks, the asesor metas
+    view). **Floor raised to 93.8 / 90.9 / 87.1 / 77.5** on the morning's green full-suite E2E
+    plus 700 unit tests. Also landed: mobile's first coverage gate (floor 10/9/13/25, the
+    shell only — screens are Maestro's).
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
