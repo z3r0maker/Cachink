@@ -15,44 +15,42 @@
 Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas por cuántas
 tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.
 
-- **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:693`
-- **N-75** Reconciliation spike — can we see card payments from any reader? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1023`
+- **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:701`
+- **N-75** Reconciliation spike — can we see card payments from any reader? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1046`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
-- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1003`
+- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1026`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
 - **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1626`
-- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1297`
+- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1320`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
-- **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1286`
-- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1317`
+- **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1309`
+- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1340`
 - **N-03** Overage warnings and provider alerts `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
 - **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
-- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:727`
-- **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:745`
+- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:750`
+- **N-27** Database audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:768`
 
-## Bloquea producción (58)
+## Bloquea producción (54)
 
 Mientras cualquiera de estas siga abierta, no se sale a producción. La marca la pone una
 etiqueta `` `[bloq]` `` en el track, no una regla sobre el texto: hay tareas que ningún documento
 llama BLOCKER y que aun así tienen producción detenida hoy.
 
-### Crítica (23) — Producción no sale sin esto, o ya está roto en producción hoy.
+### Crítica (21) — Producción no sale sin esto, o ya está roto en producción hoy.
 
 - [ ] `⛔ bloquea prod` `Crítica` **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
 - [ ] `⛔ bloquea prod` `Crítica` **X-01** Staging environment (Q17 "A later") — Blocked by: B-01…B-10 · Falta: the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo. · `07-launch.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` **X-10** Launch checklist gate — Blocked by: X-01…X-09 (except X-08) · `07-launch.md:120`
-- [ ] `⛔ bloquea prod` `Crítica` **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:777`
+- [ ] `⛔ bloquea prod` `Crítica` **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:800`
 - [ ] `⛔ bloquea prod` `Crítica` **O-2** Turn Data API off · `11-pre-launch-and-deferred.md:25`
 - [ ] `⛔ bloquea prod` `Crítica` **O-3** Backups / PITR on a paid plan · `11-pre-launch-and-deferred.md:26`
-- [ ] `⛔ bloquea prod` `Crítica` **O-4** Vercel project `xangarro-web`, Root Directory `apps/web`, domain `app.xangarro.mx`, region pdx1 · `11-pre-launch-and-deferred.md:27`
 - [ ] `⛔ bloquea prod` `Crítica` **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:33`
 - [ ] `⛔ bloquea prod` `Crítica` **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:34`
 - [ ] `⛔ bloquea prod` `Crítica` **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:37`
 - [ ] `⛔ bloquea prod` `Crítica` **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:44`
-- [ ] `⛔ bloquea prod` `Crítica` **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:45`
 - [ ] `⛔ bloquea prod` `Crítica` **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:54`
-- [ ] `⛔ bloquea prod` `Crítica` **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
+- [ ] `⛔ bloquea prod` `Crítica` **O-33** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Legal entity named. `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, · `../launch/production-readiness.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Lawyer's review of the five texts + the five confirmations in · `../launch/production-readiness.md:23`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
@@ -63,7 +61,7 @@ llama BLOCKER y que aun así tienen producción detenida hoy.
 - [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:93`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
 
-### Alta (34) — Bloquea el lanzamiento, o destraba a varias otras.
+### Alta (32) — Bloquea el lanzamiento, o destraba a varias otras.
 
 - [ ] `⛔ bloquea prod` `Alta` **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 `[alta]` `[bloq]` · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
 - [ ] `⛔ bloquea prod` `Alta` **X-02** End-to-end integration run (real app ↔ real backend) — Blocked by: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
@@ -75,17 +73,15 @@ llama BLOCKER y que aun así tienen producción detenida hoy.
 - [~] `⛔ bloquea prod` `Alta` **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:399`
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:561`
 - [~] `⛔ bloquea prod` `Alta` **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only. · `09-next-features.md:621`
-- [ ] `⛔ bloquea prod` `Alta` **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:655`
-- [ ] `⛔ bloquea prod` `Alta` **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed `[alta]` `[bloq]` (O-xx) before its phone counterpart starts · `09-next-features.md:693`
-- [ ] `⛔ bloquea prod` `Alta` **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:709`
-- [~] `⛔ bloquea prod` `Alta` **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:727`
-- [~] `⛔ bloquea prod` `Alta` **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:745`
-- [ ] `⛔ bloquea prod` `Alta` **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:759`
-- [ ] `⛔ bloquea prod` `Alta` **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:767`
-- [~] `⛔ bloquea prod` `Alta` **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:816`
-- [~] `⛔ bloquea prod` `Alta` **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:843`
-- [ ] `⛔ bloquea prod` `Alta` **O-5** Vercel project `xangarro-backoffice`, Root Directory `apps/backoffice`, domain `admin.xangarro.mx`, region pd… · `11-pre-launch-and-deferred.md:28`
-- [ ] `⛔ bloquea prod` `Alta` **O-6** Vercel project `xangarro-landing`, Root Directory `apps/landing`, domain `xangarro.mx` · `11-pre-launch-and-deferred.md:29`
+- [ ] `⛔ bloquea prod` `Alta` **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07 · `09-next-features.md:655`
+- [ ] `⛔ bloquea prod` `Alta` **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: — `[alta]` `[bloq]` · `09-next-features.md:701`
+- [ ] `⛔ bloquea prod` `Alta` **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:724`
+- [~] `⛔ bloquea prod` `Alta` **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:750`
+- [~] `⛔ bloquea prod` `Alta` **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:768`
+- [ ] `⛔ bloquea prod` `Alta` **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:782`
+- [ ] `⛔ bloquea prod` `Alta` **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:790`
+- [~] `⛔ bloquea prod` `Alta` **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:839`
+- [~] `⛔ bloquea prod` `Alta` **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:866`
 - [ ] `⛔ bloquea prod` `Alta` **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:32`
 - [ ] `⛔ bloquea prod` `Alta` **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:38`
 - [ ] `⛔ bloquea prod` `Alta` **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:68`
@@ -104,14 +100,13 @@ llama BLOCKER y que aun así tienen producción detenida hoy.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** ROADMAP.md reset — Blocked by: X-02 · `07-launch.md:114`
 
-## Papeleo del dueño (8)
+## Papeleo del dueño (7)
 
 Sólo el dueño las mueve: cuentas, llaves, DNS, KYC, firmas. Ninguna se destraba escribiendo código.
 
-### Lanzamiento (8)
+### Lanzamiento (7)
 
 - [ ] `⛔ bloquea prod` `Crítica` **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:44`
-- [ ] `⛔ bloquea prod` `Crítica` **O-13** Needs you (manual, 2026-09-23): Resend: add domain `xangarro.mx`; DNS records from `docs/ops/email.md` (MX + … · `11-pre-launch-and-deferred.md:45`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
 - [ ] `Media` Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). · `../launch/production-readiness.md:123`
 - [ ] `Baja` **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:35`
@@ -128,7 +123,7 @@ Textos, consentimiento y los derechos que el aviso promete. Varias esperan al ab
 - [ ] `⛔ bloquea prod` `Crítica` **O-17** Counsel review of `docs/legal/aviso/*` (16 open questions in its README), incl. whether ADR-064's 6-year dorm… · `11-pre-launch-and-deferred.md:54`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Legal entity named. `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, · `../launch/production-readiness.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Lawyer's review of the five texts + the five confirmations in · `../launch/production-readiness.md:23`
-- [~] `⛔ bloquea prod` `Alta` **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:843`
+- [~] `⛔ bloquea prod` `Alta` **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending. Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. · `09-next-features.md:866`
 - [ ] `Alta` **O-14** Contador sign-off on CFDI questions: PUE vs PPD for SPEI paid-on-receipt; ClaveProdServ `81112106` / unit `E4… · `11-pre-launch-and-deferred.md:51`
 - [ ] `Alta` **O-15** Generate the CSD (Certificado de Sello Digital) in CertiSAT with the e.firma · `11-pre-launch-and-deferred.md:52`
 - [ ] `Alta` **O-29** Counsel writes and approves an aviso de privacidad simplificado for signup. The signup page then shows it wit… · `11-pre-launch-and-deferred.md:56`
@@ -143,22 +138,19 @@ Textos, consentimiento y los derechos que el aviso promete. Varias esperan al ab
 - [ ] `Media` Plantilla de aviso for the negocio's own customers (OQ-L16). · `../launch/production-readiness.md:25`
 - [ ] `Baja` Retire `docs/legal/privacy.md` and `docs/legal/terms.md` once the above are approved. · `../launch/production-readiness.md:26`
 
-## Infraestructura y operación (16)
+## Infraestructura y operación (13)
 
 Entornos, base de datos, regiones y respaldos. Se prueban en staging, no en local.
 
-### Lanzamiento (14)
+### Lanzamiento (11)
 
 - [ ] `⛔ bloquea prod` `Crítica` **X-01** Staging environment (Q17 "A later") — Blocked by: B-01…B-10 · Falta: the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo. · `07-launch.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` **O-2** Turn Data API off · `11-pre-launch-and-deferred.md:25`
 - [ ] `⛔ bloquea prod` `Crítica` **O-3** Backups / PITR on a paid plan · `11-pre-launch-and-deferred.md:26`
-- [ ] `⛔ bloquea prod` `Crítica` **O-4** Vercel project `xangarro-web`, Root Directory `apps/web`, domain `app.xangarro.mx`, region pdx1 · `11-pre-launch-and-deferred.md:27`
 - [ ] `⛔ bloquea prod` `Crítica` **O-8** Database URLs per role (Transaction pooler, port 6543) · `11-pre-launch-and-deferred.md:33`
 - [ ] `⛔ bloquea prod` `Crítica` **O-9** Generate secrets: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (same in both apps), `ADMIN_TOT… · `11-pre-launch-and-deferred.md:34`
 - [ ] `⛔ bloquea prod` `Crítica` **O-30** Set `CRON_SECRET` in Vercel (xangarro-web, Production, Sensitive) and redeploy. Found by the 2026-09-27 smoke… · `11-pre-launch-and-deferred.md:37`
-- [ ] `⛔ bloquea prod` `Crítica` **O-23** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
-- [ ] `⛔ bloquea prod` `Alta` **O-5** Vercel project `xangarro-backoffice`, Root Directory `apps/backoffice`, domain `admin.xangarro.mx`, region pd… · `11-pre-launch-and-deferred.md:28`
-- [ ] `⛔ bloquea prod` `Alta` **O-6** Vercel project `xangarro-landing`, Root Directory `apps/landing`, domain `xangarro.mx` · `11-pre-launch-and-deferred.md:29`
+- [ ] `⛔ bloquea prod` `Crítica` **O-33** Vercel deploys are refused unless HEAD's commit author may deploy. On 2026-09-26 a release sat `Blocked` — no… · `11-pre-launch-and-deferred.md:67`
 - [ ] `⛔ bloquea prod` `Alta` **O-7** Check the Vercel plan allows 4 cron jobs and pinned regions · `11-pre-launch-and-deferred.md:32`
 - [ ] `⛔ bloquea prod` `Alta` **O-31** Functions run in `iad1`, not `pdx1`. The 2026-09-27 smoke check read `x-vercel-id: …::iad1::…` although O-4 p… · `11-pre-launch-and-deferred.md:38`
 - [ ] `⛔ bloquea prod` `Alta` **O-22** Staging (X-01) before the first paying customer · `11-pre-launch-and-deferred.md:68`
@@ -166,8 +158,8 @@ Entornos, base de datos, regiones y respaldos. Se prueban en staging, no en loca
 
 ### Post-lanzamiento (2)
 
-- [ ] `Baja` **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1182`
-- [ ] `Baja` **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1188`
+- [ ] `Baja` **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1205`
+- [ ] `Baja` **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1211`
 
 ## Deuda técnica y auditorías (12)
 
@@ -175,15 +167,15 @@ Auditorías, cobertura, arneses y reescrituras de prueba. Nada de esto es funci�
 
 ### Lanzamiento (4)
 
-- [~] `⛔ bloquea prod` `Alta` **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:727`
-- [~] `⛔ bloquea prod` `Alta` **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:745`
-- [ ] `⛔ bloquea prod` `Alta` **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:759`
-- [ ] `⛔ bloquea prod` `Alta` **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:767`
+- [~] `⛔ bloquea prod` `Alta` **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). · `09-next-features.md:750`
+- [~] `⛔ bloquea prod` `Alta` **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project. · `09-next-features.md:768`
+- [ ] `⛔ bloquea prod` `Alta` **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:782`
+- [ ] `⛔ bloquea prod` `Alta` **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:790`
 
 ### Post-lanzamiento (2)
 
-- [ ] `Media` **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1135`
-- [ ] `Baja` **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1169`
+- [ ] `Media` **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:1158`
+- [ ] `Baja` **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1192`
 
 ### Colas de tracks (6)
 
@@ -204,7 +196,7 @@ Lo que Apple y Google exigen antes de la primera revisión.
 - [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:91`
 - [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:93`
 - [ ] `⛔ bloquea prod` `Alta` **X-05** Store listings + review readiness — Blocked by: F-01, A-15, X-07, B-04 · Falta: `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`. · `07-launch.md:38`
-- [~] `⛔ bloquea prod` `Alta` **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:816`
+- [~] `⛔ bloquea prod` `Alta` **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:839`
 - [ ] `Media` Open-source licence notices screen generated from `pnpm licenses list --prod` (1,184 pkgs, no · `../launch/production-readiness.md:95`
 - [ ] `Baja` Never add Sign in with Apple/Google to the mobile app (would trigger 5.1.1(v)). · `../launch/production-readiness.md:97`
 
@@ -228,7 +220,7 @@ Proveedores y alianzas: Clip, Mercado Pago, el PAC, los DPA.
 
 ### Post-lanzamiento (1)
 
-- [~] `Media` **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:1003`
+- [~] `Media` **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:1026`
 
 ## Coordinación de lanzamiento (7)
 
@@ -250,7 +242,7 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 
 ### Lanzamiento (31)
 
-- [ ] `⛔ bloquea prod` `Crítica` **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:777`
+- [ ] `⛔ bloquea prod` `Crítica` **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:800`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Cancel in one click from Configuración → Suscripción. · `../launch/production-readiness.md:74`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:80`
@@ -258,9 +250,9 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - [~] `⛔ bloquea prod` `Alta` **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:399`
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:561`
 - [~] `⛔ bloquea prod` `Alta` **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only. · `09-next-features.md:621`
-- [ ] `⛔ bloquea prod` `Alta` **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:655`
-- [ ] `⛔ bloquea prod` `Alta` **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed `[alta]` `[bloq]` (O-xx) before its phone counterpart starts · `09-next-features.md:693`
-- [ ] `⛔ bloquea prod` `Alta` **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:709`
+- [ ] `⛔ bloquea prod` `Alta` **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07 · `09-next-features.md:655`
+- [ ] `⛔ bloquea prod` `Alta` **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: — `[alta]` `[bloq]` · `09-next-features.md:701`
+- [ ] `⛔ bloquea prod` `Alta` **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · Falta: the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24. · `09-next-features.md:724`
 - [ ] `Alta` Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained · `../launch/production-readiness.md:46`
 - [ ] `Alta` Archive the full text of every `AVISO_VERSION` (a hash without its text proves nothing) — · `../launch/production-readiness.md:50`
 - [ ] `⛔ bloquea prod` `Alta` Configuración → Privacidad: show accepted version, toggle novedades (writes a · `../launch/production-readiness.md:52`
@@ -285,18 +277,18 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 ### Post-lanzamiento (39)
 
 - [ ] `Media` **Z-01** `ventasCredito` — first portal-delivered feature (Q10) — Trigger: launch done; ≥ 1 customer asks for fiado, or 30 days after launch. · `08-post-launch.md:9`
-- [ ] `Media` **N-75** Reconciliation spike — can we see card payments from any reader? · `09-next-features.md:1023`
-- [ ] `Media` **N-41** `PaymentProvider` port — read side + Mercado Pago adapter — Blocked by: N-75, ADR-109 · `09-next-features.md:1039`
-- [ ] `Media` **N-43** Merchant account linking in Tipos de pago — Blocked by: N-41 · `09-next-features.md:1047`
-- [ ] `Media` **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:1142`
-- [~] `Media` **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1242`
-- [~] `Media` **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1257`
-- [ ] `Media` **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1286`
-- [ ] `Media` **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1297`
-- [ ] `Media` **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1308`
-- [ ] `Media` **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1317`
-- [ ] `Media` **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1327`
-- [ ] `Media` **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1369`
+- [ ] `Media` **N-75** Reconciliation spike — can we see card payments from any reader? · `09-next-features.md:1046`
+- [ ] `Media` **N-41** `PaymentProvider` port — read side + Mercado Pago adapter — Blocked by: N-75, ADR-109 · `09-next-features.md:1062`
+- [ ] `Media` **N-43** Merchant account linking in Tipos de pago — Blocked by: N-41 · `09-next-features.md:1070`
+- [ ] `Media` **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:1165`
+- [~] `Media` **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1265`
+- [~] `Media` **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1280`
+- [ ] `Media` **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1309`
+- [ ] `Media` **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1320`
+- [ ] `Media` **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1331`
+- [ ] `Media` **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1340`
+- [ ] `Media` **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1350`
+- [ ] `Media` **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1392`
 - [ ] `Baja` **Z-02** Portal group-2 screens — Trigger: Z-01 or customer demand. · `08-post-launch.md:15`
 - [ ] `Baja` **Z-04** Extract `apps/api` — Trigger: sync p95 latency > 800 ms at the handler, or Vercel function limits hit, or a second client (e.g. a future POS) needs the API without the portal. · `08-post-launch.md:25`
 - [ ] `Baja` **Z-05** Stripe payouts → ventas importer (dogfood) — Trigger: X-04 running for 2 months. · `08-post-launch.md:30`
@@ -304,25 +296,25 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - [ ] `Baja` **Z-08** Background sync (Android WorkManager / iOS BGTaskScheduler) — Trigger: telemetry shows > 10 % of sales reaching the cloud > 1 h after capture. · `08-post-launch.md:48`
 - [ ] `Baja` **Z-11** Pro extras: audit history + per-operator permissions UI — Trigger: first Pro customer. · Falta: only the audit-history screen (from `sync_log` / `cancelacion_logs`); the per-operator permissions editor already exists as P-05 (`equipo/operador-actions.tsx`, plan-gated, single key `canCancelSales`). · `08-post-launch.md:63`
 - [ ] `Baja` **Z-12** Sale-confirm sound: commission new audio (ADR-054 §7) — Trigger: brand work budget. · `08-post-launch.md:69`
-- [ ] `Baja` **N-76** Conciliación de tarjeta — Blocked by: N-41, N-43 · `09-next-features.md:1060`
-- [ ] `Baja` **N-77** Checklist step and invitations — Blocked by: N-43 · `09-next-features.md:1073`
-- [ ] `Baja` **N-80** `PaymentProvider` write side + Mercado Pago Point — Blocked by: N-41, N-40 (MP go), C-13 · `09-next-features.md:1086`
-- [ ] `Baja` **N-42** Payment intents backend — Blocked by: N-80, C-13 · `09-next-features.md:1094`
-- [ ] `Baja` **N-79** Terminal per caja — Blocked by: N-80, N-43, ADR-109 (D-1) · `09-next-features.md:1104`
-- [ ] `Baja` **N-44** Cobrar en terminal (phone and web caja) — Blocked by: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1114`
-- [ ] `Baja` **N-78** Terminal health at the caja — Blocked by: N-79 · `09-next-features.md:1125`
-- [ ] `Baja` **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:1148`
-- [ ] `Baja` **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:1154`
-- [ ] `Baja` **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1176`
-- [ ] `Baja` **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1193`
-- [ ] `Baja` **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go), N-75 (Clip go) · `09-next-features.md:1204`
-- [ ] `Baja` **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1265`
-- [ ] `Baja` **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1336`
-- [ ] `Baja` **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1349`
-- [ ] `Baja` **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1359`
-- [ ] `Baja` **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1379`
-- [ ] `Baja` **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1387`
-- [ ] `Baja` **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1397`
+- [ ] `Baja` **N-76** Conciliación de tarjeta — Blocked by: N-41, N-43 · `09-next-features.md:1083`
+- [ ] `Baja` **N-77** Checklist step and invitations — Blocked by: N-43 · `09-next-features.md:1096`
+- [ ] `Baja` **N-80** `PaymentProvider` write side + Mercado Pago Point — Blocked by: N-41, N-40 (MP go), C-13 · `09-next-features.md:1109`
+- [ ] `Baja` **N-42** Payment intents backend — Blocked by: N-80, C-13 · `09-next-features.md:1117`
+- [ ] `Baja` **N-79** Terminal per caja — Blocked by: N-80, N-43, ADR-109 (D-1) · `09-next-features.md:1127`
+- [ ] `Baja` **N-44** Cobrar en terminal (phone and web caja) — Blocked by: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1137`
+- [ ] `Baja` **N-78** Terminal health at the caja — Blocked by: N-79 · `09-next-features.md:1148`
+- [ ] `Baja` **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:1171`
+- [ ] `Baja` **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:1177`
+- [ ] `Baja` **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1199`
+- [ ] `Baja` **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1216`
+- [ ] `Baja` **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go), N-75 (Clip go) · `09-next-features.md:1227`
+- [ ] `Baja` **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1288`
+- [ ] `Baja` **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1359`
+- [ ] `Baja` **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1372`
+- [ ] `Baja` **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1382`
+- [ ] `Baja` **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1402`
+- [ ] `Baja` **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1410`
+- [ ] `Baja` **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1420`
 
 ### Colas de tracks (16)
 
@@ -353,7 +345,7 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
-- `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
+- `11-pre-launch-and-deferred.md` — 22 abiertos (0 en curso, 0 bloqueados, 11 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)

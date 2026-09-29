@@ -652,7 +652,15 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-22 App sync banners `[LAUNCH]` `[alta]` `[bloq]`
 
-- [ ] Status · **Blocked by:** A-06, A-07, N-24 · **Blocks:** N-29
+- [ ] Status · **Blocked by:** A-06, A-07 · **Blocks:** N-29
+      **Re-verificado 2026-09-28:** la mitad ya existe y llegó con M-05. La píldora de sync está montada
+      en el shell (`packages/ui/src/screens/AppShell/cloud-sync-pill.tsx`, usada por `app-shell.tsx` y
+      `caja-header.tsx`), el puente a la nube es `cloud-sync-bridge.tsx`, y `OfflineBanner` existe. Lo
+      que **no** existe son dos de los tres banners que esta tarea pide: `offline-banner.tsx` sólo lee
+      `pendientes` (el ámbar), así que faltan el rojo de rechazados y el gris de «sin sincronizar desde
+      hace más de 72 h». La pantalla `SyncRejected` sí está, pero no hay banner que lleve a ella. Faltan
+      también los flujos de Maestro de cada estado. N-24 deja de bloquearla: el teléfono ya se rehízo en
+      El Mostrador.
 - **What:** on top of the A-07 pill, conditional full-width banners:
   - amber — offline **and** pending > 0: "Trabajando sin conexión · 12 registros se enviarán al
     reconectar";
@@ -690,8 +698,15 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** merge of `rename/xangarro-stored-ids`; each Track O screen closed `[alta]` `[bloq]`
-      (O-xx) before its phone counterpart starts · **Blocks:** N-20, N-22, N-25
+- [ ] Status · **Blocked by:** — `[alta]` `[bloq]` · **Blocks:** N-20, N-22, N-25
+      **Re-verificado 2026-09-28:** los dos bloqueos que esta línea nombraba ya no existen, y el trabajo
+      se hizo en otro lado. `rename/xangarro-stored-ids` **está integrada en `main`** desde `52824588`
+      («Merge rename/xangarro-stored-ids: the phone track lands (A-04…A-18)»), que es lo que O-20 ya había
+      dicho el 2026-09-19. Y el teléfono no adoptó el diseño de Track O: lo **reemplazó El Mostrador**
+      (ADR-117, track `19-movil-mostrador.md`), con M-01 a M-09 cerradas entre el 2026-09-27 y el
+      2026-09-28 — shell de cuatro pestañas, Cobrar, Mi turno, Inicio, Acceso y Bloqueo. Esta tarea, tal
+      como está escrita, quedó **superada**: lo que falta del teléfono vive en M-10, M-11 y M-12. Decidir
+      si se cierra o se reescribe como el remanente que no cubre Track M.
 - **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
   caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
   device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
@@ -708,6 +723,14 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
       **Remaining (2026-09-23, after C-14 and P-06 landed):** the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24.
+      **Re-verificado 2026-09-28:** el lado del teléfono **ya se construyó**, en M-06 («Vincular: cámara
+      QR + código», cerrada el 2026-09-28). Existen `packages/ui/src/components/Scanner/` (nativo y web),
+      `apps/mobile/src/shell/scanner-host.tsx` y `packages/ui/src/screens/Activation/qr-visor-marco.tsx`.
+      Quedan exactamente dos huecos, los dos verificados por ausencia: **no hay App Links ni Universal
+      Links** (`assetlinks.json` y el AASA no están en ningún commit del repo), y **no existe la
+      confirmación SEC-MOB-04 «¿Vincular a _negocio_?»** antes de canjear el token, que necesita una
+      vista previa que nombre al negocio. N-24 deja de bloquearla.
+
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
   `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
