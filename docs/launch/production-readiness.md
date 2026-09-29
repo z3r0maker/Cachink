@@ -77,6 +77,7 @@
       plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
       «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
       copy, the confirmation and the edge cases (already cancelled, past due).
+      **Re-verificado 2026-09-28:** la mitad de plomería ya existe y conviene no rehacerla: `cancelSubscription(id)` está en `apps/web/src/server/billing/gateway.ts:114`. Lo que no existe es la pantalla: no hay carpeta `configuracion` en el portal, así que Configuración → Suscripción se construye desde cero y el botón se cuelga de ese método.
 - [ ] **BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge**, with a one-click `[critica]` `[bloq]`
       cancel link (tokenised).
 - [ ] Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. `[alta]` `[bloq]`
@@ -85,6 +86,8 @@
 - [ ] Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. `[alta]` `[bloq]`
 
 ## 5. Stores
+
+      **Re-verificado 2026-09-28:** parcial. El aviso ya está enlazado en la barra lateral del portal (`shell/sidebar-parts.tsx`, de N-34) y en el pie de la landing. Faltan: los términos en cualquiera de los dos, y los pies de los correos por completo — ningún archivo de `packages/email/src` enlaza un texto legal.
 
 - [ ] **BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest**; Play Data Safety form — `[critica]` `[bloq]`
       both derived from aviso §3 so they cannot disagree.

@@ -55,11 +55,11 @@ llama BLOCKER y que aun así tienen producción detenida hoy.
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Lawyer's review of the five texts + the five confirmations in · `../launch/production-readiness.md:23`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Cancel in one click from Configuración → Suscripción. · `../launch/production-readiness.md:74`
-- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:80`
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest; Play Data Safety form — · `../launch/production-readiness.md:89`
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:91`
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:93`
-- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
+- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:81`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest; Play Data Safety form — · `../launch/production-readiness.md:92`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:94`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:96`
+- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:124`
 
 ### Alta (32) — Bloquea el lanzamiento, o destraba a varias otras.
 
@@ -90,11 +90,11 @@ llama BLOCKER y que aun así tienen producción detenida hoy.
 - [ ] `⛔ bloquea prod` `Alta` ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day · `../launch/production-readiness.md:64`
 - [ ] `⛔ bloquea prod` `Alta` Breach protocol with the Reglamento art. 65 field list, a named person, and the 72 h clause to · `../launch/production-readiness.md:68`
 - [ ] `⛔ bloquea prod` `Alta` Verify Sentry server-side captures no PII before the aviso says so. · `../launch/production-readiness.md:70`
-- [ ] `⛔ bloquea prod` `Alta` Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:82`
-- [ ] `⛔ bloquea prod` `Alta` Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:84`
-- [ ] `⛔ bloquea prod` `Alta` Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:85`
-- [ ] `⛔ bloquea prod` `Alta` Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:101`
-- [ ] `⛔ bloquea prod` `Alta` Receipt (`comprobante`) carries "Este comprobante no es un CFDI" and the negocio's name as · `../launch/production-readiness.md:112`
+- [ ] `⛔ bloquea prod` `Alta` Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:83`
+- [ ] `⛔ bloquea prod` `Alta` Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:85`
+- [ ] `⛔ bloquea prod` `Alta` Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:86`
+- [ ] `⛔ bloquea prod` `Alta` Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:104`
+- [ ] `⛔ bloquea prod` `Alta` Receipt (`comprobante`) carries "Este comprobante no es un CFDI" and the negocio's name as · `../launch/production-readiness.md:115`
 
 ### Media (1) — Se necesita poco después de salir, o su disparador ya es cierto.
 
@@ -107,12 +107,12 @@ Sólo el dueño las mueve: cuentas, llaves, DNS, KYC, firmas. Ninguna se destrab
 ### Lanzamiento (7)
 
 - [ ] `⛔ bloquea prod` `Crítica` **O-12** Needs you (manual, 2026-09-23): Stripe test keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLI… · `11-pre-launch-and-deferred.md:44`
-- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:121`
-- [ ] `Media` Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). · `../launch/production-readiness.md:123`
+- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — IMPI trademark search and filing for "Xangarro" (classes 9, 35, 36, 42) before · `../launch/production-readiness.md:124`
+- [ ] `Media` Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). · `../launch/production-readiness.md:126`
 - [ ] `Baja` **O-10** Archive `z3r0maker/CachinkLanding` on GitHub (do not delete) · `11-pre-launch-and-deferred.md:35`
 - [ ] `Baja` **O-11** `gh auth login` on the dev machine · `11-pre-launch-and-deferred.md:36`
-- [ ] `Baja` Cyber-liability insurance — business decision. · `../launch/production-readiness.md:124`
-- [ ] `Baja` INDAUTOR software registration — optional. · `../launch/production-readiness.md:125`
+- [ ] `Baja` Cyber-liability insurance — business decision. · `../launch/production-readiness.md:127`
+- [ ] `Baja` INDAUTOR software registration — optional. · `../launch/production-readiness.md:128`
 
 ## Legal y cumplimiento (17)
 
@@ -192,13 +192,13 @@ Lo que Apple y Google exigen antes de la primera revisión.
 
 ### Lanzamiento (7)
 
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest; Play Data Safety form — · `../launch/production-readiness.md:89`
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:91`
-- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:93`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest; Play Data Safety form — · `../launch/production-readiness.md:92`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Terms and privacy URLs live (`xangarro.mx/privacidad`, `/terminos`) and · `../launch/production-readiness.md:94`
+- [ ] `⛔ bloquea prod` `Crítica` BEFORE-STORES — Reviewer notes explaining the device + NIP model (no in-app account, no · `../launch/production-readiness.md:96`
 - [ ] `⛔ bloquea prod` `Alta` **X-05** Store listings + review readiness — Blocked by: F-01, A-15, X-07, B-04 · Falta: `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`. · `07-launch.md:38`
 - [~] `⛔ bloquea prod` `Alta` **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:839`
-- [ ] `Media` Open-source licence notices screen generated from `pnpm licenses list --prod` (1,184 pkgs, no · `../launch/production-readiness.md:95`
-- [ ] `Baja` Never add Sign in with Apple/Google to the mobile app (would trigger 5.1.1(v)). · `../launch/production-readiness.md:97`
+- [ ] `Media` Open-source licence notices screen generated from `pnpm licenses list --prod` (1,184 pkgs, no · `../launch/production-readiness.md:98`
+- [ ] `Baja` Never add Sign in with Apple/Google to the mobile app (would trigger 5.1.1(v)). · `../launch/production-readiness.md:100`
 
 ### Colas de tracks (1)
 
@@ -210,13 +210,13 @@ Proveedores y alianzas: Clip, Mercado Pago, el PAC, los DPA.
 
 ### Lanzamiento (7)
 
-- [ ] `⛔ bloquea prod` `Alta` Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:101`
-- [ ] `Alta` Foundry hosting option decided and configured (Hosted on Azure, US DataZone recommended); · `../launch/production-readiness.md:103`
-- [ ] `Alta` `ASESOR_LLM_*` never pointed at a personal proxy with real tenant data (add a guard). · `../launch/production-readiness.md:105`
+- [ ] `⛔ bloquea prod` `Alta` Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:104`
+- [ ] `Alta` Foundry hosting option decided and configured (Hosted on Azure, US DataZone recommended); · `../launch/production-readiness.md:106`
+- [ ] `Alta` `ASESOR_LLM_*` never pointed at a personal proxy with real tenant data (add a guard). · `../launch/production-readiness.md:108`
 - [ ] `Media` **O-19** Contact Clip's partner team (sdk@payclip.com): OAuth/partner programme, a test device, bulk PinPad installs · `11-pre-launch-and-deferred.md:57`
 - [ ] `Media` **O-27** Create a Mercado Pago developer app (Tus integraciones), copy its test access token and run `scripts/spikes/m… · `11-pre-launch-and-deferred.md:58`
 - [ ] `Media` **O-28** Clip: finish KYC, check the reader model (Total 3 / Ultra / PinPad / Stand 2; not Plus), create production ke… · `11-pre-launch-and-deferred.md:59`
-- [ ] `Media` Rule: the Asesor's model boundary stays the only module that knows a model exists; the IA · `../launch/production-readiness.md:106`
+- [ ] `Media` Rule: the Asesor's model boundary stays the only module that knows a model exists; the IA · `../launch/production-readiness.md:109`
 
 ### Post-lanzamiento (1)
 
@@ -245,7 +245,7 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - [ ] `⛔ bloquea prod` `Crítica` **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:800`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Self-service account deletion in the portal (export → confirm → cancel Stripe → · `../launch/production-readiness.md:59`
 - [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Cancel in one click from Configuración → Suscripción. · `../launch/production-readiness.md:74`
-- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:80`
+- [ ] `⛔ bloquea prod` `Crítica` BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge, with a one-click · `../launch/production-readiness.md:81`
 - [~] `⛔ bloquea prod` `Alta` **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:142`
 - [~] `⛔ bloquea prod` `Alta` **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:399`
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:561`
@@ -260,19 +260,19 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - [ ] `⛔ bloquea prod` `Alta` ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day · `../launch/production-readiness.md:64`
 - [ ] `⛔ bloquea prod` `Alta` Breach protocol with the Reglamento art. 65 field list, a named person, and the 72 h clause to · `../launch/production-readiness.md:68`
 - [ ] `⛔ bloquea prod` `Alta` Verify Sentry server-side captures no PII before the aviso says so. · `../launch/production-readiness.md:70`
-- [ ] `⛔ bloquea prod` `Alta` Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:82`
-- [ ] `⛔ bloquea prod` `Alta` Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:84`
-- [ ] `⛔ bloquea prod` `Alta` Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:85`
-- [ ] `⛔ bloquea prod` `Alta` Receipt (`comprobante`) carries "Este comprobante no es un CFDI" and the negocio's name as · `../launch/production-readiness.md:112`
-- [ ] `Alta` Advertising claims on the landing are demonstrable (LFPC art. 32). · `../launch/production-readiness.md:117`
+- [ ] `⛔ bloquea prod` `Alta` Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. · `../launch/production-readiness.md:83`
+- [ ] `⛔ bloquea prod` `Alta` Address, phone and complaint channel visible before contracting (landing + checkout). · `../launch/production-readiness.md:85`
+- [ ] `⛔ bloquea prod` `Alta` Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. · `../launch/production-readiness.md:86`
+- [ ] `⛔ bloquea prod` `Alta` Receipt (`comprobante`) carries "Este comprobante no es un CFDI" and the negocio's name as · `../launch/production-readiness.md:115`
+- [ ] `Alta` Advertising claims on the landing are demonstrable (LFPC art. 32). · `../launch/production-readiness.md:120`
 - [ ] `Media` SOON — Nightly seal job: call `xangarro.privacy_consents_day_root(day)` and obtain a · `../launch/production-readiness.md:48`
 - [ ] `Media` Re-consent gate on login when a version adds a finalidad (art. 11); banner otherwise. · `../launch/production-readiness.md:54`
 - [ ] `Media` Decide checkbox vs. button-as-consent with the lawyer (OQ-N7); today: checkbox. · `../launch/production-readiness.md:55`
 - [ ] `Media` Retention calendar implemented per table (OQ-L13 numbers once confirmed); 72-month rule for · `../launch/production-readiness.md:66`
-- [ ] `Media` Price increases: 30-day notice + express re-acceptance flow. · `../launch/production-readiness.md:83`
-- [ ] `Media` Attribution retention rule for `signup_attribution` (geo has 400 days; propose the same). · `../launch/production-readiness.md:114`
-- [ ] `Media` Landing beacon disclosed in the aviso (done) and a footer link on `xangarro.mx` (open). · `../launch/production-readiness.md:115`
-- [ ] `Media` Marketing e-mail: opt-out honoured within the 5-day window; REPEP if phone/SMS ever used. · `../launch/production-readiness.md:116`
+- [ ] `Media` Price increases: 30-day notice + express re-acceptance flow. · `../launch/production-readiness.md:84`
+- [ ] `Media` Attribution retention rule for `signup_attribution` (geo has 400 days; propose the same). · `../launch/production-readiness.md:117`
+- [ ] `Media` Landing beacon disclosed in the aviso (done) and a footer link on `xangarro.mx` (open). · `../launch/production-readiness.md:118`
+- [ ] `Media` Marketing e-mail: opt-out honoured within the 5-day window; REPEP if phone/SMS ever used. · `../launch/production-readiness.md:119`
 
 ### Post-lanzamiento (39)
 
