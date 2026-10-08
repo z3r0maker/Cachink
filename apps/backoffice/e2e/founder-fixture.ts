@@ -57,6 +57,22 @@ export async function makeSocioFounder(): Promise<void> {
   });
 }
 
+/** What the movimientos suite captures is named «E2E …» (and its reversal «Reversa: E2E …»). */
+export const E2E_CONCEPTO = 'E2E Vercel';
+
+/** The console's corp role has no DELETE; the owner removes the suite's entries. */
+export async function clearLedgerFixture(): Promise<void> {
+  await withSuper(async (sql) => {
+    await sql.begin(async (tx) => {
+      await tx`DELETE FROM corp.entry_lines WHERE entry_id IN (
+                 SELECT id FROM corp.entries
+                  WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %')`;
+      await tx`DELETE FROM corp.entries
+                WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'`;
+    });
+  });
+}
+
 /** Leaves corp as the suite found it: no founders. */
 export async function clearFounders(): Promise<void> {
   await withSuper(async (sql) => {

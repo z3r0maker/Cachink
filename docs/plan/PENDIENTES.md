@@ -22,13 +22,13 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1026`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
-- **E-05** Expediente (Colas de tracks) — destraba 5: E-06, E-11, E-21, E-14, E-43 · `20-command-center.md:314`
+- **E-05** Expediente (Colas de tracks) — destraba 5: E-06, E-11, E-21, E-14, E-43 · `20-command-center.md:324`
 - **P-35** Portal coverage to 95% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1626`
 - **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1309`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1320`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
-- **E-04** Agenda fiscal y corporativa (Colas de tracks) — destraba 2: E-16, E-17 · `20-command-center.md:295`
-- **E-20** Tablero (Colas de tracks) — destraba 2: E-21, E-17 · `20-command-center.md:425`
+- **E-04** Agenda fiscal y corporativa (Colas de tracks) — destraba 2: E-16, E-17 · `20-command-center.md:305`
+- **E-20** Tablero (Colas de tracks) — destraba 2: E-21, E-17 · `20-command-center.md:435`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1340`
 
 ## Bloquea producción (54)
@@ -334,34 +334,34 @@ Función nueva o por terminar, en el portal, la app, el backend o la consola.
 - [ ] `Baja` **P-41** Advanced inventory functions — Blocked by: — · `04-portal.md:1911`
 - [ ] `Baja` **L-09** Comparison and alternatives pages against named competitors — Blocked by: owner — the competitor list and the facts about each that we are willing to publish · `06-landing.md:192`
 - [ ] `Baja` **L-10** Off-site presence: Reddit and YouTube — Blocked by: owner — accounts and time · `06-landing.md:208`
-- [~] **E-02** Ledger core and Movimientos — Blocked by: E-01 · Falta: the `/empresa/movimientos` screen and its capture drawer (waits on the Torre / Mostrador decision), the recurring-template screen, and the contador's código agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart, movement → balanced lines, reversal, period lock, USD at the day rate), the use cases (`@xangarro/application/corp`: registrar and revertir, idempotent imports), and corp storage (`entries`, `entry_lines`, `closed_periods`, `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines and closed-month triggers) with its integration suite. · `20-command-center.md:256`
-- [ ] **E-03** Aportaciones y préstamos de socios — Blocked by: E-02 · `20-command-center.md:282`
-- [ ] **E-04** Agenda fiscal y corporativa — Blocked by: E-01 · `20-command-center.md:295`
-- [ ] **E-05** Expediente — Blocked by: E-01 · `20-command-center.md:314`
-- [ ] **E-06** Libro corporativo — Blocked by: E-01, E-05 · `20-command-center.md:325`
-- [ ] **E-10** Ingresos y facturas emitidas — Blocked by: E-02, B-10 · `20-command-center.md:338`
-- [ ] **E-11** Facturas recibidas — Blocked by: E-02, E-05 · `20-command-center.md:350`
-- [ ] **E-12** Estado de resultados y Balance — Blocked by: E-02, OD-1 · `20-command-center.md:362`
-- [ ] **E-13** Impuestos — Blocked by: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:373`
-- [ ] **E-14** Cierre del mes — Blocked by: E-10, E-11, E-13 · `20-command-center.md:384`
-- [ ] **E-15** Límites — Blocked by: E-10 · `20-command-center.md:401`
-- [ ] **E-16** Resumen — Blocked by: E-12, E-04 · `20-command-center.md:410`
-- [ ] **E-20** Tablero — Blocked by: E-01, OD-4 · `20-command-center.md:425`
-- [ ] **E-21** Acciones y cortes — Blocked by: E-20, E-03, E-06 · `20-command-center.md:436`
-- [ ] **E-22** Presupuesto — Blocked by: E-12 · `20-command-center.md:445`
-- [ ] **E-23** Caja — Blocked by: E-12 · `20-command-center.md:453`
-- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Blocked by: E-12, OD-3 · `20-command-center.md:463`
-- [ ] **E-31** Propuestas — Blocked by: E-30 · `20-command-center.md:472`
-- [ ] **E-32** The agents of §6 — Blocked by: E-31 · `20-command-center.md:481`
-- [ ] **E-33** Foundry runtime — Blocked by: E-32 · `20-command-center.md:490`
-- [ ] **E-40** KPIs SaaS — Blocked by: N-63, E-12 · `20-command-center.md:501`
-- [ ] **E-41** Second project and shared-cost allocation — Blocked by: OD-2, a second project · `20-command-center.md:507`
-- [ ] **E-42** Banco y tipo de cambio — Blocked by: E-23 · `20-command-center.md:513`
-- [ ] **E-43** Exportación al contador — Blocked by: E-14 · `20-command-center.md:519`
-- [ ] **E-44** Salida a otro sistema — Blocked by: E-01 · `20-command-center.md:525`
-- [ ] **E-17** Resumen del trimestre — Blocked by: E-12, E-20, E-04 · `20-command-center.md:614`
-- [ ] **E-24** Servicios — Blocked by: E-02 · `20-command-center.md:629`
-- [ ] **E-25** Lectura de estados de cuenta con IA — Blocked by: E-24, E-31, OD-3 · `20-command-center.md:646`
+- [~] **E-02** Ledger core and Movimientos — Blocked by: E-01 · Falta: the recurring-template screen, the project and category filters, and the contador's código agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart, movement → balanced lines, reversal, period lock, USD at the day rate, the capture's IVA split and the month's bank summary), the use cases (`@xangarro/application/corp`: registrar and revertir, idempotent imports), corp storage (`entries`, `entry_lines`, `closed_periods`, `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines and closed-month triggers) with its integration suite, and the screens: `/empresa/movimientos` (month navigation, Entradas / Salidas / Neto, type chips, the table), `/empresa/movimientos/registrar` (gasto in MXN or USD with the live peso equivalent, comisión bancaria) and the detail with its asiento and «Revertir movimiento». Both writes are founder-gated server actions with a `staff_audit_log` row (`empresa.movimiento_registrado`, `empresa.movimiento_revertido`); corp lives in another database, so the entry commits first and a form nonce as `sourceRef` makes a retry land on the same entry. Playwright: `e2e/empresa.spec.ts` records a USD expense, checks the row, the total and the asiento, reverses it and sees the month back at zero. · `20-command-center.md:256`
+- [ ] **E-03** Aportaciones y préstamos de socios — Blocked by: E-02 · `20-command-center.md:292`
+- [ ] **E-04** Agenda fiscal y corporativa — Blocked by: E-01 · `20-command-center.md:305`
+- [ ] **E-05** Expediente — Blocked by: E-01 · `20-command-center.md:324`
+- [ ] **E-06** Libro corporativo — Blocked by: E-01, E-05 · `20-command-center.md:335`
+- [ ] **E-10** Ingresos y facturas emitidas — Blocked by: E-02, B-10 · `20-command-center.md:348`
+- [ ] **E-11** Facturas recibidas — Blocked by: E-02, E-05 · `20-command-center.md:360`
+- [ ] **E-12** Estado de resultados y Balance — Blocked by: E-02, OD-1 · `20-command-center.md:372`
+- [ ] **E-13** Impuestos — Blocked by: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:383`
+- [ ] **E-14** Cierre del mes — Blocked by: E-10, E-11, E-13 · `20-command-center.md:394`
+- [ ] **E-15** Límites — Blocked by: E-10 · `20-command-center.md:411`
+- [ ] **E-16** Resumen — Blocked by: E-12, E-04 · `20-command-center.md:420`
+- [ ] **E-20** Tablero — Blocked by: E-01, OD-4 · `20-command-center.md:435`
+- [ ] **E-21** Acciones y cortes — Blocked by: E-20, E-03, E-06 · `20-command-center.md:446`
+- [ ] **E-22** Presupuesto — Blocked by: E-12 · `20-command-center.md:455`
+- [ ] **E-23** Caja — Blocked by: E-12 · `20-command-center.md:463`
+- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Blocked by: E-12, OD-3 · `20-command-center.md:473`
+- [ ] **E-31** Propuestas — Blocked by: E-30 · `20-command-center.md:482`
+- [ ] **E-32** The agents of §6 — Blocked by: E-31 · `20-command-center.md:491`
+- [ ] **E-33** Foundry runtime — Blocked by: E-32 · `20-command-center.md:500`
+- [ ] **E-40** KPIs SaaS — Blocked by: N-63, E-12 · `20-command-center.md:511`
+- [ ] **E-41** Second project and shared-cost allocation — Blocked by: OD-2, a second project · `20-command-center.md:517`
+- [ ] **E-42** Banco y tipo de cambio — Blocked by: E-23 · `20-command-center.md:523`
+- [ ] **E-43** Exportación al contador — Blocked by: E-14 · `20-command-center.md:529`
+- [ ] **E-44** Salida a otro sistema — Blocked by: E-01 · `20-command-center.md:535`
+- [ ] **E-17** Resumen del trimestre — Blocked by: E-12, E-20, E-04 · `20-command-center.md:624`
+- [ ] **E-24** Servicios — Blocked by: E-02 · `20-command-center.md:639`
+- [ ] **E-25** Lectura de estados de cuenta con IA — Blocked by: E-24, E-31, OD-3 · `20-command-center.md:656`
 
 ## Por archivo
 

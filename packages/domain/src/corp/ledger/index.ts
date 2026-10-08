@@ -30,3 +30,11 @@ export type {
 } from './movements.js';
 export { postMovement, sumDebe, sumHaber } from './posting.js';
 export { assertPeriodOpen, convertirAMxn, periodOf, reverseLines } from './rules.js';
+export {
+  gastoDesdeCaptura,
+  resumenDelMes,
+  type CapturaGasto,
+  type EntradaDelMes,
+  type GastoCapturado,
+  type ResumenDelMes,
+} from './capture.js';

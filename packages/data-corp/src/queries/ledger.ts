@@ -17,8 +17,8 @@ import { projects } from '../schema/projects.js';
  * written in one transaction; the deferred triggers of 0001_ledger_guards.sql
  * check the balance at its commit.
  */
-type EntryRow = typeof entries.$inferSelect;
-type LineRow = typeof entryLines.$inferSelect;
+export type EntryRow = typeof entries.$inferSelect;
+export type LineRow = typeof entryLines.$inferSelect;
 
 /** Parsed, never asserted (CLAUDE.md §2.8). */
 function toLine(row: LineRow): JournalLine {
@@ -34,7 +34,7 @@ function toLine(row: LineRow): JournalLine {
   return { ...base, socio: row.socio };
 }
 
-function toEntry(row: EntryRow, lines: readonly LineRow[]): LedgerEntry {
+export function toEntry(row: EntryRow, lines: readonly LineRow[]): LedgerEntry {
   return {
     id: row.id,
     fecha: row.fecha,

@@ -254,13 +254,23 @@ with property tests:
 ### E-02 Ledger core and Movimientos
 
 - [~] Status · **Blocked by:** E-01
-  **Remaining (2026-10-08):** the `/empresa/movimientos` screen and its capture drawer (waits on
-  the Torre / Mostrador decision), the recurring-template screen, and the contador's código
-  agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart, movement → balanced lines,
-  reversal, period lock, USD at the day rate), the use cases (`@xangarro/application/corp`:
-  registrar and revertir, idempotent imports), and corp storage (`entries`, `entry_lines`,
-  `closed_periods`, `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines
-  and closed-month triggers) with its integration suite.
+  **Remaining (2026-10-08):** the recurring-template screen, the project and category filters,
+  and the contador's código agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart,
+  movement → balanced lines, reversal, period lock, USD at the day rate, the capture's IVA split
+  and the month's bank summary), the use cases (`@xangarro/application/corp`: registrar and
+  revertir, idempotent imports), corp storage (`entries`, `entry_lines`, `closed_periods`,
+  `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines and closed-month
+  triggers) with its integration suite, and the screens: `/empresa/movimientos` (month
+  navigation, Entradas / Salidas / Neto, type chips, the table), `/empresa/movimientos/registrar`
+  (gasto in MXN or USD with the live peso equivalent, comisión bancaria) and the detail with its
+  asiento and «Revertir movimiento». Both writes are founder-gated server actions with a
+  `staff_audit_log` row (`empresa.movimiento_registrado`, `empresa.movimiento_revertido`); corp
+  lives in another database, so the entry commits first and a form nonce as `sourceRef` makes a
+  retry land on the same entry. Playwright: `e2e/empresa.spec.ts` records a USD expense, checks
+  the row, the total and the asiento, reverses it and sees the month back at zero.
+  **Theme:** «Empresa» renders El Mostrador, light (`torreLight` in `styles/theme.css.ts`,
+  primitives in `styles/mostrador.css.ts` and `mostrador-data.css.ts`), inside the dark rail.
+  The capture is a page, as on board CD-03, not a drawer.
 - **What:**
   - domain: accounts, the movement → lines posting rules of §3, the balance check, reversal and
     the period lock;

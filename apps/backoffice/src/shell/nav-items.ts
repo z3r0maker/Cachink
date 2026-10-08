@@ -11,6 +11,7 @@ export type NavHref =
   | '/mapa'
   | '/campanas'
   | '/capacidad'
+  | '/empresa/movimientos'
   | '/empresa/corporativo';
 
 export interface NavItem {
@@ -72,6 +73,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
  * before (CLAUDE.md §7: no «Pronto»).
  */
 export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
+  {
+    label: 'Movimientos',
+    href: '/empresa/movimientos',
+    task: 'E-02',
+    summary: 'El libro del mes: gastos, comisiones y reversas.',
+  },
   {
     label: 'Corporativo',
     href: '/empresa/corporativo',

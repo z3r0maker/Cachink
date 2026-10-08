@@ -19,6 +19,18 @@ export function corpDb(): CorpDb | null {
   return cached;
 }
 
+/** For «Empresa» pages and actions, which only render once the founder gate passed. */
+export function requireCorpDb(): CorpDb {
+  const db = corpDb();
+  if (db === null) throw new Error('CORP_DATABASE_URL is not set.');
+  return db;
+}
+
+/** Today in Mexico City as `YYYY-MM-DD`: the founders' calendar, not the server's. */
+export function hoyEnMexico(now: Date = new Date()): string {
+  return now.toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+}
+
 /** The founder lookup over the corp connection, or null when it is not configured. */
 export function founderLookup(): FounderLookup | null {
   const db = corpDb();
