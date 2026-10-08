@@ -7,10 +7,12 @@ import {
   calculateIndicadores,
   conTotales,
   desgloseDeResultados,
+  metodoIsr,
   sum,
   type ClientPayment,
   type DayClose,
   type InventoryMovement,
+  type IsrMetodo,
   type TicketConTotal,
 } from '@xangarro/domain';
 import type { periodBalanceInputs } from '@xangarro/data-pg';
@@ -35,8 +37,8 @@ export interface EstadosModel {
   readonly indicadores: ReturnType<typeof calculateIndicadores>;
   /** The business's own ISR rate (Negocio, P-08), in basis points. */
   readonly isrTasa: number;
-  /** The SAT régime code — names the base the estimate used (ADR-089). */
-  readonly regimenSat: string | null;
+  /** How the ISR line was estimated — régime and persona (ADR-089, ADR-125). */
+  readonly isrMetodo: IsrMetodo;
   /** What each expandable line is made of — sums to the line (domain test). */
   readonly desglose: ReturnType<typeof desgloseDeResultados>;
   /**
@@ -142,28 +144,29 @@ function sinMovimiento(
   return ventas.length === 0 && egresos.length === 0 && pagos.length === 0 && cortes.length === 0;
 }
 
+type Periodo = Awaited<ReturnType<typeof leerPeriodo>>;
+
+/** Resultados, with the ISR its régime and persona call for (ADR-089, ADR-125). */
+function resultadosDe(p: Periodo, from: string, to: string): EstadosModel['resultados'] {
+  return calculateEstadoDeResultados({
+    ventas: p.ventas,
+    egresos: p.egresos,
+    mermaMovements: p.inputs.merma as unknown as readonly InventoryMovement[],
+    isrTasa: p.isrTasa,
+    regimenSat: p.regimenSat,
+    persona: p.persona,
+    mesesEnPeriodo: mesesEntre(from, to),
+  });
+}
+
 export async function loadEstadosModel(
   businessId: string,
   from: string,
   to: string,
 ): Promise<EstadosModel> {
-  const {
-    ventas,
-    egresos,
-    tickets: tk,
-    inputs,
-    isrTasa,
-    regimenSat,
-    apertura,
-  } = await leerPeriodo(businessId, from, to);
-  const resultados = calculateEstadoDeResultados({
-    ventas,
-    egresos,
-    mermaMovements: inputs.merma as unknown as readonly InventoryMovement[],
-    isrTasa,
-    regimenSat: regimenSat ?? null,
-    mesesEnPeriodo: mesesEntre(from, to),
-  });
+  const periodo = await leerPeriodo(businessId, from, to);
+  const { ventas, egresos, tickets: tk, inputs, isrTasa, apertura } = periodo;
+  const resultados = resultadosDe(periodo, from, to);
   const pagosClientes = inputs.pagos as unknown as readonly ClientPayment[];
   // The period's tickets with derived totals (ADR-073), for method-level views.
   const tickets = conTotales(tk, ventas);
@@ -182,5 +185,6 @@ export async function loadEstadosModel(
   const desglose = desgloseDeResultados({ ventas: tickets, egresos });
   const vacio = sinMovimiento(ventas, egresos, pagosClientes, inputs.cortes);
   const mermas = mermasDe(inputs.merma);
-  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose, vacio, mermas };
+  const isrMetodo = metodoIsr(periodo.regimenSat, periodo.persona);
+  return { resultados, balance, flujo, indicadores, isrTasa, isrMetodo, desglose, vacio, mermas };
 }

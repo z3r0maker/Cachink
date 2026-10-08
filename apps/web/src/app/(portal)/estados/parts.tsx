@@ -1,6 +1,6 @@
 'use client';
 
-import { formatMoney, type Money } from '@xangarro/domain';
+import { formatMoney, type IsrMetodo, type Money } from '@xangarro/domain';
 
 import { Card, Verdict } from '@/components';
 import { eyebrow } from '@/styles/text.css';
@@ -43,30 +43,41 @@ export function Resumen({
 export interface IsrNoticeModel {
   readonly isrTasa: number;
   readonly isr: bigint;
-  /** ADR-089: 626 estimates on gross, 612 on the Art. 96 tariff, else the owner's rate. */
-  readonly regimenSat: string | null;
+  /** ADR-089/125: the domain's method, so the notice names the base it used. */
+  readonly metodo: IsrMetodo;
 }
 
 const DISCLAIMER =
   'Es una referencia calculada con las tablas publicadas del SAT. Para tus cifras y deducciones reales, consulta a tu contador.';
 
-export function IsrNotice({ isrTasa, isr, regimenSat }: IsrNoticeModel) {
-  const titulo =
-    regimenSat === '626'
-      ? 'ISR referencial (RESICO, sobre tus ingresos)'
-      : regimenSat === '612'
-        ? 'ISR referencial (tarifa del SAT, sobre tu utilidad)'
-        : `ISR referencial (${isrTasa / 100}%)`;
-  const linea =
-    regimenSat === '626'
-      ? DISCLAIMER
-      : isr > 0n
-        ? DISCLAIMER
-        : `En este periodo no hubo utilidad, así que no hay ISR estimado. ${DISCLAIMER}`;
+/** RESICO for a persona moral is profit on cash basis (Art. 211 LISR), not gross. */
+const FLUJO_MORAL =
+  'En RESICO, una persona moral paga 30% sobre lo que cobró menos lo que pagó en el año; aquí usamos la utilidad del periodo.';
+
+const titulo = (metodo: IsrMetodo, isrTasa: number): string => {
+  switch (metodo) {
+    case 'resico':
+      return 'ISR referencial (RESICO, sobre tus ingresos)';
+    case 'resicoMoral':
+      return 'ISR referencial (RESICO persona moral, 30% sobre tu utilidad)';
+    case 'tarifa96':
+      return 'ISR referencial (tarifa del SAT, sobre tu utilidad)';
+    case 'tasa':
+      return `ISR referencial (${isrTasa / 100}%)`;
+  }
+};
+
+export function IsrNotice({ isrTasa, isr, metodo }: IsrNoticeModel) {
+  // Only RESICO de personas físicas owes on gross: every other base is profit.
+  const sinUtilidad = metodo !== 'resico' && isr === 0n;
+  const disclaimer = metodo === 'resicoMoral' ? `${FLUJO_MORAL} ${DISCLAIMER}` : DISCLAIMER;
+  const linea = sinUtilidad
+    ? `En este periodo no hubo utilidad, así que no hay ISR estimado. ${disclaimer}`
+    : disclaimer;
   return (
     <div className={isrNotice}>
       <div>
-        <strong>{titulo}</strong>
+        <strong>{titulo(metodo, isrTasa)}</strong>
         <p style={{ margin: '6px 0 0', fontWeight: 600 }}>{linea}</p>
       </div>
     </div>

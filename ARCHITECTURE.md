@@ -163,6 +163,7 @@ Links to discussion, docs, prior art.
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [125](#adr-125) | 2026-10-08 | RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8962,3 +8963,57 @@ misreports data:
   mode still limits pulls after sales to one per 45 s.
 - DB3-CAJA-04's other halves stay open: the full `export()` per write and the
   move to an OPFS VFS.
+
+## ADR-125
+
+**Title:** RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — amends ADR-089 §1 (the 626 row)
+
+**Context**
+
+ADR-089 estimated every 626 business with the Art. 113-E table: 1.00 %–2.50 %
+over the month's gross income. That table is RESICO **de personas físicas**
+(Título IV). The SAT catalogue opens 626 to personas morales too
+(`REGIMEN_FISCAL['626']` is `['moral', 'fisica']`), and their RESICO is a
+different chapter — LISR Título VII, **Capítulo XII**, arts. 206–215 (verified
+against the Cámara de Diputados text, última reforma DOF 01-04-2024; the 2026
+package left these articles as they were):
+
+- Art. 207: income is accumulated when **efectivamente percibido** (cash basis).
+- Art. 211: the monthly provisional payment is the **Art. 9 rate (30 %)** over
+  the year-to-date ingresos efectivamente percibidos less the deducciones
+  autorizadas efectivamente erogadas (and PTU paid, and prior losses), crediting
+  the provisional payments already made.
+
+So a persona moral in 626 was shown roughly a fortieth of its estimate.
+
+**Decision**
+
+1. `calcularIsrPorRegimen` and `calculateEstadoDeResultados` take an optional
+   `persona: TipoPersona | null`. The portal derives it from the business's RFC
+   with `tipoPersona` (12 characters: moral). `metodoIsr(regimenSat, persona)`
+   is the one routing rule; the estimate and the notice both read it.
+2. **626 + moral → `resicoMoral`:** 30 % of the period's utilidad operativa, base
+   `utilidad`, zero on a loss. Utilidad operativa stands in for the cash-basis
+   profit, as it stands in for the base gravable under 612. Because Art. 211 is
+   cumulative and credits earlier payments, a multi-month period is **one**
+   base — months offset each other — not a sum of monthly estimates.
+3. **626 + física, or persona unknown (no RFC yet) → `resico`,** unchanged. The
+   seed and most owners have no RFC on file; the física table is the common case
+   and was the behavior before this ADR.
+4. The notice names the method: «ISR referencial (RESICO persona moral, 30% sobre
+   tu utilidad)», says that the SAT's base is what was cobrado less what was
+   pagado in the year, and keeps ADR-089's disclaimer. The «no hubo utilidad»
+   variant now applies to every profit-based method, `resicoMoral` included.
+
+**Consequences**
+
+- A RESICO persona moral sees an estimate of the right order. It stays an
+  estimate: the statements are accrual (every venta counts, paid or not), there
+  is no PTU or prior-loss offset, and a custom period does not start in January.
+  The notice says so; O-14's contador sign-off still covers the nuances.
+- The phone and the monthly report pass no régime, so they keep the owner's
+  rate, as ADR-089 left them.

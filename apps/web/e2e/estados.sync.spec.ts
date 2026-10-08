@@ -4,13 +4,21 @@ import { asTenant, BIZ } from './sync-phone';
 
 /**
  * P-14's period switcher and ISR, against the seed with the business's today
- * pinned to 2026-05-12. In the `sync` project because one test changes the
- * seeded tenant's ISR rate — and puts it back.
+ * pinned to 2026-05-12. In the `sync` project because two tests change the
+ * seeded tenant's ISR rate, régime and RFC — and put them back.
  */
+let rfcSembrado: string | null = null;
+
+test.beforeAll(async () => {
+  const [row] = await asTenant(BIZ, (sql) => sql`SELECT rfc FROM businesses WHERE id = ${BIZ}`);
+  rfcSembrado = (row?.rfc as string | null | undefined) ?? null;
+});
+
 test.afterAll(async () => {
   await asTenant(
     BIZ,
-    (sql) => sql`UPDATE businesses SET isr_tasa = 125, regimen_sat = '626' WHERE id = ${BIZ}`,
+    (sql) =>
+      sql`UPDATE businesses SET isr_tasa = 125, regimen_sat = '626', rfc = ${rfcSembrado} WHERE id = ${BIZ}`,
   );
 });
 
@@ -52,6 +60,22 @@ test('the seeded RESICO estimates on gross income — even in a loss month', asy
   await expect(main(page).getByText(/tablas publicadas del SAT/)).toBeVisible();
   // May's $885.00 of ventas at 1.00%: the ISR line itself.
   await expect(main(page).getByText('$8.85')).toBeVisible();
+});
+
+test('a RESICO persona moral estimates 30% on utilidad, not on gross', async ({ page }) => {
+  // A 12-character RFC is a persona moral (ADR-125); same régime, other law.
+  await asTenant(
+    BIZ,
+    (sql) => sql`UPDATE businesses SET regimen_sat = '626', rfc = 'XAN2601019A1' WHERE id = ${BIZ}`,
+  );
+  await page.goto('/estados');
+  await expect(
+    main(page).getByText('ISR referencial (RESICO persona moral, 30% sobre tu utilidad)'),
+  ).toBeVisible();
+  await expect(main(page).getByText(/lo que cobró menos lo que pagó en el año/)).toBeVisible();
+  // May is a loss month in the seed: no profit, so no ISR, unlike the física's $8.85.
+  await expect(main(page).getByText(/no hubo utilidad, así que no hay ISR estimado/)).toBeVisible();
+  await expect(main(page).getByText('$8.85')).toHaveCount(0);
 });
 
 test('an expandable line lists what it is made of, largest first', async ({ page }) => {

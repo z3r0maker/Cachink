@@ -16,6 +16,7 @@
  */
 
 import type { Expense } from '../entities/expense.js';
+import type { TipoPersona } from '../fiscal/rfc.js';
 
 import { calcularIsrPorRegimen } from './isr-regimen.js';
 import type { InventoryMovement } from '../entities/inventory-movement.js';
@@ -48,10 +49,14 @@ export interface EstadoDeResultadosInput {
   mermaMovements?: readonly InventoryMovement[];
   /** ISR rate in basis points (3000 = 30%). The owner's rate, from Negocio. */
   isrTasa: number;
-  /** SAT régime code (ADR-089): 626 estimates on gross, 612 on the Art. 96
-   * tariff, anything else (or absent) uses `isrTasa` — the phone passes
-   * nothing, so it keeps today's behavior exactly. */
+  /** SAT régime code (ADR-089): 626 estimates on gross (a persona moral on
+   * utilidad, see `persona`), 612 on the Art. 96 tariff, anything else (or
+   * absent) uses `isrTasa` — the phone passes nothing, so it keeps today's
+   * behavior exactly. */
   regimenSat?: string | null;
+  /** The business's persona, from its RFC: a 626 persona moral is estimated
+   * at 30 % on utilidad, not on gross (ADR-125). Absent: física. */
+  persona?: TipoPersona | null;
   /** Months the period spans, for the SAT monthly tables. Default 1. */
   mesesEnPeriodo?: number;
 }
@@ -83,6 +88,7 @@ export function calculateEstadoDeResultados(input: EstadoDeResultadosInput): Est
       ? calculateIsr(utilidadOperativa, isrTasa)
       : calcularIsrPorRegimen({
           regimenSat: input.regimenSat,
+          persona: input.persona,
           ingresos,
           utilidad: utilidadOperativa,
           isrTasa,

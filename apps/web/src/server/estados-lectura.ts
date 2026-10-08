@@ -2,6 +2,7 @@ import 'server-only';
 
 import {
   cabeEnMeses,
+  tipoPersona,
   TOPE_MESES_ESTADOS,
   type Expense,
   type IsoDate,
@@ -88,6 +89,8 @@ export async function leerPeriodo(businessId: string, desde: string, hasta: stri
       inputs,
       isrTasa: negocio?.isrTasa ?? 0,
       regimenSat: negocio?.regimenSat ?? null,
+      // 626 is open to both personas and taxes them differently (ADR-125).
+      persona: negocio?.rfc ? tipoPersona(negocio.rfc) : null,
       apertura: await loadApertura(tx, businessId),
     };
   });

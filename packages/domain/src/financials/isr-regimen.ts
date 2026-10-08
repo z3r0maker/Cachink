@@ -5,10 +5,18 @@
  * already computes, and every surface that shows the result carries the
  * reference disclaimer — the estimate is not a declaration.
  *
- *   - **RESICO (626, Art. 113-E LISR):** a flat rate over **all** the month's
- *     gross income, by bracket — 1.00 % up to $25 K/mo rising to 2.50 % over
- *     $350 K/mo. This is the structural fix of F-2: the old model taxed
- *     profit, RESICO taxes income.
+ *   - **RESICO persona física (626, Art. 113-E LISR):** a flat rate over
+ *     **all** the month's gross income, by bracket — 1.00 % up to $25 K/mo
+ *     rising to 2.50 % over $350 K/mo. This is the structural fix of F-2: the
+ *     old model taxed profit, RESICO de personas físicas taxes income.
+ *   - **RESICO persona moral (626, LISR Título VII Cap. XII, Art. 211):** the
+ *     Art. 9 rate (30 %) over the year's cash-basis profit — ingresos
+ *     efectivamente percibidos less deducciones efectivamente erogadas —
+ *     crediting the earlier provisional payments. Utilidad operativa stands
+ *     in for that profit (ADR-125); being cumulative, a multi-month period is
+ *     one base, not a sum of months. 626 is valid for both personas, so the
+ *     persona decides; when it is unknown (no RFC yet) the física table
+ *     applies, as it did before the persona existed.
  *   - **PF Empresarial y Profesional (612, Art. 96 LISR via Anexo 8 RMF
  *     2026):** the progressive monthly tariff — fixed quota plus a marginal
  *     rate over the lower limit — applied to utilidad operativa as the
@@ -23,10 +31,11 @@
  * centavo-exact.
  */
 
+import type { TipoPersona } from '../fiscal/rfc.js';
 import type { Money } from '../money/index.js';
 import { ZERO } from '../money/index.js';
 
-export type IsrMetodo = 'resico' | 'tarifa96' | 'tasa';
+export type IsrMetodo = 'resico' | 'resicoMoral' | 'tarifa96' | 'tasa';
 
 export interface IsrPorRegimen {
   readonly isr: Money;
@@ -34,6 +43,9 @@ export interface IsrPorRegimen {
   /** What the rate was applied to — named so the notice can say it. */
   readonly base: 'ingresos' | 'utilidad';
 }
+
+/** Art. 9 LISR: the personas morales' rate, in basis points (30 %). */
+const TASA_PERSONAS_MORALES_BPS = 3_000n;
 
 /** RESICO monthly brackets: flat rate over the whole gross amount (Art. 113-E). */
 const RESICO: readonly { readonly hasta: Money | null; readonly tasaBps: number }[] = [
@@ -85,6 +97,18 @@ export function isrTarifa96Mensual(base: Money): Money {
   return f.cuota + ((base - f.desde + 1n) * BigInt(f.tasaBps)) / 10_000n;
 }
 
+/** The method a régime and persona are estimated with — the one routing rule. */
+export function metodoIsr(
+  regimenSat: string | null,
+  persona: TipoPersona | null = null,
+): IsrMetodo {
+  if (regimenSat === '626') return persona === 'moral' ? 'resicoMoral' : 'resico';
+  if (regimenSat === '612') return 'tarifa96';
+  return 'tasa';
+}
+
+const positiva = (m: Money): Money => (m > ZERO ? m : ZERO);
+
 /**
  * The period's ISR estimate. `meses` spreads a multi-month period across the
  * monthly tables (per-month base = total ÷ meses, ISR = monthly × meses) —
@@ -92,6 +116,8 @@ export function isrTarifa96Mensual(base: Money): Money {
  */
 export function calcularIsrPorRegimen(input: {
   readonly regimenSat: string | null;
+  /** From the RFC (`tipoPersona`); only 626 depends on it. Absent: física. */
+  readonly persona?: TipoPersona | null;
   readonly ingresos: Money;
   readonly utilidad: Money;
   readonly isrTasa: number;
@@ -99,20 +125,32 @@ export function calcularIsrPorRegimen(input: {
 }): IsrPorRegimen {
   const meses = Math.max(1, Math.floor(input.meses ?? 1));
   const porMes = (total: Money): Money => total / BigInt(meses);
+  const metodo = metodoIsr(input.regimenSat, input.persona ?? null);
 
-  if (input.regimenSat === '626') {
-    const mensual = porMes(input.ingresos);
-    return { isr: isrResicoMensual(mensual) * BigInt(meses), metodo: 'resico', base: 'ingresos' };
+  switch (metodo) {
+    case 'resico':
+      return {
+        isr: isrResicoMensual(porMes(input.ingresos)) * BigInt(meses),
+        metodo,
+        base: 'ingresos',
+      };
+    case 'resicoMoral':
+      return {
+        isr: (positiva(input.utilidad) * TASA_PERSONAS_MORALES_BPS) / 10_000n,
+        metodo,
+        base: 'utilidad',
+      };
+    case 'tarifa96':
+      return {
+        isr: isrTarifa96Mensual(positiva(porMes(input.utilidad))) * BigInt(meses),
+        metodo,
+        base: 'utilidad',
+      };
+    case 'tasa':
+      return {
+        isr: (positiva(input.utilidad) * BigInt(input.isrTasa)) / 10_000n,
+        metodo,
+        base: 'utilidad',
+      };
   }
-  if (input.regimenSat === '612') {
-    const mensual = porMes(input.utilidad);
-    const base = mensual > ZERO ? mensual : ZERO;
-    return {
-      isr: isrTarifa96Mensual(base) * BigInt(meses),
-      metodo: 'tarifa96',
-      base: 'utilidad',
-    };
-  }
-  const gravable = input.utilidad > ZERO ? input.utilidad : ZERO;
-  return { isr: (gravable * BigInt(input.isrTasa)) / 10_000n, metodo: 'tasa', base: 'utilidad' };
 }
