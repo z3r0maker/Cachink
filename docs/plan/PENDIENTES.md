@@ -47,7 +47,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **DS-10** Vincular un negocio grande — la primera descarga llega por páginas · `18-db-scale-design-changes.md:171`
 - [ ] **M-10** El dueño corrige una venta. · `19-movil-mostrador.md:33`
 - [ ] **M-11** Reescritura de Maestro. · `19-movil-mostrador.md:34`
-- [ ] **M-12** Lo que quedó de M-01. · `19-movil-mostrador.md:35`
+- [ ] **M-12** Lo que quedó de M-01. · `19-movil-mostrador.md:37`
 - [ ] En la app «Desvincular y borrar los datos de este dispositivo» (el aviso §7 hoy reconoce que · `../launch/production-readiness.md:65`
 
 ### Portal (17)

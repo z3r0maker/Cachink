@@ -13,6 +13,14 @@
 #   - runFlow: shared/dismiss-modals.yaml
 appId: mx.xangarro.mobile
 ---
+# iOS custom-scheme permission (fresh devices only): the FIRST open of the
+# dev client's exp+xangarro:// deep link stops on a system
+# «Open in "Xangarro!"?» dialog over SpringBoard — nothing else can proceed
+# until «Open» is tapped. Already-authorized devices never see it.
+- tapOn:
+    text: 'Open'
+    optional: true
+
 # Wizard-integrated consent step (wizard-step-consent).
 # On fresh install the wizard shows consent as an inline step
 # with testID "consent-no" (not "consent-modal-no").
