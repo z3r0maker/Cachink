@@ -163,6 +163,7 @@ Links to discussion, docs, prior art.
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [124](#adr-124) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Proposed |
 
 <!-- END ADR-INDEX -->
 
@@ -8984,3 +8985,117 @@ misreports data:
   mode still limits pulls after sales to one per 45 s.
 - DB3-CAJA-04's other halves stay open: the full `export()` per write and the
   move to an OPFS VFS.
+
+---
+
+## ADR-124
+
+**Title:** The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post
+
+**Date:** 2026-10-08
+
+**Status:** Proposed — owner decisions of 2026-10-07/08 (the MEXIA conversation); tasks E-01 … E-44 in `docs/plan/20-command-center.md`
+
+**Context**
+
+Xangarro is about to be operated by a company: MEXIA, S.A.S., two founders at 50/50,
+RESICO persona moral, with a founders' agreement that moves shares between them by
+measured contribution (a quarterly deliverables board, a 2,400-share performance pool
+cut every 6 months, money that compensates work at 1:1 under a cap, partner loans).
+The owner wants one place where both founders see the company and decide: income,
+expenses (licences, marketing, infrastructure), taxes and IVA withholdings, issued and
+received invoices, capital contributions and partner loans, the fiscal and corporate
+calendar, and the agreement's own mechanics. Xangarro is the first and only project.
+More are expected, and the company may later run on another system.
+
+The console (ADR-063) is the only surface that holds privileged credentials and is
+staff-only, so it is the natural host. But it is binary staff today (no roles), its
+tables are platform tables, and nothing in it models a company's books.
+
+**Decision**
+
+1. **Host.** An «Empresa» area inside `apps/backoffice`, routes under `/empresa`.
+   It is visible only to staff who are also listed as founders (`corp.founders`).
+   This is a permission separate from staff membership, checked on the server on
+   every request and action. It is not part of N-66's staff roles, because a
+   support hire must never see the cap table, cash or the agreement.
+2. **Own schema, liftable.** Every table lives in the Postgres schema `corp`. It has
+   its own Drizzle config (`schemaFilter: ['corp']`) and its own migration journal
+   in a new package, `@xangarro/data-corp`, with its own DB roles: `xangarro_corp`
+   (read/write for the console) and `xangarro_corp_agent` (SELECT plus INSERT on
+   `agent_proposals` only).
+   - There is no foreign key from `corp` into `tenant`, `billing` or staff tables.
+   - The only reads across the boundary go through application-layer ports
+     (`RevenueSource` over `billing.cfdi_payments` / N-63's events, `StaffDirectory`
+     for founder ↔ staff identity).
+   - Moving the area out is `pg_dump -n corp`, one new connection string, and new
+     adapters for the two ports.
+   - This deviates from CLAUDE.md §6 («Postgres migrations: `packages/data-pg/drizzle/`»)
+     on purpose. `data-corp` follows every other rule of `data-pg`.
+3. **Every row carries `project_id`.** One project (Xangarro) today. Shared costs get an
+   allocation rule when a second project exists. The SAS and RESICO income caps are
+   always measured on the whole company.
+4. **Books: a simplified double-entry ledger, not the formal accounting.** The contador
+   keeps the legal books. The console keeps a management ledger that the contador can
+   reconcile against.
+   - **Accounts** are a small chart mapped to the SAT código agrupador (Anexo 24), so
+     an export can go to the contador.
+   - **Entries.** Users capture *movements* (cobro, gasto/factura recibida, pago de
+     impuesto, aportación de capital, aportación adicional, préstamo de socio,
+     reembolso, transferencia, comisión, ajuste). Each one posts balanced journal lines
+     through a domain function. Entries are immutable: a correction is a reversal plus
+     a new entry, and a closed month is locked.
+   - **What it gives:** the P&L (SaaS cascade to EBITDA, and NIF), the balance sheet,
+     the partner accounts (capital social, AFAC and partner loans as a liability) and
+     the IVA position (trasladado, acreditable, retenido).
+   - **Money.** Integer centavos. USD costs are kept with their original amount and the
+     FX rate of the payment date.
+5. **Calculations live once.** P&L, EBITDA, runway, the RESICO persona moral ISR
+   estimate (cash basis, cumulative, 30 %) and IVA go in `@xangarro/domain`, shared
+   with the portal (the same module the portal's ISR estimate uses). The agreement's
+   rules (vesting, forfeits, pool cuts, the 1:1 money cap) go in a pure domain module,
+   test-first.
+6. **Agents propose, founders post.** LLM agents reach the data through one tool layer,
+   `@xangarro/corp-tools`: typed read tools (no raw SQL) and *propose* tools that write
+   `corp.agent_proposals`. A founder approves a proposal in `/empresa/propuestas`, and
+   approving runs the same use case a manual capture runs, audited.
+   - **Never by an agent:** post an entry, file anything with SAT, the Secretaría de
+     Economía or the IMPI, move money, or change shares.
+   - **Runtime 1 (now):** a local stdio MCP server over `corp-tools` for Claude
+     Desktop, connected with the `xangarro_corp_agent` role.
+   - **Runtime 2 (later):** console-side jobs on the Anthropic TypeScript SDK's Tool
+     Runner through the Microsoft Foundry client (`@anthropic-ai/foundry-sdk`, the same
+     Messages API). Managed Agents is not available on Foundry, so we host the loop.
+   - **Model:** `claude-opus-5-5`.
+   - **Data:** no tenant PII ever leaves through these tools. Revenue is aggregated by
+     project and period.
+
+**Alternatives considered**
+
+- *Tables in `data-pg` next to `billing`.* Simpler today, but couples the company's books
+  to the product's schema and journal, which is exactly what the owner wants to be able
+  to lift out.
+- *A separate app and database now.* Clean separation, but a second deploy, auth stack
+  and backup for two users and one project. The schema boundary gives the same exit at
+  a fraction of the cost.
+- *Single-entry cash book.* Easier to capture, but it cannot show partner loans as a
+  liability, AFAC as equity, IVA positions or a balance sheet. Double-entry under a
+  single-entry capture form gets both.
+- *Agents with write access.* Faster, but a wrong posting or share move is expensive to
+  unwind and touches the founders' agreement. Proposals keep a human on every write.
+- *Use Xangarro's own portal as MEXIA's books.* Reuses screens, but the portal's model
+  (ventas, egresos by shop category, NIF for a micro-business) does not cover capital,
+  loans, IVA positions, a SaaS cost of revenue or the agreement.
+
+**Consequences**
+
+- **Repo exceptions:** a new package and a second migration journal; `db-local.sh` and
+  CI apply both. CLAUDE.md §6's migration rule gains a documented exception.
+- **N-72 (cost per tenant) folds into the ledger:** its monthly vendor entry becomes the
+  recurring-expense capture, and the ratio becomes a view.
+- **Two new console permissions:** staff and founder.
+- **The portal benefits:** the RESICO persona moral ISR path (5) also fixes the portal's
+  estimate for tenants that are personas morales in régimen 626.
+- **What the console now holds:** a cap table and the agreement's records, so its
+  backups and access logs carry more weight. The audit log covers every `/empresa`
+  write.
