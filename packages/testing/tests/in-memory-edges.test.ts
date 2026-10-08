@@ -43,7 +43,11 @@ describe('InMemoryCajaMovimientosRepository · edges', () => {
     assert.equal(delTurno.length, 1);
     assert.equal(delTurno[0]?.id, primero.id);
 
-    const enRango = await r.findByDateRange('2026-09-28', '2026-09-28', BIZ);
+    // The range compares against createdAt (UTC ISO), so the day must come
+    // from the same clock the rows were stamped with — a hardcoded date
+    // failed every run after the day it was written.
+    const hoy = new Date().toISOString().slice(0, 10);
+    const enRango = await r.findByDateRange(hoy, hoy, BIZ);
     assert.equal(enRango.length, 2);
     assert.equal(await r.findById('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never), null);
   });
