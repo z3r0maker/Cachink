@@ -19,7 +19,7 @@ let inputs: {
   stock: unknown[];
   merma: { cantidad: number; costoUnitCentavos: bigint; fecha: string; producto: string | null }[];
 };
-let business: { isrTasa?: number; regimenSat?: string | null } | undefined;
+let business: { isrTasa?: number; regimenSat?: string | null; rfc?: string | null } | undefined;
 let apertura: {
   header: { cajaCentavos: bigint; bancosCentavos: bigint };
   lines: { clienteId: string; saldoCentavos: bigint }[];
@@ -66,17 +66,33 @@ describe('loadEstadosModel', () => {
     assert.equal(model.mermas.length, 0);
   });
 
-  it('a business with no row read falls back to ISR 0 and no régime', async () => {
+  it('a business with no row read falls back to ISR 0 at the owner’s rate', async () => {
     const model = await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31');
     assert.equal(model.isrTasa, 0);
-    assert.equal(model.regimenSat, null);
+    assert.equal(model.isrMetodo, 'tasa');
   });
 
   it('reads the business’s own ISR rate and SAT régime when they exist', async () => {
     business = { isrTasa: 1200, regimenSat: '621' };
     const model = await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31');
     assert.equal(model.isrTasa, 1200);
-    assert.equal(model.regimenSat, '621');
+    assert.equal(model.isrMetodo, 'tasa');
+  });
+
+  it('RESICO splits by persona: the RFC’s length names it (ADR-128)', async () => {
+    business = { isrTasa: 125, regimenSat: '626', rfc: 'XAN2601019A1' };
+    assert.equal(
+      (await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31')).isrMetodo,
+      'resicoMoral',
+    );
+    business = { isrTasa: 125, regimenSat: '626', rfc: 'TOMA850101AB1' };
+    assert.equal((await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31')).isrMetodo, 'resico');
+  });
+
+  it('a RESICO business with no RFC yet is estimated as a física', async () => {
+    business = { isrTasa: 125, regimenSat: '626', rfc: null };
+    const model = await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31');
+    assert.equal(model.isrMetodo, 'resico');
   });
 
   it('the apertura reaches the Balance as the calculator wants it (N-17), without un-emptying the window', async () => {

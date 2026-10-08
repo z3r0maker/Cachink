@@ -477,7 +477,7 @@ with property tests:
 
 ### E-13 Impuestos `[media]`
 
-- [ ] Status · **Blocked by:** E-12, the portal's RESICO persona moral fix (session task 2026-10-08)
+- [ ] Status · **Blocked by:** E-12 (the portal's RESICO persona moral estimate it reuses landed with ADR-128: `packages/domain/src/financials/isr-regimen.ts`)
 - **What:**
   - the ISR provisional (RESICO PM, cumulative cash basis) and IVA del mes from the ledger;
   - estimate vs the contador's figure (a difference over $1 is flagged);

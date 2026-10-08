@@ -37,7 +37,7 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         figure={ER.utilidadNeta}
         label="Utilidad neta"
       />
-      <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} regimenSat={m.regimenSat} />
+      <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} metodo={m.isrMetodo} />
       <div className={resultadosGrid}>
         <Waterfall er={ER} mermas={m.mermas} />
         <LadoResultados er={ER} />

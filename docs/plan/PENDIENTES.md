@@ -94,7 +94,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:445`
 - [ ] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · `20-command-center.md:457`
 - [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:469`
-- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:480`
+- [ ] **E-13** Impuestos — Bloqueada por: E-12 (the portal's RESICO persona moral estimate it reuses landed with ADR-128: `packages/domain/src/financials/isr-regimen.ts`) · `20-command-center.md:480`
 - [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:491`
 - [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:508`
 - [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:517`
