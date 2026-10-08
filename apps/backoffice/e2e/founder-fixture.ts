@@ -68,6 +68,11 @@ export const E2E_CONCEPTO = 'E2E Vercel';
 export async function clearLedgerFixture(): Promise<void> {
   await withSuper(async (sql) => {
     await sql.begin(async (tx) => {
+      const suite = tx`SELECT f.id FROM corp.founders f
+                         JOIN staff_members s ON s.id = f.staff_member_id
+                        WHERE lower(s.email) = ${SOCIO.email}`;
+      await tx`DELETE FROM corp.documents WHERE uploaded_by IN (${suite})`;
+      await tx`DELETE FROM corp.obligations WHERE created_by IN (${suite})`;
       const mine = tx`SELECT id FROM corp.entries
                        WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'
                           OR created_by IN (SELECT f.id FROM corp.founders f
@@ -77,6 +82,30 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.entries WHERE id IN (${mine})`;
       await tx`DELETE FROM corp.funding_calls WHERE concepto LIKE 'E2E %'`;
     });
+  });
+}
+
+/**
+ * The Agenda suite starts with no SAT registration, so it sets one through
+ * the screen; the company row the database had is put back afterwards.
+ */
+type Empresa = { inscripcion_rfc: string | null; updated_by: string } | null;
+
+export async function sacarEmpresa(): Promise<Empresa> {
+  return withSuper(async (sql) => {
+    const rows = await sql<{ inscripcion_rfc: string | null; updated_by: string }[]>`
+      DELETE FROM corp.company WHERE id = 'mexia'
+      RETURNING inscripcion_rfc::text, updated_by`;
+    return rows[0] ?? null;
+  });
+}
+
+export async function devolverEmpresa(antes: Empresa): Promise<void> {
+  await withSuper(async (sql) => {
+    await sql`DELETE FROM corp.company WHERE id = 'mexia'`;
+    if (antes === null) return;
+    await sql`INSERT INTO corp.company (id, inscripcion_rfc, updated_by, updated_at)
+              VALUES ('mexia', ${antes.inscripcion_rfc}, ${antes.updated_by}, now())`;
   });
 }
 

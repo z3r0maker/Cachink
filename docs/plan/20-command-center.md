@@ -322,7 +322,30 @@ with property tests:
 
 ### E-04 Agenda fiscal y corporativa
 
-- [ ] Status · **Blocked by:** E-01
+- [x] Status · **Blocked by:** E-01 · **Done:** 2026-10-08
+      **Progress (2026-10-08):** the domain (`@xangarro/domain/corp`, `agenda/`) holds CFF art. 12's
+      business days (weekends, the art. 12 holidays incl. 5 May and the executive transfer every six
+      years; the SAT's own vacations do not move a declaration), the due rules (monthly «17 o
+      siguiente día hábil», annual with a forward or a backward move, month end, N business days
+      after an event, a fixed expiry), the catalog (ISR, IVA, declaración anual, informe SAS, 32-D,
+      buzón, beneficiario controlador, CSD, e.firma, a generic trámite; DIOT and contabilidad
+      electrónica exempt with their reason and January 2027 review) and the state machine:
+      presentada needs its acuse, pagada its comprobante, or «No hubo pago»; «preparada» may be
+      skipped, nothing goes back. Recurring periods are computed from MEXIA's SAT registration
+      (`corp.company.inscripcion_rfc`, asked on the screen until set), never seeded; a row exists once
+      a founder acts on one. Storage (0003): `corp.company`, `corp.obligations`, and `corp.documents`
+      with the files as bytea (ADR-126, proposed). Screens: Agenda › Próximos (late, the next two
+      weeks, then 60 days of monthly periods plus annual and one-off dates; the funding halves from
+      Socios; «Agregar una fecha»; «Exentas»), the obligation page (why and when, the moved-date
+      sentence, documents with «Ver», upload, the step buttons blocked with their reason) and Agenda ›
+      Evidencias (the 32-D hero, the month matrix, the annual filings). Reminders: `/api/cron/agenda`
+      at 08:00 Mexico City emails each founder what falls due in 7, 3 or 1 days, once per founder per
+      day. Playwright: `e2e/empresa.spec.ts` sets the registration, opens a late ISR, sees «Marcar
+      presentada» blocked, uploads the acuse, reads it back through «Ver», files it, closes it «sin
+      pago», adds a CSD expiry and finds the acuse on Evidencias.
+      **Left for later:** retenciones (only in months with fees paid to individuals) are not in the
+      catalog yet; the Calendario tab of board CD-05 and the ISR/IVA estimate on the obligation page
+      come with E-13; whether the 32-D came out positive is not captured.
 - **What:**
   - obligation templates (authority, legal basis, recurrence, due rule «17 o siguiente día hábil»
     with a Mexican holiday table, applies or exempt with a reason);
@@ -342,6 +365,9 @@ with property tests:
 ### E-05 Expediente
 
 - [ ] Status · **Blocked by:** E-01
+      **Note (2026-10-08):** E-04 already built the storage (`corp.documents`, bytea in corp per
+      ADR-126 instead of a bucket; INSERT/SELECT only; `supersedes_id`; `retain_until`). E-05 adds the
+      Expediente screen, superseding versions and their history, and links to ledger entries.
 - **What:**
   - a private `corp-docs` bucket;
   - documents carry a kind, period, obligation or entry link, sha256 and `retain_until`

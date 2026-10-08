@@ -1,3 +1,9 @@
+export {
+  contenidoDe,
+  createAgendaRepository,
+  createDocumentRepository,
+  documentosDe,
+} from './queries/agenda.js';
 export { createCorpDb, type CorpDb } from './client.js';
 export { findFounderByStaffId, listFounders, type Founder } from './queries/founders.js';
 export { createCorpLedgerRepository } from './queries/ledger.js';

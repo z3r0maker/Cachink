@@ -13,6 +13,7 @@ export type NavHref =
   | '/capacidad'
   | '/empresa/movimientos'
   | '/empresa/socios'
+  | '/empresa/agenda'
   | '/empresa/corporativo';
 
 export interface NavItem {
@@ -85,6 +86,12 @@ export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
     href: '/empresa/socios',
     task: 'E-03',
     summary: 'Capital, fondeo por mitades, aportaciones y préstamos de cada socio.',
+  },
+  {
+    label: 'Agenda',
+    href: '/empresa/agenda',
+    task: 'E-04',
+    summary: 'Lo que vence ante el SAT, Economía e IMPI, con sus acuses y comprobantes.',
   },
   {
     label: 'Corporativo',

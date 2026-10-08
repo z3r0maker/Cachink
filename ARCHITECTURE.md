@@ -164,6 +164,7 @@ Links to discussion, docs, prior art.
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 | [124](#adr-124) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
+| [126](#adr-126) | 2026-10-08 | «Empresa»'s documents live in the `corp` schema as bytea, not in a storage bucket | Proposed |
 
 <!-- END ADR-INDEX -->
 
@@ -9099,3 +9100,52 @@ tables are platform tables, and nothing in it models a company's books.
 - **What the console now holds:** a cap table and the agreement's records, so its
   backups and access logs carry more weight. The audit log covers every `/empresa`
   write.
+
+---
+
+## ADR-126
+
+**Title:** «Empresa»'s documents live in the `corp` schema as bytea, not in a storage bucket
+
+**Date:** 2026-10-08
+
+**Status:** Proposed — taken while building E-04 (2026-10-08), for the owner to confirm before
+E-05; amends the «private `corp-docs` bucket» of `docs/plan/20-command-center.md` E-05
+
+**Context**
+
+E-04's rule is that an obligation is not marked presentada without its acuse, nor pagada without
+its proof of payment, so the evidence has to be stored with E-04, not later. The plan named a
+private `corp-docs` storage bucket. But ADR-124 §2 makes the area movable by one dump:
+`pg_dump -n corp` is the whole of it. A bucket would split the books from their evidence, and the
+console's corp role (`xangarro_corp`) cannot reach Supabase Storage without the service-role key,
+which ADR-124 keeps away from corp. The repository already keeps small files as bytea (logos,
+assisted imports).
+
+The volume is small: a few PDFs a month (acuses, the 32-D opinion, payment proofs) of tens or
+hundreds of KB each.
+
+**Decision**
+
+1. `corp.documents` holds the file itself (`content bytea`), its kind, name, MIME type, size and
+   SHA-256, the obligation or ledger entry it proves, `retain_until` (upload + 5 years, CFF art.
+   30) and the earlier version it supersedes.
+2. The console may INSERT and SELECT documents, never UPDATE or DELETE: a correction is a new
+   version that names the old one (E-05 builds the history). The agents' role reads every column
+   except `content`.
+3. A file is at most 4 MB (a request to the console carries at most 4.5 MB on Vercel), checked in
+   the domain and by a CHECK constraint; PDF, PNG, JPEG and the SAT's XML only.
+4. «Ver» serves the bytes from a founder-only route with `Content-Security-Policy: sandbox`.
+
+**Consequences**
+
+- The lift-out drill stays one dump and one restore; the evidence travels with the books.
+- The corp database grows with the files. At a few MB a month this is negligible for years; if
+  it stops being so, moving `content` to object storage is a column swap behind
+  `DocumentRepository`, with the SHA-256 proving each byte arrived intact.
+- Backups of corp now include the files, which is what a SAT review needs.
+
+**References**
+
+- ADR-124 §2 (one schema, one dump); CFF art. 30 (five years); E-04 and E-05 in
+  `docs/plan/20-command-center.md`.

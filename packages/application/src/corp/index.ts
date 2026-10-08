@@ -36,3 +36,4 @@ export {
   type RegistrarMovimientoInput,
 } from './registrar-movimiento.js';
 export { RevertirMovimientoUseCase, type RevertirMovimientoInput } from './revertir-movimiento.js';
+export * from './agenda/index.js';

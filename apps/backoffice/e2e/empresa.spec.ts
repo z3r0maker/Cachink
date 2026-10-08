@@ -1,11 +1,19 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import {
+  agregarCsd,
+  fijarInscripcion,
+  inscripcionPasada,
+  presentarConAcuse,
+} from './empresa-agenda';
+import {
   clearFounders,
   clearLedgerFixture,
+  devolverEmpresa,
   E2E_CONCEPTO,
   makeSocioFounder,
   resetSocioFixture,
+  sacarEmpresa,
   SOCIO,
 } from './founder-fixture';
 import {
@@ -31,14 +39,18 @@ test.describe.configure({ mode: 'serial' });
 // running in parallel, would lock this suite out too.
 test.use({ extraHTTPHeaders: { 'x-forwarded-for': '203.0.113.24' } });
 
+let empresa: Awaited<ReturnType<typeof sacarEmpresa>> = null;
+
 test.beforeAll(async () => {
   await clearLedgerFixture();
   await resetSocioFixture();
+  empresa = await sacarEmpresa();
 });
 
 test.afterAll(async () => {
   await clearLedgerFixture();
   await clearFounders();
+  await devolverEmpresa(empresa);
 });
 
 const empresaGroup = (page: Page) =>
@@ -155,4 +167,30 @@ test('a founder funds by halves, puts in more and closes the quarter', async ({ 
   await expect(
     page.getByTestId('movimiento-socio').filter({ hasText: 'Excedente a préstamo' }),
   ).toContainText('$10,000.00');
+});
+
+test('a founder files an obligation with its acuse and adds an expiry', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  const inscripcion = inscripcionPasada();
+  await fijarInscripcion(page, inscripcion.fecha);
+  await expect(page.getByTestId('exenta').filter({ hasText: 'DIOT' })).toContainText(
+    'RESICO persona moral está relevada',
+  );
+
+  const tarde = page.getByTestId('obligacion').filter({ hasText: 'ISR provisional' }).first();
+  await expect(tarde).toContainText('vencida hace');
+  await tarde.getByRole('link').click();
+  await expect(
+    page.getByRole('heading', { name: `ISR provisional de ${inscripcion.mes}`, level: 1 }),
+  ).toBeVisible();
+  await presentarConAcuse(page);
+
+  await page.getByRole('link', { name: 'Volver a la agenda' }).click();
+  await agregarCsd(page);
+  // The proof shows on Evidencias too.
+  await page.getByRole('link', { name: 'Evidencias' }).click();
+  await expect(
+    page.getByTestId('fila-evidencia').filter({ hasText: 'ISR provisional' }),
+  ).toContainText('✓ Acuse');
 });

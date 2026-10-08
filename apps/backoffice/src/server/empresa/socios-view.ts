@@ -1,6 +1,8 @@
 import type { LlamadaConEstado, MitadPagada, Movimiento } from '@xangarro/data-corp';
-import { formatDate, formatMoney, parseIsoDate } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import type { MovementKind } from '@xangarro/domain/corp';
+
+import { diasEntre, fechaCorta } from './fechas';
 
 /**
  * «Cuentas de socios» in the board's words (E-03, board CD-04): the funding
@@ -13,15 +15,6 @@ export interface EstadoMitad {
   readonly detalle: string;
   readonly tono: Tono;
 }
-
-const DAY_MS = 86_400_000;
-
-/** Whole days from `a` to `b`, both `YYYY-MM-DD`. */
-export function diasEntre(a: string, b: string): number {
-  return Math.round((Date.parse(`${b}T12:00:00Z`) - Date.parse(`${a}T12:00:00Z`)) / DAY_MS);
-}
-
-const fechaCorta = (iso: string) => formatDate(parseIsoDate(iso)).replace(/ \d{4}$/, '');
 
 export function estadoMitad(mitad: MitadPagada | null, vence: string, hoy: string): EstadoMitad {
   if (mitad !== null)

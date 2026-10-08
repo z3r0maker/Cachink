@@ -27,6 +27,8 @@ const nextConfig = {
   poweredByHeader: false,
   transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],
   typedRoutes: true,
+  // «Empresa» evidence uploads (E-04): a 4 MB file in a form, under Vercel's 4.5 MB request cap.
+  experimental: { serverActions: { bodySizeLimit: '5mb' } },
   async headers() {
     return [{ source: '/:path*', headers: [...SECURITY_HEADERS] }];
   },
