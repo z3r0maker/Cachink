@@ -12,7 +12,8 @@
     "./billing": "./src/billing/index.ts",
     "./email": "./src/email/index.ts",
     "./support-inbox": "./src/support-inbox/index.ts",
-    "./usage": "./src/usage/index.ts"
+    "./usage": "./src/usage/index.ts",
+    "./corp": "./src/corp/index.ts"
   },
   "scripts": {
     "build": "tsc --build",

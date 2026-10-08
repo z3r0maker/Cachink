@@ -9,6 +9,7 @@ export const NAV_ICONS: Readonly<Record<NavHref, string>> = {
   '/flags': 'M5 22V4m0 0h11l-2 4 2 4H5',
   '/mapa': 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14',
   '/campanas': 'M3 11v2l13 5V6L3 11zm13-5 5-2v16l-5-2',
+  '/empresa/corporativo': 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01',
   '/capacidad':
     'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zm0 0v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
 };

@@ -1,7 +1,9 @@
 import { logout } from '@/server/actions/auth';
+import { founderForLayout } from '@/server/founder';
 import { requireStaffPage } from '@/server/staff';
 import { OPEN_ITEMS_CAP, openInboxItems } from '@/server/torre/readings';
 import { column, footer, frame, main, who } from '@/shell/shell.css';
+import { EMPRESA_NAV_ITEMS } from '@/shell/nav-items';
 import { Sidebar, type NavCount } from '@/shell/sidebar';
 import { StatusBar } from '@/shell/status-bar';
 import { torreDark } from '@/styles/theme.css';
@@ -10,11 +12,11 @@ import { buttonQuiet, muted } from '@/styles/ui.css';
 /**
  * The console shell, «Torre de Control»: dark rail, status bar, work area.
  * `requireStaffPage()` re-applies the gate here: the proxy is the first
- * check, not the only one.
+ * check, not the only one. Founders also get the «Empresa» group (ADR-124).
  */
 export default async function ConsolaLayout({ children }: { children: React.ReactNode }) {
   const { staff } = await requireStaffPage();
-  const open = await openInboxItems();
+  const [open, founder] = await Promise.all([openInboxItems(), founderForLayout(staff.id)]);
   const inbox: NavCount | undefined =
     open === null
       ? undefined
@@ -24,7 +26,10 @@ export default async function ConsolaLayout({ children }: { children: React.Reac
         };
   return (
     <div className={`${torreDark} ${frame}`}>
-      <Sidebar counts={inbox === undefined ? {} : { '/inbox': inbox }}>
+      <Sidebar
+        counts={inbox === undefined ? {} : { '/inbox': inbox }}
+        empresa={founder === null ? [] : EMPRESA_NAV_ITEMS}
+      >
         <div className={footer}>
           <span className={muted}>Turno</span>
           <span className={who}>{staff.email}</span>

@@ -10,7 +10,8 @@ export type NavHref =
   | '/flags'
   | '/mapa'
   | '/campanas'
-  | '/capacidad';
+  | '/capacidad'
+  | '/empresa/corporativo';
 
 export interface NavItem {
   readonly label: string;
@@ -62,5 +63,19 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/capacidad',
     task: null,
     summary: 'La base de datos contra los umbrales S2 y S3 de ADR-068.',
+  },
+] as const;
+
+/**
+ * «Empresa», MEXIA's command center (ADR-124): drawn only for founders
+ * (`founderForLayout`). A screen joins this list when its task ships, never
+ * before (CLAUDE.md §7: no «Pronto»).
+ */
+export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
+  {
+    label: 'Corporativo',
+    href: '/empresa/corporativo',
+    task: 'E-06',
+    summary: 'Socios, proyectos y los registros de la sociedad.',
   },
 ] as const;

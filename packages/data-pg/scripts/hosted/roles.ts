@@ -1,5 +1,5 @@
 /**
- * The four LOGIN roles every app connects with (B-01). No Supabase key is used
+ * The LOGIN roles every app connects with (B-01; the corp pair from ADR-124). No Supabase key is used
  * anywhere: each app has its own restricted Postgres login.
  *
  * Passwords never reach the server in clear. The script sends a SCRAM-SHA-256
@@ -53,6 +53,22 @@ export const LOGIN_ROLES: readonly LoginRole[] = [
     env: 'XANGARRO_ADMIN_PASSWORD',
     usedBy: 'admin DATABASE_URL (staff console, cross-tenant read)',
     statementTimeout: '15s',
+    idleInTransactionTimeout: '10s',
+    jit: false,
+  },
+  {
+    role: 'xangarro_corp',
+    env: 'XANGARRO_CORP_PASSWORD',
+    usedBy: "admin CORP_DATABASE_URL (founders' command center, ADR-124)",
+    statementTimeout: '15s',
+    idleInTransactionTimeout: '10s',
+    jit: false,
+  },
+  {
+    role: 'xangarro_corp_agent',
+    env: 'XANGARRO_CORP_AGENT_PASSWORD',
+    usedBy: 'corp-tools agents (read-only, ADR-124 §6)',
+    statementTimeout: '30s',
     idleInTransactionTimeout: '10s',
     jit: false,
   },

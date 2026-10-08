@@ -163,7 +163,7 @@ Links to discussion, docs, prior art.
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
-| [124](#adr-124) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Proposed |
+| [124](#adr-124) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8994,7 +8994,7 @@ misreports data:
 
 **Date:** 2026-10-08
 
-**Status:** Proposed — owner decisions of 2026-10-07/08 (the MEXIA conversation); tasks E-01 … E-44 in `docs/plan/20-command-center.md`
+**Status:** Accepted — owner decisions of 2026-10-07/08 (the MEXIA conversation; accepted when the owner started Phase 0, 2026-10-08); tasks E-01 … E-44 in `docs/plan/20-command-center.md`
 
 **Context**
 

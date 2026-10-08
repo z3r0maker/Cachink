@@ -1,0 +1,39 @@
+{
+  "name": "@xangarro/data-corp",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MEXIA's command center data (ADR-124): the corp Postgres schema, its own migration journal and roles, kept apart from the product's tables so it can move to another database.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --config ../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo",
+    "db:generate": "drizzle-kit generate",
+    "db:apply": "./scripts/db-local.sh apply",
+    "test:db": "REQUIRE_DB=1 DATABASE_URL=$(./scripts/db-local.sh url) DATABASE_SUPER_URL=$(./scripts/db-local.sh super-url) CORP_AGENT_URL=$(./scripts/db-local.sh agent-url) ADMIN_URL=$(./scripts/db-local.sh admin-url) APP_URL=$(./scripts/db-local.sh app-url) vitest run"
+  },
+  "dependencies": {
+    "@xangarro/application": "workspace:*",
+    "@xangarro/domain": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@xangarro/config": "workspace:*",
+    "@xangarro/testing": "workspace:*",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}

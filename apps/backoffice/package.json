@@ -15,13 +15,15 @@
     "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "staff": "tsx scripts/staff.ts",
     "clean": "rm -rf .next dist .turbo",
-    "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh admin-url) DATABASE_SUPER_URL=$(../../packages/data-pg/scripts/db-local.sh super-url) playwright test",
-    "test:e2e:db": "./scripts/e2e-db-setup.sh && pnpm test:e2e"
+    "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh admin-url) DATABASE_SUPER_URL=$(../../packages/data-pg/scripts/db-local.sh super-url) CORP_DATABASE_URL=$(../../packages/data-corp/scripts/db-local.sh url) playwright test",
+    "test:e2e:db": "./scripts/e2e-db-setup.sh && pnpm test:e2e",
+    "founder": "tsx scripts/founder.ts"
   },
   "dependencies": {
     "@vanilla-extract/css": "^1.21.2",
     "@xangarro/application": "workspace:*",
     "@xangarro/auth-core": "workspace:*",
+    "@xangarro/data-corp": "workspace:*",
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/email": "workspace:*",

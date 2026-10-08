@@ -219,7 +219,7 @@ with property tests:
 
 ### E-01 Foundation: ADR-124, `data-corp`, founder gate, Claude Design project
 
-- [ ] Status · **Blocked by:** OD-5
+- [x] Status · Done: 2026-10-08 · branch `feat/empresa-fase0` (see Progress below)
 - **What:**
   - accept ADR-124;
   - create `@xangarro/data-corp` (Drizzle `schemaFilter: ['corp']`, its own journal), the
@@ -232,10 +232,35 @@ with property tests:
   - a staff member who is not a founder gets 404 on `/empresa` and sees no nav entry;
   - a migration test creates the schema from zero;
   - `pg_dump -n corp` restores into an empty database (the lift-out drill).
+- **Progress (2026-10-08, branch `feat/empresa-fase0`):**
+  - `@xangarro/data-corp` with its own journal, roles, `scripts/db-local.sh` and the foundation
+    and grants suites (`test:db`). CI's `db` job applies and tests the set; `backoffice-e2e` and
+    `e2e-db-setup.sh` apply it; the hosted runner gains the `corp` set and both login roles.
+  - The console: `requireFounder()` / `requireFounderPage()` (404 for non-founders), the «Empresa»
+    rail group, `/empresa` → `/empresa/corporativo` (partners and projects from corp), and the
+    `pnpm founder add` operator CLI. `e2e/empresa.spec.ts` covers the 404 and the founder's real
+    rows.
+  - The lift-out drill passed by hand: `pg_dump -n corp` restored projects, entries, lines and the
+    three ledger triggers into an empty database.
+  - **Owner actions before production:** set `XANGARRO_CORP_PASSWORD` and
+    `XANGARRO_CORP_AGENT_PASSWORD` for `db:migrate:hosted` (it now provisions both roles); add
+    `CORP_DATABASE_URL` (xangarro_corp, Transaction pooler) to the admin Vercel project; then name
+    both founders with `pnpm --filter @xangarro/backoffice founder add`.
+  - **Owner decision (2026-10-08):** «Empresa» wears El Mostrador (light), as the approved boards
+    do, inside the console's dark «Torre de Control» rail. E-01's first slice of Corporativo still
+    uses the Torre primitives; E-02 brings the Mostrador primitives and E-06 moves Corporativo onto
+    them.
 
 ### E-02 Ledger core and Movimientos
 
-- [ ] Status · **Blocked by:** E-01
+- [~] Status · **Blocked by:** E-01
+  **Remaining (2026-10-08):** the `/empresa/movimientos` screen and its capture drawer (waits on
+  the Torre / Mostrador decision), the recurring-template screen, and the contador's código
+  agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart, movement → balanced lines,
+  reversal, period lock, USD at the day rate), the use cases (`@xangarro/application/corp`:
+  registrar and revertir, idempotent imports), and corp storage (`entries`, `entry_lines`,
+  `closed_periods`, `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines
+  and closed-month triggers) with its integration suite.
 - **What:**
   - domain: accounts, the movement → lines posting rules of §3, the balance check, reversal and
     the period lock;

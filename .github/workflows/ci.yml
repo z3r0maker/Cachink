@@ -259,6 +259,14 @@ jobs:
       - name: Integration tests (RLS, claims, compat, queries)
         run: pnpm --filter @xangarro/data-pg test:db
 
+      # The command center's own set (ADR-124 §2): same database, its own
+      # journal and roles. Its suite proves who can read and write corp.
+      - name: Apply the corp set
+        run: pnpm --filter @xangarro/data-corp db:apply
+
+      - name: Integration tests (corp roles, founders)
+        run: pnpm --filter @xangarro/data-corp test:db
+
   # The staff console's own browser suite (N-05's follow-up): sign-in, forced
   # TOTP enrolment, session end, lockout and an audit row per mutation,
   # against a real Postgres with the admin migrations applied.
@@ -320,6 +328,9 @@ jobs:
           for f in apps/backoffice/src/server/db/migrations/*.sql; do
             psql "$DATABASE_SUPER_URL" -q -f "$f"
           done
+
+      - name: Apply the corp set (ADR-124)
+        run: pnpm --filter @xangarro/data-corp db:apply
 
       # See portal-e2e for why this is not `turbo run build`.
       - name: Build the console (production, webpack)
