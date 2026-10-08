@@ -27,6 +27,8 @@ import {
   InMemoryDirectorAlertsRepository,
   InMemoryCajaMovimientosRepository,
   InMemoryCancelacionLogsRepository,
+  InMemoryMensajesOperadorRepository,
+  InMemoryRespuestasOperadorRepository,
 } from '@xangarro/testing';
 import type { Repositories } from '../src/app/repository-provider';
 
@@ -56,6 +58,8 @@ export function buildTestRepos(overrides?: Partial<Repositories>): Repositories 
     directorAlerts: new InMemoryDirectorAlertsRepository(),
     cajaMovimientos: new InMemoryCajaMovimientosRepository(),
     cancelacionLogs: new InMemoryCancelacionLogsRepository(),
+    mensajesOperador: new InMemoryMensajesOperadorRepository(),
+    respuestasOperador: new InMemoryRespuestasOperadorRepository(),
     ...overrides,
   };
 }

@@ -1,87 +1,32 @@
 /**
- * Expo Router entry for /productos (UXD-R3, ADR-045).
- *
- * A stack route opened from Mi turno («Inventario», Track M M-05: it left
- * the tab bar), so it wears the frame with the way back.
- *
- * Phase 18: "Nuevo Producto" now navigates to /nuevo-producto (full page)
- * instead of opening a modal.
+ * Expo Router entry for /productos (Track M, M-09; board MvInventario):
+ * existencias and the turno's movements, with «Llegó mercancía» and «Merma»
+ * as sheets — product management stays the owner's (Track M decision of
+ * 2026-09-27). `?reponer=<productId>` — Inicio's «Para hoy» — opens the
+ * llegada sheet on that product. A stack route opened from Inicio and Mi
+ * turno, so it wears the frame with the way back.
  */
 
-import { useMemo, useState, type ReactElement } from 'react';
-import { useRouter } from 'expo-router';
-import {
-  InventarioTabBar,
-  MovimientosRoute,
-  StockScreen,
-  SwipeableTabView,
-  filterProductos,
-  useFeatureFlag,
-  useProductosConStock,
-  type InventarioSubTab,
-  type ProductoConStock,
-  useTranslation,
-} from '@xangarro/ui';
+import type { ReactElement } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { InventarioScreen, useInventario, useTranslation } from '@xangarro/ui';
 import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
 
-function toggleNext(tab: InventarioSubTab): InventarioSubTab {
-  return tab === 'stock' ? 'movimientos' : 'stock';
-}
-
-function togglePrev(tab: InventarioSubTab): InventarioSubTab {
-  return tab === 'movimientos' ? 'stock' : 'stock';
-}
-
-function ProductosBody(props: {
-  tab: InventarioSubTab;
-  stockSlot: ReactElement;
-  onNext: () => void;
-  onPrev: () => void;
-}): ReactElement {
-  return (
-    <SwipeableTabView onSwipeLeft={props.onNext} onSwipeRight={props.onPrev}>
-      {props.tab === 'stock' ? props.stockSlot : <MovimientosRoute />}
-    </SwipeableTabView>
-  );
-}
-
 export default function ProductosRoute(): ReactElement {
-  const router = useRouter();
   const { t } = useTranslation();
   const back = useBackTo('/turno');
-  const [query, setQuery] = useState('');
-  const [tab, setTab] = useState<InventarioSubTab>('stock');
-  const itemsQ = useProductosConStock();
-  // Without stock on the plan (A-14) Productos is a catalog: no stock, no Movimientos.
-  const stockOn = useFeatureFlag('stock');
-  const items = itemsQ.data ?? [];
-  const filtered = useMemo(() => filterProductos(items, query), [items, query]);
-
-  const handleProductoPress = (row: ProductoConStock): void => {
-    router.push(`/productos/${row.producto.id}` as never);
-  };
-
-  const stockSlot = (
-    <StockScreen
-      query={query}
-      onChangeQuery={setQuery}
-      items={filtered}
-      onNuevoProducto={() => router.push('/nuevo-producto' as never)}
-      onProductoPress={handleProductoPress}
-      showStock={stockOn}
-      loading={itemsQ.isLoading}
-      error={itemsQ.error as Error | null}
-    />
-  );
-
+  const inv = useInventario();
+  const { reponer } = useLocalSearchParams<{ reponer?: string }>();
   return (
-    <AppShellWrapper title={t('shell.nav.turno')} onBack={back}>
-      {stockOn && <InventarioTabBar active={tab} onChange={setTab} />}
-      <ProductosBody
-        tab={stockOn ? tab : 'stock'}
-        stockSlot={stockSlot}
-        onNext={() => setTab(toggleNext(tab))}
-        onPrev={() => setTab(togglePrev(tab))}
+    <AppShellWrapper title={t('shell.nav.inventario')} onBack={back}>
+      <InventarioScreen
+        testID="mobile-inventario"
+        state={inv.state}
+        data={inv.data}
+        dueno={inv.dueno}
+        reponer={reponer ?? null}
+        registrar={inv.registrar}
+        onRetry={inv.refetch}
       />
     </AppShellWrapper>
   );

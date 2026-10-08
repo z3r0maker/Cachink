@@ -167,7 +167,7 @@ describe('inicioMovil', () => {
     expect(d.tareas.map((t) => t.tipo)).toEqual(['gasto', 'reponer']);
     expect(d.tareas[0]?.titulo).toBe('Registrar gas de la semana');
     expect(d.tareas[1]?.detalle).toBe('Quedan 6 · el umbral es 15');
-    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/egresos', '/productos']);
+    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/gastos', '/productos']);
   });
 
   it('lists the closes newest first, as the chips say them', () => {
@@ -218,10 +218,10 @@ describe('helpers', () => {
     expect(haceDias('2026-03-01', 30)).toBe('2026-01-30');
   });
   it('maps the web hrefs to the phone routes, or none', () => {
-    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/egresos');
+    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
     expect(rutaMovil('/operador/cierre')).toBe('/turno');
-    expect(rutaMovil('/operador/cobranza/C1')).toBeNull();
+    expect(rutaMovil('/operador/cobranza/C1')).toBe('/fiado');
     expect(rutaMovil('/operador/avisos')).toBeNull();
   });
   it('splits the greeting from «La caja está lista.»', () => {

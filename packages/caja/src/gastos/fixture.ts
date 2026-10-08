@@ -1,4 +1,4 @@
-import type { GastosData } from './types';
+import type { GastosData, RecurrentePorPagar } from './types';
 
 /**
  * The design's turno (`Operador Gastos.dc.html`), in centavos: five expenses,
@@ -56,4 +56,28 @@ export const GASTOS_FIXTURE: GastosData = {
       comprobante: true,
     },
   ],
+};
+
+/**
+ * The due recurring gasto the pagar-recurrente stories pay: the weekly gas,
+ * due today, $350.00 to Gas Express — the row «Pendientes de registrar»
+ * shows beside what its sheet opens filled with.
+ */
+export const RECURRENTE_PAGAR_FIXTURE: RecurrentePorPagar = {
+  para: {
+    id: 'r-gas',
+    concepto: 'Gas del local',
+    frecuencia: 'semanal',
+    diaDelMes: null,
+    proveedor: 'Gas Express',
+    montoCentavos: '35000',
+    vence: 0,
+  },
+  prefill: {
+    recurrenteId: 'r-gas',
+    concepto: 'Gas del local',
+    monto: 350_00n,
+    categoria: 'Servicios',
+    proveedor: 'Gas Express',
+  },
 };

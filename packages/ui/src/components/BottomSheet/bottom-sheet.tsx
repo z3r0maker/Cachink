@@ -106,6 +106,7 @@ function Sheet(props: BottomSheetProps & { readonly id: string }): ReactElement 
           paddingBottom: hasFooter ? 16 : Math.max(16, insets.bottom),
         }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
         {props.children}
       </ScrollView>

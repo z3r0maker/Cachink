@@ -13,6 +13,7 @@
 
 import { sql } from 'drizzle-orm';
 import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
+import type { RawRow } from './raw-row.js';
 
 /**
  * Current schema version. Must match the number of entries in
@@ -20,9 +21,19 @@ import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
  */
 export const SCHEMA_VERSION = 14;
 
+/**
+ * Reads with `all`, not `get`: Drizzle's expo driver steps a `get` once and
+ * never resets it, and that open read makes a later `DROP TABLE` in a
+ * migration fail with «database table is locked» (M-11).
+ */
 export async function getSchemaVersion(db: XangarroDatabase): Promise<number> {
-  const result = await db.get(sql.raw('PRAGMA user_version'));
-  return (result as { user_version: number } | undefined)?.user_version ?? 0;
+  const rows = (await db.all(sql.raw('PRAGMA user_version'))) as RawRow[];
+  const row = rows[0];
+  if (row === undefined) return 0;
+  const value = Array.isArray(row)
+    ? row[0]
+    : (row as Readonly<Record<string, unknown>>).user_version;
+  return typeof value === 'number' ? value : 0;
 }
 
 export async function setSchemaVersion(db: XangarroDatabase, version: number): Promise<void> {

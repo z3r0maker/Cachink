@@ -1,4 +1,4 @@
-import type { ConteoDenominaciones, Money } from '@xangarro/domain';
+import type { ConteoDenominaciones, DiscrepancyReason, Money } from '@xangarro/domain';
 
 import type { EstadoMode } from '../estado';
 import type { PartesEsperado } from '../turno/desglose';
@@ -42,7 +42,7 @@ export interface CierreData {
 export interface CerrarVivo {
   (p: {
     readonly montoCierreCentavos: bigint;
-    readonly discrepancyReason: string | null;
+    readonly discrepancyReason: DiscrepancyReason | null;
     readonly explicacion: string | null;
     readonly denominaciones: Readonly<Record<string, number>> | null;
   }): Promise<void>;

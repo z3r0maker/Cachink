@@ -27,6 +27,7 @@ export function PinStep(props: { onSubmit: (pin: string) => void }): ReactElemen
         value={pinValue}
         onChange={setPinValue}
         onComplete={props.onSubmit}
+        useNumpad
         testID="cancel-pin-input"
       />
     </View>

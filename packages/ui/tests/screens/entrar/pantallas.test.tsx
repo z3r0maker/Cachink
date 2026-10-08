@@ -240,7 +240,7 @@ describe('Inicio', () => {
     expect(screen.getByTestId('inicio-para-hoy')).toHaveTextContent('Para hoy');
     expect(screen.getByTestId('inicio-cortes')).toHaveTextContent('Cuadró');
     tap('inicio-atajo-gastos');
-    expect(onNavigate).toHaveBeenCalledWith('/egresos');
+    expect(onNavigate).toHaveBeenCalledWith('/gastos');
   });
 
   it('turno cerrado: «Abrir turno» opens the fondo sheet and «Para hoy» waits', () => {

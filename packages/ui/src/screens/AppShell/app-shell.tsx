@@ -15,7 +15,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { View } from '@tamagui/core';
-import { BottomTabBar, OfflineBanner, PathIcon } from '../../components/index';
+import { BottomTabBar, OfflineBanner, PathIcon, SafeAreaSpacer } from '../../components/index';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
@@ -148,6 +148,11 @@ export function AppShellFrame(props: AppShellFrameProps): ReactElement {
       {layout === 'rail' ? <NavRail {...menu} /> : null}
       {layout === 'sidebar' ? <NavSidebar {...menu} /> : null}
       <View flex={1} minWidth={0}>
+        {/* The status bar sits over the frame's top edge on iOS (M-11): the
+            extension blends with the white header under it. */}
+        <View backgroundColor={colors.white}>
+          <SafeAreaSpacer />
+        </View>
         {phone ? <CajaHeader {...header} /> : <CajaTopbar {...header} />}
         {props.banners}
         <Body>{props.children}</Body>

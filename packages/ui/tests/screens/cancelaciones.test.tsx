@@ -254,9 +254,8 @@ describe('CancellationFlow (orchestrator)', () => {
     expect(screen.getByTestId('cancel-pin-input')).toBeInTheDocument();
     expect(screen.queryByTestId('cancel-reason-input')).toBeNull();
 
-    // Enter 4-digit PIN via the hidden input field.
-    const pinField = screen.getByTestId('cancel-pin-input-field');
-    fireEvent.change(pinField, { target: { value: '1234' } });
+    // Enter 4-digit PIN via the numpad keys (the phone's established pad).
+    for (const d of '1234') fireEvent.click(screen.getByTestId(`numpad-${d}`));
 
     // Step 2: Reason step should now be visible.
     await waitFor(() => {
@@ -316,9 +315,8 @@ describe('CancellationFlow (orchestrator)', () => {
 
     renderFlow(saleUnderTest, { tickets, sales, cancelacionLogs }, { onClose, onSuccess });
 
-    // Step 1: PIN.
-    const pinField = screen.getByTestId('cancel-pin-input-field');
-    fireEvent.change(pinField, { target: { value: '654321' } });
+    // Step 1: PIN, via the numpad keys.
+    for (const d of '1234') fireEvent.click(screen.getByTestId(`numpad-${d}`));
 
     // Step 2: Reason.
     await waitFor(() => {

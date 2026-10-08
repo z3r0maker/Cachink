@@ -14,6 +14,15 @@ describe('MigrationError', () => {
     expect(err.name).toBe('MigrationError');
   });
 
+  it('names the innermost cause when the driver wraps the native error', () => {
+    const native = new Error('database table is locked');
+    const wrapped = new Error("Failed to run the query 'DROP TABLE t;'", { cause: native });
+    const err = new MigrationError('0004_x', wrapped);
+    expect(err.message).toBe(
+      "Migration '0004_x' failed: Failed to run the query 'DROP TABLE t;' (database table is locked)",
+    );
+  });
+
   it('handles non-Error cause', () => {
     const err = new MigrationError('0005_users', 'string error');
     expect(err.message).toContain('string error');

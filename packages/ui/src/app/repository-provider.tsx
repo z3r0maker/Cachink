@@ -33,6 +33,8 @@ import type {
   AuditoriasInventarioRepository,
   EntregasCreditoRepository,
   DirectorAlertsRepository,
+  MensajesOperadorRepository,
+  RespuestasOperadorRepository,
 } from '@xangarro/data';
 import {
   DrizzleAppConfigRepository,
@@ -57,6 +59,8 @@ import {
   DrizzleDirectorAlertsRepository,
   DrizzleCajaMovimientosRepository,
   DrizzleCancelacionLogsRepository,
+  DrizzleMensajesOperadorRepository,
+  DrizzleRespuestasOperadorRepository,
 } from '@xangarro/data';
 
 /**
@@ -89,6 +93,9 @@ export interface Repositories {
   readonly directorAlerts: DirectorAlertsRepository;
   readonly cajaMovimientos: CajaMovimientosRepository;
   readonly cancelacionLogs: CancelacionLogsRepository;
+  /** Avisos (M-09): the owner's messages to this operator, and its replies. */
+  readonly mensajesOperador: MensajesOperadorRepository;
+  readonly respuestasOperador: RespuestasOperadorRepository;
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
@@ -127,6 +134,8 @@ export function buildDrizzleRepositories(
     directorAlerts: new DrizzleDirectorAlertsRepository(db, deviceId, uid),
     cajaMovimientos: new DrizzleCajaMovimientosRepository(db, deviceId, uid),
     cancelacionLogs: new DrizzleCancelacionLogsRepository(db, deviceId, uid),
+    mensajesOperador: new DrizzleMensajesOperadorRepository(db),
+    respuestasOperador: new DrizzleRespuestasOperadorRepository(db, deviceId, uid),
   };
 }
 
@@ -193,3 +202,7 @@ export const useCajaMovimientosRepository = (): CajaMovimientosRepository =>
   useRepositories().cajaMovimientos;
 export const useCancelacionLogsRepository = (): CancelacionLogsRepository =>
   useRepositories().cancelacionLogs;
+export const useMensajesOperadorRepository = (): MensajesOperadorRepository =>
+  useRepositories().mensajesOperador;
+export const useRespuestasOperadorRepository = (): RespuestasOperadorRepository =>
+  useRepositories().respuestasOperador;

@@ -5,7 +5,7 @@
  * Presentation only; the route creates the client and registers the ticket.
  */
 import { useState, type ReactElement } from 'react';
-import { ScrollView, TextInput } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, TextInput } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney, type Money } from '@xangarro/domain';
 import { matches } from '@xangarro/caja';
@@ -150,23 +150,29 @@ export function FiadoScreen(p: FiadoScreenProps): ReactElement {
   const e = useEleccion();
   const a = e.aQuien;
   return (
-    <View flex={1} testID={p.testID ?? 'checkout-fiado'}>
-      <Cabeza {...p} e={e} />
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Lista {...p} e={e} />
-        <ClienteNuevo valor={e.nuevo} onCambio={e.cambiarNuevo} dueno={p.dueno} />
-      </ScrollView>
-      <PieAccion
-        label={etiqueta(a, e.nuevo !== null, p.total)}
-        disabled={a === null}
-        loading={p.registrando}
-        error={p.error}
-        onPress={() => (a ? p.onAnotar(a) : undefined)}
-        testID="fiado-anotar"
-      />
-    </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View flex={1} testID={p.testID ?? 'checkout-fiado'}>
+        <Cabeza {...p} e={e} />
+        <ScrollView
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <Lista {...p} e={e} />
+          <ClienteNuevo valor={e.nuevo} onCambio={e.cambiarNuevo} dueno={p.dueno} />
+        </ScrollView>
+        <PieAccion
+          label={etiqueta(a, e.nuevo !== null, p.total)}
+          disabled={a === null}
+          loading={p.registrando}
+          error={p.error}
+          onPress={() => (a ? p.onAnotar(a) : undefined)}
+          testID="fiado-anotar"
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }

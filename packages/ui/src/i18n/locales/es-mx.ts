@@ -754,6 +754,8 @@ export const esMX = {
       gastos: 'Gastos',
       turno: 'Mi turno',
       inventario: 'Inventario',
+      fiado: 'Fiado y abonos',
+      avisos: 'Avisos',
       dinero: 'Dinero del turno',
       menu: 'Menú de la caja',
     },

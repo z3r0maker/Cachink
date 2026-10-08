@@ -52,6 +52,25 @@ describe('useAbrirCaja', () => {
     expect(result.current.data?.cierreAt).toBeNull();
   });
 
+  it('stamps the turno with the operator\u2019s LOCAL date, never the UTC one (O-36)', async () => {
+    const { result } = renderHook(() => useAbrirCaja(), {
+      wrapper: wrapper({ cajaTurnos }),
+    });
+
+    const esperada = (() => {
+      const d = new Date();
+      const dos = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+    })();
+
+    await act(async () => {
+      result.current.mutate({ userId: USER, montoAperturaCentavos: 5000n });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.fecha).toBe(esperada);
+  });
+
   it('throws when no business is configured', async () => {
     useAppConfigStore.setState({ currentBusinessId: null });
     const { result } = renderHook(() => useAbrirCaja(), {
