@@ -28,7 +28,7 @@ decisions** first: they change the copy of DS-01 and DS-06.
 
 ## Portal
 
-### DS-01 Ventas y gastos — filters answered by the server
+### DS-01 Ventas y gastos — filtros que responde el servidor
 
 - [ ] Status · Send the blocks below to the portal project; pull; align `app/(portal)/movimientos/*`.
 
@@ -61,7 +61,7 @@ updates when the answer arrives.
 > including lines the search filtered out or the page cut off. Confirm this. The ticket is the unit
 > the customer paid for.
 
-### DS-02 Exportar — every row, with a preparing state
+### DS-02 Exportar — todos los registros, con estado de preparación
 
 - [ ] Status · Send; pull; add the inventory export entry point.
 
@@ -76,7 +76,7 @@ takes a few seconds, and today no screen links to the inventory export at all.
 > archivo…» with a spinner and is disabled until the download starts. On failure, show a toast
 > «No pudimos generar el archivo. Intenta de nuevo.»
 
-### DS-03 Sincronización › Historial — the last 30 days
+### DS-03 Sincronización › Historial — los últimos 30 días
 
 - [ ] Status · Send; pull; align the historial card.
 
@@ -86,7 +86,7 @@ now reads the last 30 days.
 > **Sincronización › Historial.** Card subtitle «Últimos 30 días». Empty state: «Sin actividad de
 > sincronización en los últimos 30 días.»
 
-### DS-04 Productos › Movimientos — the newest 50
+### DS-04 Productos › Movimientos — los 50 más recientes
 
 - [ ] Status · Send; pull.
 
@@ -95,7 +95,7 @@ now reads the last 30 days.
 
 ## Caja (operador) and phone
 
-### DS-05 Sync status — «Reintentando»
+### DS-05 Estado de sincronización — «Reintentando»
 
 - [ ] Status · Send to the operador project; pull; wire `retryAt` into the caja header pill,
       Registros por enviar and the phone pill (`packages/ui/src/sync/cloud-sync-status.ts`).
@@ -112,7 +112,7 @@ and the caja shows only «en línea / sin conexión».
 > pidió esperar hasta las 7:42 p. m.» «Reintentar envío» stays as the manual override. It skips
 > our wait but not the server's.
 
-### DS-06 Cierre — rows still to send
+### DS-06 Cierre — registros que faltan por enviar
 
 - [ ] Status · Owner decision 1 answered: (a) (ADR-123). Minimal version shipped (DB3-CAJA-02): the
       amber band with the copy below, «Reintentar envío» and «Ver cuáles» kept, the close enabled;
@@ -126,7 +126,7 @@ and the caja shows only «en línea / sin conexión».
 > **Cierre — option (b).** Keep «Primero se tienen que enviar los registros pendientes.» Count
 > rows in retry and never-attempted rows too, and add «Reintentar envío» next to it.
 
-### DS-07 Registros por enviar — last and next attempt
+### DS-07 Registros por enviar — último y próximo intento
 
 - [ ] Status · Send; pull.
 
@@ -139,7 +139,7 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ## Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
 
-### DS-08 Caja — already open in another tab
+### DS-08 Caja — ya abierta en otra pestaña
 
 - [ ] Status · Web Lock wired and a minimal version shipped (DB3-CAJA-01, ADR-123): Acceso's frame
       (Don preocupado) with the two lines and «Usar esta pestaña», which waits in the lock's queue
@@ -155,7 +155,7 @@ a screen.
 > «Usar esta pestaña» (takes the register over once the other tab closes); link «Cerrar esta
 > pestaña».
 
-### DS-09 Estados — the custom range has a limit
+### DS-09 Estados — el rango personalizado tiene un límite
 
 - [ ] Status · Send to the portal project; pull; enforce the cap server-side (audit DB3-EST-01).
 
@@ -166,7 +166,7 @@ memory. The range is capped at 13 months.
 > shows the inline error «Elige un periodo de hasta 13 meses.» and «Aplicar» stays disabled. For
 > longer periods, a help link: «¿Necesitas más? Exporta tus movimientos.»
 
-### DS-10 Linking a big business — the first download comes in pages
+### DS-10 Vincular un negocio grande — la primera descarga llega por páginas
 
 - [ ] Status · Send to the operador project; pull; show the progress on the caja's «Conectar esta
       caja» and the phone's activation (audit DB3-BOOT-01, ADR-121).

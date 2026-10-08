@@ -327,9 +327,9 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
      `conversion` (N-02, OQ-5).
 - **Acceptance:** C-10 conformance suite green against the mock; domain tests for the new limits.
 
-### C-13 Payment intents API
+### C-13 API de intenciones de pago
 
-- [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** N-40 go decision · **Blocks:** N-80, N-42
+- [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** que N-40 decida avanzar · **Blocks:** N-80, N-42
 - **Amended 2026-09-25:** Mercado Pago has no QR payment API in Mexico (`docs/spikes/payments-mercadopago.md`),
   so `mode` is `'terminal'` only; `'link'` returns only if ADR-109's D-2 keeps Clip payment links.
 - **Steps:** `POST /api/v1/payments/intents` `{ clientIntentId (ULID), amountCentavos, mode:
@@ -498,9 +498,9 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 - **Acceptance:** conformance tests for pull of both tables; receivables calculator tests with an
   opening balance; drift test green.
 
-### C-21 Kill switches on the wire
+### C-21 Interruptores de apagado en la sincronización
 
-- [ ] Status · **Surfaced by:** N-09 (2026-09-23) · **Blocks:** kill-switch coverage on devices
+- [ ] Status · **Surfaced by:** N-09 (2026-09-23) · **Blocks:** la cobertura de interruptores de apagado en los dispositivos
       **Decided 2026-09-26 (owner): widen `features` to `PLATFORM_FLAG_KEYS`**, rather than adding a
       second `killSwitches` object. `entitlement.features` already means «what this tenant may use
       right now» — the plan intersected with what the platform released — and from a device's point

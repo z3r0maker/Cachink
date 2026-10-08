@@ -4,15 +4,15 @@
 
 ---
 
-### Z-01 `ventasCredito` — first portal-delivered feature (Q10)
+### Z-01 `ventasCredito` — primera función entregada por el portal (Q10)
 
-- [ ] Status · **Trigger:** launch done; ≥ 1 customer asks for fiado, or 30 days after launch.
+- [ ] Status · **Trigger:** lanzamiento completado; ≥ 1 cliente pide fiado, o 30 días después del lanzamiento.
 - **Scope:** app: un-hide Clientes picker/quick-create, Cuentas por Cobrar card, Entregas de Crédito, registrar pago; portal: Clientes module (list, detail, history, CxC aging), Dashboard CxC tile; sync: tables already in scope (§8) — verify end-to-end; flags: `PLATFORM_AVAILABLE.ventasCredito = true`, plan inclusion Emprendedor+; Maestro + Playwright flows.
 - **Acceptance:** Director toggles it on in Funciones → app shows credit flow on next pull; tests green.
 
-### Z-02 Portal group-2 screens
+### Z-02 Pantallas del grupo 2 del portal
 
-- [ ] Status · **Trigger:** Z-01 or customer demand.
+- [ ] Status · **Trigger:** Z-01 o demanda de clientes.
 - **Scope:** Indicadores (KPIs from domain), Caja reports (turnos, discrepancias — port `CajaReportes` intent), Gastos recurrentes templates (portal CRUD; app already fires them), Alertas inbox (stock-low history, rejections digest), Merma/Conversion/Auditoría reports when those flags go live.
 
 ### Z-03 CFDI automation (PAC)
@@ -20,14 +20,14 @@
 - [x] Done: dropped — superseded by N-33 (ADR-070), pulled forward to launch · Original status · **Trigger:** ≥ 50 paying businesses **or** > 2 h/month spent issuing manually.
 - **Scope:** Facturama or SW Sapien; CSD upload; webhook `invoice.paid` → CFDI issue → XML/PDF to storage → `factura_requests.issued` → email; cancellations; complemento de pago for OXXO/SPEI-settled invoices.
 
-### Z-04 Extract `apps/api`
+### Z-04 Extraer `apps/api`
 
-- [ ] Status · **Trigger:** sync p95 latency > 800 ms at the handler, or Vercel function limits hit, or a second client (e.g. a future POS) needs the API without the portal.
+- [ ] Status · **Trigger:** latencia p95 de sync > 800 ms en el handler, o límites de funciones de Vercel alcanzados, o que un segundo cliente (p. ej. un POS futuro) necesite la API sin el portal.
 - **Scope:** move `apps/web/src/app/api/v1/*` adapters to `apps/api` (Hono/Fastify), same `packages/application` use cases; portal keeps server actions. Conformance suite (C-10) must pass unchanged.
 
-### Z-05 Stripe payouts → ventas importer (dogfood)
+### Z-05 Importador de payouts de Stripe → ventas (dogfood)
 
-- [ ] Status · **Trigger:** X-04 running for 2 months.
+- [ ] Status · **Trigger:** X-04 corriendo desde hace 2 meses.
 - **Scope:** scheduled job in the portal: for the Xangarro business only, each Stripe payout → one venta (categoría Suscripciones, método Transferencia, fecha = arrival) with fee as a gasto (comisiones). Idempotent by payout id.
 
 ### Z-06 Informe mensual para el contador (PDF, Pro)
@@ -40,12 +40,12 @@
 
 ### Z-07 Multi-sucursal
 
-- [ ] Status · **Trigger:** first customer with two locations on Pro.
+- [ ] Status · **Trigger:** primer cliente con dos sucursales en Pro.
 - **Scope:** uses `business_members` already; adds business grouping (`billing.organizations`) and a consolidated dashboard; devices stay bound to one business.
 
-### Z-08 Background sync (Android WorkManager / iOS BGTaskScheduler)
+### Z-08 Sync en segundo plano (Android WorkManager / iOS BGTaskScheduler)
 
-- [ ] Status · **Trigger:** telemetry shows > 10 % of sales reaching the cloud > 1 h after capture.
+- [ ] Status · **Trigger:** la telemetría muestra > 10 % de las ventas llegando a la nube > 1 h después de la captura.
 - **Scope:** opportunistic background drain; never a dependency.
 
 ### Z-09 Internal support app (Q16 option C)
@@ -58,13 +58,13 @@
 - [x] Done: dropped — superseded by N-01 (ADR-067), pulled forward to launch · Original status · **Trigger:** churn or requests.
 - **Scope:** second Stripe Price per plan; Customer Portal already handles switch/proration.
 
-### Z-11 Pro extras: audit history + per-operator permissions UI
+### Z-11 Extras de Pro: historial de auditoría + UI de permisos por operador
 
-- [ ] Status · **Trigger:** first Pro customer.
-      **Remaining (2026-09-23, verified against the code):** only the audit-history screen (from `sync_log` / `cancelacion_logs`); the per-operator permissions editor already exists as P-05 (`equipo/operador-actions.tsx`, plan-gated, single key `canCancelSales`).
+- [ ] Status · **Trigger:** primer cliente Pro.
+      **Remaining (2026-09-23, verified against the code):** Solo falta la pantalla de historial de auditoría (desde `sync_log` / `cancelacion_logs`); el editor de permisos por operador ya existe como P-05 (`equipo/operador-actions.tsx`, restringido por plan, una sola clave `canCancelSales`).
 - **Scope:** `users.permissions` JSON editor in Operadores (portal), app enforces (already reads permissions); audit history screen from `sync_log` + `cancelacion_logs`.
 
-### Z-12 Sale-confirm sound: commission new audio (ADR-054 §7)
+### Z-12 Sonido de confirmación de venta: encargar audio nuevo (ADR-054 §7)
 
-- [ ] Status · **Trigger:** brand work budget.
+- [ ] Status · **Trigger:** presupuesto para el trabajo de marca.
 - **Scope:** replace `sale-confirm.mp3`; no code change.

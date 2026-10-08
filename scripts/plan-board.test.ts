@@ -12,7 +12,8 @@ import { join } from 'node:path';
 import { describe, it } from 'vitest';
 import { type Item, parseTrack } from './plan-board-parse.js';
 import { idsIn, nextUp } from './plan-board-next.js';
-import { categoryOf, renderBoard } from './plan-board-render.js';
+import { phaseOf, renderBoard } from './plan-board-render.js';
+import { kindOf } from './plan-board-kinds.js';
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -91,7 +92,7 @@ describe('parseTrack', () => {
   });
 });
 
-describe('categoryOf', () => {
+describe('phaseOf', () => {
   const at = (source: string, section: string): Item => ({
     source,
     section,
@@ -106,23 +107,73 @@ describe('categoryOf', () => {
   });
 
   it('splits Track N by section and routes the launch and post-launch files', () => {
-    assert.equal(categoryOf(at('09-next-features.md', '2. Launch blockers')), 'Lanzamiento');
-    assert.equal(categoryOf(at('09-next-features.md', '3. Post-launch')), 'Post-lanzamiento');
-    assert.equal(categoryOf(at('07-launch.md', '')), 'Lanzamiento');
+    assert.equal(phaseOf(at('09-next-features.md', '2. Launch blockers')), 'Lanzamiento');
+    assert.equal(phaseOf(at('09-next-features.md', '3. Post-launch')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('07-launch.md', '')), 'Lanzamiento');
     assert.equal(
-      categoryOf(at('11-pre-launch-and-deferred.md', '1. Pre-launch actions')),
+      phaseOf(at('11-pre-launch-and-deferred.md', '1. Pre-launch actions')),
       'Lanzamiento',
     );
-    assert.equal(categoryOf(at('08-post-launch.md', '')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('08-post-launch.md', '')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('../launch/production-readiness.md', '1. Legal texts')), 'Lanzamiento');
     assert.equal(
-      categoryOf(at('../launch/production-readiness.md', '1. Legal texts')),
-      'Lanzamiento',
-    );
-    assert.equal(
-      categoryOf(at('../launch/production-readiness.md', '9. Deferred by decision')),
+      phaseOf(at('../launch/production-readiness.md', '9. Deferred by decision')),
       'Post-lanzamiento',
     );
-    assert.equal(categoryOf(at('03-backend.md', '')), 'Colas de tracks');
+    assert.equal(phaseOf(at('03-backend.md', '')), 'Colas de tracks');
+  });
+});
+
+describe('kindOf', () => {
+  const item = (over: Partial<Item>): Item => ({
+    source: '09-next-features.md',
+    section: '3. Post-launch',
+    line: 1,
+    id: null,
+    title: 't',
+    status: 'open',
+    trigger: null,
+    blockedBy: null,
+    blocks: null,
+    remaining: null,
+    ...over,
+  });
+
+  it('routes ids to the four kinds, with a surface for code only', () => {
+    assert.deepEqual(kindOf(item({ id: 'N-24' })), {
+      kind: 'Código y técnico',
+      surface: 'Teléfono',
+    });
+    assert.equal(kindOf(item({ id: 'O-17' })).kind, 'Corporativo, legal y terceros');
+    assert.equal(kindOf(item({ id: 'X-01' })).kind, 'Infra y consolas');
+    assert.equal(kindOf(item({ id: 'Z-05' })).kind, 'Espera datos reales');
+    assert.equal(kindOf(item({ id: 'O-17' })).surface, null);
+  });
+
+  it('routes the id-less production-readiness rows by section and title prefix', () => {
+    const pr = (title: string, section: string): Item =>
+      item({ source: '../launch/production-readiness.md', section, id: null, title });
+    assert.equal(
+      kindOf(pr('BLOQUEANTE — Razón social constituida.', '0. The one thing')).kind,
+      'Corporativo, legal y terceros',
+    );
+    assert.equal(
+      kindOf(pr('BLOQUEANTE — Cancelar en un clic', '4. Subscriptions')).surface,
+      'Privacidad y LFPC',
+    );
+    assert.equal(
+      kindOf(pr('DPAs firmados: Supabase', '6. Third parties')).kind,
+      'Corporativo, legal y terceros',
+    );
+    assert.equal(
+      kindOf(pr('ANTES DE STORES — Apple Privacy', '5. Stores')).kind,
+      'Infra y consolas',
+    );
+    assert.equal(kindOf(pr('En la app «Desvincular y borrar', '3. Rights')).surface, 'Teléfono');
+  });
+
+  it('throws on an unclassified item — a new task needs its bucket the day it is written', () => {
+    assert.throws(() => kindOf(item({ id: 'T-99' })), /No bucket for T-99.*plan-board-kinds/);
   });
 });
 
@@ -181,15 +232,28 @@ describe('the committed board', () => {
     assert.equal(actual, expected);
   });
 
-  it('lists only open work, in the three categories, citing a line per item', () => {
+  it('lists only open work, in the four kinds, citing a line per item', () => {
     const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    for (const c of ['## Siguiente', '## Lanzamiento', '## Post-lanzamiento', '## Colas de tracks'])
-      assert.ok(board.includes(c), c);
+    for (const h of [
+      '## Siguiente',
+      '## Código y técnico',
+      '## Corporativo, legal y terceros',
+      '## Infra y consolas',
+      '## Espera datos reales',
+    ])
+      assert.ok(board.includes(h), h);
+    assert.ok(!board.includes('## Lanzamiento ('), 'the phase lists are gone');
     const lines = board.split('\n').filter((l) => /^- \[/.test(l));
     assert.ok(lines.length > 0);
     for (const line of lines) {
       assert.doesNotMatch(line, /^- \[x\]/);
       assert.match(line, /`[^`]+\.md:\d+`$/);
     }
+  });
+
+  it('classifies every open item — an unlisted task fails the board, not just the reader', () => {
+    const open = collect(ROOT).filter((i) => i.status !== 'done');
+    assert.ok(open.length > 100);
+    for (const i of open) assert.doesNotThrow(() => kindOf(i), `${i.id ?? i.title}`);
   });
 });
