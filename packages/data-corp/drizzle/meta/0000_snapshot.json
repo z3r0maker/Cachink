@@ -1,0 +1,135 @@
+{
+  "id": "0ed5f958-7bf2-45f1-a109-67f23f277277",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "corp.founders": {
+      "name": "founders",
+      "schema": "corp",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "staff_member_id": {
+          "name": "staff_member_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rfc": {
+          "name": "rfc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "founders_staff_member_id_unique": {
+          "name": "founders_staff_member_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "staff_member_id"
+          ]
+        },
+        "founders_numero_unique": {
+          "name": "founders_numero_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "founders_numero_check": {
+          "name": "founders_numero_check",
+          "value": "\"corp\".\"founders\".\"numero\" IN (1, 2)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "corp.projects": {
+      "name": "projects",
+      "schema": "corp",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "projects_slug_unique": {
+          "name": "projects_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "corp": "corp"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

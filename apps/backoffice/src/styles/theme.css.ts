@@ -39,6 +39,13 @@ createGlobalTheme(':root', t, consoleTheme.light);
 
 export const torreDark = createTheme(t, consoleTheme.dark);
 
+/**
+ * «Empresa» (ADR-124) reads in El Mostrador, light, inside the dark rail: the
+ * founders' books are paperwork, not a night shift. Re-scoping the same roles
+ * turns every console primitive light underneath it.
+ */
+export const torreLight = createTheme(t, consoleTheme.light);
+
 /** Borders in the theme's line colour: the same 2 / 2.5 px, never another width. */
 export const line = {
   thin: `2px solid ${t.line}`,

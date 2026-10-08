@@ -10,13 +10,14 @@ import { join } from 'node:path';
 import { migrationProblems, runsInTransaction } from './lint';
 
 /**
- * The three migration sets, applied in this order. `local/` is not here: the
+ * The four migration sets, applied in this order. `local/` is not here: the
  * part of it a hosted project needs is `hosted/` (see its header).
  */
 export const MIGRATION_SETS = [
   { set: 'hosted', dir: 'packages/data-pg/hosted' },
   { set: 'data-pg', dir: 'packages/data-pg/drizzle' },
   { set: 'admin', dir: 'apps/backoffice/src/server/db/migrations' },
+  { set: 'corp', dir: 'packages/data-corp/drizzle' },
 ] as const;
 
 export interface MigrationFile {

@@ -3,11 +3,14 @@ import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
 describe('vercel.json', () => {
-  it('schedules the digest at 14:00 UTC, which is 08:00 in Mexico City', () => {
+  it("schedules the digest and the founders' agenda at 14:00 UTC, 08:00 in Mexico City", () => {
     const config = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8')) as {
       crons?: { path: string; schedule: string }[];
     };
-    assert.deepEqual(config.crons, [{ path: '/api/cron/digest', schedule: '0 14 * * *' }]);
+    assert.deepEqual(config.crons, [
+      { path: '/api/cron/digest', schedule: '0 14 * * *' },
+      { path: '/api/cron/agenda', schedule: '0 14 * * *' },
+    ]);
     const cdmxHour = new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/Mexico_City',
       hour: '2-digit',

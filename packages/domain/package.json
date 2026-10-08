@@ -15,7 +15,8 @@
     "./entities": "./src/entities/index.ts",
     "./financials": "./src/financials/index.ts",
     "./comprobante": "./src/comprobante/index.ts",
-    "./usage": "./src/usage/index.ts"
+    "./usage": "./src/usage/index.ts",
+    "./corp": "./src/corp/index.ts"
   },
   "scripts": {
     "build": "tsc --build",

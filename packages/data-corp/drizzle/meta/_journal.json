@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791477744994,
+      "tag": "0000_corp_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791478431867,
+      "tag": "0001_corp_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791481404824,
+      "tag": "0002_corp_fondeo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791486745635,
+      "tag": "0003_corp_agenda",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791488590230,
+      "tag": "0004_corp_corporativo",
+      "breakpoints": true
+    }
+  ]
+}

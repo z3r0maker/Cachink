@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reset the local Postgres and apply BOTH migration sets (data-pg + admin),
+# Reset the local Postgres and apply every migration set (data-pg, admin, corp),
 # the state the console's e2e suite needs. db-local's reset only knows the
 # data-pg half; the admin migrations are psql'd in idempotent order.
 set -euo pipefail
@@ -12,3 +12,4 @@ for f in "$ROOT"/apps/backoffice/src/server/db/migrations/*.sql; do
   psql "$SUPER" -q -f "$f"
 done
 echo "admin migrations applied"
+(cd "$ROOT/packages/data-corp" && ./scripts/db-local.sh apply)

@@ -78,6 +78,9 @@ importers:
       '@xangarro/auth-core':
         specifier: workspace:*
         version: link:../../packages/auth-core
+      '@xangarro/data-corp':
+        specifier: workspace:*
+        version: link:../../packages/data-corp
       '@xangarro/data-pg':
         specifier: workspace:*
         version: link:../../packages/data-pg
@@ -684,6 +687,40 @@ importers:
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
+      drizzle-kit:
+        specifier: ^0.31.10
+        version: 0.31.10
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
+  packages/data-corp:
+    dependencies:
+      '@xangarro/application':
+        specifier: workspace:*
+        version: link:../application
+      '@xangarro/domain':
+        specifier: workspace:*
+        version: link:../domain
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/sql.js@1.4.11)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.9(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.3.0)(react@19.2.6))(react@19.2.6))(gel@2.2.0)(postgres@3.4.9)(sql.js@1.14.2)
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.17
+        version: 22.19.17
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
+      '@xangarro/testing':
+        specifier: workspace:*
+        version: link:../testing
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
