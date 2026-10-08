@@ -17,6 +17,31 @@ export function articleSchema(slug, extra = []) {
   return buildArticleSchema({ ...a, dateModified, extra });
 }
 
+/** A guide's section heading, phrased as the question a reader searches for. */
+export const H2 = ({ children }) => (
+  <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '36px 0 14px' }}>
+    {children}
+  </h2>
+);
+export const P = ({ children }) => (
+  <p
+    style={{
+      fontSize: 16,
+      lineHeight: 1.7,
+      margin: '0 0 16px',
+      color: 'var(--ink)',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </p>
+);
+export const A = ({ href, children }) => (
+  <a href={href} style={{ color: 'var(--black)' }}>
+    {children}
+  </a>
+);
+
 const backLink = {
   fontSize: 13,
   fontWeight: 700,

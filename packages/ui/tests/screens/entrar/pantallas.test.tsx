@@ -264,7 +264,7 @@ describe('Inicio', () => {
     inicio({ ...INICIO_FIXTURE, offline: true, pendientes: 3 }, { onNavigate });
     expect(screen.getByTestId('inicio-hero-offline')).toHaveTextContent('3 sin enviar');
     tap('inicio-hero-accion');
-    expect(onNavigate).toHaveBeenCalledWith('/no-enviados');
+    expect(onNavigate).toHaveBeenCalledWith('/pendientes');
     tap('inicio-hero-extra');
     expect(onNavigate).toHaveBeenCalledWith('/cobrar');
   });

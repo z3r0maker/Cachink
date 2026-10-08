@@ -137,7 +137,7 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   pull/entitlement once C-12's field exists (`usageFor()` in `apps/web/src/server/usage/live.ts`
   is ready); C-12 limits (the `usageLimitsOf` mapper stays until then); `origen` column (C-12 step 7).
 
-### N-03 Overage warnings and provider alerts `[LAUNCH]`
+### N-03 Overage warnings and provider alerts `[LAUNCH]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
   **Remaining (2026-09-23, verified against the code):** no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused).
@@ -394,7 +394,7 @@ body, attachments)`.
 - **Acceptance:** a checklist of every mobile Settings entry (`packages/ui/src/screens/Settings/*`),
   each mapped to "portal", "device (A-12)" or "dropped (why)"; each portal item has a Playwright spec.
 
-### N-12 "Platícanos de ti" wizard `[LAUNCH]`
+### N-12 "Platícanos de ti" wizard `[LAUNCH]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** N-11, N-19 · **Blocks:** N-13, N-15
   **Remaining (2026-09-23, verified against the code):** acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR.
@@ -556,7 +556,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Receipts and WhatsApp
 
-### N-19 Logo + brand colour `[LAUNCH]`
+### N-19 Logo + brand colour `[LAUNCH]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
   **Remaining (2026-09-23, verified against the code):** the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do».
@@ -616,10 +616,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** snapshot tests per template; totals stay legible with any brand colour (contrast
   check picks the text colour).
 
-### N-21 WhatsApp share `[LAUNCH]`
+### N-21 WhatsApp share `[LAUNCH]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** N-20 (done) · web half landed 2026-09-20
-  **Remaining (2026-09-23, verified against the code):** phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24.
+  **Remaining (2026-09-23, verified against the code):** phone half only. **Re-verified 2026-09-28:** `share-image.ts` no longer exists — `125d3688` («the phone app keeps only what the operator uses») deleted it, so the image hand-off is gone rather than partial. What the phone has is a **text** share of the corte, `Share.share({ message: textoDelCorte(h) })` in `cierre.tsx`, so «Enviar como texto» is met for that surface. Still missing: sharing the comprobante at all, an Android send to a preset number, the Maestro flow to the hand-off, and the Android-fallback unit test. Blocked on N-24.
 
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
@@ -650,9 +650,17 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Offline
 
-### N-22 App sync banners `[LAUNCH]`
+### N-22 App sync banners `[LAUNCH]` `[alta]` `[bloq]`
 
-- [ ] Status · **Blocked by:** A-06, A-07, N-24 · **Blocks:** N-29
+- [ ] Status · **Blocked by:** A-06, A-07 · **Blocks:** N-29
+      **Re-verificado 2026-09-28:** la mitad ya existe y llegó con M-05. La píldora de sync está montada
+      en el shell (`packages/ui/src/screens/AppShell/cloud-sync-pill.tsx`, usada por `app-shell.tsx` y
+      `caja-header.tsx`), el puente a la nube es `cloud-sync-bridge.tsx`, y `OfflineBanner` existe. Lo
+      que **no** existe son dos de los tres banners que esta tarea pide: `offline-banner.tsx` sólo lee
+      `pendientes` (el ámbar), así que faltan el rojo de rechazados y el gris de «sin sincronizar desde
+      hace más de 72 h». La pantalla `SyncRejected` sí está, pero no hay banner que lleve a ella. Faltan
+      también los flujos de Maestro de cada estado. N-24 deja de bloquearla: el teléfono ya se rehízo en
+      El Mostrador.
 - **What:** on top of the A-07 pill, conditional full-width banners:
   - amber — offline **and** pending > 0: "Trabajando sin conexión · 12 registros se enviarán al
     reconectar";
@@ -690,8 +698,15 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** merge of `rename/xangarro-stored-ids`; each Track O screen closed
-      (O-xx) before its phone counterpart starts · **Blocks:** N-20, N-22, N-25
+- [ ] Status · **Blocked by:** — `[alta]` `[bloq]` · **Blocks:** N-20, N-22, N-25
+      **Re-verificado 2026-09-28:** los dos bloqueos que esta línea nombraba ya no existen, y el trabajo
+      se hizo en otro lado. `rename/xangarro-stored-ids` **está integrada en `main`** desde `52824588`
+      («Merge rename/xangarro-stored-ids: the phone track lands (A-04…A-18)»), que es lo que O-20 ya había
+      dicho el 2026-09-19. Y el teléfono no adoptó el diseño de Track O: lo **reemplazó El Mostrador**
+      (ADR-117, track `19-movil-mostrador.md`), con M-01 a M-09 cerradas entre el 2026-09-27 y el
+      2026-09-28 — shell de cuatro pestañas, Cobrar, Mi turno, Inicio, Acceso y Bloqueo. Esta tarea, tal
+      como está escrita, quedó **superada**: lo que falta del teléfono vive en M-10, M-11 y M-12. Decidir
+      si se cierra o se reescribe como el remanente que no cubre Track M.
 - **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
   caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
   device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
@@ -704,10 +719,18 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** each phone screen matches its Track O counterpart at 375 px; Maestro flows updated
   (CLAUDE.md §6).
 
-### N-25 QR device pairing `[LAUNCH]`
+### N-25 QR device pairing `[LAUNCH]` `[alta]` `[bloq]`
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
       **Remaining (2026-09-23, after C-14 and P-06 landed):** the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24.
+      **Re-verificado 2026-09-28:** el lado del teléfono **ya se construyó**, en M-06 («Vincular: cámara
+      QR + código», cerrada el 2026-09-28). Existen `packages/ui/src/components/Scanner/` (nativo y web),
+      `apps/mobile/src/shell/scanner-host.tsx` y `packages/ui/src/screens/Activation/qr-visor-marco.tsx`.
+      Quedan exactamente dos huecos, los dos verificados por ausencia: **no hay App Links ni Universal
+      Links** (`assetlinks.json` y el AASA no están en ningún commit del repo), y **no existe la
+      confirmación SEC-MOB-04 «¿Vincular a _negocio_?»** antes de canjear el token, que necesita una
+      vista previa que nombre al negocio. N-24 deja de bloquearla.
+
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
   `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
@@ -722,7 +745,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Quality
 
-### N-26 Security audit `[LAUNCH]`
+### N-26 Security audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
   **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). **Left:** flip `Content-Security-Policy-Report-Only` to enforcing in `src/proxy.ts` after a week of clean production logs. **SEC-SUP-01 done** — `permissions: contents: read` on every workflow, every action pinned to a commit SHA, a `supply-chain` job running `pnpm audit:gate` (fails on a high/critical advisory reachable at runtime; build-only routes and a dated allowlist in `security/audit-allowlist.json` are the only excuses; the two that shipped — `tmp`, `brace-expansion` under `exceljs` — are fixed by `pnpm.overrides`) and a gitleaks scan of each run's commits, plus a CodeQL workflow (the repo is public). The gitleaks step is unrun until CI's first pass. The hosted re-run needs X-01.
@@ -740,7 +763,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   SEC-AUTH-02, Data API exposure SEC-DATA-01) belong to Track B. **Still to do:** pre-launch re-run
   on hosted B-01 with the built sync, register and webhooks; live rate-limit and PostgREST tests.
 
-### N-27 Database audit `[LAUNCH]`
+### N-27 Database audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
   **Remaining (2026-09-26, round 2 — `docs/audits/db-2026-09-26.html`, branch `perf/db-scale`):** round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project.
@@ -754,7 +777,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   critical (pull cursor loses rows — reproduced), 7 high, 12 medium, 3 low. **Still to do:** pre-beta
   re-run on hosted Supabase with `pg_stat_statements`, and the timed PITR restore drill.
 
-### N-28 Performance audit `[LAUNCH]`
+### N-28 Performance audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
 
 - [ ] Status · **Blocked by:** X-01 · **Blocks:** N-30
 - **Scope:** k6 load test on staging at 10× the beta's projected load (push, pull, portal reports);
@@ -762,7 +785,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   Android. Replace the broken `docs/archive/health-report-2026-04-30.md` with this report.
 - **Output:** `docs/audits/performance-YYYY-MM-DD.md` + the k6 scripts in the repo.
 
-### N-29 Deterministic full-stack E2E gate `[LAUNCH]`
+### N-29 Deterministic full-stack E2E gate `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
 
 - [ ] Status · **Blocked by:** P-17, A-16, N-22, N-25 · **Blocks:** N-30, X-02
 - **What:** one scenario against a real local Supabase: signup → wizard → operator → import →
@@ -772,7 +795,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   runner is affordable per PR).
 - **Acceptance:** green in CI; a deliberately broken push handler turns it red.
 
-### N-30 Closed beta `[LAUNCH]`
+### N-30 Closed beta `[LAUNCH]` `[critica]` `[bloq]`
 
 - [ ] Status · **Blocked by:** X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29
 - **Who:** 10–20 businesses — prebeta partners, 2–3 each of taquería / tiendita / servicios, and
@@ -811,7 +834,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
   contract; if C-12 ever changes them, `planes.js` is the one place to update.
 
-### N-32 Store-compliance sweep `[LAUNCH]`
+### N-32 Store-compliance sweep `[LAUNCH]` `[tiendas]` `[alta]` `[bloq]`
 
 - [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
   **Remaining (2026-09-23, verified against the code):** reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress).
@@ -838,7 +861,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   `pnpm lint:store` gates in `ci.yml` (job `ci`, after Lint). `entitlement-freelancer-limit.yaml`
   asserts the new copy. **main: 0 violations.** Still to do: reviewer checklist for X-05.
 
-### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
+### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]` `[legal]` `[alta]` `[bloq]`
 
 - [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
   **Remaining (2026-09-23, after the work below):** the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending.
@@ -998,7 +1021,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
 
 #### Phase 0 — Prove
 
-### N-40 Provider validation + Clip partnership + legal opinion
+### N-40 Provider validation + Clip partnership + legal opinion `[terceros]` `[media]`
 
 - [~] Status · **Trigger:** N-30 exit criteria met. **The Clip conversation starts now** (owner action,
   not gated by the trigger).
@@ -1018,7 +1041,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
   output in the two spike files.
 - **Acceptance:** go / no-go per provider for terminals; legal opinion filed.
 
-### N-75 Reconciliation spike — can we see card payments from any reader?
+### N-75 Reconciliation spike — can we see card payments from any reader? `[media]`
 
 - [ ] Status · **Blocks:** ADR-109, N-41, N-76
 - **What:** read Mercado Pago's payment search, account-money / released-money reports and settlement
@@ -1034,7 +1057,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 #### Phase 1 — Verify card sales, any reader
 
-### N-41 `PaymentProvider` port — read side + Mercado Pago adapter
+### N-41 `PaymentProvider` port — read side + Mercado Pago adapter `[media]`
 
 - [ ] Status · **Blocked by:** N-75, ADR-109 · **Blocks:** N-43, N-53, N-76, N-80
 - **What:** port in `packages/application`: `listPayments(range)`, `getPayment(id)`,
@@ -1042,7 +1065,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   adapter `mercadopago`, backend only. A shared adapter contract suite that N-53 must also pass.
   Amounts cross the port as integer centavos, parsed from the providers' decimal strings (§2.8).
 
-### N-43 Merchant account linking in Tipos de pago
+### N-43 Merchant account linking in Tipos de pago `[media]`
 
 - [ ] Status · **Blocked by:** N-41
 - **What:** Negocio → Tipos de pago, under the Tarjeta switch: a card «¿Cobras con Mercado Pago o
@@ -1055,7 +1078,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **Acceptance:** Playwright: connect (mock provider), connected state shows real data, disconnect,
   expired-token aviso.
 
-### N-76 Conciliación de tarjeta
+### N-76 Conciliación de tarjeta `[baja]`
 
 - [ ] Status · **Blocked by:** N-41, N-43
 - **What:** a job pulls the linked account's card payments (and N-53's, for Clip) and matches them to
@@ -1068,7 +1091,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **Acceptance:** domain matcher TDD (exact, time-window, two same-amount sales, refund, partial);
   integration test with ventas the seed does not have; Playwright shows real matched rows.
 
-### N-77 Checklist step and invitations
+### N-77 Checklist step and invitations `[baja]`
 
 - [ ] Status · **Blocked by:** N-43
 - **What:** «Primeros pasos», group «Cuando quieras»: «Conecta tu cuenta Mercado Pago o Clip» — shown
@@ -1081,7 +1104,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 #### Phase 2 — Drive the terminal
 
-### N-80 `PaymentProvider` write side + Mercado Pago Point
+### N-80 `PaymentProvider` write side + Mercado Pago Point `[baja]`
 
 - [ ] Status · **Blocked by:** N-41, N-40 (MP go), C-13 · **Blocks:** N-42, N-79
 - **What:** the port gains `createIntent`, `getIntent`, `cancelIntent`, `refund`, `listTerminals`,
@@ -1089,7 +1112,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   POS per caja, PDV mode, `X-Idempotency-Key`). The contract suite runs against the Point sandbox's
   virtual terminal and `POST /v1/orders/{id}/events`.
 
-### N-42 Payment intents backend
+### N-42 Payment intents backend `[baja]`
 
 - [ ] Status · **Blocked by:** N-80, C-13
 - **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, terminal id) →
@@ -1099,7 +1122,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   that no venta claims feed N-76's «cobro sin venta».
 - **Invariant:** the server never writes the venta (ADR-058 §2, ADR-066).
 
-### N-79 Terminal per caja
+### N-79 Terminal per caja `[baja]`
 
 - [ ] Status · **Blocked by:** N-80, N-43, ADR-109 (D-1)
 - **What:** in the Tipos de pago panel of a linked account: list the account's terminals, switch one
@@ -1109,7 +1132,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   back here.
 - **Acceptance:** Playwright with the mock provider: assign, rename, unassign; Equipo shows it.
 
-### N-44 Cobrar en terminal (phone and web caja)
+### N-44 Cobrar en terminal (phone and web caja) `[baja]`
 
 - [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
 - **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
@@ -1120,7 +1143,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **Acceptance:** Maestro flows for approve, decline, timeout, phone-killed-after-approval, no
   terminal; Playwright for the web caja.
 
-### N-78 Terminal health at the caja
+### N-78 Terminal health at the caja `[baja]`
 
 - [ ] Status · **Blocked by:** N-79
 - **What:** the caja reads its terminal's health (MP terminal list + mode; Clip `/devices/status`)
@@ -1130,26 +1153,26 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   Tipos de pago. Never shown when no terminal is configured.
 - **Acceptance:** Maestro + Playwright: healthy (no badge), unreachable, token expired, recovered.
 
-### N-45 External penetration test
+### N-45 External penetration test `[deuda]` `[media]`
 
 - [ ] Status · **Trigger:** N-42 and N-43 on staging. **Blocks:** turning `cobrosIntegrados` on in
       production. Then yearly.
 
 ### Admin — second wave
 
-### N-46 Sync health and devices
+### N-46 Sync health and devices `[media]`
 
 - [ ] Status · **Trigger:** launch + 30 days, or the first cross-tenant sync incident.
 - **What:** rejected rows across tenants by code; devices not seen in N days; force-revoke (B-12).
   Replaces the B-16 Studio saved queries for day-to-day use.
 
-### N-47 Broadcast announcements
+### N-47 Broadcast announcements `[baja]`
 
 - [ ] Status · **Trigger:** the first planned maintenance window or feature launch after go-live.
 - **What:** compose an aviso to all tenants or a filter (plan, tipo de negocio, beta allowlist);
   delivered through the ADR-060 `notices` table to the portal's Avisos and the app.
 
-### N-48 Dormancy lifecycle (ADR-064)
+### N-48 Dormancy lifecycle (ADR-064) `[baja]`
 
 - [ ] Status · **Trigger:** launch + 90 days (no tenant can be dormant earlier).
 - **What:** nightly job marks free tenants with no login and no device sync for 90 days as dormant;
@@ -1164,31 +1187,31 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### Other
 
-### N-49 GLM exploratory tester
+### N-49 GLM exploratory tester `[deuda]` `[baja]`
 
 - [ ] Status · **Trigger:** X-01 staging live and N-29 green.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
   provider), with personas ("taquero con prisa", "contador revisando el mes") and goals. Findings →
   inbox `kind=explorador` with screenshots and reproduction steps. Never a CI gate.
 
-### N-50 AI logo generation
+### N-50 AI logo generation `[baja]`
 
 - [ ] Status · **Trigger:** the ADR-059 production gate on model calls is lifted.
 - **What:** "Genera un logo con IA" in N-19 for businesses without one: style picker + name → 4
   options → pick → becomes the logo. Image model provider chosen at trigger time.
 
-### N-51 DB scaling — Stage 2 (ADR-068)
+### N-51 DB scaling — Stage 2 (ADR-068) `[infra]` `[baja]`
 
 - [ ] Status · **Trigger:** any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card).
 - **What:** monthly range partitioning of transactional tables (migration with old→new test,
   CLAUDE.md §2.9), a read replica for portal reports and the Asesor, next Supabase compute size.
 
-### N-52 DB scaling — Stage 3 (ADR-068)
+### N-52 DB scaling — Stage 3 (ADR-068) `[infra]` `[baja]`
 
 - [ ] Status · **Trigger:** DB > 500 GB or > 10 000 active tenants.
 - **What:** separate analytics read model; evaluate Citus or tenant sharding (new ADR).
 
-### N-54 Facturación for merchants (white-label PAC reseller)
+### N-54 Facturación for merchants (white-label PAC reseller) `[baja]`
 
 - [ ] Status · **Trigger:** N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own
       clients.
@@ -1199,7 +1222,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   tenant, stamps bought in bulk and resold). Needs each tenant's CSD upload, a new ADR, and pricing
   (per-stamp packs as an add-on).
 
-### N-53 Clip adapter
+### N-53 Clip adapter `[baja]`
 
 - [ ] Status · **Blocked by:** N-41, N-40 (Clip go), N-75 (Clip go) · **Blocks:** N-44 going public
 - **What:** `clip` adapter for the N-41 port. **Read side first (Phase 1):** transactions by date and
@@ -1239,7 +1262,7 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
       Store first-touch on the business at signup. Also move the rewrite out of `App.jsx` into the
       shared client entry: the `/recursos` article pages drop UTMs today, so content marketing is
       entirely unattributed.
-- [~] **N-58 · Phase 4 — purchases + landing.** Checkout hook ✅ shipped; the pixel ✅ **is built but
+- [~] **N-58 · Phase 4 — purchases + landing.** Checkout hook ✅ shipped; the pixel ✅ **is built but `[media]`
   dark** — `VITE_GEO_PIXEL_URL` is empty, so the build emits nothing, exactly like
   `VITE_PLAUSIBLE_DOMAIN`. Setting that one variable is what turns measurement on, which keeps
   the decision a config change rather than a code change.
@@ -1254,7 +1277,7 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
 - [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
-- [~] **N-60 · Phase 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10
+- [~] **N-60 · Phase 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10 `[media]`
   updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
   **Remaining and not an engineering task:** variante D for site visitors, the placeholders, and
   the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
@@ -1262,7 +1285,7 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
   engineering one — the cookie-less aggregate case is weak for one, but confirm.
 - [x] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
       Done: 2026-09-22 · 419bd02b · `xangarro.geo_prune` (`0033_geo_prune.sql`, SECURITY DEFINER, 90-day floor, execute only for `xangarro_admin`) called with `GEO_KEEP_DAYS = 400` from the digest cron. No test calls it yet; the `0033` prefix is shared with `0033_tenant_indexes.sql` (harmless, apply order sorts the full name).
-- [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best"
+- [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best" `[baja]`
       or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
       fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,
       better than an IP guess, and it adds no new collection.
@@ -1281,7 +1304,7 @@ micro-POS than location does.
 > each has a **Trigger**. Surfaced by the owner's 2026-09-22 question on what the backoffice
 > should do next.
 
-### N-63 Negocio: MRR, churn, trial → paid
+### N-63 Negocio: MRR, churn, trial → paid `[media]`
 
 - [ ] Status · **Trigger:** B-10 webhooks write `billing.subscriptions` for the first paying tenant
       (the N-06 stub is retired). **Blocked by:** N-06 · **Blocks:** N-70, N-72
@@ -1292,7 +1315,7 @@ micro-POS than location does.
   subscription; a cohort with zero trials renders "sin datos", not 0 %.
 - **Amends** ADR-063 row 3 ("MRR dashboard not built — Stripe covers it"): see ADR-096.
 
-### N-64 Activation funnel and weekly cohorts
+### N-64 Activation funnel and weekly cohorts `[media]`
 
 - [ ] Status · **Trigger:** X-10 launch (real signups). **Blocked by:** N-57 · **Blocks:** N-70, N-74
 - **What:** define **activated** as one product moment — first venta synced from a device or the
@@ -1303,7 +1326,7 @@ micro-POS than location does.
 - **Acceptance:** a cohort younger than its window shows "aún no vence"; activation is computed
   from sync data, never from the phone's own estimate.
 
-### N-65 Tenant timeline
+### N-65 Tenant timeline `[media]`
 
 - [ ] Status · **Trigger:** now (every source table exists). **Blocked by:** N-08
 - **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
@@ -1312,7 +1335,7 @@ micro-POS than location does.
 - **Acceptance:** a tenant with 500+ events pages by keyset (reuse `keyset.ts`); the feed is the
   union of existing tables — no new event table.
 
-### N-66 Staff roles
+### N-66 Staff roles `[media]`
 
 - [ ] Status · **Trigger:** the second staff member is added, or before N-68 / N-71 start —
       whichever is first. **Blocked by:** N-05 · **Blocks:** N-68, N-71
@@ -1322,7 +1345,7 @@ micro-POS than location does.
 - **Acceptance:** every server action declares its minimum role; a lector calling a write action
   gets 403 and an audit row; `scripts/staff-cli.ts` sets the role.
 
-### N-67 `/auditoria`
+### N-67 `/auditoria` `[media]`
 
 - [ ] Status · **Trigger:** now. **Blocked by:** N-05
 - **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
@@ -1331,7 +1354,7 @@ micro-POS than location does.
 - **Acceptance:** the log is append-only from this screen (no delete, no edit); an N-68 session
   shows as one row per action with both identities.
 
-### N-68 "Ver como" — time-boxed, read-only impersonation
+### N-68 "Ver como" — time-boxed, read-only impersonation `[baja]`
 
 - [ ] Status · **Trigger:** X-10 launch and the first inbox item that could not be resolved from
       `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
@@ -1344,7 +1367,7 @@ micro-POS than location does.
   attempted through the token is rejected server-side; the token dies at 30 min or on "salir".
 - **Amends** ADR-063 row 3 ("impersonation not built"): see ADR-096.
 
-### N-69 Flag lifecycle and percentage rollout
+### N-69 Flag lifecycle and percentage rollout `[baja]`
 
 - [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
 - **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
@@ -1354,7 +1377,7 @@ micro-POS than location does.
 - **Acceptance:** raising 10 % → 50 % never removes a business already in; a kill flag has no
   percentage and no expiry; a release flag past expiry is listed but keeps its last state.
 
-### N-70 Decisiones
+### N-70 Decisiones `[baja]`
 
 - [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-07, N-63
 - **What:** `/decisiones` renders the table in `17-consola-crecimiento.md` §4: signal, source,
@@ -1364,7 +1387,7 @@ micro-POS than location does.
 - **Acceptance:** the ADR-068 S2/S3 rows read the same numbers as the N-07 card; a signal with
   fewer than 4 weekly points shows "sin tendencia" instead of a date.
 
-### N-71 Cobros: dunning, expiring trials, extend / credit
+### N-71 Cobros: dunning, expiring trials, extend / credit `[media]`
 
 - [ ] Status · **Trigger:** first paying tenant. **Blocked by:** N-06, N-66
 - **What:** `/cobros`: `past_due` and `grace` tenants with days remaining and last dunning email;
@@ -1374,7 +1397,7 @@ micro-POS than location does.
 - **Acceptance:** an extension shows in Stripe within one webhook round-trip; the list is empty
   and says so when no tenant is past due.
 
-### N-72 Cost per tenant
+### N-72 Cost per tenant `[baja]`
 
 - [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-63 · **Blocks:** N-70 infra-share row
 - **What:** a monthly manual entry (admin) of the Vercel, Supabase, Resend and Facturapi invoices
@@ -1382,7 +1405,7 @@ micro-POS than location does.
   one table, one line on `/negocio` and one row on `/decisiones`.
 - **Acceptance:** a month with no entry shows "sin captura", never a stale ratio.
 
-### N-73 Account health and NPS micro-survey
+### N-73 Account health and NPS micro-survey `[baja]`
 
 - [ ] Status · **Trigger:** 50 active tenants. **Blocked by:** N-64, N-47
 - **What:** health = usage trend (N-07) + payment health (N-63) + support load (N-08) + last sync
@@ -1392,7 +1415,7 @@ micro-POS than location does.
 - **Acceptance:** the score is explainable — hovering shows the four inputs; the survey never
   shows on the phone (ADR-069).
 
-### N-74 Promo and referral codes with attribution
+### N-74 Promo and referral codes with attribution `[baja]`
 
 - [ ] Status · **Trigger:** X-10 launch. **Blocked by:** N-64, N-01
 - **What:** codes are Stripe promotion codes created from the console (admin), each tagged with a

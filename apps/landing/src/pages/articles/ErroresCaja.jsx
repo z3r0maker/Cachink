@@ -1,4 +1,4 @@
-import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
+import { A, ArticleCta, ArticleHeader, H2, P, RelatedGuides, articleSchema } from './shared.jsx';
 
 const schema = articleSchema('errores-caja');
 
@@ -7,31 +7,36 @@ const errores = [
     n: '01',
     t: 'No registrar las ventas en el momento',
     d: 'El error más común: "lo anoto después". El problema es que "después" llega cuando ya se mezclaron tres ventas, un egreso y una vuelta de cambio incorrecta. El registro tiene que ser en el momento de la transacción, aunque sea de 10 pesos.',
-    fix: 'Solución: un formulario de 3 campos en el teléfono que ya tienes en la mano. Si tardas más de 5 segundos en abrir la app y registrar, la app está mal diseñada.',
+    q: '¿Cómo registrar las ventas del día sin que se te pase ninguna?',
+    fix: 'Un formulario de 3 campos en el teléfono que ya tienes en la mano. Si tardas más de 5 segundos en abrir la app y registrar, la app está mal diseñada.',
   },
   {
     n: '02',
     t: 'No separar el dinero del negocio del dinero personal',
     d: 'Sacas $200 de la caja para comprar una torta y no lo registras como egreso. Al final del día no cuadra el efectivo y no sabes por qué. Con el tiempo, este hábito hace imposible saber si el negocio es rentable, porque parte del dinero "se fue" sin registro.',
-    fix: 'Solución: todo lo que sale de la caja es un egreso, aunque sea para gastos personales. Crea una categoría "Retiro del dueño" y regístralo siempre.',
+    q: '¿Cómo separar el dinero del negocio del dinero personal?',
+    fix: 'Todo lo que sale de la caja es un egreso, aunque sea para gastos personales. Crea una categoría "Retiro del dueño" y regístralo siempre.',
   },
   {
     n: '03',
     t: 'No registrar las ventas a crédito o "fiado"',
     d: 'El fiado existe. En muchos negocios de barrio es parte del modelo. El problema es cuando no queda registro de quién debe cuánto. Al final del mes hay dinero "en el aire" que apareció como venta pero nunca llegó a la caja.',
-    fix: 'Solución: registra la venta como ingreso en el momento que ocurre, marcándola como "pendiente de cobro". Cuando el cliente pague, registras el cobro. Así siempre sabes cuánto te deben y quién.',
+    q: '¿Cómo llevar el control de lo que fías?',
+    fix: 'Registra la venta como ingreso en el momento que ocurre, marcándola como "pendiente de cobro". Cuando el cliente pague, registras el cobro. Así siempre sabes cuánto te deben y quién.',
   },
   {
     n: '04',
     t: 'No hacer el corte de caja diario',
     d: 'Si no cuentas el efectivo físico y lo comparas con lo que dice tu sistema, los errores se acumulan. Un billete mal contado hoy son $500 de diferencia inexplicable en un mes. El corte diario es la herramienta más simple para detectar problemas antes de que crezcan.',
-    fix: 'Solución: al cerrar el día, cuenta el efectivo físico e ingrésalo en la app. Si hay diferencia, se detecta hoy, no en la reunión con el contador a fin de mes.',
+    q: '¿Cómo hacer el corte de caja diario?',
+    fix: 'Al cerrar el día, cuenta el efectivo físico e ingrésalo en la app. Si hay diferencia, se detecta hoy, no en la reunión con el contador a fin de mes.',
   },
   {
     n: '05',
     t: 'Mezclar métodos de pago en un solo registro',
     d: 'Una venta de $800 donde el cliente pagó $500 en efectivo y $300 con transferencia se registra como "$800 efectivo". Al final del día el efectivo físico no cuadra y no hay manera de saber por qué.',
-    fix: 'Solución: registra cada método de pago por separado, o usa un formulario que permita pagos mixtos. Así el desglose por método de pago es preciso y puedes conciliar con tu estado de cuenta bancario.',
+    q: '¿Cómo registrar una venta pagada en efectivo y transferencia?',
+    fix: 'Registra cada método de pago por separado, o usa un formulario que permita pagos mixtos. Así el desglose por método de pago es preciso y puedes conciliar con tu estado de cuenta bancario.',
   },
 ];
 
@@ -76,7 +81,7 @@ export default function ErroresCaja() {
             display: 'flex',
             flexDirection: 'column',
             gap: 24,
-            margin: '0 0 40px',
+            margin: 0,
           }}
         >
           {errores.map((e, i) => (
@@ -109,11 +114,17 @@ export default function ErroresCaja() {
                 >
                   {e.n}
                 </span>
-                <span
-                  style={{ fontSize: 18, fontWeight: 900, color: 'var(--white)', lineHeight: 1.2 }}
+                <h2
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: 'var(--white)',
+                    lineHeight: 1.2,
+                    margin: 0,
+                  }}
                 >
                   {e.t}
-                </span>
+                </h2>
               </div>
               <div style={{ padding: '20px 24px', background: 'var(--white)' }}>
                 <p
@@ -139,6 +150,7 @@ export default function ErroresCaja() {
                     lineHeight: 1.5,
                   }}
                 >
+                  <h3 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 4px' }}>{e.q}</h3>
                   {e.fix}
                 </div>
               </div>
@@ -146,38 +158,18 @@ export default function ErroresCaja() {
           ))}
         </ol>
 
-        <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
-          La raíz de todos los errores
-        </h2>
-        <p
-          style={{
-            fontSize: 16,
-            lineHeight: 1.7,
-            margin: '0 0 16px',
-            color: 'var(--ink)',
-            fontWeight: 500,
-          }}
-        >
-          Todos estos errores tienen algo en común: ocurren cuando el sistema de registro es más
-          incómodo que no registrar. Si abrir la hoja de Excel tarda 30 segundos y registrar tarda
-          otros 2 minutos, el cerebro encuentra razones para no hacerlo.
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            lineHeight: 1.7,
-            margin: '0 0 32px',
-            color: 'var(--ink)',
-            fontWeight: 500,
-          }}
-        >
+        <H2>¿Por qué no me cuadra la caja?</H2>
+        <P>
+          Casi siempre por alguno de estos cinco errores, y los cinco tienen la misma raíz: ocurren
+          cuando el sistema de registro es más incómodo que no registrar. Si abrir la hoja de Excel
+          tarda 30 segundos y registrar tarda otros 2 minutos, el cerebro encuentra razones para no
+          hacerlo.
+        </P>
+        <P>
           La solución no es más disciplina: es un sistema que haga el registro tan rápido que sea
           más fácil hacerlo que no hacerlo. Menos de 5 segundos por venta es el objetivo, con el{' '}
-          <a href="/#portal" style={{ color: 'var(--black)' }}>
-            corte de turno y el fiado
-          </a>{' '}
-          ya resueltos.
-        </p>
+          <A href="/#portal">corte de turno y el fiado</A> ya resueltos.
+        </P>
 
         <RelatedGuides slug="errores-caja" />
         <ArticleCta

@@ -4,7 +4,12 @@
  * domain's derived saldo, and the abono write through the real use case.
  */
 
-import { estadoDeCuenta } from '@xangarro/domain';
+import {
+  capturoDe,
+  cuentaPara,
+  totalDeLineas,
+  type ClienteCuentaFila,
+} from '@xangarro/caja/lectura';
 import { RegistrarPagoClienteUseCase } from '@xangarro/application';
 import {
   DrizzleClientPaymentsRepository,
@@ -35,16 +40,9 @@ export async function cuentasDelNegocio(
   return Promise.all(rows.map((c) => cuentaDe(c, repos)));
 }
 
-/** One client's account: fiado history, abonos, and the derived saldo. */
+/** One client's account: its rows, assembled by `@xangarro/caja`'s `cuentaPara`. */
 async function cuentaDe(
-  c: {
-    id: string;
-    nombre: string;
-    telefono: string | null;
-    createdAt: string;
-    limiteCentavos: bigint | null;
-    plazoDias: number | null;
-  },
+  c: ClienteCuentaFila,
   repos: {
     tickets: DrizzleTicketsRepository;
     sales: DrizzleSalesRepository;
@@ -55,75 +53,24 @@ async function cuentaDe(
   const ventas = await repos.tickets.findCreditoByClient(c.id as never);
   const abonos = await repos.payments.findByCliente(c.id as never);
   const montos = new Map(
-    await Promise.all(ventas.map(async (t) => [t.id, await totalDe(repos.sales, t.id)] as const)),
+    await Promise.all(
+      ventas.map(
+        async (t) => [t.id, totalDeLineas(await repos.sales.findByTicket(t.id as never))] as const,
+      ),
+    ),
   );
-  const e = estadoDeCuenta(
-    ventas.map((t) => ({ id: t.id, fecha: t.fecha, monto: montos.get(t.id) ?? 0n })),
-    abonos.map((a) => ({ id: a.id, fecha: a.fecha, monto: a.montoCentavos })),
+  const capturos = new Map(
+    await Promise.all(
+      ventas.map(async (t) => [t.id, await capturo(repos.users, t.createdByUserId)] as const),
+    ),
   );
-  return {
-    id: c.id,
-    nombre: c.nombre,
-    telefono: c.telefono,
-    creado: c.createdAt,
-    limiteCentavos: c.limiteCentavos?.toString() ?? null,
-    plazoDias: c.plazoDias,
-    saldoCentavos: e.saldo.toString(),
-    ventas: await ventasDe(ventas, montos, repos.users),
-    abonos: abonos.map(comoAbono),
-  };
-}
-
-async function ventasDe(
-  ventas: readonly {
-    id: string;
-    folio: number;
-    concepto: string;
-    fecha: string;
-    hora: string | null;
-    createdByUserId: string | null;
-  }[],
-  montos: ReadonlyMap<string, bigint>,
-  users: DrizzleUsersRepository,
-): Promise<CuentaPara['ventas']> {
-  return Promise.all(
-    ventas.map(async (t) => ({
-      folio: t.folio,
-      concepto: t.concepto,
-      fecha: `${t.fecha}T${t.hora ?? '00:00'}`,
-      montoCentavos: (montos.get(t.id) ?? 0n).toString(),
-      capturo: await capturo(users, t.createdByUserId),
-    })),
-  );
-}
-
-function comoAbono(a: {
-  id: string;
-  fecha: string;
-  montoCentavos: bigint;
-  metodo: string;
-  nota: string | null;
-}): CuentaPara['abonos'][number] {
-  return {
-    id: a.id,
-    fecha: a.fecha,
-    montoCentavos: a.montoCentavos.toString(),
-    metodo: a.metodo,
-    nota: a.nota,
-  };
-}
-
-/** A ticket's amount is what its lines say; the header carries no total. */
-async function totalDe(sales: DrizzleSalesRepository, ticketId: string): Promise<bigint> {
-  const lineas = await sales.findByTicket(ticketId as never);
-  return lineas.reduce((acc, l) => acc + (l.monto as bigint), 0n);
+  return cuentaPara({ cliente: c, ventas, montos, abonos, capturos });
 }
 
 /** «Ana Robledo · Caja 1» — who captured the ticket. */
 async function capturo(users: DrizzleUsersRepository, userId: string | null): Promise<string> {
-  if (userId === null) return 'Caja 1';
-  const nombre = (await users.findById(userId as never))?.nombre ?? 'Caja 1';
-  return `${nombre} · Caja 1`;
+  if (userId === null) return capturoDe(null, null);
+  return capturoDe(userId, (await users.findById(userId as never))?.nombre);
 }
 
 /** Record an abono through the use case — whole, oldest-first is derived (D5). */

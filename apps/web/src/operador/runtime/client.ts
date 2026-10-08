@@ -9,7 +9,7 @@
 
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { Bootstrap } from '@xangarro/contracts';
-import type { SyncCounts, SyncRunResult } from '@xangarro/sync';
+import type { SnapshotProgress, SyncCounts, SyncRunResult } from '@xangarro/sync';
 
 import type {
   BootInfo,
@@ -105,6 +105,11 @@ export class RegisterRuntime {
 
   counts(): Promise<RuntimeCounts> {
     return this.#call<RuntimeCounts>({ method: 'counts' });
+  }
+
+  /** DS-10: where linking's snapshot stands («3 de 7»); null when none is open. */
+  progresoSnapshot(): Promise<SnapshotProgress | null> {
+    return this.#call<SnapshotProgress | null>({ method: 'progresoSnapshot' });
   }
 
   /** O-12 · Vincular: the activation bootstrap becomes the local database. */

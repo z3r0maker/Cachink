@@ -40,22 +40,26 @@ function Ficha({ label, value }: { readonly label: string; readonly value: strin
 }
 
 /**
- * The lines of the same ticket, read with the page (`lineasDeTickets`) rather
- * than picked from the table: the table holds ten rows, a ticket may not.
+ * The whole ticket (DS-01), read with the page (`lineasDeTickets`) rather
+ * than picked from the table: the table holds ten rows and the search may
+ * have left lines out, but the ticket is what the customer paid for.
  */
 function Renglones({ row, rows }: { readonly row: Row; readonly rows: readonly Linea[] }) {
   if (row.ticketId === null) return null;
-  const hermanas = rows.filter((r) => r.ticketId === row.ticketId);
-  if (hermanas.length < 2) return null;
+  const ticket = rows.filter((r) => r.ticketId === row.ticketId);
+  const lineas = ticket.length === 0 ? [row] : ticket;
   return (
     <section>
       <h3 className={s.detalleLinea}>Lo que llevó</h3>
-      {hermanas.map((r) => (
+      {lineas.map((r) => (
         <div key={r.id} className={s.renglon}>
           <span>{r.concepto}</span>
           <span>{formatMoney(r.amount)}</span>
         </div>
       ))}
+      <p className={s.notaTicket}>
+        Es el ticket completo: incluye las líneas que tu búsqueda dejó fuera.
+      </p>
     </section>
   );
 }

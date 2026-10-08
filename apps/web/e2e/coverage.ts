@@ -24,6 +24,9 @@ type PageCoverage = readonly { url: string; source?: string; functions: readonly
 
 /** Workers add concurrently; MCR keeps each call in its cache until `generate`. */
 export async function addPageCoverage(coverage: PageCoverage): Promise<void> {
+  // A test whose page ran no app chunk (the API-only sync specs) hands over an
+  // empty list; MCR reads that as invalid data and cries wolf, hiding a real one.
+  if (coverage.length === 0) return;
   await MCR(e2eOptions()).add(coverage);
 }
 

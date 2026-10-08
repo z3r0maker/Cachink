@@ -12,6 +12,12 @@ export interface RegistroEnCola {
   /** Always positive; a gasto shows with «−». Null when the record carries no money. */
   readonly monto: Money | null;
   readonly hora: string;
+  /** Tried at least once and retrying by itself (DS-07). */
+  readonly reintento?: boolean;
+  /** When one of its rows was last sent (ISO); null or absent if never. */
+  readonly ultimoIntento?: string | null;
+  /** When one of its rows goes again by itself (ISO). */
+  readonly proximoIntento?: string | null;
 }
 
 export interface PendientesScreenProps {

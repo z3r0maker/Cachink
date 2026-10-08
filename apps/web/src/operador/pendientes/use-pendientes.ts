@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useCola } from '../shell/cola';
+import { useAhora } from '../shell/use-ahora';
 import { fase, type EnvioVivo, type RegistroEnCola } from '@xangarro/caja/pendientes';
 
 /** Opening the screen online with something queued sends it, once. */
@@ -18,15 +19,20 @@ function useEnvioAlAbrir(vivo: EnvioVivo | undefined, hay: boolean, enviar: () =
 /**
  * The queue as the screen shows it. Unlinked: the design's queue, empty once
  * the shell's fixture send went through. Linked: the outbox as last read,
- * «enviando» while the real flush runs (this screen's or anyone's).
+ * «enviando» while the real flush runs (this screen's or anyone's), and
+ * «reintentando» while the engine waits on a busy or slow server (DS-05).
  */
 export function usePendientes(inicial: readonly RegistroEnCola[], vivo?: EnvioVivo) {
   const shell = useCola();
   const [propio, setPropio] = useState(false);
+  const [intentado, setIntentado] = useState(false);
   const cola = vivo || shell.pendientes !== 0 ? inicial : [];
   const [enCola, setEnCola] = useState(cola.length);
+  const ahora = useAhora(shell.reintento !== null && cola.length > 0);
+  const reintento = shell.reintento !== null && shell.reintento.en > ahora ? shell.reintento : null;
   const reintentar = () => {
     setEnCola(cola.length);
+    setIntentado(true);
     if (vivo === undefined) {
       shell.enviar();
       return;
@@ -36,12 +42,16 @@ export function usePendientes(inicial: readonly RegistroEnCola[], vivo?: EnvioVi
     void vivo.enviar().finally(() => setPropio(false));
   };
   useEnvioAlAbrir(vivo, cola.length > 0, reintentar);
-  const f = fase(cola, shell.enviando || propio);
+  const f = fase(cola, shell.enviando || propio, reintento?.causa != null);
   return {
     cola,
     enCola: f === 'enviando' && propio ? enCola : cola.length,
     fase: f,
     offline: shell.connection === 'sin-conexion',
+    reintento,
+    ahora,
+    /** A person pressed «Reintentar envío» and the engine still waits. */
+    intentado: intentado && f === 'reintentando',
     reintentar,
   };
 }

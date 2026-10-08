@@ -63,6 +63,10 @@ export type PendienteCrudo = (
 ) & {
   /** Tried at least once and retrying by itself (DS-06's «M se reintentarán solos»). */
   readonly reintento?: boolean;
+  /** DS-07 «Último intento»: the latest time any of its rows was sent (ISO). */
+  readonly ultimoIntento?: string | null;
+  /** DS-07 «Próximo»: the earliest time any of its rows goes again by itself (ISO). */
+  readonly proximoIntento?: string | null;
 };
 
 /** An owner message addressed to this caja's operator (`mensajes_operador`). */

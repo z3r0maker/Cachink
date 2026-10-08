@@ -54,7 +54,7 @@
 - **Steps:** "Crear cuenta gratis" → `/signup?plan=freelancer`; "Empezar ahora" → `/signup?plan=emprendedor`; "Probar 14 días gratis" → `/signup?plan=mipyme_pro`; hero CTA → emprendedor. UTM params passed through. No checkout on the landing.
 - **Acceptance:** clicking each lands on the portal with the plan preselected (manual + a link-check script).
 
-### L-04 Domain + DNS + email domain
+### L-04 Domain + DNS + email domain `[critica]` `[bloq]`
 
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
       **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
@@ -83,10 +83,10 @@
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
-### L-05 Store badges + legal pages
+### L-05 Store badges + legal pages `[tiendas]` `[alta]`
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
-      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs.
+      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); **Re-verified 2026-09-28:** the términos route _does_ exist — `/terminos/` is in `routes.js`, wired in `AppSSR.jsx` and `main.jsx`, and prerendered from `docs/legal/aviso/terminos-borrador.md`. What is still missing is the content, not the route: the published draft mentions neither the 7-day grace nor the downgrade, and `docs/legal/terms.md` is the pre-rebrand file the aviso work (O-17) is meant to retire. The store badges still wait for X-05's real URLs.
 
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
@@ -168,3 +168,48 @@
 - **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.
+
+### L-08 SEO checklist review — headings as queries, Lighthouse in CI
+
+- [x] Status · **Blocked by:** —
+  - Done: 2026-09-27 · from a review against a 17-point SEO/GEO checklist (14 already covered by
+    L-06/L-07; Search Console has the sitemap; Cloudflare stays DNS only, so its AI-crawler blocking
+    and managed robots.txt never apply). **Headings as search queries:** errores-caja gives each
+    error its own `h2` and each fix a question `h3` («¿Cómo hacer el corte de caja diario?»), and
+    closes on «¿Por qué no me cuadra la caja?»; vs-excel opens with a direct answer under
+    «¿Excel o una app de caja: cuál conviene a un negocio pequeño?» and gains «¿Y Google Sheets?»,
+    «¿Cómo pasar de Excel a una app de caja sin perder tus datos?» (the portal's .xlsx/.csv import,
+    «Hazlo por mí», export on every plan) and «¿Tu contador puede seguir usando Excel?» (~580 → ~890
+    words); its offline row no longer claims Sheets cannot work offline. The guides' `H2`/`P`/`A`
+    live once in `pages/articles/shared.jsx`. **Lighthouse:** `scripts/lighthouse.mjs` runs
+    `@lhci/cli` over every indexable route (read from `src/routes.js`, like the sitemap); SEO and
+    best practices must be 1, accessibility ≥ 0.98, performance warns under 0.9; CI job
+    `landing-lighthouse` uploads the reports. First run: SEO 1 · BP 1 · a11y ≥ 0.99 · perf ≥ 0.92 on
+    all ten pages.
+
+### L-09 Comparison and alternatives pages against named competitors `[baja]`
+
+- [ ] Status · **Blocked by:** owner — the competitor list and the facts about each that we are
+      willing to publish
+- **Context:** `/recursos/vs-excel/` is the only comparison page. Buyers search «alternativa a
+  Eleventa», «Xangarro vs Loyverse», «Kyte o …», «Clip punto de venta»; AI answer engines quote
+  pages that compare named products criterion by criterion.
+- **Steps:** owner picks 3–5 competitors and supplies (or approves) each fact: price, platforms,
+  offline, NIF statements, inventory, fiado, export. One page per competitor at
+  `/recursos/vs-<slug>/` built like vs-excel (direct answer first, table, «¿Cuándo conviene
+  <competidor>?» with what they do better), plus an `/recursos/alternativas/` hub; each is an
+  entry in `src/routes.js` and `src/articles.js`, with its OG card (`pnpm og`). Every claim about a
+  competitor carries a dated source link; nothing unverified.
+- **Acceptance:** each page in the sitemap and `llms.txt`; the Lighthouse job green; no competitor
+  claim without a source.
+
+### L-10 Off-site presence: Reddit and YouTube `[baja]`
+
+- [ ] Status · **Blocked by:** owner — accounts and time
+- **Context:** Google and the AI answer engines weigh real mentions on Reddit and YouTube above
+  generic backlinks; the site links only Instagram and Facebook (`landing/social.js`).
+- **Steps:** a YouTube channel with a short Don Cuentas demo and one video per guide; genuine
+  answers in Mexican small-business communities (r/mexico, r/MexicoFinanciero, emprendedor
+  groups) that link a guide only when it answers the question. When the channel exists, add it to
+  `landing/social.js` so it reaches the Organization's `sameAs` and `llms-full.txt`.
+- **Acceptance:** the channel is in `sameAs`; at least one video embedded on the guide it covers.

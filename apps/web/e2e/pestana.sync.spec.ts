@@ -33,8 +33,12 @@ test('a second tab of the caja waits instead of opening the register', async ({
   const otra = await context.newPage();
   await otra.goto('/operador/caja');
   const aviso = otra.getByTestId('otra-pestana');
-  await expect(aviso).toContainText('La caja ya está abierta en otra pestaña.');
+  await expect(
+    otra.getByRole('heading', { name: 'La caja ya está abierta en otra pestaña.' }),
+  ).toBeVisible();
   await expect(aviso).toContainText('Para no perder ventas, usa una sola pestaña.');
+  // DS-08 (EsCajaPestana): no «Cerrar esta pestaña», a script cannot close it.
+  await expect(otra.getByText('Cerrar esta pestaña')).toHaveCount(0);
   await expect(otra.getByRole('heading', { name: 'Cobrar', exact: true })).toHaveCount(0);
 
   // The first tab keeps selling, offline: the sales live only in its database.
@@ -46,8 +50,17 @@ test('a second tab of the caja waits instead of opening the register', async ({
     await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
   }
 
-  // «Usar esta pestaña» waits for the lock; closing the first tab hands it over.
-  await otra.getByTestId('usar-esta-pestana').click();
+  // «Usar esta pestaña» waits for the lock; while the first tab stays open the
+  // screen says so, the claim still queued; closing the first tab hands it over.
+  const usar = otra.getByTestId('usar-esta-pestana');
+  await usar.click();
+  await expect(otra.getByRole('status').filter({ hasText: 'Esperando' })).toBeVisible();
+  await expect(usar).toHaveAttribute('aria-busy', 'true');
+  await expect(
+    otra.getByText('La otra pestaña sigue abierta. Ciérrala y vuelve a intentar.'),
+  ).toBeVisible({ timeout: 10_000 });
+  await expect(usar).toBeEnabled();
+  await usar.click();
   await expect(otra.getByRole('status').filter({ hasText: 'Esperando' })).toBeVisible();
   await page.close();
   await expect(otra.getByTestId('otra-pestana')).toHaveCount(0, { timeout: 30_000 });

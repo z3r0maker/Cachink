@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react';
 import { activar, limpiarCodigo, type Vinculo } from './activar';
 import * as a from './acceso.css';
 import { Continuar } from './boton';
+import { DescargaProgreso, type Descarga } from './descarga';
 import * as b from './boton.css';
 import { Marco } from './marco';
 import { Pasos } from './vincular-campos';
@@ -41,20 +42,32 @@ function Acciones(p: {
   readonly listo: boolean;
   readonly enviando: boolean;
   readonly falta: string;
+  readonly descarga: Descarga | null;
   readonly onConectar: () => void;
+  readonly onReintentar: () => void;
 }): ReactNode {
+  const interrumpida = p.descarga?.fase === 'interrumpida';
+  const ocupado = p.enviando || p.descarga?.fase === 'descargando';
+  const describedBy = p.descarga ? 'dl-l' : p.listo ? undefined : 'vincular-falta';
   return (
     <div className={v.acciones}>
-      <Continuar
-        listo={p.listo}
-        ocupado={p.enviando}
-        testId="vincular-continuar"
-        describedBy={p.listo ? undefined : 'vincular-falta'}
-        onClick={p.onConectar}
-      >
-        {p.enviando ? 'Conectando…' : 'Conectar esta caja'}
-      </Continuar>
-      {p.listo ? null : (
+      {interrumpida ? (
+        <Continuar listo testId="vincular-reintentar" onClick={p.onReintentar}>
+          Reintentar
+        </Continuar>
+      ) : (
+        <Continuar
+          listo={p.listo}
+          ocupado={ocupado}
+          testId="vincular-continuar"
+          describedBy={describedBy}
+          onClick={p.onConectar}
+        >
+          {ocupado ? 'Conectando…' : 'Conectar esta caja'}
+        </Continuar>
+      )}
+      {p.descarga ? <DescargaProgreso descarga={p.descarga} /> : null}
+      {p.listo || p.descarga ? null : (
         <span id="vincular-falta" className={b.falta}>
           {p.falta}
         </span>
@@ -97,6 +110,9 @@ function useVincular(onVinculado: (r: Vinculo) => void | Promise<void>) {
 
 export function Vincular(p: {
   readonly onVinculado: (r: Vinculo) => void | Promise<void>;
+  /** DS-10: the snapshot's download once the code was accepted; null before. */
+  readonly descarga?: Descarga | null;
+  readonly onReintentar?: () => void;
   readonly pie?: ReactNode;
 }) {
   const s = useVincular(p.onVinculado);
@@ -122,7 +138,9 @@ export function Vincular(p: {
         listo={s.listo}
         enviando={s.enviando}
         falta={falta(s.correoOk, s.codigo.length)}
+        descarga={p.descarga ?? null}
         onConectar={() => void s.vincular()}
+        onReintentar={() => p.onReintentar?.()}
       />
       {p.pie}
     </Marco>

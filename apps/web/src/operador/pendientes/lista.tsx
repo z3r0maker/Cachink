@@ -5,7 +5,15 @@ import { colors } from '@xangarro/tokens';
 import { OPERADOR_BASE } from '@xangarro/caja';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
-import { estadoFila, type Fase, type RegistroEnCola } from '@xangarro/caja/pendientes';
+import type { Reintento } from '@xangarro/caja';
+import {
+  estadoFila,
+  lineaIntento,
+  type EstadoFila,
+  type Fase,
+  type RegistroEnCola,
+} from '@xangarro/caja/pendientes';
+import * as i from './intentos.css';
 import * as s from './pendientes.css';
 
 const RECIBO =
@@ -28,13 +36,21 @@ export function ListaCola(props: {
   readonly offline: boolean;
   /** «el portal de Pedro», or «el portal del dueño» on a linked caja. */
   readonly portal?: string;
+  /** The clock and the engine's retry, for each row's last and next attempt (DS-07). */
+  readonly ahora?: number;
+  readonly reintento?: Reintento | null;
 }) {
-  const estado = estadoFila(props.fase, props.offline);
+  const ahora = props.ahora ?? Date.now();
   const orden = props.cola.length ? <span className={s.orden}>Se envían en este orden</span> : null;
   return (
     <Panel label="La cola" count={props.cola.length} action={orden}>
       {props.cola.map((r) => (
-        <Fila key={r.id} r={r} estado={estado} />
+        <Fila
+          key={r.id}
+          r={r}
+          estado={estadoFila(props.fase, props.offline, r)}
+          linea={lineaIntento(r, ahora, props.reintento ?? null)}
+        />
       ))}
       {props.cola.length === 0 ? (
         <NadaPendiente portal={props.portal ?? 'el portal de Pedro'} />
@@ -43,29 +59,34 @@ export function ListaCola(props: {
   );
 }
 
+const CHIP: Readonly<Record<EstadoFila, { color: string; bg: string; dot: string }>> = {
+  Enviando: { color: colors.blueText, bg: colors.blueSoft, dot: colors.blueText },
+  'En reintento': { color: colors.warningText, bg: colors.warningSoft, dot: colors.warning },
+  'Esperando conexión': { color: colors.warningText, bg: colors.warningSoft, dot: colors.warning },
+  'En cola': { color: colors.warningText, bg: colors.warningSoft, dot: colors.warning },
+};
+
 function Fila({
   r,
   estado,
+  linea,
 }: {
   readonly r: RegistroEnCola;
-  readonly estado: ReturnType<typeof estadoFila>;
+  readonly estado: EstadoFila;
+  /** DS-07's gray line; null for a row never tried. */
+  readonly linea: string | null;
 }) {
   const t = TIPO[r.tipo];
-  const enviando = estado === 'Enviando';
-  const chipColor = enviando ? colors.blueText : colors.warningText;
+  const c = CHIP[estado];
   return (
     <div className={s.fila}>
       <Tile icon={t.icon} tint={t.tint} size={48} glyph={22} />
       <span className={s.filaText}>
         <span className={s.filaTitulo}>{r.titulo}</span>
         <span className={s.filaDetalle}>{r.detalle}</span>
+        {linea === null ? null : <span className={i.linea}>{linea}</span>}
       </span>
-      <Chip
-        label={estado}
-        color={chipColor}
-        bg={enviando ? colors.blueSoft : colors.warningSoft}
-        dot={enviando ? colors.blueText : colors.warning}
-      />
+      <Chip label={estado} color={c.color} bg={c.bg} dot={c.dot} />
       <span className={s.hora}>{r.hora}</span>
       <span className={s.monto} style={{ color: t.color }}>
         {r.monto === null ? '' : `${t.signo}${formatMoney(r.monto)}`}

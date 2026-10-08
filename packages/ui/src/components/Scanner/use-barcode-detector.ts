@@ -13,7 +13,7 @@
  * manual entry.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type ScannerStatus = 'unavailable' | 'initializing' | 'scanning' | 'denied';
 
@@ -107,14 +107,19 @@ interface DetectorRefs {
   readonly cancelledRef: React.MutableRefObject<boolean>;
 }
 
+/** The refs themselves are stable; the container must be too, or the effect
+ * below restarts the camera on every render (same fault as the formats
+ * default). */
 function useDetectorRefs(): DetectorRefs {
-  return {
-    videoElRef: useRef<HTMLVideoElement | null>(null),
-    streamRef: useRef<MediaStream | null>(null),
-    loopRef: useRef<number | null>(null),
-    lastCodeRef: useRef<string | null>(null),
-    cancelledRef: useRef(false),
-  };
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const loopRef = useRef<number | null>(null);
+  const lastCodeRef = useRef<string | null>(null);
+  const cancelledRef = useRef(false);
+  return useMemo(
+    () => ({ videoElRef, streamRef, loopRef, lastCodeRef, cancelledRef }),
+    [videoElRef, streamRef, loopRef, lastCodeRef, cancelledRef],
+  );
 }
 
 async function runDetectorLifecycle(
@@ -154,10 +159,15 @@ function useStopCallback(refs: DetectorRefs): () => void {
   }, [refs]);
 }
 
+/** A stable default: a per-render array literal would churn the effect's
+ * deps below and restart the camera on every render — the detect loop never
+ * survived its own first status change. */
+const FORMATOS_POR_OMISION: readonly string[] = ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a'];
+
 export function useBarcodeDetector(
   open: boolean,
   onScan: (code: string) => void,
-  formats: readonly string[] = ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a'],
+  formats: readonly string[] = FORMATOS_POR_OMISION,
 ): UseBarcodeDetector {
   const [status, setStatus] = useState<ScannerStatus>(
     isBarcodeDetectorAvailable() ? 'initializing' : 'unavailable',

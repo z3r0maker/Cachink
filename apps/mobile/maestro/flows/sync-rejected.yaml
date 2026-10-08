@@ -1,6 +1,7 @@
-# "No enviados" (A-08): a sale the server refuses stays on the device, the
-# pill reports it, and the screen shows the reason and the hint. Once the
-# portal restores the product, "Reintentar" gets the sale accepted.
+# Refused records (A-08) on Registros por enviar (Track M, M-09): a sale the
+# server refuses stays on the device, the pill reports it and opens the
+# screen, which lists it under «No se pudieron enviar» with the reason and the
+# hint. Once the portal restores the product, "Reintentar" gets it accepted.
 #
 # Precondition: device activated against the mock on MOCK_API (activation.yaml).
 # The mock forgets "Agua de horchata" (as if purged in the portal), so the
@@ -41,7 +42,7 @@ env:
     timeout: 10000
 - assertVisible: '.*Agua de horchata.*'
 - assertVisible: 'El producto de este registro ya no existe en el portal.'
-- assertVisible: '.*regístrala con otro producto.*'
+- assertVisible: '.*Regístrala con otro producto.*'
 - runScript:
     file: shared/mock-row.js
     env:
@@ -49,10 +50,12 @@ env:
       TABLE: products
       ROW_ID: 01JPRD00000000000000000007
 - tapOn:
-    id: 'no-enviados-retry-all'
+    id: 'no-enviados-retry-all|no-enviado-retry-.*'
 - extendedWaitUntil:
     visible:
-      id: 'no-enviados-empty'
+      id: 'pendientes-heroe-enviado'
     timeout: 30000
+- assertNotVisible:
+    id: 'no-enviados-screen'
 - assertVisible:
     id: 'cloud-sync-pill-synced'

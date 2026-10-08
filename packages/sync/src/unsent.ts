@@ -18,6 +18,7 @@
 import { and, eq, or } from 'drizzle-orm';
 import { DrizzleAppConfigRepository, syncRowStatus, type XangarroDatabase } from '@xangarro/data';
 import { coalesce, readChangeSlice } from './outbox-reader.js';
+import { STALE_PENDING_MS } from './status-store.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 import { rowKey } from './table-map.js';
 
@@ -26,14 +27,31 @@ export interface UnsentRow {
   readonly rowId: string;
   /** Attempted at least once and on its way again by itself. */
   readonly retrying: boolean;
+  /** When the device last sent it (ISO); null if never (DS-07). */
+  readonly lastAttemptAt: string | null;
+  /**
+   * When it goes again by itself (ISO): a retryable rejection's backoff, or
+   * for a row still `pending` the stale sweep ten minutes after it was sent.
+   * Null if never sent. The engine's own wait (`retryAt`) can push it later.
+   */
+  readonly nextAttemptAt: string | null;
 }
+
+const masTarde = (iso: string | null, ms: number): string | null =>
+  iso === null ? null : new Date(Date.parse(iso) + ms).toISOString();
 
 /** A device never holds this many unsent changes; the pusher sends 10 batches a run. */
 export const UNSENT_SCAN_LIMIT = 5000;
 
 async function attempted(db: XangarroDatabase, limit: number): Promise<readonly UnsentRow[]> {
   const rows = await db
-    .select({ tableName: syncRowStatus.tableName, rowId: syncRowStatus.rowId })
+    .select({
+      tableName: syncRowStatus.tableName,
+      rowId: syncRowStatus.rowId,
+      status: syncRowStatus.status,
+      lastAttemptAt: syncRowStatus.lastAttemptAt,
+      retryAfter: syncRowStatus.retryAfter,
+    })
     .from(syncRowStatus)
     .where(
       or(
@@ -43,7 +61,14 @@ async function attempted(db: XangarroDatabase, limit: number): Promise<readonly 
     )
     .limit(limit)
     .all();
-  return rows.map((r) => ({ ...r, retrying: true }));
+  return rows.map((r) => ({
+    tableName: r.tableName,
+    rowId: r.rowId,
+    retrying: true,
+    lastAttemptAt: r.lastAttemptAt ?? null,
+    nextAttemptAt:
+      r.status === 'pending' ? masTarde(r.lastAttemptAt, STALE_PENDING_MS) : (r.retryAfter ?? null),
+  }));
 }
 
 /** Every unsent (table, row), retries first then the change log's order, each once. */
@@ -57,6 +82,8 @@ export async function unsentRows(
     tableName: c.tableName,
     rowId: c.rowId,
     retrying: false,
+    lastAttemptAt: null,
+    nextAttemptAt: null,
   }));
   const seen = new Set<string>();
   return [...(await attempted(db, limit)), ...fresh]

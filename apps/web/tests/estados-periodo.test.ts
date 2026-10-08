@@ -3,7 +3,7 @@ import { describe, it, vi } from 'vitest';
 import type { IsoDate } from '@xangarro/domain';
 
 import { periodoDe } from '../src/app/(portal)/estados/periodo';
-import { leerEstado } from '../src/app/(portal)/movimientos/url';
+import { leerEstado, urlDe } from '../src/app/(portal)/movimientos/url';
 
 /**
  * The portal's period parsing (DB3-EST-01, R3-14): Estados' custom range is
@@ -74,5 +74,15 @@ describe('Movimientos URL dates', () => {
     assert.equal(e.hasta, '');
     const ok = leerEstado({ rango: 'personalizado', desde: '2026-02-28', hasta: '2026-04-30' });
     assert.deepEqual([ok.desde, ok.hasta], ['2026-02-28', '2026-04-30']);
+  });
+
+  it('reads «Ir a fecha» only as a real day, and never writes it back (DS-01)', () => {
+    assert.equal(leerEstado({ ir: '2026-05-03' }).ir, '2026-05-03');
+    for (const ir of ['2026-02-30', '03/05/2026', '', undefined]) {
+      assert.equal(leerEstado({ ir }).ir, '', String(ir));
+    }
+    const e = leerEstado({ ir: '2026-05-03', pagina: '4', q: 'pan' });
+    assert.equal(urlDe({ ...e, ir: '' }), '/movimientos?q=pan&pagina=4');
+    assert.doesNotMatch(urlDe(e), /ir=/, 'the day is resolved server-side, not kept in links');
   });
 });

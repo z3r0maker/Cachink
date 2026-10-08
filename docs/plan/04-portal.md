@@ -182,7 +182,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   acceptable: fall back to CSS Modules, and add a task for a CSS-parsing value auditor — do not
   defer that discovery to Fase 5.
 
-### P-21 `pnpm design:compare` capture harness
+### P-21 `pnpm design:compare` capture harness `[deuda]` `[media]`
 
 - [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
   - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
@@ -248,7 +248,7 @@ including the press stamp.
   edits outside `theme.ts`; the contrast test runs from its new home; `pnpm lint:design` still
   reports `total: 0`; the emitted CSS contains every token in `colors`.
 
-### P-23 Primitives + Storybook inventory + visual-regression baselines
+### P-23 Primitives + Storybook inventory + visual-regression baselines `[deuda]` `[media]`
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
   - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
@@ -1164,7 +1164,7 @@ never invented text.
 - **Acceptance:** pace arithmetic unit-tested (1 happy + 3 unhappy); all seven states in Storybook;
   viewer sees no wizard.
 
-### P-28 Diagnóstico + estrategia — **«Próximamente» in production**
+### P-28 Diagnóstico + estrategia — **«Próximamente» in production** `[media]`
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
   - **Remaining (2026-09-23, verified against the code):** only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt.
@@ -1340,7 +1340,7 @@ never invented text.
 > experience this can give. Still to decide: where the per-business count lives (`usage_counters`
 > needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
-- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** — `[baja]`
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
   (Nuevo / Actualizar / Error) → commit. Structured output (`strict: true` or
   `output_config.format`) validating against the domain `Producto` schema — extracted rows are never
@@ -1348,7 +1348,7 @@ never invented text.
 - **Acceptance:** fixture photographs produce schema-valid rows; a photograph with no products
   produces the error state, not an empty commit; production renders «Próximamente».
 
-### P-30 Asesor generation runtime
+### P-30 Asesor generation runtime `[media]`
 
 - [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
   - **Remaining (2026-09-26):** the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
@@ -1621,7 +1621,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Portal coverage to 85% (unit + E2E merged, ADR-102)
+### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102) `[deuda]` `[alta]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
@@ -1673,6 +1673,80 @@ critical avisos cannot be switched off.
     coverage stopped being lost at each full navigation): lines 91.4%, statements 89.1%,
     functions 85.9%, branches 75.8%. Floor 90 / 88 / 84 / 74. Open: branches — mostly per-screen
     states (empty, error, viewer) no spec renders yet.
+  - 2026-09-26 · **Owner raised the target: 95 / 95 / 95, branches 85** (the ten-point spread
+    kept; ADR-102 amendment). Also this session: unit tests for states and refusals E2E cannot
+    reach — `server/metas.ts` 0 → 100% functions unit, `server/estados.ts` 0 → 81.8%,
+    `server/comprobante/datos.ts` 0 → 100% functions and branches — and two findings that block
+    a fresh merged measurement tonight: a warm `.next-e2e` build had been masking eight type
+    errors in an uncommitted `negocio/` redesign (a clean `next build` fails until it lands), and
+    a sandboxed shell exhausts its file table (ENFILE) mid-suite, losing the server's V8 flush —
+    full runs must be un-sandboxed. The floor stays 90 / 88 / 84 / 74 until a green full-suite
+    run re-measures and earns a `--raise`.
+  - 2026-09-27 · **Floor raised to 92.5 / 89.8 / 86.3 / 75.9** on the first green full-suite run
+    under the 95 goal (564 passed, every project to the end, server flush verified in the raw
+    data). The overnight Mostrador commits grew the app by ~540 functions; covered functions
+    grew with them. Still open toward 95 / 85: the gap is ~2.5 lines / ~5.2 statements / ~8.7
+    functions / ~9.1 branches. Two follow-ups found by the run: the repeated
+    `[MCR] … must be Array(V8) or Object(Istanbul)` warnings (worker-coverage entries MCR
+    rejects — may silently under-count, worth the next measurement pass), and the in-flight
+    `/como-empiezo` move (from 2026-09-27 00:30) breaks `onboarding.spec`'s tablet project —
+    it was set aside as a patch to take this measurement and restored after.
+  - 2026-09-27 (later) · **`/negocio/funciones` got its first spec** — `e2e/funciones.spec.ts`
+    (@serial, original `feature_flags` restored in an `afterAll` that runs on failure): the rows
+    render the tenant's real flags with the 2-de-7 count, a leaf switch saves through
+    `cambiarFuncion` and the write is asserted in Postgres, and turning Inventario off with merma
+    stored on asks first («Apagar las dos») and the cascade takes the dependent. Also: the
+    repeated `[MCR]` warnings were diagnosed — MCR reads an _empty_ array as invalid data, so
+    they fire on API-only tests that contribute nothing (log noise, not an under-count);
+    `addPageCoverage` now skips empty lists so a real rejection cannot hide among them.
+  - 2026-09-27 (evening) · **The como-empiezo blockage was a spec bug, and it is fixed.** The
+    tablet project runs at 768px, where the sidebar's «Primeros pasos» card is `wide` — hidden
+    under 1024px by design — and the spec's case-sensitive regex missed Inicio's «Ver mis
+    primeros pasos» link; the locator is now `/primeros pasos/i` (`.first()` takes the card
+    where both exist). With that, the in-flight de-gating work runs green **in** the tree — no
+    more setting it aside. Second raise of the day on a full green run (567 passed, every
+    project): after the first merge lines read 92.4 against the 92.5 floor (the de-gating had
+    removed more covered lines than it added), earned back with `tests/repo-clients.test.ts` —
+    the clients repository's not-found / no-row / optional-default branches, plus its sync-log
+    discipline. **Floor 92.6 / 90 / 86.5 / 76.2.** The real 95-worklist, from the merged
+    per-file gaps: `saldos-iniciales/lineas.tsx` (35 lines), `operador/caja/atajos.ts`
+    (33 lines, 51 branches), `server/billing/cfdi.ts`, `operador/cobranza/cliente/recordar.tsx`,
+    `repositories/clients.ts` ✦ done, `asesor/cierre.tsx`.
+  - 2026-09-27 (night) · **Third raise: 93 / 90.4 / 86.8 / 76.8** (unit half re-measured over
+    the same green E2E data — no rerun needed). `operador/caja/atajos.ts` — the register's
+    PC-keyboard layer, 51 dark branches — is now 100% functions / 96% branches via
+    `tests/operador/atajos.test.ts` (jsdom + React `act`; every root unmounted per test after a
+    leaked listener from a double mount was found owning the keyboard while the fresh one never
+    fired). `tests/cortes-exportar.test.ts` pins the CSV export: header, quote-aware cells,
+    the minus only a shortfall earns, empty-not-«undefined» motivo. Remaining from the
+    worklist: `saldos-iniciales/lineas.tsx` ✦ done, `server/billing/cfdi.ts`,
+    `cobranza/cliente/recordar.tsx`, `asesor/cierre.tsx`, `operador/caja/nuevo-partes.tsx`.
+  - 2026-09-27 (late) · **Fourth raise: 93.4 / 90.7 / 87.1 / 77.2, committed and pushed**
+    (`feat/movil-mostrador`, beside the de-gating and the coverage push). `saldos-iniciales/
+lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (jsdom): name
+    matching, line replacement, the unknown-cliente report and the no-nombre sheet. Enabler for
+    every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
+    under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
+    Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
+  - 2026-09-28 · **Main red on the gate since #32 — the floor outran CI, coverage never fell.**
+    Last green gate: `ec1a5995` (run 36375457279), 91.7 lines against the then-floor 90. The #32
+    merge brought the four local raises (92.5 → 93.4), and every CI run since measures the same
+    code at 92.7 / 89.9 / 85.6 / 76.6: per-file, CI's merged summary _rose_ from `ec1a5995` to
+    `faf0dc1a` on every file that moved (the phone merges and the `@xangarro/caja` move changed
+    nothing the portal counts). A CI-mode run locally (Node 22, `CI=1`, private Postgres) gives
+    CI's numbers to ±0.15; the raises came from non-CI local runs, and the extra is in their
+    E2E half (Node 26 vs 22 on the unit half is not it). **Rule from here: `--raise` only on
+    numbers a `portal-e2e` CI run printed.** Restored with tests, floor untouched: unit —
+    `cfdi-wiring` (the CFDI composition root: refund → charge → invoice lookup, the monthly
+    close), `cron-routes` (all four crons behind the real guard), `facturas-actions` (the
+    billing row answers only for its own business), `usage-live`, `import-plantillas` (a
+    downloaded template parses clean), `pestana` (the BroadcastChannel fallback); E2E — the
+    CxC lines by hand in `saldos-iniciales.spec` (rows asserted in Postgres, read back after a
+    reload) and `asesor-metas-cierre.sync.spec` (the missed-goal month-end dialog). That spec
+    found a bug: «Cambiar» in the dialog did nothing (`Metas` returned the dialog before
+    reading `editando`); fixed. Note: `asesor-metas.sync.spec`'s title promises the lograda
+    dialog, but the takeover consumes that load, so the dialog never renders there. CI-mode
+    measurement after: **94.2 / 91.4 / 87.9 / 77.6.**
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
@@ -1682,10 +1756,11 @@ critical avisos cannot be switched off.
      each 0% file is a route or drawer with no spec: a Playwright spec that asserts real
      data, or delete the dead file.
   4. `server/import` (5%) and `server/repositories` (53%).
-- **Acceptance:** `coverage-floor.json` at ≥ 85 for lines, statements and functions, and
-  branches ≥ 75, on a `portal-e2e` run where every project ran.
+- **Acceptance:** `coverage-floor.json` at ≥ 95 for lines, statements and functions, and
+  branches ≥ 85, on a `portal-e2e` run where every project ran. (85 / 75 until the owner
+  raised the goal, 2026-09-26.)
 
-### P-36 First production walkthrough: the owner's findings (2026-09-25)
+### P-36 First production walkthrough: the owner's findings (2026-09-25) `[alta]`
 
 - [~] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
   `feat/don-cuentas-portal` landing for P-36.7
@@ -1773,7 +1848,7 @@ own task and are not repeated here: P-28 (Diagnóstico, estrategia, «¿Me alcan
 desde una foto), P-30 (the model call behind the monthly review), P-32 (avisos and Compartir por
 WhatsApp).
 
-### P-37 Ticket printing from the caja
+### P-37 Ticket printing from the caja `[baja]`
 
 - [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
   printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
@@ -1787,7 +1862,7 @@ WhatsApp).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
 
-### P-38 Don Cuentas explains a cash difference
+### P-38 Don Cuentas explains a cash difference `[media]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
       **2026-09-26 (owner, ADR-110): fully deterministic — no model.** The causes this proposes are
@@ -1802,7 +1877,7 @@ WhatsApp).
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
 
-### P-39 Don Cuentas conclusions in Estados financieros
+### P-39 Don Cuentas conclusions in Estados financieros `[baja]`
 
 - [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
       **2026-09-26 (owner, ADR-110): written once a month, shown on Estados, and announced.**
@@ -1818,7 +1893,7 @@ WhatsApp).
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
 
-### P-40 First diagnóstico free at 90 days
+### P-40 First diagnóstico free at 90 days `[baja]`
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
   - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
@@ -1831,7 +1906,7 @@ WhatsApp).
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
-### P-41 Advanced inventory functions
+### P-41 Advanced inventory functions `[baja]`
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in

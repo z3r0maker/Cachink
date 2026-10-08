@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { borders, colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
@@ -34,9 +34,22 @@ export const primario = style([
         boxShadow: 'none',
         color: colors.textMuted,
       },
+      '&[aria-busy="true"]:disabled': {
+        border: borders.thick,
+        color: colors.black,
+        cursor: 'progress',
+      },
     },
   },
 ]);
+
+const girar = keyframes({ to: { transform: 'rotate(360deg)' } });
+
+export const gira = style({
+  display: 'inline-flex',
+  animation: `${girar} 1s linear infinite`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
 
 export const falta = style({
   fontSize: portalFontSizes.sm,

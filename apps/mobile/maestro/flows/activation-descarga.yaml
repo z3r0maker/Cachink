@@ -1,0 +1,60 @@
+# Activation of a big business (DS-10, EsMvDescarga): the snapshot comes in
+# pages, the activation screen says «Descargando los datos de tu negocio…»
+# with «N de M» and a bar while they land, and opens on the operators once
+# the last page is in.
+#
+# Precondition: same as activation.yaml (fresh install, mock reset: VALDK7M3
+# is single-use). The mock's snapshot page shrinks to 5 rows so the fixture
+# pages; the flow restores the budget at the end.
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runScript:
+    file: shared/mock-snapshot-budget.js
+    env:
+      ROWS: '5'
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 60000
+- tapOn:
+    id: 'vincular-escribir'
+- tapOn:
+    id: 'activation-email'
+    point: '95%,50%'
+- eraseText: 60
+- inputText: 'dueno@tacoslaesquina.mx'
+- tapOn:
+    id: 'activation-code'
+    point: '95%,50%'
+- eraseText: 20
+- inputText: 'valdk7m3'
+- hideKeyboard
+- tapOn:
+    id: 'activation-submit'
+# The pages land fast against a local mock: the progress is checked while it shows.
+- runFlow:
+    when:
+      visible:
+        id: 'vincular-descarga'
+    commands:
+      - assertVisible: 'Descargando los datos de tu negocio…'
+      - assertVisible:
+          id: 'vincular-descarga-paginas'
+          text: '\d+ de \d+'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 60000
+- assertNotVisible:
+    id: 'activation-screen'
+- assertNotVisible:
+    id: 'vincular-descarga-interrumpida'
+- assertVisible:
+    text: '.*Toni.*'
+- runScript:
+    file: shared/mock-snapshot-budget.js
+    env:
+      ROWS: ''

@@ -19,6 +19,8 @@
 export type Status = 'open' | 'progress' | 'blocked' | 'done';
 
 export interface Item {
+  /** Every `` `[tag]` `` a track wrote on this item: its area, its priority, `bloq`. */
+  readonly tags: readonly string[];
   readonly source: string;
   readonly line: number;
   readonly id: string | null;
@@ -56,6 +58,19 @@ function field(text: string, name: string): string | null {
   return m?.[1]?.trim() || null;
 }
 
+/**
+ * Every `` `[tag]` `` on the line, stripped before the clamp below so a long
+ * title keeps them. What each one means is decided by whoever reads it:
+ * `plan-board-areas.ts` looks for an area, `plan-board-prioridad.ts` for a
+ * priority or `bloq`. An unknown tag falls through to both and changes nothing.
+ */
+const TAG = /\s*`\[([a-záéíóúñ]+)\]`/gu;
+
+export function splitTags(text: string): { tags: string[]; rest: string } {
+  const tags = [...text.matchAll(TAG)].map((m) => m[1] as string);
+  return { tags, rest: tags.length > 0 ? text.replace(TAG, ' ') : text };
+}
+
 function clean(text: string): string {
   const t = text.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
   return t.length > TITLE_MAX ? `${t.slice(0, TITLE_MAX - 1)}…` : t;
@@ -63,7 +78,22 @@ function clean(text: string): string {
 
 interface Cursor {
   section: string;
-  heading: { id: string; title: string } | null;
+  /** Tags ride on the heading too: a `### N-26 …` item's title lives there, not on its Status line. */
+  heading: { id: string; title: string; tags: string[] } | null;
+}
+
+/** Who this line is: its own `**T-01 · …**`, or the `### T-01 …` heading above it. */
+function identify(
+  cursor: Cursor,
+  text: string,
+): { id: string | null; title: string; tags: readonly string[] } {
+  const inline = INLINE.exec(text);
+  const head = text.startsWith('Status') ? cursor.heading : null;
+  return {
+    id: inline?.[1] ?? head?.id ?? null,
+    title: inline ? clean(inline[2] ?? '') : head ? clean(head.title) : clean(text),
+    tags: head?.tags ?? [],
+  };
 }
 
 function fromTaskLine(
@@ -73,11 +103,10 @@ function fromTaskLine(
   note: string,
 ): Omit<Item, 'source' | 'line'> {
   const status = MARKS[mark] ?? 'open';
-  const inline = INLINE.exec(text);
-  const head = text.startsWith('Status') ? cursor.heading : null;
-  const id = inline?.[1] ?? head?.id ?? null;
-  const title = inline ? clean(inline[2] ?? '') : head ? clean(head.title) : clean(text);
+  const { tags: propias, rest } = splitTags(text);
+  const { id, title, tags } = identify(cursor, rest);
   return {
+    tags: [...propias, ...tags],
     id,
     title,
     status,
@@ -117,7 +146,10 @@ export function parseTrack(source: string, content: string): Item[] {
       return;
     }
     const h3 = H3.exec(ln);
-    if (h3) cursor.heading = { id: h3[1] ?? '', title: h3[2] ?? '' };
+    if (h3) {
+      const { tags, rest } = splitTags(h3[2] ?? '');
+      cursor.heading = { id: h3[1] ?? '', title: rest, tags };
+    }
     const row = OWNER_ROW.exec(ln);
     if (row) {
       items.push(ownerRow(source, idx + 1, cursor.section, row, ln));
@@ -138,11 +170,13 @@ function ownerRow(
   row: RegExpExecArray,
   raw: string,
 ): Item {
+  const { tags, rest } = splitTags(row[2] ?? '');
   return {
     source,
     line,
+    tags,
     id: row[1] ?? null,
-    title: clean(row[2] ?? ''),
+    title: clean(rest),
     status: raw.includes('**Done') ? 'done' : 'open',
     section,
     trigger: null,

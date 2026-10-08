@@ -137,6 +137,14 @@ describe('snapshot bootstrap (C-23)', () => {
       pages.map((p) => p.snapshot?.first),
       pages.map((_, i) => i === 0),
     );
+    // DS-10: the first page estimates the snapshot's pages, for «3 de 7».
+    const estimate = pages[0]?.snapshot?.pages;
+    assert.ok(Number.isInteger(estimate) && (estimate ?? 0) >= 1, `estimate ${estimate}`);
+    assert.ok(
+      pages.slice(1).every((p) => p.snapshot?.pages === undefined),
+      'first page only',
+    );
+    if (h.isMock) assert.equal(estimate, pages.length, 'exact when no page is cut by bytes');
     // Only the row arrays: `feature_flags` and `dueno_nombre` (maybe null) ride beside them.
     const ids = pages.flatMap(
       (p) => Object.values(p.tables).filter(Array.isArray).flat() as { id?: string }[],

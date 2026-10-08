@@ -92,7 +92,9 @@ test('signup → wizard → operator → import → code → activate → push �
     .then(() => true)
     .catch(() => false);
   if (hayPlan) await gratis.click();
-  await page.getByRole('link', { name: 'Ir a mi portal' }).click();
+  // Onboarding ends on the checklist, inside the portal; from there, anywhere.
+  await expect(page).toHaveURL(/\/como-empiezo$/);
+  await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Hola, Humo' })).toBeVisible();
 
   // 2 · An operator for the counter phone.

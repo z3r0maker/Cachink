@@ -8,8 +8,8 @@
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
 import { drizzle } from 'drizzle-orm/sql-js';
 import * as schema from '@xangarro/data';
-import { runMigrations } from '@xangarro/data';
-import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
+import { DrizzleAppConfigRepository, runMigrations } from '@xangarro/data';
+import { ApiClient, snapshotProgress, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
 import { POR_METODO } from './router';
 import { opfsRead, opfsWrite } from './opfs';
@@ -33,6 +33,7 @@ interface Runtime {
 }
 
 let runtime: Runtime | null = null;
+const NO_ARRANCADO = 'runtime not booted';
 let deviceToken: string | null = null;
 /** Opening, once: a second `boot` while the first reads OPFS joins it (never two copies). */
 let arranque: Promise<boolean> | null = null;
@@ -115,13 +116,13 @@ async function registrar(
   input: Parameters<typeof registrarTicket>[1],
   ctx: Parameters<typeof registrarTicket>[2],
 ): Promise<{ folio: number }> {
-  if (runtime === null) throw new Error('runtime not booted');
+  if (runtime === null) throw new Error(NO_ARRANCADO);
   return runAccess((rt) => registrarTicket(rt.db, input, ctx));
 }
 
 /** A capture pushes (and pulls at most every 45 s); `completa` pushes and pulls. */
 async function sync(request: SyncRequest): Promise<SyncRunResult> {
-  if (runtime === null) throw new Error('runtime not booted');
+  if (runtime === null) throw new Error(NO_ARRANCADO);
   deviceToken = request.token;
   const opts = { manual: request.manual };
   let result: SyncRunResult | null = null;
@@ -144,7 +145,7 @@ async function counts(): Promise<{
   retrying: number;
   unsent: number;
 }> {
-  if (runtime === null) throw new Error('runtime not booted');
+  if (runtime === null) throw new Error(NO_ARRANCADO);
   return runtime.engine.counts();
 }
 
@@ -173,6 +174,10 @@ async function handle(request: WorkerRequest): Promise<unknown> {
       return sync(request);
     case 'counts':
       return counts();
+    case 'progresoSnapshot':
+      // Read-only and polled while linking: no OPFS write, unlike `runAccess`.
+      if (runtime === null) throw new Error(NO_ARRANCADO);
+      return snapshotProgress(new DrizzleAppConfigRepository(runtime.db as never));
     default: {
       const fn = POR_METODO[request.method];
       if (fn === undefined) throw new Error('unknown method');
@@ -182,7 +187,7 @@ async function handle(request: WorkerRequest): Promise<unknown> {
 }
 
 async function runAccess<T>(fn: (rt: Runtime) => Promise<T>): Promise<T> {
-  if (runtime === null) throw new Error('runtime not booted');
+  if (runtime === null) throw new Error(NO_ARRANCADO);
   try {
     return await fn(runtime);
   } finally {

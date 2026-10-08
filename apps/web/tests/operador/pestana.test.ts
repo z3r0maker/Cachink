@@ -1,10 +1,12 @@
-import { describe, it } from 'vitest';
+import { afterEach, describe, it, vi } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
   CANDADO_CAJA,
+  hayOtraPestana,
   pedirCandado,
   reclamador,
+  responderPresencia,
   type Candados,
 } from '../../src/operador/runtime/pestana';
 
@@ -115,5 +117,49 @@ describe('reclamador · the Worker opens the database only when it owns it', () 
     const r = reclamador(undefined);
     assert.equal(await r.reclamar(false), 'sin-soporte');
     assert.equal(r.puedeAbrir(), true);
+  });
+});
+
+/**
+ * The fallback for a browser without Web Locks: an open register answers
+ * «aquí» on a BroadcastChannel, a newcomer asks and listens. Node's own
+ * BroadcastChannel delivers between instances of one process, as tabs do.
+ */
+describe('hayOtraPestana / responderPresencia (sin Web Locks)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('sees the open register that answers', async () => {
+    const parar = responderPresencia();
+    try {
+      assert.equal(await hayOtraPestana(500), true);
+    } finally {
+      parar();
+    }
+  });
+
+  it('answers false once the wait runs out with nobody there', async () => {
+    assert.equal(await hayOtraPestana(20), false);
+  });
+
+  it('stops answering once the register closes', async () => {
+    responderPresencia()();
+    assert.equal(await hayOtraPestana(20), false);
+  });
+
+  it('ignores chatter that is not an answer', async () => {
+    const ruido = new BroadcastChannel(CANDADO_CAJA);
+    const otra = hayOtraPestana(40);
+    ruido.postMessage('hola');
+    ruido.postMessage('otra-cosa');
+    assert.equal(await otra, false);
+    ruido.close();
+  });
+
+  it('assumes no other tab where BroadcastChannel does not exist', async () => {
+    vi.stubGlobal('BroadcastChannel', undefined);
+    assert.equal(await hayOtraPestana(), false);
+    assert.doesNotThrow(responderPresencia());
   });
 });

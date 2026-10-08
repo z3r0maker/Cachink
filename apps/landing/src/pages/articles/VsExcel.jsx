@@ -1,5 +1,5 @@
 import { PLAN_BY_ID, pesos } from '../../../landing/planes.js';
-import { ArticleCta, ArticleHeader, RelatedGuides, articleSchema } from './shared.jsx';
+import { A, ArticleCta, ArticleHeader, H2, P, RelatedGuides, articleSchema } from './shared.jsx';
 
 const schema = articleSchema('vs-excel');
 
@@ -12,7 +12,7 @@ const comparativa = [
   },
   {
     criterio: 'Funciona sin internet',
-    excel: 'Depende. La versión local sí, la de Google Sheets no.',
+    excel: 'Excel de escritorio sí. Google Sheets solo si activaste antes su modo sin conexión.',
     app: 'Siempre. Offline-first desde el diseño.',
     ganador: 'app',
   },
@@ -89,7 +89,15 @@ export default function VsExcel() {
           mejor cada opción. Esta comparativa es honesta: no siempre gana la app.
         </p>
 
-        <div style={{ overflowX: 'auto', margin: '0 0 40px' }}>
+        <H2>¿Excel o una app de caja: cuál conviene a un negocio pequeño?</H2>
+        <P>
+          Para registrar ventas, saber cuánto hay en caja y darle al contador un reporte cada mes,
+          una app de caja: es más rápida, no depende de fórmulas y arma los estados financieros
+          sola. Excel conviene cuando necesitas modelar algo a la medida y tienes a alguien que sepa
+          mantener la hoja. Criterio por criterio:
+        </P>
+
+        <div style={{ overflowX: 'auto', margin: '20px 0 40px' }}>
           <table
             style={{
               width: '100%',
@@ -220,59 +228,58 @@ export default function VsExcel() {
           .
         </p>
 
-        <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
-          ¿Cuándo tiene sentido seguir con Excel?
-        </h2>
-        <p
-          style={{
-            fontSize: 16,
-            lineHeight: 1.7,
-            margin: '0 0 16px',
-            color: 'var(--ink)',
-            fontWeight: 500,
-          }}
-        >
+        <H2>¿Cuándo tiene sentido seguir con Excel?</H2>
+        <P>
           Si tu negocio tiene necesidades muy específicas que una app estándar no cubre (por
           ejemplo, modelos de costos complejos, análisis de escenarios financieros o integraciones
           con sistemas de inventario a medida), Excel puede ser la herramienta correcta,
           especialmente si tienes a alguien con conocimientos para mantenerlo.
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            lineHeight: 1.7,
-            margin: '0 0 32px',
-            color: 'var(--ink)',
-            fontWeight: 500,
-          }}
-        >
+        </P>
+        <P>
           Pero para el 95% de los pequeños negocios en México (panadería, cafetería, tienda,
           taller), las necesidades son: registrar ventas rápido, saber cuánto hay en caja, y generar
           un reporte mensual para el contador. Para eso, una app especializada gana en todos los
           frentes que importan.
-        </p>
+        </P>
 
-        <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
-          El costo real de Excel en tiempo perdido
-        </h2>
-        <p
-          style={{
-            fontSize: 16,
-            lineHeight: 1.7,
-            margin: '0 0 32px',
-            color: 'var(--ink)',
-            fontWeight: 500,
-          }}
-        >
+        <H2>¿Y Google Sheets? ¿Cambia algo?</H2>
+        <P>
+          Sheets resuelve dos cosas que Excel de escritorio no: es gratis y varias personas pueden
+          abrir la misma hoja. Pero conserva los problemas de fondo: las fórmulas las escribe y las
+          mantiene alguien del negocio, una celda borrada por accidente se nota tarde (si se nota),
+          y capturar una venta en una hoja de cálculo desde el celular es lento. Para trabajar sin
+          internet hay que activar antes su modo sin conexión.
+        </P>
+
+        <H2>¿Cuánto tiempo pierdes registrando ventas en Excel?</H2>
+        <P>
           Si tardas 3 minutos por venta en Excel y tienes 30 ventas al día, son 90 minutos diarios
-          solo en captura, y{' '}
-          <a href="/#precios" style={{ color: 'var(--black)' }}>
-            empezar con Xangarro es gratis
-          </a>
-          . Con una app que procesa cada venta en 10 segundos, son 5 minutos. La diferencia: 85
-          minutos al día: más de 35 horas al mes que puedes dedicar a atender clientes, mejorar tu
-          producto o simplemente descansar.
-        </p>
+          solo en captura, y <A href="/#precios">empezar con Xangarro es gratis</A>. Con una app que
+          procesa cada venta en 10 segundos, son 5 minutos. La diferencia: 85 minutos al día, más de
+          35 horas al mes que puedes dedicar a atender clientes, mejorar tu producto o simplemente
+          descansar.
+        </P>
+
+        <H2>¿Cómo pasar de Excel a una app de caja sin perder tus datos?</H2>
+        <P>
+          No empiezas de cero. En Xangarro subes tu lista de productos o de clientes como archivo
+          .xlsx o .csv desde el portal, revisas lo que se va a importar y listo. Si prefieres no
+          hacerlo tú, en los planes de pago nos mandas tus archivos con «Hazlo por mí» y la
+          migración la hacemos nosotros. Para el resto del cambio, sigue el{' '}
+          <A href="/recursos/sin-excel/">plan de una semana para dejar el Excel</A>.
+        </P>
+        <P>
+          La salida también está abierta: todos los planes, incluido el gratuito, exportan tus datos
+          a Excel. Tus registros no quedan atrapados en la app.
+        </P>
+
+        <H2>¿Tu contador puede seguir usando Excel?</H2>
+        <P>
+          Sí, y no tiene que aprender nada nuevo. Le mandas la exportación en Excel y, desde el plan
+          Xangarro, también el estado de resultados, el balance y el flujo de efectivo en formato
+          NIF. Si quieres entender qué contiene cada uno, lee la{' '}
+          <A href="/recursos/nif/">guía de estados financieros NIF</A>.
+        </P>
 
         <RelatedGuides slug="vs-excel" />
         <ArticleCta

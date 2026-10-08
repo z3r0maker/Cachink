@@ -36,6 +36,22 @@ test('the picker refuses a 14th month before it reaches the server, and allows 1
   await page.getByTestId('periodo-hasta').fill('2026-05-31');
   await expect(page.getByText('Elige un periodo de hasta 13 meses.')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Aplicar' })).toBeEnabled();
+  // The way past the cap is offered with any range, as EsEstadosRango shows it.
+  await expect(page.getByTestId('periodo-exportar')).toHaveText(
+    '¿Necesitas más? Exporta tus movimientos.',
+  );
+});
+
+test('«Aplicar» waits for both days, in order', async ({ page }) => {
+  await page.goto('/estados?p=personalizado&desde=2026-05-01&hasta=2026-05-31');
+  const aplicar = page.getByRole('button', { name: 'Aplicar' });
+  await expect(aplicar).toBeEnabled();
+  await page.getByTestId('periodo-hasta').fill('2026-04-30');
+  await expect(aplicar).toBeDisabled();
+  await page.getByTestId('periodo-hasta').fill('');
+  await expect(aplicar).toBeDisabled();
+  await page.getByTestId('periodo-hasta').fill('2026-05-20');
+  await expect(aplicar).toBeEnabled();
 });
 
 test('13 months computes, and its ingresos are the database’s own sum for the range', async ({

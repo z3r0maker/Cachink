@@ -6,6 +6,13 @@ import { asTenant, BIZ } from './sync-phone';
  * P-14's period switcher and ISR, against the seed with the business's today
  * pinned to 2026-05-12. In the `sync` project because two tests change the
  * seeded tenant's ISR rate, régime and RFC — and put them back.
+ *
+ * **`afterEach`, not `afterAll`.** The régime test sets `regimen_sat = '616'`
+ * and the RESICO test below it reads `'626'`, so an `afterAll` restored the row
+ * only once both had run — and the second one always saw the first one's write.
+ * CLAUDE.md §6: whoever wrecks a seeded row restores it in a hook that runs on
+ * failure too, which is what makes the file re-runnable and its tests
+ * order-independent. The RFC goes back to whatever the file found (ADR-125).
  */
 let rfcSembrado: string | null = null;
 
@@ -14,7 +21,7 @@ test.beforeAll(async () => {
   rfcSembrado = (row?.rfc as string | null | undefined) ?? null;
 });
 
-test.afterAll(async () => {
+test.afterEach(async () => {
   await asTenant(
     BIZ,
     (sql) =>

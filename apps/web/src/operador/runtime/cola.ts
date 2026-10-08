@@ -19,6 +19,8 @@ export async function entradasDeCola(db: Db): Promise<readonly Entrada[]> {
     tabla: r.tableName,
     id: r.rowId,
     reintento: r.retrying,
+    ultimoIntento: r.lastAttemptAt,
+    proximoIntento: r.nextAttemptAt,
   }));
 }
 

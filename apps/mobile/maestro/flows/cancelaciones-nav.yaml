@@ -1,6 +1,6 @@
-# Navigate to Cancelaciones screen and verify empty state renders.
-# Route: /ventas (the Ventas tab; /cancelaciones redirects there)
-# Verifies: cancelaciones-screen testID, empty-state text.
+# The Ventas tab (Track M, M-08; MvVentas): the turno's sales, each opened
+# in its sheet and cancelled only with a reason. /cancelaciones redirects
+# here. At test start there is either no turno or no sale yet.
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
 tags:
@@ -12,16 +12,12 @@ tags:
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Track M (M-05): Cancelaciones became the Ventas tab (the turno's sales,
-# each cancellable with a reason).
 - tapOn:
     id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: 'mobile-cancelaciones'
+      id: 'mobile-ventas-tab'
     timeout: 5000
-
-# Verify the screen title renders
-- assertVisible: 'Cancelaciones'
-# Empty state (no sales today expected at test start)
-- assertVisible: 'No hay ventas registradas hoy'
+- assertVisible: 'Ventas'
+- assertVisible:
+    id: 'ventas-vacio|ventas-sin-turno|ventas-lista'

@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { colors } from '@xangarro/tokens';
+import { useCallback, useState, type ReactNode } from 'react';
 
-import { Toast } from '@/operador/ui/toast';
-
+import { srOnly } from '../styles/global.css';
 import { Button } from './button';
 import { MonedaGirando } from './don/cargando';
+import { ExportAviso } from './export-aviso';
+import { formato as formatoClase } from './export-aviso.css';
 
 /**
  * Downloads a dataset as .xlsx, and says so while it does (DS-02).
@@ -22,16 +22,8 @@ import { MonedaGirando } from './don/cargando';
  */
 type Dataset = 'ventas' | 'gastos' | 'productos' | 'movimientos' | 'empleados';
 
-interface Aviso {
-  readonly title: string;
-  readonly body: string;
-}
-
-const FALLO: Aviso = { title: 'No pudimos generar el archivo', body: 'Intenta de nuevo.' };
-const LIMITE: Aviso = {
-  title: 'Espera unos minutos',
-  body: 'Hiciste varias exportaciones seguidas. Intenta de nuevo en unos minutos.',
-};
+const FALLO = 'No pudimos generar el archivo. Intenta de nuevo.';
+const LIMITE = 'Espera unos minutos: hiciste varias exportaciones seguidas.';
 
 /** `attachment; filename="x.xlsx"` → `x.xlsx`. */
 const nombreDe = (disposition: string | null, dataset: Dataset) =>
@@ -50,7 +42,7 @@ function guardar(blob: Blob, nombre: string) {
 }
 
 /** One export: `null` when saved (or on the way to sign-in), the notice to show otherwise. */
-async function descargar(dataset: Dataset): Promise<Aviso | null> {
+async function descargar(dataset: Dataset): Promise<string | null> {
   try {
     const res = await fetch(`/api/export/${dataset}`, { cache: 'no-store' });
     if (res.status === 401) {
@@ -68,43 +60,67 @@ async function descargar(dataset: Dataset): Promise<Aviso | null> {
   }
 }
 
-export function ExportButton({
-  dataset,
-  label = 'Exportar',
-}: {
-  readonly dataset: Dataset;
-  readonly label?: string;
-}) {
+/**
+ * One export's state, for a screen with two ways into the same file —
+ * Productos › Movimientos' header button and its «Exportar todos» (DS-04):
+ * both wait on the one request, and the toast shows once.
+ */
+export function useExportar(dataset: Dataset) {
   const [preparando, setPreparando] = useState(false);
-  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   const cerrar = useCallback(() => setAviso(null), []);
   const exportar = async () => {
+    if (preparando) return;
     setAviso(null);
     setPreparando(true);
     setAviso(await descargar(dataset));
     setPreparando(false);
   };
+  return {
+    dataset,
+    preparando,
+    exportar: () => void exportar(),
+    aviso: aviso === null ? null : <ExportAviso texto={aviso} onClose={cerrar} />,
+  };
+}
+
+export type Exportacion = ReturnType<typeof useExportar>;
+
+export function ExportButton({
+  dataset,
+  label = 'Exportar',
+  formato,
+  control,
+}: {
+  readonly dataset: Dataset;
+  readonly label?: string;
+  /** A format tag after the label, e.g. «XLSX» (EsExportar). */
+  readonly formato?: string;
+  /** A shared export (`useExportar`); the button owns one otherwise. */
+  readonly control?: Exportacion;
+}) {
+  const propia = useExportar(dataset);
+  const e = control ?? propia;
+  const etiqueta: ReactNode = e.preparando ? 'Preparando tu archivo…' : label;
   return (
     <>
       <Button
         variant="secondary"
-        onClick={() => void exportar()}
-        disabled={preparando}
-        aria-busy={preparando}
-        icon={preparando ? <MonedaGirando /> : undefined}
+        onClick={e.exportar}
+        disabled={e.preparando}
+        aria-busy={e.preparando}
+        icon={e.preparando ? <MonedaGirando /> : undefined}
         data-testid={`export-${dataset}`}
       >
-        {preparando ? 'Preparando tu archivo…' : label}
+        {etiqueta}
+        {formato === undefined || e.preparando ? null : (
+          <span className={formatoClase}>{formato}</span>
+        )}
       </Button>
-      {aviso === null ? null : (
-        <Toast
-          title={aviso.title}
-          body={aviso.body}
-          tint={colors.warningSoft}
-          width={380}
-          onClose={cerrar}
-        />
-      )}
+      <span className={srOnly} aria-live="polite">
+        {e.preparando ? 'Preparando tu archivo…' : ''}
+      </span>
+      {e.aviso}
     </>
   );
 }

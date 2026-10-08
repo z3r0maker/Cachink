@@ -1,19 +1,10 @@
 /**
- * Expo Router entry for /no-enviados (A-08): records the server rejected,
- * each with its reason and "Reintentar". Opened from the sync pill.
+ * /no-enviados (A-08) became part of Registros por enviar (M-09): the refused
+ * records are listed there with their retry. Kept so old links land.
  */
-
 import type { ReactElement } from 'react';
-import { SyncRejectedScreen, useRejectedRows, useTranslation } from '@xangarro/ui';
-import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
+import { Redirect } from 'expo-router';
 
-export default function NoEnviadosRoute(): ReactElement {
-  const { t } = useTranslation();
-  const { rows, retry } = useRejectedRows();
-  const handleBack = useBackTo('/turno');
-  return (
-    <AppShellWrapper title={t('shell.nav.turno')} onBack={handleBack} headerStatus="static">
-      <SyncRejectedScreen rows={rows} onRetry={retry} />
-    </AppShellWrapper>
-  );
+export default function NoEnviadosRedirect(): ReactElement {
+  return <Redirect href="/pendientes" />;
 }
