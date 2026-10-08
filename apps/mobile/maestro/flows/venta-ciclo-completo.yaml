@@ -122,7 +122,10 @@ appId: mx.xangarro.mobile
 - tapOn: 'Agregar Tortilla,.*'
 - assertVisible:
     id: 'cobrar-bar'
-- runFlow: shared/cobrar-ticket.yaml
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo
 
 - extendedWaitUntil:
     visible:
@@ -148,7 +151,7 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: 'ventas-total-card'
 - assertVisible:
-    text: ".*\\$35\\.00.*"
+    text: ".*\\$35\.00.*"
 
 - assertVisible:
     id: 'ventas-list'
@@ -242,4 +245,4 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: 'ventas-total-card'
 - assertVisible:
-    text: ".*\\$15\\.00.*"
+    text: ".*\\$15\.00.*"

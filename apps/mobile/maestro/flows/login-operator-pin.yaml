@@ -1,0 +1,65 @@
+# Operator NIP sign-in (A-16; Acceso, MvAcceso M-06): on a freshly linked
+# device «¿Quién va a cobrar?» asks for the operator's NIP — a wrong NIP
+# shows its error and stays on Acceso; the right NIP enters the caja on
+# Inicio.
+#
+# Precondition: fresh install + the contracts mock reset (VALDK7M3 is
+# single-use). The flow links the device itself via activation.yaml, which
+# ends on the operator list. Nobody is pre-picked (preseleccion in
+# acceso-screen.tsx only picks whoever holds an open turno, or a sole
+# operator; the mock ships Toni + Ana with no turno), so the NIP pad stays
+# hidden until a name is tapped.
+#
+# One wrong NIP only — five lock PIN entry for 30 s (use-quick-switch-auth).
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+# Link the device; activation.yaml ends asserting the operator list.
+- runFlow: activation.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 10000
+# Pick Toni (mock operator, NIP 1234, contracts fixtures.ts OPERATOR_PINS) by
+# her deterministic row id (fixtures.ts operator(1, 'Toni'); acceso-partes.tsx
+# stamps acceso-operador-<ulid>). The pad renders only once someone is chosen
+# (acceso-screen.tsx SeccionNip). A fresh activation has no open turno, so
+# preseleccion leaves the list untapped.
+- tapOn:
+    id: 'acceso-operador-01JPRS00000000000000000001'
+- extendedWaitUntil:
+    visible:
+      id: 'numpad-1'
+    timeout: 8000
+# The pad's hidden input can pull the OS keyboard over the keys on a fresh
+# activation (a focus race); dismiss it when it is there, a no-op otherwise.
+- hideKeyboard: { optional: true }
+# Wrong NIP: 9999 → the pad's error (nip-pad.tsx NipError, testID nip-error).
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'nip-error'
+    timeout: 10000
+- assertVisible:
+    text: '.*Ese NIP no es.*'
+- assertVisible:
+    id: 'quick-switch'
+# A wrong NIP empties the dots for the next try (acceso-screen.tsx); the
+# right one signs in and the gate opens the caja on Inicio.
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-2' }
+- tapOn: { id: 'numpad-3' }
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inicio-tab'
+    timeout: 15000
+- assertVisible:
+    id: 'tab-turno'
+- assertNotVisible:
+    id: 'quick-switch'

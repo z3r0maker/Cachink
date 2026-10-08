@@ -1,47 +1,89 @@
-# Caja open/close lifecycle E2E.
+# Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old
+# CajaContent flow — caja-status-card, blind-count steps — is gone): Inicio's
+# «Abrir turno» opens the fondo sheet, the numpad types the fondo, Mi turno
+# says the cash that must be in the drawer, «Cerrar mi turno» counts it back,
+# the hecho screen closes the cycle, and Inicio returns to «Abre tu turno».
 #
-# Verifies:
-#   1. Caja opens (or confirms Director's opening) → status card visible
-#   2. Tap "Cerrar turno" → blind count step 1 → step 2 → close
-#
-# Precondition: demo mode seeded.
-# x-entrypoint: demo
+# Precondition: device activated against the mock, Toni signed in. This flow
+# opens the turno itself, so the activated setup must leave the turno closed;
+# if one is already open the conditional below skips and the flow still walks
+# the close half.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
-
-# Ensure caja is open (handles demo state where Director opened it).
-- runFlow: shared/ensure-caja-open.yaml
-
-# Status card should be visible showing the turn is open.
-- assertVisible:
-    id: 'caja-status-card'
-- assertVisible:
-    id: 'caja-balance-card'
-
-# --- Happy path: Close caja ---
+- runFlow: shared/login-operator.yaml
 - tapOn:
-    id: 'caja-cerrar-btn'
+    id: 'tab-inicio'
 
-# Step 1: BlindCountStep — enter count without seeing expected.
+# Sin turno: the hero says so; its action opens the fondo sheet (MvAbrirTurno).
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - assertVisible: '.*Abre tu turno para empezar.*'
+      - tapOn:
+          id: 'inicio-hero-accion'
+      - extendedWaitUntil:
+          visible:
+            id: 'abrir-caja-modal'
+          timeout: 5000
+      # The title greets the operator: «¡Hola, Toni! ¿Con cuánto empiezas?».
+      - assertVisible: '.*Con cuánto empiezas.*'
+      # Type 500 on the numpad (fondo-pad.tsx keeps the numpad-<n> testIDs).
+      - tapOn: { id: 'numpad-5' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - assertVisible: '.*Abrir turno con \$500\.00.*'
+      - tapOn:
+          id: 'caja-abrir-submit'
+
+# The turno is open: Inicio's hero turns «La caja está lista».
 - extendedWaitUntil:
     visible:
-      id: 'cerrar-caja-step-1'
-    timeout: 5000
+      id: 'inicio-hero-listo'
+    timeout: 10000
 
-# Enter 500 via numpad (matching amount).
-- tapOn: { id: 'numpad-5' }
-- tapOn: { id: 'numpad-0' }
-- tapOn: { id: 'numpad-0' }
+# Mi turno: the hero says the $500 that must be in the drawer.
 - tapOn:
-    id: 'blind-count-continue'
-
-# Step 2: CountResultStep — comparison + close.
+    id: 'tab-turno'
 - extendedWaitUntil:
     visible:
-      id: 'cerrar-caja-step-2'
-    timeout: 5000
+      id: 'turno-hero'
+    timeout: 10000
+- assertVisible: '.*Debe haber.*'
+- assertVisible: '.*\$500\.00.*'
+
+# Close: count the same $500 back — one bill — and close.
 - tapOn:
-    id: 'count-result-close'
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 10000
+- tapOn:
+    id: 'conteo-mas-billete-500'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn:
+    id: 'cierre-cerrar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 10000
+- assertVisible: '.*Cuadró.*'
+
+# Salir → Inicio, and the cycle is back where it started.
+- tapOn:
+    id: 'cierre-salir'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-cerrado'
+    timeout: 10000

@@ -1,0 +1,104 @@
+# A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas
+# «detalle»/«cancelar-venta»): the lines and tiles, «Mandar comprobante»
+# opening the comprobante sheet, and «Cancelar venta» asking PIN + motivo —
+# for an Efectivo sale, the cash it hands back — leaving the sale on the
+# list, visibly cancelled.
+#
+# Cancelling needs the fixture operator who may cancel (Ana, NIP 5678 — Toni
+# may not, packages/contracts/src/mock/fixtures.ts:103-104), so the flow locks
+# the caja, signs in as Ana and opens her turno. The sale is the shared
+# subflow's Taco al pastor, paid in cash with «Exacto».
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - cancelaciones
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Switch to Ana: the cancel dialog checks her PIN and her permission.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
+- tapOn: { id: 'bloqueo-cambiar' }
+- extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
+- tapOn:
+    text: 'Ana'
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil: { visible: { id: 'mobile-inicio-tab' }, timeout: 15000 }
+
+# Ana's turno, only if Inicio still says «Abrir turno».
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+
+# One cash sale (Taco al pastor, Efectivo «Exacto») — the shared subflow.
+- runFlow: shared/create-venta.yaml
+
+# Open its sheet: the lines it carried and the tiles around them.
+- tapOn: { id: 'tab-ventas' }
+- extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
+- tapOn:
+    text: 'Taco al pastor'
+- extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
+# The body (and the footer's actions) only render once the ticket loads.
+- extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
+- assertVisible: '.*Taco al pastor.*'
+- assertVisible: ".*1 × \\$25\\.00.*"
+- assertVisible: { id: 'venta-detalle-fichas' }
+- assertVisible: { id: 'venta-detalle-estado' }
+
+# «Mandar comprobante» opens the comprobante sheet; closing it returns here.
+# (The share options sit below the folded receipt preview, so scroll to them.)
+- tapOn: { id: 'venta-detalle-compartir' }
+- extendedWaitUntil: { visible: { id: 'comprobante-sheet' }, timeout: 5000 }
+- assertVisible: '.*Mandar comprobante.*'
+- scrollUntilVisible:
+    element: { id: 'comprobante-whatsapp' }
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*Escoges el contacto y le das enviar.*'
+- tapOn: { id: 'comprobante-sheet-close' }
+- extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
+- extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
+
+# «Cancelar venta»: PIN, motivo, and — cash sale — the cash it hands back.
+- tapOn: { id: 'venta-detalle-cancelar' }
+- extendedWaitUntil: { visible: { id: 'venta-cancelar' }, timeout: 5000 }
+# The PIN step is a numpad (like Acceso's): the driver scrambles typed
+# digits in a hidden keyboard input, so the keys are tapped instead.
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- extendedWaitUntil: { visible: { id: 'cancelar-motivo-El cliente se arrepintió' }, timeout: 5000 }
+- tapOn: { id: 'cancelar-motivo-El cliente se arrepintió' }
+- tapOn: { id: 'cancelar-confirmar' }
+- extendedWaitUntil: { visible: { id: 'cancel-cash-confirm' }, timeout: 5000 }
+- assertVisible: ".*Devuelve \\$25\\.00 al cliente.*"
+- tapOn: { id: 'cancel-cash-confirm' }
+
+# The sheet says what happened; only «Listo» remains.
+- extendedWaitUntil: { visible: { id: 'venta-detalle-aviso' }, timeout: 8000 }
+- assertVisible: '.*Se canceló por: El cliente se arrepintió.*'
+- tapOn: { id: 'venta-detalle-listo' }
+
+# Back on the list the sale is still there, visibly cancelled.
+# The row folds into one accessible element («Ver venta V-0001, $25.00, Efectivo, cancelada»).
+- assertVisible: '.*V-0001, \$25\.00, Efectivo, cancelada.*'

@@ -1,27 +1,35 @@
-# Navigate to Cancelaciones screen and verify empty state renders.
-# Route: /ventas (the Ventas tab; /cancelaciones redirects there)
-# Verifies: cancelaciones-screen testID, empty-state text.
-# x-entrypoint: wizard
+# The Ventas tab (Track M-11): /cancelaciones became /ventas (M-05; the old
+# route redirects, apps/mobile/src/app/cancelaciones.tsx) and the M-08 rebuild
+# turned it into «Ventas del turno». With no turno open the tab answers
+# «Sin turno abierto» and points at Cobrar; the list itself, the sheet and the
+# cancel path live in ventas-lista.yaml and venta-detalle-cancelar.yaml.
+#
+# Must run before any flow that opens the operator's turno (alphabetical
+# ordering within the activated batch already does).
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
-  - otros
+  - ventas
   - cancelaciones
   - regression
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
-# Track M (M-05): Cancelaciones became the Ventas tab (the turno's sales,
-# each cancellable with a reason).
-- tapOn:
-    id: 'tab-ventas'
-- extendedWaitUntil:
-    visible:
-      id: 'mobile-cancelaciones'
-    timeout: 5000
+- tapOn: { id: 'tab-ventas' }
+- extendedWaitUntil: { visible: { id: 'ventas-sin-turno' }, timeout: 8000 }
+- assertVisible: '.*Sin turno abierto.*'
+- assertVisible: '.*Las ventas de cada turno aparecen aquí.*.*'
+- assertVisible: { id: 'ventas-ir-cobrar' }
 
-# Verify the screen title renders
-- assertVisible: 'Cancelaciones'
-# Empty state (no sales today expected at test start)
-- assertVisible: 'No hay ventas registradas hoy'
+# The way forward lands on Cobrar — which, sin turno, gates on the caja
+# (caja-gate-banner.tsx): the way on is «Ir a Caja», not the product grid.
+- tapOn: { id: 'ventas-ir-cobrar' }
+- extendedWaitUntil: { visible: { id: 'caja-gate-banner' }, timeout: 8000 }
+- assertVisible: '.*Abre tu caja para empezar a vender.*'
+- tapOn: { id: 'caja-gate-go-to-caja' }
+# «Ir a Caja» opens Mi turno's own sin-turno state (mi-turno-estados.tsx),
+# whose way forward is back to Inicio.
+- extendedWaitUntil: { visible: { id: 'turno-sin-turno' }, timeout: 8000 }
+- assertVisible: { id: 'turno-ir-inicio' }

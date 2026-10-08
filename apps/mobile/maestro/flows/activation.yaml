@@ -1,19 +1,32 @@
-# Activation — happy path (A-04): email + valid code → operator sign-in
+# Vincular — happy path (A-04; MvVincular, M-06): a fresh install opens on
+# the camera; the typed path («Escribe el código») takes the owner's correo
+# and the eight letters, and a valid code lands on «¿Quién va a cobrar?»
 # with the operators the portal created (mock: Toni, Ana).
 #
-# Precondition: same as activation-errors.yaml. VALDK7M3 is single-use;
-# reset the mock before every run.
+# Precondition: fresh install (no activation record) and the contracts mock
+# reset — VALDK7M3 is single-use:
+#   PORT=3100 pnpm mock:api   ·   curl -X POST http://127.0.0.1:3000/__mock/reset
+# App bundled with EXPO_PUBLIC_API_BASE=http://127.0.0.1:3000.
 # x-entrypoint: fresh
 appId: mx.xangarro.mobile
 ---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
 - extendedWaitUntil:
     visible:
       id: 'activation-screen'
     timeout: 60000
-# Vincular opens on the camera (MvVincular); the typed path is «Escribe el código».
+# Vincular opens on the camera (MvVincular; vincular-escanear.tsx); the QR
+# visor cannot be driven from a simulator, so the flow takes the typed path.
+- assertVisible: '.*Escanea el código del dueño.*'
+- assertVisible: '.*vence a los 15 minutos.*'
 - tapOn:
     id: 'vincular-escribir'
-# N-34: the aviso de privacidad at linking is on screen before anything is sent.
+# The typed view keeps «‹ Escanear» as the way back (vincular-partes.tsx
+# CabezaVolver, testID vincular-escanear).
+- assertVisible:
+    id: 'vincular-escanear'
+# N-34: the aviso de privacidad is on screen before anything is sent.
 - scrollUntilVisible:
     element:
       id: 'activation-aviso'
@@ -31,16 +44,21 @@ appId: mx.xangarro.mobile
     id: 'activation-code'
     point: '95%,50%'
 - eraseText: 20
+# Lowercase on purpose: sanitizeCode uppercases (activation-form.ts), and the
+# helper copy says case does not matter.
 - inputText: 'valdk7m3'
 - hideKeyboard
 - tapOn:
     id: 'activation-submit'
+# The gate swaps Vincular for Acceso (gated-navigation.tsx: activated and no
+# userId → QuickSwitchGate).
 - extendedWaitUntil:
     visible:
       id: 'quick-switch'
     timeout: 20000
 - assertNotVisible:
     id: 'activation-screen'
+- assertVisible: '.*¿Quién va a cobrar?.*'
 - assertVisible:
     text: '.*Toni.*'
 - assertVisible:

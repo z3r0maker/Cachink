@@ -6,7 +6,9 @@
 # Precondition: signed in, any tab.
 appId: mx.xangarro.mobile
 ---
-# Phone: the Mi turno tab. Tablet: the rail's or the sidebar's item.
+# Decide the layout once: after tapping «Bloquear» the phone's tab bar is gone,
+# so a second «when» would wrongly take the tablet branch (M-11).
+# Phone: Mi turno, «Bloquear la caja» at its foot.
 - runFlow:
     when:
       visible:
@@ -14,24 +16,21 @@ appId: mx.xangarro.mobile
     commands:
       - tapOn:
           id: 'tab-turno'
-- runFlow:
-    when:
-      notVisible:
-        id: 'tab-turno'
-    commands:
+      - scrollUntilVisible:
+          element:
+            id: 'turno-bloquear'
+          direction: DOWN
+          visibilityPercentage: 60
+          # Center it: at the scroll's end the bar sits under the tab bar
+          # and the home indicator, where taps never land.
+          centerElement: true
       - tapOn:
-          id: 'rail-turno|sidebar-turno'
+          id: 'turno-bloquear'
+# Tablet: the rail's or the sidebar's item.
 - runFlow:
     when:
       visible:
-        id: 'turno-bloquear'
-    commands:
-      - tapOn:
-          id: 'turno-bloquear'
-- runFlow:
-    when:
-      notVisible:
-        id: 'turno-bloquear'
+        id: 'rail-bloquear|sidebar-bloquear'
     commands:
       - tapOn:
           id: 'rail-bloquear|sidebar-bloquear'
