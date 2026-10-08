@@ -25,6 +25,11 @@
 5. **LLM agents are welcome:** Claude Desktop through a local MCP server first, Microsoft Foundry
    later. Agents propose and founders approve (ADR-124 §6).
 6. **Design goes to Claude Design** before code (ADR-117's rule: the canvas is the spec).
+7. **Documents: in `corp` now, Azure Blob before the Tablero.** Phase 0's evidence is kept as bytea
+   in `corp`; before E-20's attachments the bytes move to an immutable Azure Blob container, not
+   to Supabase Storage, since Xangarro moves to Azure after about twenty clients (ADR-126, E-26).
+8. **Minutas feed the Tablero.** Meeting minutes are filed in the Expediente; the secretario del
+   Tablero proposes objectives and cards from them, and the founders approve (ADR-126, E-27).
 
 ### Open owner decisions (answer before the task that needs it)
 
@@ -506,7 +511,7 @@ with property tests:
 
 ### E-20 Tablero
 
-- [ ] Status · **Blocked by:** E-01, OD-4
+- [ ] Status · **Blocked by:** E-01, OD-4, E-26 (card attachments)
 - **What:** §5's Tablero, quarter by quarter: both partners' value proposals, average and 2×
   flag, verifiable criterion, the 10-day objection clock, minimum-commitment check, incumplimiento
   detection with the notice to send, the «terminado» evidence attached (E-05), and the fast
@@ -564,7 +569,7 @@ with property tests:
 
 - [ ] Status · **Blocked by:** E-31
 - **What:** prompts and tool sets for the clasificador, analista de cierre, asistente fiscal,
-  secretario del Tablero and «Pregúntale a MEXIA», as Claude Desktop project instructions first,
+  secretario del Tablero (who also reads E-27's minutas) and «Pregúntale a MEXIA», as Claude Desktop project instructions first,
   with a small eval set per agent built from real months.
 - **Acceptance:** each agent's eval passes its rubric; every agent answer cites the period and the
   screen it used.
@@ -791,3 +796,42 @@ screen, not the P&L roles.
   - **Reports** (the cierre narrative, the tax briefing) get «Marcar como leído».
   - **The agent roster** shows this month's activity and the «never do» list. The Foundry cost is
     shown in the header.
+
+## 12. Documents and minutas (owner decision, 2026-10-08)
+
+The owner asked where the area keeps its files once the Tablero has attachments and the
+founders keep meeting minutes, given Supabase and Vercel now and Azure after about twenty
+clients. ADR-126 records the answer: the bytes stay in `corp` for Phase 0's small legal evidence
+and move to Azure Blob Storage before E-20; minutas are documents the secretario del Tablero
+turns into proposed objectives and cards.
+
+### E-26 Almacenamiento de documentos en Azure Blob
+
+- [ ] Status · **Blocked by:** E-05 · **Needed by:** E-20
+- **What:**
+  - a `BlobStore` port in `@xangarro/application/corp` with the Postgres adapter of today and an
+    Azure Blob adapter (`@azure/storage-blob`, latest stable);
+  - a private `corp-docs` container with a time-based immutability policy of five years (CFF
+    art. 30); the console's identity may create blobs and read them, never delete;
+  - upload and «Ver» through short-lived SAS URLs the console signs after the founder gate, so a
+    file goes straight between the browser and the container and the 4.5 MB request cap no
+    longer applies;
+  - `corp.documents` keeps its columns; `content` becomes a blob reference, with a migration plan
+    and a test exercising old → new rows (CLAUDE.md §2.9);
+  - a one-time move: copy each file, check it against its SHA-256, then drop `content`;
+  - ADR-124 §2's lift-out runbook (E-44) gains the container copy.
+- **Acceptance:** a deleted or overwritten blob is refused by the container; a moved file's
+  SHA-256 matches the one recorded at upload; a 20 MB attachment uploads without passing through
+  the console.
+
+### E-27 Minutas
+
+- [ ] Status · **Blocked by:** E-05, E-31 · **Feeds:** E-20, E-32
+- **What:**
+  - an Expediente folder «Minutas» (a CHECK change in `corp.documents`, with its migration test);
+  - a minuta is text or a transcript, with its date and attendees; audio is not kept;
+  - the secretario del Tablero (E-32) reads a minuta and proposes objectives and Tablero cards
+    through Propuestas (E-31), each citing the lines it came from;
+  - an approved card keeps a link to its minuta, and the minuta lists the cards it produced.
+- **Acceptance:** a rejected proposal leaves no card; an approved one shows «De la minuta del
+  …» and opens it; a minuta never creates a card without a founder's approval.

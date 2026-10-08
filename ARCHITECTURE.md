@@ -164,7 +164,7 @@ Links to discussion, docs, prior art.
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 | [124](#adr-124) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
-| [126](#adr-126) | 2026-10-08 | «Empresa»'s documents live in the `corp` schema as bytea, not in a storage bucket | Proposed |
+| [126](#adr-126) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9105,12 +9105,13 @@ tables are platform tables, and nothing in it models a company's books.
 
 ## ADR-126
 
-**Title:** «Empresa»'s documents live in the `corp` schema as bytea, not in a storage bucket
+**Title:** «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments
 
 **Date:** 2026-10-08
 
-**Status:** Proposed — taken while building E-04 (2026-10-08), for the owner to confirm before
-E-05; amends the «private `corp-docs` bucket» of `docs/plan/20-command-center.md` E-05
+**Status:** Accepted — owner decision of 2026-10-08, taken while building E-04 and E-05; amends
+the «private `corp-docs` bucket» of `docs/plan/20-command-center.md` E-05; tasks E-26 (storage)
+and E-27 (minutas)
 
 **Context**
 
@@ -9122,31 +9123,47 @@ console's corp role (`xangarro_corp`) cannot reach Supabase Storage without the 
 which ADR-124 keeps away from corp. The repository already keeps small files as bytea (logos,
 assisted imports).
 
-The volume is small: a few PDFs a month (acuses, the 32-D opinion, payment proofs) of tens or
-hundreds of KB each.
+Phase 0's volume is small: a few PDFs a month (acuses, the 32-D opinion, payment proofs, actas)
+of tens or hundreds of KB each. What comes later is not: the Tablero's card attachments (E-20:
+screenshots, designs, decks) and meeting minutes (E-27) are larger and more frequent, and an
+upload through the console is capped at 4.5 MB by Vercel. Xangarro moves to Azure after about
+twenty clients (owner, 2026-10-08), so a Supabase Storage bucket would be migrated twice.
 
 **Decision**
 
-1. `corp.documents` holds the file itself (`content bytea`), its kind, the Expediente folder,
-   its title and period, name, MIME type, size and SHA-256, the obligation or ledger entry it
-   proves, `retain_until` (upload + 5 years, CFF art. 30) and the earlier version it supersedes
-   (unique, so a version has one successor).
-2. The console may INSERT and SELECT documents, never UPDATE or DELETE: a correction is a new
-   version that names the old one (E-05 builds the history). The agents' role reads every column
+1. **Now: the file in `corp`.** `corp.documents` holds the file (`content bytea`), its kind, the
+   Expediente folder, its title and period, name, MIME type, size and SHA-256, the obligation or
+   ledger entry it proves, `retain_until` (upload + 5 years, CFF art. 30) and the earlier version
+   it supersedes (unique, so a version has one successor).
+2. **Nothing is deleted.** The console may INSERT and SELECT documents, never UPDATE or DELETE: a
+   correction is a new version that names the old one. The agents' role reads every column
    except `content`.
-3. A file is at most 4 MB (a request to the console carries at most 4.5 MB on Vercel), checked in
-   the domain and by a CHECK constraint; PDF, PNG, JPEG and the SAT's XML only.
-4. «Ver» serves the bytes from a founder-only route with `Content-Security-Policy: sandbox`.
+3. **Limits now:** at most 4 MB (checked in the domain and by a CHECK constraint); PDF, PNG,
+   JPEG and the SAT's XML only. «Ver» serves the bytes from a founder-only route with
+   `Content-Security-Policy: sandbox`.
+4. **Before E-20, the bytes move to Azure Blob Storage, not to Supabase Storage (E-26).** A
+   private `corp-docs` container with a time-based immutability policy of five years, so CFF
+   art. 30's retention is enforced by the storage itself, not only by grants. Browsers upload and
+   download directly with short-lived SAS URLs that the console signs, which removes the 4.5 MB
+   cap. `corp.documents` keeps every column but `content`, which becomes a reference to the blob.
+5. **The bytes sit behind a port.** A `BlobStore` port with a Postgres adapter (today's) and an
+   Azure Blob adapter; `DocumentRepository` and the screens do not change. The move copies each
+   file, checks it against its SHA-256 and only then drops `content`.
+6. **Minutas are documents (E-27).** A meeting's minutes (text or transcript) are filed in their
+   own Expediente folder, «Minutas». Audio is not kept. The secretario del Tablero (E-32) reads a
+   minuta and proposes objectives and cards through Propuestas (E-31); the founders approve, and
+   each card keeps a link to the minuta it came from.
 
 **Consequences**
 
-- The lift-out drill stays one dump and one restore; the evidence travels with the books.
-- The corp database grows with the files. At a few MB a month this is negligible for years; if
-  it stops being so, moving `content` to object storage is a column swap behind
-  `DocumentRepository`, with the SHA-256 proving each byte arrived intact.
-- Backups of corp now include the files, which is what a SAT review needs.
+- Until E-26, the lift-out drill stays one dump and one restore, and the evidence travels with
+  the books; after it, the drill adds a container copy, verified by the SHA-256 column.
+- The corp database grows with the files until E-26; at a few MB a month that is negligible.
+- Backups of corp include the files until E-26; after it, the blob container's own redundancy and
+  immutability take over.
+- E-20 cannot attach files before E-26 ships.
 
 **References**
 
-- ADR-124 §2 (one schema, one dump); CFF art. 30 (five years); E-04 and E-05 in
-  `docs/plan/20-command-center.md`.
+- ADR-124 §2 (one schema, one dump); CFF art. 30 (five years); E-04, E-05, E-20, E-26, E-27,
+  E-31 and E-32 in `docs/plan/20-command-center.md`.
