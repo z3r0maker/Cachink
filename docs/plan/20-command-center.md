@@ -256,7 +256,7 @@ with property tests:
     uses the Torre primitives; E-02 brings the Mostrador primitives and E-06 moves Corporativo onto
     them.
 
-### E-02 Ledger core and Movimientos
+### E-02 Ledger core and Movimientos `[media]`
 
 - [~] Status · **Blocked by:** E-01
   **Remaining (2026-10-08):** the recurring-template screen, the project and category filters,
@@ -422,7 +422,7 @@ with property tests:
 
 **Phase 1 — first month with revenue**
 
-### E-10 Ingresos y facturas emitidas
+### E-10 Ingresos y facturas emitidas `[media]`
 
 - [ ] Status · **Blocked by:** E-02, B-10
 - **What:**
@@ -434,7 +434,7 @@ with property tests:
 - **Acceptance:** a month's imported income equals the month's `cfdi_payments` total without IVA;
   re-running the import posts nothing new (idempotent per payment id).
 
-### E-11 Facturas recibidas
+### E-11 Facturas recibidas `[media]`
 
 - [ ] Status · **Blocked by:** E-02, E-05
 - **What:**
@@ -446,7 +446,7 @@ with property tests:
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
   retención appears as a liability.
 
-### E-12 Estado de resultados y Balance
+### E-12 Estado de resultados y Balance `[media]`
 
 - [ ] Status · **Blocked by:** E-02, OD-1
 - **What:**
@@ -457,7 +457,7 @@ with property tests:
 - **Acceptance:** the balance sheet balances; gross margin and EBITDA match a fixture computed by
   hand; a period without costs captured shows «sin datos» for margin, not 100 %.
 
-### E-13 Impuestos
+### E-13 Impuestos `[media]`
 
 - [ ] Status · **Blocked by:** E-12, the portal's RESICO persona moral fix (session task 2026-10-08)
 - **What:**
@@ -468,7 +468,7 @@ with property tests:
 - **Acceptance:** the estimate uses the same domain function as the portal; marking «pagado»
   without proof is blocked.
 
-### E-14 Cierre del mes
+### E-14 Cierre del mes `[media]`
 
 - [ ] Status · **Blocked by:** E-10, E-11, E-13
 - **What:** the checklist:
@@ -485,7 +485,7 @@ with property tests:
 
 - **Acceptance:** a locked month refuses entries; unlock is audited with both approvals.
 
-### E-15 Límites
+### E-15 Límites `[baja]`
 
 - [ ] Status · **Blocked by:** E-10
 - **What:** company-wide income year to date against the SAS cap and the RESICO PM cap, projected
@@ -494,7 +494,7 @@ with property tests:
 - **Acceptance:** two projects sum into one gauge; a year without the new cap captured warns
   instead of using last year's silently.
 
-### E-16 Resumen
+### E-16 Resumen `[media]`
 
 - [ ] Status · **Blocked by:** E-12, E-04
 - **What:** `/empresa` home with:
@@ -509,7 +509,7 @@ with property tests:
 
 **Phase 2 — before the first pool cut (month 6)**
 
-### E-20 Tablero
+### E-20 Tablero `[alta]`
 
 - [ ] Status · **Blocked by:** E-01, OD-4, E-26 (card attachments)
 - **What:** §5's Tablero, quarter by quarter: both partners' value proposals, average and 2×
@@ -520,7 +520,7 @@ with property tests:
   quarter, no consequence is raised; a quarter with no agreed board copies the previous quarter's
   total commitment.
 
-### E-21 Acciones y cortes
+### E-21 Acciones y cortes `[media]`
 
 - [ ] Status · **Blocked by:** E-20, E-03, E-06
 - **What:** the agreement module (vesting, forfeits, pool cuts with rounding and the zero-value
@@ -529,7 +529,7 @@ with property tests:
 - **Acceptance:** property tests keep each partner within 40–60 % outside forfeits and exits; the
   simulator matches the executed cut; a forfeited share never re-vests on a sale.
 
-### E-22 Presupuesto
+### E-22 Presupuesto `[baja]`
 
 - [ ] Status · **Blocked by:** E-12
 - **What:** a quarterly budget by category and project; actual vs budget; each partner's Límite
@@ -537,7 +537,7 @@ with property tests:
   over the Límite outside the budget flagged for both partners' approval.
 - **Acceptance:** with no income the fixed Límite applies; with income it scales.
 
-### E-23 Caja
+### E-23 Caja `[baja]`
 
 - [ ] Status · **Blocked by:** E-12
 - **What:** bank balances (manual in v1), 3-month burn, runway, equal funding calls (amount, due
@@ -547,7 +547,7 @@ with property tests:
 
 **Phase 3 — agents**
 
-### E-30 `corp-tools` and the Claude Desktop MCP server
+### E-30 `corp-tools` and the Claude Desktop MCP server `[baja]`
 
 - [ ] Status · **Blocked by:** E-12, OD-3
 - **What:** typed read tools (P&L by period and project, movements search, agenda, Tablero,
@@ -556,7 +556,7 @@ with property tests:
 - **Acceptance:** no tool accepts SQL; no tool returns tenant identifiers; the role cannot write
   outside `agent_proposals` (an integration test proves it).
 
-### E-31 Propuestas
+### E-31 Propuestas `[baja]`
 
 - [ ] Status · **Blocked by:** E-30
 - **What:** `corp.agent_proposals` (kind, payload, rationale, sources, status, decided_by);
@@ -565,7 +565,7 @@ with property tests:
 - **Acceptance:** an approved proposal and a manual capture of the same movement produce identical
   entries; a rejected one leaves no trace in the ledger.
 
-### E-32 The agents of §6
+### E-32 The agents of §6 `[baja]`
 
 - [ ] Status · **Blocked by:** E-31
 - **What:** prompts and tool sets for the clasificador, analista de cierre, asistente fiscal,
@@ -574,7 +574,7 @@ with property tests:
 - **Acceptance:** each agent's eval passes its rubric; every agent answer cites the period and the
   screen it used.
 
-### E-33 Foundry runtime
+### E-33 Foundry runtime `[baja]`
 
 - [ ] Status · **Blocked by:** E-32
 - **What:** console-side jobs (month-end narrative, deadline briefings) on the Anthropic
@@ -585,31 +585,31 @@ with property tests:
 
 **Phase 4 — with volume or a second project**
 
-### E-40 KPIs SaaS
+### E-40 KPIs SaaS `[baja]`
 
 - [ ] Status · **Blocked by:** N-63, E-12
 - **What:** MRR, ARR, churn, ARPA, CAC, LTV, LTV ÷ CAC, payback and infra ÷ MRR per project, on
   Resumen and as N-70 trigger rows.
 
-### E-41 Second project and shared-cost allocation
+### E-41 Second project and shared-cost allocation `[baja]`
 
 - [ ] Status · **Blocked by:** OD-2, a second project
 - **What:** project creation, the allocation rule for «compartido» costs, and the per-project and
   consolidated toggles everywhere.
 
-### E-42 Banco y tipo de cambio
+### E-42 Banco y tipo de cambio `[baja]`
 
 - [ ] Status · **Blocked by:** E-23
 - **What:** bank CSV import with matching (the conciliador agent proposes), and the Banxico FIX
   rate fetched daily.
 
-### E-43 Exportación al contador
+### E-43 Exportación al contador `[media]`
 
 - [ ] Status · **Blocked by:** E-14
 - **What:** a monthly export by código agrupador (balanza-style CSV), plus the month's XML and
   acuses in one archive.
 
-### E-44 Salida a otro sistema
+### E-44 Salida a otro sistema `[baja]`
 
 - [ ] Status · **Blocked by:** E-01
 - **What:** a written and rehearsed runbook: dump `corp`, restore, swap the two ports, cut the
@@ -698,7 +698,7 @@ Changes to existing tasks:
   se terminaron» panel; each partner's compliance % for the closed quarter.
 - **E-42:** the bank-CSV half stays; the card-statement half moves to E-25.
 
-### E-17 Resumen del trimestre
+### E-17 Resumen del trimestre `[baja]`
 
 - [ ] Status · **Blocked by:** E-12, E-20, E-04
 - **What:** `/empresa/trimestre`, by year and quarter.
@@ -713,7 +713,7 @@ Changes to existing tasks:
 - **Acceptance:** a quarter that is not closed shows «en curso» and no headline; QoQ growth with a
   zero base shows «sin base», not ∞.
 
-### E-24 Servicios
+### E-24 Servicios `[baja]`
 
 - [ ] Status · **Blocked by:** E-02
 - **What:** `/empresa/servicios`, a catalogue of third-party services. Each service records:
@@ -730,7 +730,7 @@ Changes to existing tasks:
 - **Acceptance:** a service's average equals the mean of its last 3 months of posted expenses; a
   usage projection never shows for a month with fewer than 3 days of data.
 
-### E-25 Lectura de estados de cuenta con IA
+### E-25 Lectura de estados de cuenta con IA `[baja]`
 
 - [ ] Status · **Blocked by:** E-24, E-31, OD-3
 - **What:** upload a card or bank statement (PDF or image). `claude-opus-5-5` reads it through
@@ -805,7 +805,7 @@ clients. ADR-126 records the answer: the bytes stay in `corp` for Phase 0's smal
 and move to Azure Blob Storage before E-20; minutas are documents the secretario del Tablero
 turns into proposed objectives and cards.
 
-### E-26 Almacenamiento de documentos en Azure Blob
+### E-26 Almacenamiento de documentos en Azure Blob `[media]`
 
 - [ ] Status · **Blocked by:** E-05 · **Needed by:** E-20
 - **What:**
@@ -824,7 +824,7 @@ turns into proposed objectives and cards.
   SHA-256 matches the one recorded at upload; a 20 MB attachment uploads without passing through
   the console.
 
-### E-27 Minutas
+### E-27 Minutas `[baja]`
 
 - [ ] Status · **Blocked by:** E-05, E-31 · **Feeds:** E-20, E-32
 - **What:**
