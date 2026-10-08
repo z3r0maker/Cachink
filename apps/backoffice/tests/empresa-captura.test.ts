@@ -42,6 +42,37 @@ describe('leerCaptura', () => {
     assert.equal(r.input.projectId, null);
   });
 
+  it('records partner money with its partner and kind, outside any project', () => {
+    const r = leerCaptura(
+      form({
+        tipo: 'socios',
+        fecha: '2026-10-05',
+        concepto: 'Préstamo para el IMPI',
+        socio: '2',
+        clase: 'prestamo_socio',
+        monto: '5000',
+        proyecto: 'xangarro',
+      }),
+      'f-1',
+    );
+    assert.ok(r.ok);
+    assert.deepEqual(r.input.movement, { kind: 'prestamo_socio', socio: 2, monto: 5_000_00n });
+    assert.equal(r.input.projectId, null);
+    assert.equal(r.input.deducible, null);
+  });
+
+  it('asks whose money it is, and what kind', () => {
+    const base = { tipo: 'socios', fecha: '2026-10-05', monto: '10' };
+    assert.deepEqual(leerCaptura(form({ ...base, clase: 'prestamo_socio' }), 'f-1'), {
+      ok: false,
+      message: 'Elige de qué socio es el dinero.',
+    });
+    assert.deepEqual(leerCaptura(form({ ...base, socio: '1', clase: 'fondeo_mitades' }), 'f-1'), {
+      ok: false,
+      message: 'Elige qué tipo de dinero es.',
+    });
+  });
+
   it('asks for a number when the amount is not one', () => {
     const r = leerCaptura(form({ ...gasto, monto: '20 dólares' }), 'f-1');
     assert.equal(r.ok, false);

@@ -9,13 +9,24 @@ import { registrarMovimiento } from '@/server/actions/empresa';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
+import { DeSocios } from './de-socios';
 import { Campo, Opciones, submitWith, type Opcion } from './opciones';
 
-/** Registrar (E-02, board CD-03): a paid expense or a bank fee, in MXN or USD. */
+/**
+ * Registrar (E-02, board CD-03): a paid expense or a bank fee, in MXN or USD,
+ * and partner money (E-03).
+ */
 const TIPOS: readonly Opcion[] = [
   { value: 'gasto', title: 'Gasto', text: 'Un pago a un proveedor o servicio.' },
   { value: 'comision', title: 'Comisión bancaria', text: 'Lo que el banco te cobró.' },
+  { value: 'socios', title: 'Dinero de socios', text: 'Capital, aportaciones y préstamos.' },
 ];
+
+const BOTON: Record<string, string> = {
+  gasto: 'Registrar gasto',
+  comision: 'Registrar comisión',
+  socios: 'Registrar dinero de socio',
+};
 
 const CATEGORIAS: readonly Opcion[] = [
   { value: 'costo_servicio', title: 'Costo del servicio', text: 'Nube, base de datos, correo.' },
@@ -45,14 +56,14 @@ function equivalencia(monto: string, tipoCambio: string): string | undefined {
   }
 }
 
-function Montos({ moneda }: { readonly moneda: string }) {
+function Montos({ moneda, label }: { readonly moneda: string; readonly label?: string }) {
   const [monto, setMonto] = useState('');
   const [tc, setTc] = useState('');
   const usd = moneda === 'USD';
   return (
     <div className={d.fields}>
       <Campo
-        label={usd ? 'Monto pagado (USD)' : 'Monto pagado'}
+        label={usd ? 'Monto pagado (USD)' : (label ?? 'Monto pagado')}
         name="monto"
         inputMode="decimal"
         required
@@ -105,13 +116,51 @@ function DelGasto({ proyectos }: { readonly proyectos: readonly Opcion[] }) {
   );
 }
 
+function Detalle(props: {
+  readonly tipo: string;
+  readonly proyectos: readonly Opcion[];
+  readonly socios: readonly Opcion[];
+}) {
+  if (props.tipo === 'gasto') return <DelGasto proyectos={props.proyectos} />;
+  if (props.tipo === 'comision') return <Montos moneda="MXN" />;
+  return (
+    <>
+      <DeSocios socios={props.socios} />
+      <Montos moneda="MXN" label="Monto" />
+    </>
+  );
+}
+
+function Acciones(props: {
+  readonly tipo: string;
+  readonly inicial: string;
+  readonly pending: boolean;
+}) {
+  const { tipo, inicial, pending } = props;
+  return (
+    <div className={m.row}>
+      <Link
+        className={m.boton.quieto}
+        href={inicial === 'socios' ? '/empresa/socios' : '/empresa/movimientos'}
+      >
+        Cancelar
+      </Link>
+      <button className={m.boton.primario} type="submit" disabled={pending}>
+        {BOTON[tipo] ?? 'Registrar'}
+      </button>
+    </div>
+  );
+}
+
 export function CapturaForm(props: {
   readonly nonce: string;
   readonly hoy: string;
+  readonly tipo: string;
   readonly proyectos: readonly Opcion[];
+  readonly socios: readonly Opcion[];
 }) {
   const [state, action, pending] = useActionState(registrarMovimiento, null);
-  const [tipo, setTipo] = useState('gasto');
+  const [tipo, setTipo] = useState(props.tipo);
   return (
     <form onSubmit={submitWith(action)} className={d.form}>
       <input type="hidden" name="nonce" value={props.nonce} />
@@ -126,20 +175,13 @@ export function CapturaForm(props: {
         <Campo label="Concepto" name="concepto" required autoComplete="off" />
         <Campo label="Fecha de pago" name="fecha" type="date" required defaultValue={props.hoy} />
       </div>
-      {tipo === 'gasto' ? <DelGasto proyectos={props.proyectos} /> : <Montos moneda="MXN" />}
+      <Detalle tipo={tipo} proyectos={props.proyectos} socios={props.socios} />
       {state !== null && !state.ok ? (
         <p className={d.messageBad} role="alert">
           {state.message}
         </p>
       ) : null}
-      <div className={m.row}>
-        <Link className={m.boton.quieto} href="/empresa/movimientos">
-          Cancelar
-        </Link>
-        <button className={m.boton.primario} type="submit" disabled={pending}>
-          {tipo === 'gasto' ? 'Registrar gasto' : 'Registrar comisión'}
-        </button>
-      </div>
+      <Acciones tipo={tipo} inicial={props.tipo} pending={pending} />
     </form>
   );
 }

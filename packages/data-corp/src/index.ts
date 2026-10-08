@@ -7,5 +7,12 @@ export {
   monthBounds,
   type Movimiento,
 } from './queries/movimientos.js';
+export {
+  createFundingCallRepository,
+  listFundingCalls,
+  listPartnerEntries,
+  type LlamadaConEstado,
+  type MitadPagada,
+} from './queries/socios.js';
 export { listProjects, type Project } from './queries/projects.js';
 export * from './schema/index.js';

@@ -3,7 +3,7 @@ import { and, asc, desc, eq, gte, inArray, lt, type SQL } from 'drizzle-orm';
 
 import type { CorpDb } from '../client.js';
 import { entries, entryLines } from '../schema/ledger.js';
-import { toEntry, type LineRow } from './ledger.js';
+import { toEntry, type LineRow } from './rows.js';
 
 /**
  * The Movimientos screen's reads (E-02): one month of entries, newest first,
@@ -27,7 +27,7 @@ export function monthBounds(period: string): readonly [string, string] | null {
   return [`${period}-01`, `${next}-01`];
 }
 
-async function withDetail(db: CorpDb, rows: readonly (typeof entries.$inferSelect)[]) {
+export async function withDetail(db: CorpDb, rows: readonly (typeof entries.$inferSelect)[]) {
   if (rows.length === 0) return [];
   const ids = rows.map((r) => r.id);
   const [lines, reversals] = await Promise.all([

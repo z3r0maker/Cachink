@@ -107,6 +107,7 @@ function pagoImpuestos(m: PagoImpuestos): readonly JournalLine[] {
 
 const CONTRA: Record<MovimientoSocio['kind'], AccountKey> = {
   aportacion_capital: 'capital_social',
+  fondeo_mitades: 'afac',
   aportacion_adicional: 'afac',
   prestamo_socio: 'prestamos_socios',
   reembolso_socio: 'prestamos_socios',
@@ -144,6 +145,10 @@ export function postMovement(m: Movement): readonly JournalLine[] {
         debe('financiero', positive(m.monto, 'la comisión')),
         haber('bancos', m.monto),
       ]);
+    case 'excedente_a_prestamo': {
+      const monto = positive(m.monto, 'el excedente');
+      return balanced([debe('afac', monto, m.socio), haber('prestamos_socios', monto, m.socio)]);
+    }
     case 'ajuste':
       return balanced(ajuste(m));
     default:

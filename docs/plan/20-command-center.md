@@ -289,7 +289,27 @@ with property tests:
 
 ### E-03 Aportaciones y préstamos de socios
 
-- [ ] Status · **Blocked by:** E-02
+- [x] Status · **Blocked by:** E-02 · **Done:** 2026-10-08
+      **Progress (2026-10-08):** the agreement's money rules are pure functions in
+      `@xangarro/domain/corp` (`socios/dinero.ts`): `repartoDelDinero` (additional money counts 1:1
+      up to the quarter's finished deliverables, the rest is a loan), `mitad` (an odd centavo rounds
+      up), quarters (`trimestreDe`, `rangoDelTrimestre`, `nombreTrimestre`), `cuentasDeSocios`
+      (capital, halves, additional, loan, repaid, per partner, reversals netting out) and
+      `assertReembolsoCabe`. Two movement kinds join the ledger: `fondeo_mitades` (AFAC, no pool
+      value) and `excedente_a_prestamo` (AFAC → loan, no bank line). Use cases: `PedirFondeo`,
+      `PagarMitad` (one half per partner per call, by `source_ref llamada:<id>:F<n>`) and
+      `CerrarDineroDelTrimestre` (only once the quarter ended; dated its last day; a second close
+      reports the first). `RegistrarMovimiento` and `RevertirMovimiento` refuse anything that leaves a
+      partner's loan below zero: a repayment over the balance, or reversing a loan already partly
+      repaid. Storage: `corp.funding_calls` (0002, SELECT/INSERT only); a call's state is read from
+      the ledger. Screens: `/empresa/socios` on board CD-04 (the open call with each half, the
+      partner accounts, the last quarter's close with the live split preview, the history) and
+      «Dinero de socios» on Registrar. Playwright: `e2e/empresa.spec.ts` asks for funding, pays a
+      half, records additional money in the last quarter, sees a repayment refused, and closes the
+      quarter into $20,000 of pool value and a $10,000 loan.
+      **Until E-20 ships,** the close asks for the deliverables' value the Tablero agreed; E-20 feeds
+      it instead. The corp integration suites now delete what they wrote (`tests/cleanup.ts`, one
+      author id per file), so a shared local database stays clean for the e2e.
 - **What:**
   - the capital, equal funding call, additional contribution (AFAC), partner loan and repayment
     movements;

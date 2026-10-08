@@ -8,6 +8,12 @@ import {
   resetSocioFixture,
   SOCIO,
 } from './founder-fixture';
+import {
+  cerrarElTrimestre,
+  pedirYPagarFondeo,
+  registrarDineroDeSocio,
+  trimestrePasado,
+} from './empresa-socios';
 import { signInAsStaff } from './helpers';
 
 /**
@@ -114,4 +120,39 @@ test('a founder records a USD expense and reverses it', async ({ page }) => {
   ).toContainText('Revertido');
   // A reversed entry and its reversal cancel: the month's outflow is back to zero.
   await expect(page.getByTestId('total-salidas')).toContainText('$0.00');
+});
+
+test('a founder funds by halves, puts in more and closes the quarter', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Socios', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Cuentas de socios', level: 1 })).toBeVisible();
+  await pedirYPagarFondeo(page);
+
+  const pasado = trimestrePasado();
+  await registrarDineroDeSocio(page, {
+    concepto: 'E2E Aportación adicional',
+    clase: 'Aportación adicional',
+    monto: '30000',
+    fecha: pasado.fecha,
+  });
+  await expect(page).toHaveURL(/\/empresa\/socios$/);
+  await expect(page.getByTestId('cuenta-1')).toContainText('Aportaciones adicionales$30,000.00');
+
+  // A repayment with no loan on the books is refused, with the reason.
+  await registrarDineroDeSocio(page, {
+    concepto: 'E2E Reembolso',
+    clase: 'Reembolso de préstamo',
+    monto: '1000',
+    fecha: pasado.fecha,
+  });
+  await expect(page.getByText('Ese socio no tiene préstamos por reembolsar.')).toBeVisible();
+
+  await page.goto('/empresa/socios');
+  await cerrarElTrimestre(page, pasado.nombre);
+  await expect(page.getByTestId('cuenta-1')).toContainText('Aportaciones adicionales$20,000.00');
+  await expect(page.getByTestId('cuenta-1')).toContainText('Préstamos a la empresa$10,000.00');
+  // The close is in the history, dated the quarter's last day.
+  await expect(
+    page.getByTestId('movimiento-socio').filter({ hasText: 'Excedente a préstamo' }),
+  ).toContainText('$10,000.00');
 });

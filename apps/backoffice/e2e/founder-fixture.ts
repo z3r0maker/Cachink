@@ -60,15 +60,22 @@ export async function makeSocioFounder(): Promise<void> {
 /** What the movimientos suite captures is named «E2E …» (and its reversal «Reversa: E2E …»). */
 export const E2E_CONCEPTO = 'E2E Vercel';
 
-/** The console's corp role has no DELETE; the owner removes the suite's entries. */
+/**
+ * The console's corp role has no DELETE; the owner removes the suite's
+ * entries: the ones it names «E2E …», their reversals, and whatever its
+ * founders posted (a quarter close names itself), plus its funding calls.
+ */
 export async function clearLedgerFixture(): Promise<void> {
   await withSuper(async (sql) => {
     await sql.begin(async (tx) => {
-      await tx`DELETE FROM corp.entry_lines WHERE entry_id IN (
-                 SELECT id FROM corp.entries
-                  WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %')`;
-      await tx`DELETE FROM corp.entries
-                WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'`;
+      const mine = tx`SELECT id FROM corp.entries
+                       WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'
+                          OR created_by IN (SELECT f.id FROM corp.founders f
+                                              JOIN staff_members s ON s.id = f.staff_member_id
+                                             WHERE lower(s.email) = ${SOCIO.email})`;
+      await tx`DELETE FROM corp.entry_lines WHERE entry_id IN (${mine})`;
+      await tx`DELETE FROM corp.entries WHERE id IN (${mine})`;
+      await tx`DELETE FROM corp.funding_calls WHERE concepto LIKE 'E2E %'`;
     });
   });
 }

@@ -24,6 +24,30 @@ export class MovimientoDesconocidoError extends Error {
   }
 }
 
+export class TrimestreEnCursoError extends Error {
+  readonly code = 'TRIMESTRE_EN_CURSO' as const;
+  constructor(readonly trimestre: string) {
+    super('El dinero de un trimestre se cierra cuando el trimestre termina.');
+    this.name = 'TrimestreEnCursoError';
+  }
+}
+
+export class LlamadaDesconocidaError extends Error {
+  readonly code = 'LLAMADA_DESCONOCIDA' as const;
+  constructor(readonly callId: string) {
+    super('Ese fondeo no existe.');
+    this.name = 'LlamadaDesconocidaError';
+  }
+}
+
+export class VencimientoInvalidoError extends Error {
+  readonly code = 'VENCIMIENTO_INVALIDO' as const;
+  constructor(readonly vence: string) {
+    super('Elige una fecha límite de hoy en adelante.');
+    this.name = 'VencimientoInvalidoError';
+  }
+}
+
 export class YaRevertidoError extends Error {
   readonly code = 'YA_REVERTIDO' as const;
   constructor(readonly entryId: string) {

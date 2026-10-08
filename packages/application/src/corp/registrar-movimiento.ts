@@ -3,6 +3,7 @@ import { assertPeriodOpen, postMovement, type Movement } from '@xangarro/domain/
 import type { UseCase } from '../_use-case.js';
 import { ConceptoRequeridoError, ProyectoDesconocidoError } from './errors.js';
 import type { CorpLedgerRepository, EntrySource, LedgerEntry, NewLedgerEntry } from './ports.js';
+import { assertPrestamosCubiertos } from './prestamos.js';
 
 /**
  * Records one movement in MEXIA's ledger (E-02, ADR-124 §4): the manual
@@ -45,6 +46,7 @@ export class RegistrarMovimientoUseCase implements UseCase<RegistrarMovimientoIn
       throw new ProyectoDesconocidoError(input.projectId);
     }
     const lines = postMovement(input.movement);
+    await assertPrestamosCubiertos(this.#ledger, input.movement.kind, lines);
     return this.#ledger.insert(toNewEntry(input, concepto), lines);
   }
 }

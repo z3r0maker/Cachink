@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { PeriodoCerradoError, type JournalLine } from '@xangarro/domain/corp';
+import { PeriodoCerradoError } from '@xangarro/domain/corp';
 
 import {
   ConceptoRequeridoError,
@@ -10,41 +10,13 @@ import {
   RevertirMovimientoUseCase,
   YaRevertidoError,
   MovimientoDesconocidoError,
-  type CorpLedgerRepository,
-  type LedgerEntry,
-  type NewLedgerEntry,
-} from '../src/corp/index.js';
+} from '../../src/corp/index.js';
+import { FakeLedger } from './fake-ledger.js';
 
 /**
  * E-02 (ADR-124 §4): recording and reversing a movement. The repository is
  * faked in memory; the posting rules themselves are the domain's.
  */
-class FakeLedger implements CorpLedgerRepository {
-  readonly entries: LedgerEntry[] = [];
-  readonly projects = new Set(['xangarro']);
-  readonly closed = new Set<string>(['2026-08']);
-
-  async projectExists(id: string) {
-    return this.projects.has(id);
-  }
-  async closedPeriods() {
-    return this.closed;
-  }
-  async findBySource(source: string, ref: string) {
-    return this.entries.find((e) => e.source === source && e.sourceRef === ref) ?? null;
-  }
-  async findById(id: string) {
-    return this.entries.find((e) => e.id === id) ?? null;
-  }
-  async isReversed(id: string) {
-    return this.entries.some((e) => e.reversesEntryId === id);
-  }
-  async insert(entry: NewLedgerEntry, lines: readonly JournalLine[]) {
-    const saved: LedgerEntry = { ...entry, id: `e${this.entries.length + 1}`, lines };
-    this.entries.push(saved);
-    return saved;
-  }
-}
 
 const gasto = {
   fecha: '2026-10-08',

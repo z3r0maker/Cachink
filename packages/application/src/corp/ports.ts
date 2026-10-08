@@ -36,6 +36,35 @@ export interface CorpLedgerRepository {
   findBySource(source: EntrySource, sourceRef: string): Promise<LedgerEntry | null>;
   findById(id: string): Promise<LedgerEntry | null>;
   isReversed(id: string): Promise<boolean>;
+  /**
+   * Every entry with a partner line (E-03), oldest first; with a range, only
+   * those dated in `[desde, hasta)`.
+   */
+  listPartnerEntries(range?: {
+    readonly desde: string;
+    readonly hasta: string;
+  }): Promise<readonly LedgerEntry[]>;
   /** Writes the entry and its lines in one transaction. */
   insert(entry: NewLedgerEntry, lines: readonly JournalLine[]): Promise<LedgerEntry>;
+}
+
+/** A call for equal funding (E-03, agreement Quinta): each partner pays `porSocio`. */
+export interface NewFundingCall {
+  readonly concepto: string;
+  /** Centavos. */
+  readonly total: bigint;
+  /** Centavos; half the total, an odd centavo rounded up. */
+  readonly porSocio: bigint;
+  /** `YYYY-MM-DD`: ten business days after approval, per the agreement. */
+  readonly vence: string;
+  readonly createdBy: string;
+}
+
+export interface FundingCall extends NewFundingCall {
+  readonly id: string;
+}
+
+export interface FundingCallRepository {
+  insert(call: NewFundingCall): Promise<FundingCall>;
+  findById(id: string): Promise<FundingCall | null>;
 }

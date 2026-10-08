@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { it } from 'vitest';
+import { afterAll, it } from 'vitest';
 import { RegistrarMovimientoUseCase, RevertirMovimientoUseCase } from '@xangarro/application/corp';
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
+import { borrarLoDe } from './cleanup';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 import { getMovimiento, listMovimientos, monthBounds } from '../src/queries/movimientos';
 
@@ -25,7 +26,7 @@ const comision = (fecha: string, concepto: string) => ({
   projectId: 'xangarro',
   concepto,
   contraparte: 'Banco',
-  founderId: 'f-test',
+  founderId: 'f-movs-test',
   source: 'manual' as const,
   sourceRef: null,
   usd: null,
@@ -34,6 +35,7 @@ const comision = (fecha: string, concepto: string) => ({
 });
 
 describe('corp movimientos reads', () => {
+  afterAll(() => borrarLoDe('f-movs-test'));
   const db = () => createCorpDb(url as string);
 
   it('lists one month, newest first, and marks the reversed entry', async () => {
@@ -46,7 +48,7 @@ describe('corp movimientos reads', () => {
       entryId: early.id,
       fecha: `${mes}-21`,
       motivo: 'Cobro indebido',
-      founderId: 'f-test',
+      founderId: 'f-movs-test',
     });
 
     const list = await listMovimientos(db(), mes);

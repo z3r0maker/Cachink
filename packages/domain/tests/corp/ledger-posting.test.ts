@@ -35,7 +35,9 @@ const ALL: readonly Movement[] = [
   },
   { kind: 'pago_impuestos', isr: 3_875_00n, iva: 2_944_00n, retenciones: 723_33n },
   { kind: 'aportacion_capital', socio: 1, monto: 6_000_00n },
+  { kind: 'fondeo_mitades', socio: 2, monto: 10_000_00n },
   { kind: 'aportacion_adicional', socio: 1, monto: 20_000_00n },
+  { kind: 'excedente_a_prestamo', socio: 1, monto: 5_000_00n },
   { kind: 'prestamo_socio', socio: 1, monto: 10_000_00n },
   { kind: 'reembolso_socio', socio: 1, monto: 10_000_00n },
   { kind: 'comision_bancaria', monto: 450_00n },
@@ -82,11 +84,22 @@ describe('postMovement', () => {
   });
 
   it('records a partner loan as a liability of that partner', () => {
-    const [banco, prestamo] = postMovement(ALL[6]!);
+    const [banco, prestamo] = postMovement(ALL[8]!);
     assert.equal(banco?.cuenta, 'bancos');
     assert.equal(prestamo?.cuenta, 'prestamos_socios');
     assert.equal(prestamo?.socio, 1);
     assert.equal(prestamo?.haber, 10_000_00n);
+  });
+
+  it('moves an excess from AFAC to a loan without touching the bank', () => {
+    const lines = postMovement(ALL[7]!);
+    assert.deepEqual(
+      lines.map((l) => [l.cuenta, l.debe, l.haber, l.socio]),
+      [
+        ['afac', 5_000_00n, 0n, 1],
+        ['prestamos_socios', 0n, 5_000_00n, 1],
+      ],
+    );
   });
 
   it('refuses a zero or negative amount', () => {

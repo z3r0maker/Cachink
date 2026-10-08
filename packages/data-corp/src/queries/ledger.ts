@@ -5,55 +5,20 @@ import type {
   NewLedgerEntry,
 } from '@xangarro/application/corp';
 import { newUlid } from '@xangarro/domain';
-import { isAccountKey, type JournalLine, type Movement } from '@xangarro/domain/corp';
+import type { JournalLine } from '@xangarro/domain/corp';
 import { and, asc, eq } from 'drizzle-orm';
 
 import type { CorpDb } from '../client.js';
 import { closedPeriods, entries, entryLines } from '../schema/ledger.js';
 import { projects } from '../schema/projects.js';
+import { toEntry, type EntryRow } from './rows.js';
+import { listPartnerEntries } from './socios.js';
 
 /**
  * The ledger port over the corp schema (E-02). Entries and their lines are
  * written in one transaction; the deferred triggers of 0001_ledger_guards.sql
  * check the balance at its commit.
  */
-export type EntryRow = typeof entries.$inferSelect;
-export type LineRow = typeof entryLines.$inferSelect;
-
-/** Parsed, never asserted (CLAUDE.md §2.8). */
-function toLine(row: LineRow): JournalLine {
-  if (!isAccountKey(row.cuenta))
-    throw new Error(`corp line ${row.id} has unknown cuenta ${row.cuenta}`);
-  if (typeof row.debe !== 'bigint' || typeof row.haber !== 'bigint') {
-    throw new Error(`corp line ${row.id} amounts are not bigint`);
-  }
-  const base = { cuenta: row.cuenta, debe: row.debe, haber: row.haber };
-  if (row.socio === null) return base;
-  if (row.socio !== 1 && row.socio !== 2)
-    throw new Error(`corp line ${row.id} has socio ${row.socio}`);
-  return { ...base, socio: row.socio };
-}
-
-export function toEntry(row: EntryRow, lines: readonly LineRow[]): LedgerEntry {
-  return {
-    id: row.id,
-    fecha: row.fecha,
-    projectId: row.projectId,
-    kind: row.kind as Movement['kind'],
-    concepto: row.concepto,
-    contraparte: row.contraparte,
-    moneda: row.moneda,
-    montoOriginal: row.montoOriginal,
-    tipoCambio: row.tipoCambio,
-    deducible: row.deducible,
-    source: row.source,
-    sourceRef: row.sourceRef,
-    reversesEntryId: row.reversesEntryId,
-    payload: row.payload as NewLedgerEntry['payload'],
-    createdBy: row.createdBy,
-    lines: lines.map(toLine),
-  };
-}
 
 const toJson = (value: unknown): unknown =>
   JSON.parse(JSON.stringify(value, (_k, v: unknown) => (typeof v === 'bigint' ? v.toString() : v)));
@@ -121,6 +86,7 @@ export function createCorpLedgerRepository(db: CorpDb): CorpLedgerRepository {
     findBySource: (source, ref) => findBySource(db, source, ref),
     findById: (id) => findById(db, id),
     isReversed: (id) => exists(db, 'reversal', id),
+    listPartnerEntries: (range) => listPartnerEntries(db, range),
     insert: (entry, lines) => insert(db, entry, lines),
   };
 }

@@ -15,8 +15,10 @@ export {
   PeriodoCerradoError,
   TipoCambioInvalidoError,
 } from './errors.js';
+export { isMovementKind, MOVEMENT_KINDS } from './movements.js';
 export type {
   Ajuste,
+  ExcedenteAPrestamo,
   Cobro,
   ComisionBancaria,
   Gasto,

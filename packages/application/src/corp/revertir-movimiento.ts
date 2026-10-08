@@ -3,6 +3,7 @@ import { assertPeriodOpen, MotivoRequeridoError, reverseLines } from '@xangarro/
 import type { UseCase } from '../_use-case.js';
 import { MovimientoDesconocidoError, YaRevertidoError } from './errors.js';
 import type { CorpLedgerRepository, LedgerEntry } from './ports.js';
+import { assertPrestamosCubiertos } from './prestamos.js';
 
 /**
  * Undoes a movement the only way the ledger allows (E-02, ADR-124 §4): a new
@@ -32,6 +33,8 @@ export class RevertirMovimientoUseCase implements UseCase<RevertirMovimientoInpu
       throw new YaRevertidoError(original.id);
     }
     assertPeriodOpen(input.fecha, await this.#ledger.closedPeriods());
+    const lines = reverseLines(original.lines);
+    await assertPrestamosCubiertos(this.#ledger, original.kind, lines);
     return this.#ledger.insert(
       {
         projectId: original.projectId,
@@ -49,7 +52,7 @@ export class RevertirMovimientoUseCase implements UseCase<RevertirMovimientoInpu
         payload: { reversal: true, motivo },
         createdBy: input.founderId,
       },
-      reverseLines(original.lines),
+      lines,
     );
   }
 }

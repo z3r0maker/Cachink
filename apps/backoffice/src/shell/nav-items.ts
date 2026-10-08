@@ -12,6 +12,7 @@ export type NavHref =
   | '/campanas'
   | '/capacidad'
   | '/empresa/movimientos'
+  | '/empresa/socios'
   | '/empresa/corporativo';
 
 export interface NavItem {
@@ -78,6 +79,12 @@ export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
     href: '/empresa/movimientos',
     task: 'E-02',
     summary: 'El libro del mes: gastos, comisiones y reversas.',
+  },
+  {
+    label: 'Socios',
+    href: '/empresa/socios',
+    task: 'E-03',
+    summary: 'Capital, fondeo por mitades, aportaciones y préstamos de cada socio.',
   },
   {
     label: 'Corporativo',

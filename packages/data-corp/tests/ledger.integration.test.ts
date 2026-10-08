@@ -6,6 +6,7 @@ import { RegistrarMovimientoUseCase, RevertirMovimientoUseCase } from '@xangarro
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
+import { borrarLoDe } from './cleanup';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 
 /**
@@ -28,7 +29,7 @@ const vercel = (sourceRef: string | null) => ({
   projectId: 'xangarro',
   concepto: 'Vercel',
   contraparte: 'Vercel Inc.',
-  founderId: 'f-test',
+  founderId: 'f-ledger-test',
   source: 'manual' as const,
   sourceRef,
   usd: { montoOriginal: 20_00n, tipoCambio: '18.42' },
@@ -59,6 +60,7 @@ describe('corp ledger storage', () => {
 
   afterAll(async () => {
     await Promise.all([owner.end(), corp.end()]);
+    await borrarLoDe('f-ledger-test');
   });
 
   it('records a USD expense and reads back the same balanced lines', async () => {
@@ -89,7 +91,7 @@ describe('corp ledger storage', () => {
       entryId: saved.id,
       fecha: FECHA,
       motivo: 'Duplicado',
-      founderId: 'f-test',
+      founderId: 'f-ledger-test',
     });
     assert.equal(rev.reversesEntryId, saved.id);
     assert.equal(rev.lines[1]?.debe, 368_40n);

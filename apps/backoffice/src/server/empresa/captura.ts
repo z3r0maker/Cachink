@@ -35,12 +35,29 @@ interface Montos {
   readonly usd: RegistrarMovimientoInput['usd'];
 }
 
+/** Partner money a founder records by hand; halves of a call are paid from Socios. */
+export const CLASES_SOCIO = [
+  'aportacion_capital',
+  'aportacion_adicional',
+  'prestamo_socio',
+  'reembolso_socio',
+] as const;
+
+function deSocio(campo: Campo, monto: bigint): Montos | string {
+  const socio = campo('socio') === '1' ? 1 : campo('socio') === '2' ? 2 : null;
+  if (socio === null) return 'Elige de qué socio es el dinero.';
+  const kind = CLASES_SOCIO.find((k) => k === campo('clase'));
+  if (kind === undefined) return 'Elige qué tipo de dinero es.';
+  return { movement: { kind, socio, monto }, usd: null };
+}
+
 function montosDe(campo: Campo): Montos | string {
   const total = centavos(campo('monto'), null);
   if (total === null) return 'Escribe el monto con números, por ejemplo 368.40.';
   if (campo('tipo') === 'comision') {
     return { movement: { kind: 'comision_bancaria', monto: total }, usd: null };
   }
+  if (campo('tipo') === 'socios') return deSocio(campo, total);
   const categoria = categoriaDe(campo('categoria'));
   if (categoria === null) return 'Elige la categoría del gasto.';
   const iva = centavos(campo('iva'), 0n);
@@ -62,20 +79,26 @@ export function leerCaptura(campo: Campo, founderId: string): Captura {
   if (!FECHA.test(fecha)) return fail('Elige la fecha de pago.');
   const montos = montosDe(campo);
   if (typeof montos === 'string') return fail(montos);
-  const comision = montos.movement.kind === 'comision_bancaria';
+  const { kind } = montos.movement;
   return {
     ok: true,
     input: {
       fecha,
-      projectId: campo('proyecto') || null,
+      projectId: kind === 'gasto' ? campo('proyecto') || null : null,
       concepto: campo('concepto'),
       contraparte: campo('contraparte') || null,
       founderId,
       source: 'manual',
       sourceRef: campo('nonce') || null,
       usd: montos.usd,
-      deducible: comision ? true : campo('deducible') !== 'no',
+      deducible: deducibleDe(kind, campo),
       movement: montos.movement,
     },
   };
+}
+
+/** A bank fee is deductible; partner money is not an expense, so the question does not apply. */
+function deducibleDe(kind: Movement['kind'], campo: Campo): boolean | null {
+  if (kind === 'gasto') return campo('deducible') !== 'no';
+  return kind === 'comision_bancaria' ? true : null;
 }

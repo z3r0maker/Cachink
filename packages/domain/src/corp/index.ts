@@ -4,3 +4,4 @@
  * business with a company's ledger, and these names would only crowd it.
  */
 export * from './ledger/index.js';
+export * from './socios/index.js';
