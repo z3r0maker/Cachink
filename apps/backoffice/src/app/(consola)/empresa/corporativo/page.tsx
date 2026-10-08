@@ -1,77 +1,37 @@
-import { listFounders, listProjects, type Founder, type Project } from '@xangarro/data-corp';
-
-import { corpDb } from '@/server/db/corp';
+import { hoyEnMexico } from '@/server/db/corp';
+import { leerLibro } from '@/server/empresa/corporativo-lectura';
+import { beneficiario } from '@/server/empresa/corporativo-view';
 import { requireFounderPage } from '@/server/founder';
-import * as u from '@/styles/torre.css';
+import * as m from '@/styles/mostrador.css';
+import * as s from '@/styles/mostrador-socios.css';
+
+import { Actas, Firmas, Registros, SociosYAcciones } from './secciones';
 
 export const dynamic = 'force-dynamic';
 
-function Socios({ socios, yo }: { readonly socios: readonly Founder[]; readonly yo: string }) {
-  return (
-    <section className={u.panel} aria-labelledby="socios">
-      <div className={u.panelHead}>
-        <h2 id="socios" className={u.panelTitle}>
-          Socios
-        </h2>
-      </div>
-      <ul className={u.list}>
-        {socios.map((s) => (
-          <li key={s.id} className={u.row}>
-            <span className={u.rowTitle}>
-              Fundador {s.numero} · {s.nombre}
-              {s.id === yo ? ' (tú)' : ''}
-            </span>
-            <span className={u.rowDetail}>{s.rfc ?? 'RFC sin capturar'}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function Proyectos({ proyectos }: { readonly proyectos: readonly Project[] }) {
-  return (
-    <section className={u.panel} aria-labelledby="proyectos">
-      <div className={u.panelHead}>
-        <h2 id="proyectos" className={u.panelTitle}>
-          Proyectos
-        </h2>
-      </div>
-      {proyectos.length === 0 ? (
-        <p className={u.rowDetail}>Todavía no hay proyectos.</p>
-      ) : (
-        <ul className={u.list}>
-          {proyectos.map((p) => (
-            <li key={p.id} className={u.row}>
-              <span className={u.rowTitle}>{p.nombre}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
 /**
- * Libro corporativo, first slice (E-01): who the partners are and which
- * projects MEXIA runs, read from corp. E-06 adds registries, actas and
- * certificates on the approved board (CD-05).
+ * Libro corporativo (E-06, board CD-05 Corporativo): partners and shares as
+ * the hero, the registries and paperwork, the company's papers, and the
+ * certificates' expiries. All of it read from corp.
  */
 export default async function CorporativoPage() {
-  const { founder } = await requireFounderPage();
-  const db = corpDb();
-  if (db === null) throw new Error('CORP_DATABASE_URL is not set.');
-  const [socios, proyectos] = await Promise.all([listFounders(db), listProjects(db)]);
+  await requireFounderPage();
+  const hoy = hoyEnMexico();
+  const libro = await leerLibro();
   return (
-    <div className={u.page}>
-      <header className={u.pageHead}>
-        <div>
-          <span className={u.eyebrow}>MEXIA, S.A.S. · Empresa</span>
-          <h1 className={u.title}>Libro corporativo</h1>
+    <div className={m.page}>
+      <header className={m.head}>
+        <div className={m.headText}>
+          <span className={m.eyebrow}>MEXIA, S.A.S. · RESICO persona moral</span>
+          <h1 className={m.title}>Libro corporativo</h1>
         </div>
       </header>
-      <Socios socios={socios} yo={founder.id} />
-      <Proyectos proyectos={proyectos} />
+      <SociosYAcciones libro={libro} beneficiario={beneficiario(libro.avisos, hoy).texto} />
+      <Registros registros={libro.registros} />
+      <div className={s.grid2}>
+        <Actas docs={libro.actas} />
+        <Firmas certs={libro.certificados} hoy={hoy} />
+      </div>
     </div>
   );
 }

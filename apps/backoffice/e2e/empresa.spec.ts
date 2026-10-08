@@ -6,6 +6,7 @@ import {
   inscripcionPasada,
   presentarConAcuse,
 } from './empresa-agenda';
+import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { registrarGastoEnDolares } from './empresa-movimientos';
 import {
@@ -41,7 +42,7 @@ test.describe.configure({ mode: 'serial' });
 // running in parallel, would lock this suite out too.
 test.use({ extraHTTPHeaders: { 'x-forwarded-for': '203.0.113.24' } });
 
-let empresa: Awaited<ReturnType<typeof sacarEmpresa>> = null;
+let empresa: Awaited<ReturnType<typeof sacarEmpresa>> | null = null;
 
 test.beforeAll(async () => {
   await clearLedgerFixture();
@@ -52,7 +53,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   await clearLedgerFixture();
   await clearFounders();
-  await devolverEmpresa(empresa);
+  if (empresa !== null) await devolverEmpresa(empresa);
 });
 
 const empresaGroup = (page: Page) =>
@@ -76,9 +77,9 @@ test('a founder gets the group and the partners and projects from corp', async (
 
   await page.goto('/empresa/corporativo');
   await expect(page.getByRole('heading', { name: 'Libro corporativo' })).toBeVisible();
-  // Real rows, not a heading alone: the founder corp names, and corp's seeded project.
-  await expect(page.getByText('Fundador 1 · Socia E2E (tú)')).toBeVisible();
-  await expect(page.getByText('Xangarro', { exact: true })).toBeVisible();
+  // Real rows: the founder corp names, and corp's seeded registries.
+  await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
+  await expect(page.getByTestId('registro').filter({ hasText: 'Marca Xangarro' })).toBeVisible();
 });
 
 test('a founder records a USD expense and reverses it', async ({ page }) => {
@@ -188,4 +189,17 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
   ).toContainText('Agenda · ISR provisional');
   await subirActa(page);
   await adjuntarComprobante(page);
+});
+
+test('a founder records shares, updates a registry and keeps a CSD expiry', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Corporativo', exact: true }).click();
+  await suscribirAcciones(page);
+  await actualizarMarca(page);
+  await guardarCsd(page);
+  // The share event put its 15-business-day notice on the Agenda.
+  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  await expect(
+    page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
+  ).toBeVisible();
 });

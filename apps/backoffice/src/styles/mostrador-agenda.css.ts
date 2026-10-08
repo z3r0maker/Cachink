@@ -69,6 +69,9 @@ export const item = style({
   },
 });
 
+/** A row with no date column: the name, then its chip. */
+export const itemWide = style([item, { gridTemplateColumns: 'minmax(0, 1fr) auto' }]);
+
 export const itemLate = style({
   background: colors.redSoft,
   selectors: { '&:hover': { background: colors.redSoft } },

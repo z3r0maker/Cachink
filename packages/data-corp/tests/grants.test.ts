@@ -12,7 +12,8 @@ import { describe, it } from 'vitest';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DIR = join(HERE, '..', 'drizzle');
 const files = readdirSync(DIR).filter((f) => f.endsWith('.sql'));
-const strip = (sql: string): string => sql.replace(/--.*$/gm, '');
+/** Comments and string literals out: the rules are about SQL, not about seeded text. */
+const strip = (sql: string): string => sql.replace(/--.*$/gm, '').replace(/'(?:[^']|'')*'/g, "''");
 const all = files.map((f) => strip(readFileSync(join(DIR, f), 'utf8'))).join('\n');
 
 describe('drizzle/ (the corp set)', () => {

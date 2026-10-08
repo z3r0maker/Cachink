@@ -11,7 +11,11 @@ export async function borrarLoDe(createdBy: string): Promise<void> {
   const sql = postgres(url, { max: 1, onnotice: () => {} });
   try {
     await sql.begin(async (tx) => {
+      await tx`UPDATE corp.registries SET document_id = NULL WHERE document_id IN (
+                 SELECT id FROM corp.documents WHERE uploaded_by = ${createdBy})`;
       await tx`DELETE FROM corp.documents WHERE uploaded_by = ${createdBy}`;
+      await tx`DELETE FROM corp.share_events WHERE created_by = ${createdBy}`;
+      await tx`DELETE FROM corp.certificates WHERE created_by = ${createdBy}`;
       await tx`DELETE FROM corp.obligations WHERE created_by = ${createdBy}`;
       await tx`DELETE FROM corp.company WHERE updated_by = ${createdBy}`;
       const mine = tx`SELECT id FROM corp.entries WHERE created_by = ${createdBy}`;

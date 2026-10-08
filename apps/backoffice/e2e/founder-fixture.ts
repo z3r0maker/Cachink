@@ -71,7 +71,11 @@ export async function clearLedgerFixture(): Promise<void> {
       const suite = tx`SELECT f.id FROM corp.founders f
                          JOIN staff_members s ON s.id = f.staff_member_id
                         WHERE lower(s.email) = ${SOCIO.email}`;
+      await tx`UPDATE corp.registries SET document_id = NULL
+                WHERE document_id IN (SELECT id FROM corp.documents WHERE uploaded_by IN (${suite}))`;
       await tx`DELETE FROM corp.documents WHERE uploaded_by IN (${suite})`;
+      await tx`DELETE FROM corp.share_events WHERE created_by IN (${suite})`;
+      await tx`DELETE FROM corp.certificates WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.obligations WHERE created_by IN (${suite})`;
       const mine = tx`SELECT id FROM corp.entries
                        WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'
@@ -86,26 +90,38 @@ export async function clearLedgerFixture(): Promise<void> {
 }
 
 /**
- * The Agenda suite starts with no SAT registration, so it sets one through
- * the screen; the company row the database had is put back afterwards.
+ * The suite starts with no SAT registration and the seeded registries; the
+ * company row and the registries the database had are put back afterwards.
  */
-type Empresa = { inscripcion_rfc: string | null; updated_by: string } | null;
+type Empresa = {
+  readonly company: Record<string, unknown> | null;
+  readonly registries: readonly Record<string, unknown>[];
+};
 
 export async function sacarEmpresa(): Promise<Empresa> {
   return withSuper(async (sql) => {
-    const rows = await sql<{ inscripcion_rfc: string | null; updated_by: string }[]>`
-      DELETE FROM corp.company WHERE id = 'mexia'
-      RETURNING inscripcion_rfc::text, updated_by`;
-    return rows[0] ?? null;
+    const [company] = await sql`DELETE FROM corp.company WHERE id = 'mexia'
+                                RETURNING inscripcion_rfc::text, administrador, updated_by`;
+    const registries =
+      await sql`SELECT id, estado, referencia, siguiente, al_dia FROM corp.registries`;
+    return { company: company ?? null, registries };
   });
 }
 
 export async function devolverEmpresa(antes: Empresa): Promise<void> {
   await withSuper(async (sql) => {
+    for (const r of antes.registries) {
+      await sql`UPDATE corp.registries
+                   SET estado = ${String(r.estado)}, referencia = ${(r.referencia as string | null) ?? null},
+                       siguiente = ${String(r.siguiente)}, al_dia = ${Boolean(r.al_dia)}
+                 WHERE id = ${String(r.id)}`;
+    }
     await sql`DELETE FROM corp.company WHERE id = 'mexia'`;
-    if (antes === null) return;
-    await sql`INSERT INTO corp.company (id, inscripcion_rfc, updated_by, updated_at)
-              VALUES ('mexia', ${antes.inscripcion_rfc}, ${antes.updated_by}, now())`;
+    const c = antes.company;
+    if (c === null) return;
+    await sql`INSERT INTO corp.company (id, inscripcion_rfc, administrador, updated_by, updated_at)
+              VALUES ('mexia', ${(c.inscripcion_rfc as string | null) ?? null},
+                      ${(c.administrador as number | null) ?? null}, ${String(c.updated_by)}, now())`;
   });
 }
 

@@ -36,6 +36,10 @@ const DOMAIN_CODES = new Set([
   'DOCUMENTO_INVALIDO',
   'DOCUMENTO_DESCONOCIDO',
   'YA_REEMPLAZADO',
+  'EVENTO_ACCIONES_INVALIDO',
+  'ACCIONES_INSUFICIENTES',
+  'CERTIFICADO_INVALIDO',
+  'REGISTRO_INVALIDO',
 ]);
 
 export function failed(error: unknown, what: string): FormState {

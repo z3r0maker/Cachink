@@ -29,6 +29,13 @@
       "when": 1791486745635,
       "tag": "0003_corp_agenda",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791488590230,
+      "tag": "0004_corp_corporativo",
+      "breakpoints": true
     }
   ]
 }

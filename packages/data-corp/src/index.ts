@@ -1,4 +1,5 @@
 export { createAgendaRepository } from './queries/agenda.js';
+export { createCorporativoRepository } from './queries/corporativo.js';
 export {
   contenidoDe,
   createDocumentRepository,

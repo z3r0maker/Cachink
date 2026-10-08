@@ -7,6 +7,7 @@ import {
   date,
   index,
   integer,
+  smallint,
   text,
   unique,
 } from 'drizzle-orm/pg-core';
@@ -26,13 +27,24 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
 });
 
 /** MEXIA itself: one row. E-06 adds its registries. */
-export const company = corp.table('company', {
-  id: text('id').primaryKey(),
-  /** The SAT registration date: monthly obligations start in its month. */
-  inscripcionRfc: date('inscripcion_rfc', { mode: 'string' }),
-  updatedBy: text('updated_by').notNull(),
-  updatedAt: at('updated_at').notNull(),
-});
+export const company = corp.table(
+  'company',
+  {
+    id: text('id').primaryKey(),
+    /** The SAT registration date: monthly obligations start in its month. */
+    inscripcionRfc: date('inscripcion_rfc', { mode: 'string' }),
+    /** The partner who is administrador único (E-06); null until set. */
+    administrador: smallint('administrador'),
+    updatedBy: text('updated_by').notNull(),
+    updatedAt: at('updated_at').notNull(),
+  },
+  (t) => [
+    check(
+      'company_administrador_check',
+      sql`${t.administrador} IS NULL OR ${t.administrador} IN (1, 2)`,
+    ),
+  ],
+);
 
 /**
  * One period of an obligation of `@xangarro/domain/corp`'s catalog. A

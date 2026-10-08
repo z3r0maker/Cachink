@@ -391,7 +391,22 @@ with property tests:
 
 ### E-06 Libro corporativo
 
-- [ ] Status · **Blocked by:** E-01, E-05
+- [x] Status · **Blocked by:** E-01, E-05 · **Done:** 2026-10-08
+      **Progress (2026-10-08):** the Corporativo page is on El Mostrador and on board CD-05
+      Corporativo. «Socios y acciones» is the hero: each partner's shares and percentage from
+      `corp.share_events` (recorded by hand on `/empresa/corporativo/acciones` until E-21's cuts write
+      them), capital paid in from the ledger, the administrador (`corp.company.administrador`) and the
+      beneficial-owner notice. A share event puts its 15-business-day «Beneficiario controlador»
+      obligation on the Agenda. «Registros y trámites»: RFC, SAS, marca (with its IMPI expediente),
+      cuenta bancaria and dominios, seeded in 0004, each with status, number, next step and its proof;
+      a second upload is the document's next version. «Actas y documentos» lists the Expediente's
+      Constitución and Acuerdo de socios folders with «+ Subir documento». «Firmas y certificados»
+      keeps serials and expiries only: the domain and a CHECK refuse anything that is not a serial, a
+      MEXIA CSD or e.firma goes on the Agenda, and `alertasDeCertificados` flags what expires within 60
+      days for the Resumen (E-16). Playwright: shares subscribed and the notice on the Agenda, the
+      trademark updated with its proof, a CSD shown as «Vence en 41 días».
+      **Left for later:** the Resumen signal itself waits for E-16; the hero's «Ver acciones y bolsa»
+      waits for E-21.
 - **What:**
   - partners and the beneficial-owner file;
   - share events (they come from E-21; manual before then);

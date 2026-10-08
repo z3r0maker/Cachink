@@ -38,3 +38,4 @@ export {
 export { RevertirMovimientoUseCase, type RevertirMovimientoInput } from './revertir-movimiento.js';
 export * from './agenda/index.js';
 export * from './expediente/index.js';
+export * from './corporativo/index.js';
