@@ -1,11 +1,6 @@
 import type { DocumentoMeta, ObligacionVista } from '@xangarro/application/corp';
 import { formatMonth } from '@xangarro/domain';
-import {
-  NOMBRE_EVIDENCIA,
-  siguientesPasos,
-  type Paso,
-  type TipoEvidencia,
-} from '@xangarro/domain/corp';
+import { NOMBRE_EVIDENCIA, siguientesPasos, type Paso } from '@xangarro/domain/corp';
 
 /**
  * An obligation's page (E-04, board CD-05's detail): its title with its
@@ -49,13 +44,3 @@ export function accionesDe(o: ObligacionVista, docs: readonly DocumentoMeta[]): 
     return [accion, { nuevo, label: 'No hubo pago', sinPago: true, bloqueada: null }];
   });
 }
-
-/** A document's kind as its label on screen. */
-export const NOMBRE_DOCUMENTO: Record<TipoEvidencia, string> = {
-  acuse: 'Acuse',
-  linea_captura: 'Línea de captura',
-  comprobante_pago: 'Comprobante de pago',
-  opinion_32d: 'Opinión 32-D',
-  captura: 'Captura de la revisión',
-  otro: 'Otro documento',
-};

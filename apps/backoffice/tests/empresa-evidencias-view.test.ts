@@ -12,6 +12,10 @@ const MESES = ['2026-08', '2026-09', '2026-10'];
 const doc = (id: string, obligacionId: string, tipo: DocumentoMeta['tipo']): DocumentoMeta => ({
   id,
   tipo,
+  carpeta: 'sat',
+  titulo: tipo,
+  periodo: '2026-08',
+  entryId: null,
   nombre: `${tipo}.pdf`,
   mime: 'application/pdf',
   tamano: 10,

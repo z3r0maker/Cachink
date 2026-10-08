@@ -75,3 +75,16 @@ export async function getMovimiento(db: CorpDb, id: string): Promise<Movimiento 
   const rows = await db.select().from(entries).where(eq(entries.id, id)).limit(1);
   return (await withDetail(db, rows))[0] ?? null;
 }
+
+/** The concepto and date of each entry, for labelling what a document proves. */
+export async function conceptosDe(
+  db: CorpDb,
+  ids: readonly string[],
+): Promise<ReadonlyMap<string, { readonly concepto: string; readonly fecha: string }>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db
+    .select({ id: entries.id, concepto: entries.concepto, fecha: entries.fecha })
+    .from(entries)
+    .where(inArray(entries.id, [...ids]));
+  return new Map(rows.map((r) => [r.id, { concepto: r.concepto, fecha: r.fecha }]));
+}

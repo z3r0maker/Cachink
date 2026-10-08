@@ -1,5 +1,5 @@
 {
-  "id": "12e4ebf6-65cf-4216-a359-e4909ad8a203",
+  "id": "5ed737f3-76f1-4c0e-aad6-ff5ef0ce371f",
   "prevId": "a778d1a3-8c43-489b-9dd2-d9030cd6d0f7",
   "version": "7",
   "dialect": "postgresql",
@@ -88,6 +88,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "folder": {
+          "name": "folder",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period": {
+          "name": "period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "filename": {
           "name": "filename",
           "type": "text",
@@ -170,6 +188,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "documents_entry_idx": {
+          "name": "documents_entry_idx",
+          "columns": [
+            {
+              "expression": "entry_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -228,6 +261,18 @@
       },
       "policies": {},
       "checkConstraints": {
+        "documents_folder_check": {
+          "name": "documents_folder_check",
+          "value": "\"corp\".\"documents\".\"folder\" IN ('constitucion', 'sat', 'economia', 'impi', 'estados_financieros', 'contratos', 'acuerdo_socios', 'comprobantes')"
+        },
+        "documents_period_check": {
+          "name": "documents_period_check",
+          "value": "\"corp\".\"documents\".\"period\" IS NULL OR \"corp\".\"documents\".\"period\" ~ '^[0-9]{4}(-(0[1-9]|1[0-2]))?$'"
+        },
+        "documents_title_check": {
+          "name": "documents_title_check",
+          "value": "length(trim(\"corp\".\"documents\".\"title\")) > 0"
+        },
         "documents_size_check": {
           "name": "documents_size_check",
           "value": "\"corp\".\"documents\".\"size_bytes\" > 0 AND \"corp\".\"documents\".\"size_bytes\" <= 4194304 AND octet_length(\"corp\".\"documents\".\"content\") = \"corp\".\"documents\".\"size_bytes\""

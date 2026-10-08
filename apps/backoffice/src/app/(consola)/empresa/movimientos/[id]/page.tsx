@@ -1,4 +1,4 @@
-import { getMovimiento, type Movimiento } from '@xangarro/data-corp';
+import { documentosDelMovimiento, getMovimiento, type Movimiento } from '@xangarro/data-corp';
 import { formatMoney } from '@xangarro/domain';
 import { ACCOUNTS } from '@xangarro/domain/corp';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ import { requireFounderPage } from '@/server/founder';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
+import { Comprobantes } from './comprobantes';
 import { RevertirForm } from './revertir-form';
 
 export const dynamic = 'force-dynamic';
@@ -86,7 +87,8 @@ function Siguiente({ mov }: { readonly mov: Movimiento }) {
 export default async function MovimientoPage(props: { params: Promise<{ id: string }> }) {
   await requireFounderPage();
   const { id } = await props.params;
-  const mov = await getMovimiento(requireCorpDb(), id);
+  const db = requireCorpDb();
+  const [mov, docs] = await Promise.all([getMovimiento(db, id), documentosDelMovimiento(db, id)]);
   if (mov === null) notFound();
   const fila = filaDe(mov);
   return (
@@ -111,6 +113,7 @@ export default async function MovimientoPage(props: { params: Promise<{ id: stri
         <span className={m.tileNote}>{fila.estado}</span>
       </section>
       <Asiento mov={mov} />
+      <Comprobantes mov={mov} docs={docs} />
       <div>
         <Siguiente mov={mov} />
       </div>

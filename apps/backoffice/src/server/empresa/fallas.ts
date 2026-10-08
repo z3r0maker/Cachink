@@ -33,6 +33,9 @@ const DOMAIN_CODES = new Set([
   'OBLIGACION_EXENTA',
   'ARCHIVO_INVALIDO',
   'INSCRIPCION_FUTURA',
+  'DOCUMENTO_INVALIDO',
+  'DOCUMENTO_DESCONOCIDO',
+  'YA_REEMPLAZADO',
 ]);
 
 export function failed(error: unknown, what: string): FormState {

@@ -1,20 +1,13 @@
-import type {
-  AgendaRepository,
-  DocumentoMeta,
-  DocumentRepository,
-  NuevoDocumento,
-  ObligacionGuardada,
-} from '@xangarro/application/corp';
+import type { AgendaRepository, ObligacionGuardada } from '@xangarro/application/corp';
 import { newUlid } from '@xangarro/domain';
-import { isTipoEvidencia } from '@xangarro/domain/corp';
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import type { CorpDb } from '../client.js';
-import { company, documents, obligations } from '../schema/agenda.js';
+import { company, obligations } from '../schema/agenda.js';
 
 /**
- * The Agenda's and the Expediente's storage (E-04; ADR-126). Rows are parsed,
- * never asserted: an unknown evidence kind is a broken row.
+ * The Agenda's storage (E-04): MEXIA's SAT registration and each obligation
+ * period a founder acted on.
  */
 const COMPANY = 'mexia';
 const now = () => new Date().toISOString();
@@ -29,39 +22,6 @@ function toObligacion(r: ObligationRow): ObligacionGuardada {
     titulo: r.title,
     estado: r.status,
     sinPago: r.noPayment,
-  };
-}
-
-const META = {
-  id: documents.id,
-  kind: documents.kind,
-  filename: documents.filename,
-  mime: documents.mime,
-  sizeBytes: documents.sizeBytes,
-  sha256: documents.sha256,
-  obligationId: documents.obligationId,
-  retainUntil: documents.retainUntil,
-  supersedesId: documents.supersedesId,
-  uploadedBy: documents.uploadedBy,
-  uploadedAt: documents.uploadedAt,
-} as const;
-
-type MetaRow = Pick<typeof documents.$inferSelect, keyof typeof META>;
-
-function toMeta(r: MetaRow): DocumentoMeta {
-  if (!isTipoEvidencia(r.kind)) throw new Error(`corp document ${r.id} has kind ${r.kind}`);
-  return {
-    id: r.id,
-    tipo: r.kind,
-    nombre: r.filename,
-    mime: r.mime,
-    tamano: r.sizeBytes,
-    sha256: r.sha256,
-    obligacionId: r.obligationId,
-    retenerHasta: r.retainUntil,
-    reemplazaA: r.supersedesId,
-    subidoPor: r.uploadedBy,
-    subidoEn: r.uploadedAt,
   };
 }
 
@@ -138,69 +98,4 @@ export function createAgendaRepository(db: CorpDb): AgendaRepository {
     cambiarEstado: (id, estado, sinPago, founderId) =>
       cambiarEstado(db, id, estado, sinPago, founderId),
   };
-}
-
-export function createDocumentRepository(db: CorpDb): DocumentRepository {
-  return {
-    async guardar(doc: NuevoDocumento) {
-      const id = newUlid();
-      const rows = await db
-        .insert(documents)
-        .values({
-          id,
-          kind: doc.tipo,
-          filename: doc.nombre,
-          mime: doc.mime,
-          sizeBytes: doc.contenido.byteLength,
-          sha256: doc.sha256,
-          content: Buffer.from(doc.contenido),
-          obligationId: doc.obligacionId,
-          retainUntil: doc.retenerHasta,
-          uploadedBy: doc.subidoPor,
-          uploadedAt: now(),
-        })
-        .returning(META);
-      return toMeta(rows[0]!);
-    },
-    porObligacion: async (id) => (await documentosDe(db, [id])).get(id) ?? [],
-  };
-}
-
-/** The current (not superseded) documents of each obligation, oldest first. */
-export async function documentosDe(
-  db: CorpDb,
-  obligationIds: readonly string[],
-): Promise<ReadonlyMap<string, readonly DocumentoMeta[]>> {
-  if (obligationIds.length === 0) return new Map();
-  const rows = await db
-    .select(META)
-    .from(documents)
-    .where(inArray(documents.obligationId, [...obligationIds]))
-    .orderBy(asc(documents.uploadedAt));
-  // A new version names the one it supersedes; both share the obligation.
-  const superseded = new Set(
-    rows.flatMap((r) => (r.supersedesId === null ? [] : [r.supersedesId])),
-  );
-  const out = new Map<string, DocumentoMeta[]>();
-  for (const r of rows) {
-    if (superseded.has(r.id)) continue;
-    const meta = toMeta(r);
-    const key = meta.obligacionId ?? '';
-    out.set(key, [...(out.get(key) ?? []), meta]);
-  }
-  return out;
-}
-
-/** A document's bytes, for the download route. */
-export async function contenidoDe(
-  db: CorpDb,
-  id: string,
-): Promise<{ readonly meta: DocumentoMeta; readonly contenido: Buffer } | null> {
-  const rows = await db
-    .select({ ...META, content: documents.content })
-    .from(documents)
-    .where(eq(documents.id, id))
-    .limit(1);
-  const r = rows[0];
-  return r === undefined ? null : { meta: toMeta(r), contenido: r.content };
 }

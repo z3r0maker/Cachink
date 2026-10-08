@@ -17,6 +17,16 @@ export const NOMBRE_EVIDENCIA: Record<TipoEvidencia, string> = {
   otro: 'el documento',
 };
 
+/** A document's kind as its label on screen and in its title. */
+export const ETIQUETA_EVIDENCIA: Record<TipoEvidencia, string> = {
+  acuse: 'Acuse',
+  linea_captura: 'Línea de captura',
+  comprobante_pago: 'Comprobante de pago',
+  opinion_32d: 'Opinión 32-D',
+  captura: 'Captura de la revisión',
+  otro: 'Otro documento',
+};
+
 const ORDEN: readonly Estado[] = ['pendiente', 'preparada', 'presentada', 'pagada'];
 
 /** The template's last step: once there, the obligation is done. */

@@ -7,12 +7,8 @@ import { EvidenciaFaltanteError } from '@xangarro/domain/corp';
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
-import {
-  contenidoDe,
-  createAgendaRepository,
-  createDocumentRepository,
-  documentosDe,
-} from '../src/queries/agenda';
+import { createAgendaRepository } from '../src/queries/agenda';
+import { contenidoDe, createDocumentRepository, documentosDe } from '../src/queries/documentos';
 import { borrarLoDe } from './cleanup';
 
 /**

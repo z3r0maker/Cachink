@@ -8,6 +8,9 @@ CREATE TABLE "corp"."company" (
 CREATE TABLE "corp"."documents" (
 	"id" text PRIMARY KEY NOT NULL,
 	"kind" text NOT NULL,
+	"folder" text NOT NULL,
+	"title" text NOT NULL,
+	"period" text,
 	"filename" text NOT NULL,
 	"mime" text NOT NULL,
 	"size_bytes" integer NOT NULL,
@@ -20,6 +23,9 @@ CREATE TABLE "corp"."documents" (
 	"uploaded_by" text NOT NULL,
 	"uploaded_at" timestamp with time zone NOT NULL,
 	CONSTRAINT "documents_supersedes_id_unique" UNIQUE("supersedes_id"),
+	CONSTRAINT "documents_folder_check" CHECK ("corp"."documents"."folder" IN ('constitucion', 'sat', 'economia', 'impi', 'estados_financieros', 'contratos', 'acuerdo_socios', 'comprobantes')),
+	CONSTRAINT "documents_period_check" CHECK ("corp"."documents"."period" IS NULL OR "corp"."documents"."period" ~ '^[0-9]{4}(-(0[1-9]|1[0-2]))?$'),
+	CONSTRAINT "documents_title_check" CHECK (length(trim("corp"."documents"."title")) > 0),
 	CONSTRAINT "documents_size_check" CHECK ("corp"."documents"."size_bytes" > 0 AND "corp"."documents"."size_bytes" <= 4194304 AND octet_length("corp"."documents"."content") = "corp"."documents"."size_bytes"),
 	CONSTRAINT "documents_sha256_check" CHECK ("corp"."documents"."sha256" ~ '^[0-9a-f]{64}$')
 );
@@ -42,4 +48,5 @@ CREATE TABLE "corp"."obligations" (
 ALTER TABLE "corp"."documents" ADD CONSTRAINT "documents_obligation_id_obligations_id_fk" FOREIGN KEY ("obligation_id") REFERENCES "corp"."obligations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "corp"."documents" ADD CONSTRAINT "documents_entry_id_entries_id_fk" FOREIGN KEY ("entry_id") REFERENCES "corp"."entries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "corp"."documents" ADD CONSTRAINT "documents_supersedes_id_documents_id_fk" FOREIGN KEY ("supersedes_id") REFERENCES "corp"."documents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "documents_obligation_idx" ON "corp"."documents" USING btree ("obligation_id");
+CREATE INDEX "documents_obligation_idx" ON "corp"."documents" USING btree ("obligation_id");--> statement-breakpoint
+CREATE INDEX "documents_entry_idx" ON "corp"."documents" USING btree ("entry_id");

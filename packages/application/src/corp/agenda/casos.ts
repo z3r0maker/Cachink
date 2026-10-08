@@ -1,6 +1,9 @@
 import {
   assertArchivo,
   assertTransicion,
+  carpetaDeAutoridad,
+  ETIQUETA_EVIDENCIA,
+  periodoValido,
   esRecurrente,
   ObligacionDesconocidaError,
   retenerHasta,
@@ -77,11 +80,17 @@ export async function subirEvidencia(
   const instancia = await instanciaDe(deps.agenda, p, input.periodo, input.founderId);
   return deps.documentos.guardar({
     tipo: input.tipo,
+    carpeta: carpetaDeAutoridad(p.autoridad),
+    titulo: `${ETIQUETA_EVIDENCIA[input.tipo]} · ${instancia.titulo ?? p.titulo}`,
+    // A one-off is dated by day; the Expediente files it by its month.
+    periodo: periodoValido(input.periodo) ? input.periodo : input.periodo.slice(0, 7),
     nombre: input.nombre.trim(),
     mime: input.mime,
     contenido: input.contenido,
     sha256: await deps.sha256(input.contenido),
     obligacionId: instancia.id,
+    entryId: null,
+    reemplazaA: null,
     retenerHasta: retenerHasta(input.hoy),
     subidoPor: input.founderId,
   });

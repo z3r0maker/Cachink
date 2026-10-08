@@ -9127,9 +9127,10 @@ hundreds of KB each.
 
 **Decision**
 
-1. `corp.documents` holds the file itself (`content bytea`), its kind, name, MIME type, size and
-   SHA-256, the obligation or ledger entry it proves, `retain_until` (upload + 5 years, CFF art.
-   30) and the earlier version it supersedes.
+1. `corp.documents` holds the file itself (`content bytea`), its kind, the Expediente folder,
+   its title and period, name, MIME type, size and SHA-256, the obligation or ledger entry it
+   proves, `retain_until` (upload + 5 years, CFF art. 30) and the earlier version it supersedes
+   (unique, so a version has one successor).
 2. The console may INSERT and SELECT documents, never UPDATE or DELETE: a correction is a new
    version that names the old one (E-05 builds the history). The agents' role reads every column
    except `content`.

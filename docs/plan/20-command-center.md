@@ -364,10 +364,23 @@ with property tests:
 
 ### E-05 Expediente
 
-- [ ] Status · **Blocked by:** E-01
-      **Note (2026-10-08):** E-04 already built the storage (`corp.documents`, bytea in corp per
-      ADR-126 instead of a bucket; INSERT/SELECT only; `supersedes_id`; `retain_until`). E-05 adds the
-      Expediente screen, superseding versions and their history, and links to ledger entries.
+- [x] Status · **Blocked by:** E-01 · **Done:** 2026-10-08
+      **Progress (2026-10-08):** `corp.documents` (0003, amended before it shipped) keeps the file as
+      bytea (ADR-126, proposed, instead of the bucket below) with its kind, folder (the board's eight:
+      Constitución, SAT, Secretaría de Economía, IMPI, Estados financieros, Contratos, Acuerdo de
+      socios, Comprobantes), title, period, the obligation or ledger entry it proves, SHA-256,
+      `retain_until` (upload + 5 years) and the version it supersedes (unique: one successor each).
+      The console may only INSERT and SELECT; the agents never read the bytes. Domain: `CARPETAS`,
+      `vigentes` and `historial` over the version chain. Use cases: `subirDocumento` (a paper no
+      obligation asked for, or a movement's proof) and `subirVersion` (refuses a version already
+      superseded). Screens: `/empresa/expediente` (folders with current counts, the folder's documents
+      at their current version with «Vinculado a», the selected one's history with «Ver» per version,
+      the retention line and «Subir nueva versión»), `/empresa/expediente/subir`, «Comprobantes» on a
+      movement's detail, and «Historial» from an obligation's documents. Playwright: the Agenda's acuse
+      shows in SAT linked to its obligation; an acta is filed, versioned (v1 and v2 both kept, counted
+      once); a factura attached to a movement shows in Comprobantes linked to it.
+      **Left for later:** the folder picker is a native select (8 options; the portal's Combobox is
+      not in the console yet); a document's period cannot be edited (a new version keeps it).
 - **What:**
   - a private `corp-docs` bucket;
   - documents carry a kind, period, obligation or entry link, sha256 and `retain_until`

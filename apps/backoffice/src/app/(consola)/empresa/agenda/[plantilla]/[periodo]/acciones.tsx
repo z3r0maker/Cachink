@@ -1,10 +1,10 @@
 'use client';
 
-import { TIPOS_EVIDENCIA, type TipoEvidencia } from '@xangarro/domain/corp';
+import { ETIQUETA_EVIDENCIA, TIPOS_EVIDENCIA, type TipoEvidencia } from '@xangarro/domain/corp';
 import { useActionState, useState } from 'react';
 
 import { marcarObligacionAction, subirEvidenciaAction } from '@/server/actions/empresa-agenda';
-import { NOMBRE_DOCUMENTO, type Accion } from '@/server/empresa/obligacion-view';
+import type { Accion } from '@/server/empresa/obligacion-view';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
@@ -54,7 +54,7 @@ export function Subir(props: Clave & { readonly tipos: readonly TipoEvidencia[] 
   const [tipo, setTipo] = useState<string>(props.tipos[0] ?? 'otro');
   const opciones = props.tipos
     .filter((t) => TIPOS_EVIDENCIA.includes(t))
-    .map((t) => ({ value: t, title: NOMBRE_DOCUMENTO[t] }));
+    .map((t) => ({ value: t, title: ETIQUETA_EVIDENCIA[t] }));
   return (
     <form onSubmit={submitWith(action)} className={d.form}>
       <input type="hidden" name="plantilla" value={props.plantilla} />

@@ -6,6 +6,8 @@ import {
   inscripcionPasada,
   presentarConAcuse,
 } from './empresa-agenda';
+import { adjuntarComprobante, subirActa } from './empresa-expediente';
+import { registrarGastoEnDolares } from './empresa-movimientos';
 import {
   clearFounders,
   clearLedgerFixture,
@@ -78,26 +80,6 @@ test('a founder gets the group and the partners and projects from corp', async (
   await expect(page.getByText('Fundador 1 · Socia E2E (tú)')).toBeVisible();
   await expect(page.getByText('Xangarro', { exact: true })).toBeVisible();
 });
-
-async function registrarGastoEnDolares(page: Page) {
-  await page.getByRole('link', { name: '+ Registrar' }).click();
-  await page.getByRole('textbox', { name: 'Concepto', exact: true }).fill(E2E_CONCEPTO);
-  await page.getByRole('textbox', { name: 'Proveedor', exact: true }).fill('Vercel Inc.');
-  await page.getByText('Dólares (USD)').click();
-  await page.getByRole('textbox', { name: 'Monto pagado (USD)', exact: true }).fill('veinte');
-  await page.getByRole('textbox', { name: 'Tipo de cambio del día', exact: true }).fill('18.42');
-  await page.getByText('Costo del servicio').click();
-  await page.getByRole('button', { name: 'Registrar gasto' }).click();
-  await expect(page.getByText('Escribe el monto con números, por ejemplo 368.40.')).toBeVisible();
-  // The rest of what was typed survives the refusal.
-  await expect(page.getByRole('textbox', { name: 'Concepto', exact: true })).toHaveValue(
-    E2E_CONCEPTO,
-  );
-
-  await page.getByRole('textbox', { name: 'Monto pagado (USD)', exact: true }).fill('20');
-  await expect(page.getByText('Equivale a $368.40 MXN.')).toBeVisible();
-  await page.getByRole('button', { name: 'Registrar gasto' }).click();
-}
 
 test('a founder records a USD expense and reverses it', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
@@ -193,4 +175,17 @@ test('a founder files an obligation with its acuse and adds an expiry', async ({
   await expect(
     page.getByTestId('fila-evidencia').filter({ hasText: 'ISR provisional' }),
   ).toContainText('✓ Acuse');
+});
+
+test('a founder files papers, versions one and attaches a proof to a movement', async ({
+  page,
+}) => {
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Expediente', exact: true }).click();
+  // The acuse filed on the Agenda is here, linked to its obligation.
+  await expect(
+    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
+  ).toContainText('Agenda · ISR provisional');
+  await subirActa(page);
+  await adjuntarComprobante(page);
 });

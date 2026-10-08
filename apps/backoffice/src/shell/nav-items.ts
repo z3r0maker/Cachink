@@ -14,6 +14,7 @@ export type NavHref =
   | '/empresa/movimientos'
   | '/empresa/socios'
   | '/empresa/agenda'
+  | '/empresa/expediente'
   | '/empresa/corporativo';
 
 export interface NavItem {
@@ -92,6 +93,12 @@ export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
     href: '/empresa/agenda',
     task: 'E-04',
     summary: 'Lo que vence ante el SAT, Economía e IMPI, con sus acuses y comprobantes.',
+  },
+  {
+    label: 'Expediente',
+    href: '/empresa/expediente',
+    task: 'E-05',
+    summary: 'Los papeles de MEXIA por carpeta, con sus versiones; nada se borra.',
   },
   {
     label: 'Corporativo',

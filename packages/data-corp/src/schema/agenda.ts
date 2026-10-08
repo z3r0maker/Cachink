@@ -73,6 +73,12 @@ export const documents = corp.table(
   {
     id: text('id').primaryKey(),
     kind: text('kind').notNull(),
+    /** One of the Expediente's folders (`CARPETAS` in `@xangarro/domain/corp`). */
+    folder: text('folder').notNull(),
+    /** What the founders call it («Constancia de situación fiscal»); versions share it. */
+    title: text('title').notNull(),
+    /** `YYYY-MM`, `YYYY`, or null for a document without one (an acta). */
+    period: text('period'),
     filename: text('filename').notNull(),
     mime: text('mime').notNull(),
     sizeBytes: integer('size_bytes').notNull(),
@@ -90,6 +96,16 @@ export const documents = corp.table(
   },
   (t) => [
     index('documents_obligation_idx').on(t.obligationId),
+    index('documents_entry_idx').on(t.entryId),
+    check(
+      'documents_folder_check',
+      sql`${t.folder} IN ('constitucion', 'sat', 'economia', 'impi', 'estados_financieros', 'contratos', 'acuerdo_socios', 'comprobantes')`,
+    ),
+    check(
+      'documents_period_check',
+      sql`${t.period} IS NULL OR ${t.period} ~ '^[0-9]{4}(-(0[1-9]|1[0-2]))?$'`,
+    ),
+    check('documents_title_check', sql`length(trim(${t.title})) > 0`),
     check(
       'documents_size_check',
       sql`${t.sizeBytes} > 0 AND ${t.sizeBytes} <= 4194304 AND octet_length(${t.content}) = ${t.sizeBytes}`,

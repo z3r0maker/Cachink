@@ -54,13 +54,19 @@ export class FakeDocumentos implements DocumentRepository {
       ...rest,
       id: `d${this.docs.length + 1}`,
       tamano: contenido.byteLength,
-      reemplazaA: null,
       subidoEn: '2026-10-08T12:00:00Z',
     };
     this.docs.push(meta);
     return meta;
   }
   async porObligacion(id: string) {
-    return this.docs.filter((d) => d.obligacionId === id);
+    const reemplazados = new Set(this.docs.map((d) => d.reemplazaA));
+    return this.docs.filter((d) => d.obligacionId === id && !reemplazados.has(d.id));
+  }
+  async porId(id: string) {
+    return this.docs.find((d) => d.id === id) ?? null;
+  }
+  async reemplazadoPor(id: string) {
+    return this.docs.find((d) => d.reemplazaA === id)?.id ?? null;
   }
 }

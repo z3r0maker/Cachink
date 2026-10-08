@@ -13,6 +13,7 @@ GRANT SELECT, INSERT, UPDATE ON corp.company, corp.obligations TO xangarro_corp;
 GRANT SELECT, INSERT ON corp.documents TO xangarro_corp;
 
 GRANT SELECT ON corp.company, corp.obligations TO xangarro_corp_agent;
-GRANT SELECT (id, kind, filename, mime, size_bytes, sha256, obligation_id, entry_id,
+GRANT SELECT (id, kind, folder, title, period, filename, mime, size_bytes, sha256,
+              obligation_id, entry_id,
               retain_until, supersedes_id, uploaded_by, uploaded_at)
   ON corp.documents TO xangarro_corp_agent;

@@ -24,6 +24,7 @@ export {
 export {
   assertTransicion,
   estaCumplida,
+  ETIQUETA_EVIDENCIA,
   NOMBRE_EVIDENCIA,
   siguientesPasos,
   type Transicion,

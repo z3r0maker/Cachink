@@ -1,4 +1,4 @@
-import type { Estado, TipoEvidencia } from '@xangarro/domain/corp';
+import type { Carpeta, Estado, TipoEvidencia } from '@xangarro/domain/corp';
 
 /**
  * The Agenda's storage ports (E-04, ADR-124). `@xangarro/data-corp`
@@ -39,12 +39,21 @@ export interface AgendaRepository {
 
 export interface NuevoDocumento {
   readonly tipo: TipoEvidencia;
+  readonly carpeta: Carpeta;
+  /** What the founders call it; every version of a document shares it. */
+  readonly titulo: string;
+  /** `YYYY-MM`, `YYYY`, or null. */
+  readonly periodo: string | null;
   readonly nombre: string;
   readonly mime: string;
   readonly contenido: Uint8Array;
   /** Hex SHA-256 of `contenido`. */
   readonly sha256: string;
   readonly obligacionId: string | null;
+  /** The ledger entry it proves (a factura, a bank statement line). */
+  readonly entryId: string | null;
+  /** The version this one supersedes (E-05). */
+  readonly reemplazaA: string | null;
   readonly retenerHasta: string;
   readonly subidoPor: string;
 }
@@ -52,11 +61,15 @@ export interface NuevoDocumento {
 export interface DocumentoMeta {
   readonly id: string;
   readonly tipo: TipoEvidencia;
+  readonly carpeta: Carpeta;
+  readonly titulo: string;
+  readonly periodo: string | null;
   readonly nombre: string;
   readonly mime: string;
   readonly tamano: number;
   readonly sha256: string;
   readonly obligacionId: string | null;
+  readonly entryId: string | null;
   readonly retenerHasta: string;
   /** The earlier version this one supersedes (E-05). */
   readonly reemplazaA: string | null;
@@ -66,5 +79,9 @@ export interface DocumentoMeta {
 
 export interface DocumentRepository {
   guardar(doc: NuevoDocumento): Promise<DocumentoMeta>;
+  /** The current (not superseded) documents of an obligation. */
   porObligacion(obligacionId: string): Promise<readonly DocumentoMeta[]>;
+  porId(id: string): Promise<DocumentoMeta | null>;
+  /** The id of the version that superseded `id`, or null while it is current. */
+  reemplazadoPor(id: string): Promise<string | null>;
 }
