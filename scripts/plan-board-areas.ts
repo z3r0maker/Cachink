@@ -55,6 +55,11 @@ export const AREA_BLURB: Readonly<Record<Area, string>> = {
 
 const KNOWN = new Set<string>(AREAS);
 
+/** The area among an item's tags, or null when it carries none. */
+function tagged(item: Item): Area | null {
+  return (item.tags.find((t) => KNOWN.has(t)) as Area | undefined) ?? null;
+}
+
 /**
  * The production-readiness checklist, section by section. Most of it is
  * engineering with a legal deadline rather than paperwork: «cancel in one
@@ -78,5 +83,5 @@ function byOrigin(item: Item): Area {
 }
 
 export function areaOf(item: Item): Area {
-  return item.area !== null && KNOWN.has(item.area) ? (item.area as Area) : byOrigin(item);
+  return tagged(item) ?? byOrigin(item);
 }
