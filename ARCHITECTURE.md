@@ -163,6 +163,7 @@ Links to discussion, docs, prior art.
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [124](#adr-124) | 2026-09-28 | The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8984,3 +8985,38 @@ misreports data:
   mode still limits pulls after sales to one per 45 s.
 - DB3-CAJA-04's other halves stay open: the full `export()` per write and the
   move to an OPFS VFS.
+
+---
+
+## ADR-124
+
+**Title:** The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal
+
+**Date:** 2026-09-28
+
+**Status:** Accepted — Track M (M-12); amends ADR-027's consent surface, keeps its rules
+
+**Context**
+
+ADR-027 put Sentry behind explicit consent through a first-launch `ConsentModal`.
+The Track M rebuild (M-01…M-09) left that modal unmounted: the phone now shows
+the aviso de privacidad when the caja is linked (N-34 variante B, the same
+`AvisoVinculacion` the web caja shows), and that aviso already says crash reports
+are optional and are turned on in Ajustes, where `CrashReportingToggle` lives.
+A second, earlier modal would ask the same thing before the operator has seen
+the aviso.
+
+**Decision**
+
+- `ConsentModal` is removed. The consent surface is the linking aviso plus the
+  Ajustes switch.
+- Everything else in ADR-027 holds: reporting is off by default, PII scrubbing is
+  always on, and Sentry never starts partially; it starts only once the switch
+  is on.
+
+**Consequences**
+
+- A phone reports nothing until someone turns the switch on in Ajustes.
+- `docs/legal/aviso/aviso-simplificado.md` still mentions a "pantalla de
+  consentimiento de reportes de fallas"; counsel's review (O-17) should word it
+  as the Ajustes switch.

@@ -533,13 +533,12 @@ run a specific phase or `--dry-run` to see the full flow list.
 
 ### Debug / Development
 
-| Flow                         | What it proves          |
-| ---------------------------- | ----------------------- |
-| `debug-speed.yaml`           | Speed test assertions   |
-| `debug-operativo-auth.yaml`  | Operativo auth debug    |
-| `debug-auth.yaml`            | Auth debug flow         |
-| `demo-mode-setup.yaml`       | Demo mode initial setup |
-| `consent-modal-dismiss.yaml` | Consent modal dismiss   |
+| Flow                        | What it proves          |
+| --------------------------- | ----------------------- |
+| `debug-speed.yaml`          | Speed test assertions   |
+| `debug-operativo-auth.yaml` | Operativo auth debug    |
+| `debug-auth.yaml`           | Auth debug flow         |
+| `demo-mode-setup.yaml`      | Demo mode initial setup |
 
 ---
 

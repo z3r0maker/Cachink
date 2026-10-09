@@ -10,7 +10,6 @@ export * from './Settings/index';
 export * from './Ventas/index';
 export * from './Egresos/index';
 export * from './Productos/index';
-export * from './ConsentModal/index';
 // AppShellRouteWrapper lives in components/ but imports from
 // screens/AppShell — exporting it from the components barrel would
 // create a require cycle. Re-exported here to break the cycle while
@@ -32,7 +31,6 @@ export * from './Cierre/index';
 export * from './Checkout/index';
 export * from './Cobranza/index';
 export * from './VentasTurno/index';
-export * from './SyncRejected/index';
 // Track M, M-09 — Inventario, Avisos, Registros por enviar
 export * from './Inventario/index';
 export * from './Avisos/index';
