@@ -9,14 +9,7 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { ICONS } from '@xangarro/caja';
-import {
-  Btn,
-  GLYPHS,
-  NavRows,
-  PathIcon,
-  type NavRowChipTone,
-  type NavRowItem,
-} from '../../components/index';
+import { Btn, GLYPHS, NavRows, PathIcon, type NavRowItem } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { borderColors, borderWidths, colors } from '../../theme';
 import { NAV } from './tab-definitions';
@@ -25,30 +18,23 @@ import { useCajaLayout } from './use-caja-layout';
 /** Where each row goes: the app's stack routes. */
 export const TURNO_ROUTES = {
   gastos: NAV.gastos.path,
-  cobranza: NAV.cobranza.path,
   inventario: NAV.inventario.path,
   movimientos: '/caja-movimientos',
-  pendientes: '/pendientes',
+  pendientes: '/no-enviados',
   ajustes: '/settings',
 } as const;
 
-export type TurnoRowKey = keyof typeof TURNO_ROUTES;
-
-/** What Mi turno knows live about a row (M-09): a detail line and a status chip. */
-export interface TurnoRowVivo {
-  readonly detail?: string;
-  readonly chip?: { readonly label: string; readonly tone: NavRowChipTone };
-}
-
-export type TurnoRowsVivas = Partial<Record<TurnoRowKey, TurnoRowVivo>>;
-
-function useRows(onNavigate: (path: string) => void, vivas: TurnoRowsVivas = {}): NavRowItem[] {
+function useRows(onNavigate: (path: string) => void): NavRowItem[] {
   const { t } = useTranslation();
-  const row = (key: TurnoRowKey, testKey: string, icon: string, tint: string): NavRowItem => ({
+  const row = (
+    key: keyof typeof TURNO_ROUTES,
+    testKey: string,
+    icon: string,
+    tint: string,
+  ): NavRowItem => ({
     key,
     title: t(`shell.turno.${key}`),
-    detail: vivas[key]?.detail ?? t(`shell.turno.${key}Detalle`),
-    ...(vivas[key]?.chip ? { chip: vivas[key].chip } : {}),
+    detail: t(`shell.turno.${key}Detalle`),
     icon,
     tint,
     onPress: () => onNavigate(TURNO_ROUTES[key]),
@@ -56,7 +42,6 @@ function useRows(onNavigate: (path: string) => void, vivas: TurnoRowsVivas = {})
   });
   return [
     row('gastos', 'gastos', ICONS.gastos, colors.redSoft),
-    row('cobranza', 'cobranza', ICONS.fiado, colors.warningSoft),
     row('inventario', 'inventario', ICONS.inventario, colors.blueSoft),
     row('movimientos', 'caja-movimientos', GLYPHS.movimientos, colors.yellowSoft),
     row('pendientes', 'no-enviados', GLYPHS.nube, colors.greenSoft),
@@ -64,18 +49,10 @@ function useRows(onNavigate: (path: string) => void, vivas: TurnoRowsVivas = {})
   ];
 }
 
-export function TurnoRows(props: {
-  readonly onNavigate: (path: string) => void;
-  /** Live detail lines and chips (Mi turno); the static details otherwise. */
-  readonly vivas?: TurnoRowsVivas;
-}): ReactElement {
+export function TurnoRows(props: { readonly onNavigate: (path: string) => void }): ReactElement {
   const { t } = useTranslation();
   return (
-    <NavRows
-      testID="turno-rows"
-      label={t('shell.turno.rows')}
-      items={useRows(props.onNavigate, props.vivas)}
-    />
+    <NavRows testID="turno-rows" label={t('shell.turno.rows')} items={useRows(props.onNavigate)} />
   );
 }
 

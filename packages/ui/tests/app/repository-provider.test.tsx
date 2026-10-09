@@ -58,7 +58,7 @@ describe('useRepositories', () => {
     }
   });
 
-  it('exposes all 25 repositories (entities incl. owner messages and replies, referenceData, recordUsage) through the context record', () => {
+  it('exposes all repositories (entity + referenceData + recordUsage) through the context record', () => {
     renderWithProviders(
       <MockRepositoryProvider>
         <RepoProbe />
@@ -136,7 +136,7 @@ describe('MockRepositoryProvider overrides', () => {
 });
 
 describe('buildDrizzleRepositories', () => {
-  it('returns 25 non-null repository instances wired onto one db + deviceId', () => {
+  it('returns non-null repository instances wired onto one db + deviceId', () => {
     const sqlite = new Sqlite(':memory:');
     const shim = {
       path: ':memory:',

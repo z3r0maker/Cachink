@@ -1,31 +1,18 @@
 /**
  * Renders `docs/plan/PENDIENTES.md` from parsed items (see `plan-board.ts`).
  *
- * Two axes, because they answer different questions and a list of 175 needs
- * both. **Area** is what kind of work it is and who can move it
- * (`plan-board-areas.ts`) — the owner's ask of 2026-09-28, after a board that
- * mixed «counsel reviews the aviso» with «build the ten Diagnóstico sections»
- * turned out not to be plannable. **Category** is when it happens relative to
- * the launch (`categoryOf`) — the owner's ask of 2026-09-23. Areas group, the
- * category labels each row, and neither is stored on a task: both are decided
- * from the file, the section and an optional tag, so a task never has to move
- * to be counted where it belongs.
+ * The board is grouped by **kind of work** — the owner's ask of 2026-10-05:
+ * who has to act (code, corporate/legal, console configuration, waiting on
+ * real-world data), not when in the launch the work lands. The kind of every
+ * item is decided in `plan-board-kinds.ts`; the launch phase survives as the
+ * per-item tag in «Siguiente».
  */
 
-import { AREAS, AREA_BLURB, AREA_TITLES, areaOf, type Area } from './plan-board-areas.js';
-import {
-  PRIORIDADES,
-  PRIO_REGLA,
-  PRIO_TITULO,
-  esBloqueante,
-  ordenPrioridad,
-  prioridadDe,
-} from './plan-board-prioridad.js';
+import { KINDS, type Kind, SURFACES, kindOf } from './plan-board-kinds.js';
 import { nextUp } from './plan-board-next.js';
 import type { Item, Status } from './plan-board-parse.js';
 
-export const CATEGORIES = ['Lanzamiento', 'Post-lanzamiento', 'Colas de tracks'] as const;
-export type Category = (typeof CATEGORIES)[number];
+export type Phase = 'Lanzamiento' | 'Post-lanzamiento' | 'Colas de tracks';
 
 const OPEN: readonly Status[] = ['open', 'progress', 'blocked'];
 const MARK: Readonly<Record<Status, string>> = {
@@ -35,8 +22,23 @@ const MARK: Readonly<Record<Status, string>> = {
   done: '[x]',
 };
 
-/** Which list an item belongs to. Keyed on file + section so specs stay put. */
-export function categoryOf(item: Item): Category {
+const BLURB: Readonly<Record<Kind, string>> = {
+  'Código y técnico':
+    'Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. ' +
+    'Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.',
+  'Corporativo, legal y terceros':
+    'Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/INDAUTOR, ' +
+    'seguros, Clip y Mercado Pago, y las decisiones de negocio.',
+  'Infra y consolas':
+    'Configuración en consolas de terceros — Vercel, Supabase, Stripe, Resend, DNS, GitHub, ' +
+    'stores — y las llaves y regiones que viven ahí. El repo ya tiene lo que falta configurar.',
+  'Espera datos reales':
+    'No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral de escala o ' +
+    'tiempo después del lanzamiento. Cada una dice su disparador.',
+};
+
+/** The launch phase an item belongs to — printed as the tag in «Siguiente». */
+export function phaseOf(item: Item): Phase {
   const { source, section } = item;
   if (source === '07-launch.md' || source === '11-pre-launch-and-deferred.md') return 'Lanzamiento';
   if (source === '09-next-features.md')
@@ -50,29 +52,45 @@ export function categoryOf(item: Item): Category {
 
 function renderItem(item: Item): string {
   const id = item.id ? `**${item.id}** ` : '';
-  const prio = prioridadDe(item);
-  const marca = `${esBloqueante(item) ? '`⛔ bloquea prod` ' : ''}${prio ? `\`${PRIO_TITULO[prio]}\` ` : ''}`;
   const tail = [
-    item.blockedBy ? `Blocked by: ${item.blockedBy}` : null,
-    item.trigger ? `Trigger: ${item.trigger}` : null,
+    item.blockedBy ? `Bloqueada por: ${item.blockedBy}` : null,
+    item.trigger ? `Disparador: ${item.trigger}` : null,
     item.remaining ? `Falta: ${item.remaining}` : null,
   ]
     .filter((s) => s !== null)
     .join(' · ');
-  return `- ${MARK[item.status]} ${marca}${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
+  return `- ${MARK[item.status]} ${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
 }
 
-/** Inside an area, the launch axis is what orders the work. */
-function renderArea(area: Area, items: readonly Item[]): string[] {
+/** Código keeps its surface headers (Teléfono, Portal, …), in SURFACES order. */
+function surfaceGroups(items: readonly Item[]): [string, Item[]][] {
+  return SURFACES.map((surface) => [
+    surface,
+    items.filter((i) => kindOf(i).surface === surface),
+  ]).filter(([, list]) => list.length > 0) as [string, Item[]][];
+}
+
+/** The other kinds keep their provenance: the track file and section. */
+function provenanceGroups(items: readonly Item[]): [string, Item[]][] {
+  const out: [string, Item[]][] = [];
+  for (const item of items) {
+    const key = item.section ? `\`${item.source}\` · ${item.section}` : `\`${item.source}\``;
+    const last = out.at(-1);
+    if (last && last[0] === key) last[1].push(item);
+    else out.push([key, [item]]);
+  }
+  return out;
+}
+
+function renderKind(kind: Kind, items: readonly Item[]): string[] {
   const open = items.filter((i) => OPEN.includes(i.status));
-  const out = [`## ${AREA_TITLES[area]} (${open.length})`, '', AREA_BLURB[area], ''];
+  const out = [`## ${kind} (${open.length})`, '', BLURB[kind], ''];
   if (open.length === 0) return [...out, '_Nada abierto._', ''];
-  for (const category of CATEGORIES) {
-    const rows = open
-      .filter((i) => categoryOf(i) === category)
-      .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b));
-    if (rows.length === 0) continue;
-    out.push(`### ${category} (${rows.length})`, '', ...rows.map(renderItem), '');
+  const groups = kind === 'Código y técnico' ? surfaceGroups(open) : provenanceGroups(open);
+  for (const [key, list] of groups) {
+    out.push(`### ${key} (${list.length})`, '');
+    for (const item of list) out.push(renderItem(item));
+    out.push('');
   }
   return out;
 }
@@ -96,32 +114,6 @@ function renderSummary(items: readonly Item[]): string[] {
   return out;
 }
 
-/** Everything tagged `bloq`, gathered before the areas: the shortest read of «what stops us». */
-function renderBloqueantes(items: readonly Item[]): string[] {
-  const rows = items
-    .filter((i) => OPEN.includes(i.status) && esBloqueante(i))
-    .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b));
-  const out = [
-    `## Bloquea producción (${rows.length})`,
-    '',
-    'Mientras cualquiera de estas siga abierta, no se sale a producción. La marca la pone una',
-    'etiqueta `` `[bloq]` `` en el track, no una regla sobre el texto: hay tareas que ningún documento',
-    'llama BLOCKER y que aun así tienen producción detenida hoy.',
-    '',
-  ];
-  for (const p of PRIORIDADES) {
-    const nivel = rows.filter((i) => prioridadDe(i) === p);
-    if (nivel.length === 0) continue;
-    out.push(
-      `### ${PRIO_TITULO[p]} (${nivel.length}) — ${PRIO_REGLA[p]}`,
-      '',
-      ...nivel.map(renderItem),
-      '',
-    );
-  }
-  return out;
-}
-
 const NEXT_LIMIT = 15;
 
 /** Ready tasks (no open blocker), ranked by what they unblock. */
@@ -130,8 +122,10 @@ function renderNext(items: readonly Item[]): string[] {
   const out = [
     `## Siguiente (${rows.length})`,
     '',
-    'Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas por cuántas',
-    'tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.',
+    'Derivado de los campos **Blocked by** / **Blocks** de cada track: tareas sin bloqueo abierto,',
+    'ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula con cada',
+    '`pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las',
+    'listas de abajo.',
     '',
   ];
   for (const { item, unblocks } of rows) {
@@ -140,7 +134,7 @@ function renderNext(items: readonly Item[]): string[] {
         ? ` — destraba ${unblocks.length}: ${unblocks.slice(0, 6).join(', ')}${unblocks.length > 6 ? ', …' : ''}`
         : '';
     out.push(
-      `- **${item.id ?? ''}** ${item.title} (${categoryOf(item)})${chain} · \`${item.source}:${item.line}\``,
+      `- **${item.id ?? ''}** ${item.title} (${phaseOf(item)})${chain} · \`${item.source}:${item.line}\``,
     );
   }
   out.push('');
@@ -154,21 +148,21 @@ const HEAD = [
   '> `- [ ]` / `- [~]` / `- [!]` en un track de `docs/plan` (o de una fila `| O-n |` en',
   '> `11-pre-launch-and-deferred.md`). Para cambiar un estado, edita el track y regenera;',
   '> `pnpm test:scripts` falla cuando este archivo quedó viejo. Las especificaciones, los pasos y las',
-  '> líneas Done siguen en cada track: aquí sólo está lo que falta, agrupado por **área** — qué clase',
-  '> de trabajo es y quién puede moverlo — y dentro de cada área por momento de lanzamiento, con su',
-  '> disparador o bloqueo y la línea exacta de donde viene. Un área se deduce del archivo y la',
-  '> sección; una etiqueta `` `[área]` `` en el track manda sobre esa deducción. «Siguiente» es el',
-  '> orden de trabajo, derivado de las dependencias.',
+  '> líneas Done siguen en cada track: aquí sólo está lo que falta, en cuatro listas por tipo de',
+  '> trabajo — quién tiene que actuar —, con su disparador o bloqueo y la línea exacta de donde',
+  '> viene. El tipo de cada tarea vive en `scripts/plan-board-kinds.ts`; una tarea sin tipo rompe',
+  '> la generación. «Siguiente» es el orden de trabajo, derivado de las dependencias.',
   '',
 ];
 
 export function renderBoard(items: readonly Item[]): string {
-  const byArea = new Map<Area, Item[]>(AREAS.map((a) => [a, []]));
-  for (const item of items) byArea.get(areaOf(item))?.push(item);
-  const body = AREAS.flatMap((a) => renderArea(a, byArea.get(a) ?? []));
+  // Done items are never rendered or ranked, so they carry no kind: the tables
+  // in plan-board-kinds.ts only need to keep up with the open work.
+  const open = items.filter((i) => OPEN.includes(i.status));
+  const byKind = new Map<Kind, Item[]>(KINDS.map((k) => [k, []]));
+  for (const item of open) byKind.get(kindOf(item).kind)?.push(item);
+  const body = KINDS.flatMap((k) => renderKind(k, byKind.get(k) ?? []));
   return (
-    [...HEAD, ...renderNext(items), ...renderBloqueantes(items), ...body, ...renderSummary(items)]
-      .join('\n')
-      .trimEnd() + '\n'
+    [...HEAD, ...renderNext(items), ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n'
   );
 }

@@ -79,9 +79,25 @@ set -- "${POSITIONAL_ARGS[@]+"${POSITIONAL_ARGS[@]}"}"
 source "$SCRIPT_DIR/lib/device-resolve.sh"
 
 IPAD_DEVICE="${IPAD_DEVICE:-$MAESTRO_IPAD_DEVICE}"
-echo "📱  Target: $IPAD_DEVICE"
 
-IPAD_UDID="$(udid_for_name "$IPAD_DEVICE")"
+# Two simulators can share a display name across runtimes (two "iPad Pro
+# 11-inch (M5)": iOS 26.5 and 27.0), and udid_for_name takes the first match —
+# which once pinned the suite to the 27.0 sim, where Maestro's launchApp
+# leaves the device on SpringBoard. An explicit UDID wins over the name.
+if [[ -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
+  IPAD_UDID="$MAESTRO_DEVICE_UDID"
+  IPAD_DEVICE="$(xcrun simctl list devices -j | python3 -c "
+import json, sys
+for runtime, devices in json.load(sys.stdin)['devices'].items():
+    for d in devices:
+        if d['udid'] == '$IPAD_UDID':
+            print(d['name']); raise SystemExit
+")"
+  echo "📱  Target: $IPAD_DEVICE (UDID override $IPAD_UDID)"
+else
+  echo "📱  Target: $IPAD_DEVICE"
+  IPAD_UDID="$(udid_for_name "$IPAD_DEVICE")"
+fi
 
 if [[ -z "$IPAD_UDID" ]]; then
   echo "❌  Could not find an available simulator matching '$IPAD_DEVICE'."
@@ -90,6 +106,7 @@ if [[ -z "$IPAD_UDID" ]]; then
   xcrun simctl list devices available | grep -i ipad | sed 's/^/      /' || true
   echo ""
   echo "    Override:  MAESTRO_IPAD_DEVICE='iPad Pro 13-inch (M5)' $0 ..."
+  echo "    Or pin the UDID directly:  MAESTRO_DEVICE_UDID=<udid> $0 ..."
   exit 1
 fi
 

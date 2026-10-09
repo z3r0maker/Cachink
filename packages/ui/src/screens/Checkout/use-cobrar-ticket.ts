@@ -118,6 +118,14 @@ function useTicketUseCase(): RegistrarTicketUseCase {
   );
 }
 
+/**
+ * The key-prefixes a sale invalidates besides TOCADAS's first-word matches:
+ * the turno's ventas list lives under caja's keys, which TOCADAS cannot see.
+ */
+export function teclasAlCobrar(businessId: BusinessId | null): readonly (readonly unknown[])[] {
+  return [['caja', businessId, 'ventas-turno']];
+}
+
 export function useCobrarTicket() {
   const useCase = useAuditedUseCase(useTicketUseCase(), AUDIT_COBRAR_TICKET);
   const businessId = useCurrentBusinessId();
@@ -133,6 +141,9 @@ export function useCobrarTicket() {
         ...estadosKeys
           .dependentsForBusiness(businessId)
           .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        ...teclasAlCobrar(businessId).map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
       ]);
     },
   });

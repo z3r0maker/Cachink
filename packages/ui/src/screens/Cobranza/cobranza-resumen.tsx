@@ -1,97 +1,132 @@
 /**
- * The top of Fiado y abonos (MvCobranza): the three figures (por cobrar,
- * today's abonos, of them in cash) from the caja's `resumen`, and the search
- * by name or phone.
+ * The figures of «Fiado y abonos» (MvCobranzaLista): the three the board puts
+ * under the title — por cobrar, abonos de hoy, en efectivo, each with its hint
+ * (`kpisCobranza` in the caja package) — and «Abonos que recibiste hoy» as a
+ * quiet panel, newest first, with the operator's note when there is one.
  */
 import type { ReactElement } from 'react';
-import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { resumen, type CuentaCliente } from '@xangarro/caja/cobranza';
-import { formatMoney, type Money } from '@xangarro/domain';
-import { MText, PathIcon } from '../../components/index';
+import { formatMoney } from '@xangarro/domain';
 import {
-  borderColors,
-  borderWidths,
-  colors,
-  portalFontSizes,
-  radii,
-  typography,
-} from '../../theme';
-import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
-import { Cifra } from './cobranza-partes';
+  abonosDeHoy,
+  kpisCobranza,
+  type AbonoDelDia,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
+import { MText } from '../../components/Mostrador/index';
+import { QuietPanel } from '../../components/Panel/index';
+import { borderColors, borderWidths, colors } from '../../theme';
 
-function Figura(p: { label: string; monto: Money; color: string; borde: boolean }): ReactElement {
+function Cifra(p: {
+  readonly label: string;
+  readonly value: string;
+  readonly hint: string;
+  readonly color: string;
+  readonly fuerte: boolean;
+}): ReactElement {
   return (
     <View
-      flex={1}
-      minWidth={0}
-      paddingHorizontal={10}
-      gap={1}
-      borderRightWidth={p.borde ? borderWidths.quiet : 0}
-      borderRightColor={borderColors.quiet}
-    >
-      <MText size="xs" weight="bold" color={colors.gray600}>
-        {p.label}
-      </MText>
-      <Cifra size="lgx" color={p.color} numberOfLines={1} adjustsFontSizeToFit>
-        {formatMoney(p.monto)}
-      </Cifra>
-    </View>
-  );
-}
-
-export function Resumen(p: { cuentas: readonly CuentaCliente[]; hoy: string }): ReactElement {
-  const { cuentas, hoy } = p;
-  const r = resumen(cuentas, hoy);
-  return (
-    <View
-      role="region"
-      aria-label="Resumen de fiado"
-      testID="cobranza-resumen"
       flexDirection="row"
-      paddingVertical={10}
-      borderRadius={radii[6]}
-      borderWidth={borderWidths.quiet}
-      borderColor={borderColors.quiet}
-      backgroundColor={colors.white}
+      alignItems="baseline"
+      gap={10}
+      paddingVertical={8}
+      borderBottomWidth={borderWidths.quiet}
+      borderBottomColor={borderColors.quiet}
     >
-      <Figura label="Por cobrar" monto={r.porCobrar} color={colors.warningText} borde />
-      <Figura label="Abonos hoy" monto={r.abonado} color={colors.greenText} borde />
-      <Figura label="En efectivo" monto={r.efectivo} color={colors.black} borde={false} />
+      <View flex={1} gap={2} alignItems="flex-start">
+        <MText
+          size="xs"
+          weight="extraBold"
+          letterSpacing={1.2}
+          color={p.fuerte ? colors.ink : colors.textMuted}
+          style={{ textTransform: 'uppercase' }}
+        >
+          {p.label}
+        </MText>
+        <MText size="xs" weight="semibold" color={colors.gray600}>
+          {p.hint}
+        </MText>
+      </View>
+      <MText size="xl3" weight="extraBold" color={p.color} fontVariant={['tabular-nums']}>
+        {p.value}
+      </MText>
     </View>
   );
 }
 
-export function Buscador(p: { q: string; onQ: (q: string) => void }): ReactElement {
+/** The board's three figures, stacked on one panel. */
+export function ResumenFiado(p: {
+  readonly cuentas: readonly CuentaCliente[];
+  readonly hoy: string;
+}): ReactElement {
+  const items = kpisCobranza(p.cuentas, p.hoy);
+  return (
+    <QuietPanel label="Resumen de fiado" padding={14} testID="cobranza-kpis">
+      {items.map((k, i) => (
+        <Cifra
+          key={k.label}
+          label={k.label}
+          value={k.value}
+          hint={k.hint}
+          color={k.color}
+          fuerte={k.strong === true && i === 0}
+        />
+      ))}
+    </QuietPanel>
+  );
+}
+
+function FilaAbono({
+  a,
+  ultima,
+}: {
+  readonly a: AbonoDelDia;
+  readonly ultima: boolean;
+}): ReactElement {
   return (
     <View
       flexDirection="row"
       alignItems="center"
       gap={10}
-      height={48}
-      paddingHorizontal={14}
-      borderRadius={radii[3]}
-      borderWidth={borderWidths.thin}
-      borderColor={colors.black}
-      backgroundColor={colors.white}
+      paddingVertical={10}
+      borderBottomWidth={ultima ? 0 : borderWidths.quiet}
+      borderBottomColor={borderColors.quiet}
     >
-      <PathIcon d={COBRAR_GLYPHS.buscar} size={18} color={colors.gray600} />
-      <TextInput
-        testID="cobranza-buscar"
-        aria-label="Buscar cliente"
-        placeholder="Busca por nombre o teléfono"
-        placeholderTextColor={colors.textMuted}
-        value={p.q}
-        onChangeText={p.onQ}
-        style={{
-          flex: 1,
-          height: 44,
-          fontFamily: typography.fontFamily,
-          fontWeight: '600',
-          fontSize: portalFontSizes.body,
-          color: colors.black,
-        }}
-      />
+      <MText size="sm" weight="extraBold" color={colors.gray600} fontVariant={['tabular-nums']}>
+        {a.hora}
+      </MText>
+      <View flex={1} minWidth={0} gap={2} alignItems="flex-start">
+        <MText size="sm" weight="extraBold" numberOfLines={1}>
+          {a.cliente}
+        </MText>
+        <MText size="xs" weight="semibold" color={colors.gray600} numberOfLines={2}>
+          {a.detalle}
+        </MText>
+      </View>
+      <MText size="body" weight="extraBold" color={colors.greenText} fontVariant={['tabular-nums']}>
+        {formatMoney(a.monto)}
+      </MText>
     </View>
+  );
+}
+
+/** «Abonos que recibiste hoy», newest first; nothing when there were none. */
+export function AbonosHoyPanel(p: {
+  readonly cuentas: readonly CuentaCliente[];
+  readonly hoy: string;
+}): ReactElement | null {
+  const abonos = abonosDeHoy(p.cuentas, p.hoy);
+  if (abonos.length === 0) return null;
+  return (
+    <QuietPanel
+      label="Abonos que recibiste hoy"
+      count={abonos.length}
+      padding={14}
+      testID="cobranza-abonos-hoy"
+    >
+      {abonos.map((a, i) => (
+        <FilaAbono key={a.id} a={a} ultima={i === abonos.length - 1} />
+      ))}
+    </QuietPanel>
   );
 }

@@ -1,53 +1,34 @@
 /**
- * Expo Router entry for /cierre («Cierre de turno», MvCierre and
- * MvCierreHecho; Track M, M-09). A stack route opened from Mi turno's
- * «Cerrar turno» (and the tablet rail's), with the way back and the static
- * sync pill. The count by denomination, the difference and its motive, and
- * the close through `CerrarCajaUseCase`; records still to send warn, never
- * block (ADR-123). Once closed: the corte, «Mandar el corte a …» through the
- * phone's share sheet, and «Salir», which locks the caja back to Acceso.
+ * Expo Router entry for /cierre (Track M, M-09; boards MvCierre,
+ * MvCierreHecho): the count, the expected-vs-counted resumen, the queue band
+ * (ADR-123 — close stays enabled with rows still to send), the diferencia's
+ * motivo, and the hecho screen with the WhatsApp corte. A stack route OUTSIDE
+ * the tabs, as the boards draw it: the count is a focused flow, and the tab
+ * bar under the close button ate taps meant for it (M-11).
  */
 
-import { useCallback, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Share } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import {
-  CierreScreen,
-  useCierreMovil,
-  useSetUserId,
-  useTranslation,
-  textoDelCorte,
-  type CierreHecho,
-} from '@xangarro/ui';
-import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
-
-function compartir(h: CierreHecho): void {
-  void Share.share({ message: textoDelCorte(h) }).catch(() => undefined);
-}
+import { useRouter } from 'expo-router';
+import { CierreScreen, useCierreTurno } from '@xangarro/ui';
+import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function CierreRoute(): ReactElement {
-  const { t } = useTranslation();
   const router = useRouter();
-  const back = useBackTo('/turno');
-  const setUserId = useSetUserId();
-  const x = useCierreMovil();
-  const { refetch, hecho } = x;
-  useFocusEffect(useCallback(() => (hecho ? undefined : refetch()), [refetch, hecho]));
+  const c = useCierreTurno();
   return (
-    <AppShellWrapper
-      title={t('shell.nav.turno')}
-      onBack={hecho ? undefined : back}
-      headerStatus="static"
-    >
+    <AppShellWrapper title="Cierre de turno" onBack={() => router.navigate('/turno' as never)}>
       <CierreScreen
-        x={x}
-        onVerCuales={() => router.navigate('/pendientes' as never)}
-        onCompartir={compartir}
-        onSalir={() => {
-          router.replace('/inicio' as never);
-          setUserId(null);
+        testID="mobile-cierre"
+        state={c.state}
+        data={c.data}
+        cola={c.cola}
+        onCerrar={c.cerrar}
+        onRetry={c.refetch}
+        onSalir={() => router.navigate('/inicio' as never)}
+        onCompartir={(texto) => {
+          void Share.share({ message: texto });
         }}
-        onVolver={() => router.replace('/turno' as never)}
       />
     </AppShellWrapper>
   );

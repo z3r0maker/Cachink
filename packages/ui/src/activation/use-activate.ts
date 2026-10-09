@@ -5,7 +5,6 @@
  * → app_config (A-04; the paged snapshot bootstrap, C-23).
  */
 
-import { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ActivateResponse } from '@xangarro/contracts';
 import type { AppConfigRepository } from '@xangarro/data';
@@ -61,32 +60,14 @@ export async function persistActivation(
   return record;
 }
 
-/** Opens the gate: the activation record and the app config read again. */
-export function useAbrirApp(): () => Promise<void> {
-  const queryClient = useQueryClient();
-  return useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['appConfig'] });
-    await queryClient.invalidateQueries({ queryKey: ACTIVATION_QUERY_KEY });
-  }, [queryClient]);
-}
-
-export interface ActivateOptions {
-  /**
-   * A big business's snapshot has more pages (C-23, DS-10): the gate brings
-   * them with «Descargando los datos de tu negocio… 3 de 7» and opens after.
-   * Without it the app opens at once and the first sync brings the rest.
-   */
-  readonly onFaltanPaginas?: () => void;
-}
-
-export function useActivate(opts: ActivateOptions = {}) {
+export function useActivate() {
   const { client, config } = useActivationContext();
   const referenceData = useReferenceDataRepository();
   const appConfig = useAppConfigRepository();
-  const abrir = useAbrirApp();
+  const queryClient = useQueryClient();
   const setBusinessId = useSetCurrentBusinessId();
   const setMode = useSetMode();
-  return useMutation<Activado, ActivationError, ActivateInput>({
+  return useMutation<ActivationRecord, ActivationError, ActivateInput>({
     async mutationFn(input) {
       // N-34: the aviso this screen showed goes with the request.
       const res = await client.activate({
@@ -96,23 +77,16 @@ export function useActivate(opts: ActivateOptions = {}) {
         bootstrap: 'snapshot',
       });
       if (!res.ok) throw new ActivationError(activationErrorKey(res.code), res.message);
-      const record = await persistActivation(
+      return persistActivation(
         { referenceData, appConfig, tokenStore: config.tokenStore },
         res.data,
       );
-      return { record, faltanPaginas: Boolean(res.data.bootstrap.snapshot?.next) };
     },
-    async onSuccess({ record, faltanPaginas }) {
+    async onSuccess(record) {
       setMode('local');
       setBusinessId(record.businessId as BusinessId);
-      if (faltanPaginas && opts.onFaltanPaginas) opts.onFaltanPaginas();
-      else await abrir();
+      await queryClient.invalidateQueries({ queryKey: ['appConfig'] });
+      await queryClient.invalidateQueries({ queryKey: ACTIVATION_QUERY_KEY });
     },
   });
-}
-
-interface Activado {
-  readonly record: ActivationRecord;
-  /** The snapshot has pages after the first (DS-10). */
-  readonly faltanPaginas: boolean;
 }

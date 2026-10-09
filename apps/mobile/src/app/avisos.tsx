@@ -1,29 +1,34 @@
 /**
- * Expo Router entry for /avisos, «Avisos» (MvAvisos; Track M, M-09): the
- * owner's messages to this operator and what the caja itself flags. Opened
- * from the header bell and Inicio; a stack route with the way back to Inicio.
+ * Expo Router entry for /avisos (Track M, M-09; board MvAvisos): the owner's
+ * messages and the caja's, replies from the phone. The caja's cta hrefs are
+ * the web's `/operador/...` paths; `rutaMovil` maps them (or nothing). A
+ * stack route opened from the header bell, so it wears the frame with the
+ * way back.
  */
-import { useCallback, type ReactElement } from 'react';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { AvisosScreen, rutaMovil, useAvisosCaja } from '@xangarro/ui';
+
+import type { ReactElement } from 'react';
+import { useRouter } from 'expo-router';
+import { AvisosScreen, rutaMovil, useAvisos, useTranslation } from '@xangarro/ui';
 import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
 
 export default function AvisosRoute(): ReactElement {
+  const { t } = useTranslation();
   const router = useRouter();
   const back = useBackTo('/inicio');
-  const avisos = useAvisosCaja();
-  const { refetch } = avisos;
-  useFocusEffect(useCallback(() => refetch(), [refetch]));
+  const a = useAvisos();
   return (
-    <AppShellWrapper title="Inicio" backLabel="Volver a Inicio" onBack={back}>
+    <AppShellWrapper title={t('shell.nav.avisos')} onBack={back}>
       <AvisosScreen
-        state={avisos.state}
-        data={avisos.data}
-        onMarcar={avisos.marcar}
-        onResponder={avisos.responder}
-        rutaDe={rutaMovil}
-        onIr={(ruta) => router.push(ruta as never)}
-        onRetry={refetch}
+        testID="mobile-avisos"
+        tab="dueno"
+        state={a.state}
+        data={a.data}
+        vivo={a.vivo}
+        onAbrir={(href) => {
+          const ruta = rutaMovil(href);
+          if (ruta !== null) router.navigate(ruta as never);
+        }}
+        onRetry={a.refetch}
       />
     </AppShellWrapper>
   );

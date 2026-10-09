@@ -14,7 +14,7 @@ import type { CuentaPara } from '../runtime/protocol';
 import type { MetodoAbono } from '@xangarro/caja/cobranza';
 
 export { hoyLocal } from '@xangarro/caja';
-export { comoCuenta } from '@xangarro/caja/cobranza';
+export { comoCuenta } from '@xangarro/caja/cobranza/vivo';
 
 /** Read the business's accounts from the register's own database. */
 export async function leerCuentas(cred: Credenciales): Promise<readonly CuentaPara[]> {

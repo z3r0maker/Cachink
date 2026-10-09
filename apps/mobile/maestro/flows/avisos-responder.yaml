@@ -1,0 +1,73 @@
+# Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread
+# count, /avisos lists the owner's messages, and an aclaración is answered in
+# place — a quick answer fills the box, the reply lands (toast), and the card
+# keeps what was sent.
+#
+# A fresh pull carries 7 unread: the two mensajes the mock seeds for Toni
+# (contracts/mock/fixtures.ts mensajes()) plus the five stock-bajo avisos the
+# read caps at MAX_STOCK = 5 (use-avisos.ts:41) — every fixture product starts
+# at 0 existencias, at or under its umbral. The pill wait below ensures the
+# pull has landed, so the cola aviso is gone and the count is stable.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# The bell and its unread badge (avisos-bell.tsx; count from useCampana,
+# (tabs)/_layout.tsx).
+- assertVisible:
+    id: 'avisos-bell'
+- assertVisible: '.*7.*'
+
+# The bell opens /avisos. The owner's tab lists his aclaración: MSG-1
+# (severidad aclaracion) shows the derived título — its cajaTurnoId TRN-1
+# has no local row, so corte is null and it reads «Aclara un corte»
+# (caja/avisos/vivo.ts mensaje()).
+- tapOn:
+    id: 'avisos-bell'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-avisos'
+    timeout: 10000
+- assertVisible: '.*Lo que te manda el dueño y lo que la caja te avisa.*'
+- assertVisible:
+    id: 'aviso-dueno-01JMSG00000000000000000001'
+- assertVisible: '.*Aclara un corte.*'
+- assertVisible: '.*Aclara el corte del 13 de mayo.*'
+- assertVisible: '.*Sin leer.*'
+
+# Responder: the sheet over the list, a quick answer chips the box in
+# (RESPUESTAS_RAPIDAS, caja/avisos/movil.ts), send.
+- tapOn:
+    id: 'aviso-responder-01JMSG00000000000000000001'
+- extendedWaitUntil:
+    visible:
+      id: 'responder-sheet'
+    timeout: 5000
+- assertVisible: '.*Responder al dueño.*'
+- assertVisible: '.*Sobre el corte.*'
+- tapOn:
+    id: 'responder-rapida-Di cambio de más'
+- tapOn:
+    id: 'responder-enviar'
+
+# The toast says it landed (toastRespuesta: «El dueño ya tiene tu respuesta
+# sobre el corte.»); the card keeps the reply and turns read.
+- extendedWaitUntil:
+    visible:
+      id: 'avisos-toast'
+    timeout: 8000
+- assertVisible: '.*Respuesta enviada.*'
+- assertVisible: '.*El dueño ya tiene tu respuesta sobre el corte\..*'
+- tapOn:
+    id: 'avisos-toast-close'
+- assertVisible:
+    id: 'aviso-respondido'
+- assertVisible: '.*Le mandaste tu respuesta al dueño.*'
+- assertVisible: '.*“Creo que di cambio de más a un cliente.”.*'

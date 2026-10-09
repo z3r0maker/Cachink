@@ -164,8 +164,7 @@ export function Metas({
     return <NegocioNuevo />;
   }
 
-  // «Cambiar» in the month-end dialog opens the wizard, so the dialog yields to it.
-  if (data.estado === 'cerrada' && data.recienCerrada !== null && !editando) {
+  if (data.estado === 'cerrada' && data.recienCerrada !== null) {
     return <CierreReciente data={data} onCambiar={() => setEditando(true)} />;
   }
 

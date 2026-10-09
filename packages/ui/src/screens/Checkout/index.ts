@@ -3,7 +3,7 @@ export { CobroScreen, type CobroScreenProps } from './cobro-screen';
 export { FiadoScreen, type FiadoScreenProps, type AQuien } from './fiado-screen';
 export { VentaHechaDialog, type VentaHechaDialogProps } from './venta-hecha-dialog';
 export { ComprobanteSheet, type ComprobanteSheetProps } from './comprobante-sheet';
-export { useVentaHecha, type VentaHecha } from './venta-hecha';
+export { useVentaHecha, ventaHechaDeDetalle, type VentaHecha } from './venta-hecha';
 export {
   METODOS as METODOS_COBRO,
   metodoDominio,

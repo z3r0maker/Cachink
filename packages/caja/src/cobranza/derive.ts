@@ -1,7 +1,9 @@
-import { sum, type Money } from '@xangarro/domain';
+import { sum, formatMoney, type Money } from '@xangarro/domain';
+import { colors } from '@xangarro/tokens';
 
 import { enPalabras } from '../inicio/copy';
 import { matches } from '../comun/search';
+import type { StatItem } from '../comun/stat';
 import { abiertas, estadoCliente, estadoCuenta, ultimoAbono } from './cliente/derive';
 import type { CuentaCliente } from './cliente/types';
 import type { FiltroCobranza, MetodoAbono } from './types';
@@ -91,4 +93,33 @@ export function resumen(cuentas: readonly CuentaCliente[], hoy: string) {
 export function rapidos(total: Money): readonly Money[] {
   if (total <= 0n) return [];
   return [total, ...[500_00n, 200_00n].filter((v) => v < total)];
+}
+
+/**
+ * The screen's three figures, as the phone's KPI panel reads them (M-08):
+ * what is owed, what was abonado today and how much of it is cash.
+ */
+export function kpisCobranza(cuentas: readonly CuentaCliente[], hoy: string): readonly StatItem[] {
+  const r = resumen(cuentas, hoy);
+  return [
+    {
+      label: 'Por cobrar',
+      value: formatMoney(r.porCobrar),
+      hint: r.conSaldo,
+      color: colors.warningText,
+      strong: true,
+    },
+    {
+      label: 'Abonos de hoy',
+      value: formatMoney(r.abonado),
+      hint: r.recibidos,
+      color: colors.greenText,
+    },
+    {
+      label: 'En efectivo',
+      value: formatMoney(r.efectivo),
+      hint: 'Entró a tu caja y se cuenta al cerrar',
+      color: colors.black,
+    },
+  ];
 }

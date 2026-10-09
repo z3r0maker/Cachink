@@ -10,7 +10,6 @@
 
 import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { DescargaInicial } from '../../activation/use-descarga';
 import { colors } from '../../theme';
 import { VincularCodigo } from './vincular-codigo';
 import { VincularEscanear } from './vincular-escanear';
@@ -23,9 +22,6 @@ export interface ActivationScreenProps {
   readonly submitting: boolean;
   /** i18n key of the current error, if any. */
   readonly errorKey?: string | null;
-  /** DS-10: the snapshot's remaining pages after the code was accepted; null otherwise. */
-  readonly descarga?: DescargaInicial | null;
-  readonly onReintentar?: () => void;
   /** The view to open on (the stories show both). */
   readonly vistaInicial?: 'escanear' | 'codigo';
   readonly testID?: string;
@@ -74,8 +70,6 @@ export function ActivationScreen(props: ActivationScreenProps): ReactElement {
           onConectar={v.enviar}
           submitting={props.submitting}
           errorKey={v.errorKey}
-          descarga={props.descarga ?? null}
-          onReintentar={props.onReintentar}
         />
       ) : (
         <VincularEscanear onToken={v.leer} leyendo={v.token === null} onEscribir={v.irCodigo} />
@@ -86,8 +80,6 @@ export function ActivationScreen(props: ActivationScreenProps): ReactElement {
         onVolver={v.irEscanear}
         submitting={props.submitting}
         errorKey={props.errorKey ?? null}
-        descarga={props.descarga ?? null}
-        onReintentar={props.onReintentar}
       />
     </View>
   );

@@ -33,7 +33,7 @@ are answered, and the copy below already follows them.
 
 ## Portal
 
-### DS-01 Ventas y gastos — filters answered by the server
+### DS-01 Ventas y gastos — filtros que responde el servidor
 
 - [x] Status · done 2026-09-28: `app/(portal)/movimientos/*` follows EsVentasFiltros — the old rows
       stay dimmed under a bar while a filter is out (React transition; «Cargando movimientos…»), a
@@ -71,7 +71,7 @@ updates when the answer arrives.
 > including lines the search filtered out or the page cut off. Confirm this. The ticket is the unit
 > the customer paid for.
 
-### DS-02 Exportar — every row, with a preparing state
+### DS-02 Exportar — todos los registros, con estado de preparación
 
 - [x] Status · done 2026-09-28: every `ExportButton` shows «Preparando tu archivo…» and fails with
       the one-line toast «No pudimos generar el archivo. Intenta de nuevo.»; Productos › Movimientos
@@ -88,7 +88,7 @@ takes a few seconds, and today no screen links to the inventory export at all.
 > archivo…» with a spinner and is disabled until the download starts. On failure, show a toast
 > «No pudimos generar el archivo. Intenta de nuevo.»
 
-### DS-03 Sincronización › Historial — the last 30 days
+### DS-03 Sincronización › Historial — los últimos 30 días
 
 - [x] Status · done 2026-09-28: the historial card says «Últimos 30 días» and has its empty state.
 
@@ -98,7 +98,7 @@ now reads the last 30 days.
 > **Sincronización › Historial.** Card subtitle «Últimos 30 días». Empty state: «Sin actividad de
 > sincronización en los últimos 30 días.»
 
-### DS-04 Productos › Movimientos — the newest 50
+### DS-04 Productos › Movimientos — los 50 más recientes
 
 - [x] Status · done 2026-09-28: the footer reads «Mostrando los 50 más recientes · Exportar
       todos», the same export as the header button.
@@ -108,7 +108,7 @@ now reads the last 30 days.
 
 ## Caja (operador) and phone
 
-### DS-05 Sync status — «Reintentando»
+### DS-05 Estado de sincronización — «Reintentando»
 
 - [x] Status · done 2026-09-28: EsCajaReintentando and EsMvReintentando. One wording for both
       (`pillEnvio`, `@xangarro/caja`): en línea · enviando · reintentando («Reintentando en 1 min»
@@ -130,7 +130,7 @@ and the caja shows only «en línea / sin conexión».
 > pidió esperar hasta las 7:42 p. m.» «Reintentar envío» stays as the manual override. It skips
 > our wait but not the server's.
 
-### DS-06 Cierre — rows still to send
+### DS-06 Cierre — registros que faltan por enviar
 
 - [x] Status · done 2026-09-28: option (a) (ADR-123) as EsCajaCierre and EsMvCierre draw it: the
       band with the sync tile, «Enviando…» / «Todavía no se pudo…» after a retry, «N por enviar»
@@ -144,7 +144,7 @@ and the caja shows only «en línea / sin conexión».
 > **Cierre — option (b).** Keep «Primero se tienen que enviar los registros pendientes.» Count
 > rows in retry and never-attempted rows too, and add «Reintentar envío» next to it.
 
-### DS-07 Registros por enviar — last and next attempt
+### DS-07 Registros por enviar — último y próximo intento
 
 - [x] Status · done 2026-09-28: each record in retry carries the chip «En reintento» and the gray
       line «Último intento: hace 3 min · Próximo: en 2 min» (`lineaIntento`, `@xangarro/caja`;
@@ -161,7 +161,7 @@ or 10 minutes with no answer, it moves to «en reintento» on a jittered backoff
 
 ## Added by the round-3 audit (`docs/audits/db-2026-09-26-r3.html`)
 
-### DS-08 Caja — already open in another tab
+### DS-08 Caja — ya abierta en otra pestaña
 
 - [x] Status · done 2026-09-28: EsCajaPestana's three states: aviso (the notice in Don's bubble,
       the date, the two tabs, the rule), esperando (the busy button, «Esperando a que se cierre la
@@ -178,7 +178,7 @@ a screen.
 > «Usar esta pestaña» (takes the register over once the other tab closes); link «Cerrar esta
 > pestaña».
 
-### DS-09 Estados — the custom range has a limit
+### DS-09 Estados — el rango personalizado tiene un límite
 
 - [x] Status · done 2026-09-28: the cap is enforced server-side and in the picker: the inline error
       on «Hasta», «Aplicar» disabled past 13 months or without both days in order, and the help link
@@ -191,7 +191,7 @@ memory. The range is capped at 13 months.
 > shows the inline error «Elige un periodo de hasta 13 meses.» and «Aplicar» stays disabled. For
 > longer periods, a help link: «¿Necesitas más? Exporta tus movimientos.»
 
-### DS-10 Linking a big business — the first download comes in pages
+### DS-10 Vincular un negocio grande — la primera descarga llega por páginas
 
 - [x] Status · done 2026-09-28: EsCajaDescarga, EsMvDescarga, EsMvInventarioBajando. «Conectar
       esta caja» and the phone's activation stay busy with «Descargando los datos de tu negocio…»,

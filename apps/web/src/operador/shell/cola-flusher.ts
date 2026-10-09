@@ -60,7 +60,7 @@ async function leerCola(): Promise<Cuenta> {
   const runtime = registerRuntime();
   const [cola, counts] = await Promise.all([
     runtime.colaPendiente(),
-    runtime.counts().catch(() => null),
+    runtime.counts ? runtime.counts().catch(() => null) : Promise.resolve(null),
   ]);
   return { ...contarCola(cola), rechazados: counts?.rejected ?? 0 };
 }

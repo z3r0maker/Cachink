@@ -5,16 +5,17 @@
  * opens the database, the tab's Worker asks for the register's Web Lock; the
  * tab that gets it is the caja. A second tab never opens the file: it shows
  * «La caja ya está abierta en otra pestaña.», and «Usar esta pestaña» waits
- * in the lock's queue until the first tab closes; if it has not closed after a
- * few seconds, «La otra pestaña sigue abierta» says so while the claim stays
- * queued (EsCajaPestana: aviso, esperando, sigue). Without Web Locks the tabs
+ * in the lock's queue until the first tab closes. Without Web Locks the tabs
  * ask each other over a BroadcastChannel instead — a warning, not a lock.
  */
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
-import { OtraPestana } from './pestana-aviso';
+import { Continuar } from './boton';
+import { Marco } from './marco';
+import * as a from './acceso.css';
 import { registerRuntime } from '../runtime/client';
+import { readDevice } from '../runtime/device-store';
 import { hayOtraPestana, responderPresencia } from '../runtime/pestana';
 
 type Estado = 'decidiendo' | 'propia' | 'ocupada' | 'esperando';
@@ -32,10 +33,10 @@ async function tomar(sinCandado: boolean): Promise<'propia' | 'ocupada'> {
   return (await registerRuntime().reclamar(true)) === 'ocupada' ? 'ocupada' : 'propia';
 }
 
-/** How long «Esperando a que se cierre la otra pestaña…» shows before «sigue abierta». */
-const SIGUE_MS = 3_000;
-
-function useDecision(setEstado: (e: Estado) => void, setSinCandado: (b: boolean) => void): void {
+function usePestana() {
+  const [estado, setEstado] = useState<Estado>('decidiendo');
+  const [sinCandado, setSinCandado] = useState(false);
+  const [sigue, setSigue] = useState(false);
   useEffect(() => {
     let vivo = true;
     decidir()
@@ -49,33 +50,16 @@ function useDecision(setEstado: (e: Estado) => void, setSinCandado: (b: boolean)
     return () => {
       vivo = false;
     };
-  }, [setEstado, setSinCandado]);
-}
-
-function usePestana() {
-  const [estado, setEstado] = useState<Estado>('decidiendo');
-  const [sinCandado, setSinCandado] = useState(false);
-  const [sigue, setSigue] = useState(false);
-  const espera = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useDecision(setEstado, setSinCandado);
+  }, []);
   useEffect(
     () => (estado === 'propia' && sinCandado ? responderPresencia() : undefined),
     [estado, sinCandado],
   );
-  useEffect(() => () => (espera.current ? clearTimeout(espera.current) : undefined), []);
   const usarEsta = useCallback(() => {
     setEstado('esperando');
-    setSigue(false);
-    if (espera.current) clearTimeout(espera.current);
-    // The claim stays queued; after a while the screen says the other tab is still open.
-    espera.current = setTimeout(() => {
-      setSigue(true);
-      setEstado((e) => (e === 'esperando' ? 'ocupada' : e));
-    }, SIGUE_MS);
     void tomar(sinCandado)
       .catch(() => 'ocupada' as const)
       .then((e) => {
-        if (e === 'propia' && espera.current) clearTimeout(espera.current);
         setSigue(e === 'ocupada');
         setEstado(e);
       });
@@ -88,4 +72,38 @@ export function PestanaUnica(p: { readonly children: ReactNode }): ReactNode {
   if (t.estado === 'decidiendo') return null;
   if (t.estado === 'propia') return p.children;
   return <OtraPestana esperando={t.estado === 'esperando'} sigue={t.sigue} onUsar={t.usarEsta} />;
+}
+
+function OtraPestana(p: {
+  readonly esperando: boolean;
+  readonly sigue: boolean;
+  readonly onUsar: () => void;
+}): ReactNode {
+  return (
+    <Marco
+      pose="preocupado"
+      mensaje={null}
+      chip="Esta pestaña"
+      chipSub="en espera"
+      vinculada={readDevice() !== null}
+    >
+      <div className={a.heading} data-testid="otra-pestana">
+        <h1 className={a.titulo}>La caja ya está abierta en otra pestaña.</h1>
+        <p className={a.lead}>Para no perder ventas, usa una sola pestaña.</p>
+      </div>
+      <Continuar listo ocupado={p.esperando} testId="usar-esta-pestana" onClick={p.onUsar}>
+        Usar esta pestaña
+      </Continuar>
+      {p.esperando ? (
+        <p className={a.lead} role="status">
+          Esperando a que se cierre la otra pestaña…
+        </p>
+      ) : null}
+      {p.sigue ? (
+        <p className={a.fallo} role="alert">
+          La otra pestaña sigue abierta. Ciérrala y vuelve a intentar.
+        </p>
+      ) : null}
+    </Marco>
+  );
 }

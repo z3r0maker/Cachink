@@ -54,10 +54,10 @@
 - **Steps:** "Crear cuenta gratis" → `/signup?plan=freelancer`; "Empezar ahora" → `/signup?plan=emprendedor`; "Probar 14 días gratis" → `/signup?plan=mipyme_pro`; hero CTA → emprendedor. UTM params passed through. No checkout on the landing.
 - **Acceptance:** clicking each lands on the portal with the plan preselected (manual + a link-check script).
 
-### L-04 Domain + DNS + email domain `[critica]` `[bloq]`
+### L-04 Dominio + DNS + dominio de correo [critica] [bloq]
 
-- [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
-      **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
+- [ ] Status · **Blocked by:** — (hacerlo temprano; seguimiento del ADR-054)
+      **Remaining (2026-09-23, verified against the code):** Solo del lado del dueño — registrador, zona DNS y consola de Resend (O-4 … O-6, O-13 en `11-pre-launch-and-deferred.md`); nada en el repo puede comprobarlo.
 
 - **State (2026-09-24, verified over DNS-over-HTTPS):** registrar GoDaddy, zone on Cloudflare
   (`elle`/`leland.ns.cloudflare.com`), apex `xangarro.mx` CNAME-flattened to Vercel (DNS only), `www`
@@ -83,11 +83,10 @@
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
-### L-05 Store badges + legal pages `[tiendas]` `[alta]`
+### L-05 Badges de tienda + páginas legales
 
-- [ ] Status · **Blocked by:** X-05 (real store URLs)
-      **Remaining (2026-09-24, verified against the code):** `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); **Re-verified 2026-09-28:** the términos route _does_ exist — `/terminos/` is in `routes.js`, wired in `AppSSR.jsx` and `main.jsx`, and prerendered from `docs/legal/aviso/terminos-borrador.md`. What is still missing is the content, not the route: the published draft mentions neither the 7-day grace nor the downgrade, and `docs/legal/terms.md` is the pre-rebrand file the aviso work (O-17) is meant to retire. The store badges still wait for X-05's real URLs.
-
+- [ ] Status · **Blocked by:** X-05 (URLs reales de tienda)
+      **Remaining (2026-10-05, verified against the code):** `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. [ ] [tiendas] [alta]
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
 
@@ -187,10 +186,10 @@
     `landing-lighthouse` uploads the reports. First run: SEO 1 · BP 1 · a11y ≥ 0.99 · perf ≥ 0.92 on
     all ten pages.
 
-### L-09 Comparison and alternatives pages against named competitors `[baja]`
+### L-09 Páginas de comparación y alternativas contra competidores nombrados [baja]
 
-- [ ] Status · **Blocked by:** owner — the competitor list and the facts about each that we are
-      willing to publish
+- [ ] Status · **Blocked by:** el dueño — la lista de competidores y los datos de cada uno que
+      estemos dispuestos a publicar
 - **Context:** `/recursos/vs-excel/` is the only comparison page. Buyers search «alternativa a
   Eleventa», «Xangarro vs Loyverse», «Kyte o …», «Clip punto de venta»; AI answer engines quote
   pages that compare named products criterion by criterion.
@@ -203,9 +202,9 @@
 - **Acceptance:** each page in the sitemap and `llms.txt`; the Lighthouse job green; no competitor
   claim without a source.
 
-### L-10 Off-site presence: Reddit and YouTube `[baja]`
+### L-10 Presencia fuera del sitio: Reddit y YouTube [baja]
 
-- [ ] Status · **Blocked by:** owner — accounts and time
+- [ ] Status · **Blocked by:** el dueño — cuentas y tiempo
 - **Context:** Google and the AI answer engines weigh real mentions on Reddit and YouTube above
   generic backlinks; the site links only Instagram and Facebook (`landing/social.js`).
 - **Steps:** a YouTube channel with a short Don Cuentas demo and one video per guide; genuine

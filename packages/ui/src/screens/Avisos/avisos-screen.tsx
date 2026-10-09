@@ -1,195 +1,183 @@
 /**
- * Avisos (MvAvisos, the web's OpAvisos; M-09): «De Pedro», what the owner
- * wrote to this operator (read it, mark it read, answer a request to clear up
- * a corte), and «De tu caja», what the caja itself flags (low stock, records
- * not sent yet or refused, fiado running late), each with the button to the
- * screen that deals with it. «Todo leído» marks everything read.
+ * AvisosScreen — «Avisos» (Track M, M-09; the board `Operador Avisos` said
+ * on the phone): what the owner sends and what the caja itself notices, in
+ * two tabs with their unread counts. An aclaración is answered in place,
+ * from a bottom sheet with the quick answers. Presentational: the route
+ * hands it `useAvisos()` and maps each cta href to a route.
  */
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import {
-  deDueno,
-  mayuscula,
-  type Aviso,
-  type AvisoGrupo,
-  type AvisosData,
-} from '@xangarro/caja/avisos';
-import { Btn, CajaEstado, GLYPHS, MText, PathIcon, SegmentedTabs } from '../../components/index';
-import { colors } from '../../theme';
-import { AvisoDueno } from './aviso-dueno';
-import { AvisoSistema } from './aviso-sistema';
+import type { AvisoGrupo, AvisosData, AvisosVivo } from '@xangarro/caja/avisos';
+import { deDueno, mayuscula, sinLeer } from '@xangarro/caja/avisos';
+import { Toast } from '../../components/Toast/index';
+import { EstadosCaja } from '../Pendientes/estados';
+import { AvisosCabeza, AvisosTabs } from './avisos-cabeza';
+import { AvisoCajaTarjeta } from './aviso-caja-tarjeta';
+import { AvisoDuenoTarjeta } from './aviso-tarjeta';
+import { ResponderSheet } from './responder-sheet';
+import { useAvisosVista } from './use-avisos-vista';
+
+export type AvisosEstado = 'happy' | 'cargando' | 'sin-avisos' | 'error' | 'sin-internet';
 
 export interface AvisosScreenProps {
-  readonly state: 'loading' | 'error' | 'empty' | 'happy';
-  readonly data: AvisosData;
-  readonly tabInicial?: AvisoGrupo;
-  readonly onMarcar: (ids: readonly string[]) => void;
-  readonly onResponder: (mensajeId: string, texto: string) => Promise<void>;
-  /** The phone route for a notice's href (`/operador/inventario` → `/inventario`). */
-  readonly rutaDe: (href: string) => string | null;
-  readonly onIr: (ruta: string) => void;
+  readonly state: AvisosEstado;
+  readonly data: AvisosData | null;
+  /** The tab the screen opens on; the unread counts keep themselves fresh. */
+  readonly tab: AvisoGrupo;
+  /** A linked caja: persists read marks and writes each reply. */
+  readonly vivo?: AvisosVivo;
+  /** A cta's href (a web `/operador/...` path), mapped to a phone route. */
+  readonly onAbrir: (href: string) => void;
   readonly onRetry: () => void;
+  readonly testID?: string;
 }
 
-const LISTA = { paddingHorizontal: 16, paddingTop: 6, paddingBottom: 18, gap: 14 } as const;
+type AvisosLista = ReturnType<typeof useAvisosVista>['visibles'];
 
-function useRespuestas(onResponder: AvisosScreenProps['onResponder']) {
-  const [drafts, setDrafts] = useState<Readonly<Record<string, string>>>({});
-  const [enviando, setEnviando] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const enviar = (id: string): void => {
-    setEnviando(id);
-    setError(null);
-    onResponder(id, drafts[id] ?? '').then(
-      () => {
-        setEnviando(null);
-        setDrafts((d) => ({ ...d, [id]: '' }));
-      },
-      () => {
-        setEnviando(null);
-        setError(id);
-      },
-    );
-  };
-  const draft = (id: string, t: string) => setDrafts((d) => ({ ...d, [id]: t }));
-  return { drafts, enviando, error, enviar, draft };
-}
-
-function Cabeza(p: { dueno: string; sinLeer: readonly Aviso[]; onTodo: () => void }): ReactElement {
+function Lista(p: {
+  readonly visibles: AvisosLista;
+  readonly dueno: string;
+  readonly abrir: (id: string) => void;
+  readonly marcar: (id: string) => void;
+  readonly onAbrir: (href: string) => void;
+}): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" gap={10}>
-      <View flex={1} minWidth={0}>
-        <MText size="xl4" weight="extraBold" letterSpacing={-0.9} role="heading">
-          Avisos
-        </MText>
-        <MText size="md" weight="semibold" color={colors.gray600}>
-          {`Lo que te manda ${p.dueno} y lo que la caja te avisa`}
-        </MText>
-      </View>
-      {p.sinLeer.length > 0 ? (
-        <Btn
-          variant="quiet"
-          size="md"
-          sentence
-          onPress={p.onTodo}
-          ariaLabel="Marcar todo como leído"
-          icon={<PathIcon d={GLYPHS.check} size={18} strokeWidth={2.2} />}
-          testID="avisos-todo-leido"
-        >
-          Todo leído
-        </Btn>
-      ) : null}
+    <View gap={12}>
+      {p.visibles.map((a) =>
+        a.grupo === 'dueno' ? (
+          <AvisoDuenoTarjeta
+            key={a.id}
+            aviso={a}
+            dueno={p.dueno}
+            onResponder={() => p.abrir(a.id)}
+            onMarcarLeido={() => p.marcar(a.id)}
+            onAbrir={p.onAbrir}
+          />
+        ) : (
+          <AvisoCajaTarjeta key={a.id} aviso={a} onAbrir={p.onAbrir} />
+        ),
+      )}
     </View>
   );
 }
 
-function Vacio({ texto }: { texto: string }): ReactElement {
-  return (
-    <MText
-      testID="avisos-vacio"
-      size="body"
-      weight="bold"
-      color={colors.gray600}
-      textAlign="center"
-      padding={32}
-    >
-      {texto}
-    </MText>
-  );
-}
-
-const conCuenta = (label: string, n: number): string => (n > 0 ? `${label} · ${n}` : label);
-
-function Arriba(p: {
-  data: AvisosData;
-  tab: AvisoGrupo;
-  onTab: (t: AvisoGrupo) => void;
-  onMarcar: (ids: readonly string[]) => void;
-}): ReactElement {
-  const { dueno, avisos } = p.data;
-  const sinLeer = avisos.filter((x) => !x.leido);
-  const cuenta = (g: AvisoGrupo) => sinLeer.filter((x) => x.grupo === g).length;
-  return (
-    <View paddingHorizontal={16} paddingTop={14} paddingBottom={8} gap={10}>
-      <Cabeza dueno={dueno} sinLeer={sinLeer} onTodo={() => p.onMarcar(sinLeer.map((x) => x.id))} />
-      <SegmentedTabs
-        ariaLabel="Quién avisa"
-        value={p.tab}
-        onChange={p.onTab}
-        tabs={[
-          { key: 'dueno', label: conCuenta(mayuscula(deDueno(dueno)), cuenta('dueno')) },
-          { key: 'caja', label: conCuenta('De tu caja', cuenta('caja')) },
-        ]}
-        testID="avisos-tabs"
-      />
-    </View>
-  );
-}
-
-function Tarjeta(p: {
-  x: Aviso;
-  hero: boolean;
-  s: AvisosScreenProps;
-  r: ReturnType<typeof useRespuestas>;
-}): ReactElement {
-  const { x, s, r } = p;
-  if (x.grupo === 'caja') {
+/** One of the non-happy states, in the screen's words. */
+function Estado(p: AvisosScreenProps): ReactElement {
+  if (p.state === 'cargando') return <EstadosCaja id="cargando" testID="avisos" />;
+  if (p.state === 'sin-internet')
+    return <EstadosCaja id="sin-internet" onRetry={p.onRetry} testID="avisos" />;
+  if (p.state === 'error')
     return (
-      <AvisoSistema
-        aviso={x}
-        ruta={x.cta ? s.rutaDe(x.cta.href) : null}
-        onIr={(ruta) => {
-          if (!x.leido) s.onMarcar([x.id]);
-          s.onIr(ruta);
-        }}
+      <EstadosCaja
+        id="falla"
+        titulo="No pudimos leer tus avisos"
+        onRetry={p.onRetry}
+        testID="avisos"
       />
     );
-  }
+  const dueno = p.data?.dueno ?? 'el dueño';
   return (
-    <AvisoDueno
-      aviso={x}
-      dueno={s.data.dueno}
-      hero={p.hero}
-      draft={r.drafts[x.id] ?? ''}
-      enviando={r.enviando === x.id}
-      error={r.error === x.id}
-      onDraft={(t) => r.draft(x.id, t)}
-      onSend={() => r.enviar(x.id)}
-      onRead={() => s.onMarcar([x.id])}
+    <EstadosCaja
+      id="sin-nada"
+      titulo="Nada por leer"
+      cuerpo={`Ni mensajes ${deDueno(dueno)} ni avisos de tu caja.`}
+      testID="avisos"
     />
   );
 }
 
-export function AvisosScreen(p: AvisosScreenProps): ReactElement {
-  const [tab, setTab] = useState<AvisoGrupo>(p.tabInicial ?? 'dueno');
-  const r = useRespuestas(p.onResponder);
-  if (p.state === 'loading' || p.state === 'error') {
-    return (
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <CajaEstado
-          mode={p.state}
-          errorTitle="No pudimos leer tus avisos"
-          onRetry={p.onRetry}
-          testID="avisos"
-        />
-      </ScrollView>
-    );
-  }
-  const visibles = p.data.avisos.filter((x) => x.grupo === tab);
-  const hero = visibles.find((x) => x.responder !== undefined && !x.respuesta)?.id;
-  const vacio =
-    tab === 'dueno'
-      ? `Sin mensajes ${deDueno(p.data.dueno)} por ahora.`
-      : 'Tu caja no tiene nada que avisarte.';
+/** The empty open tab: who has not written. */
+function NadaPorLeer(p: { readonly tab: AvisoGrupo; readonly dueno: string }): ReactElement {
   return (
-    <View flex={1} testID="avisos">
-      <Arriba data={p.data} tab={tab} onTab={setTab} onMarcar={p.onMarcar} />
-      <ScrollView contentContainerStyle={LISTA} keyboardShouldPersistTaps="handled">
-        {visibles.length === 0 ? <Vacio texto={vacio} /> : null}
-        {visibles.map((x) => (
-          <Tarjeta key={x.id} x={x} hero={x.id === hero} s={p} r={r} />
-        ))}
+    <EstadosCaja
+      id="sin-nada"
+      titulo="Nada por leer"
+      cuerpo={
+        p.tab === 'dueno'
+          ? `${mayuscula(p.dueno)} no te ha escrito nada nuevo.`
+          : 'Tu caja no tiene avisos del sistema.'
+      }
+      testID="avisos"
+    />
+  );
+}
+
+/** The sheet and the toast, above the list. */
+function Capas(p: {
+  readonly data: AvisosData;
+  readonly v: ReturnType<typeof useAvisosVista>;
+}): ReactElement | null {
+  const respondiendo = p.v.avisos.find((a) => a.id === p.v.respondiendo) ?? null;
+  return (
+    <>
+      {respondiendo?.responder !== undefined ? (
+        <ResponderSheet
+          open
+          aviso={respondiendo}
+          dueno={p.data.dueno}
+          onClose={p.v.cerrarRespuesta}
+          onEnviar={(texto) => p.v.responder(respondiendo.id, texto)}
+        />
+      ) : null}
+      {p.v.toast ? (
+        <Toast
+          title={p.v.toast.ok ? 'Respuesta enviada' : 'No se pudo enviar'}
+          body={p.v.toast.texto}
+          tone={p.v.toast.ok ? 'ok' : 'warn'}
+          floating
+          onClose={p.v.cerrarToast}
+          testID="avisos-toast"
+        />
+      ) : null}
+    </>
+  );
+}
+
+function Feliz(p: AvisosScreenProps & { readonly data: AvisosData }): ReactElement {
+  const v = useAvisosVista(p.data, p.tab, p.vivo);
+  return (
+    <View flex={1} testID={p.testID ?? 'avisos'}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, gap: 14 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <AvisosCabeza
+          dueno={p.data.dueno}
+          haySinLeer={sinLeer(v.avisos) > 0}
+          onMarcarTodo={v.marcarTodo}
+        />
+        <AvisosTabs dueno={p.data.dueno} value={v.tab} sinLeer={v.sinLeer} onChange={v.setTab} />
+        {v.visibles.length === 0 ? (
+          <NadaPorLeer tab={v.tab} dueno={p.data.dueno} />
+        ) : (
+          <Lista
+            visibles={v.visibles}
+            dueno={p.data.dueno}
+            abrir={v.abrirRespuesta}
+            marcar={v.marcarLeido}
+            onAbrir={p.onAbrir}
+          />
+        )}
+      </ScrollView>
+      <Capas data={p.data} v={v} />
+    </View>
+  );
+}
+
+export function AvisosScreen(p: AvisosScreenProps): ReactElement {
+  if (p.state === 'happy' && p.data !== null && p.data.avisos.length > 0) {
+    return <Feliz {...p} data={p.data} />;
+  }
+  return (
+    <View flex={1} testID={p.testID ?? 'avisos'}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+        <AvisosCabeza
+          dueno={p.data?.dueno ?? 'el dueño'}
+          haySinLeer={false}
+          onMarcarTodo={() => undefined}
+        />
+        <Estado {...p} />
       </ScrollView>
     </View>
   );

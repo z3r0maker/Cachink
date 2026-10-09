@@ -1,0 +1,23 @@
+# The `activated` entry's setup (M-11; A-05's bucket rework): the mock reset
+# (VALDK7M3 is single-use), the activation by code, the operator login (Toni)
+# and one completed sync cycle — so an `activated` flow starts signed-in on
+# Inicio with the reference data pulled (the 20 products, the clientes, the
+# mensajes, REC-1). The harness wipes the local database before running this
+# (fresh-install.sh --reset-only), so activation is always from scratch.
+appId: mx.xangarro.mobile
+---
+# reset_app leaves the app running; launchApp is idempotent (foregrounds
+# when running, launches when not) and keeps this flow self-sufficient.
+- launchApp
+- runScript:
+    file: mock-reset.js
+    env:
+      MOCK_API: 'http://127.0.0.1:3000'
+- runFlow:
+    file: ../activation.yaml
+- runFlow:
+    file: login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 120000

@@ -1,0 +1,67 @@
+# Bloqueo (MvBloqueo, M-06): «Bloquear la caja» on Mi turno locks the caja
+# without closing the turno — the lock screen names whoever was signed in
+# and asks for their NIP; a wrong NIP shows its error and stays locked, the
+# right one returns to the caja.
+#
+# Precondition: activated + signed in (Toni, NIP 1234); starts on Inicio.
+# No turno needed: locking records whoever signs out (caja-lock.ts), open
+# turno or not.
+#
+# One wrong NIP only — five lock PIN entry for 30 s (use-quick-switch-auth).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+# launchApp cold-restarts and the NIP session does not survive it (the
+# lock itself records whoever was signed in — sign in first).
+- runFlow: shared/login-operator.yaml
+# The lock bar sits at the foot of Mi turno (turno-nav.tsx LockBar, testID
+# turno-bloquear); shared/lock-caja.yaml taps the tab and the bar.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'bloqueo'
+    timeout: 10000
+# The lock asks for the NIP of whoever was signed in (bloqueo-screen.tsx;
+# the shell's root testID is bloqueo, bloqueo-shell.tsx) and offers the way
+# out to Acceso.
+- assertVisible: '.*Pon tu NIP para seguir.*'
+- assertVisible: '.*No soy Toni, cambiar de persona.*'
+- assertVisible:
+    id: 'bloqueo-cambiar'
+# The key says «Desbloquear», not «Entrar» (nip-pad.tsx accion desbloquear;
+# same nip-enviar testID as Acceso). The key's accessible label carries the
+# verb — its visible text is folded into the ariaLabel by the key's
+# accessible trait.
+- assertVisible:
+    id: 'nip-enviar'
+- assertVisible: '.*Desbloquear, falta completar.*'
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'nip-error'
+    timeout: 10000
+- assertVisible:
+    text: '.*Ese NIP no es.*'
+- assertVisible:
+    id: 'bloqueo'
+# The right NIP unlocks: the gate renders the app again and the tab bar is
+# back. Which tab remounts is the router's business — the bar is the proof.
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-2' }
+- tapOn: { id: 'numpad-3' }
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'tab-turno'
+    timeout: 15000
+- assertNotVisible:
+    id: 'bloqueo'
+- assertNotVisible:
+    id: 'nip-error'

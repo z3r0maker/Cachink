@@ -1,0 +1,72 @@
+# Pagar un gasto recurrente vencido (Track M-11, M-08; board MvGastos
+# «pagar»): the seeded «Renta local» (mensual, vence el 2026-10-01, así que
+# ya toca) waits in /gastos' «Pendientes de registrar»; its «Registrar» opens
+# the sheet prefilled from the template, and one write records the gasto and
+# clears the pendiente (Inicio's «Para hoy» and Mi turno's panel go with it).
+#
+# The pendiente's button id embeds the fixture's deterministic ULID
+# (01JREC…0001): packages/contracts/src/mock/fixtures.ts:174 seeds it via
+# ulidOf('REC', 1) (mock/ids.ts), and gasto-fila.tsx:141 stamps
+# `gastos-pagar-${r.id}`.
+#
+# Ordering: this consumes the one due recurrente — it must run on a fresh
+# activated batch (the mock reset + re-activation restores it).
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - gastos
+  - recurrente
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Paying stamps the open turno; open one only if Inicio still asks for it.
+- tapOn: { id: 'tab-inicio' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+# The hero reflows as the turno's KPIs land; let it settle or the atajo tap
+# resolves stale coordinates (the screen then never opens).
+- waitForAnimationToEnd
+
+# Inicio's shortcut tile opens Gastos, where the due template waits.
+- tapOn: { id: 'inicio-atajo-gastos' }
+- extendedWaitUntil: { visible: { id: 'mobile-gastos' }, timeout: 8000 }
+- extendedWaitUntil: { visible: { id: 'gastos-pendientes' }, timeout: 8000 }
+- assertVisible: '.*Pendientes de registrar.*'
+- assertVisible: '.*Renta local.*'
+# Anchored: the line renders as one text with its amount («Cada mes · día 1 ·
+# $12,000.00»), and an unanchored prefix does not match it.
+- assertVisible: '.*Cada mes · día 1.*'
+
+# «Registrar» opens the pagar sheet prefilled from the template: the card,
+# the words, and the amount already in the action.
+- tapOn: { id: 'gastos-pagar-01JREC00000000000000000001' }
+- extendedWaitUntil: { visible: { id: 'pagar-recurrente-sheet' }, timeout: 5000 }
+- assertVisible: { id: 'pagar-recurrente-tarjeta' }
+- assertVisible: '.*Pagar renta local.*'
+- assertVisible: ".*Registrar gasto de \\$12,000\\.00.*"
+
+# One write records the egreso and advances the schedule.
+- tapOn: { id: 'gasto-guardar' }
+- extendedWaitUntil: { notVisible: { id: 'pagar-recurrente-sheet' }, timeout: 8000 }
+
+# The pendiente cleared (the read refreshes after the write), and the gasto
+# heads the turno's list. (The stored categoría «Renta» reads «Otros» on the
+# phone — caja/vocabulario.ts:33 — which the filters row always shows, so the
+# row is asserted by its words + amount.)
+- extendedWaitUntil: { notVisible: { id: 'gastos-pendientes' }, timeout: 10000 }
+- assertVisible: '.*Renta local.*'
+- assertVisible: ".*−\\$12,000\\.00.*"

@@ -1,35 +1,57 @@
-# Smoke test: app launches and the JS bundle drives all the way
-# through the first-launch flow.
+# Smoke: the activated caja opens on Inicio and the phone's four tabs —
+# Inicio, Cobrar, Ventas, Mi turno — sit on the bar and navigate
+# (app-shell.tsx `tab-${tab.key}`; appTabs() in tab-definitions.ts).
 #
-# What this verifies:
-#   - expo-sqlite init + Drizzle migration runs without crashing
-#     (P1C C1-C4).
-#   - Btn taps fire `onPress` end-to-end (Audit M-1 STEP0-T01 swap
-#     to `<Pressable>` in `btn.tsx` — the prior Tamagui
-#     `<View onPress>` silently no-op'd on Maestro/iOS taps).
-#   - The wizard renders on fresh launch and exposes its primary CTAs
-#     to the accessibility tree.
-#   - Consent step appears inline within the wizard after mode
-#     selection (Audit M-1 PR 6 moved consent into the wizard).
+# What this verifies: the JS bundle loads, the boot gates let a signed-in
+# operator through (gated-navigation.tsx), and the shell renders its frame
+# around Inicio. The fresh-install entry (Vincular) is covered by
+# activation.yaml; a fresh install has no tab bar to assert.
 #
-# Precondition: xangarro.db does NOT exist (fresh install). Run via
-# the wrapper script to get a clean slate without breaking Metro:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/smoke-launch.yaml
-#
-# DO NOT use `clearState: true` — on iOS 18+ / Expo SDK 55, it
-# wipes the dev-client's stored Metro URL and the app fails to
-# reconnect to the JS bundler. See Finding 1 in the Maestro audit.
-# x-entrypoint: fresh
+# DO NOT use `clearState: true` — on iOS 18+ / Expo SDK 55, it wipes the
+# dev-client's stored Metro URL and the app fails to reconnect to the JS
+# bundler. See Finding 1 in the Maestro audit.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal legacy, etc.)
 - runFlow: shared/dismiss-modals.yaml
-
-# Wizard renders directly on fresh launch.
-- assertVisible: '¡Bienvenido a Xangarro!'
+# launchApp cold-restarts the app and the operator NIP session does not
+# survive it: every activated flow signs in again (no-op when still in).
+- runFlow: shared/login-operator.yaml
+# The caja lands on Inicio ((tabs)/index.tsx redirects to /inicio; the
+# route's wrapper carries testID mobile-inicio-tab, inicio.tsx).
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inicio-tab'
+    timeout: 15000
+# Exactly four tabs on the phone (tab-definitions.ts appTabs): Inicio,
+# Cobrar, Ventas, Mi turno.
 - assertVisible:
-    id: 'wizard-step1-solo'
+    id: 'tab-inicio'
+- assertVisible:
+    id: 'tab-cobrar'
+- assertVisible:
+    id: 'tab-ventas'
+- assertVisible:
+    id: 'tab-turno'
+# The bar navigates. Ventas and Mi turno carry route testIDs (ventas.tsx
+# mobile-ventas, turno/index.tsx mobile-turno); Cobrar's surface belongs to
+# the Dinero flows, so its tab being present above is enough here.
+- tapOn:
+    id: 'tab-ventas'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-ventas'
+    timeout: 10000
+- tapOn:
+    id: 'tab-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-turno'
+    timeout: 10000
+- tapOn:
+    id: 'tab-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inicio-tab'
+    timeout: 10000

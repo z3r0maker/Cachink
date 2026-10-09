@@ -1,9 +1,11 @@
-# Reusable subflow: ensure the current operator has a turno open (M-06).
+# Reusable subflow: ensure the current operator has a turno open (M-06/M-09).
 #
-# Mi turno with no turno shows the «Antes de cobrar» card; its «Abrir turno»
-# opens the fondo sheet (MvAbrirTurno). Type 500 (the next digit replaces
-# the suggested last close) and open. With a turno already open the card is
-# not there and every step is skipped.
+# Inicio's hero carries the one «Abrir turno» (Mi turno's sin-turno state only
+# points back to Inicio, mi-turno-estados.tsx). When no turno is open the hero
+# reads «Abre tu turno para empezar» (tono cerrado) and its action opens the
+# fondo sheet (AbrirTurnoSheet); the $500 quick chip funds it. With a turno
+# already open the hero reads «La caja está lista» (tono listo) and every
+# step is skipped.
 #
 # Usage:
 #   - runFlow: shared/login-operator.yaml
@@ -11,11 +13,11 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-inicio'
 - runFlow:
     when:
       visible:
-        id: 'inicio-hero-accion'
+        id: 'inicio-hero-cerrado'
     commands:
       - tapOn:
           id: 'inicio-hero-accion'
@@ -23,12 +25,11 @@ appId: mx.xangarro.mobile
           visible:
             id: 'abrir-caja-modal'
           timeout: 5000
-      - tapOn: { id: 'numpad-5' }
-      - tapOn: { id: 'numpad-0' }
-      - tapOn: { id: 'numpad-0' }
+      - tapOn:
+          id: 'fondo-rapido-500'
       - tapOn:
           id: 'caja-abrir-submit'
 - extendedWaitUntil:
     visible:
-      id: 'mi-turno-esperado'
+      id: 'inicio-hero-listo'
     timeout: 10000

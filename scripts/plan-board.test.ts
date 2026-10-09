@@ -12,15 +12,8 @@ import { join } from 'node:path';
 import { describe, it } from 'vitest';
 import { type Item, parseTrack } from './plan-board-parse.js';
 import { idsIn, nextUp } from './plan-board-next.js';
-import { categoryOf, renderBoard } from './plan-board-render.js';
-import { AREAS, AREA_TITLES, areaOf } from './plan-board-areas.js';
-import {
-  PRIORIDADES,
-  PRIO_TITULO,
-  esBloqueante,
-  ordenPrioridad,
-  prioridadDe,
-} from './plan-board-prioridad.js';
+import { phaseOf, renderBoard } from './plan-board-render.js';
+import { kindOf } from './plan-board-kinds.js';
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -99,7 +92,7 @@ describe('parseTrack', () => {
   });
 });
 
-describe('categoryOf', () => {
+describe('phaseOf', () => {
   const at = (source: string, section: string): Item => ({
     source,
     section,
@@ -114,23 +107,73 @@ describe('categoryOf', () => {
   });
 
   it('splits Track N by section and routes the launch and post-launch files', () => {
-    assert.equal(categoryOf(at('09-next-features.md', '2. Launch blockers')), 'Lanzamiento');
-    assert.equal(categoryOf(at('09-next-features.md', '3. Post-launch')), 'Post-lanzamiento');
-    assert.equal(categoryOf(at('07-launch.md', '')), 'Lanzamiento');
+    assert.equal(phaseOf(at('09-next-features.md', '2. Launch blockers')), 'Lanzamiento');
+    assert.equal(phaseOf(at('09-next-features.md', '3. Post-launch')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('07-launch.md', '')), 'Lanzamiento');
     assert.equal(
-      categoryOf(at('11-pre-launch-and-deferred.md', '1. Pre-launch actions')),
+      phaseOf(at('11-pre-launch-and-deferred.md', '1. Pre-launch actions')),
       'Lanzamiento',
     );
-    assert.equal(categoryOf(at('08-post-launch.md', '')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('08-post-launch.md', '')), 'Post-lanzamiento');
+    assert.equal(phaseOf(at('../launch/production-readiness.md', '1. Legal texts')), 'Lanzamiento');
     assert.equal(
-      categoryOf(at('../launch/production-readiness.md', '1. Legal texts')),
-      'Lanzamiento',
-    );
-    assert.equal(
-      categoryOf(at('../launch/production-readiness.md', '9. Deferred by decision')),
+      phaseOf(at('../launch/production-readiness.md', '9. Deferred by decision')),
       'Post-lanzamiento',
     );
-    assert.equal(categoryOf(at('03-backend.md', '')), 'Colas de tracks');
+    assert.equal(phaseOf(at('03-backend.md', '')), 'Colas de tracks');
+  });
+});
+
+describe('kindOf', () => {
+  const item = (over: Partial<Item>): Item => ({
+    source: '09-next-features.md',
+    section: '3. Post-launch',
+    line: 1,
+    id: null,
+    title: 't',
+    status: 'open',
+    trigger: null,
+    blockedBy: null,
+    blocks: null,
+    remaining: null,
+    ...over,
+  });
+
+  it('routes ids to the four kinds, with a surface for code only', () => {
+    assert.deepEqual(kindOf(item({ id: 'N-24' })), {
+      kind: 'Código y técnico',
+      surface: 'Teléfono',
+    });
+    assert.equal(kindOf(item({ id: 'O-17' })).kind, 'Corporativo, legal y terceros');
+    assert.equal(kindOf(item({ id: 'X-01' })).kind, 'Infra y consolas');
+    assert.equal(kindOf(item({ id: 'Z-05' })).kind, 'Espera datos reales');
+    assert.equal(kindOf(item({ id: 'O-17' })).surface, null);
+  });
+
+  it('routes the id-less production-readiness rows by section and title prefix', () => {
+    const pr = (title: string, section: string): Item =>
+      item({ source: '../launch/production-readiness.md', section, id: null, title });
+    assert.equal(
+      kindOf(pr('BLOQUEANTE — Razón social constituida.', '0. The one thing')).kind,
+      'Corporativo, legal y terceros',
+    );
+    assert.equal(
+      kindOf(pr('BLOQUEANTE — Cancelar en un clic', '4. Subscriptions')).surface,
+      'Privacidad y LFPC',
+    );
+    assert.equal(
+      kindOf(pr('DPAs firmados: Supabase', '6. Third parties')).kind,
+      'Corporativo, legal y terceros',
+    );
+    assert.equal(
+      kindOf(pr('ANTES DE STORES — Apple Privacy', '5. Stores')).kind,
+      'Infra y consolas',
+    );
+    assert.equal(kindOf(pr('En la app «Desvincular y borrar', '3. Rights')).surface, 'Teléfono');
+  });
+
+  it('throws on an unclassified item — a new task needs its bucket the day it is written', () => {
+    assert.throws(() => kindOf(item({ id: 'T-99' })), /No bucket for T-99.*plan-board-kinds/);
   });
 });
 
@@ -189,17 +232,17 @@ describe('the committed board', () => {
     assert.equal(actual, expected);
   });
 
-  it('lists only open work, grouped by area, citing a line per item', () => {
+  it('lists only open work, in the four kinds, citing a line per item', () => {
     const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    const h2 = board.split('\n').filter((l) => l.startsWith('## '));
-    // Anchored: `includes('## Lanzamiento')` also matches the `### Lanzamiento`
-    // sub-heading, so it passed while the board had no such H2 at all.
-    assert.ok(h2.some((l) => l.startsWith('## Siguiente')));
-    for (const area of AREAS)
-      assert.ok(
-        h2.some((l) => l.startsWith(`## ${AREA_TITLES[area]} (`)),
-        `no H2 for ${area}`,
-      );
+    for (const h of [
+      '## Siguiente',
+      '## Código y técnico',
+      '## Corporativo, legal y terceros',
+      '## Infra y consolas',
+      '## Espera datos reales',
+    ])
+      assert.ok(board.includes(h), h);
+    assert.ok(!board.includes('## Lanzamiento ('), 'the phase lists are gone');
     const lines = board.split('\n').filter((l) => /^- \[/.test(l));
     assert.ok(lines.length > 0);
     for (const line of lines) {
@@ -208,124 +251,9 @@ describe('the committed board', () => {
     }
   });
 
-  it('never prints an area tag — it is structure, not prose', () => {
-    const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    for (const area of AREAS) assert.ok(!board.includes(`\`[${area}]\``), area);
-  });
-});
-
-describe('areaOf', () => {
-  const item = (over: Partial<Item>): Item => ({
-    source: '09-next-features.md',
-    line: 1,
-    tags: [],
-    id: 'N-01',
-    title: 'x',
-    status: 'open',
-    section: '2. Launch blockers',
-    trigger: null,
-    blockedBy: null,
-    blocks: null,
-    remaining: null,
-    ...over,
-  });
-
-  it('takes the track\u2019s tag over what the file would have said', () => {
-    assert.equal(areaOf(item({})), 'producto');
-    assert.equal(areaOf(item({ tags: ['deuda'] })), 'deuda');
-  });
-
-  it('falls back to the file when the tag is not an area', () => {
-    // A typo must not vanish an item from every list.
-    assert.equal(areaOf(item({ tags: ['deudas'] })), 'producto');
-  });
-
-  it('reads the owner actions and the legal checklist from their sections', () => {
-    assert.equal(
-      areaOf(
-        item({ source: '11-pre-launch-and-deferred.md', section: '1. Pre-launch actions (owner)' }),
-      ),
-      'papeleo',
-    );
-    const pr = '../launch/production-readiness.md';
-    assert.equal(areaOf(item({ source: pr, section: '1. Legal texts' })), 'legal');
-    assert.equal(areaOf(item({ source: pr, section: '5. Stores' })), 'tiendas');
-    assert.equal(
-      areaOf(item({ source: pr, section: '6. Third parties and contracts' })),
-      'terceros',
-    );
-    // Sections 2/3/4/7 are engineering with a legal deadline, not paperwork.
-    assert.equal(
-      areaOf(item({ source: pr, section: '4. Subscriptions (LFPC art. 76 Bis)' })),
-      'producto',
-    );
-  });
-
-  it('survives a title longer than the board\u2019s clamp', () => {
-    // The tag is stripped before the 110-char cut, so where it sits cannot
-    // change the area — this is why the parser owns it and not the renderer.
-    const largo = `### T-9 \`[infra]\` ${'a'.repeat(200)}\n\n- [ ] Status · **Blocks:** T-1\n`;
-    const [parsed] = parseTrack('07-launch.md', largo);
-    assert.deepEqual(parsed?.tags, ['infra']);
-    assert.equal(areaOf(parsed as Item), 'infra');
-    assert.ok((parsed?.title.length ?? 0) <= 110);
-  });
-});
-
-describe('prioridad y bloqueo', () => {
-  const item = (tags: string[]): Item => ({
-    source: '09-next-features.md',
-    line: 1,
-    tags,
-    id: 'N-01',
-    title: 'x',
-    status: 'open',
-    section: '2. Launch blockers',
-    trigger: null,
-    blockedBy: null,
-    blocks: null,
-    remaining: null,
-  });
-
-  it('reads both axes off the same tag list', () => {
-    const it = item(['deuda', 'critica', 'bloq']);
-    assert.equal(areaOf(it), 'deuda');
-    assert.equal(prioridadDe(it), 'critica');
-    assert.equal(esBloqueante(it), true);
-  });
-
-  it('says «not judged» rather than guessing a level', () => {
-    // An item nobody has weighed is not a low one, and must not sort as if it were.
-    assert.equal(prioridadDe(item([])), null);
-    assert.equal(esBloqueante(item([])), false);
-    assert.ok(ordenPrioridad(item([])) > ordenPrioridad(item(['baja'])));
-  });
-
-  it('orders critical first', () => {
-    const orden = [...PRIORIDADES].map((p) => ordenPrioridad(item([p])));
-    assert.deepEqual(
-      orden,
-      [...orden].sort((a, b) => a - b),
-    );
-  });
-
-  it('every open item on the board carries a level', () => {
-    // The point of the axis is that nothing is unranked; a new task fails this
-    // until somebody judges it, which is the reminder.
-    const sin = collect(ROOT)
-      .filter((i) => i.status !== 'done' && prioridadDe(i) === null)
-      .map((i) => `${i.source}:${i.line}`);
-    assert.deepEqual(sin, [], `sin prioridad: ${sin.join(', ')}`);
-  });
-
-  it('the board prints the blocker list and every level it uses', () => {
-    const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    assert.ok(board.includes('## Bloquea producción ('));
-    const items = collect(ROOT).filter((i) => i.status !== 'done');
-    for (const p of PRIORIDADES) {
-      if (!items.some((i) => prioridadDe(i) === p)) continue;
-      assert.ok(board.includes(`\`${PRIO_TITULO[p]}\``), PRIO_TITULO[p]);
-    }
-    assert.equal(board.includes('`⛔ bloquea prod`'), items.some(esBloqueante));
+  it('classifies every open item — an unlisted task fails the board, not just the reader', () => {
+    const open = collect(ROOT).filter((i) => i.status !== 'done');
+    assert.ok(open.length > 100);
+    for (const i of open) assert.doesNotThrow(() => kindOf(i), `${i.id ?? i.title}`);
   });
 });

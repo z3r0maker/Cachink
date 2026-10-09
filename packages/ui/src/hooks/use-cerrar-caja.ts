@@ -34,8 +34,6 @@ export interface CerrarCajaHookInput {
   readonly montoCierreCentavos: Money;
   readonly discrepancyReason: DiscrepancyReason | null;
   readonly explicacion: string | null;
-  /** The count by denomination (MvCierre), stored with the close (ADR-074 §4). */
-  readonly denominaciones?: Readonly<Record<string, number>>;
 }
 
 export type CerrarCajaResult = UseMutationResult<CajaTurno, Error, CerrarCajaHookInput, unknown>;
@@ -46,7 +44,6 @@ function buildFullInput(input: CerrarCajaHookInput, businessId: BusinessId): Cer
     montoCierreCentavos: input.montoCierreCentavos,
     discrepancyReason: input.discrepancyReason,
     explicacion: input.explicacion,
-    ...(input.denominaciones === undefined ? {} : { denominaciones: { ...input.denominaciones } }),
     businessId,
   };
 }

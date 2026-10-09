@@ -28,6 +28,8 @@ export {
   useDirectorAlertsRepository,
   useCajaMovimientosRepository,
   useCancelacionLogsRepository,
+  useMensajesOperadorRepository,
+  useRespuestasOperadorRepository,
   type Repositories,
   type RepositoryProviderProps,
 } from './repository-provider';

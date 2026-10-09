@@ -1,0 +1,114 @@
+# Inventario (Track M, M-09; board MvInventario): /productos lists the
+# existencias; a row's entrada square opens «Entrada de mercancía» with the
+# product already picked, the count rises and the toast confirms; «Merma»
+# writes off with its motivo and the count falls.
+#
+# The row squares share one testID per kind (mover-botones.tsx
+# inventario-fila-<tipo>), so the first match is the list's first row —
+# «Agua de horchata» (PRD-7): the list is sorted es-MX (inventario-lectura.ts)
+# and both «Agua de…» sort first. Stock is 0 on a fresh sync (no ledger rows),
+# so every row reads «Reponer» (porReponer, caja/inventario/derive.ts).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+# Existencias listed, first row below the KPIs and the toolbar.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000007'
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: 'inventario-existencias'
+- assertVisible: '.*Reponer.*'
+# Llegó mercancía: the first row's entrada square preselects the product
+# (use-hoja.ts abrir(tipo, productoId)); the toast confirms (mov-toast.tsx,
+# copy from toastDe).
+- tapOn:
+    id: 'inventario-fila-entrada'
+- extendedWaitUntil:
+    visible:
+      id: 'llego-mercancia-sheet'
+    timeout: 5000
+- assertVisible: '.*Entrada de mercancía.*'
+- tapOn:
+    id: 'mover-cantidad'
+- inputText: '15'
+# One drag in the sheet body: it dismisses the keyboard (keyboardDismissMode
+# on-drag) — hideKeyboard alone leaves it up and the fixed save footer's
+# center lands UNDER the keyboard, so the tap would hit a key instead.
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- assertVisible: '.*Entrada registrada.*'
+- assertVisible: '.*\+15 de Agua de horchata\. Queda en tu turno\..*'
+- tapOn:
+    id: 'mov-toast-entendido'
+# 0 + 15; the pill turned (15 > umbral 3).
+- assertVisible:
+    id: 'inventario-cantidad-01JPRD00000000000000000007'
+- assertVisible: '.*15.*'
+- assertVisible: '.*Suficiente.*'
+# Merma: the labelled button above the list opens the sheet empty; pick the
+# product, the amount, and the reason a write-off always needs (use-mover-form).
+- scrollUntilVisible:
+    element:
+      id: 'inventario-abrir-merma'
+    direction: UP
+    timeout: 5000
+- tapOn:
+    id: 'inventario-abrir-merma'
+- extendedWaitUntil:
+    visible:
+      id: 'merma-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'mover-producto-Agua de horchata'
+- tapOn:
+    id: 'mover-cantidad'
+- inputText: '2'
+# Dismiss before the motivo chips: they sit under the open keyboard (the
+# hideKeyboard command does not reliably dismiss it) and the tap would hit
+# a key instead — the form then stays incomplete and the save is a no-op.
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-motivo-Se rompió'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- assertVisible: '.*Merma registrada.*'
+- assertVisible: '.*−2 de Agua de horchata · Se rompió\. Queda en tu turno\..*'
+- tapOn:
+    id: 'mov-toast-entendido'
+# 15 − 2.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000007'
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*13.*'

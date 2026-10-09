@@ -28,11 +28,13 @@ appId: mx.xangarro.mobile
     commands:
       - tapOn:
           id: 'rail-turno|sidebar-turno'
+# Mi turno is one long scroll (M-09's foot moved the rows into it): give the
+# scroll room to cross the hero and the figures before the row appears.
 - scrollUntilVisible:
     element:
       id: ${ROW}
     direction: DOWN
-    timeout: 5000
+    timeout: 15000
     centerElement: true
 - tapOn:
     id: ${ROW}

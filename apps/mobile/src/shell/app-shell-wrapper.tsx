@@ -5,18 +5,12 @@
  * Injects Expo Router: `router.navigate` for every destination (it switches
  * tabs in place and pops back to a screen already on the stack instead of
  * piling copies), and the pathname, which lights the current destination in
- * the tab bar, the rail and the sidebar. It also gives the header its avisos
- * bell: the owner's unread messages, opening Avisos (M-09). App-shell code
- * per CLAUDE.md §5.6.
+ * the tab bar, the rail and the sidebar. App-shell code per CLAUDE.md §5.6.
  */
 
 import type { ReactElement } from 'react';
 import { usePathname, useRouter } from 'expo-router';
-import {
-  AppShellRouteWrapper,
-  useAvisosSinLeer,
-  type AppShellRouteWrapperProps,
-} from '@xangarro/ui';
+import { AppShellRouteWrapper, type AppShellRouteWrapperProps } from '@xangarro/ui';
 
 export type AppShellWrapperProps = Omit<
   AppShellRouteWrapperProps,
@@ -27,16 +21,8 @@ export function AppShellWrapper(props: AppShellWrapperProps): ReactElement | nul
   const router = useRouter();
   const pathname = usePathname();
   const go = (path: string): void => router.navigate(path as never);
-  const sinLeer = useAvisosSinLeer();
-  const avisos = props.avisos ?? { count: sinLeer, onPress: () => go('/avisos') };
   return (
-    <AppShellRouteWrapper
-      {...props}
-      avisos={avisos}
-      activeTabKey={pathname}
-      navigate={go}
-      replaceRoute={go}
-    />
+    <AppShellRouteWrapper {...props} activeTabKey={pathname} navigate={go} replaceRoute={go} />
   );
 }
 

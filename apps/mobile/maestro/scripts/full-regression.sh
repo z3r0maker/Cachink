@@ -257,12 +257,13 @@ should_run() {
 
 # ── Default run: entry-point-aware, grouped so each state seeds once ─────────
 # Collects THIS script's own active (uncommented) run_flow list — the curated,
-# dependency-ordered set — then buckets by entry-point (demo → wizard/other →
-# fresh) preserving relative order within each bucket, so run_setup re-seeds ~3×
-# instead of ~60× (the interleaved order would otherwise reseed demo on every
-# transition). Used when no --phase is given; --phase keeps the legacy linear path.
+# dependency-ordered set — then buckets by entry-point (activated → demo →
+# wizard/other → fresh) preserving relative order within each bucket, so
+# run_setup re-seeds ~4× instead of ~60× (the interleaved order would
+# otherwise reseed on every transition). Used when no --phase is given;
+# --phase keeps the legacy linear path.
 run_grouped_suite() {
-  echo "🧭  Entry-point-aware grouped MVP run (demo → wizard → fresh)"
+  echo "🧭  Entry-point-aware grouped MVP run (activated → demo → wizard → fresh)"
   rm -f "$STATE_FILE"   # force a clean first setup regardless of prior runs
 
   local flows=()
@@ -271,10 +272,11 @@ run_grouped_suite() {
   done < <(grep -E '^[[:space:]]*run_flow[[:space:]]+"\$FLOWS_DIR/' "$0" \
             | sed -E 's#.*\$FLOWS_DIR/([A-Za-z0-9_.-]+\.yaml).*#\1#')
 
-  local demo=() wizard=() fresh=() f e
+  local activated=() demo=() wizard=() fresh=() f e
   for f in "${flows[@]+"${flows[@]}"}"; do
     e="$(detect_entry "$f")"
     case "$e" in
+      activated) activated+=("$f") ;;
       demo)  demo+=("$f") ;;
       fresh) fresh+=("$f") ;;
       *)     wizard+=("$f") ;;   # wizard + anything unrecognized
@@ -282,11 +284,12 @@ run_grouped_suite() {
   done
 
   local ordered=()
+  ordered+=("${activated[@]+"${activated[@]}"}")
   ordered+=("${demo[@]+"${demo[@]}"}")
   ordered+=("${wizard[@]+"${wizard[@]}"}")
   ordered+=("${fresh[@]+"${fresh[@]}"}")
 
-  echo "   demo=${#demo[@]}  wizard=${#wizard[@]}  fresh=${#fresh[@]}  total=${#ordered[@]}"
+  echo "   activated=${#activated[@]}  demo=${#demo[@]}  wizard=${#wizard[@]}  fresh=${#fresh[@]}  total=${#ordered[@]}"
   CURRENT_PHASE="Grouped MVP run"
   for f in "${ordered[@]+"${ordered[@]}"}"; do
     run_flow "$f"
