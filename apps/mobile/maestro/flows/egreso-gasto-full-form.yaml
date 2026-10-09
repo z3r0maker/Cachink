@@ -1,59 +1,39 @@
-# Create a gasto egreso with ALL optional fields (categoría + proveedor).
+# Every question of «Registrar gasto» (Track M, M-08; MvGastos): amount with
+# decimals, concept, category and who was paid; the row shows the supplier.
 #
-# Verifies:
-#   1. Open NuevoEgreso → fill concepto, categoría, monto, proveedor
-#   2. gasto-categoria selector works
-#   3. gasto-proveedor field accepts input
-#   4. Submit → egreso appears with category tag
-#
-# Precondition: wizard complete, Operativo or Director role active.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/egreso-gasto-full-form.yaml
+# Precondition: wizard complete, business set, a turno open.
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/abrir-registrar-gasto.yaml
 
-# Navigate to Egresos.
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-gastos'
-- tapOn:
-    id: 'egresos-nuevo'
-
-# Gasto tab is the default — fill concepto.
-- assertVisible: 'Nuevo egreso'
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-dot' }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-0' }
+- assertVisible: '.*45\.50.*'
 - tapOn:
     id: 'gasto-concepto'
-- inputText: 'Material de limpieza'
-
-# Select a category from the categoria selector.
+- inputText: 'Taxi por insumos'
 - tapOn:
-    id: 'gasto-categoria'
-- tapOn: 'Servicios'
-
-# Fill proveedor.
+    id: 'gasto-categoria-Transporte'
 - tapOn:
     id: 'gasto-proveedor'
-- inputText: 'Proveedor Industrial SA'
-
-# Fill monto.
+- inputText: 'Sitio Centro'
+- assertVisible: 'Registrar gasto de $45.50'
 - tapOn:
-    id: 'gasto-monto'
-- inputText: '2500'
+    id: 'gasto-guardar'
 
-# Submit the egreso.
+- extendedWaitUntil:
+    notVisible:
+      id: 'registrar-gasto'
+    timeout: 5000
+- assertVisible: 'Taxi por insumos'
+- assertVisible: 'Sitio Centro'
 - tapOn:
-    id: 'gasto-submit'
-
-# Modal closes and the egreso appears in the list with context.
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: 'Material de limpieza'
+    id: 'gastos-filtro-Transporte'
+- assertVisible: 'Taxi por insumos'

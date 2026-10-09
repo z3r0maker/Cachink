@@ -1,55 +1,37 @@
-# Add stock to an existing product via the "Entrada" action in the
-# ProductoDetailPopover → MovimientoModal.
+# «Llegó mercancía» (Track M, M-09; MvInventario): a product's movement sheet
+# records an entrada with the stepper, who brought it and a note; the toast
+# confirms it and it shows under «Movimientos».
 #
-# Complements the existing inventario-salida.yaml which tests
-# stock decrements. This flow tests stock INCREMENTS.
-#
-# Precondition: wizard + at least one product exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
+# Precondition: signed in with an open turno, and a tracked product "Tortilla".
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Open the product's detail via search (see find-producto-stock.yaml). On
-# iOS/Fabric, Tamagui onPress-cards expose a merged accessibilityText but NOT
-# their testID, so the row/detail buttons are matched by `text: "<label>.*"`
-# (anchored regex) — containers/inputs keep working by `id:`.
 - runFlow: shared/find-producto-stock.yaml
-
-# Tap the product row → navigates to the product detail route.
 - tapOn:
-    id: 'producto-card-.*'
-
-# Detail screen — open the "Entrada" movimiento.
+    id: 'inventario-fila-.*'
 - assertVisible:
-    text: 'Entrada.*'
+    id: 'mover-sheet'
 - tapOn:
-    text: 'Entrada.*'
-
-# MovimientoModal (tipo pre-set to "entrada"): CANTIDAD / MOTIVO / NOTA.
-- assertVisible:
-    text: 'CANTIDAD.*'
-
-# Enter quantity for the stock entrada.
+    id: 'mover-tipo-Entrada'
 - tapOn:
-    id: 'movimiento-cantidad'
-- eraseText
-- inputText: '50'
-
-# Submit the movement — the "REGISTRAR" button (NOT the "Registrar entrada" title).
+    id: 'mover-mas'
 - tapOn:
-    text: 'REGISTRAR'
-
-# Modal closes — the CANTIDAD field is gone.
+    id: 'mover-proveedor'
+- inputText: 'Tortillería Esperanza'
+- hideKeyboard
+- tapOn:
+    id: 'mover-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-toast'
+    timeout: 5000
 - assertNotVisible:
-    text: 'CANTIDAD.*'
+    id: 'mover-sheet'
+- tapOn:
+    id: 'inventario-tabs-movimientos'
+- assertVisible:
+    id: 'inventario-mov-.*'
+- assertVisible: '.*Llegó mercancía.*'

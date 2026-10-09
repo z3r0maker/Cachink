@@ -182,7 +182,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   acceptable: fall back to CSS Modules, and add a task for a CSS-parsing value auditor — do not
   defer that discovery to Fase 5.
 
-### P-21 Capturas lado a lado para `pnpm design:compare`
+### P-21 Capturas lado a lado para `pnpm design:compare` [deuda] [media]
 
 - [ ] Status · **Blocked by:** P-18 · **Blocks:** la verificación 1 de cada tarea de pantalla
   - **Remaining (2026-09-23, verified against the code):** todo el sistema de captura. El que se
@@ -249,7 +249,7 @@ including the press stamp.
   edits outside `theme.ts`; the contrast test runs from its new home; `pnpm lint:design` still
   reports `total: 0`; the emitted CSS contains every token in `colors`.
 
-### P-23 Primitivas + inventario en Storybook + líneas base de regresión visual
+### P-23 Primitivas + inventario en Storybook + líneas base de regresión visual [deuda] [media]
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 y todas las tareas de pantalla
   - **Remaining (2026-09-23, verified against the code):** la cláusula de aceptación de `design:compare` espera a P-21, reabierto ese mismo día (el sistema de captura nunca llegó a un commit y no existe en ningún disco; ver P-21). No hay página de Storybook en `apps/web`; Toast, gauge, nav item, switcher y user menu siguen sin cubrirse.
@@ -1165,7 +1165,7 @@ never invented text.
 - **Acceptance:** pace arithmetic unit-tested (1 happy + 3 unhappy); all seven states in Storybook;
   viewer sees no wizard.
 
-### P-28 Diagnóstico + estrategia — **«Próximamente» en producción**
+### P-28 Diagnóstico + estrategia — **«Próximamente» en producción** [media]
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
   - **Remaining (2026-09-23, verified against the code):** sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse.
@@ -1341,7 +1341,7 @@ never invented text.
 > experience this can give. Still to decide: where the per-business count lives (`usage_counters`
 > needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
-- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** —
+- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** — `[baja]`
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
   (Nuevo / Actualizar / Error) → commit. Structured output (`strict: true` or
   `output_config.format`) validating against the domain `Producto` schema — extracted rows are never
@@ -1349,7 +1349,7 @@ never invented text.
 - **Acceptance:** fixture photographs produce schema-valid rows; a photograph with no products
   produces the error state, not an empty commit; production renders «Próximamente».
 
-### P-30 Runtime de generación del Asesor
+### P-30 Runtime de generación del Asesor [media]
 
 - [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
   - **Remaining (2026-10-05, verified against the code):** la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo.
@@ -1622,7 +1622,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102)
+### P-35 Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
@@ -1738,8 +1738,26 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     view). **Floor raised to 93.8 / 90.9 / 87.1 / 77.5** on the morning's green full-suite E2E
     plus 700 unit tests. Also landed: mobile's first coverage gate (floor 10/9/13/25, the
     shell only — screens are Maestro's).
-- **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
-  in uncovered lines at the first measurement (≈700 lines to 85%):
+  - 2026-09-28 · **Main red on the gate since #32 — the floor outran CI, coverage never fell.**
+    Last green gate: `ec1a5995` (run 36375457279), 91.7 lines against the then-floor 90. The #32
+    merge brought the four local raises (92.5 → 93.4), and every CI run since measures the same
+    code at 92.7 / 89.9 / 85.6 / 76.6: per-file, CI's merged summary _rose_ from `ec1a5995` to
+    `faf0dc1a` on every file that moved (the phone merges and the `@xangarro/caja` move changed
+    nothing the portal counts). A CI-mode run locally (Node 22, `CI=1`, private Postgres) gives
+    CI's numbers to ±0.15; the raises came from non-CI local runs, and the extra is in their
+    E2E half (Node 26 vs 22 on the unit half is not it). **Rule from here: `--raise` only on
+    numbers a `portal-e2e` CI run printed.** Restored with tests, floor untouched: unit —
+    `cfdi-wiring` (the CFDI composition root: refund → charge → invoice lookup, the monthly
+    close), `cron-routes` (all four crons behind the real guard), `facturas-actions` (the
+    billing row answers only for its own business), `usage-live`, `import-plantillas` (a
+    downloaded template parses clean), `pestana` (the BroadcastChannel fallback); E2E — the
+    CxC lines by hand in `saldos-iniciales.spec` (rows asserted in Postgres, read back after a
+    reload) and `asesor-metas-cierre.sync.spec` (the missed-goal month-end dialog). That spec
+    found a bug: «Cambiar» in the dialog did nothing (`Metas` returned the dialog before
+    reading `editando`); fixed. Note: `asesor-metas.sync.spec`'s title promises the lograda
+    dialog, but the takeover consumes that load, so the dialog never renders there. CI-mode
+    measurement after: **94.2 / 91.4 / 87.9 / 77.6.**- **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
+    in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
   2. `server/actions` (44%, 290 lines; 7 files at 0%) — the error branches Playwright
      never reaches: Postgres integration tests per CLAUDE.md §6.
@@ -1751,7 +1769,7 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
   branches ≥ 85, on a `portal-e2e` run where every project ran. (85 / 75 until the owner
   raised the goal, 2026-09-26.)
 
-### P-36 First production walkthrough: the owner's findings (2026-09-25)
+### P-36 First production walkthrough: the owner's findings (2026-09-25) `[alta]`
 
 - [x] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
       `feat/don-cuentas-portal` landing for P-36.7
@@ -1842,7 +1860,7 @@ own task and are not repeated here: P-28 (Diagnóstico, estrategia, «¿Me alcan
 desde una foto), P-30 (the model call behind the monthly review), P-32 (avisos and Compartir por
 WhatsApp).
 
-### P-37 Impresión de tickets desde la caja
+### P-37 Impresión de tickets desde la caja [baja]
 
 - [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
   printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
@@ -1856,7 +1874,7 @@ WhatsApp).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
 
-### P-38 Don Cuentas explica una diferencia de caja
+### P-38 Don Cuentas explica una diferencia de caja [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
       **2026-09-26 (owner, ADR-110): totalmente determinista — sin modelo.** Las causas que esto
@@ -1872,7 +1890,7 @@ WhatsApp).
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
 
-### P-39 Conclusiones de Don Cuentas en Estados financieros
+### P-39 Conclusiones de Don Cuentas en Estados financieros [baja]
 
 - [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
       **2026-09-26 (owner, ADR-110): se escribe una vez al mes, se muestra en Estados y se anuncia.**
@@ -1890,7 +1908,7 @@ WhatsApp).
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
 
-### P-40 Primer diagnóstico gratis a los 90 días
+### P-40 Primer diagnóstico gratis a los 90 días [baja]
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
   - **Acotado por ADR-109 (2026-09-26).** Esto decía «Xangarrito **or Xangarro**», escrito cuando el
@@ -1904,7 +1922,7 @@ WhatsApp).
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
-### P-41 Funciones avanzadas de inventario
+### P-41 Funciones avanzadas de inventario [baja]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in

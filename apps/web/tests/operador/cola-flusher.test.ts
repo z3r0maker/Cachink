@@ -53,7 +53,13 @@ describe('useFlusher', () => {
     colaPendiente.mockResolvedValue(pendientes(5, 1));
     const { result } = renderHook(() => useFlusher(true));
     await waitFor(() => assert.ok(result.current.reales !== null));
-    assert.deepEqual(result.current.reales, { pendientes: 5, reintentando: 1, enLinea: true });
+    assert.deepEqual(result.current.reales, {
+      pendientes: 5,
+      reintentando: 1,
+      rechazados: 0,
+      reintento: null,
+      enLinea: true,
+    });
   });
 
   it('a flush reports the queue after the run, online', async () => {
@@ -63,7 +69,13 @@ describe('useFlusher', () => {
     await act(async () => {
       await result.current.flush('captura', false);
     });
-    assert.deepEqual(result.current.reales, { pendientes: 3, reintentando: 0, enLinea: true });
+    assert.deepEqual(result.current.reales, {
+      pendientes: 3,
+      reintentando: 0,
+      rechazados: 0,
+      reintento: null,
+      enLinea: true,
+    });
     assert.equal(result.current.enviando, false);
   });
 
@@ -97,14 +109,26 @@ describe('useFlusher', () => {
     colaPendiente.mockResolvedValueOnce(pendientes(4));
     const { result } = renderHook(() => useFlusher(true));
     await waitFor(() =>
-      assert.deepEqual(result.current.reales, { pendientes: 4, reintentando: 0, enLinea: true }),
+      assert.deepEqual(result.current.reales, {
+        pendientes: 4,
+        reintentando: 0,
+        rechazados: 0,
+        reintento: null,
+        enLinea: true,
+      }),
     );
 
     colaPendiente.mockRejectedValue(new Error('worker ocupado'));
     await act(async () => {
       await result.current.flush('completa', true);
     });
-    assert.deepEqual(result.current.reales, { pendientes: 4, reintentando: 0, enLinea: true });
+    assert.deepEqual(result.current.reales, {
+      pendientes: 4,
+      reintentando: 0,
+      rechazados: 0,
+      reintento: null,
+      enLinea: true,
+    });
   });
 
   it('no device: the flush is a no-op', async () => {

@@ -1,0 +1,190 @@
+/**
+ * InventarioTab — the inventory-purchase form, now inside Gastos'
+ * «Compra de inventario» sheet (Slice 2 C5, M4-T02 inventario, ADR-021;
+ * restyled for El Mostrador in M-08).
+ *
+ * Fields: producto (select), cantidad (int > 0), costo_unit (pesos).
+ *
+ * On submit calls `RegistrarMovimientoInventarioUseCase` via the
+ * useRegistrarMovimiento hook (parent wires it). The use-case
+ * dual-writes the MovimientoInventario + the Egreso with
+ * categoria='Inventario' — this form never touches the Expense
+ * side directly per ADR-021.
+ *
+ * Empty-state: when no productos exist, shows a "Crear producto" Btn.
+ * Creating a producto mid-flow auto-selects it.
+ */
+
+import { useState, type ReactElement } from 'react';
+import {
+  NewInventoryMovementSchema,
+  fromPesos,
+  type BusinessId,
+  type IsoDate,
+  type NewInventoryMovement,
+  type Product,
+  type ProductId,
+} from '@xangarro/domain';
+import { Btn, Combobox } from '../../components/index';
+import { MoneyField, WheelQuantityPicker } from '../../components/fields/index';
+import { useTranslation } from '../../i18n/index';
+
+export interface InventarioTabProps {
+  readonly businessId: BusinessId;
+  readonly fecha: IsoDate;
+  readonly productos: readonly Product[];
+  readonly onSubmit: (input: NewInventoryMovement) => void;
+  readonly onCrearProducto?: () => void;
+  readonly submitting?: boolean;
+}
+
+interface FormState {
+  productoId: string;
+  cantidad: number;
+  costoUnitPesos: string;
+}
+
+interface FormErrors {
+  producto?: string;
+  cantidad?: string;
+  costo?: string;
+}
+
+function initialState(): FormState {
+  return { productoId: '', cantidad: 1, costoUnitPesos: '' };
+}
+
+function validate(state: FormState, requiredLabel: string, cantidadInvalid: string): FormErrors {
+  const errors: FormErrors = {};
+  if (!state.productoId) errors.producto = requiredLabel;
+  if (!Number.isInteger(state.cantidad) || state.cantidad <= 0) errors.cantidad = cantidadInvalid;
+  const costo = Number(state.costoUnitPesos);
+  if (!Number.isFinite(costo) || costo <= 0) errors.costo = requiredLabel;
+  return errors;
+}
+
+function buildPayload(
+  state: FormState,
+  businessId: BusinessId,
+  fecha: IsoDate,
+): NewInventoryMovement {
+  return NewInventoryMovementSchema.parse({
+    productoId: state.productoId as ProductId,
+    fecha,
+    tipo: 'entrada',
+    cantidad: state.cantidad,
+    costoUnitCentavos: fromPesos(state.costoUnitPesos),
+    motivo: 'Compra a proveedor',
+    businessId,
+  });
+}
+
+interface InventarioFieldsProps {
+  readonly state: FormState;
+  readonly update: (p: Partial<FormState>) => void;
+  readonly errors: FormErrors;
+  readonly productos: readonly Product[];
+  /** Audit 5.4 — Bluetooth-keyboard Enter-to-submit. */
+  readonly onSubmitEditing?: () => void;
+  readonly t: ReturnType<typeof useTranslation>['t'];
+}
+
+function InventarioFields(props: InventarioFieldsProps): ReactElement {
+  const { state, update, errors, productos, t } = props;
+  return (
+    <>
+      <Combobox
+        label={t('nuevoEgreso.productoLabel')}
+        value={state.productoId}
+        onChange={(v) => update({ productoId: v })}
+        options={productos.map((p) => ({ key: p.id, label: p.nombre }))}
+        note={errors.producto}
+        testID="inventario-producto"
+      />
+      <WheelQuantityPicker
+        label={t('nuevoEgreso.cantidadLabel')}
+        value={state.cantidad}
+        onChange={(v) => update({ cantidad: v })}
+        error={errors.cantidad}
+        min={1}
+        max={999}
+        testID="inventario-cantidad"
+      />
+      <MoneyField
+        label={t('nuevoEgreso.costoUnitLabel')}
+        value={state.costoUnitPesos}
+        onChange={(v) => update({ costoUnitPesos: v })}
+        note={errors.costo}
+        testID="inventario-costo"
+        returnKeyType="done"
+        onSubmitEditing={props.onSubmitEditing}
+      />
+    </>
+  );
+}
+
+function EmptyProductos({
+  onCrearProducto,
+  t,
+}: {
+  onCrearProducto: () => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <Btn variant="secondary" onPress={onCrearProducto} fullWidth testID="inventario-crear-producto">
+      {t('nuevoEgreso.crearProducto')}
+    </Btn>
+  );
+}
+
+function GuardarCompra(p: { readonly onPress: () => void; readonly loading: boolean }) {
+  return (
+    <Btn
+      variant="primary"
+      size="xl"
+      sentence
+      onPress={p.onPress}
+      loading={p.loading}
+      fullWidth
+      testID="inventario-submit"
+    >
+      Registrar compra
+    </Btn>
+  );
+}
+
+export function InventarioTab(props: InventarioTabProps): ReactElement {
+  const { t } = useTranslation();
+  const [state, setState] = useState<FormState>(initialState);
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const update = (p: Partial<FormState>): void => setState((prev) => ({ ...prev, ...p }));
+  const handleSubmit = (): void => {
+    const v = validate(state, t('empleados.required'), t('nuevoEgreso.cantidadInvalid'));
+    if (Object.keys(v).length > 0) {
+      setErrors(v);
+      return;
+    }
+    setErrors({});
+    props.onSubmit(buildPayload(state, props.businessId, props.fecha));
+    setState(initialState());
+  };
+
+  if (props.productos.length === 0 && props.onCrearProducto) {
+    return <EmptyProductos onCrearProducto={props.onCrearProducto} t={t} />;
+  }
+
+  return (
+    <>
+      <InventarioFields
+        state={state}
+        update={update}
+        errors={errors}
+        productos={props.productos}
+        onSubmitEditing={handleSubmit}
+        t={t}
+      />
+      <GuardarCompra onPress={handleSubmit} loading={props.submitting === true} />
+    </>
+  );
+}

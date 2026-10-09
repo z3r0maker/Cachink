@@ -18,6 +18,8 @@ import {
   search,
   toolbar,
 } from './movimientos.css';
+import { buscador } from './carga.css';
+import { PISTA_ID, PistaPersonalizado } from './carga';
 import type { Personalizado, RangoChip } from './periodo';
 
 export type Row = MovimientosVista['filas'][number];
@@ -70,16 +72,22 @@ export function SearchAndRange(props: {
   readonly ranges: readonly { value: RangoChip; label: string }[];
   readonly custom: Personalizado;
   readonly onCustom: (v: Personalizado) => void;
+  /** Personalizado with a side open: the search reads that whole side (DS-01). */
+  readonly lento: boolean;
 }) {
   return (
     <div className={toolbar}>
-      <input
-        className={search}
-        placeholder="Buscar por concepto, folio u operador"
-        aria-label="Buscar movimientos"
-        value={props.query}
-        onChange={(e) => props.onQuery(e.target.value)}
-      />
+      <div className={buscador}>
+        <input
+          className={search}
+          placeholder="Buscar por concepto, folio u operador"
+          aria-label="Buscar movimientos"
+          aria-describedby={props.lento ? PISTA_ID : undefined}
+          value={props.query}
+          onChange={(e) => props.onQuery(e.target.value)}
+        />
+        {props.lento ? <PistaPersonalizado /> : null}
+      </div>
       {props.ranges.map((r) => (
         <FilterChip
           key={r.value}

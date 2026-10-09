@@ -7,15 +7,14 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [ ] **BLOQUEANTE — Razón social constituida.** `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`,
-      `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+- [ ] **BLOQUEANTE — Razón social constituida.** `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
       art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
       When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
       `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
 
 ## 1. Textos legales
 
-- [~] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based).
+- [~] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based). `[alta]`
 - [~] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`.
 - [~] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`).
 - [~] Anexo de encargado — `docs/legal/aviso/encargado-clausulas.md`.
@@ -24,8 +23,7 @@
       `docs/legal/aviso/respuestas-oq-borrador.md` §0.
 - [ ] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
 - [ ] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
-- [ ] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los
-      `[PLAZO]`s once OQ-L13 is confirmed.
+- [ ] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
 
 ## 2. Captura de consentimiento (PRIV-REG-01) — implementado 2026-09-22
 
@@ -59,7 +57,7 @@
 
 ## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)
 
-- [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe →
+- [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe → `[critica]` `[bloq]`
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
       creation) — see OQ-N4.
 - [ ] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
@@ -82,8 +80,7 @@
 
 ## 4. Suscripciones (LFPC art. 76 Bis VIII–IX, en vigor 2025-12-13)
 
-- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción.
-      **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
+- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción. `[critica]` `[bloq]` **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
       directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
       plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
       «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
@@ -109,13 +106,12 @@
 
 ## 6. Terceros y contratos
 
-- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, **Microsoft (Foundry)**,
+- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, **Microsoft (Foundry)**, `[alta]` `[bloq]`
       **Anthropic**. Named list delivered to negocios via the Anexo, and on request.
 - [ ] Opción de hosting de Foundry decidida y configurada (recomendada: **Hosted on Azure, US DataZone**);
       written confirmation of the retention figure before the IA section publishes a number.
 - [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda).
-- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA
-      section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
+- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
       at that boundary.
 
 ## 7. Higiene de producto con peso legal
@@ -133,7 +129,7 @@
 
 ## 8. Propiedad intelectual y gobernanza
 
-- [ ] **BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro»** (clases 9, 35, 36, 42) antes
+- [ ] **BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro»** (clases 9, 35, 36, 42) antes `[critica]` `[bloq]`
       public launch; ADR-054 is still "pending clearance".
 - [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa).
 - [ ] Seguro de ciberresponsabilidad — decisión de negocio.

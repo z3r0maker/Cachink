@@ -85,7 +85,7 @@ function mensaje(m: MensajePara, leidos: ReadonlySet<string>, hoy: string): Avis
   return { ...base, titulo, cuerpo: resto, tono: 'dueno' };
 }
 
-function cola(c: AvisosPara['cola'], hoy: string): Aviso[] {
+function cola(c: AvisosPara['cola'], hoy: string, donde: string): Aviso[] {
   if (c.cuantos === 0) return [];
   return [
     {
@@ -96,8 +96,7 @@ function cola(c: AvisosPara['cola'], hoy: string): Aviso[] {
         c.cuantos === 1
           ? '1 registro sigue sin enviarse'
           : `${c.cuantos} registros siguen sin enviarse`,
-      cuerpo:
-        'Viven en este navegador hasta que suban. No podrás cerrar el turno hasta que se envíen.',
+      cuerpo: `Viven en ${donde} hasta que suban. No podrás cerrar el turno hasta que se envíen.`,
       hora: c.desde === null ? 'Ahora' : cuando(c.desde, hoy),
       icono: NUBE,
       tono: 'atencion',
@@ -140,15 +139,21 @@ function stock(p: StockBajoPara): Aviso {
   };
 }
 
-/** Everything Avisos lists, read marks applied. `hoy` is the device's "YYYY-MM-DD". */
-export function avisosVivos(a: AvisosPara, hoy: string): AvisosData {
+/**
+ * Everything Avisos lists, read marks applied. `hoy` is the device's
+ * "YYYY-MM-DD"; `donde` is where unsent records live («este navegador» on the
+ * web caja, «esta caja» on the phone).
+ */
+export function avisosVivos(a: AvisosPara, hoy: string, donde = 'este navegador'): AvisosData {
   const leidos = new Set(a.leidos);
   const marcar = (x: Aviso): Aviso => (leidos.has(x.id) ? { ...x, leido: true } : x);
   return {
     dueno: nombreDueno(a.dueno),
     avisos: [
       ...a.mensajes.map((m) => mensaje(m, leidos, hoy)),
-      ...[...cola(a.cola, hoy), ...rechazados(a.rechazados), ...a.stockBajo.map(stock)].map(marcar),
+      ...[...cola(a.cola, hoy, donde), ...rechazados(a.rechazados), ...a.stockBajo.map(stock)].map(
+        marcar,
+      ),
     ],
   };
 }

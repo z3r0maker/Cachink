@@ -20,12 +20,14 @@ export const heroe = style({
 
 export const fase = styleVariants({
   espera: { background: colors.warningSoft },
+  reintentando: { background: colors.warningSoft },
   enviando: { background: colors.blueSoft },
   enviado: { background: colors.greenSoft },
 });
 
 export const faseTexto = styleVariants({
   espera: { color: colors.warningText },
+  reintentando: { color: colors.warningText },
   enviando: { color: colors.blueText },
   enviado: { color: colors.greenText },
 });

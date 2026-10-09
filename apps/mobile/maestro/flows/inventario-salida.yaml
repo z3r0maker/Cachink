@@ -1,45 +1,27 @@
-# Register a salida on an existing producto; verify stock decrement +
-# movimiento visible in the Movimientos view.
-# Covers P1C-M5-T04 (Entrada/Salida modal).
+# «Se echó a perder o se dañó (merma)» (Track M, M-09; MvInventario): a merma
+# always says what happened; the stepper never goes past the stock, and the
+# movement lowers the stock as a salida for «Merma / daño».
 #
-# Precondition: producto 'Tortilla' with stock >= 5 exists (create via
-# inventario-producto.yaml and an entrada flow, or seed e2e-seed.json).
+# Precondition: signed in with an open turno, and a tracked product "Tortilla"
+# with stock.
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Open the product's detail via search (onPress cards match by text-regex).
 - runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: 'producto-card-.*'
-
-# Detail screen — open the "Salida" movimiento.
-- assertVisible:
-    text: 'Salida.*'
+    id: 'inventario-fila-.*'
 - tapOn:
-    text: 'Salida.*'
-
-# MovimientoModal (tipo=salida): CANTIDAD visible, COSTO hidden for salida.
-- assertVisible:
-    text: 'CANTIDAD.*'
-- assertNotVisible:
-    id: 'movimiento-costo'
-
-# Enter the salida quantity (< stock).
+    id: 'mover-tipo-Merma'
+- assertVisible: '¿Qué le pasó?'
 - tapOn:
-    id: 'movimiento-cantidad'
-- eraseText
-- inputText: '3'
-
-# Submit the movement — the "REGISTRAR" button.
+    id: 'mover-motivo-Se echó a perder'
 - tapOn:
-    text: 'REGISTRAR'
-
-# Modal closes — CANTIDAD gone, stock decremented.
-- assertNotVisible:
-    text: 'CANTIDAD.*'
+    id: 'mover-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-toast'
+    timeout: 5000
+- assertVisible: '.*Se echó a perder. Queda en tu turno.*'

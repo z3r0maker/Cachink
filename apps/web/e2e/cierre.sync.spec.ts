@@ -131,6 +131,19 @@ test('the close goes ahead with records still to send, and they go up later', as
   const banda = page.getByTestId('cierre-por-enviar');
   await expect(banda).toContainText(/Tienes \d+ registros? por enviar/);
   await expect(banda).toContainText('Puedes cerrar; se enviarán cuando vuelva la conexión.');
+  // DS-06 (EsCajaCierre): the summary counts them «por enviar»; a retry that
+  // finds no server says it keeps trying, and the close stays open.
+  await expect(page.getByLabel('Resumen del turno')).toContainText(/\d+ por enviar/);
+  await banda.getByRole('button', { name: 'Reintentar envío' }).click();
+  await expect(banda.getByRole('status')).toHaveText(
+    'Todavía no se pudo. Lo volvemos a intentar solos en un momento.',
+    { timeout: 15_000 },
+  );
+  // No server at all: the pill says so, with the count.
+  await expect(page.locator('[data-estado="sin-conexion"]')).toHaveAttribute(
+    'aria-label',
+    /^Estado del envío: Sin conexión · \d+ sin enviar$/,
+  );
 
   // $500 fondo + $50 in cash: one $500 bill and one $50 bill. Not blocked.
   await page.getByLabel('Cuántos billetes de $500', { exact: true }).fill('1');
@@ -139,8 +152,11 @@ test('the close goes ahead with records still to send, and they go up later', as
   await expect(cerrar).toBeEnabled();
   await cerrar.click();
   await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
+  // Its own line on the closed screen (EsCajaCierre).
   await expect(
-    page.getByText('Pedro lo verá en su portal cuando se envíen los registros.'),
+    page
+      .getByRole('status')
+      .filter({ hasText: 'Pedro lo verá en su portal cuando se envíen los registros.' }),
   ).toBeVisible();
   expect(await ticketsDelNegocio()).toBe(antes);
 

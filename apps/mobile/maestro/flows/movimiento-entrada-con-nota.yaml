@@ -1,62 +1,28 @@
-# Stock entrada with costo + nota fields.
+# «Llegó mercancía» with a note (Track M, M-09; MvInventario): the note
+# travels with the entrada and shows under «Movimientos».
 #
-# Verifies:
-#   1. Navigate to product → tap "Entrada"
-#   2. Fill cantidad + costo
-#   3. Fill movimiento-nota (delivery note reference)
-#   4. Submit → stock increases
-#
-# Precondition: wizard complete, product "Tortilla" exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/movimiento-entrada-con-nota.yaml
+# Precondition: signed in with an open turno, and a tracked product "Tortilla".
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Open the product's detail via search (onPress cards match by text-regex).
 - runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: 'producto-card-.*'
-
-# Detail screen — open the "Entrada" movimiento.
-- assertVisible:
-    text: 'Entrada.*'
+    id: 'inventario-fila-.*'
 - tapOn:
-    text: 'Entrada.*'
-
-# MovimientoModal (tipo pre-set to "entrada"): CANTIDAD / MOTIVO / NOTA.
-- assertVisible:
-    text: 'CANTIDAD.*'
-
-# Enter quantity (CANTIDAD is a wheel picker; inputText commits the value).
+    id: 'mover-tipo-Entrada'
 - tapOn:
-    id: 'movimiento-cantidad'
-- eraseText
-- inputText: '25'
-
-# Fill the optional nota (delivery reference) — a text input.
+    id: 'mover-nota'
+- inputText: 'Recibo entrega 4521'
+- hideKeyboard
 - tapOn:
-    id: 'movimiento-nota'
-- inputText: 'Recibo entrega 4521 Proveedor ABC'
-
-# Tapping the CANTIDAD wheel blurs the nota field and dismisses its keyboard
-# (hideKeyboard is flaky inside this modal) so the REGISTRAR button is reachable.
+    id: 'mover-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-toast'
+    timeout: 5000
 - tapOn:
-    id: 'movimiento-cantidad'
-
-# Submit the movement — the "REGISTRAR" button.
-- tapOn:
-    text: 'REGISTRAR'
-
-# Modal closes — CANTIDAD gone, stock increased.
-- assertNotVisible:
-    text: 'CANTIDAD.*'
+    id: 'inventario-tabs-movimientos'
+- assertVisible: '.*Recibo entrega 4521.*'

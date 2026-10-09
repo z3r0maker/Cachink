@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
 import type { RangoChip } from './periodo';
-import { urlDe, type EstadoMovimientos } from './url';
+import { urlDe, urlIrA, type EstadoMovimientos } from './url';
 
 /** How long typing pauses before the search goes to the server. */
 const ESPERA_BUSQUEDA_MS = 300;
@@ -61,10 +61,12 @@ export function useMovimientos(servido: EstadoMovimientos) {
   }, [estado]);
 
   const ir = (cambio: Partial<EstadoMovimientos>) => {
-    const next = { ...ultimo.current, pagina: 1, ...cambio };
+    // «Ir a fecha» is one request, never carried into the next change.
+    const next = { ...ultimo.current, pagina: 1, ir: '', ...cambio };
     ultimo.current = next;
     setEstado(next);
-    startTransition(() => router.replace(urlDe(next), { scroll: false }));
+    const url = next.ir === '' ? urlDe(next) : urlIrA(next, next.ir);
+    startTransition(() => router.replace(url, { scroll: false }));
   };
   const busqueda = useBusquedaDiferida(servido.q, (q) => ir({ q }));
 
@@ -77,6 +79,10 @@ export function useMovimientos(servido: EstadoMovimientos) {
     setRange: (r: RangoChip) => ir({ rango: r }),
     setCustom: (c: { desde: string; hasta: string }) => ir({ desde: c.desde, hasta: c.hasta }),
     setFilter: (cat: string | null) => ir({ cat }),
+    /** «Ir a fecha» (DS-01): the server opens that day's page and redirects to `?pagina=N`. */
+    irAFecha: (dia: string) => ir({ ir: dia }),
+    /** «Reintentar»: the same URL, asked again; the old rows stay until it answers. */
+    reintentar: () => startTransition(() => router.refresh()),
     /**
      * One page on from the page last **asked for**, within `paginas`: two
      * quick clicks on «Siguiente» are two pages, not the same one twice.

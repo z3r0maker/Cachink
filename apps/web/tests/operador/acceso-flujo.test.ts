@@ -23,6 +23,9 @@ let deviceActual: unknown = null;
 
 vi.mock('../../src/operador/runtime/client', () => ({
   registerRuntime: () => ({
+    // The door polls the snapshot's download (DS-10); null progress reads as «no word yet».
+    progresoSnapshot: () => Promise.resolve(null),
+    counts: () => Promise.resolve({ pending: 0, rejected: 0, retrying: 0 }),
     boot,
     turnoAbierto,
     operadores,
@@ -151,8 +154,13 @@ describe('vincularYPasar', () => {
     operadores.mockResolvedValue(LISTA);
     const setOperadores = vi.fn();
     sync.mockRejectedValueOnce(new Error('red'));
-    await vincularYPasar(vinculo('token-2'), setOperadores);
+    // DS-10: the door reports the download's progress as it waits for it.
+    const alDescargar = vi.fn();
+    const paso = await vincularYPasar(vinculo('token-2'), setOperadores, alDescargar);
     assert.equal(sync.mock.calls.length, 1);
-    assert.deepEqual(setOperadores.mock.calls, [[LISTA]], 'the door still moves on');
+    // DS-10: an interrupted download no longer falls through to the picker —
+    // the door stays and offers «Reintentar»; what came down stays.
+    assert.equal(paso, false);
+    assert.deepEqual(setOperadores.mock.calls, [], 'the door waits for the retry');
   });
 });

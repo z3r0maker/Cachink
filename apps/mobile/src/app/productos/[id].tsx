@@ -1,28 +1,11 @@
 /**
- * Expo Router entry for /productos/[id] — read-only product detail with
- * stock Entrada/Salida (A-09).
+ * /productos/<id> became Inventario's movement sheet for that product
+ * (Track M, M-09). Kept so old links land.
  */
-
 import type { ReactElement } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Text, View } from '@tamagui/core';
-import { today } from '@xangarro/domain';
-import { ProductoDetailSmart, useProductosConStock } from '@xangarro/ui';
-import { AppShellWrapper } from '../../shell/app-shell-wrapper';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 
-export default function ProductoDetailRoute(): ReactElement {
+export default function ProductoRedirect(): ReactElement {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const row = (useProductosConStock().data ?? []).find((r) => r.producto.id === id) ?? null;
-  return (
-    <AppShellWrapper title="Inventario" onBack={() => router.back()}>
-      {row ? (
-        <ProductoDetailSmart row={row} fecha={today()} onBack={() => router.back()} />
-      ) : (
-        <View flex={1} alignItems="center" justifyContent="center">
-          <Text>Producto no encontrado</Text>
-        </View>
-      )}
-    </AppShellWrapper>
-  );
+  return <Redirect href={{ pathname: '/inventario', params: { producto: id } } as never} />;
 }

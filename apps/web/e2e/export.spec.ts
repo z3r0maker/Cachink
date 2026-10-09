@@ -132,6 +132,62 @@ test('the button shows «Preparando tu archivo…» and a refusal becomes a toas
   await page.unroute('**/api/export/ventas');
 });
 
+/** DS-02: a failed build is the board's one-line toast, and the button comes back. */
+test('a failed export says «No pudimos generar el archivo. Intenta de nuevo.»', async ({
+  page,
+}) => {
+  await page.goto('/movimientos');
+  await page.route('**/api/export/ventas', (route) =>
+    route.fulfill({ status: 500, contentType: 'text/plain', body: 'boom' }),
+  );
+  const boton = page.getByTestId('export-ventas');
+  await expect(async () => {
+    await boton.click();
+    await expect(page.getByRole('alert')).toContainText(
+      'No pudimos generar el archivo. Intenta de nuevo.',
+      { timeout: 1_000 },
+    );
+  }).toPass({ timeout: 15_000 });
+  await expect(boton).toBeEnabled();
+  await page.getByRole('button', { name: 'Cerrar aviso' }).click();
+  await expect(page.getByText('No pudimos generar el archivo. Intenta de nuevo.')).toHaveCount(0);
+  await page.unroute('**/api/export/ventas');
+});
+
+/**
+ * DS-04: the Movimientos tab lists the newest fifty and says so; «Exportar
+ * todos» in its footer is the same whole-history file as the header button.
+ */
+test('Productos › Movimientos says it lists the newest 50, and «Exportar todos» downloads all', async ({
+  page,
+}) => {
+  await page.goto('/productos');
+  await page
+    .getByRole('group', { name: 'Productos' })
+    .getByRole('button', { name: /^Movimientos/ })
+    .click();
+  const pie = page.getByTestId('movimientos-pie');
+  await expect(pie).toContainText('Mostrando los 50 más recientes ·');
+  await expect(page.locator('main tbody tr')).toHaveCount(50);
+  await expect(page.getByTestId('export-movimientos')).toContainText('XLSX');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    pie.getByRole('button', { name: 'Exportar todos' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^xangarro-movimientos-\d{4}-\d{2}-\d{2}\.xlsx$/);
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  const [{ n }] = await asTenant(
+    BIZ,
+    (sql) =>
+      sql<
+        [{ n: number }]
+      >`SELECT count(*)::int AS n FROM inventory_movements WHERE deleted_at IS NULL`,
+  );
+  expect(await filasDelLibro(Buffer.concat(chunks))).toBe(n);
+});
+
 test('an unknown dataset is refused rather than guessed at', async ({ request }) => {
   const res = await request.get('/api/export/nomina-secreta');
   expect(res.status()).toBe(404);

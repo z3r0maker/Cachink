@@ -287,7 +287,7 @@
 - **Context:** Q9 — the phone may purge only rows the server has durably stored. `acknowledged_through` in pull (B-09) + `server_seq` per accepted row in push (B-08) already give this. This task adds the **integration test** proving a row acknowledged in push is ≤ `acknowledged_through` on the next pull, and that a row rejected is never acknowledged.
 - **Acceptance:** that test, green.
 
-### B-16 Back-office: consultas guardadas de Studio + funciones de soporte
+### B-16 Back-office: consultas guardadas de Studio + funciones de soporte [media]
 
 - [~] Status · **Blocked by:** B-03, B-11
   **Remaining (2026-09-23, verified against the code):** falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona.

@@ -22,7 +22,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
+import { leerFallo, type Reintento } from '@xangarro/caja';
 import type { PendienteCrudo } from '@xangarro/caja/lectura';
+import type { SyncRunResult } from '@xangarro/sync';
 import type { SyncMode } from '../runtime/protocol';
 
 /** The upper bound of the random wait before flushing on `online`. */
@@ -31,16 +33,56 @@ const ONLINE_JITTER_MS = 3_000;
 export interface Reales {
   readonly pendientes: number;
   readonly reintentando: number;
+  /** Refused for good (the pill's «con rechazos», DS-05). */
+  readonly rechazados: number;
   readonly enLinea: boolean;
+  /** When the engine goes again by itself and why, after a failed run (DS-05). */
+  readonly reintento: Reintento | null;
 }
 
+type Cuenta = Pick<Reales, 'pendientes' | 'reintentando' | 'rechazados'>;
+
+const VACIA: Omit<Reales, 'enLinea'> = {
+  pendientes: 0,
+  reintentando: 0,
+  rechazados: 0,
+  reintento: null,
+};
+
 /** The queue's two numbers: every unsent record, and those already retrying. */
-export function contarCola(cola: readonly PendienteCrudo[]): Omit<Reales, 'enLinea'> {
+export function contarCola(
+  cola: readonly PendienteCrudo[],
+): Pick<Reales, 'pendientes' | 'reintentando'> {
   return { pendientes: cola.length, reintentando: cola.filter((p) => p.reintento === true).length };
 }
 
-async function leerCola(): Promise<Omit<Reales, 'enLinea'>> {
-  return contarCola(await registerRuntime().colaPendiente());
+async function leerCola(): Promise<Cuenta> {
+  const runtime = registerRuntime();
+  const [cola, counts] = await Promise.all([
+    runtime.colaPendiente(),
+    runtime.counts ? runtime.counts().catch(() => null) : Promise.resolve(null),
+  ]);
+  return { ...contarCola(cola), rechazados: counts?.rejected ?? 0 };
+}
+
+/** A run's failure as the pill reads it: offline, or when and why it retries. */
+function lecturaDe(result: SyncRunResult): ReturnType<typeof leerFallo> {
+  const error = result.push?.error ?? result.pull?.error ?? null;
+  return leerFallo({ retryAt: result.retryAt ?? null, error });
+}
+
+/**
+ * After a run: the queue as Registros por enviar lists it — everything not
+ * yet accepted, including what was captured and never tried (O-27) — and
+ * whether the engine now waits, when and why (DS-05).
+ */
+async function trasEnvio(result: SyncRunResult): Promise<Reales> {
+  const fallo = lecturaDe(result);
+  return {
+    ...(await leerCola()),
+    enLinea: navigator.onLine && !fallo.sinRed,
+    reintento: fallo.reintento,
+  };
 }
 
 export type Flush = (mode: SyncMode, manual: boolean) => Promise<void>;
@@ -97,11 +139,9 @@ export function useFlusher(linked: boolean): {
             Date.parse(result.retryAt) - Date.now(),
           );
         else reintento.clear();
-        // The queue as Registros por enviar lists it: everything not yet
-        // accepted, including what was captured and never tried (O-27).
-        setReales({ ...(await leerCola()), enLinea: navigator.onLine });
+        setReales(await trasEnvio(result));
       } catch {
-        setReales((r) => ({ pendientes: 0, reintentando: 0, ...r, enLinea: navigator.onLine }));
+        setReales((r) => ({ ...VACIA, ...r, enLinea: navigator.onLine }));
       } finally {
         enCurso.current -= 1;
         setEnviando(enCurso.current > 0);
@@ -123,7 +163,7 @@ function useCuentaInicial(
   useEffect(() => {
     if (!linked) return;
     void leerCola()
-      .then((c) => setReales((r) => r ?? { ...c, enLinea: navigator.onLine }))
+      .then((c) => setReales((r) => r ?? { ...c, reintento: null, enLinea: navigator.onLine }))
       .catch(() => undefined);
   }, [linked, setReales]);
 }
@@ -137,8 +177,7 @@ function useConexion(
   const espera = useTimer();
   useEffect(() => {
     if (!linked) return;
-    const mark = (enLinea: boolean): void =>
-      setReales((r) => ({ pendientes: 0, reintentando: 0, ...r, enLinea }));
+    const mark = (enLinea: boolean): void => setReales((r) => ({ ...VACIA, ...r, enLinea }));
     const onLine = (): void => {
       mark(true);
       espera.set(() => void flush('completa', true), Math.random() * ONLINE_JITTER_MS);

@@ -76,6 +76,13 @@ export const SnapshotInfoSchema = z.object({
   next: z.string().min(1).max(512).nullable(),
   /** Baseline rows in this page; added to what earlier pages of the snapshot brought. */
   stockBaseline: z.array(StockBaselineRowSchema).default([]),
+  /**
+   * On the first page only (DS-10): an estimate of the snapshot's pages, its
+   * rows over {@link MAX_SNAPSHOT_PAGE_ROWS}, for «3 de 7». A page's byte
+   * budget can cut it into more, so a device shows the larger of this and the
+   * page it is on. Absent from an older server.
+   */
+  pages: z.number().int().positive().optional(),
 });
 export type SnapshotInfo = z.infer<typeof SnapshotInfoSchema>;
 
@@ -107,6 +114,14 @@ export function decodeSnapshotToken(token: string): SnapshotCursor | null {
   } catch {
     return null;
   }
+}
+
+/** Pages for `rows` snapshot rows at `rowsPerPage` a page: never fewer than one. */
+export function snapshotPagesEstimate(
+  rows: number,
+  rowsPerPage: number = MAX_SNAPSHOT_PAGE_ROWS,
+): number {
+  return Math.max(1, Math.ceil(rows / Math.max(1, rowsPerPage)));
 }
 
 /** The cursor of a snapshot starting now, at committed cursor `c`. */

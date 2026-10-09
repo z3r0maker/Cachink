@@ -97,35 +97,6 @@ export const actionSlot = style({
   '@media': { [PHONE]: { display: 'none' } },
 });
 
-/** Shared by the linked pill (main screens) and the static one (Pendientes, Cierre). */
-export const syncBase = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 9,
-  padding: '7px 14px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-  color: colors.black,
-  textDecoration: 'none',
-  background: colors.greenSoft,
-  selectors: { '&[data-offline]': { background: colors.warningSoft } },
-  '@media': { [PHONE]: { padding: '5px 10px', gap: 6 } },
-} as const;
-
-export const syncPill = style([pressable, syncBase]);
-export const syncStatic = style(syncBase);
-
-export const syncDot = style({
-  ...contentBox,
-  flex: 'none',
-  width: 11,
-  height: 11,
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-  background: colors.green,
-  selectors: { '[data-offline] &': { background: colors.warning } },
-});
-
 export const syncLabel = style({
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.bold,
@@ -133,16 +104,6 @@ export const syncLabel = style({
   whiteSpace: 'nowrap',
   '@media': { [PHONE]: { display: 'none' } },
 });
-
-export const syncCorto = style([
-  syncLabel,
-  {
-    display: 'none',
-    fontSize: portalFontSizes.xs,
-    fontWeight: typography.weights.extraBold,
-    '@media': { [PHONE]: { display: 'inline' } },
-  },
-]);
 
 export const bell = style([
   pressable,

@@ -14,6 +14,7 @@ import {
   conSigno,
   DIF,
   lineaCerrado,
+  lineaPorEnviar,
   segundaLinea,
   tituloHecho,
   type CierreData,
@@ -148,6 +149,11 @@ export function CierreHecho(p: CierreHechoProps): ReactElement {
       <MText size="sm" weight="semibold" color={colors.gray600} textAlign="left">
         {`${lineaCerrado(p.e.dif, p.motivo, p.data.dueno, p.porEnviar)}${gracias}`}
       </MText>
+      {p.porEnviar > 0 ? (
+        <MText size="sm" weight="semibold" color={colors.gray600} textAlign="left">
+          {lineaPorEnviar(p.data.dueno)}
+        </MText>
+      ) : null}
       <Cifras e={p.e} ventas={p.data.resumen.ventas} />
       {entregado ? (
         <Entregado dueno={p.data.dueno} />

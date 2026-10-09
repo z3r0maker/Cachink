@@ -99,6 +99,40 @@ test('each range chip filters the rows and the counter follows', async ({ page }
   await enRango(page, '2026-05-11', '2026-05-11');
 });
 
+/**
+ * DS-01: a filter is a round trip now, so while it is out the chip is lit,
+ * the old rows stay — dimmed, under a bar — and a screen reader hears it. The
+ * server's answer is held by the test to see that moment, then let through.
+ */
+test('between filters the old rows stay, dimmed, until the answer arrives', async ({ page }) => {
+  await page.goto('/movimientos');
+  await expect(counter(page)).toHaveText(/^Mostrando 1–\d+ de \d+ movimientos$/);
+  const filas = await page.locator('main tbody tr').count();
+  expect(filas).toBeGreaterThan(0);
+
+  let soltar: () => void = () => undefined;
+  const retenida = new Promise<void>((r) => {
+    soltar = r;
+  });
+  const esRsc = (u: URL) => u.pathname === '/movimientos' && u.searchParams.has('_rsc');
+  await page.route(esRsc, async (route) => {
+    await retenida;
+    await route.continue();
+  });
+  const cuerpo = page.locator('main tbody');
+  await page.getByRole('button', { name: 'Hoy', exact: true }).click();
+  await expect(cuerpo).toHaveAttribute('data-busy', 'true');
+  await expect(page.locator('main tbody tr')).toHaveCount(filas);
+  await expect(page.getByText('Cargando movimientos…')).toBeAttached();
+
+  soltar();
+  await expect(page).toHaveURL(/rango=hoy/);
+  await expect(cuerpo).toHaveAttribute('data-busy', 'false');
+  await expect(page.getByText('Cargando movimientos…')).toHaveCount(0);
+  await expect(page.getByTestId('periodo-caption')).toHaveText('Periodo: Hoy');
+  await page.unroute(esRsc);
+});
+
 test.describe('pagination', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
   const stamp = Date.now();

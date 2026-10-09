@@ -62,6 +62,53 @@ test.describe('Operador · Acceso (O-12)', () => {
     await expect(page.getByRole('heading', { name: 'Cobrar', exact: true })).toBeVisible();
   });
 
+  test('a big business downloads in pages; a cut download keeps the door and offers Reintentar (DS-10)', async ({
+    page,
+    context,
+  }) => {
+    const code = 'DSDESC7A';
+    await mintCode(code);
+    // The real activation, told there is more (a whale's snapshot, EsCajaDescarga):
+    // three pages, the next one never reachable.
+    await context.route('**/api/v1/activate', async (route) => {
+      const res = await route.fetch();
+      const body = (await res.json()) as {
+        bootstrap?: { snapshot?: { next: string | null; pages?: number } };
+      };
+      if (body.bootstrap?.snapshot) {
+        body.bootstrap.snapshot.next = 'e2e-siguiente-pagina';
+        body.bootstrap.snapshot.pages = 3;
+      }
+      await route.fulfill({ response: res, json: body });
+    });
+    await context.route('**/api/v1/sync/pull**', (route) => route.abort('internetdisconnected'));
+
+    await page.goto('/operador/caja');
+    await page.getByTestId('vincular-correo').fill(EMAIL);
+    await page.getByTestId('vincular-codigo').fill(code);
+    await page.getByTestId('vincular-continuar').click();
+
+    // The first page is in: «1 de 3», then the cut and «Reintentar».
+    const descarga = page.getByTestId('vincular-descarga');
+    await expect(descarga).toContainText(
+      'Se interrumpió la descarga. Lo que ya bajó se queda; toca Reintentar.',
+      { timeout: 30_000 },
+    );
+    await expect(descarga).toContainText('1 de 3');
+    const barra = page.getByRole('progressbar', { name: 'Descarga de los datos del negocio' });
+    await expect(barra).toHaveAttribute('aria-valuenow', '1');
+    await expect(barra).toHaveAttribute('aria-valuemax', '3');
+    // The NIP step waits for the data.
+    await expect(page.getByRole('heading', { name: '¿Quién va a cobrar?' })).toHaveCount(0);
+
+    // «Reintentar» downloads again, and says so while it does.
+    await page.getByTestId('vincular-reintentar').click();
+    await expect(descarga).toContainText(/Descargando los datos de tu negocio…|Se interrumpió/);
+    await expect(page.getByTestId('vincular-reintentar')).toBeVisible({ timeout: 30_000 });
+    await context.unroute('**/api/v1/sync/pull**');
+    await context.unroute('**/api/v1/activate');
+  });
+
   test('a wrong code does not link, and the register stays gated', async ({ page }) => {
     await page.goto('/operador');
     await expect(page.getByTestId('acceso-card')).toBeVisible();

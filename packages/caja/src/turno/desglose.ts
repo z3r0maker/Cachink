@@ -24,3 +24,20 @@ export const desglose = (p: PartesEsperado): readonly (readonly [string, string]
   ['Abonos en efectivo', formatMoney(p.abonosEfectivo)],
   ['Gastos de caja chica', `−${formatMoney(p.gastosEfectivo)}`],
 ];
+
+export interface ParteFirmada {
+  readonly label: string;
+  /** «con el que abriste» under the fondo. */
+  readonly nota?: string;
+  /** Signed the way the boards read them: «+$1,980.00», «−$620.00». */
+  readonly valor: string;
+  readonly resta: boolean;
+}
+
+/** Mi turno's breakdown under the figure (OpTurno, MvTurno). */
+export const desgloseFirmado = (p: PartesEsperado): readonly ParteFirmada[] => [
+  { label: 'Fondo de caja', nota: 'con el que abriste', valor: formatMoney(p.fondo), resta: false },
+  { label: 'Ventas en efectivo', valor: `+${formatMoney(p.ventasEfectivo)}`, resta: false },
+  { label: 'Abonos en efectivo', valor: `+${formatMoney(p.abonosEfectivo)}`, resta: false },
+  { label: 'Gastos de caja chica', valor: `−${formatMoney(p.gastosEfectivo)}`, resta: true },
+];

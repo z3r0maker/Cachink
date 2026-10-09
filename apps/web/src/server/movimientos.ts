@@ -2,6 +2,7 @@ import 'server-only';
 
 import {
   contarMovimientos,
+  paginaDeFecha,
   lineasDeTickets,
   listMovimientos,
   resumenMovimientos,
@@ -44,6 +45,16 @@ export function filasDe(grupos: readonly GrupoMovimientos[], cat: string | null 
   return grupos
     .filter((g) => cat === null || cat === undefined || g.clasificacion === cat)
     .reduce((n, g) => n + g.filas, 0);
+}
+
+/** «Ir a fecha» (DS-01): the page, at {@link POR_PAGINA} rows, that holds `fecha`. */
+export function paginaParaFecha(
+  businessId: string,
+  kind: 'venta' | 'gasto',
+  filtro: FiltroMovimientos,
+  fecha: string,
+): Promise<number> {
+  return withTenant(businessId, (tx) => paginaDeFecha(tx, kind, filtro, fecha, POR_PAGINA));
 }
 
 export function loadMovimientos(

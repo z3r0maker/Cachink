@@ -8759,6 +8759,18 @@ autocommitting statement at a time.
 - Not done here: DB3-L-01 (a device re-downloading its own movements). It is
   independent of the bootstrap.
 
+**Amendment 2026-09-28 — the device can say how far along it is (DS-10).** The
+first page adds an optional `pages`: the snapshot's rows over the 5,000-row
+budget, counted in one statement with the reader's own rules and the baseline
+as one row per product (an upper bound, so the first page does not aggregate
+the whole history a second time). It is an estimate: a byte-cut page can
+exceed it, so `snapshotProgress` never reports fewer pages than it has
+applied. The device keeps `bootstrapPage` / `bootstrapPages` in `app_config`,
+written by `applyPulledPage` inside the page's own transaction, so a resumed
+snapshot knows its place and a failed page moves nothing; the last page
+clears both. The caja reads it through the Worker's read-only
+`progresoSnapshot` call while `vincularYPasar` pulls the rest.
+
 ---
 
 ## ADR-122

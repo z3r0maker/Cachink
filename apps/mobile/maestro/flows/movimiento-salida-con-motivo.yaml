@@ -1,45 +1,33 @@
-# Stock salida with a motivo (reason) selected from the dropdown.
+# A merma with its reason and a note (Track M, M-09; MvInventario): «Se
+# rompió» and the note show together under «Movimientos».
 #
-# Verifies: product detail -> Salida -> pick MOTIVO -> set CANTIDAD -> REGISTRAR.
-# MOTIVO is a dropdown for salida (Venta / Uso / Merma-dano / Muestra / Ajuste / Otro).
-# Order matters: pick the motivo FIRST, then commit CANTIDAD last, because changing
-# the motivo re-renders the form and drops an uncommitted wheel value.
+# Precondition: signed in with an open turno, and a tracked product "Tortilla"
+# with stock.
 # x-entrypoint: demo
 appId: mx.xangarro.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-
-# Open the product's detail via search, then the Salida movimiento.
 - runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: 'producto-card-.*'
-- assertVisible:
-    text: 'Salida.*'
+    id: 'inventario-fila-.*'
 - tapOn:
-    text: 'Salida.*'
-- assertVisible:
-    text: 'CANTIDAD.*'
-
-# Pick the MOTIVO first (dropdown) — selecting it re-renders the form.
-- tapOn:
-    id: 'movimiento-motivo'
-- tapOn:
-    text: 'Merma.*'
-
-# Commit CANTIDAD last so the value survives the motivo re-render.
-- tapOn:
-    id: 'movimiento-cantidad'
-- eraseText
-- inputText: '2'
-
-# Submit the movement.
-- tapOn:
-    text: 'REGISTRAR'
-
-# Modal closes — CANTIDAD gone, stock decremented.
+    id: 'mover-tipo-Merma'
 - assertNotVisible:
-    text: 'CANTIDAD.*'
+    id: 'mover-proveedor'
+- tapOn:
+    id: 'mover-motivo-Se rompió'
+- tapOn:
+    id: 'mover-nota'
+- inputText: 'Se cayó al piso'
+- hideKeyboard
+- tapOn:
+    id: 'mover-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-toast'
+    timeout: 5000
+- tapOn:
+    id: 'inventario-tabs-movimientos'
+- assertVisible: '.*Se rompió · Se cayó al piso.*'

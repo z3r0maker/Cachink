@@ -10,12 +10,25 @@ export const banda = style({
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: 16,
-  padding: '10px 18px 10px 12px',
-  border: borders.thick,
+  padding: '12px 16px 12px 14px',
+  border: `2px solid ${colors.warningText}`,
   borderRadius: radii[6],
   background: colors.warningSoft,
-  boxShadow: `4px 4px 0 ${colors.warningText}`,
   '@media': { [PHONE]: { gap: 10, padding: 12 } },
+});
+
+/** The white tile with the sync glyph, spinning while it sends (EsCajaCierre). */
+export const tile = style({
+  flex: 'none',
+  width: 48,
+  height: 48,
+  boxSizing: 'border-box',
+  display: 'grid',
+  placeItems: 'center',
+  border: borders.thin,
+  borderRadius: radii[3],
+  background: colors.white,
+  color: colors.warningText,
 });
 
 export const cuerpo = style({

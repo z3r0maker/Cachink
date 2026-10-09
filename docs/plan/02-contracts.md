@@ -134,7 +134,7 @@ Response `200`:
 ```
 
 Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap (legacy; `426 PROTOCOL_UNSUPPORTED` past 5,000 live movements).
-`?snapshot=start` = the first page of a snapshot bootstrap, `?snapshot=<next>` the following ones (C-23, ADR-121): each page is at most 5,000 rows and 1.9 MB of row JSON, carries `snapshot: { cutoff, first, next, stockBaseline }` and the snapshot's cursor as `serverSeq` on every page; `next: null` ends it and the device pulls `since=serverSeq` from there. Stock = `stockBaseline` + the movements the device holds. An unknown token → `400 VALIDATION`. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant. `dueno_nombre` (optional, additive) is the owner's display name, sent on the bootstrap, every snapshot page and every pull (`xangarro.owner_nombre()`, data-pg 0044); `null` when the owner set none, absent from older servers (the device keeps what it has, in `app_config`).
+`?snapshot=start` = the first page of a snapshot bootstrap, `?snapshot=<next>` the following ones (C-23, ADR-121): each page is at most 5,000 rows and 1.9 MB of row JSON, carries `snapshot: { cutoff, first, next, stockBaseline }` and the snapshot's cursor as `serverSeq` on every page, and the first page adds `pages` (optional, additive; DS-10): the snapshot's rows over the row budget, an estimate a byte-cut page can exceed, so a device shows the larger of it and the page it is on; `next: null` ends it and the device pulls `since=serverSeq` from there. Stock = `stockBaseline` + the movements the device holds. An unknown token → `400 VALIDATION`. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant. `dueno_nombre` (optional, additive) is the owner's display name, sent on the bootstrap, every snapshot page and every pull (`xangarro.owner_nombre()`, data-pg 0044); `null` when the owner set none, absent from older servers (the device keeps what it has, in `app_config`).
 
 ## §6 Entitlement payload
 
@@ -327,7 +327,7 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
      `conversion` (N-02, OQ-5).
 - **Acceptance:** C-10 conformance suite green against the mock; domain tests for the new limits.
 
-### C-13 API de intenciones de pago
+### C-13 API de intenciones de pago [media]
 
 - [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** que N-40 decida avanzar · **Blocks:** N-80, N-42
 - **Amended 2026-09-25:** Mercado Pago has no QR payment API in Mexico (`docs/spikes/payments-mercadopago.md`),
@@ -498,7 +498,7 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 - **Acceptance:** conformance tests for pull of both tables; receivables calculator tests with an
   opening balance; drift test green.
 
-### C-21 Interruptores de apagado en la sincronización
+### C-21 Interruptores de apagado en la sincronización [media]
 
 - [ ] Status · **Surfaced by:** N-09 (2026-09-23) · **Blocks:** la cobertura de interruptores de apagado en los dispositivos
       **Decided 2026-09-26 (owner): widen `features` to `PLATFORM_FLAG_KEYS`**, rather than adding a

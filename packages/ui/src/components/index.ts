@@ -56,3 +56,4 @@ export * from './NavRows/index';
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from
 // screens/index.ts instead (both end up in the top-level barrel).
+export * from './CajaEstado/index';

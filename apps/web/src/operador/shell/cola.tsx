@@ -15,7 +15,7 @@ import { readDevice } from '../runtime/device-store';
 
 import { useFlusher } from './cola-flusher';
 
-import type { Connection } from '@xangarro/caja';
+import type { Connection, Reintento } from '@xangarro/caja';
 
 /** How long the fixture «send» takes, as in `Operador Pendientes.dc.html`. */
 const ENVIO_MS = 1400;
@@ -26,6 +26,10 @@ export interface Cola {
   readonly pendientes: number;
   /** Of those, the ones already tried once and retrying by themselves. */
   readonly reintentando: number;
+  /** Refused for good: they wait for a person (DS-05's «con rechazos»). */
+  readonly rechazados: number;
+  /** The engine's own retry after a failed run: when, and why (DS-05). */
+  readonly reintento: Reintento | null;
   readonly enviando: boolean;
   /** «Reintentar envío», from Registros por enviar or the close's banner. */
   readonly enviar: () => void;
@@ -40,6 +44,13 @@ let desencolarAhora: (() => Promise<void>) | null = null;
 
 export function desencolar(): Promise<void> {
   return desencolarAhora?.() ?? Promise.resolve();
+}
+
+/** «Reintentar envío»: a manual full run, past the engine's own wait (never the server's, DS-05). */
+let enviarYaAhora: (() => Promise<void>) | null = null;
+
+export function enviarYa(): Promise<void> {
+  return enviarYaAhora?.() ?? Promise.resolve();
 }
 
 /** The linked shell's full sync (push and pull), when mounted; the pill follows it. */
@@ -70,9 +81,11 @@ function useLinkedQueue(linked: boolean): ReturnType<typeof useFlusher> {
     if (!linked) return;
     desencolarAhora = () => flush('captura', false);
     refrescarAhora = () => flush('completa', false);
+    enviarYaAhora = () => flush('completa', true);
     return () => {
       desencolarAhora = null;
       refrescarAhora = null;
+      enviarYaAhora = null;
     };
   }, [linked, flush]);
   return real;
@@ -102,6 +115,37 @@ function useFixtureQueue(): {
   };
 }
 
+/** A linked caja's queue: the outbox flusher's, never the fixture's count. */
+function colaVinculada(real: ReturnType<typeof useFlusher>): Cola {
+  const r = real.reales;
+  return {
+    connection: (r?.enLinea ?? navigator.onLine) ? 'en-linea' : 'sin-conexion',
+    pendientes: r?.pendientes ?? 0,
+    reintentando: r?.reintentando ?? 0,
+    rechazados: r?.rechazados ?? 0,
+    reintento: r?.reintento ?? null,
+    enviando: real.enviando,
+    enviar: () => void real.flush('completa', true),
+  };
+}
+
+/** The design-file queue, before the browser is linked. */
+function colaDiseno(
+  fixture: ReturnType<typeof useFixtureQueue>,
+  connection: Connection,
+  pendientes: number,
+): Cola {
+  return {
+    connection: fixture.vacia ? 'en-linea' : connection,
+    pendientes: fixture.vacia ? 0 : pendientes,
+    reintentando: 0,
+    rechazados: 0,
+    reintento: null,
+    enviando: fixture.enviando,
+    enviar: fixture.enviar,
+  };
+}
+
 /**
  * The register's send queue as every screen sees it. One state, so the header
  * pill, Registros por enviar and Cierre never disagree. Linked: the outbox
@@ -117,22 +161,7 @@ export function ColaProvider(p: {
   const real = useLinkedQueue(linked);
   const fixture = useFixtureQueue();
   const value = useMemo<Cola>(
-    () =>
-      linked
-        ? {
-            connection: (real.reales?.enLinea ?? navigator.onLine) ? 'en-linea' : 'sin-conexion',
-            pendientes: real.reales?.pendientes ?? 0,
-            reintentando: real.reales?.reintentando ?? 0,
-            enviando: real.enviando,
-            enviar: () => void real.flush('completa', true),
-          }
-        : {
-            connection: fixture.vacia ? 'en-linea' : p.connection,
-            pendientes: fixture.vacia ? 0 : p.pendientes,
-            reintentando: 0,
-            enviando: fixture.enviando,
-            enviar: fixture.enviar,
-          },
+    () => (linked ? colaVinculada(real) : colaDiseno(fixture, p.connection, p.pendientes)),
     [linked, real, fixture, p.connection, p.pendientes],
   );
   return <ColaContext.Provider value={value}>{p.children}</ColaContext.Provider>;

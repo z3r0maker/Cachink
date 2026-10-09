@@ -34,7 +34,8 @@ export function EmptyState({ title, body, glyph, action, inset }: EmptyStateProp
         {glyph}
       </div>
       <h2 className={stateTitle}>{title}</h2>
-      <p className={stateBody}>{body}</p>
+      {/* A one-sentence state (an empty search, DS-01) has no body. */}
+      {body === '' ? null : <p className={stateBody}>{body}</p>}
       {action ? (
         <div className={stateAction}>
           <Button onClick={action.onClick}>{action.label}</Button>
