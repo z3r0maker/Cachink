@@ -97,7 +97,7 @@ importers:
         specifier: ^0.45.2
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/sql.js@1.4.11)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.9(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.3.0)(react@19.2.6))(react@19.2.6))(gel@2.2.0)(postgres@3.4.9)(sql.js@1.14.2)
       next:
-        specifier: ^16.4.0
+        specifier: ^16.3.8
         version: 16.4.0(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react:
         specifier: 19.2.6
@@ -439,7 +439,7 @@ importers:
         specifier: ^1.47.0
         version: 1.47.0(react@19.2.6)
       next:
-        specifier: ^16.4.0
+        specifier: ^16.3.8
         version: 16.4.0(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       qrcode:
         specifier: 1.5.4
