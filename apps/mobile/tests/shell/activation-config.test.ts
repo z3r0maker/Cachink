@@ -36,7 +36,6 @@ vi.mock('react', () => ({ useMemo: <T>(f: () => T) => f() }));
 
 /** Metro injects __DEV__; the runner must too. */
 declare global {
-   
   var __DEV__: boolean;
 }
 (globalThis as { __DEV__?: boolean }).__DEV__ = true;

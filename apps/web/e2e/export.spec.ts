@@ -143,10 +143,11 @@ test('a failed export says «No pudimos generar el archivo. Intenta de nuevo.»'
   const boton = page.getByTestId('export-ventas');
   await expect(async () => {
     await boton.click();
-    await expect(page.getByRole('alert')).toContainText(
-      'No pudimos generar el archivo. Intenta de nuevo.',
-      { timeout: 1_000 },
-    );
+    // Scoped: the page can carry another live alert (the carga row's
+    // «No pudimos cargar los movimientos»), and strict mode counts both.
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'No pudimos generar el archivo' }),
+    ).toContainText('No pudimos generar el archivo. Intenta de nuevo.', { timeout: 1_000 });
   }).toPass({ timeout: 15_000 });
   await expect(boton).toBeEnabled();
   await page.getByRole('button', { name: 'Cerrar aviso' }).click();

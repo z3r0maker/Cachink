@@ -14,14 +14,20 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const stamp = Date.now();
-const email = `busqueda-${stamp}@test.mx`;
-const biz = newUlid();
+// Computed in beforeAll, not here: the module loads once per worker, and CI
+// re-runs beforeAll against a database that already holds this tenant's rows
+// (users_email_key). A fresh stamp per execution makes every run its own tenant.
+let stamp = '';
+let email = '';
+let biz = '';
 
 const counter = (page: Page) => page.locator('main').getByRole('status');
 const conceptos = (page: Page) => page.locator('main tbody tr').allInnerTexts();
 
 test.beforeAll(async () => {
+  stamp = `${process.pid}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+  email = `busqueda-${stamp}@test.mx`;
+  biz = newUlid();
   const userId = randomUUID();
   const hash = await hashPassword('busqueda-1');
   const [dev, producto, lupita, turno] = [newUlid(), newUlid(), newUlid(), newUlid()];
