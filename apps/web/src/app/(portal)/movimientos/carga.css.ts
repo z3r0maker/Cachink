@@ -16,7 +16,9 @@ export const caption = style({
 export const enPeriodo = style({
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.bold,
-  color: colors.textMuted,
+  // gray600, not textMuted: the chip sits on gray200, where textMuted reads
+  // 3.95:1 (the token's own contract — textMuted fails on gray200).
+  color: colors.gray600,
 });
 
 export const tabsFila = style({ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' });
