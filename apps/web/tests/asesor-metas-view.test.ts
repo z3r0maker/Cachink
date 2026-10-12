@@ -72,11 +72,12 @@ describe('Metas · the view states', () => {
     assert.ok(screen.getByText('Aún no hay un mes que comparar'));
   });
 
-  it('a goal that just closed shows the dialog, and «cambiar» reports upward', () => {
+  it('a goal that just closed shows the dialog, and «Cambiar» opens the wizard', () => {
     montar({ ...BASE, estado: 'cerrada', recienCerrada: { id: 'm-1' } as never });
+    // The month-end dialog yields to the wizard when «Cambiar» opens it —
+    // the sync spec's contract (asesor-metas-cierre.sync.spec).
     fireEvent.click(screen.getByText('cambiar'));
-    // The real CierreReciente owns what «cambiar» does with it.
-    assert.ok(screen.getByText('cambiar'));
+    assert.ok(screen.getByText('el wizard'));
   });
 
   it('sin-meta opens the wizard for the owner; the viewer gets the read-only word', async () => {
