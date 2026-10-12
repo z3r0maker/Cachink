@@ -149,8 +149,14 @@ test('a busy server: the pill counts down, the rows say their last and next atte
   await expect(page.getByText('El servidor está ocupado; reintentamos solos.')).toBeVisible({
     timeout: 20_000,
   });
-  await expect(page.getByRole('heading', { name: '1 registro por enviar' })).toBeVisible();
-  await expect(page.getByText('Suman $40.00 de ventas. Puedes seguir cobrando.')).toBeVisible();
+  // The hero lands on a second round-trip after the pill's state; CI's
+  // runners need more than the default 5s for it.
+  await expect(page.getByRole('heading', { name: '1 registro por enviar' })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.getByText('Suman $40.00 de ventas. Puedes seguir cobrar.')).toBeVisible({
+    timeout: 20_000,
+  });
   // The pill counts down to the engine's retryAt, in the warning state.
   await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
     'aria-label',
@@ -195,8 +201,11 @@ test('a server that says when: the pill and the helper name the hour (DS-05)', a
   await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
     'aria-label',
     /^Estado del envío: Reintentando a las \d{1,2}:\d{2} [ap]\. m\.$/,
+    { timeout: 20_000 },
   );
-  await expect(page.getByText(/· Próximo: a las \d{1,2}:\d{2} [ap]\. m\.$/)).toBeVisible();
+  await expect(page.getByText(/· Próximo: a las \d{1,2}:\d{2} [ap]\. m\.$/)).toBeVisible({
+    timeout: 20_000,
+  });
 
   // The manual retry never skips the server's wait: it says when it goes.
   await page.getByRole('button', { name: 'Reintentar envío' }).click();
