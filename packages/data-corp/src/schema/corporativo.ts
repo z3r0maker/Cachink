@@ -34,7 +34,7 @@ export const shareEvents = corp.table(
   ],
 );
 
-/** RFC, SAS, trademark, bank, domains: seeded by 0004_corporativo_grants.sql. */
+/** RFC, SAS, trademark, bank, domains: seeded by 0004_zz_corp_corporativo_privileges.sql. */
 export const registries = corp.table('registries', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
