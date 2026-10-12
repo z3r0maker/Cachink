@@ -5,6 +5,10 @@ import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
 
+// Two Playwright projects (desktop, laptop) load this module together on CI —
+// a bare workerStamp collides across workers, so the stamp carries the pid too.
+const workerStamp = `${process.pid}-${Date.now()}`;
+
 /**
  * Ventas y gastos searches the folio and the operador, not only the concepto
  * (owner decision 2026-09-27, DS-01). The seed puts no ticket on a shift, so
@@ -14,7 +18,7 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const stamp = Date.now();
+const stamp = workerStamp;
 const email = `busqueda-${stamp}@test.mx`;
 const biz = newUlid();
 

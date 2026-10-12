@@ -5,6 +5,10 @@ import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
 
+// Two Playwright projects (desktop, laptop) load this module together on CI —
+// a bare workerStamp collides across workers, so the stamp carries the pid too.
+const workerStamp = `${process.pid}-${Date.now()}`;
+
 /**
  * P-08's archive row on a throwaway tenant (never the seeded one): a wrong name
  * is refused, the right one archives, signs the owner out and unlinks the
@@ -12,9 +16,9 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const email = `archivo-${Date.now()}@test.mx`;
+const email = `archivo-${workerStamp}@test.mx`;
 const password = 'archivo-123';
-const nombre = `Fonda ${Date.now()}`;
+const nombre = `Fonda ${workerStamp}`;
 const biz = newUlid();
 const dev = newUlid();
 
