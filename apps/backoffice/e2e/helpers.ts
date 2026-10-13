@@ -14,12 +14,24 @@ export { ADMIN_COOKIE } from '../src/server/auth/config';
 export const STAFF_EMAIL = process.env.E2E_STAFF_EMAIL ?? 'e2e@xangarro.mx';
 export const STAFF_PASSWORD = process.env.E2E_STAFF_PASSWORD ?? 'e2e-password-123';
 
-/** The seed this run enrolled with, so later verifies can compute codes. */
-let enrolledSeed: string | null = null;
+/** Who signs in: the auth suite's member by default, another spec's own otherwise. */
+export interface StaffLogin {
+  readonly email: string;
+  readonly password: string;
+}
+
+const DEFAULT_LOGIN: StaffLogin = { email: STAFF_EMAIL, password: STAFF_PASSWORD };
+
+/**
+ * The seed each member enrolled with this run, so later verifies can compute
+ * codes. Keyed by email: two specs sharing a worker must not hand one member's
+ * seed to the other.
+ */
+const enrolledSeeds = new Map<string, string>();
 
 /** Records a seed captured outside `signInAsStaff` (the enrolment spec). */
-export function rememberSeed(seed: string): void {
-  enrolledSeed = seed;
+export function rememberSeed(seed: string, email: string = STAFF_EMAIL): void {
+  enrolledSeeds.set(email.toLowerCase(), seed);
 }
 
 /** The seed text the enrolment page shows, de-grouped (`XXXX XXXX` → `XXXXXX`). */
@@ -32,8 +44,8 @@ export function codeFor(seed: string): string {
   return totpCode(seed, new Date());
 }
 
-/** The step a code was last rejected at (the replay guard consumed it). */
-const consumedSteps = new Set<number>();
+/** The steps already used, per seed (the replay guard is per member). */
+const consumedSteps = new Map<string, Set<number>>();
 
 const stepNow = (): number => Math.floor(Date.now() / 30_000);
 
@@ -47,21 +59,19 @@ async function sleep(ms: number): Promise<void> {
  * same 30-second window needs the NEXT step (up to ~30s of waiting).
  */
 export async function freshCodeFor(seed: string): Promise<string> {
-  const start = stepNow();
-  if (!consumedSteps.has(start)) {
-    consumedSteps.add(start);
-    return codeFor(seed);
-  }
-  while (consumedSteps.has(stepNow())) await sleep(500);
-  consumedSteps.add(stepNow());
+  const used = consumedSteps.get(seed) ?? new Set<number>();
+  consumedSteps.set(seed, used);
+  while (used.has(stepNow())) await sleep(500);
+  used.add(stepNow());
   return codeFor(seed);
 }
 
 /** Signs in and, on the first-ever run, enrols TOTP; lands past the gates. */
-export async function signInAsStaff(page: Page): Promise<void> {
+export async function signInAsStaff(page: Page, who: StaffLogin = DEFAULT_LOGIN): Promise<void> {
+  const key = who.email.toLowerCase();
   await page.goto('/login');
-  await page.fill('input[name="email"]', STAFF_EMAIL);
-  await page.fill('input[name="password"]', STAFF_PASSWORD);
+  await page.fill('input[name="email"]', who.email);
+  await page.fill('input[name="password"]', who.password);
   await page.getByRole('button', { name: 'Abrir la trastienda' }).click();
   // The action's redirect is a soft navigation the proxy never sees; wait for
   // it to finish (the cookie is only set once it does), then a full load
@@ -72,18 +82,22 @@ export async function signInAsStaff(page: Page): Promise<void> {
   if (page.url().includes('/mfa/enroll')) {
     const grouped = (await page.locator('code').first().textContent()) ?? '';
     const seed = seedFromPageText(grouped);
-    enrolledSeed = seed;
+    enrolledSeeds.set(key, seed);
     await page.fill('input[name="code"]', await freshCodeFor(seed));
     await page.getByRole('button', { name: 'Registrar' }).click();
-    // The success view links on to verification; the cookie is already AAL2-side.
+    // The success view links on to verification (or past it, when the gate
+    // already counts the session as AAL2). The codes render once the action
+    // answers: wait for them, not a glance.
     const seguir = page.getByRole('link', { name: /ya los guard/i }).first();
-    if (await seguir.isVisible().catch(() => false)) await seguir.click();
+    await seguir.waitFor({ state: 'visible', timeout: 15_000 });
+    await seguir.click();
+    await page.waitForURL((u) => !u.pathname.startsWith('/mfa/enroll'), { timeout: 10_000 });
   }
   if (page.url().includes('/mfa/verify')) {
     // The verify page shows no seed (the human has it in their app); the
     // suite enrolled earlier in the run and remembers it.
-    const seed = enrolledSeed;
-    if (seed === null) throw new Error('verify reached before enrolment captured the seed');
+    const seed = enrolledSeeds.get(key);
+    if (seed === undefined) throw new Error('verify reached before enrolment captured the seed');
     await page.fill('input[name="code"]', await freshCodeFor(seed));
     await page.getByRole('button', { name: 'Verificar' }).click();
     await page.waitForURL((u) => !u.pathname.startsWith('/mfa'), { timeout: 40_000 });

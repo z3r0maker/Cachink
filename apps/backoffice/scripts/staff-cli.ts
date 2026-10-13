@@ -18,9 +18,9 @@ export const USAGE = `usage (the password is read from stdin, never from argumen
   printf %s "$PASSWORD" | pnpm --filter @xangarro/backoffice staff create --email <email> --nombre <nombre>
   printf %s "$PASSWORD" | pnpm --filter @xangarro/backoffice staff set-password --email <email> [--reset-totp]`;
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function flags(args: readonly string[]): Map<string, string | true> {
+export function flags(args: readonly string[]): Map<string, string | true> {
   const out = new Map<string, string | true>();
   for (let i = 0; i < args.length; i++) {
     const a = args[i] ?? '';
@@ -34,7 +34,7 @@ function flags(args: readonly string[]): Map<string, string | true> {
   return out;
 }
 
-function text(f: Map<string, string | true>, name: string): string {
+export function text(f: Map<string, string | true>, name: string): string {
   const v = f.get(name);
   if (typeof v !== 'string' || v.trim() === '') throw new UsageError(`--${name} is required`);
   return v.trim();

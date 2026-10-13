@@ -10,7 +10,12 @@ export type NavHref =
   | '/flags'
   | '/mapa'
   | '/campanas'
-  | '/capacidad';
+  | '/capacidad'
+  | '/empresa/movimientos'
+  | '/empresa/socios'
+  | '/empresa/agenda'
+  | '/empresa/expediente'
+  | '/empresa/corporativo';
 
 export interface NavItem {
   readonly label: string;
@@ -62,5 +67,43 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/capacidad',
     task: null,
     summary: 'La base de datos contra los umbrales S2 y S3 de ADR-068.',
+  },
+] as const;
+
+/**
+ * «Empresa», MEXIA's command center (ADR-124): drawn only for founders
+ * (`founderForLayout`). A screen joins this list when its task ships, never
+ * before (CLAUDE.md §7: no «Pronto»).
+ */
+export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
+  {
+    label: 'Movimientos',
+    href: '/empresa/movimientos',
+    task: 'E-02',
+    summary: 'El libro del mes: gastos, comisiones y reversas.',
+  },
+  {
+    label: 'Socios',
+    href: '/empresa/socios',
+    task: 'E-03',
+    summary: 'Capital, fondeo por mitades, aportaciones y préstamos de cada socio.',
+  },
+  {
+    label: 'Agenda',
+    href: '/empresa/agenda',
+    task: 'E-04',
+    summary: 'Lo que vence ante el SAT, Economía e IMPI, con sus acuses y comprobantes.',
+  },
+  {
+    label: 'Expediente',
+    href: '/empresa/expediente',
+    task: 'E-05',
+    summary: 'Los papeles de MEXIA por carpeta, con sus versiones; nada se borra.',
+  },
+  {
+    label: 'Corporativo',
+    href: '/empresa/corporativo',
+    task: 'E-06',
+    summary: 'Socios, proyectos y los registros de la sociedad.',
   },
 ] as const;

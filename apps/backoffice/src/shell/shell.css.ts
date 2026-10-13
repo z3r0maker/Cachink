@@ -66,6 +66,17 @@ export const navItem = style({
 
 export const navLabel = style({ flex: 1 });
 
+/** A group heading in the rail («Empresa»). */
+export const navGroup = style({
+  marginTop: 14,
+  padding: '0 12px 4px',
+  fontSize: fontSizes.xs,
+  fontWeight: typography.weights.bold,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: t.dim,
+});
+
 export const navCount = style({
   fontFamily: monoStack,
   fontSize: fontSizes.xs,

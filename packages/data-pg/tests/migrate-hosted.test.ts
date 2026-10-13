@@ -162,10 +162,17 @@ describe('pendingMigrations', () => {
 });
 
 describe('roles', () => {
-  it('provisions exactly the four app logins', () => {
+  it('provisions exactly the app logins, with the corp pair of ADR-124 last', () => {
     assert.deepEqual(
       LOGIN_ROLES.map((r) => r.role),
-      ['xangarro_app', 'xangarro_billing', 'xangarro_metering', 'xangarro_admin'],
+      [
+        'xangarro_app',
+        'xangarro_billing',
+        'xangarro_metering',
+        'xangarro_admin',
+        'xangarro_corp',
+        'xangarro_corp_agent',
+      ],
     );
   });
 

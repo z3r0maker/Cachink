@@ -15,19 +15,20 @@
 Work is split into **tracks**. Each track is one file, meant for one session. Task IDs are prefixed
 by track so a task is identifiable anywhere (commit messages, PR titles, chat).
 
-| Track                                | File                          | Prefix | Owner session            | Can start when                                     |
-| ------------------------------------ | ----------------------------- | ------ | ------------------------ | -------------------------------------------------- |
-| **Foundation** (shared)              | `../archive/01-foundation.md` | `F-`   | done                     | archived 2026-09-22                                |
-| **Contracts** (shared, frozen)       | `02-contracts.md`             | `C-`   | same session as F        | after F-05                                         |
-| **Backend / Supabase**               | `03-backend.md`               | `B-`   | session "Backend+Portal" | after F + C                                        |
-| **Portal** (admin web)               | `04-portal.md`                | `P-`   | session "Backend+Portal" | after B-01..B-05                                   |
-| **App** (mobile)                     | `05-app.md`                   | `A-`   | session "App"            | after F + C (uses mock server C-09)                |
-| **Landing**                          | `06-landing.md`               | `L-`   | anyone, small            | after F-01                                         |
-| **Launch** (integration)             | `07-launch.md`                | `X-`   | one session              | after A, B, P, L                                   |
-| **Post-launch**                      | `08-post-launch.md`           | `Z-`   | later                    | after X                                            |
-| **Next features**                    | `09-next-features.md`         | `N-`   | per task group           | §2 launch blockers join the X gate; §3 on triggers |
-| **Operator view** (browser register) | `../archive/10-operador.md`   | `O-`   | done                     | archived 2026-09-22                                |
-| **Design conformance** (web portal)  | `16-design-conformance.md`    | `W-`   | per batch                | now (audit `docs/audits/design-2026-09-22.md`)     |
+| Track                                  | File                          | Prefix | Owner session            | Can start when                                            |
+| -------------------------------------- | ----------------------------- | ------ | ------------------------ | --------------------------------------------------------- |
+| **Foundation** (shared)                | `../archive/01-foundation.md` | `F-`   | done                     | archived 2026-09-22                                       |
+| **Contracts** (shared, frozen)         | `02-contracts.md`             | `C-`   | same session as F        | after F-05                                                |
+| **Backend / Supabase**                 | `03-backend.md`               | `B-`   | session "Backend+Portal" | after F + C                                               |
+| **Portal** (admin web)                 | `04-portal.md`                | `P-`   | session "Backend+Portal" | after B-01..B-05                                          |
+| **App** (mobile)                       | `05-app.md`                   | `A-`   | session "App"            | after F + C (uses mock server C-09)                       |
+| **Landing**                            | `06-landing.md`               | `L-`   | anyone, small            | after F-01                                                |
+| **Launch** (integration)               | `07-launch.md`                | `X-`   | one session              | after A, B, P, L                                          |
+| **Post-launch**                        | `08-post-launch.md`           | `Z-`   | later                    | after X                                                   |
+| **Next features**                      | `09-next-features.md`         | `N-`   | per task group           | §2 launch blockers join the X gate; §3 on triggers        |
+| **Operator view** (browser register)   | `../archive/10-operador.md`   | `O-`   | done                     | archived 2026-09-22                                       |
+| **Design conformance** (web portal)    | `16-design-conformance.md`    | `W-`   | per batch                | now (audit `docs/audits/design-2026-09-22.md`)            |
+| **Empresa** (founders' command center) | `20-command-center.md`        | `E-`   | per phase                | now (ADR-124; design brief `21-command-center-design.md`) |
 
 **Other files in this directory.** `PENDIENTES.md` — the **generated** board of everything still
 open, across every track (see §3). `11-pre-launch-and-deferred.md` — owner actions (`O-n` rows) and
