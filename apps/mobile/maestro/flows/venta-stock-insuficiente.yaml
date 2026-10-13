@@ -5,7 +5,7 @@
 # asserts that behavior: sell more than available → sale succeeds.
 #
 # Precondition: demo mode seeded (products + caja open).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - ventas
@@ -14,7 +14,7 @@ tags:
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 
 # Navigate to Cobrar.

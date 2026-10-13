@@ -1,20 +1,19 @@
 # Create a producto and register an entrada; verify stock + egreso.
 # Covers P1C-M5-T01 (Stock list) and P1C-M5-T03 (NuevoProducto modal).
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 # Select Operativo role if RolePicker is showing (cold start).
 
 # Navigate to Productos via Otros (merma flag ON replaces tab).
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |
 # Estados — no Otros tab. The tool grid moved into Configuración.
 # This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: 'otros-productos'

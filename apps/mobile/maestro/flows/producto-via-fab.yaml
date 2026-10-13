@@ -4,14 +4,14 @@
 # on both devices and drives the same create flow. Tapping it navigates to the full
 # /nuevo-producto screen (Phase 18 — no longer a modal). Required fields: nombre,
 # costo, precio-venta (validateProducto).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 # Productos tab -> add product (header button; FAB is iPhone-only).
 - runFlow:

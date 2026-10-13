@@ -2,12 +2,12 @@
 # empty state, and «Registrar gasto» still in the thumb zone.
 #
 # Precondition: fresh install, wizard complete, no gastos today.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow:
     file: shared/open-turno-row.yaml
     env:

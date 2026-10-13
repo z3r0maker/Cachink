@@ -4,7 +4,7 @@
 #
 # Sourced by both run-flow.sh and full-regression.sh so the two runners
 # share ONE implementation of "read a flow's x-entrypoint and put the app
-# into the right state (fresh / demo / wizard), caching the current state
+# into the right state (activated / fresh), caching the current state
 # so consecutive same-entry flows don't re-seed".
 #
 # Provides: detect_entry <flow>, current_state, run_setup <entry>.
@@ -51,7 +51,7 @@ detect_entry() {
 
   local precondition
   precondition=$(_flow_header "$flow" | grep -i '# Precondition:' 2>/dev/null | head -1 || true)
-  if [[ -z "$precondition" ]]; then echo "wizard"; return; fi
+  if [[ -z "$precondition" ]]; then echo "activated"; return; fi
 
   if echo "$precondition" | grep -qi 'fresh install'; then echo "fresh"
   elif echo "$precondition" | grep -qi 'demo mode'; then echo "demo"
@@ -148,23 +148,12 @@ run_setup() {
       reset_app || return 1
       _maestro_setup "$ACTIVATED_FLOW" || return 1
       ;;
-    demo)
-      "$FRESH_SCRIPT" --reset-only
-      # fresh-install.sh --reset-only deletes the DB but exits before its
-      # terminate+reconnect, so the app keeps stale in-memory state and the
-      # seed flow's launchApp would only foreground it. Force a cold start
-      # (dev-client is already primed to localhost:8081).
-      local sim_target="${MAESTRO_DEVICE_UDID:-booted}"
-      local dev_url="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
-      xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
-      xcrun simctl openurl "$sim_target" "$dev_url" 2>/dev/null || true
-      sleep 5
-      xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
-      echo "🌱  Seeding demo data (this takes 2-3 minutes)..."
-      maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$DEMO_FLOW"
-      ;;
-    wizard)
-      "$FRESH_SCRIPT" "$WIZARD_FLOW"
+    demo|wizard)
+      # A-16: the demo and wizard seed flows were retired with the surfaces
+      # they seeded. Repoint the flow at the activated entry (or delete it if
+      # its surface is gone); this bucket no longer exists.
+      echo "❌  The '$entry' entry point is retired (A-16): repoint the flow at 'activated'."
+      return 1
       ;;
     *)
       echo "❌  Unknown entry point: $entry"

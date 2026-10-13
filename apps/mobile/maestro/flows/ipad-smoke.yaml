@@ -28,14 +28,14 @@
 # NOTE: iPad companion for smoke-launch.yaml (which tests the wizard).
 # iPhone counterpart: smoke-launch.yaml, director-home-structure.yaml,
 # estados-subtabs.yaml, otros-nav.yaml
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, consent wizard step).
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-director.yaml
+- runFlow: shared/login-operator.yaml
 
 # ── 1. Director Home ─────────────────────────────────────────────
 # authenticate.yaml lands on Director Home. Assert the structural
@@ -138,7 +138,6 @@ appId: mx.xangarro.mobile
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |
 # Estados — no Otros tab. The tool grid moved into Configuración.
 # This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
 - assertVisible:
     id: 'otros-usuarios'
 - assertVisible:

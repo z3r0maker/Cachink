@@ -263,7 +263,7 @@ should_run() {
 # otherwise reseed on every transition). Used when no --phase is given;
 # --phase keeps the legacy linear path.
 run_grouped_suite() {
-  echo "🧭  Entry-point-aware grouped MVP run (activated → demo → wizard → fresh)"
+  echo "🧭  Entry-point-aware grouped MVP run (activated → fresh)"
   rm -f "$STATE_FILE"   # force a clean first setup regardless of prior runs
 
   local flows=()
@@ -272,24 +272,21 @@ run_grouped_suite() {
   done < <(grep -E '^[[:space:]]*run_flow[[:space:]]+"\$FLOWS_DIR/' "$0" \
             | sed -E 's#.*\$FLOWS_DIR/([A-Za-z0-9_.-]+\.yaml).*#\1#')
 
-  local activated=() demo=() wizard=() fresh=() f e
+  local activated=() fresh=() f e
   for f in "${flows[@]+"${flows[@]}"}"; do
     e="$(detect_entry "$f")"
     case "$e" in
       activated) activated+=("$f") ;;
-      demo)  demo+=("$f") ;;
-      fresh) fresh+=("$f") ;;
-      *)     wizard+=("$f") ;;   # wizard + anything unrecognized
+      fresh)     fresh+=("$f") ;;
+      *) echo "$(basename "$f"): '$e' entry retired (A-16) - repoint at activated."; exit 1 ;;
     esac
   done
 
   local ordered=()
   ordered+=("${activated[@]+"${activated[@]}"}")
-  ordered+=("${demo[@]+"${demo[@]}"}")
-  ordered+=("${wizard[@]+"${wizard[@]}"}")
   ordered+=("${fresh[@]+"${fresh[@]}"}")
 
-  echo "   activated=${#activated[@]}  demo=${#demo[@]}  wizard=${#wizard[@]}  fresh=${#fresh[@]}  total=${#ordered[@]}"
+  echo "   activated=${#activated[@]}  fresh=${#fresh[@]}  total=${#ordered[@]}"
   CURRENT_PHASE="Grouped MVP run"
   for f in "${ordered[@]+"${ordered[@]}"}"; do
     run_flow "$f"
@@ -319,15 +316,9 @@ if [[ -z "$PHASE" ]]; then
   exit 0
 fi
 
-# ──────────────── Phase 0: Fresh install + wizard (legacy --phase path) ──────
-if [[ "$SKIP_FRESH" == false ]]; then
-  echo "🔄  Phase 0: Fresh install + wizard"
-  if [[ "$DRY_RUN" == true ]]; then
-    echo "  📋  fresh-install.sh + wizard-local-standalone"
-  else
-    "$FRESH_SCRIPT" "$FLOWS_DIR/wizard-local-standalone.yaml"
-  fi
-fi
+# ──────────────── Phase 0: (retired with the wizard, A-16) ─────
+# Every entry bucket seeds itself through run-flow.sh's setup now; the
+# wizard-era pre-step is gone with its flows.
 
 # ──────────────── Phase 1: Empty states (before data) ──────────
 if should_run "C"; then
@@ -335,9 +326,7 @@ if should_run "C"; then
   echo ""
   echo "📂  Phase 1: Empty states"
   run_flow "$FLOWS_DIR/empty-ventas.yaml"
-  run_flow "$FLOWS_DIR/ventas-productos-gate.yaml"            # Products gate before caja gate
   run_flow "$FLOWS_DIR/empty-productos.yaml"
-  run_flow "$FLOWS_DIR/empty-estados.yaml"
   run_flow "$FLOWS_DIR/empty-egresos.yaml"                  # B2 — Phase 15
   # run_flow "$FLOWS_DIR/empty-clientes.yaml"                 # A4 — Phase 15 (parked-mvp)
 fi
@@ -362,15 +351,11 @@ if should_run "B"; then
 fi
 
 if should_run "A"; then
-  run_flow "$FLOWS_DIR/editar-producto.yaml"
-  run_flow "$FLOWS_DIR/editar-producto-full-form.yaml"      # Gap 4 — Phase 16
   run_flow "$FLOWS_DIR/movimiento-salida-con-motivo.yaml"   # E1 — Phase 15
   run_flow "$FLOWS_DIR/movimiento-entrada-con-nota.yaml"    # E2 — Phase 15
 fi
 
 if should_run "C"; then
-  run_flow "$FLOWS_DIR/producto-full-form.yaml"
-  run_flow "$FLOWS_DIR/nuevo-producto-icon-picker.yaml"  # Audit — previously excluded
   run_flow "$FLOWS_DIR/producto-via-fab.yaml"             # Audit — previously excluded
   # MVP-parked: producto-uso-selector depends on conversion flag
   # run_flow "$FLOWS_DIR/producto-uso-selector.yaml"
@@ -380,7 +365,6 @@ fi
 CURRENT_PHASE="Phase 4: Sales"
 echo ""
 echo "📂  Phase 4: Sales"
-run_flow "$FLOWS_DIR/venta-ciclo-completo.yaml"        # Must run first — deterministic totals
 run_flow "$FLOWS_DIR/venta-efectivo.yaml"
 
 if should_run "B"; then
@@ -443,64 +427,21 @@ echo "📂  Phase 7: Clientes + CxC"
 CURRENT_PHASE="Phase 8: Corte de día"
 echo ""
 echo "📂  Phase 8: Corte de día"
-run_flow "$FLOWS_DIR/corte-historial-director.yaml"         # Audit — previously excluded
 
-# ──────────────── Phase 9: Director features ───────────────────
-CURRENT_PHASE="Phase 9: Director features"
-echo ""
-echo "📂  Phase 9: Director features"
+# ──────────────── Phase 9: Director features (retired, A-03/A-16) ──
 
-if should_run "B"; then
-  run_flow "$FLOWS_DIR/role-switch.yaml"
-fi
 
-run_flow "$FLOWS_DIR/director-home.yaml"
-run_flow "$FLOWS_DIR/director-home-structure.yaml"          # Gap 10 — Phase 16
-run_flow "$FLOWS_DIR/director-home-ver-ventas.yaml"         # Gap 23 — Phase 16
-
-if should_run "D"; then
-  # run_flow "$FLOWS_DIR/director-home-cxc-nav.yaml"         # (parked-mvp)
-  run_flow "$FLOWS_DIR/director-home-utilidad-nav.yaml"
-  run_flow "$FLOWS_DIR/director-home-stock-bajo.yaml"
-  run_flow "$FLOWS_DIR/director-home-actividad.yaml"
-  # run_flow "$FLOWS_DIR/director-home-cxc-strip.yaml"        # Audit (parked-mvp)
-fi
-
-if should_run "B"; then
-  run_flow "$FLOWS_DIR/estados-subtabs.yaml"
-  run_flow "$FLOWS_DIR/estados-resultados-data.yaml"
-  run_flow "$FLOWS_DIR/estados-resultados-all-rows.yaml"    # D1 — Phase 15
-  run_flow "$FLOWS_DIR/estados-period-picker.yaml"          # Gap 7 — Phase 16
-  run_flow "$FLOWS_DIR/estados-balance-data.yaml"
-  run_flow "$FLOWS_DIR/balance-general-all-rows.yaml"       # D2 — Phase 15
-  run_flow "$FLOWS_DIR/balance-general-pasivo.yaml"         # Gap 9 — Phase 16
-  run_flow "$FLOWS_DIR/estados-flujo-efectivo.yaml"
-  run_flow "$FLOWS_DIR/flujo-efectivo-all-rows.yaml"        # Gap 8 — Phase 16
-  run_flow "$FLOWS_DIR/indicadores-screen.yaml"
-fi
-
-run_flow "$FLOWS_DIR/informe-mensual.yaml"
 
 # ──────────────── Phase 9.5: Auth + Feature Flags (Phase 13) ────
 if should_run "B"; then
   CURRENT_PHASE="Phase 9.5: Auth + Feature Flags"
   echo ""
   echo "📂  Phase 9.5: Auth + Feature Flags"
-  run_flow "$FLOWS_DIR/quick-switch-login.yaml"
   run_flow "$FLOWS_DIR/inicio-entrar.yaml"
-  run_flow "$FLOWS_DIR/funciones-toggle.yaml"
-  run_flow "$FLOWS_DIR/otros-nav.yaml"
-  run_flow "$FLOWS_DIR/otros-mvp-hidden-items.yaml"          # A1 — MVP absence test
-  run_flow "$FLOWS_DIR/usuario-crear.yaml"
   run_flow "$FLOWS_DIR/caja-abrir-cerrar.yaml"
   # MVP-parked: merma flows moved to parked-mvp/
 fi
 
-if should_run "C"; then
-  run_flow "$FLOWS_DIR/recovery-back-and-factory-reset.yaml" # Gap 20 — Phase 16
-  run_flow "$FLOWS_DIR/funciones-stock-disabled.yaml"
-  # change-password.yaml DELETED — ChangePassword screen removed by ADR-049.
-fi
 
 # ──────────────── Phase 13: Coverage gap — flag cascades ──────
 if should_run "A"; then
@@ -514,7 +455,6 @@ if should_run "A"; then
   # run_flow "$FLOWS_DIR/funciones-ventas-credito-toggle.yaml" # (parked-mvp)
   # run_flow "$FLOWS_DIR/otros-conversion-nav.yaml"
   # run_flow "$FLOWS_DIR/otros-auditoria-nav.yaml"
-  run_flow "$FLOWS_DIR/otros-caja-reportes-nav.yaml"        # F3 — Phase 15
   # run_flow "$FLOWS_DIR/otros-ventas-credito-nav.yaml"       # Gap 14 — Phase 16 (parked-mvp)
   # run_flow "$FLOWS_DIR/otros-merma-reportes-nav.yaml"
 fi
@@ -524,16 +464,9 @@ if should_run "A"; then
   CURRENT_PHASE="Phase 13.5: User management lifecycle"
   echo ""
   echo "📂  Phase 13.5: User management lifecycle"
-  run_flow "$FLOWS_DIR/usuario-crear-cancel.yaml"           # Gap 19 — Phase 16
-  run_flow "$FLOWS_DIR/usuario-multi-switch.yaml"
-  run_flow "$FLOWS_DIR/usuario-last-director-guard.yaml"
   # usuario-eliminar runs AFTER multi-switch (needs the user to exist)
-  run_flow "$FLOWS_DIR/usuario-eliminar.yaml"
 fi
 
-if should_run "D"; then
-  run_flow "$FLOWS_DIR/usuario-wrong-password-lockout.yaml"
-fi
 
 # ──────────────── Phase 13.6: Caja edge cases ────────────────
 if should_run "C"; then
@@ -546,18 +479,12 @@ if should_run "C"; then
 fi
 
 # ──────────────── Phase 13.7: Error paths ─────────────────────
-if should_run "D"; then
-  CURRENT_PHASE="Phase 13.7: Error paths"
-  echo ""
-  echo "📂  Phase 13.7: Error paths"
-fi
 
 # ──────────────── Phase 9.7: Notifications + Otros deep nav ────
 if should_run "D"; then
   CURRENT_PHASE="Phase 9.7: Notifications + Otros deep nav"
   echo ""
   echo "📂  Phase 9.7: Notifications + Otros deep nav"
-  run_flow "$FLOWS_DIR/director-notificaciones.yaml"        # Audit — previously excluded
   run_flow "$FLOWS_DIR/cancelaciones-nav.yaml"              # NEW — uncovered screen
   run_flow "$FLOWS_DIR/caja-movimientos-nav.yaml"           # NEW — uncovered screen
 fi
@@ -567,21 +494,13 @@ if should_run "B"; then
   CURRENT_PHASE="Phase 10: Settings"
   echo ""
   echo "📂  Phase 10: Settings"
-  run_flow "$FLOWS_DIR/settings-hub-nav.yaml"
-  run_flow "$FLOWS_DIR/settings-negocio-editar.yaml"
-  run_flow "$FLOWS_DIR/settings-edit-business-isr.yaml"     # Gap 17 — Phase 16
   # run_flow "$FLOWS_DIR/otros-empleados-empty.yaml"         # Gap 18 — Phase 16 (parked-mvp)
-  run_flow "$FLOWS_DIR/settings-funciones-nav.yaml"         # Audit — previously excluded
-  run_flow "$FLOWS_DIR/settings-tipos-de-pago.yaml"         # NEW — uncovered screen
 fi
 
 if should_run "E"; then
   CURRENT_PHASE="Phase 10.5: Settings deep flows"
   echo ""
   echo "📂  Phase 10.5: Settings deep flows"
-  run_flow "$FLOWS_DIR/settings-tasas-isr.yaml"
-  run_flow "$FLOWS_DIR/advanced-backend-screen.yaml"        # H1 — Phase 15
-  run_flow "$FLOWS_DIR/wizard-confirm-mode-change.yaml"     # H2 — Phase 15
   run_flow "$FLOWS_DIR/settings-check-updates.yaml"         # Audit — previously excluded
   run_flow "$FLOWS_DIR/bug-report-sheet.yaml"               # NEW — uncovered screen
 fi
@@ -594,42 +513,15 @@ if should_run "C"; then
   run_flow "$FLOWS_DIR/validation-producto.yaml"
 fi
 
-# ──────────────── Phase 16: E2E Coverage Gap Remediation ──────
-if should_run "E"; then
-  CURRENT_PHASE="Phase 16: E2E coverage gap"
-  echo ""
-  echo "📂  Phase 16: E2E coverage gap — wizard edge cases"
-  # Note: wizard-business-back requires fresh install state.
-  # It's placed here as a standalone flow that can run after
-  # a fresh-install script call in targeted execution.
-  run_flow "$FLOWS_DIR/wizard-business-back.yaml"           # Gap 16 — Phase 16
-fi
-
 # ──────────────── Phase 12: Deletions (state-destroying — run last)
-if should_run "A"; then
-  CURRENT_PHASE="Phase 12: Deletions"
-  echo ""
-  echo "📂  Phase 12: Deletions (state-destroying — run last)"
-  run_flow "$FLOWS_DIR/eliminar-producto.yaml"
-fi
 
-# ──────────────── Phase W: Wizard edge cases (fresh install) ──
+# ──────────────── Phase W: Fresh-state standalones ────────────
 if should_run "W"; then
-  CURRENT_PHASE="Phase W: Wizard edge cases"
+  CURRENT_PHASE="Phase W: Fresh-state standalones"
   echo ""
-  echo "📂  Phase W: Wizard edge cases (requires fresh install per flow)"
-  for wiz in wizard-cloud-solo wizard-help-modal wizard-multi-branch \
-             wizard-mobile-disabled-host wizard-rerun-with-data \
-             wizard-join-existing-link wizard-business-full-form; do
-    "$FRESH_SCRIPT" --install-only
-    run_flow "$FLOWS_DIR/$wiz.yaml"
-  done
-  # Standalone flows that benefit from fresh state
+  echo "  Fresh-state standalones (the wizard edge cases retired with the wizard, A-16)"
   "$FRESH_SCRIPT" --install-only
-  run_flow "$FLOWS_DIR/smoke-launch.yaml"
-  "$FRESH_SCRIPT" --install-only
-  run_flow "$FLOWS_DIR/crash-screen.yaml"
-  run_flow "$FLOWS_DIR/a11y-smoke.yaml"
+  run_flow "$FLOWS_DIR/activation-errors.yaml"
 fi
 
 # ──────────────── Summary ──────────────────────────────────────

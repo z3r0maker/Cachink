@@ -3,12 +3,12 @@
 # catalogue in the portal; there is no «create product» action here.
 #
 # Precondition: fresh install with the wizard complete but no tracked products.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-wizard.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow:
     file: shared/open-turno-row.yaml
     env:

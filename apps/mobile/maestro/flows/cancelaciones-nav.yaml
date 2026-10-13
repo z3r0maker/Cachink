@@ -6,7 +6,8 @@
 #
 # Must run before any flow that opens the operator's turno (alphabetical
 # ordering within the activated batch already does).
-# x-entrypoint: activatedappId: mx.xangarro.mobile
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
 tags:
   - ventas
   - cancelaciones
