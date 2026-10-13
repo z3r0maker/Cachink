@@ -10,9 +10,10 @@
 #       env:
 #         METODO: Transferencia
 appId: mx.xangarro.mobile
-env:
-  METODO: Efectivo
 ---
+# METODO always comes from the caller's runFlow env. A default here would
+# SHADOW it (a subflow's own env wins in Maestro) and every sale would
+# silently charge as the default method.
 - tapOn:
     id: 'cart-checkout-btn'
 - extendedWaitUntil:
@@ -25,8 +26,29 @@ env:
     visible:
       id: 'checkout-cobro'
     timeout: 8000
+# The method tiles can sit low on the checkout; a blind tap lands on the
+# sheet behind them and the sale records as the default Efectivo.
+- scrollUntilVisible:
+    element:
+      id: 'cobro-metodo-${METODO}'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+    centerElement: true
 - tapOn:
     id: 'cobro-metodo-${METODO}'
+- waitForAnimationToEnd
+# The method panel renders only for the chosen non-cash method: it proves
+# the selection took (a flaky tap leaves Efectivo and the sale records
+# wrong — the panel assert fails the flow here instead).
+- runFlow:
+    when:
+      true: ${METODO != 'Efectivo'}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: 'cobro-panel-${METODO}'
+          timeout: 5000
 - runFlow:
     when:
       true: ${METODO == 'Efectivo'}

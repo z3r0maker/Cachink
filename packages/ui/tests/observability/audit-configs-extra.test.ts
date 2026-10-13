@@ -82,3 +82,37 @@ describe('Audit mutation configs', () => {
     expect(id).toBe('fallback-id');
   });
 });
+
+// The smoke block above never calls the extractors; every one of them is
+// exercised here with an input carrying all the fields any of them reads.
+describe('Audit mutation configs · extractors exercised', () => {
+  // A superset input: whichever fields any extractor reads are present.
+  const entra = {
+    id: 'x-1',
+    nombre: 'Queso',
+    currentStock: 3,
+    estado: 'pendiente',
+    materiaPrimaId: 'mp-1',
+    productoResultanteId: 'pr-1',
+    key: 'stock',
+    newValue: true,
+    fecha: '2026-09-28',
+    cantidad: 2,
+    monto: 100n,
+    empleadoId: 'e-1',
+    clienteId: 'c-1',
+    categoria: 'Producto',
+    template: { id: 'rec-1' },
+  };
+  const sale = { id: 'x-1' };
+
+  for (const { name, config } of ALL_CONFIGS) {
+    it(`${name} extracts an id, and metadata when it gathers any`, () => {
+      const id = config.extractEntityId(sale as never, entra as never);
+      expect(id).toBeDefined();
+      if (config.extractMetadata !== undefined) {
+        expect(config.extractMetadata(entra as never)).toEqual(expect.anything());
+      }
+    });
+  }
+});

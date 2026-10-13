@@ -40,6 +40,20 @@ function linea(
   return { productoId, nombre, cantidad, categoria, ...(precio === undefined ? {} : { precio }) };
 }
 
+/**
+ * The cancelled ticket of the Ventas board (V-0405, «1 gringa», $60.00,
+ * «error de captura»), for the phone's detalle-cancelada state. Separate from
+ * `DETALLE_VENTAS` so the web's `ventaPorFolio` keeps its two priced tickets.
+ */
+export const DETALLE_CANCELADA: VentaDetalle = {
+  folio: 'V-0405',
+  cuando: 'Hoy 12:58',
+  metodo: 'Efectivo',
+  lineas: [linea('gringa', 'Gringa', 1, 'Guisados', 60_00n)],
+  total: 60_00n,
+  cancelada: { motivo: 'error de captura' },
+};
+
 export function detalleFixture(venta: VentaDetalle | null): DetalleData {
   return {
     negocio: 'Taquería Don Pedro',

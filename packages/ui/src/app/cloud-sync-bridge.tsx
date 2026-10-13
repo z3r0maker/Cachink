@@ -23,8 +23,7 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { leerFallo } from '@xangarro/caja';
-import { SyncEngine, type RejectedRow, type SyncCounts, type SyncRunResult } from '@xangarro/sync';
+import { SyncEngine, type RejectedRow, type SyncRunResult } from '@xangarro/sync';
 import { useActivationContext } from '../activation/activation-context';
 import { forgetDevice } from '../activation/forget-device';
 import { useActivationState } from '../activation/use-activation-state';
@@ -41,8 +40,6 @@ export interface CloudSyncContextValue {
   readonly state: CloudSyncState;
   /** "Actualizar": push then pull now. */
   readonly syncNow: () => void;
-  /** A manual full run, awaited: activation brings a big snapshot's pages with it (DS-10). */
-  readonly runNow: () => Promise<SyncRunResult | null>;
   /** Rows the server refused, with local data ("No enviados", A-08). */
   readonly listRejected: () => Promise<readonly RejectedRow[]>;
   /** Manual retry of rejected rows: all due now, then one push. */
@@ -52,7 +49,6 @@ export interface CloudSyncContextValue {
 const CloudSyncContext = createContext<CloudSyncContextValue>({
   state: INITIAL_CLOUD_SYNC_STATE,
   syncNow: () => undefined,
-  runNow: async () => null,
   listRejected: async () => [],
   requeue: async () => undefined,
 });
@@ -89,52 +85,40 @@ function useSyncRunner(
   const appConfig = useAppConfigRepository();
   const queryClient = useQueryClient();
   return useMemo(() => {
-    const runOnce = async (mode: Mode, manual: boolean): Promise<SyncRunResult> => {
+    const runOnce = async (mode: Mode, manual: boolean): Promise<void> => {
       setState((s) => ({ ...s, phase: 'syncing' }));
       const result = await run(engine, mode, manual);
       if (result.retryAt) retryIn.current(Date.parse(result.retryAt) - Date.now());
       if (result.revoked)
         await forgetDevice({ appConfig, tokenStore: config.tokenStore, queryClient });
       const counts = await engine.counts();
-      setState((s) => stateAfter(s, result, counts));
+      const phase = phaseOf(result);
+      const reached = result.push !== null && phase !== 'offline' && !result.deferred;
+      setState((s) => ({
+        phase,
+        counts,
+        lastSyncAt: reached ? new Date().toISOString() : s.lastSyncAt,
+      }));
       // Row outcomes may change without the counts changing (a manual retry
       // rejected again), so "No enviados" always refreshes after a run.
       await queryClient.invalidateQueries({ queryKey: CLOUD_SYNC_QUERY_KEY });
       if ((result.pull?.applied ?? 0) > 0) await queryClient.invalidateQueries();
-      return result;
     };
     // A throw (e.g. a SQLite error during the retention purge) must not leave
     // the pill stuck on "Sincronizando…"; the next trigger retries.
-    const failed = (error: unknown): null => {
-      console.error('[cloud-sync] run failed', error);
-      setState((s) => ({ ...s, phase: 'error' }));
-      return null;
-    };
     const runSafely = (mode: Mode, manual = false): void => {
-      runOnce(mode, manual).catch(failed);
+      runOnce(mode, manual).catch((error: unknown) => {
+        console.error('[cloud-sync] run failed', error);
+        setState((s) => ({ ...s, phase: 'error' }));
+      });
     };
     return {
       runPush: () => runSafely('push'),
       runSync: () => runSafely('both'),
       /** A person asked: skip the engine's own backoff. */
       runManual: (mode: Mode) => runSafely(mode, true),
-      /** The same, awaited (activation's download, DS-10). */
-      runAwaited: (): Promise<SyncRunResult | null> => runOnce('both', true).catch(failed),
     };
   }, [engine, setState, retryIn, appConfig, config.tokenStore, queryClient]);
-}
-
-/** The pill's state after a run: phase, counts, last contact, and the engine's retry (DS-05). */
-function stateAfter(s: CloudSyncState, result: SyncRunResult, counts: SyncCounts): CloudSyncState {
-  const phase = phaseOf(result);
-  const reached = result.push !== null && phase !== 'offline' && !result.deferred;
-  const error = result.push?.error ?? result.pull?.error ?? null;
-  return {
-    phase,
-    counts,
-    lastSyncAt: reached ? new Date().toISOString() : s.lastSyncAt,
-    reintento: leerFallo({ retryAt: result.retryAt ?? null, error }).reintento,
-  };
 }
 
 function useSchedulerWiring(
@@ -184,7 +168,6 @@ export function CloudSyncBridge(props: { readonly children: ReactNode }): ReactE
     () => ({
       state,
       syncNow: () => runner.runManual('both'),
-      runNow: runner.runAwaited,
       listRejected: () => engine.rejected(),
       requeue: async (rows) => {
         for (const r of rows) await engine.requeue(r.tableName, r.rowId);

@@ -1,0 +1,100 @@
+# Gastos del turno (Track M-11, M-08; board MvGastos): Inicio's atajo opens
+# /gastos, «Registrar gasto» records what left the drawer — concepto, monto y
+# categoría required — and the new row heads the list. The unhappy path first:
+# an empty monto leaves the action blocked (it still reads «$___»).
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio (a turno is opened here if none is).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - gastos
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# A gasto stamps the open turno; open one only if Inicio still asks for it.
+- tapOn: { id: 'tab-inicio' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+# The hero reflows as the turno's KPIs land; let it settle or the atajo tap
+# resolves stale coordinates (the screen then never opens).
+- waitForAnimationToEnd
+
+# Inicio's shortcut tile opens Gastos.
+- tapOn: { id: 'inicio-atajo-gastos' }
+- extendedWaitUntil: { visible: { id: 'mobile-gastos' }, timeout: 8000 }
+- assertVisible: '.*Lo que salió de la caja en tu turno.*'
+- assertVisible: { id: 'gastos-cifras' }
+
+# Unhappy: concepto alone is not enough — no monto, no categoría, and the
+# action stays blocked (the button still says «$___»; the sheet stays open).
+- tapOn: { id: 'gastos-abrir-registrar' }
+- extendedWaitUntil: { visible: { id: 'registrar-gasto-sheet' }, timeout: 5000 }
+- tapOn: { id: 'gasto-concepto' }
+- inputText: 'Cilindro de gas'
+- hideKeyboard
+- tapOn: { id: 'gasto-guardar' }
+- assertVisible: ".*Registrar gasto de \\$___.*"
+- assertVisible: { id: 'registrar-gasto-sheet' }
+
+# Happy: monto + categoría, and the sheet closes on the saved gasto.
+# Settle before typing: digits typed during the field's focus transition
+# drop (a '350' once landed as '30' — and the wrong amount saved).
+- tapOn: { id: 'gasto-monto' }
+- waitForAnimationToEnd
+- inputText: '350'
+# The sheet's footer says the parsed monto; if a digit still dropped, fix it
+# before anything is saved.
+- runFlow:
+    when:
+      visible:
+        id: 'gasto-guardar'
+        text: ".*\\$30\\.00.*"
+    commands:
+      - tapOn: { id: 'gasto-monto' }
+      - eraseText
+      - inputText: '350'
+# One drag in the body does both jobs: it dismisses the keyboard
+# (keyboardDismissMode on-drag on the sheet) and lifts the chips clear
+# of the fixed save footer they sit half-clipped under.
+- swipe:
+    start: '50%, 40%'
+    end: '50%, 15%'
+- waitForAnimationToEnd
+# Resolve the chip AFTER the sheet settles (a bare tap once landed on the
+# neighbouring chip while the wrapped row still reflowed).
+- scrollUntilVisible:
+    element:
+      id: 'gasto-categoria-Insumos'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 60
+- tapOn: { id: 'gasto-categoria-Insumos' }
+- waitForAnimationToEnd
+# The sheet's footer can sit below the fold on a phone (60% visible is
+# enough to tap; 100% never lands with the grabber over it).
+- scrollUntilVisible:
+    element:
+      id: 'gasto-guardar'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn: { id: 'gasto-guardar' }
+- extendedWaitUntil: { notVisible: { id: 'registrar-gasto-sheet' }, timeout: 8000 }
+
+# The new row heads the list, red and negative, with its categoría chip.
+# The row's concepto text is not asserted: the driver drops characters
+# while typing into that field, so only the amount is stable.
+- extendedWaitUntil: { visible: { text: ".*−\\$350\\.00.*" }, timeout: 10000 }
+- assertVisible: '.*Insumos.*'

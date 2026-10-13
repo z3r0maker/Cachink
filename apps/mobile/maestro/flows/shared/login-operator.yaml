@@ -1,6 +1,13 @@
 # Operator sign-in on an activated device (A-05/A-07; Acceso, Track M M-06):
-# pick Toni (mock operator, NIP 1234), type the four digits and tap «Entrar»;
-# the caja lands on Inicio. No-op when someone is already signed in.
+# pick Toni (mock operator, NIP 1234, contracts fixtures.ts OPERATOR_PINS),
+# type the four digits and tap «Entrar»; the caja lands on Inicio. No-op when
+# someone is already signed in.
+#
+# Preseleccion (acceso-screen.tsx) picks whoever holds the open turno when the
+# list comes up, so after a relaunch with a turno open the pad is already
+# there and there is no row to tap — hence the optional pad wait first. Toni's
+# row id is deterministic (fixtures.ts: users: [operator(1, 'Toni', …)], the
+# ulidOf('PRS', 1) the row stamps as acceso-operador-<id>).
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -10,14 +17,24 @@ appId: mx.xangarro.mobile
     commands:
       - extendedWaitUntil:
           visible:
-            id: 'quick-switch'
-          timeout: 60000
-      - tapOn:
-          text: 'Toni'
-      - extendedWaitUntil:
-          visible:
             id: 'numpad-1'
-          timeout: 8000
+            optional: true
+          timeout: 15000
+      - runFlow:
+          when:
+            notVisible:
+              id: 'numpad-1'
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: 'acceso-operador-01JPRS00000000000000000001'
+                timeout: 20000
+            - tapOn:
+                id: 'acceso-operador-01JPRS00000000000000000001'
+            - extendedWaitUntil:
+                visible:
+                  id: 'numpad-1'
+                timeout: 8000
       - tapOn: { id: 'numpad-1' }
       - tapOn: { id: 'numpad-2' }
       - tapOn: { id: 'numpad-3' }

@@ -18,7 +18,8 @@
     "./lectura": "./src/lectura/index.ts",
     "./pendientes": "./src/pendientes/index.ts",
     "./turno": "./src/turno/index.ts",
-    "./ventas": "./src/ventas/index.ts"
+    "./ventas": "./src/ventas/index.ts",
+    "./cobranza/vivo": "./src/cobranza/vivo.ts"
   },
   "scripts": {
     "build": "tsc --build",

@@ -7,24 +7,39 @@
  */
 export * from './Btn/index';
 export * from './Input/index';
+export * from './Tag/index';
 export * from './Modal/index';
 export * from './EmptyState/index';
 export * from './SectionTitle/index';
 export * from './Card/index';
 export * from './BottomTabBar/index';
+export * from './TopBar/index';
 export * from './Scanner/index';
 export * from './Icon/index';
 export * from './Don/index';
+export * from './RoleIllustration/index';
+export * from './SegmentedToggle/index';
 export * from './Combobox/index';
 export * from './ConfirmDialog/index';
 export * from './ErrorState/index';
+export * from './FAB/index';
+export * from './List/index';
+export * from './SearchBar/index';
+export * from './Skeleton/index';
+export * from './SplitPane/index';
+export * from './SwipeableRow/index';
+export * from './SwipeableTabView/index';
 export * from './SafeAreaSpacer/index';
 export * from './fields/index';
+export * from './ProductoCard/index';
+export * from './ProductoCardGrid/index';
 export * from './FloatingCoinsBackground/index';
 export * from './ActivityTracker/index';
 export * from './PinCodeInput/index';
 export * from './OptionCardGroup/index';
 export * from './Spinner/index';
+export * from './LoadingOverlay/index';
+export * from './SaleBurst/index';
 // El Mostrador primitives (Track M, M-05).
 export * from './PathIcon/index';
 export * from './Mostrador/index';
@@ -35,10 +50,10 @@ export * from './BottomSheet/index';
 export * from './Dialog/index';
 export * from './Toast/index';
 export * from './OfflineBanner/index';
-export * from './CajaEstado/index';
 export * from './Bloqueo/index';
 export * from './NavRows/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from
 // screens/index.ts instead (both end up in the top-level barrel).
+export * from './CajaEstado/index';

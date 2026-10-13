@@ -6,16 +6,12 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import { ActivationScreen } from '../screens/Activation/index';
-import { useAbrirApp, useActivate } from '../activation/use-activate';
-import { useDescargaInicial } from '../activation/use-descarga';
+import { useActivate } from '../activation/use-activate';
 import { useActivationState } from '../activation/use-activation-state';
 
 export function ActivationGate(props: { readonly children: ReactNode }): ReactElement | null {
   const { record } = useActivationState();
-  const abrir = useAbrirApp();
-  // DS-10: a big business's remaining pages come before the app opens.
-  const d = useDescargaInicial(abrir);
-  const activate = useActivate({ onFaltanPaginas: d.bajar });
+  const activate = useActivate();
   if (record === undefined) return null;
   if (record !== null) return <>{props.children}</>;
   return (
@@ -24,8 +20,6 @@ export function ActivationGate(props: { readonly children: ReactNode }): ReactEl
       onScan={(qrToken) => activate.mutate({ qrToken })}
       submitting={activate.isPending}
       errorKey={activate.error?.key ?? null}
-      descarga={d.descarga}
-      onReintentar={d.bajar}
     />
   );
 }

@@ -19,7 +19,7 @@ import {
 import { GLYPHS, MText, PathIcon } from '../../components/index';
 import { borderColors, borderWidths, colors, shapeRadii } from '../../theme';
 import { ProductoIcono } from '../Ventas/cobrar-tile';
-import type { ExistenciaMovil } from './inventario-lectura';
+import type { ExistenciaMovil } from './inventario-registro';
 
 /** A small chip with its tint's edge and text. */
 function Pastilla(p: { texto: string; tinta: string; fondo: string }): ReactElement {

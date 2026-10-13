@@ -13,6 +13,8 @@ import type { CuentaPara } from '../lectura/shapes';
 import { comoMetodo } from '../ventas/derive';
 import { abiertas, estadoCuenta, vence } from './cliente/derive';
 import type { AbonoCuenta, CuentaCliente, VentaCuenta } from './cliente/types';
+
+export type { CuentaCliente } from './cliente/types';
 import type { MetodoAbono } from './types';
 
 const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;

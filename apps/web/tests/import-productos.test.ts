@@ -148,3 +148,97 @@ describe('planImport', () => {
     );
   });
 });
+
+// The branches the round-trip never takes: each check's refusal, in its own
+// words, and the sí/no words a shopkeeper actually types.
+describe('parseProductSheet · the refusals', () => {
+  const cabecera = [
+    'sku',
+    'nombre',
+    'categoria',
+    'unidad',
+    'costo_unitario',
+    'precio_venta',
+    'seguir_stock',
+    'umbral_stock_bajo',
+    'icono',
+  ];
+
+  it('a row with every refusal names each field it refuses', () => {
+    const r = parseProductSheet([
+      cabecera,
+      ['', '', 'Comida', 'piezas', 'abc', 'dos', 'quizá', '-1', 'no-es-icono'],
+    ]);
+    if (!r.ok) throw new Error('sheet-level failure');
+    const errores = r.rows[0]?.errors ?? [];
+    assert.ok(errores.includes('nombre vacío'));
+    assert.ok(errores.some((e) => e.includes('categoria «Comida» no existe')));
+    assert.ok(errores.some((e) => e.includes('unidad «piezas» no existe')));
+    assert.ok(errores.some((e) => e.includes('costo_unitario «abc» no es un monto')));
+    assert.ok(errores.some((e) => e.includes('precio_venta «dos» no es un monto')));
+    assert.ok(errores.includes('seguir_stock es sí o no'));
+  });
+
+  it('the sí/no words a shopkeeper types all parse, empty included', () => {
+    const palabras = [
+      'sí',
+      'si',
+      'SÍ',
+      'true',
+      'verdadero',
+      '1',
+      'x',
+      'no',
+      'NO',
+      'false',
+      'falso',
+      '0',
+      '',
+    ];
+    const filas = palabras.map((w, i) => [
+      'sku-' + i,
+      'Queso',
+      'Producto Terminado',
+      'pza',
+      '10',
+      '15',
+      w,
+      '3',
+      '',
+    ]);
+    const r = parseProductSheet([cabecera, ...filas]);
+    if (!r.ok) throw new Error('sheet-level failure');
+    for (const fila of r.rows) {
+      assert.notEqual(fila?.values?.seguirStock, undefined, `“${fila?.errors.join(';')}”`);
+      assert.equal(fila?.errors.length, 0);
+    }
+    const seguidos = r.rows.filter((f) => f?.values?.seguirStock === true).length;
+    assert.equal(seguidos, 8, 'seven yes-words plus the empty default');
+  });
+
+  it('a bad umbral and a bad icono refuse too; a good row passes clean', () => {
+    const r = parseProductSheet([
+      cabecera,
+      ['a', 'Queso', 'Producto Terminado', 'pza', '10', '15', 'sí', 'dos', 'beef'],
+    ]);
+    if (!r.ok) throw new Error('sheet-level failure');
+    assert.ok(r.rows[0]?.errors.some((e) => e.includes('umbral')));
+
+    const buena = parseProductSheet([
+      cabecera,
+      ['a', 'Queso', 'Producto Terminado', 'pza', '10', '15', 'sí', '3', 'beef'],
+    ]);
+    if (!buena.ok) throw new Error('sheet-level failure');
+    assert.equal(buena.rows[0]?.errors.length, 0);
+    assert.equal(buena.rows[0]?.values?.icono, 'beef');
+  });
+
+  it('an unknown icono is refused', () => {
+    const r = parseProductSheet([
+      cabecera,
+      ['a', 'Queso', 'Producto Terminado', 'pza', '10', '15', 'sí', '3', 'cuchara'],
+    ]);
+    if (!r.ok) throw new Error('sheet-level failure');
+    assert.ok(r.rows[0]?.errors.some((e) => e.includes('icono')));
+  });
+});

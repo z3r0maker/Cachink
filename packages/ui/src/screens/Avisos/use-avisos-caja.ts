@@ -16,7 +16,7 @@ import {
   DUENO_GENERICO,
   type AvisosData,
 } from '@xangarro/caja/avisos';
-import { comoCuenta } from '@xangarro/caja/cobranza';
+import { comoCuenta } from '@xangarro/caja/cobranza/vivo';
 import type { BusinessId, UserId } from '@xangarro/domain';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useRepositories } from '../../app/repository-provider';

@@ -30,7 +30,10 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: 'cobrar-bar'
 - assertVisible: '3 piezas ·'
-- runFlow: shared/cobrar-ticket.yaml
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo
 
 # Back on Cobrar with an empty ticket.
 - extendedWaitUntil:

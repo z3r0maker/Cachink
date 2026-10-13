@@ -1,6 +1,7 @@
 import type { Money } from '@xangarro/domain';
 
 import type { EstadoMode } from '../estado';
+import type { RecurrentePara } from '../lectura/turno-shapes';
 
 /** The five petty-cash categories of `Operador Gastos.dc.html`. */
 export const CATEGORIAS = ['Insumos', 'Servicios', 'Transporte', 'Mantenimiento', 'Otros'] as const;
@@ -23,6 +24,8 @@ export interface GastosData {
   readonly caja: string;
   readonly desde: string;
   readonly gastos: readonly GastoTurno[];
+  /** The owner's first name, for the «Sin comprobante» note (M-08's read). */
+  readonly dueno?: string;
 }
 
 export interface NuevoGasto {
@@ -44,6 +47,16 @@ export interface PrefillGasto {
   readonly monto: bigint;
   readonly categoria: CategoriaGasto;
   readonly proveedor: string | null;
+}
+
+/**
+ * A due recurring gasto as the phone's Gastos pays it (M-08): the row the
+ * «Pendientes de registrar» list shows (`RecurrentePara`, the shape Mi turno
+ * and Inicio already say) beside what its sheet opens filled with.
+ */
+export interface RecurrentePorPagar {
+  readonly para: RecurrentePara;
+  readonly prefill: PrefillGasto;
 }
 
 export interface GastosScreenProps {

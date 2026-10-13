@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { AbrirCajaUseCase } from '@xangarro/application';
-import { today } from '@xangarro/domain';
+import { hoyLocal } from '@xangarro/caja';
 import type { BusinessId, CajaTurno, Money, UserId } from '@xangarro/domain';
 import { useCajaTurnosRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -39,7 +39,11 @@ export function useAbrirCaja(): AbrirCajaResult {
       }
       return useCase.execute({
         userId: input.userId,
-        fecha: today(),
+        // O-36: the register's dates are the operator's local ones. The
+        // domain's today() is UTC and split the day after 18:00 in Mexico:
+        // a turno opened in the evening carried tomorrow's date, and every
+        // local-dated row (movements, sales) fell outside its window.
+        fecha: hoyLocal() as never,
         montoAperturaCentavos: input.montoAperturaCentavos,
         efectivoAdicionalCentavos: input.efectivoAdicionalCentavos ?? 0n,
         businessId: businessId,

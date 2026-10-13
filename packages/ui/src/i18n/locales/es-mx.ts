@@ -38,6 +38,10 @@ export const esMX = {
       searchPlaceholder: 'Buscar...',
       searchAriaLabel: 'Buscar opciones',
     },
+    exactAmount: {
+      label: 'Exacto',
+      ariaLabel: 'Importe exacto',
+    },
     money: {
       placeholderDefault: '0.00',
     },
@@ -101,10 +105,28 @@ export const esMX = {
     cancelSale: 'Cancelar',
     cancelSaleAriaLabel: 'Cancelar venta',
   },
+  productos: {
+    backAriaLabel: 'Volver',
+    editInPortal: 'Este producto se edita o elimina desde la cuenta del negocio, no desde la app.',
+  },
   inventario: {
+    title: 'Inventario',
+    stockTab: 'Stock',
+    movimientosTab: 'Movimientos',
+    buscar: 'Buscar',
+    buscarPlaceholder: 'Nombre o SKU',
     stockInstructions: 'Toca un producto para registrar entrada o salida de inventario.',
+    emptyTitle: 'Aún no hay productos',
+    emptyBody: 'Registra tu primer producto con el botón de abajo.',
+    newCta: '+ Nuevo Producto',
+    entrada: 'Entrada',
+    salida: 'Salida',
     stockLabel: 'Stock',
     valorLabel: 'Valor',
+    bajoStockTitle: 'Stock bajo',
+    movimientoEmptyTitle: 'Sin movimientos recientes',
+    movimientoEmptyBody:
+      'Selecciona un producto en la pestaña Stock para registrar una entrada o salida.',
     delete: 'Eliminar',
     deleteBlockedTitle: 'Este producto tiene stock',
     deleteBlockedBody: 'Hay unidades en stock. ¿Eliminar de todas formas?',
@@ -145,6 +167,15 @@ export const esMX = {
     portalHint: 'Costo, unidad, alerta de stock e ícono se ajustan desde la cuenta del negocio.',
   },
   movimiento: {
+    titleEntrada: 'Registrar entrada',
+    titleSalida: 'Registrar salida',
+    cantidadLabel: 'Cantidad',
+    cantidadInvalid: 'Mayor a 0',
+    costoUnitLabel: 'Costo por unidad',
+    motivoLabel: 'Motivo',
+    notaLabel: 'Nota',
+    notaOpcional: 'Opcional',
+    save: 'Registrar',
     typeLabel: 'Tipo',
   },
   scanner: {
@@ -242,6 +273,10 @@ export const esMX = {
       'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
     cajaGateCta: 'Ir a Caja',
     // Products Gate
+    productosGateTitle: 'Registra tus productos para empezar a vender',
+    productosGateDescription:
+      'Aún no tienes productos. Agrega al menos uno para poder registrar ventas.',
+    productosGateCta: 'Ir a Productos',
     // Tap-to-Cart redesign
     carrito: 'Carrito',
     vaciar: 'Vaciar',
@@ -522,6 +557,12 @@ export const esMX = {
     reRunWizardHint: 'Conectar otro dispositivo o cambiar de modo',
     notificacionesLabel: 'Notificaciones',
     notificacionesHint: 'Recibir avisos de stock bajo al final del día',
+    crashReportingTitle: '¿Enviar reportes de errores?',
+    crashReportingBody:
+      'Envía datos de diagnóstico a Sentry y a la base de datos de errores de Xangarro para detectar fallos más rápido. Nunca enviamos conceptos, nombres o notas.',
+    crashReportingYes: 'Sí, enviar',
+    crashReportingNo: 'No, gracias',
+    crashReportingLater: 'Decidir después',
     crashReportingToggleLabel: 'Reportes de errores',
     crashReportingToggleHint:
       'Envía datos de diagnóstico y errores para mejorar la app. Nunca se envían conceptos, nombres ni notas.',
@@ -659,8 +700,9 @@ export const esMX = {
   noEnviados: {
     title: 'No enviados',
     intro: 'Estos registros siguen guardados en este dispositivo, pero el servidor no los aceptó.',
+    empty: 'Todo se envió. No hay registros pendientes de revisar.',
     retry: 'Reintentar',
-    retryAll: 'Reintentar todos ({{count}})',
+    retrying: 'Reintentando automáticamente',
     kinds: {
       venta: 'Venta',
       egreso: 'Egreso',
@@ -675,8 +717,8 @@ export const esMX = {
       otro: 'Registro',
     },
     hints: {
-      productMissing: 'El producto fue eliminado. Regístrala con otro producto.',
-      clientMissing: 'El cliente fue eliminado. Regístrala sin cliente o con otro.',
+      productMissing: 'El producto fue eliminado — regístrala con otro producto.',
+      clientMissing: 'El cliente fue eliminado — regístrala sin cliente o con otro.',
       userMissing: 'El operador fue eliminado en el portal.',
     },
   },
@@ -701,7 +743,6 @@ export const esMX = {
     never: 'Sin enviar',
     tapToUpdate: 'Toca para enviar ahora',
     openRejected: 'Toca para ver los no enviados',
-    openPendientes: 'Toca para ver los registros por enviar',
     update: 'Actualizar',
   },
   // The caja's frame (Track M, M-05): tabs, rail, sidebar, header, overlays.
@@ -711,9 +752,10 @@ export const esMX = {
       cobrar: 'Cobrar',
       ventas: 'Ventas',
       gastos: 'Gastos',
-      cobranza: 'Fiado y abonos',
       turno: 'Mi turno',
       inventario: 'Inventario',
+      fiado: 'Fiado y abonos',
+      avisos: 'Avisos',
       dinero: 'Dinero del turno',
       menu: 'Menú de la caja',
     },
@@ -721,8 +763,6 @@ export const esMX = {
       rows: 'Lo de tu turno',
       gastos: 'Gastos',
       gastosDetalle: 'Lo que sale de la caja',
-      cobranza: 'Fiado y abonos',
-      cobranzaDetalle: 'Quién te debe y los abonos',
       inventario: 'Inventario',
       inventarioDetalle: 'Productos, existencias y lo que llegó',
       movimientos: 'Movimientos de caja',

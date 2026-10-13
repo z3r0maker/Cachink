@@ -40,7 +40,14 @@ import { StrictMode, type ReactElement } from 'react';
 
 // Victory Native XL + react-native-reanimated use deprecated StrictMode
 // APIs internally — harmless but noisy. Suppress until upstream fixes land.
-LogBox.ignoreLogs(['findHostInstance_DEPRECATED', 'findNodeHandle is deprecated']);
+LogBox.ignoreLogs([
+  'findHostInstance_DEPRECATED',
+  'findNodeHandle is deprecated',
+  // The compra sheet nests the quantity wheel's FlatList in the sheet's
+  // ScrollView — legal on iOS, but the dev LogBox overlay then covers the
+  // app and eats taps. The warning is noise for E2E (M-11).
+  'VirtualizedLists should never be nested',
+]);
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

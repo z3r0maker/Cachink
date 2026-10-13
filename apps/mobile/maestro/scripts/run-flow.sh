@@ -150,9 +150,8 @@ for flow in "$@"; do
     echo "📋  $name"
     echo "    entry: $local_entry"
     case "$local_entry" in
-      fresh)  echo "    setup: fresh-install.sh --reset-only" ;;
-      demo)   echo "    setup: fresh-install.sh --reset-only + maestro test demo-mode-setup.yaml" ;;
-      wizard) echo "    setup: fresh-install.sh wizard-local-standalone.yaml" ;;
+      fresh)  echo "    setup: reset_app (keychain + DB + mock reset, prime-dev-client)" ;;
+      *)      echo "    setup: reset_app + setup-activated (or a relaunch when already activated)" ;;
     esac
     echo "    run:   maestro test $flow"
     echo ""
@@ -164,7 +163,12 @@ for flow in "$@"; do
   echo "🧪  $name (entry: $local_entry)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  run_setup "$local_entry"
+  if ! run_setup "$local_entry"; then
+    echo "  ❌  $name SETUP FAILED"
+    FAILED=$((FAILED + 1))
+    rm -f "$STATE_FILE"
+    continue
+  fi
 
   # NOTE: this block runs in the top-level for-loop, not a function, so `local`
   # is invalid here (aborts under set -e). Use plain assignments.
@@ -187,6 +191,8 @@ for flow in "$@"; do
     elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
     echo "  ❌  $name FAILED (${elapsed_ms}ms)"
     FAILED=$((FAILED + 1))
+    # A failed flow can leave any screen or data behind: the next flow resets.
+    rm -f "$STATE_FILE"
 
     echo "  🔬  Running auto-diagnosis..."
     "$DIAGNOSE_SCRIPT" "$flow" "$debug_dir" "$test_dir" || true

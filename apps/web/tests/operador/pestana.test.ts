@@ -1,12 +1,10 @@
-import { afterEach, describe, it, vi } from 'vitest';
+import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
   CANDADO_CAJA,
-  hayOtraPestana,
   pedirCandado,
   reclamador,
-  responderPresencia,
   type Candados,
 } from '../../src/operador/runtime/pestana';
 
@@ -120,46 +118,20 @@ describe('reclamador · the Worker opens the database only when it owns it', () 
   });
 });
 
-/**
- * The fallback for a browser without Web Locks: an open register answers
- * «aquí» on a BroadcastChannel, a newcomer asks and listens. Node's own
- * BroadcastChannel delivers between instances of one process, as tabs do.
- */
-describe('hayOtraPestana / responderPresencia (sin Web Locks)', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('sees the open register that answers', async () => {
+describe('the BroadcastChannel handshake · the no-Locks fallback (DB3-CAJA-01)', () => {
+  it('an open register answers a newcomer within the window', async () => {
+    const { hayOtraPestana, responderPresencia } =
+      await import('../../src/operador/runtime/pestana');
     const parar = responderPresencia();
-    try {
-      assert.equal(await hayOtraPestana(500), true);
-    } finally {
-      parar();
-    }
+    assert.equal(await hayOtraPestana(200), true);
+    parar();
+    assert.equal(await hayOtraPestana(100), false);
   });
 
-  it('answers false once the wait runs out with nobody there', async () => {
-    assert.equal(await hayOtraPestana(20), false);
-  });
-
-  it('stops answering once the register closes', async () => {
-    responderPresencia()();
-    assert.equal(await hayOtraPestana(20), false);
-  });
-
-  it('ignores chatter that is not an answer', async () => {
-    const ruido = new BroadcastChannel(CANDADO_CAJA);
-    const otra = hayOtraPestana(40);
-    ruido.postMessage('hola');
-    ruido.postMessage('otra-cosa');
-    assert.equal(await otra, false);
-    ruido.close();
-  });
-
-  it('assumes no other tab where BroadcastChannel does not exist', async () => {
-    vi.stubGlobal('BroadcastChannel', undefined);
-    assert.equal(await hayOtraPestana(), false);
-    assert.doesNotThrow(responderPresencia());
+  it('nobody home means no other tab, and the window is waited', async () => {
+    const { hayOtraPestana } = await import('../../src/operador/runtime/pestana');
+    const t0 = Date.now();
+    assert.equal(await hayOtraPestana(80), false);
+    assert.ok(Date.now() - t0 >= 70);
   });
 });

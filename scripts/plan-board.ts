@@ -9,7 +9,8 @@
  * silently.
  *
  * Usage: `pnpm plan:board` (writes) · `pnpm plan:board --check` (exit 1 when stale).
- * Parsing is `plan-board-parse.ts`; the three-list layout is `plan-board-render.ts`.
+ * Parsing is `plan-board-parse.ts`; the four kind-of-work lists are laid out in
+ * `plan-board-render.ts`, and each item's kind is decided in `plan-board-kinds.ts`.
  */
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';

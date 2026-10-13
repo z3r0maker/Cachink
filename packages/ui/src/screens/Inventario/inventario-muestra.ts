@@ -5,7 +5,7 @@
  */
 import { INVENTARIO_FIXTURE } from '@xangarro/caja/inventario';
 import type { Money, ProductIcon } from '@xangarro/domain';
-import type { InventarioLeido } from './inventario-lectura';
+import type { InventarioLeido } from './inventario-registro';
 
 const GLIFO: Readonly<Record<string, ProductIcon>> = {
   ham: 'beef',

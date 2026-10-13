@@ -93,9 +93,8 @@ export interface Repositories {
   readonly directorAlerts: DirectorAlertsRepository;
   readonly cajaMovimientos: CajaMovimientosRepository;
   readonly cancelacionLogs: CancelacionLogsRepository;
-  /** The owner's messages to the operator, pulled (DOWN; Avisos, ADR-075). */
+  /** Avisos (M-09): the owner's messages to this operator, and its replies. */
   readonly mensajesOperador: MensajesOperadorRepository;
-  /** The operator's replies, pushed (UP; Avisos, ADR-075). */
   readonly respuestasOperador: RespuestasOperadorRepository;
 }
 
@@ -203,3 +202,7 @@ export const useCajaMovimientosRepository = (): CajaMovimientosRepository =>
   useRepositories().cajaMovimientos;
 export const useCancelacionLogsRepository = (): CancelacionLogsRepository =>
   useRepositories().cancelacionLogs;
+export const useMensajesOperadorRepository = (): MensajesOperadorRepository =>
+  useRepositories().mensajesOperador;
+export const useRespuestasOperadorRepository = (): RespuestasOperadorRepository =>
+  useRepositories().respuestasOperador;

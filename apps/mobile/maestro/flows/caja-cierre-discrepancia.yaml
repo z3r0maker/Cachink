@@ -1,55 +1,71 @@
-# Close with a faltante (Track M, M-09; MvCierre): the difference asks for a
-# motive before the close button works, and the closed screen says it.
+# Cierre with a diferencia explained by its own note (M-09; the old flow's
+# CountResultStep dropdown + explicación is gone): count short, the motivo
+# chips come out, «Otra razón» is the one that also asks for a nota — the
+# close stays blocked until it is written — and the hecho screen carries the
+# motivo in its line.
 #
-# Verifies:
-#   1. Open turno with $500; Cierre counts one $200 bill → Falta $300.00
-#   2. «Cerrar turno con faltante de $300.00» stays gray until a motive
-#   3. «Otra razón» asks for the note; with it the turno closes
-#   4. «Turno cerrado» with the faltante
-#
-# Precondition: demo mode seeded, the operator's turno not yet open or open
-# with no sales.
-# x-entrypoint: demo
+# Precondition: activated device, turno open with the $500 fondo
+# (shared/ensure-caja-open.yaml), nothing else captured.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
-tags:
-  - caja
-  - cierre
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
-
 - tapOn:
-    id: 'turno-cerrar'
+    id: 'tab-turno'
 - extendedWaitUntil:
     visible:
-      id: 'cierre-esperado'
-    timeout: 8000
+      id: 'turno-cerrar-mi-turno'
+    timeout: 10000
 - tapOn:
-    id: 'conteo-billete-200-mas'
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 10000
+
+# Count two $200 bills: $400 of the $500 expected → $100 short.
+- tapOn:
+    id: 'conteo-mas-billete-200'
+- tapOn:
+    id: 'conteo-mas-billete-200'
+
+# Falta, with the amount in the close button (cerrarLabel).
 - scrollUntilVisible:
     element:
-      id: 'cierre-diferencia-falta'
+      id: 'cierre-diferencia'
     direction: DOWN
-    timeout: 5000
-- assertVisible:
-    text: 'Elige un motivo para poder cerrar.'
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible: '.*Falta.*'
 
+# «Otra razón» asks for the nota (cierre-explica.tsx Nota; the hint under the
+# button says which half is missing, cerrarHint in caja/src/cierre/copy.ts).
 - tapOn:
-    id: 'cierre-motivo-3'
-- assertVisible:
-    text: 'Escribe la nota para poder cerrar.'
+    id: 'cierre-motivo-Otra razón'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- assertVisible: '.*Cerrar turno con faltante de \$100\.00.*'
+- assertVisible: '.*Escribe la nota para poder cerrar\..*'
 - tapOn:
     id: 'cierre-nota'
-- inputText: 'Se pagó el gas sin registrar'
+- inputText: 'Se cayó el sobre del cambio'
 - hideKeyboard
-
 - tapOn:
-    id: 'cierre-cerrar'
+    id: 'cierre-cerrar-turno'
+
+# Hecho: «Faltante» with the note's motivo in its line (lineaCerrado).
 - extendedWaitUntil:
     visible:
       id: 'cierre-hecho'
-    timeout: 8000
-- assertVisible:
-    text: 'Con un faltante de $300.00.'
+    timeout: 10000
+- assertVisible: '.*Faltante.*'
+- assertVisible: '.*Con un faltante de \$100\.00\..*'
+- assertVisible: '.*Quedó un faltante explicado como «Otra razón»\..*'

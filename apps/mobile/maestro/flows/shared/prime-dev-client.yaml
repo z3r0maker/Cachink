@@ -1,0 +1,31 @@
+# Harness subflow (M-11): point the Expo dev-client at the local Metro and wait
+# until the app's first screen is up. entry-setup.sh runs it after every reset.
+# Handles the iOS «Open in …?» prompt and the dev menu's one-time welcome sheet
+# (A-16 harness gotcha).
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    text: 'Open'
+    optional: true
+- openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+- tapOn:
+    text: 'Open'
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Continue'
+    timeout: 8000
+    optional: true
+- tapOn:
+    text: 'Continue'
+    optional: true
+- tapOn:
+    id: 'xmark'
+    optional: true
+# The floating «Tools» button covers the header's bell on phones. Switch it off
+# once per simulator in the dev menu (gear › Tools button); the dev-client
+# remembers it across resets.
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen|quick-switch|tab-inicio|tab-turno'
+    timeout: 120000

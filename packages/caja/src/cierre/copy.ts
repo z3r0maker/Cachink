@@ -51,6 +51,7 @@ export function bandaTitulo(porEnviar: number, reintentando: number): string {
 }
 export const BANDA_CUERPO = 'Puedes cerrar; se enviarán cuando vuelva la conexión.';
 /** Under the band after «Reintentar envío» left records waiting (EsCajaCierre, EsMvCierre). */
+export const BANDA_SIN_RED = 'Todavía no hay internet. Lo volvemos a intentar solos en un momento.';
 export const BANDA_NO_SE_PUDO = 'Todavía no se pudo. Lo volvemos a intentar solos en un momento.';
 
 /** The closed screen's own line while records wait (DS-06): the owner sees the close once they go up. */
@@ -79,4 +80,18 @@ export function lineaCerrado(
 export function conSigno(d: DiferenciaCorte): string {
   if (d.tipo === 'cuadra') return formatMoney(d.monto);
   return `${d.tipo === 'falta' ? '−' : '+'}${formatMoney(d.monto)}`;
+}
+
+/** The chip the close ends on: «Cuadró», «Faltante», «Sobrante». */
+export const CHIP_CIERRE = { cuadra: 'Cuadró', falta: 'Faltante', sobra: 'Sobrante' } as const;
+
+/** The done title: the celebration only when it landed on the centavo. */
+export const tituloHecho = (d: DiferenciaCorte): string =>
+  d.tipo === 'cuadra' ? '¡Turno cerrado!' : 'Turno cerrado';
+
+/** The title's second line: «Cuadró al centavo.», «Con un faltante de $70.00.» */
+export function segundaLinea(d: DiferenciaCorte): string {
+  if (d.tipo === 'cuadra') return 'Cuadró al centavo.';
+  const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
+  return `Con un ${que} de ${formatMoney(d.monto)}.`;
 }

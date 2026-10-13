@@ -4,7 +4,6 @@
  */
 import { describe, expect, it } from 'vitest';
 import { heroFor, kpisFor } from '@xangarro/caja/inicio';
-import { cuentaPara } from '@xangarro/caja/lectura';
 import type { CajaTurno, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
 import {
   cortesDe,
@@ -115,7 +114,7 @@ function filas(p: Partial<FilasInicio> = {}): FilasInicio {
     ],
     lineas: [linea('A', 16_000n), linea('B', 9_000n), linea('C', 5_000n)],
     gastos: [],
-    abonos: [],
+    movimientos: [],
     turnos: [
       turno({
         id: 'T0',
@@ -168,44 +167,7 @@ describe('inicioMovil', () => {
     expect(d.tareas.map((t) => t.tipo)).toEqual(['gasto', 'reponer']);
     expect(d.tareas[0]?.titulo).toBe('Registrar gas de la semana');
     expect(d.tareas[1]?.detalle).toBe('Quedan 6 · el umbral es 15');
-    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual([
-      '/egresos',
-      '/inventario?reponer=P9',
-    ]);
-  });
-
-  it('reads fiado from the accounts: «Por cobrar» and «Cobrar a …» when overdue', () => {
-    const chuy = cuentaPara({
-      cliente: {
-        id: 'C1',
-        nombre: 'Taller de Chuy',
-        telefono: null,
-        createdAt: '2026-01-10T12:00:00Z',
-        limiteCentavos: 1500_00n,
-        plazoDias: 15,
-      },
-      ventas: [
-        {
-          id: 'T9',
-          folio: 288,
-          concepto: 'Comida',
-          fecha: '2026-04-28',
-          hora: '13:10',
-          createdByUserId: null,
-        },
-      ],
-      montos: new Map([['T9', 800_00n]]),
-      abonos: [{ id: 'A1', fecha: HOY, montoCentavos: 400_00n, metodo: 'Efectivo', nota: null }],
-      capturos: new Map(),
-    });
-    const cerrado = turno({ cierreAt: new Date(2026, 4, 14, 14, 0).toISOString() });
-    const d = inicioMovil(filas({ turno: cerrado }), ENTORNO, HOY, [chuy]);
-    expect(d.ultimoTurno.porCobrar).toBe(400_00n);
-    expect(d.ultimoTurno.clientesConSaldo).toBe(1);
-    const cobrar = d.tareas.find((t) => t.tipo === 'cobrar');
-    expect(cobrar?.titulo).toBe('Cobrar a Taller de Chuy');
-    expect(rutaMovil(cobrar?.href ?? '')).toBe('/cobranza/C1?abonar=1');
-    expect(inicioMovil(filas(), ENTORNO, HOY).ultimoTurno.porCobrar).toBe(0n);
+    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/gastos', '/productos']);
   });
 
   it('lists the closes newest first, as the chips say them', () => {
@@ -256,15 +218,11 @@ describe('helpers', () => {
     expect(haceDias('2026-03-01', 30)).toBe('2026-01-30');
   });
   it('maps the web hrefs to the phone routes, or none', () => {
-    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/egresos');
+    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
-    expect(rutaMovil('/operador/cierre')).toBe('/cierre');
-    expect(rutaMovil('/operador/cobranza/C1')).toBe('/cobranza/C1?abonar=1');
-    expect(rutaMovil('/operador/cobranza')).toBe('/cobranza');
-    expect(rutaMovil('/operador/avisos')).toBe('/avisos');
-    expect(rutaMovil('/operador/pendientes')).toBe('/pendientes');
-    expect(rutaMovil('/operador/inventario?reponer=P9')).toBe('/inventario?reponer=P9');
-    expect(rutaMovil('/operador/acceso')).toBeNull();
+    expect(rutaMovil('/operador/cierre')).toBe('/turno');
+    expect(rutaMovil('/operador/cobranza/C1')).toBe('/fiado');
+    expect(rutaMovil('/operador/avisos')).toBeNull();
   });
   it('splits the greeting from «La caja está lista.»', () => {
     expect(partirSaludo('¡Buenas tardes, Ana! La caja está lista.')).toEqual([

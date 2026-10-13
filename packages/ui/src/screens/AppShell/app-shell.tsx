@@ -15,7 +15,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { View } from '@tamagui/core';
-import { BottomTabBar, OfflineBanner, PathIcon } from '../../components/index';
+import { BottomTabBar, OfflineBanner, PathIcon, SafeAreaSpacer } from '../../components/index';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
@@ -114,14 +114,14 @@ function useFrame(props: AppShellFrameProps) {
     back,
     status: props.headerStatus ?? 'full',
     avisos: props.avisos,
-    onOpenPendientes: () => props.onNavigate('/pendientes'),
+    onOpenRejected: () => props.onNavigate('/no-enviados'),
   };
   const menu: NavMenuProps = {
     activeKey: active,
     data,
     onNavigate: props.onNavigate,
     onLock: props.onLock ?? props.onSwitchOperator,
-    onCloseTurno: () => props.onNavigate('/cierre'),
+    onCloseTurno: () => props.onNavigate(NAV.turno.path),
   };
   return { active, header, menu };
 }
@@ -129,8 +129,7 @@ function useFrame(props: AppShellFrameProps) {
 function OfflineSlot(): ReactElement | null {
   const { state } = useCloudSync();
   if (state.phase !== 'offline') return null;
-  // The one «por enviar» count (DB3-CAJA-02): the pill's and Registros por enviar's.
-  return <OfflineBanner pendientes={state.counts.unsent} />;
+  return <OfflineBanner pendientes={state.counts.pending + state.counts.retrying} />;
 }
 
 /** The frame itself, fed its data: what Storybook renders without a database. */
@@ -149,6 +148,11 @@ export function AppShellFrame(props: AppShellFrameProps): ReactElement {
       {layout === 'rail' ? <NavRail {...menu} /> : null}
       {layout === 'sidebar' ? <NavSidebar {...menu} /> : null}
       <View flex={1} minWidth={0}>
+        {/* The status bar sits over the frame's top edge on iOS (M-11): the
+            extension blends with the white header under it. */}
+        <View backgroundColor={colors.white}>
+          <SafeAreaSpacer />
+        </View>
         {phone ? <CajaHeader {...header} /> : <CajaTopbar {...header} />}
         {props.banners}
         <Body>{props.children}</Body>

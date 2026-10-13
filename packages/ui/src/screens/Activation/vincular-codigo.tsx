@@ -7,13 +7,11 @@
 import type { ReactElement } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import { Eyebrow, MText, PathIcon } from '../../components/index';
+import { Btn, Eyebrow, MText, PathIcon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { borderWidths, colors, radii } from '../../theme';
 import { faltaParaConectar, correoValido, ACTIVATION_CODE_LENGTH } from './activation-form';
-import type { DescargaInicial } from '../../activation/use-descarga';
 import { CampoCorreo, CodigoCajas } from './vincular-campos';
-import { BotonConectar, VincularDescarga } from './vincular-descarga';
 import { AvisoVinculacion, CabezaVolver, Paso, Pie } from './vincular-partes';
 
 export interface VincularCodigoProps {
@@ -26,9 +24,6 @@ export interface VincularCodigoProps {
   readonly submitting: boolean;
   /** i18n key of the server's refusal, if any. */
   readonly errorKey: string | null;
-  /** DS-10: a big business's pages after the first, once the code was accepted. */
-  readonly descarga?: DescargaInicial | null;
-  readonly onReintentar?: () => void;
 }
 
 const ALERTA = 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 8v4M12 16h.01';
@@ -92,17 +87,19 @@ function PieConectar(p: VincularCodigoProps): ReactElement {
         : t('entrar.vincular.faltanLetras', { n: falta.n });
   return (
     <Pie>
-      <BotonConectar
-        label={t('entrar.vincular.conectar')}
+      <Btn
+        variant="primary"
+        size="xl"
+        fullWidth
+        sentence
         disabled={falta !== null}
-        submitting={p.submitting}
-        descarga={p.descarga ?? null}
-        onConectar={p.onConectar}
-        onReintentar={() => p.onReintentar?.()}
+        loading={p.submitting}
+        onPress={p.onConectar}
         testID="activation-submit"
-      />
-      {p.descarga ? <VincularDescarga d={p.descarga} /> : null}
-      {texto && !p.descarga ? (
+      >
+        {t('entrar.vincular.conectar')}
+      </Btn>
+      {texto ? (
         <MText size="sm" weight="bold" color={colors.gray600} textAlign="center">
           {texto}
         </MText>

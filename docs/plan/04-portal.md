@@ -182,16 +182,17 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   acceptable: fall back to CSS Modules, and add a task for a CSS-parsing value auditor — do not
   defer that discovery to Fase 5.
 
-### P-21 `pnpm design:compare` capture harness `[deuda]` `[media]`
+### P-21 Capturas lado a lado para `pnpm design:compare` [deuda] [media]
 
-- [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
-  - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
-    `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern
-    `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the
-    `package.json` script and the ignore line. The sources are on no disk (worktree and main
-    checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the
-    dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery.
-    Restore the script entry when the harness lands.
+- [ ] Status · **Blocked by:** P-18 · **Blocks:** la verificación 1 de cada tarea de pantalla
+  - **Remaining (2026-09-23, verified against the code):** todo el sistema de captura. El que se
+    verificó en `83ec5840` (2026-09-21) nunca llegó a un commit: el patrón `design-compare/` de
+    `.gitignore`, sin anclar, también coincidía con `scripts/design-compare/`, así que el commit
+    sólo llevó el script de `package.json` y la línea del ignore. Las fuentes no están en ningún
+    disco (se revisaron el worktree y el checkout principal) ni en ningún commit. El mismo día: el
+    patrón ahora es `/design-compare/` y el script `design:compare` que quedó colgando se eliminó,
+    así que los Steps de abajo son una reescritura, no una recuperación. Restaura la entrada del
+    script cuando aterrice el sistema de captura.
 - **Context:** ADR-058. Check 1 is a review, not an assertion — the design plan itself lists browser
   width, text reflow and real-vs-sample data as acceptable differences, and the `.dc.html` files
   render through a vendored runtime that fetches fonts over the network. This never runs in CI.
@@ -248,12 +249,12 @@ including the press stamp.
   edits outside `theme.ts`; the contrast test runs from its new home; `pnpm lint:design` still
   reports `total: 0`; the emitted CSS contains every token in `colors`.
 
-### P-23 Primitives + Storybook inventory + visual-regression baselines `[deuda]` `[media]`
+### P-23 Primitivas + inventario en Storybook + líneas base de regresión visual [deuda] [media]
 
-- [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
-  - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
-  - 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance.
-  - In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed.
+- [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 y todas las tareas de pantalla
+  - **Remaining (2026-09-23, verified against the code):** la cláusula de aceptación de `design:compare` espera a P-21, reabierto ese mismo día (el sistema de captura nunca llegó a un commit y no existe en ningún disco; ver P-21). No hay página de Storybook en `apps/web`; Toast, gauge, nav item, switcher y user menu siguen sin cubrirse.
+  - Auditoría doc 2026-09-22: entregado salvo la compuerta de `design:compare` en su Acceptance.
+  - En curso: 2026-09-17 · **vocabulario núcleo construido y en pantalla**, la compuerta aún no cierra.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
     `pressTransform`); Button (6 fills × 3 sizes, disabled, hover-to-`yellowDeep`); Card
     (8 tones × 3 emphases, interactive lift); Tag and StatusPill (9 tones, bordered dot);
@@ -1164,13 +1165,13 @@ never invented text.
 - **Acceptance:** pace arithmetic unit-tested (1 happy + 3 unhappy); all seven states in Storybook;
   viewer sees no wizard.
 
-### P-28 Diagnóstico + estrategia — **«Próximamente» in production** `[media]`
+### P-28 Diagnóstico + estrategia — **«Próximamente» en producción** [media]
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
-  - **Remaining (2026-09-23, verified against the code):** only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt.
-  - 2026-09-22 doc audit: shipped except the ten report sections and the price table.
-  - In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built.
-  - Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor ===
+  - **Remaining (2026-09-23, verified against the code):** sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse.
+  - Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios.
+  - En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido.
+  - Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor ===
 'completo'` renders `locked` with the Xangarrote upsell, and an LLM-backed path with the
     production flag closed renders **«Próximamente»** — which has no call to action, because it is
     not something a customer can unlock.
@@ -1320,7 +1321,7 @@ never invented text.
   made; locally the report renders from fixtures; a prompt-injection fixture (a product named with
   instruction text) does not alter the output structure.
 
-### P-29 Catálogo desde una foto — **«Próximamente» in production**
+### P-29 Catálogo desde una foto — **«Próximamente» en producción**
 
 > **2026-09-26 (ADR-110): the only unbounded model call left.** After P-38 went deterministic and
 > P-39 moved to the monthly run, this is the one user-triggered model call in the product, and it
@@ -1348,12 +1349,12 @@ never invented text.
 - **Acceptance:** fixture photographs produce schema-valid rows; a photograph with no products
   produces the error state, not an empty commit; production renders «Próximamente».
 
-### P-30 Asesor generation runtime `[media]`
+### P-30 Runtime de generación del Asesor [media]
 
 - [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
-  - **Remaining (2026-09-26):** the **model call**, and only that. The fan-out landed — see below. The `notices` line in an earlier Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`.
-    - **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table.
-  - 2026-09-26 · **The daily fan-out landed, and it needed no migration.** The open question was which role may enumerate tenants, between a new privileged function, the metering role, and the console's service role. **The metering role wins, and the answer was already in the schema:** 0010 grants `xangarro_metering` `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read USING (true)` policy, because `usage_counts(NULL, …)` enumerates the very same set in order to count it. So `liveBusinessIds` reads two already-granted columns — **no migration, no new role, no new secret**, and the portal already holds `METERING_DATABASE_URL` for the nightly recompute. The service role was never eligible: CLAUDE.md §3 makes the backoffice the only project that may hold it, so reaching for it would have moved either the key or the cron. This also un-blocks P-30 from B-02/B-03, which it was only waiting on for that decision.
+  - **Remaining (2026-10-05, verified against the code):** la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo.
+    - **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia.
+  - 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. **The metering role wins, and the answer was already in the schema:** 0010 grants `xangarro_metering` `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read USING (true)` policy, because `usage_counts(NULL, …)` enumerates the very same set in order to count it. So `liveBusinessIds` reads two already-granted columns — **no migration, no new role, no new secret**, and the portal already holds `METERING_DATABASE_URL` for the nightly recompute. The service role was never eligible: CLAUDE.md §3 makes the backoffice the only project that may hold it, so reaching for it would have moved either the key or the cron. This also un-blocks P-30 from B-02/B-03, which it was only waiting on for that decision.
     - `server/asesor/fanout.ts` sweeps every live business **sequentially**, like the usage recompute — `generarParaNegocio` opens three transactions per business and a serverless pool is small. Per-tenant try/catch: one tenant failing is reported under its own id, tallied in `fallidos`, and the sweep continues to the next, because a scheduled job that 500s on the first bad tenant hides every tenant behind it.
     - **Universal and unfiltered, per ADR-109 §1** — no tier gate and no activity gate. Both belong to the _monthly_ Diagnóstico, which is the only part that costs money and has nowhere to be stored until P-28.
     - **The deadline is explicit.** The sweep stops starting tenants at 240 s (inside Vercel's 300 s) and returns `restantes`, reported as an error so a sweep that outgrew one invocation is loud rather than truncated in silence. It is a freshness bound, not a correctness one: `loadAsesorPage` materialises the same pipeline on read (ADR-088), so a tenant the deadline cut off still sees correct insights the moment it opens the page. **The fix when `restantes` first goes non-zero is sharding by id range** (`?shard=0/4`), which needs no new state because the enumeration is ordered by id.
@@ -1621,7 +1622,7 @@ critical avisos cannot be switched off.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
 
-### P-35 Portal coverage to 95% (unit + E2E merged, ADR-102) `[deuda]` `[alta]`
+### P-35 Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
@@ -1728,6 +1729,15 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     every component test after it: the app tsconfig's `jsx: preserve` left .tsx untransformed
     under Vite 8 — the override moved from `esbuild` to `oxc` in `apps/web/vitest.config.ts`.
     Functions, the steepest climb, are +1.2 since the morning; branches +1.3.
+  - 2026-09-28 · **The merge put the floor underwater, and the ratchet earned it back.** The
+    perf/db-scale merge landed new untested screens (cobranza/recordar, runtime/pestana,
+    caja/nuevo-partes, estado blocks) and the portal read 92.9/90.0/86.2/76.5 against the
+    93.4/90.7/87.1/77.2 floor — exactly what ADR-102 is for. Eight suites lit the dark code
+    (the BroadcastChannel handshake, the door's runtime calls, the NIP state machine, the
+    one-tab gate, the WhatsApp reminder, the send queue, the estado blocks, the asesor metas
+    view). **Floor raised to 93.8 / 90.9 / 87.1 / 77.5** on the morning's green full-suite E2E
+    plus 700 unit tests. Also landed: mobile's first coverage gate (floor 10/9/13/25, the
+    shell only — screens are Maestro's).
   - 2026-09-28 · **Main red on the gate since #32 — the floor outran CI, coverage never fell.**
     Last green gate: `ec1a5995` (run 36375457279), 91.7 lines against the then-floor 90. The #32
     merge brought the four local raises (92.5 → 93.4), and every CI run since measures the same
@@ -1746,9 +1756,8 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     found a bug: «Cambiar» in the dialog did nothing (`Metas` returned the dialog before
     reading `editando`); fixed. Note: `asesor-metas.sync.spec`'s title promises the lograda
     dialog, but the takeover consumes that load, so the dialog never renders there. CI-mode
-    measurement after: **94.2 / 91.4 / 87.9 / 77.6.**
-- **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
-  in uncovered lines at the first measurement (≈700 lines to 85%):
+    measurement after: **94.2 / 91.4 / 87.9 / 77.6.**- **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
+    in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
   2. `server/actions` (44%, 290 lines; 7 files at 0%) — the error branches Playwright
      never reaches: Postgres integration tests per CLAUDE.md §6.
@@ -1762,8 +1771,13 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
 
 ### P-36 First production walkthrough: the owner's findings (2026-09-25) `[alta]`
 
-- [~] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
-  `feat/don-cuentas-portal` landing for P-36.7
+- [x] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
+      `feat/don-cuentas-portal` landing for P-36.7
+  - Done: 2026-10-05 · the last two halves landed and verified in code: `feat/no-trial` (PR #11,
+    merge `59808c31`) and `feat/don-cuentas-portal` (PR #10, merge `04065d11`) are both merged — the
+    paid CTAs read «Contratar este plan» / «Seguir gratis» with no «14 días» string anywhere (pinned
+    by `e2e/onboarding.spec.ts`), and the sidebar entry is Don Cuentas with its avatar
+    (`shell/nav-items.ts`, `components/don-cuentas.tsx`). Item closed.
   - Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required
     and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie)
     with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's
@@ -1772,8 +1786,6 @@ lineas.tsx` — the CxC prefill — is pinned by `tests/saldos-lineas.test.ts` (
     closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two
     one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests:
     domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run).
-    **Remaining:** P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para
-    vender. N opcionales por hacer» once the required list is done.
 - **Context:** the owner walked signup → wizard → «Tu plan ideal» → Stripe → portal on production
   the night the domains went live and wrote down what was off. Verified against the code
   (`origin/main` @ `d9e0c4a8`); each item names its cause.
@@ -1848,7 +1860,7 @@ own task and are not repeated here: P-28 (Diagnóstico, estrategia, «¿Me alcan
 desde una foto), P-30 (the model call behind the monthly review), P-32 (avisos and Compartir por
 WhatsApp).
 
-### P-37 Ticket printing from the caja `[baja]`
+### P-37 Impresión de tickets desde la caja [baja]
 
 - [!] Status · **Deferred 2026-09-26 (owner): hardware is not in scope.** There is no ticket
   printer to build against and none on the roadmap, so the acceptance — «a sale prints on a
@@ -1862,51 +1874,55 @@ WhatsApp).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
 
-### P-38 Don Cuentas explains a cash difference `[media]`
+### P-38 Don Cuentas explica una diferencia de caja [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
-      **2026-09-26 (owner, ADR-110): fully deterministic — no model.** The causes this proposes are
-      named in its own Steps: cancelled sales, fiado, gastos without comprobante. Those are three
-      queries over one turno, ranked by amount. Its acceptance — «cites only that turno's rows» —
-      is then free rather than something a prompt has to be trusted for; it works on every plan,
-      Xangarrito included; and it costs nothing on a shop that cashes up daily, which was the most
-      frequent model call in the product. **No longer blocked by P-30:** it needed the generation
-      runtime only because it was going to be generated.
+      **2026-09-26 (owner, ADR-110): totalmente determinista — sin modelo.** Las causas que esto
+      propone están nombradas en sus propios Steps: ventas canceladas, fiado, gastos sin
+      comprobante. Son tres consultas sobre un turno, ordenadas por monto. Su aceptación — «cites
+      only that turno's rows» — sale gratis en lugar de algo que haya que confiarle a un prompt;
+      funciona en todos los planes, Xangarrito incluido; y no cuesta nada en un negocio que hace
+      corte a diario, que era la llamada al modelo más frecuente del producto.
+      **Ya no está bloqueado por P-30:** sólo necesitaba el runtime de generación porque iba a ser
+      generado.
 - **Steps:** on a corte with a faltante or sobrante, Don Cuentas proposes the likely causes from
   the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
 
-### P-39 Don Cuentas conclusions in Estados financieros `[baja]`
+### P-39 Conclusiones de Don Cuentas en Estados financieros [baja]
 
 - [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
-      **2026-09-26 (owner, ADR-110): written once a month, shown on Estados, and announced.**
-      Not per statement view — that was a per-view bill nobody had costed — and not folded into the
-      Diagnóstico either, because the value is a line _where the numbers are_. Generated with the
-      monthly run, stored for that period, rendered on Estados financieros. The same run writes a
-      notice naming what was generated, with links to Diagnóstico and to Estados, so a shopkeeper
-      who does not open the right tab still learns it exists. That notice is **`source='sistema'`,
-      not `'asesor'`** — ADR-060 keeps the bell clear of Asesor insights on purpose, so an `asesor`
-      row would be written and never ring; «your report is ready» is a system event, not an insight.
-      Needs somewhere to keep one conclusion per period per statement, which P-28's output defines.
+      **2026-09-26 (owner, ADR-110): se escribe una vez al mes, se muestra en Estados y se anuncia.**
+      No por cada vista del estado — esa era una factura por vista que nadie había cotizado — y
+      tampoco se pliega en el Diagnóstico, porque el valor es una línea _donde están los números_.
+      Se genera con la corrida mensual, se guarda para ese periodo y se renderiza en Estados
+      financieros. La misma corrida escribe un aviso que nombra lo que se generó, con enlaces al
+      Diagnóstico y a Estados, para que un tendero que no abre la pestaña correcta igual se entere
+      de que existe. Ese aviso es **`source='sistema'`, no `'asesor'`** — ADR-060 mantiene a
+      propósito la campana limpia de insights del Asesor, así que un renglón `asesor` se
+      escribiría y nunca sonaría; «your report is ready» es un evento del sistema, no un insight.
+      Necesita un lugar donde guardar una conclusión por periodo por estado, cosa que define la
+      salida de P-28.
 - **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
 
-### P-40 First diagnóstico free at 90 days `[baja]`
+### P-40 Primer diagnóstico gratis a los 90 días [baja]
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
-  - **Narrowed by ADR-109 (2026-09-26).** This said «Xangarrito **or Xangarro**», written when the
-    Diagnóstico was Xangarrote-only. Xangarro now gets one every month as part of the plan, so a
-    one-off free report is not an offer to them — **P-40 is Xangarrito's alone.** What it shows is
-    the _short read_ (Xangarro's shape, per P-28), not the full report: the point is to taste what a
-    written reading is worth, and a free full report would undercut both paid tiers at once. The
-    design already draws the state — `diagFreeOffer`, one of the Diagnóstico's six.
+  - **Acotado por ADR-109 (2026-09-26).** Esto decía «Xangarrito **or Xangarro**», escrito cuando el
+    Diagnóstico era sólo de Xangarrote. Xangarro ya recibe uno cada mes como parte del plan, así
+    que un reporte gratis único no es una oferta para ellos — **P-40 es sólo de Xangarrito.** Lo
+    que muestra es la _lectura corta_ (la forma de Xangarro, según P-28), no el reporte completo:
+    la idea es probar cuánto vale una lectura escrita, y un reporte completo gratis socavaría
+    ambos niveles de pago a la vez. El diseño ya dibuja el estado — `diagFreeOffer`, uno de los
+    seis del Diagnóstico.
 - **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
 
-### P-41 Advanced inventory functions `[baja]`
+### P-41 Funciones avanzadas de inventario [baja]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
