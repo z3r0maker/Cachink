@@ -29,6 +29,9 @@ pnpm lint
 echo "▶ pre-push: pnpm typecheck"
 pnpm typecheck
 
+echo "▶ pre-push: pnpm format:check"
+pnpm format:check
+
 echo "▶ pre-push: pnpm test"
 pnpm test
 
