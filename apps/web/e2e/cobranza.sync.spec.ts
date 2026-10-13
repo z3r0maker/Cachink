@@ -78,7 +78,8 @@ test('a fiado sale opens an account, and an abono settles it oldest first', asyn
         asTenant(BIZ, async (sql) => {
           const [pago] = await sql<{ monto: string }[]>`
             SELECT monto_centavos::text AS monto FROM client_payments
-            WHERE business_id = ${BIZ} ORDER BY created_at DESC LIMIT 1`;
+            WHERE business_id = ${BIZ} AND nota IS NULL
+            ORDER BY created_at DESC LIMIT 1`;
           const [ticket] = await sql<{ estado: string; cliente: string }[]>`
             SELECT estado_pago AS estado, cliente_id AS cliente FROM tickets
             WHERE business_id = ${BIZ} AND folio = 1

@@ -12,13 +12,21 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const stamp = Date.now();
-const email = `sync-${stamp}@test.mx`;
-const biz = newUlid();
-const dev = newUlid();
-const rejection = newUlid();
+// Minted in beforeAll, not here: CI re-runs beforeAll against a database that
+// already holds this tenant's rows (users_email_key), so every execution gets
+// its own stamp.
+let stamp = 0;
+let email = '';
+let biz = '';
+let dev = '';
+let rejection = '';
 
 test.beforeAll(async () => {
+  stamp = `${process.pid}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` as never;
+  email = `sync-${stamp}@test.mx`;
+  biz = newUlid();
+  dev = newUlid();
+  rejection = newUlid();
   const userId = randomUUID();
   const hash = await hashPassword('sync-1234');
   await asTenant(biz, async (sql) => {
