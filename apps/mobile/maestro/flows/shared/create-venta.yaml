@@ -13,7 +13,18 @@ appId: mx.xangarro.mobile
     timeout: 8000
 
 # Add a product to the ticket and charge it (Efectivo, «Exacto»).
-- tapOn: 'Agregar Taco al Pastor.*'
+# The grid lists alphabetically; this tile is below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000001'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000001' }
 - assertVisible:
     id: 'cobrar-bar'
-- runFlow: cobrar-ticket.yaml
+- runFlow:
+    file: cobrar-ticket.yaml
+    env:
+      METODO: Efectivo

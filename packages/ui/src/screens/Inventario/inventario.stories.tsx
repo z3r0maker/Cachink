@@ -1,59 +1,90 @@
 /**
- * Inventario (Track M, M-09) for review against the board MvInventario, with
- * the design's inventory (`INVENTARIO_FIXTURE`); the live route reads the
- * phone's tracked products and this turno's movements.
+ * Inventario (Track M, M-09) in its seven board states, for review against
+ * the phone board: the existencias with their regla, the turno's movements,
+ * each movement sheet, sin productos, cargando y con error. Fed the caja
+ * package's design fixture; the live screen reads `useInventario()`.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
+import { INVENTARIO_FIXTURE } from '@xangarro/caja/inventario';
 import { initI18n } from '../../i18n/index';
-import { InventarioScreen, type InventarioScreenProps } from './inventario-screen';
-import { MarcoDetalle } from './marco-detalle';
-import { muestraInventario } from './inventario-muestra';
+import { Marco } from '../Inicio/story-marco';
+import { InventarioScreen } from './inventario-screen';
+import { LlegoMercanciaSheet } from './llego-mercancia-sheet';
+import { MermaSheet } from './merma-sheet';
 
 initI18n();
 
-type Vista = 'existencias' | 'movimientos' | 'merma' | 'llego' | 'vacio' | 'cargando' | 'error';
+type Estado =
+  | 'existencias'
+  | 'movimientos'
+  | 'llego-mercancia'
+  | 'merma'
+  | 'sin-productos'
+  | 'cargando'
+  | 'error-al-leer';
 
-function props(vista: Vista): InventarioScreenProps {
-  const base: InventarioScreenProps = {
-    state: 'happy',
-    data: muestraInventario(),
-    dueno: 'Pedro',
-    registrando: false,
-    onRegistrar: () => Promise.resolve(),
-    onRetry: () => undefined,
-  };
-  if (vista === 'movimientos') return { ...base, tabInicial: 'movimientos' };
-  if (vista === 'merma') return { ...base, abrir: { id: 'horchata', tipo: 'Merma' } };
-  if (vista === 'llego') return { ...base, abrir: { id: 'pastor', tipo: 'Entrada' } };
-  if (vista === 'vacio')
-    return { ...base, state: 'empty', data: { existencias: [], movimientos: [] } };
-  if (vista === 'cargando') return { ...base, state: 'loading' };
-  if (vista === 'error') return { ...base, state: 'error' };
-  return base;
-}
+const FIRMA = `${INVENTARIO_FIXTURE.operador}, ${INVENTARIO_FIXTURE.caja}`;
 
-function Demo({ vista }: { vista: Vista }): ReactElement {
+function Pantalla(p: { readonly estado: Estado }): ReactElement {
+  const hoja = p.estado === 'llego-mercancia' || p.estado === 'merma';
+  const cargando = p.estado === 'cargando';
+  const error = p.estado === 'error-al-leer';
+  const vacio = p.estado === 'sin-productos';
   return (
-    <MarcoDetalle ruta="/inventario" volver="Mi turno" avisos={2}>
-      <InventarioScreen {...props(vista)} />
-    </MarcoDetalle>
+    <Marco layout="phone" shell>
+      <InventarioScreen
+        state={cargando ? 'loading' : error ? 'error' : 'happy'}
+        tabInicial={p.estado === 'movimientos' ? 'movimientos' : 'existencias'}
+        data={
+          cargando || error
+            ? null
+            : vacio
+              ? { ...INVENTARIO_FIXTURE, existencias: [], movimientos: [] }
+              : INVENTARIO_FIXTURE
+        }
+        dueno="Pedro"
+        registrar={() => Promise.resolve()}
+        onRetry={() => undefined}
+      />
+      {hoja ? (
+        p.estado === 'merma' ? (
+          <MermaSheet
+            open
+            items={INVENTARIO_FIXTURE.existencias}
+            preselect="queso"
+            firma={FIRMA}
+            onClose={() => undefined}
+            onGuardar={() => Promise.resolve()}
+          />
+        ) : (
+          <LlegoMercanciaSheet
+            open
+            items={INVENTARIO_FIXTURE.existencias}
+            preselect="pastor"
+            firma={FIRMA}
+            onClose={() => undefined}
+            onGuardar={() => Promise.resolve()}
+          />
+        )
+      ) : null}
+    </Marco>
   );
 }
 
-const meta: Meta<typeof Demo> = {
+const meta: Meta<typeof Pantalla> = {
   title: 'Track M / Pantallas / Inventario',
-  component: Demo,
+  component: Pantalla,
   parameters: { layout: 'centered' },
 };
 export default meta;
 
-type Story = StoryObj<typeof Demo>;
+type Story = StoryObj<typeof Pantalla>;
 
-export const Existencias: Story = { args: { vista: 'existencias' } };
-export const Movimientos: Story = { args: { vista: 'movimientos' } };
-export const Merma: Story = { args: { vista: 'merma' } };
-export const LlegoMercancia: Story = { args: { vista: 'llego' } };
-export const SinProductos: Story = { args: { vista: 'vacio' } };
-export const Cargando: Story = { args: { vista: 'cargando' } };
-export const ErrorAlLeer: Story = { args: { vista: 'error' } };
+export const Existencias: Story = { args: { estado: 'existencias' } };
+export const Movimientos: Story = { args: { estado: 'movimientos' } };
+export const LlegoMercancia: Story = { args: { estado: 'llego-mercancia' } };
+export const Merma: Story = { args: { estado: 'merma' } };
+export const SinProductos: Story = { args: { estado: 'sin-productos' } };
+export const Cargando: Story = { args: { estado: 'cargando' } };
+export const ErrorAlLeer: Story = { args: { estado: 'error-al-leer' } };

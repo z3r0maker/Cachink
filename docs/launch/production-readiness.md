@@ -5,29 +5,27 @@
 > Legend: **BLOCKER** = cannot go live · **BEFORE-STORES** = needed for App Store / Play submission ·
 > **SOON** = first weeks after launch · `[x]` done · `[ ]` open · `[~]` drafted, pending review.
 
-## 0. The one thing everything waits on
+## 0. Lo único que todo lo demás espera
 
-- [ ] **BLOCKER — Legal entity named.** `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]`
-      `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+- [ ] **BLOQUEANTE — Razón social constituida.** `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
       art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
       When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
       `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
 
-## 1. Legal texts
+## 1. Textos legales
 
 - [~] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based). `[alta]`
-- [~] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`. `[alta]`
-- [~] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`). `[alta]`
-- [~] Anexo de encargado — `docs/legal/aviso/encargado-clausulas.md`. `[alta]`
-- [~] Procedimiento ARCO — `docs/legal/aviso/arco-procedimiento.md`. `[alta]`
-- [ ] **BLOCKER — Lawyer's review** of the five texts + the five confirmations in `[critica]` `[bloq]`
+- [~] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`.
+- [~] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`).
+- [~] Anexo de encargado — `docs/legal/aviso/encargado-clausulas.md`.
+- [~] Procedimiento ARCO — `docs/legal/aviso/arco-procedimiento.md`.
+- [ ] **BLOQUEANTE — Revisión del abogado** de los cinco textos + las cinco confirmaciones en
       `docs/legal/aviso/respuestas-oq-borrador.md` §0.
-- [ ] Plantilla de aviso for the negocio's own customers (OQ-L16). `[media]`
-- [ ] Retire `docs/legal/privacy.md` and `docs/legal/terms.md` once the above are approved. `[baja]`
-- [ ] Fill the three `[PAÍS]` cells in aviso §6.1 (error monitoring, mail, messaging) and the `[alta]`
-      `[PLAZO]`s once OQ-L13 is confirmed.
+- [ ] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
+- [ ] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
+- [ ] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
 
-## 2. Consent capture (PRIV-REG-01) — implemented 2026-09-22
+## 2. Captura de consentimiento (PRIV-REG-01) — implementado 2026-09-22
 
 - [x] Aviso simplificado rendered on `/signup` above the button (`signup/consent.tsx`).
 - [x] One affirmative act (unticked checkbox) for aviso + términos + express patrimonial consent;
@@ -43,91 +41,101 @@
       no role but `postgres`, and `privacy_consents_immutable` fires `BEFORE DELETE OR UPDATE`
       `FOR EACH ROW`, so the owner is blocked too. (`xangarro_app` cannot execute
       `privacy_consents_day_root` — correct: that is the seal job's, not the app's.)
-- [ ] Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained `[alta]`
-      the acepto step and a refusal test) — not run in the session that wrote it.
-- [ ] **SOON — Nightly seal job:** call `xangarro.privacy_consents_day_root(day)` and obtain a `[media]`
+- [x] Run the Playwright onboarding spec against a database (`apps/web/e2e/onboarding.spec.ts` gained
+      the acepto step and a refusal test). **Done 2026-10-05:** CI runs it against a live database on
+      every push — the `portal-e2e` job in `.github/workflows/ci.yml` starts postgres:17, applies and
+      seeds the schema, and `test:e2e:coverage` includes `onboarding.spec.ts` (not excluded by
+      `playwright.config.ts`).
+- [ ] **PRONTO — Trabajo nocturno de sellado:** llamar `xangarro.privacy_consents_day_root(day)` y obtener una
       NOM-151 constancia (PSC) or an RFC 3161 timestamp; archive it with the day. Decide the PSC.
-- [ ] Archive the full text of every `AVISO_VERSION` (a hash without its text proves nothing) — `[alta]`
+- [ ] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
       simplest: a `consent_versions` table or a versioned file kept forever.
-- [ ] Configuración → Privacidad: show accepted version, toggle novedades (writes a `[alta]` `[bloq]`
+- [ ] Configuración → Privacidad: mostrar la versión aceptada, alternar novedades (escribe una
       `surface='configuracion'` row), link to ARCO.
-- [ ] Re-consent gate on login when a version adds a finalidad (art. 11); banner otherwise. `[media]`
-- [ ] Decide checkbox vs. button-as-consent with the lawyer (OQ-N7); today: checkbox. `[media]`
+- [ ] Bloqueo de re-consentimiento al iniciar sesión cuando una versión agregue una finalidad (art. 11); banner en caso contrario.
+- [ ] Decidir casilla vs. botón como consentimiento con el abogado (OQ-N7); hoy: casilla.
 
-## 3. Rights the aviso promises (must exist before the aviso is public)
+## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)
 
-- [ ] **BLOCKER — Self-service account deletion in the portal** (export → confirm → cancel Stripe → `[critica]` `[bloq]`
+- [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe → `[critica]` `[bloq]`
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
       creation) — see OQ-N4.
-- [ ] In-app **"Desvincular y borrar los datos de este dispositivo"** (aviso §7 currently admits `[alta]` `[bloq]`
+- [ ] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
       unlinking does not wipe).
-- [ ] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day `[alta]` `[bloq]`
-      clock (LFPA art. 28 calendar) and acuse.
-- [ ] Retention calendar implemented per table (OQ-L13 numbers once confirmed); 72-month rule for `[media]`
+- [x] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day
+      clock (LFPA art. 28 calendar) and acuse. **Done 2026-10-05, verified against the code:** the
+      public form (`apps/web/src/app/privacidad/solicitud/page.tsx`), `solicitar-arco.ts` (folio,
+      `kind='arco'`, `dueAt` on the `dias-habiles.ts` CDMX calendar with `plazosArco`'s 20th business
+      day), console handling in the inbox (`apps/backoffice/…/inbox/`), and the
+      `privacidad-arco.spec.ts` e2e.
+- [ ] Calendario de retención implementado por tabla (cifras de OQ-L13 una vez confirmadas); regla de 72 meses para
       payment-default data (art. 10).
-- [ ] Breach protocol with the Reglamento art. 65 field list, a named person, and the 72 h clause to `[alta]` `[bloq]`
+- [ ] Protocolo de brechas con la lista de campos del Reglamento art. 65, una persona designada y la cláusula de 72 h para
       negocios; `security.txt` + vulnerability-disclosure page.
-- [ ] Verify Sentry server-side captures no PII before the aviso says so. `[alta]` `[bloq]`
+- [x] Verify Sentry server-side captures no PII before the aviso says so. **Done 2026-10-05:**
+      `apps/web/src/server/observability/sentry.ts` inits with `sendDefaultPii: false` and scrubs the
+      request (except method + query-less URL), the user and the breadcrumbs in `beforeSend`; pinned
+      by `apps/web/tests/observability.test.ts` («strips cookies, headers, query and the user»); the
+      phone scrubs too (`packages/ui/src/telemetry/sentry.ts`).
 
-## 4. Subscriptions (LFPC art. 76 Bis VIII–IX, in force 2025-12-13)
+## 4. Suscripciones (LFPC art. 76 Bis VIII–IX, en vigor 2025-12-13)
 
-- [ ] **BLOCKER — Cancel in one click** from Configuración → Suscripción. `[critica]` `[bloq]`
-      **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
+- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción. `[critica]` `[bloq]` **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
       directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
       plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
       «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
       copy, the confirmation and the edge cases (already cancelled, past due).
-      **Re-verificado 2026-09-28:** la mitad de plomería ya existe y conviene no rehacerla: `cancelSubscription(id)` está en `apps/web/src/server/billing/gateway.ts:114`. Lo que no existe es la pantalla: no hay carpeta `configuracion` en el portal, así que Configuración → Suscripción se construye desde cero y el botón se cuelga de ese método.
-- [ ] **BLOCKER — Renewal reminder e-mail ≥ 5 business days before each charge**, with a one-click `[critica]` `[bloq]`
+- [ ] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de cancelación en un clic
       cancel link (tokenised).
-- [ ] Recurring-charge consent screen at checkout: frequency, amount, date, express acceptance. `[alta]` `[bloq]`
-- [ ] Price increases: 30-day notice + express re-acceptance flow. `[media]`
-- [ ] Address, phone and complaint channel visible **before** contracting (landing + checkout). `[alta]` `[bloq]`
-- [ ] Legal links (aviso, términos) in the landing footer, the portal footer, e-mail footers. `[alta]` `[bloq]`
+- [ ] Pantalla de consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa.
+- [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
+- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout).
+- [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
 
-## 5. Stores
+## 5. Tiendas de apps
 
-      **Re-verificado 2026-09-28:** parcial. El aviso ya está enlazado en la barra lateral del portal (`shell/sidebar-parts.tsx`, de N-34) y en el pie de la landing. Faltan: los términos en cualquiera de los dos, y los pies de los correos por completo — ningún archivo de `packages/email/src` enlaza un texto legal.
-
-- [ ] **BEFORE-STORES — Apple Privacy Nutrition Label + privacy manifest**; Play Data Safety form — `[critica]` `[bloq]`
+- [ ] **ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad**; formulario de Data Safety de Play —
       both derived from aviso §3 so they cannot disagree.
-- [ ] **BEFORE-STORES — Terms and privacy URLs live** (`xangarro.mx/privacidad`, `/terminos`) and `[critica]` `[bloq]`
+- [ ] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
       linked inside the app binary + App Store Connect (Guideline 3.1.2).
-- [ ] **BEFORE-STORES — Reviewer notes** explaining the device + NIP model (no in-app account, no `[critica]` `[bloq]`
+- [ ] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
       Sign in with Apple/Google, deletion via the portal).
-- [ ] Open-source licence notices screen generated from `pnpm licenses list --prod` (1,184 pkgs, no `[media]`
+- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes, sin
       copyleft; resolve the 2 `Unknown`: `@tamagui/native`, `buffers`).
-- [ ] Never add Sign in with Apple/Google to the mobile app (would trigger 5.1.1(v)). `[baja]`
+- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)).
 
-## 6. Third parties and contracts
+## 6. Terceros y contratos
 
-- [ ] Signed DPAs: Supabase, Vercel, Sentry, Stripe, mail provider, PAC, **Microsoft (Foundry)**, `[alta]` `[bloq]`
+- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, **Microsoft (Foundry)**, `[alta]` `[bloq]`
       **Anthropic**. Named list delivered to negocios via the Anexo, and on request.
-- [ ] Foundry hosting option decided and configured (**Hosted on Azure, US DataZone** recommended); `[alta]`
+- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: **Hosted on Azure, US DataZone**);
       written confirmation of the retention figure before the IA section publishes a number.
-- [ ] `ASESOR_LLM_*` never pointed at a personal proxy with real tenant data (add a guard). `[alta]`
-- [ ] Rule: the Asesor's model boundary stays the only module that knows a model exists; the IA `[media]`
-      section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
+- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda).
+- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
       at that boundary.
 
-## 7. Product hygiene with legal weight
+## 7. Higiene de producto con peso legal
 
-- [ ] Receipt (`comprobante`) carries **"Este comprobante no es un CFDI"** and the negocio's name as `[alta]` `[bloq]`
-      issuer (one i18n string + template line).
-- [ ] Attribution retention rule for `signup_attribution` (geo has 400 days; propose the same). `[media]`
-- [ ] Landing beacon disclosed in the aviso (done) and a footer link on `xangarro.mx` (open). `[media]`
-- [ ] Marketing e-mail: opt-out honoured within the 5-day window; REPEP if phone/SMS ever used. `[media]`
-- [ ] Advertising claims on the landing are demonstrable (LFPC art. 32). `[alta]`
+- [x] Receipt (`comprobante`) carries **"Este comprobante no es un CFDI"** and the negocio's name as
+      issuer (one i18n string + template line). **Done 2026-10-05:** the shipped legend reads «Este
+      documento no es un comprobante fiscal (CFDI).» — same legal meaning — with the negocio's name
+      as issuer, on the portal's papel and ticket (`negocio/comprobantes/muestra.ts` →
+      `papel.tsx`/`ticket.tsx`), the register (`operador/caja/receipt.ts`, `share-recibo.tsx`) and the
+      phone (`packages/ui/src/screens/Checkout/comprobante.ts`).
+- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo).
+- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto).
+- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
+- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
 
-## 8. Intellectual property and governance
+## 8. Propiedad intelectual y gobernanza
 
-- [ ] **BLOCKER — IMPI trademark search and filing for "Xangarro"** (classes 9, 35, 36, 42) before `[critica]` `[bloq]`
+- [ ] **BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro»** (clases 9, 35, 36, 42) antes `[critica]` `[bloq]`
       public launch; ADR-054 is still "pending clearance".
-- [ ] Licences recorded for hero images/illustrations/fonts (assets beyond sounds and map data). `[media]`
-- [ ] Cyber-liability insurance — business decision. `[baja]`
-- [ ] INDAUTOR software registration — optional. `[baja]`
+- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa).
+- [ ] Seguro de ciberresponsabilidad — decisión de negocio.
+- [ ] Registro de software ante el INDAUTOR — opcional.
 
-## 9. Deferred by decision (do not reopen without a reason)
+## 9. Diferido por decisión (no reabrir sin motivo)
 
 - Credit / financing features: **not in v1.** When they come: opt-in addendum in the app, medium-not-
   offeror model, filtering only after the user's "sí" — full brief in `respuestas-oq-borrador.md` OQ-N2.

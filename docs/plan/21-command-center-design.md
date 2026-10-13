@@ -1,6 +1,6 @@
 # «Empresa» — the brief for Claude Design
 
-The founders' command center (Track E, `20-command-center.md`; ADR-124) needs screens before
+The founders' command center (Track E, `20-command-center.md`; ADR-125) needs screens before
 code (ADR-117: the canvas is the spec). No Claude Design project holds the console yet, so
 these go to a new **«Consola»** project (OD-5). Mirror it into `design-reference/consola/` with
 `pnpm design:pull`, like the others, and never edit the mirror by hand (ADR-058).

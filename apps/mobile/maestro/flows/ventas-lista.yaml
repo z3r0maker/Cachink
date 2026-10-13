@@ -1,0 +1,137 @@
+# Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists
+# the turno's sales — the three-figure KPI row, each sale's folio/monto/metodo,
+# a fiado row naming its client, and a cancelled row keeping its red chip.
+#
+# Cancelling needs the fixture operator who may cancel (Ana, NIP 5678 — Toni
+# may not, packages/contracts/src/mock/fixtures.ts:103-104), so the flow locks
+# the caja, signs in as Ana and opens her turno.
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - cancelaciones
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Switch to Ana: the cancel dialog checks her PIN and her permission.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
+- tapOn: { id: 'bloqueo-cambiar' }
+- extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
+- tapOn:
+    text: 'Ana'
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil: { visible: { id: 'mobile-inicio-tab' }, timeout: 15000 }
+
+# Ana's turno, only if Inicio still says «Abrir turno».
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+
+# One Transferencia sale (an Efectivo cancel's cash-back step is covered by
+# venta-detalle-cancelar.yaml; the fiado sale is charged further down).
+- tapOn: { id: 'tab-cobrar' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+# The grid lists alphabetically; this tile is below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000002'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000002' }
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Transferencia
+
+# The list: the KPI row, and the row's folio, monto and metodo.
+- tapOn: { id: 'tab-ventas' }
+- extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
+- assertVisible: { id: 'venta-resumen' }
+- assertVisible: '.*Ventas del turno.*'
+- assertVisible: '.*Cobrado.*'
+- assertVisible: '.*En efectivo.*'
+- assertVisible: ".*V-\\d{4}.*"
+# The row carries an explicit aria-label, so iOS folds its children (concepto,
+# monto, chips) out of the tree — the label is the only matchable text, and it
+# now names the metodo too (else VoiceOver would never hear how they paid).
+- assertVisible: ".*Ver venta V-\\d{4}, \\$27\\.50, Transferencia.*"
+- assertVisible: ".*\\$27\\.50.*"
+- assertVisible: '.*Transferencia.*'
+
+# Cancel it from its own row: PIN, then one of the four motivos.
+- tapOn: { id: 'venta-fila-V-0001' }
+- extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
+# The footer (and its «Cancelar venta») only renders once the ticket loads.
+- extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
+- tapOn: { id: 'venta-detalle-cancelar' }
+- extendedWaitUntil: { visible: { id: 'venta-cancelar' }, timeout: 5000 }
+# The PIN step is a numpad (like Acceso's): the driver scrambles typed
+# digits in a hidden keyboard input, so the keys are tapped instead.
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+
+- extendedWaitUntil: { visible: { id: 'cancelar-motivo-Error de captura' }, timeout: 5000 }
+- tapOn: { id: 'cancelar-motivo-Error de captura' }
+- tapOn: { id: 'cancelar-confirmar' }
+- extendedWaitUntil: { visible: { id: 'venta-detalle-aviso' }, timeout: 8000 }
+- tapOn: { id: 'venta-detalle-listo' }
+# Nothing is deleted: the row stays, struck through, with its chip and motivo.
+- assertVisible: '.*cancelada.*'
+
+# A fiado sale keeps its client on the row (cobrar-ticket cannot do Fiado:
+# Fiado is its own row, cobro-fiado, not a cobro-metodo-*).
+- tapOn: { id: 'tab-cobrar' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+# The grid lists alphabetically; this tile is below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000004'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000004' }
+- tapOn: { id: 'cart-checkout-btn' }
+- extendedWaitUntil: { visible: { id: 'ticket-sheet' }, timeout: 5000 }
+- tapOn: { id: 'ticket-cobrar' }
+- extendedWaitUntil: { visible: { id: 'checkout-cobro' }, timeout: 8000 }
+- tapOn: { id: 'cobro-fiado' }
+- extendedWaitUntil: { visible: { id: 'checkout-fiado' }, timeout: 5000 }
+# Client radios fold like venta rows (aria-label); tap by fixture id (CNT 1).
+- tapOn: { id: 'fiado-cliente-01JCNT00000000000000000001' }
+- tapOn: { id: 'fiado-anotar' }
+- extendedWaitUntil: { visible: { id: 'venta-hecha' }, timeout: 8000 }
+- assertVisible: ".*Anotaste \\$32\\.50 a Don Pedro.*"
+- tapOn: { id: 'venta-hecha-nueva' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+
+- tapOn: { id: 'tab-ventas' }
+- extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
+# The Fiado filter leaves the fiado row alone on the list — and exercises
+# the filter for real (the panel is one row tall per venta; no scrolling).
+- tapOn: { id: 'venta-filtro-Fiado' }
+- extendedWaitUntil: { visible: { id: 'venta-fila-V-0002' }, timeout: 8000 }
+- assertVisible: '.*Don Pedro.*'
+- assertVisible: '.*Fiado.*'

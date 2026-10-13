@@ -1,0 +1,94 @@
+# Cierre con faltante (Track M, M-09): count short of the expected, the
+# diferencia turns red, asks its motivo and names the faltante in the close
+# button, and the hecho screen says «Faltante» with the motivo in its line.
+# «Mandar el corte» composes the WhatsApp share — the OS sheet opens inside
+# the app and is dismissed here; nothing is sent to an external app.
+#
+# Precondition: activated device, turno open with the $500 fondo, nothing
+# else captured (expected = fondo).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- tapOn:
+    id: 'tab-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'turno-cerrar-mi-turno'
+    timeout: 10000
+- tapOn:
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 10000
+
+# Count two $100 bills: $200 of the $500 expected → $300 short.
+- tapOn:
+    id: 'conteo-mas-billete-100'
+- tapOn:
+    id: 'conteo-mas-billete-100'
+
+# Falta: Don worries, the motivo is required (DIF.falta.hint and cerrarHint,
+# caja/src/cierre/copy.ts). The diferencia panel is below the counter.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-diferencia'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible: '.*Falta.*'
+- assertVisible: '.*Cuenta otra vez antes de explicar. Pasa seguido\..*'
+# The hint rides under the close button, below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- assertVisible: '.*Elige un motivo para poder cerrar\..*'
+
+# «Cambio mal dado» answers it; the button below carries the amount
+# (cerrarLabel: «Cerrar turno con faltante de $300.00»).
+- tapOn:
+    id: 'cierre-motivo-Cambio mal dado'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- assertVisible: '.*Cerrar turno con faltante de \$300\.00.*'
+- tapOn:
+    id: 'cierre-cerrar-turno'
+
+# Hecho: the «Faltante» chip, no celebration, the motivo in the line
+# (segundaLinea and lineaCerrado, caja/src/cierre/copy.ts).
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 10000
+- assertVisible: '.*Faltante.*'
+- assertVisible: '.*Turno cerrado.*'
+- assertVisible: '.*Con un faltante de \$300\.00\..*'
+- assertVisible: '.*Quedó un faltante explicado como «Cambio mal dado»\..*'
+
+# The WhatsApp corte's «Compartir» button (the route calls Share.share with
+# textoCorte, cierre.tsx). The OS share sheet itself is not asserted: its
+# Cancel is not a stable element across simulator OS versions and locales
+# (M-11) — the compose is the OS's behavior, not the app's.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-compartir'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible:
+    id: 'cierre-compartir'
+- assertVisible:
+    id: 'cierre-hecho'

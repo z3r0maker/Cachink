@@ -26,8 +26,6 @@ export interface ComprobanteSheetProps {
   readonly business: Business | null;
   readonly onClose: () => void;
   readonly onNueva: () => void;
-  /** The footer's words; «Listo, nueva venta» right after a cobro (Ventas says «Listo»). */
-  readonly listoLabel?: string;
 }
 
 interface OpcionDef {
@@ -171,7 +169,7 @@ export function ComprobanteSheet(p: ComprobanteSheetProps): ReactElement {
       onPress={p.onNueva}
       testID="comprobante-nueva"
     >
-      {p.listoLabel ?? 'Listo, nueva venta'}
+      Listo, nueva venta
     </Btn>
   );
   return (

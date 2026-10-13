@@ -9,7 +9,7 @@ import { buscar, type Pestana } from '@xangarro/caja/inventario';
 import { MText } from '../../components/index';
 import { borderColors, borderWidths, colors, radii } from '../../theme';
 import { ExistenciaFila, MovimientoFila } from './inventario-filas';
-import type { ExistenciaMovil, InventarioLeido } from './inventario-lectura';
+import type { ExistenciaMovil, InventarioLeido } from './inventario-registro';
 
 function Tarjeta({ children, label }: { children: ReactNode; label: string }): ReactElement {
   return (

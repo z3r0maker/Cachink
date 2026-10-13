@@ -105,10 +105,10 @@ export default function SettingsRoute(): ReactElement {
   const [bugReportVisible, setBugReportVisible] = useState(false);
   const device = useDeviceSettings(() => setBugReportVisible(true));
   return (
-    <AppShellWrapper title={t('shell.nav.turno')} onBack={back}>
+    <AppShellWrapper title={t('shell.turno.ajustes')} onBack={back}>
       <SettingsScreen
         device={device}
-        onOpenRejected={() => router.push('/no-enviados' as never)}
+        onOpenRejected={() => router.push('/pendientes' as never)}
         footer={devFooter}
       />
       <BugReportSheet

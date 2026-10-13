@@ -15,7 +15,7 @@ import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useDeviceId, useUserId } from '../../app-config/use-app-config';
 import { useFeatureFlag } from '../../hooks/use-feature-flags';
 import { useRegistrarMovimiento } from '../../hooks/use-registrar-movimiento';
-import { leerInventario, type ExistenciaMovil, type InventarioLeido } from './inventario-lectura';
+import { leerInventario, type ExistenciaMovil, type InventarioLeido } from './inventario-registro';
 import { detalle, type Borrador } from './mover-logica';
 import { useSnapshotPendiente } from './use-snapshot-pendiente';
 

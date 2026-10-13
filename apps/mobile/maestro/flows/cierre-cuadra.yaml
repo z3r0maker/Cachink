@@ -1,0 +1,111 @@
+# Cierre que cuadra (Track M, M-09; boards MvCierre/MvCierreHecho): from Mi
+# turno's «Cerrar mi turno», count the drawer by denomination to the expected
+# total, the diferencia says «Cuadra» $0.00 and never asks a motivo, and the
+# close lands on «¡Turno cerrado!» with the «Cuadró» chip.
+#
+# Precondition: activated device, turno open with the $500 fondo
+# (shared/ensure-caja-open.yaml) and nothing else captured, so the expected
+# cash is exactly the fondo.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+# The apertura row must be up: the resumen says «Todo enviado» only then.
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# «Cerrar mi turno» opens the Cierre flow, a full page under the Turno tab.
+- tapOn:
+    id: 'tab-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'turno-cerrar-mi-turno'
+    timeout: 10000
+- tapOn:
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 10000
+- assertVisible: '.*Cierre de turno.*'
+- assertVisible: '.*Cuenta el efectivo de la caja.*'
+
+# Count one $500 bill — the only piece the expected $500 needs. The steppers
+# write whole pieces (cierre-conteo-fila.tsx: conteo-mas-<clave>); the foot
+# under the two columns says the Contado.
+- tapOn:
+    id: 'conteo-mas-billete-500'
+# The Contado foot sits under both columns, below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-contado'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible: '.*Contaste.*'
+
+# Everything below the counter is under the fold; scroll to each in order
+# (screen order: Conteo → Esperado → Diferencia → Resumen → Cerrar).
+- scrollUntilVisible:
+    element:
+      id: 'cierre-esperado'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- scrollUntilVisible:
+    element:
+      id: 'cierre-diferencia'
+    direction: DOWN
+    timeout: 5000
+
+# Diferencia: Cuadra; the motivo chips only render on a difference
+# (cierre-lado.tsx renders Explica when dif.tipo !== 'cuadra').
+- assertVisible: '.*Cuadra.*'
+- assertVisible: '.*Lo contado coincide con lo esperado. Puedes cerrar\..*'
+- assertNotVisible:
+    id: 'cierre-motivo-Cambio mal dado'
+
+# The resumen rows, all sent.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-resumen'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+- assertVisible: '.*Todo enviado.*'
+
+# Close: the plain «Cerrar turno» — no faltante in the label (cerrarLabel).
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn:
+    id: 'cierre-cerrar-turno'
+
+# Hecho: the «Cuadró» chip, Don celebrating, the owner's line.
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 10000
+- assertVisible: '.*Cuadró.*'
+- assertVisible: '.*¡Turno cerrado!.*'
+- assertVisible: '.*Cuadró al centavo\..*'
+# lineaCerrado appends «Gracias por tu turno, Toni.» — match the prefix.
+- assertVisible: '.*El conteo cuadró con lo esperado\..*'
+- assertVisible:
+    id: 'cierre-hecho-cifras'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-entregar-efectivo'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible: '.*Entregar el efectivo al dueño.*'

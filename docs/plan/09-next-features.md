@@ -56,7 +56,7 @@
 
 ---
 
-## 2. Launch blockers
+## 2. Bloqueantes de lanzamiento
 
 ### Billing
 
@@ -137,10 +137,10 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   pull/entitlement once C-12's field exists (`usageFor()` in `apps/web/src/server/usage/live.ts`
   is ready); C-12 limits (the `usageLimitsOf` mapper stays until then); `origen` column (C-12 step 7).
 
-### N-03 Overage warnings and provider alerts `[LAUNCH]` `[alta]` `[bloq]`
+### N-03 Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` [LAUNCH] [alta] [bloq]
 
 - [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused).
+  **Remaining (2026-09-23, verified against the code):** sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa).
 
 - **What:** thresholds 80 % / 100 % per metric → owner email (once per threshold per month), portal
   banner, app banner (from the pulled `usage`). **App copy is neutral** (ADR-069): "Este negocio está
@@ -394,10 +394,10 @@ body, attachments)`.
 - **Acceptance:** a checklist of every mobile Settings entry (`packages/ui/src/screens/Settings/*`),
   each mapped to "portal", "device (A-12)" or "dropped (why)"; each portal item has a Playwright spec.
 
-### N-12 "Platícanos de ti" wizard `[LAUNCH]` `[alta]` `[bloq]`
+### N-12 Asistente «Platícanos de ti» `[LAUNCH]` [LAUNCH] [alta] [bloq]
 
 - [~] Status · **Blocked by:** N-11, N-19 · **Blocks:** N-13, N-15
-  **Remaining (2026-09-23, verified against the code):** acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR.
+  **Remaining (2026-09-23, verified against the code):** criterio de aceptación cumplido (`suggested-plan-table.test.ts`, 535ceaa1). Las respuestas de tipo de negocio y de WhatsApp nunca se guardan aunque existen `businesses.tipo_negocio` / `whatsapp` (`AplicarConfiguracionUseCase` escribe solo nombre + métodos de pago); el paso 6 registra `hasLogo` sin subida de archivo (N-19); las respuestas viven en `business_onboarding`, no en `businesses.onboarding` — documentado, pero sin ratificar mediante un ADR.
 
 - **What:** replaces P-04's steps. "Paso N de 8", one question per step, icon + description cards
   (CLAUDE.md §6), every step skippable:
@@ -556,10 +556,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Receipts and WhatsApp
 
-### N-19 Logo + brand colour `[LAUNCH]` `[alta]` `[bloq]`
+### N-19 Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq]
 
 - [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
-  **Remaining (2026-09-23, verified against the code):** the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do».
+  **Remaining (2026-09-23, verified against the code):** el teléfono no descarga ni guarda en caché el logo (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do».
 
 - Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
   portal-only `business_logos` table (0023) — **deviation from the interview's bucket, ratified
@@ -616,11 +616,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** snapshot tests per template; totals stay legible with any brand colour (contrast
   check picks the text colour).
 
-### N-21 WhatsApp share `[LAUNCH]` `[alta]` `[bloq]`
+### N-21 Compartir por WhatsApp `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-20 (done) · web half landed 2026-09-20
-  **Remaining (2026-09-23, verified against the code):** phone half only. **Re-verified 2026-09-28:** `share-image.ts` no longer exists — `125d3688` («the phone app keeps only what the operator uses») deleted it, so the image hand-off is gone rather than partial. What the phone has is a **text** share of the corte, `Share.share({ message: textoDelCorte(h) })` in `cierre.tsx`, so «Enviar como texto» is met for that surface. Still missing: sharing the comprobante at all, an Android send to a preset number, the Maestro flow to the hand-off, and the Android-fallback unit test. Blocked on N-24.
-
+- [~] Status · **Blocked by:** N-20 (hecho) · web half landed 2026-09-20
+  **Remaining (2026-09-23, verified against the code):** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. [LAUNCH] [~] [alta] [bloq]
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
   device-token route `GET /api/v1/comprobante?ticketId=` renders the N-20
@@ -650,7 +649,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Offline
 
-### N-22 App sync banners `[LAUNCH]` `[alta]` `[bloq]`
+### N-22 Banners de sincronización en la app `[LAUNCH]` [LAUNCH] [alta] [bloq]
 
 - [ ] Status · **Blocked by:** A-06, A-07 · **Blocks:** N-29
       **Re-verificado 2026-09-28:** la mitad ya existe y llegó con M-05. La píldora de sync está montada
@@ -692,25 +691,19 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### App phase 2
 
-### N-24 Phone app adopts the Track O operator design `[LAUNCH]`
+### N-24 La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]`
 
 > **Re-scoped 2026-09-17 (owner decision):** A-01…A-18 are already built on the unmerged branch
 > `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** — `[alta]` `[bloq]` · **Blocks:** N-20, N-22, N-25
-      **Re-verificado 2026-09-28:** los dos bloqueos que esta línea nombraba ya no existen, y el trabajo
-      se hizo en otro lado. `rename/xangarro-stored-ids` **está integrada en `main`** desde `52824588`
-      («Merge rename/xangarro-stored-ids: the phone track lands (A-04…A-18)»), que es lo que O-20 ya había
-      dicho el 2026-09-19. Y el teléfono no adoptó el diseño de Track O: lo **reemplazó El Mostrador**
-      (ADR-117, track `19-movil-mostrador.md`), con M-01 a M-09 cerradas entre el 2026-09-27 y el
-      2026-09-28 — shell de cuatro pestañas, Cobrar, Mi turno, Inicio, Acceso y Bloqueo. Esta tarea, tal
-      como está escrita, quedó **superada**: lo que falta del teléfono vive en M-10, M-11 y M-12. Decidir
-      si se cierra o se reescribe como el remanente que no cubre Track M.
-- **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
-  caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
-  device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
-  operator sees the same register on the phone and in the browser.
+- [ ] Status · **Blocked by:** lo que falta del lado del teléfono — las fases restantes del track del `[alta]` `[bloq]`
+      móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las
+      barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente
+      terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · **Blocks:** N-20, N-22, N-25- **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
+      caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
+      device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
+      operator sees the same register on the phone and in the browser.
 - **How:** `design-reference/operador/` is the spec at its 375 px width. Native-only surfaces not in
   the handoff — barcode scanner, WhatsApp image share (N-21), stock-low notification (A-13), camera
   activation (N-25) — are added upstream in the Claude Design project first as small amendments
@@ -719,24 +712,15 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** each phone screen matches its Track O counterpart at 375 px; Maestro flows updated
   (CLAUDE.md §6).
 
-### N-25 QR device pairing `[LAUNCH]` `[alta]` `[bloq]`
+### N-25 Vinculación de dispositivos por QR `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
-      **Remaining (2026-09-23, after C-14 and P-06 landed):** the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24.
-      **Re-verificado 2026-09-28:** el lado del teléfono **ya se construyó**, en M-06 («Vincular: cámara
-      QR + código», cerrada el 2026-09-28). Existen `packages/ui/src/components/Scanner/` (nativo y web),
-      `apps/mobile/src/shell/scanner-host.tsx` y `packages/ui/src/screens/Activation/qr-visor-marco.tsx`.
-      Quedan exactamente dos huecos, los dos verificados por ausencia: **no hay App Links ni Universal
-      Links** (`assetlinks.json` y el AASA no están en ningún commit del repo), y **no existe la
-      confirmación SEC-MOB-04 «¿Vincular a _negocio_?»** antes de canjear el token, que necesita una
-      vista previa que nombre al negocio. N-24 deja de bloquearla.
-
-- **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
-  "Compartir por WhatsApp" button carry an **https universal / app link**
-  `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
-  SEC-DEV-01) (custom schemes aren't tappable in WhatsApp; the https
-  link falls back to the store listing). The app's activation screen opens on the camera; a scan
-  activates with no other input. "Escribir código" (email + code) remains the fallback.
+      **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. [LAUNCH] [ ] [alta] [bloq]- **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
+      "Compartir por WhatsApp" button carry an **https universal / app link**
+      `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
+      SEC-DEV-01) (custom schemes aren't tappable in WhatsApp; the https
+      link falls back to the store listing). The app's activation screen opens on the camera; a scan
+      activates with no other input. "Escribir código" (email + code) remains the fallback.
 - **Store framing (ADR-069):** all copy says **"Vincular este dispositivo a tu negocio"** — a sign-in
   to the business account, never "activar", "licencia" or "desbloquear" (App Store 3.1.1 names
   unlocking via "license keys… QR codes" as a rejection reason).
@@ -745,10 +729,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### Quality
 
-### N-26 Security audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
+### N-26 Auditoría de seguridad `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq]
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). **Left:** flip `Content-Security-Policy-Report-Only` to enforcing in `src/proxy.ts` after a week of clean production logs. **SEC-SUP-01 done** — `permissions: contents: read` on every workflow, every action pinned to a commit SHA, a `supply-chain` job running `pnpm audit:gate` (fails on a high/critical advisory reachable at runtime; build-only routes and a dated allowlist in `security/audit-allowlist.json` are the only excuses; the two that shipped — `tmp`, `brace-expansion` under `exceljs` — are fixed by `pnpm.overrides`) and a gitleaks scan of each run's commits, plus a CodeQL workflow (the repo is public). The gitleaks step is unrun until CI's first pass. The hosted re-run needs X-01.
+  **Remaining (2026-09-23, verified against the code):** 4 de 6 hallazgos altos corregidos (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — el oráculo quedó cerrado y el token QR construido por C-14, 2026-09-23); SEC-DATA-01 es el interruptor del dueño O-2; SEC-PRIV-01 es N-34. Hallazgos medios en el alcance, 2026-09-23: **SEC-WEB-01 hecho** — el portal envía X-Frame-Options, un `frame-ancestors 'none'` obligatorio, nosniff, HSTS, un referrer estricto y Permissions-Policy, `poweredByHeader` desactivado, todo desde una implementación compartida con la consola (`@xangarro/config/security`); su CSP completa con nonce (`src/proxy.ts`, con `'wasm-unsafe-eval'` y workers para la caja) se sirve en modo **report-only** hacia `/api/csp-report`, y el barrido encontró cero violaciones en 18 páginas y en todos los flujos e2e de caja y sincronización tras dos correcciones (la sonda eval de Zod ponía `jitless` en el head; cada ruta se renderiza por petición, de modo que cada script recibe el nonce). **Falta:** pasar `Content-Security-Policy-Report-Only` a modo obligatorio en `src/proxy.ts` tras una semana de logs de producción limpios. **SEC-SUP-01 hecho** — `permissions: contents: read` en cada workflow, cada acción fijada a un SHA de commit, un job `supply-chain` que ejecuta `pnpm audit:gate` (falla ante cualquier advisory high/critical alcanzable en runtime; las rutas de solo build y una allowlist fechada en `security/audit-allowlist.json` son las únicas excepciones; los dos que salieron — `tmp`, `brace-expansion` bajo `exceljs` — quedan corregidos con `pnpm.overrides`) y un escaneo de gitleaks sobre los commits de cada ejecución, además de un workflow de CodeQL (el repo es público). El paso de gitleaks sigue sin ejecutarse hasta el primer pase del CI. La re-ejecución en el proyecto hospedado necesita X-01.
 
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
   staff token handling; Stripe webhook signature; secrets and service-role isolation (N-05 guard);
@@ -763,10 +747,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   SEC-AUTH-02, Data API exposure SEC-DATA-01) belong to Track B. **Still to do:** pre-launch re-run
   on hosted B-01 with the built sync, register and webhooks; live rate-limit and PostgREST tests.
 
-### N-27 Database audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
+### N-27 Auditoría de base de datos `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq]
 
 - [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
-  **Remaining (2026-09-26, round 2 — `docs/audits/db-2026-09-26.html`, branch `perf/db-scale`):** round 2 re-checked the 25 first-round findings (9 fixed, 9 partial, 6 open, 1 obsolete; QRY-01 and MIG-01 were only partial, SYNC-02 was done) and measured 24 new DB2-\* findings at scale. Fixed on `perf/db-scale`: DB2-USE-01 (indexes + debounced recount), DB2-SYNC-01/-02 (batched push, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (no-transaction migrations, ADR-119; not the stale drizzle journal), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Open: DB-OPS-01/DB2-OPS-01 (PITR + drill = O-3), DB2-QRY-05 (`product_stock` rollup; the snapshot bootstrap is done, ADR-121), DB2-SYNC-03 (receipt/log retention, needs an ADR), DB2-CHK-01 (the never-created B-19), the drizzle journal half of B-20, DB2-KEY-01, DB2-PART-01 (S2 ADR), incremental usage counters; UI in `18-db-scale-design-changes.md`. Round 3 (`docs/audits/db-2026-09-26-r3.html`) audited the branch itself: 31 findings (7 high). Fixed on `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Fixed on `perf/db-launch`: DB3-BOOT-01 (the bootstrap passed Vercel's 4.5 MB limit after about a month of a heavy tenant; now a paged snapshot — stock baseline + 90 days of movements, ≤ 2 MB a page — ADR-121, C-23; also the bootstrap half of DB2-QRY-05). DB3-EXP-01 (streamed exports), DB3-EST-01 (13-month cap, sums in SQL), DB3-SYNC-05 (503 + Retry-After instead of queueing), DB3-QRY-03 (summary), ADR-122. DB3-SYNC-01 (b) (a batch refused as a whole is halved to its row; row size limit), DB3-L-02/03/07. Also fixed on `perf/db-launch`: DB3-CAJA-01/02/03 (one tab owns the caja, one «por enviar», cierre with a banner, idle pulls; ADR-123) and DB3-CAJA-04 in part (queued OPFS writes; the VFS stays open). `pg_stat_statements` re-run still needs the hosted project.
+  **Remaining (2026-09-26, round 2 — `docs/audits/db-2026-09-26.html`, branch `perf/db-scale`):** la ronda 2 reverificó los 25 hallazgos de la primera ronda (9 corregidos, 9 parciales, 6 abiertos, 1 obsoleto; QRY-01 y MIG-01 quedaron solo parciales, SYNC-02 estaba hecho) y midió 24 hallazgos nuevos DB2-\* a escala. Corregidos en `perf/db-scale`: DB2-USE-01 (índices + reconteo con debounce), DB2-SYNC-01/-02 (push por lotes, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (migraciones sin transacción, ADR-119; no el journal desactualizado de drizzle), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Abiertos: DB-OPS-01/DB2-OPS-01 (PITR + simulacro = O-3), DB2-QRY-05 (rollup de `product_stock`; el bootstrap por snapshot ya está hecho, ADR-121), DB2-SYNC-03 (retención de recibos/logs, necesita un ADR), DB2-CHK-01 (el B-19 que nunca se creó), la mitad del journal de drizzle de B-20, DB2-KEY-01, DB2-PART-01 (ADR de S2), contadores de uso incrementales; la UI en `18-db-scale-design-changes.md`. La ronda 3 (`docs/audits/db-2026-09-26-r3.html`) auditó la propia rama: 31 hallazgos (7 altos). Corregidos en `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Corregidos en `perf/db-launch`: DB3-BOOT-01 (el bootstrap rebasó el límite de 4.5 MB de Vercel tras alrededor de un mes con un negocio pesado; ahora es un snapshot paginado — línea base de stock + 90 días de movimientos, ≤ 2 MB por página — ADR-121, C-23; también la mitad bootstrap de DB2-QRY-05). DB3-EXP-01 (exportaciones en streaming), DB3-EST-01 (tope de 13 meses, sumas en SQL), DB3-SYNC-05 (503 + Retry-After en lugar de encolar), DB3-QRY-03 (resumen), ADR-122. DB3-SYNC-01 (b) (un lote rechazado en su totalidad se parte a la mitad hasta su fila; límite de tamaño de fila), DB3-L-02/03/07. También corregidos en `perf/db-launch`: DB3-CAJA-01/02/03 (una pestaña es la dueña de la caja, una «por enviar», el cierre con banner, pulls en reposo; ADR-123) y DB3-CAJA-04 en parte (escrituras OPFS encoladas; el VFS permanece abierto). La re-ejecución de `pg_stat_statements` todavía necesita el proyecto hospedado.
 
 - **Scope:** Postgres (the 2026-05 reports cover the archived SQLite desktop DB): `pg_stat_statements`
   top queries and plans, `business_id`-leading indexes, RLS predicate cost, enum CHECK constraints
@@ -777,7 +761,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   critical (pull cursor loses rows — reproduced), 7 high, 12 medium, 3 low. **Still to do:** pre-beta
   re-run on hosted Supabase with `pg_stat_statements`, and the timed PITR restore drill.
 
-### N-28 Performance audit `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
+### N-28 Auditoría de rendimiento `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq]
 
 - [ ] Status · **Blocked by:** X-01 · **Blocks:** N-30
 - **Scope:** k6 load test on staging at 10× the beta's projected load (push, pull, portal reports);
@@ -785,7 +769,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   Android. Replace the broken `docs/archive/health-report-2026-04-30.md` with this report.
 - **Output:** `docs/audits/performance-YYYY-MM-DD.md` + the k6 scripts in the repo.
 
-### N-29 Deterministic full-stack E2E gate `[LAUNCH]` `[deuda]` `[alta]` `[bloq]`
+### N-29 Gate E2E determinista de toda la pila `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq]
 
 - [ ] Status · **Blocked by:** P-17, A-16, N-22, N-25 · **Blocks:** N-30, X-02
 - **What:** one scenario against a real local Supabase: signup → wizard → operator → import →
@@ -795,7 +779,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   runner is affordable per PR).
 - **Acceptance:** green in CI; a deliberately broken push handler turns it red.
 
-### N-30 Closed beta `[LAUNCH]` `[critica]` `[bloq]`
+### N-30 Beta cerrada `[LAUNCH]` [LAUNCH] [critica] [bloq]
 
 - [ ] Status · **Blocked by:** X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29
 - **Who:** 10–20 businesses — prebeta partners, 2–3 each of taquería / tiendita / servicios, and
@@ -834,10 +818,10 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
   contract; if C-12 ever changes them, `planes.js` is the one place to update.
 
-### N-32 Store-compliance sweep `[LAUNCH]` `[tiendas]` `[alta]` `[bloq]`
+### N-32 Barrido de cumplimiento para las tiendas de apps `[LAUNCH]` [LAUNCH] [tiendas] [alta] [bloq]
 
 - [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
-  **Remaining (2026-09-23, verified against the code):** reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress).
+  **Remaining (2026-09-23, verified against the code):** la checklist del revisor para X-05 en `docs/store/`. `pnpm lint:store` vuelve a estar en verde y forma parte del gate en `ci.yml` (ver Progress).
 
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
@@ -861,10 +845,10 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   `pnpm lint:store` gates in `ci.yml` (job `ci`, after Lint). `entitlement-freelancer-limit.yaml`
   asserts the new copy. **main: 0 violations.** Still to do: reviewer checklist for X-05.
 
-### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]` `[legal]` `[alta]` `[bloq]`
+### N-34 Aviso de privacidad + solicitudes ARCO `[LAUNCH]` [LAUNCH] [legal] [alta] [bloq]
 
 - [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
-  **Remaining (2026-09-23, after the work below):** the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17). Hosted apply done 2026-09-25: `db:migrate:hosted` applied data-pg `0034`–`0042` and console `0017`–`0019` (12 files; the first production signup had failed with 42883 on `privacy_consent_record`); dry run reports 0 pending.
+  **Remaining (2026-09-23, after the work below):** el aviso del NIP de operador (variante C); Configuración → Privacidad para retirar el consentimiento; eliminación por autoservicio; enrutar las solicitudes de los clientes de un comercio hacia el comercio; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. Los textos son borradores con huecos `[BRACKET]` hasta que el abogado dé el visto bueno (O-17). La aplicación al proyecto hospedado quedó hecha 2026-09-25: `db:migrate:hosted` aplicó data-pg `0034`–`0042` y consola `0017`–`0019` (12 archivos; el primer signup en producción había fallado con 42883 en `privacy_consent_record`); el dry run reporta 0 pendientes.
   Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. **ARCO requests:** the public form `app.xangarro.mx/privacidad/solicitud` (xangarro.mx/privacidad/solicitud redirects there; Ayuda links to it), throttled per IP, files `kind = 'arco'` through `SolicitarArcoUseCase` with a folio and `dueAt`, the end of the 20th día hábil in CDMX (`plazosArco`, LFT art. 74 calendar); the titular sees the folio and the date. The console shows «Responder antes del …» in the list and the detail, and lists open ARCO requests by nearest deadline in every daily digest (console `0019_support_arco.sql`: the kind, `due_at`, a CHECK tying them). **Device linking:** the phone's activation screen and the browser register's «Vincula esta caja» show variante B (no checkbox, per the draft) and send its version; `/activate` stores it with the text's SHA-256 on the device row (C-22, data-pg `0041_device_aviso.sql`). Tests: `arco.test.ts`, `support-item.test.ts`, `solicitar-arco.test.ts`, console `inbox-create`, `digest`, `support-items-sql`, `legal-aviso.test.ts`, `privacidad-arco.spec.ts`, `acceso.sync.spec.ts` (the notice and the stored hash), Maestro `activation.yaml`.
 
 - **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
@@ -976,7 +960,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ---
 
-## 3. Post-launch
+## 3. Post-lanzamiento
 
 ### Merchant card payments (ADR-066)
 
@@ -1021,10 +1005,10 @@ fees per sale; and, in Phase 2 only, the amount typed once.
 
 #### Phase 0 — Prove
 
-### N-40 Provider validation + Clip partnership + legal opinion `[terceros]` `[media]`
+### N-40 Validación de proveedores + alianza con Clip + opinión legal [terceros] [media]
 
-- [~] Status · **Trigger:** N-30 exit criteria met. **The Clip conversation starts now** (owner action,
-  not gated by the trigger).
+- [~] Status · **Trigger:** criterios de salida de N-30 cumplidos. **La conversación con Clip empieza
+  ya** (acción del dueño, no depende del disparador).
 - **Already verified from docs (2026-09-17, §6):** MP — Orders API for Point in MX (Point Smart 1/2,
   terminal in PDV mode, store + POS setup), OAuth with 180-day tokens + refresh,
   `x-signature` HMAC webhooks. Clip — PinPad API (Total 3 / Ultra / PinPad / Stand 2, **not Plus**;
@@ -1041,7 +1025,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
   output in the two spike files.
 - **Acceptance:** go / no-go per provider for terminals; legal opinion filed.
 
-### N-75 Reconciliation spike — can we see card payments from any reader? `[media]`
+### N-75 Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media]
 
 - [ ] Status · **Blocks:** ADR-109, N-41, N-76
 - **What:** read Mercado Pago's payment search, account-money / released-money reports and settlement
@@ -1057,7 +1041,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 #### Phase 1 — Verify card sales, any reader
 
-### N-41 `PaymentProvider` port — read side + Mercado Pago adapter `[media]`
+### N-41 Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago [media]
 
 - [ ] Status · **Blocked by:** N-75, ADR-109 · **Blocks:** N-43, N-53, N-76, N-80
 - **What:** port in `packages/application`: `listPayments(range)`, `getPayment(id)`,
@@ -1065,7 +1049,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   adapter `mercadopago`, backend only. A shared adapter contract suite that N-53 must also pass.
   Amounts cross the port as integer centavos, parsed from the providers' decimal strings (§2.8).
 
-### N-43 Merchant account linking in Tipos de pago `[media]`
+### N-43 Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago [media]
 
 - [ ] Status · **Blocked by:** N-41
 - **What:** Negocio → Tipos de pago, under the Tarjeta switch: a card «¿Cobras con Mercado Pago o
@@ -1091,7 +1075,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **Acceptance:** domain matcher TDD (exact, time-window, two same-amount sales, refund, partial);
   integration test with ventas the seed does not have; Playwright shows real matched rows.
 
-### N-77 Checklist step and invitations `[baja]`
+### N-77 Paso del checklist e invitaciones [baja]
 
 - [ ] Status · **Blocked by:** N-43
 - **What:** «Primeros pasos», group «Cuando quieras»: «Conecta tu cuenta Mercado Pago o Clip» — shown
@@ -1104,15 +1088,15 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 #### Phase 2 — Drive the terminal
 
-### N-80 `PaymentProvider` write side + Mercado Pago Point `[baja]`
+### N-80 Puerto `PaymentProvider` — lado de escritura + Mercado Pago Point [baja]
 
-- [ ] Status · **Blocked by:** N-41, N-40 (MP go), C-13 · **Blocks:** N-42, N-79
+- [ ] Status · **Blocked by:** N-41, N-40 (go de MP), C-13 · **Blocks:** N-42, N-79
 - **What:** the port gains `createIntent`, `getIntent`, `cancelIntent`, `refund`, `listTerminals`,
   `setTerminalMode`; the `mercadopago` adapter implements them on the Orders API for Point (stores,
   POS per caja, PDV mode, `X-Idempotency-Key`). The contract suite runs against the Point sandbox's
   virtual terminal and `POST /v1/orders/{id}/events`.
 
-### N-42 Payment intents backend `[baja]`
+### N-42 Backend de intenciones de pago [baja]
 
 - [ ] Status · **Blocked by:** N-80, C-13
 - **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, terminal id) →
@@ -1122,7 +1106,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   that no venta claims feed N-76's «cobro sin venta».
 - **Invariant:** the server never writes the venta (ADR-058 §2, ADR-066).
 
-### N-79 Terminal per caja `[baja]`
+### N-79 Terminal por caja [baja]
 
 - [ ] Status · **Blocked by:** N-80, N-43, ADR-109 (D-1)
 - **What:** in the Tipos de pago panel of a linked account: list the account's terminals, switch one
@@ -1132,7 +1116,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   back here.
 - **Acceptance:** Playwright with the mock provider: assign, rename, unassign; Equipo shows it.
 
-### N-44 Cobrar en terminal (phone and web caja) `[baja]`
+### N-44 Cobrar en terminal (app y caja web) [baja]
 
 - [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
 - **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
@@ -1143,7 +1127,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 - **Acceptance:** Maestro flows for approve, decline, timeout, phone-killed-after-approval, no
   terminal; Playwright for the web caja.
 
-### N-78 Terminal health at the caja `[baja]`
+### N-78 Salud de la terminal en la caja [baja]
 
 - [ ] Status · **Blocked by:** N-79
 - **What:** the caja reads its terminal's health (MP terminal list + mode; Clip `/devices/status`)
@@ -1153,28 +1137,28 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   Tipos de pago. Never shown when no terminal is configured.
 - **Acceptance:** Maestro + Playwright: healthy (no badge), unreachable, token expired, recovered.
 
-### N-45 External penetration test `[deuda]` `[media]`
+### N-45 Prueba de penetración externa [deuda] [media]
 
-- [ ] Status · **Trigger:** N-42 and N-43 on staging. **Blocks:** turning `cobrosIntegrados` on in
-      production. Then yearly.
+- [ ] Status · **Trigger:** N-42 y N-43 en staging. **Blocks:** encender `cobrosIntegrados` en
+      producción. Después, cada año.
 
 ### Admin — second wave
 
-### N-46 Sync health and devices `[media]`
+### N-46 Salud de la sincronización y dispositivos [media]
 
-- [ ] Status · **Trigger:** launch + 30 days, or the first cross-tenant sync incident.
+- [ ] Status · **Trigger:** lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos.
 - **What:** rejected rows across tenants by code; devices not seen in N days; force-revoke (B-12).
   Replaces the B-16 Studio saved queries for day-to-day use.
 
-### N-47 Broadcast announcements `[baja]`
+### N-47 Anuncios a todos los inquilinos [baja]
 
-- [ ] Status · **Trigger:** the first planned maintenance window or feature launch after go-live.
+- [ ] Status · **Trigger:** la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción.
 - **What:** compose an aviso to all tenants or a filter (plan, tipo de negocio, beta allowlist);
   delivered through the ADR-060 `notices` table to the portal's Avisos and the app.
 
-### N-48 Dormancy lifecycle (ADR-064) `[baja]`
+### N-48 Ciclo de vida de cuentas inactivas (ADR-064) [baja]
 
-- [ ] Status · **Trigger:** launch + 90 days (no tenant can be dormant earlier).
+- [ ] Status · **Trigger:** lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes).
 - **What:** nightly job marks free tenants with no login and no device sync for 90 days as dormant;
   emails at d90 and d150 with a one-click "sigo aquí"; at d180 writes the full export (reuses P-34:
   Excel + JSON) to a private, encrypted bucket, verifies it (row counts), then deletes the tenant's
@@ -1187,34 +1171,34 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### Other
 
-### N-49 GLM exploratory tester `[deuda]` `[baja]`
+### N-49 Explorador de pruebas con GLM [deuda] [baja]
 
-- [ ] Status · **Trigger:** X-01 staging live and N-29 green.
+- [ ] Status · **Trigger:** el staging de X-01 en vivo y N-29 en verde.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
   provider), with personas ("taquero con prisa", "contador revisando el mes") and goals. Findings →
   inbox `kind=explorador` with screenshots and reproduction steps. Never a CI gate.
 
-### N-50 AI logo generation `[baja]`
+### N-50 Generación de logo con IA [baja]
 
-- [ ] Status · **Trigger:** the ADR-059 production gate on model calls is lifted.
+- [ ] Status · **Trigger:** se levante la restricción de ADR-059 sobre las llamadas a modelos en producción.
 - **What:** "Genera un logo con IA" in N-19 for businesses without one: style picker + name → 4
   options → pick → becomes the logo. Image model provider chosen at trigger time.
 
-### N-51 DB scaling — Stage 2 (ADR-068) `[infra]` `[baja]`
+### N-51 Escalamiento de BD — Etapa 2 (ADR-068) [infra] [baja]
 
-- [ ] Status · **Trigger:** any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card).
+- [ ] Status · **Trigger:** cualquiera de: BD > 25 GB · una tabla > 50 M de filas · sync p95 > 800 ms (tarjeta N-07).
 - **What:** monthly range partitioning of transactional tables (migration with old→new test,
   CLAUDE.md §2.9), a read replica for portal reports and the Asesor, next Supabase compute size.
 
-### N-52 DB scaling — Stage 3 (ADR-068) `[infra]` `[baja]`
+### N-52 Escalamiento de BD — Etapa 3 (ADR-068) [infra] [baja]
 
-- [ ] Status · **Trigger:** DB > 500 GB or > 10 000 active tenants.
+- [ ] Status · **Trigger:** BD > 500 GB o > 10 000 inquilinos activos.
 - **What:** separate analytics read model; evaluate Citus or tenant sharding (new ADR).
 
-### N-54 Facturación for merchants (white-label PAC reseller) `[baja]`
+### N-54 Facturación para negocios (revendedor PAC de marca blanca) [baja]
 
-- [ ] Status · **Trigger:** N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own
-      clients.
+- [ ] Status · **Trigger:** N-33 en `live` durante 3 meses, y ≥ 5 clientes pidiendo facturar a sus
+      propios clientes.
 - **What:** let tenants issue CFDI to _their_ customers from a venta ("Facturar esta venta") and a
   self-invoicing page for their clients. **Not** by becoming a PAC (needs a persona moral with
   MX$10 M paid-in capital, a TESOFE bond, SAT technical validation and ongoing audits — RMF 2.7.2.1 /
@@ -1222,9 +1206,9 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
   tenant, stamps bought in bulk and resold). Needs each tenant's CSD upload, a new ADR, and pricing
   (per-stamp packs as an add-on).
 
-### N-53 Clip adapter `[baja]`
+### N-53 Adaptador de Clip [baja]
 
-- [ ] Status · **Blocked by:** N-41, N-40 (Clip go), N-75 (Clip go) · **Blocks:** N-44 going public
+- [ ] Status · **Blocked by:** N-41, N-40 (go de Clip), N-75 (go de Clip) · **Blocks:** la salida al público de N-44
 - **What:** `clip` adapter for the N-41 port. **Read side first (Phase 1):** transactions by date and
   settlements, for N-76. **Write side (Phase 2):** PinPad API terminal push (`/f2f/pinpad/v1`:
   payment, status, cancel, `/devices/status`); payment links only if D-2 keeps them. Basic auth from
@@ -1262,8 +1246,7 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
       Store first-touch on the business at signup. Also move the rewrite out of `App.jsx` into the
       shared client entry: the `/recursos` article pages drop UTMs today, so content marketing is
       entirely unattributed.
-- [~] **N-58 · Phase 4 — purchases + landing.** Checkout hook ✅ shipped; the pixel ✅ **is built but `[media]`
-  dark** — `VITE_GEO_PIXEL_URL` is empty, so the build emits nothing, exactly like
+- [~] **N-58 · Etapa 4 — compras + landing.** Checkout hook ✅ shipped; the pixel ✅ **is built but `[media]` dark** — `VITE_GEO_PIXEL_URL` is empty, so the build emits nothing, exactly like
   `VITE_PLAUSIBLE_DOMAIN`. Setting that one variable is what turns measurement on, which keeps
   the decision a config change rather than a code change.
   ⚠️ **Do not set it until the legal half is done — blocked on legal, not engineering:**
@@ -1277,16 +1260,14 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
 - [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
-- [~] **N-60 · Phase 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10 `[media]`
-  updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
+- [~] **N-60 · Etapa 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10 `[media]` updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
   **Remaining and not an engineering task:** variante D for site visitors, the placeholders, and
   the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
   and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
   engineering one — the cookie-less aggregate case is weak for one, but confirm.
 - [x] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
       Done: 2026-09-22 · 419bd02b · `xangarro.geo_prune` (`0033_geo_prune.sql`, SECURITY DEFINER, 90-day floor, execute only for `xangarro_admin`) called with `GEO_KEEP_DAYS = 400` from the digest cron. No test calls it yet; the `0033` prefix is shared with `0033_tenant_indexes.sql` (harmless, apply order sorts the full name).
-- [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best" `[baja]`
-      or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
+- [ ] **N-62 · Métricas de cohortes desde el domicilio fiscal, no desde la IP.** For "which states retain best" `[baja]` or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
       fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,
       better than an IP guess, and it adds no new collection.
 
@@ -1304,10 +1285,10 @@ micro-POS than location does.
 > each has a **Trigger**. Surfaced by the owner's 2026-09-22 question on what the backoffice
 > should do next.
 
-### N-63 Negocio: MRR, churn, trial → paid `[media]`
+### N-63 Negocio: MRR, churn, prueba → pago [media]
 
-- [ ] Status · **Trigger:** B-10 webhooks write `billing.subscriptions` for the first paying tenant
-      (the N-06 stub is retired). **Blocked by:** N-06 · **Blocks:** N-70, N-72
+- [ ] Status · **Trigger:** los webhooks de B-10 escriban `billing.subscriptions` para el primer inquilino
+      que paga (se retira el stub de N-06). **Blocked by:** N-06 · **Blocks:** N-70, N-72
 - **What:** `/negocio`. MRR (plus IVA excluded, centavos), MRR by plan, new / expansion /
   contraction / churned MRR per month, logo churn, trial → paid per weekly signup cohort, annual vs
   monthly mix. Read from a webhook-fed `billing_events` table — the console never calls Stripe.
@@ -1315,9 +1296,9 @@ micro-POS than location does.
   subscription; a cohort with zero trials renders "sin datos", not 0 %.
 - **Amends** ADR-063 row 3 ("MRR dashboard not built — Stripe covers it"): see ADR-096.
 
-### N-64 Activation funnel and weekly cohorts `[media]`
+### N-64 Embudo de activación y cohortes semanales [media]
 
-- [ ] Status · **Trigger:** X-10 launch (real signups). **Blocked by:** N-57 · **Blocks:** N-70, N-74
+- [ ] Status · **Trigger:** lanzamiento de X-10 (registros reales). **Blocked by:** N-57 · **Blocks:** N-70, N-74
 - **What:** define **activated** as one product moment — first venta synced from a device or the
   operator view — and record `activated_at` on the business (server-side, from the first push).
   Funnel per weekly cohort: signup → wizard done → first venta (≤ 7 d) → active in week 2 → paid.
@@ -1326,19 +1307,19 @@ micro-POS than location does.
 - **Acceptance:** a cohort younger than its window shows "aún no vence"; activation is computed
   from sync data, never from the phone's own estimate.
 
-### N-65 Tenant timeline `[media]`
+### N-65 Línea de tiempo del inquilino [media]
 
-- [ ] Status · **Trigger:** now (every source table exists). **Blocked by:** N-08
+- [ ] Status · **Trigger:** ya (todas las tablas fuente existen). **Blocked by:** N-08
 - **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
   and revoked, plan and override changes, flag allowlist changes, inbox items, B-18 rejections,
   billing events, migrations. Each entry links to its source screen. Read-only.
 - **Acceptance:** a tenant with 500+ events pages by keyset (reuse `keyset.ts`); the feed is the
   union of existing tables — no new event table.
 
-### N-66 Staff roles `[media]`
+### N-66 Roles del staff [media]
 
-- [ ] Status · **Trigger:** the second staff member is added, or before N-68 / N-71 start —
-      whichever is first. **Blocked by:** N-05 · **Blocks:** N-68, N-71
+- [ ] Status · **Trigger:** que se agregue al segundo miembro del staff, o antes de que arranquen
+      N-68 / N-71 — lo que ocurra primero. **Blocked by:** N-05 · **Blocks:** N-68, N-71
 - **What:** `staff_members.role ∈ { lector, operador, admin }`. Lector reads everything, writes
   nothing. Operador does inbox, migrations, overrides, trial extensions, "ver como". Admin also
   manages flags, staff and thresholds. Enforced in `requireStaff()` per action, not per page.
@@ -1347,17 +1328,17 @@ micro-POS than location does.
 
 ### N-67 `/auditoria` `[media]`
 
-- [ ] Status · **Trigger:** now. **Blocked by:** N-05
+- [ ] Status · **Trigger:** ya. **Blocked by:** N-05
 - **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
   origin. Filters by actor, action kind, tenant, date range; keyset paging; CSV export for an
   authority or the privacy audit (`docs/audits/privacidad-2026-09-22.md`).
 - **Acceptance:** the log is append-only from this screen (no delete, no edit); an N-68 session
   shows as one row per action with both identities.
 
-### N-68 "Ver como" — time-boxed, read-only impersonation `[baja]`
+### N-68 «Ver como» — suplantación de solo lectura con límite de tiempo [baja]
 
-- [ ] Status · **Trigger:** X-10 launch and the first inbox item that could not be resolved from
-      `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
+- [ ] Status · **Trigger:** lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda
+      resolver desde `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
 - **What:** an operador opens the portal as a tenant's dueño in **read-only** mode for ≤ 30 min,
   with a reason (free text, required). The portal renders a persistent banner («Soporte de
   Xangarro está viendo tu cuenta»), refuses every write, and the tenant sees the session in
@@ -1367,7 +1348,7 @@ micro-POS than location does.
   attempted through the token is rejected server-side; the token dies at 30 min or on "salir".
 - **Amends** ADR-063 row 3 ("impersonation not built"): see ADR-096.
 
-### N-69 Flag lifecycle and percentage rollout `[baja]`
+### N-69 Ciclo de vida de flags y despliegue porcentual [baja]
 
 - [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
 - **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
@@ -1387,9 +1368,9 @@ micro-POS than location does.
 - **Acceptance:** the ADR-068 S2/S3 rows read the same numbers as the N-07 card; a signal with
   fewer than 4 weekly points shows "sin tendencia" instead of a date.
 
-### N-71 Cobros: dunning, expiring trials, extend / credit `[media]`
+### N-71 Cobros: cobranza de vencidos, pruebas por vencer, extender / acreditar [media]
 
-- [ ] Status · **Trigger:** first paying tenant. **Blocked by:** N-06, N-66
+- [ ] Status · **Trigger:** el primer inquilino que paga. **Blocked by:** N-06, N-66
 - **What:** `/cobros`: `past_due` and `grace` tenants with days remaining and last dunning email;
   trials ending in ≤ 7 days with activation state (N-64); pagos sin CFDI (N-33, moves here).
   Actions (operador): extend trial by N days, apply a one-time credit — both through the existing
@@ -1397,17 +1378,17 @@ micro-POS than location does.
 - **Acceptance:** an extension shows in Stripe within one webhook round-trip; the list is empty
   and says so when no tenant is past due.
 
-### N-72 Cost per tenant `[baja]`
+### N-72 Costo por inquilino [baja]
 
-- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-63 · **Blocks:** N-70 infra-share row
+- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-63 · **Blocks:** el renglón de infraestructura de N-70
 - **What:** a monthly manual entry (admin) of the Vercel, Supabase, Resend and Facturapi invoices
   in centavos; the console divides by active tenants and by MRR. No vendor APIs in v1 — one form,
   one table, one line on `/negocio` and one row on `/decisiones`.
 - **Acceptance:** a month with no entry shows "sin captura", never a stale ratio.
 
-### N-73 Account health and NPS micro-survey `[baja]`
+### N-73 Salud de la cuenta y microencuesta NPS [baja]
 
-- [ ] Status · **Trigger:** 50 active tenants. **Blocked by:** N-64, N-47
+- [ ] Status · **Trigger:** 50 inquilinos activos. **Blocked by:** N-64, N-47
 - **What:** health = usage trend (N-07) + payment health (N-63) + support load (N-08) + last sync
   (N-46), bucketed verde / ámbar / rojo on `/tenants`. One-question NPS in the portal after the
   third corte de día, at most once per quarter, delivered through the ADR-060 `notices` channel;
@@ -1415,9 +1396,9 @@ micro-POS than location does.
 - **Acceptance:** the score is explainable — hovering shows the four inputs; the survey never
   shows on the phone (ADR-069).
 
-### N-74 Promo and referral codes with attribution `[baja]`
+### N-74 Códigos promocionales y de referidos con atribución [baja]
 
-- [ ] Status · **Trigger:** X-10 launch. **Blocked by:** N-64, N-01
+- [ ] Status · **Trigger:** lanzamiento de X-10. **Blocked by:** N-64, N-01
 - **What:** codes are Stripe promotion codes created from the console (admin), each tagged with a
   campaign; redemption lands in `/campanas` as its own origin and flows into N-64's funnel. A
   dueño's "recomienda Xangarro" link is a code with the referrer's business id, one month free for

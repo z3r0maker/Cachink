@@ -1,0 +1,93 @@
+# Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno —
+# the hero with the cash that must be in the drawer, the four figures, the
+# movements of the turno, the due recurrente with its «Registrar» (which goes
+# to Gastos prefilled), and the big rows under the fold.
+#
+# Precondition: device activated against the mock; one cash venta captured so
+# the figures and the movements list carry data (Taco al pastor, $25.00).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+
+# The tab. The cabeza names the operator, the caja and the opening time
+# (packages/ui/src/screens/Turno/mi-turno-screen.tsx Cabeza).
+- tapOn:
+    id: 'tab-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-turno'
+    timeout: 10000
+- assertVisible: '.*Toni, .*desde las.*.*'
+
+# Hero: the cash that must be in the drawer, its parts, «Debe haber».
+- assertVisible:
+    id: 'turno-hero'
+- assertVisible: '.*Efectivo que debe haber en la caja.*'
+- assertVisible: '.*Fondo de caja.*'
+- assertVisible: '.*Ventas en efectivo.*'
+- assertVisible: '.*Debe haber.*'
+
+# The four figures (mi-turno-cifras.tsx; copy from kpisMiTurno, caja/turno).
+- assertVisible:
+    id: 'turno-cifras'
+- assertVisible: '.*Todos los métodos.*'
+- assertVisible: '.*Ninguna cancelada.*'
+
+# The big rows — stack routes off the tab bar, inside the one scroll at the
+# foot (shared/open-turno-row.yaml addresses them one by one).
+- scrollUntilVisible:
+    element:
+      id: 'turno-rows'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- assertVisible:
+    id: 'turno-rows'
+- assertVisible:
+    id: 'otros-gastos'
+- assertVisible:
+    id: 'otros-inventario'
+- assertVisible:
+    id: 'otros-no-enviados'
+
+# A due recurrente (mock fixture REC-1 «Renta local», proximoDisparo
+# 2026-10-01, contracts/mock/fixtures.ts:174) with its due chip.
+- scrollUntilVisible:
+    element:
+      id: 'turno-pendientes'
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*Renta local.*'
+- assertVisible: '.*Cada mes · día 1.*'
+- assertVisible: '.*Atrasado.*|Vence hoy.*'
+
+# The movements: the venta create-venta.yaml just captured («Venta V-0001»).
+- scrollUntilVisible:
+    element:
+      id: 'turno-movimientos'
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*Venta V-.*.*'
+- assertVisible: '.*Ver ventas.*'
+
+# «Registrar» → /gastos?recurrente=<id> with the pagar sheet prefilled
+# (turno/index.tsx onRegistrar → GastosScreen prefill → PagarRecurrenteSheet).
+- scrollUntilVisible:
+    element:
+      id: 'turno-registrar-01JREC00000000000000000001'
+    direction: UP
+    timeout: 5000
+- tapOn:
+    id: 'turno-registrar-01JREC00000000000000000001'
+- extendedWaitUntil:
+    visible:
+      id: 'pagar-recurrente-sheet'
+    timeout: 10000
+- assertVisible: '.*Pagar renta local.*'
+- assertVisible:
+    id: 'pagar-recurrente-tarjeta'

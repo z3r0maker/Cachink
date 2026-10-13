@@ -50,10 +50,10 @@ export * from './BottomSheet/index';
 export * from './Dialog/index';
 export * from './Toast/index';
 export * from './OfflineBanner/index';
-export * from './CajaEstado/index';
 export * from './Bloqueo/index';
 export * from './NavRows/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from
 // screens/index.ts instead (both end up in the top-level barrel).
+export * from './CajaEstado/index';

@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
-import { comoCuenta, type CuentaCliente } from '@xangarro/caja/cobranza';
+import { comoCuenta, type CuentaCliente } from '@xangarro/caja/cobranza/vivo';
 import type { CuentaPara } from '@xangarro/caja/lectura';
 import type { BusinessId } from '@xangarro/domain';
 import { useRepositories } from '../../app/repository-provider';

@@ -47,7 +47,7 @@ export function useScheduleStockLowCheck(options: UseScheduleStockLowCheckOption
       minute: 0,
       title: t('notifications.stockLowTitle'),
       body,
-      payload: { count, actionRoute: '/productos' },
+      payload: { count, actionRoute: '/inventario' },
     });
   }, [notificationsEnabled, stockEnabled, scheduler, productosQ.data, t]);
 }

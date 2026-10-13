@@ -1,20 +1,21 @@
 # Reusable subflow: navigate to the device's Ajustes (Configuración).
 #
 # Track M (M-05): the header lost its cog. Ajustes is a stack route opened
-# from Mi turno's «Ajustes de la caja» row (`otros-configuracion`).
+# from Mi turno's «Ajustes de la caja» row (`otros-configuracion`) — but
+# the XCUITest driver intermittently cannot resolve that one row (an
+# kAXErrorInvalidUIElement on its frame query; the row is on screen and
+# the tap works when the query resolves). Until that driver quirk is
+# understood, the flows deep-link to the route, which mounts the same
+# screen (M-11).
 #
 # Caveat: the Expo Dev Client's floating gear can sit over the header.
 # Disable "Tools button" in the dev menu before running the suite — see
 # E2E-SESSION-NOTES.md.
 #
-# Precondition: user is authenticated and on any tab.
+# Precondition: user is authenticated (the route renders inside the shell).
 appId: mx.xangarro.mobile
 ---
-- runFlow:
-    file: open-turno-row.yaml
-    env:
-      ROW: 'otros-configuracion'
-
+- openLink: 'xangarro://settings'
 - extendedWaitUntil:
     visible: 'Ajustes'
-    timeout: 5000
+    timeout: 8000

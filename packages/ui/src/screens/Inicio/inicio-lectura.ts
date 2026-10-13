@@ -1,14 +1,13 @@
 /**
  * Reads the rows Inicio says (`FilasInicio`) from the phone's repositories:
- * the operator's open turno (or the newest one on this device), its rows
- * (`leerFilasDelTurno`: tickets, lines, gastos and abonos), the last month of
+ * the operator's open turno (or the newest one on this device), that day's
+ * tickets, lines and gastos, the turno's cash movements, the last month of
  * turnos for «Tus últimos cortes», the recurring gastos already due and the
  * tracked products' stock for «Para hoy».
  */
 import type { StockTarea } from '@xangarro/caja/inicio';
 import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
 import type { Repositories } from '../../app/repository-provider';
-import { leerFilasDelTurno, SIN_FILAS } from '../MiTurno/filas-del-turno';
 import type { FilasInicio } from './inicio-filas';
 
 /** How far back «Tus últimos cortes» looks. */
@@ -26,7 +25,7 @@ type R = Pick<
   | 'tickets'
   | 'sales'
   | 'expenses'
-  | 'clientPayments'
+  | 'cajaMovimientos'
   | 'recurringExpenses'
   | 'products'
   | 'inventoryMovements'
@@ -55,11 +54,15 @@ export async function leerFilasInicio(
 ): Promise<FilasInicio> {
   const abierto = await r.cajaTurnos.findOpenByUser(userId);
   const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
-  const [filas, turnos, recurrentes, stock] = await Promise.all([
-    turno ? leerFilasDelTurno(r, turno.fecha, hoy, businessId) : Promise.resolve(SIN_FILAS),
+  const fecha = turno?.fecha ?? hoy;
+  const [tickets, lineas, gastos, movimientos, turnos, recurrentes, stock] = await Promise.all([
+    r.tickets.findByDateRange(fecha, fecha, businessId),
+    r.sales.findByDateRange(fecha, fecha, businessId),
+    r.expenses.findByDateRange(fecha, fecha, businessId),
+    turno ? r.cajaMovimientos.findByTurno(turno.id) : Promise.resolve([]),
     r.cajaTurnos.findByDateRange(haceDias(hoy, DIAS_CORTES), hoy, businessId),
     r.recurringExpenses.findDue(hoy as IsoDate, businessId),
     leerStock(r, businessId),
   ]);
-  return { turno, ...filas, turnos, recurrentes, stock };
+  return { turno, tickets, lineas, gastos, movimientos, turnos, recurrentes, stock };
 }

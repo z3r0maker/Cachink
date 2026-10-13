@@ -3,33 +3,33 @@
 > **Origin:** the owner conversation of 2026-10-07/08. MEXIA, S.A.S. (RESICO persona moral, two
 > founders at 50/50, a founders' agreement with a performance pool) will operate Xangarro, and the
 > owner wants "a command center of the company, visible to the partners, to make decisions".
-> **ADR-124** records the architecture. This file holds the scope, the definitions, the phases and
+> **ADR-125** records the architecture. This file holds the scope, the definitions, the phases and
 > the tasks **E-01 … E-44**. The screens go to Claude Design through
 > `21-command-center-design.md`.
 >
-> Read ADR-063 (the console), ADR-070 (CFDI for our own payments), ADR-124 and
+> Read ADR-063 (the console), ADR-070 (CFDI for our own payments), ADR-125 and
 > `17-consola-crecimiento.md` (N-63 MRR, N-70 decisions, N-72 cost per tenant) before a task here.
 
 ---
 
 ## 1. Owner decisions (2026-10-08)
 
-1. **Founders only.** «Empresa» is a separate permission from staff (ADR-124 §1). Support hires
+1. **Founders only.** «Empresa» is a separate permission from staff (ADR-125 §1). Support hires
    never see it.
 2. **Own tables, inside Xangarro for now.** It uses the `corp` schema, its own package
-   (`@xangarro/data-corp`) and its own journal, so it can move to another system later (ADR-124 §2).
+   (`@xangarro/data-corp`) and its own journal, so it can move to another system later (ADR-125 §2).
 3. **Accounting-style, not the formal accounting.** It shows income, expenses (licences,
    marketing, infrastructure), taxes, IVA withholdings, issued and received invoices, capital
    contributions, and partner loans owed by the company. The contador keeps the legal books.
-4. **Multi-project from day one,** with Xangarro as the only project (ADR-124 §3).
+4. **Multi-project from day one,** with Xangarro as the only project (ADR-125 §3).
 5. **LLM agents are welcome:** Claude Desktop through a local MCP server first, Microsoft Foundry
-   later. Agents propose and founders approve (ADR-124 §6).
+   later. Agents propose and founders approve (ADR-125 §6).
 6. **Design goes to Claude Design** before code (ADR-117's rule: the canvas is the spec).
 7. **Documents: in `corp` now, Azure Blob before the Tablero.** Phase 0's evidence is kept as bytea
    in `corp`; before E-20's attachments the bytes move to an immutable Azure Blob container, not
-   to Supabase Storage, since Xangarro moves to Azure after about twenty clients (ADR-126, E-26).
+   to Supabase Storage, since Xangarro moves to Azure after about twenty clients (ADR-127, E-26).
 8. **Minutas feed the Tablero.** Meeting minutes are filed in the Expediente; the secretario del
-   Tablero proposes objectives and cards from them, and the founders approve (ADR-126, E-27).
+   Tablero proposes objectives and cards from them, and the founders approve (ADR-127, E-27).
 
 ### Open owner decisions (answer before the task that needs it)
 
@@ -63,7 +63,7 @@
 | `/empresa/corporativo` | Libro corporativo    | Partners, beneficial owners, actas, credentials, trademark  | 0     |
 | `/empresa/propuestas`  | Propuestas           | What did the agents suggest that we must approve?           | 3     |
 
-## 3. The ledger (ADR-124 §4)
+## 3. The ledger (ADR-125 §4)
 
 **Capture is single-entry; storage is double-entry.** A founder records a _movement_, and a
 domain function posts its balanced lines. Nobody types debits and credits.
@@ -169,7 +169,7 @@ with property tests:
 - **Aportaciones (E-03).** A per-partner ledger of capital, equal funding calls, additional money
   (counted 1:1 up to the cap, with the excess becoming a loan) and repayments.
 
-## 6. Agents (ADR-124 §6)
+## 6. Agents (ADR-125 §6)
 
 **One tool layer, two runtimes.**
 
@@ -222,11 +222,11 @@ with property tests:
 
 **Phase 0 — at incorporation**
 
-### E-01 Foundation: ADR-124, `data-corp`, founder gate, Claude Design project
+### E-01 Foundation: ADR-125, `data-corp`, founder gate, Claude Design project
 
 - [x] Status · Done: 2026-10-08 · branch `feat/empresa-fase0` (see Progress below)
 - **What:**
-  - accept ADR-124;
+  - accept ADR-125;
   - create `@xangarro/data-corp` (Drizzle `schemaFilter: ['corp']`, its own journal), the
     `xangarro_corp` and `xangarro_corp_agent` roles, and `db-local.sh` / CI applying it;
   - `corp.projects` (seed Xangarro) and `corp.founders` (staff member id, founder number, name,
@@ -339,7 +339,7 @@ with property tests:
       skipped, nothing goes back. Recurring periods are computed from MEXIA's SAT registration
       (`corp.company.inscripcion_rfc`, asked on the screen until set), never seeded; a row exists once
       a founder acts on one. Storage (0003): `corp.company`, `corp.obligations`, and `corp.documents`
-      with the files as bytea (ADR-126, proposed). Screens: Agenda › Próximos (late, the next two
+      with the files as bytea (ADR-127, proposed). Screens: Agenda › Próximos (late, the next two
       weeks, then 60 days of monthly periods plus annual and one-off dates; the funding halves from
       Socios; «Agregar una fecha»; «Exentas»), the obligation page (why and when, the moved-date
       sentence, documents with «Ver», upload, the step buttons blocked with their reason) and Agenda ›
@@ -371,7 +371,7 @@ with property tests:
 
 - [x] Status · **Blocked by:** E-01 · **Done:** 2026-10-08
       **Progress (2026-10-08):** `corp.documents` (0003, amended before it shipped) keeps the file as
-      bytea (ADR-126, proposed, instead of the bucket below) with its kind, folder (the board's eight:
+      bytea (ADR-127, proposed, instead of the bucket below) with its kind, folder (the board's eight:
       Constitución, SAT, Secretaría de Economía, IMPI, Estados financieros, Contratos, Acuerdo de
       socios, Comprobantes), title, period, the obligation or ledger entry it proves, SHA-256,
       `retain_until` (upload + 5 years) and the version it supersedes (unique: one successor each).
@@ -801,7 +801,7 @@ screen, not the P&L roles.
 
 The owner asked where the area keeps its files once the Tablero has attachments and the
 founders keep meeting minutes, given Supabase and Vercel now and Azure after about twenty
-clients. ADR-126 records the answer: the bytes stay in `corp` for Phase 0's small legal evidence
+clients. ADR-127 records the answer: the bytes stay in `corp` for Phase 0's small legal evidence
 and move to Azure Blob Storage before E-20; minutas are documents the secretario del Tablero
 turns into proposed objectives and cards.
 
@@ -819,7 +819,7 @@ turns into proposed objectives and cards.
   - `corp.documents` keeps its columns; `content` becomes a blob reference, with a migration plan
     and a test exercising old → new rows (CLAUDE.md §2.9);
   - a one-time move: copy each file, check it against its SHA-256, then drop `content`;
-  - ADR-124 §2's lift-out runbook (E-44) gains the container copy.
+  - ADR-125 §2's lift-out runbook (E-44) gains the container copy.
 - **Acceptance:** a deleted or overwritten blob is refused by the container; a moved file's
   SHA-256 matches the one recorded at upload; a 20 MB attachment uploads without passing through
   the console.

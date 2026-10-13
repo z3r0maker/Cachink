@@ -182,6 +182,11 @@ export function keyboardHintsFor(type: InputType): KeyboardHints {
 export interface FieldProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
+  /** testID for the TextInput itself: the wrapper keeps the base id and the
+   * field gets `<base>-input`, so a tap lands on the field, not the label
+   * (M-11: typing into `inventario-costo` went nowhere — the View ate the
+   * tap and the keystrokes had no responder). */
+  readonly inputTestID?: string;
   readonly placeholder?: string;
   readonly options?: readonly string[];
   readonly type: InputType;

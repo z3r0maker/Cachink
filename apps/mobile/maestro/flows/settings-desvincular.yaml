@@ -1,23 +1,32 @@
-# Device-only Configuración (A-12): Cuenta / Sincronización / Dispositivo /
-# Datos, and "Desvincular este dispositivo" sends the device back to
-# activation. The flow then resets the mock and re-activates, so it leaves
-# the device as it found it.
+# Device-only Configuración (A-12): Cuenta / Sincronización / Dispositivo,
+# and «Desvincular este dispositivo» forgets the device's identity (every
+# record stays) and sends it back to Vincular. The flow then resets the
+# mock, re-activates and signs Toni back in, leaving the device as the
+# `activated` entrypoint expects.
 #
-# Precondition: device activated against the mock (activation.yaml).
+# Precondition: activated + signed in (Toni, NIP 1234); starts on Inicio.
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 env:
-  MOCK_API: http://127.0.0.1:3100
+  MOCK_API: http://127.0.0.1:3000
 ---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+# launchApp cold-restarts and the NIP session does not survive it: /settings
+# renders behind the auth gate, so sign in before the deep link.
 - runFlow: shared/login-operator.yaml
+# Ajustes is a stack route opened from Mi turno's rows (M-05: the header
+# lost its cog); shared/navigate-to-settings.yaml deep-links to it.
 - runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: 'settings-screen'
     timeout: 10000
+# Cuenta: the business this device belongs to (settings-account-section.tsx).
 - assertVisible:
     id: 'settings-account'
 - assertVisible: '.*Tacos La Esquina.*'
+# Sincronización: the status row and «Actualizar» (settings-sync-section.tsx).
 - assertVisible:
     id: 'settings-sync'
 - tapOn:
@@ -26,14 +35,23 @@ env:
     element:
       id: 'settings-unlink'
     direction: UP
+- assertVisible: '.*Desvincular este dispositivo.*'
 - tapOn:
     id: 'settings-unlink'
+# The confirm dialog asks before anything is forgotten (ConfirmDialog,
+# confirm-dialog-confirm).
+- assertVisible: '.*¿Desvincular este dispositivo?.*'
 - tapOn:
     id: 'confirm-dialog-confirm'
+# Unlinking drops the activation record: the gate shows Vincular again
+# (gated-navigation.tsx: not activated → ActivationScreen).
 - extendedWaitUntil:
     visible:
       id: 'activation-screen'
     timeout: 15000
+# Leave the device as it was found: the code is single-use, so reset the
+# mock first, then link again and sign Toni in (no-op if already signed in).
 - runScript:
     file: shared/mock-reset.js
 - runFlow: activation.yaml
+- runFlow: shared/login-operator.yaml

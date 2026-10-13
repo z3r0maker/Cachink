@@ -1,0 +1,102 @@
+# Registros por enviar (Track M, M-09; board MvPorEnviar): the queue's whole
+# face, not only its rejections. The mock «forgets» a product (as if purged
+# in the portal, shared/mock-row.js), one venta of it is refused with
+# FK_PRODUCT_MISSING, the pill turns red and opens /no-enviados, the hero
+# says the phase (con-rechazados) with the server's sentence under it, and
+# once the portal restores the product «Reintentar» requeues the row and
+# everything lands: «Todo enviado».
+#
+# Precondition: activated device against the mock on MOCK_API, turno open.
+# Replaces sync-rejected.yaml (A-08's old «No enviados» screen is gone).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# The server loses «Agua de horchata» (PRD-7); one venta of it — refused.
+- runScript:
+    file: shared/mock-row.js
+    env:
+      ACTION: forget
+      TABLE: products
+      ROW_ID: 01JPRD00000000000000000007
+- tapOn:
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- tapOn: 'Agregar Agua de horchata,.*'
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Transferencia
+
+# The pill refuses and opens «Registros por enviar»
+# (app-shell.tsx onOpenRejected → /no-enviados).
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-rejected'
+    timeout: 30000
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-por-enviar'
+    timeout: 10000
+
+# The phase and its hero (heroeTelefono con-rechazados, caja/pendientes);
+# «La cola» still lists the venta.
+- assertVisible:
+    id: 'por-enviar-heroe'
+- assertVisible: '.*Revisar.*'
+- assertVisible: '.*El servidor no aceptó [0-9]* registros*.*'
+- assertVisible: '.*Sigue en esta caja, no se pierde\. Lee la razón de cada uno abajo y reintenta los que puedas\..*'
+- assertVisible: '.*Reintentar envío.*'
+- assertVisible:
+    id: 'cola-panel'
+- assertVisible: 'Venta · .*'
+
+# «El servidor no aceptó» is below the cola: the server's sentence and hint
+# (rechazado.ts RAZON/PISTA FK_PRODUCT_MISSING), then the row's «Reintentar».
+- scrollUntilVisible:
+    element:
+      id: 'rechazados-panel'
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*El producto de este registro ya no existe en el portal\..*'
+- assertVisible: '.*El producto fue eliminado — regístrala con otro producto\..*'
+- runScript:
+    file: shared/mock-row.js
+    env:
+      ACTION: restore
+      TABLE: products
+      ROW_ID: 01JPRD00000000000000000007
+# The refusal hits BOTH rows that name the product (the sale and its stock
+# movement), so two cards wait: «Reintentar todos» requeues every one of
+# them — one card's button would leave the other refused.
+- tapOn: { id: 'rechazados-retry-todos' }
+
+# The queue drains: «Todo enviado», «Nada pendiente» (the panel sits above
+# where the refusals were — scroll up to it), the pill green again.
+# The retry flushes the whole queue through the mock: give the sweep room
+# before the hero flips to «Todo enviado».
+- extendedWaitUntil:
+    visible: { text: '.*Todo enviado.*' }
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: 'cola-vacia'
+    direction: UP
+    timeout: 30000
+- assertVisible: '.*Todo enviado.*'
+- assertVisible: '.*Nada pendiente.*'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000

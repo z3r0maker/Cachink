@@ -229,7 +229,7 @@ describe('useEmitDirectorAlert', () => {
     expect(scheduler.presented).toHaveLength(0);
   });
 
-  it('carries actionRoute in payload, defaulting to /notificaciones', async () => {
+  it('carries actionRoute in payload, defaulting to /avisos', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
     const { result } = renderHook(
@@ -253,7 +253,7 @@ describe('useEmitDirectorAlert', () => {
 
     await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     expect(scheduler.presented[0]!.payload).toMatchObject({
-      actionRoute: '/notificaciones',
+      actionRoute: '/avisos',
     });
   });
 

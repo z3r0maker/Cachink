@@ -1,5 +1,29 @@
 import { matches } from '../comun/search';
-import type { Existencia, Movimiento, TipoMovimiento } from './types';
+import type { Existencia, Movimiento, NuevoMovimientoVivo, TipoMovimiento } from './types';
+
+/** What the confirmation toast says: its kind and the sentence under it. */
+export interface ToastMov {
+  readonly tipo: TipoMovimiento;
+  readonly body: string;
+}
+
+/** «+15 de Carne de pastor. Queda en tu turno.», «−2 de Horchata preparada · Se rompió. …» */
+export function toastDe(n: NuevoMovimientoVivo, nombre: string): ToastMov {
+  const signo = n.tipo === 'Merma' ? '−' : '+';
+  const motivo = n.tipo === 'Merma' && n.detalle !== '' ? ` · ${n.detalle}` : '';
+  return { tipo: n.tipo, body: `${signo}${n.cantidad} de ${nombre}${motivo}. Queda en tu turno.` };
+}
+
+/**
+ * The sheet's raw text as the quantity the domain accepts — a whole number
+ * above zero — or null. The ledger counts integers, so a decimal is refused
+ * here just as `movimientoDominio` refuses it (the panel already does).
+ */
+export const cantidadValida = (raw: string): number | null => {
+  if (raw.trim() === '' || /[^0-9.]/.test(raw)) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
 
 export const porReponer = (e: Existencia): boolean => e.existencias <= e.umbral;
 

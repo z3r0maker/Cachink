@@ -240,7 +240,7 @@ describe('Inicio', () => {
     expect(screen.getByTestId('inicio-para-hoy')).toHaveTextContent('Para hoy');
     expect(screen.getByTestId('inicio-cortes')).toHaveTextContent('Cuadró');
     tap('inicio-atajo-gastos');
-    expect(onNavigate).toHaveBeenCalledWith('/egresos');
+    expect(onNavigate).toHaveBeenCalledWith('/gastos');
   });
 
   it('turno cerrado: «Abrir turno» opens the fondo sheet and «Para hoy» waits', () => {
@@ -264,7 +264,7 @@ describe('Inicio', () => {
     inicio({ ...INICIO_FIXTURE, offline: true, pendientes: 3 }, { onNavigate });
     expect(screen.getByTestId('inicio-hero-offline')).toHaveTextContent('3 sin enviar');
     tap('inicio-hero-accion');
-    expect(onNavigate).toHaveBeenCalledWith('/pendientes');
+    expect(onNavigate).toHaveBeenCalledWith('/no-enviados');
     tap('inicio-hero-extra');
     expect(onNavigate).toHaveBeenCalledWith('/cobrar');
   });

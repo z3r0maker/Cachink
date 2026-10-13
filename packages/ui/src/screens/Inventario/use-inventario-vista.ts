@@ -5,7 +5,7 @@
  */
 import { useState } from 'react';
 import type { Pestana, TipoMovimiento } from '@xangarro/caja/inventario';
-import type { ExistenciaMovil, InventarioLeido } from './inventario-lectura';
+import type { ExistenciaMovil, InventarioLeido } from './inventario-registro';
 import { avisoHecho, tipoAlAbrir, type Borrador } from './mover-logica';
 
 export interface Abierto {

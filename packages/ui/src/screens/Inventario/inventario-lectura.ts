@@ -1,88 +1,86 @@
 /**
- * Inventario's read on the phone (MvInventario, the web's O-24 read in
- * `operador/runtime/inventario.ts`): the business's tracked products with
- * their stock from the ledger (`sumStock`), and this turno's manual
- * movements on this device (`delTurno`: entradas and mermas since the
- * apertura, never a sale's). Said the way the screen says them through
- * `@xangarro/caja/inventario` (`comoExistencia`, `comoMovimiento`); the
- * product's glyph and tint are the phone catalogue's, as Cobrar draws them.
+ * Reads the rows the Inventario screen says from the phone's repositories
+ * (Track M, M-09): the stocked products with their ledger count, this
+ * turno's manual movements (this device, since the apertura — the register's
+ * `delTurno` rule), and the owner's first name for the empty answer. The
+ * web operador's `inventarioDelTurno` said on the phone. Pure over the
+ * repositories' rows; the shaping into `Existencia`/`Movimiento` stays in
+ * `@xangarro/caja/inventario` (`comoInventario`).
  */
-import type { Existencia, Movimiento } from '@xangarro/caja/inventario';
-import { comoExistencia, comoMovimiento } from '@xangarro/caja/inventario';
-import { delTurno, type FilaMovimiento } from '@xangarro/caja/lectura';
+import { nombreDueno } from '@xangarro/caja';
 import {
-  resolveProductIcon,
-  type BusinessId,
-  type IsoDate,
-  type Money,
-  type Product,
-  type ProductIcon,
-  type UserId,
-} from '@xangarro/domain';
+  delTurno,
+  type FilaMovimiento,
+  type InventarioPara,
+  type MovimientoInventarioPara,
+} from '@xangarro/caja/lectura';
+import type { BusinessId, DeviceId, Product, UserId } from '@xangarro/domain';
+import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
-import { PRODUCT_BG_COLORS } from '../../product-colors';
 
-export interface ExistenciaMovil extends Existencia {
-  /** The product's own glyph, as the Cobrar tile draws it. */
-  readonly glifo: ProductIcon;
-  readonly costoUnitCentavos: Money;
-}
+type R = Pick<Repositories, 'appConfig' | 'cajaTurnos' | 'products' | 'inventoryMovements'>;
 
-export interface InventarioLeido {
-  readonly existencias: readonly ExistenciaMovil[];
-  readonly movimientos: readonly Movimiento[];
-}
-
-type R = Pick<Repositories, 'products' | 'inventoryMovements' | 'cajaTurnos'>;
-
-/** Stock is the screen's only when tracked, alive and not awaiting review (the web's `seSigue`). */
+/** Stock is the screen's only when tracked, alive and not awaiting review. */
 export const seSigue = (p: Product): boolean =>
   p.seguirStock && p.deletedAt === null && p.estadoRevision !== 'pendiente';
 
-async function existencias(r: R, businessId: BusinessId): Promise<ExistenciaMovil[]> {
-  const productos = (await r.products.listForBusiness(businessId)).filter(seSigue);
-  const out = await Promise.all(
-    productos.map(async (p) => ({
-      ...comoExistencia({
-        id: p.id,
-        nombre: p.nombre,
-        existencias: await r.inventoryMovements.sumStock(p.id),
-        umbral: p.umbralStockBajo,
-        unidad: p.unidad,
-        icono: p.icono,
-        color: p.colorFondo,
-        categoria: p.categoria,
-      }),
-      tint: PRODUCT_BG_COLORS[p.colorFondo],
-      glifo: resolveProductIcon(p.icono, p.categoria),
-      costoUnitCentavos: p.costoUnitCentavos,
-    })),
-  );
-  return out.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-MX'));
+export interface FilasInventario {
+  /** The turno whose movements the list says: the open one, or the newest. */
+  readonly turnoId: string | null;
+  readonly inventario: InventarioPara;
+  /** The owner's first name, or «el dueño» until the device knows it. */
+  readonly dueno: string;
 }
 
-async function delTurnoAbierto(
+/** This device's manual movements of the turno (empty without a turno). */
+async function movimientosDelTurno(
+  r: R,
+  businessId: BusinessId,
+  deviceId: DeviceId,
+  turnoFecha: string,
+  aperturaAt: string,
+  hoy: string,
+): Promise<readonly MovimientoInventarioPara[]> {
+  const rows = await r.inventoryMovements.findByDateRange(
+    turnoFecha as never,
+    hoy as never,
+    businessId,
+  );
+  return delTurno(rows as unknown as readonly FilaMovimiento[], deviceId, aperturaAt);
+}
+
+/** The Inventario screen's read: stocked products and this turno's movements. */
+export async function leerFilasInventario(
   r: R,
   businessId: BusinessId,
   userId: UserId,
-  deviceId: string,
+  deviceId: DeviceId,
   hoy: string,
-): Promise<readonly Movimiento[]> {
-  const turno = await r.cajaTurnos.findOpenByUser(userId);
-  if (turno === null) return [];
-  const filas = await r.inventoryMovements.findByDateRange(turno.fecha, hoy as IsoDate, businessId);
-  return delTurno(filas as unknown as readonly FilaMovimiento[], deviceId, turno.aperturaAt).map(
-    comoMovimiento,
-  );
-}
-
-export async function leerInventario(
-  r: R,
-  s: { businessId: BusinessId; userId: UserId; deviceId: string; hoy: string },
-): Promise<InventarioLeido> {
-  const [e, m] = await Promise.all([
-    existencias(r, s.businessId),
-    delTurnoAbierto(r, s.businessId, s.userId, s.deviceId, s.hoy),
+): Promise<FilasInventario> {
+  const abierto = await r.cajaTurnos.findOpenByUser(userId);
+  const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
+  const [productos, movimientos, dueno] = await Promise.all([
+    r.products.listForBusiness(businessId),
+    turno === null
+      ? Promise.resolve([])
+      : movimientosDelTurno(r, businessId, deviceId, turno.fecha, turno.aperturaAt, hoy),
+    r.appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
   ]);
-  return { existencias: e, movimientos: m };
+  const existencias = await Promise.all(
+    productos.filter(seSigue).map(async (p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      existencias: await r.inventoryMovements.sumStock(p.id),
+      umbral: p.umbralStockBajo,
+      unidad: p.unidad,
+      icono: p.icono,
+      color: p.colorFondo,
+      categoria: p.categoria,
+    })),
+  );
+  const inventario: InventarioPara = {
+    existencias: existencias.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-MX')),
+    movimientos,
+  };
+  return { turnoId: turno?.id ?? null, inventario, dueno: nombreDueno(dueno) };
 }

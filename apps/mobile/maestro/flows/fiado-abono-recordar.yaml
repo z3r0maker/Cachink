@@ -1,0 +1,133 @@
+# Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza*): Inicio's
+# atajo opens /fiado; a client's account opens its sheet; «Recibir abono»
+# takes the quick «Todo» and a método, and the saldo drops; «Recordarle por
+# WhatsApp» composes the message in the sheet (nothing external is asserted).
+#
+# The fixture clients carry no phone (fixtures.ts:129) and nobody owes
+# anything, so the flow first charges a fiado Gringa to a NEW client with a
+# number — the account and the reminder both come from that.
+#
+# The reminder is driven BEFORE the abono: a client who owes nothing keeps the
+# account sheet's «Recordarle por WhatsApp», but the card's «Ver cuenta» stops
+# being a labelled button once the saldo is zero.
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - fiado
+  - cobranza
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# The fiado venta needs the open turno; open one only if Inicio still asks.
+- tapOn: { id: 'tab-inicio' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+
+# Charge a Gringa on credit to a cliente nuevo with his phone.
+- tapOn: { id: 'tab-cobrar' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+# The grid lists alphabetically; this tile is below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000005'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000005' }
+- tapOn: { id: 'cart-checkout-btn' }
+- extendedWaitUntil: { visible: { id: 'ticket-sheet' }, timeout: 5000 }
+- tapOn: { id: 'ticket-cobrar' }
+- extendedWaitUntil: { visible: { id: 'checkout-cobro' }, timeout: 8000 }
+- tapOn: { id: 'cobro-fiado' }
+- extendedWaitUntil: { visible: { id: 'checkout-fiado' }, timeout: 5000 }
+- tapOn: { id: 'fiado-nuevo' }
+- tapOn: { id: 'fiado-nuevo-nombre' }
+- inputText: 'Don Beto'
+- tapOn: { id: 'fiado-nuevo-telefono' }
+- inputText: '5512345678'
+# The keyboard-avoiding panel lifts «Anotar» while typing; let the shift
+# settle BEFORE resolving the button, or the tap lands on stale coordinates
+# (which once submitted the sale by accident).
+- waitForAnimationToEnd
+- tapOn: { id: 'fiado-anotar' }
+- extendedWaitUntil: { visible: { id: 'venta-hecha' }, timeout: 8000 }
+# The dialog animates in; tapping «Nueva venta» on stale coordinates once left
+# it open, and the later tab taps landed on its overlay instead.
+- waitForAnimationToEnd
+- assertVisible: ".*Anotaste \\$35\\.00 a Don Beto.*"
+- assertVisible: '.*Ahora debe.*'
+- tapOn: { id: 'venta-hecha-nueva' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+- assertNotVisible: { id: 'venta-hecha' }
+
+# Inicio's shortcut tile opens Fiado y abonos; Don Beto owes the gringa.
+- tapOn: { id: 'tab-inicio' }
+# The hero refetches after the venta («Cobraste $35.00») and the tiles shift;
+# let the layout settle before resolving the atajo, or the tap lands stale.
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 8000 }
+- waitForAnimationToEnd
+- tapOn: { id: 'inicio-atajo-fiado' }
+- extendedWaitUntil: { visible: { id: 'mobile-fiado' }, timeout: 8000 }
+- assertVisible: '.*Fiado y abonos.*'
+- assertVisible: { id: 'cobranza-kpis' }
+- assertVisible: '.*Don Beto.*'
+- tapOn:
+    text: 'Ver cuenta'
+- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+- assertVisible: '.*Cuenta de fiado.*'
+- assertVisible: '.*5512345678.*'
+
+# «Recordarle por WhatsApp»: the number came prefilled and the message
+# composed (editing it offers the original back). The sheet only opens
+# WhatsApp — nothing outside the app is asserted.
+- tapOn: { id: 'cuenta-recordar' }
+- extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
+- assertVisible: '.*Recordarle su saldo a Don Beto.*'
+- assertVisible: { id: 'recordar-telefono' }
+- assertVisible: '.*Se abre WhatsApp con el mensaje listo. Tú decides si lo mandas\..*'
+- tapOn: { id: 'recordar-mensaje' }
+- inputText: 'Nos vemos!'
+- assertVisible: { id: 'recordar-restaurar' }
+- tapOn: { id: 'recordar-restaurar' }
+- tapOn: { id: 'recordar-sheet-close' }
+- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+
+# «Recibir abono»: the quick «Todo», how they pay, and the saldo drops.
+- tapOn: { id: 'cuenta-abonar' }
+- extendedWaitUntil: { visible: { id: 'abono-sheet' }, timeout: 5000 }
+- assertVisible: '.*Saldo actual.*'
+# The quick chip folds (aria-label «Todo, $35.00»); the dot form is visual only.
+- assertVisible: ".*Todo, \\$35\\.00.*"
+- tapOn: { id: 'abono-rapido-3500' }
+- tapOn: { id: 'abono-metodo-Transferencia' }
+- tapOn: { id: 'abono-registrar' }
+- extendedWaitUntil: { visible: { id: 'cobranza-toast' }, timeout: 8000 }
+- assertVisible: '.*Abono registrado.*'
+- assertVisible: ".*queda \\$0\\.00.*"
+# The day's abonos land in the panel below the client cards (the toast floats
+# over them, so close it first). The cards reshuffle once the saldo drops, so
+# let that settle before scrolling for the panel.
+- tapOn: { id: 'cobranza-toast-close' }
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: { id: 'cobranza-abonos-hoy' }
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- assertVisible: '.*Abonos que recibiste hoy.*'
