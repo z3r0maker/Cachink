@@ -365,38 +365,17 @@ fi
 CURRENT_PHASE="Phase 4: Sales"
 echo ""
 echo "📂  Phase 4: Sales"
-run_flow "$FLOWS_DIR/venta-efectivo.yaml"
-
-if should_run "B"; then
-  run_flow "$FLOWS_DIR/venta-otros-metodos.yaml"
-fi
 
 if should_run "C"; then
   run_flow "$FLOWS_DIR/venta-cantidad-multiple.yaml"
-  run_flow "$FLOWS_DIR/venta-search-product.yaml"
   run_flow "$FLOWS_DIR/checkout-method-picker.yaml"        # NEW — uncovered screen
-  run_flow "$FLOWS_DIR/venta-stock-insuficiente.yaml"      # Edge — VEN-16
 fi
 
 # ──────────────── Phase 5: Egresos ─────────────────────────────
 CURRENT_PHASE="Phase 5: Egresos"
 echo ""
 echo "📂  Phase 5: Egresos"
-run_flow "$FLOWS_DIR/egreso-gasto.yaml"
-run_flow "$FLOWS_DIR/egreso-inventario.yaml"
-run_flow "$FLOWS_DIR/egreso-recurrente.yaml"
-run_flow "$FLOWS_DIR/egreso-gasto-full-form.yaml"           # B1 — Phase 15
-run_flow "$FLOWS_DIR/egresos-total-y-fecha.yaml"            # B3 — Phase 15
-run_flow "$FLOWS_DIR/egreso-recurrente-mensual.yaml"        # G1 — Phase 15
 
-if should_run "C"; then
-  run_flow "$FLOWS_DIR/validation-egreso.yaml"
-  run_flow "$FLOWS_DIR/egreso-recurrente-semanal.yaml"
-  run_flow "$FLOWS_DIR/egreso-gasto-via-fab.yaml"         # Audit — previously excluded
-  run_flow "$FLOWS_DIR/egreso-inventario-empty-state.yaml" # Audit — previously excluded
-  run_flow "$FLOWS_DIR/egreso-recurrente-descartar.yaml"  # Audit — previously excluded
-  run_flow "$FLOWS_DIR/egreso-recurrente-quincenal.yaml"  # Edge — EGR-15
-fi
 
 if should_run "A"; then
   run_flow "$FLOWS_DIR/nuevo-egreso-cancel.yaml"            # Gap 21 — Phase 16

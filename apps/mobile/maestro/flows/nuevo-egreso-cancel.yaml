@@ -9,23 +9,23 @@ appId: mx.xangarro.mobile
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/abrir-registrar-gasto.yaml
 
-- tapOn: { id: 'numpad-9' }
-- tapOn:
-    id: 'gasto-concepto'
+# A concepto alone, cancelled: nothing is saved, the sheet closes.
+- tapOn: { id: 'gasto-concepto' }
 - inputText: 'No se guarda'
-- tapOn:
-    id: 'gasto-cancelar'
+- hideKeyboard
+- tapOn: { id: 'gasto-cancelar' }
 - extendedWaitUntil:
-    notVisible:
-      id: 'registrar-gasto'
+    notVisible: { id: 'registrar-gasto-sheet' }
     timeout: 5000
 - assertNotVisible: 'No se guarda'
 
-# The close square does the same, and each opening starts clean.
-- tapOn:
-    id: 'gastos-registrar'
-- assertVisible: 'Escribe cuánto fue.'
-- tapOn:
-    id: 'registrar-gasto-close'
-- assertNotVisible:
-    id: 'registrar-gasto'
+# Reopening starts clean: the empty sheet blocks on concepto + monto.
+- tapOn: { id: 'gastos-abrir-registrar' }
+- extendedWaitUntil:
+    visible: { id: 'registrar-gasto-sheet' }
+    timeout: 5000
+- assertVisible: ".*Registrar gasto de \\$___.*"
+- tapOn: { id: 'gasto-cancelar' }
+- extendedWaitUntil:
+    notVisible: { id: 'registrar-gasto-sheet' }
+    timeout: 5000

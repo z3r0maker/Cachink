@@ -17,12 +17,7 @@ appId: mx.xangarro.mobile
 # Open Settings via Otros → Configuración.
 - runFlow: shared/navigate-to-settings.yaml
 
-# Navigate to Sistema sub-screen.
-- tapOn:
-    id: 'settings-hub-sistema'
-- extendedWaitUntil:
-    visible: 'Sistema'
-    timeout: 5000
+# Ajustes is one page now (A-12): no Sistema hub to hop through.
 
 # Scroll down to find the "Check for updates" button.
 - scrollUntilVisible:
