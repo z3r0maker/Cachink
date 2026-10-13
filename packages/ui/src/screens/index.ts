@@ -10,7 +10,6 @@ export * from './Settings/index';
 export * from './Ventas/index';
 export * from './Egresos/index';
 export * from './Productos/index';
-export * from './ConsentModal/index';
 // AppShellRouteWrapper lives in components/ but imports from
 // screens/AppShell — exporting it from the components barrel would
 // create a require cycle. Re-exported here to break the cycle while
@@ -26,11 +25,12 @@ export * from './Activation/index';
 export * from './Inicio/index';
 export * from './AbrirTurno/index';
 export * from './Bloqueo/index';
-export * from './Caja/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';
 export * from './Cancelaciones/index';
-export * from './SyncRejected/index';
+// The old «No enviados» screen went with M-12; its one live part remains.
+export { describeRejectedRow } from './SyncRejected/describe-rejected-row';
+export { useRejectedRows } from './SyncRejected/use-rejected-rows';
 // Track M, M-08 — Dinero del turno: Gastos y Fiado y abonos
 export * from './Gastos/index';
 export * from './Cobranza/index';

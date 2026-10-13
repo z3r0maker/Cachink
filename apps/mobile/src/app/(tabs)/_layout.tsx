@@ -3,8 +3,7 @@
  * Single role (ADR-053). The frame (header, tab bar, or the rail and the
  * sidebar on a tablet) is `AppShell`; Expo Router's own tab bar is hidden.
  * Gastos, Inventario, Movimientos, No enviados and Ajustes are stack routes
- * opened from Mi turno. The header bell counts the unread avisos (M-09).
- */
+ * opened from Mi turno. The header bell counts the unread avisos (M-09). */
 
 import type { ReactElement } from 'react';
 import { Tabs, useRouter } from 'expo-router';

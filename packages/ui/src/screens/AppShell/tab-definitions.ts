@@ -67,8 +67,7 @@ export function navGroups(): readonly NavGroup[] {
  * (`/productos/p1` → Inventario, `/checkout/efectivo` → Cobrar). Unknown
  * paths (settings, no-enviados, caja-movimientos) belong to Mi turno, where
  * they are opened from.
- */
-export function navKeyFor(pathname: string): NavKey {
+ */ export function navKeyFor(pathname: string): NavKey {
   const first = pathname.replace(/^\/+/, '').split('/')[0] ?? '';
   switch (first) {
     case 'inicio':

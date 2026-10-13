@@ -32,11 +32,11 @@ listas de abajo.
 - **N-27** Auditoría de base de datos `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:752`
 - **N-34** Aviso de privacidad + solicitudes ARCO `[LAUNCH]` [LAUNCH] [legal] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:850`
 
-## Código y técnico (85)
+## Código y técnico (84)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (10)
+### Teléfono (9)
 
 - [ ] **A-16** Suite de Maestro para la nueva app [deuda] — Bloqueada por: A-04…A-10, A-15 `[alta]` `[bloq]` · Falta: M-11 portó el harness completo (entry `activated` con `reset_app`/`prime-dev-client`/`_maestro_setup`, buckets en `run-flow.sh`/`full-regression.sh`, preámbulo `launchApp → dismiss-modals → login-operator` en cada flujo) y cerró **sus 19 flujos en verde en el sim de iPhone 17 Pro**; `login-operator-pin.yaml` ya existe; `sync-rejected.yaml` se reemplazó por `por-enviar.yaml`. Quedan a A-16: los ~12 flujos legacy de preactivación con sus subflujos compartidos (authenticate-director/operativo, complete-first-run, director-setup, first-run-onboarding, open-director-tools, select-operativo), la lista de reescrituras de A-01/A-09, sustituir del todo los buckets `demo`/`wizard` (hoy `demo` aún corre `demo-mode-setup.yaml`; `activated` ya existe), la cláusula «regression green» de A-15, y la corrida verde en iPhone + iPad (`full-regression.sh --device`). · `05-app.md:194`
 - [~] **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
@@ -44,9 +44,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-22** Banners de sincronización en la app `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: A-06, A-07 · `09-next-features.md:654`
 - [ ] **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del `[alta]` `[bloq]` móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. [LAUNCH] [ ] [alta] [bloq]- · `09-next-features.md:717`
-- [ ] **M-10** El dueño corrige una venta. · `19-movil-mostrador.md:33`
+- [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] **M-11** Reescritura de Maestro. · `19-movil-mostrador.md:34`
-- [ ] **M-12** Lo que quedó de M-01. · `19-movil-mostrador.md:38`
 - [ ] En la app «Desvincular y borrar los datos de este dispositivo» (el aviso §7 hoy reconoce que · `../launch/production-readiness.md:63`
 
 ### Portal (12)
@@ -308,5 +307,5 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 3 abiertos (0 en curso, 0 bloqueados, 9 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 10 hechos)
 - `../launch/production-readiness.md` — 42 abiertos (5 en curso, 0 bloqueados, 10 hechos)

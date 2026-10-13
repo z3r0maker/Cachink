@@ -41,20 +41,14 @@
     "@xangarro/domain": "workspace:*",
     "@xangarro/observability": "workspace:*",
     "bcryptjs": "3.0.3",
-    "@react-pdf/renderer": "^4.5.1",
     "@sentry/browser": "^10.53.1",
     "drizzle-orm": "^0.45.2",
-    "exceljs": "^4.4.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1",
     "@xangarro/contracts": "workspace:*",
     "@xangarro/sync": "workspace:*",
     "@xangarro/tokens": "workspace:*"
   },
   "peerDependencies": {
-    "@hookform/resolvers": "^5.2",
     "@sentry/react-native": "^8",
-    "@shopify/react-native-skia": ">=2",
     "@tamagui/core": "2.0.0-rc.42",
     "@tamagui/dialog": "2.0.0-rc.42",
     "@tamagui/input": "2.0.0-rc.42",
@@ -65,8 +59,6 @@
     "@tauri-apps/plugin-fs": "^2",
     "@tauri-apps/plugin-notification": "^2",
     "@tauri-apps/plugin-sql": "^2",
-    "echarts": ">=5",
-    "echarts-for-react": ">=3",
     "expo-camera": "~55",
     "expo-file-system": "~55.0.20",
     "expo-notifications": "~55.0.0",
@@ -75,22 +67,14 @@
     "lucide-react": "^1.16.0",
     "lucide-react-native": "^1.16.0",
     "react": "^19",
-    "react-hook-form": "^7.76",
     "react-i18next": "^17",
     "react-native": ">=0.83",
     "react-native-svg": "^15.15.0",
     "react-native-wheely": "^0.6.0",
     "ulid": "^3",
-    "victory-native": ">=41",
     "zustand": "^5"
   },
   "peerDependenciesMeta": {
-    "echarts": {
-      "optional": true
-    },
-    "echarts-for-react": {
-      "optional": true
-    },
     "@sentry/react-native": {
       "optional": true
     },
@@ -123,21 +107,13 @@
     },
     "react-native-wheely": {
       "optional": true
-    },
-    "victory-native": {
-      "optional": true
-    },
-    "@shopify/react-native-skia": {
-      "optional": true
     }
   },
   "devDependencies": {
     "@xangarro/config": "workspace:*",
     "@xangarro/testing": "workspace:*",
-    "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.60.0",
     "@sentry/react-native": "^8.11.1",
-    "@shopify/react-native-skia": "~2.6.2",
     "@storybook/addon-a11y": "^10.4.0",
     "@storybook/addon-docs": "^10.4.0",
     "@storybook/react-native-web-vite": "^10.4.0",
@@ -157,8 +133,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.1.6",
     "better-sqlite3": "^12.10.0",
-    "echarts": "~6.0.0",
-    "echarts-for-react": "~3.0.6",
     "expo-camera": "~55.0.18",
     "expo-file-system": "~55.0.20",
     "expo-notifications": "~55.0.23",
@@ -168,7 +142,6 @@
     "lucide-react": "^1.16.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-hook-form": "^7.76.0",
     "react-i18next": "^17.0.8",
     "react-native": "0.83.6",
     "react-native-web": "^0.21.2",
@@ -176,7 +149,6 @@
     "storybook": "^10.4.0",
     "typescript": "^6.0.3",
     "ulid": "^3.0.2",
-    "victory-native": "~41.20.3",
     "vite": "^8.0.13",
     "vitest": "^4.1.6",
     "zustand": "^5.0.13"
