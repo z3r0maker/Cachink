@@ -7,17 +7,26 @@
 # Precondition: signed in, any tab.
 appId: mx.xangarro.mobile
 ---
-- runFlow:
-    file: open-turno-row.yaml
-    env:
-      ROW: 'otros-gastos'
-- extendedWaitUntil:
-    visible:
-      id: 'gastos'
-    timeout: 5000
+# The flows that use this subflow speak the MvGastos sheet's ids (the
+# numpad, gasto-concepto, gasto-categoria-*, gasto-guardar) — so they open
+# the mostrador gastos screen, not the older /egresos list.
+- runFlow: ensure-caja-open.yaml
 - tapOn:
-    id: 'gastos-registrar'
+    id: 'tab-inicio'
 - extendedWaitUntil:
     visible:
-      id: 'registrar-gasto'
+      id: 'inicio-hero-listo'
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn:
+    id: 'inicio-atajo-gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'gastos-abrir-registrar'
+    timeout: 8000
+- tapOn:
+    id: 'gastos-abrir-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'registrar-gasto-sheet'
     timeout: 5000

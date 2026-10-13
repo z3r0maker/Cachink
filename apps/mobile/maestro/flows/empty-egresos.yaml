@@ -8,14 +8,23 @@ appId: mx.xangarro.mobile
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-gastos'
+- runFlow: shared/ensure-caja-open.yaml
+- tapOn:
+    id: 'tab-inicio'
 - extendedWaitUntil:
     visible:
-      id: 'gastos-vacio'
-    timeout: 5000
-- assertVisible: 'Gastos'
+      id: 'inicio-hero-listo'
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn:
+    id: 'inicio-atajo-gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
+# A just-opened turno has no gastos: the empty state owns the middle, and
+# «Registrar gasto» stays in the thumb zone.
 - assertVisible:
-    id: 'gastos-registrar'
+    id: 'gastos-sin-gastos'
+- assertVisible:
+    id: 'gastos-abrir-registrar'
