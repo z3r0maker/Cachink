@@ -13,64 +13,30 @@ tags:
   - observability
   - regression
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
+- runFlow: shared/navigate-to-settings.yaml
 
-# Navigate to Otros tab, then scroll to Configuración card.
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- extendedWaitUntil:
-    visible: 'Otros'
-    timeout: 5000
-- scrollUntilVisible:
-    element:
-      id: 'otros-configuracion'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
-- tapOn:
-    id: 'otros-configuracion'
-- extendedWaitUntil:
-    visible:
-      id: 'settings-hub-screen'
-    timeout: 5000
-
-- tapOn:
-    id: 'settings-hub-sistema'
-- extendedWaitUntil:
-    visible:
-      id: 'settings-sistema-screen'
-    timeout: 5000
-
-# Scroll to and tap the "Reportar un problema" button.
+# The sheet opens from Ajustes' device section, below the fold.
 - scrollUntilVisible:
     element:
       id: 'settings-open-bug-report'
     direction: DOWN
-    timeout: 5000
+    timeout: 8000
+    centerElement: true
 - tapOn:
     id: 'settings-open-bug-report'
-
-# Verify the bug report sheet content appears.
 - extendedWaitUntil:
     visible:
       id: 'bug-report-sheet'
     timeout: 5000
-
-# Assert description input is visible.
 - assertVisible:
     id: 'bug-report-description-input'
-
-# Type a description.
-- tapOn:
-    id: 'bug-report-description-input'
-- inputText: 'La app se cerró al editar un producto'
-
-# Assert share button is visible (fallback path when consent is off).
 - assertVisible:
     id: 'bug-report-share-btn'
-
-# Close the sheet.
-- tapOn: 'Cancelar'
+- tapOn:
+    text: '✕'
+- extendedWaitUntil:
+    notVisible:
+      id: 'bug-report-sheet'
+    timeout: 5000

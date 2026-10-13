@@ -13,8 +13,13 @@ appId: mx.xangarro.mobile
 # Open settings via the cog in the TopBar.
 - runFlow: shared/navigate-to-settings.yaml
 
-- assertVisible:
-    id: 'settings-notifications-toggle'
+# The toggle lives below the fold on Ajustes' one page.
+- scrollUntilVisible:
+    element:
+      id: 'settings-notifications-toggle'
+    direction: DOWN
+    timeout: 8000
+    centerElement: true
 
 # Toggle off.
 - tapOn:

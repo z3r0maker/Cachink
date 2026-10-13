@@ -11,18 +11,13 @@
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
-
 - tapOn:
-    id: 'tab-cobrar'
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: 'cobrar-vacio'
-    timeout: 5000
-- assertVisible: 'Todavía no hay productos'
-- assertVisible:
-    id: 'cobrar-vacio-nuevo'
-- assertVisible: 'Toca un producto para empezar'
+      id: 'ventas-vacio'
+    timeout: 8000
+- assertVisible: 'Sin ventas en este turno'

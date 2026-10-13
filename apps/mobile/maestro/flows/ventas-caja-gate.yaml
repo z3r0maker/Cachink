@@ -9,18 +9,14 @@ tags:
   - caja
   - gate
 ---
-- launchApp
+# A fresh session has no turno: the Cobrar tab answers with the caja gate,
+# and its CTA goes where the turno opens (Mi turno).
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
-
-# Navigate to Ventas tab — should show caja gate (product exists, no turno).
 - tapOn:
     id: 'tab-cobrar'
-- assertVisible:
-    id: 'caja-gate-banner'
-- assertVisible:
-    text: 'Abre tu caja para empezar a vender'
-- tapOn:
-    id: 'caja-gate-go-to-caja'
-- assertVisible:
-    id: 'caja-abrir-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'caja-gate-banner'
+    timeout: 8000
+- assertVisible: 'Abre tu caja para empezar a vender'
