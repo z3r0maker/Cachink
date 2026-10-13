@@ -2,14 +2,14 @@
 # Covers P1C-M5-T05/T06 (scanner + manual fallback) for mobile. On
 # simulators without a physical camera the ManualEntry field is the
 # only reliable code source.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 - runFlow:
     file: shared/open-turno-row.yaml

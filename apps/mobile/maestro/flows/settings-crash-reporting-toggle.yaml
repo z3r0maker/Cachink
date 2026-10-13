@@ -6,14 +6,14 @@
 #   - Bug report button is visible
 #
 # Precondition: wizard complete.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 # Open Settings via Otros → Configuración.
 - runFlow: shared/navigate-to-settings.yaml

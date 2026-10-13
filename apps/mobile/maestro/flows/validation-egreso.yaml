@@ -2,12 +2,12 @@
 # the amount, then the concept, then the category; the button stays off.
 #
 # Precondition: wizard complete, business set, a turno open.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow: shared/abrir-registrar-gasto.yaml
 
 - assertVisible: 'Escribe cuánto fue.'

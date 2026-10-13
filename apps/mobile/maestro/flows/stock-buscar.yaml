@@ -2,12 +2,12 @@
 # Existencias list, and a name with no product says so.
 #
 # Precondition: signed in, a tracked product "Tortilla".
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow: shared/find-producto-stock.yaml
 - assertVisible: '.*Tortilla.*'
 - tapOn:

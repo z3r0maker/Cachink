@@ -5,12 +5,12 @@
 # The phone no longer creates recurring gastos (the owner does, in the
 # portal). Precondition: a due template on the device, e.g. the mock
 # scenario's `01JPHK0000000000000000RE01`.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow:
     file: shared/open-turno-row.yaml
     env:

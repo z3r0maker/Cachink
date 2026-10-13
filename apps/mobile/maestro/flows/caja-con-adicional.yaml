@@ -8,7 +8,7 @@
 #   3. Cierre: one $500 and one $200 bill cuadra; close
 #
 # Precondition: demo mode seeded, the operator's turno not yet open.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - caja
@@ -16,7 +16,7 @@ tags:
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 - tapOn:
     id: 'tab-turno'

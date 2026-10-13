@@ -6,7 +6,7 @@
 # problema" button in Settings Sistema. It auto-attaches audit events +
 # errors and supports server-first submit (when consent on) or
 # file-share fallback.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - settings
@@ -15,13 +15,12 @@ tags:
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 # Navigate to Otros tab, then scroll to Configuración card.
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |
 # Estados — no Otros tab. The tool grid moved into Configuración.
 # This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
 - extendedWaitUntil:
     visible: 'Otros'
     timeout: 5000

@@ -1,12 +1,12 @@
 # Closing «Registrar gasto» without saving records nothing (Track M, M-08).
 #
 # Precondition: wizard complete, business set.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 - runFlow: shared/abrir-registrar-gasto.yaml
 
 - tapOn: { id: 'numpad-9' }

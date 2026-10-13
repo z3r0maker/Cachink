@@ -6,7 +6,7 @@
 #   3. Verify the frequency label shows "Quincenal"
 #
 # Precondition: demo mode seeded.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - egresos
@@ -15,7 +15,7 @@ tags:
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-operator.yaml
 
 # Navigate to Egresos via Operativo tab.
 - runFlow:

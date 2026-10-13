@@ -4,7 +4,7 @@
 # and «Recordarle su saldo» opens the message sheet.
 #
 # Precondition: demo mode seeded (products + users exist).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - fiado
