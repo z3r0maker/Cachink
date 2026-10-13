@@ -20,7 +20,9 @@ import { describe, expect, it } from 'vitest';
 import { loadMobileUpdateAdapter } from '../../src/shell/use-update-adapter';
 
 describe('loadMobileUpdateAdapter (Round 3 F11)', () => {
-  it('rejects when expo-updates is not installed', async () => {
+  it('rejects when expo-updates is not installed', { timeout: 20_000 }, async () => {
+    // Resolving (then rejecting) the dynamic import races the whole suite's
+    // filesystem; under the full parallel gate the 5s default kept firing.
     await expect(loadMobileUpdateAdapter()).rejects.toThrow();
   });
 
