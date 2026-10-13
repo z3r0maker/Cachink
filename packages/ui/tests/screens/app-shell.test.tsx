@@ -39,13 +39,11 @@ describe('the caja navigation model', () => {
   it('lights a detail route under its destination', () => {
     expect(navKeyFor('/cobrar')).toBe('cobrar');
     expect(navKeyFor('/checkout/efectivo')).toBe('cobrar');
-    expect(navKeyFor('/productos/p-1')).toBe('inventario');
     expect(navKeyFor('/inventario')).toBe('inventario');
     expect(navKeyFor('/avisos')).toBe('inicio');
     expect(navKeyFor('/pendientes')).toBe('cobrar');
     expect(navKeyFor('/egresos')).toBe('gastos');
     expect(navKeyFor('/cobranza/c-1')).toBe('cobranza');
-    expect(navKeyFor('/cancelaciones')).toBe('ventas');
     expect(navKeyFor('/settings')).toBe('turno');
     expect(navKeyFor('/')).toBe('inicio');
   });

@@ -5,6 +5,10 @@ import { randomUUID } from 'node:crypto';
 import { linkIn, latestMailTo } from './outbox';
 import { asTenant, BIZ } from './sync-phone';
 
+// Two Playwright projects (desktop, laptop) load this module together on CI —
+// a bare workerStamp collides across workers, so the stamp carries the pid too.
+const workerStamp = `${process.pid}-${Date.now()}`;
+
 /**
  * ADR-080's emailed links end to end: request → email in the dev outbox →
  * link → signed in. A throwaway member and its own IP each run, so the
@@ -13,10 +17,12 @@ import { asTenant, BIZ } from './sync-phone';
 test.describe.configure({ mode: 'serial' });
 test.use({
   storageState: { cookies: [], origins: [] },
-  extraHTTPHeaders: { 'x-forwarded-for': `203.0.113.${Date.now() % 250}` },
+  extraHTTPHeaders: {
+    'x-forwarded-for': `203.0.113.${Number(`${process.pid}${Date.now() % 100}`) % 250}`,
+  },
 });
 
-const email = `links-${Date.now()}@test.mx`;
+const email = `links-${workerStamp}@test.mx`;
 
 test.beforeAll(async () => {
   const userId = randomUUID();
@@ -85,7 +91,7 @@ test('a sign-in link opens a session with one tap, once', async ({ page }) => {
 });
 
 test('an unknown address reads the same, and no email is written', async ({ page }) => {
-  const nobody = `nadie-${Date.now()}@test.mx`;
+  const nobody = `nadie-${workerStamp}@test.mx`;
   await requestLink(page, '¿Olvidaste tu contraseña?', nobody);
   expect(await latestMailTo(nobody)).toBeNull();
 });

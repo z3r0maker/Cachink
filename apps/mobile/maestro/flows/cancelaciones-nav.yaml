@@ -1,6 +1,6 @@
 # The Ventas tab (Track M, M-08; MvVentas): the turno's sales, each opened
-# in its sheet and cancelled only with a reason. /cancelaciones redirects
-# here. At test start there is either no turno or no sale yet.
+# in its sheet and cancelled only with a reason. At test start there is
+# either no turno or no sale yet.
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
 tags:

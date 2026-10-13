@@ -71,7 +71,7 @@ export function navGroups(): readonly NavGroup[] {
 
 /**
  * The destination a pathname belongs to: a detail route lights its parent
- * (`/productos/p1` → Inventario, `/checkout/efectivo` → Cobrar). Avisos
+ * (`/cobranza/c1` → Fiado y abonos, `/checkout/fiado` → Cobrar). Avisos
  * lights Inicio and Registros por enviar lights Cobrar, as their boards do
  * (MvAvisos, MvPendientes). Unknown paths (settings, caja-movimientos) belong
  * to Mi turno, where they are opened from.
@@ -85,11 +85,9 @@ const DESTINO: Readonly<Record<string, NavKey>> = {
   'nuevo-producto': 'cobrar',
   pendientes: 'cobrar',
   ventas: 'ventas',
-  cancelaciones: 'ventas',
   egresos: 'gastos',
   cobranza: 'cobranza',
   inventario: 'inventario',
-  productos: 'inventario',
 };
 
 export function navKeyFor(pathname: string): NavKey {

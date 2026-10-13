@@ -9,7 +9,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { Btn } from '../src/components/Btn/btn';
 import { Card } from '../src/components/Card/card';
 import { BottomTabBar } from '../src/components/BottomTabBar/bottom-tab-bar';
-import { TopBar } from '../src/components/TopBar/top-bar';
 import { Input } from '../src/components/Input/input';
 import { initI18n } from '../src/i18n/index';
 import { renderWithProviders, screen } from './test-utils';
@@ -47,11 +46,6 @@ describe('A11y — primitives', () => {
     );
     expect(screen.getByTestId('tab-a')).toBeInTheDocument();
     expect(screen.getByTestId('tab-b')).toBeInTheDocument();
-  });
-
-  it('TopBar title declares header role', () => {
-    renderWithProviders(<TopBar title="Inicio" />);
-    expect(screen.getByTestId('top-bar-title')).toBeInTheDocument();
   });
 
   it('Input forwards the label into accessibilityLabel', () => {

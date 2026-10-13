@@ -3,6 +3,10 @@ import { expect, test } from './test';
 import { BASE_URL } from './base-url';
 import { ROUTES } from './routes';
 
+// Two Playwright projects (desktop, laptop) load this module together on CI —
+// a bare workerStamp collides across workers, so the stamp carries the pid too.
+const workerStamp = `${process.pid}-${Date.now()}`;
+
 /**
  * The gate itself.
  *
@@ -137,8 +141,10 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'counts against one address');
   // Its own client, so the lock it earns touches nothing else in the suite.
-  await page.setExtraHTTPHeaders({ 'x-forwarded-for': `203.0.113.${Date.now() % 250}` });
-  const email = `nadie-${Date.now()}@example.com`;
+  await page.setExtraHTTPHeaders({
+    'x-forwarded-for': `203.0.113.${Number(`${process.pid}${Date.now() % 100}`) % 250}`,
+  });
+  const email = `nadie-${workerStamp}@example.com`;
   await page.goto('/login');
   await page.getByTestId('login-door-owner').click();
   for (let i = 1; i <= 5; i += 1) {

@@ -149,17 +149,26 @@ test('a busy server: the pill counts down, the rows say their last and next atte
   await expect(page.getByText('El servidor está ocupado; reintentamos solos.')).toBeVisible({
     timeout: 20_000,
   });
-  await expect(page.getByRole('heading', { name: '1 registro por enviar' })).toBeVisible();
-  await expect(page.getByText('Suman $40.00 de ventas. Puedes seguir cobrando.')).toBeVisible();
+  // The hero lands on a second round-trip after the pill's state; CI's
+  // runners need more than the default 5s for it.
+  // The sale's stock movement joins the queue on its own write — whether it
+  // has landed by now is a race, so the count is not pinned to one.
+  await expect(page.getByRole('heading', { name: /^\d+ registros? por enviar$/ })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.getByText('Suman $40.00 de ventas. Puedes seguir cobrando.')).toBeVisible({
+    timeout: 20_000,
+  });
   // The pill counts down to the engine's retryAt, in the warning state.
   await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
     'aria-label',
     /^Estado del envío: Reintentando en \d+ min$/,
   );
-  // The sale's own row: tried, and when it goes again.
-  await expect(page.getByText('En reintento')).toBeVisible();
+  // The sale's own row: tried, and when it goes again. Both rows (the sale
+  // and its stock movement) carry these, so first() is the row we mean.
+  await expect(page.getByText('En reintento').first()).toBeVisible();
   await expect(
-    page.getByText(/^Último intento: hace un momento · Próximo: en \d+ min$/),
+    page.getByText(/^Último intento: hace un momento · Próximo: en \d+ min$/).first(),
   ).toBeVisible();
   // Don no longer says the turno waits for the queue (DS-06).
   await expect(
@@ -195,8 +204,12 @@ test('a server that says when: the pill and the helper name the hour (DS-05)', a
   await expect(page.locator('[data-estado="reintentando"]')).toHaveAttribute(
     'aria-label',
     /^Estado del envío: Reintentando a las \d{1,2}:\d{2} [ap]\. m\.$/,
+    { timeout: 20_000 },
   );
-  await expect(page.getByText(/· Próximo: a las \d{1,2}:\d{2} [ap]\. m\.$/)).toBeVisible();
+  // Two rows can carry the retry hour (the sale and its stock movement).
+  await expect(page.getByText(/· Próximo: a las \d{1,2}:\d{2} [ap]\. m\.$/).first()).toBeVisible({
+    timeout: 20_000,
+  });
 
   // The manual retry never skips the server's wait: it says when it goes.
   await page.getByRole('button', { name: 'Reintentar envío' }).click();

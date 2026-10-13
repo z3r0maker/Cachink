@@ -48,7 +48,7 @@ function emitMermaAlert(
     severity: 'warning',
     titleKey: 'notificaciones.mermaThreshold',
     message: `Se registró merma: ${movement.cantidad} unidades (${movement.motivo}).`,
-    actionRoute: '/merma-reportes',
+    actionRoute: '/inventario',
     metadata: JSON.stringify({
       productoId: movement.productoId,
       cantidad: movement.cantidad,
