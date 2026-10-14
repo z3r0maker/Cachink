@@ -28,4 +28,4 @@ appId: mx.xangarro.mobile
 - extendedWaitUntil:
     visible:
       id: 'activation-screen|quick-switch|tab-inicio|tab-turno'
-    timeout: 120000
+    timeout: 300000

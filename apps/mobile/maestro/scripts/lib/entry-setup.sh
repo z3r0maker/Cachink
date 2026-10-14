@@ -75,7 +75,7 @@ PRIME_FLOW="${PRIME_FLOW:-$FLOWS_DIR/shared/prime-dev-client.yaml}"
 _maestro_setup() {
   local flow="$1" try
   for try in 1 2 3; do
-    perl -e 'alarm shift; exec @ARGV' 240 \
+    perl -e 'alarm shift; exec @ARGV' 420 \
       maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$flow" && return 0
     echo "⚠️   setup flow $(basename "$flow") failed (try $try)"
     pkill -f "maestro test" 2>/dev/null || true
