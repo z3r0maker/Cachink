@@ -1,7 +1,7 @@
 # Reusable subflow: open Inventario (Track M, M-09; MvInventario) from Mi turno
-# and filter the Existencias list to the standard test product "Tortilla" (demo
-# seeds "Tortilla maíz kg"; the wizard's inventario-producto flow creates
-# "Tortilla") with the search box, so one row remains on any device.
+# and filter the Existencias list to the standard test product "pastor" (demo
+# seeds "Taco al pastor"; the wizard's inventario-producto flow creates
+# "pastor") with the search box (the contracts mock seeds «Taco al pastor»), so one row remains on any device.
 #
 # Leaves the filtered list showing. The caller opens the product's movement
 # sheet («¿Qué pasó con la mercancía?») with:
@@ -14,7 +14,7 @@ appId: mx.xangarro.mobile
       ROW: 'otros-inventario'
 - tapOn:
     id: 'inventario-buscar'
-- inputText: 'Tortilla'
+- inputText: 'pastor'
 - assertVisible:
     id: 'inventario-fila-.*'
 - hideKeyboard

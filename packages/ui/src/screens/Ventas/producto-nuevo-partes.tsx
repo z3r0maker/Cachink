@@ -96,6 +96,7 @@ export function Nombre({ f }: { f: ProductoNuevoForm }): ReactElement {
       placeholderTextColor={colors.textMuted}
       value={f.nombre}
       onChangeText={f.setNombre}
+      autoCorrect={false}
       style={CAMPO}
     />
   );

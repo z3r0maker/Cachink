@@ -326,7 +326,6 @@ if should_run "C"; then
   echo ""
   echo "📂  Phase 1: Empty states"
   run_flow "$FLOWS_DIR/empty-ventas.yaml"
-  run_flow "$FLOWS_DIR/empty-productos.yaml"
   run_flow "$FLOWS_DIR/empty-egresos.yaml"                  # B2 — Phase 15
   # run_flow "$FLOWS_DIR/empty-clientes.yaml"                 # A4 — Phase 15 (parked-mvp)
 fi
@@ -335,7 +334,6 @@ fi
 CURRENT_PHASE="Phase 2: Create baseline data"
 echo ""
 echo "📂  Phase 2: Create baseline data"
-run_flow "$FLOWS_DIR/inventario-producto.yaml"
 run_flow "$FLOWS_DIR/ventas-caja-gate.yaml"                  # Caja gate (requires product)
 # run_flow "$FLOWS_DIR/cliente-crear.yaml"                   # (parked-mvp)
 # run_flow "$FLOWS_DIR/cliente-crear-full-form.yaml"          # Gap 6 — Phase 16 (parked-mvp)
@@ -345,21 +343,10 @@ if should_run "B"; then
   CURRENT_PHASE="Phase 3: Product management"
   echo ""
   echo "📂  Phase 3: Product management"
-  run_flow "$FLOWS_DIR/producto-entrada-stock.yaml"
-  run_flow "$FLOWS_DIR/producto-movimientos.yaml"
   run_flow "$FLOWS_DIR/stock-buscar.yaml"                   # C2 — Phase 15
 fi
 
-if should_run "A"; then
-  run_flow "$FLOWS_DIR/movimiento-salida-con-motivo.yaml"   # E1 — Phase 15
-  run_flow "$FLOWS_DIR/movimiento-entrada-con-nota.yaml"    # E2 — Phase 15
-fi
 
-if should_run "C"; then
-  run_flow "$FLOWS_DIR/producto-via-fab.yaml"             # Audit — previously excluded
-  # MVP-parked: producto-uso-selector depends on conversion flag
-  # run_flow "$FLOWS_DIR/producto-uso-selector.yaml"
-fi
 
 # ──────────────── Phase 4: Sales ───────────────────────────────
 CURRENT_PHASE="Phase 4: Sales"
@@ -368,7 +355,6 @@ echo "📂  Phase 4: Sales"
 
 if should_run "C"; then
   run_flow "$FLOWS_DIR/venta-cantidad-multiple.yaml"
-  run_flow "$FLOWS_DIR/checkout-method-picker.yaml"        # NEW — uncovered screen
 fi
 
 # ──────────────── Phase 5: Egresos ─────────────────────────────
@@ -452,9 +438,7 @@ if should_run "C"; then
   CURRENT_PHASE="Phase 13.6: Caja edge cases"
   echo ""
   echo "📂  Phase 13.6: Caja edge cases"
-  run_flow "$FLOWS_DIR/caja-con-adicional.yaml"
   run_flow "$FLOWS_DIR/caja-cierre-discrepancia.yaml"
-  run_flow "$FLOWS_DIR/caja-movimiento-turno-cerrado.yaml"  # Edge — CAJ-13
 fi
 
 # ──────────────── Phase 13.7: Error paths ─────────────────────
