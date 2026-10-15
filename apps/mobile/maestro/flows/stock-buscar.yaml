@@ -5,16 +5,28 @@
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
+# Inventario's search (MvInventario): typing filters the Existencias list,
+# and a name with no product says so in the board's words.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
-- runFlow: shared/find-producto-stock.yaml
-- assertVisible: '.*Tortilla.*'
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 8000
+- tapOn:
+    id: 'inventario-buscar'
+- inputText: 'pastor'
+- hideKeyboard
+- assertVisible:
+    id: 'inventario-cantidad-01JPRD00000000000000000001'
+# A name with no product: the list says so, still inside the panel.
 - tapOn:
     id: 'inventario-buscar'
 - eraseText
-- inputText: 'ZZZNOFOUND'
-- assertVisible:
-    id: 'inventario-sin-resultados'
-- assertNotVisible:
-    id: 'inventario-fila-.*'
+- inputText: 'xyzsinproductoss'
+- hideKeyboard
+- assertVisible: '.*Ningún producto coincide.*'
