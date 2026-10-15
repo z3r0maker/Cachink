@@ -1,4 +1,4 @@
-import type { LedgerEntry } from '@xangarro/application/corp';
+import type { LedgerEntry, RecurrenteRegistrado } from '@xangarro/application/corp';
 
 import type { FormState } from '../actions/form-state';
 import { NotPermitted } from '../staff';
@@ -40,6 +40,9 @@ const DOMAIN_CODES = new Set([
   'ACCIONES_INSUFICIENTES',
   'CERTIFICADO_INVALIDO',
   'REGISTRO_INVALIDO',
+  'PLANTILLA_INVALIDA',
+  'PLANTILLA_DESCONOCIDA',
+  'RECURRENTE_YA_REGISTRADO',
 ]);
 
 export function failed(error: unknown, what: string): FormState {
@@ -58,3 +61,9 @@ export const auditOfEntry = (action: string) => (entry: LedgerEntry) => ({
   action,
   payload: { entryId: entry.id, kind: entry.kind, fecha: entry.fecha, source: entry.source },
 });
+
+/** A recurring charge is a ledger write too; the row also names its template (E-02). */
+export const auditOfRecurrente = (r: RecurrenteRegistrado) => {
+  const row = auditOfEntry('empresa.movimiento_registrado')(r.entry);
+  return { ...row, payload: { ...row.payload, plantillaId: r.plantilla.id } };
+};

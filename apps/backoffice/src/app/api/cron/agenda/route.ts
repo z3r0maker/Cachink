@@ -7,6 +7,7 @@ import { corpDb, hoyEnMexico } from '@/server/db/corp';
 import { emailsDeStaff } from '@/server/db/staff-emails';
 import { leerAgenda } from '@/server/empresa/agenda-lectura';
 import { handleAgendaCron } from '@/server/empresa/cron-agenda';
+import { leerMes } from '@/server/empresa/movimientos-lectura';
 
 /** The founders' Agenda reminders (E-04); see `src/server/empresa/cron-agenda.ts`. */
 export const dynamic = 'force-dynamic';
@@ -30,6 +31,7 @@ export async function GET(request: Request): Promise<Response> {
     secret: process.env.CRON_SECRET,
     hoy: () => hoyEnMexico(),
     leer: corpDb() === null ? null : async (hoy) => (await leerAgenda(hoy)).vistas,
+    cargos: async (hoy) => (await leerMes(hoy.slice(0, 7), hoy)).recurrentes,
     destinatarios,
     // B-14: Resend with RESEND_API_KEY; the dev outbox (.email-outbox/) without it.
     sender: emailSenderFromEnv(process.env),

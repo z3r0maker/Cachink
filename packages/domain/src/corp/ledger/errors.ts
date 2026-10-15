@@ -45,3 +45,11 @@ export class TipoCambioInvalidoError extends Error {
     this.name = 'TipoCambioInvalidoError';
   }
 }
+
+export class PlantillaInvalidaError extends Error {
+  readonly code = 'PLANTILLA_INVALIDA' as const;
+  constructor(detalle: string) {
+    super(`Gasto recurrente inválido: ${detalle}.`);
+    this.name = 'PlantillaInvalidaError';
+  }
+}

@@ -8,7 +8,13 @@ import {
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
-import { registrarGastoEnDolares } from './empresa-movimientos';
+import {
+  E2E_RECURRENTE,
+  mesesDePrueba,
+  registrarGastoEnDolares,
+  registrarLaSugerencia,
+  repetirGasto,
+} from './empresa-movimientos';
 import {
   clearFounders,
   clearLedgerFixture,
@@ -115,6 +121,32 @@ test('a founder records a USD expense and reverses it', async ({ page }) => {
   ).toContainText('Revertido');
   // A reversed entry and its reversal cancel: the month's outflow is back to zero.
   await expect(page.getByTestId('total-salidas')).toContainText('$0.00');
+});
+
+test('a founder repeats an expense, registers its next charge and stops it', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  const { actual, anterior } = mesesDePrueba();
+  await repetirGasto(page, anterior);
+  await expect(page.getByTestId('movimiento').filter({ hasText: E2E_RECURRENTE })).toContainText(
+    'Registrado',
+  );
+
+  // This month the 1st has come: the charge is suggested, and posts nothing yet.
+  await registrarLaSugerencia(page, actual);
+  await expect(page.getByTestId('movimiento').filter({ hasText: E2E_RECURRENTE })).toContainText(
+    '−$3,500.00',
+  );
+  await expect(
+    page.getByTestId('movimiento-sugerido').filter({ hasText: E2E_RECURRENTE }),
+  ).toHaveCount(0);
+
+  await page.getByRole('link', { name: /^Recurrentes · \d+$/ }).click();
+  const fila = page.getByTestId('recurrente').filter({ hasText: E2E_RECURRENTE });
+  await expect(fila).toContainText('Registrado');
+  await expect(fila).toContainText('$3,500.00');
+  await fila.getByRole('button', { name: `Dejar de repetir ${E2E_RECURRENTE}` }).click();
+  await expect(fila).toContainText('ya no se repite');
+  await expect(fila.getByRole('button', { name: /Dejar de repetir/ })).toHaveCount(0);
 });
 
 test('a founder funds by halves, puts in more and closes the quarter', async ({ page }) => {

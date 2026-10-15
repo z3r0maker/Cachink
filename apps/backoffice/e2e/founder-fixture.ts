@@ -85,6 +85,8 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.entry_lines WHERE entry_id IN (${mine})`;
       await tx`DELETE FROM corp.entries WHERE id IN (${mine})`;
       await tx`DELETE FROM corp.funding_calls WHERE concepto LIKE 'E2E %'`;
+      await tx`DELETE FROM corp.recurring_templates
+                WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;
     });
   });
 }

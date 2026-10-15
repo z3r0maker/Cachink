@@ -1,20 +1,21 @@
 'use client';
 
-import { formatMoney, pesosToCentavos } from '@xangarro/domain';
-import { convertirAMxn } from '@xangarro/domain/corp';
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
 
 import { registrarMovimiento } from '@/server/actions/empresa';
 import * as d from '@/styles/mostrador-data.css';
+import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
 
 import { DeSocios } from './de-socios';
+import { DelGasto, Montos, type Prefill } from './del-gasto';
 import { Campo, Opciones, submitWith, type Opcion } from './opciones';
 
 /**
  * Registrar (E-02, board CD-03): a paid expense or a bank fee, in MXN or USD,
- * and partner money (E-03).
+ * and partner money (E-03). A recurring charge arrives prefilled from its
+ * template; only the real amount and, for USD, the day's rate are left.
  */
 const TIPOS: readonly Opcion[] = [
   { value: 'gasto', title: 'Gasto', text: 'Un pago a un proveedor o servicio.' },
@@ -28,100 +29,16 @@ const BOTON: Record<string, string> = {
   socios: 'Registrar dinero de socio',
 };
 
-const CATEGORIAS: readonly Opcion[] = [
-  { value: 'costo_servicio', title: 'Costo del servicio', text: 'Nube, base de datos, correo.' },
-  { value: 'ventas_marketing', title: 'Ventas y marketing', text: 'Anuncios y campañas.' },
-  { value: 'desarrollo', title: 'Desarrollo', text: 'Herramientas para construir.' },
-  { value: 'administracion', title: 'Administración', text: 'Contador, trámites, oficina.' },
-];
-
-const MONEDAS: readonly Opcion[] = [
-  { value: 'MXN', title: 'Pesos (MXN)' },
-  { value: 'USD', title: 'Dólares (USD)' },
-];
-
-const DEDUCIBLE: readonly Opcion[] = [
-  { value: 'si', title: 'Sí', text: 'Hay factura a nombre de MEXIA.' },
-  { value: 'no', title: 'No', text: 'Sin factura, o no es de la empresa.' },
-];
-
-/** «Equivale a $368.40 MXN» while the founder types; nothing until both parse. */
-function equivalencia(monto: string, tipoCambio: string): string | undefined {
-  const usd = pesosToCentavos(monto);
-  if (usd === null || usd === 0n) return undefined;
-  try {
-    return `Equivale a ${formatMoney(convertirAMxn(usd, tipoCambio))} MXN.`;
-  } catch {
-    return undefined;
-  }
-}
-
-function Montos({ moneda, label }: { readonly moneda: string; readonly label?: string }) {
-  const [monto, setMonto] = useState('');
-  const [tc, setTc] = useState('');
-  const usd = moneda === 'USD';
-  return (
-    <div className={d.fields}>
-      <Campo
-        label={usd ? 'Monto pagado (USD)' : (label ?? 'Monto pagado')}
-        name="monto"
-        inputMode="decimal"
-        required
-        value={monto}
-        onChange={(e) => setMonto(e.target.value)}
-      />
-      {usd ? (
-        <Campo
-          label="Tipo de cambio del día"
-          name="tipoCambio"
-          inputMode="decimal"
-          required
-          value={tc}
-          onChange={(e) => setTc(e.target.value)}
-          hint={equivalencia(monto, tc) ?? 'Pesos por dólar en la fecha de pago.'}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-function DelGasto({ proyectos }: { readonly proyectos: readonly Opcion[] }) {
-  const [moneda, setMoneda] = useState('MXN');
-  return (
-    <>
-      <Campo label="Proveedor" name="contraparte" autoComplete="off" />
-      <Opciones
-        legend="Moneda"
-        name="moneda"
-        opciones={MONEDAS}
-        value={moneda}
-        onChange={setMoneda}
-      />
-      <Montos moneda={moneda} />
-      <Campo
-        label="IVA incluido"
-        name="iva"
-        inputMode="decimal"
-        hint="Déjalo vacío si el recibo no trae IVA."
-      />
-      <Opciones legend="Categoría" name="categoria" opciones={CATEGORIAS} value="" />
-      <Opciones
-        legend="Proyecto"
-        name="proyecto"
-        opciones={proyectos}
-        value={proyectos[0]?.value ?? ''}
-      />
-      <Opciones legend="¿Deducible?" name="deducible" opciones={DEDUCIBLE} value="si" />
-    </>
-  );
-}
-
 function Detalle(props: {
   readonly tipo: string;
+  readonly fecha: string;
+  readonly prefill: Prefill | null;
   readonly proyectos: readonly Opcion[];
   readonly socios: readonly Opcion[];
 }) {
-  if (props.tipo === 'gasto') return <DelGasto proyectos={props.proyectos} />;
+  if (props.tipo === 'gasto') {
+    return <DelGasto proyectos={props.proyectos} fecha={props.fecha} prefill={props.prefill} />;
+  }
   if (props.tipo === 'comision') return <Montos moneda="MXN" />;
   return (
     <>
@@ -152,30 +69,95 @@ function Acciones(props: {
   );
 }
 
+/** The suggestion being registered: which template, which month. */
+function DeLaPlantilla({ prefill }: { readonly prefill: Prefill }) {
+  return (
+    <>
+      <input type="hidden" name="plantilla" value={prefill.plantillaId} />
+      <input type="hidden" name="mesPlantilla" value={prefill.mes} />
+      <p className={mv.aviso}>
+        Registra el cargo de {prefill.concepto} de {prefill.nombreMes}. Revisa el monto contra tu
+        estado de cuenta.
+      </p>
+    </>
+  );
+}
+
+/** What is being registered: the type cards, or the suggestion's note. */
+function QueSeRegistra(props: {
+  readonly prefill: Prefill | null;
+  readonly tipo: string;
+  readonly onTipo: (tipo: string) => void;
+}) {
+  if (props.prefill !== null) {
+    return (
+      <>
+        <input type="hidden" name="tipo" value="gasto" />
+        <DeLaPlantilla prefill={props.prefill} />
+      </>
+    );
+  }
+  return (
+    <Opciones
+      legend="¿Qué vas a registrar?"
+      name="tipo"
+      opciones={TIPOS}
+      value={props.tipo}
+      onChange={props.onTipo}
+    />
+  );
+}
+
+function ConceptoYFecha(props: {
+  readonly concepto: string | undefined;
+  readonly fecha: string;
+  readonly onFecha: (fecha: string) => void;
+}) {
+  return (
+    <div className={d.fields}>
+      <Campo
+        label="Concepto"
+        name="concepto"
+        required
+        autoComplete="off"
+        defaultValue={props.concepto}
+      />
+      <Campo
+        label="Fecha de pago"
+        name="fecha"
+        type="date"
+        required
+        value={props.fecha}
+        onChange={(e) => props.onFecha(e.target.value)}
+      />
+    </div>
+  );
+}
+
 export function CapturaForm(props: {
   readonly nonce: string;
   readonly hoy: string;
   readonly tipo: string;
+  readonly prefill: Prefill | null;
   readonly proyectos: readonly Opcion[];
   readonly socios: readonly Opcion[];
 }) {
   const [state, action, pending] = useActionState(registrarMovimiento, null);
-  const [tipo, setTipo] = useState(props.tipo);
+  const { prefill } = props;
+  const [tipo, setTipo] = useState(prefill === null ? props.tipo : 'gasto');
+  const [fecha, setFecha] = useState(prefill?.fecha ?? props.hoy);
   return (
     <form onSubmit={submitWith(action)} className={d.form}>
       <input type="hidden" name="nonce" value={props.nonce} />
-      <Opciones
-        legend="¿Qué vas a registrar?"
-        name="tipo"
-        opciones={TIPOS}
-        value={tipo}
-        onChange={setTipo}
+      <QueSeRegistra prefill={prefill} tipo={tipo} onTipo={setTipo} />
+      <ConceptoYFecha concepto={prefill?.concepto} fecha={fecha} onFecha={setFecha} />
+      <Detalle
+        tipo={tipo}
+        fecha={fecha}
+        prefill={prefill}
+        proyectos={props.proyectos}
+        socios={props.socios}
       />
-      <div className={d.fields}>
-        <Campo label="Concepto" name="concepto" required autoComplete="off" />
-        <Campo label="Fecha de pago" name="fecha" type="date" required defaultValue={props.hoy} />
-      </div>
-      <Detalle tipo={tipo} proyectos={props.proyectos} socios={props.socios} />
       {state !== null && !state.ok ? (
         <p className={d.messageBad} role="alert">
           {state.message}

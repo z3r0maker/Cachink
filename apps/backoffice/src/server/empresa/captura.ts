@@ -14,9 +14,36 @@ import {
  */
 export type Campo = (name: string) => string;
 
+/** What the capture does with a recurring expense (E-02, board CD-03). */
+export type Recurrencia =
+  | { readonly tipo: 'nueva'; readonly id: string }
+  | { readonly tipo: 'existente'; readonly id: string; readonly mes: string }
+  | null;
+
 export type Captura =
-  | { readonly ok: true; readonly input: RegistrarMovimientoInput }
+  | {
+      readonly ok: true;
+      readonly input: RegistrarMovimientoInput;
+      readonly recurrencia: Recurrencia;
+    }
   | { readonly ok: false; readonly message: string };
+
+const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+/**
+ * «Hacer recurrente cada mes» makes a template named after the form's nonce;
+ * a suggestion being registered names its template and month instead.
+ */
+function recurrenciaDe(campo: Campo, kind: Movement['kind']): Recurrencia {
+  if (kind !== 'gasto') return null;
+  const plantilla = campo('plantilla');
+  if (plantilla !== '' && MES.test(campo('mesPlantilla'))) {
+    return { tipo: 'existente', id: plantilla, mes: campo('mesPlantilla') };
+  }
+  const nonce = campo('nonce');
+  if (campo('recurrente') !== 'si' || !nonce.startsWith('manual-')) return null;
+  return { tipo: 'nueva', id: `rec-${nonce.slice('manual-'.length)}` };
+}
 
 const fail = (message: string): Captura => ({ ok: false, message });
 
@@ -82,6 +109,7 @@ export function leerCaptura(campo: Campo, founderId: string): Captura {
   const { kind } = montos.movement;
   return {
     ok: true,
+    recurrencia: recurrenciaDe(campo, kind),
     input: {
       fecha,
       projectId: kind === 'gasto' ? campo('proyecto') || null : null,

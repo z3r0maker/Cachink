@@ -48,6 +48,25 @@ export class VencimientoInvalidoError extends Error {
   }
 }
 
+export class PlantillaDesconocidaError extends Error {
+  readonly code = 'PLANTILLA_DESCONOCIDA' as const;
+  constructor(readonly plantillaId: string) {
+    super('Ese gasto recurrente no existe.');
+    this.name = 'PlantillaDesconocidaError';
+  }
+}
+
+export class RecurrenteYaRegistradoError extends Error {
+  readonly code = 'RECURRENTE_YA_REGISTRADO' as const;
+  constructor(
+    readonly nombre: string,
+    readonly mes: string,
+  ) {
+    super(`${nombre} ya está registrado en ese mes. Si el monto estaba mal, revierte el anterior.`);
+    this.name = 'RecurrenteYaRegistradoError';
+  }
+}
+
 export class YaRevertidoError extends Error {
   readonly code = 'YA_REVERTIDO' as const;
   constructor(readonly entryId: string) {
