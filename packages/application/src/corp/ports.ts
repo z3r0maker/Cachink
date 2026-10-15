@@ -1,4 +1,4 @@
-import type { JournalLine, Movement } from '@xangarro/domain/corp';
+import type { JournalLine, Movement, PlantillaRecurrente } from '@xangarro/domain/corp';
 
 /**
  * The ledger's storage port (E-02, ADR-124 §4). `@xangarro/data-corp`
@@ -67,4 +67,20 @@ export interface FundingCall extends NewFundingCall {
 export interface FundingCallRepository {
   insert(call: NewFundingCall): Promise<FundingCall>;
   findById(id: string): Promise<FundingCall | null>;
+}
+
+/** A recurring template as a capture creates it (E-02); it starts active. */
+export interface NuevaPlantilla extends Omit<PlantillaRecurrente, 'activo'> {
+  readonly createdBy: string;
+}
+
+export interface RecurringTemplateRepository {
+  /** Writes it unless its id exists, and returns the stored one: a retry is a no-op. */
+  ensure(plantilla: NuevaPlantilla): Promise<PlantillaRecurrente>;
+  findById(id: string): Promise<PlantillaRecurrente | null>;
+  /** Every template, active or stopped. */
+  list(): Promise<readonly PlantillaRecurrente[]>;
+  setActivo(id: string, activo: boolean): Promise<void>;
+  /** Template id → the entry of its standing charge for `mes` (a reversed one does not count). */
+  registradasEn(mes: string): Promise<ReadonlyMap<string, string>>;
 }

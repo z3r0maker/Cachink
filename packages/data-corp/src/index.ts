@@ -25,4 +25,5 @@ export {
   type MitadPagada,
 } from './queries/socios.js';
 export { listProjects, type Project } from './queries/projects.js';
+export { createRecurringTemplateRepository } from './queries/recurrentes.js';
 export * from './schema/index.js';

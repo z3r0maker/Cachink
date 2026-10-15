@@ -13,6 +13,7 @@ export {
   MontoInvalidoError,
   MotivoRequeridoError,
   PeriodoCerradoError,
+  PlantillaInvalidaError,
   TipoCambioInvalidoError,
 } from './errors.js';
 export { isMovementKind, MOVEMENT_KINDS } from './movements.js';
@@ -40,3 +41,13 @@ export {
   type GastoCapturado,
   type ResumenDelMes,
 } from './capture.js';
+export {
+  assertPlantilla,
+  fechaDeCargo,
+  leerRefRecurrente,
+  recurrentesDelMes,
+  refRecurrente,
+  type EstadoRecurrente,
+  type PlantillaRecurrente,
+  type RecurrenteDelMes,
+} from './recurrentes.js';

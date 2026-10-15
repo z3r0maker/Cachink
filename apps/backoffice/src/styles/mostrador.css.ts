@@ -175,6 +175,8 @@ export const tag = styleVariants({
   ok: { background: colors.greenSoft, color: colors.greenText },
   off: { background: colors.gray100, color: colors.gray600 },
   info: { background: colors.blueSoft, color: colors.blueText },
+  /** «Sugerido» on board CD-02: a recurring charge still to register. */
+  sugerido: { background: colors.purpleSoft, color: colors.ink },
 });
 
 export const tagBase = style({

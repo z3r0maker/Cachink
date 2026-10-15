@@ -3,18 +3,19 @@
 import {
   RegistrarMovimientoUseCase,
   RevertirMovimientoUseCase,
+  registrarRecurrente,
   type LedgerEntry,
 } from '@xangarro/application/corp';
-import { createCorpLedgerRepository } from '@xangarro/data-corp';
+import { createCorpLedgerRepository, createRecurringTemplateRepository } from '@xangarro/data-corp';
 import { periodOf } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { auditedMutation } from '../audited';
 import { hoyEnMexico, requireCorpDb } from '../db/corp';
-import { leerCaptura } from '../empresa/captura';
+import { leerCaptura, type Captura } from '../empresa/captura';
 import { requireFounder } from '../founder';
-import { auditOfEntry, failed } from '../empresa/fallas';
+import { auditOfEntry, auditOfRecurrente, failed } from '../empresa/fallas';
 import { field, type FormState } from './form-state';
 
 /**
@@ -24,16 +25,32 @@ import { field, type FormState } from './form-state';
  * commits first and carries a form nonce as `sourceRef`, so a retry after a
  * failed audit finds the same entry and audits it instead of posting twice.
  */
+async function registrar(captura: Extract<Captura, { ok: true }>): Promise<LedgerEntry> {
+  const db = requireCorpDb();
+  const ledger = createCorpLedgerRepository(db);
+  const { recurrencia } = captura;
+  if (recurrencia === null) {
+    const { result } = await auditedMutation(auditOfEntry('empresa.movimiento_registrado'), () =>
+      new RegistrarMovimientoUseCase(ledger).execute(captura.input),
+    );
+    return result;
+  }
+  const { result } = await auditedMutation(auditOfRecurrente, () =>
+    registrarRecurrente(
+      { ledger, plantillas: createRecurringTemplateRepository(db) },
+      { movimiento: captura.input, nonce: captura.input.sourceRef ?? '', plantilla: recurrencia },
+    ),
+  );
+  return result.entry;
+}
+
 export async function registrarMovimiento(_prev: FormState, form: FormData): Promise<FormState> {
   let saved: LedgerEntry;
   try {
     const { founder } = await requireFounder();
     const captura = leerCaptura((name) => field(form, name), founder.id);
     if (!captura.ok) return captura;
-    const ledger = createCorpLedgerRepository(requireCorpDb());
-    ({ result: saved } = await auditedMutation(auditOfEntry('empresa.movimiento_registrado'), () =>
-      new RegistrarMovimientoUseCase(ledger).execute(captura.input),
-    ));
+    saved = await registrar(captura);
   } catch (error) {
     return failed(error, 'registrarMovimiento');
   }

@@ -10,7 +10,9 @@ export {
   ConceptoRequeridoError,
   LlamadaDesconocidaError,
   MovimientoDesconocidoError,
+  PlantillaDesconocidaError,
   ProyectoDesconocidoError,
+  RecurrenteYaRegistradoError,
   TrimestreEnCursoError,
   VencimientoInvalidoError,
   YaRevertidoError,
@@ -30,7 +32,16 @@ export type {
   LedgerEntry,
   NewFundingCall,
   NewLedgerEntry,
+  NuevaPlantilla,
+  RecurringTemplateRepository,
 } from './ports.js';
+export {
+  dejarDeRepetir,
+  plantillaDe,
+  registrarRecurrente,
+  type RecurrenteRegistrado,
+  type RegistrarRecurrenteInput,
+} from './recurrentes.js';
 export {
   RegistrarMovimientoUseCase,
   type RegistrarMovimientoInput,

@@ -1,14 +1,18 @@
-import { listMovimientos } from '@xangarro/data-corp';
 import { formatMoney, formatMonth } from '@xangarro/domain';
 import { resumenDelMes, type ResumenDelMes } from '@xangarro/domain/corp';
 import Link from 'next/link';
 
-import { hoyEnMexico, requireCorpDb } from '@/server/db/corp';
+import { hoyEnMexico } from '@/server/db/corp';
 import { filaDe, mesesVecinos, parseFiltro, parseMes } from '@/server/empresa/movimiento-view';
+import { leerMes, type MesDeMovimientos } from '@/server/empresa/movimientos-lectura';
+import { filaRecurrente, filasDelMes, parseCategoria } from '@/server/empresa/recurrentes-view';
 import { requireFounderPage } from '@/server/founder';
+import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
 
-import { Filtros, Tabla } from './tabla';
+import { Buscar, Categorias, Tipos, type Vista } from './filtros';
+import { TablaRecurrentes } from './recurrentes';
+import { Tabla } from './tabla';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,36 +67,54 @@ function Encabezado({ mes }: { readonly mes: string }) {
   );
 }
 
+function Contenido({ vista, datos }: { readonly vista: Vista; readonly datos: MesDeMovimientos }) {
+  if (vista.ver === 'recurrentes') {
+    return (
+      <TablaRecurrentes
+        filas={datos.recurrentes.map((r) => filaRecurrente(r, vista.mes))}
+        activos={datos.activos}
+      />
+    );
+  }
+  const filas = filasDelMes(datos.movimientos.map(filaDe), datos.recurrentes, vista.mes, vista);
+  const vacio =
+    datos.movimientos.length === 0 && filas.length === 0
+      ? 'Este mes todavía no tiene movimientos. Registra el primero.'
+      : 'Ningún movimiento coincide en el mes.';
+  return <Tabla filas={filas} vacio={vacio} />;
+}
+
 /**
  * Movimientos (E-02, board CD-02): one month of MEXIA's ledger, its bank
- * totals, and every entry with its state. Entries are never edited; a wrong
- * one is reversed from its detail.
+ * totals, and every entry with its state, plus the recurring charges still to
+ * register. Entries are never edited; a wrong one is reversed from its detail.
  */
 export default async function MovimientosPage(props: {
-  searchParams: Promise<{ mes?: string; ver?: string }>;
+  searchParams: Promise<{ mes?: string; ver?: string; cat?: string; q?: string }>;
 }) {
   await requireFounderPage();
   const sp = await props.searchParams;
-  const mes = parseMes(sp.mes, hoyEnMexico());
-  const filtro = parseFiltro(sp.ver);
-  const movimientos = await listMovimientos(requireCorpDb(), mes);
-  const filas = movimientos.map(filaDe).filter((f) => filtro === 'todos' || f.filtro === filtro);
+  const hoy = hoyEnMexico();
+  const vista: Vista = {
+    mes: parseMes(sp.mes, hoy),
+    ver: parseFiltro(sp.ver),
+    cat: parseCategoria(sp.cat),
+    q: (sp.q ?? '').slice(0, 80),
+  };
+  const datos = await leerMes(vista.mes, hoy);
   return (
     <div className={m.page}>
-      <Encabezado mes={mes} />
-      <Totales r={resumenDelMes(movimientos)} />
+      <Encabezado mes={vista.mes} />
+      <Totales r={resumenDelMes(datos.movimientos)} />
       <section className={m.panel} aria-label="Movimientos del mes">
-        <div className={m.pad}>
-          <Filtros mes={mes} activo={filtro} />
+        <div className={`${m.pad} ${m.stack}`}>
+          <div className={mv.barra}>
+            <Tipos vista={vista} recurrentes={datos.recurrentes.length} />
+            {vista.ver === 'recurrentes' ? null : <Buscar vista={vista} />}
+          </div>
+          {vista.ver === 'todos' || vista.ver === 'gastos' ? <Categorias vista={vista} /> : null}
         </div>
-        <Tabla
-          filas={filas}
-          vacio={
-            movimientos.length === 0
-              ? 'Este mes todavía no tiene movimientos. Registra el primero.'
-              : 'Ningún movimiento de este tipo en el mes.'
-          }
-        />
+        <Contenido vista={vista} datos={datos} />
       </section>
     </div>
   );

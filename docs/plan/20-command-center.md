@@ -259,23 +259,41 @@ with property tests:
 ### E-02 Ledger core and Movimientos `[media]`
 
 - [~] Status · **Blocked by:** E-01
-  **Remaining (2026-10-08):** the recurring-template screen, the project and category filters,
-  and the contador's código agrupador mapping. Done: the domain (`@xangarro/domain/corp`: chart,
-  movement → balanced lines, reversal, period lock, USD at the day rate, the capture's IVA split
-  and the month's bank summary), the use cases (`@xangarro/application/corp`: registrar and
-  revertir, idempotent imports), corp storage (`entries`, `entry_lines`, `closed_periods`,
-  `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines and closed-month
-  triggers) with its integration suite, and the screens: `/empresa/movimientos` (month
-  navigation, Entradas / Salidas / Neto, type chips, the table), `/empresa/movimientos/registrar`
-  (gasto in MXN or USD with the live peso equivalent, comisión bancaria) and the detail with its
-  asiento and «Revertir movimiento». Both writes are founder-gated server actions with a
-  `staff_audit_log` row (`empresa.movimiento_registrado`, `empresa.movimiento_revertido`); corp
-  lives in another database, so the entry commits first and a form nonce as `sourceRef` makes a
-  retry land on the same entry. Playwright: `e2e/empresa.spec.ts` records a USD expense, checks
-  the row, the total and the asiento, reverses it and sees the month back at zero.
-  **Theme:** «Empresa» renders El Mostrador, light (`torreLight` in `styles/theme.css.ts`,
-  primitives in `styles/mostrador.css.ts` and `mostrador-data.css.ts`), inside the dark rail.
-  The capture is a page, as on board CD-03, not a drawer.
+  **Remaining (2026-10-14):** only the contador's código agrupador mapping, which waits on the
+  contador. The project filter moves to E-41: with one project the list has nothing to filter,
+  and Registrar already asks Xangarro or Compartido.
+  **Done 2026-10-14, recurring expenses and filters (boards CD-02, CD-03):**
+  - «Hacer recurrente cada mes» on Registrar makes a template from the charge being captured,
+    with «Te recordamos registrarlo cada N» read off the payment date.
+  - Each month the template's charge shows in Movimientos as «Sugerido». It posts nothing and
+    never counts in the totals. Its row opens Registrar prefilled, so only the real amount and,
+    for USD, the day's rate are left to type.
+  - The «Recurrentes · N» tab lists each template's charge in the month as Registrado, Sugerido
+    or Próximo, with «Dejar de repetir».
+  - The morning email (`/api/cron/agenda`) names the charges due that day.
+  - The category chips and the concepto/proveedor search are in place.
+  - A charge carries `<template>:<YYYY-MM>:<nonce>` as its `sourceRef`. A month is registered
+    once, a double submit lands on the same entry, and a reversed month can be registered again.
+  - Migration 0005 adds the template's supplier, deductibility, first month and author, plus
+    checks. A template of the old shape starts in the month it was made, which a migration test
+    proves on the real file.
+  - Playwright covers repeat, register the suggestion and stop.
+    **Done before:** the domain (`@xangarro/domain/corp`: chart,
+    movement → balanced lines, reversal, period lock, USD at the day rate, the capture's IVA split
+    and the month's bank summary), the use cases (`@xangarro/application/corp`: registrar and
+    revertir, idempotent imports), corp storage (`entries`, `entry_lines`, `closed_periods`,
+    `recurring_templates`; INSERT/SELECT only, plus deferred balance, has-lines and closed-month
+    triggers) with its integration suite, and the screens: `/empresa/movimientos` (month
+    navigation, Entradas / Salidas / Neto, type chips, the table), `/empresa/movimientos/registrar`
+    (gasto in MXN or USD with the live peso equivalent, comisión bancaria) and the detail with its
+    asiento and «Revertir movimiento». Both writes are founder-gated server actions with a
+    `staff_audit_log` row (`empresa.movimiento_registrado`, `empresa.movimiento_revertido`); corp
+    lives in another database, so the entry commits first and a form nonce as `sourceRef` makes a
+    retry land on the same entry. Playwright: `e2e/empresa.spec.ts` records a USD expense, checks
+    the row, the total and the asiento, reverses it and sees the month back at zero.
+    **Theme:** «Empresa» renders El Mostrador, light (`torreLight` in `styles/theme.css.ts`,
+    primitives in `styles/mostrador.css.ts` and `mostrador-data.css.ts`), inside the dark rail.
+    The capture is a page, as on board CD-03, not a drawer.
 - **What:**
   - domain: accounts, the movement → lines posting rules of §3, the balance check, reversal and
     the period lock;
@@ -595,7 +613,8 @@ with property tests:
 
 - [ ] Status · **Blocked by:** OD-2, a second project
 - **What:** project creation, the allocation rule for «compartido» costs, and the per-project and
-  consolidated toggles everywhere.
+  consolidated toggles everywhere, Movimientos' project filter included (moved from E-02;
+  `listMovimientos` already takes a `projectId`).
 
 ### E-42 Banco y tipo de cambio `[baja]`
 

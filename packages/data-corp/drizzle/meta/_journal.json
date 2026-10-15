@@ -36,6 +36,13 @@
       "when": 1791488590230,
       "tag": "0004_corp_corporativo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792028384045,
+      "tag": "0005_corp_recurrentes",
+      "breakpoints": true
     }
   ]
 }

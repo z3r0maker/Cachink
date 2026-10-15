@@ -1,26 +1,39 @@
 import type { Movimiento } from '@xangarro/data-corp';
 import { formatDate, formatMoney, parseIsoDate } from '@xangarro/domain';
-import { ACCOUNTS, type AccountGroup, type MovementKind } from '@xangarro/domain/corp';
+import {
+  ACCOUNTS,
+  CATEGORIAS_GASTO,
+  type AccountGroup,
+  type CategoriaGasto,
+  type MovementKind,
+} from '@xangarro/domain/corp';
 
 /**
  * A ledger entry as the Movimientos table shows it (E-02, board CD-02): the
  * type, the category, the bank effect and the state, in the board's words.
+ * A recurring charge still to register is a row too, «Sugerido», that posts
+ * nothing until a founder registers it.
  */
-export type Estado = 'Registrado' | 'Revertido' | 'Reversa';
-export type Filtro = 'todos' | 'ingresos' | 'gastos' | 'socios' | 'impuestos';
+export type Estado = 'Registrado' | 'Revertido' | 'Reversa' | 'Sugerido';
+export type Filtro = 'todos' | 'ingresos' | 'gastos' | 'socios' | 'impuestos' | 'recurrentes';
 
 export interface FilaMovimiento {
   readonly id: string;
+  /** The entry's detail, or the Registrar form prefilled for a suggestion. */
+  readonly href: string;
+  readonly fechaIso: string;
   readonly fecha: string;
   readonly tipo: string;
   readonly concepto: string;
   readonly detalle: string;
   readonly categoria: string;
+  /** The expense category, for the category chips; null for anything but an expense. */
+  readonly categoriaKey: CategoriaGasto | null;
   /** Signed: «+$1,160.00» in, «−$368.40» out. */
   readonly monto: string;
   readonly entra: boolean;
   readonly estado: Estado;
-  readonly filtro: Exclude<Filtro, 'todos'> | null;
+  readonly filtro: Exclude<Filtro, 'todos' | 'recurrentes'> | null;
 }
 
 const TIPO: Record<MovementKind, string> = {
@@ -38,7 +51,7 @@ const TIPO: Record<MovementKind, string> = {
   ajuste: 'Ajuste',
 };
 
-const FILTRO: Partial<Record<MovementKind, Exclude<Filtro, 'todos'>>> = {
+const FILTRO: Partial<Record<MovementKind, Exclude<Filtro, 'todos' | 'recurrentes'>>> = {
   cobro: 'ingresos',
   payout: 'ingresos',
   gasto: 'gastos',
@@ -92,13 +105,19 @@ export function filaDe(m: Movimiento): FilaMovimiento {
   const efecto = efectoEnBancos(m);
   const entra = efecto > 0n;
   const abs = efecto < 0n ? -efecto : efecto;
+  const original = m.reversesEntryId === null;
   return {
     id: m.id,
+    href: `/empresa/movimientos/${m.id}`,
+    fechaIso: m.fecha,
     fecha: formatDate(parseIsoDate(m.fecha)),
-    tipo: m.reversesEntryId === null ? TIPO[m.kind] : 'Reversa',
+    tipo: original ? TIPO[m.kind] : 'Reversa',
     concepto: m.concepto,
     detalle: detalle(m),
     categoria: categoria(m),
+    categoriaKey: original
+      ? (CATEGORIAS_GASTO.find((c) => m.lines.some((l) => l.cuenta === c)) ?? null)
+      : null,
     monto: `${entra ? '+' : '−'}${formatMoney(abs)}`,
     entra,
     estado: estado(m),
@@ -112,6 +131,7 @@ export const FILTROS: readonly { readonly id: Filtro; readonly label: string }[]
   { id: 'gastos', label: 'Gastos' },
   { id: 'socios', label: 'Socios' },
   { id: 'impuestos', label: 'Impuestos' },
+  { id: 'recurrentes', label: 'Recurrentes' },
 ];
 
 export function parseFiltro(value: string | undefined): Filtro {

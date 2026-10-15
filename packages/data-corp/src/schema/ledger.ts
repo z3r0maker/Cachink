@@ -99,18 +99,43 @@ export const closedPeriods = corp.table('closed_periods', {
   closedAt: at('closed_at').notNull(),
 });
 
-/** A monthly service the founders capture each month (Vercel, el contador, …). */
-export const recurringTemplates = corp.table('recurring_templates', {
-  id: text('id').primaryKey(),
-  projectId: text('project_id').references(() => projects.id),
-  nombre: text('nombre').notNull(),
-  categoria: text('categoria').notNull(),
-  moneda: text('moneda', { enum: ['MXN', 'USD'] })
-    .notNull()
-    .default('MXN'),
-  /** The usual monthly amount, in the template's currency's centavos. */
-  montoEstimado: bigint('monto_estimado', { mode: 'bigint' }).notNull(),
-  diaCargo: smallint('dia_cargo').notNull(),
-  activo: boolean('activo').notNull().default(true),
-  createdAt: at('created_at').notNull(),
-});
+/**
+ * A monthly service the founders pay (Vercel, el contador, …). It never posts:
+ * each month it suggests its charge until one is registered against it, with
+ * `source = 'recurring'` and the template and month in `source_ref`
+ * (`@xangarro/domain/corp` `refRecurrente`). Stopping one is an UPDATE of
+ * `activo`; a template is never deleted.
+ */
+export const recurringTemplates = corp.table(
+  'recurring_templates',
+  {
+    id: text('id').primaryKey(),
+    projectId: text('project_id').references(() => projects.id),
+    nombre: text('nombre').notNull(),
+    contraparte: text('contraparte'),
+    /** A `CategoriaGasto` of `@xangarro/domain/corp`. */
+    categoria: text('categoria').notNull(),
+    moneda: text('moneda', { enum: ['MXN', 'USD'] })
+      .notNull()
+      .default('MXN'),
+    /** The usual monthly amount, IVA included, in the template's currency's centavos. */
+    montoEstimado: bigint('monto_estimado', { mode: 'bigint' }).notNull(),
+    diaCargo: smallint('dia_cargo').notNull(),
+    deducible: boolean('deducible').notNull().default(true),
+    /** `YYYY-MM`: the first month it charges. */
+    desde: text('desde').notNull(),
+    activo: boolean('activo').notNull().default(true),
+    /** Null only on a template made before 0005. */
+    createdBy: text('created_by'),
+    createdAt: at('created_at').notNull(),
+  },
+  (t) => [
+    check('recurring_templates_dia_check', sql`${t.diaCargo} BETWEEN 1 AND 31`),
+    check('recurring_templates_monto_check', sql`${t.montoEstimado} > 0`),
+    check(
+      'recurring_templates_categoria_check',
+      sql`${t.categoria} IN ('costo_servicio', 'ventas_marketing', 'desarrollo', 'administracion')`,
+    ),
+    check('recurring_templates_desde_check', sql`${t.desde} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
+  ],
+);
