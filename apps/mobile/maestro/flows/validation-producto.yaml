@@ -15,54 +15,72 @@
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
+# The quick-add sheet's validation (MvProductoNuevo): the nombre is what
+# blocks — the Agregar button says so until it is filled, and filling it
+# lets the save through (the ticket names the product). The door on a
+# seeded catalogue is a search with no matches.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
-
-# Navigate to the Productos tab.
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-inventario'
-
-# Open the NuevoProducto modal.
+- runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'stock-nuevo-producto'
-
-# The modal should be open.
-- assertVisible: 'Nuevo producto'
-
-# ── Case 1: empty nombre blocks submission ──────────────────────
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
 - tapOn:
-    id: 'producto-costo'
-- inputText: '5'
-- tapOn:
-    id: 'producto-precio-venta'
-- inputText: '15'
-
-- tapOn:
-    id: 'producto-submit'
-
-# Modal should still be open — validation prevents submission
-# when nombre is empty.
-- assertVisible: 'Nuevo producto'
-
-# ── Case 2: costo may be left empty ─────────────────────────────
-# Clear the cost we just typed and give the product a name. The
-# product must save: costo is optional, so the modal closes.
-- tapOn:
-    id: 'producto-costo'
-- eraseText
-- tapOn:
-    id: 'producto-nombre'
-- inputText: 'Servicio de asesoría'
+    id: 'cobrar-search'
+- inputText: 'zzz'
 - hideKeyboard
-
 - tapOn:
-    id: 'producto-submit'
+    text: 'Producto nuevo'
+- extendedWaitUntil:
+    visible:
+      id: 'producto-nuevo-sheet'
+    timeout: 5000
+- waitForAnimationToEnd
 
-# Modal closed → the save went through with no costo.
-- assertNotVisible: 'Nuevo producto'
-- assertVisible: 'Servicio de asesoría'
+# Case 1: no nombre — the precio alone does not unlock Agregar.
+- tapOn:
+    id: 'producto-nuevo-precio'
+- inputText: '15'
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- assertVisible:
+    text: '.*Escribe el nombre y el precio.*'
+
+# Case 2: the nombre unlocks it; the ticket names the product.
+- tapOn:
+    id: 'producto-nuevo-nombre'
+- waitForAnimationToEnd
+- inputText: 'Asesor'
+- runFlow:
+    when:
+      notVisible:
+        id: 'producto-nuevo-nombre'
+        text: '.*Asesor.*'
+    commands:
+      - tapOn: { id: 'producto-nuevo-nombre' }
+      - eraseText
+      - inputText: 'Asesor'
+# The keyboard came up for the nombre; dismiss it or Agregar's tap lands
+# on a key and the sheet never closes.
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- assertVisible:
+    text: '.*Agregar y ponerlo en el ticket.*'
+- tapOn:
+    id: 'producto-nuevo-agregar'
+- extendedWaitUntil:
+    notVisible: { id: 'producto-nuevo-nombre' }
+    timeout: 15000
+# The search filter ('zzz') still hides the grid and the ticket panel folds
+# its line out of the tree; the observable contract is that the ticket got a
+# line at all — its Vaciar button only renders with one.
+- extendedWaitUntil:
+    visible: { id: 'cobrar-bar-vaciar' }
+    timeout: 10000

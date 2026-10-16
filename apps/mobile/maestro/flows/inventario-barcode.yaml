@@ -5,48 +5,39 @@
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
+# The escáner (MvEscaner over Cobrar): its sheet opens from the catalogue's
+# scan button, the manual entry takes a code, and a known code adds the
+# product to the ticket (the ticket's Vaciar renders with a line). An
+# unknown code says so in the sheet.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
-
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-inventario'
+- runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'stock-nuevo-producto'
-
+    id: 'tab-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
 - tapOn:
-    id: 'producto-nombre'
-- inputText: 'Refresco 600ml'
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+# Manual entry: the keypad button swaps the camera for the code field.
 - tapOn:
-    id: 'producto-scan'
-
-- assertVisible: 'Escanear código'
+    id: 'escaner-manual'
+- waitForAnimationToEnd
 - tapOn:
-    id: 'scanner-manual'
+    id: 'escaner-codigo'
 - inputText: '7501055300005'
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
 - tapOn:
-    id: 'scanner-manual-submit'
-
-# Scanner closes + SKU populated on the form.
-- assertNotVisible: 'Escanear código'
-
-# Enter pricing to verify Margen de ganancia row appears.
-- tapOn:
-    id: 'producto-costo'
-- eraseText
-- inputText: '50'
-- pressKey: enter
-- tapOn:
-    id: 'producto-precio-venta'
-- eraseText
-- inputText: '100'
-- hideKeyboard
-- assertVisible: 'Margen de ganancia'
-
-- tapOn:
-    id: 'producto-submit'
-- assertVisible: 'Refresco 600ml'
+    id: 'escaner-buscar'
+# A code the catalogue does not carry stays in the sheet with its answer.
+- extendedWaitUntil:
+    visible: { id: 'escaner-desconocido' }
+    timeout: 8000
