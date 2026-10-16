@@ -45,9 +45,14 @@ vi.mock('../../src/operador/acceso/acceso.css', () => ({
   titulo: 'titulo',
   lead: 'lead',
   fallo: 'fallo',
+  eyebrow: 'eyebrow',
+}));
+vi.mock('../../src/shell/icon', () => ({
+  Icon: () => createElement('span', null),
 }));
 vi.mock('../../src/operador/acceso/marco', () => ({
-  Marco: (p: { readonly children: ReactNode }) => createElement('div', null, p.children),
+  Marco: (p: { readonly children: ReactNode; readonly mensaje?: string }) =>
+    createElement('div', null, p.mensaje ?? null, p.children),
 }));
 vi.mock('../../src/operador/acceso/boton', () => ({
   Continuar: (p: {
@@ -74,7 +79,10 @@ beforeEach(() => {
   responder.mockReturnValue(() => undefined);
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe('PestanaUnica', () => {
   it('the tab that wins the lock renders the app, and without locks it answers newcomers', async () => {
@@ -92,9 +100,7 @@ describe('PestanaUnica', () => {
     expect(responder).toHaveBeenCalled();
   });
 
-  // TODO(A-16): port to the three-state gate (decidiendo → ocupada → esperando →
-  // sigue); the real-browser contract is covered by pestana.sync.spec, green in CI.
-  it.skip('a second tab is told the register is open elsewhere, and may wait', async () => {
+  it('a second tab is told the register is open elsewhere, and may wait', async () => {
     reclamar.mockResolvedValue('ocupada');
     montar();
     await waitFor(() => assert.ok(screen.getByTestId('otra-pestana')));
@@ -107,9 +113,7 @@ describe('PestanaUnica', () => {
     assert.ok(screen.getByText(/Esperando a que se cierre la otra pestaña/));
   });
 
-  // TODO(A-16): port to the three-state gate (decidiendo → ocupada → esperando →
-  // sigue); the real-browser contract is covered by pestana.sync.spec, green in CI.
-  it.skip('waiting ends by owning the register, or by learning the other tab is still there', async () => {
+  it('waiting ends by owning the register, or by learning the other tab is still there', async () => {
     reclamoOcupadaLuego('propia');
     montar();
     await waitFor(() => assert.ok(screen.getByTestId('otra-pestana')));
@@ -121,14 +125,14 @@ describe('PestanaUnica', () => {
     reclamoOcupadaLuego('ocupada');
     montar();
     await waitFor(() => assert.ok(screen.getByTestId('otra-pestana')));
+    vi.useFakeTimers();
     screen.getByTestId('usar-esta-pestana').click();
-    await waitFor(() => assert.ok(screen.getByRole('alert')));
-    assert.ok(screen.getByText(/La otra pestaña sigue abierta/));
+    await vi.advanceTimersByTimeAsync(3_100);
+    vi.useRealTimers();
+    await waitFor(() => assert.ok(screen.getByText(/La otra pestaña sigue abierta/)));
   });
 
-  // TODO(A-16): port to the three-state gate (decidiendo → ocupada → esperando →
-  // sigue); the real-browser contract is covered by pestana.sync.spec, green in CI.
-  it.skip('without locks the BroadcastChannel look decides both ways', async () => {
+  it('without locks the BroadcastChannel look decides both ways', async () => {
     reclamar.mockResolvedValue('sin-soporte');
     hayOtra.mockResolvedValue(true);
     montar();
