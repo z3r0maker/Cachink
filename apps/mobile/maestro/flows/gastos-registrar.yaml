@@ -60,7 +60,12 @@ tags:
 - extendedWaitUntil: { visible: { id: 'registrar-gasto-sheet' }, timeout: 5000 }
 - tapOn: { id: 'gasto-concepto' }
 - inputText: 'Cilindro de gas'
-- hideKeyboard
+# hideKeyboard alone leaves the OS keyboard up on the iPad's sheet and the
+# blocked-save check taps a key instead — one drag dismisses it for real.
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
 - tapOn: { id: 'gasto-guardar' }
 - assertVisible: ".*Registrar gasto de \\$___.*"
 - assertVisible: { id: 'registrar-gasto-sheet' }

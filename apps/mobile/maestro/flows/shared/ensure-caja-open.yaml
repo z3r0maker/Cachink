@@ -13,7 +13,7 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 - runFlow:
     when:
       visible:

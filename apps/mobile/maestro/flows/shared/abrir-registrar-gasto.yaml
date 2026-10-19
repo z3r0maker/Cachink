@@ -12,7 +12,7 @@ appId: mx.xangarro.mobile
 # the mostrador gastos screen, not the older /egresos list.
 - runFlow: ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 - extendedWaitUntil:
     visible:
       id: 'inicio-hero-listo'
