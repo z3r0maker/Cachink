@@ -14,7 +14,7 @@ tags:
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - tapOn:
-    id: 'tab-cobrar'
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'caja-gate-banner'

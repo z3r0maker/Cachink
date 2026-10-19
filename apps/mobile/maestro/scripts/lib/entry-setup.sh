@@ -97,8 +97,8 @@ reset_app() {
   # it eats taps on the header (the sync pill) and the checkout bar with no
   # trace in the accessibility tree — the handoff's «Tools button» gotcha.
   xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.hasStoredPosition -bool YES 2>/dev/null || true
-  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionX -float 40 2>/dev/null || true
-  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionY -float 110 2>/dev/null || true
+  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionX -float 200 2>/dev/null || true
+  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionY -float 200 2>/dev/null || true
   "$FRESH_SCRIPT" --reset-only
   curl -sf -X POST "$MOCK_API/__mock/reset" >/dev/null \
     || { echo "❌  Contracts mock not reachable at $MOCK_API (pnpm mock:api)"; return 1; }

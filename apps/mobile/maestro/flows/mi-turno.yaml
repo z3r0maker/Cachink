@@ -17,7 +17,7 @@ appId: mx.xangarro.mobile
 # The tab. The cabeza names the operator, the caja and the opening time
 # (packages/ui/src/screens/Turno/mi-turno-screen.tsx Cabeza).
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'mobile-turno'

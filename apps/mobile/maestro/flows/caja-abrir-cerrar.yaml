@@ -15,7 +15,7 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - tapOn:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 
 # Sin turno: the hero says so; its action opens the fondo sheet (MvAbrirTurno).
 - runFlow:
@@ -48,7 +48,7 @@ appId: mx.xangarro.mobile
 
 # Mi turno: the hero says the $500 that must be in the drawer.
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'turno-hero'

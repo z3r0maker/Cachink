@@ -15,7 +15,7 @@ appId: mx.xangarro.mobile
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
 - extendedWaitUntil:
     visible:
       id: 'ventas-vacio'

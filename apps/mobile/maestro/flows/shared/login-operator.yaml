@@ -13,7 +13,7 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       notVisible:
-        id: 'tab-turno'
+        id: 'tab-turno|rail-turno|sidebar-turno'
     commands:
       - extendedWaitUntil:
           visible:
@@ -42,5 +42,5 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'nip-enviar' }
 - extendedWaitUntil:
     visible:
-      id: 'tab-turno'
+      id: 'tab-turno|rail-turno|sidebar-turno'
     timeout: 15000

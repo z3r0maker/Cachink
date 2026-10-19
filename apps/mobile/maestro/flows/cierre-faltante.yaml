@@ -14,7 +14,7 @@ appId: mx.xangarro.mobile
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'turno-cerrar-mi-turno'

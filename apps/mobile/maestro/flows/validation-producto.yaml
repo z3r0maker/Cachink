@@ -23,7 +23,7 @@ appId: mx.xangarro.mobile
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-cobrar'
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

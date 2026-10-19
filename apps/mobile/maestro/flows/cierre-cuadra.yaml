@@ -21,7 +21,7 @@ appId: mx.xangarro.mobile
 
 # «Cerrar mi turno» opens the Cierre flow, a full page under the Turno tab.
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'turno-cerrar-mi-turno'

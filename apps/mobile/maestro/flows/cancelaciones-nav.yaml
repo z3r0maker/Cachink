@@ -17,7 +17,7 @@ tags:
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 
-- tapOn: { id: 'tab-ventas' }
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'ventas-sin-turno' }, timeout: 8000 }
 - assertVisible: '.*Sin turno abierto.*'
 - assertVisible: '.*Las ventas de cada turno aparecen aquí.*.*'

@@ -27,30 +27,30 @@ appId: mx.xangarro.mobile
 # Exactly four tabs on the phone (tab-definitions.ts appTabs): Inicio,
 # Cobrar, Ventas, Mi turno.
 - assertVisible:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 - assertVisible:
-    id: 'tab-cobrar'
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - assertVisible:
-    id: 'tab-ventas'
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
 - assertVisible:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 # The bar navigates. Ventas and Mi turno carry route testIDs (ventas.tsx
 # mobile-ventas, turno/index.tsx mobile-turno); Cobrar's surface belongs to
 # the Dinero flows, so its tab being present above is enough here.
 - tapOn:
-    id: 'tab-ventas'
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
 - extendedWaitUntil:
     visible:
       id: 'mobile-ventas'
     timeout: 10000
 - tapOn:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'mobile-turno'
     timeout: 10000
 - tapOn:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 - extendedWaitUntil:
     visible:
       id: 'mobile-inicio-tab'
