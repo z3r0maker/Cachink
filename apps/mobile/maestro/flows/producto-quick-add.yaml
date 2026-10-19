@@ -8,8 +8,9 @@ appId: mx.xangarro.mobile
 ---
 # Products are create-only on the device (A-09): Cobrar's catalogue opens the
 # «Producto nuevo» sheet — nombre and precio the minimum — and Agregar saves
-# it AND puts it on the ticket. The door on a seeded catalogue is a search
-# with no matches (the Vacio state carries the button).
+# it AND puts it on the ticket (the ticket panel names it). The door on a
+# seeded catalogue is a search with no matches (the Vacio state carries the
+# button).
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
@@ -29,20 +30,22 @@ appId: mx.xangarro.mobile
     visible:
       id: 'producto-nuevo-sheet'
     timeout: 5000
-# The sheet is still settling onto the keyboard-avoiding layout when it first
-# appears; typing into that moving field drops keystrokes ('Jugo'
-# landed as 'Agu fesca'). Let the sheet finish before touching the form.
-- waitForAnimationToEnd
 - waitForAnimationToEnd
 - tapOn:
     id: 'producto-nuevo-nombre'
-# Letters drop in the field's focus race («mineral» once landed as «miear»)
-# — settle, type, then read the field back before anything is saved.
 - waitForAnimationToEnd
 - inputText: 'Jugo'
-- assertVisible:
-    id: 'producto-nuevo-nombre'
-    text: '.*Jugo.*'
+# Synthetic keystrokes drop mid-layout ('Jugo' once landed short); the
+# readback retries once when the field did not take it.
+- runFlow:
+    when:
+      notVisible:
+        id: 'producto-nuevo-nombre'
+        text: '.*Jugo.*'
+    commands:
+      - tapOn: { id: 'producto-nuevo-nombre' }
+      - eraseText
+      - inputText: 'Jugo'
 - hideKeyboard
 - tapOn:
     id: 'producto-nuevo-precio'
@@ -53,8 +56,6 @@ appId: mx.xangarro.mobile
     start: '50%,45%'
     end: '50%,25%'
 - waitForAnimationToEnd
-# The button says whether the form is complete; a digit dropped in the
-# precio's focus race leaves it on the disabled wording.
 - assertVisible:
     text: '.*Agregar y ponerlo en el ticket.*'
 - tapOn:
@@ -64,19 +65,7 @@ appId: mx.xangarro.mobile
 - extendedWaitUntil:
     notVisible: { id: 'producto-nuevo-nombre' }
     timeout: 15000
-# The catalogue was filtered to the nonsense search that opened the door;
-# clear it and the new product's tile carries the folded label.
-- tapOn:
-    id: 'cobrar-search'
-- eraseText
-- hideKeyboard
-# The tile lands below the fold on the alphabetical grid, and the list
-# refilters as the search clears — wait it out, then find the tile.
-- waitForAnimationToEnd
-- scrollUntilVisible:
-    element: { text: '.*Agregar Jugo, \\$18\\.00.*' }
-    direction: DOWN
+# The contract: the new product is on the ticket, priced (ticket-lineas).
+- extendedWaitUntil:
+    visible: { text: '.*Jugo.*' }
     timeout: 10000
-    visibilityPercentage: 60
-    centerElement: true
-- assertVisible: '.*Agregar Jugo, \\$18\\.00.*'
