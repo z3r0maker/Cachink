@@ -10,7 +10,7 @@
  * Android back button calls `onClose`.
  */
 import type { ReactElement, ReactNode } from 'react';
-import { Animated, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Animated, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
@@ -18,6 +18,7 @@ import { borderColors, borderWidths, colors, radii, shapeRadii } from '../../the
 import { useTranslation } from '../../i18n/index';
 import { useEnterMotion } from '../motion/use-enter-motion';
 import { OverlayHead, PINNED, Scrim } from '../Overlay/overlay-parts';
+import { useKeyboardHeight } from './use-keyboard-height';
 
 /**
  * The boards draw 24; the ladder tops out at 22 and a new radius goes into
@@ -117,10 +118,16 @@ function Sheet(props: BottomSheetProps & { readonly id: string }): ReactElement 
 
 export function BottomSheet(props: BottomSheetProps): ReactElement {
   const id = props.testID ?? 'bottom-sheet';
+  const teclado = useKeyboardHeight();
   return (
     <Dialog modal open={props.open} onOpenChange={(next) => (next ? undefined : props.onClose())}>
       <Dialog.Portal>
         <Scrim onPress={props.onClose} testID={`${id}-scrim`} />
+        {/* The sheet rides the keyboard through the PINNED container's
+            bottom margin — the only thing that moves an absolutely-pinned
+            element. (A KeyboardAvoidingView cannot: its padding is ignored
+            by position-pinned children, and the sheet's footer ended up
+            behind the keyboard, where a phone-pad offers no dismiss key.) */}
         <Dialog.Content
           key="sheet"
           unstyled
@@ -129,12 +136,11 @@ export function BottomSheet(props: BottomSheetProps): ReactElement {
           left={0}
           right={0}
           bottom={0}
+          marginBottom={teclado}
           maxHeight="92%"
           backgroundColor="transparent"
         >
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <Sheet {...props} id={id} />
-          </KeyboardAvoidingView>
+          <Sheet {...props} id={id} />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog>

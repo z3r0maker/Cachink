@@ -77,8 +77,11 @@ tags:
 - inputText: '5512345678'
 # The keyboard-avoiding panel lifts «Anotar» while typing; let the shift
 # settle BEFORE resolving the button, or the tap lands on stale coordinates
-# (which once submitted the sale by accident).
+# (which once submitted the sale by accident). The phone's OS keyboard parks
+# itself over «Anotar» after the phone number — drop it first (on the iPad
+# hideKeyboard is inert but harmless: the panel sits clear of the keyboard).
 - waitForAnimationToEnd
+- hideKeyboard
 - tapOn: { id: 'fiado-anotar' }
 - extendedWaitUntil: { visible: { id: 'venta-hecha' }, timeout: 8000 }
 # The dialog animates in; tapping «Nueva venta» on stale coordinates once left

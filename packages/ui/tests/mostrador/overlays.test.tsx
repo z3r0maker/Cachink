@@ -9,6 +9,13 @@ import { renderWithProviders, screen, fireEvent } from '../test-utils';
 
 initI18n();
 
+// vi.mock hoists file-wide: the keyboard height rides a mutable so each test
+// sets its own.
+const teclado = vi.hoisted(() => ({ h: 0 }));
+vi.mock('../../src/components/BottomSheet/use-keyboard-height', () => ({
+  useKeyboardHeight: () => teclado.h,
+}));
+
 function tap(el: Element): void {
   fireEvent.pointerDown(el);
   fireEvent.pointerUp(el);
@@ -57,6 +64,28 @@ describe('BottomSheet', () => {
     tap(close);
     tap(screen.getByTestId('bottom-sheet-scrim'));
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it('rides the keyboard: the frame lifts by its height so the footer stays reachable', () => {
+    teclado.h = 336;
+    renderWithProviders(
+      <BottomSheet open onClose={vi.fn()} title="Registrar gasto">
+        <span>cuerpo</span>
+      </BottomSheet>,
+    );
+    const hoja = screen.getByTestId('bottom-sheet') as HTMLElement;
+    expect(getComputedStyle(hoja).marginBottom).toBe('336px');
+  });
+
+  it('sits flush with the screen bottom when no keyboard is up', () => {
+    teclado.h = 0;
+    renderWithProviders(
+      <BottomSheet open onClose={vi.fn()} title="Registrar gasto">
+        <span>cuerpo</span>
+      </BottomSheet>,
+    );
+    const hoja = screen.getByTestId('bottom-sheet') as HTMLElement;
+    expect(getComputedStyle(hoja).marginBottom).toBe('0px');
   });
 
   it('carries the thick black edge on the sheet', () => {

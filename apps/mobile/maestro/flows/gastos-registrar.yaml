@@ -69,8 +69,9 @@ tags:
 - waitForAnimationToEnd
 - inputText: 'Cilindro de gas'
 - waitForAnimationToEnd
-# No dismissal step: the guardar button sits above the keyboard on the iPad
-# (a drag closes the whole sheet; the title tap hits the backdrop's close).
+# No dismissal step: the harness connects the sims' hardware keyboard, so no
+# OS keyboard ever rises to bury the pinned footer (the phone's software
+# keyboard once ate the guardar tap — the footer never saved).
 - tapOn: { id: 'gasto-guardar' }
 - assertVisible: ".*Registrar gasto de \\$___.*"
 - assertVisible: { id: 'registrar-gasto-sheet' }
@@ -92,9 +93,8 @@ tags:
       - tapOn: { id: 'gasto-monto' }
       - eraseText
       - inputText: '350'
-# No dismissal step here either: the title sits in the backdrop's close zone
-# on the iPad (the tap shut the sheet once). The body's drag drops the OS
-# keyboard on its own (keyboardDismissMode on-drag), so nothing else is owed.
+# Settle after the monto typing (a digit once dropped mid-ride; the
+# conditional below catches it if it ever comes back).
 - waitForAnimationToEnd
 - waitForAnimationToEnd
 # Swipe the sheet's OWN body (registrar-gasto-sheet-body) — never the
