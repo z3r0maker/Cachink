@@ -40,8 +40,12 @@ tags:
       - tapOn: { id: 'inicio-atajo-gastos' }
 - runFlow:
     when:
-      notVisible:
-        id: 'inicio-atajo-gastos'
+      # Still on Inicio = the atajo never existed (the tablet drops
+      # it); «atajo gone» would also be true a beat AFTER the phone
+      # taps it and navigates away, and the deep link would then
+      # fight the navigation with the iOS «Open in …?» dialog.
+      visible:
+        id: 'inicio-hero-listo'
     commands:
       # The atajos are phone-only (inicio-screen drops them when wide); the
       # tablet deep-links the same screen (the navigate-to-settings pattern).

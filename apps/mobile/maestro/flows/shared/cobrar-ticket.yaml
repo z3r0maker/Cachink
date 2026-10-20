@@ -30,9 +30,13 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'ticket-cobrar' }
 - runFlow:
     when:
-      notVisible:
-        id: 'cart-checkout-btn'
+      visible:
+        id: 'ticket-panel'
     commands:
+      # Gated on the tablet's own panel, never on «the bar is gone»: once the
+      # phone branch opens the checkout the bar is gone TOO, and a fast
+      # transition let this branch fire there and tap a ticket-cobrar that no
+      # longer existed (a slow one hid the race — flaky by construction).
       - tapOn: { id: 'ticket-cobrar' }
 - extendedWaitUntil:
     visible:
