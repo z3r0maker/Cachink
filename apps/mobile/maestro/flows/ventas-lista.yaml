@@ -47,7 +47,7 @@ tags:
 
 # One Transferencia sale (an Efectivo cancel's cash-back step is covered by
 # venta-detalle-cancelar.yaml; the fiado sale is charged further down).
-- tapOn: { id: 'tab-cobrar' }
+- tapOn: { id: 'tab-cobrar|rail-cobrar|sidebar-cobrar' }
 - extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
 # The grid lists alphabetically; this tile is below the fold.
 - scrollUntilVisible:
@@ -64,7 +64,7 @@ tags:
       METODO: Transferencia
 
 # The list: the KPI row, and the row's folio, monto and metodo.
-- tapOn: { id: 'tab-ventas' }
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 - assertVisible: { id: 'venta-resumen' }
 - assertVisible: '.*Ventas del turno.*'
@@ -102,7 +102,7 @@ tags:
 
 # A fiado sale keeps its client on the row (cobrar-ticket cannot do Fiado:
 # Fiado is its own row, cobro-fiado, not a cobro-metodo-*).
-- tapOn: { id: 'tab-cobrar' }
+- tapOn: { id: 'tab-cobrar|rail-cobrar|sidebar-cobrar' }
 - extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
 # The grid lists alphabetically; this tile is below the fold.
 - scrollUntilVisible:
@@ -127,7 +127,7 @@ tags:
 - tapOn: { id: 'venta-hecha-nueva' }
 - extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
 
-- tapOn: { id: 'tab-ventas' }
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 # The Fiado filter leaves the fiado row alone on the list — and exercises
 # the filter for real (the panel is one row tall per venta; no scrolling).

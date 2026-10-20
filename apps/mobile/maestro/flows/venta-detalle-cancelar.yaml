@@ -52,7 +52,7 @@ tags:
 - runFlow: shared/create-venta.yaml
 
 # Open its sheet: the lines it carried and the tiles around them.
-- tapOn: { id: 'tab-ventas' }
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 - tapOn:
     text: 'Taco al pastor'

@@ -9,7 +9,7 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: 'tab-turno'
+        id: 'tab-turno|rail-turno|sidebar-turno'
     commands:
       - runFlow: shared/lock-caja.yaml
       # Locking shows Bloqueo for the same person; «No soy …» goes to Acceso.

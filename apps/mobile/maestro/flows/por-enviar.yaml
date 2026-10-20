@@ -26,7 +26,7 @@ env:
       TABLE: products
       ROW_ID: 01JPRD00000000000000000007
 - tapOn:
-    id: 'tab-cobrar'
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
     visible:
       id: 'ventas-product-grid'

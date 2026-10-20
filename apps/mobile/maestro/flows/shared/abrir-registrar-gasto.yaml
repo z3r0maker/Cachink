@@ -12,14 +12,30 @@ appId: mx.xangarro.mobile
 # the mostrador gastos screen, not the older /egresos list.
 - runFlow: ensure-caja-open.yaml
 - tapOn:
-    id: 'tab-inicio'
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
 - extendedWaitUntil:
     visible:
       id: 'inicio-hero-listo'
     timeout: 8000
 - waitForAnimationToEnd
-- tapOn:
-    id: 'inicio-atajo-gastos'
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-atajo-gastos'
+    commands:
+      - tapOn: { id: 'inicio-atajo-gastos' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'inicio-atajo-gastos'
+    commands:
+      # The atajos are phone-only (inicio-screen drops them when wide); the
+      # tablet deep-links the same screen (the navigate-to-settings pattern).
+      - openLink: 'xangarro://gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'gastos-abrir-registrar'
+    timeout: 8000
 - extendedWaitUntil:
     visible:
       id: 'gastos-abrir-registrar'

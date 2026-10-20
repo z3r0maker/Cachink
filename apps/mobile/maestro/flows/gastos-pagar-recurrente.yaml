@@ -26,7 +26,7 @@ tags:
 - runFlow: shared/login-operator.yaml
 
 # Paying stamps the open turno; open one only if Inicio still asks for it.
-- tapOn: { id: 'tab-inicio' }
+- tapOn: { id: 'tab-inicio|rail-inicio|sidebar-inicio' }
 - runFlow:
     when:
       visible:
@@ -42,7 +42,24 @@ tags:
 - waitForAnimationToEnd
 
 # Inicio's shortcut tile opens Gastos, where the due template waits.
-- tapOn: { id: 'inicio-atajo-gastos' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-atajo-gastos'
+    commands:
+      - tapOn: { id: 'inicio-atajo-gastos' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'inicio-atajo-gastos'
+    commands:
+      # The atajos are phone-only (inicio-screen drops them when wide); the
+      # tablet deep-links the same screen (the navigate-to-settings pattern).
+      - openLink: 'xangarro://gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
 - extendedWaitUntil: { visible: { id: 'mobile-gastos' }, timeout: 8000 }
 - extendedWaitUntil: { visible: { id: 'gastos-pendientes' }, timeout: 8000 }
 - assertVisible: '.*Pendientes de registrar.*'

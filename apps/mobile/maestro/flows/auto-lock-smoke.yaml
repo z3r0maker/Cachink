@@ -28,7 +28,7 @@ appId: mx.xangarro.mobile
 
 # Verify we're logged in and tabs are visible.
 - assertVisible:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 
 # Wait for the inactivity timeout to fire.
 # Default is 5min (300s). If E2E reduces it to 10s, this works faster.

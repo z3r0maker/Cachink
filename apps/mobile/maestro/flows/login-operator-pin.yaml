@@ -60,6 +60,6 @@ appId: mx.xangarro.mobile
       id: 'mobile-inicio-tab'
     timeout: 15000
 - assertVisible:
-    id: 'tab-turno'
+    id: 'tab-turno|rail-turno|sidebar-turno'
 - assertNotVisible:
     id: 'quick-switch'

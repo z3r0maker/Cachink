@@ -25,7 +25,7 @@ tags:
 - runFlow: shared/login-operator.yaml
 
 # The fiado venta needs the open turno; open one only if Inicio still asks.
-- tapOn: { id: 'tab-inicio' }
+- tapOn: { id: 'tab-inicio|rail-inicio|sidebar-inicio' }
 - runFlow:
     when:
       visible:
@@ -38,7 +38,7 @@ tags:
 - extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
 
 # Charge a Gringa on credit to a cliente nuevo with his phone.
-- tapOn: { id: 'tab-cobrar' }
+- tapOn: { id: 'tab-cobrar|rail-cobrar|sidebar-cobrar' }
 - extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
 # The grid lists alphabetically; this tile is below the fold.
 - scrollUntilVisible:
@@ -76,12 +76,29 @@ tags:
 - assertNotVisible: { id: 'venta-hecha' }
 
 # Inicio's shortcut tile opens Fiado y abonos; Don Beto owes the gringa.
-- tapOn: { id: 'tab-inicio' }
+- tapOn: { id: 'tab-inicio|rail-inicio|sidebar-inicio' }
 # The hero refetches after the venta («Cobraste $35.00») and the tiles shift;
 # let the layout settle before resolving the atajo, or the tap lands stale.
 - extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 8000 }
 - waitForAnimationToEnd
-- tapOn: { id: 'inicio-atajo-fiado' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-atajo-fiado'
+    commands:
+      - tapOn: { id: 'inicio-atajo-fiado' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'inicio-atajo-fiado'
+    commands:
+      # The atajos are phone-only (inicio-screen drops them when wide); the
+      # tablet deep-links the same screen (the navigate-to-settings pattern).
+      - openLink: 'xangarro://fiado'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-fiado'
+    timeout: 8000
 - extendedWaitUntil: { visible: { id: 'mobile-fiado' }, timeout: 8000 }
 - assertVisible: '.*Fiado y abonos.*'
 - assertVisible: { id: 'cobranza-kpis' }

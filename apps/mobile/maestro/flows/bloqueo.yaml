@@ -59,7 +59,7 @@ appId: mx.xangarro.mobile
 - tapOn: { id: 'nip-enviar' }
 - extendedWaitUntil:
     visible:
-      id: 'tab-turno'
+      id: 'tab-turno|rail-turno|sidebar-turno'
     timeout: 15000
 - assertNotVisible:
     id: 'bloqueo'

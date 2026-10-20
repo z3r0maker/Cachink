@@ -32,7 +32,7 @@ env:
 - assertNotVisible: 'Movimientos'
 - assertNotVisible: '.*Stock bajo.*'
 - tapOn:
-    id: 'tab-cobrar'
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - assertNotVisible: 'Stock 0'
 - runScript:
     file: shared/mock-scenario.js
