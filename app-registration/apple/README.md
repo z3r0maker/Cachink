@@ -27,20 +27,20 @@ without friction provided two things hold:
 
 ## What lives here
 
-| File                       | What it is                                            |
-| -------------------------- | ----------------------------------------------------- |
-| `README.md`                | This positioning note                                 |
-| `AUDIT-steering.md`        | The no-steering audit of the app's user-facing copy   |
-| `SCREENSHOTS.md`           | Manifest of `screenshots/` (device, screen, capture)  |
-| `METADATA.md`              | Listing draft: name, subtitle, review notes, demo account TODO |
-| `screenshots/`             | PNG captures at Apple's required device sizes         |
+| File                | What it is                                                     |
+| ------------------- | -------------------------------------------------------------- |
+| `README.md`         | This positioning note                                          |
+| `AUDIT-steering.md` | The no-steering audit of the app's user-facing copy            |
+| `SCREENSHOTS.md`    | Manifest of `screenshots/` (device, screen, capture)           |
+| `METADATA.md`       | Listing draft: name, subtitle, review notes, demo account TODO |
+| `screenshots/`      | PNG captures at Apple's required device sizes                  |
 
 ## Sizes captured
 
-| Device class      | Simulator                  | Resolution    | Apple requirement |
-| ----------------- | -------------------------- | ------------- | ----------------- |
-| iPhone 6.9"       | iPhone 17 Pro Max (iOS 26.5) | 1320 × 2868 | required set      |
-| iPad 13"          | iPad Pro 13-inch (M5, iOS 26.5) | 2064 × 2796 | required (supportsTablet) |
+| Device class | Simulator                       | Resolution  | Apple requirement         |
+| ------------ | ------------------------------- | ----------- | ------------------------- |
+| iPhone 6.9"  | iPhone 17 Pro Max (iOS 26.5)    | 1320 × 2868 | required set              |
+| iPad 13"     | iPad Pro 13-inch (M5, iOS 26.5) | 2064 × 2796 | required (supportsTablet) |
 
 Captures are honest app states driven by the Maestro harness against the
 contracts mock (no compositing, no fixture screens).

@@ -5,14 +5,14 @@ gets filled from.
 
 ## Identity
 
-| Field                | Value                                |
-| -------------------- | ------------------------------------ |
-| Name                 | `Xangarro` (check availability of `Xangarro!` — punctuation allowed, first-come) |
-| Subtitle            | `La terminal de venta de tu negocio` (draft — es-MX) |
-| Primary language     | Spanish (Mexico)                     |
-| Category             | Business (primary); Finance (secondary, optional) |
-| Bundle ID            | `mx.xangarro.mobile` (explicit App ID under team `25T7H2DCB3`) |
-| Price                | Free — no in-app purchases           |
+| Field            | Value                                                                            |
+| ---------------- | -------------------------------------------------------------------------------- |
+| Name             | `Xangarro` (check availability of `Xangarro!` — punctuation allowed, first-come) |
+| Subtitle         | `La terminal de venta de tu negocio` (draft — es-MX)                             |
+| Primary language | Spanish (Mexico)                                                                 |
+| Category         | Business (primary); Finance (secondary, optional)                                |
+| Bundle ID        | `mx.xangarro.mobile` (explicit App ID under team `25T7H2DCB3`)                   |
+| Price            | Free — no in-app purchases                                                       |
 
 ## Description skeleton (draft)
 
@@ -46,3 +46,11 @@ plan mention, no «descarga» marketing.
       (`ITSAppUsesNonExemptEncryption: false`)
 - [ ] Production build verified on an iOS 27 device/sim (the scene-lifecycle
       crash we saw is dev-client-only, but verify once with a real store build)
+- [ ] **The sale sound's replay bug** (found capturing these shots, with
+      `EXPO_PUBLIC_E2E` off): the second sale's `seekTo(0)+play()` on the
+      expo-audio player throws `Uncaught (in promise): The 1st argument
+cannot be cast to type SharedObject<AudioPlayer>` — the try/catch in
+      `use-sale-sound` cannot see it (the rejection is emitted past the call
+      site). It took the app down on the simulator during capture; verify
+      behavior on a production build and harden the replay path before
+      submission (a user rings many sales in a row).

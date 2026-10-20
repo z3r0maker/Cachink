@@ -10,16 +10,16 @@ outside 3.1.1.
 
 ## Verdict: clean — no violations found
 
-| Area checked                                 | Result |
-| -------------------------------------------- | ------ |
-| Purchase CTAs / upsell / «contrata», «compra», «suscríbete», pricing | none — every grep hit is domain vocabulary (buying inventory, sale price of the user's products) |
-| Plan names / plan rows                        | none by design: `settings-account-section.tsx` carries the note «No plan row: the app never names plans, prices or the portal» |
+| Area checked                                                            | Result                                                                                                                                                                                                                                          |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Purchase CTAs / upsell / «contrata», «compra», «suscríbete», pricing    | none — every grep hit is domain vocabulary (buying inventory, sale price of the user's products)                                                                                                                                                |
+| Plan names / plan rows                                                  | none by design: `settings-account-section.tsx` carries the note «No plan row: the app never names plans, prices or the portal»                                                                                                                  |
 | `planLimit` / `planBanner` (the limit + payment banners — highest risk) | compliant: they state the fact («Llegaste a N registros este mes», «Tu pago está pendiente — tienes hasta el {fecha}») and direct to the OWNER ROLE («Pide al dueño del negocio que revise su cuenta») with no upgrade path, no URL, no pricing |
-| Outbound links (`Linking.openURL`)           | only WhatsApp and SMS — `recordar-saldo`, `recordar-acciones`, `comprobante-acciones` (sending receipts and payment reminders: core physical-goods function) |
-| URLs in user-facing copy                     | none. The only `xangarro.mx` reference is a code comment in `packages/ui/src/activation/activation-config.ts` (never rendered) |
-| Portal mentions                               | functional administration only («Este producto se edita… desde la cuenta del negocio», «El dueño lo genera en su portal, en Equipo y nómina», «Se cambia desde el portal del dueño») — account-management pointers, which 3.1.1 permits |
-| Desvincular dialog                            | neutral wording, no portal URL |
-| Activation screen                              | describes the QR/code flow and the portal by role; no commercial copy |
+| Outbound links (`Linking.openURL`)                                      | only WhatsApp and SMS — `recordar-saldo`, `recordar-acciones`, `comprobante-acciones` (sending receipts and payment reminders: core physical-goods function)                                                                                    |
+| URLs in user-facing copy                                                | none. The only `xangarro.mx` reference is a code comment in `packages/ui/src/activation/activation-config.ts` (never rendered)                                                                                                                  |
+| Portal mentions                                                         | functional administration only («Este producto se edita… desde la cuenta del negocio», «El dueño lo genera en su portal, en Equipo y nómina», «Se cambia desde el portal del dueño») — account-management pointers, which 3.1.1 permits         |
+| Desvincular dialog                                                      | neutral wording, no portal URL                                                                                                                                                                                                                  |
+| Activation screen                                                       | describes the QR/code flow and the portal by role; no commercial copy                                                                                                                                                                           |
 
 ## Standing rules (so the next screen doesn't regress this)
 
