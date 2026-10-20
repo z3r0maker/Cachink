@@ -8,6 +8,11 @@ appId: mx.xangarro.mobile
     text: 'Open'
     optional: true
 - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+# The «Open in …?» dialog sometimes shows without a text the driver can see;
+# its button sits mid-screen — one coordinate tap accepts it either way.
+- tapOn:
+    point: '50%,57%'
+    optional: true
 - tapOn:
     text: 'Open'
     optional: true
@@ -22,6 +27,29 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'xmark'
     optional: true
+# The dialog can eat the deep link's url param: the launcher then lands on
+# its home («Runtime version …») instead of connecting. Re-sending the link
+# connects — the scheme is already authorized, so no dialog intervenes again.
+- runFlow:
+    when:
+      visible:
+        text: '.*Runtime version.*'
+    commands:
+      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+# The manual-entry dialog with the URL prefilled: Connect submits it.
+- runFlow:
+    when:
+      visible:
+        text: 'Enter URL manually'
+    commands:
+      - tapOn:
+          text: 'Connect'
+- runFlow:
+    when:
+      visible:
+        text: '.*Runtime version.*'
+    commands:
+      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
 # The floating «Tools» button covers the header's bell on phones. Switch it off
 # once per simulator in the dev menu (gear › Tools button); the dev-client
 # remembers it across resets.

@@ -113,9 +113,21 @@ tags:
     visibilityPercentage: 60
     centerElement: true
 - tapOn: { id: 'cobrar-tile-01JPRD00000000000000000004' }
-- tapOn: { id: 'cart-checkout-btn' }
-- extendedWaitUntil: { visible: { id: 'ticket-sheet' }, timeout: 5000 }
-- tapOn: { id: 'ticket-cobrar' }
+- runFlow:
+    when:
+      visible:
+        id: 'cart-checkout-btn'
+    commands:
+      - tapOn: { id: 'cart-checkout-btn' }
+      - extendedWaitUntil: { visible: { id: 'ticket-sheet' }, timeout: 5000 }
+      - tapOn: { id: 'ticket-cobrar' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'cart-checkout-btn'
+    commands:
+      # The tablet's TicketPanel goes straight to the checkout, no sheet.
+      - tapOn: { id: 'ticket-cobrar' }
 - extendedWaitUntil: { visible: { id: 'checkout-cobro' }, timeout: 8000 }
 - tapOn: { id: 'cobro-fiado' }
 - extendedWaitUntil: { visible: { id: 'checkout-fiado' }, timeout: 5000 }

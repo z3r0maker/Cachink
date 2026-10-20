@@ -26,10 +26,26 @@ env:
 - tapOn:
     id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - tapOn: 'Agregar Agua de jamaica,.*'
-- tapOn:
-    id: 'cart-checkout-btn'
-- tapOn:
-    id: 'ticket-cobrar'
+- runFlow:
+    when:
+      visible:
+        id: 'cart-checkout-btn'
+    commands:
+      - tapOn: { id: 'cart-checkout-btn' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'cart-checkout-btn'
+    commands:
+      # The tablet's TicketPanel goes straight to the checkout, no sheet.
+      - tapOn: { id: 'ticket-cobrar' }
+- runFlow:
+    when:
+      visible:
+        id: 'ticket-sheet'
+    commands:
+      - tapOn:
+          id: 'ticket-cobrar'
 - tapOn:
     id: 'cobro-metodo-Transferencia'
 - tapOn:
