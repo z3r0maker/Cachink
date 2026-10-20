@@ -268,37 +268,41 @@ trap finalize_on_exit INT TERM
 # device unlinked, and the fresh bucket that follows re-seeds anyway.
 run_curated_suite() {
   CURRENT_PHASE="M-11 suite"
-  echo "🧭  M-11 curated suite (activated → fresh)"
-  rm -f "$STATE_FILE"   # force a clean first setup regardless of prior runs
-
-  # Baseline + auth
-  run_flow "$FLOWS_DIR/smoke-launch.yaml"
-  run_flow "$FLOWS_DIR/login-lockout.yaml"
-  run_flow "$FLOWS_DIR/bloqueo.yaml"
-  # Caja + ventas (the checkout is form-factor-aware: phone bar vs tablet
-  # TicketPanel — shared/cobrar-ticket.yaml carries both branches)
-  run_flow "$FLOWS_DIR/caja-abrir-cerrar.yaml"
-  run_flow "$FLOWS_DIR/ventas-lista.yaml"
-  run_flow "$FLOWS_DIR/venta-detalle-cancelar.yaml"
-  run_flow "$FLOWS_DIR/fiado-abono-recordar.yaml"
-  # Gastos
-  run_flow "$FLOWS_DIR/gastos-registrar.yaml"
-  run_flow "$FLOWS_DIR/gastos-pagar-recurrente.yaml"
-  # Turno, cola, avisos, inventario
-  run_flow "$FLOWS_DIR/mi-turno.yaml"
-  run_flow "$FLOWS_DIR/por-enviar.yaml"
-  run_flow "$FLOWS_DIR/cancelaciones-nav.yaml"
-  run_flow "$FLOWS_DIR/avisos-responder.yaml"
-  run_flow "$FLOWS_DIR/inventario-llego-merma.yaml"
-  # Cierre family
-  run_flow "$FLOWS_DIR/cierre-cuadra.yaml"
-  run_flow "$FLOWS_DIR/caja-cierre-discrepancia.yaml"
-  run_flow "$FLOWS_DIR/cierre-faltante.yaml"
-  # Settings last of the activated bucket: desvincular unlinks the device.
-  run_flow "$FLOWS_DIR/settings-desvincular.yaml"
-  # Fresh entry: the activation family (one re-seed covers both).
-  run_flow "$FLOWS_DIR/activation.yaml"
-  run_flow "$FLOWS_DIR/login-operator-pin.yaml"
+  echo "🧡  M-11 curated suite (fresh entry state per flow)"
+  # Each flow's contract is a virgin device — the same conditions the M-11
+  # sweep verified 19/19 under (run-flow.sh solo clears the entry state per
+  # flow): exact stock counts, exact cierre math, sin-turno screens. A
+  # continuous run breaks those asserts, some by design (a turno that
+  # accumulated other flows' sales cannot «cuadrar» against the seeded
+  # denominations). The state file is cleared before every flow so
+  # run_setup re-seeds — the sweep's conditions, one runner, one report.
+  local suite=(
+    smoke-launch
+    login-lockout
+    bloqueo
+    caja-abrir-cerrar
+    ventas-lista
+    venta-detalle-cancelar
+    fiado-abono-recordar
+    gastos-registrar
+    gastos-pagar-recurrente
+    mi-turno
+    por-enviar
+    cancelaciones-nav
+    avisos-responder
+    inventario-llego-merma
+    cierre-cuadra
+    caja-cierre-discrepancia
+    cierre-faltante
+    settings-desvincular
+    activation
+    login-operator-pin
+  )
+  local f
+  for f in "${suite[@]}"; do
+    rm -f "$STATE_FILE"
+    run_flow "$FLOWS_DIR/$f.yaml"
+  done
 }
 
 run_curated_suite
