@@ -55,7 +55,7 @@ tags:
 - tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 - tapOn:
-    text: 'Taco al pastor'
+    id: 'venta-fila-V-0001'
 - extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
 # The body (and the footer's actions) only render once the ticket loads.
 - extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }

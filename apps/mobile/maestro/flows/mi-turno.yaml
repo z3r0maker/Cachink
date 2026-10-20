@@ -52,6 +52,14 @@ appId: mx.xangarro.mobile
     id: 'otros-gastos'
 - assertVisible:
     id: 'otros-inventario'
+# The rows stack longer than the iPad's viewport; scroll the last one in
+# (the asserts above it sit within the fold on both layouts).
+- scrollUntilVisible:
+    element:
+      id: 'otros-no-enviados'
+    direction: DOWN
+    timeout: 8000
+    visibilityPercentage: 60
 - assertVisible:
     id: 'otros-no-enviados'
 
