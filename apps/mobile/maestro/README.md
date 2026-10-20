@@ -39,11 +39,10 @@ hosted Xangarro dev instance documented in `supabase/README.md`.
 # Dry-run (just print the flow list):
 ./apps/mobile/maestro/scripts/full-regression.sh --dry-run
 
-# Specific phase only:
-./apps/mobile/maestro/scripts/full-regression.sh --phase B
-
-# Wizard flows (requires fresh install per flow):
-./apps/mobile/maestro/scripts/full-regression.sh --phase W
+# On a specific device class (26.5 runtime pinned — the dev client
+# crashes at launch on iOS 27.0):
+./apps/mobile/maestro/scripts/full-regression.sh --device-class iphone
+./apps/mobile/maestro/scripts/full-regression.sh --device-class ipad
 
 # A single flow (auto-detects and runs the correct setup):
 ./apps/mobile/maestro/scripts/run-flow.sh apps/mobile/maestro/flows/venta-efectivo.yaml
@@ -242,33 +241,24 @@ EXPO_PUBLIC_E2E=1 npx expo start
 
 ## Regression Script Phases
 
-`full-regression.sh` runs flows in dependency order. Use `--phase X` to
-run a specific phase or `--dry-run` to see the full flow list.
+The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
+now runs the M-11 curated suite — the 20 per-screen flows — in dependency
+order, each on a FRESH entry state (the conditions every flow's contract was
+verified under: exact stock counts, exact cierre math, sin-turno screens; a
+turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 
-| Phase | Gate   | Description                                | Flow count |
-| ----- | ------ | ------------------------------------------ | ---------- |
-| 0     | always | Fresh install + wizard                     | 1          |
-| 1     | C      | Empty states (before data)                 | 5          |
-| 2     | always | Create baseline data                       | 3          |
-| 3     | B/A/C  | Product management                         | ~12        |
-| 4     | B/C/A  | Sales + checkout                           | ~10        |
-| 5     | C/A    | Egresos                                    | ~14        |
-| 6     | A      | Employee management                        | 2          |
-| 7     | always | Clientes + CxC                             | 8          |
-| 8     | always | Corte de día                               | 4          |
-| 9     | B/D    | Director features + estados                | ~17        |
-| 9.5   | B/C    | Auth + Feature Flags                       | ~12        |
-| 9.7   | D      | Notifications + Otros deep nav             | 4          |
-| 13    | A      | Flag cascades + user lifecycle             | 9          |
-| 13.5  | A/D    | User management lifecycle                  | 5          |
-| 13.6  | C      | Caja edge cases                            | 3          |
-| 13.7  | D      | Error paths                                | 2          |
-| 10    | B      | Settings                                   | 7          |
-| 10.5  | E      | Settings deep flows                        | 6          |
-| 11    | C      | Validation                                 | 2          |
-| 16    | E      | E2E coverage gap — wizard                  | 1          |
-| 12    | A      | Deletions (state-destroying, last!)        | 4          |
-| W     | W      | Wizard edge cases (fresh install per flow) | ~10        |
+| Order | Flows                                                                             |
+| ----- | --------------------------------------------------------------------------------- |
+| 1–3   | smoke-launch, login-lockout, bloqueo                                              |
+| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar     |
+| 8–9   | gastos-registrar, gastos-pagar-recurrente                                         |
+| 10–14 | mi-turno, por-enviar, cancelaciones-nav, avisos-responder, inventario-llego-merma |
+| 15–17 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante                          |
+| 18    | settings-desvincular (leaves the device unlinked)                                 |
+| 19–20 | activation, login-operator-pin (fresh entry)                                      |
+
+Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
+the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ---
 
