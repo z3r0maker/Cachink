@@ -27,8 +27,9 @@ tags:
 - extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
 - tapOn: { id: 'bloqueo-cambiar' }
 - extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
-- tapOn:
-    text: 'Ana'
+# Her row id, never her name: the label grows with the turno detail
+# («Ana, Turno abierto desde las 21:18»), and an exact-text tap misses it.
+- tapOn: { id: 'acceso-operador-01JPRS00000000000000000002' }
 - tapOn: { id: 'numpad-5' }
 - tapOn: { id: 'numpad-6' }
 - tapOn: { id: 'numpad-7' }
