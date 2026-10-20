@@ -10,7 +10,7 @@
 # IMPORTANT: The Xangarro dev client must be installed on the iPad
 # simulator before this script can run. One-time setup per device:
 #
-#   pnpm --filter @xangarro/mobile ios -- --device "iPad (10th generation)"
+#   pnpm --filter @xangarro/mobile ios -- --device "iPad Pro 11-inch (M5)"
 #
 # After that initial install the binary stays on the simulator; you
 # only need to reinstall when upgrading the Expo SDK or resetting Xcode.
@@ -34,7 +34,9 @@
 #
 # Env vars:
 #   MAESTRO_IPAD_DEVICE  Display name of the target iPad simulator.
-#                        Default: "iPad (10th generation)"
+#                        Default from lib/device-resolve.sh ("iPad Pro 11-inch
+#                        (M5)", pinned to the iOS 26.5 runtime — the dev
+#                        client crashes at launch on 27.0).
 #   MAESTRO_EXCLUSIVE    Set to 1 to terminate all booted iPhone
 #                        simulators before booting the iPad (avoids
 #                        Maestro picking the wrong device when both
