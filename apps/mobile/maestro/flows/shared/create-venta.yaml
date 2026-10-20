@@ -23,7 +23,7 @@ appId: mx.xangarro.mobile
     centerElement: true
 - tapOn: { id: 'cobrar-tile-01JPRD00000000000000000001' }
 - assertVisible:
-    id: 'cobrar-bar'
+    id: 'cobrar-bar|ticket-panel'
 - runFlow:
     file: cobrar-ticket.yaml
     env:

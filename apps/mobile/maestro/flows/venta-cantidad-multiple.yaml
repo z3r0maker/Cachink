@@ -28,7 +28,7 @@ appId: mx.xangarro.mobile
 
 # The bar shows the three pieces.
 - assertVisible:
-    id: 'cobrar-bar'
+    id: 'cobrar-bar|ticket-panel'
 - assertVisible: '3 piezas ·'
 - runFlow:
     file: shared/cobrar-ticket.yaml

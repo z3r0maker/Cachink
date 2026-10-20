@@ -14,14 +14,26 @@ appId: mx.xangarro.mobile
 # METODO always comes from the caller's runFlow env. A default here would
 # SHADOW it (a subflow's own env wins in Maestro) and every sale would
 # silently charge as the default method.
-- tapOn:
-    id: 'cart-checkout-btn'
-- extendedWaitUntil:
-    visible:
-      id: 'ticket-sheet'
-    timeout: 5000
-- tapOn:
-    id: 'ticket-cobrar'
+# The checkout opens form-factor ways: the phone's bottom bar opens the
+# ticket sheet first, then the sheet's own «Cobrar»; the tablet's
+# TicketPanel goes straight to «¿Cómo paga?» with no sheet in between.
+- runFlow:
+    when:
+      visible:
+        id: 'cart-checkout-btn'
+    commands:
+      - tapOn: { id: 'cart-checkout-btn' }
+      - extendedWaitUntil:
+          visible:
+            id: 'ticket-sheet'
+          timeout: 5000
+      - tapOn: { id: 'ticket-cobrar' }
+- runFlow:
+    when:
+      notVisible:
+        id: 'cart-checkout-btn'
+    commands:
+      - tapOn: { id: 'ticket-cobrar' }
 - extendedWaitUntil:
     visible:
       id: 'checkout-cobro'
