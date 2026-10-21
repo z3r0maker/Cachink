@@ -23,10 +23,12 @@ export const DEMO = {
   },
   /** Matches `ACTIVATION_CODE_REGEX`; re-minted on every run. */
   activationCode: 'DEMXK7M3',
-  /** Two registers, the PINs the review notes state. */
+  /** Two registers, the PINs the review notes state. The id suffixes must
+   * stay inside the ULID alphabet (no I/L/O/U): the bootstrap payload is
+   * contract-validated, and 'USER1' once failed the reviewer's activation. */
   operators: [
-    { id: demoId('USER1'), nombre: 'Lupita', pin: '1234', color: '#3B6FFF' },
-    { id: demoId('USER2'), nombre: 'Chuy', pin: '5678', color: '#FF7A00' },
+    { id: demoId('REG01'), nombre: 'Lupita', pin: '1234', color: '#3B6FFF' },
+    { id: demoId('REG02'), nombre: 'Chuy', pin: '5678', color: '#FF7A00' },
   ],
 } as const;
 
