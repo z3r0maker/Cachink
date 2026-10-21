@@ -14,11 +14,9 @@ import {
   ResetDemoAction,
   SettingsScreen,
   useAppConfigRepository,
-  useSaleSoundEnabled,
   useCheckForUpdates,
   useCrashReportingEnabled,
   useNotificationsEnabled,
-  useSetSaleSoundEnabled,
   useSetCrashReportingEnabled,
   useSetNotificationsEnabled,
   useTranslation,
@@ -62,11 +60,6 @@ function useUpdateCheck(): { check: () => void; status: string | undefined } {
 
 function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
   const K = APP_CONFIG_KEYS;
-  const [sound, onSound] = usePersistedToggle(
-    K.saleSoundEnabled,
-    useSaleSoundEnabled(),
-    useSetSaleSoundEnabled(),
-  );
   const [notif, onNotif] = usePersistedToggle(
     K.notificationsEnabled,
     useNotificationsEnabled(),
@@ -79,8 +72,6 @@ function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
   );
   const updates = useUpdateCheck();
   return {
-    soundEnabled: sound,
-    onSoundChange: onSound,
     notificationsEnabled: notif,
     onNotificationsChange: onNotif,
     crashReportingEnabled: crash,

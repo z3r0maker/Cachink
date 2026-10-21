@@ -589,8 +589,6 @@ export const esMX = {
     confirmIsrChange: '¿Actualizar tasa de ISR a {{pct}}%?',
     confirmIsrYes: 'Sí, actualizar',
     confirmIsrNo: 'No, mantener actual',
-    saleSoundLabel: 'Sonido ¡XANGARRO!',
-    saleSoundHint: 'Reproduce el sonido de caja registradora al registrar una venta',
     tiposDePagoCard: 'Tipos de pago',
     tiposDePagoSubtitle: 'Métodos de pago aceptados',
     indicadoresCard: 'Indicadores Financieros',

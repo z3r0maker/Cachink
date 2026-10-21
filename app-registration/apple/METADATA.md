@@ -46,11 +46,6 @@ plan mention, no «descarga» marketing.
       (`ITSAppUsesNonExemptEncryption: false`)
 - [ ] Production build verified on an iOS 27 device/sim (the scene-lifecycle
       crash we saw is dev-client-only, but verify once with a real store build)
-- [ ] **The sale sound's replay bug** (found capturing these shots, with
-      `EXPO_PUBLIC_E2E` off): the second sale's `seekTo(0)+play()` on the
-      expo-audio player throws `Uncaught (in promise): The 1st argument
-cannot be cast to type SharedObject<AudioPlayer>` — the try/catch in
-      `use-sale-sound` cannot see it (the rejection is emitted past the call
-      site). It took the app down on the simulator during capture; verify
-      behavior on a production build and harden the replay path before
-      submission (a user rings many sales in a row).
+- [x] ~~The sale sound's replay bug~~ — resolved by removal: the sale sound
+      (a Cachink-era artifact) is gone wholesale — player, hook, toggle,
+      setting, asset and the expo-audio dependency (`feat/remove-sale-sound`).

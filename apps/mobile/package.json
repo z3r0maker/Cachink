@@ -45,7 +45,6 @@
     "dinero.js": "^2.0.2",
     "expo": "~55.0.24",
     "expo-application": "~55.0.3",
-    "expo-audio": "~55.0.14",
     "expo-camera": "~55.0.18",
     "expo-dev-client": "~55.0.34",
     "expo-device": "~55.0.3",
