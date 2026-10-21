@@ -123,8 +123,11 @@ tags:
       - tapOn: { id: 'ticket-cobrar' }
 - runFlow:
     when:
-      notVisible:
-        id: 'cart-checkout-btn'
+      # The tablet's own panel, never «the bar is gone» — a beat after the
+      # phone branch opens the checkout the bar is gone there too, and this
+      # branch would tap a ticket-cobrar that no longer exists.
+      visible:
+        id: 'ticket-panel'
     commands:
       # The tablet's TicketPanel goes straight to the checkout, no sheet.
       - tapOn: { id: 'ticket-cobrar' }

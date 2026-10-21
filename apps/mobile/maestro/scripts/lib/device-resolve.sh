@@ -24,11 +24,17 @@
 # generation)") do not exist under the iOS 26.x runtimes and made
 # --device-class fail outright.
 MAESTRO_SE_DEVICE="${MAESTRO_SE_DEVICE:-Xangarro-SE}"
-MAESTRO_IPHONE_DEVICE="${MAESTRO_IPHONE_DEVICE:-iPhone 17}"
-MAESTRO_IPAD_DEVICE="${MAESTRO_IPAD_DEVICE:-iPad (A16)}"
+MAESTRO_IPHONE_DEVICE="${MAESTRO_IPHONE_DEVICE:-iPhone 17 Pro}"
+MAESTRO_IPAD_DEVICE="${MAESTRO_IPAD_DEVICE:-iPad Pro 11-inch (M5)}"
 
 # Runtime + devicetype used when creating the small-screen target on demand.
-MAESTRO_IOS_RUNTIME="${MAESTRO_IOS_RUNTIME:-}"
+# The default pins 26.5 on purpose: the dev client does not adopt scene
+# lifecycle and CRASHES AT LAUNCH on iOS 27.0 (M-11's NoSceneLifecycleAdoption
+# finding) — "newest runtime" would resolve every class onto a device the app
+# cannot boot on.
+MAESTRO_IOS_RUNTIME="${MAESTRO_IOS_RUNTIME:-com.apple.CoreSimulator.SimRuntime.iOS-26-5}"
+# udid_for_name's python reads it through os.environ, not the shell scope.
+export MAESTRO_IOS_RUNTIME
 _SE_DEVICETYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation"
 
 # ──────────── Class → name ────────────────────────────────────────
@@ -57,12 +63,19 @@ device_pattern() {
 # "iPhone 17" to "iPhone 17 Pro", because Pro / Pro Max / 17e all contain
 # it. That silently audited the wrong device — the opposite of the point
 # when the whole exercise is comparing form factors.
+#
+# Candidates are narrowed to MAESTRO_IOS_RUNTIME first (default 26.5 — the
+# dev client crashes at launch on 27.0). Two simulators can share a display
+# name across runtimes, and simctl's JSON lists the newer runtime first, so
+# without the runtime pass "iPad Pro 11-inch (M5)" resolves onto the 27.0
+# twin the app cannot boot on (M-11).
 udid_for_name() {
   export _RESOLVE_TARGET="$1"
   xcrun simctl list devices available -j 2>/dev/null \
     | python3 -c "
 import sys, json, os
 target = os.environ.get('_RESOLVE_TARGET', '').strip().lower()
+runtime = os.environ.get('MAESTRO_IOS_RUNTIME', '').strip()
 # An empty target must match NOTHING. Without this guard the substring test
 # below is true for every device, so an unset variable silently resolves to
 # whichever simulator happens to be first in simctl JSON -- which is exactly
@@ -70,7 +83,9 @@ target = os.environ.get('_RESOLVE_TARGET', '').strip().lower()
 if not target:
     sys.exit(1)
 data = json.load(sys.stdin)
-names = [d for _, devs in data.get('devices', {}).items() for d in devs]
+all_names = [d for _, devs in data.get('devices', {}).items() for d in devs]
+names = [d for rt, devs in data.get('devices', {}).items()
+         for d in devs if runtime and runtime in rt] or all_names
 for d in names:
     if d.get('name', '').lower() == target:
         print(d['udid'])

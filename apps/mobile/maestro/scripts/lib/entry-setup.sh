@@ -93,12 +93,18 @@ reset_app() {
   # serves the stale bundle cached on disk, and app-side fixes never reach
   # the phone (M-11). A fresh URL forces the reconnect to re-fetch.
   export BUNDLE_BUSTER="$(date +%s)"
-  # Park the dev client's floating gear at the top-left (M-11): left to drift,
-  # it eats taps on the header (the sync pill) and the checkout bar with no
-  # trace in the accessibility tree — the handoff's «Tools button» gotcha.
+  # Park the dev client's floating gear in the status bar's right corner
+  # (M-11): left to drift it eats taps with no trace in the accessibility
+  # tree — the handoff's «Tools button» gotcha. The strip is dead on every
+  # layout — no app chrome lives in the status bar (the bell and the sync
+  # pill sit in the app header below it). Four parks failed before this
+  # one: (40,110) rode the iPad's 88px rail, (200,200) sat mid-checkout on
+  # the wide layout, (201,8) — centre strip — landed on the iPhone's
+  # Dynamic Island where the sync pill lives, and (30,8) — left corner —
+  # covered the iPad rail's first item (the Inicio tap opened the dev menu).
   xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.hasStoredPosition -bool YES 2>/dev/null || true
-  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionX -float 200 2>/dev/null || true
-  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionY -float 200 2>/dev/null || true
+  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionX -float 370 2>/dev/null || true
+  xcrun simctl spawn "$sim_target" defaults write "$APP_ID" DevMenuFAB.positionY -float 8 2>/dev/null || true
   "$FRESH_SCRIPT" --reset-only
   curl -sf -X POST "$MOCK_API/__mock/reset" >/dev/null \
     || { echo "❌  Contracts mock not reachable at $MOCK_API (pnpm mock:api)"; return 1; }

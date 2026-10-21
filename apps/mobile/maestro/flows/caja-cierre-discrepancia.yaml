@@ -57,7 +57,12 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'cierre-nota'
 - inputText: 'Se cayó el sobre del cambio'
-- hideKeyboard
+# hideKeyboard alone leaves the OS keyboard up and the close tap lands on a
+# key instead (the screen stays on the count) — one drag dismisses it.
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
 - tapOn:
     id: 'cierre-cerrar-turno'
 

@@ -27,8 +27,9 @@ tags:
 - extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
 - tapOn: { id: 'bloqueo-cambiar' }
 - extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
-- tapOn:
-    text: 'Ana'
+# Her row id, never her name: the label grows with the turno detail
+# («Ana, Turno abierto desde las 21:18»), and an exact-text tap misses it.
+- tapOn: { id: 'acceso-operador-01JPRS00000000000000000002' }
 - tapOn: { id: 'numpad-5' }
 - tapOn: { id: 'numpad-6' }
 - tapOn: { id: 'numpad-7' }
@@ -51,11 +52,15 @@ tags:
 # One cash sale (Taco al pastor, Efectivo «Exacto») — the shared subflow.
 - runFlow: shared/create-venta.yaml
 
-# Open its sheet: the lines it carried and the tiles around them.
+# Open its sheet: the lines it carried and the tiles around them. The row
+# tapped is the FIRST match, not a folio: in a continuous run the early
+# folios belong to other flows' sales — this flow's Taco is the newest row,
+# and the list heads with the newest.
 - tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 - tapOn:
-    text: 'Taco al pastor'
+    id: 'venta-fila-.*'
+    index: 0
 - extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
 # The body (and the footer's actions) only render once the ticket loads.
 - extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }

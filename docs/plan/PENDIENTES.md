@@ -17,7 +17,7 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 listas de abajo.
 
 - **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:261`
-- **A-16** Suite de Maestro para la nueva app [deuda] (Colas de tracks) — destraba 14: N-24, N-29, N-22, N-25, N-32, N-44, … · `05-app.md:194`
+- **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:700`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media] (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1030`
 - **X-01** Entorno de staging (Q17 "A later") [infra] [critica] [bloq] (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
@@ -32,20 +32,18 @@ listas de abajo.
 - **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 - **N-26** Auditoría de seguridad `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:734`
 
-## Código y técnico (110)
+## Código y técnico (108)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (9)
+### Teléfono (7)
 
-- [ ] **A-16** Suite de Maestro para la nueva app [deuda] — Bloqueada por: A-04…A-10, A-15 `[alta]` `[bloq]` · `05-app.md:194`
 - [~] **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [~] **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: N-20 (hecho) · web half landed 2026-09-20 · Falta: solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. [LAUNCH] [~] [alta] [bloq] · `09-next-features.md:621`
 - [ ] **N-22** Banners de sincronización en la app `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: A-06, A-07 · `09-next-features.md:654`
 - [ ] **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del `[alta]` `[bloq]` móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. [LAUNCH] [ ] [alta] [bloq]- · `09-next-features.md:717`
 - [ ] **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
-- [ ] **M-11** Reescritura de Maestro. · `19-movil-mostrador.md:34`
 - [ ] En la app «Desvincular y borrar los datos de este dispositivo» (el aviso §7 hoy reconoce que · `../launch/production-readiness.md:63`
 
 ### Portal (12)
@@ -325,7 +323,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 21 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
 - `04-portal.md` — 11 abiertos (3 en curso, 1 bloqueados, 30 hechos)
-- `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
+- `05-app.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 18 hechos)
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
@@ -333,6 +331,6 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 10 hechos)
+- `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
 - `20-command-center.md` — 26 abiertos (1 en curso, 0 bloqueados, 5 hechos)
 - `../launch/production-readiness.md` — 42 abiertos (5 en curso, 0 bloqueados, 10 hechos)

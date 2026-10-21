@@ -1,9 +1,10 @@
 /**
  * Reads the rows Inicio says (`FilasInicio`) from the phone's repositories:
- * the operator's open turno (or the newest one on this device), that day's
- * tickets, lines and gastos, the turno's cash movements, the last month of
- * turnos for «Tus últimos cortes», the recurring gastos already due and the
- * tracked products' stock for «Para hoy».
+ * the operator's open turno (or the newest CLOSED one on this device — an
+ * open turno that belongs to a colleague is nobody else's Inicio), that
+ * day's tickets, lines and gastos, the turno's cash movements, the last
+ * month of turnos for «Tus últimos cortes», the recurring gastos already
+ * due and the tracked products' stock for «Para hoy».
  */
 import type { StockTarea } from '@xangarro/caja/inicio';
 import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
@@ -53,7 +54,13 @@ export async function leerFilasInicio(
   hoy: string,
 ): Promise<FilasInicio> {
   const abierto = await r.cajaTurnos.findOpenByUser(userId);
-  const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
+  // The fallback shows the day's figures after a cierre — but a colleague's
+  // synced OPEN turno must not take it: the hero would read «la caja está
+  // lista» while Cobrar gates on the operator's OWN turno, hiding the one
+  // «Abrir turno» and leaving them unable to sell or open (the M-11
+  // regression's stuck-operator case).
+  const anterior = await r.cajaTurnos.findLatest(businessId);
+  const turno = abierto ?? (anterior !== null && anterior.cierreAt !== null ? anterior : null);
   const fecha = turno?.fecha ?? hoy;
   const [tickets, lineas, gastos, movimientos, turnos, recurrentes, stock] = await Promise.all([
     r.tickets.findByDateRange(fecha, fecha, businessId),

@@ -40,8 +40,12 @@ tags:
       - tapOn: { id: 'inicio-atajo-gastos' }
 - runFlow:
     when:
-      notVisible:
-        id: 'inicio-atajo-gastos'
+      # Still on Inicio = the atajo never existed (the tablet drops
+      # it); «atajo gone» would also be true a beat AFTER the phone
+      # taps it and navigates away, and the deep link would then
+      # fight the navigation with the iOS «Open in …?» dialog.
+      visible:
+        id: 'inicio-hero-listo'
     commands:
       # The atajos are phone-only (inicio-screen drops them when wide); the
       # tablet deep-links the same screen (the navigate-to-settings pattern).
@@ -59,13 +63,15 @@ tags:
 - tapOn: { id: 'gastos-abrir-registrar' }
 - extendedWaitUntil: { visible: { id: 'registrar-gasto-sheet' }, timeout: 5000 }
 - tapOn: { id: 'gasto-concepto' }
-- inputText: 'Cilindro de gas'
-# hideKeyboard alone leaves the OS keyboard up on the iPad's sheet and the
-# blocked-save check taps a key instead — one drag dismisses it for real.
-- swipe:
-    start: '50%,45%'
-    end: '50%,25%'
+# The keyboard's rise races the typing on the iPad (keystrokes drop into the
+# moving sheet — once clear off it). Let it fully mount first, then type.
 - waitForAnimationToEnd
+- waitForAnimationToEnd
+- inputText: 'Cilindro de gas'
+- waitForAnimationToEnd
+# No dismissal step: the harness connects the sims' hardware keyboard, so no
+# OS keyboard ever rises to bury the pinned footer (the phone's software
+# keyboard once ate the guardar tap — the footer never saved).
 - tapOn: { id: 'gasto-guardar' }
 - assertVisible: ".*Registrar gasto de \\$___.*"
 - assertVisible: { id: 'registrar-gasto-sheet' }
@@ -87,31 +93,46 @@ tags:
       - tapOn: { id: 'gasto-monto' }
       - eraseText
       - inputText: '350'
-# One drag in the body does both jobs: it dismisses the keyboard
-# (keyboardDismissMode on-drag on the sheet) and lifts the chips clear
-# of the fixed save footer they sit half-clipped under.
-- swipe:
-    start: '50%, 40%'
-    end: '50%, 15%'
+# Settle after the monto typing (a digit once dropped mid-ride; the
+# conditional below catches it if it ever comes back).
 - waitForAnimationToEnd
-# Resolve the chip AFTER the sheet settles (a bare tap once landed on the
-# neighbouring chip while the wrapped row still reflowed).
-- scrollUntilVisible:
-    element:
+- waitForAnimationToEnd
+# Swipe the sheet's OWN body (registrar-gasto-sheet-body) — never the
+# screen. The iPad's sheet is short and a centre-of-screen swipe begins on
+# the scrim above it, whose tap closes the sheet outright; the body ScrollView
+# is the one container that can reveal the wrapped chips. `scroll` takes no
+# element in this Maestro — an element-anchored `swipe` is the scoped gesture.
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-categoria-Insumos'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-categoria-Insumos'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- extendedWaitUntil:
+    visible:
       id: 'gasto-categoria-Insumos'
-    direction: DOWN
     timeout: 5000
-    visibilityPercentage: 60
+# The chip tap lands with the keyboard still up: the body sets
+# keyboardShouldPersistTaps, so the chip resolves the press.
 - tapOn: { id: 'gasto-categoria-Insumos' }
 - waitForAnimationToEnd
-# The sheet's footer can sit below the fold on a phone (60% visible is
-# enough to tap; 100% never lands with the grabber over it).
-- scrollUntilVisible:
-    element:
+# guardar lives in the sheet's pinned footer — no scroll can hide it.
+- extendedWaitUntil:
+    visible:
       id: 'gasto-guardar'
-    direction: DOWN
-    timeout: 10000
-    visibilityPercentage: 60
+    timeout: 5000
 - tapOn: { id: 'gasto-guardar' }
 - extendedWaitUntil: { notVisible: { id: 'registrar-gasto-sheet' }, timeout: 8000 }
 

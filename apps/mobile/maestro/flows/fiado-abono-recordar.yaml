@@ -59,8 +59,11 @@ tags:
       - tapOn: { id: 'ticket-cobrar' }
 - runFlow:
     when:
-      notVisible:
-        id: 'cart-checkout-btn'
+      # The tablet's own panel, never «the bar is gone» — a beat after the
+      # phone branch opens the checkout the bar is gone there too, and this
+      # branch would tap a ticket-cobrar that no longer exists.
+      visible:
+        id: 'ticket-panel'
     commands:
       # The tablet's TicketPanel goes straight to the checkout, no sheet.
       - tapOn: { id: 'ticket-cobrar' }
@@ -74,8 +77,11 @@ tags:
 - inputText: '5512345678'
 # The keyboard-avoiding panel lifts «Anotar» while typing; let the shift
 # settle BEFORE resolving the button, or the tap lands on stale coordinates
-# (which once submitted the sale by accident).
+# (which once submitted the sale by accident). The phone's OS keyboard parks
+# itself over «Anotar» after the phone number — drop it first (on the iPad
+# hideKeyboard is inert but harmless: the panel sits clear of the keyboard).
 - waitForAnimationToEnd
+- hideKeyboard
 - tapOn: { id: 'fiado-anotar' }
 - extendedWaitUntil: { visible: { id: 'venta-hecha' }, timeout: 8000 }
 # The dialog animates in; tapping «Nueva venta» on stale coordinates once left
@@ -101,8 +107,12 @@ tags:
       - tapOn: { id: 'inicio-atajo-fiado' }
 - runFlow:
     when:
-      notVisible:
-        id: 'inicio-atajo-fiado'
+      # Still on Inicio = the atajo never existed (the tablet drops
+      # it); «atajo gone» would also be true a beat AFTER the phone
+      # taps it and navigates away, and the deep link would then
+      # fight the navigation with the iOS «Open in …?» dialog.
+      visible:
+        id: 'inicio-hero-listo'
     commands:
       # The atajos are phone-only (inicio-screen drops them when wide); the
       # tablet deep-links the same screen (the navigate-to-settings pattern).

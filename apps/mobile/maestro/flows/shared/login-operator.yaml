@@ -4,10 +4,14 @@
 # someone is already signed in.
 #
 # Preseleccion (acceso-screen.tsx) picks whoever holds the open turno when the
-# list comes up, so after a relaunch with a turno open the pad is already
-# there and there is no row to tap — hence the optional pad wait first. Toni's
-# row id is deterministic (fixtures.ts: users: [operator(1, 'Toni', …)], the
-# ulidOf('PRS', 1) the row stamps as acceso-operador-<id>).
+# list comes up — and after a sync pull that can be ANA (operator 02, a
+# NIP this subflow does not know), not Toni. So the row is ALWAYS tapped, pad
+# up or not: it switches the pad when someone else is preselected and is a
+# no-op when Toni already is (the rows stay listed beside the pad). The old
+# "pad visible → skip the row" shortcut typed Toni's NIP into Ana's pad and
+# failed every login after the first synced turno. Toni's row id is
+# deterministic (fixtures.ts: users: [operator(1, 'Toni', …)], the ulidOf
+# ('PRS', 1) the row stamps as acceso-operador-<id>).
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -17,24 +21,14 @@ appId: mx.xangarro.mobile
     commands:
       - extendedWaitUntil:
           visible:
+            id: 'acceso-operador-01JPRS00000000000000000001'
+          timeout: 20000
+      - tapOn:
+          id: 'acceso-operador-01JPRS00000000000000000001'
+      - extendedWaitUntil:
+          visible:
             id: 'numpad-1'
-            optional: true
-          timeout: 15000
-      - runFlow:
-          when:
-            notVisible:
-              id: 'numpad-1'
-          commands:
-            - extendedWaitUntil:
-                visible:
-                  id: 'acceso-operador-01JPRS00000000000000000001'
-                timeout: 20000
-            - tapOn:
-                id: 'acceso-operador-01JPRS00000000000000000001'
-            - extendedWaitUntil:
-                visible:
-                  id: 'numpad-1'
-                timeout: 8000
+          timeout: 8000
       - tapOn: { id: 'numpad-1' }
       - tapOn: { id: 'numpad-2' }
       - tapOn: { id: 'numpad-3' }
