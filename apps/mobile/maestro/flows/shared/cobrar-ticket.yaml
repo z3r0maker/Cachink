@@ -26,7 +26,7 @@ appId: mx.xangarro.mobile
       - extendedWaitUntil:
           visible:
             id: 'ticket-sheet'
-          timeout: 5000
+          timeout: 10000
       - tapOn: { id: 'ticket-cobrar' }
 - runFlow:
     when:

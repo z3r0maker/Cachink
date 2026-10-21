@@ -12,7 +12,6 @@ import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '
 import type { AppConfigRepository } from '@xangarro/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
-import { readSaleSoundSetting } from './legacy-keys';
 
 export interface AppConfigProviderProps {
   readonly children: ReactNode;
@@ -40,7 +39,6 @@ interface HydratedConfig {
   readonly currentBusinessId: BusinessId | null;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
-  readonly saleSoundEnabled: boolean;
 }
 
 function parseBool(raw: string | null, fallback: boolean): boolean {
@@ -115,14 +113,12 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
-  const saleSoundEnabled = parseBool(await readSaleSoundSetting(repo), true);
   return {
     deviceId,
     mode,
     currentBusinessId: rawBusinessId as BusinessId | null,
     notificationsEnabled,
     crashReportingEnabled,
-    saleSoundEnabled,
   };
 }
 
@@ -132,7 +128,6 @@ interface Setters {
   readonly setCurrentBusinessId: (v: BusinessId | null) => void;
   readonly setNotificationsEnabled: (v: boolean) => void;
   readonly setCrashReportingEnabled: (v: boolean | null) => void;
-  readonly setSaleSoundEnabled: (v: boolean) => void;
   readonly setHydrated: (v: boolean) => void;
 }
 
@@ -142,7 +137,6 @@ function applyHydrated(c: HydratedConfig, s: Setters): void {
   s.setCurrentBusinessId(c.currentBusinessId);
   s.setNotificationsEnabled(c.notificationsEnabled);
   s.setCrashReportingEnabled(c.crashReportingEnabled);
-  s.setSaleSoundEnabled(c.saleSoundEnabled);
   s.setHydrated(true);
 }
 
@@ -153,7 +147,6 @@ function useStoreSetters(): Setters {
     setCurrentBusinessId: useAppConfigStore((s) => s.setCurrentBusinessId),
     setNotificationsEnabled: useAppConfigStore((s) => s.setNotificationsEnabled),
     setCrashReportingEnabled: useAppConfigStore((s) => s.setCrashReportingEnabled),
-    setSaleSoundEnabled: useAppConfigStore((s) => s.setSaleSoundEnabled),
     setHydrated: useAppConfigStore((s) => s.setHydrated),
   };
 }

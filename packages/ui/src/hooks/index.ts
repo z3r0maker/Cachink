@@ -34,7 +34,6 @@ export * from './use-feature-flags';
 export * from './use-abrir-caja';
 export * from './use-cerrar-caja';
 export * from './use-open-caja-turno';
-export * from './use-sale-sound';
 export * from './use-enabled-payment-methods';
 // Tap-to-Cart POS redesign
 export * from './use-cart';
