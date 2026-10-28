@@ -7,10 +7,10 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [ ] **BLOQUEANTE — Razón social constituida.** `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
-      art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
-      When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
-      `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
+- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both now `0.2-borrador`) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+  art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
+  When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
+  `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
 
 ## 1. Textos legales
 
