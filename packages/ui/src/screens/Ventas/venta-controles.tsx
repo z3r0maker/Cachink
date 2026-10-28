@@ -53,6 +53,7 @@ export function Buscador(p: {
     >
       <PathIcon d={COBRAR_GLYPHS.buscar} size={18} color={colors.gray600} />
       <TextInput
+        autoCorrect={false}
         testID="venta-buscar"
         aria-label="Buscar venta"
         placeholder="Busca por folio, producto o cliente"

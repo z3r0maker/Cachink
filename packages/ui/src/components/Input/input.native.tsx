@@ -130,6 +130,7 @@ export function Input(props: InputProps): ReactElement {
         value={props.value}
         onChange={props.onChange}
         placeholder={props.placeholder}
+        inputTestID={props.testID !== undefined ? `${props.testID}-input` : undefined}
         options={props.options}
         ariaLabel={props.ariaLabel ?? props.label}
         label={props.label}

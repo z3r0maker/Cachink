@@ -109,6 +109,7 @@ export function Precio({ f }: { f: ProductoNuevoForm }): ReactElement {
         $
       </MText>
       <TextInput
+        autoCorrect={false}
         testID="producto-nuevo-precio"
         aria-label="¿En cuánto lo vendes?"
         inputMode="decimal"

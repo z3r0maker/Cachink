@@ -35,6 +35,7 @@ function Nota(p: {
     <View gap={6}>
       <Eyebrow>{`Nota para ${p.dueno}`}</Eyebrow>
       <TextInput
+        autoCorrect={false}
         testID="cierre-nota"
         aria-label={`Nota para ${p.dueno}`}
         placeholder="Cuéntale qué pasó"
