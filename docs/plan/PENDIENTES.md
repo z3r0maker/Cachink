@@ -213,7 +213,7 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
-- [ ] BLOQUEANTE — Razón social constituida. `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[CORREO SOPOR… · `../launch/production-readiness.md:10`
+- [~] BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S., domicilio Paseo Lomas Altas 524, inter… · `../launch/production-readiness.md:10`
 
 ### `../launch/production-readiness.md` · 1. Textos legales (7)
 
@@ -333,4 +333,4 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
 - `20-command-center.md` — 26 abiertos (1 en curso, 0 bloqueados, 5 hechos)
-- `../launch/production-readiness.md` — 42 abiertos (5 en curso, 0 bloqueados, 10 hechos)
+- `../launch/production-readiness.md` — 42 abiertos (6 en curso, 0 bloqueados, 10 hechos)
