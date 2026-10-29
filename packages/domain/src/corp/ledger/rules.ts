@@ -3,7 +3,7 @@ import { MontoInvalidoError, PeriodoCerradoError, TipoCambioInvalidoError } from
 import type { JournalLine } from './movements.js';
 
 /**
- * The ledger's other rules (E-02, ADR-124 §4): entries are never edited, a
+ * The ledger's other rules (E-02, ADR-125 §4): entries are never edited, a
  * closed month takes nothing, and a USD charge is posted in MXN at the rate of
  * its payment date.
  */

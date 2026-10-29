@@ -6,7 +6,7 @@ import type { Founder } from '@xangarro/data-corp';
 import { founderForNav, founderOrNull } from '../src/server/founder-gate';
 
 /**
- * The founder permission (E-01, ADR-124 §1): a staff member reaches «Empresa»
+ * The founder permission (E-01, ADR-125 §1): a staff member reaches «Empresa»
  * only when corp names them. The console must keep working when the corp
  * connection is not configured or fails: the area disappears, the rest stays.
  */

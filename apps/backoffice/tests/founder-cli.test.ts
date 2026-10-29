@@ -6,7 +6,7 @@ import { UsageError } from '../scripts/staff-cli';
 
 /**
  * The operator CLI that names a staff member as Fundador 1 or 2 (E-01,
- * ADR-124 §1). The console itself never writes corp.founders.
+ * ADR-125 §1). The console itself never writes corp.founders.
  */
 describe('parseFounderArgs', () => {
   it('reads add with email, numero, nombre and an optional RFC', () => {

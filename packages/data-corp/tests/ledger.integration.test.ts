@@ -10,7 +10,7 @@ import { borrarLoDe } from './cleanup';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 
 /**
- * E-02's storage (ADR-124 §4): the ledger port writes balanced entries and
+ * E-02's storage (ADR-125 §4): the ledger port writes balanced entries and
  * reads them back as the domain's lines; the database itself refuses an
  * unbalanced entry, an entry in a closed month, and any edit or delete.
  */

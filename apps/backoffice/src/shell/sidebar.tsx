@@ -53,7 +53,7 @@ function NavLink({
 }
 
 /**
- * The console rail. `empresa` is the founders' group (ADR-124 §1): empty for
+ * The console rail. `empresa` is the founders' group (ADR-125 §1): empty for
  * everyone else, and then not even its heading is drawn.
  */
 export function Sidebar({

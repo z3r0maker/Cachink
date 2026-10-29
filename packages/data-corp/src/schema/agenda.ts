@@ -16,9 +16,9 @@ import { at, corp } from './corp.js';
 import { entries } from './ledger.js';
 
 /**
- * The Agenda and its evidence (E-04, E-05's storage; ADR-126). Files live
+ * The Agenda and its evidence (E-04, E-05's storage; ADR-127). Files live
  * here as bytea, not in a storage bucket, so `pg_dump -n corp` still carries
- * every acuse when the area moves to its own database (ADR-124 §2).
+ * every acuse when the area moves to its own database (ADR-125 §2).
  */
 const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   dataType() {

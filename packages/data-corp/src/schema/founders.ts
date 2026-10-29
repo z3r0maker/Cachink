@@ -5,7 +5,7 @@ import { at, corp } from './corp.js';
 
 /**
  * The partners of MEXIA, and the founder permission of the console
- * (ADR-124 §1). A staff member is a founder when a row here names their
+ * (ADR-125 §1). A staff member is a founder when a row here names their
  * `staff_members.id`. There is deliberately no foreign key to it: staff live
  * in another schema, and a corp row must survive the move to its own
  * database. The console checks the pairing on every request instead.

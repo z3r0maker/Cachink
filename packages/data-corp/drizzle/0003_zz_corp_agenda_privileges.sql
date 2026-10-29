@@ -1,4 +1,4 @@
--- The Agenda's and the Expediente's privileges (E-04, E-05; ADR-126).
+-- The Agenda's and the Expediente's privileges (E-04, E-05; ADR-127).
 -- Hand-written: Drizzle Kit models no privileges. Applied after
 -- 0003_corp_agenda.sql.
 --

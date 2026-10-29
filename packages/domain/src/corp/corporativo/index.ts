@@ -76,7 +76,7 @@ export function assertEventoAcciones(previos: readonly EventoAcciones[], e: Even
 export type TipoCertificado = 'csd' | 'efirma';
 export type Titular = 'mexia' | 'f1' | 'f2';
 
-/** Metadata only: never a key file, a .cer or a password (ADR-124). */
+/** Metadata only: never a key file, a .cer or a password (ADR-125). */
 export interface Certificado {
   readonly id: string;
   readonly tipo: TipoCertificado;

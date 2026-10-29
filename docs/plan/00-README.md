@@ -28,7 +28,7 @@ by track so a task is identifiable anywhere (commit messages, PR titles, chat).
 | **Next features**                      | `09-next-features.md`         | `N-`   | per task group           | §2 launch blockers join the X gate; §3 on triggers        |
 | **Operator view** (browser register)   | `../archive/10-operador.md`   | `O-`   | done                     | archived 2026-09-22                                       |
 | **Design conformance** (web portal)    | `16-design-conformance.md`    | `W-`   | per batch                | now (audit `docs/audits/design-2026-09-22.md`)            |
-| **Empresa** (founders' command center) | `20-command-center.md`        | `E-`   | per phase                | now (ADR-124; design brief `21-command-center-design.md`) |
+| **Empresa** (founders' command center) | `20-command-center.md`        | `E-`   | per phase                | now (ADR-125; design brief `21-command-center-design.md`) |
 
 **Other files in this directory.** `PENDIENTES.md` — the **generated** board of everything still
 open, across every track (see §3). `11-pre-launch-and-deferred.md` — owner actions (`O-n` rows) and

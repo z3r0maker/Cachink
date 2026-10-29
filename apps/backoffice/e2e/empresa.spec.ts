@@ -34,7 +34,7 @@ import {
 import { signInAsStaff } from './helpers';
 
 /**
- * «Empresa» (ADR-124). E-01: the area exists only for founders. A staff
+ * «Empresa» (ADR-125). E-01: the area exists only for founders. A staff
  * member who is not one sees no trace of it and gets a 404 from its pages;
  * once corp names them, the group appears with corp's real rows. E-02: a
  * founder records a USD expense, sees it in the month and reverses it.

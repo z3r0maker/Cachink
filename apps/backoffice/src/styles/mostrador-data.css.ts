@@ -2,7 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { borders, colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
 
 /**
- * El Mostrador's tables and forms for «Empresa» (ADR-124): rows separated by
+ * El Mostrador's tables and forms for «Empresa» (ADR-125): rows separated by
  * gray100 rules, fields with the black edge of «you can act on this».
  */
 

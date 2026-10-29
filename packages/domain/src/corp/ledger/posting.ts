@@ -14,7 +14,7 @@ import type {
 } from './movements.js';
 
 /**
- * Movement → balanced journal lines (E-02, ADR-124 §4). The one place the
+ * Movement → balanced journal lines (E-02, ADR-125 §4). The one place the
  * founders' capture becomes double entry; every branch ends in `balanced()`.
  */
 const debe = (cuenta: AccountKey, monto: Money, socio?: Socio): JournalLine =>

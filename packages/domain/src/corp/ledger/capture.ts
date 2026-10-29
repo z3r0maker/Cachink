@@ -32,7 +32,7 @@ function enPesos(c: CapturaGasto, monto: Money): Money {
   return convertirAMxn(monto, c.tipoCambio);
 }
 
-/** A paid expense, IVA split out; a USD charge converted at its rate (ADR-124 §4). */
+/** A paid expense, IVA split out; a USD charge converted at its rate (ADR-125 §4). */
 export function gastoDesdeCaptura(c: CapturaGasto): GastoCapturado {
   if (c.total <= 0n) throw new MontoInvalidoError('el monto debe ser mayor a cero');
   if (c.iva < 0n || c.iva >= c.total)

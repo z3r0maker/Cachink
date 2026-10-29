@@ -6,7 +6,7 @@ import type { CorpLedgerRepository, EntrySource, LedgerEntry, NewLedgerEntry } f
 import { assertPrestamosCubiertos } from './prestamos.js';
 
 /**
- * Records one movement in MEXIA's ledger (E-02, ADR-124 §4): the manual
+ * Records one movement in MEXIA's ledger (E-02, ADR-125 §4): the manual
  * capture, an import (billing, a statement) or an approved agent proposal all
  * come through here, so they post identically.
  *

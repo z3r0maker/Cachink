@@ -7,7 +7,7 @@ import type { CorpDb } from '../client.js';
 import { documents } from '../schema/agenda.js';
 
 /**
- * The Expediente's storage (E-05, ADR-126): every kept file and its
+ * The Expediente's storage (E-05, ADR-127): every kept file and its
  * metadata. Rows are parsed, never asserted: an unknown kind or folder is a
  * broken row. Reads never carry the bytes except `contenidoDe`.
  */

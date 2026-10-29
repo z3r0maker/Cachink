@@ -49,7 +49,7 @@ export default defineConfig({
     timeout: 240_000,
     env: {
       DATABASE_URL: databaseUrl(),
-      // «Empresa» (ADR-124): the corp login. Unset, the area simply does not exist.
+      // «Empresa» (ADR-125): the corp login. Unset, the area simply does not exist.
       CORP_DATABASE_URL: process.env.CORP_DATABASE_URL ?? '',
       E2E_PORT: String(E2E_PORT),
       // Locally, a build of its own (see next.config): other sessions' builds

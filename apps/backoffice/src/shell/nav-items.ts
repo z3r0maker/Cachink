@@ -71,7 +71,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 ] as const;
 
 /**
- * «Empresa», MEXIA's command center (ADR-124): drawn only for founders
+ * «Empresa», MEXIA's command center (ADR-125): drawn only for founders
  * (`founderForLayout`). A screen joins this list when its task ships, never
  * before (CLAUDE.md §7: no «Pronto»).
  */

@@ -14,7 +14,7 @@ import { borrarLoDe } from './cleanup';
 /**
  * E-04's storage: the registration, an obligation's row and state, and its
  * evidence kept as bytes in corp, which the console can never change or
- * delete and the agents can read only as metadata (ADR-126).
+ * delete and the agents can read only as metadata (ADR-127).
  */
 const { url, describe } = integrationSuite();
 const AUTOR = 'f-agenda-test';

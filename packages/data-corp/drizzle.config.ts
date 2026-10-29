@@ -1,7 +1,7 @@
 import type { Config } from 'drizzle-kit';
 
 /**
- * The corp schema's own migration journal (ADR-124 §2). Generated from the
+ * The corp schema's own migration journal (ADR-125 §2). Generated from the
  * schema, never hand-written, like data-pg's (CLAUDE.md §6). The one exception,
  * as there, is the grants file: Drizzle Kit does not model roles or GRANTs.
  *
