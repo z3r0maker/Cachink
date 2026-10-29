@@ -166,6 +166,8 @@ Links to discussion, docs, prior art.
 | [124](#adr-124) | 2026-09-28 | The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal | Accepted |
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
+| [129](#adr-129) | 2026-10-08 | CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan | Accepted |
+| [130](#adr-130) | 2026-10-08 | No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9203,3 +9205,190 @@ twenty clients (owner, 2026-10-08), so a Supabase Storage bucket would be migrat
 
 - ADR-125 §2 (one schema, one dump); CFF art. 30 (five years); E-04, E-05, E-20, E-26, E-27,
   E-31 and E-32 in `docs/plan/20-command-center.md`.
+
+---
+
+## ADR-129
+
+**Title:** CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — owner decisions of 2026-10-08; supersedes ADR-108; amends ADR-066 (CoDi is not
+`cobrosIntegrados`) and ADR-117 (a QR/CoDi ticket reads «CoDi» again); tasks K-01 … K-31 in
+`docs/plan/22-codi.md`, design brief `docs/plan/23-codi-design.md`
+
+**Context**
+
+ADR-108 retired QR/CoDi because it was only a label: the cashier tapped it and «Pago recibido»,
+nothing drew a QR or confirmed the money. That was right then, and it stays the bar: CoDi comes
+back only as something the product actually does.
+
+Three things changed in September and October 2026:
+
+- The **Ley de Economía Digital** passed the Cámara de Diputados on 2026-10-06 and goes to the
+  Senado. It does not oblige a small shop to stop taking cash; Hacienda will name the sectors
+  where digital payment can become the only one (gasolineras and carreteras first). It frames
+  SPEI and CoDi as free for buyer and seller, and the government's pitch is the small shop
+  charging with a QR on its phone.
+- **Banks must ship CoDi in their apps by December**, and several committed to the first half
+  of November, before El Buen Fin (2026-11-13 … 17).
+- Banxico's SPEI rules of 2026-06-17 create the **Cuenta Nivel 2 Bis** for micro-merchants
+  (15,000 UDIs a month, at least 12,000 from SPEI/CoDi/DiMo), so a shop's digital receipts
+  start to matter to the shop.
+
+Banxico's _Guía de participación en CoDi® para comercios y terceros desarrolladores_ (last
+updated 2023-05-02) sets the terms for software that generates cobros: the developer is a
+persona moral that registers and certifies with Banxico (carta de intención with notarised
+company papers delivered in person in CDMX, Banxico may take up to 4 months to comment;
+confidentiality agreement; technical documentation; trademark licence; sandbox; pre-check;
+certification, with information-security requirements). The developer may not charge per
+cobro or by amount, may not surcharge a CoDi payment, must pay the beneficiary directly with
+no concentrating account, and any extra service must be optional. MEXIA, S.A.S. (ADR-125) is the
+persona moral that applies.
+
+**Decision**
+
+1. **Certify, and ship an honest bridge first.** MEXIA registers and certifies Xangarro as a
+   tercero desarrollador (K-01). Until certification, a **bridge** ships: the shop's own bank
+   generates its static CoDi QR, the owner scans it into the portal once, and Xangarro shows it at
+   the counter. The bridge never claims to confirm anything: its screen says the cashier checks
+   their bank app, and its button is «Ya me llegó». That is the difference from what ADR-108
+   retired: no promise the product does not keep.
+2. **Certified flow: live QR, bridge as fallback.** Once certified, tapping CoDi asks the server
+   for a cobro (amount and concepto inside the QR); the server signs the request to Banxico,
+   holds the intent, and verifies Banxico's signed result notification. The device polls, and on
+   «pagado» **writes the venta itself** with the CoDi folio as its `payment_ref` (ADR-066's
+   one-writer rule). Offline, a Banxico timeout or an expired code drop the same screen to the
+   bridge QR with «Ya me llegó». A sale is never blocked (§2.2). Push to the customer's phone
+   number is not built: one more field and personal data, for orders we do not take.
+3. **CoDi is on every plan, Xangarrito included,** under its own capability `codi` and its own
+   kill switch, separate from `cobrosIntegrados` (card terminals stay paid, ADR-066). Banxico's
+   rule against charging for CoDi is read strictly: no plan price buys it.
+4. **The money model is ADR-066's:** money settles to the shop's own CLABE, Xangarro takes no fee
+   and never holds funds. Banxico's credentials and MEXIA's signing keys live server-side only.
+5. **One method, one label.** The enum value `QR/CoDi` already in `PaymentMethodEnum` and both
+   `CHECK`s is reused: no migration for the method itself. It leaves `RETIRED_PAYMENT_METHODS`
+   and returns to `METODOS_CONFIGURABLES` once the shop has set CoDi up. Every surface labels it
+   «CoDi», historical tickets included (they were cashier-declared, as a bridge sale is). A sale's
+   detail says how it was confirmed: «Confirmado por Banxico» with the folio, or «Confirmado en
+   caja».
+6. **Scope:** portal setup (scan, check, activate), the phone's Cobrar, the web caja (through
+   `@xangarro/caja`, ADR-118), a printable «Aquí aceptamos CoDi» sign, CoDi as its own line in
+   cierre, flujo and Ventas y gastos, a Nivel 2 Bis meter on the portal's Inicio once the law's
+   limits are final, and a landing section.
+
+**Alternatives considered**
+
+- *Certify only, ship nothing until then.* Rejected: misses El Buen Fin and the first wave of
+  shops the law moves, for a delay measured in months.
+- *Through a certified partner (a SPEI participant or PSP) behind the `PaymentProvider` port.*
+  Kept as the fallback if certification stalls; not chosen first because it adds a dependency and
+  Banxico's no-concentrating-account rule leaves the partner little room.
+- *Bridge only.* Rejected as the destination: it is close to what ADR-108 retired.
+- *CoDi on the paid plans.* Rejected: Banxico may read a plan price as a CoDi fee, which could
+  stop certification; and free digital cobros are what bring the smallest shops in.
+- *A new enum value «CoDi».* Rejected: a migration on both databases and a sync-schema change for
+  a name the label layer already gives.
+
+**Consequences**
+
+- ADR-108's retirement is reversed; its reasoning stands as the bar for the bridge's copy.
+- CLAUDE.md §1's method list and `docs/design/el-mostrador.md` («never QR/CoDi») change, the style
+  guide once the canvas boards are approved (ADR-117: canvas first).
+- `payment_ref` is new on the venta: a sync-schema and contract change (C-task under K-21) with a
+  migration test on both databases (§2.9).
+- New owner actions: the Banxico file (K-01) and a counsel opinion (K-02). New secrets: MEXIA's
+  Banxico certificates per environment.
+- The landing and the bridge can say «sin comisiones» about CoDi because Banxico and the law do;
+  they may not say «confirmación automática» until K-24 ships.
+
+**References**
+
+- Banxico, _Guía de participación en CoDi® para comercios y terceros desarrolladores_ (2023-05-02).
+- Infobae 2026-09-24, El Financiero 2026-09-24 and 2026-06-19, Alto Nivel (Ley de Economía Digital).
+- ADR-066, ADR-108, ADR-117, ADR-118, ADR-125.
+
+## ADR-130
+
+**Title:** No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — owner decision of 2026-10-08; amends ADR-129 (drops its certified-partner fallback, and «delivered in person» reads «on paper, if Banxico still asks for it»); tasks K-01 in `docs/plan/22-codi.md`
+
+**Context**
+
+Banxico's certification (ADR-129, K-01) is slow: a paper file, then up to four months for
+Banxico's comments, then sandbox, pre-check and certification. The owner asked whether a paid
+service could deliver automatic confirmation sooner, with the direct integration later.
+
+What we found on 2026-10-08:
+
+- No provider publishes a CoDi price or a CoDi API that a platform can use for many shops.
+  STP's «Contratar CoDi» page returns 404.
+- The nearest thing is a gateway confirming a SPEI transfer:
+  - Conekta: $12.50 + IVA ($14.50) per transfer, on its official pricing page;
+  - Stripe México: about 1.8%, from comparison blogs only, not verified;
+  - Openpay: no published price.
+- On a $160 ticket, Conekta's fee is 9.1%, more than a card through Conekta (3.4% + $3 + IVA,
+  about 6.1%).
+- The money settles to the gateway's account and is paid out to the shop later.
+- If MEXIA contracted the service, MEXIA would receive shops' money, which ADR-066 forbids and
+  which can make it a regulated payment institution under the Ley Fintech.
+- CoDi itself is free for buyer and seller (Banxico, and the law's pitch). The fees above pay for
+  the gateway's own service, not for CoDi.
+
+Two things about how the file is submitted:
+
+- The 2023 guide says the carta de intención and Anexo 1 are delivered on paper to Banxico's
+  Gerencia de Continuidad, Control y Soporte de Sistemas de Pagos e Infraestructuras de Mercados
+  (5 de Mayo 6, piso 7, CDMX). It does not say the representative has to attend in person.
+- The owner saw online that email may be accepted; we found no official confirmation.
+  codi.org.mx lists `codi@banxico.org.mx` and 800 226 9426 (option 3) for questions.
+
+**Decision**
+
+1. **No paid gateway or partner for CoDi.** Automatic confirmation comes only from MEXIA's own
+   certification as a tercero desarrollador. ADR-129's fallback («a certified partner behind the
+   `PaymentProvider` port») is withdrawn, to be reopened only if Banxico declines the file.
+2. **The bridge is not affected.** The shop's own bank QR with «Ya me llegó» (ADR-129 §1)
+   involves neither a gateway nor Banxico, and costs the shop nothing.
+3. **K-01 starts with a written question to `codi@banxico.org.mx`:**
+   - can the carta de intención and Anexo 1 be filed digitally with an e.firma?
+   - if on paper, can a third party or a courier deliver them?
+   - is there a guide or annex newer than 2023-05-02?
+
+   The file goes on paper only if Banxico says so.
+4. **Gather the short-lived papers last.** The SAT opinión de cumplimiento, the constancia and
+   the Buró report expire after 15 business days, and the power of attorney after 20, so they
+   are pulled once Banxico has answered how to file.
+
+**Alternatives considered**
+
+- *A SPEI gateway now (Conekta, Stripe, Openpay), direct later.* Rejected:
+  - a per-transfer fee that costs more than a card on small tickets, which breaks «sin
+    comisiones»;
+  - money that reaches the shop late;
+  - and, contracted by MEXIA, money held by MEXIA.
+- *Each shop contracts a gateway itself, the ADR-066 card model.* Rejected for CoDi: it asks an
+  informal shop to open an account and pass identity checks to pay fees on something free.
+- *Wait for Banxico's answer before deciding.* Unnecessary: neither answer changes the decision
+  against a gateway; it only changes how the file is delivered.
+
+**Consequences**
+
+- **Timing:** automatic confirmation (K-20 … K-25) follows Banxico's clock, so plan on months,
+  not weeks.
+- **What can be claimed:** «sin comisiones» stays true everywhere CoDi is offered.
+- **Nothing new to run:** no new vendor, contract or secret.
+- **Bookkeeping:** K-01 is in progress, with the Anexo 1 and Anexo 2 checklist in its task; the
+  research is in `22-codi.md` §2.
+
+**References**
+
+- Banxico, _Guía de participación en CoDi® para comercios y terceros desarrolladores_
+  (2023-05-02), and its format for the carta de intención.
+- codi.org.mx, «Contacta a tu desarrollador».
+- Conekta's pricing page, consulted 2026-10-08.
+- ADR-066, ADR-125, ADR-129.

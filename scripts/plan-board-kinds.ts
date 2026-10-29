@@ -58,7 +58,9 @@ const ids = (text: string): readonly string[] => text.trim().split(/\s+/);
 /** Razón social, abogado y contador, SAT/IMPI/INDAUTOR, seguros, Clip y
  * Mercado Pago, y las decisiones de negocio (folded here by the owner). */
 const CORPORATE = new Set(
-  ids('X-07 X-08 O-14 O-15 O-16 O-17 O-18 O-19 O-27 O-28 O-29 O-32 N-40 N-45 N-50 Z-12 L-09 L-10'),
+  ids(
+    'X-07 X-08 O-14 O-15 O-16 O-17 O-18 O-19 O-27 O-28 O-29 O-32 N-40 N-45 N-50 Z-12 L-09 L-10 K-01 K-02 K-25',
+  ),
 );
 
 /** Configuration in third-party consoles: Vercel, Supabase, Stripe, Resend,
@@ -70,16 +72,20 @@ const CONSOLES = new Set(
 /** Cannot start until the world delivers: real customers, telemetry, scale
  * thresholds, or time after launch. Each carries its Trigger in the track. */
 const WAITS = new Set(
-  ids('X-04 N-30 Z-01 Z-02 Z-04 Z-05 Z-07 Z-08 Z-11 N-51 N-52 N-54 N-63 N-64 N-71 N-72 N-73 N-74'),
+  ids(
+    'X-04 N-30 Z-01 Z-02 Z-04 Z-05 Z-07 Z-08 Z-11 N-51 N-52 N-54 N-63 N-64 N-71 N-72 N-73 N-74 K-30',
+  ),
 );
 
 const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
-  Teléfono: ids('N-19 N-21 N-22 N-24 N-25 A-16 M-08 M-09 M-10 M-11 M-12 DS-10'),
+  Teléfono: ids('N-19 N-21 N-22 N-24 N-25 A-16 M-08 M-09 M-10 M-11 M-12 DS-10 K-13 K-24'),
   Portal: ids(
-    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 DS-01 DS-02 DS-03 DS-04 DS-09',
+    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 DS-01 DS-02 DS-03 DS-04 DS-09 K-12 K-23',
   ),
-  'Caja web': ids('P-37 DS-05 DS-06 DS-07 DS-08'),
-  'Pagos y conciliación': ids('C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53'),
+  'Caja web': ids('P-37 DS-05 DS-06 DS-07 DS-08 K-14'),
+  'Pagos y conciliación': ids(
+    'C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53 K-10 K-11 K-15 K-20 K-21 K-22',
+  ),
   'Consola (backoffice)': ids(
     'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44',
   ),
@@ -87,7 +93,7 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   'Privacidad y LFPC': ids('N-34 N-60'),
   'Auditorías y calidad': ids('N-26 N-27 N-28 N-29 N-49'),
   'Lanzamiento, stores e integración': ids('X-02 X-03 X-05 X-09 X-10 N-32'),
-  Landing: ids('N-58 L-05'),
+  Landing: ids('N-58 L-05 K-31'),
 };
 
 /** `production-readiness.md` rows carry no id: the §section decides, except
