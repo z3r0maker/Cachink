@@ -8,7 +8,7 @@
  * screens. The legacy routes `rutaDeAviso` translates are checked on their
  * targets, not their keys.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { RUTAS_DE_AVISO, rutaDeAviso } from '../src/shell/ruta-de-aviso';
@@ -18,12 +18,26 @@ const APP = join(MOBILE, 'src/app');
 const FUENTES = [join(MOBILE, 'src'), join(MOBILE, '../../packages/ui/src')];
 const OMITIR = /(\.test\.|\.stories\.|story-|ruta-de-aviso\.ts$)/;
 
+/** One recursive listing, no `statSync` per entry (see `FUENTES_LEIDAS`). */
 function archivos(dir: string): string[] {
-  return readdirSync(dir).flatMap((n) => {
-    const p = join(dir, n);
-    return statSync(p).isDirectory() ? archivos(p) : /\.tsx?$/.test(n) ? [p] : [];
-  });
+  return readdirSync(dir, { recursive: true, encoding: 'utf8' })
+    .filter((n) => /\.tsx?$/.test(n))
+    .map((n) => join(dir, n));
 }
+
+function sinComentarios(s: string): string {
+  return s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+/**
+ * The sources, walked and read **once**, while the file is collected. The walk
+ * used to run inside the test with a `statSync` per entry and a read per file
+ * (~500 files): 130 ms alone, over 5 s under `pnpm test`, which failed a
+ * pre-push gate on 2026-10-28.
+ */
+const FUENTES_LEIDAS = FUENTES.flatMap(archivos)
+  .filter((f) => !OMITIR.test(f))
+  .map((f) => ({ archivo: relative(MOBILE, f), texto: sinComentarios(readFileSync(f, 'utf8')) }));
 
 /** `(tabs)/turno.tsx` → `turno`; `cobranza/[cliente].tsx` → `cobranza/[cliente]`. */
 function rutasDeLaApp(): string[][] {
@@ -38,22 +52,12 @@ function rutasDeLaApp(): string[][] {
     .map((s) => (s[s.length - 1] === 'index' ? s.slice(0, -1) : s));
 }
 
-function sinComentarios(s: string): string {
-  return s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
-}
-
 /** Route-looking literals: '/turno', `/cobranza/${id}?abonar=1`. */
 function rutasNombradas(): { ruta: string; archivo: string }[] {
   const rx = /['"`](\/[a-z][a-z0-9_-]*(?:\/[^'"`?#\s]*)?)(?:[?#][^'"`]*)?['"`]/g;
-  return FUENTES.flatMap(archivos)
-    .filter((f) => !OMITIR.test(f))
-    .flatMap((f) => {
-      const texto = sinComentarios(readFileSync(f, 'utf8'));
-      return [...texto.matchAll(rx)].map((m) => ({
-        ruta: m[1] ?? '',
-        archivo: relative(MOBILE, f),
-      }));
-    });
+  return FUENTES_LEIDAS.flatMap(({ archivo, texto }) =>
+    [...texto.matchAll(rx)].map((m) => ({ ruta: m[1] ?? '', archivo })),
+  );
 }
 
 function existe(ruta: string, rutas: readonly string[][]): boolean {
