@@ -9,3 +9,28 @@ patchedDependencies:
   # ADR-102: a module Next compiles into two webpack layers of one chunk kept its dead copy's
   # count — sum repeated original ranges instead. Drop once monocart-coverage-reports merges them.
   monocart-coverage-reports@2.13.0: patches/monocart-coverage-reports@2.13.0.patch
+
+# Moved from the root package.json `pnpm` field, which pnpm 10.33 no longer reads.
+overrides:
+  zod: 4.6.2
+  '@xangarro/landing>react': 18.3.1
+  '@xangarro/landing>react-dom': 18.3.1
+  react: 19.2.6
+  react-dom: 19.2.6
+  # Security overrides.
+  'tmp@<0.2.6': 0.2.7
+  'brace-expansion@<1.1.18': 1.1.21
+  'brace-expansion@>=2 <2.1.4': 2.1.7
+  'brace-expansion@>=5 <5.0.9': 5.0.12
+
+peerDependencyRules:
+  allowedVersions:
+    react: 19.2.6
+    react-dom: 19.2.6
+    typescript: 6.0.3
+
+onlyBuiltDependencies:
+  - '@shopify/react-native-skia'
+  - '@swc/core'
+  - better-sqlite3
+  - esbuild
