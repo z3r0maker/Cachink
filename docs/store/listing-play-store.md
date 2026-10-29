@@ -54,9 +54,9 @@ punto de venta, inventario, negocio, emprendedor, finanzas, NIF, México
 
 ## Contacto
 
-contacto@cachink.mx
+soporte@xangarro.mx
 
 ## Políticas
 
-- Política de privacidad: https://cachink.mx/privacidad
-- Términos y condiciones: https://cachink.mx/terminos
+- Política de privacidad: https://xangarro.mx/privacidad/
+- Términos y condiciones: https://xangarro.mx/terminos/
