@@ -19,6 +19,7 @@ import Arco from './pages/legal/Arco.jsx';
 import Terminos from './pages/legal/Terminos.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Acerca from './pages/Acerca.jsx';
+import Soporte from './pages/Soporte.jsx';
 
 function HomePage() {
   return (
@@ -45,6 +46,7 @@ export default function AppSSR({ route = '/' }) {
   if (clean === '/privacidad/arco') return <Arco />;
   if (clean === '/terminos') return <Terminos />;
   if (clean === '/acerca') return <Acerca />;
+  if (clean === '/soporte') return <Soporte />;
   if (clean === '/404') return <NotFound />;
 
   return <HomePage />;

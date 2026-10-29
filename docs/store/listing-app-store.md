@@ -65,8 +65,8 @@ emprendedor, mexico, nif, estado de resultados, flujo de efectivo
 
 ## URL de soporte
 
-https://cachink.mx/soporte
+https://xangarro.mx/soporte/
 
 ## URL de política de privacidad
 
-https://cachink.mx/privacidad
+https://xangarro.mx/privacidad/
