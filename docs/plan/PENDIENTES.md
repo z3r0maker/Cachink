@@ -22,7 +22,7 @@ listas de abajo.
 - **X-01** Entorno de staging (Q17 "A later") [infra] [critica] [bloq] (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
 - **C-13** API de intenciones de pago [media] (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
-- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1627`
+- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
 - **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:829`
 - **N-63** Negocio: MRR, churn, prueba → pago [media] (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1290`
 - **N-64** Embudo de activación y cohortes semanales [media] (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1301`
@@ -53,17 +53,17 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] **P-28** Diagnóstico + estrategia — «Próximamente» en producción [media] — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [~] **P-30** Runtime de generación del Asesor [media] — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
-- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1627`
-- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1879`
-- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1895`
-- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1913`
-- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1927`
+- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1639`
+- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1891`
+- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
+- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1925`
+- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1939`
 - [~] **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-02, N-08, B-14 · Falta: sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
 - [~] **N-12** Asistente «Platícanos de ti» `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-11, N-19 · Falta: criterio de aceptación cumplido (`suggested-plan-table.test.ts`, 535ceaa1). Las respuestas de tipo de negocio y de WhatsApp nunca se guardan aunque existen `businesses.tipo_negocio` / `whatsapp` (`AplicarConfiguracionUseCase` escribe solo nombre + métodos de pago); el paso 6 registra `hasLogo` sin subida de archivo (N-19); las respuestas viven en `business_onboarding`, no en `businesses.onboarding` — documentado, pero sin ratificar mediante un ADR. · `09-next-features.md:399`
 
 ### Caja web (1)
 
-- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1865`
+- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1877`
 
 ### Pagos y conciliación (12)
 

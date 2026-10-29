@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { stamp } from './tenant';
 import postgres from 'postgres';
 
 import { restoreSharedBusinessName, SERIAL_TAG, SHARED_BIZ } from './shared-tenant';
@@ -56,7 +58,7 @@ test.afterAll(restoreSharedBusinessName);
 
 test('editing a product saves it and tells the devices', { tag: SERIAL_TAG }, async ({ page }) => {
   const before = await syncLogCount();
-  const renamed = `Taco al pastor ${Date.now()}`;
+  const renamed = `Taco al pastor ${stamp()}`;
 
   await page.goto('/productos');
   const row = page.locator('main').locator('tr', { hasText: 'TAC-001' });
@@ -117,7 +119,7 @@ test(
   { tag: SERIAL_TAG },
   async ({ page }) => {
     const before = await syncLogCount('businesses');
-    const renamed = `Taquería Don Pedro ${Date.now()}`;
+    const renamed = `Taquería Don Pedro ${stamp()}`;
 
     await page.goto('/negocio');
     await page.getByRole('button', { name: 'Editar datos generales' }).click();
@@ -134,7 +136,7 @@ test(
 
 test('adding an employee stores centavos, not pesos', { tag: SERIAL_TAG }, async ({ page }) => {
   const before = await syncLogCount('employees');
-  const nombre = `Marta ${Date.now()}`;
+  const nombre = `Marta ${stamp()}`;
 
   await page.goto('/empleados');
   await page.getByRole('button', { name: 'Nuevo empleado' }).click();
