@@ -1,6 +1,6 @@
 # CoDi — the brief for Claude Design
 
-Track K (`22-codi.md`, ADR-129) needs boards before code: the canvas is the spec (ADR-117). The
+Track K (`22-codi.md`, ADR-130) needs boards before code: the canvas is the spec (ADR-117). The
 boards live on their own page, «CoDi», of the El Mostrador canvas
 (https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt). The owner approves each board; then
 `docs/design/el-mostrador.md` §11 drops «never QR/CoDi».

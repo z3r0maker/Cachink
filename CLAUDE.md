@@ -28,7 +28,7 @@
 
 **Xangarro!** (`Cachink!` before ADR-054) — _"Finanzas para emprendedores."_ Financial control and micro-POS for Mexican emprendedores and small businesses: captures ventas, egresos and movimientos de inventario, and produces NIF-compliant financial statements and KPIs. **Not an ERP, not facturación, not a CRM.** Every feature justifies itself against _the less clicks, the most value._
 
-**Market:** Mexico — MXN, Spanish (es-MX) only, NIF accounting, Mexican payment methods (Efectivo, Tarjeta, Transferencia, Fiado; CoDi, retired by ADR-108, returns as a real cobro under ADR-129 — never as a bare label).
+**Market:** Mexico — MXN, Spanish (es-MX) only, NIF accounting, Mexican payment methods (Efectivo, Tarjeta, Transferencia, Fiado; CoDi, retired by ADR-108, returns as a real cobro under ADR-130 — never as a bare label).
 
 **The shape of the product (ADR-053).** The phone is **strictly the capture surface**: ventas, egresos, caja y turnos, stock and scanning — the work done on the shop floor, single-role, no Director build. **The web portal owns everything else**: identity, roles, business configuration, catalogue, dashboards, estados financieros and billing. The NIF and KPI calculations stay in `packages/domain` and both surfaces consume them — that shared domain is the single constraint that makes the split safe.
 

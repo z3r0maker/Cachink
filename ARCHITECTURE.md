@@ -166,8 +166,8 @@ Links to discussion, docs, prior art.
 | [124](#adr-124) | 2026-09-28 | The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal | Accepted |
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
-| [129](#adr-129) | 2026-10-08 | CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan | Accepted |
-| [130](#adr-130) | 2026-10-08 | No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it | Accepted |
+| [130](#adr-130) | 2026-10-08 | CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan | Accepted |
+| [131](#adr-131) | 2026-10-08 | No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9208,7 +9208,7 @@ twenty clients (owner, 2026-10-08), so a Supabase Storage bucket would be migrat
 
 ---
 
-## ADR-129
+## ADR-130
 
 **Title:** CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan
 
@@ -9309,17 +9309,17 @@ persona moral that applies.
 - Infobae 2026-09-24, El Financiero 2026-09-24 and 2026-06-19, Alto Nivel (Ley de Economía Digital).
 - ADR-066, ADR-108, ADR-117, ADR-118, ADR-125.
 
-## ADR-130
+## ADR-131
 
 **Title:** No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it
 
 **Date:** 2026-10-08
 
-**Status:** Accepted — owner decision of 2026-10-08; amends ADR-129 (drops its certified-partner fallback, and «delivered in person» reads «on paper, if Banxico still asks for it»); tasks K-01 in `docs/plan/22-codi.md`
+**Status:** Accepted — owner decision of 2026-10-08; amends ADR-130 (drops its certified-partner fallback, and «delivered in person» reads «on paper, if Banxico still asks for it»); tasks K-01 in `docs/plan/22-codi.md`
 
 **Context**
 
-Banxico's certification (ADR-129, K-01) is slow: a paper file, then up to four months for
+Banxico's certification (ADR-130, K-01) is slow: a paper file, then up to four months for
 Banxico's comments, then sandbox, pre-check and certification. The owner asked whether a paid
 service could deliver automatic confirmation sooner, with the direct integration later.
 
@@ -9350,9 +9350,9 @@ Two things about how the file is submitted:
 **Decision**
 
 1. **No paid gateway or partner for CoDi.** Automatic confirmation comes only from MEXIA's own
-   certification as a tercero desarrollador. ADR-129's fallback («a certified partner behind the
+   certification as a tercero desarrollador. ADR-130's fallback («a certified partner behind the
    `PaymentProvider` port») is withdrawn, to be reopened only if Banxico declines the file.
-2. **The bridge is not affected.** The shop's own bank QR with «Ya me llegó» (ADR-129 §1)
+2. **The bridge is not affected.** The shop's own bank QR with «Ya me llegó» (ADR-130 §1)
    involves neither a gateway nor Banxico, and costs the shop nothing.
 3. **K-01 starts with a written question to `codi@banxico.org.mx`:**
    - can the carta de intención and Anexo 1 be filed digitally with an e.firma?
@@ -9391,4 +9391,4 @@ Two things about how the file is submitted:
   (2023-05-02), and its format for the carta de intención.
 - codi.org.mx, «Contacta a tu desarrollador».
 - Conekta's pricing page, consulted 2026-10-08.
-- ADR-066, ADR-125, ADR-129.
+- ADR-066, ADR-125, ADR-130.

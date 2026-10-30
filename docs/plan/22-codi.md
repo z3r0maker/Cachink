@@ -1,6 +1,6 @@
 # Track K — CoDi, de vuelta y de verdad
 
-CoDi comes back (ADR-129, superseding ADR-108) as a real cobro. The **bridge** ships first, in
+CoDi comes back (ADR-130, superseding ADR-108) as a real cobro. The **bridge** ships first, in
 time for El Buen Fin (2026-11-13): the shop's own bank QR shown at the counter, with manual
 confirmation. The **certified** flow follows once Banxico certifies MEXIA as a tercero
 desarrollador: a live QR with the amount and automatic confirmation. Screens come from the canvas
@@ -10,7 +10,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 
 1. **Route:** certify with Banxico _and_ ship an honest manual bridge now. ~~A certified partner
    behind the `PaymentProvider` port is the fallback if certification stalls.~~ Dropped
-   2026-10-08 (ADR-130): there is no paid gateway or partner for CoDi, and automatic confirmation
+   2026-10-08 (ADR-131): there is no paid gateway or partner for CoDi, and automatic confirmation
    waits for MEXIA's certification.
 2. **Plans:** CoDi on every plan, Xangarrito included, with its own capability `codi` and kill
    switch. `cobrosIntegrados` stays card terminals only.
@@ -29,11 +29,11 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
   payment can be the only one. Banks have until December to ship CoDi in their apps, several
   before El Buen Fin.
 - **Banxico's terms** (Guía de participación, 2023-05-02):
-  - the 7-step registration in ADR-129;
+  - the 7-step registration in ADR-130;
   - no fee per cobro or by amount, and no surcharge;
   - money paid straight to the shop's account, never through a concentrating account;
   - extra services optional.
-- **Paid services** (evaluated 2026-10-08, ADR-130):
+- **Paid services** (evaluated 2026-10-08, ADR-131):
   - no provider publishes a CoDi price or a CoDi API for platforms, and STP's «Contratar CoDi»
     page returns 404;
   - the nearest thing is a gateway confirming a SPEI transfer:
@@ -84,7 +84,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 - [~] Status · **Blocked by:** MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125)
   **Remaining (2026-10-08):** el dueño revisa el expediente. Investigación completa en
   `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está
-  constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-130) con cuatro
+  constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro
   preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más
   nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay
   servicio de pago: la confirmación automática espera esta certificación.
@@ -135,7 +135,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
     - i. giro: software for micro and small businesses (Xangarro);
     - ii. how we use CoDi: QR cobro at the counter (static from the shop's bank, then
       dynamic with the amount), recorded as a venta;
-    - iii. features: QR now, «vía internet» later if ever (ADR-129 skips push), plus our own
+    - iii. features: QR now, «vía internet» later if ever (ADR-130 skips push), plus our own
       extras (bookkeeping, reports);
     - iv. sold to comercios (micro-businesses), with no price tied to the number or amount of
       cobros, and how we identify clients dealing in virtual assets (we do not serve them);
