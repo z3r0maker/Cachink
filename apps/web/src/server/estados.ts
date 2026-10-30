@@ -37,7 +37,7 @@ export interface EstadosModel {
   readonly indicadores: ReturnType<typeof calculateIndicadores>;
   /** The business's own ISR rate (Negocio, P-08), in basis points. */
   readonly isrTasa: number;
-  /** How the ISR line was estimated — régime and persona (ADR-089, ADR-128). */
+  /** How the ISR line was estimated — régime and persona (ADR-089, ADR-129). */
   readonly isrMetodo: IsrMetodo;
   /** What each expandable line is made of — sums to the line (domain test). */
   readonly desglose: ReturnType<typeof desgloseDeResultados>;
@@ -146,7 +146,7 @@ function sinMovimiento(
 
 type Periodo = Awaited<ReturnType<typeof leerPeriodo>>;
 
-/** Resultados, with the ISR its régime and persona call for (ADR-089, ADR-128). */
+/** Resultados, with the ISR its régime and persona call for (ADR-089, ADR-129). */
 function resultadosDe(p: Periodo, from: string, to: string): EstadosModel['resultados'] {
   return calculateEstadoDeResultados({
     ventas: p.ventas,

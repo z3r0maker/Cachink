@@ -89,7 +89,7 @@ export async function leerPeriodo(businessId: string, desde: string, hasta: stri
       inputs,
       isrTasa: negocio?.isrTasa ?? 0,
       regimenSat: negocio?.regimenSat ?? null,
-      // 626 is open to both personas and taxes them differently (ADR-128).
+      // 626 is open to both personas and taxes them differently (ADR-129).
       persona: negocio?.rfc ? tipoPersona(negocio.rfc) : null,
       apertura: await loadApertura(tx, businessId),
     };

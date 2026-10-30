@@ -55,7 +55,7 @@ export interface EstadoDeResultadosInput {
    * behavior exactly. */
   regimenSat?: string | null;
   /** The business's persona, from its RFC: a 626 persona moral is estimated
-   * at 30 % on utilidad, not on gross (ADR-128). Absent: física. */
+   * at 30 % on utilidad, not on gross (ADR-129). Absent: física. */
   persona?: TipoPersona | null;
   /** Months the period spans, for the SAT monthly tables. Default 1. */
   mesesEnPeriodo?: number;

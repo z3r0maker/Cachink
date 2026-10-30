@@ -9200,7 +9200,7 @@ the aviso.
 
 ---
 
-## ADR-128
+## ADR-129
 
 **Title:** RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross
 

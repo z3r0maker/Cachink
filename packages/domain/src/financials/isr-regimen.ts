@@ -13,7 +13,7 @@
  *     Art. 9 rate (30 %) over the year's cash-basis profit — ingresos
  *     efectivamente percibidos less deducciones efectivamente erogadas —
  *     crediting the earlier provisional payments. Utilidad operativa stands
- *     in for that profit (ADR-128); being cumulative, a multi-month period is
+ *     in for that profit (ADR-129); being cumulative, a multi-month period is
  *     one base, not a sum of months. 626 is valid for both personas, so the
  *     persona decides; when it is unknown (no RFC yet) the física table
  *     applies, as it did before the persona existed.

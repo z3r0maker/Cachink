@@ -70,7 +70,7 @@ test('the seeded RESICO estimates on gross income — even in a loss month', asy
 });
 
 test('a RESICO persona moral estimates 30% on utilidad, not on gross', async ({ page }) => {
-  // A 12-character RFC is a persona moral (ADR-128); same régime, other law.
+  // A 12-character RFC is a persona moral (ADR-129); same régime, other law.
   await asTenant(
     BIZ,
     (sql) => sql`UPDATE businesses SET regimen_sat = '626', rfc = 'XAN2601019A1' WHERE id = ${BIZ}`,

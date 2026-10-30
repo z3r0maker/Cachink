@@ -79,7 +79,7 @@ describe('loadEstadosModel', () => {
     assert.equal(model.isrMetodo, 'tasa');
   });
 
-  it('RESICO splits by persona: the RFC’s length names it (ADR-128)', async () => {
+  it('RESICO splits by persona: the RFC’s length names it (ADR-129)', async () => {
     business = { isrTasa: 125, regimenSat: '626', rfc: 'XAN2601019A1' };
     assert.equal(
       (await loadEstadosModel('biz-1', '2026-05-01', '2026-05-31')).isrMetodo,
