@@ -166,6 +166,7 @@ Links to discussion, docs, prior art.
 | [124](#adr-124) | 2026-09-28 | The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal | Accepted |
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
+| [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
 | [130](#adr-130) | 2026-10-08 | CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan | Accepted |
 | [131](#adr-131) | 2026-10-08 | No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it | Accepted |
 
@@ -9205,6 +9206,79 @@ twenty clients (owner, 2026-10-08), so a Supabase Storage bucket would be migrat
 
 - ADR-125 §2 (one schema, one dump); CFF art. 30 (five years); E-04, E-05, E-20, E-26, E-27,
   E-31 and E-32 in `docs/plan/20-command-center.md`.
+
+---
+
+## ADR-128
+
+**Title:** A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest
+
+**Date:** 2026-10-28
+
+**Status:** Accepted — extends ADR-103, after measuring a month of `main`
+
+**Context**
+
+ADR-103 made writing the seeded tenant a schedule: `@serial`, a serial project,
+and a Postgres trigger that refuses writes to Taquería Don Pedro while the
+viewport projects run. It held. What it did not cover is everything *after* the
+viewport phase, and a month of main shows where that left the suite: **`ci`
+failed 21 of 40 runs between 27 September and 21 October**, with `portal-e2e`
+the usual job and two causes behind nearly all of it.
+
+1. **Specs sharing one tenant's rows, one after another.** The guard unlocks for
+   `serial`, `operador`, `devices` and `sync`, where twenty specs read and write
+   the same business in sequence. October's reds are that:
+   `Expected "2000|pendiente|…CDMAR"` / `Received "20000|…"` — one spec asserting
+   a seeded client's saldo that another had moved. Every fix since has been the
+   same shape, one spec at a time: "a spec that ate its own fixture", "the
+   cobranza poll ignores the seed's fixture abono", "the pendientes specs stop
+   pinning the queue at one row".
+2. **Fixture identity built from the clock.** Seventeen specs each hand-rolled
+   the same four rows (auth user, business, membership, device) with seven
+   different idioms for the unique stamp, two of them `Date.now()`. Two workers
+   starting inside the same millisecond mint the same address, so
+   `duplicate key value violates unique constraint "users_email_key"` kept
+   coming back — patched in September, again in October, and still in the 13
+   October log.
+
+**Decision**
+
+1. **The seed is reference data.** Specs read Taquería's ledger and assert its
+   figures. A spec that writes mints its own business.
+2. **One factory does the minting.** `e2e/tenant.ts` owns identity — the owner
+   account, the business, the membership, a device, and the plan's row in the
+   billing database, including its Stripe status. `e2e/tenant-rows.ts` composes
+   what a test is actually about onto it: products, sales, operators, devices.
+   An account can own two businesses (`owner`, `joinedAfter` — the switcher) and
+   a business can hold a second account with its own role (`addMember`).
+3. **`stamp()` is the only unique name**, and it carries the pid and a UUID.
+   `clientIp()` is its equivalent for the throttles, which key on the address.
+4. **A vitest guard holds all of it** (`tests/e2e-fixture-identity.test.ts`):
+   no `Date.now()` inside a string anywhere in `e2e/*.spec.ts`, and
+   `INSERT INTO businesses` only in the factory. Both rules were learned from CI
+   rather than from first principles, so both are checks rather than comments.
+
+**Alternatives considered**
+
+- *Extend the trigger to the serial phases*, claiming rows per spec. Rejected as
+  the primary fix: it makes the collisions loud but keeps them, and keeps the
+  serialization that costs the suite its wall-clock.
+- *Leave the migration to whoever is bitten next.* That is what had been
+  happening — eleven of the `sync` specs had already moved on their own, one
+  incident at a time, which is how the suite ended up with seven stamp idioms.
+
+**Consequences**
+
+- Seventeen fixtures became ~290 lines from ~820: the same four rows are now
+  written in one place that knows about plans and billing.
+- The `users_email_key` class is gone by construction, not by patch.
+- What this does **not** yet do: the register's door (`acceso-flow.ts`) is still
+  hard-wired to the seeded tenant — its owner's address, Ana Robledo's NIP, and
+  Taquería's two device slots — so `operador`, `devices` and `sync` still share
+  one tenant and still run one file at a time. Giving the door a tenant of its
+  own is what would let those projects run in parallel, and it is the next step,
+  not this one.
 
 ---
 

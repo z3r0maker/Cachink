@@ -1,4 +1,4 @@
-import { pgSchema, timestamp } from 'drizzle-orm/pg-core';
+import { customType, pgSchema, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * The one Postgres schema MEXIA's command center lives in (ADR-125 §2). No
@@ -9,3 +9,10 @@ export const corp = pgSchema('corp');
 
 /** An instant as an ISO string, the way data-pg's tables carry them. */
 export const at = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' });
+
+/** Raw bytes: evidence is kept in the schema, not in a bucket (ADR-126). */
+export const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+});

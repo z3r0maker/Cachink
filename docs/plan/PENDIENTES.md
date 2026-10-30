@@ -16,7 +16,7 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 `pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las
 listas de abajo.
 
-- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:261`
+- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:267`
 - **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:700`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media] (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1030`
 - **X-01** Entorno de staging (Q17 "A later") [infra] [critica] [bloq] (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
@@ -24,8 +24,8 @@ listas de abajo.
 - **K-10** Dominio: CoDi vuelve como método (Colas de tracks) — destraba 6: K-11, K-15, K-12, K-13, K-14, K-31 · `22-codi.md:181`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
 - **C-13** API de intenciones de pago [media] (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
-- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1627`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:829`
+- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:868`
 - **N-63** Negocio: MRR, churn, prueba → pago [media] (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1290`
 - **N-64** Embudo de activación y cohortes semanales [media] (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1301`
 - **X-07** Masters de marca + derivados (ADR-054 §6) [alta] [bloq] (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -55,11 +55,11 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] **P-28** Diagnóstico + estrategia — «Próximamente» en producción [media] — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [~] **P-30** Runtime de generación del Asesor [media] — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
-- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1627`
-- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1879`
-- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1895`
-- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1913`
-- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1927`
+- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1639`
+- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1891`
+- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
+- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1925`
+- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1939`
 - [~] **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-02, N-08, B-14 · Falta: sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
 - [~] **N-12** Asistente «Platícanos de ti» `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-11, N-19 · Falta: criterio de aceptación cumplido (`suggested-plan-table.test.ts`, 535ceaa1). Las respuestas de tipo de negocio y de WhatsApp nunca se guardan aunque existen `businesses.tipo_negocio` / `whatsapp` (`AplicarConfiguracionUseCase` escribe solo nombre + métodos de pago); el paso 6 registra `hasLogo` sin subida de archivo (N-19); las respuestas viven en `business_onboarding`, no en `businesses.onboarding` — documentado, pero sin ratificar mediante un ADR. · `09-next-features.md:399`
 - [ ] **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
@@ -67,7 +67,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 ### Caja web (2)
 
-- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1865`
+- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1877`
 - [ ] **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · `22-codi.md:234`
 
 ### Pagos y conciliación (18)
@@ -101,32 +101,32 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-67** `/auditoria` — Bloqueada por: N-05 · Disparador: ya. · `09-next-features.md:1331`
 - [ ] **N-68** «Ver como» — suplantación de solo lectura con límite de tiempo [baja] — Bloqueada por: N-66, N-67 · Disparador: lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda resolver desde `/tenants/[id]` + N-65. · `09-next-features.md:1340`
 - [ ] **N-70** Decisiones — Bloqueada por: N-07, N-63 · Disparador: N-63 `[x]`. · `09-next-features.md:1363`
-- [~] **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:261`
-- [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:445`
-- [ ] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · `20-command-center.md:457`
-- [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:469`
-- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:480`
-- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:491`
-- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:508`
-- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:517`
-- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:532`
-- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:543`
-- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:552`
-- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:560`
-- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:570`
-- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:579`
-- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:588`
-- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:597`
-- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:608`
-- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:614`
-- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:621`
-- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:627`
-- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:633`
-- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:722`
-- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:737`
-- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:754`
-- [ ] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:829`
-- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:848`
+- [~] **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:267`
+- [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:451`
+- [~] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: board CD-06d, attaching one XML from Registrar gasto; a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they post dated today, with no confirmation, as the board shows); checking an unverified invoice («Sin verificar») with the SAT again. · `20-command-center.md:466`
+- [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:508`
+- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:519`
+- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:530`
+- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:547`
+- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:556`
+- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:571`
+- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:582`
+- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:591`
+- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:599`
+- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:609`
+- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:618`
+- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:627`
+- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:636`
+- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:647`
+- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:653`
+- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:660`
+- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:666`
+- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:672`
+- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:761`
+- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:776`
+- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:793`
+- [ ] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:868`
+- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:887`
 
 ### Backend, sync y datos (6)
 
@@ -171,7 +171,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 - [ ] **X-02** Corrida de integración de extremo a extremo (app real ↔ backend real) [alta] [bloq] — Bloqueada por: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
 - [ ] **X-03** Migración de partners [alta] [bloq] — Bloqueada por: X-02 · `07-launch.md:24`
-- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: `app.json` ya está renombrado (Xangarro!, `mx.xangarro.mobile`) y `store:screenshots` existe, pero `docs/store/listing-*.md` sigue apuntando soporte/privacidad/términos a `cachink.mx`, el copy es previo al pivote (modo local, Director, LAN sync), no hay notas de revisión (cuenta demo, «no purchase flow»), y `submit.production` dentro de `eas.json` no tiene `ascAppId`. · `07-launch.md:38`
+- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: `app.json` ya está renombrado (Xangarro!, `mx.xangarro.mobile`) y las capturas de iPhone 6.9" e iPad 13" están en `app-registration/apple/screenshots/`. Hecho 2026-10-29: `docs/store/listing-*.md` apuntan a `xangarro.mx` (soporte, privacidad, términos; contacto `soporte@xangarro.mx`); `xangarro.mx/soporte/` existe (renderizada desde `docs/store/soporte.md`, enlazada desde el footer; falta el deploy manual del landing); el permiso de cámara de iOS dice para qué es, en español, y se quitaron los de micrófono y Face ID que la app no usa. Falta: el copy de las fichas es previo al pivote (modo local, Director, LAN sync); las notas de revisión no tienen la cuenta demo sembrada en producción (`app-registration/apple/METADATA.md` la marca TODO); el cuestionario App Privacy; `submit.production` dentro de `eas.json` no tiene `ascAppId`; y el splash sigue diciendo «Cachink!» (X-07). · `07-launch.md:38`
 - [ ] **X-09** Reset de ROADMAP.md [media] [bloq] — Bloqueada por: X-02 · `07-launch.md:114`
 - [ ] **X-10** Compuerta del checklist de lanzamiento [critica] [bloq] — Bloqueada por: X-01…X-09 (excepto X-08) · `07-launch.md:120`
 - [~] **N-32** Barrido de cumplimiento para las tiendas de apps `[LAUNCH]` [LAUNCH] [tiendas] [alta] [bloq] — Bloqueada por: N-24, A-15 · Falta: la checklist del revisor para X-05 en `docs/store/`. `pnpm lint:store` vuelve a estar en verde y forma parte del gate en `ci.yml` (ver Progress). · `09-next-features.md:823`
@@ -225,7 +225,7 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `22-codi.md` · 4. Tasks (3)
 
-- [~] **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-130) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
+- [~] **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
 - [ ] **K-02** Opinión legal sobre CoDi — Bloqueada por: — · `22-codi.md:168`
 - [ ] **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:301`
 
@@ -354,6 +354,6 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
-- `20-command-center.md` — 26 abiertos (1 en curso, 0 bloqueados, 5 hechos)
+- `20-command-center.md` — 26 abiertos (2 en curso, 0 bloqueados, 5 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 42 abiertos (6 en curso, 0 bloqueados, 10 hechos)

@@ -9,6 +9,7 @@ import type {
   Movement,
   MovimientoSocio,
   PagoImpuestos,
+  PagoProveedor,
   Payout,
   Socio,
 } from './movements.js';
@@ -84,11 +85,32 @@ function gasto(m: Gasto): readonly JournalLine[] {
   if (retenido >= total)
     throw new MontoInvalidoError('las retenciones no pueden igualar la factura');
   const acreditable = m.tratamientoIva === 'acreditable';
+  const cargo = debe(m.categoria, acreditable ? subtotal : total);
+  const ivaCargo = acreditable ? iva : 0n;
+  // On credit: owed in full, IVA pending, withheld when paid (owner decision 9).
+  if (!m.pagado) return [cargo, debe('iva_por_acreditar', ivaCargo), haber('proveedores', total)];
   return [
-    debe(m.categoria, acreditable ? subtotal : total),
-    debe('iva_acreditable', acreditable ? iva : 0n),
+    cargo,
+    debe('iva_acreditable', ivaCargo),
     haber('retenciones_por_pagar', retenido),
-    haber(m.pagado ? 'bancos' : 'proveedores', total - retenido),
+    haber('bancos', total - retenido),
+  ];
+}
+
+function pagoProveedor(m: PagoProveedor): readonly JournalLine[] {
+  const total = positive(m.total, 'el pago');
+  const iva = nonNegative(m.ivaPorAcreditar, 'el IVA');
+  const retenido =
+    nonNegative(m.retencionIsr, 'la retención de ISR') +
+    nonNegative(m.retencionIva, 'la retención de IVA');
+  if (retenido >= total) throw new MontoInvalidoError('las retenciones no pueden igualar el pago');
+  if (iva > total) throw new MontoInvalidoError('el IVA no puede superar el pago');
+  return [
+    debe('proveedores', total),
+    haber('bancos', total - retenido),
+    haber('retenciones_por_pagar', retenido),
+    debe('iva_acreditable', iva),
+    haber('iva_por_acreditar', iva),
   ];
 }
 
@@ -138,6 +160,8 @@ export function postMovement(m: Movement): readonly JournalLine[] {
       return balanced(payout(m));
     case 'gasto':
       return balanced(gasto(m));
+    case 'pago_proveedor':
+      return balanced(pagoProveedor(m));
     case 'pago_impuestos':
       return balanced(pagoImpuestos(m));
     case 'comision_bancaria':

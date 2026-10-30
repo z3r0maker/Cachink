@@ -117,11 +117,25 @@ export const ROUTES = [
       'Las condiciones para usar Xangarro: tu cuenta, planes y cobros recurrentes, cancelación, el Asesor con IA y tus datos.',
     smoke: 'Quién te presta el servicio',
     // The draft's title note, banner and open questions for counsel are never published.
-    absent: ['borrador', 'Borrador', 'Preguntas abiertas', 'OQ-T1'],
+    absent: ['borrador', 'Borrador', 'Preguntas abiertas', 'OQ-T1', '](http'],
     type: 'website',
     changefreq: 'monthly',
     priority: '0.3',
     sources: ['src/pages/legal', '../../docs/legal/aviso/terminos-borrador.md'],
+  },
+  {
+    path: '/soporte/',
+    outDir: 'dist/soporte',
+    title: 'Soporte · Xangarro',
+    description:
+      'Cómo pedir ayuda con Xangarro: el correo de soporte, qué hacer si no puedes vincular un dispositivo o olvidaste tu NIP, y cómo exportar o borrar tus datos.',
+    smoke: 'soporte@xangarro.mx',
+    // A link the page renderer failed to parse would show its Markdown.
+    absent: ['](http'],
+    type: 'website',
+    changefreq: 'monthly',
+    priority: '0.4',
+    sources: ['src/pages/Soporte.jsx', 'src/pages/legal', '../../docs/store/soporte.md'],
   },
   {
     path: '/acerca/',

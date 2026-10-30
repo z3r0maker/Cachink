@@ -153,6 +153,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - **Anything reading Postgres:** an integration test that builds the rows the seed does not. A broken join is invisible when no seeded row exercises it.
 - **New portal screen, route or drawer:** a Playwright spec that asserts **real data reached the page**, not just that a heading rendered.
 - **A portal spec that writes the seeded tenant** carries the `@serial` tag (ADR-103), which runs it once in the serial project after the parallel phase; whoever wrecks a seeded row restores it in a hook that runs on failure too, and a fixture a test consumes it re-makes. While the viewport projects run, Postgres refuses every write to that tenant — the rule is enforced, not documented.
+- **Better still, a spec that writes mints its own tenant** with `mintTenant()` from `apps/web/e2e/tenant.ts`, and composes what it needs onto it from `tenant-rows.ts` (ADR-128). The seed is reference data: read its figures, never rewrite them. Unique names come from `stamp()` — never the clock, which two workers share — and `tests/e2e-fixture-identity.test.ts` holds both rules.
 - **Phone screens, tabs, modals and auth gates:** a Maestro flow in `apps/mobile/maestro/flows/`, using the shared subflows in `flows/shared/` — never inlined auth steps. Changing a testID or a nav path means updating every affected flow in the same change.
 
 ---
@@ -167,7 +168,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - Do not commit a schema change without a migration test.
 - Do not silently merge sync conflicts. Surface them inline.
 - Do not read a tenant's rows outside `withTenant`.
-- Do not write the seeded portal tenant from an untagged Playwright test (ADR-103).
+- Do not write the seeded portal tenant from an untagged Playwright test (ADR-103), and do not hand-roll a tenant fixture or name one from `Date.now()` — `mintTenant()` and `stamp()` own both (ADR-128).
 - Do not re-baseline `.design-lint-baseline.json` upward to make a change pass.
 - Do not show fixture data on a live screen, or label anything «Pronto» or «Próximamente»: an unbuilt feature is omitted (ADR-117).
 - Do not write an em dash in UI copy (the «—» empty placeholder excepted), or make an action a bare text link or raw URL.

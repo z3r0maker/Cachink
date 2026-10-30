@@ -1,4 +1,6 @@
 import { expect, test, type Page } from './test';
+
+import { stamp, clientIp } from './tenant';
 import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 
@@ -7,7 +9,7 @@ import { asTenant, BIZ } from './sync-phone';
 
 // Two Playwright projects (desktop, laptop) load this module together on CI —
 // a bare workerStamp collides across workers, so the stamp carries the pid too.
-const workerStamp = `${process.pid}-${Date.now()}`;
+const workerStamp = `${process.pid}-${stamp()}`;
 
 /**
  * ADR-080's emailed links end to end: request → email in the dev outbox →
@@ -18,7 +20,7 @@ test.describe.configure({ mode: 'serial' });
 test.use({
   storageState: { cookies: [], origins: [] },
   extraHTTPHeaders: {
-    'x-forwarded-for': `203.0.113.${Number(`${process.pid}${Date.now() % 100}`) % 250}`,
+    'x-forwarded-for': clientIp(),
   },
 });
 

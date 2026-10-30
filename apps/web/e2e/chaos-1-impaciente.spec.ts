@@ -1,4 +1,6 @@
 import { expect, test, type Locator } from './test';
+
+import { stamp } from './tenant';
 import postgres from 'postgres';
 
 import { SERIAL_TAG } from './shared-tenant';
@@ -105,7 +107,7 @@ test.describe('login gate (signed out)', () => {
 
     await page.goto('/login');
     await page.getByTestId('login-door-owner').click();
-    await page.getByTestId('login-email').fill(`nadie-${Date.now()}@example.com`);
+    await page.getByTestId('login-email').fill(`nadie-${stamp()}@example.com`);
     await page.getByTestId('login-password').fill('incorrecta');
 
     // The storefront login's button (feat/portal-cortina): «Abrir mi changarro», «Subiendo la cortina…» while pending.
@@ -149,7 +151,7 @@ test(
         return row?.nombre ?? '';
       });
     const oldName = await readName();
-    const newName = `Taco al pastor ${Date.now()}`;
+    const newName = `Taco al pastor ${stamp()}`;
 
     await page.goto('/productos');
     await page
