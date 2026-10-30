@@ -5,3 +5,4 @@ export { projects } from './projects.js';
 export { fundingCalls } from './socios.js';
 export { company, documents, obligations } from './agenda.js';
 export { certificates, registries, shareEvents } from './corporativo.js';
+export { receivedInvoices } from './facturas.js';

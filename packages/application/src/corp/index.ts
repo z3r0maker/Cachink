@@ -50,3 +50,4 @@ export { RevertirMovimientoUseCase, type RevertirMovimientoInput } from './rever
 export * from './agenda/index.js';
 export * from './expediente/index.js';
 export * from './corporativo/index.js';
+export * from './facturas/index.js';

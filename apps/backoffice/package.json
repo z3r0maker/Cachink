@@ -42,6 +42,7 @@
     "@types/react-dom": "^19.3.0",
     "@vanilla-extract/next-plugin": "^2.5.2",
     "@xangarro/config": "workspace:*",
+    "@xangarro/testing": "workspace:*",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6",

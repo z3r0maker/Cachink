@@ -9,6 +9,16 @@ import {
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import {
+  AGENCIA,
+  DESPACHO,
+  fijarRfcMexia,
+  fila,
+  HONORARIOS,
+  IMPRENTA,
+  registrarTres,
+  subirCinco,
+} from './empresa-facturas';
+import {
   E2E_RECURRENTE,
   mesesDePrueba,
   registrarGastoEnDolares,
@@ -234,4 +244,49 @@ test('a founder records shares, updates a registry and keeps a CSD expiry', asyn
   await expect(
     page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
   ).toBeVisible();
+});
+
+test('a founder uploads invoices, registers three, pays one on credit and cancels another', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Facturas', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Facturas', level: 1 })).toBeVisible();
+
+  const honorarios = await subirCinco(page);
+  await expect(page.getByRole('heading', { name: 'Revisa antes de registrar' })).toBeVisible();
+  await expect(
+    page.getByText('Subiste 5 archivos. 3 están listos; 2 no se registran'),
+  ).toBeVisible();
+  const fuera = page.getByTestId('factura-fuera');
+  await expect(fuera.filter({ hasText: 'No es de MEXIA' })).toContainText('Pídele al proveedor');
+  await expect(fuera.filter({ hasText: 'Cancelada' })).toContainText('El SAT la reporta cancelada');
+  await expect(page.getByRole('article', { name: HONORARIOS })).toContainText('Se pagó$3,336.67');
+  await registrarTres(page);
+
+  // Real rows: the XML's figures, the SAT's word and where each one went.
+  await expect(fila(page, HONORARIOS)).toContainText('−$723.33');
+  await expect(fila(page, HONORARIOS)).toContainText('Vigente');
+  await expect(fila(page, HONORARIOS).getByRole('link', { name: 'Administración' })).toBeVisible();
+  await expect(fila(page, AGENCIA.nombre)).toContainText('Cancelada');
+  await expect(fila(page, AGENCIA.nombre)).toContainText('No se registró');
+  await expect(page.getByTestId('facturas-recibidas')).toContainText('2 por pagar: $8,700.00');
+  await expect(page.getByTestId('facturas-retenciones')).toContainText('$723.33');
+
+  // Owner decision 9: the invoice on credit is paid; the other one came wrong.
+  await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
+  await expect(fila(page, DESPACHO.nombre)).toContainText('a crédito, pagada');
+  await page.getByRole('button', { name: `Cancelar la factura de ${IMPRENTA.nombre}` }).click();
+  await expect(fila(page, IMPRENTA.nombre)).toContainText('Se revirtió');
+  await expect(page.getByTestId('facturas-recibidas')).toContainText('Ninguna por pagar');
+
+  // The same XML again is refused, pointing at its movement; leaving the review keeps nothing.
+  await page.getByLabel('Elegir archivos').setInputFiles(honorarios);
+  await expect(
+    page.getByTestId('factura-fuera').filter({ hasText: 'Ya registrada' }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ver movimiento' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page).toHaveURL(/\/empresa\/facturas$/);
 });
