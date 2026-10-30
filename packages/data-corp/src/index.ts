@@ -9,6 +9,11 @@ export {
 } from './queries/documentos.js';
 export { createCorpDb, type CorpDb } from './client.js';
 export { findFounderByStaffId, listFounders, type Founder } from './queries/founders.js';
+export {
+  createReceivedInvoiceRepository,
+  facturasDelMes,
+  type FacturaDelMes,
+} from './queries/facturas.js';
 export { createCorpLedgerRepository } from './queries/ledger.js';
 export {
   conceptosDe,

@@ -46,7 +46,7 @@ export const entries = corp.table(
     deducible: boolean('deducible'),
     /** Where it came from; with `sourceRef`, makes an import idempotent. */
     source: text('source', {
-      enum: ['manual', 'billing', 'statement', 'recurring', 'agent'],
+      enum: ['manual', 'billing', 'statement', 'recurring', 'agent', 'cfdi'],
     }).notNull(),
     sourceRef: text('source_ref'),
     /** The entry this one reverses, for a correction. */

@@ -3,7 +3,6 @@ import {
   type AnyPgColumn,
   boolean,
   check,
-  customType,
   date,
   index,
   integer,
@@ -12,7 +11,7 @@ import {
   unique,
 } from 'drizzle-orm/pg-core';
 
-import { at, corp } from './corp.js';
+import { at, bytea, corp } from './corp.js';
 import { entries } from './ledger.js';
 
 /**
@@ -20,11 +19,6 @@ import { entries } from './ledger.js';
  * here as bytea, not in a storage bucket, so `pg_dump -n corp` still carries
  * every acuse when the area moves to its own database (ADR-124 §2).
  */
-const bytea = customType<{ data: Buffer; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
-});
 
 /** MEXIA itself: one row. E-06 adds its registries. */
 export const company = corp.table(

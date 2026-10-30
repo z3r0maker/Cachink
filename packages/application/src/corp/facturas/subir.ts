@@ -139,7 +139,9 @@ async function revisarArchivo(
   if (antes?.tipo === 'rechazada') {
     return rechazo(archivo, antes.motivo, cfdi, yaRegistrada ? (guardada?.entryId ?? null) : null);
   }
-  if (guardada !== null) return porLoGuardado(archivo, cfdi, guardada);
+  if (guardada !== null && guardada.estado !== 'descartada') {
+    return porLoGuardado(archivo, cfdi, guardada);
+  }
   const revision = revisarConSat(await deps.sat.estado(cfdi));
   if (revision.tipo === 'rechazada') return rechazo(archivo, revision.motivo, cfdi);
   return guardarSegunSat(deps, ctx, archivo, leido, revision);
@@ -163,4 +165,11 @@ export async function subirFacturas(
     else rechazos.push(paso.rechazo);
   }
   return { listas, rechazos };
+}
+
+/** «Cancelar» on the review: what was waiting is set aside, and can be uploaded again. */
+export async function descartarRevision(facturas: ReceivedInvoiceRepository): Promise<number> {
+  const pendientes = await facturas.porRevisar();
+  for (const f of pendientes) await facturas.descartar(f.cfdi.uuid);
+  return pendientes.length;
 }

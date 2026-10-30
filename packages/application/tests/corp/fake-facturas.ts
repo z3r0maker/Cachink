@@ -16,7 +16,7 @@ export class FakeFacturas implements ReceivedInvoiceRepository {
     return this.filas.get(uuid) ?? null;
   }
   async guardar(f: NuevaFactura) {
-    if (this.filas.has(f.cfdi.uuid)) return;
+    if (this.filas.has(f.cfdi.uuid) && this.filas.get(f.cfdi.uuid)?.estado !== 'descartada') return;
     this.filas.set(f.cfdi.uuid, {
       cfdi: f.cfdi,
       xml: f.xml,
@@ -49,7 +49,8 @@ export class FakeFacturas implements ReceivedInvoiceRepository {
     this.#cambiar(uuid, { estado: 'cancelada' });
   }
   async descartar(uuid: string) {
-    if (this.filas.get(uuid)?.estado === 'por_revisar') this.filas.delete(uuid);
+    if (this.filas.get(uuid)?.estado === 'por_revisar')
+      this.#cambiar(uuid, { estado: 'descartada' });
   }
   async recordadaPara(rfc: string) {
     const ultima = [...this.filas.values()]

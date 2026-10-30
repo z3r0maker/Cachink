@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import {
+  descartarRevision,
   RfcMexiaPendienteError,
   SinArchivosError,
   subirFacturas,
@@ -106,6 +107,20 @@ describe('subirFacturas (E-11)', () => {
     assert.equal(r.rechazos[0]?.motivo, 'no_es_cfdi');
     assert.deepEqual(r.listas, [A]);
     assert.equal((await d.facturas.porUuid(A))?.estadoSat, 'sin_verificar');
+  });
+
+  it('discards what was waiting when the review is left, and takes it again on a new upload', async () => {
+    const d = deps();
+    await subirFacturas(d, { archivos: [archivo('a.xml', { uuid: A })], founderId: 'f1' });
+    assert.equal(await descartarRevision(d.facturas), 1);
+    assert.deepEqual(await d.facturas.porRevisar(), []);
+    assert.equal((await d.facturas.porUuid(A))?.estado, 'descartada');
+    const r = await subirFacturas(d, {
+      archivos: [archivo('a.xml', { uuid: A })],
+      founderId: 'f1',
+    });
+    assert.deepEqual(r.listas, [A]);
+    assert.equal((await d.facturas.porUuid(A))?.estado, 'por_revisar');
   });
 
   it('needs MEXIA’s RFC, and between 1 and 25 files', async () => {

@@ -6,9 +6,10 @@ import type { CategoriaGasto, CfdiRecibido, EstadoSat } from '@xangarro/domain/c
  * An uploaded invoice waits «por revisar» until a founder registers it,
  * which posts its expense; a cancelled one is kept, flagged, and posts
  * nothing. The XML stays on the row; registering also files it in the
- * Expediente next to its movement.
+ * Expediente next to its movement. Leaving the review discards what was
+ * waiting; nothing is deleted, and a discarded upload can come again.
  */
-export type EstadoFactura = 'por_revisar' | 'registrada' | 'cancelada';
+export type EstadoFactura = 'por_revisar' | 'registrada' | 'cancelada' | 'descartada';
 
 /** What the SAT said when the invoice was uploaded; «sin verificar» when it did not answer. */
 export type EstadoSatGuardado = 'vigente' | 'cancelado' | 'sin_verificar';
@@ -44,7 +45,7 @@ export interface RegistroFactura {
 
 export interface ReceivedInvoiceRepository {
   porUuid(uuid: string): Promise<FacturaRecibida | null>;
-  /** Writes it unless its UUID exists: a second upload of the same file is a no-op. */
+  /** Writes it unless its UUID is kept: a second upload is a no-op, a discarded one comes back. */
   guardar(factura: NuevaFactura): Promise<void>;
   /** Waiting for review, oldest upload first. */
   porRevisar(): Promise<readonly FacturaRecibida[]>;
@@ -52,7 +53,7 @@ export interface ReceivedInvoiceRepository {
   marcarRegistrada(uuid: string, registro: RegistroFactura): Promise<void>;
   marcarPagada(uuid: string, pagoEntryId: string): Promise<void>;
   marcarCancelada(uuid: string): Promise<void>;
-  /** Removes an upload still waiting for review; a registered or cancelled one stays. */
+  /** Sets aside an upload still waiting for review; a registered or cancelled one stays. */
   descartar(uuid: string): Promise<void>;
   /** The category and project of the supplier's last registered invoice. */
   recordadaPara(rfc: string): Promise<Omit<RegistroFactura, 'entryId'> | null>;
