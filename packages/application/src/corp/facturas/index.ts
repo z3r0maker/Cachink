@@ -29,6 +29,7 @@ export {
   MAX_ARCHIVOS,
   MAX_BYTES_XML,
   descartarRevision,
+  quitarFactura,
   subirFacturas,
   type ArchivoXml,
   type MotivoRechazo,

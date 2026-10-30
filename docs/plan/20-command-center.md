@@ -464,11 +464,22 @@ with property tests:
 ### E-11 Facturas recibidas `[media]`
 
 - [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-10-29):**
-  - board CD-06d, attaching one XML from Registrar gasto;
+  **Remaining (2026-10-30):**
   - a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they
     post dated today, with no confirmation, as the board shows);
-  - checking an unverified invoice («Sin verificar») with the SAT again.
+  - checking an unverified invoice («Sin verificar») with the SAT again;
+  - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
+    known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
+    both yet. It needs a decision on how a template knows its month was registered by an invoice.
+    **Done 2026-10-30, boards CD-01 (the XML zone) and CD-06d:**
+  - Registrar gasto takes one XML. It travels the same path as an upload in Facturas (RFC, «Ya
+    registrada», SAT), so a refusal shows the review's reason in place. The form then opens on
+    the XML: supplier and figures read-only, the concept and a paid invoice's payment date
+    editable, the withholdings as owed with the next month's declaration date, and the category
+    remembered per RFC. An invoice on credit keeps its own date.
+  - «Quitar» sets the waiting XML aside (`quitarFactura`); a registered or cancelled one cannot be.
+  - Playwright: another RFC refused in place, «Quitar», and a honorarios XML registered with the
+    founder's concept and date, then listed in Facturas.
     **Done 2026-10-29, boards CD-06b and CD-06c:**
   - `leerCfdi` reads a stamped CFDI 4.0 income invoice with a small XML reader that refuses any
     DOCTYPE. It covers USD at the invoice's rate, IEPS and local taxes added to cost, and refuses

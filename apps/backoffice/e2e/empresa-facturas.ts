@@ -67,3 +67,14 @@ export async function registrarTres(page: Page) {
 
 export const fila = (page: Page, proveedor: string) =>
   page.getByTestId('factura-recibida').filter({ hasText: proveedor });
+
+/** Board CD-06d's supplier: honorarios with both withholdings, new to the suite. */
+export const CONTADORA = { rfc: 'COCO800101AB3', nombre: 'Contadora E2E' };
+
+export const hoyMx = (): string =>
+  new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+
+/** Attaches one XML on Registrar gasto. */
+export async function adjuntar(page: Page, name: string, o: CfdiDePrueba = {}) {
+  await page.getByLabel('Elegir el XML de la factura').setInputFiles(archivo(name, o));
+}

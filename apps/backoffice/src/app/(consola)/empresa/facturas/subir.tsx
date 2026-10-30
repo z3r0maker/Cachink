@@ -1,29 +1,13 @@
 'use client';
 
-import { startTransition, useActionState, useState, type DragEvent } from 'react';
+import { startTransition, useActionState } from 'react';
 
 import { subirFacturasAction } from '@/server/actions/empresa-facturas';
 import * as mf from '@/styles/mostrador-facturas.css';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
-/** Drop handlers for the zone: it lights up while files hover over it. */
-function useArrastre(enviar: (files: FileList) => void) {
-  const [arrastrando, setArrastrando] = useState(false);
-  return {
-    'data-arrastrando': arrastrando,
-    onDragOver: (e: DragEvent<HTMLElement>) => {
-      e.preventDefault();
-      setArrastrando(true);
-    },
-    onDragLeave: () => setArrastrando(false),
-    onDrop: (e: DragEvent<HTMLElement>) => {
-      e.preventDefault();
-      setArrastrando(false);
-      enviar(e.dataTransfer.files);
-    },
-  };
-}
+import { useArrastre } from './arrastre';
 
 function Texto({ error }: { readonly error: string | null }) {
   return (

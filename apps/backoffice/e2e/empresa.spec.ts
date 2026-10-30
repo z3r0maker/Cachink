@@ -9,11 +9,14 @@ import {
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import {
+  adjuntar,
   AGENCIA,
+  CONTADORA,
   DESPACHO,
   fijarRfcMexia,
   fila,
   HONORARIOS,
+  hoyMx,
   IMPRENTA,
   registrarTres,
   subirCinco,
@@ -289,4 +292,51 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   await expect(page.getByRole('link', { name: 'Ver movimiento' })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page).toHaveURL(/\/empresa\/facturas$/);
+});
+
+test('a founder attaches one XML on Registrar gasto, rewords it and registers it', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  // Through the links, as a founder gets there: a file chosen before the page hydrates is lost.
+  await page.getByRole('link', { name: 'Movimientos', exact: true }).click();
+  await page.getByRole('link', { name: '+ Registrar' }).click();
+  await expect(page.getByRole('heading', { name: 'Registrar', level: 1 })).toBeVisible();
+
+  // Another RFC's invoice is refused right there, with the review's reason.
+  await adjuntar(page, 'papeleria.xml', { receptor: 'OTR010101AA1' });
+  await expect(page.getByRole('alert').filter({ hasText: 'No es de MEXIA' })).toContainText(
+    'Está a nombre de otro RFC',
+  );
+
+  // «Quitar» sets the XML aside and gives back the blank form.
+  await adjuntar(page, 'quitar.xml', { emisor: CONTADORA, concepto: 'Para quitar' });
+  await expect(page.getByText('quitar.xml leído · vigente en el SAT')).toBeVisible();
+  await page.getByRole('button', { name: 'Quitar' }).click();
+  await expect(page.getByRole('heading', { name: 'Registrar', level: 1 })).toBeVisible();
+
+  await adjuntar(page, 'contadora.xml', { emisor: CONTADORA });
+  await expect(page.getByText('contadora.xml leído · vigente en el SAT')).toBeVisible();
+  await expect(page.getByLabel('Proveedor')).toHaveValue(
+    `${CONTADORA.nombre} · RFC ${CONTADORA.rfc}`,
+  );
+  const delXml = page.getByRole('region', { name: 'Del XML' });
+  await expect(delXml).toContainText('IVA retenido−$373.33');
+  await expect(delXml).toContainText('Salió del banco$3,336.67');
+  await expect(delXml).toContainText('la declaración del 17 de');
+  await page.getByLabel('Concepto').fill('Honorarios E2E de octubre');
+  await page.getByLabel('Fecha de pago').fill(hoyMx());
+  await page.getByText('Administración', { exact: true }).click();
+  await page.getByRole('button', { name: 'Registrar gasto' }).click();
+
+  // Real rows: the movement in its month, and the invoice in Facturas, pointing at it.
+  await expect(page).toHaveURL(/\/empresa\/movimientos\?mes=\d{4}-\d{2}$/);
+  await expect(page.getByText('Honorarios E2E de octubre')).toBeVisible();
+  await page.goto('/empresa/facturas');
+  await expect(fila(page, CONTADORA.nombre)).toContainText('Vigente');
+  await expect(fila(page, CONTADORA.nombre)).toContainText('−$723.33');
+  await expect(
+    fila(page, CONTADORA.nombre).getByRole('link', { name: 'Administración' }),
+  ).toBeVisible();
 });
