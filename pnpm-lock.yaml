@@ -133,6 +133,9 @@ importers:
       '@xangarro/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@xangarro/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       postgres:
         specifier: ^3.4.7
         version: 3.4.9
