@@ -10,7 +10,8 @@
     ".": "./src/index.ts",
     "./contract": "./src/contract/index.ts",
     "./ui": "./src/ui/index.ts",
-    "./integration": "./src/integration.ts"
+    "./integration": "./src/integration.ts",
+    "./corp": "./src/corp/cfdi.ts"
   },
   "scripts": {
     "build": "tsc --build",

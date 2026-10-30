@@ -28,6 +28,7 @@ export type {
   MovementKind,
   MovimientoSocio,
   PagoImpuestos,
+  PagoProveedor,
   Payout,
   Socio,
 } from './movements.js';
