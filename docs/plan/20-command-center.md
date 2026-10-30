@@ -43,25 +43,67 @@
 
 ## 2. Map of the area
 
-`/empresa` routes in `apps/backoffice`, behind `requireFounder()`:
+`/empresa` routes in `apps/backoffice`, behind `requireFounder()`. The «Entry › tab» column is the
+navigation below.
 
-| Route                  | Screen               | The question it answers                                     | Phase |
-| ---------------------- | -------------------- | ----------------------------------------------------------- | ----- |
-| `/empresa`             | Resumen              | How is the company today, and what needs us?                | 1     |
-| `/empresa/movimientos` | Movimientos          | What came in and went out, and why?                         | 0     |
-| `/empresa/facturas`    | Facturas             | Which CFDIs did we issue and receive, and their state?      | 1     |
-| `/empresa/resultados`  | Estado de resultados | Do we make money? Gross margin, EBITDA, net                 | 1     |
-| `/empresa/balance`     | Balance y socios     | What do we own and owe, and what is each partner's account? | 1     |
-| `/empresa/impuestos`   | Impuestos            | What ISR and IVA do we owe this month, and was it paid?     | 1     |
-| `/empresa/caja`        | Caja                 | How much cash do we have, and how many months does it last? | 2     |
-| `/empresa/presupuesto` | Presupuesto          | Are we within plan? Each partner's spending Límite          | 2     |
-| `/empresa/tablero`     | Tablero              | What did each partner commit to and deliver this quarter?   | 2     |
-| `/empresa/acciones`    | Acciones             | Who owns what, and how would the next pool cut fall?        | 2     |
-| `/empresa/agenda`      | Agenda               | What is due, to SAT, SE and IMPI, and when?                 | 0     |
-| `/empresa/expediente`  | Expediente           | Where is that document?                                     | 0     |
-| `/empresa/cierre`      | Cierre del mes       | Is this month closed and reconciled?                        | 1     |
-| `/empresa/corporativo` | Libro corporativo    | Partners, beneficial owners, actas, credentials, trademark  | 0     |
-| `/empresa/propuestas`  | Propuestas           | What did the agents suggest that we must approve?           | 3     |
+| Route                  | Entry › tab                       | The question it answers                                     | Task       | Phase |
+| ---------------------- | --------------------------------- | ----------------------------------------------------------- | ---------- | ----- |
+| `/empresa`             | Resumen                           | How is the company today, and what needs us?                | E-16       | 1     |
+| `/empresa/movimientos` | Dinero › Movimientos              | What came in and went out, and why?                         | E-02       | 0     |
+| `/empresa/facturas`    | Dinero › Facturas                 | Which CFDIs did we issue and receive, and their state?      | E-10, E-11 | 1     |
+| `/empresa/servicios`   | Dinero › Servicios                | Which services do we pay for, and what will they cost?      | E-24       | —     |
+| `/empresa/caja`        | Dinero › Caja                     | How much cash do we have, and how many months does it last? | E-23       | 2     |
+| `/empresa/resultados`  | Resultados › Estado de resultados | Do we make money? Gross margin, EBITDA, net                 | E-12       | 1     |
+| `/empresa/balance`     | Resultados › Balance              | What do we own and owe?                                     | E-12       | 1     |
+| `/empresa/impuestos`   | Resultados › Impuestos            | What ISR and IVA do we owe this month, and was it paid?     | E-13       | 1     |
+| `/empresa/presupuesto` | Resultados › Presupuesto          | Are we within plan? Each partner's spending Límite          | E-22       | 2     |
+| `/empresa/socios`      | Socios › Cuentas                  | What did each partner put in and lend?                      | E-03       | 0     |
+| `/empresa/tablero`     | Socios › Tablero                  | What did each partner commit to and deliver this quarter?   | E-20       | 2     |
+| `/empresa/trimestre`   | Socios › Trimestre                | How did the quarter go, against the previous one?           | E-17       | 2     |
+| `/empresa/acciones`    | Socios › Acciones                 | Who owns what, and how would the next pool cut fall?        | E-21       | 2     |
+| `/empresa/agenda`      | Cumplimiento › Agenda             | What is due, to SAT, SE and IMPI, and when?                 | E-04       | 0     |
+| `/empresa/cierre`      | Cumplimiento › Cierre del mes     | Is this month closed and reconciled?                        | E-14       | 1     |
+| `/empresa/expediente`  | Cumplimiento › Expediente         | Where is that document?                                     | E-05       | 0     |
+| `/empresa/corporativo` | Cumplimiento › Corporativo        | Partners, beneficial owners, actas, credentials, trademark  | E-06       | 0     |
+| `/empresa/propuestas`  | Propuestas                        | What did the agents suggest that we must approve?           | E-31       | 3     |
+
+### Navigation (owner decision, 2026-10-29; canvas «Ronda 7 · Navegación»)
+
+The owner found the rail's 17 entries too many. «Empresa» has **six entries, each one question**,
+and an entry's screens are tabs under the page title. Boards: «Navegación agrupada (componente)»,
+«Mapa: de 17 entradas a 6», «Dinero · Movimientos» (every tab) and «Cumplimiento · Agenda» (only
+what is built today).
+
+| Entry        | Tabs, in order                                           | The question                                           |
+| ------------ | -------------------------------------------------------- | ------------------------------------------------------ |
+| Resumen      | none (the landing page; holds E-15's tope de la SAS)     | How is the company today, and what needs us?           |
+| Dinero       | Movimientos · Facturas · Servicios · Caja                | What came in, what went out, and how much is left?     |
+| Resultados   | Estado de resultados · Balance · Impuestos · Presupuesto | Do we make money, and what do we owe the SAT?          |
+| Socios       | Cuentas · Tablero · Trimestre · Acciones                 | What did each partner put in, promise and deliver?     |
+| Cumplimiento | Agenda · Cierre del mes · Expediente · Corporativo       | What is due, is the month closed, where is each paper? |
+| Propuestas   | none (an inbox with its pending count)                   | What did the agents suggest that we must approve?      |
+
+**Rules**
+
+1. **A tab appears when its screen ships** (ADR-117: nothing reads «Pronto»). An entry appears with
+   its first built tab, and an entry with one built tab draws no tab bar. Today a founder sees
+   Dinero (Movimientos), Socios (Cuentas) and Cumplimiento (Agenda, Expediente, Corporativo).
+2. **Routes do not change.** A tab is a link to its own route; the rail entry is active on any of
+   its tabs' routes and links to its first built tab. That keeps the change cheap to undo, so it
+   has no ADR.
+3. **`/empresa` opens on Resumen** once E-16 ships; until then it opens on Dinero › Movimientos.
+4. **Two levels, never three.** Page tabs sit under the title; a screen's own filters or views
+   (Movimientos' Todos, Ingresos, Gastos…; Agenda's Próximos, Calendario, Evidencias) stay inside
+   its panel. At most five tabs per entry (CLAUDE.md §6).
+5. **Trimestre lives in Socios** (owner, 2026-10-29): it is the partners' quarterly review and
+   draws on the Tablero, and Resumen's own Mes, Trimestre, Año selector would clash with a tab of
+   that name.
+6. **The share register stays in Corporativo until E-21.** Corporativo's hero is partners and
+   shares (round 2); E-21's Socios › Acciones takes over the register and the simulator, and
+   Corporativo keeps a summary that links there.
+7. The «Plataforma» group is out of scope here.
+
+The live rail moves to this shape in E-07.
 
 ## 3. The ledger (ADR-125 §4)
 
@@ -437,6 +479,20 @@ with property tests:
   - e.firma and CSD serial numbers and expiry dates, metadata only, never key material.
 - **Acceptance:** a share event creates its 15-business-day beneficial-owner obligation in E-04;
   a CSD expiring in 60 days raises a Resumen signal.
+
+### E-07 Navegación por grupos `[media]`
+
+- [ ] Status · **Blocked by:** — · **Surfaced by:** canvas «Ronda 7 · Navegación» (owner, 2026-10-29)
+- **What:** §2's navigation in the console:
+  - `EMPRESA_NAV_ITEMS` becomes the six entries, each with its tabs (label, route, task), and an
+    entry or tab is listed only once its task ships;
+  - a shared page-tabs component (links with `aria-current`, the El Mostrador segmented style,
+    tokens only) under the title of each built entry with two or more tabs;
+  - the rail entry is active on any of its tabs' routes;
+  - `/empresa` keeps redirecting to Movimientos until E-16.
+- **Acceptance:** a Playwright spec shows the founder three entries (Dinero, Socios,
+  Cumplimiento), Cumplimiento's three tabs with live data on each, and no tab bar on Dinero or
+  Socios; every existing `/empresa/*` URL still opens its screen.
 
 **Phase 1 — first month with revenue**
 
