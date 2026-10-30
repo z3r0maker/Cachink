@@ -27,13 +27,15 @@ without friction provided two things hold:
 
 ## What lives here
 
-| File                | What it is                                                     |
-| ------------------- | -------------------------------------------------------------- |
-| `README.md`         | This positioning note                                          |
-| `AUDIT-steering.md` | The no-steering audit of the app's user-facing copy            |
-| `SCREENSHOTS.md`    | Manifest of `screenshots/` (device, screen, capture)           |
-| `METADATA.md`       | Listing draft: name, subtitle, review notes, demo account TODO |
-| `screenshots/`      | PNG captures at Apple's required device sizes                  |
+| File                | What it is                                                      |
+| ------------------- | --------------------------------------------------------------- |
+| `README.md`         | This positioning note                                           |
+| `AUDIT-steering.md` | The no-steering audit of the app's user-facing copy             |
+| `SCREENSHOTS.md`    | Manifest of `screenshots/` (device, screen, capture)            |
+| `METADATA.md`       | Identity fields, demo tenant, review-safety checklist           |
+| `REVIEW-NOTES.md`   | Paste-ready App Review notes + the steps before each submission |
+| `PRIVACY-LABEL.md`  | The App Privacy answers, derived from what the app sends        |
+| `screenshots/`      | PNG captures at Apple's required device sizes                   |
 
 ## Sizes captured
 

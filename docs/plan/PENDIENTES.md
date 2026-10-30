@@ -17,7 +17,7 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 listas de abajo.
 
 - **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:261`
-- **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:700`
+- **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 12: N-22, N-25, N-44, N-29, N-30, X-02, … · `09-next-features.md:700`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media] (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1030`
 - **X-01** Entorno de staging (Q17 "A later") [infra] [critica] [bloq] (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
@@ -32,7 +32,7 @@ listas de abajo.
 - **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 - **N-26** Auditoría de seguridad `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:734`
 
-## Código y técnico (108)
+## Código y técnico (107)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
@@ -82,7 +82,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 ### Consola (backoffice) (34)
 
-- [~] **B-16** Back-office: consultas guardadas de Studio + funciones de soporte [media] — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:292`
+- [~] **B-16** Back-office: consultas guardadas de Studio + funciones de soporte [media] — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:293`
 - [ ] **N-46** Salud de la sincronización y dispositivos [media] — Disparador: lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos. · `09-next-features.md:1149`
 - [ ] **N-62** Métricas de cohortes desde el domicilio fiscal, no desde la IP. · `09-next-features.md:1270`
 - [ ] **N-65** Línea de tiempo del inquilino [media] — Bloqueada por: N-08 · Disparador: ya (todas las tablas fuente existen). · `09-next-features.md:1312`
@@ -156,14 +156,13 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-29** Gate E2E determinista de toda la pila `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] — Bloqueada por: P-17, A-16, N-22, N-25 · `09-next-features.md:774`
 - [ ] **N-49** Explorador de pruebas con GLM [deuda] [baja] — Disparador: el staging de X-01 en vivo y N-29 en verde. · `09-next-features.md:1176`
 
-### Lanzamiento, stores e integración (10)
+### Lanzamiento, stores e integración (9)
 
 - [ ] **X-02** Corrida de integración de extremo a extremo (app real ↔ backend real) [alta] [bloq] — Bloqueada por: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
 - [ ] **X-03** Migración de partners [alta] [bloq] — Bloqueada por: X-02 · `07-launch.md:24`
-- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: `app.json` ya está renombrado (Xangarro!, `mx.xangarro.mobile`) y las capturas de iPhone 6.9" e iPad 13" están en `app-registration/apple/screenshots/`. Hecho 2026-10-29: `docs/store/listing-*.md` apuntan a `xangarro.mx` (soporte, privacidad, términos; contacto `soporte@xangarro.mx`); `xangarro.mx/soporte/` existe (renderizada desde `docs/store/soporte.md`, enlazada desde el footer; falta el deploy manual del landing); el permiso de cámara de iOS dice para qué es, en español, y se quitaron los de micrófono y Face ID que la app no usa. Falta: el copy de las fichas es previo al pivote (modo local, Director, LAN sync); las notas de revisión no tienen la cuenta demo sembrada en producción (`app-registration/apple/METADATA.md` la marca TODO); el cuestionario App Privacy; `submit.production` dentro de `eas.json` no tiene `ascAppId`; y el splash sigue diciendo «Cachink!» (X-07). · `07-launch.md:38`
+- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: Hecho 2026-10-29: fichas apuntando a `xangarro.mx`, `xangarro.mx/soporte/` en producción, permiso de cámara en español. Hecho 2026-10-30: `docs/store/listing-app-store.md` reescrita para la app de mostrador (cada campo contado contra el límite de Apple, sin precio, plan ni enlace de compra); notas de revisión listas para pegar, con los pasos antes de cada envío, en `app-registration/apple/REVIEW-NOTES.md`; respuestas de App Privacy derivadas del código en `app-registration/apple/PRIVACY-LABEL.md`; y el seed demo ahora crea dos códigos (`DEMXK7M3`, `DEMXPAD2`, uno por lugar de dispositivo del plan Xangarro) y revoca los dispositivos de la revisión anterior: con un solo código de un uso y dos lugares, una revisión en iPhone + iPad o un segundo envío no podían vincular. Falta: crear el registro en App Store Connect y poner su `ascAppId` en `submit.production` de `eas.json`; llenar App Privacy desde ese archivo; correr el seed demo contra el hospedado antes de enviar; un build de producción probado; el splash sigue diciendo «Cachink!» (X-07); la ficha de Play (`listing-play-store.md`) sigue con el copy previo al pivote. · `07-launch.md:38`
 - [ ] **X-09** Reset de ROADMAP.md [media] [bloq] — Bloqueada por: X-02 · `07-launch.md:114`
 - [ ] **X-10** Compuerta del checklist de lanzamiento [critica] [bloq] — Bloqueada por: X-01…X-09 (excepto X-08) · `07-launch.md:120`
-- [~] **N-32** Barrido de cumplimiento para las tiendas de apps `[LAUNCH]` [LAUNCH] [tiendas] [alta] [bloq] — Bloqueada por: N-24, A-15 · Falta: la checklist del revisor para X-05 en `docs/store/`. `pnpm lint:store` vuelve a estar en verde y forma parte del gate en `ci.yml` (ver Progress). · `09-next-features.md:823`
 - [ ] ANTES DE STORES — URLs de términos y privacidad activas (`xangarro.mx/privacidad`, `/terminos`) y · `../launch/production-readiness.md:99`
 - [ ] ANTES DE STORES — Notas para el revisor que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, s… · `../launch/production-readiness.md:101`
 - [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:103`
@@ -327,7 +326,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
-- `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
+- `09-next-features.md` — 49 abiertos (10 en curso, 0 bloqueados, 27 hechos)
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)

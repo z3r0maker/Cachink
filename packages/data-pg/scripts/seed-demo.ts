@@ -2,10 +2,11 @@
  * Seed — "Tacos La Esquina", the App Review tenant (B-04, X-05).
  *
  * Separate from the dev seed and runnable against the hosted project: a store
- * reviewer signs in as `demo@xangarro.mx`, pairs a phone with `DEMXK7M3`,
- * and finds a month of ventas and gastos. Idempotent by upsert — the app
- * role cannot DELETE since 0036 (DB-RLS-01), so a re-run keeps the rows it
- * already wrote and only re-mints the activation code; it never wipes. The
+ * reviewer signs in as `demo@xangarro.mx`, pairs a phone with `DEMXK7M3`
+ * (and an iPad with `DEMXPAD2`), and finds a month of ventas and gastos.
+ * Idempotent by upsert — the app role cannot DELETE since 0036 (DB-RLS-01),
+ * so a re-run keeps the rows it already wrote, re-mints the codes and revokes
+ * the last review's devices so their slots are free; it never wipes. The
  * owner's password is set on the **first** run only: the app role cannot
  * rewrite `auth.users` (`account_create` refuses a taken address, and
  * `password_reset` needs a link), which is also what review notes want — a
@@ -81,14 +82,27 @@ async function seedOwner(sql: Sql, password: string): Promise<void> {
     ON CONFLICT (id) DO NOTHING`;
 }
 
-/** Re-minted on every run: a reviewer's redeemed code is live again for the next reviewer. */
-async function seedActivationCode(sql: Sql, today: Date): Promise<void> {
+/** Re-minted on every run: a reviewer's redeemed codes are live again for the next reviewer. */
+async function seedActivationCodes(sql: Sql, today: Date): Promise<void> {
   const expires = new Date(today.getTime() + CODE_DAYS * 86_400_000).toISOString();
+  for (const code of DEMO.activationCodes) {
+    await sql`
+      INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
+      VALUES (${code}, ${DEMO.owner.email}, ${expires}, ${DEMO.businessId}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET expires_at = EXCLUDED.expires_at, redeemed_at = NULL,
+        redeemed_by_device_id = NULL, updated_at = now()`;
+  }
+}
+
+/**
+ * The last review's devices still hold the plan's two slots, and a live code
+ * is refused while they do (NO_DEVICE_SLOTS). Revoking is how the portal frees
+ * a slot too; the app role cannot delete the row, and need not.
+ */
+async function releaseDemoDevices(sql: Sql): Promise<void> {
   await sql`
-    INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-    VALUES (${DEMO.activationCode}, ${DEMO.owner.email}, ${expires}, ${DEMO.businessId}, now(), now())
-    ON CONFLICT (code) DO UPDATE SET expires_at = EXCLUDED.expires_at, redeemed_at = NULL,
-      redeemed_by_device_id = NULL, updated_at = now()`;
+    UPDATE devices SET revoked_at = now(), updated_at = now()
+    WHERE business_id = ${DEMO.businessId} AND revoked_at IS NULL`;
 }
 
 export interface SeedDemoOptions {
@@ -110,7 +124,8 @@ export async function seedDemo(sql: Sql, options: SeedDemoOptions): Promise<Seed
   await seedClients(sql);
   await seedOperators(sql);
   await seedOwner(sql, options.password);
-  await seedActivationCode(sql, today);
+  await seedActivationCodes(sql, today);
+  await releaseDemoDevices(sql);
   await seedDemoOpeningStock(sql, today);
   const ventas = await seedDemoVentas(sql, today);
   const gastos = await seedDemoGastos(sql, today);
@@ -160,7 +175,7 @@ async function main(): Promise<void> {
     await seedDemoBilling(billingUrl);
     console.log(
       `seeded ${DEMO.nombre} — ${DEMO_PRODUCTS.length} productos, ${ventas} ventas, ${gastos} gastos, ` +
-        `${DEMO.operators.length} operadores, código ${DEMO.activationCode}, owner ${DEMO.owner.email} (${Date.now() - started} ms)`,
+        `${DEMO.operators.length} operadores, códigos ${DEMO.activationCodes.join(', ')}, owner ${DEMO.owner.email} (${Date.now() - started} ms)`,
     );
   } finally {
     await sql.end({ timeout: 5 });
