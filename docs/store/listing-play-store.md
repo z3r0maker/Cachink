@@ -1,62 +1,83 @@
-# Xangarro — Play Store listing (es-MX)
+# Xangarro — Google Play listing (es-MX)
 
-## Título (30 caracteres)
+Paste-ready text for each Play Console field (Grow → Store presence → Main
+store listing). The number after each heading is Google's character limit;
+every field was counted against it on 2026-10-30. Like the App Store listing
+(`listing-app-store.md`), the text names no price or plan and has no link to
+buy: the app sells nothing, so nothing in it may point at a purchase. No
+emoji, no ranking words («el mejor», «#1»): Play's metadata policy rejects
+both. The rest of the Play Console answers are in `app-registration/google-play/`.
 
-**Xangarro Finanzas**
+## Nombre de la app (30)
 
-## Descripción corta (80 caracteres)
+Xangarro! Caja de tu negocio
 
-POS y finanzas para emprendedoras. Funciona sin internet. Sin complicaciones.
+Play has no subtitle, so the name carries the description. If Play objects to
+the descriptor, use `Xangarro!` alone.
 
-## Descripción completa (4000 caracteres)
+## Descripción breve (80)
 
-Xangarro es la app más simple para llevar las finanzas de un negocio
-pequeño en México. Registra ventas y egresos, controla inventario, y
-ve tus estados financieros al día — todo en tu dispositivo, sin
-necesidad de internet.
+Cobra, registra gastos y cierra la caja de tu negocio, aunque no haya internet.
 
-Diseñada para emprendedores y pequeños negocios: tortillerías,
-papelerías, food trucks, cafés y tiendas de barrio.
+## Descripción completa (4000)
 
-**¿Qué incluye?**
+Xangarro es la caja de tu negocio en el teléfono o la tablet. Tu equipo cobra en el mostrador, registra los gastos y cierra el turno, y todo llega a la cuenta del negocio.
 
-📈 **Ventas** — Efectivo, Transferencia, Tarjeta o Crédito.
-Comprobantes por WhatsApp en un toque.
+Para usar la app necesitas una cuenta de Xangarro. El dueño vincula cada dispositivo con un código o un QR, y cada persona del equipo entra con su NIP.
 
-📉 **Egresos** — Gasto, Nómina e Inventario (compras) en un mismo
-flujo. Gastos recurrentes (renta, servicios) con recordatorios
-automáticos.
+COBRA EN SEGUNDOS
+• Arma el ticket tocando tus productos o escaneando su código de barras.
+• Cobra en efectivo, tarjeta, transferencia o fiado.
+• La app te dice el cambio y manda el comprobante por WhatsApp.
 
-📦 **Inventario** — productos, movimientos de stock, alertas de
-bajo inventario a las 19:00.
+SE VA EL INTERNET, NO LA VENTA
+• La app sigue cobrando sin conexión.
+• Las ventas se envían solas cuando vuelve la señal.
 
-📊 **Estados financieros NIF** — Resultados, Balance y Flujo de
-Efectivo. Informe mensual en PDF para tu contador.
+CAJA Y TURNOS
+• Abre el turno con el fondo de la caja y ciérralo con el corte.
+• Ve lo que se vendió y lo que salió de la caja en el día.
 
-👥 **Dos roles** — Director (ve todo) y Operativo (captura). Sin
-enredos.
+GASTOS E INVENTARIO
+• Registra los gastos del día y confirma los recurrentes cuando toca.
+• Da entrada a la mercancía y lleva el stock al día.
 
-🌙 **Sin internet obligatorio** — la app funciona fuera de línea.
-Sincroniza cuando tengas conexión.
+FIADO
+• Anota quién te debe y mándale un recordatorio por WhatsApp.
 
-🔒 **Privacidad primero** — tus datos se quedan contigo. Reportes de
-errores solo si tú aceptas.
-
-_Finanzas para emprendedores._
+Funciona en teléfonos y tablets Android, en español y en pesos.
 
 ## Categoría
 
-Finanzas
+App → **Empresa** (Business).
 
-## Tags
+## Etiquetas
 
-punto de venta, inventario, negocio, emprendedor, finanzas, NIF, México
+Play only offers tags from its own list (up to five). Pick the ones closest
+to: punto de venta, caja registradora, inventario, pequeños negocios,
+contabilidad. Leave out any tag about payments or banking: the app moves no
+money.
 
-## Contacto
+## Datos de contacto
 
-soporte@xangarro.mx
+| Campo              | Valor                       |
+| ------------------ | --------------------------- |
+| Correo electrónico | soporte@xangarro.mx         |
+| Sitio web          | https://xangarro.mx         |
+| Teléfono           | (opcional; vacío por ahora) |
 
-## Políticas
+## Política de privacidad (App content → Privacy policy)
 
-- Política de privacidad: https://xangarro.mx/privacidad/
-- Términos y condiciones: https://xangarro.mx/terminos/
+https://xangarro.mx/privacidad/
+
+## Gráficos
+
+| Asset                 | Play's rule                                  | Status                                                                                                                                                                                                    |
+| --------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ícono (512 × 512 PNG) | 32-bit PNG, ≤ 1 MB                           | Ready: `assets/brand/icons/app-icon-512.png`                                                                                                                                                              |
+| Gráfico de funciones  | 1024 × 500, JPEG or 24-bit PNG, no alpha     | **Missing.** Brand work (X-07); draw it on the canvas first                                                                                                                                               |
+| Capturas de teléfono  | 2–8, each side 320–3840 px, at most 2:1      | **Missing.** The App Store set (`app-registration/apple/screenshots/iphone-6.9/`, 1320 × 2868) is 2.17:1, over Play's limit, and shows the iOS status bar. Re-shoot the same eight on an Android emulator |
+| Capturas de tablet    | 7" and 10" sets, needed for the tablet badge | **Missing.** The iPad set (2064 × 2752) fits the size rule but shows iPadOS; re-shoot on an Android tablet emulator                                                                                       |
+
+The eight shots and their story are in `app-registration/apple/SCREENSHOTS.md`;
+the Android set should tell the same story in the same order.
