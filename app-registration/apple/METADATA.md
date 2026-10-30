@@ -30,14 +30,26 @@ plan mention, no «descarga» marketing.
 - How to get in: use the manual code path («Escribir código» on the first
   screen) with the demo credentials below — the QR path requires a second
   screen.
-- Demo credentials: **TODO — seed a demo business + operator NIP on the
-  production cloud and pin them here before the first submission.** The
-  reviewer needs: activation email + code (or a pre-linked build), operator
-  NIP, and a business with catalogue + an open turno so the app is alive.
+- Demo credentials: **seeded and verified (2026-10-20)** — the App Review
+  tenant is `packages/data-pg/scripts/seed-demo.ts` («Tacos La Esquina»):
+  the reviewer types `demo@xangarro.mx` + code **`DEMXK7M3`** on the
+  activation screen («Escribir código»), then signs the register in as
+  **Lupita, NIP 1234** (Chuy, 5678, is the second). The code is minted
+  for a year and re-minted (and un-redeemed) by re-running the seed —
+  **run it against the hosted DB before each submission**:
+  `DATABASE_URL=… BILLING_DATABASE_URL=… DEMO_OWNER_PASSWORD=… pnpm
+--filter @xangarro/data-pg exec tsx scripts/seed-demo.ts`. The owner's
+  portal password is set on the first run only (stable for review).
+  Verified locally against the real stack (portal + Postgres, no mock):
+  typed activation → bootstrap → Lupita's login → turno → one cash sale
+  → the ticket landed in `tickets`. The seed also fixes two contract
+  violations that 500'd the reviewer's activation before this: operator
+  ids with a non-ULID `U`, and an entrada `motivo` outside
+  `EntryReasonEnum`.
 
 ## Review-safety checklist
 
-- [ ] Demo tenant seeded and stable (credential rotation breaks review)
+- [x] Demo tenant seeded and verified — `seed-demo.ts`, credentials above; re-run before each submission to re-mint the code
 - [ ] Privacy policy URL live (landing site, Spanish)
 - [ ] App Privacy label filled: crash reporting OFF by default (ADR-027),
       sync data to our own cloud, no ads, no tracking, no third-party sharing

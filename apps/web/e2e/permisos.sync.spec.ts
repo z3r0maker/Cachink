@@ -1,11 +1,7 @@
-import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
-import { newUlid } from '@xangarro/domain';
-import { execFileSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import postgres from 'postgres';
+import { expect, test } from './test';
 
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, stamp, type Tenant } from './tenant';
 
 /**
  * P-05's permissions editor on a throwaway **Xangarrote** tenant (the plan
@@ -15,51 +11,19 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const stamp = Date.now();
-const email = `xangarrote-${stamp}@test.mx`;
-const password = 'xangarrote-1';
-const biz = newUlid();
-const operador = `Beto ${stamp}`;
-
-const billingUrl = (): string =>
-  process.env.BILLING_DATABASE_URL ??
-  execFileSync('../../packages/data-pg/scripts/db-local.sh', ['billing-url']).toString().trim();
+let t: Tenant;
+/** Typed into the dialog, so it carries the tenant's own stamp. */
+let operador = '';
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword(password);
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Grande ${stamp}`}, 'RESICO', '626', 125, ${biz}, ${newUlid()}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
-  });
-  const billing = postgres(billingUrl(), { max: 1, onnotice: () => undefined });
-  try {
-    await billing`
-      INSERT INTO subscriptions (stripe_subscription_id, business_id, stripe_customer_id, plan_id, interval,
-        status, stripe_status, current_period_start, current_period_end, collection_method)
-      VALUES (${`sub_e2e_${stamp}`}, ${biz}, ${`cus_e2e_${stamp}`}, 'xangarrote', 'month',
-        'active', 'active', now(), '2099-01-01', 'charge_automatically')`;
-  } finally {
-    await billing.end({ timeout: 5 });
-  }
+  // Xangarrote is the plan that includes per-operator permissions; the seeded
+  // tenant is on Xangarro, where the editor must be absent.
+  t = await mintTenant({ label: 'Permisos', plan: 'xangarrote' });
+  operador = `Beto ${stamp()}`;
 });
 
-async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill(password);
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
-}
-
 test('on Xangarrote an operator can be allowed to cancel sales', async ({ page }) => {
-  await signIn(page);
+  await signIn(page, t);
   await page.goto('/equipo');
   await page.getByRole('button', { name: 'Nuevo operador' }).click();
   await page.getByTestId('operador-nombre').fill(operador);
@@ -78,7 +42,7 @@ test('on Xangarrote an operator can be allowed to cancel sales', async ({ page }
   await expect(page.getByText('Puede cancelar ventas', { exact: true }).first()).toBeVisible();
 
   const [row] = await asTenant(
-    biz,
+    t.biz,
     (sql) => sql`
       SELECT u.permissions,
              (SELECT count(*)::int FROM sync_log l WHERE l.table_name = 'users' AND l.row_id = u.id) AS logged

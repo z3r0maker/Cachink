@@ -30,6 +30,12 @@
    to Supabase Storage, since Xangarro moves to Azure after about twenty clients (ADR-127, E-26).
 8. **Minutas feed the Tablero.** Meeting minutes are filed in the Expediente; the secretario del
    Tablero proposes objectives and cards from them, and the founders approve (ADR-127, E-27).
+9. **Invoices on credit (PPD) post when issued, as owed (2026-10-29).** A received PPD invoice
+   posts in its own month as «por pagar» (Proveedores), and its IVA becomes creditable when it
+   is paid. Its row offers «Registrar pago», which posts the bank outflow, and «Cancelar», which
+   reverses it when the supplier cancels or it came wrong (E-11). An invoice MEXIA issues before
+   being paid posts as «por cobrar», with «Marcar cobrada» and «Cancelar» (E-10). A paid (PUE)
+   invoice posts paid, as today.
 
 ### Open owner decisions (answer before the task that needs it)
 
@@ -448,21 +454,54 @@ with property tests:
     exist);
   - a daily import posting the «cobro» and «payout» movements per project;
   - `/empresa/facturas`, «Emitidas» tab: CFDI status, global CFDI, credit notes (read from ADR-070
-    tables, never Stripe live).
+    tables, never Stripe live);
+  - an invoice issued before payment (PPD) posts as «por cobrar», with «Marcar cobrada» and
+    «Cancelar» (owner decision 9). The Emitidas board is still to draw.
 - **Acceptance:** a month's imported income equals the month's `cfdi_payments` total without IVA;
-  re-running the import posts nothing new (idempotent per payment id).
+  re-running the import posts nothing new (idempotent per payment id); a «por cobrar» invoice
+  counts as income in its month and moves to the bank only when marked collected.
 
 ### E-11 Facturas recibidas `[media]`
 
-- [ ] Status · **Blocked by:** E-02, E-05
+- [~] Status · **Blocked by:** E-02, E-05
+  **Remaining (2026-10-29):**
+  - board CD-06d, attaching one XML from Registrar gasto;
+  - a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they
+    post dated today, with no confirmation, as the board shows);
+  - checking an unverified invoice («Sin verificar») with the SAT again.
+    **Done 2026-10-29, boards CD-06b and CD-06c:**
+  - `leerCfdi` reads a stamped CFDI 4.0 income invoice with a small XML reader that refuses any
+    DOCTYPE. It covers USD at the invoice's rate, IEPS and local taxes added to cost, and refuses
+    a complemento de pago or a 3.3 with their own reasons.
+  - `corp.received_invoices` (0006) keeps each UUID with the XML's figures and bytes. Its guards
+    (0006_zz) grant no DELETE, freeze the figures and only move an invoice forward. Leaving the
+    review marks uploads «descartada»; a new upload takes them again.
+  - `/empresa/facturas` lists the month's invoices plus every expense without one («Sin CFDI»),
+    under four tiles. `/empresa/facturas/revisar` shows a card per invoice, with its category
+    remembered per supplier RFC, and a line per file set aside.
+  - The SAT's public status service is behind `ConsultaSat`. No answer means «Sin verificar»;
+    e2e runs it simulated (`CORP_SAT_CONSULTA`).
+  - A PPD invoice posts owed with its IVA in `iva_por_acreditar`. «Registrar pago»
+    (`pago_proveedor`) pays the net, books the withholdings and makes the IVA creditable;
+    «Cancelar» reverses the expense.
+  - MEXIA's RFC is the «RFC de MEXIA» registry in Corporativo; until it is filled in, uploads are
+    refused with that instruction.
+  - Playwright: five XML in one upload (two refused), three registered, one paid, one cancelled,
+    and a re-upload refused as «Ya registrada».
 - **What:**
   - XML upload (drag and drop, several at once), parsed into the expense movement (emisor,
     subtotal, IVA, retenciones, uso, método de pago);
   - the SAT status check;
   - foreign providers without a CFDI: PDF plus manual capture;
-  - the «Recibidas» tab.
+  - the «Recibidas» tab;
+  - a PPD invoice posts as «por pagar», with «Registrar pago» and «Cancelar» (owner decision 9);
+  - an invoice addressed to another RFC is refused («No es de MEXIA»), and the category is
+    remembered per supplier RFC.
+- **Design:** canvas round 6, boards CD-06b (Recibidas), CD-06c (Revisa antes de registrar) and
+  CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day. The Emitidas tab
+  stays out of the screen until E-10.
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
-  retención appears as a liability.
+  retención appears as a liability; a PPD invoice's IVA is creditable only once it is paid.
 
 ### E-12 Estado de resultados y Balance `[media]`
 
