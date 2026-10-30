@@ -16,6 +16,8 @@ and what to check before every submission (N-32's reviewer checklist, X-05).
    ```
 
    It prints `códigos DEMXK7M3, DEMXPAD2`. Each code links **one device, once**.
+   An App Store review can use both, so never have the App Store and Google
+   Play in review at the same time ([one store at a time](../google-play/README.md#one-store-at-a-time)).
 
 2. **Walk the steps below yourself** on a fresh install of the build you are
    submitting, with `DEMXK7M3`. Then re-run the seed, so both codes and both

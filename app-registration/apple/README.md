@@ -1,7 +1,7 @@
 # App Registration — Apple (App Store)
 
-The App Store presence for the phone app. Sibling folders (`google-play/`)
-will follow when the Android listing starts; everything here is Apple-only.
+The App Store presence for the phone app; everything here is Apple-only. The
+Play Store's answers live in the sibling folder [`google-play/`](../google-play/README.md).
 
 ## Positioning (the load-bearing decision)
 

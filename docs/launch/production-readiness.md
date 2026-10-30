@@ -94,12 +94,20 @@
 
 ## 5. Tiendas de apps
 
-- [ ] **ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad**; formulario de Data Safety de Play —
-      both derived from aviso §3 so they cannot disagree.
-- [ ] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
-      linked inside the app binary + App Store Connect (Guideline 3.1.2).
-- [ ] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
-      Sign in with Apple/Google, deletion via the portal).
+- [~] **ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad**; formulario de Data Safety de Play —
+  both derived from aviso §3 so they cannot disagree. **Answers written 2026-10-30:**
+  `app-registration/apple/PRIVACY-LABEL.md` and `app-registration/google-play/DATA-SAFETY.md`, derived
+  from the code and cross-referenced row by row. Still to do: type them into App Store Connect and Play
+  Console; the manifest is merged by EAS (see PRIVACY-LABEL.md if `ITMS-91053` comes back).
+- [~] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
+  linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
+  subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
+  2026-10-29; both listings carry them. Still to do: the app shows `xangarro.mx/privacidad` only as plain
+  text in the linking notice; a tappable «Aviso de privacidad» row (Ajustes, and the linking screen) needs
+  a board first.
+- [x] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
+      Sign in with Apple/Google, deletion via the portal). **Done 2026-10-30:** `app-registration/apple/REVIEW-NOTES.md`
+      and the App access text in `app-registration/google-play/README.md`.
 - [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes, sin
       copyleft; resolve the 2 `Unknown`: `@tamagui/native`, `buffers`).
 - [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)).
