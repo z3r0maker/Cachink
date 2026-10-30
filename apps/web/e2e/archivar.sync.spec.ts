@@ -1,13 +1,7 @@
-import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
-import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
+import { expect, test } from './test';
 
 import { asTenant } from './sync-phone';
-
-// Two Playwright projects (desktop, laptop) load this module together on CI —
-// a bare workerStamp collides across workers, so the stamp carries the pid too.
-const workerStamp = `${process.pid}-${Date.now()}`;
+import { mintTenant, signIn, submitSignIn, type Tenant } from './tenant';
 
 /**
  * P-08's archive row on a throwaway tenant (never the seeded one): a wrong name
@@ -16,39 +10,17 @@ const workerStamp = `${process.pid}-${Date.now()}`;
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const email = `archivo-${workerStamp}@test.mx`;
-const password = 'archivo-123';
-const nombre = `Fonda ${workerStamp}`;
-const biz = newUlid();
-const dev = newUlid();
+let t: Tenant;
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword(password);
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${nombre}, 'RESICO', '626', 125, ${biz}, ${dev}, now(), now())`;
-    await sql`
-      INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
-      VALUES (${dev}, 'Caja', 'android', 'x', ${biz}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
-  });
+  // On the free plan: `ArchivarNegocioUseCase` refuses a business whose
+  // subscription is still active (`SuscripcionActivaError`), and the factory's
+  // default plan is a paid one.
+  t = await mintTenant({ label: 'Fonda', plan: 'free' });
 });
 
-async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill(password);
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-}
-
 test('archiving takes the typed name, unlinks the phones and closes the door', async ({ page }) => {
-  await signIn(page);
+  await signIn(page, t);
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/negocio');
   await page.getByRole('button', { name: 'Archivar negocio' }).click();
@@ -57,18 +29,21 @@ test('archiving takes the typed name, unlinks the phones and closes the door', a
   await dialog.getByRole('button', { name: 'Archivar' }).click();
   await expect(dialog.getByText(/Escribe el nombre del negocio/)).toBeVisible();
 
-  await dialog.getByTestId('archivar-confirmacion').fill(nombre.toLowerCase());
+  await dialog.getByTestId('archivar-confirmacion').fill(t.nombre.toLowerCase());
   await dialog.getByRole('button', { name: 'Archivar' }).click();
   await page.waitForURL((u) => u.pathname.startsWith('/login'));
 
   const [row] = await asTenant(
-    biz,
+    t.biz,
     (sql) => sql`
-      SELECT (SELECT deleted_at IS NOT NULL FROM businesses WHERE id = ${biz}) AS archived,
+      SELECT (SELECT deleted_at IS NOT NULL FROM businesses WHERE id = ${t.biz}) AS archived,
              (SELECT count(*)::int FROM devices WHERE revoked_at IS NULL) AS live`,
   );
   expect(row).toEqual({ archived: true, live: 0 });
 
-  await signIn(page);
-  await expect(page.getByText('Tu cuenta aún no pertenece a ningún negocio.')).toBeVisible();
+  // The door is pressed, not opened: the archived business answers with its own
+  // page. By role, because Next's route announcer repeats the heading's text
+  // and `getByText` then matches two elements.
+  await submitSignIn(page, t);
+  await expect(page.getByRole('heading', { name: 'Sube la cortina.' })).toBeVisible();
 });

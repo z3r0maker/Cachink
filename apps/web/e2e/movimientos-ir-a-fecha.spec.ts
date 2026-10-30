@@ -1,10 +1,9 @@
 import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { clickUntil } from './interact';
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
  * «Ir a fecha» (DS-01): `?ir=YYYY-MM-DD` opens the page holding that day and
@@ -14,57 +13,39 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
+let t: Tenant;
+
 // Computed in beforeAll, not here: the module loads once per worker, and CI
 // re-runs beforeAll against a database that already holds this tenant's rows
-// (users_email_key). A fresh stamp per execution makes every run its own tenant.
-let stamp = '';
-let email = '';
-let biz = '';
 const counter = (page: Page) => page.locator('main').getByRole('status');
 
 test.beforeAll(async () => {
-  stamp = `${process.pid}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
-  email = `ir-fecha-${stamp}@test.mx`;
-  biz = newUlid();
-  const userId = randomUUID();
-  const hash = await hashPassword('ir-fecha-1');
-  const [dev, producto] = [newUlid(), newUlid()];
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Un día a la vez ${stamp}`}, 'RESICO', 125, ${biz}, ${dev}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'viewer', ${biz}, now(), now())`;
+  t = await mintTenant({ label: 'Fecha' });
+  const [producto] = [newUlid(), newUlid()];
+  await asTenant(t.biz, async (sql) => {
     await sql`
       INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, business_id, device_id,
                             created_at, updated_at)
-      VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', ${biz}, ${dev}, now(), now())`;
+      VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', ${t.biz}, ${t.deviceId}, now(), now())`;
     for (let dia = 1; dia <= 25; dia += 1) {
       const id = newUlid();
       const fecha = `2026-05-${String(dia).padStart(2, '0')}`;
       await sql`
         INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, business_id, device_id,
                              created_at, updated_at)
-        VALUES (${id}, ${dia}, ${fecha}, ${`Venta del ${dia}`}, 'Efectivo', 'pagado', ${biz}, ${dev},
+        VALUES (${id}, ${dia}, ${fecha}, ${`Venta del ${dia}`}, 'Efectivo', 'pagado', ${t.biz}, ${t.deviceId},
                 now(), now())`;
       await sql`
         INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                            producto_id, cantidad, business_id, device_id, created_at, updated_at)
         VALUES (${id}, ${id}, ${fecha}, ${`Venta del ${dia}`}, 'Producto', 1000,
-                ${producto}, 1, ${biz}, ${dev}, now(), now())`;
+                ${producto}, 1, ${t.biz}, ${t.deviceId}, now(), now())`;
     }
   });
 });
 
 async function entrar(page: Page) {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('ir-fecha-1');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
 }
 
 test('«Ir a fecha» opens the day’s page, and the pager goes on from it', async ({ page }) => {

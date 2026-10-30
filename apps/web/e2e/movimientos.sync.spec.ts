@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { stamp } from './tenant';
 import { newUlid } from '@xangarro/domain';
 
 import { filled } from './interact';
@@ -99,7 +101,7 @@ test('a product created in the portal reaches the phones, at zero stock', async 
   request,
 }) => {
   const cursor = (await pull(request, b, b.cursor)).serverSeq;
-  const nombre = `Agua de jamaica ${Date.now()}`;
+  const nombre = `Agua de jamaica ${stamp()}`;
   createdName = nombre;
   await page.goto('/productos');
   // ADR-107: its own page, three questions.

@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { stamp } from './tenant';
 import { deviceHeaders } from '@xangarro/contracts';
 import { newUlid } from '@xangarro/domain';
 
@@ -60,7 +62,7 @@ test('a push is stored with its money, acknowledged, and its bad row shows on Si
 });
 
 test('a client added on one phone reaches the other', async ({ request }) => {
-  const c = client(a, `Cliente E2E ${Date.now()}`);
+  const c = client(a, `Cliente E2E ${stamp()}`);
   expect((await (await push(request, a, [c])).json()).accepted).toHaveLength(1);
   const got = await pull(request, b, b.cursor);
   expect(got.tables.clients.map((x: { id: string }) => x.id)).toContain(c.rowId);
@@ -68,7 +70,7 @@ test('a client added on one phone reaches the other', async ({ request }) => {
 
 test('a portal edit reaches the next pull, and only it', async ({ page, request }) => {
   const cursor = (await pull(request, b, b.cursor)).serverSeq;
-  const renamed = `Taco al pastor ${Date.now()}`;
+  const renamed = `Taco al pastor ${stamp()}`;
   await page.goto('/productos');
   await page
     .locator('main')
