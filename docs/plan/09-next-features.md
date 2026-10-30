@@ -820,8 +820,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ### N-32 Barrido de cumplimiento para las tiendas de apps `[LAUNCH]` [LAUNCH] [tiendas] [alta] [bloq]
 
-- [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
-  **Remaining (2026-09-23, verified against the code):** la checklist del revisor para X-05 en `docs/store/`. `pnpm lint:store` vuelve a estar en verde y forma parte del gate en `ci.yml` (ver Progress).
+- [x] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
+      Done: 2026-10-30 · the reviewer checklist is `app-registration/apple/REVIEW-NOTES.md` (with the paste-ready notes in the ADR-069 framing) rather than `docs/store/`: the Apple registration folder is where the store work now lives. `pnpm lint:store` gates CI since 2026-09-23 (see Progress). The demo code in the How (`DEMOK7M3`) is `DEMXK7M3` plus `DEMXPAD2`: the code alphabet has no O, and one single-use code could not cover a review on two devices.
 
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
