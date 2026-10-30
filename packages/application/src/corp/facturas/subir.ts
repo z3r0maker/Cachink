@@ -8,7 +8,12 @@ import {
   type Revision,
 } from '@xangarro/domain/corp';
 
-import { RfcMexiaPendienteError, SinArchivosError } from './errors.js';
+import {
+  FacturaDesconocidaError,
+  FacturaNoPendienteError,
+  RfcMexiaPendienteError,
+  SinArchivosError,
+} from './errors.js';
 import type { ConsultaSat, FacturaRecibida, ReceivedInvoiceRepository } from './ports.js';
 
 /**
@@ -172,4 +177,15 @@ export async function descartarRevision(facturas: ReceivedInvoiceRepository): Pr
   const pendientes = await facturas.porRevisar();
   for (const f of pendientes) await facturas.descartar(f.cfdi.uuid);
   return pendientes.length;
+}
+
+/** «Quitar» on Registrar gasto (board CD-06d): only a waiting XML is set aside. */
+export async function quitarFactura(
+  facturas: ReceivedInvoiceRepository,
+  uuid: string,
+): Promise<void> {
+  const f = await facturas.porUuid(uuid);
+  if (f === null) throw new FacturaDesconocidaError(uuid);
+  if (f.estado !== 'por_revisar') throw new FacturaNoPendienteError(uuid);
+  await facturas.descartar(uuid);
 }

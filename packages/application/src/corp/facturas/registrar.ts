@@ -34,6 +34,10 @@ export interface Seleccion {
   readonly uuid: string;
   readonly categoria: CategoriaGasto;
   readonly projectId: string | null;
+  /** The founder's wording (board CD-06d); blank keeps the XML's. */
+  readonly concepto?: string;
+  /** The day a paid (PUE) invoice left the bank; one on credit keeps its own date. */
+  readonly fecha?: string;
 }
 
 export async function factura(deps: FacturasDeps, uuid: string): Promise<FacturaRecibida> {
@@ -70,6 +74,13 @@ async function archivar(
   });
 }
 
+/** The movement's date and concept: the founder's, where the invoice allows it. */
+function conceptoYFecha(f: FacturaRecibida, s: Seleccion) {
+  const concepto = s.concepto?.trim() || f.cfdi.concepto || `Factura de ${proveedor(f)}`;
+  const fecha = f.cfdi.metodoPago === 'PUE' && s.fecha ? s.fecha : f.cfdi.fecha;
+  return { concepto, fecha };
+}
+
 async function registrarUna(
   deps: RegistrarFacturasDeps,
   s: Seleccion,
@@ -82,9 +93,8 @@ async function registrarUna(
   }
   if (f.estado !== 'por_revisar') throw new FacturaNoPendienteError(s.uuid);
   const entry = await new RegistrarMovimientoUseCase(deps.ledger).execute({
-    fecha: f.cfdi.fecha,
+    ...conceptoYFecha(f, s),
     projectId: s.projectId,
-    concepto: f.cfdi.concepto || `Factura de ${proveedor(f)}`,
     contraparte: proveedor(f),
     founderId: ctx.founderId,
     source: 'cfdi',
@@ -93,7 +103,11 @@ async function registrarUna(
     deducible: true,
     movement: gastoDeCfdi(f.cfdi, s.categoria),
   });
-  await deps.facturas.marcarRegistrada(f.cfdi.uuid, { ...s, entryId: entry.id });
+  await deps.facturas.marcarRegistrada(f.cfdi.uuid, {
+    categoria: s.categoria,
+    projectId: s.projectId,
+    entryId: entry.id,
+  });
   await archivar(deps, f, entry.id, ctx.hoy, ctx.founderId);
   return entry;
 }
