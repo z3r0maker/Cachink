@@ -10,6 +10,7 @@ import {
 
 import { requireCorpDb } from '../db/corp';
 import { esSinCfdi } from './facturas-view';
+import { panelXml, type PanelXml } from './registrar-xml-view';
 import { tarjetaDe, type TarjetaRevision } from './revision-view';
 
 /**
@@ -37,6 +38,14 @@ export async function leerRevision(): Promise<readonly TarjetaRevision[]> {
   return Promise.all(
     pendientes.map(async (f) => tarjetaDe(f, await facturas.recordadaPara(f.cfdi.emisor.rfc))),
   );
+}
+
+/** The XML attached on Registrar gasto (board CD-06d), while it still waits; else null. */
+export async function leerPanelXml(uuid: string): Promise<PanelXml | null> {
+  const facturas = createReceivedInvoiceRepository(requireCorpDb());
+  const f = await facturas.porUuid(uuid);
+  if (f === null || f.estado !== 'por_revisar') return null;
+  return panelXml(f, await facturas.recordadaPara(f.cfdi.emisor.rfc));
 }
 
 /** MEXIA's RFC as the founders recorded it in Corporativo (E-06), or null. */
