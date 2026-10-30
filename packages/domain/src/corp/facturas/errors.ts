@@ -22,6 +22,9 @@ const MENSAJES: Record<MotivoCfdiInvalido, string> = {
   importes: 'Sus importes no cuadran: subtotal, impuestos y total no suman.',
 };
 
+/** The sentence board CD-06c shows for a file that is not a received invoice. */
+export const mensajeCfdiInvalido = (motivo: MotivoCfdiInvalido): string => MENSAJES[motivo];
+
 export class CfdiInvalidoError extends Error {
   readonly code = 'CFDI_INVALIDO' as const;
   constructor(readonly motivo: MotivoCfdiInvalido) {

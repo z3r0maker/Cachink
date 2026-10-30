@@ -51,6 +51,8 @@ export default defineConfig({
       DATABASE_URL: databaseUrl(),
       // «Empresa» (ADR-124): the corp login. Unset, the area simply does not exist.
       CORP_DATABASE_URL: process.env.CORP_DATABASE_URL ?? '',
+      // E-11: the SAT's CFDI status service answers without the network (sat-consulta.ts).
+      CORP_SAT_CONSULTA: 'simulada',
       E2E_PORT: String(E2E_PORT),
       // Locally, a build of its own (see next.config): other sessions' builds
       // in this directory cannot swap it out mid-run. CI builds `.next` in

@@ -1,5 +1,5 @@
 export { leerCfdi, type CfdiRecibido } from './cfdi.js';
-export { CfdiInvalidoError, type MotivoCfdiInvalido } from './errors.js';
+export { CfdiInvalidoError, mensajeCfdiInvalido, type MotivoCfdiInvalido } from './errors.js';
 export {
   gastoDeCfdi,
   pagoDeGasto,
