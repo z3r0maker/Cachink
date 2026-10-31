@@ -39,13 +39,13 @@
 
 ### Open owner decisions (answer before the task that needs it)
 
-| #    | Decision                                         | Recommendation                                                                                             | Needed by |
-| ---- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | --------- |
-| OD-1 | Default basis of the P&L view                    | **Devengado** (invoiced in the month) with a «Flujo» toggle; taxes always use flujo (RESICO is cash basis) | E-12      |
-| OD-2 | How shared costs split between projects          | By revenue share, with a manual override per cost. Irrelevant until project 2                              | E-41      |
-| OD-3 | May MEXIA's financial data go to Claude/Foundry? | Yes for MEXIA's own books; **never** tenant PII. Revenue leaves only aggregated by project and period      | E-30      |
-| OD-4 | Tablero wording the owner still finds ambiguous  | Settle the deliverable definition on the canvas (E-20's design) before coding it                           | E-20      |
-| OD-5 | Which Claude Design project holds these screens  | A new **«Consola»** project (none exists; `design-reference/` holds portal, operador, comprobantes)        | E-01      |
+| #    | Decision                                         | Recommendation                                                                                                                  | Needed by |
+| ---- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| OD-1 | Default basis of the P&L view                    | **Answered 2026-10-30: devengado** (invoiced in the month) with a «Flujo» toggle; taxes always use flujo (RESICO is cash basis) | E-12      |
+| OD-2 | How shared costs split between projects          | By revenue share, with a manual override per cost. Irrelevant until project 2                                                   | E-41      |
+| OD-3 | May MEXIA's financial data go to Claude/Foundry? | Yes for MEXIA's own books; **never** tenant PII. Revenue leaves only aggregated by project and period                           | E-30      |
+| OD-4 | Tablero wording the owner still finds ambiguous  | Settle the deliverable definition on the canvas (E-20's design) before coding it                                                | E-20      |
+| OD-5 | Which Claude Design project holds these screens  | A new **«Consola»** project (none exists; `design-reference/` holds portal, operador, comprobantes)                             | E-01      |
 
 ## 2. Map of the area
 
@@ -585,7 +585,28 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [ ] Status · **Blocked by:** E-02, OD-1
+- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Falta:** Balance, whose board
+  CD-08 is not on the canvas yet (draw it, owner review, then build `/empresa/balance` and its
+  «Activo = Pasivo + Capital» check); the sweat-cost memo, which reads the Tablero's accepted
+  value (E-20); the bridge's drivers («8 negocios nuevos…»), which need E-10's billing import.
+  **Progress (2026-10-30, board CD-07):**
+  - `@xangarro/domain/corp` `resultados/`: periods (month, quarter, year and the one before),
+    `estadoDeResultados` (§4's cascade; each P&L line carries its invoice date and the day its
+    money moved, so devengado and flujo are one function; margins are null without income or
+    without costs captured), `puenteEbitda` and `tendencia`. ISR is estimated on cash in both
+    bases at 30 % through the portal's `calcularIsrPorRegimen`; E-13 refines it. The hand-worked
+    fixture is the board's September (gross margin 81.0 %, EBITDA 35.0 %).
+  - `importesDeResultados` (data-corp): an invoice on credit moves money on its payment's date
+    and never while unpaid; its cancellation moves none. Integration test with a cash expense,
+    a PPD paid next month, a PPD cancelled unpaid and a reversal.
+  - `/empresa/resultados`, the new «Resultados» rail entry (one tab, no bar): the cascade, the
+    EBITDA bridge against the previous period, six months of income against costs, and the
+    statement, each line opening into its movements. Mes, Trimestre, Año; Devengado, Flujo.
+    Charts are SVG rects coloured from the new `dataviz` tokens (ADR-133): the console's CSP
+    drops inline `style` attributes.
+  - Playwright: two cobros posted by the use case and a fee captured in Registrar, in a month
+    of their own; the figures, the bridge, an opened line, Flujo and the quarter reach the page.
+  - Not in scope: a project filter (E-41, one project today).
 - **What:**
   - §4's cascade as domain functions shared with the portal;
   - `/empresa/resultados`: month, quarter and year; project or company; devengado or flujo; the
@@ -824,8 +845,8 @@ New owner decisions:
   normal-vision ΔE 16.3). Aqua and magenta sit below 3:1 contrast, so they always carry labels.
   Aqua next to red (up/down) always carries a + or − sign.
 
-  **Next step:** a design-system change adds the group to `@xangarro/tokens`, recorded with an
-  ADR.
+  **Done 2026-10-30:** `@xangarro/tokens` has the `dataviz` group (ADR-133), listed in
+  `DESIGN_CONTRACT.md`; E-12's charts are its first use.
 
 - **Unfinished work rolls over.** At quarter close, unfinished cards move to the next quarter and
   are recorded as «no cumplido» in the quarter they missed. Unaccepted value never counts for that

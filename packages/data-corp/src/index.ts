@@ -22,6 +22,7 @@ export {
   monthBounds,
   type Movimiento,
 } from './queries/movimientos.js';
+export { importesDeResultados } from './queries/resultados.js';
 export {
   createFundingCallRepository,
   listFundingCalls,

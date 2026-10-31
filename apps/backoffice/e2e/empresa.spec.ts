@@ -9,6 +9,7 @@ import {
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
+import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   adjuntar,
@@ -352,8 +353,8 @@ test('a founder attaches one XML on Registrar gasto, rewords it and registers it
 
 test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  // The rail shows the three built entries; their screens are tabs, not entries.
-  for (const entrada of ['Dinero', 'Socios', 'Cumplimiento']) {
+  // The rail shows the built entries; their screens are tabs, not entries.
+  for (const entrada of ['Dinero', 'Resultados', 'Socios', 'Cumplimiento']) {
     await expect(rail(page).getByRole('link', { name: entrada, exact: true })).toBeVisible();
   }
   for (const pantalla of ['Movimientos', 'Facturas', 'Agenda', 'Expediente', 'Corporativo']) {
@@ -390,7 +391,10 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   await expect(secciones(page, 'Dinero').getByRole('link')).toHaveText(['Movimientos', 'Facturas']);
   await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
 
-  // One built tab is no choice: Socios draws no bar.
+  // One built tab is no choice: Resultados and Socios draw no bar.
+  await abrirEntrada(page, 'Resultados');
+  await expect(page).toHaveURL(/\/empresa\/resultados$/);
+  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
   await abrirEntrada(page, 'Socios');
   await expect(page).toHaveURL(/\/empresa\/socios$/);
   await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
@@ -412,4 +416,45 @@ test('a founder files a 20 MB document straight to the blob store (E-26)', async
     page.getByTestId('documento-expediente').filter({ hasText: 'E2E Deck de 20 MB' }),
   ).toBeVisible();
   await verDesdeElAlmacen(page, id);
+});
+
+test('a founder reads a month of results, opens a line, and switches basis and period (E-12)', async ({
+  page,
+}) => {
+  await sembrarCobros();
+  await signInAsStaff(page, SOCIO);
+  await registrarHonorarios(page);
+  await abrirEntrada(page, 'Resultados');
+  await expect(page.getByRole('heading', { name: 'Resultados', level: 1 })).toBeVisible();
+
+  // Real rows: two cobros the use case posted and the fee Registrar took, worked by hand.
+  await page.goto(`/empresa/resultados?periodo=${MES}`);
+  await expect(page.getByText('Marzo de 2024 vs febrero')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'De $10,000 de ingresos a $4,900 de utilidad' }),
+  ).toBeVisible();
+  await expect(renglon(page, 'ingresos')).toContainText('$10,000.00');
+  await expect(renglon(page, 'administracion')).toContainText('($3,000.00)');
+  await expect(renglon(page, 'ebitda')).toContainText('$7,000.00');
+  await expect(renglon(page, 'ebitda')).toContainText('70.0 %');
+  await expect(renglon(page, 'isr_estimado')).toContainText('($2,100.00)');
+  await expect(renglon(page, 'utilidad_neta')).toContainText('$4,900.00');
+  await expect(page.getByText('De $8,000 en febrero a $7,000 en marzo.')).toBeVisible();
+  await expect(page.getByTestId('puente-paso')).toHaveCount(4);
+
+  // A line opens into the movements behind it.
+  await renglon(page, 'administracion').getByRole('link').click();
+  await expect(
+    page.getByTestId('estado-movimiento').filter({ hasText: 'E2E Contador de marzo' }),
+  ).toContainText('($3,000.00)');
+
+  await page.getByRole('navigation', { name: 'Base' }).getByRole('link', { name: 'Flujo' }).click();
+  await expect(page.getByText('Flujo: lo cobrado y pagado')).toBeVisible();
+  await expect(renglon(page, 'ebitda')).toContainText('$7,000.00');
+  await page
+    .getByRole('navigation', { name: 'Periodo' })
+    .getByRole('link', { name: 'Trimestre' })
+    .click();
+  await expect(page).toHaveURL(/periodo=2024-T1/);
+  await expect(renglon(page, 'ingresos')).toContainText('$18,000.00');
 });

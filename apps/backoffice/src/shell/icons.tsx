@@ -17,6 +17,7 @@ export const NAV_ICONS: Readonly<Record<NavHref, string>> = {
 /** The «Empresa» rail entries (plan §2): one icon per question. */
 export const EMPRESA_ICONS: Readonly<Record<EmpresaEntryId, string>> = {
   dinero: 'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 12h.01M18 12h.01',
+  resultados: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   socios:
     'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.1a4 4 0 0 1 0 7.8M22 21v-1a6 6 0 0 0-4-5.6',
   cumplimiento:

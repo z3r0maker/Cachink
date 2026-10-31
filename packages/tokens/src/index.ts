@@ -10,6 +10,7 @@
  */
 
 export { colors, type ColorToken } from './colors.js';
+export { dataviz, type DatavizToken } from './dataviz.js';
 export { productTints, type ProductTintKey } from './product-tints.js';
 export {
   fontSizes,

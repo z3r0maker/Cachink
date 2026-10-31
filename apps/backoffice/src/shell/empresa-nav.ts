@@ -9,13 +9,14 @@
 export type EmpresaHref =
   | '/empresa/movimientos'
   | '/empresa/facturas'
+  | '/empresa/resultados'
   | '/empresa/socios'
   | '/empresa/agenda'
   | '/empresa/expediente'
   | '/empresa/corporativo';
 
 /** The rail entries built so far; their icons live in `icons.tsx`. */
-export type EmpresaEntryId = 'dinero' | 'socios' | 'cumplimiento';
+export type EmpresaEntryId = 'dinero' | 'resultados' | 'socios' | 'cumplimiento';
 
 export interface EmpresaTab {
   readonly label: string;
@@ -40,6 +41,12 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
       { label: 'Movimientos', href: '/empresa/movimientos', task: 'E-02' },
       { label: 'Facturas', href: '/empresa/facturas', task: 'E-11' },
     ],
+  },
+  {
+    id: 'resultados',
+    label: 'Resultados',
+    summary: '¿Ganamos dinero y qué le debemos al SAT?',
+    tabs: [{ label: 'Estado de resultados', href: '/empresa/resultados', task: 'E-12' }],
   },
   {
     id: 'socios',

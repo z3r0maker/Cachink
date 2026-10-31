@@ -23,7 +23,7 @@ listas de abajo.
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
 - **C-13** API de intenciones de pago [media] (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:949`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:970`
 - **N-63** Negocio: MRR, churn, prueba → pago [media] (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1290`
 - **N-64** Embudo de activación y cohortes semanales [media] (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1301`
 - **X-07** Masters de marca + derivados (ADR-054 §6) [alta] [bloq] (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -93,29 +93,29 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:309`
 - [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:520`
 - [~] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they post dated today, with no confirmation, as the board shows); checking an unverified invoice («Sin verificar») with the SAT again; «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be both yet. It needs a decision on how a template knows its month was registered by an invoice. · `20-command-center.md:535`
-- [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:588`
-- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:599`
-- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:610`
-- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:627`
-- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:636`
-- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:651`
-- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:662`
-- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:671`
-- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:679`
-- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:689`
-- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:698`
-- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:707`
-- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:716`
-- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:727`
-- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:733`
-- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:740`
-- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:746`
-- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:752`
-- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:842`
-- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:857`
-- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:874`
-- [~] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:949`
-- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:981`
+- [~] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 (answered 2026-10-30) · `20-command-center.md:588`
+- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:620`
+- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:631`
+- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:648`
+- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:657`
+- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:672`
+- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:683`
+- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:692`
+- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:700`
+- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:710`
+- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:719`
+- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:728`
+- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:737`
+- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:748`
+- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:754`
+- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:761`
+- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:767`
+- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:773`
+- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:863`
+- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:878`
+- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:895`
+- [~] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:970`
+- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:1002`
 
 ### Backend, sync y datos (6)
 
@@ -330,5 +330,5 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
-- `20-command-center.md` — 26 abiertos (3 en curso, 0 bloqueados, 6 hechos)
+- `20-command-center.md` — 26 abiertos (4 en curso, 0 bloqueados, 6 hechos)
 - `../launch/production-readiness.md` — 41 abiertos (8 en curso, 0 bloqueados, 11 hechos)

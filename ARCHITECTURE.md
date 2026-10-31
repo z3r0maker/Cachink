@@ -167,6 +167,7 @@ Links to discussion, docs, prior art.
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
 | [132](#adr-132) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
+| [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9330,3 +9331,43 @@ account exists.
 **References**
 
 - ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.
+
+## ADR-133
+
+**Title:** A `dataviz` token group for charts, separate from the brand palette
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision OD-6 of 2026-10-08 (canvas board «Paleta de datos»)
+
+**Context**
+
+«Empresa»'s Resultados (E-12, board CD-07) is the first screen with charts: a cascade from
+income to net profit, an EBITDA bridge and a six-month trend. The brand palette was built for
+interface, not data. Yellow and black mark actions and selection, and the soft tints are too
+close to each other to tell series apart, above all for colour-blind readers. A chart coloured
+from it would either reuse the action colour for data or pick hex values inline, which
+`pnpm lint:design` forbids.
+
+**Decision**
+
+1. `@xangarro/tokens` gains `dataviz`, eight colours by role: `ingreso`, `restante`, `perdida`,
+   `impuesto`, and one per expense category (`costoServicio`, `ventasMarketing`, `desarrollo`,
+   `administracion`). The values are the board's, after the owner moved income from green to
+   aqua.
+2. Charts take their colours only from `dataviz`; interface surfaces never do. Yellow and black
+   never encode data.
+3. `ingreso` and `administracion` sit below 3:1 on white, so a mark in either always carries its
+   label. Up and down next to each other (`ingreso` beside `perdida`) always carry a + or − sign.
+4. `DESIGN_CONTRACT.md` lists the group under Color, generated like the rest.
+
+**Consequences**
+
+- Every adjacent pair passed the dataviz validator on the board (worst colour-vision-deficiency
+  ΔE 9.2, worst normal-vision ΔE 16.3). A new series colour is added here and re-validated,
+  never picked on a screen.
+- The phone has no charts today; when it does, it reads the same group.
+
+**References**
+
+- OD-6 in `docs/plan/20-command-center.md` §10; E-12; ADR-057 (tokens); ADR-117 (El Mostrador).

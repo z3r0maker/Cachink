@@ -1,11 +1,9 @@
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import postgres from 'postgres';
+import type postgres from 'postgres';
 import { afterAll, beforeAll, it } from 'vitest';
 import { integrationSuite } from '@xangarro/testing/integration';
+
+import { crearBaseDesechable, type BaseDesechable } from './base-desechable';
 
 /**
  * 0007 + 0008 (E-26), old → new (CLAUDE.md §2.9): a document filed before the
@@ -14,47 +12,26 @@ import { integrationSuite } from '@xangarro/testing/integration';
  * suite's own database is never rolled back.
  */
 const { describe } = integrationSuite();
-const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..');
-const sqlFiles = (dir: string) =>
-  readdirSync(join(ROOT, dir))
-    .filter((f) => f.endsWith('.sql'))
-    .sort()
-    .map((f) => join(ROOT, dir, f));
 
 describe('0007 + 0008: documents point at their blobs', () => {
-  const name = `xg_scratch_corp_${randomBytes(6).toString('hex')}`;
-  let admin: postgres.Sql;
+  let base: BaseDesechable;
   let sql: postgres.Sql;
   const bytes = Buffer.from('%PDF-1.7 acta de 2026');
 
-  const apply = async (files: readonly string[]) => {
-    for (const f of files) await sql.unsafe(readFileSync(f, 'utf8'));
-  };
-
   beforeAll(async () => {
-    const superUrl = process.env.DATABASE_SUPER_URL ?? '';
-    admin = postgres(superUrl, { max: 1, onnotice: () => {} });
-    await admin.unsafe(`CREATE DATABASE ${name}`);
-    const u = new URL(superUrl);
-    u.pathname = `/${name}`;
-    sql = postgres(u.toString(), { max: 1, onnotice: () => {} });
-    const drizzle = sqlFiles('drizzle');
-    await apply([...sqlFiles('local'), ...drizzle.filter((f) => f.split('/').pop()! < '0007')]);
+    base = await crearBaseDesechable();
+    sql = base.sql;
+    await base.aplicar((f) => f < '0007');
     await sql`
       INSERT INTO corp.documents (id, kind, folder, title, period, filename, mime, size_bytes,
                                   sha256, content, retain_until, uploaded_by, uploaded_at)
       VALUES ('doc-viejo', 'otro', 'constitucion', 'Acta constitutiva', '2026', 'acta.pdf',
               'application/pdf', ${bytes.byteLength}, ${'a'.repeat(64)}, ${bytes},
               '2031-10-08', 'f1', now())`;
-    await apply(drizzle.filter((f) => f.split('/').pop()! >= '0007'));
+    await base.aplicar((f) => f >= '0007');
   });
 
-  afterAll(async () => {
-    await sql?.end({ timeout: 5 });
-    await admin?.unsafe(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
-    await admin?.end({ timeout: 5 });
-  });
+  afterAll(() => base?.cerrar());
 
   it('moves the bytes into corp.blobs under the document id', async () => {
     const [blob] = await sql<{ content: Buffer }[]>`
