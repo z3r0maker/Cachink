@@ -1,6 +1,6 @@
 /**
- * Expo Router entry for /settings — device-only Configuración (A-12):
- * Cuenta, Sincronización, Dispositivo. Business settings live in the
+ * Expo Router entry for /settings — device-only Ajustes (A-12, MvAjustes):
+ * Esta caja, Sincronización, En este teléfono, Privacidad y términos. Business settings live in the
  * portal. This route wires the persisted device toggles, the update check,
  * the bug-report sheet and the dev-only database reset.
  */

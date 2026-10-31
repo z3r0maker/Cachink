@@ -1,15 +1,14 @@
 /**
  * The pieces MvVincular's two views share: the yellow brand head and the
  * white head with «‹ Escanear», the «Sin conectar» chip, the numbered step,
- * the amber note, the aviso de privacidad (N-34, variante B: shown, never a
- * checkbox) and the white foot that holds the action in the thumb zone.
+ * the amber note and the white foot that holds the action in the thumb zone.
+ * The aviso de privacidad is in `aviso-vinculacion.tsx`.
  */
 import type { ReactElement, ReactNode } from 'react';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { View } from '@tamagui/core';
-import { AVISO_VINCULACION } from '@xangarro/domain';
 import { GLYPHS, MText, PathIcon, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { borderColors, borderWidths, colors, radii, shadows, shapeRadii } from '../../theme';
@@ -155,28 +154,6 @@ export function NotaAmbar({ texto }: { texto: string }): ReactElement {
       <PathIcon d={RELOJ} size={18} strokeWidth={2.2} color={colors.warningText} />
       <MText flex={1} size="sm" weight="bold">
         {texto}
-      </MText>
-    </View>
-  );
-}
-
-/** N-34 variante B: the aviso is read here; its version travels with the request. */
-export function AvisoVinculacion(): ReactElement {
-  const { t } = useTranslation();
-  return (
-    <View
-      gap={4}
-      padding={12}
-      borderRadius={radii[3]}
-      borderWidth={borderWidths.quiet}
-      borderColor={borderColors.quiet}
-      backgroundColor={colors.white}
-    >
-      <MText size="body" weight="extraBold">
-        {t('entrar.vincular.aviso')}
-      </MText>
-      <MText testID="activation-aviso" size="sm" weight="semibold" color={colors.gray600}>
-        {AVISO_VINCULACION.join(' ')}
       </MText>
     </View>
   );

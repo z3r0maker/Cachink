@@ -1,7 +1,7 @@
 /**
- * Cuenta (A-12): which business this device belongs to, and "Desvincular este
- * dispositivo" — which forgets the device's identity but keeps every record
- * on it. No plan row: the app never names plans, prices or the portal
+ * Esta caja (A-12, MvAjustes): which business this device belongs to, and
+ * «Desvincular esta caja», which forgets the device's identity but keeps
+ * every record on it. No plan row: the app never names plans, prices or the portal
  * (ADR-069).
  */
 

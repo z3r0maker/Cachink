@@ -36,6 +36,10 @@ test.describe('Operador · Acceso (O-12)', () => {
     await page.getByTestId('vincular-codigo').fill(` ${CODE.slice(0, 4)}-${CODE.slice(4)}`);
     // N-34: the aviso at linking is shown before the request goes.
     await expect(page.getByTestId('vincular-aviso')).toContainText('derechos ARCO');
+    await expect(page.getByTestId('vincular-aviso-enlace')).toHaveAttribute(
+      'href',
+      'https://xangarro.mx/privacidad/',
+    );
     await page.getByTestId('vincular-continuar').click();
 
     // Paso 2 · the operator picker came from the activation bootstrap.

@@ -177,4 +177,6 @@ export const avisoTexto = style({
   color: colors.gray600,
 });
 
+export const avisoEnlace = style({ alignSelf: 'flex-start' });
+
 export const acciones = style({ display: 'flex', flexDirection: 'column', gap: 10 });

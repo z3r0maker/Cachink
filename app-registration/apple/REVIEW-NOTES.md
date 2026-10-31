@@ -74,6 +74,8 @@ ACCOUNTS AND DATA
 Employees do not create accounts in the app; the business owner adds them on
 the website. A business can request deletion of its account and data at
 soporte@xangarro.mx or through https://xangarro.mx/privacidad/arco/.
+The privacy policy and the terms open from Mi turno > Ajustes > "Privacidad
+y términos", and from the privacy notice on the linking screen.
 
 Support: soporte@xangarro.mx · https://xangarro.mx/soporte/
 ```

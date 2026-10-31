@@ -7,7 +7,7 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both now `0.2-borrador`) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both then `0.2-borrador`; the linking one is `0.3-borrador` since 2026-10-31) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
   art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
   When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
   `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
@@ -99,12 +99,14 @@
   `app-registration/apple/PRIVACY-LABEL.md` and `app-registration/google-play/DATA-SAFETY.md`, derived
   from the code and cross-referenced row by row. Still to do: type them into App Store Connect and Play
   Console; the manifest is merged by EAS (see PRIVACY-LABEL.md if `ITMS-91053` comes back).
-- [~] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
-  linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
-  subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
-  2026-10-29; both listings carry them. Still to do: the app shows `xangarro.mx/privacidad` only as plain
-  text in the linking notice; a tappable «Aviso de privacidad» row (Ajustes, and the linking screen) needs
-  a board first.
+- [x] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
+      linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
+      subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
+      2026-10-29; both listings carry them. Done 2026-10-31 in the app: Ajustes has «Privacidad y términos»
+      (both pages open in the browser), and the linking notice opens the aviso from a «Leer el aviso
+      completo» button instead of showing the address as text (boards MvAjustes and MvVincularAviso). The
+      notice's text changed, so `aviso-vinculacion.ts` is `0.3-borrador`; the server still hashes 0.2 for
+      phones on an older build.
 - [x] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
       Sign in with Apple/Google, deletion via the portal). **Done 2026-10-30:** `app-registration/apple/REVIEW-NOTES.md`
       and the App access text in `app-registration/google-play/README.md`.
