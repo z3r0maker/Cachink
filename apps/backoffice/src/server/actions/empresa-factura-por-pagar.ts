@@ -1,12 +1,14 @@
 'use server';
 
 import { cancelarFactura, registrarPagoFactura } from '@xangarro/application/corp';
+import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { auditedMutation } from '../audited';
 import { hoyEnMexico } from '../db/corp';
 import { facturasDeps as deps } from '../empresa/facturas-deps';
+import { facturasHref } from '../empresa/facturas-rutas';
 import { failed } from '../empresa/fallas';
 import { mensajeMesCerrado } from '../empresa/pago-factura-view';
 import { requireFounder } from '../founder';
@@ -18,7 +20,6 @@ import { field, type FormState } from './form-state';
  * founder confirmed it (board CD-06f), reversed today so a closed month stays
  * closed. Founders only, each with its staff audit row.
  */
-const MES = /^\d{4}-\d{2}$/;
 
 const codigo = (error: unknown) =>
   error instanceof Error && 'code' in error ? String(error.code) : '';
@@ -63,5 +64,5 @@ export async function cancelarFacturaAction(_p: FormState, form: FormData): Prom
     return failed(error, 'cancelarFactura');
   }
   revalidatePath('/empresa', 'layout');
-  redirect(`/empresa/facturas?${MES.test(mes) ? `mes=${mes}&` : ''}aviso=cancelada`);
+  redirect(facturasHref(mes, { aviso: 'cancelada' }) as Route);
 }

@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import type { FacturaRecibida } from '@xangarro/application/corp';
-import type { FacturaDelMes, Movimiento } from '@xangarro/data-corp';
-import { leerCfdi } from '@xangarro/domain/corp';
-import { cfdiXml, type CfdiDePrueba } from '@xangarro/testing/corp';
+import type { Movimiento } from '@xangarro/data-corp';
 
 import {
   esSinCfdi,
@@ -11,46 +8,10 @@ import {
   filaSinCfdi,
   resumenFacturas,
 } from '../src/server/empresa/facturas-view';
+import { delMes, despacho, factura } from './empresa-facturas-fixture';
 
 /** E-11, board CD-06b: the received invoices of a month, in the board's words. */
-const factura = (o: CfdiDePrueba, f: Partial<FacturaRecibida> = {}): FacturaRecibida => ({
-  cfdi: leerCfdi(cfdiXml(o)),
-  archivo: 'f.xml',
-  estado: 'registrada',
-  estadoSat: 'vigente',
-  categoria: 'administracion',
-  projectId: null,
-  entryId: 'e1',
-  pagoEntryId: null,
-  ...f,
-});
-const delMes = (
-  f: FacturaRecibida,
-  revertida = false,
-  fechas: Partial<Pick<FacturaDelMes, 'pagadaEl' | 'revertidaEl'>> = {},
-): FacturaDelMes => ({
-  factura: f,
-  revertida,
-  pagadaEl: null,
-  revertidaEl: null,
-  ...fechas,
-});
-
 const honorarios = delMes(factura({ fecha: '2026-10-28' }));
-const despacho = delMes(
-  factura(
-    {
-      fecha: '2026-10-30',
-      metodoPago: 'PPD',
-      emisor: { rfc: 'DJU010101AB1', nombre: 'Despacho jurídico, S.C.' },
-      subtotal: '4000.00',
-      iva: '640.00',
-      isr: '0.00',
-      ivaRetenido: '0.00',
-    },
-    { entryId: 'e2' },
-  ),
-);
 const cancelada = delMes(
   factura(
     { fecha: '2026-10-09' },

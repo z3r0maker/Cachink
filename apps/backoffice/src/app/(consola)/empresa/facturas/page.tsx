@@ -90,19 +90,21 @@ function Encabezado({ mes }: { readonly mes: string }) {
 
 /**
  * Facturas (E-11, board CD-06b): the month's received invoices with their
- * SAT status and movement, the XML drop zone, and each invoice on credit
- * still owed with «Registrar pago» and «Cancelar». The Emitidas tab waits for
+ * SAT status and movement, the XML drop zone, each invoice on credit still
+ * owed with «Registrar pago» and «Cancelar», and «Consultar al SAT» for an
+ * unverified one with the warning when the supplier cancelled it (CD-06g). The Emitidas tab waits for
  * E-10, so the screen has no tabs yet.
  */
 export default async function FacturasPage(props: {
-  searchParams: Promise<{ mes?: string; aviso?: string }>;
+  searchParams: Promise<{ mes?: string; aviso?: string; consultada?: string }>;
 }) {
   await requireFounderPage();
   const params = await props.searchParams;
   const hoy = hoyEnMexico();
   const mes = parseMes(params.mes, hoy);
   const { facturas, sinCfdi } = await leerFacturas(mes);
-  const filas = [...facturas.map(filaFactura), ...sinCfdi.map(filaSinCfdi)];
+  const consultada = params.consultada ?? null;
+  const filas = [...facturas.map((f) => filaFactura(f, consultada)), ...sinCfdi.map(filaSinCfdi)];
   return (
     <div className={m.page}>
       <Encabezado mes={mes} />

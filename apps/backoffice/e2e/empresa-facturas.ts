@@ -27,7 +27,7 @@ export async function fijarRfcMexia(): Promise<void> {
   }
 }
 
-const archivo = (name: string, o: CfdiDePrueba) => ({
+export const archivo = (name: string, o: CfdiDePrueba) => ({
   name,
   mimeType: 'application/xml',
   buffer: Buffer.from(cfdiXml({ fecha: fechaDelMes(), ...o })),

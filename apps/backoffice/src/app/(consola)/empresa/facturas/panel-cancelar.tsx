@@ -10,7 +10,7 @@ import * as m from '@/styles/mostrador.css';
 import { submitWith } from '../movimientos/registrar/opciones';
 import { Botones, Falla } from './panel-comun';
 
-function Alerta() {
+export function Alerta() {
   return (
     <svg
       className={pp.alerta}

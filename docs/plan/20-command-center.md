@@ -464,11 +464,20 @@ with property tests:
 ### E-11 Facturas recibidas `[media]`
 
 - [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-10-30):**
-  - checking an unverified invoice («Sin verificar») with the SAT again;
+  **Remaining (2026-10-31):**
   - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
     known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
     both yet. It needs a decision on how a template knows its month was registered by an invoice.
+    **Done 2026-10-31, board CD-06g (round 9, approved the same day):**
+  - «Consultar al SAT» next to a registered invoice's «Sin verificar» (`consultarSatFactura`).
+    «vigente» and «cancelado» are kept (`marcarEstadoSat`, only from `sin_verificar`); no answer
+    or not found yet leaves it unverified and says why in place. «vigente» comes back as «El SAT
+    la confirmó hoy».
+  - Owner decisions: a supplier's cancellation reverses nothing by itself. The row reads
+    «Cancelada en el SAT» with a warning under it. While the invoice is still owed, the warning
+    offers «Cancelar la factura» (CD-06f) and «Registrar pago» is withdrawn. Once paid, the
+    warning only asks for the substitute invoice or a refund: the money did leave the bank.
+  - Playwright: no answer, «vigente», cancelling one still owed, and the warning on a paid one.
     **Done 2026-10-30, boards CD-06e and CD-06f (round 8, approved the same day):**
   - «Registrar pago» opens a panel under the row: «Fecha de pago» (today, or the invoice's date
     when it is newer), what leaves the bank and what turns creditable. A date before the invoice
@@ -518,8 +527,9 @@ with property tests:
     remembered per supplier RFC.
 - **Design:** canvas round 6, boards CD-06b (Recibidas), CD-06c (Revisa antes de registrar) and
   CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day; round 8,
-  CD-06e (Registrar pago con fecha) and CD-06f (Cancelar con confirmación), approved 2026-10-30. The Emitidas tab
-  stays out of the screen until E-10.
+  CD-06e (Registrar pago con fecha) and CD-06f (Cancelar con confirmación), approved 2026-10-30;
+  round 9, CD-06g (Consultar de nuevo al SAT), approved 2026-10-31. The Emitidas tab stays out of
+  the screen until E-10.
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
   retención appears as a liability; a PPD invoice's IVA is creditable only once it is paid.
 

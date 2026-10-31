@@ -67,5 +67,6 @@ describe('consultaSat (E-11)', () => {
     const de = (uuid: string) => simulada(leerCfdi(cfdiXml({ uuid })));
     assert.equal(de('00000000-0000-4000-8000-000000000001'), 'cancelado');
     assert.equal(de('FFFFFFFF-0000-4000-8000-000000000001'), 'no_encontrado');
+    assert.equal(de('EEEEEEEE-0000-4000-8000-000000000001'), 'sin_respuesta');
   });
 });

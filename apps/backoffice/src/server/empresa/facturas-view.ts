@@ -3,15 +3,22 @@ import type { FacturaDelMes, Movimiento } from '@xangarro/data-corp';
 import { formatMoney, tipoPersona } from '@xangarro/domain';
 import { ACCOUNTS, CATEGORIAS_GASTO } from '@xangarro/domain/corp';
 
+import { porPagar } from './factura-estado';
 import { fechaCorta } from './fechas';
 import { pagoFactura, type PagoFactura } from './pago-factura-view';
+import { satFila, type SatFila } from './sat-fila-view';
 
 /**
  * Facturas recibidas as board CD-06b shows them (E-11): one row per received
  * CFDI of the month, plus each expense registered without one («Sin CFDI»),
  * and the four tiles above the list.
  */
-export type EstadoFila = 'Vigente' | 'Sin verificar' | 'Cancelada' | 'Sin CFDI';
+export type EstadoFila =
+  | 'Vigente'
+  | 'Sin verificar'
+  | 'Cancelada'
+  | 'Cancelada en el SAT'
+  | 'Sin CFDI';
 
 export type Destino =
   | { readonly tipo: 'enlace'; readonly href: string; readonly texto: string }
@@ -28,6 +35,8 @@ export interface FilaFactura {
   readonly iva: string;
   readonly retenciones: string;
   readonly estado: EstadoFila;
+  /** What the «Estado SAT» column offers beyond its tag (board CD-06g). */
+  readonly sat: SatFila;
   readonly destino: Destino;
 }
 
@@ -46,13 +55,6 @@ const retenido = (f: FacturaRecibida) => f.cfdi.retencionIsr + f.cfdi.retencionI
 const menos = (c: bigint) => (c === 0n ? formatMoney(0n) : `−${formatMoney(c)}`);
 const nombreCategoria = (f: FacturaRecibida) =>
   f.categoria === null ? 'Ver movimiento' : ACCOUNTS[f.categoria].nombre;
-
-/** Owed: registered on credit, not paid, its expense still standing. */
-export const porPagar = (d: FacturaDelMes) =>
-  d.factura.estado === 'registrada' &&
-  d.factura.cfdi.metodoPago === 'PPD' &&
-  d.factura.pagoEntryId === null &&
-  !d.revertida;
 
 /** Paid and standing: what counts for IVA and withholdings. */
 const pagada = (d: FacturaDelMes) =>
@@ -85,7 +87,10 @@ function subDe(d: FacturaDelMes): string {
 
 function destinoDe(d: FacturaDelMes): Destino {
   const f = d.factura;
-  if (porPagar(d)) return { tipo: 'por_pagar', pago: pagoFactura(f) };
+  // One the SAT says is cancelled is not paid: its warning offers to cancel it.
+  if (porPagar(d) && f.estadoSat !== 'cancelado') {
+    return { tipo: 'por_pagar', pago: pagoFactura(f) };
+  }
   if (f.entryId === null) return { tipo: 'texto', texto: 'No se registró' };
   const href = `/empresa/movimientos/${f.entryId}`;
   if (f.estado === 'cancelada' || d.revertida) return { tipo: 'enlace', href, texto: 'Revertido' };
@@ -94,10 +99,12 @@ function destinoDe(d: FacturaDelMes): Destino {
 
 function estadoDe(d: FacturaDelMes): EstadoFila {
   if (d.factura.estado === 'cancelada') return 'Cancelada';
+  if (d.factura.estadoSat === 'cancelado') return 'Cancelada en el SAT';
   return d.factura.estadoSat === 'sin_verificar' ? 'Sin verificar' : 'Vigente';
 }
 
-export function filaFactura(d: FacturaDelMes): FilaFactura {
+/** `consultada`: the UUID just asked about at the SAT, from the page's address. */
+export function filaFactura(d: FacturaDelMes, consultada: string | null = null): FilaFactura {
   const c = d.factura.cfdi;
   return {
     key: c.uuid,
@@ -108,6 +115,7 @@ export function filaFactura(d: FacturaDelMes): FilaFactura {
     iva: formatMoney(c.iva),
     retenciones: menos(retenido(d.factura)),
     estado: estadoDe(d),
+    sat: satFila(d, consultada),
     destino: destinoDe(d),
   };
 }
@@ -135,6 +143,7 @@ export function filaSinCfdi(m: Movimiento): FilaFactura {
     iva: formatMoney(suma(m, ['iva_acreditable'], 'debe')),
     retenciones: menos(suma(m, ['retenciones_por_pagar'], 'haber')),
     estado: 'Sin CFDI',
+    sat: { tipo: 'nada' },
     destino: {
       tipo: 'enlace',
       href: `/empresa/movimientos/${m.id}`,

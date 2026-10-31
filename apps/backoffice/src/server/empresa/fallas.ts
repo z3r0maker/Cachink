@@ -50,6 +50,7 @@ const DOMAIN_CODES = new Set([
   'FACTURA_NO_PENDIENTE',
   'FACTURA_NO_POR_PAGAR',
   'FECHA_PAGO_ANTERIOR',
+  'FACTURA_NO_POR_VERIFICAR',
 ]);
 
 export function failed(error: unknown, what: string): FormState {
