@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
+  cancelarFactura,
   descartarRevision,
   registrarFacturas,
   registrarPagoFactura,
@@ -74,7 +75,7 @@ describe('corp received invoices', () => {
     const uuid = uuidDePrueba();
     const emisor = { rfc: `PPD${mes.replace('-', '').slice(2)}AB1`, nombre: 'Despacho, S.C.' };
     assert.deepEqual(
-      (await subir(d, { uuid, emisor, fecha: `${mes}-30`, metodoPago: 'PPD' })).listas,
+      (await subir(d, { uuid, emisor, fecha: `${mes}-28`, metodoPago: 'PPD' })).listas,
       [uuid],
     );
     const [gasto] = await registrarFacturas(d, {
@@ -90,13 +91,32 @@ describe('corp received invoices', () => {
       categoria: 'administracion',
       projectId: 'xangarro',
     });
-    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-30`, founderId: AUTOR });
+    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-28`, founderId: AUTOR });
     const [delMes] = await facturasDelMes(d.db, mes);
     assert.deepEqual(
       [delMes?.factura.cfdi.uuid, delMes?.factura.pagoEntryId, delMes?.revertida],
       [uuid, pago.id, false],
     );
+    assert.deepEqual([delMes?.pagadaEl, delMes?.revertidaEl], [`${mes}-28`, null]);
     assert.equal(delMes?.factura.cfdi.total, 3_336_67n);
+  });
+
+  it('lists a cancelled invoice on credit with the day its expense was reversed', async () => {
+    const d = deps();
+    const mes = mesLibre();
+    const uuid = uuidDePrueba();
+    await subir(d, { uuid, fecha: `${mes}-02`, metodoPago: 'PPD' });
+    await registrarFacturas(d, {
+      selecciones: [{ uuid, categoria: 'administracion', projectId: null }],
+      founderId: AUTOR,
+      hoy: '2026-10-29',
+    });
+    await cancelarFactura(d, { uuid, fecha: `${mes}-09`, motivo: 'Vino mal', founderId: AUTOR });
+    const [delMes] = await facturasDelMes(d.db, mes);
+    assert.deepEqual(
+      [delMes?.factura.estado, delMes?.revertida, delMes?.pagadaEl, delMes?.revertidaEl],
+      ['cancelada', true, null, `${mes}-09`],
+    );
   });
 
   it('takes a discarded upload again, and never lists one waiting or discarded', async () => {

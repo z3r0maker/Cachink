@@ -1,10 +1,8 @@
 'use server';
 
 import {
-  cancelarFactura,
   descartarRevision,
   registrarFacturas,
-  registrarPagoFactura,
   subirFacturas,
   type Seleccion,
 } from '@xangarro/application/corp';
@@ -24,8 +22,8 @@ import { field, type FormState } from './form-state';
 
 /**
  * Facturas recibidas' writes (E-11): upload XML, register what was
- * reviewed, leave the review, and pay or cancel an invoice on credit.
- * Founders only, each with its staff audit row. Nothing here deletes.
+ * reviewed and leave the review; paying or cancelling an invoice on credit
+ * is empresa-factura-por-pagar.ts. Founders only, each with its staff audit row. Nothing here deletes.
  */
 const FACTURAS = '/empresa/facturas';
 
@@ -96,34 +94,4 @@ export async function descartarRevisionAction(): Promise<FormState> {
     return failed(error, 'descartarRevision');
   }
   redirect(FACTURAS);
-}
-
-async function porPagar(form: FormData, accion: 'pago' | 'cancelar'): Promise<FormState> {
-  const uuid = field(form, 'uuid');
-  try {
-    const { founder } = await requireFounder();
-    const input = { uuid, fecha: hoyEnMexico(), founderId: founder.id };
-    await auditedMutation(
-      (entry) => ({
-        action: accion === 'pago' ? 'empresa.factura_pagada' : 'empresa.factura_cancelada',
-        payload: { uuid, entryId: entry.id },
-      }),
-      () =>
-        accion === 'pago'
-          ? registrarPagoFactura(deps(), input)
-          : cancelarFactura(deps(), { ...input, motivo: 'Factura cancelada desde Facturas' }),
-    );
-  } catch (error) {
-    return failed(error, accion === 'pago' ? 'registrarPagoFactura' : 'cancelarFactura');
-  }
-  revalidatePath('/empresa', 'layout');
-  return { ok: true, message: accion === 'pago' ? 'Pago registrado.' : 'Factura cancelada.' };
-}
-
-export async function registrarPagoAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'pago');
-}
-
-export async function cancelarFacturaAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'cancelar');
 }
