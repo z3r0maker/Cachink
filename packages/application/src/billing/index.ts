@@ -16,4 +16,8 @@ export * from './start-trial-checkout.js';
 export * from './start-spei-annual.js';
 export * from './open-customer-portal.js';
 export * from './apply-stripe-event.js';
+export * from './cancel-ports.js';
+export * from './cancel-subscription.js';
+export * from './cancel-link.js';
+export * from './consent.js';
 export * from './cfdi-listener.js';

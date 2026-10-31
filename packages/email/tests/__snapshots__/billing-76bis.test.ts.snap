@@ -1,0 +1,140 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cancellation acuse > states the end date, the folio and the moment, and offers to undo it 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Tu plan sigue hasta el 31 de octubre y no se te cobrará más.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><h1 style="color:#0D0D0D;font-size:24px;line-height:30px;font-weight:800;margin:0 0 16px">Cancelaste tu suscripción</h1><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Recibimos tu cancelación. Tu plan sigue hasta el <!-- -->31 de octubre de 2026<!-- --> y no se te cobrará más. Después pasas a Xangarrito, gratis, con todos tus registros.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border:1.5px solid #E4E4E0;border-radius:10px;margin:0 0 16px"><tbody><tr><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Negocio</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Taquería Don Pedro</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Plan</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Xangarro, mensual</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Cancelada el</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">30 de octubre de 2026, 18:42</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Folio</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">CX-7F3A21</p></td></tr></tbody></table></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Guarda este correo: es tu comprobante de cancelación.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://app.xangarro.mx/suscripcion" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Seguir con mi plan</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Cambiaste de idea? Puedes seguir con tu plan hasta el <!-- -->31 de octubre<!-- -->.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Te llega porque cancelaste tu plan de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas o quejas? Responde a este correo o escribe a <!-- -->hola@xangarro.mx<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0"><a href="https://xangarro.mx/privacidad" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Aviso de privacidad</a> · <a href="https://xangarro.mx/terminos" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Términos y condiciones</a></p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Cancelaste tu plan Xangarro",
+  "text": "Xangarro!
+
+
+CANCELASTE TU SUSCRIPCIÓN
+
+Recibimos tu cancelación. Tu plan sigue hasta el 31 de octubre de 2026 y no se te cobrará más. Después pasas a Xangarrito, gratis, con todos tus registros.
+
+Negocio
+
+Taquería Don Pedro
+
+Plan
+
+Xangarro, mensual
+
+Cancelada el
+
+30 de octubre de 2026, 18:42
+
+Folio
+
+CX-7F3A21
+
+Guarda este correo: es tu comprobante de cancelación.
+
+Seguir con mi plan https://app.xangarro.mx/suscripcion
+
+¿Cambiaste de idea? Puedes seguir con tu plan hasta el 31 de octubre.
+
+----------------------------------------
+
+Te llega porque cancelaste tu plan de Xangarro.
+
+¿Dudas o quejas? Responde a este correo o escribe a hola@xangarro.mx.
+
+MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco
+
+Aviso de privacidad https://xangarro.mx/privacidad · Términos y condiciones https://xangarro.mx/terminos",
+}
+`;
+
+exports[`renewal reminder > SPEI, annual: speaks of the invoice and the CLABE, never of a card 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Ese día te llega la factura para pagar $2,308.40 por SPEI.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><h1 style="color:#0D0D0D;font-size:24px;line-height:30px;font-weight:800;margin:0 0 16px">Tu plan anual vence el 31 de octubre</h1><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">El 31 de octubre de 2026 vence el plan de Taquería Don Pedro. Ese día te mandamos la factura con la CLABE para pagarla por transferencia SPEI.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border:1.5px solid #E4E4E0;border-radius:10px;margin:0 0 16px"><tbody><tr><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Plan</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Xangarro, anual por SPEI</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Periodo</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">31 oct 2026 al 30 oct 2027</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">La factura llega</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">31 de octubre de 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Total</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">$2,308.40 MXN, IVA incluido</p></td></tr></tbody></table></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si quieres seguir, paga la factura cuando te llegue.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si prefieres cancelar, basta con un clic y ya no te mandamos la factura. Sigues con tu plan hasta el 31 de octubre.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://app.xangarro.mx/cancelar?t=abc" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Cancelar mi suscripción</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Para cambiar de plan o pagar con tarjeta, entra a Mi negocio › Plan y pagos.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Te llega porque tienes un plan de pago en Xangarro. Te avisamos antes de cada cobro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas o quejas? Responde a este correo o escribe a <!-- -->hola@xangarro.mx<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0"><a href="https://xangarro.mx/privacidad" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Aviso de privacidad</a> · <a href="https://xangarro.mx/terminos" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Términos y condiciones</a></p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu plan Xangarro anual vence el 31 de octubre",
+  "text": "Xangarro!
+
+
+TU PLAN ANUAL VENCE EL 31 DE OCTUBRE
+
+El 31 de octubre de 2026 vence el plan de Taquería Don Pedro. Ese día te mandamos la factura con la CLABE para pagarla por transferencia SPEI.
+
+Plan
+
+Xangarro, anual por SPEI
+
+Periodo
+
+31 oct 2026 al 30 oct 2027
+
+La factura llega
+
+31 de octubre de 2026
+
+Total
+
+$2,308.40 MXN, IVA incluido
+
+Si quieres seguir, paga la factura cuando te llegue.
+
+Si prefieres cancelar, basta con un clic y ya no te mandamos la factura. Sigues con tu plan hasta el 31 de octubre.
+
+Cancelar mi suscripción https://app.xangarro.mx/cancelar?t=abc
+
+Para cambiar de plan o pagar con tarjeta, entra a Mi negocio › Plan y pagos.
+
+----------------------------------------
+
+Te llega porque tienes un plan de pago en Xangarro. Te avisamos antes de cada cobro.
+
+¿Dudas o quejas? Responde a este correo o escribe a hola@xangarro.mx.
+
+MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco
+
+Aviso de privacidad https://xangarro.mx/privacidad · Términos y condiciones https://xangarro.mx/terminos",
+}
+`;
+
+exports[`renewal reminder > card, monthly: date, period, total with IVA, the one-click cancel and the supplier 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Te cobraremos $230.84 con IVA. Si quieres cancelar, es un clic.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><h1 style="color:#0D0D0D;font-size:24px;line-height:30px;font-weight:800;margin:0 0 16px">Tu plan se renueva el 31 de octubre</h1><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">El 31 de octubre de 2026 renovamos el plan de Taquería Don Pedro y te cobramos con la tarjeta que registraste.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border:1.5px solid #E4E4E0;border-radius:10px;margin:0 0 16px"><tbody><tr><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Plan</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Xangarro, mensual</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Periodo</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">31 oct al 29 nov de 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Fecha del cobro</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">31 de octubre de 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody style="width:100%"><tr style="width:100%"><td data-id="__react-email-column"><p style="font-size:14px;line-height:24px;color:#6F6F6B;padding:10px 14px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Total</p></td><td data-id="__react-email-column"><p style="font-size:15px;line-height:24px;color:#0D0D0D;font-weight:700;padding:10px 14px;margin:0;text-align:right;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">$230.84 MXN, IVA incluido</p></td></tr></tbody></table></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si quieres seguir, no tienes que hacer nada.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si prefieres cancelar, basta con un clic. Sigues con tu plan hasta el 31 de octubre y ya no se te cobra.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://app.xangarro.mx/cancelar?t=abc" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Cancelar mi suscripción</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Para cambiar de plan o de tarjeta, entra a Mi negocio › Plan y pagos.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Te llega porque tienes un plan de pago en Xangarro. Te avisamos antes de cada cobro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas o quejas? Responde a este correo o escribe a <!-- -->hola@xangarro.mx<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0"><a href="https://xangarro.mx/privacidad" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Aviso de privacidad</a> · <a href="https://xangarro.mx/terminos" style="color:#0D0D0D;text-decoration-line:none" target="_blank">Términos y condiciones</a></p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu plan Xangarro se renueva el 31 de octubre",
+  "text": "Xangarro!
+
+
+TU PLAN SE RENUEVA EL 31 DE OCTUBRE
+
+El 31 de octubre de 2026 renovamos el plan de Taquería Don Pedro y te cobramos con la tarjeta que registraste.
+
+Plan
+
+Xangarro, mensual
+
+Periodo
+
+31 oct al 29 nov de 2026
+
+Fecha del cobro
+
+31 de octubre de 2026
+
+Total
+
+$230.84 MXN, IVA incluido
+
+Si quieres seguir, no tienes que hacer nada.
+
+Si prefieres cancelar, basta con un clic. Sigues con tu plan hasta el 31 de octubre y ya no se te cobra.
+
+Cancelar mi suscripción https://app.xangarro.mx/cancelar?t=abc
+
+Para cambiar de plan o de tarjeta, entra a Mi negocio › Plan y pagos.
+
+----------------------------------------
+
+Te llega porque tienes un plan de pago en Xangarro. Te avisamos antes de cada cobro.
+
+¿Dudas o quejas? Responde a este correo o escribe a hola@xangarro.mx.
+
+MEXIA, S.A.S. · Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco
+
+Aviso de privacidad https://xangarro.mx/privacidad · Términos y condiciones https://xangarro.mx/terminos",
+}
+`;

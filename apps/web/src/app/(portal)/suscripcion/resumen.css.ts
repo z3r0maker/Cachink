@@ -60,6 +60,7 @@ export const tono = styleVariants({
   activo: { ...pill, background: colors.greenSoft, color: colors.greenText },
   atrasado: { ...pill, background: colors.warningSoft, color: colors.warningText },
   vencido: { ...pill, background: colors.redSoft, color: colors.redText },
+  cancelando: { ...pill, background: colors.black, color: colors.yellow },
 });
 
 export const planNombre = style({

@@ -11,12 +11,22 @@ import {
   Button,
   Container,
   Head,
+  Heading,
   Hr,
   Html,
+  Link,
   Preview,
+  Row,
+  Column,
   Section,
   Text,
 } from '@react-email/components';
+import {
+  AVISO_PUBLICO_URL,
+  PROVEEDOR,
+  PROVEEDOR_LINEA,
+  TERMINOS_PUBLICO_URL,
+} from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 import type { ReactNode } from 'react';
 
@@ -44,6 +54,24 @@ const s = {
   },
   p: { color: colors.ink, fontSize: 16, lineHeight: '24px', margin: '0 0 16px' },
   small: { color: colors.textMuted, fontSize: 13, lineHeight: '20px', margin: '0 0 8px' },
+  h1: {
+    color: colors.black,
+    fontSize: 24,
+    lineHeight: '30px',
+    fontWeight: 800,
+    margin: '0 0 16px',
+  },
+  detalles: { border: `1.5px solid ${colors.gray200}`, borderRadius: 10, margin: '0 0 16px' },
+  k: { color: colors.textMuted, fontSize: 14, padding: '10px 14px', margin: 0 },
+  v: {
+    color: colors.black,
+    fontSize: 15,
+    fontWeight: 700,
+    padding: '10px 14px',
+    margin: 0,
+    textAlign: 'right' as const,
+  },
+  link: { color: colors.black },
   button: {
     backgroundColor: colors.yellow,
     border: `2px solid ${colors.black}`,
@@ -68,10 +96,42 @@ export function Small({ children }: { readonly children: ReactNode }) {
   return <Text style={s.small}>{children}</Text>;
 }
 
-export function Cta({ href, children }: { readonly href: string; readonly children: ReactNode }) {
+export function Titulo({ children }: { readonly children: ReactNode }) {
+  return <Heading style={s.h1}>{children}</Heading>;
+}
+
+/** The facts of the email as label · value rows (plan, period, date, total). */
+export function Detalles({ filas }: { readonly filas: readonly (readonly [string, string])[] }) {
+  return (
+    <Section style={s.detalles}>
+      {filas.map(([k, v]) => (
+        <Row key={k}>
+          <Column>
+            <Text style={s.k}>{k}</Text>
+          </Column>
+          <Column>
+            <Text style={s.v}>{v}</Text>
+          </Column>
+        </Row>
+      ))}
+    </Section>
+  );
+}
+
+/** `secundario`: white with a black border, for an action that is not the page's pitch. */
+export function Cta({
+  href,
+  children,
+  secundario = false,
+}: {
+  readonly href: string;
+  readonly children: ReactNode;
+  readonly secundario?: boolean;
+}) {
+  const style = secundario ? { ...s.button, backgroundColor: colors.white } : s.button;
   return (
     <Section style={{ margin: '8px 0 24px' }}>
-      <Button href={href} style={s.button}>
+      <Button href={href} style={style}>
         {children}
       </Button>
     </Section>
@@ -84,11 +144,34 @@ export interface LayoutProps {
   readonly children: ReactNode;
   /** Why this person got the email; defaults to the owner-account line. */
   readonly reason?: string;
+  /**
+   * Billing emails (LFPC art. 76 Bis): the complaints contact, the supplier's
+   * name and address, and the legal links in the footer.
+   */
+  readonly legal?: boolean;
 }
 
 const DEFAULT_REASON = 'Recibes este correo porque tienes una cuenta de Xangarro.';
 
-export function Layout({ preview, children, reason = DEFAULT_REASON }: LayoutProps) {
+function PieLegal() {
+  return (
+    <>
+      <Small>¿Dudas o quejas? Responde a este correo o escribe a {PROVEEDOR.correo}.</Small>
+      <Small>{PROVEEDOR_LINEA}</Small>
+      <Small>
+        <Link href={AVISO_PUBLICO_URL} style={s.link}>
+          Aviso de privacidad
+        </Link>
+        {' · '}
+        <Link href={TERMINOS_PUBLICO_URL} style={s.link}>
+          Términos y condiciones
+        </Link>
+      </Small>
+    </>
+  );
+}
+
+export function Layout({ preview, children, reason = DEFAULT_REASON, legal = false }: LayoutProps) {
   return (
     <Html lang="es-MX">
       <Head />
@@ -99,8 +182,14 @@ export function Layout({ preview, children, reason = DEFAULT_REASON }: LayoutPro
           {children}
           <Hr style={{ borderColor: colors.gray200, margin: '24px 0 16px' }} />
           <Small>{reason}</Small>
-          <Small>¿Dudas? Responde a este correo y te ayudamos.</Small>
-          <Small>Xangarro · Finanzas para emprendedores</Small>
+          {legal ? (
+            <PieLegal />
+          ) : (
+            <>
+              <Small>¿Dudas? Responde a este correo y te ayudamos.</Small>
+              <Small>Xangarro · Finanzas para emprendedores</Small>
+            </>
+          )}
         </Container>
       </Body>
     </Html>

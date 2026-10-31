@@ -75,6 +75,15 @@ export class FakeStripe {
         return Promise.resolve(this.#subscription(p));
       },
       cancel: (id: string) => (this.#record('subscriptions.cancel', { id }), Promise.resolve({})),
+      update: (id: string, p: Obj) => {
+        this.#record('subscriptions.update', { id, ...p });
+        const sub = this.#subscription({ items: [{ price: this.prices[0]?.id }] });
+        return Promise.resolve({
+          ...sub,
+          id,
+          cancel_at: p.cancel_at_period_end === true ? sub.items.data[0]?.current_period_end : null,
+        });
+      },
     },
     invoices: {
       finalizeInvoice: (id: string) => {

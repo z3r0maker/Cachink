@@ -90,6 +90,8 @@ export interface BillingStatusSnapshot {
   readonly interval: BillingInterval;
   /** Next charge, or the trial's end while trialing. */
   readonly currentPeriodEnd: string | null;
+  /** When a cancelled subscription ends; `null` while it renews (LFPC 76 Bis). */
+  readonly cancelAt: string | null;
   readonly stripeCustomerId: string;
 }
 
@@ -106,6 +108,7 @@ export function billingStatusSnapshot(
       current.status === 'trialing'
         ? (current.trialEnd ?? current.currentPeriodEnd)
         : current.currentPeriodEnd,
+    cancelAt: current.status === 'lapsed' ? null : current.cancelAt,
     stripeCustomerId: current.stripeCustomerId,
   };
 }

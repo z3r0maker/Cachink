@@ -13,3 +13,5 @@ export * from './in-memory.js';
 export * from './trial-selection.js';
 export * from './send-trial-reminders.js';
 export * from './notify-usage-threshold.js';
+export * from './renewal-selection.js';
+export * from './send-renewal-reminders.js';

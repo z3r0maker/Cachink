@@ -96,6 +96,60 @@ describe('stripeGateway', () => {
     assert.equal('trial_period_days' in sub, false);
   });
 
+  it('Checkout requires the Términos box, stating the total with IVA, the cadence and how to cancel (LFPC 76 Bis)', async () => {
+    await gateway().createCheckoutSession({
+      customerId: 'cus_1',
+      businessId: BIZ,
+      lookupKey: 'plan_xangarro_monthly',
+      trialDays: null,
+      successUrl: 'https://x/ok',
+      cancelUrl: 'https://x/no',
+    });
+    const [p] = fake.created('checkout.sessions.create');
+    assert.deepEqual(p?.consent_collection, { terms_of_service: 'required' });
+    const text = p?.custom_text as {
+      terms_of_service_acceptance: { message: string };
+      submit: { message: string };
+    };
+    const msg = text.terms_of_service_acceptance.message;
+    assert.match(msg, /\$230\.84 MXN \(IVA incluido\)/);
+    assert.match(msg, /el mismo día de cada mes, hasta que cancele/);
+    assert.match(msg, /Mi negocio › Plan y pagos/);
+    assert.match(msg, /5 días hábiles/);
+    assert.match(msg, /\[Términos\]\(https:\/\/xangarro\.mx\/terminos\)/);
+    assert.ok(msg.length <= 1200, 'Stripe caps custom text at 1,200 characters');
+    assert.match(text.submit.message, /^MEXIA, S\.A\.S\. · Paseo Lomas Altas 524/);
+    assert.doesNotMatch(text.submit.message, /TELÉFONO/);
+  });
+
+  it('the annual Checkout states the annual total and a yearly cadence', async () => {
+    await gateway().createCheckoutSession({
+      customerId: 'cus_1',
+      businessId: BIZ,
+      lookupKey: 'plan_xangarrote_annual',
+      trialDays: null,
+      successUrl: 'https://x/ok',
+      cancelUrl: 'https://x/no',
+    });
+    const text = fake.created('checkout.sessions.create')[0]?.custom_text as {
+      terms_of_service_acceptance: { message: string };
+    };
+    assert.match(text.terms_of_service_acceptance.message, /\$4,628\.40 MXN.*misma fecha cada año/);
+  });
+
+  it('cancel at period end, and back, is an update, never an immediate cancel', async () => {
+    const off = await gateway().setCancelAtPeriodEnd('sub_9', true);
+    const on = await gateway().setCancelAtPeriodEnd('sub_9', false);
+    assert.deepEqual(
+      fake.created('subscriptions.update').map((p) => p.cancel_at_period_end),
+      [true, false],
+    );
+    assert.equal(fake.created('subscriptions.cancel').length, 0);
+    assert.equal(off.id, 'sub_9');
+    assert.notEqual(off.cancelAt, null);
+    assert.equal(on.cancelAt, null);
+  });
+
   it('SPEI: send_invoice, customer balance by MX bank transfer, first invoice finalized', async () => {
     const r = await gateway().createSpeiSubscription({
       customerId: 'cus_1',

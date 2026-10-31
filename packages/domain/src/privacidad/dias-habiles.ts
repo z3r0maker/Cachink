@@ -6,7 +6,8 @@
  * of March, 1 May, 16 September, the third Monday of November, 25 December,
  * and 1 October of each year the federal executive changes hands (2024,
  * 2030, …). LFPDPPP 2025 counts ARCO deadlines in días hábiles without its
- * own calendar; this one is the proposal for counsel (O-17).
+ * own calendar; this one is the proposal for counsel (O-17). The renewal
+ * reminder of LFPC art. 76 Bis counts backwards on the same calendar.
  */
 
 import type { IsoDate } from '../dates/index.js';
@@ -53,6 +54,21 @@ export function sumarDiasHabiles(desde: IsoDate, n: number): IsoDate {
   let contados = 0;
   while (contados < n) {
     fecha = sumarDias(fecha, 1);
+    if (esDiaHabil(fecha)) contados += 1;
+  }
+  return fecha;
+}
+
+/**
+ * The `n`th día hábil before `hasta` (which is not counted): the last day a
+ * notice owed `n` días hábiles ahead may go out. `n` must be a positive integer.
+ */
+export function restarDiasHabiles(hasta: IsoDate, n: number): IsoDate {
+  if (!Number.isInteger(n) || n < 1) throw new RangeError(`días hábiles inválidos: ${n}`);
+  let fecha = hasta;
+  let contados = 0;
+  while (contados < n) {
+    fecha = sumarDias(fecha, -1);
     if (esDiaHabil(fecha)) contados += 1;
   }
   return fecha;

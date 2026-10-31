@@ -16,7 +16,7 @@ test('the owner sees the real status, the entitlement line and the billing butto
   await expect(main.getByTestId('entitlement-debug')).toContainText('el plan Xangarro');
   await expect(main.getByRole('button', { name: 'Administrar pago' })).toBeVisible();
   await expect(main.getByRole('button', { name: 'Este es tu plan' })).toBeDisabled();
-  await expect(main.getByRole('button', { name: 'Cambiar a Xangarrito' })).toBeVisible();
+  await expect(main.getByTestId('cancelar-suscripcion')).toHaveText('Cancelar suscripción');
 });
 
 /** N-01: the annual switch shows the two-months-free prices, and SPEI is offered
@@ -57,7 +57,7 @@ test.describe('past due, seen by a viewer', () => {
     await expect(main.getByText('Tu último pago no pasó.')).toBeVisible();
     await expect(main.getByText(/7 días de gracia/)).toBeVisible();
     await expect(main.getByRole('button', { name: 'Administrar pago' })).toHaveCount(0);
-    await expect(main.getByRole('button', { name: 'Cambiar a Xangarrito' })).toHaveCount(0);
+    await expect(main.getByTestId('cancelar-suscripcion')).toHaveCount(0);
     await expect(main.getByRole('button', { name: /Probar|Contratar|Crear cuenta/ })).toHaveCount(
       0,
     );

@@ -15,6 +15,7 @@ export * from './portal';
 export * from './onboarding';
 export * from './sync';
 export * from './billing';
+export * from './billing-76bis.js';
 export * from './metering';
 export * from './cfdi';
 export * from './logos.js';

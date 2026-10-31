@@ -31,6 +31,10 @@ export interface CheckoutCompleted extends EventBase {
   readonly businessId: string | null;
   readonly customerId: string | null;
   readonly subscriptionId: string | null;
+  /** `cs_…`, the session the consent was given in. */
+  readonly checkoutSessionId?: string;
+  /** When the owner ticked the Términos box in Checkout; `null` when not asked. */
+  readonly termsAcceptedAt?: string | null;
 }
 
 export interface SubscriptionChanged extends EventBase {

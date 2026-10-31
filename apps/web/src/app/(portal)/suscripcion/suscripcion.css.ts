@@ -76,6 +76,16 @@ export const btn = styleVariants({
     boton,
     { border: `2px solid ${colors.redText}`, background: colors.white, color: colors.redText },
   ],
+  /** «Seguir con mi plan»: black with yellow text, the selected-chip pairing. */
+  oscuro: [
+    boton,
+    {
+      border: borders.thin,
+      background: colors.black,
+      color: colors.yellow,
+      boxShadow: `3px 3px 0 ${colors.gray600}`,
+    },
+  ],
 });
 
 export const lleno = style({ width: '100%' });

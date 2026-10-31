@@ -9,6 +9,7 @@ export const BILLING_ERROR_CODES = [
   'ALREADY_SUBSCRIBED',
   'NO_BILLING_CUSTOMER',
   'MISSING_EMAIL',
+  'NO_SUBSCRIPTION',
 ] as const;
 export type BillingErrorCode = (typeof BILLING_ERROR_CODES)[number];
 
@@ -19,6 +20,7 @@ const MESSAGES: Record<BillingErrorCode, string> = {
     'Tu negocio ya tiene una suscripción. Cámbiala desde «Administrar suscripción».',
   NO_BILLING_CUSTOMER: 'Todavía no tienes una suscripción que administrar.',
   MISSING_EMAIL: 'Necesitamos el correo del dueño para enviarte los recibos.',
+  NO_SUBSCRIPTION: 'Tu negocio no tiene una suscripción de pago que cambiar.',
 };
 
 export class BillingError extends Error {

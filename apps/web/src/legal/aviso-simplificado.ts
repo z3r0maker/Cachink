@@ -8,10 +8,13 @@
  * `AVISO_VERSION`, because the hash changes and the ledger must say why.
  */
 
+import { TERMINOS_PUBLICO_URL } from '@xangarro/domain';
+
 export const AVISO_VERSION = '0.2-borrador' as const;
 
 export const AVISO_INTEGRAL_URL = 'https://xangarro.mx/privacidad' as const;
-export const TERMINOS_URL = 'https://xangarro.mx/terminos' as const;
+/** One URL for the Términos everywhere (Checkout, emails, signup). */
+export const TERMINOS_URL = TERMINOS_PUBLICO_URL;
 
 export const AVISO_SIMPLIFICADO = {
   responsable:

@@ -7,7 +7,8 @@ import type { SuscripcionData } from '@/server/suscripcion';
 import { useSession } from '@/session/provider';
 
 import { BotonStripe } from './acciones';
-import { estadoCopy, estadoTono, TONO_LABEL } from './estado';
+import { SeguirBoton } from './cancelar';
+import { estadoCopy, estadoTono, seCancela, TONO_LABEL } from './estado';
 import { IconoAlerta, IconoCalendario } from './iconos';
 import { precioLinea } from './precio';
 import * as r from './resumen.css';
@@ -17,7 +18,22 @@ import { btn } from './suscripcion.css';
  * «Tu plan»: the yellow hero. The name, the price, what Stripe says right now
  * (a tag and a sentence) and, for the owner, the ways to change it.
  */
+/** Cancelled but running: undo it, or manage the card (SbPlan «Cancelada»). */
+function AccionesCancelada() {
+  return (
+    <div className={r.heroAcciones}>
+      <span className={r.heroBoton}>
+        <SeguirBoton />
+      </span>
+      <span className={r.heroBoton}>
+        <BotonStripe full label="Administrar pago" accion={() => administrarSuscripcion()} />
+      </span>
+    </div>
+  );
+}
+
 function Acciones({ data }: { readonly data: SuscripcionData }) {
+  if (seCancela(data.estado) && data.estado.status !== 'past_due') return <AccionesCancelada />;
   // A monthly subscriber can move to annual in the Customer Portal (N-01);
   // proration is Stripe's.
   const puedeAnual =

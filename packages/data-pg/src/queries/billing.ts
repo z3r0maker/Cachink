@@ -21,7 +21,7 @@ export type SubscriptionRow = Omit<typeof subscriptions.$inferSelect, 'createdAt
 
 const iso = (v: string | null): string | null => (v === null ? null : new Date(v).toISOString());
 
-function toRow(r: typeof subscriptions.$inferSelect): SubscriptionRow {
+export function toSubscriptionRow(r: typeof subscriptions.$inferSelect): SubscriptionRow {
   return {
     stripeSubscriptionId: r.stripeSubscriptionId,
     businessId: r.businessId,
@@ -76,7 +76,7 @@ export async function subscriptionsOfBusiness(
     .from(subscriptions)
     .where(eq(subscriptions.businessId, businessId))
     .orderBy(desc(subscriptions.updatedAt));
-  return rows.map(toRow);
+  return rows.map(toSubscriptionRow);
 }
 
 /** Rows for many businesses at once — the admin's `BillingStatusSource` adapter. */
@@ -89,12 +89,12 @@ export async function subscriptionsOfBusinesses(
     .select()
     .from(subscriptions)
     .where(inArray(subscriptions.businessId, [...businessIds]));
-  return rows.map(toRow);
+  return rows.map(toSubscriptionRow);
 }
 
 /** Every subscription row — the console's billing filter (admin role, N-06). The table is small. */
 export async function allSubscriptions(db: Conn): Promise<SubscriptionRow[]> {
-  return (await db.select().from(subscriptions)).map(toRow);
+  return (await db.select().from(subscriptions)).map(toSubscriptionRow);
 }
 
 /** Insert, or replace every Stripe-owned column of, one subscription. */
