@@ -40,6 +40,14 @@ export class FacturaNoPorPagarError extends Error {
   }
 }
 
+export class FacturaNoPorVerificarError extends Error {
+  readonly code = 'FACTURA_NO_POR_VERIFICAR' as const;
+  constructor(readonly uuid: string) {
+    super('Esa factura ya no está sin verificar.');
+    this.name = 'FacturaNoPorVerificarError';
+  }
+}
+
 export class FechaPagoAnteriorError extends Error {
   readonly code = 'FECHA_PAGO_ANTERIOR' as const;
   constructor(readonly fecha: string) {

@@ -1,3 +1,5 @@
+import type { EstadoSat } from '@xangarro/domain/corp';
+
 import { subirFacturas } from '../../src/corp/index.js';
 import { FakeDocumentos } from './fake-agenda.js';
 import { cfdiXml, RFC_MEXIA_PRUEBA, type CfdiDePrueba } from './cfdi-xml.js';
@@ -7,7 +9,8 @@ import { FakeLedger } from './fake-ledger.js';
 /** E-11's shared scenario: one received invoice uploaded and waiting for review. */
 export const A = 'AAAAAAAA-0000-4000-8000-000000000001';
 
-export async function conSubida(o: CfdiDePrueba = {}) {
+/** `sat` is what the SAT answers at upload; it answers «vigente» unless told otherwise. */
+export async function conSubida(o: CfdiDePrueba = {}, sat?: EstadoSat) {
   const d = {
     facturas: new FakeFacturas(),
     sat: new FakeSat(),
@@ -16,6 +19,7 @@ export async function conSubida(o: CfdiDePrueba = {}) {
     sha256: async () => 'c'.repeat(64),
     rfcMexia: async () => RFC_MEXIA_PRUEBA,
   };
+  if (sat !== undefined) d.sat.respuestas.set(A, sat);
   const texto = cfdiXml({ uuid: A, ...o });
   const contenido = new TextEncoder().encode(texto);
   await subirFacturas(d, {

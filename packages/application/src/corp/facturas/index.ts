@@ -1,7 +1,9 @@
+export { consultarSatFactura, type ConsultarSatDeps } from './consultar-sat.js';
 export {
   FacturaDesconocidaError,
   FacturaNoPendienteError,
   FacturaNoPorPagarError,
+  FacturaNoPorVerificarError,
   FechaPagoAnteriorError,
   RfcMexiaPendienteError,
   SinArchivosError,
