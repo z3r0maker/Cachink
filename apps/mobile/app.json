@@ -40,7 +40,20 @@
       "expo-localization",
       "expo-font",
       "expo-updates",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Xangarro usa la cámara para escanear el código QR que vincula este dispositivo a tu negocio y los códigos de barras de tus productos.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "./plugins/with-min-pod-deployment-target.js"
     ],
     "updates": {

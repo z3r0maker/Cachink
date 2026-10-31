@@ -13,13 +13,13 @@
  * bump `AVISO_VINCULACION_VERSION`.
  */
 
-export const AVISO_VINCULACION_VERSION = '0.1-borrador' as const;
+export const AVISO_VINCULACION_VERSION = '0.2-borrador' as const;
 
 /** The public aviso; ADR-069: the phone links to the website, not the portal. */
 export const AVISO_PUBLICO_URL = 'https://xangarro.mx/privacidad' as const;
 
 export const AVISO_VINCULACION = [
-  'Tu privacidad. [RAZÓN SOCIAL] (Xangarro), [DOMICILIO], trata los datos técnicos de este ' +
+  'Tu privacidad. MEXIA, S.A.S. (Xangarro), Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco, trata los datos técnicos de este ' +
     'dispositivo (identificador, modelo, sistema y versión) y los registros que captures, para ' +
     'sincronizarlos con tu negocio y mantener el servicio seguro.',
   'Los datos de clientes y operadores los trata Xangarro por cuenta del negocio, que es su ' +

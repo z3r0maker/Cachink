@@ -36,7 +36,11 @@ export interface Payout {
   readonly comision: Money;
 }
 
-/** An expense or received invoice. */
+/**
+ * An expense or received invoice. Unpaid (an invoice on credit, PPD) it is
+ * owed in full to the supplier, its IVA pending, and its withholdings are
+ * made when it is paid (`PagoProveedor`, owner decision 9).
+ */
 export interface Gasto {
   readonly kind: 'gasto';
   readonly categoria: CategoriaGasto;
@@ -47,6 +51,20 @@ export interface Gasto {
   readonly retencionIva: Money;
   /** False: the invoice is owed to the supplier (proveedores) until paid. */
   readonly pagado: boolean;
+}
+
+/**
+ * Paying an invoice on credit (E-11): the bank pays the net of withholdings,
+ * which become owed to the SAT, and the invoice's IVA becomes creditable.
+ */
+export interface PagoProveedor {
+  readonly kind: 'pago_proveedor';
+  /** What the invoice left owed to the supplier, centavos. */
+  readonly total: Money;
+  /** The IVA it left pending; 0 when it was not creditable. */
+  readonly ivaPorAcreditar: Money;
+  readonly retencionIsr: Money;
+  readonly retencionIva: Money;
 }
 
 export interface PagoImpuestos {
@@ -99,6 +117,7 @@ export type Movement =
   | Cobro
   | Payout
   | Gasto
+  | PagoProveedor
   | PagoImpuestos
   | MovimientoSocio
   | ExcedenteAPrestamo
@@ -112,6 +131,7 @@ export const MOVEMENT_KINDS = [
   'cobro',
   'payout',
   'gasto',
+  'pago_proveedor',
   'pago_impuestos',
   'aportacion_capital',
   'fondeo_mitades',

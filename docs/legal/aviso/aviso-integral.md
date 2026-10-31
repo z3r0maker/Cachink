@@ -1,6 +1,6 @@
 # Aviso de Privacidad Integral — Xangarro
 
-> **BORRADOR v0.1 (2026-09-17) para revisión de abogado. No publicar.**
+> **BORRADOR v0.2 (2026-10-28) para revisión de abogado. No publicar.**
 > Los textos entre corchetes `[ ]` son datos pendientes. Las notas `> Nota:` son para quien revisa y se
 > eliminan antes de publicar. Fundamento: Ley Federal de Protección de Datos Personales en Posesión de
 > los Particulares, DOF 20-03-2025, última reforma DOF 14-11-2025 ("la Ley"). Ver `README.md`.
@@ -9,7 +9,7 @@ _Versión: [VERSIÓN] · Última actualización: [FECHA]_
 
 ## 1. Quién es responsable de tus datos
 
-**[RAZÓN SOCIAL]** ("Xangarro", "nosotros"), con domicilio en **[DOMICILIO]**, es responsable del
+**MEXIA, S.A.S.** ("Xangarro", "nosotros"), con domicilio en **Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco**, es responsable del
 tratamiento de los datos personales que se describen en este aviso, en términos del artículo 15,
 fracción I de la Ley.
 

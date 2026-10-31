@@ -1,48 +1,24 @@
 import { expect, test } from './test';
-import { hashPassword } from '@xangarro/auth-core';
-import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { clickUntil } from './interact';
-import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
- * P-32's acceptance on a throwaway member (the contador role — the matrix is
+ * P-32's acceptance on a member of its own (the contador role — the matrix is
  * personal, so even Solo lectura sets theirs): toggling a channel persists
  * across a reload, critical rows show a lock («Siempre») instead of a switch,
  * and WhatsApp, not delivered yet, has no column.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-// A fresh address per *process*, not per millisecond: this file's `beforeAll`
-// runs once in every viewport project, and three of them starting inside the
-// same millisecond gave `Date.now()` the same value and the second insert a
-// duplicate `users_email_key`. `onboarding.spec.ts` already carries a patch
-// for the same collision.
-const email = `avisos-${randomUUID()}@test.mx`;
-const biz = newUlid();
+let t: Tenant;
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword('avisos-123');
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Avisos ${Date.now()}`}, 'RESICO', 125, ${biz}, ${newUlid()}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'viewer', ${biz}, now(), now())`;
-  });
+  t = await mintTenant({ label: 'Avisos', role: 'viewer' });
 });
 
 test('a channel switch persists; critical avisos cannot be switched off', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('avisos-123');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
 
   const correo = page.getByRole('switch', { name: 'Stock bajo por correo' });
   const open = async () => {

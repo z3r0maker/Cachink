@@ -8,9 +8,9 @@ import { afterAll, beforeAll, it } from 'vitest';
 import { integrationSuite } from '@xangarro/testing/integration';
 
 /**
- * 0006 + 0007 (E-26), old → new (CLAUDE.md §2.9): a document filed before the
+ * 0007 + 0008 (E-26), old → new (CLAUDE.md §2.9): a document filed before the
  * migration keeps its bytes, now in `corp.blobs` under its id, and its row
- * points there. Run on a throwaway database migrated up to 0005, so the
+ * points there. Run on a throwaway database migrated up to 0006, so the
  * suite's own database is never rolled back.
  */
 const { describe } = integrationSuite();
@@ -22,7 +22,7 @@ const sqlFiles = (dir: string) =>
     .sort()
     .map((f) => join(ROOT, dir, f));
 
-describe('0006 + 0007: documents point at their blobs', () => {
+describe('0007 + 0008: documents point at their blobs', () => {
   const name = `xg_scratch_corp_${randomBytes(6).toString('hex')}`;
   let admin: postgres.Sql;
   let sql: postgres.Sql;
@@ -40,14 +40,14 @@ describe('0006 + 0007: documents point at their blobs', () => {
     u.pathname = `/${name}`;
     sql = postgres(u.toString(), { max: 1, onnotice: () => {} });
     const drizzle = sqlFiles('drizzle');
-    await apply([...sqlFiles('local'), ...drizzle.filter((f) => f.split('/').pop()! < '0006')]);
+    await apply([...sqlFiles('local'), ...drizzle.filter((f) => f.split('/').pop()! < '0007')]);
     await sql`
       INSERT INTO corp.documents (id, kind, folder, title, period, filename, mime, size_bytes,
                                   sha256, content, retain_until, uploaded_by, uploaded_at)
       VALUES ('doc-viejo', 'otro', 'constitucion', 'Acta constitutiva', '2026', 'acta.pdf',
               'application/pdf', ${bytes.byteLength}, ${'a'.repeat(64)}, ${bytes},
               '2031-10-08', 'f1', now())`;
-    await apply(drizzle.filter((f) => f.split('/').pop()! >= '0006'));
+    await apply(drizzle.filter((f) => f.split('/').pop()! >= '0007'));
   });
 
   afterAll(async () => {

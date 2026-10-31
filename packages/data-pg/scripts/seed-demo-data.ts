@@ -4,7 +4,7 @@
  * A second business, separate from the dev seed, that a store reviewer can
  * sign into and pair a phone with. Ids are ULIDs under their own prefix so
  * the two tenants can never collide; the prefix is Crockford base32 (no I, L,
- * O, U), which is also why the activation code is `DEMXK7M3` and not
+ * O, U), which is also why the first activation code is `DEMXK7M3` and not
  * `DEMOK7M3` — the code alphabet excludes O too (`ACTIVATION_CODE_REGEX`).
  */
 
@@ -21,12 +21,16 @@ export const DEMO = {
     nombre: 'Reviewer',
     memberId: demoId('MEMB0'),
   },
-  /** Matches `ACTIVATION_CODE_REGEX`; re-minted on every run. */
-  activationCode: 'DEMXK7M3',
-  /** Two registers, the PINs the review notes state. */
+  /** One per device slot of the Xangarro plan (2): a code links one device,
+   * once, and a review may run on an iPhone and an iPad. Each matches
+   * `ACTIVATION_CODE_REGEX`; all are re-minted on every run. */
+  activationCodes: ['DEMXK7M3', 'DEMXPAD2'],
+  /** Two registers, the PINs the review notes state. The id suffixes must
+   * stay inside the ULID alphabet (no I/L/O/U): the bootstrap payload is
+   * contract-validated, and 'USER1' once failed the reviewer's activation. */
   operators: [
-    { id: demoId('USER1'), nombre: 'Lupita', pin: '1234', color: '#3B6FFF' },
-    { id: demoId('USER2'), nombre: 'Chuy', pin: '5678', color: '#FF7A00' },
+    { id: demoId('REG01'), nombre: 'Lupita', pin: '1234', color: '#3B6FFF' },
+    { id: demoId('REG02'), nombre: 'Chuy', pin: '5678', color: '#FF7A00' },
   ],
 } as const;
 

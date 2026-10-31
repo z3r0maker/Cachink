@@ -1,4 +1,5 @@
 import { expect, test } from './test';
+import { AVISO_VINCULACION_VERSION } from '@xangarro/domain';
 import postgres from 'postgres';
 
 import { mintCode } from './acceso-flow';
@@ -128,7 +129,7 @@ async function expectAvisoOnNewestDevice(): Promise<void> {
     const [row] = await sql<{ aviso_version: string | null; aviso_sha256: string | null }[]>`
       SELECT aviso_version, aviso_sha256 FROM devices
       WHERE plataforma = 'web' ORDER BY created_at DESC LIMIT 1`;
-    expect(row?.aviso_version).toBe('0.1-borrador');
+    expect(row?.aviso_version).toBe(AVISO_VINCULACION_VERSION);
     expect(row?.aviso_sha256).toMatch(/^[0-9a-f]{64}$/);
   } finally {
     await sql.end({ timeout: 5 });

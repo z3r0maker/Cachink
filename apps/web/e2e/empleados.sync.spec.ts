@@ -1,5 +1,7 @@
 import { expect, test } from './test';
 
+import { stamp } from './tenant';
+
 import { asTenant, BIZ } from './sync-phone';
 
 /**
@@ -7,7 +9,7 @@ import { asTenant, BIZ } from './sync-phone';
  * each stored in centavos and logged for the phones. In the `sync` project: it
  * writes the shared tenant, with its own uniquely named employee.
  */
-const nombre = `Lupita ${Date.now()}`;
+const nombre = `Lupita ${stamp()}`;
 
 const row = async () => {
   const [r] = await asTenant(

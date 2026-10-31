@@ -33,6 +33,8 @@ async function mountApp() {
     Component = (await import('./pages/legal/Terminos.jsx')).default;
   } else if (path === '/acerca') {
     Component = (await import('./pages/Acerca.jsx')).default;
+  } else if (path === '/soporte') {
+    Component = (await import('./pages/Soporte.jsx')).default;
   } else if (path === '/recursos') {
     Component = (await import('./pages/Recursos.jsx')).default;
   } else if (path === '/') {

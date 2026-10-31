@@ -17,7 +17,7 @@ _Vigentes desde: [FECHA]. Versión: [VERSIÓN]._
 
 ## 1. Quién te presta el servicio
 
-Xangarro es un servicio de **[RAZÓN SOCIAL]**, con domicilio en **[DOMICILIO]** y RFC **[RFC]**
+Xangarro es un servicio de **MEXIA, S.A.S.**, con domicilio en **Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco** y RFC **[RFC]**
 ("Xangarro", "nosotros"). Puedes escribirnos a **[CORREO SOPORTE]** o llamarnos al **[TELÉFONO]**
 (LFPC art. 76 Bis III: estos datos se muestran también antes de contratar, en xangarro.mx).
 
@@ -203,7 +203,7 @@ Si descargaste la app de App Store aplica además lo siguiente (términos mínim
   privacidad, y por cualquier reclamación de que la app infringe propiedad intelectual de terceros.
 - **Cumplimiento legal.** Declaras que no estás en un país sujeto a embargo del gobierno de EE. UU. ni
   en una lista de partes restringidas.
-- **Datos de contacto:** [RAZÓN SOCIAL], [DOMICILIO], [CORREO SOPORTE], [TELÉFONO].
+- **Datos de contacto:** MEXIA, S.A.S., Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco, [CORREO SOPORTE], [TELÉFONO].
 - **Terceros.** Debes cumplir los términos de terceros aplicables al usar la app.
 - **Apple y sus filiales son terceros beneficiarios** de estos Términos y pueden hacerlos valer.
 

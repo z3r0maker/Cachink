@@ -9,6 +9,8 @@ import * as m from '@/styles/mostrador.css';
  */
 export function EncabezadoSeccion(props: {
   readonly actual: EmpresaHref;
+  /** A line under the title, such as the month on screen. */
+  readonly sub?: string;
   readonly children?: React.ReactNode;
 }) {
   const entry = entryOf(props.actual);
@@ -18,6 +20,7 @@ export function EncabezadoSeccion(props: {
       <div className={m.headText}>
         <span className={m.eyebrow}>MEXIA · Empresa</span>
         <h1 className={m.title}>{label}</h1>
+        {props.sub === undefined ? null : <p className={m.sub}>{props.sub}</p>}
         <PageTabs label={`Secciones de ${label}`} tabs={entry?.tabs ?? []} actual={props.actual} />
       </div>
       {props.children}

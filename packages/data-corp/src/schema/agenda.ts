@@ -3,7 +3,6 @@ import {
   type AnyPgColumn,
   boolean,
   check,
-  customType,
   date,
   index,
   integer,
@@ -12,7 +11,7 @@ import {
   unique,
 } from 'drizzle-orm/pg-core';
 
-import { at, corp } from './corp.js';
+import { at, bytea, corp } from './corp.js';
 import { entries } from './ledger.js';
 
 /**
@@ -21,11 +20,6 @@ import { entries } from './ledger.js';
  * and `blob_key` where. The Postgres store is `corp.blobs`, so until the move
  * to Azure `pg_dump -n corp` still carries every acuse (ADR-125 §2).
  */
-const bytea = customType<{ data: Buffer; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
-});
 
 /** The Postgres `BlobStore` (E-26): bytes by key, written once, never changed. */
 export const blobs = corp.table(

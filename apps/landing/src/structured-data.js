@@ -50,6 +50,15 @@ const organization = {
   },
   description:
     'Xangarro es la plataforma mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador. Hecho en México para emprendedores mexicanos.',
+  legalName: EMPRESA.razonSocial,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: EMPRESA.domicilio,
+    postalCode: EMPRESA.codigoPostal,
+    addressLocality: EMPRESA.ciudad,
+    addressRegion: EMPRESA.estado,
+    addressCountry: 'MX',
+  },
   foundingDate: EMPRESA.fundacion,
   foundingLocation: {
     '@type': 'Place',

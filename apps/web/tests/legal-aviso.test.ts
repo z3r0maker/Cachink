@@ -32,9 +32,17 @@ describe('aviso simplificado at signup (N-34, PRIV-REG-01)', () => {
     assert.match(text, /Cómo limitar el uso/);
   });
 
+  it('names the responsable by its razón social and domicilio (2026-10-28)', () => {
+    assert.match(
+      avisoTextoCanonico(),
+      /MEXIA, S\.A\.S\. \(Xangarro\), con domicilio en Paseo Lomas Altas 524/,
+    );
+    assert.doesNotMatch(avisoTextoCanonico(), /\[RAZÓN SOCIAL\]|\[DOMICILIO\]/);
+  });
+
   it('still carries production placeholders — this test is the reminder to close them', () => {
     // Remove this assertion when docs/launch/production-readiness.md closes the legal-entity items.
-    assert.match(avisoTextoCanonico(), /\[RAZÓN SOCIAL\]/);
+    assert.match(avisoTextoCanonico(), /\[CORREO PRIVACIDAD\]/);
   });
 
   it('hashes an IP and leaves an unknown one empty', () => {

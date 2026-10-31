@@ -1,9 +1,8 @@
 import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
  * Ventas y gastos searches the folio and the operador, not only the concepto
@@ -14,42 +13,29 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
+let t: Tenant;
+
 // Computed in beforeAll, not here: the module loads once per worker, and CI
 // re-runs beforeAll against a database that already holds this tenant's rows
-// (users_email_key). A fresh stamp per execution makes every run its own tenant.
-let stamp = '';
-let email = '';
-let biz = '';
 
 const counter = (page: Page) => page.locator('main').getByRole('status');
 const conceptos = (page: Page) => page.locator('main tbody tr').allInnerTexts();
 
 test.beforeAll(async () => {
-  stamp = `${process.pid}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
-  email = `busqueda-${stamp}@test.mx`;
-  biz = newUlid();
-  const userId = randomUUID();
-  const hash = await hashPassword('busqueda-1');
-  const [dev, producto, lupita, turno] = [newUlid(), newUlid(), newUlid(), newUlid()];
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Panadería ${stamp}`}, 'RESICO', 125, ${biz}, ${dev}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'viewer', ${biz}, now(), now())`;
+  t = await mintTenant({ label: 'Busqueda' });
+  const [producto, lupita, turno] = [newUlid(), newUlid(), newUlid()];
+  await asTenant(t.biz, async (sql) => {
     await sql`
       INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, business_id, device_id,
                             created_at, updated_at)
-      VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', ${biz}, ${dev}, now(), now())`;
+      VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', ${t.biz}, ${t.deviceId}, now(), now())`;
     await sql`
       INSERT INTO users (id, nombre, pin_hash, active, business_id, device_id, created_at, updated_at)
-      VALUES (${lupita}, 'Lupita Díaz', 'x', true, ${biz}, ${dev}, now(), now())`;
+      VALUES (${lupita}, 'Lupita Díaz', 'x', true, ${t.biz}, ${t.deviceId}, now(), now())`;
     await sql`
       INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, monto_apertura_centavos,
                                efectivo_adicional_centavos, business_id, device_id, created_at, updated_at)
-      VALUES (${turno}, ${lupita}, '2026-05-10', now(), 0, 0, ${biz}, ${dev}, now(), now())`;
+      VALUES (${turno}, ${lupita}, '2026-05-10', now(), 0, 0, ${t.biz}, ${t.deviceId}, now(), now())`;
     for (const [folio, concepto, enTurno] of [
       [7, 'Concha', null],
       [17, 'Bolillo', null],
@@ -60,23 +46,18 @@ test.beforeAll(async () => {
         INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, caja_turno_id,
                              business_id, device_id, created_at, updated_at)
         VALUES (${id}, ${folio}, '2026-05-10', ${concepto}, 'Efectivo', 'pagado', ${enTurno},
-                ${biz}, ${dev}, now(), now())`;
+                ${t.biz}, ${t.deviceId}, now(), now())`;
       await sql`
         INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                            producto_id, cantidad, business_id, device_id, created_at, updated_at)
         VALUES (${id}, ${id}, '2026-05-10', ${concepto}, 'Producto', 1000,
-                ${producto}, 1, ${biz}, ${dev}, now(), now())`;
+                ${producto}, 1, ${t.biz}, ${t.deviceId}, now(), now())`;
     }
   });
 });
 
 test('a folio, a number and an operator each find their ventas', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('busqueda-1');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
   await page.goto('/movimientos');
   await expect(counter(page)).toHaveText('Mostrando 1–3 de 3 movimientos');
   const buscar = page.getByRole('textbox', { name: 'Buscar movimientos' });
@@ -102,12 +83,7 @@ test('a folio, a number and an operator each find their ventas', async ({ page }
 test('an empty folio search says so, and the caption carries the search (DS-01)', async ({
   page,
 }) => {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('busqueda-1');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
   await page.goto('/movimientos');
   await expect(counter(page)).toHaveText('Mostrando 1–3 de 3 movimientos');
 

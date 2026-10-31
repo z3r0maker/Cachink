@@ -143,7 +143,7 @@
   internet on the street), both founders, Don Cuentas, four principles, contact. `landing/empresa.js`
   holds Zapopan, Jalisco, 2026 — the Organization's `foundingDate`/`foundingLocation`, the page and
   llms-full read it; the page carries an AboutPage graph; footer link beside the aviso; in the
-  sitemap. No legal entity yet: the aviso keeps `[RAZÓN SOCIAL]` (production-readiness blocker).
+  sitemap. The legal entity is MEXIA, S.A.S. (2026-10-28); the aviso names it and its domicilio, the Organization schema carries `legalName` and the address.
 - Done (round 3, code + content): 2026-09-24 · the NIF guide is the pillar (~1,300 words): what the
   NIF are and their series, who issues them and since when (CINIF, 2006), the three statements with
   their norms (B-3, B-6, B-2) and one month of a fonda shown in all three so the numbers connect,

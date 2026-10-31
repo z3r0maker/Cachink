@@ -1,5 +1,7 @@
 import { expect, test, type Page } from './test';
 
+import { stamp } from './tenant';
+
 /**
  * Signup → "Platícanos de ti" → "Tu plan ideal" → "¿Cómo empiezo?" → re-run
  * (P-03, P-04, N-12 … N-15), as a brand-new visitor: a **fresh context**, no
@@ -40,7 +42,7 @@ test('signup refuses to proceed until the aviso is accepted', async ({ page }) =
   await expect(page.getByTestId('signup-acepto')).not.toBeChecked();
   await expect(page.getByTestId('signup-novedades')).toBeChecked();
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
-  await page.getByTestId('signup-email').fill(`aviso+${Date.now()}@ejemplo.mx`);
+  await page.getByTestId('signup-email').fill(`aviso+${stamp()}@ejemplo.mx`);
   await page.getByTestId('signup-password').fill('tortas-2026');
   await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
   await expect(page.getByText(/acepta el aviso de privacidad/)).toBeVisible();
@@ -50,7 +52,7 @@ test('signup refuses to proceed until the aviso is accepted', async ({ page }) =
 test('a new owner signs up, answers the wizard, stays free and lands on the checklist', async ({
   page,
 }, info) => {
-  const email = `lupita+${Date.now()}-${info.project.name}@ejemplo.mx`;
+  const email = `lupita+${stamp()}-${info.project.name}@ejemplo.mx`;
   await page.goto('/signup?plan=xangarro');
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
   await page.getByTestId('signup-email').fill(email);
@@ -121,7 +123,7 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
 test('signup refuses a short password without creating anything', async ({ page }) => {
   await page.goto('/signup');
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
-  await page.getByTestId('signup-email').fill(`corta+${Date.now()}@ejemplo.mx`);
+  await page.getByTestId('signup-email').fill(`corta+${stamp()}@ejemplo.mx`);
   await page.getByTestId('signup-password').fill('corta');
   await page.getByTestId('signup-acepto').check();
   await page.getByRole('button', { name: 'Crear mi cuenta' }).click();

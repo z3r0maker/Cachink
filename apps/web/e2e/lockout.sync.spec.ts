@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { clientIp } from './tenant';
 import { deviceHeaders } from '@xangarro/contracts';
 
 import { asTenant, BIZ } from './sync-phone';
@@ -12,7 +14,7 @@ import { asTenant, BIZ } from './sync-phone';
 test('guessing activation codes locks the caller out before any device token', async ({
   request,
 }) => {
-  const from = { ...deviceHeaders(), 'x-forwarded-for': `198.51.100.${Date.now() % 250}` };
+  const from = { ...deviceHeaders(), 'x-forwarded-for': clientIp() };
   const attempt = (code: string) =>
     request.post('/api/v1/activate', {
       headers: from,

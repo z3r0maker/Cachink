@@ -1598,6 +1598,18 @@ critical avisos cannot be switched off.
     claims against what the app actually does — which also unblocks P-35's first full measurement,
     taken without the `sync` project because that run could not reach it. **Full suite, three
     consecutive runs on a fresh database: 482 passed, 0 failed.**
+  - 2026-10-28 · **A spec that writes owns its tenant** (ADR-128). A month of main measured the
+    rest of the problem: `ci` red in 21 of 40 runs, `portal-e2e` the usual job, and two causes —
+    specs sharing the seeded tenant's rows _after_ the viewport phase (where ADR-103's guard
+    unlocks), and fixture identity built from `Date.now()`, which two workers in the same
+    millisecond share (`users_email_key`, patched spec by spec in September and again in October).
+    Seventeen hand-rolled fixtures (~820 lines, seven idioms for the unique stamp) are now
+    `mintTenant()` + `tenant-rows.ts` (~290 lines), which also own the plan's billing row and its
+    Stripe status; `stamp()` and `clientIp()` replace the clock;
+    `tests/e2e-fixture-identity.test.ts` refuses a new `Date.now()` identity or a hand-rolled
+    business. **Still open:** the register's door is hard-wired to Taquería — its owner's address,
+    Ana's NIP, its two device slots — so `operador`, `devices` and `sync` still share one tenant and
+    still run a file at a time. A door that takes a tenant is what would let them run in parallel.
 - **Steps:** One flow — free signup → onboarding → create operator → import 3 products → issue a
   device code → call `/activate` via the C-10 conformance helper → device appears → push one sale
   via the helper → it appears in Movimientos. Runs against local Supabase and the dev server in CI

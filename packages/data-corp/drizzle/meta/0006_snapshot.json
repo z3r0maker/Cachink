@@ -1,39 +1,9 @@
 {
-  "id": "5a3efb64-512c-4d91-9360-ef8db6f4d159",
+  "id": "a79ea440-20ed-4f4f-b96f-fedb55cb3d25",
   "prevId": "8b24acad-da7d-401d-99d9-66f59679fc6f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "corp.blobs": {
-      "name": "blobs",
-      "schema": "corp",
-      "columns": {
-        "key": {
-          "name": "key",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "content": {
-          "name": "content",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "blobs_size_check": {
-          "name": "blobs_size_check",
-          "value": "octet_length(\"corp\".\"blobs\".\"content\") BETWEEN 1 AND 4194304"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "corp.certificates": {
       "name": "certificates",
       "schema": "corp",
@@ -239,18 +209,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "storage": {
-          "name": "storage",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "blob_key": {
-          "name": "blob_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "content": {
           "name": "content",
           "type": "bytea",
@@ -372,13 +330,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "documents_blob_key_unique": {
-          "name": "documents_blob_key_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "blob_key"
-          ]
-        },
         "documents_supersedes_id_unique": {
           "name": "documents_supersedes_id_unique",
           "nullsNotDistinct": false,
@@ -939,6 +890,325 @@
       },
       "policies": {},
       "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "corp.received_invoices": {
+      "name": "received_invoices",
+      "schema": "corp",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fecha": {
+          "name": "fecha",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "folio": {
+          "name": "folio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "emisor_rfc": {
+          "name": "emisor_rfc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emisor_nombre": {
+          "name": "emisor_nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "receptor_rfc": {
+          "name": "receptor_rfc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uso_cfdi": {
+          "name": "uso_cfdi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metodo_pago": {
+          "name": "metodo_pago",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moneda": {
+          "name": "moneda",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monto_original": {
+          "name": "monto_original",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_cambio": {
+          "name": "tipo_cambio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iva": {
+          "name": "iva",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "retencion_isr": {
+          "name": "retencion_isr",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "retencion_iva": {
+          "name": "retencion_iva",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total": {
+          "name": "total",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "concepto": {
+          "name": "concepto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sat_total": {
+          "name": "sat_total",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sello8": {
+          "name": "sello8",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "archivo": {
+          "name": "archivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "xml": {
+          "name": "xml",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado_sat": {
+          "name": "estado_sat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entry_id": {
+          "name": "entry_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pago_entry_id": {
+          "name": "pago_entry_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "received_invoices_fecha_idx": {
+          "name": "received_invoices_fecha_idx",
+          "columns": [
+            {
+              "expression": "fecha",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "received_invoices_emisor_idx": {
+          "name": "received_invoices_emisor_idx",
+          "columns": [
+            {
+              "expression": "emisor_rfc",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "received_invoices_project_id_projects_id_fk": {
+          "name": "received_invoices_project_id_projects_id_fk",
+          "tableFrom": "received_invoices",
+          "tableTo": "projects",
+          "schemaTo": "corp",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "received_invoices_entry_id_entries_id_fk": {
+          "name": "received_invoices_entry_id_entries_id_fk",
+          "tableFrom": "received_invoices",
+          "tableTo": "entries",
+          "schemaTo": "corp",
+          "columnsFrom": [
+            "entry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "received_invoices_pago_entry_id_entries_id_fk": {
+          "name": "received_invoices_pago_entry_id_entries_id_fk",
+          "tableFrom": "received_invoices",
+          "tableTo": "entries",
+          "schemaTo": "corp",
+          "columnsFrom": [
+            "pago_entry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "received_invoices_entry_id_unique": {
+          "name": "received_invoices_entry_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "entry_id"
+          ]
+        },
+        "received_invoices_pago_entry_id_unique": {
+          "name": "received_invoices_pago_entry_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "pago_entry_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "received_invoices_uuid_check": {
+          "name": "received_invoices_uuid_check",
+          "value": "\"corp\".\"received_invoices\".\"uuid\" ~ '^[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}$'"
+        },
+        "received_invoices_estado_check": {
+          "name": "received_invoices_estado_check",
+          "value": "\"corp\".\"received_invoices\".\"estado\" IN ('por_revisar', 'registrada', 'cancelada', 'descartada')"
+        },
+        "received_invoices_estado_sat_check": {
+          "name": "received_invoices_estado_sat_check",
+          "value": "\"corp\".\"received_invoices\".\"estado_sat\" IN ('vigente', 'cancelado', 'sin_verificar')"
+        },
+        "received_invoices_metodo_check": {
+          "name": "received_invoices_metodo_check",
+          "value": "\"corp\".\"received_invoices\".\"metodo_pago\" IN ('PUE', 'PPD')"
+        },
+        "received_invoices_montos_check": {
+          "name": "received_invoices_montos_check",
+          "value": "\"corp\".\"received_invoices\".\"subtotal\" > 0 AND \"corp\".\"received_invoices\".\"iva\" >= 0 AND \"corp\".\"received_invoices\".\"retencion_isr\" >= 0 AND \"corp\".\"received_invoices\".\"retencion_iva\" >= 0\n          AND \"corp\".\"received_invoices\".\"total\" = \"corp\".\"received_invoices\".\"subtotal\" + \"corp\".\"received_invoices\".\"iva\" - \"corp\".\"received_invoices\".\"retencion_isr\" - \"corp\".\"received_invoices\".\"retencion_iva\""
+        },
+        "received_invoices_usd_check": {
+          "name": "received_invoices_usd_check",
+          "value": "(\"corp\".\"received_invoices\".\"moneda\" = 'MXN' AND \"corp\".\"received_invoices\".\"monto_original\" IS NULL AND \"corp\".\"received_invoices\".\"tipo_cambio\" IS NULL)\n          OR (\"corp\".\"received_invoices\".\"moneda\" = 'USD' AND \"corp\".\"received_invoices\".\"monto_original\" > 0 AND \"corp\".\"received_invoices\".\"tipo_cambio\" IS NOT NULL)"
+        },
+        "received_invoices_categoria_check": {
+          "name": "received_invoices_categoria_check",
+          "value": "\"corp\".\"received_invoices\".\"categoria\" IS NULL OR \"corp\".\"received_invoices\".\"categoria\" IN ('costo_servicio', 'ventas_marketing', 'desarrollo', 'administracion')"
+        },
+        "received_invoices_registrada_check": {
+          "name": "received_invoices_registrada_check",
+          "value": "\"corp\".\"received_invoices\".\"estado\" <> 'registrada' OR (\"corp\".\"received_invoices\".\"entry_id\" IS NOT NULL AND \"corp\".\"received_invoices\".\"categoria\" IS NOT NULL)"
+        },
+        "received_invoices_pago_check": {
+          "name": "received_invoices_pago_check",
+          "value": "\"corp\".\"received_invoices\".\"pago_entry_id\" IS NULL OR (\"corp\".\"received_invoices\".\"metodo_pago\" = 'PPD' AND \"corp\".\"received_invoices\".\"entry_id\" IS NOT NULL)"
+        }
+      },
       "isRLSEnabled": false
     },
     "corp.recurring_templates": {

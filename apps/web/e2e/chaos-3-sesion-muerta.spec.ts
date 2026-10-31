@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { stamp } from './tenant';
 import postgres from 'postgres';
 
 import { BASE_URL } from './base-url';
@@ -37,7 +39,7 @@ test('session death mid-edit returns the inline message, then the gate redirects
       .getByRole('button', { name: 'Editar' }),
     page.getByTestId('producto-nombre'),
   );
-  await page.getByTestId('producto-nombre').fill(`Fantasma ${Date.now()}`);
+  await page.getByTestId('producto-nombre').fill(`Fantasma ${stamp()}`);
 
   // The session vanishes while the drawer is open and filled.
   await page.context().clearCookies();
@@ -100,8 +102,8 @@ test(
     await page.getByRole('button', { name: 'Editar datos generales' }).click();
     await pageB.getByRole('button', { name: 'Editar datos generales' }).click();
 
-    const nameA = `Negocio A ${Date.now()}`;
-    const nameB = `Negocio B ${Date.now()}`;
+    const nameA = `Negocio A ${stamp()}`;
+    const nameB = `Negocio B ${stamp()}`;
     await page.getByTestId('negocio-nombre').fill(nameA);
     await pageB.getByTestId('negocio-nombre').fill(nameB);
 

@@ -5,11 +5,20 @@
  */
 import { parseLegalMarkdown } from './markdown.js';
 
-const INLINE = /(\*\*[^*]+\*\*|`[^`]+`|(?<![\w])_[^_]+_(?![\w]))/g;
+const INLINE = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|`[^`]+`|(?<![\w])_[^_]+_(?![\w]))/g;
+const LINK = /^\[([^\]]+)\]\(([^)\s]+)\)$/;
 
-/** Bold, code and emphasis; everything else is text. */
+/** Links, bold, code and emphasis; everything else is text. */
 function Inline({ text }) {
   return text.split(INLINE).map((part, i) => {
+    const link = LINK.exec(part);
+    if (link) {
+      return (
+        <a key={i} href={link[2]} style={{ color: 'var(--black)', fontWeight: 700 }}>
+          {link[1]}
+        </a>
+      );
+    }
     if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
     if (part.startsWith('`')) return <code key={i}>{part.slice(1, -1)}</code>;
     if (part.startsWith('_') && part.endsWith('_') && part.length > 2) {

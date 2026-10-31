@@ -3,11 +3,11 @@ import { afterAll, beforeAll, it } from 'vitest';
 import { compare } from 'bcryptjs';
 import postgres from 'postgres';
 import { ACTIVATION_CODE_REGEX } from '@xangarro/contracts';
-import { ExpenseSchema, ProductSchema } from '@xangarro/domain';
+import { ExpenseSchema, PLAN_LIMITS, ProductSchema } from '@xangarro/domain';
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { expenses, products } from '../src/schema/index.js';
-import { DEMO } from '../scripts/seed-demo-data.js';
+import { DEMO, demoId } from '../scripts/seed-demo-data.js';
 import { seedDemo } from '../scripts/seed-demo.js';
 import { integrationSuite } from './support/db';
 
@@ -66,12 +66,18 @@ describe('the App Review demo tenant (B-04)', () => {
     assert.equal(member?.role, 'owner');
   });
 
-  it('mints a live activation code that the contract accepts', async () => {
-    assert.match(DEMO.activationCode, ACTIVATION_CODE_REGEX);
-    const [code] = await app<{ redeemed_at: string | null; expires_at: string }[]>`
-      SELECT redeemed_at, expires_at FROM activation_codes WHERE code = ${DEMO.activationCode}`;
-    assert.equal(code?.redeemed_at, null);
-    assert.ok(new Date(code?.expires_at ?? 0).getTime() > TODAY.getTime() + 300 * 86_400_000);
+  it('mints one live code per device slot, each one the contract accepts', async () => {
+    // A code links one device, once. A review on an iPhone and an iPad needs two,
+    // and more codes than the plan has slots would only mint a refusal.
+    assert.equal(DEMO.activationCodes.length, PLAN_LIMITS.xangarro.devices);
+    assert.equal(new Set(DEMO.activationCodes).size, DEMO.activationCodes.length);
+    for (const c of DEMO.activationCodes) {
+      assert.match(c, ACTIVATION_CODE_REGEX);
+      const [code] = await app<{ redeemed_at: string | null; expires_at: string }[]>`
+        SELECT redeemed_at, expires_at FROM activation_codes WHERE code = ${c}`;
+      assert.equal(code?.redeemed_at, null, `${c} is live`);
+      assert.ok(new Date(code?.expires_at ?? 0).getTime() > TODAY.getTime() + 300 * 86_400_000);
+    }
   });
 
   it('seeds twenty products and a month of ventas and gastos that pass the domain schemas', async () => {
@@ -112,20 +118,35 @@ describe('the App Review demo tenant (B-04)', () => {
     assert.equal(short.length, 0, `net negative: ${short.map((r) => r.producto_id).join(', ')}`);
   });
 
-  it('is idempotent: a second run adds nothing, re-mints a redeemed code, keeps the password', async () => {
+  it('is idempotent: a second run adds nothing, re-mints the codes, keeps the password', async () => {
     const count = async () =>
       (await app<{ n: string }[]>`SELECT count(*)::text AS n FROM sales`)[0]?.n;
     const before = await count();
-    await owner`UPDATE activation_codes SET redeemed_at = now() WHERE code = ${DEMO.activationCode}`;
+    await owner`UPDATE activation_codes SET redeemed_at = now() WHERE code = ANY(${DEMO.activationCodes})`;
     await seedDemo(app, { password: SECOND_PASSWORD, today: TODAY });
     assert.equal(await count(), before);
-    const [code] = await app<{ redeemed_at: string | null }[]>`
-      SELECT redeemed_at FROM activation_codes WHERE code = ${DEMO.activationCode}`;
-    assert.equal(code?.redeemed_at, null, 'the next reviewer gets a live code');
+    const live = await app<{ code: string }[]>`
+      SELECT code FROM activation_codes WHERE code = ANY(${DEMO.activationCodes}) AND redeemed_at IS NULL`;
+    assert.equal(live.length, DEMO.activationCodes.length, 'the next reviewer gets live codes');
     const [row] = await app<{ hash: string }[]>`
       SELECT encrypted_password AS hash FROM xangarro.login_lookup(${DEMO.owner.email})`;
     assert.equal(await compare(PASSWORD, row?.hash ?? ''), true, 'the first password sticks');
     assert.equal(await compare(SECOND_PASSWORD, row?.hash ?? ''), false);
+  });
+
+  it("frees the last review's device slots, so the next review can link", async () => {
+    // A slot is a device that is not revoked; the app role can revoke but not delete.
+    for (const i of [0, 1]) {
+      await owner`
+        INSERT INTO devices (id, nombre, plataforma, business_id, created_at, updated_at)
+        VALUES (${demoId(`RVW0${i}`)}, ${`Revisor ${i}`}, 'ios', ${DEMO.businessId}, now(), now())
+        ON CONFLICT (id) DO UPDATE SET revoked_at = NULL`;
+    }
+    await seedDemo(app, { password: PASSWORD, today: TODAY });
+    const [held] = await owner<{ n: string }[]>`
+      SELECT count(*)::text AS n FROM devices
+      WHERE business_id = ${DEMO.businessId} AND revoked_at IS NULL`;
+    assert.equal(held?.n, '0');
   });
 
   it('stays out of the dev seed: nothing of Tacos La Esquina is visible to Taquería Don Pedro', async () => {

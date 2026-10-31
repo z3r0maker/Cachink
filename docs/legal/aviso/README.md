@@ -23,7 +23,7 @@ textos, `privacy.md` debe quedar reemplazado y `terms.md` reescrito con el anexo
 
 ## 1. Supuestos
 
-1. Xangarro opera como una sola persona moral mexicana (`[RAZÓN SOCIAL]`, `[DOMICILIO]`), sin empresas
+1. Xangarro opera como una sola persona moral mexicana (`MEXIA, S.A.S.`, `Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco`), sin empresas
    del grupo.
 2. Clientes: negocios pequeños; muchos dueños son **personas físicas** (RESICO, actividad empresarial),
    así que sus registros de ventas y gastos son también datos patrimoniales suyos.

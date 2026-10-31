@@ -1,72 +1,68 @@
 # Xangarro — App Store listing (es-MX)
 
-## Nombre
+Paste-ready text for each App Store Connect field. The number after each
+heading is Apple's character limit; every field was counted against it on
+2026-10-30. The text names no price or plan and has no link to buy
+(Guideline 3.1.1, `app-registration/apple/AUDIT-steering.md`).
 
-**Xangarro — Finanzas para emprendedores**
+## Nombre (30)
 
-## Subtítulo (30 caracteres)
+Xangarro!
 
-Ventas, egresos, inventario.
+If the name is taken, use `Xangarro: caja del negocio`.
 
-## Descripción corta (80 caracteres)
+## Subtítulo (30)
 
-POS y finanzas para emprendedoras mexicanas. Funciona sin internet.
+Ventas y caja de tu negocio
 
-## Descripción larga
+## Texto promocional (170)
 
-Xangarro es la app más simple para llevar las finanzas de tu negocio en
-México. Registra ventas y egresos, controla inventario y ve tus
-estados financieros al día — todo en tu dispositivo, sin conexión
-obligatoria.
+Cobra en segundos, aunque se vaya el internet. Ventas, gastos, caja y turnos de tu negocio, en el teléfono o la tablet de tu mostrador.
 
-**Para quién es Xangarro**
+## Descripción (4000)
 
-- Emprendedoras y emprendedores que quieren llevar su negocio en orden
-  sin aprender contabilidad.
-- Negocios chicos: tortillerías, papelerías, food trucks, cafés,
-  tiendas de barrio.
+Xangarro es la caja de tu negocio en el teléfono o la tablet. Tu equipo cobra en el mostrador, registra los gastos y cierra el turno, y todo llega a la cuenta del negocio.
 
-**Qué puedes hacer**
+Para usar la app necesitas una cuenta de Xangarro. El dueño vincula cada dispositivo con un código o un QR, y cada persona del equipo entra con su NIP.
 
-- 📈 **Ventas** — registra ventas con Efectivo, Transferencia, Tarjeta o
-  Crédito. Comparte el comprobante por WhatsApp con un toque.
-- 📉 **Egresos** — Gasto, Nómina, e Inventario en un mismo modal con
-  tres pestañas. Marca gastos como recurrentes y confirma con un toque
-  cuando se disparan.
-- 📦 **Inventario** — productos, movimientos (entradas y salidas), y
-  alertas automáticas de stock bajo.
-- 📊 **Estados financieros NIF** — Resultados (B-3), Balance (B-6) y
-  Flujo de Efectivo (B-2). Informe mensual en PDF para tu contador.
-- 💼 **Director y Operativo** — dos roles, una app. El Director ve
-  todo, el Operativo solo captura.
-- 🌙 **Funciona sin internet** — cada dispositivo trabaja con sus
-  propios datos. Sincroniza por Wi-Fi con otros equipos en tu negocio
-  o en la nube cuando quieras.
+COBRA EN SEGUNDOS
+• Arma el ticket tocando tus productos o escaneando su código de barras.
+• Cobra en efectivo, tarjeta, transferencia o fiado.
+• La app te dice el cambio y manda el comprobante por WhatsApp.
 
-**Privacidad primero**
+SE VA EL INTERNET, NO LA VENTA
+• La app sigue cobrando sin conexión.
+• Las ventas se envían solas cuando vuelve la señal.
 
-- Todo se guarda en tu dispositivo por defecto.
-- Exporta cuando quieras: Excel + PDF con un toque.
-- Reportes de errores **solo si tú aceptas** — nunca enviamos nombres,
-  notas ni conceptos.
+CAJA Y TURNOS
+• Abre el turno con el fondo de la caja y ciérralo con el corte.
+• Ve lo que se vendió y lo que salió de la caja en el día.
 
-**Sin suscripciones obligatorias**
+GASTOS E INVENTARIO
+• Registra los gastos del día y confirma los recurrentes cuando toca.
+• Da entrada a la mercancía y lleva el stock al día.
 
-Xangarro funciona en modo local sin costo recurrente. La sincronización
-LAN entre equipos en tu negocio no cuesta nada. Solo la sincronización
-en la nube requiere una cuenta — y puedes usar la nuestra o la tuya.
+FIADO
+• Anota quién te debe y mándale un recordatorio por WhatsApp.
 
-_Finanzas para emprendedores._
+Funciona en iPhone y iPad, en español y en pesos.
 
-## Palabras clave
+## Palabras clave (100)
 
-pos, punto de venta, inventario, finanzas, ventas, egresos, negocio,
-emprendedor, mexico, nif, estado de resultados, flujo de efectivo
+punto de venta,pos,caja,cobrar,ventas,gastos,inventario,fiado,corte de caja,turno,tienda,taquería
+
+## Categoría
+
+Negocios (principal). Sin categoría secundaria.
 
 ## URL de soporte
 
-https://cachink.mx/soporte
+https://xangarro.mx/soporte/
 
 ## URL de política de privacidad
 
-https://cachink.mx/privacidad
+https://xangarro.mx/privacidad/
+
+## Derechos de autor
+
+2026 MEXIA, S.A.S.

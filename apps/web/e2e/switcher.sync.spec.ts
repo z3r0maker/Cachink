@@ -1,55 +1,26 @@
-import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
-import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
+import { expect, test } from './test';
 
-import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
- * P-02's business switcher on throwaway tenants: an account in two businesses
- * starts on the first, switches to the second from the sidebar (ADR-107), and sees the
- * second's data under its own role there.
+ * P-02's business switcher on tenants of its own: an account in two businesses
+ * starts on the first, switches to the second from the sidebar (ADR-107), and
+ * sees the second's data under its own role there.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const stamp = Date.now();
-const email = `dos-negocios-${stamp}@test.mx`;
-const password = 'dos-negocios-1';
-const A = { id: newUlid(), nombre: `Panadería ${stamp}`, role: 'owner' };
-const B = { id: newUlid(), nombre: `Cafetería ${stamp}`, role: 'viewer' };
+let A: Tenant;
+let B: Tenant;
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword(password);
-  await asTenant(
-    A.id,
-    (sql) =>
-      sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`,
-  );
-  // A first: the membership lookup orders by when the account joined.
-  for (const [i, b] of [A, B].entries()) {
-    await asTenant(b.id, async (sql) => {
-      await sql`
-        INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-        VALUES (${b.id}, ${b.nombre}, 'RESICO', '626', 125, ${b.id}, ${newUlid()}, now(), now())`;
-      await sql`
-        INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${userId}, ${b.role}, ${b.id}, now() + ${`${i} seconds`}::interval, now())`;
-    });
-  }
+  // A first: the membership lookup orders by when the account joined, and B's
+  // membership is a second later for exactly that reason.
+  A = await mintTenant({ label: 'Panadería' });
+  B = await mintTenant({ label: 'Cafetería', role: 'viewer', owner: A, joinedAfter: 1 });
 });
 
-async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill(password);
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
-}
-
 test('an account in two businesses switches from the sidebar', async ({ page }) => {
-  await signIn(page);
+  await signIn(page, A);
   const aside = page.locator('aside');
   await expect(aside.getByText(A.nombre)).toBeVisible();
   await expect(aside.getByText('Dueño')).toBeVisible();

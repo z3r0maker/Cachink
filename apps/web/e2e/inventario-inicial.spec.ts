@@ -1,9 +1,8 @@
 import { expect, test } from './test';
-import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
  * «Captura tu inventario inicial» (N-17) end to end, on a throwaway owner
@@ -17,24 +16,14 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const sello = randomUUID();
-const email = `inventario-${sello}@test.mx`;
-const biz = newUlid();
+let t: Tenant;
+
 const TORTILLA = 'Tortilla (kg)';
 const SALSA = 'Salsa verde (lt)';
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword('inventario-123');
-  const device = newUlid();
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Inventario ${sello}`}, 'RESICO', 125, ${biz}, ${device}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
+  t = await mintTenant({ label: 'Inventario' });
+  await asTenant(t.biz, async (sql) => {
     for (const [nombre, costo] of [
       [TORTILLA, 1250],
       [SALSA, 300],
@@ -44,19 +33,14 @@ test.beforeAll(async () => {
                               umbral_stock_bajo, tipo, seguir_stock, precio_venta_centavos,
                               business_id, device_id, created_at, updated_at)
         VALUES (${newUlid()}, ${nombre}, ${`INV-${nombre.length}`}, 'Materia Prima', ${costo}, 'pza', 3,
-                'producto', true, 0, ${biz}, ${device}, now(), now())`;
+                'producto', true, 0, ${t.biz}, ${t.deviceId}, now(), now())`;
     }
   });
 });
 
 test('the grid captures the opening stock once, at the typed cost', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'one throwaway tenant, one run');
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('inventario-123');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
 
   await page.goto('/inventario-inicial');
   // Real rows: this tenant's two products, their catalogue cost prefilled.
@@ -87,7 +71,7 @@ test('the grid captures the opening stock once, at the typed cost', async ({ pag
   await expect(page.getByText('Ya está capturado')).toBeVisible();
 
   const movimientos = await asTenant(
-    biz,
+    t.biz,
     (sql) => sql<{ cantidad: number; costo: string }[]>`
       SELECT cantidad, costo_unit_centavos::text AS costo FROM inventory_movements
       ORDER BY cantidad`,

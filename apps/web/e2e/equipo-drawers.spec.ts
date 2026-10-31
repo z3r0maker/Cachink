@@ -1,10 +1,9 @@
-import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
+import { expect, test } from './test';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { clickUntil } from './interact';
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
  * The Equipo drawers on a throwaway free-plan tenant. P-05: an operator's
@@ -13,41 +12,28 @@ import { asTenant } from './sync-phone';
  * cortes; «Desvincular» frees the slot.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
+
+let t: Tenant;
 // One tenant for both tests; the second revokes the device the first reads.
 test.describe.configure({ mode: 'serial' });
 
-const stamp = Date.now();
-const email = `disp-${randomUUID()}@test.mx`;
-const biz = newUlid();
-const dev = newUlid();
 const op = newUlid();
 
 test.beforeAll(async () => {
-  const userId = randomUUID();
-  const hash = await hashPassword('disp-1234');
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-    await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Disp ${stamp}`}, 'RESICO', 125, ${biz}, ${dev}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
-    await sql`
-      INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
-      VALUES (${dev}, 'Caja única', 'android', 'Moto G', ${biz}, now(), now())`;
+  t = await mintTenant({ label: 'Disp', plan: 'xangarrito' });
+  await asTenant(t.biz, async (sql) => {
     await sql`
       INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
                          business_id, device_id, created_at, updated_at)
-      VALUES (${op}, 'Rosa Turnos', 'x', 'blue', '{}', true, ${biz}, ${dev}, now(), now())`;
+      VALUES (${op}, 'Rosa Turnos', 'x', 'blue', '{}', true, ${t.biz}, ${t.deviceId}, now(), now())`;
     await sql`
       INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, cierre_at, monto_apertura_centavos,
                                efectivo_adicional_centavos, diferencia_centavos, business_id, device_id,
                                created_at, updated_at)
       VALUES (${newUlid()}, ${op}, '2026-05-11', '2026-05-11T15:00:00Z', '2026-05-12T03:00:00Z', 50000, 0,
-              -2000, ${biz}, ${dev}, now(), now()),
-             (${newUlid()}, ${op}, '2026-05-12', '2026-05-12T15:00:00Z', NULL, 50000, 0, NULL, ${biz},
-              ${dev}, now(), now())`;
+              -2000, ${t.biz}, ${t.deviceId}, now(), now()),
+             (${newUlid()}, ${op}, '2026-05-12', '2026-05-12T15:00:00Z', NULL, 50000, 0, NULL, ${t.biz},
+              ${t.deviceId}, now(), now())`;
     for (const [fecha, contado] of [
       ['2026-05-11', 150000],
       ['2026-05-12', 148000],
@@ -55,22 +41,13 @@ test.beforeAll(async () => {
       await sql`
         INSERT INTO day_closes (id, fecha, efectivo_esperado_centavos, efectivo_contado_centavos,
                                 diferencia_centavos, cerrado_por, business_id, device_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${fecha}, 150000, ${contado}, ${contado - 150000}, 'Operativo', ${biz}, ${dev}, now(), now())`;
+        VALUES (${newUlid()}, ${fecha}, 150000, ${contado}, ${contado - 150000}, 'Operativo', ${t.biz}, ${t.deviceId}, now(), now())`;
     }
   });
 });
 
-async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('disp-1234');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
-}
-
 test('the operator drawer lists their shifts, the open one first', async ({ page }) => {
-  await signIn(page);
+  await signIn(page, t);
   await page.goto('/equipo');
   const turnos = page
     .getByRole('dialog', { name: 'Rosa Turnos' })
@@ -88,7 +65,7 @@ test('the operator drawer lists their shifts, the open one first', async ({ page
 test('a full plan says so, the drawer shows cortes, and Desvincular frees the slot', async ({
   page,
 }) => {
-  await signIn(page);
+  await signIn(page, t);
   await page.goto('/equipo?tab=dispositivos');
 
   const main = page.locator('main');

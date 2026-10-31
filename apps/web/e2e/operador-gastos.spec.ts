@@ -2,6 +2,8 @@ import { newUlid } from '@xangarro/domain';
 
 import { expect, test, type Page } from './test';
 
+import { stamp } from './tenant';
+
 import { puertaOperador } from './puerta-operador';
 import { asTenant, BIZ } from './sync-phone';
 
@@ -130,7 +132,7 @@ async function retirarRecurrente(id: string): Promise<void> {
 test('paying a due recurring gasto from Mi turno clears it from Pendientes and Para hoy', async ({
   page,
 }) => {
-  const concepto = `Gas del local ${Date.now().toString(36)}`;
+  const concepto = `Gas del local ${stamp()}`;
   const id = await sembrarRecurrente(concepto);
   try {
     await puertaOperador(page);

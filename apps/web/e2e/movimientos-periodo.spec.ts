@@ -1,9 +1,8 @@
 import { expect, test, type Page } from './test';
-import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
  * P-09's range chips and pagination. The suite pins the business's today to
@@ -135,29 +134,19 @@ test('between filters the old rows stay, dimmed, until the answer arrives', asyn
 
 test.describe('pagination', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  const stamp = Date.now();
-  const email = `paginas-${stamp}@test.mx`;
-  const biz = newUlid();
+
+  let t: Tenant;
 
   test.beforeAll(async () => {
-    const userId = randomUUID();
-    const hash = await hashPassword('paginas-1');
-    const dev = newUlid();
+    t = await mintTenant({ label: 'Periodo' });
     const producto = newUlid();
-    await asTenant(biz, async (sql) => {
-      await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
-      await sql`
-        INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-        VALUES (${biz}, ${`Muchas ventas ${stamp}`}, 'RESICO', 125, ${biz}, ${dev}, now(), now())`;
-      await sql`
-        INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${userId}, 'viewer', ${biz}, now(), now())`;
+    await asTenant(t.biz, async (sql) => {
       await sql`
         INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, umbral_stock_bajo,
                               tipo, seguir_stock, precio_venta_centavos, business_id, device_id,
                               created_at, updated_at)
         VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', 3, 'producto', false, 1000,
-                ${biz}, ${dev}, now(), now())`;
+                ${t.biz}, ${t.deviceId}, now(), now())`;
       // C-17 (ADR-073): every sale is a line of a ticket — listVentas joins
       // the header, so seeding lines without one would show nothing.
       for (let i = 1; i <= 23; i += 1) {
@@ -166,23 +155,18 @@ test.describe('pagination', () => {
           INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
                                business_id, device_id, created_at, updated_at)
           VALUES (${saleId}, ${i}, '2026-05-10', ${`Venta ${i}`}, 'Efectivo', 'pagado',
-                  ${biz}, ${dev}, now(), now())`;
+                  ${t.biz}, ${t.deviceId}, now(), now())`;
         await sql`
           INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at)
           VALUES (${saleId}, ${saleId}, '2026-05-10', ${`Venta ${i}`}, 'Producto', 1000,
-                  ${producto}, 1, ${biz}, ${dev}, now(), now())`;
+                  ${producto}, 1, ${t.biz}, ${t.deviceId}, now(), now())`;
       }
     });
   });
 
   test('23 ventas are 10 per page, and a filter goes back to page 1', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByTestId('login-door-owner').click();
-    await page.getByTestId('login-email').fill(email);
-    await page.getByTestId('login-password').fill('paginas-1');
-    await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-    await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    await signIn(page, t);
     await page.goto('/movimientos');
 
     await expect(counter(page)).toHaveText('Mostrando 1–10 de 23 movimientos');

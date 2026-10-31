@@ -1,4 +1,6 @@
 import { expect, test } from './test';
+
+import { stamp } from './tenant';
 import postgres from 'postgres';
 
 import { deviceHeaders } from '@xangarro/contracts';
@@ -40,7 +42,7 @@ test('a 500 on the negocio action surfaces an error state and writes nothing', a
     await route.continue();
   });
 
-  const attempted = `No Debería Existir ${Date.now()}`;
+  const attempted = `No Debería Existir ${stamp()}`;
   await page.goto('/negocio');
   await page.getByRole('button', { name: 'Editar datos generales' }).click();
   await page.getByTestId('negocio-nombre').fill(attempted);
@@ -92,14 +94,19 @@ test('a 500 on export produces no download and a visible failure notice', async 
   });
 
   const download = page.waitForEvent('download', { timeout: 3_000 });
-  const [response] = await Promise.all([
-    page.waitForResponse((r) => r.url().includes('/api/export/ventas')),
-    page.getByTestId('export-ventas').click(),
-  ]);
+  // The click is retried with the wait: one dropped in the hydration window
+  // fires no request, and `waitForResponse` then sits there until the test
+  // times out — `chaos-3`'s export test was fixed the same way (ADR-103).
+  await expect(async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse((r) => r.url().includes('/api/export/ventas'), { timeout: 5_000 }),
+      page.getByTestId('export-ventas').click(),
+    ]);
+    expect(response.status()).toBe(500);
+  }).toPass({ timeout: 20_000, intervals: [500, 1_000, 2_000] });
 
   // Recovery state: the failure is visible as the DS-02 toast, the button is
   // usable again, and the browser must NOT save a corrupt file.
-  expect(response?.status()).toBe(500);
   await expect(download).rejects.toThrow();
   await expect(page.getByText('No pudimos generar el archivo')).toBeVisible();
   await expect(page.getByTestId('export-ventas')).toBeEnabled();
