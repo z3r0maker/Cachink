@@ -43,6 +43,12 @@ const DOMAIN_CODES = new Set([
   'PLANTILLA_INVALIDA',
   'PLANTILLA_DESCONOCIDA',
   'RECURRENTE_YA_REGISTRADO',
+  'CFDI_INVALIDO',
+  'RFC_MEXIA_PENDIENTE',
+  'SIN_ARCHIVOS',
+  'FACTURA_DESCONOCIDA',
+  'FACTURA_NO_PENDIENTE',
+  'FACTURA_NO_POR_PAGAR',
 ]);
 
 export function failed(error: unknown, what: string): FormState {

@@ -12,6 +12,7 @@ export type NavHref =
   | '/campanas'
   | '/capacidad'
   | '/empresa/movimientos'
+  | '/empresa/facturas'
   | '/empresa/socios'
   | '/empresa/agenda'
   | '/empresa/expediente'
@@ -81,6 +82,12 @@ export const EMPRESA_NAV_ITEMS: readonly NavItem[] = [
     href: '/empresa/movimientos',
     task: 'E-02',
     summary: 'El libro del mes: gastos, comisiones y reversas.',
+  },
+  {
+    label: 'Facturas',
+    href: '/empresa/facturas',
+    task: 'E-11',
+    summary: 'Las facturas recibidas por su XML, con su estado en el SAT y lo que se debe.',
   },
   {
     label: 'Socios',

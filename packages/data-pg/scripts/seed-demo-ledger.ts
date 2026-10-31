@@ -25,7 +25,7 @@ export async function seedDemoOpeningStock(sql: Sql, today: Date): Promise<void>
       INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad, costo_unit_centavos,
                                        motivo, business_id, device_id, created_at, updated_at)
       VALUES (${demoId(`E${suffix.slice(1)}`)}, ${demoId(suffix)}, ${day}, 'entrada', ${OPENING_STOCK},
-              ${costo}, 'Inventario inicial', ${DEMO.businessId}, ${DEMO.deviceId}, ${ts(day, 8)}, ${ts(day, 8)})
+              ${costo}, 'Ajuste de inventario', ${DEMO.businessId}, ${DEMO.deviceId}, ${ts(day, 8)}, ${ts(day, 8)})
       ON CONFLICT (id) DO NOTHING`;
   }
 }

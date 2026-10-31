@@ -1,7 +1,7 @@
 # App Registration — Apple (App Store)
 
-The App Store presence for the phone app. Sibling folders (`google-play/`)
-will follow when the Android listing starts; everything here is Apple-only.
+The App Store presence for the phone app; everything here is Apple-only. The
+Play Store's answers live in the sibling folder [`google-play/`](../google-play/README.md).
 
 ## Positioning (the load-bearing decision)
 
@@ -27,13 +27,15 @@ without friction provided two things hold:
 
 ## What lives here
 
-| File                | What it is                                                     |
-| ------------------- | -------------------------------------------------------------- |
-| `README.md`         | This positioning note                                          |
-| `AUDIT-steering.md` | The no-steering audit of the app's user-facing copy            |
-| `SCREENSHOTS.md`    | Manifest of `screenshots/` (device, screen, capture)           |
-| `METADATA.md`       | Listing draft: name, subtitle, review notes, demo account TODO |
-| `screenshots/`      | PNG captures at Apple's required device sizes                  |
+| File                | What it is                                                      |
+| ------------------- | --------------------------------------------------------------- |
+| `README.md`         | This positioning note                                           |
+| `AUDIT-steering.md` | The no-steering audit of the app's user-facing copy             |
+| `SCREENSHOTS.md`    | Manifest of `screenshots/` (device, screen, capture)            |
+| `METADATA.md`       | Identity fields, demo tenant, review-safety checklist           |
+| `REVIEW-NOTES.md`   | Paste-ready App Review notes + the steps before each submission |
+| `PRIVACY-LABEL.md`  | The App Privacy answers, derived from what the app sends        |
+| `screenshots/`      | PNG captures at Apple's required device sizes                   |
 
 ## Sizes captured
 

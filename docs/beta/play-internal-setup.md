@@ -34,7 +34,7 @@ juan@ejemplo.mx,Juan,López,emprendedor
 
 ## Feedback loop
 
-Same `mailto:feedback@cachink.mx` flow as TestFlight. Play doesn't have
+Same `mailto:soporte@xangarro.mx` flow as TestFlight. Play doesn't have
 an equivalent in-track feedback widget.
 
 ## Promotion to Production

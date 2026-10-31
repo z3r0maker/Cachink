@@ -1,61 +1,39 @@
 import { expect, test } from './test';
-import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
-import { randomUUID } from 'node:crypto';
 
 import { asTenant } from './sync-phone';
+import { mintTenant, signIn, type Tenant } from './tenant';
 
 /**
- * P-11 on a throwaway tenant: a refused row names its device and says why in a
+ * P-11 on a tenant of its own: a refused row names its device and says why in a
  * sentence, the Historial records it, and «Ya lo resolví» is saved:
  * the row stays gone after a reload, with `resolved_at` set.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-// Minted in beforeAll, not here: CI re-runs beforeAll against a database that
-// already holds this tenant's rows (users_email_key), so every execution gets
-// its own stamp.
-let stamp = 0;
-let email = '';
-let biz = '';
-let dev = '';
+// Minted in `beforeAll`, not at module scope: CI re-runs the hook against a
+// database that may already hold this tenant's rows, so every execution gets a
+// business of its own (`mintTenant`).
+let t: Tenant;
 let rejection = '';
 
 test.beforeAll(async () => {
-  stamp = `${process.pid}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` as never;
-  email = `sync-${stamp}@test.mx`;
-  biz = newUlid();
-  dev = newUlid();
+  t = await mintTenant({ label: 'Sync' });
   rejection = newUlid();
-  const userId = randomUUID();
-  const hash = await hashPassword('sync-1234');
-  await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
+  await asTenant(t.biz, async (sql) => {
+    await sql`UPDATE devices SET nombre = 'Caja norte' WHERE id = ${t.deviceId}`;
     await sql`
-      INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Sync ${stamp}`}, 'RESICO', 125, ${biz}, ${dev}, now(), now())`;
-    await sql`
-      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
-    await sql`
-      INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
-      VALUES (${dev}, 'Caja norte', 'android', 'x', ${biz}, now(), now())`;
-    await sql`
-      INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, payload, received_at, business_id, created_at, updated_at)
-      VALUES (${rejection}, ${dev}, 'sales', ${newUlid()}, 'FK_PRODUCT_MISSING',
-              ${sql.json({ preview: 'Venta · Pan ×2' })}, now(), ${biz}, now(), now())`;
+      INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, payload, received_at,
+                                   business_id, created_at, updated_at)
+      VALUES (${rejection}, ${t.deviceId}, 'sales', ${newUlid()}, 'FK_PRODUCT_MISSING',
+              ${sql.json({ preview: 'Venta · Pan ×2' })}, now(), ${t.biz}, now(), now())`;
   });
 });
 
 test('a refused row reads as a sentence, is in the history, and stays resolved', async ({
   page,
 }) => {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(email);
-  await page.getByTestId('login-password').fill('sync-1234');
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await signIn(page, t);
   await page.goto('/sincronizacion');
 
   const main = page.locator('main');
@@ -77,7 +55,7 @@ test('a refused row reads as a sentence, is in the history, and stays resolved',
   await page.reload();
   await expect(main.getByText('Todo al día. Tus números están completos.')).toBeVisible();
   const [r] = await asTenant(
-    biz,
+    t.biz,
     (sql) =>
       sql`SELECT resolved_at IS NOT NULL AS resolved FROM sync_rejections WHERE id = ${rejection}`,
   );
@@ -89,41 +67,24 @@ test('a refused row reads as a sentence, is in the history, and stays resolved',
  * has nothing in the history, and the card says so in its own words.
  */
 test.describe('nothing in the last 30 days', () => {
-  const viejo = `sync-viejo-${stamp}@test.mx`;
-  const bizViejo = newUlid();
-  const devViejo = newUlid();
+  let viejo: Tenant;
 
   test.beforeAll(async () => {
-    const userId = randomUUID();
-    const hash = await hashPassword('sync-viejo-1');
-    await asTenant(bizViejo, async (sql) => {
-      await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${viejo}, ${hash})`;
-      await sql`
-        INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-        VALUES (${bizViejo}, ${`Sync viejo ${stamp}`}, 'RESICO', 125, ${bizViejo}, ${devViejo}, now(), now())`;
-      await sql`
-        INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${userId}, 'owner', ${bizViejo}, now(), now())`;
-      await sql`
-        INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
-        VALUES (${devViejo}, 'Caja vieja', 'android', 'x', ${bizViejo}, now(), now())`;
+    viejo = await mintTenant({ label: 'Sync viejo' });
+    await asTenant(viejo.biz, async (sql) => {
+      await sql`UPDATE devices SET nombre = 'Caja vieja' WHERE id = ${viejo.deviceId}`;
       // Refused and resolved 40 days ago: outside the window on every side.
       await sql`
         INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, payload, received_at,
                                      resolved_at, business_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${devViejo}, 'sales', ${newUlid()}, 'FK_PRODUCT_MISSING',
+        VALUES (${newUlid()}, ${viejo.deviceId}, 'sales', ${newUlid()}, 'FK_PRODUCT_MISSING',
                 ${sql.json({ preview: 'Venta · Pan ×1' })}, now() - interval '40 days',
-                now() - interval '40 days', ${bizViejo}, now(), now())`;
+                now() - interval '40 days', ${viejo.biz}, now(), now())`;
     });
   });
 
   test('the history says there was no activity in the last 30 days', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByTestId('login-door-owner').click();
-    await page.getByTestId('login-email').fill(viejo);
-    await page.getByTestId('login-password').fill('sync-viejo-1');
-    await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
-    await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    await signIn(page, viejo);
     await page.goto('/sincronizacion');
     const main = page.locator('main');
     await expect(main.getByText('Últimos 30 días', { exact: true })).toBeVisible();

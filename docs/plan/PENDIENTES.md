@@ -16,14 +16,14 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 `pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las
 listas de abajo.
 
-- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:261`
-- **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:700`
+- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 20: E-10, E-11, E-12, E-24, E-14, E-15, … · `20-command-center.md:267`
+- **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` (Lanzamiento) — destraba 12: N-22, N-25, N-44, N-29, N-30, X-02, … · `09-next-features.md:700`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media] (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1030`
 - **X-01** Entorno de staging (Q17 "A later") [infra] [critica] [bloq] (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
 - **C-13** API de intenciones de pago [media] (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
-- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1627`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:829`
+- **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:879`
 - **N-63** Negocio: MRR, churn, prueba → pago [media] (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1290`
 - **N-64** Embudo de activación y cohortes semanales [media] (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1301`
 - **X-07** Masters de marca + derivados (ADR-054 §6) [alta] [bloq] (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -32,7 +32,7 @@ listas de abajo.
 - **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 - **N-26** Auditoría de seguridad `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:734`
 
-## Código y técnico (108)
+## Código y técnico (106)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
@@ -53,17 +53,17 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] **P-28** Diagnóstico + estrategia — «Próximamente» en producción [media] — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [~] **P-30** Runtime de generación del Asesor [media] — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
-- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1627`
-- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1879`
-- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1895`
-- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1913`
-- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1927`
+- [ ] **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] — Bloqueada por: — · `04-portal.md:1639`
+- [ ] **P-38** Don Cuentas explica una diferencia de caja [media] — Bloqueada por: — · `04-portal.md:1891`
+- [ ] **P-39** Conclusiones de Don Cuentas en Estados financieros [baja] — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
+- [ ] **P-40** Primer diagnóstico gratis a los 90 días [baja] — Bloqueada por: P-28 · `04-portal.md:1925`
+- [ ] **P-41** Funciones avanzadas de inventario [baja] — Bloqueada por: — · `04-portal.md:1939`
 - [~] **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-02, N-08, B-14 · Falta: sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
 - [~] **N-12** Asistente «Platícanos de ti» `[LAUNCH]` [LAUNCH] [alta] [bloq] — Bloqueada por: N-11, N-19 · Falta: criterio de aceptación cumplido (`suggested-plan-table.test.ts`, 535ceaa1). Las respuestas de tipo de negocio y de WhatsApp nunca se guardan aunque existen `businesses.tipo_negocio` / `whatsapp` (`AplicarConfiguracionUseCase` escribe solo nombre + métodos de pago); el paso 6 registra `hasLogo` sin subida de archivo (N-19); las respuestas viven en `business_onboarding`, no en `businesses.onboarding` — documentado, pero sin ratificar mediante un ADR. · `09-next-features.md:399`
 
 ### Caja web (1)
 
-- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1865`
+- [!] **P-37** Impresión de tickets desde la caja [baja] · `04-portal.md:1877`
 
 ### Pagos y conciliación (12)
 
@@ -82,7 +82,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 ### Consola (backoffice) (34)
 
-- [~] **B-16** Back-office: consultas guardadas de Studio + funciones de soporte [media] — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:292`
+- [~] **B-16** Back-office: consultas guardadas de Studio + funciones de soporte [media] — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:293`
 - [ ] **N-46** Salud de la sincronización y dispositivos [media] — Disparador: lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos. · `09-next-features.md:1149`
 - [ ] **N-62** Métricas de cohortes desde el domicilio fiscal, no desde la IP. · `09-next-features.md:1270`
 - [ ] **N-65** Línea de tiempo del inquilino [media] — Bloqueada por: N-08 · Disparador: ya (todas las tablas fuente existen). · `09-next-features.md:1312`
@@ -90,32 +90,32 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-67** `/auditoria` — Bloqueada por: N-05 · Disparador: ya. · `09-next-features.md:1331`
 - [ ] **N-68** «Ver como» — suplantación de solo lectura con límite de tiempo [baja] — Bloqueada por: N-66, N-67 · Disparador: lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda resolver desde `/tenants/[id]` + N-65. · `09-next-features.md:1340`
 - [ ] **N-70** Decisiones — Bloqueada por: N-07, N-63 · Disparador: N-63 `[x]`. · `09-next-features.md:1363`
-- [~] **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:261`
-- [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:445`
-- [ ] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · `20-command-center.md:457`
-- [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:469`
-- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:480`
-- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:491`
-- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:508`
-- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:517`
-- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:532`
-- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:543`
-- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:552`
-- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:560`
-- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:570`
-- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:579`
-- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:588`
-- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:597`
-- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:608`
-- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:614`
-- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:621`
-- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:627`
-- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:633`
-- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:722`
-- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:737`
-- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:754`
-- [ ] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:829`
-- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:848`
+- [~] **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:267`
+- [ ] **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:451`
+- [~] **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they post dated today, with no confirmation, as the board shows); checking an unverified invoice («Sin verificar») with the SAT again; «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be both yet. It needs a decision on how a template knows its month was registered by an invoice. · `20-command-center.md:466`
+- [ ] **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 · `20-command-center.md:519`
+- [ ] **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:530`
+- [ ] **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:541`
+- [ ] **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:558`
+- [ ] **E-16** Resumen — Bloqueada por: E-12, E-04 · `20-command-center.md:567`
+- [ ] **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:582`
+- [ ] **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:593`
+- [ ] **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:602`
+- [ ] **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:610`
+- [ ] **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:620`
+- [ ] **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:629`
+- [ ] **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:638`
+- [ ] **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:647`
+- [ ] **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:658`
+- [ ] **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:664`
+- [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:671`
+- [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:677`
+- [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:683`
+- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:772`
+- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:787`
+- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:804`
+- [ ] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:879`
+- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:898`
 
 ### Backend, sync y datos (6)
 
@@ -123,8 +123,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-47** Anuncios a todos los inquilinos [baja] — Disparador: la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción. · `09-next-features.md:1155`
 - [ ] **N-48** Ciclo de vida de cuentas inactivas (ADR-064) [baja] — Disparador: lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes). · `09-next-features.md:1161`
 - [ ] **N-69** Ciclo de vida de flags y despliegue porcentual [baja] — Bloqueada por: N-09 · Disparador: N-09 `[x]`. · `09-next-features.md:1353`
-- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:113`
-- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:114`
+- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:121`
+- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:122`
 
 ### Privacidad y LFPC (19)
 
@@ -144,9 +144,9 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa. · `../launch/production-readiness.md:91`
 - [ ] Domicilio, teléfono y canal de quejas visibles antes de contratar (landing + checkout). · `../launch/production-readiness.md:92`
 - [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos. · `../launch/production-readiness.md:93`
-- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo). · `../launch/production-readiness.md:125`
-- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto). · `../launch/production-readiness.md:126`
-- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS. · `../launch/production-readiness.md:127`
+- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo). · `../launch/production-readiness.md:133`
+- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto). · `../launch/production-readiness.md:134`
+- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS. · `../launch/production-readiness.md:135`
 
 ### Auditorías y calidad (5)
 
@@ -156,18 +156,16 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-29** Gate E2E determinista de toda la pila `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] — Bloqueada por: P-17, A-16, N-22, N-25 · `09-next-features.md:774`
 - [ ] **N-49** Explorador de pruebas con GLM [deuda] [baja] — Disparador: el staging de X-01 en vivo y N-29 en verde. · `09-next-features.md:1176`
 
-### Lanzamiento, stores e integración (10)
+### Lanzamiento, stores e integración (8)
 
 - [ ] **X-02** Corrida de integración de extremo a extremo (app real ↔ backend real) [alta] [bloq] — Bloqueada por: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
 - [ ] **X-03** Migración de partners [alta] [bloq] — Bloqueada por: X-02 · `07-launch.md:24`
-- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: `app.json` ya está renombrado (Xangarro!, `mx.xangarro.mobile`) y `store:screenshots` existe, pero `docs/store/listing-*.md` sigue apuntando soporte/privacidad/términos a `cachink.mx`, el copy es previo al pivote (modo local, Director, LAN sync), no hay notas de revisión (cuenta demo, «no purchase flow»), y `submit.production` dentro de `eas.json` no tiene `ascAppId`. · `07-launch.md:38`
+- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: Hecho 2026-10-29: fichas apuntando a `xangarro.mx`, `xangarro.mx/soporte/` en producción, permiso de cámara en español. Hecho 2026-10-30: `docs/store/listing-app-store.md` reescrita para la app de mostrador (cada campo contado contra el límite de Apple, sin precio, plan ni enlace de compra); notas de revisión listas para pegar, con los pasos antes de cada envío, en `app-registration/apple/REVIEW-NOTES.md`; respuestas de App Privacy derivadas del código en `app-registration/apple/PRIVACY-LABEL.md`; y el seed demo ahora crea dos códigos (`DEMXK7M3`, `DEMXPAD2`, uno por lugar de dispositivo del plan Xangarro) y revoca los dispositivos de la revisión anterior: con un solo código de un uso y dos lugares, una revisión en iPhone + iPad o un segundo envío no podían vincular. Falta: crear el registro en App Store Connect y poner su `ascAppId` en `submit.production` de `eas.json`; llenar App Privacy desde ese archivo; correr el seed demo contra el hospedado antes de enviar; un build de producción probado; el splash sigue diciendo «Cachink!» (X-07). Hecho 2026-10-30 (Play): `docs/store/listing-play-store.md` reescrita como la de Apple (contada contra los límites de Google); respuestas de Data safety en `app-registration/google-play/DATA-SAFETY.md`; contenido de la app, acceso del revisor y la regla «una tienda a la vez» (los dos códigos y lugares no alcanzan para dos revisiones simultáneas) en `app-registration/google-play/README.md`. Falta en Play: la cuenta de desarrollador como organización (MEXIA, con D-U-N-S; una cuenta personal nueva exige una prueba cerrada de 12 personas por 14 días); el gráfico de funciones de 1024 × 500 (X-07); capturas de Android, porque las de Apple pasan de la proporción 2:1 de Play y muestran la barra de iOS; llenar Data safety. En ambas tiendas: un enlace tocable al aviso de privacidad dentro de la app (5.1.1(i)); hoy solo aparece como texto en el aviso de vinculación. · `07-launch.md:38`
 - [ ] **X-09** Reset de ROADMAP.md [media] [bloq] — Bloqueada por: X-02 · `07-launch.md:114`
 - [ ] **X-10** Compuerta del checklist de lanzamiento [critica] [bloq] — Bloqueada por: X-01…X-09 (excepto X-08) · `07-launch.md:120`
-- [~] **N-32** Barrido de cumplimiento para las tiendas de apps `[LAUNCH]` [LAUNCH] [tiendas] [alta] [bloq] — Bloqueada por: N-24, A-15 · Falta: la checklist del revisor para X-05 en `docs/store/`. `pnpm lint:store` vuelve a estar en verde y forma parte del gate en `ci.yml` (ver Progress). · `09-next-features.md:823`
-- [ ] ANTES DE STORES — URLs de términos y privacidad activas (`xangarro.mx/privacidad`, `/terminos`) y · `../launch/production-readiness.md:99`
-- [ ] ANTES DE STORES — Notas para el revisor que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, s… · `../launch/production-readiness.md:101`
-- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:103`
-- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)). · `../launch/production-readiness.md:105`
+- [~] ANTES DE STORES — URLs de términos y privacidad activas (`xangarro.mx/privacidad`, `/terminos`) y · `../launch/production-readiness.md:102`
+- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:111`
+- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)). · `../launch/production-readiness.md:113`
 
 ### Landing (2)
 
@@ -213,7 +211,7 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
-- [ ] BLOQUEANTE — Razón social constituida. `[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[RFC]`, `[TELÉFONO]`, `[CORREO SOPOR… · `../launch/production-readiness.md:10`
+- [~] BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S., domicilio Paseo Lomas Altas 524, inter… · `../launch/production-readiness.md:10`
 
 ### `../launch/production-readiness.md` · 1. Textos legales (7)
 
@@ -235,19 +233,19 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `../launch/production-readiness.md` · 6. Terceros y contratos (2)
 
-- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:109`
-- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: Hosted on Azure, US DataZone); · `../launch/production-readiness.md:111`
+- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:117`
+- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: Hosted on Azure, US DataZone); · `../launch/production-readiness.md:119`
 
 ### `../launch/production-readiness.md` · 7. Higiene de producto con peso legal (1)
 
-- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32). · `../launch/production-readiness.md:128`
+- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32). · `../launch/production-readiness.md:136`
 
 ### `../launch/production-readiness.md` · 8. Propiedad intelectual y gobernanza (4)
 
-- [ ] BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro» (clases 9, 35, 36, 42) antes · `../launch/production-readiness.md:132`
-- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa… · `../launch/production-readiness.md:134`
-- [ ] Seguro de ciberresponsabilidad — decisión de negocio. · `../launch/production-readiness.md:135`
-- [ ] Registro de software ante el INDAUTOR — opcional. · `../launch/production-readiness.md:136`
+- [ ] BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro» (clases 9, 35, 36, 42) antes · `../launch/production-readiness.md:140`
+- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa… · `../launch/production-readiness.md:142`
+- [ ] Seguro de ciberresponsabilidad — decisión de negocio. · `../launch/production-readiness.md:143`
+- [ ] Registro de software ante el INDAUTOR — opcional. · `../launch/production-readiness.md:144`
 
 ## Infra y consolas (19)
 
@@ -282,7 +280,7 @@ Configuración en consolas de terceros — Vercel, Supabase, Stripe, Resend, DNS
 
 ### `../launch/production-readiness.md` · 5. Tiendas de apps (1)
 
-- [ ] ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad; formulario de Data Safety de Play… · `../launch/production-readiness.md:97`
+- [~] ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad; formulario de Data Safety de Play… · `../launch/production-readiness.md:97`
 
 ## Espera datos reales (18)
 
@@ -327,10 +325,10 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
-- `09-next-features.md` — 50 abiertos (11 en curso, 0 bloqueados, 26 hechos)
+- `09-next-features.md` — 49 abiertos (10 en curso, 0 bloqueados, 27 hechos)
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
-- `20-command-center.md` — 26 abiertos (1 en curso, 0 bloqueados, 5 hechos)
-- `../launch/production-readiness.md` — 42 abiertos (5 en curso, 0 bloqueados, 10 hechos)
+- `20-command-center.md` — 26 abiertos (2 en curso, 0 bloqueados, 5 hechos)
+- `../launch/production-readiness.md` — 41 abiertos (8 en curso, 0 bloqueados, 11 hechos)

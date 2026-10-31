@@ -43,6 +43,13 @@
       "when": 1792028384045,
       "tag": "0005_corp_recurrentes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793321320428,
+      "tag": "0006_corp_facturas",
+      "breakpoints": true
     }
   ]
 }

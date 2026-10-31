@@ -17,7 +17,7 @@ import { Campo, Opciones, type Opcion } from './opciones';
  */
 export type { Prefill };
 
-const CATEGORIAS: readonly Opcion[] = [
+export const CATEGORIAS: readonly Opcion[] = [
   { value: 'costo_servicio', title: 'Costo del servicio', text: 'Nube, base de datos, correo.' },
   { value: 'ventas_marketing', title: 'Ventas y marketing', text: 'Anuncios y campañas.' },
   { value: 'desarrollo', title: 'Desarrollo', text: 'Herramientas para construir.' },

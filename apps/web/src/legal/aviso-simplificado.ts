@@ -8,14 +8,14 @@
  * `AVISO_VERSION`, because the hash changes and the ledger must say why.
  */
 
-export const AVISO_VERSION = '0.1-borrador' as const;
+export const AVISO_VERSION = '0.2-borrador' as const;
 
 export const AVISO_INTEGRAL_URL = 'https://xangarro.mx/privacidad' as const;
 export const TERMINOS_URL = 'https://xangarro.mx/terminos' as const;
 
 export const AVISO_SIMPLIFICADO = {
   responsable:
-    '[RAZÓN SOCIAL] (Xangarro), con domicilio en [DOMICILIO], es responsable de tus datos.',
+    'MEXIA, S.A.S. (Xangarro), con domicilio en Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco, es responsable de tus datos.',
   datos:
     'Qué datos usamos: tu nombre, correo, teléfono y contraseña; los datos fiscales y del negocio ' +
     '(RFC, régimen, código postal); tus pagos y los registros de tu negocio, que pueden ser datos ' +

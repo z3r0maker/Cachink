@@ -10,6 +10,8 @@ export const NAV_ICONS: Readonly<Record<NavHref, string>> = {
   '/mapa': 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14',
   '/campanas': 'M3 11v2l13 5V6L3 11zm13-5 5-2v16l-5-2',
   '/empresa/movimientos': 'M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3',
+  '/empresa/facturas':
+    'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5',
   '/empresa/socios':
     'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.1a4 4 0 0 1 0 7.8M22 21v-1a6 6 0 0 0-4-5.6',
   '/empresa/agenda':
