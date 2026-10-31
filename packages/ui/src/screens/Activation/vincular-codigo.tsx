@@ -12,7 +12,8 @@ import { useTranslation } from '../../i18n/index';
 import { borderWidths, colors, radii } from '../../theme';
 import { faltaParaConectar, correoValido, ACTIVATION_CODE_LENGTH } from './activation-form';
 import { CampoCorreo, CodigoCajas } from './vincular-campos';
-import { AvisoVinculacion, CabezaVolver, Paso, Pie } from './vincular-partes';
+import { AvisoVinculacion } from './aviso-vinculacion';
+import { CabezaVolver, Paso, Pie } from './vincular-partes';
 
 export interface VincularCodigoProps {
   readonly email: string;

@@ -48,7 +48,10 @@ describe('Vincular', () => {
     );
     tap('vincular-escribir');
     expect(screen.getByTestId('activation-aviso')).toHaveTextContent(
-      'Aviso completo y derechos ARCO',
+      'El aviso completo explica tus derechos ARCO.',
+    );
+    expect(screen.getByTestId('activation-aviso-enlace')).toHaveTextContent(
+      'Leer el aviso completo',
     );
     tap('activation-submit');
     expect(onSubmit).not.toHaveBeenCalled();

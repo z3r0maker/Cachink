@@ -2,7 +2,8 @@
  * NavRows — the big rows Mi turno and Inicio open the rest of the caja from
  * (MvTurno «Lo de tu turno»): a quiet panel of 68 px rows, each a tinted
  * 44 px glyph tile with the black edge, a title and its detail, an optional
- * status chip and a chevron. Every row is one button.
+ * status chip and a chevron. Every row is one button. A row that leaves the
+ * app (Ajustes' aviso and términos) ends in the external-link glyph instead.
  */
 import type { ReactElement } from 'react';
 import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
@@ -31,6 +32,8 @@ export interface NavRowItem {
   /** The glyph tile's ground: a `*Soft` colour. */
   readonly tint: string;
   readonly chip?: { readonly label: string; readonly tone: NavRowChipTone };
+  /** True when the row opens the browser: the trailing glyph says so. */
+  readonly external?: boolean;
   readonly onPress: () => void;
   readonly testID?: string;
 }
@@ -94,7 +97,12 @@ function RowBody({ item }: { item: NavRowItem }): ReactElement {
         ) : null}
       </View>
       {item.chip ? <RowChip {...item.chip} /> : null}
-      <PathIcon d={GLYPHS.chevronRight} size={18} strokeWidth={2.4} color={colors.textMuted} />
+      <PathIcon
+        d={item.external ? GLYPHS.externo : GLYPHS.chevronRight}
+        size={18}
+        strokeWidth={2.4}
+        color={colors.textMuted}
+      />
     </>
   );
 }
@@ -104,7 +112,7 @@ function Row({ item, last }: { item: NavRowItem; last: boolean }): ReactElement 
   return (
     <Pressable
       testID={item.testID ?? `nav-row-${item.key}`}
-      role="button"
+      role={item.external ? 'link' : 'button'}
       aria-label={item.chip ? `${label}. ${item.chip.label}` : label}
       onPress={() => {
         impactLight();

@@ -32,7 +32,7 @@ listas de abajo.
 - **N-19** Logo + color de marca `[LAUNCH]` [LAUNCH] [alta] [bloq] (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 - **N-26** Auditoría de seguridad `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:734`
 
-## Código y técnico (106)
+## Código y técnico (105)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
@@ -123,8 +123,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-47** Anuncios a todos los inquilinos [baja] — Disparador: la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción. · `09-next-features.md:1155`
 - [ ] **N-48** Ciclo de vida de cuentas inactivas (ADR-064) [baja] — Disparador: lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes). · `09-next-features.md:1161`
 - [ ] **N-69** Ciclo de vida de flags y despliegue porcentual [baja] — Bloqueada por: N-09 · Disparador: N-09 `[x]`. · `09-next-features.md:1353`
-- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:121`
-- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:122`
+- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:123`
+- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:124`
 
 ### Privacidad y LFPC (19)
 
@@ -144,9 +144,9 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa. · `../launch/production-readiness.md:91`
 - [ ] Domicilio, teléfono y canal de quejas visibles antes de contratar (landing + checkout). · `../launch/production-readiness.md:92`
 - [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos. · `../launch/production-readiness.md:93`
-- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo). · `../launch/production-readiness.md:133`
-- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto). · `../launch/production-readiness.md:134`
-- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS. · `../launch/production-readiness.md:135`
+- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo). · `../launch/production-readiness.md:135`
+- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto). · `../launch/production-readiness.md:136`
+- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS. · `../launch/production-readiness.md:137`
 
 ### Auditorías y calidad (5)
 
@@ -156,16 +156,15 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **N-29** Gate E2E determinista de toda la pila `[LAUNCH]` [LAUNCH] [deuda] [alta] [bloq] — Bloqueada por: P-17, A-16, N-22, N-25 · `09-next-features.md:774`
 - [ ] **N-49** Explorador de pruebas con GLM [deuda] [baja] — Disparador: el staging de X-01 en vivo y N-29 en verde. · `09-next-features.md:1176`
 
-### Lanzamiento, stores e integración (8)
+### Lanzamiento, stores e integración (7)
 
 - [ ] **X-02** Corrida de integración de extremo a extremo (app real ↔ backend real) [alta] [bloq] — Bloqueada por: X-01, P-03, P-04, P-05, P-06, P-11, A-04…A-10, L-03 · `07-launch.md:18`
 - [ ] **X-03** Migración de partners [alta] [bloq] — Bloqueada por: X-02 · `07-launch.md:24`
-- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: Hecho 2026-10-29: fichas apuntando a `xangarro.mx`, `xangarro.mx/soporte/` en producción, permiso de cámara en español. Hecho 2026-10-30: `docs/store/listing-app-store.md` reescrita para la app de mostrador (cada campo contado contra el límite de Apple, sin precio, plan ni enlace de compra); notas de revisión listas para pegar, con los pasos antes de cada envío, en `app-registration/apple/REVIEW-NOTES.md`; respuestas de App Privacy derivadas del código en `app-registration/apple/PRIVACY-LABEL.md`; y el seed demo ahora crea dos códigos (`DEMXK7M3`, `DEMXPAD2`, uno por lugar de dispositivo del plan Xangarro) y revoca los dispositivos de la revisión anterior: con un solo código de un uso y dos lugares, una revisión en iPhone + iPad o un segundo envío no podían vincular. Falta: crear el registro en App Store Connect y poner su `ascAppId` en `submit.production` de `eas.json`; llenar App Privacy desde ese archivo; correr el seed demo contra el hospedado antes de enviar; un build de producción probado; el splash sigue diciendo «Cachink!» (X-07). Hecho 2026-10-30 (Play): `docs/store/listing-play-store.md` reescrita como la de Apple (contada contra los límites de Google); respuestas de Data safety en `app-registration/google-play/DATA-SAFETY.md`; contenido de la app, acceso del revisor y la regla «una tienda a la vez» (los dos códigos y lugares no alcanzan para dos revisiones simultáneas) en `app-registration/google-play/README.md`. Falta en Play: la cuenta de desarrollador como organización (MEXIA, con D-U-N-S; una cuenta personal nueva exige una prueba cerrada de 12 personas por 14 días); el gráfico de funciones de 1024 × 500 (X-07); capturas de Android, porque las de Apple pasan de la proporción 2:1 de Play y muestran la barra de iOS; llenar Data safety. En ambas tiendas: un enlace tocable al aviso de privacidad dentro de la app (5.1.1(i)); hoy solo aparece como texto en el aviso de vinculación. · `07-launch.md:38`
+- [ ] **X-05** Fichas de tienda + preparación para la revisión [tiendas] [alta] [bloq] — Bloqueada por: F-01, A-15, X-07, B-04 · Falta: Hecho 2026-10-29: fichas apuntando a `xangarro.mx`, `xangarro.mx/soporte/` en producción, permiso de cámara en español. Hecho 2026-10-30: `docs/store/listing-app-store.md` reescrita para la app de mostrador (cada campo contado contra el límite de Apple, sin precio, plan ni enlace de compra); notas de revisión listas para pegar, con los pasos antes de cada envío, en `app-registration/apple/REVIEW-NOTES.md`; respuestas de App Privacy derivadas del código en `app-registration/apple/PRIVACY-LABEL.md`; y el seed demo ahora crea dos códigos (`DEMXK7M3`, `DEMXPAD2`, uno por lugar de dispositivo del plan Xangarro) y revoca los dispositivos de la revisión anterior: con un solo código de un uso y dos lugares, una revisión en iPhone + iPad o un segundo envío no podían vincular. Falta: crear el registro en App Store Connect y poner su `ascAppId` en `submit.production` de `eas.json`; llenar App Privacy desde ese archivo; correr el seed demo contra el hospedado antes de enviar; un build de producción probado; el splash sigue diciendo «Cachink!» (X-07). Hecho 2026-10-30 (Play): `docs/store/listing-play-store.md` reescrita como la de Apple (contada contra los límites de Google); respuestas de Data safety en `app-registration/google-play/DATA-SAFETY.md`; contenido de la app, acceso del revisor y la regla «una tienda a la vez» (los dos códigos y lugares no alcanzan para dos revisiones simultáneas) en `app-registration/google-play/README.md`. Falta en Play: la cuenta de desarrollador como organización (MEXIA, con D-U-N-S; una cuenta personal nueva exige una prueba cerrada de 12 personas por 14 días); el gráfico de funciones de 1024 × 500 (X-07); capturas de Android, porque las de Apple pasan de la proporción 2:1 de Play y muestran la barra de iOS; llenar Data safety. Hecho 2026-10-31 (ambas tiendas, 5.1.1(i)): Ajustes tiene «Privacidad y términos», que abren `xangarro.mx/privacidad/` y `/terminos/` en el navegador, y el aviso de vinculación abre el aviso completo desde un botón en vez de mostrar la dirección como texto (aviso `0.3-borrador`). · `07-launch.md:38`
 - [ ] **X-09** Reset de ROADMAP.md [media] [bloq] — Bloqueada por: X-02 · `07-launch.md:114`
 - [ ] **X-10** Compuerta del checklist de lanzamiento [critica] [bloq] — Bloqueada por: X-01…X-09 (excepto X-08) · `07-launch.md:120`
-- [~] ANTES DE STORES — URLs de términos y privacidad activas (`xangarro.mx/privacidad`, `/terminos`) y · `../launch/production-readiness.md:102`
-- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:111`
-- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)). · `../launch/production-readiness.md:113`
+- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:113`
+- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)). · `../launch/production-readiness.md:115`
 
 ### Landing (2)
 
@@ -233,19 +232,19 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `../launch/production-readiness.md` · 6. Terceros y contratos (2)
 
-- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:117`
-- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: Hosted on Azure, US DataZone); · `../launch/production-readiness.md:119`
+- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:119`
+- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: Hosted on Azure, US DataZone); · `../launch/production-readiness.md:121`
 
 ### `../launch/production-readiness.md` · 7. Higiene de producto con peso legal (1)
 
-- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32). · `../launch/production-readiness.md:136`
+- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32). · `../launch/production-readiness.md:138`
 
 ### `../launch/production-readiness.md` · 8. Propiedad intelectual y gobernanza (4)
 
-- [ ] BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro» (clases 9, 35, 36, 42) antes · `../launch/production-readiness.md:140`
-- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa… · `../launch/production-readiness.md:142`
-- [ ] Seguro de ciberresponsabilidad — decisión de negocio. · `../launch/production-readiness.md:143`
-- [ ] Registro de software ante el INDAUTOR — opcional. · `../launch/production-readiness.md:144`
+- [ ] BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro» (clases 9, 35, 36, 42) antes · `../launch/production-readiness.md:142`
+- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa… · `../launch/production-readiness.md:144`
+- [ ] Seguro de ciberresponsabilidad — decisión de negocio. · `../launch/production-readiness.md:145`
+- [ ] Registro de software ante el INDAUTOR — opcional. · `../launch/production-readiness.md:146`
 
 ## Infra y consolas (19)
 
@@ -331,4 +330,4 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
 - `20-command-center.md` — 26 abiertos (2 en curso, 0 bloqueados, 5 hechos)
-- `../launch/production-readiness.md` — 41 abiertos (8 en curso, 0 bloqueados, 11 hechos)
+- `../launch/production-readiness.md` — 40 abiertos (7 en curso, 0 bloqueados, 12 hechos)
