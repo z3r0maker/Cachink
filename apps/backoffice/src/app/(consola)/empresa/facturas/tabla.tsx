@@ -6,7 +6,7 @@ import * as mf from '@/styles/mostrador-facturas.css';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
-import { PorPagar } from './por-pagar';
+import { FilaPorPagar } from './por-pagar';
 
 /** The received invoices of the month (E-11, board CD-06b). */
 const ESTADO_TAG: Record<EstadoFila, string> = {
@@ -16,20 +16,10 @@ const ESTADO_TAG: Record<EstadoFila, string> = {
   'Sin CFDI': m.tag.off,
 };
 
-function Destino({ f }: { readonly f: FilaFactura }) {
-  const destino = f.destino;
-  if (destino.tipo === 'por_pagar') return <PorPagar uuid={destino.uuid} proveedor={f.proveedor} />;
-  if (destino.tipo === 'texto') return <span className={d.cellSub}>{destino.texto}</span>;
+/** Every cell but «Movimiento». */
+function Celdas({ f }: { readonly f: FilaFactura }) {
   return (
-    <Link className={d.rowLink} href={destino.href as Route}>
-      {destino.texto}
-    </Link>
-  );
-}
-
-function Fila({ f }: { readonly f: FilaFactura }) {
-  return (
-    <tr className={d.rowOpen} data-testid="factura-recibida">
+    <>
       <td className={d.td}>{f.fecha}</td>
       <td className={d.td}>
         <span className={mf.nombre}>{f.proveedor}</span>
@@ -41,8 +31,31 @@ function Fila({ f }: { readonly f: FilaFactura }) {
       <td className={d.td}>
         <span className={`${m.tagBase} ${ESTADO_TAG[f.estado]}`}>{f.estado}</span>
       </td>
+    </>
+  );
+}
+
+function Fila({ f, hoy }: { readonly f: FilaFactura; readonly hoy: string }) {
+  const destino = f.destino;
+  if (destino.tipo === 'por_pagar') {
+    const { proveedor, subtotal, iva } = f;
+    return (
+      <FilaPorPagar pago={destino.pago} {...{ proveedor, subtotal, iva, hoy }}>
+        <Celdas f={f} />
+      </FilaPorPagar>
+    );
+  }
+  return (
+    <tr className={d.rowOpen} data-testid="factura-recibida">
+      <Celdas f={f} />
       <td className={d.td}>
-        <Destino f={f} />
+        {destino.tipo === 'texto' ? (
+          <span className={d.cellSub}>{destino.texto}</span>
+        ) : (
+          <Link className={d.rowLink} href={destino.href as Route}>
+            {destino.texto}
+          </Link>
+        )}
       </td>
     </tr>
   );
@@ -58,7 +71,14 @@ const COLUMNAS = [
   { id: 'Movimiento', num: false },
 ] as const;
 
-export function Tabla({ filas }: { readonly filas: readonly FilaFactura[] }) {
+export function Tabla({
+  filas,
+  hoy,
+}: {
+  readonly filas: readonly FilaFactura[];
+  /** `YYYY-MM-DD` in Mexico, the payment date «Registrar pago» offers first. */
+  readonly hoy: string;
+}) {
   if (filas.length === 0) {
     return (
       <p className={d.empty}>
@@ -80,7 +100,7 @@ export function Tabla({ filas }: { readonly filas: readonly FilaFactura[] }) {
         </thead>
         <tbody>
           {filas.map((f) => (
-            <Fila key={f.key} f={f} />
+            <Fila key={f.key} f={f} hoy={hoy} />
           ))}
         </tbody>
       </table>

@@ -4,6 +4,7 @@ import { formatMoney, tipoPersona } from '@xangarro/domain';
 import { ACCOUNTS, CATEGORIAS_GASTO } from '@xangarro/domain/corp';
 
 import { fechaCorta } from './fechas';
+import { pagoFactura, type PagoFactura } from './pago-factura-view';
 
 /**
  * Facturas recibidas as board CD-06b shows them (E-11): one row per received
@@ -16,7 +17,7 @@ export type Destino =
   | { readonly tipo: 'enlace'; readonly href: string; readonly texto: string }
   | { readonly tipo: 'texto'; readonly texto: string }
   /** An invoice on credit still owed: «Por pagar» with «Registrar pago» and «Cancelar». */
-  | { readonly tipo: 'por_pagar'; readonly uuid: string };
+  | { readonly tipo: 'por_pagar'; readonly pago: PagoFactura };
 
 export interface FilaFactura {
   readonly key: string;
@@ -60,20 +61,35 @@ const pagada = (d: FacturaDelMes) =>
 const persona = (rfc: string): string =>
   tipoPersona(rfc) === 'fisica' ? 'persona física' : 'persona moral';
 
-function subDe(f: FacturaRecibida): string {
-  const credito = f.cfdi.metodoPago === 'PPD';
-  const pago = credito ? (f.pagoEntryId === null ? 'a crédito (PPD)' : 'a crédito, pagada') : '';
-  return [`RFC ${f.cfdi.emisor.rfc}`, persona(f.cfdi.emisor.rfc), pago, f.cfdi.concepto]
+/** «a crédito (PPD)», «a crédito, pagada el 5 nov» or «a crédito, cancelada el 30 oct». */
+function credito(d: FacturaDelMes): string {
+  const f = d.factura;
+  if (f.cfdi.metodoPago !== 'PPD') return '';
+  if (f.pagoEntryId !== null) {
+    return d.pagadaEl === null
+      ? 'a crédito, pagada'
+      : `a crédito, pagada el ${fechaCorta(d.pagadaEl)}`;
+  }
+  if (f.estado === 'cancelada' && d.revertidaEl !== null) {
+    return `a crédito, cancelada el ${fechaCorta(d.revertidaEl)}`;
+  }
+  return 'a crédito (PPD)';
+}
+
+function subDe(d: FacturaDelMes): string {
+  const f = d.factura;
+  return [`RFC ${f.cfdi.emisor.rfc}`, persona(f.cfdi.emisor.rfc), credito(d), f.cfdi.concepto]
     .filter((p) => p !== '')
     .join(' · ');
 }
 
 function destinoDe(d: FacturaDelMes): Destino {
   const f = d.factura;
-  if (porPagar(d)) return { tipo: 'por_pagar', uuid: f.cfdi.uuid };
+  if (porPagar(d)) return { tipo: 'por_pagar', pago: pagoFactura(f) };
   if (f.entryId === null) return { tipo: 'texto', texto: 'No se registró' };
-  if (f.estado === 'cancelada' || d.revertida) return { tipo: 'texto', texto: 'Se revirtió' };
-  return { tipo: 'enlace', href: `/empresa/movimientos/${f.entryId}`, texto: nombreCategoria(f) };
+  const href = `/empresa/movimientos/${f.entryId}`;
+  if (f.estado === 'cancelada' || d.revertida) return { tipo: 'enlace', href, texto: 'Revertido' };
+  return { tipo: 'enlace', href, texto: nombreCategoria(f) };
 }
 
 function estadoDe(d: FacturaDelMes): EstadoFila {
@@ -87,7 +103,7 @@ export function filaFactura(d: FacturaDelMes): FilaFactura {
     key: c.uuid,
     fecha: fechaCorta(c.fecha),
     proveedor: c.emisor.nombre || c.emisor.rfc,
-    sub: subDe(d.factura),
+    sub: subDe(d),
     subtotal: formatMoney(c.subtotal),
     iva: formatMoney(c.iva),
     retenciones: menos(retenido(d.factura)),

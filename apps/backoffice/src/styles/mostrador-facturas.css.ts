@@ -55,6 +55,14 @@ export const tono = styleVariants({
   aviso: { background: colors.warningSoft, color: colors.warningText },
 });
 
+/** «Factura cancelada…» after «Cancelar» (board CD-06f). */
+export const hecho = style({
+  margin: 0,
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.bold,
+  color: colors.greenText,
+});
+
 export const pie = style({
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.semibold,
