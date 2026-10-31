@@ -482,7 +482,16 @@ with property tests:
 
 ### E-07 Navegación por grupos `[media]`
 
-- [ ] Status · **Blocked by:** — · **Surfaced by:** canvas «Ronda 7 · Navegación» (owner, 2026-10-29)
+- [x] Status · **Blocked by:** — · **Surfaced by:** canvas «Ronda 7 · Navegación» (owner, 2026-10-29)
+      · **Done:** 2026-10-30
+      **Progress (2026-10-30):** `src/shell/empresa-nav.ts` holds the built entries (Dinero ›
+      Movimientos, Socios › Cuentas, Cumplimiento › Agenda · Expediente · Corporativo); the rail
+      lights an entry on any of its tabs' routes, sub-pages included. `PageTabs` draws the bar only
+      for two or more tabs, so Dinero and Socios show none. Cumplimiento's three screens share
+      `EncabezadoSeccion` (title «Cumplimiento», the tabs under it, the screen's actions at the
+      right); the Agenda's Próximos and Evidencias views moved out of the header into the content.
+      Playwright: the founder sees three entries, Cumplimiento's tabs with live rows on each, no bar
+      on Dinero or Socios, and every existing `/empresa/*` URL opens.
 - **What:** §2's navigation in the console:
   - `EMPRESA_NAV_ITEMS` becomes the six entries, each with its tabs (label, route, task), and an
     entry or tab is listed only once its task ships;

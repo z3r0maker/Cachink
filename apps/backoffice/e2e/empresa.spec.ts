@@ -8,6 +8,7 @@ import {
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
+import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   E2E_RECURRENTE,
   mesesDePrueba,
@@ -82,7 +83,10 @@ test('a founder gets the group and the partners and projects from corp', async (
   await expect(empresaGroup(page)).toBeVisible();
 
   await page.goto('/empresa/corporativo');
-  await expect(page.getByRole('heading', { name: 'Libro corporativo' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Cumplimiento', level: 1 })).toBeVisible();
+  await expect(
+    secciones(page, 'Cumplimiento').getByRole('link', { name: 'Corporativo' }),
+  ).toHaveAttribute('aria-current', 'page');
   // Real rows: the founder corp names, and corp's seeded registries.
   await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
   await expect(page.getByTestId('registro').filter({ hasText: 'Marca Xangarro' })).toBeVisible();
@@ -186,7 +190,7 @@ test('a founder funds by halves, puts in more and closes the quarter', async ({ 
 
 test('a founder files an obligation with its acuse and adds an expiry', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
   const inscripcion = inscripcionPasada();
   await fijarInscripcion(page, inscripcion.fecha);
   await expect(page.getByTestId('exenta').filter({ hasText: 'DIOT' })).toContainText(
@@ -214,7 +218,8 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
   page,
 }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Expediente', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
+  await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
   // The acuse filed on the Agenda is here, linked to its obligation.
   await expect(
     page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
@@ -225,13 +230,64 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
 
 test('a founder records shares, updates a registry and keeps a CSD expiry', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Corporativo', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
+  await abrirPestana(page, 'Corporativo', /\/empresa\/corporativo$/);
   await suscribirAcciones(page);
   await actualizarMarca(page);
   await guardarCsd(page);
   // The share event put its 15-business-day notice on the Agenda.
-  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  await abrirPestana(page, 'Agenda', /\/empresa\/agenda$/);
   await expect(
     page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
   ).toBeVisible();
+});
+
+test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  // The rail shows the three built entries; their screens are tabs, not entries.
+  for (const entrada of ['Dinero', 'Socios', 'Cumplimiento']) {
+    await expect(rail(page).getByRole('link', { name: entrada, exact: true })).toBeVisible();
+  }
+  for (const pantalla of ['Movimientos', 'Agenda', 'Expediente', 'Corporativo']) {
+    await expect(rail(page).getByRole('link', { name: pantalla, exact: true })).toHaveCount(0);
+  }
+
+  // Cumplimiento: three tabs, each with the rows earlier tests left.
+  await abrirEntrada(page, 'Cumplimiento');
+  await expect(page).toHaveURL(/\/empresa\/agenda$/);
+  await expect(secciones(page, 'Cumplimiento').getByRole('link')).toHaveText([
+    'Agenda',
+    'Expediente',
+    'Corporativo',
+  ]);
+  await expect(
+    page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
+  ).toBeVisible();
+  await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
+  await expect(
+    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
+  ).toBeVisible();
+  await abrirPestana(page, 'Corporativo', /\/empresa\/corporativo$/);
+  await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
+  // A sub-page keeps its entry lit.
+  await page.getByRole('link', { name: 'Registrar acciones' }).click();
+  await expect(rail(page).getByRole('link', { name: 'Cumplimiento', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+
+  // One built tab is no choice: Dinero and Socios draw no bar.
+  await abrirEntrada(page, 'Dinero');
+  await expect(page).toHaveURL(/\/empresa\/movimientos/);
+  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
+  await abrirEntrada(page, 'Socios');
+  await expect(page).toHaveURL(/\/empresa\/socios$/);
+  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
+
+  // Every URL the area had still opens its screen.
+  for (const [ruta, titulo] of RUTAS) {
+    const response = await page.goto(ruta);
+    expect(response?.status(), ruta).toBe(200);
+    await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible();
+  }
 });

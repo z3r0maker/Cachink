@@ -7,6 +7,7 @@ import { requireFounderPage } from '@/server/founder';
 import * as x from '@/styles/mostrador-expediente.css';
 import * as m from '@/styles/mostrador.css';
 
+import { EncabezadoSeccion } from '../encabezado-seccion';
 import { Carpetas, Documentos, PanelHistorial } from './partes';
 
 export const dynamic = 'force-dynamic';
@@ -28,15 +29,11 @@ export default async function ExpedientePage(props: {
   const h = doc === undefined ? null : historialDe(expediente.docs, doc, expediente.contexto);
   return (
     <div className={m.page}>
-      <header className={m.head}>
-        <div className={m.headText}>
-          <span className={m.eyebrow}>MEXIA · Empresa</span>
-          <h1 className={m.title}>Expediente</h1>
-        </div>
+      <EncabezadoSeccion actual="/empresa/expediente">
         <Link className={m.boton.primario} href={`/empresa/expediente/subir?carpeta=${carpeta}`}>
           + Subir documentos
         </Link>
-      </header>
+      </EncabezadoSeccion>
       <div className={x.layout}>
         <Carpetas activa={carpeta} conteos={conteos(expediente.docs)} />
         <Documentos
