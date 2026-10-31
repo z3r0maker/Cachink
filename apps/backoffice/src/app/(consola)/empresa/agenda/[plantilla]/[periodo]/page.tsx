@@ -4,6 +4,7 @@ import { ETIQUETA_EVIDENCIA, type TipoEvidencia } from '@xangarro/domain/corp';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { limiteMb } from '@/server/blobs';
 import { leerObligacion } from '@/server/empresa/agenda-lectura';
 import { etiquetaEstado, recorrido } from '@/server/empresa/agenda-view';
 import { accionesDe, tituloDe } from '@/server/empresa/obligacion-view';
@@ -78,7 +79,7 @@ export default async function ObligacionPage(props: {
             `${ETIQUETA_EVIDENCIA[d.tipo]} · se guarda hasta el ${formatDate(parseIsoDate(d.retenerHasta))}`
           }
         />
-        <Subir {...clave} tipos={tiposDe(o)} />
+        <Subir {...clave} tipos={tiposDe(o)} limiteMb={limiteMb()} />
       </section>
     </div>
   );

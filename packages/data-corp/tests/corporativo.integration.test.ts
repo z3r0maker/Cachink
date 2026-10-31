@@ -13,6 +13,7 @@ import { integrationSuite } from '@xangarro/testing/integration';
 import { createCorpDb } from '../src/client';
 import { createAgendaRepository } from '../src/queries/agenda';
 import { createCorporativoRepository } from '../src/queries/corporativo';
+import { createPgBlobStore } from '../src/queries/blobs';
 import { createDocumentRepository } from '../src/queries/documentos';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 import { borrarLoDe } from './cleanup';
@@ -37,7 +38,7 @@ describe('corp corporate book storage', () => {
   const deps = () => ({
     corp: createCorporativoRepository(db()),
     agenda: createAgendaRepository(db()),
-    documentos: createDocumentRepository(db()),
+    documentos: createDocumentRepository(db(), createPgBlobStore(db())),
     ledger: createCorpLedgerRepository(db()),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   });
@@ -116,7 +117,9 @@ describe('corp corporate book storage', () => {
       founderId: AUTOR,
     });
     assert.deepEqual([r.estado, r.referencia, r.carpeta], ['En examen', '3141592', 'impi']);
-    const doc = await createDocumentRepository(db()).porId(r.documentoId ?? '');
+    const doc = await createDocumentRepository(db(), createPgBlobStore(db())).porId(
+      r.documentoId ?? '',
+    );
     assert.deepEqual([doc?.carpeta, doc?.titulo], ['impi', 'Marca Xangarro']);
   });
 });

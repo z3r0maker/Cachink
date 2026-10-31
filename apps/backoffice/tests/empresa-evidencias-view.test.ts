@@ -11,6 +11,8 @@ const MESES = ['2026-08', '2026-09', '2026-10'];
 
 const doc = (id: string, obligacionId: string, tipo: DocumentoMeta['tipo']): DocumentoMeta => ({
   id,
+  almacen: 'pg',
+  blobKey: id,
   tipo,
   carpeta: 'sat',
   titulo: tipo,

@@ -13,6 +13,7 @@ import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
 import { Campo, Opciones, submitWith } from '../movimientos/registrar/opciones';
+import { useEnvioConArchivo } from '../subida-directa';
 import { Aviso } from '../socios/formas';
 
 /** The corporate book's forms (E-06). Certificates take a serial and a date, never a file. */
@@ -171,12 +172,13 @@ function CamposRegistro(props: RegistroProps) {
 
 export function RegistroForm(props: RegistroProps) {
   const [state, action, pending] = useActionState(actualizarRegistroAction, null);
+  const { onSubmit, subiendo } = useEnvioConArchivo(action);
   return (
-    <form onSubmit={submitWith(action)} className={d.form}>
+    <form onSubmit={onSubmit} className={d.form}>
       <input type="hidden" name="id" value={props.id} />
       <CamposRegistro {...props} />
       <ArchivoOpcional />
-      <Enviar state={state} pending={pending} label="Guardar" primario />
+      <Enviar state={state} pending={pending || subiendo} label="Guardar" primario />
     </form>
   );
 }

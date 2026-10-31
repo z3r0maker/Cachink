@@ -23,7 +23,7 @@ listas de abajo.
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal [terceros] [media] (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1010`
 - **C-13** API de intenciones de pago [media] (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta] (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1627`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:894`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:895`
 - **N-63** Negocio: MRR, churn, prueba → pago [media] (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1290`
 - **N-64** Embudo de activación y cohortes semanales [media] (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1301`
 - **X-07** Masters de marca + derivados (ADR-054 §6) [alta] [bloq] (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -111,11 +111,11 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:686`
 - [ ] **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:692`
 - [ ] **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:698`
-- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:787`
-- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:802`
-- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:819`
-- [ ] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:894`
-- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:913`
+- [ ] **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:788`
+- [ ] **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:803`
+- [ ] **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:820`
+- [~] **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:895`
+- [ ] **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:927`
 
 ### Backend, sync y datos (6)
 
@@ -332,5 +332,5 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
-- `20-command-center.md` — 26 abiertos (1 en curso, 0 bloqueados, 6 hechos)
+- `20-command-center.md` — 26 abiertos (2 en curso, 0 bloqueados, 6 hechos)
 - `../launch/production-readiness.md` — 42 abiertos (5 en curso, 0 bloqueados, 10 hechos)

@@ -696,8 +696,9 @@ with property tests:
 ### E-44 Salida a otro sistema `[baja]`
 
 - [ ] Status · **Blocked by:** E-01
-- **What:** a written and rehearsed runbook: dump `corp`, restore, swap the two ports, cut the
-  console routes over.
+- **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
+  container and check every file against `corp.documents.sha256` (E-26, ADR-132), swap the two
+  ports, cut the console routes over.
 
 ## 9. Canvas round 2 (owner review, 2026-10-08)
 
@@ -891,7 +892,20 @@ turns into proposed objectives and cards.
 
 ### E-26 Almacenamiento de documentos en Azure Blob `[media]`
 
-- [ ] Status · **Blocked by:** E-05 · **Needed by:** E-20
+- [~] Status · **Blocked by:** E-05 · **Needed by:** E-20 · **Falta:** an Azure account. Run
+  `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY`
+  in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the
+  script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted),
+  then `corp-blobs:move --vaciar`. The 20 MB upload and the lock are proven on Azurite and by
+  that script, not yet against the real container.
+  **Progress (2026-10-30, ADR-132):** the code is done and Postgres stays the live store.
+  `BlobStore` port in `@xangarro/application/corp` with `corp.blobs` (migrations 0006 + 0007,
+  old → new test) and an Azure adapter (`apps/backoffice/src/server/blobs/`, tested on
+  Azurite). Browsers PUT into a `corp-entrantes` inbox with a ten-minute SAS; the console
+  reads, hashes and files the file into `corp-docs`. «Ver» redirects Azure files to a read
+  SAS. Limits follow the store (4 MB / 25 MB). The move is the `moverDocumentos` use case.
+  The console signs with the account key and relies on the locked policy for «never delete»
+  (ADR-132 §5), not on a delete-less identity.
 - **What:**
   - a `BlobStore` port in `@xangarro/application/corp` with the Postgres adapter of today and an
     Azure Blob adapter (`@azure/storage-blob`, latest stable);

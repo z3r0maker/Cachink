@@ -73,6 +73,8 @@ export async function clearLedgerFixture(): Promise<void> {
                         WHERE lower(s.email) = ${SOCIO.email}`;
       await tx`UPDATE corp.registries SET document_id = NULL
                 WHERE document_id IN (SELECT id FROM corp.documents WHERE uploaded_by IN (${suite}))`;
+      await tx`DELETE FROM corp.blobs WHERE key IN (SELECT blob_key FROM corp.documents
+                 WHERE uploaded_by IN (${suite}) AND storage = 'pg')`;
       await tx`DELETE FROM corp.documents WHERE uploaded_by IN (${suite})`;
       await tx`DELETE FROM corp.share_events WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.certificates WHERE created_by IN (${suite})`;

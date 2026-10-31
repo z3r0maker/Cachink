@@ -32,6 +32,15 @@ describe('buildCsp', () => {
   it('names no third-party origin', () => {
     assert.doesNotMatch(buildCsp('n', false), /https?:|\*/);
   });
+
+  it('lets the browser reach the document store only when one is configured (E-26)', () => {
+    const blob = 'https://mexiacorp.blob.core.windows.net';
+    const d = directives(buildCsp('n', false, [blob]));
+    assert.equal(d.get('connect-src'), `'self' ${blob}`);
+    // Only fetches: no script, frame or form may come from or go to it.
+    assert.equal(buildCsp('n', false, [blob]).split(blob).length, 2);
+    assert.equal(directives(buildCsp('n', false)).get('connect-src'), `'self'`);
+  });
 });
 
 describe('newNonce', () => {

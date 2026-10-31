@@ -61,6 +61,11 @@ export default defineConfig({
       ADMIN_TOTP_KEY: process.env.ADMIN_TOTP_KEY ?? 'MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=',
       ADMIN_INGEST_SECRET: process.env.ADMIN_INGEST_SECRET ?? 'e2e-ingest-secret',
       CRON_SECRET: process.env.CRON_SECRET ?? 'e2e-cron-secret',
+      // E-26: «Empresa»'s blob store. Unset (the default run), files stay in
+      // Postgres; pointed at Azurite, uploads go straight from the browser.
+      CORP_BLOB_ACCOUNT: process.env.CORP_BLOB_ACCOUNT ?? '',
+      CORP_BLOB_KEY: process.env.CORP_BLOB_KEY ?? '',
+      CORP_BLOB_URL: process.env.CORP_BLOB_URL ?? '',
       // A long-lived server for every worker keeps a pool of 5 (DB2-CONN-01).
       DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX ?? '5',
     },

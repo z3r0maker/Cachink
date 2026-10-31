@@ -13,7 +13,9 @@ import { isTipoEvidencia, type Paso } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 
 import { auditedMutation } from '../audited';
+import { almacenParaNuevos } from '../blobs';
 import { hoyEnMexico, requireCorpDb } from '../db/corp';
+import { archivoDelForm } from '../empresa/archivo';
 import { failed } from '../empresa/fallas';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
@@ -27,7 +29,7 @@ const deps = () => {
   const db = requireCorpDb();
   return {
     agenda: createAgendaRepository(db),
-    documentos: createDocumentRepository(db),
+    documentos: createDocumentRepository(db, almacenParaNuevos(db)),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   };
 };
@@ -77,17 +79,17 @@ export async function agregarVencimientoAction(_p: FormState, form: FormData): P
 export async function subirEvidenciaAction(_p: FormState, form: FormData): Promise<FormState> {
   try {
     const { founder } = await requireFounder();
-    const archivo = form.get('archivo');
     const tipo = field(form, 'tipo');
-    if (!(archivo instanceof File)) return { ok: false, message: 'Elige el archivo.' };
+    const archivo = await archivoDelForm(form);
+    if (archivo === null) return { ok: false, message: 'Elige el archivo.' };
     if (!isTipoEvidencia(tipo)) return { ok: false, message: 'Elige qué documento es.' };
     const input = {
       plantillaId: field(form, 'plantilla'),
       periodo: field(form, 'periodo'),
       tipo,
-      nombre: archivo.name,
-      mime: archivo.type,
-      contenido: new Uint8Array(await archivo.arrayBuffer()),
+      nombre: archivo.nombre,
+      mime: archivo.mime,
+      contenido: archivo.contenido,
       hoy: hoyEnMexico(),
       founderId: founder.id,
     };
@@ -98,7 +100,7 @@ export async function subirEvidenciaAction(_p: FormState, form: FormData): Promi
       }),
       () => subirEvidencia(deps(), input),
     );
-    return done(`Guardado: ${archivo.name}.`);
+    return done(`Guardado: ${archivo.nombre}.`);
   } catch (error) {
     return failed(error, 'subirEvidencia');
   }

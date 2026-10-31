@@ -165,6 +165,7 @@ Links to discussion, docs, prior art.
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
+| [132](#adr-132) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9196,3 +9197,65 @@ the aviso.
 - `docs/legal/aviso/aviso-simplificado.md` still mentions a "pantalla de
   consentimiento de reportes de fallas"; counsel's review (O-17) should word it
   as the Ajustes switch.
+
+## ADR-132
+
+**Title:** «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision of 2026-10-30 to build E-26 before an Azure account
+exists; details ADR-127 §4 and §5
+
+**Context**
+
+ADR-127 put a `BlobStore` port in front of «Empresa»'s files, with a Postgres adapter for today
+and an Azure Blob adapter for later, and asked for direct browser uploads with short-lived SAS
+URLs, a container under a five-year immutability policy, and a console identity that can create
+and read blobs but never delete them. MEXIA has no Azure account yet. The code has to be ready
+and tested now (Postgres stays the live store), and the move has to be one command once the
+account exists.
+
+**Decision**
+
+1. **The Postgres store is its own table.** `corp.blobs (key, content)` holds the bytes; the
+   console may insert and select, never update or delete. `corp.documents` loses `content` and
+   gains `storage` (`pg` | `azure`) and `blob_key` (unique). Migration 0006 copies every file into
+   `corp.blobs` under its document's id and points the row at it; 0007 drops `content`. Both
+   adapters therefore look alike, and the move to Azure is a copy between two stores.
+2. **Browsers upload into an inbox, not into the kept container.** `corp-entrantes` takes a
+   one-time `cw` SAS PUT (ten minutes) signed after the founder gate and the domain's file check.
+   The console then reads the file (25 MB at most), hashes it, runs the same use case as a form
+   upload and writes it into `corp-docs` with `If-None-Match: *`. Only the console writes the kept
+   container, and only after validation; a lifecycle rule empties the inbox after a day.
+3. **Limits follow the store.** 4 MB on Postgres (the request cap), 25 MB on Azure
+   (`MAX_BYTES_DIRECTO`); the repository exposes its store's limit and the use cases apply it.
+4. **«Ver» on an Azure file redirects** to a ten-minute `r` SAS URL with the name and type set by
+   the SAS. The storage account's origin is not the console's, so the `sandbox` CSP the console
+   puts on Postgres files is not needed for isolation; a Vercel function could not return 25 MB
+   anyway.
+5. **The console signs with the account key.** Delete and overwrite are refused by the container's
+   **locked** time-based immutability policy (1826 days), which binds every caller, the key
+   included. This replaces the plan's «console identity that may create and read, never delete»:
+   there is no Azure-hosted identity on Vercel, and a service principal with a custom role would
+   add a secret and a moving part without adding a refusal the lock does not already give.
+6. **The move is a use case** (`moverDocumentos`): check the SHA-256 recorded at upload, copy,
+   check the copy, then point the row at Azure as the schema's owner. A second run checks and does
+   not rewrite. Emptying `corp.blobs` is a separate command that checks each copy again first.
+
+**Consequences**
+
+- Until Azure is configured nothing changes for the founders; the browser asks for a signed URL,
+  gets none, and the file travels in the form as before.
+- `pg_dump -n corp` still carries every file while they live in `corp.blobs`. After the move,
+  the lift-out (E-44) adds a container copy, verified against the SHA-256 column.
+- The account key is a production secret with the power to write; leaking it cannot destroy a
+  kept file, but it can fill the containers. Rotating it is the response.
+- A failed row insert after a successful blob write leaves an unreferenced blob; nothing reads
+  it, and on Azure it cannot be removed before its retention ends.
+- Azurite does not enforce immutability, so the lock is proven by
+  `scripts/corp-blob-provision.sh --bloquear` against the real container.
+
+**References**
+
+- ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.

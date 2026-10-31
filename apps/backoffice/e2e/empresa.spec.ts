@@ -7,6 +7,7 @@ import {
   presentarConAcuse,
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
+import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
@@ -52,6 +53,7 @@ test.use({ extraHTTPHeaders: { 'x-forwarded-for': '203.0.113.24' } });
 let empresa: Awaited<ReturnType<typeof sacarEmpresa>> | null = null;
 
 test.beforeAll(async () => {
+  if (CON_AZURE) await prepararAzurite(`http://localhost:${process.env.E2E_PORT ?? 3200}`);
   await clearLedgerFixture();
   await resetSocioFixture();
   empresa = await sacarEmpresa();
@@ -290,4 +292,15 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     expect(response?.status(), ruta).toBe(200);
     await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible();
   }
+});
+
+test('a founder files a 20 MB document straight to the blob store (E-26)', async ({ page }) => {
+  test.skip(!CON_AZURE, 'needs CORP_BLOB_* pointed at a blob store (Azurite locally)');
+  test.setTimeout(180_000);
+  await signInAsStaff(page, SOCIO);
+  const id = await subirVeinteMegas(page);
+  await expect(
+    page.getByTestId('documento-expediente').filter({ hasText: 'E2E Deck de 20 MB' }),
+  ).toBeVisible();
+  await verDesdeElAlmacen(page, id);
 });
