@@ -97,7 +97,8 @@ describe('PestanaUnica', () => {
     hayOtra.mockResolvedValue(false);
     montar();
     await waitFor(() => assert.ok(screen.getByText('la caja misma')));
-    expect(responder).toHaveBeenCalled();
+    // The answer starts in an effect after that render; a loaded runner sees the text first.
+    await waitFor(() => expect(responder).toHaveBeenCalled());
   });
 
   it('a second tab is told the register is open elsewhere, and may wait', async () => {

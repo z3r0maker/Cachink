@@ -75,7 +75,7 @@ describe('corp received invoices', () => {
     const uuid = uuidDePrueba();
     const emisor = { rfc: `PPD${mes.replace('-', '').slice(2)}AB1`, nombre: 'Despacho, S.C.' };
     assert.deepEqual(
-      (await subir(d, { uuid, emisor, fecha: `${mes}-30`, metodoPago: 'PPD' })).listas,
+      (await subir(d, { uuid, emisor, fecha: `${mes}-28`, metodoPago: 'PPD' })).listas,
       [uuid],
     );
     const [gasto] = await registrarFacturas(d, {
@@ -91,13 +91,13 @@ describe('corp received invoices', () => {
       categoria: 'administracion',
       projectId: 'xangarro',
     });
-    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-30`, founderId: AUTOR });
+    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-28`, founderId: AUTOR });
     const [delMes] = await facturasDelMes(d.db, mes);
     assert.deepEqual(
       [delMes?.factura.cfdi.uuid, delMes?.factura.pagoEntryId, delMes?.revertida],
       [uuid, pago.id, false],
     );
-    assert.deepEqual([delMes?.pagadaEl, delMes?.revertidaEl], [`${mes}-30`, null]);
+    assert.deepEqual([delMes?.pagadaEl, delMes?.revertidaEl], [`${mes}-28`, null]);
     assert.equal(delMes?.factura.cfdi.total, 3_336_67n);
   });
 
