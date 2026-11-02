@@ -465,12 +465,20 @@ with property tests:
 
 - [~] Status · **Blocked by:** E-02, E-05
   **Remaining (2026-10-30):**
-  - a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they
-    post dated today, with no confirmation, as the board shows);
   - checking an unverified invoice («Sin verificar») with the SAT again;
   - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
     known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
     both yet. It needs a decision on how a template knows its month was registered by an invoice.
+    **Done 2026-10-30, boards CD-06e and CD-06f (round 8, approved the same day):**
+  - «Registrar pago» opens a panel under the row: «Fecha de pago» (today, or the invoice's date
+    when it is newer), what leaves the bank and what turns creditable. A date before the invoice
+    is refused (`FechaPagoAnteriorError`); a closed month is answered in its name.
+  - «Cancelar» asks first: what is reversed, that it is reversed today (a closed month stays
+    closed) and stays in the history. Then «Factura cancelada» and a «Revertido» link.
+  - `facturasDelMes` brings the payment and reversal dates: «a crédito, pagada el 5 nov»,
+    «a crédito, cancelada el 30 oct».
+  - Playwright: the panel's figures and date, «No, regresar», paying, and cancelling once
+    confirmed.
     **Done 2026-10-30, boards CD-01 (the XML zone) and CD-06d:**
   - Registrar gasto takes one XML. It travels the same path as an upload in Facturas (RFC, «Ya
     registrada», SAT), so a refusal shows the review's reason in place. The form then opens on
@@ -509,7 +517,8 @@ with property tests:
   - an invoice addressed to another RFC is refused («No es de MEXIA»), and the category is
     remembered per supplier RFC.
 - **Design:** canvas round 6, boards CD-06b (Recibidas), CD-06c (Revisa antes de registrar) and
-  CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day. The Emitidas tab
+  CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day; round 8,
+  CD-06e (Registrar pago con fecha) and CD-06f (Cancelar con confirmación), approved 2026-10-30. The Emitidas tab
   stays out of the screen until E-10.
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
   retención appears as a liability; a PPD invoice's IVA is creditable only once it is paid.

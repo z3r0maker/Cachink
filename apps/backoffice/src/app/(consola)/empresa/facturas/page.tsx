@@ -94,9 +94,13 @@ function Encabezado({ mes }: { readonly mes: string }) {
  * still owed with «Registrar pago» and «Cancelar». The Emitidas tab waits for
  * E-10, so the screen has no tabs yet.
  */
-export default async function FacturasPage(props: { searchParams: Promise<{ mes?: string }> }) {
+export default async function FacturasPage(props: {
+  searchParams: Promise<{ mes?: string; aviso?: string }>;
+}) {
   await requireFounderPage();
-  const mes = parseMes((await props.searchParams).mes, hoyEnMexico());
+  const params = await props.searchParams;
+  const hoy = hoyEnMexico();
+  const mes = parseMes(params.mes, hoy);
   const { facturas, sinCfdi } = await leerFacturas(mes);
   const filas = [...facturas.map(filaFactura), ...sinCfdi.map(filaSinCfdi)];
   return (
@@ -110,7 +114,12 @@ export default async function FacturasPage(props: { searchParams: Promise<{ mes?
             Facturas recibidas en {nombreMes(mes)}
           </h2>
         </div>
-        <Tabla filas={filas} />
+        <Tabla filas={filas} hoy={hoy} />
+        {params.aviso === 'cancelada' ? (
+          <p className={`${m.pad} ${mf.hecho}`} role="status">
+            Factura cancelada. Su gasto quedó revertido en Movimientos.
+          </p>
+        ) : null}
         <p className={`${m.pad} ${mf.pie}`}>
           ¿Un proveedor del extranjero sin factura mexicana? Regístralo como gasto y adjunta su
           comprobante en PDF; aparece aquí como «Sin CFDI».
