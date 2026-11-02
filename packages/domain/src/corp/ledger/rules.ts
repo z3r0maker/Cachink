@@ -1,3 +1,4 @@
+import { esIsoDate } from '../../dates/index.js';
 import type { Money } from '../../money/index.js';
 import { MontoInvalidoError, PeriodoCerradoError, TipoCambioInvalidoError } from './errors.js';
 import type { JournalLine } from './movements.js';
@@ -13,16 +14,12 @@ export function reverseLines(lines: readonly JournalLine[]): readonly JournalLin
   return lines.map((l) => ({ ...l, debe: l.haber, haber: l.debe }));
 }
 
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-/** `YYYY-MM` of an ISO date, or null when it is not one. */
+/**
+ * `YYYY-MM` of an ISO date, or null when it is not one, including a day the
+ * month does not have (`2026-11-31`, `2026-02-29`).
+ */
 export function periodOf(fecha: string): string | null {
-  const m = ISO_DATE.exec(fecha);
-  if (m === null) return null;
-  const month = Number(m[2]);
-  const day = Number(m[3]);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return `${m[1]}-${m[2]}`;
+  return esIsoDate(fecha) ? fecha.slice(0, 7) : null;
 }
 
 /** Throws when the entry's month is closed (E-14) or its date is not a date. */
