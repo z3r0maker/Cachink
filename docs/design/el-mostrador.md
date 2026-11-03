@@ -95,12 +95,12 @@ takes a rung, never an arbitrary number.
 
 Four motions, nothing else. All of them are wrapped in `@media (prefers-reduced-motion: reduce)`.
 
-| Motion      | What                                                       | Source                                      |
-| ----------- | ---------------------------------------------------------- | ------------------------------------------- |
-| Press       | `translate(2px, 2px)`, shadow to `shadows.pressed`, 100 ms | `pressTransform`, `pressable`               |
-| Panel slide | side panel in from the right, 280 ms, scrim fades 160 ms   | `drawer.css.ts`, `lateral.css.ts`           |
-| Dialog pop  | scale from 0.94–0.96, 160–220 ms                           | `dialog.css.ts`, `dialogo-mostrador.css.ts` |
-| Don idle    | his pose's loop; the loader's coin toss                    | `don.css.ts`, `DonCargando`                 |
+| Motion      | What                                                                                       | Source                                                 |
+| ----------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Press       | `translate(2px, 2px)`, shadow to `shadows.pressed`, 100 ms                                 | `pressTransform`, `pressable`                          |
+| Panel slide | side panel in from the right, 280 ms, scrim fades 160 ms; the console's menu from the left | `drawer.css.ts`, `lateral.css.ts`, `mobile-nav.css.ts` |
+| Dialog pop  | scale from 0.94–0.96, 160–220 ms                                                           | `dialog.css.ts`, `dialogo-mostrador.css.ts`            |
+| Don idle    | his pose's loop; the loader's coin toss                                                    | `don.css.ts`, `DonCargando`                            |
 
 Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner.
 
@@ -151,6 +151,10 @@ Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner
 
   The web caja today has the tab bar below 760 px and a 248 px sidebar above; the rail is still
   to come.
+
+  The console (`apps/backoffice`, canvas CD-19 and CD-19b) folds on the same 760 px edge: below
+  it the 232 px rail becomes a top bar whose «Menú» opens the rail in a drawer from the left
+  (`shell/mobile-nav.tsx`, a native `<dialog>`), and `main` keeps 16 px gutters.
 
 ## 11. Copy
 

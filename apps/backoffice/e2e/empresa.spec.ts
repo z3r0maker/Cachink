@@ -8,6 +8,7 @@ import {
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
+import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
@@ -502,4 +503,31 @@ test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-
   await expect(csd).toContainText('Si vence, no se puede facturar.');
   await csd.getByRole('link', { name: 'Ver certificados' }).click();
   await expect(page).toHaveURL(/\/empresa\/corporativo$/);
+});
+
+test('on a phone the rail folds into «Menú» and no Empresa page scrolls sideways', async ({
+  page,
+}) => {
+  await signInAsStaff(page, SOCIO);
+  await page.setViewportSize(TELEFONO);
+
+  // Real rows: E-12's March, the busiest month the suite leaves.
+  await page.goto(`/empresa?periodo=${MES}`);
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$10,000');
+  await sinScrollLateral(page);
+  await page.goto(`/empresa/resultados?periodo=${MES}`);
+  await expect(renglon(page, 'utilidad_neta')).toContainText('$4,900.00');
+  await sinScrollLateral(page);
+
+  // The menu is the rail: the same links, the entry lit, closed by a tap.
+  await abrirMenu(page);
+  const enMenu = (nombre: string) => menu(page).getByRole('link', { name: nombre, exact: true });
+  await expect(enMenu('Resultados')).toHaveAttribute('aria-current', 'page');
+  await enMenu('Resumen').click();
+  await expect(page).toHaveURL(/\/empresa$/);
+  await expect(menu(page)).toBeHidden();
+  await abrirMenu(page);
+  await expect(enMenu('Resumen')).toHaveAttribute('aria-current', 'page');
+  await page.keyboard.press('Escape');
+  await expect(menu(page)).toBeHidden();
 });
