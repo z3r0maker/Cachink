@@ -116,7 +116,7 @@ describe('stripeGateway', () => {
     assert.match(msg, /el mismo día de cada mes, hasta que cancele/);
     assert.match(msg, /Mi negocio › Plan y pagos/);
     assert.match(msg, /5 días hábiles/);
-    assert.match(msg, /\[Términos\]\(https:\/\/xangarro\.mx\/terminos\)/);
+    assert.match(msg, /\[Términos\]\(https:\/\/xangarro\.mx\/terminos\/\)/);
     assert.ok(msg.length <= 1200, 'Stripe caps custom text at 1,200 characters');
     assert.match(text.submit.message, /^MEXIA, S\.A\.S\. · Paseo Lomas Altas 524/);
     assert.doesNotMatch(text.submit.message, /TELÉFONO/);

@@ -12,7 +12,5 @@ export const PROVEEDOR = {
   correo: 'hola@xangarro.mx',
 } as const;
 
-export const TERMINOS_PUBLICO_URL = 'https://xangarro.mx/terminos' as const;
-
 /** «MEXIA, S.A.S. · Paseo Lomas Altas 524, …, Zapopan, Jalisco». */
 export const PROVEEDOR_LINEA = `${PROVEEDOR.razonSocial} · ${PROVEEDOR.domicilio}`;
