@@ -39,3 +39,11 @@ export class FacturaNoPorPagarError extends Error {
     this.name = 'FacturaNoPorPagarError';
   }
 }
+
+export class FechaPagoAnteriorError extends Error {
+  readonly code = 'FECHA_PAGO_ANTERIOR' as const;
+  constructor(readonly fecha: string) {
+    super('La fecha de pago no puede ser antes de la fecha de la factura.');
+    this.name = 'FechaPagoAnteriorError';
+  }
+}

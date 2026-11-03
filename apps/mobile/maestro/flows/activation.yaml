@@ -32,7 +32,14 @@ appId: mx.xangarro.mobile
       id: 'activation-aviso'
     direction: DOWN
 - assertVisible:
-    text: '.*Aviso completo y derechos ARCO.*'
+    text: '.*derechos ARCO.*'
+# The full aviso opens from a button, never a bare address (5.1.1(i)). Not
+# tapped: it would leave the app for the browser.
+- scrollUntilVisible:
+    element:
+      id: 'activation-aviso-enlace'
+    direction: DOWN
+- assertVisible: '.*Leer el aviso completo.*'
 # Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
     id: 'activation-email'

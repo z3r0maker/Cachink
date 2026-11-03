@@ -1,5 +1,5 @@
 /**
- * Dispositivo (A-12): the settings that belong to this phone —
+ * En este teléfono (A-12, MvAjustes): the settings that belong to this phone:
  * notifications, crash reports, reporting a problem, checking for updates.
  * Exporting the business's data is the owner's, in the portal.
  */

@@ -19,6 +19,14 @@ export const GLYPHS = {
   ajustes: 'M20 7h-9M14 17H5M17 14a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM7 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
   /** Lucide `log-out`: the rail's «Cerrar» (the turno). */
   salir: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
+  /** Lucide `external-link`: a button that opens the browser. */
+  externo: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6',
+  /** Lucide `shield`: the aviso de privacidad. */
+  privacidad:
+    'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z',
+  /** Lucide `file-text`: the términos y condiciones. */
+  terminos:
+    'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7ZM14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8M10 9H8',
 } as const;
 
 export type GlyphName = keyof typeof GLYPHS;

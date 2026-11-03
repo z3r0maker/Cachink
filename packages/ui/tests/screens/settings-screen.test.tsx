@@ -1,10 +1,12 @@
 /**
  * Device-only Configuración (A-12): sections, plan from the verified
- * entitlement, "Desvincular" forgets identity but keeps data, and the sync
- * section leads to "No enviados" only when something was refused.
+ * entitlement, "Desvincular" forgets identity but keeps data, the sync
+ * section leads to "No enviados" only when something was refused, and the
+ * aviso and términos open xangarro.mx in the browser (5.1.1(i)).
  */
 
 import { act, type ReactNode } from 'react';
+import { Linking } from 'react-native';
 import { describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
@@ -77,7 +79,7 @@ async function mount(opts: { rejected?: number } = {}) {
 describe('SettingsScreen (A-12)', () => {
   it('shows only device sections and never a plan name (ADR-069)', async () => {
     await mount();
-    for (const id of ['settings-account', 'settings-sync', 'settings-device']) {
+    for (const id of ['settings-account', 'settings-sync', 'settings-device', 'settings-privacy']) {
       expect(screen.getByTestId(id)).toBeInTheDocument();
     }
     expect(screen.queryByTestId('settings-data')).toBeNull();
@@ -106,5 +108,17 @@ describe('SettingsScreen (A-12)', () => {
     const { onOpenRejected } = await mount({ rejected: 2 });
     fireEvent.click(screen.getByTestId('settings-no-enviados'));
     expect(onOpenRejected).toHaveBeenCalled();
+  });
+
+  it('opens the aviso and the términos on xangarro.mx, not the portal', async () => {
+    const open = vi.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await mount();
+    fireEvent.click(screen.getByTestId('settings-aviso-privacidad'));
+    fireEvent.click(screen.getByTestId('settings-terminos'));
+    expect(open.mock.calls).toEqual([
+      ['https://xangarro.mx/privacidad/'],
+      ['https://xangarro.mx/terminos/'],
+    ]);
+    open.mockRestore();
   });
 });

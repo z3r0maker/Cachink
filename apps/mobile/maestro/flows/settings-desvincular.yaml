@@ -1,8 +1,8 @@
-# Device-only Configuración (A-12): Cuenta / Sincronización / Dispositivo,
-# and «Desvincular este dispositivo» forgets the device's identity (every
-# record stays) and sends it back to Vincular. The flow then resets the
-# mock, re-activates and signs Toni back in, leaving the device as the
-# `activated` entrypoint expects.
+# Device-only Ajustes (A-12, MvAjustes): Esta caja / Sincronización / En
+# este teléfono / Privacidad y términos, and «Desvincular esta caja» forgets
+# the device's identity (every record stays) and sends it back to Vincular.
+# The flow then resets the mock, re-activates and signs Toni back in, leaving
+# the device as the `activated` entrypoint expects.
 #
 # Precondition: activated + signed in (Toni, NIP 1234); starts on Inicio.
 # x-entrypoint: activated
@@ -22,7 +22,7 @@ env:
     visible:
       id: 'settings-screen'
     timeout: 10000
-# Cuenta: the business this device belongs to (settings-account-section.tsx).
+# Esta caja: the business this device belongs to (settings-account-section.tsx).
 - assertVisible:
     id: 'settings-account'
 - assertVisible: '.*Tacos La Esquina.*'
@@ -31,16 +31,26 @@ env:
     id: 'settings-sync'
 - tapOn:
     id: 'settings-sync-now'
+# Privacidad y términos: the aviso and the terms open in the browser
+# (settings-privacy-section.tsx; 5.1.1(i)). Not tapped: they leave the app.
+- scrollUntilVisible:
+    element:
+      id: 'settings-terminos'
+    direction: DOWN
+- assertVisible:
+    id: 'settings-aviso-privacidad'
+- assertVisible: '.*Aviso de privacidad.*'
+- assertVisible: '.*Términos y condiciones.*'
 - scrollUntilVisible:
     element:
       id: 'settings-unlink'
     direction: UP
-- assertVisible: '.*Desvincular este dispositivo.*'
+- assertVisible: '.*Desvincular esta caja.*'
 - tapOn:
     id: 'settings-unlink'
 # The confirm dialog asks before anything is forgotten (ConfirmDialog,
 # confirm-dialog-confirm).
-- assertVisible: '.*¿Desvincular este dispositivo?.*'
+- assertVisible: '.*¿Desvincular esta caja?.*'
 - tapOn:
     id: 'confirm-dialog-confirm'
 # Unlinking drops the activation record: the gate shows Vincular again
