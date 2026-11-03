@@ -98,32 +98,44 @@ export async function descartarRevisionAction(): Promise<FormState> {
   redirect(FACTURAS);
 }
 
-async function porPagar(form: FormData, accion: 'pago' | 'cancelar'): Promise<FormState> {
+/** «Registrar pago» on the day the founder chose (board CD-06e). */
+export async function registrarPagoAction(_p: FormState, form: FormData): Promise<FormState> {
   const uuid = field(form, 'uuid');
   try {
     const { founder } = await requireFounder();
-    const input = { uuid, fecha: hoyEnMexico(), founderId: founder.id };
+    const input = { uuid, fecha: field(form, 'fecha'), hoy: hoyEnMexico(), founderId: founder.id };
     await auditedMutation(
-      (entry) => ({
-        action: accion === 'pago' ? 'empresa.factura_pagada' : 'empresa.factura_cancelada',
-        payload: { uuid, entryId: entry.id },
-      }),
-      () =>
-        accion === 'pago'
-          ? registrarPagoFactura(deps(), input)
-          : cancelarFactura(deps(), { ...input, motivo: 'Factura cancelada desde Facturas' }),
+      (entry) => ({ action: 'empresa.factura_pagada', payload: { uuid, entryId: entry.id } }),
+      () => registrarPagoFactura(deps(), input),
     );
   } catch (error) {
-    return failed(error, accion === 'pago' ? 'registrarPagoFactura' : 'cancelarFactura');
+    return failed(error, 'registrarPagoFactura');
   }
   revalidatePath('/empresa', 'layout');
-  return { ok: true, message: accion === 'pago' ? 'Pago registrado.' : 'Factura cancelada.' };
+  return { ok: true, message: 'Pago registrado.' };
 }
 
-export async function registrarPagoAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'pago');
-}
+const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
 
+/** «Sí, cancelar la factura», after its confirmation (board CD-06f): reversed today. */
 export async function cancelarFacturaAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'cancelar');
+  const uuid = field(form, 'uuid');
+  const mes = field(form, 'mes');
+  try {
+    const { founder } = await requireFounder();
+    await auditedMutation(
+      (entry) => ({ action: 'empresa.factura_cancelada', payload: { uuid, entryId: entry.id } }),
+      () =>
+        cancelarFactura(deps(), {
+          uuid,
+          fecha: hoyEnMexico(),
+          founderId: founder.id,
+          motivo: 'Factura cancelada desde Facturas',
+        }),
+    );
+  } catch (error) {
+    return failed(error, 'cancelarFactura');
+  }
+  revalidatePath('/empresa', 'layout');
+  redirect(`${FACTURAS}?${MES.test(mes) ? `mes=${mes}&` : ''}cancelada=1`);
 }

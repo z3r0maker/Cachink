@@ -49,6 +49,7 @@ const DOMAIN_CODES = new Set([
   'FACTURA_DESCONOCIDA',
   'FACTURA_NO_PENDIENTE',
   'FACTURA_NO_POR_PAGAR',
+  'FECHA_DE_PAGO_INVALIDA',
 ]);
 
 export function failed(error: unknown, what: string): FormState {

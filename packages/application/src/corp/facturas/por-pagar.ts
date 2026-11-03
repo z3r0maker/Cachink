@@ -4,6 +4,7 @@ import type { LedgerEntry } from '../ports.js';
 import { RegistrarMovimientoUseCase } from '../registrar-movimiento.js';
 import { RevertirMovimientoUseCase } from '../revertir-movimiento.js';
 import { FacturaNoPorPagarError } from './errors.js';
+import { assertFechaDePago } from './fecha-de-pago.js';
 import { factura, proveedor, type FacturasDeps } from './registrar.js';
 
 /**
@@ -34,12 +35,17 @@ export interface MovimientoDeFacturaInput {
   readonly founderId: string;
 }
 
-/** «Registrar pago»: the bank pays the net, withholdings are owed, the IVA turns creditable. */
+/**
+ * «Registrar pago»: the bank pays the net, withholdings are owed, the IVA
+ * turns creditable, on the day the founder chose (board CD-06e).
+ */
 export async function registrarPagoFactura(
   deps: FacturasDeps,
-  input: MovimientoDeFacturaInput,
+  input: MovimientoDeFacturaInput & { readonly hoy: string },
 ): Promise<LedgerEntry> {
   const { f, categoria } = await porPagar(deps, input.uuid);
+  const limites = { factura: f.cfdi.fecha, hoy: input.hoy };
+  assertFechaDePago(input.fecha, limites, await deps.ledger.closedPeriods());
   const entry = await new RegistrarMovimientoUseCase(deps.ledger).execute({
     fecha: input.fecha,
     projectId: f.projectId,

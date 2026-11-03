@@ -72,8 +72,12 @@ export function createReceivedInvoiceRepository(db: CorpDb): ReceivedInvoiceRepo
 
 export interface FacturaDelMes {
   readonly factura: FacturaRecibida;
-  /** Its expense was reversed from Movimientos, outside «Cancelar». */
+  /** Its expense was reversed, by «Cancelar» or from Movimientos. */
   readonly revertida: boolean;
+  /** The day its expense was reversed, `YYYY-MM-DD`, if it was. */
+  readonly revertidaEl: string | null;
+  /** The day an invoice on credit was paid, `YYYY-MM-DD`, once it is. */
+  readonly pagadaEl: string | null;
 }
 
 /**
@@ -86,10 +90,12 @@ export async function facturasDelMes(db: CorpDb, mes: string): Promise<readonly 
   if (bounds === null) throw new Error(`facturasDelMes: «${mes}» is not a month`);
   const [desde, hasta] = bounds;
   const reversa = alias(entries, 'reversa');
+  const pago = alias(entries, 'pago');
   const rows = await db
-    .select({ row: ri, reversa: reversa.id })
+    .select({ row: ri, reversa: reversa.id, revertidaEl: reversa.fecha, pagadaEl: pago.fecha })
     .from(ri)
     .leftJoin(reversa, eq(reversa.reversesEntryId, ri.entryId))
+    .leftJoin(pago, eq(pago.id, ri.pagoEntryId))
     .where(
       and(
         gte(ri.fecha, desde),
@@ -98,5 +104,10 @@ export async function facturasDelMes(db: CorpDb, mes: string): Promise<readonly 
       ),
     )
     .orderBy(desc(ri.fecha), desc(ri.createdAt));
-  return rows.map((r) => ({ factura: toFactura(r.row), revertida: r.reversa !== null }));
+  return rows.map((r) => ({
+    factura: toFactura(r.row),
+    revertida: r.reversa !== null,
+    revertidaEl: r.revertidaEl,
+    pagadaEl: r.pagadaEl,
+  }));
 }

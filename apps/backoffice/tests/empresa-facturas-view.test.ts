@@ -27,6 +27,8 @@ const factura = (o: CfdiDePrueba, f: Partial<FacturaRecibida> = {}): FacturaReci
 const delMes = (f: FacturaRecibida, revertida = false): FacturaDelMes => ({
   factura: f,
   revertida,
+  revertidaEl: revertida ? '2026-10-31' : null,
+  pagadaEl: null,
 });
 
 const honorarios = delMes(factura({ fecha: '2026-10-28' }));
@@ -103,8 +105,9 @@ describe('filaFactura (E-11)', () => {
       ['Cancelada', { tipo: 'texto', texto: 'No se registró' }],
     );
     assert.deepEqual(filaFactura(delMes(despacho.factura, true)).destino, {
-      tipo: 'texto',
-      texto: 'Se revirtió',
+      tipo: 'enlace',
+      href: '/empresa/movimientos/e2',
+      texto: 'Revertido',
     });
   });
 

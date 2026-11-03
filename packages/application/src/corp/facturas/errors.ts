@@ -39,3 +39,12 @@ export class FacturaNoPorPagarError extends Error {
     this.name = 'FacturaNoPorPagarError';
   }
 }
+
+/** «Registrar pago» on a day the money could not have left the bank (board CD-06e). */
+export class FechaDePagoError extends Error {
+  readonly code = 'FECHA_DE_PAGO_INVALIDA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'FechaDePagoError';
+  }
+}

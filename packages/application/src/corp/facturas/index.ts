@@ -2,6 +2,7 @@ export {
   FacturaDesconocidaError,
   FacturaNoPendienteError,
   FacturaNoPorPagarError,
+  FechaDePagoError,
   RfcMexiaPendienteError,
   SinArchivosError,
 } from './errors.js';

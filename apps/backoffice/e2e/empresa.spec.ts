@@ -11,17 +11,16 @@ import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from 
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
+import { cancelarConfirmando, pagarConFecha } from './empresa-por-pagar';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   adjuntar,
   AGENCIA,
   CONTADORA,
-  DESPACHO,
   fijarRfcMexia,
   fila,
   HONORARIOS,
   hoyMx,
-  IMPRENTA,
   registrarTres,
   subirCinco,
 } from './empresa-facturas';
@@ -288,10 +287,8 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   await expect(page.getByTestId('facturas-retenciones')).toContainText('$723.33');
 
   // Owner decision 9: the invoice on credit is paid; the other one came wrong.
-  await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
-  await expect(fila(page, DESPACHO.nombre)).toContainText('a crédito, pagada');
-  await page.getByRole('button', { name: `Cancelar la factura de ${IMPRENTA.nombre}` }).click();
-  await expect(fila(page, IMPRENTA.nombre)).toContainText('Se revirtió');
+  await pagarConFecha(page);
+  await cancelarConfirmando(page);
   await expect(page.getByTestId('facturas-recibidas')).toContainText('Ninguna por pagar');
 
   // The same XML again is refused, pointing at its movement; leaving the review keeps nothing.

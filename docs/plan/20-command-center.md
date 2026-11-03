@@ -535,13 +535,23 @@ with property tests:
 ### E-11 Facturas recibidas `[media]`
 
 - [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-10-30):**
-  - a date on «Registrar pago» and a confirmation on «Cancelar», both to draw first (today they
-    post dated today, with no confirmation, as the board shows);
+  **Remaining (2026-11-03):**
   - checking an unverified invoice («Sin verificar») with the SAT again;
   - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
     known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
     both yet. It needs a decision on how a template knows its month was registered by an invoice.
+    **Done 2026-11-03, boards CD-06e and CD-06f (canvas round 8):**
+  - «Registrar pago» opens «Registrar el pago» under the row: the date (today by default, from the
+    invoice's own day to today, never in a closed month, which the refusal names with the first
+    open one), what leaves the bank and the IVA that turns creditable. `registrarPagoFactura` takes
+    `hoy` and refuses the rest with `FECHA_DE_PAGO_INVALIDA`.
+  - «Cancelar» opens its confirmation first; «Sí, cancelar la factura» reverses it today and the list
+    says «Factura cancelada…». The row then reads «a crédito · cancelada el …», its SAT status as the
+    SAT has it, and «Revertido» links to the movement; a paid one reads «pagada el …»
+    (`facturasDelMes` returns both days).
+  - Playwright: «No, regresar» returns the focus, the payment is dated the invoice's day, and the
+    cancellation is confirmed and shown.
+  - Left: «vence 29 nov» on a PPD row, which needs the invoice's due date the CFDI does not carry.
     **Done 2026-10-30, boards CD-01 (the XML zone) and CD-06d:**
   - Registrar gasto takes one XML. It travels the same path as an upload in Facturas (RFC, «Ya
     registrada», SAT), so a refusal shows the review's reason in place. The form then opens on

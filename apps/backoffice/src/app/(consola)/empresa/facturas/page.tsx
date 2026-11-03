@@ -11,6 +11,7 @@ import {
 import { mesesVecinos, parseMes } from '@/server/empresa/movimiento-view';
 import { requireFounderPage } from '@/server/founder';
 import * as mf from '@/styles/mostrador-facturas.css';
+import * as p from '@/styles/mostrador-facturas-paneles.css';
 import * as m from '@/styles/mostrador.css';
 
 import { EncabezadoDinero } from '../encabezado-dinero';
@@ -73,9 +74,13 @@ function Totales({ r, mes }: { readonly r: ResumenFacturas; readonly mes: string
  * still owed with «Registrar pago» and «Cancelar». The Emitidas tab waits for
  * E-10; the screen is Dinero's second tab (plan §2).
  */
-export default async function FacturasPage(props: { searchParams: Promise<{ mes?: string }> }) {
+export default async function FacturasPage(props: {
+  searchParams: Promise<{ mes?: string; cancelada?: string }>;
+}) {
   await requireFounderPage();
-  const mes = parseMes((await props.searchParams).mes, hoyEnMexico());
+  const q = await props.searchParams;
+  const hoy = hoyEnMexico();
+  const mes = parseMes(q.mes, hoy);
   const { facturas, sinCfdi } = await leerFacturas(mes);
   const filas = [...facturas.map(filaFactura), ...sinCfdi.map(filaSinCfdi)];
   return (
@@ -89,7 +94,12 @@ export default async function FacturasPage(props: { searchParams: Promise<{ mes?
             Facturas recibidas en {nombreMes(mes)}
           </h2>
         </div>
-        <Tabla filas={filas} />
+        <Tabla filas={filas} hoy={hoy} mes={mes} />
+        {q.cancelada === '1' ? (
+          <p className={`${m.pad} ${p.hecho}`} role="status">
+            Factura cancelada. Su gasto quedó revertido en Movimientos.
+          </p>
+        ) : null}
         <p className={`${m.pad} ${mf.pie}`}>
           ¿Un proveedor del extranjero sin factura mexicana? Regístralo como gasto y adjunta su
           comprobante en PDF; aparece aquí como «Sin CFDI».

@@ -73,14 +73,19 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
     const [gasto] = await registrarFacturas(d, { selecciones: [seleccion], ...ctx });
     assert.equal(cuenta(gasto?.lines ?? [], 'proveedores')?.haber, 4_060_00n);
     assert.equal(cuenta(gasto?.lines ?? [], 'iva_acreditable'), undefined);
-    const pago = await registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', founderId: 'f1' });
+    const pago = await registrarPagoFactura(d, {
+      uuid: A,
+      fecha: '2026-11-20',
+      hoy: '2026-11-30',
+      founderId: 'f1',
+    });
     assert.equal(pago.sourceRef, `${A}:pago`);
     assert.equal(pago.fecha, '2026-11-20');
     assert.equal(cuenta(pago.lines, 'bancos')?.haber, 3_336_67n);
     assert.equal(cuenta(pago.lines, 'iva_acreditable')?.debe, 560_00n);
     assert.equal((await d.facturas.porUuid(A))?.pagoEntryId, pago.id);
     await assert.rejects(
-      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-21', founderId: 'f1' }),
+      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-21', hoy: '2026-11-30', founderId: 'f1' }),
       FacturaNoPorPagarError,
     );
   });
@@ -97,7 +102,7 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
     assert.equal(reversa.reversesEntryId, gasto?.id);
     assert.equal((await d.facturas.porUuid(A))?.estado, 'cancelada');
     await assert.rejects(
-      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', founderId: 'f1' }),
+      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', hoy: '2026-11-30', founderId: 'f1' }),
       FacturaNoPorPagarError,
     );
   });
@@ -105,7 +110,12 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
   it('refuses to pay or cancel a paid (PUE) invoice, or one not registered yet', async () => {
     const pue = await conSubida();
     await assert.rejects(
-      registrarPagoFactura(pue, { uuid: A, fecha: '2026-11-20', founderId: 'f1' }),
+      registrarPagoFactura(pue, {
+        uuid: A,
+        fecha: '2026-11-20',
+        hoy: '2026-11-30',
+        founderId: 'f1',
+      }),
       FacturaNoPorPagarError,
     );
     await registrarFacturas(pue, { selecciones: [seleccion], ...ctx });

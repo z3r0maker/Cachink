@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
+  cancelarFactura,
   descartarRevision,
   registrarFacturas,
   registrarPagoFactura,
@@ -89,13 +90,39 @@ describe('corp received invoices', () => {
       categoria: 'administracion',
       projectId: 'xangarro',
     });
-    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-30`, founderId: AUTOR });
+    const fecha = `${mes}-30`;
+    const pago = await registrarPagoFactura(d, { uuid, fecha, hoy: fecha, founderId: AUTOR });
     const [delMes] = await facturasDelMes(d.db, mes);
     assert.deepEqual(
       [delMes?.factura.cfdi.uuid, delMes?.factura.pagoEntryId, delMes?.revertida],
       [uuid, pago.id, false],
     );
+    assert.deepEqual([delMes?.pagadaEl, delMes?.revertidaEl], [fecha, null]);
     assert.equal(delMes?.factura.cfdi.total, 3_336_67n);
+  });
+
+  it('dates a cancelled invoice by its reversal (board CD-06f)', async () => {
+    const d = deps();
+    const mes = mesLibre();
+    const uuid = uuidDePrueba();
+    const emisor = { rfc: `CAN${mes.replace('-', '').slice(2)}AB1`, nombre: 'Imprenta, S.A.' };
+    await subir(d, { uuid, emisor, fecha: `${mes}-03`, metodoPago: 'PPD' });
+    await registrarFacturas(d, {
+      selecciones: [{ uuid, categoria: 'administracion', projectId: 'xangarro' }],
+      founderId: AUTOR,
+      hoy: `${mes}-03`,
+    });
+    await cancelarFactura(d, {
+      uuid,
+      fecha: `${mes}-09`,
+      motivo: 'Llegó con error',
+      founderId: AUTOR,
+    });
+    const [delMes] = await facturasDelMes(d.db, mes);
+    assert.deepEqual(
+      [delMes?.factura.estado, delMes?.revertida, delMes?.revertidaEl, delMes?.pagadaEl],
+      ['cancelada', true, `${mes}-09`, null],
+    );
   });
 
   it('takes a discarded upload again, and never lists one waiting or discarded', async () => {

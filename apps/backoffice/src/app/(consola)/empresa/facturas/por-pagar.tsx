@@ -1,77 +1,97 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useRef, useState } from 'react';
 
-import { cancelarFacturaAction, registrarPagoAction } from '@/server/actions/empresa-facturas';
-import type { FormState } from '@/server/actions/form-state';
+import type { FilaFactura, PorPagarDestino } from '@/server/empresa/facturas-view';
 import * as mf from '@/styles/mostrador-facturas.css';
+import * as p from '@/styles/mostrador-facturas-paneles.css';
 import * as d from '@/styles/mostrador-data.css';
-import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
 
-import { submitWith } from '../movimientos/registrar/opciones';
+import { Celdas, COLUMNAS } from './celdas';
+import { PanelCancelar, PanelPago } from './por-pagar-paneles';
 
-type Accion = (prev: FormState, form: FormData) => Promise<FormState>;
+/**
+ * An invoice on credit still owed (owner decision 9): «Registrar pago» and
+ * «Cancelar» each open their panel under the row (boards CD-06e and CD-06f),
+ * and «No, regresar» closes it and puts the focus back on its button.
+ */
+type Abierto = 'pago' | 'cancelar' | null;
 
-/** One of the row's two buttons, with its own pending state and its error. */
-function Boton({
-  uuid,
-  accion,
-  texto,
-  aria,
-  clase,
+interface Props {
+  readonly f: FilaFactura;
+  readonly destino: PorPagarDestino;
+  readonly hoy: string;
+  readonly mes: string;
+}
+
+function Acciones({
+  proveedor,
+  abrir,
+  volverA,
 }: {
-  readonly uuid: string;
-  readonly accion: Accion;
-  readonly texto: string;
-  readonly aria: string;
-  readonly clase: string;
+  readonly proveedor: string;
+  readonly abrir: (a: 'pago' | 'cancelar') => void;
+  readonly volverA: React.RefObject<Abierto>;
 }) {
-  const [state, action, pending] = useActionState(accion, null);
+  const enfocar = (a: Abierto) => (el: HTMLButtonElement | null) => {
+    if (el !== null && volverA.current === a) {
+      el.focus();
+      volverA.current = null;
+    }
+  };
   return (
-    <form className={mv.enLinea} onSubmit={submitWith(action)}>
-      <input type="hidden" name="uuid" value={uuid} />
-      <button className={clase} type="submit" disabled={pending} aria-label={aria}>
-        {texto}
+    <>
+      <button
+        ref={enfocar('pago')}
+        className={m.boton.primario}
+        type="button"
+        aria-label={`Registrar pago a ${proveedor}`}
+        onClick={() => abrir('pago')}
+      >
+        Registrar pago
       </button>
-      {state !== null && !state.ok ? (
-        <p className={d.messageBad} role="alert">
-          {state.message}
-        </p>
-      ) : null}
-    </form>
+      <button
+        ref={enfocar('cancelar')}
+        className={m.boton.secundario}
+        type="button"
+        aria-label={`Cancelar la factura de ${proveedor}`}
+        onClick={() => abrir('cancelar')}
+      >
+        Cancelar
+      </button>
+    </>
   );
 }
 
-/**
- * An invoice on credit still owed (owner decision 9, board CD-06b): «Registrar
- * pago» posts today's bank outflow and makes its IVA creditable; «Cancelar»
- * reverses its expense when the supplier cancelled it or it came wrong.
- */
-export function PorPagar({
-  uuid,
-  proveedor,
-}: {
-  readonly uuid: string;
-  readonly proveedor: string;
-}) {
+export function FilaPorPagar({ f, destino, hoy, mes }: Props) {
+  const [abierto, setAbierto] = useState<Abierto>(null);
+  const volverA = useRef<Abierto>(null);
+  const regresar = () => {
+    volverA.current = abierto;
+    setAbierto(null);
+  };
+  const panel = { destino, proveedor: f.proveedor, mes, onRegresar: regresar };
   return (
-    <div className={mf.porPagar}>
-      <span className={`${m.tagBase} ${mf.tono.aviso}`}>Por pagar</span>
-      <Boton
-        uuid={uuid}
-        accion={registrarPagoAction}
-        texto="Registrar pago"
-        aria={`Registrar pago a ${proveedor}`}
-        clase={m.boton.primario}
-      />
-      <Boton
-        uuid={uuid}
-        accion={cancelarFacturaAction}
-        texto="Cancelar"
-        aria={`Cancelar la factura de ${proveedor}`}
-        clase={m.boton.secundario}
-      />
-    </div>
+    <>
+      <tr className={abierto === null ? d.rowOpen : p.filaAbierta} data-testid="factura-recibida">
+        <Celdas f={f} />
+        <td className={d.td}>
+          <div className={mf.porPagar}>
+            <span className={`${m.tagBase} ${mf.tono.aviso}`}>Por pagar</span>
+            {abierto === null ? (
+              <Acciones proveedor={f.proveedor} abrir={setAbierto} volverA={volverA} />
+            ) : null}
+          </div>
+        </td>
+      </tr>
+      {abierto === null ? null : (
+        <tr className={p.filaAbierta}>
+          <td className={p.celdaPanel} colSpan={COLUMNAS}>
+            {abierto === 'pago' ? <PanelPago {...panel} hoy={hoy} /> : <PanelCancelar {...panel} />}
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

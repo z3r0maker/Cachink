@@ -124,7 +124,13 @@ describe('corp resultados read', () => {
       founderId: AUTOR,
     });
     const pagada = await facturaACredito(d, `${mes}-20`);
-    await registrarPagoFactura(d, { uuid: pagada.uuid, fecha: `${sig}-05`, founderId: AUTOR });
+    const pagoEl = `${sig}-05`;
+    await registrarPagoFactura(d, {
+      uuid: pagada.uuid,
+      fecha: pagoEl,
+      hoy: pagoEl,
+      founderId: AUTOR,
+    });
     const cancelada = await facturaACredito(d, `${mes}-21`);
     const anulacion = await cancelarFactura(d, {
       uuid: cancelada.uuid,
