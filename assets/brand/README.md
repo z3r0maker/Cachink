@@ -33,12 +33,22 @@ of one of them. Edit a master, re-render, then re-copy the derivatives below.
 `favicon-16.png` and `favicon-32.png` are kept as masters for anything that
 needs a PNG favicon; nothing consumes them today.
 
+### Splash and store art
+
+Rendered from the owner-approved canvas boards (page «Teléfono y tableta», row
+«Marca en las tiendas»): the board is the master, the PNG is its rendering.
+Change the board, then re-export at the size below, 24-bit RGB, no alpha.
+
+| File                                               | Board                      | Size       | Copied to                                                           |
+| -------------------------------------------------- | -------------------------- | ---------- | ------------------------------------------------------------------- |
+| `splash-mobile.png`                                | `MarcaSplash` («Amarillo») | 852 × 1846 | `apps/mobile/assets/splash.png` (`app.json` fills `#FFD60A`, cover) |
+| `app-registration/google-play/feature-graphic.png` | `MarcaPlayGrafico` (Claro) | 1024 × 500 | Play Console → Main store listing → Feature graphic                 |
+
 ### Still to land (X-07)
 
-| File                | What it is                                           | Consumed by                                                                               |
-| ------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `logo.png`          | In-app brand logo (~1536×1024)                       | **Copied once** into `packages/ui/src/assets/logo.png`, used by `<BrandLogo />`.          |
-| `splash-mobile.png` | Mobile launch splash (~852×1846, portrait, no alpha) | **Copied** into `apps/mobile/assets/splash.png` — the current one still reads «Cachink!». |
+| File       | What it is                     | Consumed by                                                                      |
+| ---------- | ------------------------------ | -------------------------------------------------------------------------------- |
+| `logo.png` | In-app brand logo (~1536×1024) | **Copied once** into `packages/ui/src/assets/logo.png`, used by `<BrandLogo />`. |
 
 `icon-padded.png` predates the kit and fed the archived Tauri desktop app.
 
