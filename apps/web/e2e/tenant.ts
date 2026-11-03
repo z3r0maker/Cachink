@@ -80,7 +80,13 @@ export interface MintOptions {
   readonly joinedAfter?: number;
   /** Anything but `active` also moves the period, as Stripe would. */
   readonly status?: Status;
+  /** Cancelled at period end (LFPC 76 Bis): `cancel_at` is the period's end, as Stripe sets it. */
+  readonly cancelando?: boolean;
 }
+
+/** The subscription id `mintTenant` gave the tenant's row. */
+export const subscriptionIdOf = (t: Pick<Tenant, 'biz'>): string =>
+  `sub_${`${t.biz}`.slice(-12)}`.slice(0, 40);
 
 /** What Stripe would say about the subscription: the screens read this, not us. */
 export type Status = 'active' | 'past_due' | 'canceled' | 'trialing';
@@ -91,6 +97,7 @@ async function subscribe(
   plan: Exclude<Plan, 'free'>,
   sello: string,
   status: Status,
+  cancelando = false,
 ): Promise<void> {
   const sql = postgres(billingDatabaseUrl(), { max: 1, onnotice: () => undefined });
   try {
@@ -102,6 +109,10 @@ async function subscribe(
         ${status === 'past_due' ? sql`now() - interval '1 month'` : sql`now() - interval '1 day'`},
         ${status === 'past_due' ? sql`now() + interval '2 days'` : sql`now() + interval '1 month'`},
         'charge_automatically')`;
+    if (cancelando) {
+      await sql`UPDATE subscriptions SET cancel_at = current_period_end
+                WHERE stripe_subscription_id = ${`sub_${sello}`.slice(0, 40)}`;
+    }
   } finally {
     await sql.end({ timeout: 5 });
   }
@@ -153,7 +164,13 @@ export async function mintTenant(options: MintOptions = {}): Promise<Tenant> {
       VALUES (${t.deviceId}, 'Caja única', 'android', 'Moto G', ${t.biz}, now(), now())`;
   });
   if (plan !== 'free') {
-    await subscribe(t.biz, plan, `${t.biz}`.slice(-12), options.status ?? 'active');
+    await subscribe(
+      t.biz,
+      plan,
+      `${t.biz}`.slice(-12),
+      options.status ?? 'active',
+      options.cancelando === true,
+    );
   }
   return t;
 }

@@ -139,7 +139,14 @@ describe('current subscription and its entitlement', () => {
       status: 'active',
       interval: 'month',
       currentPeriodEnd: at(20),
+      cancelAt: null,
       stripeCustomerId: 'cus_1',
     });
+  });
+
+  it('a cancelled subscription says when it ends; a lapsed one says nothing', () => {
+    assert.equal(billingStatusSnapshot([record({ cancelAt: at(20) })])?.cancelAt, at(20));
+    const lapsed = record({ status: 'lapsed', cancelAt: at(-1) });
+    assert.equal(billingStatusSnapshot([lapsed])?.cancelAt, null);
   });
 });

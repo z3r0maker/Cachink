@@ -11,6 +11,14 @@
 import { KINDS, type Kind, SURFACES, kindOf } from './plan-board-kinds.js';
 import { nextUp } from './plan-board-next.js';
 import type { Item, Status } from './plan-board-parse.js';
+import {
+  PRIORIDADES,
+  PRIO_REGLA,
+  PRIO_TITULO,
+  esBloqueante,
+  ordenPrioridad,
+  prioridadDe,
+} from './plan-board-prioridad.js';
 
 export type Phase = 'Lanzamiento' | 'Post-lanzamiento' | 'Colas de tracks';
 
@@ -52,6 +60,8 @@ export function phaseOf(item: Item): Phase {
 
 function renderItem(item: Item): string {
   const id = item.id ? `**${item.id}** ` : '';
+  const prio = prioridadDe(item);
+  const marca = `${esBloqueante(item) ? '`⛔ bloquea prod` ' : ''}${prio ? `\`${PRIO_TITULO[prio]}\` ` : ''}`;
   const tail = [
     item.blockedBy ? `Bloqueada por: ${item.blockedBy}` : null,
     item.trigger ? `Disparador: ${item.trigger}` : null,
@@ -59,7 +69,7 @@ function renderItem(item: Item): string {
   ]
     .filter((s) => s !== null)
     .join(' · ');
-  return `- ${MARK[item.status]} ${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
+  return `- ${MARK[item.status]} ${marca}${id}${item.title}${tail ? ` — ${tail}` : ''} · \`${item.source}:${item.line}\``;
 }
 
 /** Código keeps its surface headers (Teléfono, Portal, …), in SURFACES order. */
@@ -82,6 +92,33 @@ function provenanceGroups(items: readonly Item[]): [string, Item[]][] {
   return out;
 }
 
+/** Todo lo marcado `bloq`, junto: la lectura más corta de «qué nos detiene». */
+function renderBloqueantes(items: readonly Item[]): string[] {
+  const rows = items
+    .filter((i) => OPEN.includes(i.status) && esBloqueante(i))
+    .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b));
+  const out = [
+    `## Bloquea producción (${rows.length})`,
+    '',
+    'Mientras cualquiera siga abierta, no se sale a producción. La marca la pone una etiqueta',
+    '`` `[bloq]` `` en el track, no una regla sobre el texto: hay tareas que ningún documento llama',
+    'BLOCKER y que aun así tienen producción detenida hoy. Cada una vuelve a aparecer en su tipo de',
+    'trabajo, que es quien tiene que moverla.',
+    '',
+  ];
+  for (const p of PRIORIDADES) {
+    const nivel = rows.filter((i) => prioridadDe(i) === p);
+    if (nivel.length === 0) continue;
+    out.push(
+      `### ${PRIO_TITULO[p]} (${nivel.length}) — ${PRIO_REGLA[p]}`,
+      '',
+      ...nivel.map(renderItem),
+      '',
+    );
+  }
+  return out;
+}
+
 function renderKind(kind: Kind, items: readonly Item[]): string[] {
   const open = items.filter((i) => OPEN.includes(i.status));
   const out = [`## ${kind} (${open.length})`, '', BLURB[kind], ''];
@@ -89,7 +126,8 @@ function renderKind(kind: Kind, items: readonly Item[]): string[] {
   const groups = kind === 'Código y técnico' ? surfaceGroups(open) : provenanceGroups(open);
   for (const [key, list] of groups) {
     out.push(`### ${key} (${list.length})`, '');
-    for (const item of list) out.push(renderItem(item));
+    for (const item of [...list].sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b)))
+      out.push(renderItem(item));
     out.push('');
   }
   return out;
@@ -161,7 +199,10 @@ export function renderBoard(items: readonly Item[]): string {
   const open = items.filter((i) => OPEN.includes(i.status));
   const byKind = new Map<Kind, Item[]>(KINDS.map((k) => [k, []]));
   for (const item of open) byKind.get(kindOf(item).kind)?.push(item);
-  const body = KINDS.flatMap((k) => renderKind(k, byKind.get(k) ?? []));
+  const body = [
+    ...renderBloqueantes(items),
+    ...KINDS.flatMap((k) => renderKind(k, byKind.get(k) ?? [])),
+  ];
   return (
     [...HEAD, ...renderNext(items), ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n'
   );

@@ -7,6 +7,7 @@ export * from './entities.js';
 export * from './balance.js';
 export * from './digest.js';
 export * from './billing.js';
+export * from './billing-cancel.js';
 export * from './metering.js';
 export * from './cfdi.js';
 export * from './fiscal.js';
