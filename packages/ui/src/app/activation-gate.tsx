@@ -8,10 +8,12 @@ import type { ReactElement, ReactNode } from 'react';
 import { ActivationScreen } from '../screens/Activation/index';
 import { useActivate } from '../activation/use-activate';
 import { useActivationState } from '../activation/use-activation-state';
+import { useAvisoBorrado } from '../activation/use-aviso-borrado';
 
 export function ActivationGate(props: { readonly children: ReactNode }): ReactElement | null {
   const { record } = useActivationState();
   const activate = useActivate();
+  const borrado = useAvisoBorrado();
   if (record === undefined) return null;
   if (record !== null) return <>{props.children}</>;
   return (
@@ -20,6 +22,7 @@ export function ActivationGate(props: { readonly children: ReactNode }): ReactEl
       onScan={(qrToken) => activate.mutate({ qrToken })}
       submitting={activate.isPending}
       errorKey={activate.error?.key ?? null}
+      borrado={borrado}
     />
   );
 }

@@ -60,8 +60,12 @@
 - [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe → `[critica]` `[bloq]`
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
       creation) — see OQ-N4.
-- [ ] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
-      unlinking does not wipe).
+- [x] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
+      unlinking does not wipe). **Done 2026-11-03:** Ajustes → «Desvincular esta caja» offers
+      «Desvincular y borrar» (board MvDesvincularBorrar). It refuses while anything is unsent or
+      refused, empties every local table with `secure_delete` and `VACUUM`
+      (`packages/data/src/wipe-local-data.ts`), clears the token and restarts on the connect screen.
+      Aviso §7 and términos §4 updated. A portal revocation still does not wipe the phone.
 - [x] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day
       clock (LFPA art. 28 calendar) and acuse. **Done 2026-10-05, verified against the code:** the
       public form (`apps/web/src/app/privacidad/solicitud/page.tsx`), `solicitar-arco.ts` (folio,
