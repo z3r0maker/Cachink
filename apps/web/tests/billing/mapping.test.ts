@@ -64,6 +64,21 @@ describe('Stripe → billing shapes (API 2026-08-26.dahlia)', () => {
     });
   });
 
+  it('a Checkout whose Términos box was ticked carries the session and when (LFPC 76 Bis)', () => {
+    const e = event('event-checkout-completed', (x) => {
+      (x as unknown as { created: number }).created = 1_790_000_000;
+      x.data.object.consent = { terms_of_service: 'accepted', promotions: null };
+    });
+    const r = toBillingEvent(e) as { checkoutSessionId?: string; termsAcceptedAt?: string | null };
+    assert.match(r.checkoutSessionId ?? '', /^cs_/);
+    assert.equal(r.termsAcceptedAt, new Date(1_790_000_000_000).toISOString());
+  });
+
+  it('a Checkout that asked for no consent carries none', () => {
+    const e = event('event-checkout-completed', (x) => void (x.data.object.consent = null));
+    assert.equal((toBillingEvent(e) as { termsAcceptedAt?: string | null }).termsAcceptedAt, null);
+  });
+
   it('a payment-mode Checkout is not billing’s', () => {
     const e = event('event-checkout-completed', (x) => void (x.data.object.mode = 'payment'));
     assert.equal(toBillingEvent(e), null);

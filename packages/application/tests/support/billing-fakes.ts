@@ -110,6 +110,16 @@ export class FakeGateway implements BillingGateway {
     this.cancelled.push(id);
     return Promise.resolve();
   }
+  readonly cancelAtPeriodEnd: { id: string; cancel: boolean }[] = [];
+  /** Stripe sets `cancel_at` to the period's end and clears it on resume. */
+  setCancelAtPeriodEnd(id: string, cancel: boolean) {
+    this.cancelAtPeriodEnd.push({ id, cancel });
+    const found = this.subscriptions.get(id);
+    if (found === undefined) return Promise.reject(new Error(`No such subscription: ${id}`));
+    const next = { ...found, cancelAt: cancel ? found.currentPeriodEnd : null };
+    this.subscriptions.set(id, next);
+    return Promise.resolve(next);
+  }
   createPortalSession(customerId: string) {
     return Promise.resolve(`https://billing.stripe.com/p/session/${customerId}`);
   }
