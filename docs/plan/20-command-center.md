@@ -97,7 +97,7 @@ what is built today).
 2. **Routes do not change.** A tab is a link to its own route; the rail entry is active on any of
    its tabs' routes and links to its first built tab. That keeps the change cheap to undo, so it
    has no ADR.
-3. **`/empresa` opens on Resumen** once E-16 ships; until then it opens on Dinero › Movimientos.
+3. **`/empresa` opens on Resumen** (E-16, 2026-11-02); before it, it opened on Dinero › Movimientos.
 4. **Two levels, never three.** Page tabs sit under the title; a screen's own filters or views
    (Movimientos' Todos, Ingresos, Gastos…; Agenda's Próximos, Calendario, Evidencias) stay inside
    its panel. At most five tabs per entry (CLAUDE.md §6).
@@ -175,8 +175,10 @@ Memo: costo de sudor = valor aceptado del Tablero no pagado → EBITDA económic
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ISR provisional (RESICO PM) | Year to date: (income actually collected − authorised deductions actually paid) × 30 %, minus provisional payments already made. Shared with the portal's estimate for persona-moral tenants |
 | IVA del mes                 | IVA trasladado collected − IVA acreditable paid − IVA retenido (when applicable); cash basis                                                                                                 |
-| Burn                        | Net cash out per month, as the average of the last 3 months                                                                                                                                  |
+| Caja                        | Bancos + Stripe por depositar at the cut, partner money included                                                                                                                             |
+| Burn                        | Net cash out per month, as the average of the last 3 months. Partner money (an entry touching capital, AFAC or a partner loan) is left out, and so are months before the first movement      |
 | Meses de caja (runway)      | Cash ÷ burn. «Sin consumo» when burn ≤ 0                                                                                                                                                     |
+| Punto de equilibrio         | The monthly income that covers the average cash out, every cost taken as fixed (conservative: costo del servicio really falls with income). «Hasta X %» = (cash in − cash out) ÷ cash in     |
 | CAC                         | Ventas y marketing spend ÷ new paying customers, per period and project                                                                                                                      |
 | LTV                         | ARPA × gross margin % ÷ monthly churn (from N-63)                                                                                                                                            |
 | Payback                     | CAC ÷ (ARPA × gross margin %), in months                                                                                                                                                     |
@@ -476,8 +478,8 @@ with property tests:
       MEXIA CSD or e.firma goes on the Agenda, and `alertasDeCertificados` flags what expires within 60
       days for the Resumen (E-16). Playwright: shares subscribed and the notice on the Agenda, the
       trademark updated with its proof, a CSD shown as «Vence en 41 días».
-      **Left for later:** the Resumen signal itself waits for E-16; the hero's «Ver acciones y bolsa»
-      waits for E-21.
+      **Left for later:** the Resumen signal itself waits for E-16 (shipped 2026-11-02); the hero's
+      «Ver acciones y bolsa» waits for E-21.
 - **What:**
   - partners and the beneficial-owner file;
   - share events (they come from E-21; manual before then);
@@ -654,7 +656,33 @@ with property tests:
 
 ### E-16 Resumen `[media]`
 
-- [ ] Status · **Blocked by:** E-12, E-04
+- [x] Status · **Blocked by:** E-12, E-04 · **Done:** 2026-11-02
+- **Progress (2026-11-02, boards CD-12b and CD-12c, approved):**
+  - **Autonomía, in the domain** (`@xangarro/domain/corp` `caja/`): `cajaAl`, `flujoMensual` and
+    `autonomia`, test-first, with §4's Caja, Burn and Punto de equilibrio definitions. E-23 reuses them.
+  - **The read** (`movimientosDeCaja` in `data-corp`) nets each entry on cash and marks partner
+    money. Its integration test covers a Stripe cobro and payout, capital, a loan, a reversed
+    expense, one on credit and an entry after the cut.
+  - **The page** (`/empresa`, which the area now opens on, and the rail's first entry):
+    - the hero is always today's cash, averaged over the three whole months before today (the
+      running month stands in for a company younger than one). It has three states: CD-12 «se
+      sostiene sola», CD-12b «aún depende de los socios» and CD-12c «Aún no hay movimientos»,
+      which also covers a ledger with partner money and nothing else;
+    - four tiles (Ingresos netos, Margen bruto, EBITDA, Utilidad neta), devengado like Resultados,
+      against the previous period, each a link to Resultados for that period. The margin is
+      truncated to whole points, so 69.9 % never reads as the 70 % target;
+    - «De dónde sale la utilidad» as bars from zero, scaled to the largest of income, the costs'
+      total and each line; below EBITDA a line shows only when it moved;
+    - signals: margin under 70 %, runway under 6 months, a certificate expiring within 60 days
+      (`alertasDeCertificados`, E-06), and the Agenda's late items (one signal, or one for all);
+    - the Agenda's next three open items, funding halves included, as Agenda › Próximos lists them.
+  - **Tests:** view tests for the hero, tiles, bars and signals in the boards' own figures, and a
+    Playwright step on E-12's March that follows a tile and the CSD signal.
+  - **Left for later**, each joining the Resumen with its own task: MRR and «8 negocios nuevos»
+    (E-10), Impuestos del mes (E-13), Tope de la SAS and its 60/80/95 % signal (E-15), Objetivos
+    del trimestre and the pool summary (E-20, E-21), «Pendientes de socios» (E-20, E-31), the
+    infra ÷ MRR signal (E-10), «Ver caja y escenarios» (E-23) and the Proyecto chip (one project
+    until E-41).
 - **What:** `/empresa` home with:
   - the KPI strip: caja, meses de caja, MRR, margen bruto, EBITDA, impuestos del mes, avance al
     tope SAS;

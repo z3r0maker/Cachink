@@ -7,6 +7,7 @@
  * «Pronto»). Routes never change: a tab is a link to the screen's own URL.
  */
 export type EmpresaHref =
+  | '/empresa'
   | '/empresa/movimientos'
   | '/empresa/facturas'
   | '/empresa/resultados'
@@ -16,7 +17,7 @@ export type EmpresaHref =
   | '/empresa/corporativo';
 
 /** The rail entries built so far; their icons live in `icons.tsx`. */
-export type EmpresaEntryId = 'dinero' | 'resultados' | 'socios' | 'cumplimiento';
+export type EmpresaEntryId = 'resumen' | 'dinero' | 'resultados' | 'socios' | 'cumplimiento';
 
 export interface EmpresaTab {
   readonly label: string;
@@ -33,6 +34,12 @@ export interface EmpresaEntry {
 }
 
 export const EMPRESA_NAV: readonly EmpresaEntry[] = [
+  {
+    id: 'resumen',
+    label: 'Resumen',
+    summary: '¿Cómo está la empresa hoy y qué necesita de nosotros?',
+    tabs: [{ label: 'Resumen', href: '/empresa', task: 'E-16' }],
+  },
   {
     id: 'dinero',
     label: 'Dinero',
@@ -66,8 +73,9 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
   },
 ] as const;
 
+/** The area's root is the Resumen alone: every other screen sits under it. */
 const onRoute = (href: EmpresaHref, pathname: string): boolean =>
-  pathname === href || pathname.startsWith(`${href}/`);
+  pathname === href || (href !== '/empresa' && pathname.startsWith(`${href}/`));
 
 /** An entry is active on any of its tabs' routes, sub-pages included. */
 export function isEntryActive(entry: EmpresaEntry, pathname: string): boolean {

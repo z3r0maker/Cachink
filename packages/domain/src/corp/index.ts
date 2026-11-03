@@ -10,3 +10,4 @@ export * from './expediente/index.js';
 export * from './corporativo/index.js';
 export * from './facturas/index.js';
 export * from './resultados/index.js';
+export * from './caja/index.js';

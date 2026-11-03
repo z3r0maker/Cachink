@@ -23,6 +23,7 @@ export {
   type Movimiento,
 } from './queries/movimientos.js';
 export { importesDeResultados } from './queries/resultados.js';
+export { movimientosDeCaja, type MovimientoCajaDeEntrada } from './queries/caja.js';
 export {
   createFundingCallRepository,
   listFundingCalls,

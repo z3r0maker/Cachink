@@ -17,7 +17,7 @@ describe('EMPRESA_NAV', () => {
   it('lists the built entries in the plan order, with Dinero’s and Cumplimiento’s tabs', () => {
     assert.deepEqual(
       EMPRESA_NAV.map((e) => e.label),
-      ['Dinero', 'Resultados', 'Socios', 'Cumplimiento'],
+      ['Resumen', 'Dinero', 'Resultados', 'Socios', 'Cumplimiento'],
     );
     assert.deepEqual(
       entry('dinero').tabs.map((t) => t.label),
@@ -52,8 +52,15 @@ describe('isEntryActive', () => {
     assert.equal(isEntryActive(entry('socios'), '/empresa/sociosx'), false);
   });
 
-  it('lights nothing on the area root or outside it', () => {
-    for (const path of ['/empresa', '/', '/tenants']) {
+  it('lights the Resumen on the area root alone', () => {
+    const r = entry('resumen');
+    assert.equal(isEntryActive(r, '/empresa'), true);
+    assert.equal(isEntryActive(r, '/empresa/agenda'), false);
+    assert.equal(isEntryActive(entry('dinero'), '/empresa'), false);
+  });
+
+  it('lights nothing outside the area', () => {
+    for (const path of ['/', '/tenants', '/empresax']) {
       assert.equal(
         EMPRESA_NAV.some((e) => isEntryActive(e, path)),
         false,
@@ -67,5 +74,6 @@ describe('entryOf', () => {
   it('finds the entry that owns a route', () => {
     assert.equal(entryOf('/empresa/expediente')?.label, 'Cumplimiento');
     assert.equal(entryOf('/empresa/movimientos')?.label, 'Dinero');
+    assert.equal(entryOf('/empresa')?.label, 'Resumen');
   });
 });

@@ -10,6 +10,7 @@ import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corpor
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
+import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   adjuntar,
@@ -110,8 +111,7 @@ test('a founder gets the group and the partners and projects from corp', async (
 
 test('a founder records a USD expense and reverses it', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.goto('/empresa');
-  await expect(page).toHaveURL(/\/empresa\/movimientos$/);
+  await page.goto('/empresa/movimientos');
   await expect(page.getByRole('heading', { name: 'Dinero', level: 1 })).toBeVisible();
 
   await registrarGastoEnDolares(page);
@@ -354,7 +354,7 @@ test('a founder attaches one XML on Registrar gasto, rewords it and registers it
 test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
   // The rail shows the built entries; their screens are tabs, not entries.
-  for (const entrada of ['Dinero', 'Resultados', 'Socios', 'Cumplimiento']) {
+  for (const entrada of ['Resumen', 'Dinero', 'Resultados', 'Socios', 'Cumplimiento']) {
     await expect(rail(page).getByRole('link', { name: entrada, exact: true })).toBeVisible();
   }
   for (const pantalla of ['Movimientos', 'Facturas', 'Agenda', 'Expediente', 'Corporativo']) {
@@ -457,4 +457,49 @@ test('a founder reads a month of results, opens a line, and switches basis and p
     .click();
   await expect(page).toHaveURL(/periodo=2024-T1/);
   await expect(renglon(page, 'ingresos')).toContainText('$18,000.00');
+});
+
+test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-16)', async ({
+  page,
+}) => {
+  await signInAsStaff(page, SOCIO);
+  await abrirEntrada(page, 'Resumen');
+  await expect(page).toHaveURL(/\/empresa$/);
+  await expect(page.getByRole('heading', { name: 'Resumen', level: 1 })).toBeVisible();
+  // Autonomía is today's cash: every movement the earlier tests left.
+  await revisarAutonomia(page);
+
+  // Real rows: E-12's March, two cobros and the contador's fee, worked by hand.
+  await page.goto(`/empresa?periodo=${MES}`);
+  await expect(page.getByText('Marzo de 2024', { exact: true })).toBeVisible();
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$10,000');
+  await expect(kpi(page, 'Ingresos netos')).toContainText('+$2,000 vs febrero');
+  await expect(kpi(page, 'Margen bruto')).toContainText('Sin datos de febrero');
+  await expect(kpi(page, 'EBITDA')).toContainText('$7,000');
+  await expect(kpi(page, 'Utilidad neta')).toContainText('$4,900');
+  await expect(kpi(page, 'Utilidad neta')).toContainText('Después de ISR estimado');
+  await expect(page.getByTestId('utilidad-fila')).toHaveCount(8);
+  await expect(filaUtilidad(page, 'Administración')).toContainText('−$3,000');
+  await expect(filaUtilidad(page, 'ISR estimado')).toContainText('−$2,100');
+  await expect(
+    page.getByText('Los costos de marzo suman $3,000: 30 % de los ingresos.'),
+  ).toBeVisible();
+  // E-04's Agenda puts its next items here; the late ones are signals.
+  await expect(page.getByTestId('vencimiento').first()).toBeVisible();
+
+  await page
+    .getByRole('navigation', { name: 'Periodo' })
+    .getByRole('link', { name: 'Trimestre' })
+    .click();
+  await expect(page).toHaveURL(/periodo=2024-T1/);
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$18,000');
+  await kpi(page, 'Ingresos netos').click();
+  await expect(page).toHaveURL(/\/empresa\/resultados\?periodo=2024-T1$/);
+
+  // E-06's CSD, 41 days out, is a signal that opens the certificates.
+  await page.goto('/empresa');
+  const csd = page.getByTestId('senal').filter({ hasText: 'El CSD vence en 41 días' });
+  await expect(csd).toContainText('Si vence, no se puede facturar.');
+  await csd.getByRole('link', { name: 'Ver certificados' }).click();
+  await expect(page).toHaveURL(/\/empresa\/corporativo$/);
 });

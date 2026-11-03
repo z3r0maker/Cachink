@@ -39,6 +39,7 @@ export async function abrirPestana(
  * routes did not change, so each one still opens.
  */
 export const RUTAS: readonly (readonly [string, string])[] = [
+  ['/empresa', 'Resumen'],
   ['/empresa/movimientos', 'Dinero'],
   ['/empresa/facturas', 'Dinero'],
   ['/empresa/resultados', 'Resultados'],
