@@ -45,6 +45,7 @@ function deps(counts: SyncCounts = NADA) {
     queryClient: new QueryClient(),
     contar: vi.fn(async () => counts),
     reiniciar,
+    esperaReinicioMs: 0,
     now: () => new Date('2026-11-03T18:00:00.000Z'),
   };
 }
@@ -53,6 +54,7 @@ describe('wipeDevice', () => {
   it('clears the token, wipes, leaves the «Listo» flag, then restarts', async () => {
     const d = deps();
     await expect(wipeDevice(d)).resolves.toEqual({ kind: 'borrado' });
+    await vi.waitFor(() => expect(d.reiniciar).toHaveBeenCalled());
     expect(orden).toEqual(['token', 'wipe', 'reiniciar']);
     expect(await d.tokenStore.get()).toBeNull();
     expect(await d.appConfig.get(APP_CONFIG_KEYS.avisoBorrado)).toBe('2026-11-03T18:00:00.000Z');
@@ -78,6 +80,28 @@ describe('wipeDevice', () => {
     await expect(wipeDevice(d)).rejects.toThrow('disk I/O error');
     expect(await d.appConfig.get(APP_CONFIG_KEYS.avisoBorrado)).toBeNull();
     expect(d.reiniciar).not.toHaveBeenCalled();
+  });
+
+  it('lands on the connect screen first, and restarts only once it settled', async () => {
+    vi.useFakeTimers();
+    try {
+      const d = deps();
+      const reset = vi.spyOn(d.queryClient, 'resetQueries');
+      await wipeDevice({ ...d, esperaReinicioMs: 800 });
+      expect(reset).toHaveBeenCalled();
+      expect(d.reiniciar).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(800);
+      expect(d.reiniciar).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('without a restart (web, tests) the connect screen is the end', async () => {
+    const d = deps();
+    const reset = vi.spyOn(d.queryClient, 'resetQueries');
+    await wipeDevice({ ...d, reiniciar: undefined });
+    expect(reset).toHaveBeenCalled();
   });
 
   it('asks the database, not the last known counts, right before wiping', async () => {

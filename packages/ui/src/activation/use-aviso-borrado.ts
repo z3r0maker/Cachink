@@ -1,8 +1,9 @@
 /**
- * useAvisoBorrado — whether this launch follows a «Desvincular y borrar»
- * (MvDesvincularBorrar «Listo»). The flag `wipeDevice` leaves is read once
- * and deleted at once, so the notice shows on this visit to the connect
- * screen and never again.
+ * useAvisoBorrado — whether this phone was wiped by «Desvincular y borrar»
+ * and not linked since (MvDesvincularBorrar «Listo»). The flag `wipeDevice`
+ * leaves is only read here; linking again deletes it (`persistActivation`).
+ * Deleting it on read lost the notice: the connect screen mounts before the
+ * restart and again after it.
  */
 
 import { useEffect, useState } from 'react';
@@ -14,12 +15,12 @@ export function useAvisoBorrado(): boolean {
   const [borrado, setBorrado] = useState(false);
   useEffect(() => {
     let vivo = true;
-    void (async () => {
-      const marca = await appConfig.get(APP_CONFIG_KEYS.avisoBorrado);
-      if (marca === null) return;
-      await appConfig.delete(APP_CONFIG_KEYS.avisoBorrado);
-      if (vivo) setBorrado(true);
-    })().catch(() => undefined);
+    appConfig
+      .get(APP_CONFIG_KEYS.avisoBorrado)
+      .then((marca) => {
+        if (vivo) setBorrado(marca !== null);
+      })
+      .catch(() => undefined);
     return () => {
       vivo = false;
     };

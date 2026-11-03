@@ -1,6 +1,7 @@
 /**
- * The «Listo, se borraron los datos» notice (MvDesvincularBorrar): shown on
- * the launch after a wipe, once; the flag is deleted as soon as it is read.
+ * The «Listo, se borraron los datos» notice (MvDesvincularBorrar): shown
+ * after a wipe until the phone is linked again, however often the connect
+ * screen mounts (once before the restart, once after).
  */
 
 import type { ReactNode } from 'react';
@@ -22,12 +23,14 @@ function wrapper(appConfig: InMemoryAppConfigRepository) {
 }
 
 describe('useAvisoBorrado', () => {
-  it('says so once after a wipe, and deletes the flag', async () => {
+  it('says so after a wipe, and keeps the flag for the next mount', async () => {
     const appConfig = new InMemoryAppConfigRepository();
     await appConfig.set('avisoBorrado', '2026-11-03T18:00:00.000Z');
-    const { result } = renderHook(() => useAvisoBorrado(), { wrapper: wrapper(appConfig) });
-    await waitFor(() => expect(result.current).toBe(true));
-    expect(await appConfig.get('avisoBorrado')).toBeNull();
+    const first = renderHook(() => useAvisoBorrado(), { wrapper: wrapper(appConfig) });
+    await waitFor(() => expect(first.result.current).toBe(true));
+    first.unmount();
+    const second = renderHook(() => useAvisoBorrado(), { wrapper: wrapper(appConfig) });
+    await waitFor(() => expect(second.result.current).toBe(true));
   });
 
   it('stays quiet on an ordinary launch', async () => {
