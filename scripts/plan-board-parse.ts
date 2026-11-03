@@ -75,9 +75,19 @@ function field(text: string, name: string): string | null {
 const TAG =
   /\s*`?\[(critica|alta|media|baja|bloq|producto|deuda|papeleo|legal|infra|tiendas|terceros|lanzamiento)\]`?/gu;
 
+/**
+ * A tag takes the space before it with it, so it leaves nothing behind, or one
+ * space when text runs straight on (`[bloq]tres`). Leaving a space for every
+ * tag printed «…md`)   móvil» on N-24, which prettier then rewrote.
+ */
+function dropTag(match: string, _tag: string, at: number, text: string): string {
+  const next = text[at + match.length];
+  return next === undefined || /\s/u.test(next) ? '' : ' ';
+}
+
 export function splitTags(text: string): { tags: string[]; rest: string } {
   const tags = [...text.matchAll(TAG)].map((m) => m[1] as string);
-  return { tags, rest: tags.length > 0 ? text.replace(TAG, ' ') : text };
+  return { tags, rest: tags.length > 0 ? text.replace(TAG, dropTag) : text };
 }
 
 function clean(text: string): string {

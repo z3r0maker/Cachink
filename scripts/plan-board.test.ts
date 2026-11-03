@@ -295,6 +295,19 @@ describe('etiquetas de estructura', () => {
     assert.deepEqual(it1.tags, ['alta', 'bloq']);
   });
 
+  it('no deja espacios de más donde estaban, para que prettier no reescriba el tablero', () => {
+    // N-24 salía con tres espacios («…mostrador.md`)   móvil…»): prettier los
+    // juntaba en uno y el tablero ya no era el que genera `pnpm plan:board`.
+    const it1 = uno(
+      '### T-1 Título\n\n- [ ] Status · **Blocked by:** M-10 y M-11 `[alta]` `[bloq]`\n  y el rework de A-16\n',
+    );
+    assert.equal(it1.blockedBy, 'M-10 y M-11 y el rework de A-16');
+    assert.equal(
+      uno('### T-1 Uno `[alta]` dos [bloq]tres\n\n- [ ] Status\n').title,
+      'Uno dos tres',
+    );
+  });
+
   it('deja en paz a `[LAUNCH]`, que sí se muestra', () => {
     // Es la fase de lanzamiento que `plan-board-kinds.ts` conserva a propósito.
     const it1 = uno('### T-1 Auditoría `[LAUNCH]` `[alta]`\n\n- [ ] Status\n');
