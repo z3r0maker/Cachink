@@ -111,6 +111,18 @@ describe('FacturaFila · the row', () => {
   });
 });
 
+/**
+ * Clicks a button once the previous action has let go of it. The row's
+ * `setNota` runs after an `await` inside `startTransition`, so the note can
+ * render a commit before `pending` clears: a click in that gap hits a disabled
+ * button and is dropped. It failed CI on a slow runner (#71).
+ */
+async function clicHabilitado(name: RegExp) {
+  const boton = screen.getByRole('button', { name }) as HTMLButtonElement;
+  await waitFor(() => assert.equal(boton.disabled, false));
+  fireEvent.click(boton);
+}
+
 describe('FacturaFila · the actions', () => {
   it('a writer downloads PDF and XML by format; a failed download says so', async () => {
     urlDescargaFactura.mockResolvedValueOnce({ ok: true, url: '/f.pdf', filename: 'factura.pdf' });
@@ -120,7 +132,7 @@ describe('FacturaFila · the actions', () => {
     assert.deepEqual(urlDescargaFactura.mock.calls, [['pi-1', 'pdf']]);
 
     urlDescargaFactura.mockResolvedValueOnce({ ok: false, message: 'El archivo expiró.' });
-    fireEvent.click(screen.getByRole('button', { name: /Descargar XML/ }));
+    await clicHabilitado(/Descargar XML/);
     await waitFor(() => assert.ok(screen.getByText('El archivo expiró.')));
   });
 
@@ -142,7 +154,7 @@ describe('FacturaFila · the actions', () => {
     await waitFor(() => assert.ok(screen.getByText(/te la enviamos a tu correo/)));
 
     solicitarFacturaNominal.mockResolvedValueOnce({ ok: false, message: 'Ya hay una solicitud.' });
-    fireEvent.click(screen.getByRole('button', { name: /Solicitar factura a mi nombre/ }));
+    await clicHabilitado(/Solicitar factura a mi nombre/);
     await waitFor(() => assert.ok(screen.getByText('Ya hay una solicitud.')));
   });
 
