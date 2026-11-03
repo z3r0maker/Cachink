@@ -59,7 +59,7 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { AppProviders, StockLowScheduleHost } from '@xangarro/ui';
+import { AppProviders, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
@@ -84,7 +84,7 @@ function MobileStack(): ReactElement {
   );
 }
 
-export default function RootLayout(): ReactElement | null {
+export default function RootLayout(): ReactElement {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
@@ -93,27 +93,37 @@ export default function RootLayout(): ReactElement | null {
     PlusJakartaSans_800ExtraBold,
   });
   const deviceContext = useMobileDeviceContext();
-  if (!fontsLoaded) return null;
   return (
     <StrictMode>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <AppProviders
-            platform="mobile"
-            deviceContext={deviceContext}
-            activation={mobileActivationConfig}
-            overlays={
-              <>
-                <MobileScannerHost />
-                <NotificationTapHost />
-                <StockLowScheduleHost />
-              </>
-            }
-          >
-            <MobileStack />
-          </AppProviders>
+          {fontsLoaded ? <MobileApp deviceContext={deviceContext} /> : null}
+          {/* Above everything from the first frame, drawn like the native
+              splash; it fades once the first real screen is up. */}
+          <SplashAnimado />
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </StrictMode>
+  );
+}
+
+function MobileApp(props: {
+  readonly deviceContext: ReturnType<typeof useMobileDeviceContext>;
+}): ReactElement {
+  return (
+    <AppProviders
+      platform="mobile"
+      deviceContext={props.deviceContext}
+      activation={mobileActivationConfig}
+      overlays={
+        <>
+          <MobileScannerHost />
+          <NotificationTapHost />
+          <StockLowScheduleHost />
+        </>
+      }
+    >
+      <MobileStack />
+    </AppProviders>
   );
 }
