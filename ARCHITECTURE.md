@@ -167,6 +167,7 @@ Links to discussion, docs, prior art.
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
 | [132](#adr-132) | 2026-10-31 | Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout | Accepted |
+| [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9357,3 +9358,120 @@ deleted by nobody (`0049_billing_cancel_76bis.sql`).
   unit suites over Stripe fakes.
 - Not in this round: self-service account deletion (its own retention ADR),
   the 30-day notice for price increases, and the landing's footer.
+
+## ADR-134
+
+**Title:** Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table
+
+**Date:** 2026-11-03
+
+**Status:** Accepted — owner decision of 2026-11-03 («Yes, via sync»); amends contract §8 (a fourth HYBRID table), Track M's «no product management on the phone» (a photo is capture, not management) and ADR-083 D3's bucket (the same mechanism can carry receipt photos later); tasks C-24, B-19, M-13, P-42
+
+**Context**
+
+A product's visual is two strings: a Lucide icon name (`icono`) and one of eight tints
+(`colorFondo`). The owner wants the real product on the tile, captured on the phone where the
+product is in hand, and explicitly not «the traditional upload»: no file dialog, no crop handles,
+no progress bar. The portal shows the photo; it does not take one for now.
+
+Three facts of the codebase shape the design:
+
+1. **The sync carries JSON rows only.** A pushed row is capped at 16 KB (`MAX_PUSH_ROW_BYTES`),
+   a body at 2 MB, a snapshot page at 1.9 MB. Bytes cannot ride the `products` row.
+2. **Products are HYBRID: a phone inserts, never updates.** Attaching a photo to an existing
+   product is, naively, an update the server refuses (`HYBRID_UPDATE_FORBIDDEN`).
+3. **There is no object storage.** Supabase Storage was ruled out (N-19: its REST needs a JWT our
+   auth never mints); ADR-127 keeps files as `bytea` behind a `BlobStore` port with Azure Blob as
+   the destination after about twenty clients. ADR-083 D3 planned a bucket for receipt photos and
+   nothing was built.
+
+On the device side, both platforms already ship the segmentation this needs, free and offline:
+Apple Vision's `VNGenerateForegroundInstanceMaskRequest` (iOS 17, the model ships with the OS)
+and ML Kit Subject Segmentation on Android (API 24, a one-time ~5 MB model from Play services,
+about 200 ms on a mid-range phone). The four npm wrappers around them are each ~200 lines of
+Swift and Kotlin with no maintenance record (one unpublished since 2024, one at v0.1.0 with no
+history, one whose README admits iOS is unverified). Models we would ship ourselves are worse for
+this market: RMBG-2.0 is non-commercial, BiRefNet is 40 MB or more in the binary and slow on the
+Android phones most emprendedores carry. `@shopify/react-native-skia`, already a dependency,
+encodes WebP with alpha on both platforms.
+
+**Decision**
+
+1. **The photo is a row, not a file.** A new table `product_images` — `id` (ULID), `businessId`,
+   `productId`, `deviceId` (who took it; `null` from the portal), `mime` (`image/webp` only),
+   `bytes` (base64 text on the wire and in SQLite, `bytea` in Postgres), `width`, `height`,
+   `createdAt`. **`bytes = null` is the tombstone**: «Quitar foto» inserts one. The domain entity
+   is `ProductImage` in `packages/domain`; `products` gains no column.
+2. **Append-only, HYBRID.** `product_images` joins `HYBRID_TABLES` beside `inventory_movements`:
+   phones and the portal insert, nobody updates or deletes a row. Replacing a photo is a new row.
+   This sidesteps the hybrid-update ban without touching it, and rides the outbox, the
+   entitlement auth, the pull and the snapshot as they are. The row limit for this table is
+   **64 KB** (`maxPushRowBytes`), its own entry beside `auditorias_inventario`.
+3. **The newest row per product wins**, by `createdAt` then `id` (ULIDs order by time). Two
+   phones photographing the same product within the same second is the only conflict and either
+   photo is right, so nothing is surfaced; this is a deliberate, written carve-out from «never
+   silently merge», confined to this table. Superseded rows are purged server-side 30 days after
+   they are superseded and on the device as soon as a newer one is applied.
+4. **Capture is two taps.** The tile's camera affordance opens `expo-camera` with a square guide;
+   one shot; the subject lifts off the background onto the product's tint (the «lift» motion of
+   `docs/design/el-mostrador.md` §6), and «Listo» saves it. A gallery pick sits behind a long
+   press as the secondary path. No crop UI: the mask's bounding box is the crop.
+5. **Segmentation is ours, on-device, with a fallback that never blocks.** An Expo module in
+   `apps/mobile/modules/subject-lift` (Swift over Vision, Kotlin over ML Kit) returns a PNG cutout
+   cropped to the subject's bounding box, at most 1024 px, and `lifted: boolean`. iOS 16, Android
+   without Play services, a model not yet downloaded, or no subject found → `lifted: false` and a
+   centred square crop of the plain photo. The Android model is requested at app start
+   (`ModuleInstallClient`), so the first capture does not wait for it.
+6. **One asset, 512 px, WebP.** Skia draws the cutout into a 512 × 512 transparent canvas with an
+   8 % margin and encodes WebP at quality 80, stepping down to 70 and 60 until the bytes are
+   under 40 KB (base64 ≈ 55 KB, under the row limit). No thumbnails: a tile is drawn at 120 pt
+   and 512 px covers 4× density. A 4 MB camera JPEG becomes about 30 KB.
+7. **Rendering.** The phone's `ProductoIcono` draws the photo on the tint when the product has
+   one, from a `data:` URI; the icon stays the fallback. The portal serves the newest row from
+   `GET /api/productos/[productId]/imagen` inside `withTenant`, with an ETag of the bytes' hash,
+   and draws it in the catalogue rows and the product sheet; the sheet offers «Quitar foto». The
+   web caja keeps icons until its own sync learns the table (out of scope here).
+8. **The bytes stay behind the ADR-127 port.** `bytea` now; when the tenant data moves to Azure
+   Blob the Postgres side becomes a reference and the wire does not change — the device never
+   learns where the cloud keeps the bytes.
+
+**Alternatives considered**
+
+- *A separate media endpoint and a second outbox* (ADR-083 D3's shape): the path that scales to
+  Azure Blob first and would serve receipt photos too, but it needs a second auth path, a lazy
+  download cache on every phone and a key on the product row (a hybrid update) before one photo
+  shows. Rejected for now; it remains the shape to grow into if a tenant's catalogue outgrows
+  the snapshot (see consequences).
+- *Base64 in the `products` row*: zero new tables, but every pull of a product carries its image,
+  a product edit from the portal re-sends it, and a phone still cannot attach a photo to an
+  existing product. Rejected.
+- *A shipped segmentation model* (RMBG-2.0, BiRefNet via ExecuTorch or ONNX): licence and binary
+  size, above. Rejected.
+- *An npm wrapper*: the same 200 lines, without a maintainer. Rejected; the code lives in the app.
+- *Portal upload with in-browser removal* (`@imgly/background-removal`, a 40–80 MB model
+  download per browser): deferred; the owner wants the phone first.
+
+**Consequences**
+
+- A 1,000-photo catalogue adds about 30 MB to the tenant and about 25 pages to a snapshot
+  activation (the snapshot sends only the newest row per product). Incremental pulls carry only
+  new photos. If a tenant ever outgrows that, the move is to lazy fetch by id over the same
+  table, not a new shape.
+- The export includes the photos: the data is never held hostage (ADR-053 §5).
+- Capture works offline end to end; the only download is Android's segmentation model, once.
+- `expo-camera`'s permission string must name product photos, not only barcodes.
+- Track M's «no product management on the phone» is narrowed: creating a product and giving it
+  a photo are capture; editing its name, price or icon is still the portal's.
+- A new SQLite migration (triggers into the change log), a Postgres migration with RLS, a snapshot
+  section after `products`, and the mock server all learn one table — each with its migration
+  and conformance test, per CLAUDE.md §2.9.
+
+**References**
+
+- Apple Vision `VNGenerateForegroundInstanceMaskRequest` (iOS 17); ML Kit Subject Segmentation
+  (`play-services-mlkit-subject-segmentation:16.0.0-beta1`, API 24).
+- ADR-053 §5 (data never held hostage), ADR-081 (HYBRID insert-only precedent), ADR-083 D3
+  (receipt photos), ADR-103/ADR-128 (what a spec that writes must do), ADR-117 (El Mostrador:
+  the capture boards go on the canvas first), ADR-121 (snapshot paging), ADR-127 (`BlobStore`
+  port, Azure Blob later).
+- C-24, B-19, M-13, P-42 in `docs/plan/`.

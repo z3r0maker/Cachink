@@ -21,16 +21,16 @@ listas de abajo.
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1031`
 - **X-01** Entorno de staging (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1011`
-- **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:332`
+- **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:336`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
 - **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:888`
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1291`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1302`
 - **X-07** Masters de marca + derivados (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1322`
+- **B-19** `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) (Colas de tracks) — destraba 1: P-42 · `03-backend.md:344`
 - **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
 - **N-19** Logo + color de marca `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
-- **N-26** Auditoría de seguridad `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:735`
 
 ## Bloquea producción (24)
 
@@ -72,21 +72,22 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (103)
+## Código y técnico (106)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (7)
+### Teléfono (8)
 
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + color de marca `[LAUNCH]` — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [ ] `⛔ bloquea prod` `Alta` **N-22** Banners de sincronización en la app `[LAUNCH]` — Bloqueada por: A-06, A-07 · `09-next-features.md:654`
 - [ ] `⛔ bloquea prod` `Alta` **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
+- [ ] `Media` **M-13** Foto del producto: dos toques, sin fondo, 512 px (ADR-134). · `19-movil-mostrador.md:47`
 - [~] **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: N-20 (hecho) · web half landed 2026-09-20 · Falta: solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. [LAUNCH] · `09-next-features.md:621`
 - [ ] **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
 - [ ] En la app «Desvincular y borrar los datos de este dispositivo» (el aviso §7 hoy reconoce que · `../launch/production-readiness.md:63`
 
-### Portal (12)
+### Portal (13)
 
 - [ ] `Alta` **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) — Bloqueada por: — · `04-portal.md:1639`
 - [~] `⛔ bloquea prod` `Alta` **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` — Bloqueada por: N-02, N-08, B-14 · Falta: sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
@@ -96,6 +97,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **P-28** Diagnóstico + estrategia — «Próximamente» en producción — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [~] `Media` **P-30** Runtime de generación del Asesor — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
 - [ ] `Media` **P-38** Don Cuentas explica una diferencia de caja — Bloqueada por: — · `04-portal.md:1891`
+- [ ] `Media` **P-42** La foto del producto en el catálogo y en la ficha (ADR-134) — Bloqueada por: B-19 · `04-portal.md:1946`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
 - [ ] `Baja` **P-40** Primer diagnóstico gratis a los 90 días — Bloqueada por: P-28 · `04-portal.md:1925`
@@ -107,7 +109,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 ### Pagos y conciliación (12)
 
-- [ ] `Media` **C-13** API de intenciones de pago — Disparador: que N-40 decida avanzar · `02-contracts.md:332`
+- [ ] `Media` **C-13** API de intenciones de pago — Disparador: que N-40 decida avanzar · `02-contracts.md:336`
 - [ ] `Media` **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? · `09-next-features.md:1031`
 - [ ] `Media` **N-41** Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago — Bloqueada por: N-75, ADR-109 · `09-next-features.md:1047`
 - [ ] `Media` **N-43** Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago — Bloqueada por: N-41 · `09-next-features.md:1055`
@@ -157,12 +159,13 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:813`
 - [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:907`
 
-### Backend, sync y datos (6)
+### Backend, sync y datos (7)
 
-- [ ] `Media` **C-21** Interruptores de apagado en la sincronización · `02-contracts.md:503`
+- [ ] `Media` **C-21** Interruptores de apagado en la sincronización · `02-contracts.md:507`
 - [ ] `Baja` **N-47** Anuncios a todos los inquilinos — Disparador: la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción. · `09-next-features.md:1156`
 - [ ] `Baja` **N-48** Ciclo de vida de cuentas inactivas (ADR-064) — Disparador: lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes). · `09-next-features.md:1162`
 - [ ] `Baja` **N-69** Ciclo de vida de flags y despliegue porcentual — Bloqueada por: N-09 · Disparador: N-09 `[x]`. · `09-next-features.md:1354`
+- [ ] **B-19** `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) — Bloqueada por: C-24 · `03-backend.md:344`
 - [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:134`
 - [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:135`
 
@@ -355,9 +358,9 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 ## Por archivo
 
-- `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 21 hechos)
-- `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
-- `04-portal.md` — 11 abiertos (3 en curso, 1 bloqueados, 30 hechos)
+- `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 22 hechos)
+- `03-backend.md` — 2 abiertos (1 en curso, 0 bloqueados, 17 hechos)
+- `04-portal.md` — 12 abiertos (3 en curso, 1 bloqueados, 30 hechos)
 - `05-app.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 18 hechos)
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 2 hechos)
@@ -366,6 +369,6 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `11-pre-launch-and-deferred.md` — 26 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 11 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 11 hechos)
 - `20-command-center.md` — 26 abiertos (2 en curso, 0 bloqueados, 5 hechos)
 - `../launch/production-readiness.md` — 38 abiertos (7 en curso, 0 bloqueados, 15 hechos)
