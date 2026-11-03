@@ -9,6 +9,7 @@ import {
   ConversionRecetaSchema,
   EmployeeSchema,
   InventoryMovementSchema,
+  ProductImageSchema,
   MensajeOperadorSchema,
   OpeningBalanceClientSchema,
   OpeningBalanceSchema,
@@ -106,6 +107,8 @@ export const ReferenceTablesSchema = z.object({
   opening_balance_clients: z.array(wireSchema(OpeningBalanceClientSchema)).default([]),
   /** Every phone's and the portal's movements: stock is their sum (ADR-081). */
   inventory_movements: z.array(wireSchema(InventoryMovementSchema)).default([]),
+  /** Product photos, newest row per product wins (ADR-134); default [] for old servers. */
+  product_images: z.array(wireSchema(ProductImageSchema)).default([]),
   /** Tenant layer only; the device resolves platform × plan itself. */
   feature_flags: z.record(z.string(), z.boolean()),
   /**
