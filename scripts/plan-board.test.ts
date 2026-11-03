@@ -257,3 +257,56 @@ describe('the committed board', () => {
     for (const i of open) assert.doesNotThrow(() => kindOf(i), `${i.id ?? i.title}`);
   });
 });
+
+describe('etiquetas de estructura', () => {
+  const uno = (track: string): Item => {
+    const [item] = parseTrack('09-next-features.md', track);
+    return item as Item;
+  };
+
+  it('las lee con y sin comillas invertidas', () => {
+    // El pase de traducción de 2026-10 se las quitó. Mientras el patrón las
+    // exigió, 88 renglones del tablero imprimieron `[critica]` como título.
+    assert.deepEqual(uno('### T-1 Título `[critica]` `[bloq]`\n\n- [ ] Status\n').tags, [
+      'critica',
+      'bloq',
+    ]);
+    assert.deepEqual(uno('### T-1 Título [critica] [bloq]\n\n- [ ] Status\n').tags, [
+      'critica',
+      'bloq',
+    ]);
+  });
+
+  it('nunca las deja dentro del título', () => {
+    for (const forma of ['`[alta]`', '[alta]']) {
+      assert.equal(
+        uno(`### T-1 Entorno de staging ${forma}\n\n- [ ] Status\n`).title,
+        'Entorno de staging',
+      );
+    }
+  });
+
+  it('tampoco dentro de «Blocked by», que se lee de la línea cruda', () => {
+    // N-24 imprimía «… las fases restantes del track del `[alta]` `[bloq]`».
+    const it1 = uno(
+      '### T-1 Título\n\n- [ ] Status · **Blocked by:** M-10 y M-11 `[alta]` `[bloq]`\n',
+    );
+    assert.equal(it1.blockedBy, 'M-10 y M-11');
+    assert.deepEqual(it1.tags, ['alta', 'bloq']);
+  });
+
+  it('deja en paz a `[LAUNCH]`, que sí se muestra', () => {
+    // Es la fase de lanzamiento que `plan-board-kinds.ts` conserva a propósito.
+    const it1 = uno('### T-1 Auditoría `[LAUNCH]` `[alta]`\n\n- [ ] Status\n');
+    assert.equal(it1.title, 'Auditoría `[LAUNCH]`');
+    assert.deepEqual(it1.tags, ['alta']);
+  });
+
+  it('el tablero publicado no imprime ninguna', () => {
+    const board = readFileSync(join(ROOT, BOARD), 'utf8');
+    const sueltas = board
+      .split('\n')
+      .filter((l) => l.startsWith('- [') && /\[(critica|alta|media|baja|bloq)\]/.test(l));
+    assert.deepEqual(sueltas, [], `renglones con etiqueta impresa: ${sueltas.length}`);
+  });
+});

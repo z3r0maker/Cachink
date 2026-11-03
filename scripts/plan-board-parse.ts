@@ -64,7 +64,16 @@ function field(text: string, name: string): string | null {
  * `plan-board-areas.ts` looks for an area, `plan-board-prioridad.ts` for a
  * priority or `bloq`. An unknown tag falls through to both and changes nothing.
  */
-const TAG = /\s*`\[([a-záéíóúñ]+)\]`/gu;
+/**
+ * Las etiquetas de estructura, con o sin comillas invertidas. El pase de
+ * traducción de 2026-10 se las quitó, y como el patrón las exigía, 88
+ * renglones del tablero empezaron a imprimir `[critica]` o `[bloq]` como si
+ * fueran parte del título. El vocabulario va enumerado a propósito: `[LAUNCH]`
+ * **no** está, porque esa sí se muestra (es la fase de lanzamiento que
+ * `plan-board-kinds.ts` conserva).
+ */
+const TAG =
+  /\s*`?\[(critica|alta|media|baja|bloq|producto|deuda|papeleo|legal|infra|tiendas|terceros|lanzamiento)\]`?/gu;
 
 export function splitTags(text: string): { tags: string[]; rest: string } {
   const tags = [...text.matchAll(TAG)].map((m) => m[1] as string);
@@ -119,6 +128,11 @@ function fromTaskLine(
 }
 
 /** The Status line plus everything indented under it (continuation lines and nested bullets). */
+/**
+ * Las etiquetas también se quitan de la nota, no sólo del título: una que
+ * quedó al final de un «Blocked by» salía impresa dentro de ese campo, porque
+ * `field()` lee la línea cruda y no la que `splitTags` ya limpió.
+ */
 function gatherNote(lines: readonly string[], from: number): string {
   let note = lines[from] ?? '';
   for (let i = from + 1; i < lines.length; i += 1) {
@@ -130,7 +144,7 @@ function gatherNote(lines: readonly string[], from: number): string {
     if (!NESTED.test(ln)) break;
     note += ` ${ln.trim().replace(/^- /, '')}`;
   }
-  return note;
+  return splitTags(note).rest;
 }
 
 /** Every item in one file, done ones included; `source` is the label the board prints. */
