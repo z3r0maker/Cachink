@@ -27,6 +27,10 @@ export const EMPRESA_ICONS: Readonly<Record<EmpresaEntryId, string>> = {
 
 export const SEARCH_ICON = 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm9 2-3.5-3.5';
 
+/** The phone's «Menú» and its close (CD-19). */
+export const MENU_ICON = 'M4 7h16M4 12h16M4 17h16';
+export const CLOSE_ICON = 'M6 6l12 12M18 6 6 18';
+
 export function Icon({ d, size = 18 }: { readonly d: string; readonly size?: number }) {
   return (
     <svg
