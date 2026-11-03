@@ -100,6 +100,11 @@ export interface BillingGateway {
     request: SpeiRequest,
   ): Promise<{ readonly subscription: SubscriptionFacts; readonly hostedInvoiceUrl: string }>;
   cancelSubscription(subscriptionId: string): Promise<void>;
+  /**
+   * End the subscription when its paid period ends (`true`), or take that
+   * back (`false`); returns the subscription as Stripe now says it is.
+   */
+  setCancelAtPeriodEnd(subscriptionId: string, cancel: boolean): Promise<SubscriptionFacts>;
   createPortalSession(customerId: string, returnUrl: string): Promise<string>;
   retrieveSubscription(subscriptionId: string): Promise<SubscriptionFacts>;
 }

@@ -80,17 +80,28 @@
 
 ## 4. Suscripciones (LFPC art. 76 Bis VIII–IX, en vigor 2025-12-13)
 
-- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción. `[critica]` `[bloq]` **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
-      directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
-      plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
-      «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
-      copy, the confirmation and the edge cases (already cancelled, past due).
-- [ ] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de cancelación en un clic
-      cancel link (tokenised).
-- [ ] Pantalla de consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa.
+- [x] **BLOQUEANTE — Cancelar en un clic** desde Mi negocio › Plan y pagos. `[critica]` `[bloq]` **Done 2026-10-31
+      (ADR-132, `feat/billing-cancelar-76bis`):** «Cancelar suscripción» is one tap that sets
+      `cancel_at_period_end` in Stripe, with a folio'd acuse (`billing_cancellations`) and a
+      confirmation email; «Seguir con mi plan» undoes it until the period ends. Replaces «¿Quieres
+      pausar tu suscripción?». Decided 2026-09-26 (owner): in-app, not a Customer Portal deep link.
+- [x] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de
+      cancelación en un clic. **Done 2026-10-31 (ADR-132):** `/api/cron/renewal-emails`, daily, from
+      the sixth día hábil before each charge, monthly included, with a SPEI variant; the single-use
+      link opens `/cancelar`, which cancels on the tap, never on open.
+- [x] Consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa. **Done
+      2026-10-31 (ADR-132):** a required «Acepto…» box inside Stripe Checkout with the total with IVA,
+      the cadence and how to cancel; the webhook copies it to `billing_consents` with
+      `TERMINOS_VERSION`.
+- [ ] **Operador — set the Términos URL in Stripe's Dashboard** (Settings › Public details →
+      `https://xangarro.mx/terminos`) in test and live mode. Until it is set, Stripe refuses the
+      Checkout consent and no paid Checkout opens (ADR-132).
 - [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
-- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout).
+- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Progress
+      2026-10-31: Checkout shows the domicilio and the quejas address under the pay button
+      (`PROVEEDOR`, ADR-132). Open: the landing, and the phone number, which does not exist yet.
 - [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
+      Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`).
 
 ## 5. Tiendas de apps
 

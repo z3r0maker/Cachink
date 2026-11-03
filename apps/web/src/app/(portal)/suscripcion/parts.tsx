@@ -2,11 +2,9 @@
 
 import { Don } from '@/components';
 import type { AsesorTier } from '@/data/planes';
-import { administrarSuscripcion } from '@/server/billing/actions';
 import { useSession } from '@/session/provider';
 import { PLAN_NOMBRE } from '@xangarro/domain';
 
-import { BotonStripe } from './acciones';
 import * as a from './asesor.css';
 import { IconoCheck } from './iconos';
 import * as p from './planes.css';
@@ -52,29 +50,6 @@ export function AsesorBlock({ tiers }: { readonly tiers: readonly AsesorTier[] }
           <AsesorTierCard key={t.name} t={t} tuyo={t.name === tuyo} />
         ))}
       </div>
-    </section>
-  );
-}
-
-export function PauseRow() {
-  return (
-    <section className={s.pausa} aria-labelledby="pausa-t">
-      <span className={s.pausaTexto}>
-        <h2 id="pausa-t" className={s.pausaTitulo}>
-          ¿Quieres pausar tu suscripción?
-        </h2>
-        <span className={s.nota}>
-          Bajas a Xangarrito y conservas tus registros. Vuelves cuando quieras.
-        </span>
-      </span>
-      <span>
-        {/* Pausing is a cancel in Stripe's Customer Portal; the plan ends at period end. */}
-        <BotonStripe
-          estilo="peligro"
-          label="Cambiar a Xangarrito"
-          accion={() => administrarSuscripcion()}
-        />
-      </span>
     </section>
   );
 }

@@ -7,6 +7,7 @@ import type {
 import type Stripe from 'stripe';
 
 import { CatalogMissingError, findIvaRate, findPrice } from './catalog';
+import { checkoutConsent } from './checkout-consent';
 import { subscriptionFacts } from './stripe-mapping';
 
 /**
@@ -21,6 +22,8 @@ import { subscriptionFacts } from './stripe-mapping';
  * - Every line carries the 16 % IVA tax rate; prices are tax-exclusive.
  * - Every subscription carries `metadata.business_id`, which is how the
  *   webhook finds its tenant.
+ * - Checkout asks for the recurring-charge consent (`checkout-consent.ts`),
+ *   and cancelling ends the subscription at the period's end (LFPC 76 Bis).
  */
 async function priceAndTax(stripe: Stripe, key: string): Promise<{ price: string; tax: string }> {
   const [price, tax] = await Promise.all([findPrice(stripe, key), findIvaRate(stripe)]);
@@ -52,6 +55,7 @@ function checkoutParams(
           }),
     },
     metadata,
+    ...checkoutConsent(r.lookupKey),
     locale: 'es',
     success_url: r.successUrl,
     cancel_url: r.cancelUrl,
@@ -113,6 +117,11 @@ export function stripeGateway(stripe: Stripe): BillingGateway {
     createSpeiSubscription: (r: SpeiRequest) => createSpei(stripe, r),
     async cancelSubscription(id: string) {
       await stripe.subscriptions.cancel(id);
+    },
+    async setCancelAtPeriodEnd(id: string, cancel: boolean) {
+      return subscriptionFacts(
+        await stripe.subscriptions.update(id, { cancel_at_period_end: cancel }),
+      );
     },
     async createPortalSession(customer: string, returnUrl: string) {
       const session = await stripe.billingPortal.sessions.create({

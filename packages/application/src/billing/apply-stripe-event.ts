@@ -33,6 +33,8 @@ import type {
   StripeEventLedger,
 } from './ports.js';
 import { noopPaymentFailed } from './ports.js';
+import type { ConsentLedger } from './consent.js';
+import type { CheckoutCompleted } from './events.js';
 import { recordFrom } from './record.js';
 import { entitlementFromBilling } from './entitlement.js';
 import type { BillingTrigger } from './status.js';
@@ -63,6 +65,8 @@ export interface ApplyStripeEventDeps {
   /** The owner's payment-failed email (B-14); optional so unrelated tests skip it. */
   readonly paymentFailures?: PaymentFailedListener;
   readonly entitlements: EntitlementListener;
+  /** Where the Checkout consent is copied (LFPC 76 Bis); optional so unrelated tests skip it. */
+  readonly consents?: ConsentLedger;
   readonly now: () => Date;
 }
 
@@ -103,6 +107,7 @@ export class ApplyStripeEventUseCase {
       if (event.businessId !== null && event.customerId !== null) {
         await this.#rememberCustomer(event.businessId, event.customerId);
       }
+      await this.#rememberConsent(event);
       if (event.subscriptionId === null) return { outcome: 'ignored', reason: 'NO_SUBSCRIPTION' };
       return this.#sync(event.subscriptionId, 'sync', event.businessId);
     }
@@ -127,6 +132,18 @@ export class ApplyStripeEventUseCase {
       customerId: event.customerId,
       refundId,
       amountRefundedCentavos,
+    });
+  }
+
+  async #rememberConsent(event: CheckoutCompleted): Promise<void> {
+    const { consents } = this.#deps;
+    const { businessId, checkoutSessionId, termsAcceptedAt } = event;
+    if (!consents || !businessId || !checkoutSessionId || !termsAcceptedAt) return;
+    await consents.recordTerms({
+      checkoutSessionId,
+      businessId,
+      stripeSubscriptionId: event.subscriptionId,
+      acceptedAt: termsAcceptedAt,
     });
   }
 

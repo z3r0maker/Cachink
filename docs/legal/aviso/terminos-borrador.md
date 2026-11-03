@@ -118,8 +118,9 @@ Consumidor.
   de cada renovación automática, indicando la fecha y el monto, **con un enlace para cancelar en un
   clic desde el propio correo**. **Puedes cancelar sin penalización** en ese plazo.
 - **Cancelación inmediata.** Puedes cancelar **en cualquier momento** desde el portal, en
-  **Configuración → Suscripción**, sin llamadas, sin trámites y sin tener que escribirnos. Cancelar
-  nunca será más difícil que suscribirse.
+  **Mi negocio › Plan y pagos**, con un solo botón, sin llamadas, sin trámites y sin tener que
+  escribirnos. Cancelar nunca será más difícil que suscribirse. Te mandamos un comprobante con folio
+  a tu correo.
 - **Efecto de la cancelación.** Conservas el servicio hasta el final del periodo que ya pagaste; no se
   renueva después. Puedes exportar todos tus datos antes o después (sección 10).
 - Si cambias de plan a media suscripción, el ajuste se calcula de forma proporcional.
