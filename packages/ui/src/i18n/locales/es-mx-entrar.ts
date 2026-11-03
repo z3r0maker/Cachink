@@ -10,6 +10,8 @@ export const entrar = {
   vincular: {
     sinConectar: 'Sin conectar',
     don: 'Esta caja todavía no está conectada. Vamos a conectarla.',
+    borradoTitulo: 'Listo, se borraron los datos',
+    borradoCuerpo: 'Este teléfono ya no guarda nada del negocio.',
     eyebrow: 'Una sola vez · te toma un minuto',
     escanearTitulo: 'Escanea el código del dueño',
     escanearCuerpo:

@@ -526,9 +526,24 @@ export const esMX = {
     portalHint: 'Operadores y productos se administran desde la cuenta del negocio.',
     unlink: 'Desvincular esta caja',
     unlinkConfirmTitle: '¿Desvincular esta caja?',
-    unlinkConfirmBody:
-      'Tus registros se quedan guardados aquí. Para volver a usarla necesitarás conectarla de nuevo con un código nuevo.',
+    unlinkConfirmBody: 'Elige qué pasa con lo que está guardado en este teléfono.',
     unlinkConfirm: 'Desvincular',
+    unlinkSolo: 'Solo desvincular',
+    unlinkSoloDetalle:
+      'Los registros se quedan en este teléfono. Si la vuelves a conectar, se envía lo pendiente.',
+    unlinkBorrar: 'Desvincular y borrar',
+    unlinkBorrarDetalle:
+      'Se borran de este teléfono las ventas, los gastos, los turnos, el catálogo y los NIP. En el portal no se borra nada.',
+    unlinkTodoEnviado: 'Todo está enviado al portal. No se pierde nada.',
+    unlinkSinEnviar:
+      'Registros sin enviar: {{count}}. Si borras ahora, se pierden: envíalos primero.',
+    unlinkEnviarAhora: 'Enviar ahora',
+    unlinkEnviando: 'Enviando…',
+    unlinkVerNoEnviados: 'Ver no enviados',
+    unlinkCancelar: 'Cancelar',
+    unlinkBorrandoTitulo: 'Borrando los datos de esta caja',
+    unlinkBorrandoCuerpo: 'Tarda unos segundos. No cierres la app.',
+    unlinkBorrarFallo: 'No se pudieron borrar los datos. Intenta de nuevo.',
     sincronizacion: 'Sincronización',
     estado: 'Estado',
     noEnviados: 'Ver {{count}} no enviados',

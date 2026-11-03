@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import { Btn, Eyebrow, MText, PathIcon } from '../../components/index';
+import { Btn, Eyebrow, MText, NotaTono, PathIcon } from '../../components/index';
 import { DonBurbuja } from '../../components/Don/don-burbuja';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
@@ -22,6 +22,8 @@ export interface VincularEscanearProps {
   /** False while the confirm sheet is open. */
   readonly leyendo: boolean;
   readonly onEscribir: () => void;
+  /** Right after «Desvincular y borrar» (MvDesvincularBorrar «Listo»). */
+  readonly borrado?: boolean;
 }
 
 function Encabezado(): ReactElement {
@@ -39,12 +41,26 @@ function Encabezado(): ReactElement {
   );
 }
 
+/** Right after «Desvincular y borrar»: the phone is empty (MvDesvincularBorrar «Listo»). */
+function AvisoBorrado(): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <NotaTono
+      tono="verde"
+      titulo={t('entrar.vincular.borradoTitulo')}
+      cuerpo={t('entrar.vincular.borradoCuerpo')}
+      testID="vincular-borrado"
+    />
+  );
+}
+
 export function VincularEscanear(props: VincularEscanearProps): ReactElement {
   const { t } = useTranslation();
   return (
     <View flex={1}>
       <CabezaMarca />
       <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 14, gap: 14 }}>
+        {props.borrado ? <AvisoBorrado /> : null}
         <DonBurbuja pose="senalando" size={80}>
           <MText size="body" weight="extraBold">
             {t('entrar.vincular.don')}

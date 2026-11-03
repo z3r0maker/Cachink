@@ -20,6 +20,8 @@ import { SettingsSyncSection } from './settings-sync-section';
 export interface SettingsScreenProps {
   readonly device: DeviceSettings;
   readonly onOpenRejected: () => void;
+  /** Restarts the app after «Desvincular y borrar» (the mobile shell's). */
+  readonly restartApp?: () => void;
   /** Dev-only tools (reset database). */
   readonly footer?: ReactNode;
   readonly testID?: string;
@@ -34,7 +36,7 @@ export function SettingsScreen(props: SettingsScreenProps): ReactElement {
       contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 32 }}
     >
       <SectionTitle title={t('settings.hubTitle')} />
-      <SettingsAccountSection />
+      <SettingsAccountSection onOpenRejected={props.onOpenRejected} restartApp={props.restartApp} />
       <SettingsSyncSection onOpenRejected={props.onOpenRejected} />
       <SettingsDeviceSection device={props.device} />
       <SettingsPrivacySection />
