@@ -48,11 +48,13 @@ env:
 - assertVisible: '.*Desvincular esta caja.*'
 - tapOn:
     id: 'settings-unlink'
-# The confirm dialog asks before anything is forgotten (ConfirmDialog,
-# confirm-dialog-confirm).
+# The sheet asks first (desvincular-sheet.tsx). «Solo desvincular» is the
+# chosen card: the records stay; settings-borrar.yaml covers the wipe.
 - assertVisible: '.*¿Desvincular esta caja?.*'
+- assertVisible:
+    id: 'option-card-solo'
 - tapOn:
-    id: 'confirm-dialog-confirm'
+    id: 'unlink-confirm'
 # Unlinking drops the activation record: the gate shows Vincular again
 # (gated-navigation.tsx: not activated → ActivationScreen).
 - extendedWaitUntil:

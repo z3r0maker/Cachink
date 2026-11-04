@@ -57,7 +57,8 @@ Las decisiones de negocio que tomes con la información de Xangarro son tuyas.
 - Respecto de los datos personales que tú capturas (tus clientes, tus operadores), **tú eres el
   responsable y Xangarro es el encargado**. Las reglas están en el **Anexo A**.
 - Si desvinculas o revocas un dispositivo, los datos ya descargados pueden permanecer en él hasta que
-  lo borres. Lo explicamos en el Aviso de Privacidad.
+  lo borres. En la app puedes borrarlos al desvincular («Desvincular y borrar»). Lo explicamos en el
+  Aviso de Privacidad.
 
 ## 5. Uso permitido y prohibido
 

@@ -205,8 +205,10 @@ el plan**.
 - [ ] `[nuevo]` Calendario de retención por tabla y log (SEC-PRIV-01 lo pide): soporte, ARCO,
       `staff_audit_log`, `bug-report` (90 días, SEC-FN-01), importaciones (30 días, fila 18), logs de
       Vercel, respaldos.
-- [ ] `[nuevo]` Decisión sobre respaldos del teléfono (SEC-MOB-02) y "revocar y borrar" en el
-      dispositivo: el aviso hoy dice que desvincular no borra.
+- [~] `[nuevo]` Decisión sobre respaldos del teléfono (SEC-MOB-02) y "revocar y borrar" en el
+      dispositivo. Hecho 2026-11-03: «Desvincular y borrar» en Ajustes de la app (espera a que no
+      quede nada sin enviar), y el aviso §7 y los términos §4 ya lo dicen. Falta: los respaldos del
+      sistema (iCloud, Android) y borrar cuando el dueño revoca desde el portal.
 
 ### Encargado y proveedores
 

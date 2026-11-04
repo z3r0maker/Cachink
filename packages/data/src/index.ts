@@ -3,3 +3,4 @@ export * from './schema/index.js';
 export * from './hardware/index.js';
 export * from './sync-state.js';
 export * from './migrator/index.js';
+export * from './wipe-local-data.js';
