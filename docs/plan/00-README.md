@@ -75,10 +75,27 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 - If you discover a needed task that isn't here, add it at the **end** of the track with the next
   number and note which task surfaced it.
 - Contract changes: update `02-contracts.md` first, then the tasks that depend on it.
-- **The board is generated.** `PENDIENTES.md` (three lists: Lanzamiento · Post-lanzamiento · Colas
-  de tracks) is written by `pnpm plan:board` from these checkbox lines (and the `| O-n |` rows of `11-pre-launch-and-deferred.md`). Never edit it by hand: change the
-  track, regenerate, commit both. `pnpm test:scripts` fails while it is stale. Its «Siguiente» list is
-  the work order — derived from **Blocked by** / **Blocks** (ready tasks first, ranked by what they
+- **Every open task carries a priority**, as a tag on its heading (`### N-26 Título [alta] [bloq]`)
+  or, when it has no heading, at the start of its own line right after the checkbox
+  (`- [ ] [media] Plantilla de aviso …`). Four levels, and `pnpm test:scripts` fails while any open
+  task lacks one — the point is that nobody has to guess, so pick the level when you write the task:
+  - `[critica]` — producción no sale sin esto, o ya está roto en producción hoy.
+  - `[alta]` — bloquea el lanzamiento, o destraba a varias otras.
+  - `[media]` — se necesita poco después de salir, o su disparador ya es cierto.
+  - `[baja]` — opcional, aplazada, o su disparador está lejos.
+
+  Add `[bloq]` on top when **production cannot go live while this is open** — illegal or
+  non-compliant, a known high security or data-loss exposure, or a user-visible function that simply
+  does not work. It is a judgement, not a rule over the text: no document calls `CRON_SECRET` a
+  BLOCKER, and without it the trial emails, the nightly usage recount and the monthly CFDI close have
+  never run. The tags never reach the board's prose — the parser strips them and prints a badge — so a
+  level written mid-sentence is a level nobody sees; keep them where this bullet says.
+
+- **The board is generated.** `PENDIENTES.md` is written by `pnpm plan:board` from these checkbox
+  lines (and the `| O-n |` rows of `11-pre-launch-and-deferred.md`): «Bloquea producción» first, then
+  four lists by kind of work — who has to act. Never edit it by hand: change the track, regenerate,
+  commit both. `pnpm test:scripts` fails while it is stale. Its «Siguiente» list is the work
+  order — derived from **Blocked by** / **Blocks** (ready tasks first, ranked by what they
   unblock), so keep those two fields accurate: they are what orders the board.
 
 ---

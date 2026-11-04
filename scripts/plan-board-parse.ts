@@ -49,6 +49,15 @@ const OWNER_ROW = /^\| (O-\d+)\s*\|([^|]*)\|/;
 const NESTED = /^\s{2,}\S/;
 const TITLE_MAX = 110;
 
+/**
+ * Un renglón de la tabla del dueño cerrado dice `**Done` o `**Hecho`: las dos
+ * formas existen porque el pase de traducción de 2026-10 dejó las viejas en
+ * inglés y escribió las nuevas en español. Mientras el detector fue solo
+ * inglés, O-4, O-5, O-6 y O-13 siguieron contando como abiertos cinco semanas
+ * después de haberse verificado y cerrado.
+ */
+const CERRADO = /\*\*(Done|Hecho)\b/u;
+
 /** `name` is a regex fragment, so a dated label like `Remaining (2026-09-23)` still matches. */
 function field(text: string, name: string): string | null {
   // Stops at the next bold field (`· **Blocks:**` or a bare `**Blocked by:**` on a continuation line).
@@ -123,7 +132,7 @@ function fromTaskLine(
 ): Omit<Item, 'source' | 'line'> {
   const status = MARKS[mark] ?? 'open';
   const { tags: propias, rest } = splitTags(text);
-  const { id, title, tags } = identify(cursor, rest);
+  const { id, title, tags } = identify(cursor, rest.trim());
   return {
     tags: [...propias, ...tags],
     id,
@@ -201,7 +210,7 @@ function ownerRow(
     tags,
     id: row[1] ?? null,
     title: clean(rest),
-    status: raw.includes('**Done') ? 'done' : 'open',
+    status: CERRADO.test(raw) ? 'done' : 'open',
     section,
     trigger: null,
     blockedBy: null,
