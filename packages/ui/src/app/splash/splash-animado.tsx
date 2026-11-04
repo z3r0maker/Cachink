@@ -8,7 +8,15 @@
  * crossfade. E2E runs skip it, as they skip the floating coins.
  */
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, Easing, Image, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Image,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type ImageSourcePropType,
+} from 'react-native';
 import exclamacionPng from '../../assets/splash/exclamacion.png';
 import fondoPng from '../../assets/splash/fondo.png';
 import monedaPng from '../../assets/splash/moneda.png';
@@ -48,16 +56,24 @@ function useCiclo(reducido: boolean): Animated.Value {
   return t;
 }
 
-/** Counts from mount; leaves at `momentoDeSalida`, or at the cap regardless. */
-function useSalida(reducido: boolean): { salida: Animated.Value; visible: boolean } {
+/**
+ * Counts from the first painted frame (`desde`), so the exit lands at the end
+ * of a flip; leaves at `momentoDeSalida`, or at the cap regardless. Until the
+ * background paints, only the cap applies, counted from mount.
+ */
+function useSalida(
+  reducido: boolean,
+  desde: number | null,
+): { salida: Animated.Value; visible: boolean } {
   const listo = useArranque((s) => s.listo);
-  const inicio = useRef(Date.now()).current;
+  const montado = useRef(Date.now()).current;
   const salida = useRef(new Animated.Value(0)).current;
   const [visible, setVisible] = useState(true);
   const yendo = useRef(false);
   useEffect(() => {
+    const inicio = desde ?? montado;
     const transcurrido = Date.now() - inicio;
-    const cuando = listo ? momentoDeSalida(transcurrido, reducido) : TOPE_MS;
+    const cuando = listo && desde !== null ? momentoDeSalida(transcurrido, reducido) : TOPE_MS;
     const id = setTimeout(
       () => {
         if (yendo.current) return;
@@ -72,8 +88,47 @@ function useSalida(reducido: boolean): { salida: Animated.Value; visible: boolea
       Math.max(0, cuando - transcurrido),
     );
     return () => clearTimeout(id);
-  }, [listo, reducido, inicio, salida]);
+  }, [listo, reducido, desde, montado, salida]);
   return { salida, visible };
+}
+
+/**
+ * When the background first painted. The flip waits for it, so the first frame
+ * on screen is the still splash the phone just showed.
+ */
+function usePintado(): [number | null, () => void] {
+  const [pintadoEn, setPintadoEn] = useState<number | null>(null);
+  return [pintadoEn, () => setPintadoEn((v) => v ?? Date.now())];
+}
+
+type Caja = ReturnType<typeof aPantalla>;
+
+/**
+ * A moving layer in its own flat wrapper. As direct siblings of the
+ * background, iOS depth-sorts them against it and hides whatever turns behind
+ * its plane (half the coin mid-flip, the coplanar «!»). `collapsable={false}`
+ * keeps React Native from flattening the wrapper away.
+ */
+function CapaMovil(props: {
+  box: Caja;
+  source: ImageSourcePropType;
+  transform: ReturnType<typeof moverMoneda> | ReturnType<typeof moverExclamacion>;
+  origen?: string;
+}): ReactElement {
+  const { box } = props;
+  return (
+    <View collapsable={false} style={[styles.abs, box]}>
+      <Animated.Image
+        source={props.source}
+        style={{
+          width: box.width,
+          height: box.height,
+          transformOrigin: props.origen,
+          transform: props.transform,
+        }}
+      />
+    </View>
+  );
 }
 
 function moverMoneda(t: Animated.Value, escala: number) {
@@ -112,11 +167,14 @@ function moverExclamacion(t: Animated.Value, escala: number) {
 export function SplashAnimado(): ReactElement | null {
   const reducido = useReducedMotion();
   const pantalla = useWindowDimensions();
-  const t = useCiclo(reducido);
-  const { salida, visible } = useSalida(reducido);
+  const [pintadoEn, pintado] = usePintado();
+  const t = useCiclo(reducido || pintadoEn === null);
+  const { salida, visible } = useSalida(reducido, pintadoEn);
   if (IS_E2E || !visible) return null;
   const escala = Math.max(pantalla.width / LIENZO.w, pantalla.height / LIENZO.h);
   const fondo = aPantalla({ x: 0, y: 0, ...LIENZO }, pantalla);
+  const moneda = aPantalla(MONEDA, pantalla);
+  const exclamacion = aPantalla(EXCLAMACION, pantalla);
   const opacity = salida.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
   const scale = salida.interpolate({ inputRange: [0, 1], outputRange: [1, reducido ? 1 : 1.06] });
   return (
@@ -127,18 +185,13 @@ export function SplashAnimado(): ReactElement | null {
       importantForAccessibility="no-hide-descendants"
       style={[StyleSheet.absoluteFill, styles.capa, { opacity, transform: [{ scale }] }]}
     >
-      <Image source={fondoPng} style={[styles.abs, fondo]} />
-      <Animated.Image
-        source={monedaPng}
-        style={[styles.abs, aPantalla(MONEDA, pantalla), { transform: moverMoneda(t, escala) }]}
-      />
-      <Animated.Image
+      <Image source={fondoPng} style={[styles.abs, fondo]} onLoad={pintado} onError={pintado} />
+      <CapaMovil box={moneda} source={monedaPng} transform={moverMoneda(t, escala)} />
+      <CapaMovil
+        box={exclamacion}
         source={exclamacionPng}
-        style={[
-          styles.abs,
-          aPantalla(EXCLAMACION, pantalla),
-          { transformOrigin: '50% 90%', transform: moverExclamacion(t, escala) },
-        ]}
+        transform={moverExclamacion(t, escala)}
+        origen="50% 90%"
       />
     </Animated.View>
   );
