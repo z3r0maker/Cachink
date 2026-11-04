@@ -9517,6 +9517,7 @@ encodes WebP with alpha on both platforms.
   the capture boards go on the canvas first), ADR-121 (snapshot paging), ADR-127 (`BlobStore`
   port, Azure Blob later).
 - C-24, B-19, M-13, P-42 in `docs/plan/`.
+
 ## ADR-135
 
 **Title:** «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy

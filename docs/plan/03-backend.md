@@ -339,22 +339,22 @@
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.
 
-### B-19 `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) [media]
+### B-19 The product photo's image route and the purge of superseded rows (ADR-134) [media]
 
 - [ ] Status · **Blocked by:** C-24 · **Blocks:** P-42
-- **Files:** `packages/data-pg/drizzle/00NN_product_images.sql` + `src/schema/catalog.ts`
-  (`product_images`: `bytes bytea` nullable, `mime` CHECK `= 'image/webp'`,
-  `octet_length(bytes) <= 49152`, `width`/`height` ≤ 512, index `(business_id, product_id,
-created_at desc, id desc)`, RLS as `inventory_movements`); `src/sync/tables.ts`
-  (`SYNCED_TABLES.product_images`), the wire↔row mapping (base64 ↔ bytea, parsed never
-  asserted — §2.8), the snapshot pager's section (newest row per product, `DISTINCT ON`);
-  `src/queries/product-images.ts` (`latestProductImage(tx, productId)`, `purgeSupersededImages
-(tx, olderThanDays = 30)`); `apps/web/src/app/api/productos/[productId]/imagen/route.ts`
-  (`withTenant`, newest row, 404 on none or tombstone, ETag = sha256 of the bytes, private
-  `Cache-Control`); a cron or the existing maintenance entry point for the purge.
-- **Steps:** migration + migration test (old → new data: products without images still
-  activate); integration test that builds two images and a tombstone for one product and asserts
-  which one the route and the snapshot return; purge test (a superseded row older than 30 days
-  goes, the newest never does, a tombstone stays until superseded).
+- **Context:** C-24 already shipped the Postgres half: migration `0050_product_images.sql` (CHECKs
+  for WebP, `octet_length(bytes) <= 40960` and sizes up to 512, RLS, append-only grants), the
+  `productImages` table with its base64 ↔ `bytea` column type, `SYNCED_TABLES.product_images`,
+  the snapshot section and the queries `newestPhotoIds`, `newestProductImages` and
+  `latestProductImage`. What is left is serving the photo and keeping the table small.
+- **Files:** `apps/web/src/app/api/productos/[productId]/imagen/route.ts` (`withTenant`,
+  `latestProductImage`, 404 on none or tombstone, ETag = sha256 of the bytes, private
+  `Cache-Control`); `packages/data-pg/src/queries/product-images.ts` gains
+  `purgeSupersededImages(tx, olderThanDays = 30)`, run from a cron or the existing maintenance
+  entry point (it needs a role that may DELETE, since `xangarro_app` may not); the seed gains one
+  product with a photo.
+- **Steps:** integration test for the purge (a superseded row older than 30 days goes, the newest
+  never does, a tombstone stays until superseded); route test that builds two photos and a
+  tombstone for one product and asserts what the route returns for each state.
 - **Acceptance:** `pnpm --filter @xangarro/data-pg test` green; `db:reset` seeds one product
   with a photo so the Playwright sentinel of P-42 has data to find.
