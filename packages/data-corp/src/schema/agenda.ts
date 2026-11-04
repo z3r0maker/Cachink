@@ -15,10 +15,24 @@ import { at, bytea, corp } from './corp.js';
 import { entries } from './ledger.js';
 
 /**
- * The Agenda and its evidence (E-04, E-05's storage; ADR-126). Files live
- * here as bytea, not in a storage bucket, so `pg_dump -n corp` still carries
- * every acuse when the area moves to its own database (ADR-124 §2).
+ * The Agenda and its evidence (E-04, E-05; ADR-127). A document's bytes sit
+ * behind the `BlobStore` port (E-26): `storage` says which store holds them
+ * and `blob_key` where. The Postgres store is `corp.blobs`, so until the move
+ * to Azure `pg_dump -n corp` still carries every acuse (ADR-125 §2).
  */
+
+/** The Postgres `BlobStore` (E-26): bytes by key, written once, never changed. */
+export const blobs = corp.table(
+  'blobs',
+  {
+    key: text('key').primaryKey(),
+    content: bytea('content').notNull(),
+  },
+  (t) => [
+    // The console's request cap (4.5 MB) bounds what reaches this store.
+    check('blobs_size_check', sql`octet_length(${t.content}) BETWEEN 1 AND 4194304`),
+  ],
+);
 
 /** MEXIA itself: one row. E-06 adds its registries. */
 export const company = corp.table(
@@ -88,9 +102,11 @@ export const documents = corp.table(
     filename: text('filename').notNull(),
     mime: text('mime').notNull(),
     sizeBytes: integer('size_bytes').notNull(),
-    /** Hex SHA-256 of `content`. */
+    /** Hex SHA-256 of the file, checked again whenever it moves between stores. */
     sha256: text('sha256').notNull(),
-    content: bytea('content').notNull(),
+    /** Which `BlobStore` holds the bytes: `pg` (`corp.blobs`) or `azure`. */
+    storage: text('storage', { enum: ['pg', 'azure'] }).notNull(),
+    blobKey: text('blob_key').notNull().unique(),
     obligationId: text('obligation_id').references(() => obligations.id),
     entryId: text('entry_id').references(() => entries.id),
     retainUntil: date('retain_until', { mode: 'string' }).notNull(),
@@ -112,10 +128,9 @@ export const documents = corp.table(
       sql`${t.period} IS NULL OR ${t.period} ~ '^[0-9]{4}(-(0[1-9]|1[0-2]))?$'`,
     ),
     check('documents_title_check', sql`length(trim(${t.title})) > 0`),
-    check(
-      'documents_size_check',
-      sql`${t.sizeBytes} > 0 AND ${t.sizeBytes} <= 4194304 AND octet_length(${t.content}) = ${t.sizeBytes}`,
-    ),
+    check('documents_storage_check', sql`${t.storage} IN ('pg', 'azure')`),
+    // 25 MiB: the largest file a browser may send straight to Azure (E-26).
+    check('documents_size_check', sql`${t.sizeBytes} > 0 AND ${t.sizeBytes} <= 26214400`),
     check('documents_sha256_check', sql`${t.sha256} ~ '^[0-9a-f]{64}$'`),
   ],
 );

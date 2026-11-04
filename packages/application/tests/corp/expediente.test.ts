@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { ArchivoInvalidoError, historial } from '@xangarro/domain/corp';
+import {
+  ArchivoInvalidoError,
+  historial,
+  MAX_BYTES_DIRECTO,
+  MAX_BYTES_EVIDENCIA,
+} from '@xangarro/domain/corp';
 
 import {
   DocumentoDesconocidoError,
@@ -90,6 +95,57 @@ describe('subirDocumento', () => {
     );
     await assert.rejects(
       subirDocumento(d, { ...base, archivo: { ...pdf('x'), mime: 'application/zip' } }),
+      ArchivoInvalidoError,
+    );
+  });
+});
+
+describe('the store behind the repository sets the size limit (E-26)', () => {
+  const grande = (bytes: number) => ({
+    nombre: 'deck.pdf',
+    mime: 'application/pdf',
+    contenido: new Uint8Array(bytes),
+  });
+
+  it('takes a 20 MB file when the store receives direct uploads', async () => {
+    const d = { ...deps(), documentos: new FakeDocumentos(MAX_BYTES_DIRECTO) };
+    const doc = await subirDocumento(d, { ...base, archivo: grande(20 * 1024 * 1024) });
+    assert.equal(doc.tamano, 20 * 1024 * 1024);
+  });
+
+  it('refuses the same file on the Postgres store, and files nothing', async () => {
+    const d = deps();
+    await assert.rejects(
+      subirDocumento(d, { ...base, archivo: grande(MAX_BYTES_EVIDENCIA + 1) }),
+      /4 MB/,
+    );
+    assert.equal(d.documentos.docs.length, 0);
+  });
+
+  it('applies the limit to a new version and to an obligation’s evidence too', async () => {
+    const d = deps();
+    const v1 = await subirDocumento(d, { ...base, archivo: pdf('v1') });
+    await assert.rejects(
+      subirVersion(d, {
+        documentoId: v1.id,
+        archivo: grande(MAX_BYTES_EVIDENCIA + 1),
+        hoy: '2026-10-09',
+        founderId: 'f1',
+      }),
+      ArchivoInvalidoError,
+    );
+    await assert.rejects(
+      subirEvidencia(
+        { agenda: new FakeAgenda(), documentos: d.documentos, sha256: d.sha256 },
+        {
+          plantillaId: 'isr_mensual',
+          periodo: '2026-09',
+          tipo: 'otro',
+          ...grande(MAX_BYTES_EVIDENCIA + 1),
+          hoy: '2026-10-08',
+          founderId: 'f1',
+        },
+      ),
       ArchivoInvalidoError,
     );
   });

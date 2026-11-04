@@ -16,6 +16,8 @@ export function buildCsp(o: {
   readonly blobs?: boolean;
   readonly workers?: boolean;
   readonly formAction?: readonly string[];
+  /** Origins the page may fetch from besides its own (the console's blob store, E-26). */
+  readonly connect?: readonly string[];
   readonly reportUri?: string;
 }): string;
 export function newNonce(): string;

@@ -1,5 +1,12 @@
 import { style } from '@vanilla-extract/css';
-import { fontSizes, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
+import {
+  cajaBreakpoints,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 import { line, monoStack, t } from '@/styles/theme.css';
 
@@ -7,7 +14,12 @@ import { line, monoStack, t } from '@/styles/theme.css';
  * «Torre de Control» — the console's frame: a dark rail on the left, the
  * status bar across the top, and the work area. The frame carries `torreDark`,
  * so everything inside it reads the dark roles.
+ *
+ * Under El Mostrador's phone edge (§10, the caja's `rail`) the rail gives its
+ * width back: a top bar and a menu take over (`mobile-nav.tsx`, CD-19).
  */
+
+export const PHONE = `screen and (max-width: ${cajaBreakpoints.rail - 1}px)`;
 
 export const frame = style({
   display: 'grid',
@@ -15,6 +27,7 @@ export const frame = style({
   minHeight: '100vh',
   background: t.bg,
   color: t.body,
+  '@media': { [PHONE]: { display: 'block' } },
 });
 
 export const aside = style({
@@ -27,6 +40,7 @@ export const aside = style({
   padding: '20px 14px',
   borderRight: line.thin,
   background: t.bg,
+  '@media': { [PHONE]: { display: 'none' } },
 });
 
 export const brand = style({ display: 'flex', flexDirection: 'column', gap: 4, padding: '0 6px' });
@@ -127,6 +141,7 @@ export const status = style({
   color: t.dim,
   overflowX: 'auto',
   whiteSpace: 'nowrap',
+  '@media': { [PHONE]: { position: 'static', padding: '0 16px' } },
 });
 
 export const env = style({
@@ -144,7 +159,12 @@ export const reading = style({ display: 'inline-flex', alignItems: 'center', gap
 
 export const clock = style({ marginLeft: 'auto', color: t.body });
 
-export const main = style({ flex: 1, minWidth: 0, padding: '22px 24px 32px' });
+export const main = style({
+  flex: 1,
+  minWidth: 0,
+  padding: '22px 24px 32px',
+  '@media': { [PHONE]: { padding: '20px 16px 24px' } },
+});
 
 const ledBase = {
   display: 'inline-block',

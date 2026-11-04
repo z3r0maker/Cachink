@@ -72,6 +72,19 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 | `scrim` | `rgba(13, 13, 13, 0.45)` | `--scrim` |
 | `yellowRule` | `#DBB80A` | `--yellow-rule` |
 
+**Paleta de datos** (`dataviz`, ADR-133): charts only; yellow and black never encode data.
+
+| Token | Value |
+| --- | --- |
+| `ingreso` | `#1BAF7A` |
+| `restante` | `#2A78D6` |
+| `perdida` | `#E34948` |
+| `impuesto` | `#8A8984` |
+| `costoServicio` | `#EB6834` |
+| `ventasMarketing` | `#4A3AA7` |
+| `desarrollo` | `#008300` |
+| `administracion` | `#E87BA4` |
+
 ## 4. Shape
 
 **Radii** — the strict ladder, nothing else: 8, 10, 12, 14, 16, 18, 20, 22; plus the dense steps 11 and 13 (ADR-076).

@@ -1,6 +1,7 @@
 import { CARPETAS, type Carpeta } from '@xangarro/domain/corp';
 import Link from 'next/link';
 
+import { limiteMb } from '@/server/blobs';
 import type { FilaDocumento, Historial } from '@/server/empresa/expediente-view';
 import * as a from '@/styles/mostrador-agenda.css';
 import * as d from '@/styles/mostrador-data.css';
@@ -116,7 +117,7 @@ export function PanelHistorial({ h }: { readonly h: Historial }) {
         ))}
       </div>
       <span className={a.authority}>Se conserva hasta {h.conservaHasta} · CFF art. 30</span>
-      <NuevaVersionForm documentoId={h.vigenteId} />
+      <NuevaVersionForm documentoId={h.vigenteId} limiteMb={limiteMb()} />
     </section>
   );
 }

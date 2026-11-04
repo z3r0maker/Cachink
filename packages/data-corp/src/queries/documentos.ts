@@ -1,4 +1,10 @@
-import type { DocumentoMeta, DocumentRepository, NuevoDocumento } from '@xangarro/application/corp';
+import type {
+  Almacen,
+  BlobStore,
+  DocumentoMeta,
+  DocumentRepository,
+  NuevoDocumento,
+} from '@xangarro/application/corp';
 import { newUlid } from '@xangarro/domain';
 import { isCarpeta, isTipoEvidencia } from '@xangarro/domain/corp';
 import { asc, eq, inArray } from 'drizzle-orm';
@@ -7,9 +13,10 @@ import type { CorpDb } from '../client.js';
 import { documents } from '../schema/agenda.js';
 
 /**
- * The Expediente's storage (E-05, ADR-126): every kept file and its
- * metadata. Rows are parsed, never asserted: an unknown kind or folder is a
- * broken row. Reads never carry the bytes except `contenidoDe`.
+ * The Expediente's storage (E-05, ADR-127): every kept file's metadata, and
+ * where its bytes are. The bytes themselves sit in a `BlobStore` (E-26).
+ * Rows are parsed, never asserted: an unknown kind, folder or store is a
+ * broken row.
  */
 const META = {
   id: documents.id,
@@ -21,6 +28,8 @@ const META = {
   mime: documents.mime,
   sizeBytes: documents.sizeBytes,
   sha256: documents.sha256,
+  storage: documents.storage,
+  blobKey: documents.blobKey,
   obligationId: documents.obligationId,
   entryId: documents.entryId,
   retainUntil: documents.retainUntil,
@@ -31,11 +40,16 @@ const META = {
 
 type MetaRow = Pick<typeof documents.$inferSelect, keyof typeof META>;
 
+const isAlmacen = (s: string): s is Almacen => s === 'pg' || s === 'azure';
+
 function toMeta(r: MetaRow): DocumentoMeta {
   if (!isTipoEvidencia(r.kind)) throw new Error(`corp document ${r.id} has kind ${r.kind}`);
   if (!isCarpeta(r.folder)) throw new Error(`corp document ${r.id} has folder ${r.folder}`);
+  if (!isAlmacen(r.storage)) throw new Error(`corp document ${r.id} has storage ${r.storage}`);
   return {
     id: r.id,
+    almacen: r.storage,
+    blobKey: r.blobKey,
     tipo: r.kind,
     carpeta: r.folder,
     titulo: r.title,
@@ -53,11 +67,14 @@ function toMeta(r: MetaRow): DocumentoMeta {
   };
 }
 
-async function guardar(db: CorpDb, doc: NuevoDocumento): Promise<DocumentoMeta> {
+/** The bytes first, then the row: a row never points at a missing file. */
+async function guardar(db: CorpDb, store: BlobStore, doc: NuevoDocumento): Promise<DocumentoMeta> {
+  const id = newUlid();
+  await store.guardar(id, doc.contenido, doc.mime);
   const rows = await db
     .insert(documents)
     .values({
-      id: newUlid(),
+      id,
       kind: doc.tipo,
       folder: doc.carpeta,
       title: doc.titulo,
@@ -66,7 +83,8 @@ async function guardar(db: CorpDb, doc: NuevoDocumento): Promise<DocumentoMeta> 
       mime: doc.mime,
       sizeBytes: doc.contenido.byteLength,
       sha256: doc.sha256,
-      content: Buffer.from(doc.contenido),
+      storage: store.almacen,
+      blobKey: id,
       obligationId: doc.obligacionId,
       entryId: doc.entryId,
       retainUntil: doc.retenerHasta,
@@ -80,9 +98,11 @@ async function guardar(db: CorpDb, doc: NuevoDocumento): Promise<DocumentoMeta> 
   return toMeta(row);
 }
 
-export function createDocumentRepository(db: CorpDb): DocumentRepository {
+/** `store` is where new files go; existing ones stay where their row says. */
+export function createDocumentRepository(db: CorpDb, store: BlobStore): DocumentRepository {
   return {
-    guardar: (doc) => guardar(db, doc),
+    maxBytes: store.maxBytes,
+    guardar: (doc) => guardar(db, store, doc),
     porObligacion: async (id) => (await documentosDe(db, [id])).get(id) ?? [],
     async porId(id) {
       const rows = await db.select(META).from(documents).where(eq(documents.id, id)).limit(1);
@@ -151,18 +171,4 @@ export async function documentosDelMovimiento(
     .where(eq(documents.entryId, entryId))
     .orderBy(asc(documents.uploadedAt));
   return vigentesDe(rows.map(toMeta));
-}
-
-/** A document's bytes, for «Ver». */
-export async function contenidoDe(
-  db: CorpDb,
-  id: string,
-): Promise<{ readonly meta: DocumentoMeta; readonly contenido: Buffer } | null> {
-  const rows = await db
-    .select({ ...META, content: documents.content })
-    .from(documents)
-    .where(eq(documents.id, id))
-    .limit(1);
-  const r = rows[0];
-  return r === undefined ? null : { meta: toMeta(r), contenido: r.content };
 }

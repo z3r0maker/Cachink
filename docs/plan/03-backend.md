@@ -339,7 +339,7 @@
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.
 
-### B-19 `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134)
+### B-19 `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) [media]
 
 - [ ] Status · **Blocked by:** C-24 · **Blocks:** P-42
 - **Files:** `packages/data-pg/drizzle/00NN_product_images.sql` + `src/schema/catalog.ts`

@@ -9,11 +9,14 @@ import { ActivationScreen } from '../screens/Activation/index';
 import { useActivate } from '../activation/use-activate';
 import { useActivationState } from '../activation/use-activation-state';
 import { useAvisoBorrado } from '../activation/use-aviso-borrado';
+import { useMarcarArranqueListo } from './splash/arranque';
 
 export function ActivationGate(props: { readonly children: ReactNode }): ReactElement | null {
   const { record } = useActivationState();
   const activate = useActivate();
   const borrado = useAvisoBorrado();
+  // Not linked: the connect screen is the first real screen, the splash may go.
+  useMarcarArranqueListo(record === null);
   if (record === undefined) return null;
   if (record !== null) return <>{props.children}</>;
   return (

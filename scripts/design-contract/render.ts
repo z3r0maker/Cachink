@@ -10,6 +10,7 @@
 import {
   borders,
   colors,
+  dataviz,
   emojiSizes,
   fontSizes,
   portalFontSizes,
@@ -73,7 +74,19 @@ function prohibitions(): readonly string[] {
 }
 
 function colour(): readonly string[] {
-  return ['## 3. Color', '', table(colourRows(), ['Token', 'Value', 'CSS custom property']), ''];
+  return [
+    '## 3. Color',
+    '',
+    table(colourRows(), ['Token', 'Value', 'CSS custom property']),
+    '',
+    '**Paleta de datos** (`dataviz`, ADR-133): charts only; yellow and black never encode data.',
+    '',
+    table(
+      Object.entries(dataviz).map(([name, value]) => [`\`${name}\``, `\`${value}\``]),
+      ['Token', 'Value'],
+    ),
+    '',
+  ];
 }
 
 function shape(): readonly string[] {
