@@ -28,7 +28,7 @@ listas de abajo.
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1302`
 - **X-07** Masters de marca + derivados (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1322`
-- **B-19** `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) (Colas de tracks) — destraba 1: P-42 · `03-backend.md:344`
+- **B-19** The product photo's image route and the purge of superseded rows (ADR-134) (Colas de tracks) — destraba 1: P-42 · `03-backend.md:344`
 - **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
 - **N-19** Logo + color de marca `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
 
@@ -178,7 +178,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 ### Backend, sync y datos (7)
 
 - [ ] `Media` **C-21** Interruptores de apagado en la sincronización · `02-contracts.md:507`
-- [ ] `Media` **B-19** `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) — Bloqueada por: C-24 · `03-backend.md:344`
+- [ ] `Media` **B-19** The product photo's image route and the purge of superseded rows (ADR-134) — Bloqueada por: C-24 · `03-backend.md:344`
 - [ ] `Media` `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). · `../launch/production-readiness.md:138`
 - [ ] `Media` Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… · `../launch/production-readiness.md:139`
 - [ ] `Baja` **N-47** Anuncios a todos los inquilinos — Disparador: la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción. · `09-next-features.md:1156`
