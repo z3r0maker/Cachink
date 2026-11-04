@@ -27,6 +27,13 @@ import {
   subirCinco,
 } from './empresa-facturas';
 import {
+  DISENADOR,
+  fijarEstadoSat,
+  HOSTING,
+  MENSAJERIA,
+  registrarParaConsultar,
+} from './empresa-sat';
+import {
   E2E_RECURRENTE,
   mesesDePrueba,
   registrarGastoEnDolares,
@@ -546,4 +553,57 @@ test('on a phone the rail folds into «Menú» and no Empresa page scrolls sidew
   await expect(enMenu('Resumen')).toHaveAttribute('aria-current', 'page');
   await page.keyboard.press('Escape');
   await expect(menu(page)).toBeHidden();
+});
+
+test('a founder asks the SAT again, and cancels the invoice it says was cancelled', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  await page.getByRole('link', { name: 'Facturas', exact: true }).click();
+  const uuids = await registrarParaConsultar(page);
+  await fijarEstadoSat(uuids.hosting, 'sin_verificar');
+  await fijarEstadoSat(uuids.disenador, 'cancelado');
+  await page.reload();
+
+  // No answer again: it stays unverified and says why, in place (board CD-06g).
+  await expect(fila(page, MENSAJERIA.nombre)).toContainText('Sin verificar');
+  await page
+    .getByRole('button', { name: `Consultar al SAT la factura de ${MENSAJERIA.nombre}` })
+    .click();
+  await expect(fila(page, MENSAJERIA.nombre).getByRole('alert')).toHaveText(
+    'El SAT no respondió. Intenta en unos minutos.',
+  );
+
+  // It answers «vigente»: the row says so, today.
+  await page
+    .getByRole('button', { name: `Consultar al SAT la factura de ${HOSTING.nombre}` })
+    .click();
+  await expect(page).toHaveURL(/consultada=/);
+  await expect(fila(page, HOSTING.nombre)).toContainText('VigenteEl SAT la confirmó hoy');
+  await expect(fila(page, MENSAJERIA.nombre)).not.toContainText('El SAT la confirmó hoy');
+
+  // The supplier cancelled one still owed: a warning, and nothing reversed until a founder confirms.
+  await expect(fila(page, DISENADOR.nombre)).toContainText('Cancelada en el SAT');
+  await expect(
+    page.getByRole('button', { name: `Registrar pago a ${DISENADOR.nombre}` }),
+  ).toBeHidden();
+  const aviso = page.getByRole('alert').filter({ hasText: 'El proveedor canceló esta factura' });
+  await expect(aviso).toContainText('Su gasto de $1,000.00 y su IVA de $160.00 siguen registrados');
+  await aviso.getByRole('button', { name: `Cancelar la factura de ${DISENADOR.nombre}` }).click();
+  const cancelar = page.getByRole('form', { name: `¿Cancelar la factura de ${DISENADOR.nombre}?` });
+  await cancelar.getByRole('button', { name: 'Sí, cancelar la factura' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Factura cancelada' })).toBeVisible();
+  await expect(fila(page, DISENADOR.nombre)).toContainText('Cancelada');
+  await expect(fila(page, DISENADOR.nombre).getByRole('link', { name: 'Revertido' })).toBeVisible();
+  await expect(page.getByText('El proveedor canceló esta factura')).toBeHidden();
+
+  // A paid one is only warned about: its money did leave the bank (owner, 2026-10-31).
+  await fijarEstadoSat(uuids.hosting, 'cancelado');
+  await page.reload();
+  const pagada = page.getByRole('alert').filter({ hasText: 'Ya la pagaste' });
+  await expect(pagada).toContainText(
+    'Pide al proveedor la factura que la sustituye o el reembolso',
+  );
+  await expect(pagada.getByRole('button')).toHaveCount(0);
 });

@@ -60,6 +60,12 @@ export function createReceivedInvoiceRepository(db: CorpDb): ReceivedInvoiceRepo
     marcarRegistrada: (uuid, r) => cambiar(db, uuid, { ...r, estado: 'registrada' }),
     marcarPagada: (uuid, pagoEntryId) => cambiar(db, uuid, { pagoEntryId }),
     marcarCancelada: (uuid) => cambiar(db, uuid, { estado: 'cancelada' }),
+    marcarEstadoSat: async (uuid, estadoSat) => {
+      await db
+        .update(ri)
+        .set({ estadoSat, updatedAt: now() })
+        .where(and(eq(ri.uuid, uuid), eq(ri.estadoSat, 'sin_verificar')));
+    },
     descartar: async (uuid) => {
       await db
         .update(ri)
