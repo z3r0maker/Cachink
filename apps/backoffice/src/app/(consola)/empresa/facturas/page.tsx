@@ -12,7 +12,8 @@ import { mesesVecinos, parseMes } from '@/server/empresa/movimiento-view';
 import { requireFounderPage } from '@/server/founder';
 import * as mf from '@/styles/mostrador-facturas.css';
 import * as m from '@/styles/mostrador.css';
-import Link from 'next/link';
+
+import { EncabezadoDinero } from '../encabezado-dinero';
 
 import { Subir } from './subir';
 import { Tabla } from './tabla';
@@ -66,34 +67,12 @@ function Totales({ r, mes }: { readonly r: ResumenFacturas; readonly mes: string
   );
 }
 
-function Encabezado({ mes }: { readonly mes: string }) {
-  const { anterior, siguiente } = mesesVecinos(mes);
-  const nombre = formatMonth(mes);
-  return (
-    <header className={m.head}>
-      <div className={m.headText}>
-        <span className={m.eyebrow}>MEXIA · Empresa</span>
-        <h1 className={m.title}>Facturas</h1>
-        <p className={m.sub}>{nombre.charAt(0).toUpperCase() + nombre.slice(1)}</p>
-      </div>
-      <div className={m.row}>
-        <Link className={m.boton.quieto} href={`?mes=${anterior}`}>
-          Mes anterior
-        </Link>
-        <Link className={m.boton.quieto} href={`?mes=${siguiente}`}>
-          Mes siguiente
-        </Link>
-      </div>
-    </header>
-  );
-}
-
 /**
  * Facturas (E-11, board CD-06b): the month's received invoices with their
  * SAT status and movement, the XML drop zone, each invoice on credit still
  * owed with «Registrar pago» and «Cancelar», and «Consultar al SAT» for an
- * unverified one with the warning when the supplier cancelled it (CD-06g). The Emitidas tab waits for
- * E-10, so the screen has no tabs yet.
+ * unverified one with the warning when the supplier cancelled it (CD-06g).
+ * The Emitidas tab waits for E-10; the screen is Dinero's second tab (plan §2).
  */
 export default async function FacturasPage(props: {
   searchParams: Promise<{ mes?: string; aviso?: string; consultada?: string }>;
@@ -107,7 +86,7 @@ export default async function FacturasPage(props: {
   const filas = [...facturas.map((f) => filaFactura(f, consultada)), ...sinCfdi.map(filaSinCfdi)];
   return (
     <div className={m.page}>
-      <Encabezado mes={mes} />
+      <EncabezadoDinero actual="/empresa/facturas" mes={mes} />
       <Totales r={resumenFacturas(facturas, sinCfdi)} mes={mes} />
       <Subir />
       <section className={m.panel} aria-labelledby="lista">
