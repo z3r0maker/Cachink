@@ -242,20 +242,20 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — the 20 per-screen flows — in dependency
+now runs the M-11 curated suite — the 21 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 
-| Order | Flows                                                                             |
-| ----- | --------------------------------------------------------------------------------- |
-| 1–3   | smoke-launch, login-lockout, bloqueo                                              |
-| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar     |
-| 8–9   | gastos-registrar, gastos-pagar-recurrente                                         |
-| 10–14 | mi-turno, por-enviar, cancelaciones-nav, avisos-responder, inventario-llego-merma |
-| 15–17 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante                          |
-| 18    | settings-desvincular (leaves the device unlinked)                                 |
-| 19–20 | activation, login-operator-pin (fresh entry)                                      |
+| Order | Flows                                                                              |
+| ----- | ---------------------------------------------------------------------------------- |
+| 1–3   | smoke-launch, login-lockout, bloqueo                                               |
+| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar      |
+| 8–9   | gastos-registrar, gastos-pagar-recurrente                                          |
+| 10–14 | mi-turno, por-enviar, cancelaciones-nav, avisos-responder, inventario-llego-merma  |
+| 15–17 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante                           |
+| 18–19 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked) |
+| 20–21 | activation, login-operator-pin (fresh entry)                                       |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).

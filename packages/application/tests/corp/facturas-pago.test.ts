@@ -43,7 +43,10 @@ describe('«Registrar pago» on the day the money left the bank (board CD-06e)',
 
   it('refuses a date that is not a date', async () => {
     const d = await porPagar();
-    await assert.rejects(pagar(d, '2026-13-01'), PeriodoCerradoError);
+    // All after the invoice, so only the date itself can be refused.
+    for (const bad of ['2026-11-31', '2027-02-29', '2026-13-01']) {
+      await assert.rejects(pagar(d, bad), PeriodoCerradoError, bad);
+    }
     await assert.rejects(pagar(d, ''), FechaPagoAnteriorError);
   });
 });

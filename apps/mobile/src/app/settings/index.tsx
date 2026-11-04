@@ -1,8 +1,9 @@
 /**
- * Expo Router entry for /settings — device-only Configuración (A-12):
- * Cuenta, Sincronización, Dispositivo. Business settings live in the
+ * Expo Router entry for /settings — device-only Ajustes (A-12, MvAjustes):
+ * Esta caja, Sincronización, En este teléfono, Privacidad y términos. Business settings live in the
  * portal. This route wires the persisted device toggles, the update check,
- * the bug-report sheet and the dev-only database reset.
+ * the bug-report sheet, the restart after «Desvincular y borrar» and the
+ * dev-only database reset.
  */
 
 import { useState, type ReactElement } from 'react';
@@ -24,14 +25,8 @@ import {
 } from '@xangarro/ui';
 import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
+import { restartApp } from '../../shell/restart-app';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
-
-function reloadApp(): void {
-  // In dev, DevSettings.reload() restarts the JS bundle
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { DevSettings } = require('react-native');
-  DevSettings.reload();
-}
 
 /** Persist a device toggle, then update the in-memory store. */
 function usePersistedToggle(
@@ -85,7 +80,7 @@ function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
 const devFooter =
   typeof __DEV__ !== 'undefined' && __DEV__ ? (
     <View style={{ gap: 16 }}>
-      <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={reloadApp} />
+      <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={restartApp} />
     </View>
   ) : null;
 
@@ -100,6 +95,7 @@ export default function SettingsRoute(): ReactElement {
       <SettingsScreen
         device={device}
         onOpenRejected={() => router.push('/pendientes' as never)}
+        restartApp={restartApp}
         footer={devFooter}
       />
       <BugReportSheet

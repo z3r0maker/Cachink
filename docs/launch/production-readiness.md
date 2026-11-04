@@ -7,7 +7,7 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both now `0.2-borrador`) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both then `0.2-borrador`; the linking one is `0.3-borrador` since 2026-10-31) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
   art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
   When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
   `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
@@ -60,8 +60,12 @@
 - [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe → `[critica]` `[bloq]`
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
       creation) — see OQ-N4.
-- [ ] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
-      unlinking does not wipe).
+- [x] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
+      unlinking does not wipe). **Done 2026-11-03:** Ajustes → «Desvincular esta caja» offers
+      «Desvincular y borrar» (board MvDesvincularBorrar). It refuses while anything is unsent or
+      refused, empties every local table with `secure_delete` and `VACUUM`
+      (`packages/data/src/wipe-local-data.ts`), clears the token and restarts on the connect screen.
+      Aviso §7 and términos §4 updated. A portal revocation still does not wipe the phone.
 - [x] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day
       clock (LFPA art. 28 calendar) and acuse. **Done 2026-10-05, verified against the code:** the
       public form (`apps/web/src/app/privacidad/solicitud/page.tsx`), `solicitar-arco.ts` (folio,
@@ -80,17 +84,28 @@
 
 ## 4. Suscripciones (LFPC art. 76 Bis VIII–IX, en vigor 2025-12-13)
 
-- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción. `[critica]` `[bloq]` **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
-      directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
-      plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
-      «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
-      copy, the confirmation and the edge cases (already cancelled, past due).
-- [ ] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de cancelación en un clic
-      cancel link (tokenised).
-- [ ] Pantalla de consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa.
+- [x] **BLOQUEANTE — Cancelar en un clic** desde Mi negocio › Plan y pagos. `[critica]` `[bloq]` **Done 2026-10-31
+      (ADR-132, `feat/billing-cancelar-76bis`):** «Cancelar suscripción» is one tap that sets
+      `cancel_at_period_end` in Stripe, with a folio'd acuse (`billing_cancellations`) and a
+      confirmation email; «Seguir con mi plan» undoes it until the period ends. Replaces «¿Quieres
+      pausar tu suscripción?». Decided 2026-09-26 (owner): in-app, not a Customer Portal deep link.
+- [x] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de
+      cancelación en un clic. **Done 2026-10-31 (ADR-132):** `/api/cron/renewal-emails`, daily, from
+      the sixth día hábil before each charge, monthly included, with a SPEI variant; the single-use
+      link opens `/cancelar`, which cancels on the tap, never on open.
+- [x] Consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa. **Done
+      2026-10-31 (ADR-132):** a required «Acepto…» box inside Stripe Checkout with the total with IVA,
+      the cadence and how to cancel; the webhook copies it to `billing_consents` with
+      `TERMINOS_VERSION`.
+- [ ] **Operador — set the Términos URL in Stripe's Dashboard** (Settings › Public details →
+      `https://xangarro.mx/terminos`) in test and live mode. Until it is set, Stripe refuses the
+      Checkout consent and no paid Checkout opens (ADR-132).
 - [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
-- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout).
+- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Progress
+      2026-10-31: Checkout shows the domicilio and the quejas address under the pay button
+      (`PROVEEDOR`, ADR-132). Open: the landing, and the phone number, which does not exist yet.
 - [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
+      Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`).
 
 ## 5. Tiendas de apps
 
@@ -99,12 +114,14 @@
   `app-registration/apple/PRIVACY-LABEL.md` and `app-registration/google-play/DATA-SAFETY.md`, derived
   from the code and cross-referenced row by row. Still to do: type them into App Store Connect and Play
   Console; the manifest is merged by EAS (see PRIVACY-LABEL.md if `ITMS-91053` comes back).
-- [~] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
-  linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
-  subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
-  2026-10-29; both listings carry them. Still to do: the app shows `xangarro.mx/privacidad` only as plain
-  text in the linking notice; a tappable «Aviso de privacidad» row (Ajustes, and the linking screen) needs
-  a board first.
+- [x] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
+      linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
+      subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
+      2026-10-29; both listings carry them. Done 2026-10-31 in the app: Ajustes has «Privacidad y términos»
+      (both pages open in the browser), and the linking notice opens the aviso from a «Leer el aviso
+      completo» button instead of showing the address as text (boards MvAjustes and MvVincularAviso). The
+      notice's text changed, so `aviso-vinculacion.ts` is `0.3-borrador`; the server still hashes 0.2 for
+      phones on an older build.
 - [x] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
       Sign in with Apple/Google, deletion via the portal). **Done 2026-10-30:** `app-registration/apple/REVIEW-NOTES.md`
       and the App access text in `app-registration/google-play/README.md`.

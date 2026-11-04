@@ -22,6 +22,8 @@ export interface ActivationScreenProps {
   readonly submitting: boolean;
   /** i18n key of the current error, if any. */
   readonly errorKey?: string | null;
+  /** Right after «Desvincular y borrar»: the scan view says «Listo». */
+  readonly borrado?: boolean;
   /** The view to open on (the stories show both). */
   readonly vistaInicial?: 'escanear' | 'codigo';
   readonly testID?: string;
@@ -72,7 +74,12 @@ export function ActivationScreen(props: ActivationScreenProps): ReactElement {
           errorKey={v.errorKey}
         />
       ) : (
-        <VincularEscanear onToken={v.leer} leyendo={v.token === null} onEscribir={v.irCodigo} />
+        <VincularEscanear
+          onToken={v.leer}
+          leyendo={v.token === null}
+          onEscribir={v.irCodigo}
+          borrado={props.borrado}
+        />
       )}
       <VincularLeido
         open={v.vista === 'escanear' && v.token !== null}

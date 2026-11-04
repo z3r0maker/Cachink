@@ -5,6 +5,7 @@ import {
   AVISO_VINCULACION_VERSION,
   AvisoVigenteSchema,
   avisoVinculacionTexto,
+  avisoVinculacionTextoDe,
 } from '@xangarro/domain';
 
 import { AVISO_PARRAFOS, AVISO_VERSION, avisoTextoCanonico } from '../src/legal/aviso-simplificado';
@@ -59,6 +60,17 @@ describe('aviso shown at device linking (N-34, variante B)', () => {
       avisoVersion: AVISO_VINCULACION_VERSION,
       avisoSha256: expected,
     });
+  });
+
+  it('still hashes 0.2, so a phone on an older build keeps its record', () => {
+    const texto = avisoVinculacionTextoDe('0.2-borrador') ?? '';
+    const expected = createHash('sha256').update(texto, 'utf8').digest('hex');
+    assert.ok(texto.length > 0);
+    assert.deepEqual(avisoDeVinculacion('0.2-borrador'), {
+      avisoVersion: '0.2-borrador',
+      avisoSha256: expected,
+    });
+    assert.notEqual(expected, avisoDeVinculacion(AVISO_VINCULACION_VERSION).avisoSha256);
   });
 
   it('keeps an unknown version without inventing a hash, and nothing for an older app', () => {

@@ -813,6 +813,9 @@ importers:
       '@xangarro/application':
         specifier: workspace:*
         version: link:../application
+      '@xangarro/domain':
+        specifier: workspace:*
+        version: link:../domain
       '@xangarro/tokens':
         specifier: workspace:*
         version: link:../tokens

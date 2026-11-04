@@ -33,6 +33,8 @@ export interface OptionCardGroupProps<K extends string = string> {
   readonly label?: string;
   /** Card arrangement. `list` = vertical stack (default), `grid` = 2-column squares. */
   readonly layout?: 'list' | 'grid';
+  /** List cards show the whole description instead of one line (the unlink sheet). */
+  readonly wrap?: boolean;
   /** Forwarded to root View so E2E tests can anchor to it. */
   readonly testID?: string;
 }
@@ -42,7 +44,8 @@ const BS = 2.5;
 const BU = 2;
 
 /** Bold label over a muted one-line description. */
-function CardText({ label, description }: { label: string; description: string }): ReactElement {
+function CardText(p: { label: string; description: string; wrap?: boolean }): ReactElement {
+  const { label, description, wrap } = p;
   return (
     <View flex={1} gap={2}>
       <Text
@@ -59,7 +62,7 @@ function CardText({ label, description }: { label: string; description: string }
         fontWeight={typography.weights.regular}
         fontSize={fontSizes.xs}
         color={colors.textMuted}
-        numberOfLines={1}
+        numberOfLines={wrap ? undefined : 1}
       >
         {description}
       </Text>
@@ -71,6 +74,7 @@ function ListCard<K extends string>(p: {
   item: OptionCardItem<K>;
   selected: boolean;
   onPress: () => void;
+  wrap?: boolean;
 }): ReactElement {
   return (
     <Pressable
@@ -94,7 +98,7 @@ function ListCard<K extends string>(p: {
         backgroundColor={p.selected ? colors.yellowSoft : colors.white}
       >
         <Icon name={p.item.icon} size={24} color={colors.black} />
-        <CardText label={p.item.label} description={p.item.description} />
+        <CardText label={p.item.label} description={p.item.description} wrap={p.wrap} />
       </View>
     </Pressable>
   );
@@ -166,7 +170,6 @@ function GroupLabel({ label }: { label: string | undefined }): ReactElement | nu
 
 export function OptionCardGroup<K extends string>(props: OptionCardGroupProps<K>): ReactElement {
   const isGrid = props.layout === 'grid';
-  const Card = isGrid ? GridCard : ListCard;
 
   return (
     <View gap={8} testID={props.testID ?? 'option-card-group'}>
@@ -174,7 +177,7 @@ export function OptionCardGroup<K extends string>(props: OptionCardGroupProps<K>
       {isGrid ? (
         <View flexDirection="row" flexWrap="wrap" gap={8}>
           {props.options.map((item) => (
-            <Card
+            <GridCard
               key={item.key}
               item={item}
               selected={item.key === props.value}
@@ -184,11 +187,12 @@ export function OptionCardGroup<K extends string>(props: OptionCardGroupProps<K>
         </View>
       ) : (
         props.options.map((item) => (
-          <Card
+          <ListCard
             key={item.key}
             item={item}
             selected={item.key === props.value}
             onPress={() => tap(item, props.value, props.onChange)}
+            wrap={props.wrap}
           />
         ))
       )}

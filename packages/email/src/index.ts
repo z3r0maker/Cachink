@@ -51,3 +51,5 @@ export {
   type EmailTransport,
   type FromEnvOptions,
 } from './adapters/from-env.js';
+export { renderRenewalEmail, type RenewalEmailProps } from './templates/renewal.js';
+export { renderCancellationEmail, type CancellationEmailProps } from './templates/cancellation.js';
