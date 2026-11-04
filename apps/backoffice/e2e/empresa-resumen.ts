@@ -11,6 +11,9 @@ import { autonomiaDeHoy, heroDe } from '../src/server/empresa/resumen-hero';
 const hoy = (): string =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
 
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export async function revisarAutonomia(page: Page): Promise<void> {
   const db = createCorpDb(process.env.CORP_DATABASE_URL ?? '', 1);
   const hero = heroDe(autonomiaDeHoy(await movimientosDeCaja(db, hoy()), hoy()), hoy());
@@ -22,7 +25,7 @@ export async function revisarAutonomia(page: Page): Promise<void> {
   await expect(seccion.getByRole('heading', { level: 2 })).toHaveText(hero.titulo);
   await expect(page.getByTestId('autonomia-pie')).toHaveText(hero.pie);
   await expect(page.getByTestId('autonomia-tarjeta')).toHaveText(
-    hero.tarjetas.map((t) => new RegExp(`${t.etiqueta}${t.valor.replace('$', '\\$')}`)),
+    hero.tarjetas.map((t) => new RegExp(`${t.etiqueta}${escapeRegExp(t.valor)}`)),
   );
 }
 
