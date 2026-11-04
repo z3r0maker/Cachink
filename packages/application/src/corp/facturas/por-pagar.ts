@@ -3,8 +3,7 @@ import { gastoDeCfdi, pagoDeGasto, refPagoFactura } from '@xangarro/domain/corp'
 import type { LedgerEntry } from '../ports.js';
 import { RegistrarMovimientoUseCase } from '../registrar-movimiento.js';
 import { RevertirMovimientoUseCase } from '../revertir-movimiento.js';
-import { FacturaNoPorPagarError } from './errors.js';
-import { assertFechaDePago } from './fecha-de-pago.js';
+import { FacturaNoPorPagarError, FechaPagoAnteriorError } from './errors.js';
 import { factura, proveedor, type FacturasDeps } from './registrar.js';
 
 /**
@@ -36,16 +35,16 @@ export interface MovimientoDeFacturaInput {
 }
 
 /**
- * «Registrar pago»: the bank pays the net, withholdings are owed, the IVA
- * turns creditable, on the day the founder chose (board CD-06e).
+ * «Registrar pago» on the day the money left the bank (board CD-06e): the bank
+ * pays the net, withholdings are owed, the IVA turns creditable. Never before
+ * the invoice itself; a closed month is the ledger's to refuse.
  */
 export async function registrarPagoFactura(
   deps: FacturasDeps,
-  input: MovimientoDeFacturaInput & { readonly hoy: string },
+  input: MovimientoDeFacturaInput,
 ): Promise<LedgerEntry> {
   const { f, categoria } = await porPagar(deps, input.uuid);
-  const limites = { factura: f.cfdi.fecha, hoy: input.hoy };
-  assertFechaDePago(input.fecha, limites, await deps.ledger.closedPeriods());
+  if (input.fecha < f.cfdi.fecha.slice(0, 10)) throw new FechaPagoAnteriorError(input.fecha);
   const entry = await new RegistrarMovimientoUseCase(deps.ledger).execute({
     fecha: input.fecha,
     projectId: f.projectId,

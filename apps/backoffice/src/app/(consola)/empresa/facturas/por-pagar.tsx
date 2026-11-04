@@ -1,94 +1,91 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
-import type { FilaFactura, PorPagarDestino } from '@/server/empresa/facturas-view';
+import type { PagoFactura } from '@/server/empresa/pago-factura-view';
 import * as mf from '@/styles/mostrador-facturas.css';
-import * as p from '@/styles/mostrador-facturas-paneles.css';
 import * as d from '@/styles/mostrador-data.css';
+import * as pp from '@/styles/mostrador-por-pagar.css';
 import * as m from '@/styles/mostrador.css';
 
-import { Celdas, COLUMNAS } from './celdas';
-import { PanelCancelar, PanelPago } from './por-pagar-paneles';
+import { PanelCancelar } from './panel-cancelar';
+import { PanelPago } from './panel-pago';
 
-/**
- * An invoice on credit still owed (owner decision 9): «Registrar pago» and
- * «Cancelar» each open their panel under the row (boards CD-06e and CD-06f),
- * and «No, regresar» closes it and puts the focus back on its button.
- */
 type Abierto = 'pago' | 'cancelar' | null;
 
-interface Props {
-  readonly f: FilaFactura;
-  readonly destino: PorPagarDestino;
+export interface FilaPorPagarProps {
+  readonly pago: PagoFactura;
+  readonly proveedor: string;
+  /** The expense and its IVA, as the row shows them: what «Cancelar» reverses. */
+  readonly subtotal: string;
+  readonly iva: string;
+  /** `YYYY-MM-DD` in Mexico, the payment date offered first. */
   readonly hoy: string;
-  readonly mes: string;
+  /** The row's other cells, rendered on the server. */
+  readonly children: ReactNode;
 }
 
+/** «Por pagar», and while no panel is open, the two buttons that open one. */
 function Acciones({
   proveedor,
+  abierto,
   abrir,
-  volverA,
 }: {
   readonly proveedor: string;
-  readonly abrir: (a: 'pago' | 'cancelar') => void;
-  readonly volverA: React.RefObject<Abierto>;
+  readonly abierto: Abierto;
+  readonly abrir: (a: Abierto) => void;
 }) {
-  const enfocar = (a: Abierto) => (el: HTMLButtonElement | null) => {
-    if (el !== null && volverA.current === a) {
-      el.focus();
-      volverA.current = null;
-    }
-  };
   return (
-    <>
-      <button
-        ref={enfocar('pago')}
-        className={m.boton.primario}
-        type="button"
-        aria-label={`Registrar pago a ${proveedor}`}
-        onClick={() => abrir('pago')}
-      >
-        Registrar pago
-      </button>
-      <button
-        ref={enfocar('cancelar')}
-        className={m.boton.secundario}
-        type="button"
-        aria-label={`Cancelar la factura de ${proveedor}`}
-        onClick={() => abrir('cancelar')}
-      >
-        Cancelar
-      </button>
-    </>
+    <div className={mf.porPagar}>
+      <span className={`${m.tagBase} ${mf.tono.aviso}`}>Por pagar</span>
+      {abierto === null ? (
+        <>
+          <button
+            className={m.boton.primario}
+            type="button"
+            aria-label={`Registrar pago a ${proveedor}`}
+            onClick={() => abrir('pago')}
+          >
+            Registrar pago
+          </button>
+          <button
+            className={m.boton.secundario}
+            type="button"
+            aria-label={`Cancelar la factura de ${proveedor}`}
+            onClick={() => abrir('cancelar')}
+          >
+            Cancelar
+          </button>
+        </>
+      ) : null}
+    </div>
   );
 }
 
-export function FilaPorPagar({ f, destino, hoy, mes }: Props) {
+/**
+ * An invoice on credit still owed (owner decision 9): «Registrar pago» opens a
+ * panel under the row to pay it on a date (board CD-06e); «Cancelar» opens one
+ * that asks before reversing its expense (board CD-06f).
+ */
+export function FilaPorPagar({ children, ...p }: FilaPorPagarProps) {
   const [abierto, setAbierto] = useState<Abierto>(null);
-  const volverA = useRef<Abierto>(null);
-  const regresar = () => {
-    volverA.current = abierto;
-    setAbierto(null);
-  };
-  const panel = { destino, proveedor: f.proveedor, mes, onRegresar: regresar };
+  const onCerrar = () => setAbierto(null);
   return (
     <>
-      <tr className={abierto === null ? d.rowOpen : p.filaAbierta} data-testid="factura-recibida">
-        <Celdas f={f} />
+      <tr className={abierto === null ? undefined : pp.abierta} data-testid="factura-recibida">
+        {children}
         <td className={d.td}>
-          <div className={mf.porPagar}>
-            <span className={`${m.tagBase} ${mf.tono.aviso}`}>Por pagar</span>
-            {abierto === null ? (
-              <Acciones proveedor={f.proveedor} abrir={setAbierto} volverA={volverA} />
-            ) : null}
-          </div>
+          <Acciones proveedor={p.proveedor} abierto={abierto} abrir={setAbierto} />
         </td>
       </tr>
       {abierto === null ? null : (
-        <tr className={p.filaAbierta}>
-          <td className={p.celdaPanel} colSpan={COLUMNAS}>
-            {abierto === 'pago' ? <PanelPago {...panel} hoy={hoy} /> : <PanelCancelar {...panel} />}
+        <tr className={pp.abierta}>
+          <td className={pp.celda} colSpan={7}>
+            {abierto === 'pago' ? (
+              <PanelPago {...p} onCerrar={onCerrar} />
+            ) : (
+              <PanelCancelar {...p} onCerrar={onCerrar} />
+            )}
           </td>
         </tr>
       )}

@@ -40,11 +40,10 @@ export class FacturaNoPorPagarError extends Error {
   }
 }
 
-/** «Registrar pago» on a day the money could not have left the bank (board CD-06e). */
-export class FechaDePagoError extends Error {
-  readonly code = 'FECHA_DE_PAGO_INVALIDA' as const;
-  constructor(message: string) {
-    super(message);
-    this.name = 'FechaDePagoError';
+export class FechaPagoAnteriorError extends Error {
+  readonly code = 'FECHA_PAGO_ANTERIOR' as const;
+  constructor(readonly fecha: string) {
+    super('La fecha de pago no puede ser antes de la fecha de la factura.');
+    this.name = 'FechaPagoAnteriorError';
   }
 }

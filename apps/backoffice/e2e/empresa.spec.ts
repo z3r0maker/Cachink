@@ -12,16 +12,17 @@ import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono'
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
-import { cancelarConfirmando, pagarConFecha } from './empresa-por-pagar';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   adjuntar,
   AGENCIA,
   CONTADORA,
+  DESPACHO,
   fijarRfcMexia,
   fila,
   HONORARIOS,
   hoyMx,
+  IMPRENTA,
   registrarTres,
   subirCinco,
 } from './empresa-facturas';
@@ -287,9 +288,27 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   await expect(page.getByTestId('facturas-recibidas')).toContainText('2 por pagar: $8,700.00');
   await expect(page.getByTestId('facturas-retenciones')).toContainText('$723.33');
 
-  // Owner decision 9: the invoice on credit is paid; the other one came wrong.
-  await pagarConFecha(page);
-  await cancelarConfirmando(page);
+  // Owner decision 9: the invoice on credit is paid on a date (CD-06e); the other one came wrong
+  // and is cancelled once confirmed (CD-06f).
+  await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
+  const pago = page.getByRole('form', { name: `Registrar el pago a ${DESPACHO.nombre}` });
+  await expect(pago).toContainText('Sale del banco$4,640.00');
+  const fecha = pago.getByLabel('Fecha de pago');
+  await expect(fecha).toHaveValue(hoyMx());
+  await expect(fecha).toHaveAttribute('min', `${hoyMx().slice(0, 7)}-01`);
+  await pago.getByRole('button', { name: 'No, regresar' }).click();
+  await expect(pago).toBeHidden();
+  await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
+  await pago.getByRole('button', { name: 'Confirmar pago' }).click();
+  await expect(fila(page, DESPACHO.nombre)).toContainText('a crédito, pagada el');
+
+  await page.getByRole('button', { name: `Cancelar la factura de ${IMPRENTA.nombre}` }).click();
+  const cancelar = page.getByRole('form', { name: `¿Cancelar la factura de ${IMPRENTA.nombre}?` });
+  await expect(cancelar).toContainText('No se puede deshacer');
+  await cancelar.getByRole('button', { name: 'Sí, cancelar la factura' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Factura cancelada' })).toBeVisible();
+  await expect(fila(page, IMPRENTA.nombre)).toContainText('a crédito, cancelada el');
+  await expect(fila(page, IMPRENTA.nombre).getByRole('link', { name: 'Revertido' })).toBeVisible();
   await expect(page.getByTestId('facturas-recibidas')).toContainText('Ninguna por pagar');
 
   // The same XML again is refused, pointing at its movement; leaving the review keeps nothing.

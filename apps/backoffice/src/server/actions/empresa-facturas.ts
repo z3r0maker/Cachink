@@ -1,10 +1,8 @@
 'use server';
 
 import {
-  cancelarFactura,
   descartarRevision,
   registrarFacturas,
-  registrarPagoFactura,
   subirFacturas,
   type Seleccion,
 } from '@xangarro/application/corp';
@@ -24,8 +22,8 @@ import { field, type FormState } from './form-state';
 
 /**
  * Facturas recibidas' writes (E-11): upload XML, register what was
- * reviewed, leave the review, and pay or cancel an invoice on credit.
- * Founders only, each with its staff audit row. Nothing here deletes.
+ * reviewed and leave the review; paying or cancelling an invoice on credit
+ * is empresa-factura-por-pagar.ts. Founders only, each with its staff audit row. Nothing here deletes.
  */
 const FACTURAS = '/empresa/facturas';
 
@@ -96,46 +94,4 @@ export async function descartarRevisionAction(): Promise<FormState> {
     return failed(error, 'descartarRevision');
   }
   redirect(FACTURAS);
-}
-
-/** «Registrar pago» on the day the founder chose (board CD-06e). */
-export async function registrarPagoAction(_p: FormState, form: FormData): Promise<FormState> {
-  const uuid = field(form, 'uuid');
-  try {
-    const { founder } = await requireFounder();
-    const input = { uuid, fecha: field(form, 'fecha'), hoy: hoyEnMexico(), founderId: founder.id };
-    await auditedMutation(
-      (entry) => ({ action: 'empresa.factura_pagada', payload: { uuid, entryId: entry.id } }),
-      () => registrarPagoFactura(deps(), input),
-    );
-  } catch (error) {
-    return failed(error, 'registrarPagoFactura');
-  }
-  revalidatePath('/empresa', 'layout');
-  return { ok: true, message: 'Pago registrado.' };
-}
-
-const MES = /^\d{4}-(0[1-9]|1[0-2])$/;
-
-/** «Sí, cancelar la factura», after its confirmation (board CD-06f): reversed today. */
-export async function cancelarFacturaAction(_p: FormState, form: FormData): Promise<FormState> {
-  const uuid = field(form, 'uuid');
-  const mes = field(form, 'mes');
-  try {
-    const { founder } = await requireFounder();
-    await auditedMutation(
-      (entry) => ({ action: 'empresa.factura_cancelada', payload: { uuid, entryId: entry.id } }),
-      () =>
-        cancelarFactura(deps(), {
-          uuid,
-          fecha: hoyEnMexico(),
-          founderId: founder.id,
-          motivo: 'Factura cancelada desde Facturas',
-        }),
-    );
-  } catch (error) {
-    return failed(error, 'cancelarFactura');
-  }
-  revalidatePath('/empresa', 'layout');
-  redirect(`${FACTURAS}?${MES.test(mes) ? `mes=${mes}&` : ''}cancelada=1`);
 }

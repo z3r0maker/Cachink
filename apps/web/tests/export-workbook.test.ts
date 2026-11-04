@@ -8,6 +8,12 @@ import {
   type Column,
 } from '../src/server/export/workbook';
 
+// `loadExcelJs` imports ExcelJS lazily: about 4 s cold on its own and 8 s
+// under `pnpm test`, against the 5 s default. Loading it here puts that in
+// collection, not inside the first test's timeout; the tests below still go
+// through `loadExcelJs` and its namespace unwrap.
+await import('exceljs');
+
 /**
  * The portal's per-screen workbook (not the ten-sheet `@xangarro/ui` one):
  * one sheet, a bold header, the columns' own widths, the rows in order, and

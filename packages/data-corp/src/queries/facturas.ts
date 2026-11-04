@@ -74,10 +74,10 @@ export interface FacturaDelMes {
   readonly factura: FacturaRecibida;
   /** Its expense was reversed, by «Cancelar» or from Movimientos. */
   readonly revertida: boolean;
-  /** The day its expense was reversed, `YYYY-MM-DD`, if it was. */
-  readonly revertidaEl: string | null;
-  /** The day an invoice on credit was paid, `YYYY-MM-DD`, once it is. */
+  /** `YYYY-MM-DD` of the payment of an invoice on credit, once paid (board CD-06e). */
   readonly pagadaEl: string | null;
+  /** `YYYY-MM-DD` of the reversal of its expense (board CD-06f). */
+  readonly revertidaEl: string | null;
 }
 
 /**
@@ -92,7 +92,7 @@ export async function facturasDelMes(db: CorpDb, mes: string): Promise<readonly 
   const reversa = alias(entries, 'reversa');
   const pago = alias(entries, 'pago');
   const rows = await db
-    .select({ row: ri, reversa: reversa.id, revertidaEl: reversa.fecha, pagadaEl: pago.fecha })
+    .select({ row: ri, reversa: reversa.fecha, pago: pago.fecha })
     .from(ri)
     .leftJoin(reversa, eq(reversa.reversesEntryId, ri.entryId))
     .leftJoin(pago, eq(pago.id, ri.pagoEntryId))
@@ -107,7 +107,7 @@ export async function facturasDelMes(db: CorpDb, mes: string): Promise<readonly 
   return rows.map((r) => ({
     factura: toFactura(r.row),
     revertida: r.reversa !== null,
-    revertidaEl: r.revertidaEl,
-    pagadaEl: r.pagadaEl,
+    pagadaEl: r.pago,
+    revertidaEl: r.reversa,
   }));
 }

@@ -11,10 +11,8 @@ import {
 import { mesesVecinos, parseMes } from '@/server/empresa/movimiento-view';
 import { requireFounderPage } from '@/server/founder';
 import * as mf from '@/styles/mostrador-facturas.css';
-import * as p from '@/styles/mostrador-facturas-paneles.css';
 import * as m from '@/styles/mostrador.css';
-
-import { EncabezadoDinero } from '../encabezado-dinero';
+import Link from 'next/link';
 
 import { Subir } from './subir';
 import { Tabla } from './tabla';
@@ -68,24 +66,46 @@ function Totales({ r, mes }: { readonly r: ResumenFacturas; readonly mes: string
   );
 }
 
+function Encabezado({ mes }: { readonly mes: string }) {
+  const { anterior, siguiente } = mesesVecinos(mes);
+  const nombre = formatMonth(mes);
+  return (
+    <header className={m.head}>
+      <div className={m.headText}>
+        <span className={m.eyebrow}>MEXIA · Empresa</span>
+        <h1 className={m.title}>Facturas</h1>
+        <p className={m.sub}>{nombre.charAt(0).toUpperCase() + nombre.slice(1)}</p>
+      </div>
+      <div className={m.row}>
+        <Link className={m.boton.quieto} href={`?mes=${anterior}`}>
+          Mes anterior
+        </Link>
+        <Link className={m.boton.quieto} href={`?mes=${siguiente}`}>
+          Mes siguiente
+        </Link>
+      </div>
+    </header>
+  );
+}
+
 /**
  * Facturas (E-11, board CD-06b): the month's received invoices with their
  * SAT status and movement, the XML drop zone, and each invoice on credit
  * still owed with «Registrar pago» and «Cancelar». The Emitidas tab waits for
- * E-10; the screen is Dinero's second tab (plan §2).
+ * E-10, so the screen has no tabs yet.
  */
 export default async function FacturasPage(props: {
-  searchParams: Promise<{ mes?: string; cancelada?: string }>;
+  searchParams: Promise<{ mes?: string; aviso?: string }>;
 }) {
   await requireFounderPage();
-  const q = await props.searchParams;
+  const params = await props.searchParams;
   const hoy = hoyEnMexico();
-  const mes = parseMes(q.mes, hoy);
+  const mes = parseMes(params.mes, hoy);
   const { facturas, sinCfdi } = await leerFacturas(mes);
   const filas = [...facturas.map(filaFactura), ...sinCfdi.map(filaSinCfdi)];
   return (
     <div className={m.page}>
-      <EncabezadoDinero actual="/empresa/facturas" mes={mes} />
+      <Encabezado mes={mes} />
       <Totales r={resumenFacturas(facturas, sinCfdi)} mes={mes} />
       <Subir />
       <section className={m.panel} aria-labelledby="lista">
@@ -94,9 +114,9 @@ export default async function FacturasPage(props: {
             Facturas recibidas en {nombreMes(mes)}
           </h2>
         </div>
-        <Tabla filas={filas} hoy={hoy} mes={mes} />
-        {q.cancelada === '1' ? (
-          <p className={`${m.pad} ${p.hecho}`} role="status">
+        <Tabla filas={filas} hoy={hoy} />
+        {params.aviso === 'cancelada' ? (
+          <p className={`${m.pad} ${mf.hecho}`} role="status">
             Factura cancelada. Su gasto quedó revertido en Movimientos.
           </p>
         ) : null}

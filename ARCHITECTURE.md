@@ -166,8 +166,9 @@ Links to discussion, docs, prior art.
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
-| [132](#adr-132) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
+| [132](#adr-132) | 2026-10-31 | Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout | Accepted |
 | [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
+| [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9270,7 +9271,136 @@ the usual job and two causes behind nearly all of it.
   own is what would let those projects run in parallel, and it is the next step,
   not this one.
 
+---
+
 ## ADR-132
+
+**Title:** Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout
+
+**Date:** 2026-10-31
+
+**Status:** Accepted — decided with the owner 2026-10-30 on the El Mostrador canvas («Cancelar y renovar»: SbPlan, SbCancelarEnlace, SbCorreo)
+
+**Context**
+
+The LFPC reform in force since 2025-12-13 (art. 76 Bis VIII–IX) asks a
+subscription to be cancellable as easily as it was bought, to be announced
+before each automatic renewal with a way to cancel from that notice, and to
+rest on an express, informed consent to the recurring charge. Plan y pagos
+offered only «¿Quieres pausar tu suscripción?», a detour into Stripe's
+Customer Portal of three clicks; no email went out before a renewal; and
+Checkout asked for no consent beyond paying. Three of the five subscription
+lines of `docs/launch/production-readiness.md` §4 were launch blockers.
+
+**Decision**
+
+1. **Cancel is one tap and ends at the period's end.** «Cancelar suscripción»
+   on Mi negocio › Plan y pagos calls Stripe directly
+   (`subscriptions.update({ cancel_at_period_end: true })`), with no «¿seguro?»
+   step. Nothing is refunded and nothing more is charged; the business keeps
+   the plan until `cancel_at` and then falls to Xangarrito with its records.
+   «Seguir con mi plan» undoes it until then. The row is rewritten from
+   Stripe's answer at once, so the screen does not wait for the webhook. The
+   immediate `cancelSubscription` stays for its one caller (a SPEI year
+   replacing a card subscription).
+2. **Every cancellation has an acuse.** `billing_cancellations` keeps one
+   append-only row per act (folio `CX-XXXXXX`, channel `portal | correo`, who,
+   when, when the plan ends) and the owner gets a confirmation email with the
+   folio. A confirmation that cannot be sent is reported and never undoes the
+   cancellation.
+3. **Every renewal is announced, monthly included.** A daily cron
+   (`/api/cron/renewal-emails`, 16:00 UTC) emails each active, uncancelled
+   subscription from the sixth día hábil before its charge (LFT art. 74
+   calendar, `restarDiasHabiles`): five clear días hábiles plus a day's margin
+   for a failed run. A renewal first seen inside the window is announced late
+   rather than never. The email states plan, period, date and total with IVA;
+   a SPEI year speaks of its invoice and CLABE instead of a card.
+4. **The reminder's link cancels in one tap, never on open.** Mail scanners
+   open links, so `/cancelar?t=…` (public, no session) only reads and shows one
+   button; the tap cancels through the same use case and spends the link. A
+   link is 256 random bits, stored as its SHA-256 in
+   `billing_renewal_notices`, valid until the charge it announced and only for
+   the subscription it was sent for. A renewal whose email never went out is
+   re-claimed with a new link; the message key carries the link's prefix so the
+   provider never answers a retry with an email whose link no longer works.
+5. **The consent lives inside Stripe Checkout.** `consent_collection:
+   { terms_of_service: 'required' }` with our `custom_text`: the total with
+   IVA, «hoy y el mismo día de cada mes» (or each year), how to cancel, the
+   Términos and the aviso; under the pay button, the supplier's name, address
+   and complaints address. No screen of ours. The webhook copies the tick to
+   `billing_consents` with `TERMINOS_VERSION`, so the proof does not live only
+   at Stripe.
+6. **The supplier is written once.** `PROVEEDOR` in `@xangarro/domain` feeds
+   Checkout, the billing emails' footer and the public page. The phone number
+   is still missing; nothing prints a placeholder in its place.
+
+The three tables are written only by `xangarro_billing`, read by no tenant,
+deleted by nobody (`0049_billing_cancel_76bis.sql`).
+
+**Alternatives considered**
+
+- *Deep-link into Stripe's Customer Portal.* Rejected 2026-09-26: a redirect
+  plus a confirm leaves «one click» to a lawyer's reading, and the copy is not
+  ours.
+- *Cancel immediately with a prorated refund.* Rejected: the owner paid for the
+  period, and Términos §8 already promise service to its end.
+- *A consent screen of our own before Checkout.* Rejected: one more step for
+  every buyer, when Checkout records the tick itself.
+- *Cancel on opening the email link.* Rejected: link scanners would cancel
+  subscriptions nobody asked to cancel.
+
+**Consequences**
+
+- Stripe refuses `terms_of_service: 'required'` until the Términos URL is set in
+  the Dashboard (Settings › Public details): an operator step before Checkout
+  works, listed in `docs/launch/production-readiness.md` §4.
+- The e2e server has no Stripe key, so Playwright proves the reads and the
+  failure states («no se cambió nada»); the successful taps are covered by the
+  unit suites over Stripe fakes.
+- Not in this round: self-service account deletion (its own retention ADR),
+  the 30-day notice for price increases, and the landing's footer.
+
+## ADR-133
+
+**Title:** A `dataviz` token group for charts, separate from the brand palette
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision OD-6 of 2026-10-08 (canvas board «Paleta de datos»)
+
+**Context**
+
+«Empresa»'s Resultados (E-12, board CD-07) is the first screen with charts: a cascade from
+income to net profit, an EBITDA bridge and a six-month trend. The brand palette was built for
+interface, not data. Yellow and black mark actions and selection, and the soft tints are too
+close to each other to tell series apart, above all for colour-blind readers. A chart coloured
+from it would either reuse the action colour for data or pick hex values inline, which
+`pnpm lint:design` forbids.
+
+**Decision**
+
+1. `@xangarro/tokens` gains `dataviz`, eight colours by role: `ingreso`, `restante`, `perdida`,
+   `impuesto`, and one per expense category (`costoServicio`, `ventasMarketing`, `desarrollo`,
+   `administracion`). The values are the board's, after the owner moved income from green to
+   aqua.
+2. Charts take their colours only from `dataviz`; interface surfaces never do. Yellow and black
+   never encode data.
+3. `ingreso` and `administracion` sit below 3:1 on white, so a mark in either always carries its
+   label. Up and down next to each other (`ingreso` beside `perdida`) always carry a + or − sign.
+4. `DESIGN_CONTRACT.md` lists the group under Color, generated like the rest.
+
+**Consequences**
+
+- Every adjacent pair passed the dataviz validator on the board (worst colour-vision-deficiency
+  ΔE 9.2, worst normal-vision ΔE 16.3). A new series colour is added here and re-validated,
+  never picked on a screen.
+- The phone has no charts today; when it does, it reads the same group.
+
+**References**
+
+- OD-6 in `docs/plan/20-command-center.md` §10; E-12; ADR-057 (tokens); ADR-117 (El Mostrador).
+
+## ADR-135
 
 **Title:** «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy
 
@@ -9331,43 +9461,3 @@ account exists.
 **References**
 
 - ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.
-
-## ADR-133
-
-**Title:** A `dataviz` token group for charts, separate from the brand palette
-
-**Date:** 2026-10-30
-
-**Status:** Accepted — owner decision OD-6 of 2026-10-08 (canvas board «Paleta de datos»)
-
-**Context**
-
-«Empresa»'s Resultados (E-12, board CD-07) is the first screen with charts: a cascade from
-income to net profit, an EBITDA bridge and a six-month trend. The brand palette was built for
-interface, not data. Yellow and black mark actions and selection, and the soft tints are too
-close to each other to tell series apart, above all for colour-blind readers. A chart coloured
-from it would either reuse the action colour for data or pick hex values inline, which
-`pnpm lint:design` forbids.
-
-**Decision**
-
-1. `@xangarro/tokens` gains `dataviz`, eight colours by role: `ingreso`, `restante`, `perdida`,
-   `impuesto`, and one per expense category (`costoServicio`, `ventasMarketing`, `desarrollo`,
-   `administracion`). The values are the board's, after the owner moved income from green to
-   aqua.
-2. Charts take their colours only from `dataviz`; interface surfaces never do. Yellow and black
-   never encode data.
-3. `ingreso` and `administracion` sit below 3:1 on white, so a mark in either always carries its
-   label. Up and down next to each other (`ingreso` beside `perdida`) always carry a + or − sign.
-4. `DESIGN_CONTRACT.md` lists the group under Color, generated like the rest.
-
-**Consequences**
-
-- Every adjacent pair passed the dataviz validator on the board (worst colour-vision-deficiency
-  ΔE 9.2, worst normal-vision ΔE 16.3). A new series colour is added here and re-validated,
-  never picked on a screen.
-- The phone has no charts today; when it does, it reads the same group.
-
-**References**
-
-- OD-6 in `docs/plan/20-command-center.md` §10; E-12; ADR-057 (tokens); ADR-117 (El Mostrador).

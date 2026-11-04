@@ -535,23 +535,21 @@ with property tests:
 ### E-11 Facturas recibidas `[media]`
 
 - [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-11-03):**
+  **Remaining (2026-10-30):**
   - checking an unverified invoice («Sin verificar») with the SAT again;
   - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
     known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
     both yet. It needs a decision on how a template knows its month was registered by an invoice.
-    **Done 2026-11-03, boards CD-06e and CD-06f (canvas round 8):**
-  - «Registrar pago» opens «Registrar el pago» under the row: the date (today by default, from the
-    invoice's own day to today, never in a closed month, which the refusal names with the first
-    open one), what leaves the bank and the IVA that turns creditable. `registrarPagoFactura` takes
-    `hoy` and refuses the rest with `FECHA_DE_PAGO_INVALIDA`.
-  - «Cancelar» opens its confirmation first; «Sí, cancelar la factura» reverses it today and the list
-    says «Factura cancelada…». The row then reads «a crédito · cancelada el …», its SAT status as the
-    SAT has it, and «Revertido» links to the movement; a paid one reads «pagada el …»
-    (`facturasDelMes` returns both days).
-  - Playwright: «No, regresar» returns the focus, the payment is dated the invoice's day, and the
-    cancellation is confirmed and shown.
-  - Left: «vence 29 nov» on a PPD row, which needs the invoice's due date the CFDI does not carry.
+    **Done 2026-10-30, boards CD-06e and CD-06f (round 8, approved the same day):**
+  - «Registrar pago» opens a panel under the row: «Fecha de pago» (today, or the invoice's date
+    when it is newer), what leaves the bank and what turns creditable. A date before the invoice
+    is refused (`FechaPagoAnteriorError`); a closed month is answered in its name.
+  - «Cancelar» asks first: what is reversed, that it is reversed today (a closed month stays
+    closed) and stays in the history. Then «Factura cancelada» and a «Revertido» link.
+  - `facturasDelMes` brings the payment and reversal dates: «a crédito, pagada el 5 nov»,
+    «a crédito, cancelada el 30 oct».
+  - Playwright: the panel's figures and date, «No, regresar», paying, and cancelling once
+    confirmed.
     **Done 2026-10-30, boards CD-01 (the XML zone) and CD-06d:**
   - Registrar gasto takes one XML. It travels the same path as an upload in Facturas (RFC, «Ya
     registrada», SAT), so a refusal shows the review's reason in place. The form then opens on
@@ -590,7 +588,8 @@ with property tests:
   - an invoice addressed to another RFC is refused («No es de MEXIA»), and the category is
     remembered per supplier RFC.
 - **Design:** canvas round 6, boards CD-06b (Recibidas), CD-06c (Revisa antes de registrar) and
-  CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day. The Emitidas tab
+  CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day; round 8,
+  CD-06e (Registrar pago con fecha) and CD-06f (Cancelar con confirmación), approved 2026-10-30. The Emitidas tab
   stays out of the screen until E-10.
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
   retención appears as a liability; a PPD invoice's IVA is creditable only once it is paid.
@@ -810,7 +809,7 @@ with property tests:
 
 - [ ] Status · **Blocked by:** E-01
 - **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
-  container and check every file against `corp.documents.sha256` (E-26, ADR-132), swap the two
+  container and check every file against `corp.documents.sha256` (E-26, ADR-135), swap the two
   ports, cut the console routes over.
 
 ## 9. Canvas round 2 (owner review, 2026-10-08)
@@ -1011,14 +1010,14 @@ turns into proposed objectives and cards.
   script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted),
   then `corp-blobs:move --vaciar`. The 20 MB upload and the lock are proven on Azurite and by
   that script, not yet against the real container.
-  **Progress (2026-10-30, ADR-132):** the code is done and Postgres stays the live store.
+  **Progress (2026-10-30, ADR-135):** the code is done and Postgres stays the live store.
   `BlobStore` port in `@xangarro/application/corp` with `corp.blobs` (migrations 0007 + 0008,
   old → new test) and an Azure adapter (`apps/backoffice/src/server/blobs/`, tested on
   Azurite). Browsers PUT into a `corp-entrantes` inbox with a ten-minute SAS; the console
   reads, hashes and files the file into `corp-docs`. «Ver» redirects Azure files to a read
   SAS. Limits follow the store (4 MB / 25 MB). The move is the `moverDocumentos` use case.
   The console signs with the account key and relies on the locked policy for «never delete»
-  (ADR-132 §5), not on a delete-less identity.
+  (ADR-135 §5), not on a delete-less identity.
 - **What:**
   - a `BlobStore` port in `@xangarro/application/corp` with the Postgres adapter of today and an
     Azure Blob adapter (`@azure/storage-blob`, latest stable);

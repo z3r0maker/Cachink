@@ -1,9 +1,10 @@
 import type { FacturaRecibida } from '@xangarro/application/corp';
 import type { FacturaDelMes, Movimiento } from '@xangarro/data-corp';
 import { formatMoney, tipoPersona } from '@xangarro/domain';
-import { ACCOUNTS, CATEGORIAS_GASTO, gastoDeCfdi, pagoDeGasto } from '@xangarro/domain/corp';
+import { ACCOUNTS, CATEGORIAS_GASTO } from '@xangarro/domain/corp';
 
-import { fechaCorta, fechaLarga } from './fechas';
+import { fechaCorta } from './fechas';
+import { pagoFactura, type PagoFactura } from './pago-factura-view';
 
 /**
  * Facturas recibidas as board CD-06b shows them (E-11): one row per received
@@ -16,22 +17,7 @@ export type Destino =
   | { readonly tipo: 'enlace'; readonly href: string; readonly texto: string }
   | { readonly tipo: 'texto'; readonly texto: string }
   /** An invoice on credit still owed: «Por pagar» with «Registrar pago» and «Cancelar». */
-  | PorPagarDestino;
-
-/** What the row's two panels name (boards CD-06e and CD-06f). */
-export interface PorPagarDestino {
-  readonly tipo: 'por_pagar';
-  readonly uuid: string;
-  /** The invoice's own day, `YYYY-MM-DD`: the earliest it can be paid. */
-  readonly desde: string;
-  readonly desdeLarga: string;
-  /** The net the bank pays: subtotal + IVA − withholdings. */
-  readonly saleDelBanco: string;
-  /** The expense «Cancelar» reverses. */
-  readonly gasto: string;
-  /** The IVA that turns creditable on paying, or that cancelling drops; none when there is none. */
-  readonly iva: string | null;
-}
+  | { readonly tipo: 'por_pagar'; readonly pago: PagoFactura };
 
 export interface FilaFactura {
   readonly key: string;
@@ -75,13 +61,18 @@ const pagada = (d: FacturaDelMes) =>
 const persona = (rfc: string): string =>
   tipoPersona(rfc) === 'fisica' ? 'persona física' : 'persona moral';
 
-/** How an invoice on credit stands: owed, paid on a day, or cancelled on a day. */
+/** «a crédito (PPD)», «a crédito, pagada el 5 nov» or «a crédito, cancelada el 30 oct». */
 function credito(d: FacturaDelMes): string {
-  if (d.factura.cfdi.metodoPago !== 'PPD') return '';
-  const el = (fecha: string | null) => (fecha === null ? '' : ` el ${fechaCorta(fecha)}`);
-  if (d.revertida)
-    return `a crédito · ${d.factura.estado === 'cancelada' ? 'cancelada' : 'revertida'}${el(d.revertidaEl)}`;
-  if (d.factura.pagoEntryId !== null) return `a crédito, pagada${el(d.pagadaEl)}`;
+  const f = d.factura;
+  if (f.cfdi.metodoPago !== 'PPD') return '';
+  if (f.pagoEntryId !== null) {
+    return d.pagadaEl === null
+      ? 'a crédito, pagada'
+      : `a crédito, pagada el ${fechaCorta(d.pagadaEl)}`;
+  }
+  if (f.estado === 'cancelada' && d.revertidaEl !== null) {
+    return `a crédito, cancelada el ${fechaCorta(d.revertidaEl)}`;
+  }
   return 'a crédito (PPD)';
 }
 
@@ -92,36 +83,18 @@ function subDe(d: FacturaDelMes): string {
     .join(' · ');
 }
 
-function porPagarDe(f: FacturaRecibida): PorPagarDestino {
-  const c = f.cfdi;
-  const iva = pagoDeGasto(gastoDeCfdi(c, f.categoria ?? 'administracion')).ivaPorAcreditar;
-  return {
-    tipo: 'por_pagar',
-    uuid: c.uuid,
-    desde: c.fecha,
-    desdeLarga: fechaLarga(c.fecha),
-    saleDelBanco: formatMoney(c.total),
-    gasto: formatMoney(c.subtotal),
-    iva: iva === 0n ? null : formatMoney(iva),
-  };
-}
-
 function destinoDe(d: FacturaDelMes): Destino {
   const f = d.factura;
-  if (porPagar(d)) return porPagarDe(f);
+  if (porPagar(d)) return { tipo: 'por_pagar', pago: pagoFactura(f) };
   if (f.entryId === null) return { tipo: 'texto', texto: 'No se registró' };
   const href = `/empresa/movimientos/${f.entryId}`;
   if (f.estado === 'cancelada' || d.revertida) return { tipo: 'enlace', href, texto: 'Revertido' };
   return { tipo: 'enlace', href, texto: nombreCategoria(f) };
 }
 
-/** What the SAT says: an invoice the founder cancelled still stands there. */
 function estadoDe(d: FacturaDelMes): EstadoFila {
-  const f = d.factura;
-  if (f.estadoSat === 'cancelado' || (f.estado === 'cancelada' && f.entryId === null)) {
-    return 'Cancelada';
-  }
-  return f.estadoSat === 'sin_verificar' ? 'Sin verificar' : 'Vigente';
+  if (d.factura.estado === 'cancelada') return 'Cancelada';
+  return d.factura.estadoSat === 'sin_verificar' ? 'Sin verificar' : 'Vigente';
 }
 
 export function filaFactura(d: FacturaDelMes): FilaFactura {
