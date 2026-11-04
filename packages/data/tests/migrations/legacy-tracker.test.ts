@@ -70,6 +70,7 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
       '0011_movimiento_origen',
       '0012_business_branding',
       '0013_opening_balances',
+      '0014_product_images',
     ]);
   });
 
@@ -77,7 +78,7 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
     const { sqlite, db } = oldRunnerInstall();
     await runMigrations(db);
     await runMigrations(db);
-    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 8);
+    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 9);
   });
 
   it('does not create or rename a legacy tracker on a fresh install', async () => {
@@ -96,7 +97,7 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
 
     await expect(runMigrations(db)).resolves.toBeUndefined();
     expect(tags(sqlite, '__cachink_migrations')).toEqual([]);
-    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 8);
+    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 9);
   });
 
   it('fails loudly when the legacy tracker is unreadable instead of re-running 0000', async () => {

@@ -11,8 +11,7 @@ import { autonomiaDeHoy, heroDe } from '../src/server/empresa/resumen-hero';
 const hoy = (): string =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
 
-const escapeRegExp = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export async function revisarAutonomia(page: Page): Promise<void> {
   const db = createCorpDb(process.env.CORP_DATABASE_URL ?? '', 1);

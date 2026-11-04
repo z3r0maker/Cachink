@@ -6,6 +6,7 @@ import {
   conversionRecetas,
   conversions,
   inventoryMovements,
+  productImages,
   products,
   auditoriasInventario,
 } from '../schema/catalog.js';
@@ -41,6 +42,7 @@ export const SYNCED_TABLES = {
   conversions,
   auditorias_inventario: auditoriasInventario,
   products,
+  product_images: productImages,
   clients,
   businesses,
   users,

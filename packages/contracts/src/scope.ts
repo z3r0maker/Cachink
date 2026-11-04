@@ -26,8 +26,17 @@ export const UP_TABLES = [
  * `inventory_movements` moved here from UP (ADR-081): phones compute stock by
  * summing movements, so a movement only one phone had — another phone's sale,
  * or an entrada recorded in the portal — left every other phone's stock wrong.
+ *
+ * `product_images` (ADR-134, C-24) is append-only like the movements: a photo
+ * is a row, replacing it is a newer row, removing it is a tombstone (`bytes`
+ * null); the newest row per product wins. Phones and the portal insert.
  */
-export const HYBRID_TABLES = ['products', 'clients', 'inventory_movements'] as const;
+export const HYBRID_TABLES = [
+  'products',
+  'clients',
+  'inventory_movements',
+  'product_images',
+] as const;
 
 /** Cloud → device only. */
 export const DOWN_TABLES = [

@@ -46,6 +46,8 @@ export const SNAPSHOT_SECTIONS = [
   'users',
   'employees',
   'products',
+  // Newest non-tombstone photo per product only (ADR-134): a fresh device needs no history.
+  'product_images',
   'stock_baseline',
   'clients',
   'recurring_expenses',

@@ -17,6 +17,7 @@ import {
   type Business,
   type OpeningBalance,
   type OpeningBalanceClient,
+  type ProductImage,
   type Client,
   type Employee,
   type MensajeOperador,
@@ -55,6 +56,8 @@ export interface FixtureRows {
   /** Day-one facts (C-20); the demo business starts without them. */
   readonly opening_balances: readonly OpeningBalance[];
   readonly opening_balance_clients: readonly OpeningBalanceClient[];
+  /** Product photos (ADR-134); the demo catalogue has none until a phone takes one. */
+  readonly product_images: readonly ProductImage[];
 }
 
 const PRODUCT_NAMES = [
@@ -189,5 +192,6 @@ export function buildFixtures(): FixtureRows {
     mensajes_operador: mensajes(),
     opening_balances: [],
     opening_balance_clients: [],
+    product_images: [],
   };
 }

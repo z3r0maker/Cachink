@@ -22,6 +22,7 @@ import {
   conversionRecetas,
   employees,
   products,
+  productImages,
   inventoryMovements,
   mensajesOperador,
   openingBalanceClients,
@@ -45,6 +46,7 @@ const TABLES: Record<DeviceRefTableName, SQLiteTable> = {
   inventory_movements: inventoryMovements,
   mensajes_operador: mensajesOperador,
   products,
+  product_images: productImages,
   clients,
   users,
   employees,
@@ -60,6 +62,7 @@ const APPLY_ORDER: readonly DeviceRefTableName[] = [
   'users',
   'employees',
   'products',
+  'product_images',
   'clients',
   'recurring_expenses',
   'conversion_recetas',
@@ -93,6 +96,7 @@ export async function applyReferenceTables(
     await forgetEchoes(db, TABLES[name], rows, floor);
     applied[name] = rows.length;
   }
+  await pruneSupersededImages(db);
   const flags = JSON.stringify(tables.feature_flags);
   await db
     .update(businesses)
@@ -117,6 +121,24 @@ async function storeDuenoNombre(
   const limpio = nombre?.trim() ?? '';
   if (limpio === '') await config.delete(SYNC_CONFIG_KEYS.duenoNombre);
   else await config.set(SYNC_CONFIG_KEYS.duenoNombre, limpio);
+}
+
+/**
+ * A product keeps only its newest photo row on the device (ADR-134 §3): the
+ * older ones are history the cloud keeps for 30 days and the phone never
+ * reads. A row still in the change log is this phone's own, not yet pushed,
+ * and stays until the server has it.
+ */
+export async function pruneSupersededImages(db: XangarroDatabase): Promise<void> {
+  await db.run(sql`
+    DELETE FROM product_images WHERE id IN (
+      SELECT a.id FROM product_images a
+       WHERE EXISTS (SELECT 1 FROM product_images b
+                      WHERE b.producto_id = a.producto_id AND b.deleted_at IS NULL
+                        AND (b.created_at > a.created_at
+                             OR (b.created_at = a.created_at AND b.id > a.id)))
+         AND NOT EXISTS (SELECT 1 FROM __xangarro_change_log c
+                          WHERE c.table_name = 'product_images' AND c.row_id = a.id))`);
 }
 
 async function changeLogHighWater(db: XangarroDatabase): Promise<number> {
