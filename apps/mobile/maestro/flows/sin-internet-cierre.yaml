@@ -1,0 +1,130 @@
+# The close goes ahead with records still to send (ADR-123; catalogue J4-26,
+# the phone half of cierre.sync.spec): with the server gone, one sale is
+# captured and the operator closes the turno anyway — the Cierre page carries
+# the band «Tienes N registros por enviar», the close stays enabled, and the
+# turno lands on «¡Turno cerrado!». When the server is back the queue drains
+# and the pill is «Enviado».
+#
+# Precondition: activated device against the mock on MOCK_API, no turno open
+# or a turno with nothing but its $500 fondo (shared/ensure-caja-open.yaml):
+# the count is one $500 bill plus the sale's cash.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - sync
+  - offline
+  - cierre
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: down
+
+# One cash sale, offline.
+- runFlow: shared/create-venta.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-offline'
+    timeout: 30000
+
+# Cerrar mi turno, from the Mi turno tab.
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+# With rows waiting, Mi turno puts the band above the hero and «Cerrar mi
+# turno» drops below the fold: centre it first, or the tap lands short.
+- scrollUntilVisible:
+    element:
+      id: 'turno-cerrar-mi-turno'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 100
+    centerElement: true
+# Let the centring scroll settle: a tap mid-momentum lands beside the button.
+- waitForAnimationToEnd
+- tapOn:
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 15000
+
+# The band (cierre-banda.tsx, copy.ts bandaTitulo): the rows wait, the close
+# does not. Below the counter, with the resumen.
+- scrollUntilVisible:
+    element:
+      id: 'cierre-por-enviar'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+- assertVisible: 'Tienes .* por enviar.*'
+
+# Count one $500 bill against the $500 fondo + the sale's cash: a faltante,
+# explained with «Cambio mal dado» (the chip that needs no note). The flow is
+# about closing with rows pending, not about cuadrar.
+- scrollUntilVisible:
+    element:
+      id: 'conteo-mas-billete-500'
+    direction: UP
+    timeout: 15000
+    visibilityPercentage: 60
+- tapOn:
+    id: 'conteo-mas-billete-500'
+- scrollUntilVisible:
+    element:
+      id: 'cierre-motivo-Cambio mal dado'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn:
+    id: 'cierre-motivo-Cambio mal dado'
+
+# Close: enabled with rows pending (ADR-123).
+- scrollUntilVisible:
+    element:
+      id: 'cierre-cerrar-turno'
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn:
+    id: 'cierre-cerrar-turno'
+# Hecho with a faltante: no celebration, «Turno cerrado» and the motivo in
+# the line; with rows still to send, lineaCerrado leaves out «ya lo tiene en
+# su portal» and lineaPorEnviar says when the owner sees it.
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 15000
+- assertVisible: '.*Faltante.*'
+- assertVisible: '.*Turno cerrado.*'
+- assertVisible: '.*Quedó un faltante explicado como «Cambio mal dado»\..*'
+
+# The server returns; the cierre and the sale go up.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: up
+# Off-centre on purpose: offline, the header hides the bell and the pill
+# slides right, under the parked dev-menu gear (entry-setup.sh); a centre
+# tap opens the dev menu instead of the sync. The queue also drains by
+# itself on the next scheduled run — the tap only hurries it.
+- tapOn:
+    id: 'cloud-sync-pill'
+    point: '25%,50%'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 60000

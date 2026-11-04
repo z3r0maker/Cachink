@@ -1,0 +1,96 @@
+# Sin internet, sigue cobrando (CLAUDE.md §2.2; catalogue J10-07 phone half,
+# J4-26): the server vanishes mid-shift (`/__mock/down` drops every socket, as
+# airplane mode would), two sales still go through, the amber «Sin internet»
+# strip sits under the header, the pill reads «2 sin enviar» and Inicio's hero
+# says so; the server comes back, «Actualizar» sends both and the pill is
+# «Enviado» again. Nothing is ever refused or lost.
+#
+# Precondition: activated device against the mock on MOCK_API, Toni signed in
+# or on Acceso; opens a turno when none is open. Restores the mock (`up`) at
+# the end, and on the way out if an assertion fails the harness's reset does.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - sync
+  - offline
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+# Start clean: the apertura is up, nothing waits.
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# The network goes.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: down
+
+# Two cash sales, both «Venta hecha» with no server to talk to.
+- runFlow: shared/create-venta.yaml
+- runFlow: shared/create-venta.yaml
+
+# The shell knows: the amber strip (app-shell.tsx, phase 'offline') and the
+# pill counting what waits (syncPill.offline: «{{count}} sin enviar»).
+- extendedWaitUntil:
+    visible:
+      id: 'offline-banner'
+    timeout: 30000
+- assertVisible: '.*Sin internet.*'
+- assertVisible: '.*Sigue cobrando\..*'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-offline'
+    timeout: 30000
+# Each sale is a ticket, a line and a stock movement; the count is rows, so
+# only «sin enviar» is pinned, not the number.
+- assertVisible: '.* sin enviar'
+
+# Inicio's hero takes the offline tone (inicio/copy.ts sinConexion).
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-offline'
+    timeout: 10000
+- assertVisible: '.*Sin internet, sigue cobrando.*'
+- assertVisible: '.*Se envían solos cuando vuelva la señal\..*'
+
+# Ventas still lists both sales: offline never hides what was captured.
+- tapOn:
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
+- extendedWaitUntil:
+    visible: 'Ver venta V-\d{4}, .*'
+    timeout: 10000
+
+# The network is back; «Actualizar» (the pill) pushes everything.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: up
+# Off-centre on purpose: offline, the header hides the bell and the pill
+# slides right, under the parked dev-menu gear (entry-setup.sh); a centre
+# tap opens the dev menu instead of the sync. The queue also drains by
+# itself on the next scheduled run — the tap only hurries it.
+- tapOn:
+    id: 'cloud-sync-pill'
+    point: '25%,50%'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 60000
+- assertNotVisible:
+    id: 'offline-banner'
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 10000

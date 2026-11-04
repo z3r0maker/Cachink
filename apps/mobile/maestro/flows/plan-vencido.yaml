@@ -1,0 +1,78 @@
+# Lapsed payment (ADR-053 §5, A-10; catalogue J8-06): both the plan's
+# validUntil and its graceUntil are past (mock scenario `lapsed`). The phone
+# falls back to Xangarrito's limits with the red banner «La cuenta de tu
+# negocio necesita atención» — and keeps capturing: a sale goes through, nothing
+# is deleted or locked. Stock is a Xangarrito feature that is off, so
+# Inventario shows the plain catalog, no «Movimientos». Back on the paid
+# scenario the banner is gone and Movimientos is back.
+#
+# Precondition: activated device against the mock on MOCK_API. Restores the
+# default scenario at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - entitlement
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+- assertNotVisible:
+    id: 'plan-banner-fellBack'
+
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: lapsed
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'plan-banner-fellBack'
+    timeout: 30000
+- assertVisible: '.*La cuenta de tu negocio necesita atención\..*'
+
+# Capture continues on the fallback plan: never read-only while the server
+# is reachable (that needs thirty days without a pull, unit-tested in
+# packages/sync/tests/entitlement.test.ts).
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+- assertVisible:
+    id: 'plan-banner-fellBack'
+
+# Xangarrito has no stock: the Cobrar tiles carry no «Quedan N» chip (the
+# stock map is empty, use-stock-map.ts). Inventario itself is NOT asserted:
+# the Mostrador route (/productos → use-inventario.ts) never reads the flag
+# and still shows the stock UI on a plan without it — catalogue J8-04, open.
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 10000
+- assertNotVisible: 'Quedan \d+'
+
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: xangarro
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    notVisible:
+      id: 'plan-banner-fellBack'
+    timeout: 30000
+# Back on Xangarro: the stock UI returns on the next pull.
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible: 'Quedan \d+'
+    timeout: 30000

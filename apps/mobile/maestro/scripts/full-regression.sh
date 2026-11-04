@@ -295,6 +295,11 @@ run_curated_suite() {
     cierre-cuadra
     caja-cierre-discrepancia
     cierre-faltante
+    sin-internet-cobrar
+    sin-internet-cierre
+    plan-pago-pendiente
+    plan-vencido
+    dispositivo-revocado
     settings-borrar
     settings-desvincular
     activation

@@ -37,6 +37,14 @@ export interface MockResponse {
   readonly body: unknown;
 }
 
+/**
+ * What `handle` answers while `/__mock/down` holds: no HTTP status at all. The
+ * Node wrapper drops the socket and the msw adapter answers a network error,
+ * so the client sees what a phone with no signal sees (`NETWORK`), never a
+ * 5xx it could mistake for the server's own refusal.
+ */
+export const MOCK_DOWN: MockResponse = { status: 0, body: null };
+
 function err(
   code: ErrorCode,
   message: string = code,
@@ -66,6 +74,7 @@ export class MockApi {
   async handle(req: MockRequest): Promise<MockResponse> {
     const control = controlRoute(this.state, req);
     if (control) return control;
+    if (this.state.down) return MOCK_DOWN;
     if (req.headers[HEADER_PROTOCOL.toLowerCase()] !== String(PROTOCOL_VERSION)) {
       return err('PROTOCOL_UNSUPPORTED', 'send X-Xangarro-Protocol: 1');
     }

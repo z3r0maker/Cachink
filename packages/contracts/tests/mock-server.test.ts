@@ -16,6 +16,28 @@ afterAll(async () => {
 });
 
 describe('the http wrapper', () => {
+  it('while down, a contract call fails as the network would, and the controls still answer', async () => {
+    const caido = await startMockServer();
+    try {
+      const abajo = await fetch(`${caido.url}/__mock/down`, { method: 'POST' });
+      assert.equal(abajo.status, 200);
+      // No HTTP status at all: the socket is dropped, which the phone's
+      // ApiClient reads as NETWORK — exactly what airplane mode produces.
+      await assert.rejects(
+        fetch(`${caido.url}/api/v1/sync/pull?since=0`, {
+          headers: { 'X-Xangarro-Protocol': '1' },
+        }),
+        TypeError,
+      );
+      const arriba = await fetch(`${caido.url}/__mock/up`, { method: 'POST' });
+      assert.deepEqual(await arriba.json(), { down: false });
+      const r = await fetch(`${caido.url}/api/v1/sync/pull?since=0`);
+      assert.equal(r.status, 426);
+    } finally {
+      await caido.close();
+    }
+  });
+
   it('takes a POST with no body, as curl would send it to /__mock/reset', async () => {
     corriendo = await startMockServer();
     const r = await fetch(`${corriendo.url}/__mock/reset`, { method: 'POST' });
