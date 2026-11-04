@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
@@ -16,9 +14,11 @@ import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
 import { documentosDelMovimiento } from '../src/queries/documentos';
+import { createPgBlobStore } from '../src/queries/blobs';
 import { createDocumentRepository } from '../src/queries/documentos';
 import { createReceivedInvoiceRepository, facturasDelMes } from '../src/queries/facturas';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
+import { crearBaseDesechable } from './base-desechable';
 import { borrarLoDe } from './cleanup';
 
 /**
@@ -28,7 +28,6 @@ import { borrarLoDe } from './cleanup';
  */
 const { url, describe } = integrationSuite();
 const AUTOR = 'f-facturas-test';
-const DIR = join(import.meta.dirname, '../drizzle');
 
 let seq = 0;
 /** A month no other run uses, so the month's list is this test's alone. */
@@ -51,7 +50,7 @@ describe('corp received invoices', () => {
       db,
       facturas: createReceivedInvoiceRepository(db),
       ledger: createCorpLedgerRepository(db),
-      documentos: createDocumentRepository(db),
+      documentos: createDocumentRepository(db, createPgBlobStore(db)),
       sat: { estado: async () => 'vigente' as const },
       rfcMexia: async () => RFC_MEXIA_PRUEBA,
       sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
@@ -154,28 +153,26 @@ describe('corp received invoices', () => {
   });
 
   it('0006 applies over a schema that already has entries', async () => {
-    const ROLLBACK = new Error('rollback');
-    await assert.rejects(
-      // Repeatable read: the other files' rows come and go while this one counts.
-      owner.begin('isolation level repeatable read', async (tx) => {
-        const [antes] = await tx<{ n: string }[]>`SELECT count(*)::text AS n FROM corp.entries`;
-        await tx.unsafe('DROP TABLE corp.received_invoices');
-        await tx.unsafe(
-          readFileSync(join(DIR, '0006_corp_facturas.sql'), 'utf8').replaceAll(
-            '--> statement-breakpoint',
-            '',
-          ),
-        );
-        await tx.unsafe(readFileSync(join(DIR, '0006_zz_corp_facturas_guards.sql'), 'utf8'));
-        const [despues] = await tx<{ n: string }[]>`SELECT count(*)::text AS n FROM corp.entries`;
-        assert.equal(despues?.n, antes?.n);
-        const [vacia] = await tx<
-          { n: string }[]
-        >`SELECT count(*)::text AS n FROM corp.received_invoices`;
-        assert.equal(vacia?.n, '0');
-        throw ROLLBACK;
-      }),
-      (e) => e === ROLLBACK,
-    );
+    // A throwaway database: dropping the table here would lock `entries` for every other file.
+    const base = await crearBaseDesechable();
+    try {
+      await base.aplicar((f) => f < '0006');
+      await base.sql.begin(async (tx) => {
+        await tx`INSERT INTO corp.entries (id, fecha, kind, concepto, source, payload, created_by, created_at)
+                 VALUES ('e-viejo', '2026-09-30', 'comision_bancaria', 'Comisión', 'manual', '{}', ${AUTOR}, now())`;
+        await tx`INSERT INTO corp.entry_lines (id, entry_id, cuenta, debe, haber) VALUES
+                   ('l1', 'e-viejo', 'financiero', 1250, 0), ('l2', 'e-viejo', 'bancos', 0, 1250)`;
+      });
+      await base.aplicar((f) => f.startsWith('0006'));
+      const [entradas] = await base.sql<
+        { n: string }[]
+      >`SELECT count(*)::text AS n FROM corp.entries`;
+      const [facturas] = await base.sql<
+        { n: string }[]
+      >`SELECT count(*)::text AS n FROM corp.received_invoices`;
+      assert.deepEqual([entradas?.n, facturas?.n], ['1', '0']);
+    } finally {
+      await base.cerrar();
+    }
   });
 });

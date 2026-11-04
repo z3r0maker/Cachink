@@ -4,6 +4,7 @@ import { describe, it } from 'vitest';
 import {
   ArchivoInvalidoError,
   assertArchivo,
+  MAX_BYTES_DIRECTO,
   MAX_BYTES_EVIDENCIA,
   retenerHasta,
 } from '../../src/corp/index.js';
@@ -24,6 +25,20 @@ describe('assertArchivo', () => {
 
   it('refuses a file over 4 MB', () => {
     assert.throws(() => assertArchivo('scan.png', 'image/png', MAX_BYTES_EVIDENCIA + 1), /4 MB/);
+  });
+
+  it('accepts a 20 MB file when it goes straight to storage (E-26)', () => {
+    const veinte = 20 * 1024 * 1024;
+    assert.doesNotThrow(() =>
+      assertArchivo('deck.pdf', 'application/pdf', veinte, MAX_BYTES_DIRECTO),
+    );
+  });
+
+  it('refuses a file over 25 MB even straight to storage', () => {
+    assert.throws(
+      () => assertArchivo('video.png', 'image/png', MAX_BYTES_DIRECTO + 1, MAX_BYTES_DIRECTO),
+      /25 MB/,
+    );
   });
 });
 

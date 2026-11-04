@@ -1,6 +1,7 @@
 export {
   ANIOS_RETENCION,
   assertArchivo,
+  MAX_BYTES_DIRECTO,
   MAX_BYTES_EVIDENCIA,
   MIMES_EVIDENCIA,
   retenerHasta,

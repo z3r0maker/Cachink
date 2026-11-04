@@ -1,14 +1,16 @@
-import { formatMoney, formatMonth } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { resumenDelMes, type ResumenDelMes } from '@xangarro/domain/corp';
 import Link from 'next/link';
 
 import { hoyEnMexico } from '@/server/db/corp';
-import { filaDe, mesesVecinos, parseFiltro, parseMes } from '@/server/empresa/movimiento-view';
+import { filaDe, parseFiltro, parseMes } from '@/server/empresa/movimiento-view';
 import { leerMes, type MesDeMovimientos } from '@/server/empresa/movimientos-lectura';
 import { filaRecurrente, filasDelMes, parseCategoria } from '@/server/empresa/recurrentes-view';
 import { requireFounderPage } from '@/server/founder';
 import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
+
+import { EncabezadoDinero } from '../encabezado-dinero';
 
 import { Buscar, Categorias, Tipos, type Vista } from './filtros';
 import { TablaRecurrentes } from './recurrentes';
@@ -39,31 +41,6 @@ function Totales({ r }: { readonly r: ResumenDelMes }) {
         </div>
       ))}
     </section>
-  );
-}
-
-function Encabezado({ mes }: { readonly mes: string }) {
-  const { anterior, siguiente } = mesesVecinos(mes);
-  const nombre = formatMonth(mes);
-  return (
-    <header className={m.head}>
-      <div className={m.headText}>
-        <span className={m.eyebrow}>MEXIA · Empresa</span>
-        <h1 className={m.title}>Movimientos</h1>
-        <p className={m.sub}>{nombre.charAt(0).toUpperCase() + nombre.slice(1)}</p>
-      </div>
-      <div className={m.row}>
-        <Link className={m.boton.quieto} href={`?mes=${anterior}`}>
-          Mes anterior
-        </Link>
-        <Link className={m.boton.quieto} href={`?mes=${siguiente}`}>
-          Mes siguiente
-        </Link>
-        <Link className={m.boton.primario} href="/empresa/movimientos/registrar">
-          + Registrar
-        </Link>
-      </div>
-    </header>
   );
 }
 
@@ -104,7 +81,11 @@ export default async function MovimientosPage(props: {
   const datos = await leerMes(vista.mes, hoy);
   return (
     <div className={m.page}>
-      <Encabezado mes={vista.mes} />
+      <EncabezadoDinero actual="/empresa/movimientos" mes={vista.mes}>
+        <Link className={m.boton.primario} href="/empresa/movimientos/registrar">
+          + Registrar
+        </Link>
+      </EncabezadoDinero>
       <Totales r={resumenDelMes(datos.movimientos)} />
       <section className={m.panel} aria-label="Movimientos del mes">
         <div className={`${m.pad} ${m.stack}`}>

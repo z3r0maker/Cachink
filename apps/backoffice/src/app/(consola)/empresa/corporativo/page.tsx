@@ -5,6 +5,7 @@ import { requireFounderPage } from '@/server/founder';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
 
+import { EncabezadoSeccion } from '../encabezado-seccion';
 import { Actas, Firmas, Registros, SociosYAcciones } from './secciones';
 
 export const dynamic = 'force-dynamic';
@@ -20,12 +21,7 @@ export default async function CorporativoPage() {
   const libro = await leerLibro();
   return (
     <div className={m.page}>
-      <header className={m.head}>
-        <div className={m.headText}>
-          <span className={m.eyebrow}>MEXIA, S.A.S. · RESICO persona moral</span>
-          <h1 className={m.title}>Libro corporativo</h1>
-        </div>
-      </header>
+      <EncabezadoSeccion actual="/empresa/corporativo" />
       <SociosYAcciones libro={libro} beneficiario={beneficiario(libro.avisos, hoy).texto} />
       <Registros registros={libro.registros} />
       <div className={s.grid2}>

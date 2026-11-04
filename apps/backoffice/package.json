@@ -17,9 +17,11 @@
     "clean": "rm -rf .next dist .turbo",
     "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh admin-url) DATABASE_SUPER_URL=$(../../packages/data-pg/scripts/db-local.sh super-url) CORP_DATABASE_URL=$(../../packages/data-corp/scripts/db-local.sh url) playwright test",
     "test:e2e:db": "./scripts/e2e-db-setup.sh && pnpm test:e2e",
-    "founder": "tsx scripts/founder.ts"
+    "founder": "tsx scripts/founder.ts",
+    "corp-blobs:move": "tsx scripts/corp-blobs-move.ts"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.34.0",
     "@vanilla-extract/css": "^1.21.2",
     "@xangarro/application": "workspace:*",
     "@xangarro/auth-core": "workspace:*",
@@ -37,16 +39,16 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vanilla-extract/next-plugin": "^2.5.2",
     "@xangarro/config": "workspace:*",
     "@xangarro/testing": "workspace:*",
+    "postgres": "^3.4.7",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6",
-    "@playwright/test": "^1.63.0",
-    "postgres": "^3.4.7"
+    "vitest": "^4.1.6"
   }
 }
