@@ -338,3 +338,23 @@
   - **Ops, not code:** set `SENTRY_DSN` in production. Browser-side Sentry is not wired.
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.
+
+### B-19 `product_images` in Postgres: migration, RLS, purge and the tenant image route (ADR-134) [media]
+
+- [ ] Status · **Blocked by:** C-24 · **Blocks:** P-42
+- **Files:** `packages/data-pg/drizzle/00NN_product_images.sql` + `src/schema/catalog.ts`
+  (`product_images`: `bytes bytea` nullable, `mime` CHECK `= 'image/webp'`,
+  `octet_length(bytes) <= 49152`, `width`/`height` ≤ 512, index `(business_id, product_id,
+created_at desc, id desc)`, RLS as `inventory_movements`); `src/sync/tables.ts`
+  (`SYNCED_TABLES.product_images`), the wire↔row mapping (base64 ↔ bytea, parsed never
+  asserted — §2.8), the snapshot pager's section (newest row per product, `DISTINCT ON`);
+  `src/queries/product-images.ts` (`latestProductImage(tx, productId)`, `purgeSupersededImages
+(tx, olderThanDays = 30)`); `apps/web/src/app/api/productos/[productId]/imagen/route.ts`
+  (`withTenant`, newest row, 404 on none or tombstone, ETag = sha256 of the bytes, private
+  `Cache-Control`); a cron or the existing maintenance entry point for the purge.
+- **Steps:** migration + migration test (old → new data: products without images still
+  activate); integration test that builds two images and a tombstone for one product and asserts
+  which one the route and the snapshot return; purge test (a superseded row older than 30 days
+  goes, the newest never does, a tombstone stays until superseded).
+- **Acceptance:** `pnpm --filter @xangarro/data-pg test` green; `db:reset` seeds one product
+  with a photo so the Playwright sentinel of P-42 has data to find.

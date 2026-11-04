@@ -167,6 +167,9 @@ Links to discussion, docs, prior art.
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
 | [132](#adr-132) | 2026-10-31 | Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout | Accepted |
+| [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
+| [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
+| [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9357,3 +9360,221 @@ deleted by nobody (`0049_billing_cancel_76bis.sql`).
   unit suites over Stripe fakes.
 - Not in this round: self-service account deletion (its own retention ADR),
   the 30-day notice for price increases, and the landing's footer.
+
+## ADR-133
+
+**Title:** A `dataviz` token group for charts, separate from the brand palette
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision OD-6 of 2026-10-08 (canvas board «Paleta de datos»)
+
+**Context**
+
+«Empresa»'s Resultados (E-12, board CD-07) is the first screen with charts: a cascade from
+income to net profit, an EBITDA bridge and a six-month trend. The brand palette was built for
+interface, not data. Yellow and black mark actions and selection, and the soft tints are too
+close to each other to tell series apart, above all for colour-blind readers. A chart coloured
+from it would either reuse the action colour for data or pick hex values inline, which
+`pnpm lint:design` forbids.
+
+**Decision**
+
+1. `@xangarro/tokens` gains `dataviz`, eight colours by role: `ingreso`, `restante`, `perdida`,
+   `impuesto`, and one per expense category (`costoServicio`, `ventasMarketing`, `desarrollo`,
+   `administracion`). The values are the board's, after the owner moved income from green to
+   aqua.
+2. Charts take their colours only from `dataviz`; interface surfaces never do. Yellow and black
+   never encode data.
+3. `ingreso` and `administracion` sit below 3:1 on white, so a mark in either always carries its
+   label. Up and down next to each other (`ingreso` beside `perdida`) always carry a + or − sign.
+4. `DESIGN_CONTRACT.md` lists the group under Color, generated like the rest.
+
+**Consequences**
+
+- Every adjacent pair passed the dataviz validator on the board (worst colour-vision-deficiency
+  ΔE 9.2, worst normal-vision ΔE 16.3). A new series colour is added here and re-validated,
+  never picked on a screen.
+- The phone has no charts today; when it does, it reads the same group.
+
+**References**
+
+- OD-6 in `docs/plan/20-command-center.md` §10; E-12; ADR-057 (tokens); ADR-117 (El Mostrador).
+
+## ADR-134
+
+**Title:** Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table
+
+**Date:** 2026-11-03
+
+**Status:** Accepted — owner decision of 2026-11-03 («Yes, via sync»); amends contract §8 (a fourth HYBRID table), Track M's «no product management on the phone» (a photo is capture, not management) and ADR-083 D3's bucket (the same mechanism can carry receipt photos later); tasks C-24, B-19, M-13, P-42
+
+**Context**
+
+A product's visual is two strings: a Lucide icon name (`icono`) and one of eight tints
+(`colorFondo`). The owner wants the real product on the tile, captured on the phone where the
+product is in hand, and explicitly not «the traditional upload»: no file dialog, no crop handles,
+no progress bar. The portal shows the photo; it does not take one for now.
+
+Three facts of the codebase shape the design:
+
+1. **The sync carries JSON rows only.** A pushed row is capped at 16 KB (`MAX_PUSH_ROW_BYTES`),
+   a body at 2 MB, a snapshot page at 1.9 MB. Bytes cannot ride the `products` row.
+2. **Products are HYBRID: a phone inserts, never updates.** Attaching a photo to an existing
+   product is, naively, an update the server refuses (`HYBRID_UPDATE_FORBIDDEN`).
+3. **There is no object storage.** Supabase Storage was ruled out (N-19: its REST needs a JWT our
+   auth never mints); ADR-127 keeps files as `bytea` behind a `BlobStore` port with Azure Blob as
+   the destination after about twenty clients. ADR-083 D3 planned a bucket for receipt photos and
+   nothing was built.
+
+On the device side, both platforms already ship the segmentation this needs, free and offline:
+Apple Vision's `VNGenerateForegroundInstanceMaskRequest` (iOS 17, the model ships with the OS)
+and ML Kit Subject Segmentation on Android (API 24, a one-time ~5 MB model from Play services,
+about 200 ms on a mid-range phone). The four npm wrappers around them are each ~200 lines of
+Swift and Kotlin with no maintenance record (one unpublished since 2024, one at v0.1.0 with no
+history, one whose README admits iOS is unverified). Models we would ship ourselves are worse for
+this market: RMBG-2.0 is non-commercial, BiRefNet is 40 MB or more in the binary and slow on the
+Android phones most emprendedores carry. `@shopify/react-native-skia`, already a dependency,
+encodes WebP with alpha on both platforms.
+
+**Decision**
+
+1. **The photo is a row, not a file.** A new table `product_images` — `id` (ULID), `businessId`,
+   `productId`, `deviceId` (who took it; `null` from the portal), `mime` (`image/webp` only),
+   `bytes` (base64 text on the wire and in SQLite, `bytea` in Postgres), `width`, `height`,
+   `createdAt`. **`bytes = null` is the tombstone**: «Quitar foto» inserts one. The domain entity
+   is `ProductImage` in `packages/domain`; `products` gains no column.
+2. **Append-only, HYBRID.** `product_images` joins `HYBRID_TABLES` beside `inventory_movements`:
+   phones and the portal insert, nobody updates or deletes a row. Replacing a photo is a new row.
+   This sidesteps the hybrid-update ban without touching it, and rides the outbox, the
+   entitlement auth, the pull and the snapshot as they are. The row limit for this table is
+   **64 KB** (`maxPushRowBytes`), its own entry beside `auditorias_inventario`.
+3. **The newest row per product wins**, by `createdAt` then `id` (ULIDs order by time). Two
+   phones photographing the same product within the same second is the only conflict and either
+   photo is right, so nothing is surfaced; this is a deliberate, written carve-out from «never
+   silently merge», confined to this table. Superseded rows are purged server-side 30 days after
+   they are superseded and on the device as soon as a newer one is applied.
+4. **Capture is two taps.** The tile's camera affordance opens `expo-camera` with a square guide;
+   one shot; the subject lifts off the background onto the product's tint (the «lift» motion of
+   `docs/design/el-mostrador.md` §6), and «Listo» saves it. A gallery pick sits behind a long
+   press as the secondary path. No crop UI: the mask's bounding box is the crop.
+5. **Segmentation is ours, on-device, with a fallback that never blocks.** An Expo module in
+   `apps/mobile/modules/subject-lift` (Swift over Vision, Kotlin over ML Kit) returns a PNG cutout
+   cropped to the subject's bounding box, at most 1024 px, and `lifted: boolean`. iOS 16, Android
+   without Play services, a model not yet downloaded, or no subject found → `lifted: false` and a
+   centred square crop of the plain photo. The Android model is requested at app start
+   (`ModuleInstallClient`), so the first capture does not wait for it.
+6. **One asset, 512 px, WebP.** Skia draws the cutout into a 512 × 512 transparent canvas with an
+   8 % margin and encodes WebP at quality 80, stepping down to 70 and 60 until the bytes are
+   under 40 KB (base64 ≈ 55 KB, under the row limit). No thumbnails: a tile is drawn at 120 pt
+   and 512 px covers 4× density. A 4 MB camera JPEG becomes about 30 KB.
+7. **Rendering.** The phone's `ProductoIcono` draws the photo on the tint when the product has
+   one, from a `data:` URI; the icon stays the fallback. The portal serves the newest row from
+   `GET /api/productos/[productId]/imagen` inside `withTenant`, with an ETag of the bytes' hash,
+   and draws it in the catalogue rows and the product sheet; the sheet offers «Quitar foto». The
+   web caja keeps icons until its own sync learns the table (out of scope here).
+8. **The bytes stay behind the ADR-127 port.** `bytea` now; when the tenant data moves to Azure
+   Blob the Postgres side becomes a reference and the wire does not change — the device never
+   learns where the cloud keeps the bytes.
+
+**Alternatives considered**
+
+- *A separate media endpoint and a second outbox* (ADR-083 D3's shape): the path that scales to
+  Azure Blob first and would serve receipt photos too, but it needs a second auth path, a lazy
+  download cache on every phone and a key on the product row (a hybrid update) before one photo
+  shows. Rejected for now; it remains the shape to grow into if a tenant's catalogue outgrows
+  the snapshot (see consequences).
+- *Base64 in the `products` row*: zero new tables, but every pull of a product carries its image,
+  a product edit from the portal re-sends it, and a phone still cannot attach a photo to an
+  existing product. Rejected.
+- *A shipped segmentation model* (RMBG-2.0, BiRefNet via ExecuTorch or ONNX): licence and binary
+  size, above. Rejected.
+- *An npm wrapper*: the same 200 lines, without a maintainer. Rejected; the code lives in the app.
+- *Portal upload with in-browser removal* (`@imgly/background-removal`, a 40–80 MB model
+  download per browser): deferred; the owner wants the phone first.
+
+**Consequences**
+
+- A 1,000-photo catalogue adds about 30 MB to the tenant and about 25 pages to a snapshot
+  activation (the snapshot sends only the newest row per product). Incremental pulls carry only
+  new photos. If a tenant ever outgrows that, the move is to lazy fetch by id over the same
+  table, not a new shape.
+- The export includes the photos: the data is never held hostage (ADR-053 §5).
+- Capture works offline end to end; the only download is Android's segmentation model, once.
+- `expo-camera`'s permission string must name product photos, not only barcodes.
+- Track M's «no product management on the phone» is narrowed: creating a product and giving it
+  a photo are capture; editing its name, price or icon is still the portal's.
+- A new SQLite migration (triggers into the change log), a Postgres migration with RLS, a snapshot
+  section after `products`, and the mock server all learn one table — each with its migration
+  and conformance test, per CLAUDE.md §2.9.
+
+**References**
+
+- Apple Vision `VNGenerateForegroundInstanceMaskRequest` (iOS 17); ML Kit Subject Segmentation
+  (`play-services-mlkit-subject-segmentation:16.0.0-beta1`, API 24).
+- ADR-053 §5 (data never held hostage), ADR-081 (HYBRID insert-only precedent), ADR-083 D3
+  (receipt photos), ADR-103/ADR-128 (what a spec that writes must do), ADR-117 (El Mostrador:
+  the capture boards go on the canvas first), ADR-121 (snapshot paging), ADR-127 (`BlobStore`
+  port, Azure Blob later).
+- C-24, B-19, M-13, P-42 in `docs/plan/`.
+## ADR-135
+
+**Title:** «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision of 2026-10-30 to build E-26 before an Azure account
+exists; details ADR-127 §4 and §5
+
+**Context**
+
+ADR-127 put a `BlobStore` port in front of «Empresa»'s files, with a Postgres adapter for today
+and an Azure Blob adapter for later, and asked for direct browser uploads with short-lived SAS
+URLs, a container under a five-year immutability policy, and a console identity that can create
+and read blobs but never delete them. MEXIA has no Azure account yet. The code has to be ready
+and tested now (Postgres stays the live store), and the move has to be one command once the
+account exists.
+
+**Decision**
+
+1. **The Postgres store is its own table.** `corp.blobs (key, content)` holds the bytes; the
+   console may insert and select, never update or delete. `corp.documents` loses `content` and
+   gains `storage` (`pg` | `azure`) and `blob_key` (unique). Migration 0007 copies every file into
+   `corp.blobs` under its document's id and points the row at it; 0008 drops `content`. Both
+   adapters therefore look alike, and the move to Azure is a copy between two stores.
+2. **Browsers upload into an inbox, not into the kept container.** `corp-entrantes` takes a
+   one-time `cw` SAS PUT (ten minutes) signed after the founder gate and the domain's file check.
+   The console then reads the file (25 MB at most), hashes it, runs the same use case as a form
+   upload and writes it into `corp-docs` with `If-None-Match: *`. Only the console writes the kept
+   container, and only after validation; a lifecycle rule empties the inbox after a day.
+3. **Limits follow the store.** 4 MB on Postgres (the request cap), 25 MB on Azure
+   (`MAX_BYTES_DIRECTO`); the repository exposes its store's limit and the use cases apply it.
+4. **«Ver» on an Azure file redirects** to a ten-minute `r` SAS URL with the name and type set by
+   the SAS. The storage account's origin is not the console's, so the `sandbox` CSP the console
+   puts on Postgres files is not needed for isolation; a Vercel function could not return 25 MB
+   anyway.
+5. **The console signs with the account key.** Delete and overwrite are refused by the container's
+   **locked** time-based immutability policy (1826 days), which binds every caller, the key
+   included. This replaces the plan's «console identity that may create and read, never delete»:
+   there is no Azure-hosted identity on Vercel, and a service principal with a custom role would
+   add a secret and a moving part without adding a refusal the lock does not already give.
+6. **The move is a use case** (`moverDocumentos`): check the SHA-256 recorded at upload, copy,
+   check the copy, then point the row at Azure as the schema's owner. A second run checks and does
+   not rewrite. Emptying `corp.blobs` is a separate command that checks each copy again first.
+
+**Consequences**
+
+- Until Azure is configured nothing changes for the founders; the browser asks for a signed URL,
+  gets none, and the file travels in the form as before.
+- `pg_dump -n corp` still carries every file while they live in `corp.blobs`. After the move,
+  the lift-out (E-44) adds a container copy, verified against the SHA-256 column.
+- The account key is a production secret with the power to write; leaking it cannot destroy a
+  kept file, but it can fill the containers. Rotating it is the response.
+- A failed row insert after a successful blob write leaves an unreferenced blob; nothing reads
+  it, and on Azure it cannot be removed before its retention ends.
+- Azurite does not enforce immutability, so the lock is proven by
+  `scripts/corp-blob-provision.sh --bloquear` against the real container.
+
+**References**
+
+- ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.

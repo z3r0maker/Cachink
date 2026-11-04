@@ -12,7 +12,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { boolean, index, integer, pgTable, text } from 'drizzle-orm/pg-core';
+import { boolean, customType, index, integer, pgTable, text } from 'drizzle-orm/pg-core';
 
 import { auditColumns, centavos } from './_columns';
 
@@ -128,4 +128,46 @@ export const products = pgTable(
     ...auditColumns,
   },
   (t) => [index('products_business_idx').on(t.businessId, t.nombre)],
+);
+
+/**
+ * Base64 on the wire and in every row object, `bytea` on disk: the photo's
+ * row shape is identical to the device's (`tests/drift.test.ts` compares
+ * names; the codec needs no per-table case), while Postgres stores bytes.
+ */
+const base64Bytea = customType<{ data: string; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+  toDriver(value: string): Buffer {
+    return Buffer.from(value, 'base64');
+  },
+  fromDriver(value: Buffer): string {
+    return Buffer.from(value).toString('base64');
+  },
+});
+
+/**
+ * Product photos (ADR-134): append-only, the newest row per product wins, a
+ * row with `bytes` NULL is the tombstone. HYBRID on the wire (contract §8).
+ */
+export const productImages = pgTable(
+  'product_images',
+  {
+    id: text('id').primaryKey(),
+    productoId: text('producto_id').notNull(),
+    mime: text('mime').notNull().default('image/webp'),
+    bytes: base64Bytea('bytes'),
+    width: integer('width'),
+    height: integer('height'),
+    ...auditColumns,
+  },
+  (t) => [
+    index('product_images_business_producto_idx').on(
+      t.businessId,
+      t.productoId,
+      t.createdAt.desc(),
+      t.id.desc(),
+    ),
+  ],
 );

@@ -10,6 +10,7 @@ import { historial } from '@xangarro/domain/corp';
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
+import { createPgBlobStore } from '../src/queries/blobs';
 import {
   createDocumentRepository,
   documentosDelMovimiento,
@@ -34,7 +35,7 @@ const archivo = (texto: string) => ({
 describe('corp expediente storage', () => {
   const db = () => createCorpDb(url as string);
   const deps = () => ({
-    documentos: createDocumentRepository(db()),
+    documentos: createDocumentRepository(db(), createPgBlobStore(db())),
     ledger: createCorpLedgerRepository(db()),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   });
@@ -68,7 +69,7 @@ describe('corp expediente storage', () => {
     );
     // Two versions racing past the use case still meet the unique constraint.
     await assert.rejects(
-      createDocumentRepository(db()).guardar({
+      createDocumentRepository(db(), createPgBlobStore(db())).guardar({
         ...v1,
         contenido: new Uint8Array([1]),
         obligacionId: null,

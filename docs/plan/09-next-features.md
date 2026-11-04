@@ -616,10 +616,10 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** snapshot tests per template; totals stay legible with any brand colour (contrast
   check picks the text colour).
 
-### N-21 Compartir por WhatsApp `[LAUNCH]`
+### N-21 Compartir por WhatsApp `[LAUNCH]` [alta]
 
 - [~] Status · **Blocked by:** N-20 (hecho) · web half landed 2026-09-20
-  **Remaining (2026-09-23, verified against the code):** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. [LAUNCH]
+  **Remaining (2026-09-23, verified against the code):** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24.
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
   device-token route `GET /api/v1/comprobante?ticketId=` renders the N-20
@@ -712,7 +712,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - **Acceptance:** each phone screen matches its Track O counterpart at 375 px; Maestro flows updated
   (CLAUDE.md §6).
 
-### N-25 Vinculación de dispositivos por QR `[LAUNCH]`
+### N-25 Vinculación de dispositivos por QR `[LAUNCH]` [alta]
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
       **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24.

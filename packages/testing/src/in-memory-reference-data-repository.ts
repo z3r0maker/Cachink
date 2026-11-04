@@ -31,6 +31,7 @@ export class InMemoryReferenceDataRepository implements ReferenceDataRepository 
         conversion_recetas: count(tables.conversion_recetas),
         opening_balances: count(tables.opening_balances),
         opening_balance_clients: count(tables.opening_balance_clients),
+        product_images: count(tables.product_images),
       },
     };
   }

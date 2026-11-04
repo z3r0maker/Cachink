@@ -39,35 +39,77 @@
 
 ### Open owner decisions (answer before the task that needs it)
 
-| #    | Decision                                         | Recommendation                                                                                             | Needed by |
-| ---- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | --------- |
-| OD-1 | Default basis of the P&L view                    | **Devengado** (invoiced in the month) with a «Flujo» toggle; taxes always use flujo (RESICO is cash basis) | E-12      |
-| OD-2 | How shared costs split between projects          | By revenue share, with a manual override per cost. Irrelevant until project 2                              | E-41      |
-| OD-3 | May MEXIA's financial data go to Claude/Foundry? | Yes for MEXIA's own books; **never** tenant PII. Revenue leaves only aggregated by project and period      | E-30      |
-| OD-4 | Tablero wording the owner still finds ambiguous  | Settle the deliverable definition on the canvas (E-20's design) before coding it                           | E-20      |
-| OD-5 | Which Claude Design project holds these screens  | A new **«Consola»** project (none exists; `design-reference/` holds portal, operador, comprobantes)        | E-01      |
+| #    | Decision                                         | Recommendation                                                                                                                  | Needed by |
+| ---- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| OD-1 | Default basis of the P&L view                    | **Answered 2026-10-30: devengado** (invoiced in the month) with a «Flujo» toggle; taxes always use flujo (RESICO is cash basis) | E-12      |
+| OD-2 | How shared costs split between projects          | By revenue share, with a manual override per cost. Irrelevant until project 2                                                   | E-41      |
+| OD-3 | May MEXIA's financial data go to Claude/Foundry? | Yes for MEXIA's own books; **never** tenant PII. Revenue leaves only aggregated by project and period                           | E-30      |
+| OD-4 | Tablero wording the owner still finds ambiguous  | Settle the deliverable definition on the canvas (E-20's design) before coding it                                                | E-20      |
+| OD-5 | Which Claude Design project holds these screens  | A new **«Consola»** project (none exists; `design-reference/` holds portal, operador, comprobantes)                             | E-01      |
 
 ## 2. Map of the area
 
-`/empresa` routes in `apps/backoffice`, behind `requireFounder()`:
+`/empresa` routes in `apps/backoffice`, behind `requireFounder()`. The «Entry › tab» column is the
+navigation below.
 
-| Route                  | Screen               | The question it answers                                     | Phase |
-| ---------------------- | -------------------- | ----------------------------------------------------------- | ----- |
-| `/empresa`             | Resumen              | How is the company today, and what needs us?                | 1     |
-| `/empresa/movimientos` | Movimientos          | What came in and went out, and why?                         | 0     |
-| `/empresa/facturas`    | Facturas             | Which CFDIs did we issue and receive, and their state?      | 1     |
-| `/empresa/resultados`  | Estado de resultados | Do we make money? Gross margin, EBITDA, net                 | 1     |
-| `/empresa/balance`     | Balance y socios     | What do we own and owe, and what is each partner's account? | 1     |
-| `/empresa/impuestos`   | Impuestos            | What ISR and IVA do we owe this month, and was it paid?     | 1     |
-| `/empresa/caja`        | Caja                 | How much cash do we have, and how many months does it last? | 2     |
-| `/empresa/presupuesto` | Presupuesto          | Are we within plan? Each partner's spending Límite          | 2     |
-| `/empresa/tablero`     | Tablero              | What did each partner commit to and deliver this quarter?   | 2     |
-| `/empresa/acciones`    | Acciones             | Who owns what, and how would the next pool cut fall?        | 2     |
-| `/empresa/agenda`      | Agenda               | What is due, to SAT, SE and IMPI, and when?                 | 0     |
-| `/empresa/expediente`  | Expediente           | Where is that document?                                     | 0     |
-| `/empresa/cierre`      | Cierre del mes       | Is this month closed and reconciled?                        | 1     |
-| `/empresa/corporativo` | Libro corporativo    | Partners, beneficial owners, actas, credentials, trademark  | 0     |
-| `/empresa/propuestas`  | Propuestas           | What did the agents suggest that we must approve?           | 3     |
+| Route                  | Entry › tab                       | The question it answers                                     | Task       | Phase |
+| ---------------------- | --------------------------------- | ----------------------------------------------------------- | ---------- | ----- |
+| `/empresa`             | Resumen                           | How is the company today, and what needs us?                | E-16       | 1     |
+| `/empresa/movimientos` | Dinero › Movimientos              | What came in and went out, and why?                         | E-02       | 0     |
+| `/empresa/facturas`    | Dinero › Facturas                 | Which CFDIs did we issue and receive, and their state?      | E-10, E-11 | 1     |
+| `/empresa/servicios`   | Dinero › Servicios                | Which services do we pay for, and what will they cost?      | E-24       | —     |
+| `/empresa/caja`        | Dinero › Caja                     | How much cash do we have, and how many months does it last? | E-23       | 2     |
+| `/empresa/resultados`  | Resultados › Estado de resultados | Do we make money? Gross margin, EBITDA, net                 | E-12       | 1     |
+| `/empresa/balance`     | Resultados › Balance              | What do we own and owe?                                     | E-12       | 1     |
+| `/empresa/impuestos`   | Resultados › Impuestos            | What ISR and IVA do we owe this month, and was it paid?     | E-13       | 1     |
+| `/empresa/presupuesto` | Resultados › Presupuesto          | Are we within plan? Each partner's spending Límite          | E-22       | 2     |
+| `/empresa/socios`      | Socios › Cuentas                  | What did each partner put in and lend?                      | E-03       | 0     |
+| `/empresa/tablero`     | Socios › Tablero                  | What did each partner commit to and deliver this quarter?   | E-20       | 2     |
+| `/empresa/trimestre`   | Socios › Trimestre                | How did the quarter go, against the previous one?           | E-17       | 2     |
+| `/empresa/acciones`    | Socios › Acciones                 | Who owns what, and how would the next pool cut fall?        | E-21       | 2     |
+| `/empresa/agenda`      | Cumplimiento › Agenda             | What is due, to SAT, SE and IMPI, and when?                 | E-04       | 0     |
+| `/empresa/cierre`      | Cumplimiento › Cierre del mes     | Is this month closed and reconciled?                        | E-14       | 1     |
+| `/empresa/expediente`  | Cumplimiento › Expediente         | Where is that document?                                     | E-05       | 0     |
+| `/empresa/corporativo` | Cumplimiento › Corporativo        | Partners, beneficial owners, actas, credentials, trademark  | E-06       | 0     |
+| `/empresa/propuestas`  | Propuestas                        | What did the agents suggest that we must approve?           | E-31       | 3     |
+
+### Navigation (owner decision, 2026-10-29; canvas «Ronda 7 · Navegación»)
+
+The owner found the rail's 17 entries too many. «Empresa» has **six entries, each one question**,
+and an entry's screens are tabs under the page title. Boards: «Navegación agrupada (componente)»,
+«Mapa: de 17 entradas a 6», «Dinero · Movimientos» (every tab) and «Cumplimiento · Agenda» (only
+what is built today).
+
+| Entry        | Tabs, in order                                           | The question                                           |
+| ------------ | -------------------------------------------------------- | ------------------------------------------------------ |
+| Resumen      | none (the landing page; holds E-15's tope de la SAS)     | How is the company today, and what needs us?           |
+| Dinero       | Movimientos · Facturas · Servicios · Caja                | What came in, what went out, and how much is left?     |
+| Resultados   | Estado de resultados · Balance · Impuestos · Presupuesto | Do we make money, and what do we owe the SAT?          |
+| Socios       | Cuentas · Tablero · Trimestre · Acciones                 | What did each partner put in, promise and deliver?     |
+| Cumplimiento | Agenda · Cierre del mes · Expediente · Corporativo       | What is due, is the month closed, where is each paper? |
+| Propuestas   | none (an inbox with its pending count)                   | What did the agents suggest that we must approve?      |
+
+**Rules**
+
+1. **A tab appears when its screen ships** (ADR-117: nothing reads «Pronto»). An entry appears with
+   its first built tab, and an entry with one built tab draws no tab bar. Today a founder sees
+   Dinero (Movimientos), Socios (Cuentas) and Cumplimiento (Agenda, Expediente, Corporativo).
+2. **Routes do not change.** A tab is a link to its own route; the rail entry is active on any of
+   its tabs' routes and links to its first built tab. That keeps the change cheap to undo, so it
+   has no ADR.
+3. **`/empresa` opens on Resumen** (E-16, 2026-11-02); before it, it opened on Dinero › Movimientos.
+4. **Two levels, never three.** Page tabs sit under the title; a screen's own filters or views
+   (Movimientos' Todos, Ingresos, Gastos…; Agenda's Próximos, Calendario, Evidencias) stay inside
+   its panel. At most five tabs per entry (CLAUDE.md §6).
+5. **Trimestre lives in Socios** (owner, 2026-10-29): it is the partners' quarterly review and
+   draws on the Tablero, and Resumen's own Mes, Trimestre, Año selector would clash with a tab of
+   that name.
+6. **The share register stays in Corporativo until E-21.** Corporativo's hero is partners and
+   shares (round 2); E-21's Socios › Acciones takes over the register and the simulator, and
+   Corporativo keeps a summary that links there.
+7. The «Plataforma» group is out of scope here.
+
+The live rail moves to this shape in E-07.
 
 ## 3. The ledger (ADR-125 §4)
 
@@ -133,8 +175,10 @@ Memo: costo de sudor = valor aceptado del Tablero no pagado → EBITDA económic
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ISR provisional (RESICO PM) | Year to date: (income actually collected − authorised deductions actually paid) × 30 %, minus provisional payments already made. Shared with the portal's estimate for persona-moral tenants |
 | IVA del mes                 | IVA trasladado collected − IVA acreditable paid − IVA retenido (when applicable); cash basis                                                                                                 |
-| Burn                        | Net cash out per month, as the average of the last 3 months                                                                                                                                  |
+| Caja                        | Bancos + Stripe por depositar at the cut, partner money included                                                                                                                             |
+| Burn                        | Net cash out per month, as the average of the last 3 months. Partner money (an entry touching capital, AFAC or a partner loan) is left out, and so are months before the first movement      |
 | Meses de caja (runway)      | Cash ÷ burn. «Sin consumo» when burn ≤ 0                                                                                                                                                     |
+| Punto de equilibrio         | The monthly income that covers the average cash out, every cost taken as fixed (conservative: costo del servicio really falls with income). «Hasta X %» = (cash in − cash out) ÷ cash in     |
 | CAC                         | Ventas y marketing spend ÷ new paying customers, per period and project                                                                                                                      |
 | LTV                         | ARPA × gross margin % ÷ monthly churn (from N-63)                                                                                                                                            |
 | Payback                     | CAC ÷ (ARPA × gross margin %), in months                                                                                                                                                     |
@@ -434,8 +478,8 @@ with property tests:
       MEXIA CSD or e.firma goes on the Agenda, and `alertasDeCertificados` flags what expires within 60
       days for the Resumen (E-16). Playwright: shares subscribed and the notice on the Agenda, the
       trademark updated with its proof, a CSD shown as «Vence en 41 días».
-      **Left for later:** the Resumen signal itself waits for E-16; the hero's «Ver acciones y bolsa»
-      waits for E-21.
+      **Left for later:** the Resumen signal itself waits for E-16 (shipped 2026-11-02); the hero's
+      «Ver acciones y bolsa» waits for E-21.
 - **What:**
   - partners and the beneficial-owner file;
   - share events (they come from E-21; manual before then);
@@ -443,6 +487,33 @@ with property tests:
   - e.firma and CSD serial numbers and expiry dates, metadata only, never key material.
 - **Acceptance:** a share event creates its 15-business-day beneficial-owner obligation in E-04;
   a CSD expiring in 60 days raises a Resumen signal.
+
+### E-07 Navegación por grupos `[media]`
+
+- [x] Status · **Blocked by:** — · **Surfaced by:** canvas «Ronda 7 · Navegación» (owner, 2026-10-29)
+      · **Done:** 2026-10-30
+      **Progress (2026-10-30):** `src/shell/empresa-nav.ts` holds the built entries (Dinero ›
+      Movimientos, Socios › Cuentas, Cumplimiento › Agenda · Expediente · Corporativo); the rail
+      lights an entry on any of its tabs' routes, sub-pages included. `PageTabs` draws the bar only
+      for two or more tabs, so Dinero and Socios show none. Cumplimiento's three screens share
+      `EncabezadoSeccion` (title «Cumplimiento», the tabs under it, the screen's actions at the
+      right); the Agenda's Próximos and Evidencias views moved out of the header into the content.
+      Playwright: the founder sees three entries, Cumplimiento's tabs with live rows on each, no bar
+      on Dinero or Socios, and every existing `/empresa/*` URL opens.
+      **Merged with E-11 (2026-10-30):** Facturas joins Dinero as its second tab, so Dinero now
+      draws its bar (Movimientos · Facturas) under `EncabezadoDinero`, which both month screens
+      share (title «Dinero», the month, «Mes anterior» / «Mes siguiente», the screen's actions).
+      Socios alone still shows none.
+- **What:** §2's navigation in the console:
+  - `EMPRESA_NAV_ITEMS` becomes the six entries, each with its tabs (label, route, task), and an
+    entry or tab is listed only once its task ships;
+  - a shared page-tabs component (links with `aria-current`, the El Mostrador segmented style,
+    tokens only) under the title of each built entry with two or more tabs;
+  - the rail entry is active on any of its tabs' routes;
+  - `/empresa` keeps redirecting to Movimientos until E-16.
+- **Acceptance:** a Playwright spec shows the founder three entries (Dinero, Socios,
+  Cumplimiento), Cumplimiento's three tabs with live data on each, and no tab bar on Dinero or
+  Socios; every existing `/empresa/*` URL still opens its screen.
 
 **Phase 1 — first month with revenue**
 
@@ -535,7 +606,28 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [ ] Status · **Blocked by:** E-02, OD-1
+- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Falta:** Balance, whose board
+  CD-08 is not on the canvas yet (draw it, owner review, then build `/empresa/balance` and its
+  «Activo = Pasivo + Capital» check); the sweat-cost memo, which reads the Tablero's accepted
+  value (E-20); the bridge's drivers («8 negocios nuevos…»), which need E-10's billing import.
+  **Progress (2026-10-30, board CD-07):**
+  - `@xangarro/domain/corp` `resultados/`: periods (month, quarter, year and the one before),
+    `estadoDeResultados` (§4's cascade; each P&L line carries its invoice date and the day its
+    money moved, so devengado and flujo are one function; margins are null without income or
+    without costs captured), `puenteEbitda` and `tendencia`. ISR is estimated on cash in both
+    bases at 30 % through the portal's `calcularIsrPorRegimen`; E-13 refines it. The hand-worked
+    fixture is the board's September (gross margin 81.0 %, EBITDA 35.0 %).
+  - `importesDeResultados` (data-corp): an invoice on credit moves money on its payment's date
+    and never while unpaid; its cancellation moves none. Integration test with a cash expense,
+    a PPD paid next month, a PPD cancelled unpaid and a reversal.
+  - `/empresa/resultados`, the new «Resultados» rail entry (one tab, no bar): the cascade, the
+    EBITDA bridge against the previous period, six months of income against costs, and the
+    statement, each line opening into its movements. Mes, Trimestre, Año; Devengado, Flujo.
+    Charts are SVG rects coloured from the new `dataviz` tokens (ADR-133): the console's CSP
+    drops inline `style` attributes.
+  - Playwright: two cobros posted by the use case and a fee captured in Registrar, in a month
+    of their own; the figures, the bridge, an opened line, Flujo and the quarter reach the page.
+  - Not in scope: a project filter (E-41, one project today).
 - **What:**
   - §4's cascade as domain functions shared with the portal;
   - `/empresa/resultados`: month, quarter and year; project or company; devengado or flujo; the
@@ -583,7 +675,33 @@ with property tests:
 
 ### E-16 Resumen `[media]`
 
-- [ ] Status · **Blocked by:** E-12, E-04
+- [x] Status · **Blocked by:** E-12, E-04 · **Done:** 2026-11-02
+- **Progress (2026-11-02, boards CD-12b and CD-12c, approved):**
+  - **Autonomía, in the domain** (`@xangarro/domain/corp` `caja/`): `cajaAl`, `flujoMensual` and
+    `autonomia`, test-first, with §4's Caja, Burn and Punto de equilibrio definitions. E-23 reuses them.
+  - **The read** (`movimientosDeCaja` in `data-corp`) nets each entry on cash and marks partner
+    money. Its integration test covers a Stripe cobro and payout, capital, a loan, a reversed
+    expense, one on credit and an entry after the cut.
+  - **The page** (`/empresa`, which the area now opens on, and the rail's first entry):
+    - the hero is always today's cash, averaged over the three whole months before today (the
+      running month stands in for a company younger than one). It has three states: CD-12 «se
+      sostiene sola», CD-12b «aún depende de los socios» and CD-12c «Aún no hay movimientos»,
+      which also covers a ledger with partner money and nothing else;
+    - four tiles (Ingresos netos, Margen bruto, EBITDA, Utilidad neta), devengado like Resultados,
+      against the previous period, each a link to Resultados for that period. The margin is
+      truncated to whole points, so 69.9 % never reads as the 70 % target;
+    - «De dónde sale la utilidad» as bars from zero, scaled to the largest of income, the costs'
+      total and each line; below EBITDA a line shows only when it moved;
+    - signals: margin under 70 %, runway under 6 months, a certificate expiring within 60 days
+      (`alertasDeCertificados`, E-06), and the Agenda's late items (one signal, or one for all);
+    - the Agenda's next three open items, funding halves included, as Agenda › Próximos lists them.
+  - **Tests:** view tests for the hero, tiles, bars and signals in the boards' own figures, and a
+    Playwright step on E-12's March that follows a tile and the CSD signal.
+  - **Left for later**, each joining the Resumen with its own task: MRR and «8 negocios nuevos»
+    (E-10), Impuestos del mes (E-13), Tope de la SAS and its 60/80/95 % signal (E-15), Objetivos
+    del trimestre and the pool summary (E-20, E-21), «Pendientes de socios» (E-20, E-31), the
+    infra ÷ MRR signal (E-10), «Ver caja y escenarios» (E-23) and the Proyecto chip (one project
+    until E-41).
 - **What:** `/empresa` home with:
   - the KPI strip: caja, meses de caja, MRR, margen bruto, EBITDA, impuestos del mes, avance al
     tope SAS;
@@ -700,8 +818,9 @@ with property tests:
 ### E-44 Salida a otro sistema `[baja]`
 
 - [ ] Status · **Blocked by:** E-01
-- **What:** a written and rehearsed runbook: dump `corp`, restore, swap the two ports, cut the
-  console routes over.
+- **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
+  container and check every file against `corp.documents.sha256` (E-26, ADR-135), swap the two
+  ports, cut the console routes over.
 
 ## 9. Canvas round 2 (owner review, 2026-10-08)
 
@@ -773,8 +892,8 @@ New owner decisions:
   normal-vision ΔE 16.3). Aqua and magenta sit below 3:1 contrast, so they always carry labels.
   Aqua next to red (up/down) always carries a + or − sign.
 
-  **Next step:** a design-system change adds the group to `@xangarro/tokens`, recorded with an
-  ADR.
+  **Done 2026-10-30:** `@xangarro/tokens` has the `dataviz` group (ADR-133), listed in
+  `DESIGN_CONTRACT.md`; E-12's charts are its first use.
 
 - **Unfinished work rolls over.** At quarter close, unfinished cards move to the next quarter and
   are recorded as «no cumplido» in the quarter they missed. Unaccepted value never counts for that
@@ -895,7 +1014,20 @@ turns into proposed objectives and cards.
 
 ### E-26 Almacenamiento de documentos en Azure Blob `[media]`
 
-- [ ] Status · **Blocked by:** E-05 · **Needed by:** E-20
+- [~] Status · **Blocked by:** E-05 · **Needed by:** E-20 · **Falta:** an Azure account. Run
+  `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY`
+  in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the
+  script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted),
+  then `corp-blobs:move --vaciar`. The 20 MB upload and the lock are proven on Azurite and by
+  that script, not yet against the real container.
+  **Progress (2026-10-30, ADR-135):** the code is done and Postgres stays the live store.
+  `BlobStore` port in `@xangarro/application/corp` with `corp.blobs` (migrations 0007 + 0008,
+  old → new test) and an Azure adapter (`apps/backoffice/src/server/blobs/`, tested on
+  Azurite). Browsers PUT into a `corp-entrantes` inbox with a ten-minute SAS; the console
+  reads, hashes and files the file into `corp-docs`. «Ver» redirects Azure files to a read
+  SAS. Limits follow the store (4 MB / 25 MB). The move is the `moverDocumentos` use case.
+  The console signs with the account key and relies on the locked policy for «never delete»
+  (ADR-135 §5), not on a delete-less identity.
 - **What:**
   - a `BlobStore` port in `@xangarro/application/corp` with the Postgres adapter of today and an
     Azure Blob adapter (`@azure/storage-blob`, latest stable);

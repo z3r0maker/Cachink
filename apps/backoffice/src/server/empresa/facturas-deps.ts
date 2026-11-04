@@ -7,6 +7,7 @@ import {
   createReceivedInvoiceRepository,
 } from '@xangarro/data-corp';
 
+import { almacenParaNuevos } from '../blobs';
 import { requireCorpDb } from '../db/corp';
 import { rfcDeMexia } from './facturas-lectura';
 import { consultaSat } from './sat-consulta';
@@ -17,7 +18,7 @@ export const facturasDeps = () => {
   return {
     facturas: createReceivedInvoiceRepository(db),
     ledger: createCorpLedgerRepository(db),
-    documentos: createDocumentRepository(db),
+    documentos: createDocumentRepository(db, almacenParaNuevos(db)),
     sat: consultaSat(),
     rfcMexia: () => rfcDeMexia(db),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),

@@ -1940,3 +1940,21 @@ WhatsApp).
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
   the v1 clamp (Q10), become switchable in Mi negocio › Funciones for Xangarrote.
 - **Acceptance:** each one, switched on, appears in the caja and syncs its records.
+
+### P-42 La foto del producto en el catálogo y en la ficha (ADR-134) [media]
+
+- [ ] Status · **Blocked by:** B-19 · **Blocks:** —
+- **Context:** the phone takes the photo (M-13); the portal shows it and can remove it. No upload
+  here yet (ADR-134 alternatives).
+- **Files:** `apps/web/src/app/(portal)/productos/celdas.tsx` (the row's glyph becomes the photo
+  on the tint when `GET /api/productos/[id]/imagen` has one; `ProductGlyph` stays the fallback),
+  `sheet/apariencia.tsx` (the preview shows the photo; «Quitar foto» inserts a tombstone row
+  through a `'use server'` action → `recordChange`, so every phone drops it on the next pull),
+  `nuevo/vista.tsx` (preview unchanged: a new product has no photo).
+- **Steps:** canvas first — the catalogue row and the Apariencia section with a photo go on the
+  «Portal» page of the canvas and are approved before code (ADR-117); then the two screens; a
+  Playwright spec on a minted tenant (`mintTenant()` + a `product_images` row from
+  `tenant-rows.ts`) that asserts the image request returns 200 with `image/webp` and that
+  «Quitar foto» makes it 404.
+- **Acceptance:** `pnpm lint:design` stays at zero; the spec is green in the parallel phase (it
+  writes its own tenant, no `@serial`).

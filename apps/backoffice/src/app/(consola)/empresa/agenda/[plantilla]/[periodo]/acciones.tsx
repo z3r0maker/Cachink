@@ -9,6 +9,7 @@ import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
 import { Opciones, submitWith } from '../../../movimientos/registrar/opciones';
+import { useEnvioConArchivo } from '../../../subida-directa';
 import { Aviso } from '../../../socios/formas';
 
 /** An obligation's buttons and its upload (E-04): each step posts, each file uploads. */
@@ -49,14 +50,35 @@ export function Acciones(props: Clave & { readonly acciones: readonly Accion[] }
   );
 }
 
-export function Subir(props: Clave & { readonly tipos: readonly TipoEvidencia[] }) {
+function CampoArchivo({ limiteMb }: { readonly limiteMb: number }) {
+  return (
+    <label className={d.field}>
+      <span className={d.label}>Archivo</span>
+      <input
+        className={d.input}
+        type="file"
+        name="archivo"
+        required
+        accept="application/pdf,image/png,image/jpeg,application/xml,text/xml,.xml"
+      />
+      <span className={d.hint}>
+        PDF, imagen o XML del SAT, hasta {limiteMb} MB. Se guarda 5 años.
+      </span>
+    </label>
+  );
+}
+
+export function Subir(
+  props: Clave & { readonly tipos: readonly TipoEvidencia[]; readonly limiteMb: number },
+) {
   const [state, action, pending] = useActionState(subirEvidenciaAction, null);
+  const { onSubmit, subiendo } = useEnvioConArchivo(action);
   const [tipo, setTipo] = useState<string>(props.tipos[0] ?? 'otro');
   const opciones = props.tipos
     .filter((t) => TIPOS_EVIDENCIA.includes(t))
     .map((t) => ({ value: t, title: ETIQUETA_EVIDENCIA[t] }));
   return (
-    <form onSubmit={submitWith(action)} className={d.form}>
+    <form onSubmit={onSubmit} className={d.form}>
       <input type="hidden" name="plantilla" value={props.plantilla} />
       <input type="hidden" name="periodo" value={props.periodo} />
       <Opciones
@@ -66,20 +88,10 @@ export function Subir(props: Clave & { readonly tipos: readonly TipoEvidencia[] 
         value={tipo}
         onChange={setTipo}
       />
-      <label className={d.field}>
-        <span className={d.label}>Archivo</span>
-        <input
-          className={d.input}
-          type="file"
-          name="archivo"
-          required
-          accept="application/pdf,image/png,image/jpeg,application/xml,text/xml,.xml"
-        />
-        <span className={d.hint}>PDF, imagen o XML del SAT, hasta 4 MB. Se guarda 5 años.</span>
-      </label>
+      <CampoArchivo limiteMb={props.limiteMb} />
       <Aviso state={state} />
       <div className={m.row}>
-        <button className={m.boton.secundario} type="submit" disabled={pending}>
+        <button className={m.boton.secundario} type="submit" disabled={pending || subiendo}>
           Subir documento
         </button>
       </div>

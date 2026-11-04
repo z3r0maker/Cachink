@@ -17,7 +17,9 @@ import type { Certificado, Socio } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 
 import { auditedMutation } from '../audited';
+import { almacenParaNuevos } from '../blobs';
 import { hoyEnMexico, requireCorpDb } from '../db/corp';
+import { archivoDelForm } from '../empresa/archivo';
 import { failed } from '../empresa/fallas';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
@@ -32,7 +34,7 @@ const deps = () => {
   return {
     corp: createCorporativoRepository(db),
     agenda: createAgendaRepository(db),
-    documentos: createDocumentRepository(db),
+    documentos: createDocumentRepository(db, almacenParaNuevos(db)),
     ledger: createCorpLedgerRepository(db),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   };
@@ -121,11 +123,7 @@ export async function agregarCertificadoAction(_p: FormState, form: FormData): P
 export async function actualizarRegistroAction(_p: FormState, form: FormData): Promise<FormState> {
   try {
     const { founder } = await requireFounder();
-    const f = form.get('archivo');
-    const archivo =
-      f instanceof File && f.size > 0
-        ? { nombre: f.name, mime: f.type, contenido: new Uint8Array(await f.arrayBuffer()) }
-        : null;
+    const archivo = await archivoDelForm(form);
     const input = {
       id: field(form, 'id'),
       estado: field(form, 'estado'),

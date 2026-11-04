@@ -28,6 +28,7 @@ const NOUN: Record<PushableTable, string> = {
   respuestas_operador: 'Respuesta a Pedro',
   products: 'Producto',
   clients: 'Cliente',
+  product_images: 'Foto de producto',
 };
 
 export function rejectionPayload(table: PushableTable, row: Row): string {

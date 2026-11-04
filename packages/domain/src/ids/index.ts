@@ -42,6 +42,7 @@ export type CancelacionLogId = Ulid & { readonly __entity: 'CancelacionLog' };
 export type TicketId = Ulid & { readonly __entity: 'Ticket' };
 export type MensajeOperadorId = Ulid & { readonly __entity: 'MensajeOperador' };
 export type RespuestaOperadorId = Ulid & { readonly __entity: 'RespuestaOperador' };
+export type ProductImageId = Ulid & { readonly __entity: 'ProductImage' };
 
 /** Convenience factory for any branded entity id. */
 export function newEntityId<T extends Ulid>(): T {

@@ -108,6 +108,7 @@ export function pageTables(sections: FilledPage['sections']) {
       users: of('users'),
       employees: of('employees'),
       products: of('products'),
+      product_images: of('product_images'),
       clients: of('clients'),
       recurring_expenses: of('recurring_expenses'),
       conversion_recetas: of('conversion_recetas'),

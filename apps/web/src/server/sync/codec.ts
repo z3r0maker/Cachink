@@ -57,6 +57,7 @@ const OUT: Record<PullableTable, (row: Row) => Row> = {
   recurring_expenses: toWire,
   conversion_recetas: toWire,
   inventory_movements: toWire,
+  product_images: toWire,
   mensajes_operador: toWire,
   opening_balances: toWire,
   opening_balance_clients: toWire,

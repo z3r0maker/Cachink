@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, ConfirmDialog, SectionTitle } from '../components/index';
+import { useMarcarArranqueListo } from '../app/splash/arranque';
 import { useTranslation } from '../i18n/index';
 import { colors, fontSizes, typography } from '../theme';
 
@@ -97,6 +98,8 @@ function ResetConfirm({ props }: ResetConfirmProps): ReactElement | null {
 
 export function DatabaseErrorState(props: DatabaseErrorStateProps): ReactElement {
   const { t } = useTranslation();
+  // The animated splash must not cover this screen.
+  useMarcarArranqueListo();
   return (
     <View
       testID="database-error-state"

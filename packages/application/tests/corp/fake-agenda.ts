@@ -1,3 +1,5 @@
+import { MAX_BYTES_EVIDENCIA } from '@xangarro/domain/corp';
+
 import type {
   AgendaRepository,
   DocumentoMeta,
@@ -48,11 +50,17 @@ export class FakeAgenda implements AgendaRepository {
 export class FakeDocumentos implements DocumentRepository {
   readonly docs: DocumentoMeta[] = [];
 
+  /** The Postgres store's limit unless a test hands it Azure's. */
+  constructor(readonly maxBytes: number = MAX_BYTES_EVIDENCIA) {}
+
   async guardar(doc: NuevoDocumento) {
     const { contenido, ...rest } = doc;
-    const meta = {
+    const id = `d${this.docs.length + 1}`;
+    const meta: DocumentoMeta = {
       ...rest,
-      id: `d${this.docs.length + 1}`,
+      id,
+      almacen: 'pg',
+      blobKey: id,
       tamano: contenido.byteLength,
       subidoEn: '2026-10-08T12:00:00Z',
     };

@@ -14,6 +14,7 @@ import { type Item, parseTrack } from './plan-board-parse.js';
 import { idsIn, nextUp } from './plan-board-next.js';
 import { phaseOf, renderBoard } from './plan-board-render.js';
 import { kindOf } from './plan-board-kinds.js';
+import { esBloqueante, ordenPrioridad, prioridadDe } from './plan-board-prioridad.js';
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -47,7 +48,8 @@ const FIXTURE = `# Track T
 | ID  | Acción | Dónde |
 | --- | ------ | ----- |
 | O-1 | Test project | Supabase — **Done 2026-09-18**: applied. |
-| O-2 | Turn **Data API** off | Supabase |
+| O-2 | [alta] [bloq] Turn **Data API** off | Supabase |
+| O-3 | **Hecho 2026-11-03:** PITR on. | Supabase |
 `;
 
 describe('parseTrack', () => {
@@ -78,17 +80,22 @@ describe('parseTrack', () => {
     assert.equal(plain?.section, '3. Post-launch');
   });
 
-  it('reads owner-action rows, done when the row says so', () => {
+  it('reads owner-action rows, done when the row says so, in either language', () => {
     const o1 = items.find((i) => i.id === 'O-1');
     const o2 = items.find((i) => i.id === 'O-2');
+    const o3 = items.find((i) => i.id === 'O-3');
     assert.equal(o1?.status, 'done');
     assert.equal(o2?.status, 'open');
     assert.equal(o2?.title, 'Turn Data API off');
     assert.equal(o2?.line, 30);
+    // O-4…O-6 y O-13 se cerraron en español el 2026-11-03 y siguieron
+    // contando como abiertos: el detector sólo conocía `**Done`.
+    assert.equal(o3?.status, 'done');
+    assert.deepEqual(o2?.tags, ['alta', 'bloq']);
   });
 
   it('never invents items from prose or numbered decision tables', () => {
-    assert.equal(items.length, 7);
+    assert.equal(items.length, 8);
   });
 });
 
@@ -96,6 +103,7 @@ describe('phaseOf', () => {
   const at = (source: string, section: string): Item => ({
     source,
     section,
+    tags: [],
     line: 1,
     id: null,
     title: 't',
@@ -128,6 +136,7 @@ describe('kindOf', () => {
   const item = (over: Partial<Item>): Item => ({
     source: '09-next-features.md',
     section: '3. Post-launch',
+    tags: [],
     line: 1,
     id: null,
     title: 't',
@@ -186,6 +195,7 @@ describe('nextUp', () => {
   ): Item => ({
     source: 's.md',
     section: '',
+    tags: [],
     line: 1,
     id,
     title: id,
@@ -256,6 +266,57 @@ describe('the committed board', () => {
     assert.ok(open.length > 100);
     for (const i of open) assert.doesNotThrow(() => kindOf(i), `${i.id ?? i.title}`);
   });
+
+  it('da un nivel a cada tarea abierta — sin él, el tablero no se lee por urgencia', () => {
+    // El eje de prioridad llegó el 2026-09-28 y lo escribió sobre las 162
+    // tareas de entonces. Las 61 que nacieron después se quedaron sin nivel y
+    // la lista volvió a no decir qué hacer primero. Esta prueba es lo que
+    // impide que vuelva a pasar: el nivel se escribe el día que se escribe la
+    // tarea, igual que su tipo de trabajo (`kindOf` arriba).
+    const sin = collect(ROOT)
+      .filter((i) => i.status !== 'done' && prioridadDe(i) === null)
+      .map((i) => `  ${i.id ?? i.title.slice(0, 48)} · ${i.source}:${i.line}`);
+    assert.deepEqual(
+      sin,
+      [],
+      `${sin.length} tareas abiertas sin [critica]/[alta]/[media]/[baja] (docs/plan/00-README.md §3):\n${sin.join('\n')}`,
+    );
+  });
+});
+
+describe('prioridad', () => {
+  const con = (...tags: string[]): Item => ({
+    tags,
+    source: '09-next-features.md',
+    section: '',
+    line: 1,
+    id: 'T-1',
+    title: 't',
+    status: 'open',
+    trigger: null,
+    blockedBy: null,
+    blocks: null,
+    remaining: null,
+  });
+
+  it('lee el nivel y el bloqueo de las etiquetas, no del texto', () => {
+    assert.equal(prioridadDe(con('deuda', 'alta', 'bloq')), 'alta');
+    assert.equal(esBloqueante(con('alta', 'bloq')), true);
+    assert.equal(esBloqueante(con('critica')), false);
+  });
+
+  it('deja sin nivel lo que nadie juzgó, y lo ordena al final', () => {
+    // Un `null` a propósito: una tarea que nadie pesó no es una tarea ligera,
+    // así que no se filtra sola entre las `baja`.
+    assert.equal(prioridadDe(con('deuda')), null);
+    assert.ok(ordenPrioridad(con()) > ordenPrioridad(con('baja')));
+    assert.deepEqual(
+      [con('baja'), con(), con('critica'), con('media')]
+        .sort((a, b) => ordenPrioridad(a) - ordenPrioridad(b))
+        .map(prioridadDe),
+      ['critica', 'media', 'baja', null],
+    );
+  });
 });
 
 describe('etiquetas de estructura', () => {
@@ -306,6 +367,22 @@ describe('etiquetas de estructura', () => {
       uno('### T-1 Uno `[alta]` dos [bloq]tres\n\n- [ ] Status\n').title,
       'Uno dos tres',
     );
+  });
+
+  it('las lee cuando abren el renglón, que es donde caben en un bullet que envuelve', () => {
+    // Al final de la primera línea física caían a media frase; el peor caso
+    // las metió entre dos marcadores de plantilla del aviso: «Still open:
+    // `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]`, `[CORREO SOPORTE]`…».
+    const [item] = parseTrack(
+      '../launch/production-readiness.md',
+      '- [ ] [critica] [bloq] **BLOQUEANTE — Razón social constituida.** Falta `[RFC]`\n      y el `[TELÉFONO]`.\n',
+    );
+    assert.deepEqual(item?.tags, ['critica', 'bloq']);
+    assert.equal(item?.title, 'BLOQUEANTE — Razón social constituida. Falta `[RFC]`');
+    // Un `[PAÍS]` o un `[RFC]` no son etiquetas: el vocabulario va enumerado.
+    assert.deepEqual(uno('### T-1 Celdas `[PAÍS]` y `[PLAZO]` [media]\n\n- [ ] Status\n').tags, [
+      'media',
+    ]);
   });
 
   it('deja en paz a `[LAUNCH]`, que sí se muestra', () => {
