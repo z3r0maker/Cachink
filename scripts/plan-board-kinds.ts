@@ -64,7 +64,7 @@ const CORPORATE = new Set(
 /** Configuration in third-party consoles: Vercel, Supabase, Stripe, Resend,
  * DNS, GitHub. The repo already carries everything these need. */
 const CONSOLES = new Set(
-  ids('X-01 L-04 O-2 O-3 O-4 O-5 O-6 O-7 O-8 O-9 O-10 O-11 O-12 O-13 O-22 O-23 O-30 O-31'),
+  ids('X-01 L-04 O-2 O-3 O-4 O-5 O-6 O-7 O-8 O-9 O-10 O-11 O-12 O-13 O-22 O-30 O-31 O-33'),
 );
 
 /** Cannot start until the world delivers: real customers, telemetry, scale
