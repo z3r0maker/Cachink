@@ -21,6 +21,7 @@ import { ActivityTracker } from '../components/ActivityTracker/index';
 import { DEFAULT_AUTO_LOCK_TIMEOUT, useAutoLock } from '../hooks/use-auto-lock';
 import { ActivationGate } from './activation-gate';
 import { AppLoadingSkeleton } from './app-loading-skeleton';
+import { useMarcarArranqueListo } from './splash/arranque';
 import { QuickSwitchGate } from './auth-gates';
 
 export interface GatedNavigationProps {
@@ -35,6 +36,8 @@ function AuthInner(props: {
   const userId = useUserId();
   // Auto-lock after inactivity (does NOT close Caja turns); every touch resets it.
   const { resetActivity } = useAutoLock(DEFAULT_AUTO_LOCK_TIMEOUT);
+  // A session that survived the restart opens straight on the app.
+  useMarcarArranqueListo(userId !== null);
   if (userId === null) return <QuickSwitchGate businessId={props.businessId} />;
   return <ActivityTracker onActivity={resetActivity}>{props.children}</ActivityTracker>;
 }

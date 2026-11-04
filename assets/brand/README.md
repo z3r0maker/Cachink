@@ -44,6 +44,12 @@ Change the board, then re-export at the size below, 24-bit RGB, no alpha.
 | `splash-mobile.png`                                | `MarcaSplash` («Amarillo») | 852 × 1846 | `apps/mobile/assets/splash.png` (`app.json` fills `#FFD60A`, cover) |
 | `app-registration/google-play/feature-graphic.png` | `MarcaPlayGrafico` (Claro) | 1024 × 500 | Play Console → Main store listing → Feature graphic                 |
 
+The animated splash (`MarcaSplashAnimado`) draws the app's first frame like
+the native one from three layers rendered from the same layout:
+`packages/ui/src/assets/splash/{fondo,moneda,exclamacion}.png`. Their boxes
+are in `packages/ui/src/app/splash/splash-capas.ts`. Re-render all four
+together, or the coin no longer lands on the native splash's.
+
 ### Still to land (X-07)
 
 | File       | What it is                     | Consumed by                                                                      |
