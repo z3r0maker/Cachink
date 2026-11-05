@@ -5,7 +5,7 @@ import type { NegocioData } from '@/server/screens';
 import { useSession } from '@/session/provider';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
-import { ArchivarNegocio } from './archivar';
+import { CuentaFilas } from './cuenta';
 import type { Business } from './edicion/draft';
 import { EdicionDrawer } from './edicion/drawer';
 import { useEdicion, type Seccion } from './edicion/use-edicion';
@@ -42,7 +42,7 @@ function Loaded({ business, owner }: { readonly business: Business; readonly own
       </div>
       {owner ? (
         <>
-          <ArchivarNegocio nombre={business.nombre} />
+          <CuentaFilas />
           <EdicionDrawer e={e} business={business} />
         </>
       ) : null}

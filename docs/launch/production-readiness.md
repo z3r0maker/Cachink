@@ -57,9 +57,18 @@
 
 ## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)
 
-- [ ] [critica] [bloq] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe →
+- [x] [critica] [bloq] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe →
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
-      creation) — see OQ-N4.
+      creation) — see OQ-N4. **Done 2026-11-05 (ADR-136, `feat/eliminar-cuenta`):** Mi negocio ›
+      General › «Eliminar mi cuenta» (replaces «Archivar negocio»): «Descargar todo» (.zip, Excel +
+      JSON), the password once, then the account and every business it owns close at once and are
+      erased 30 days later by `/api/cron/borrar-cuentas`; the folio'd email and a reminder 3 days
+      before carry single-use undo links. Billing, CFDI and consents stay blocked 10 years
+      (`xangarro.account_deletions`, 0051).
+- [ ] [alta] Counsel (O-17) confirms the deletion's figures: 10 years for billing and CFDI (CCom art.
+      38 over CFF art. 30's 5; the aviso §7 now says 10), and 30 calendar days for a self-service
+      erase alongside the ARCO procedure's own deadlines. The backoffice support inbox (a separate
+      database) is not erased by the job: an ARCO file follows its own retention.
 - [x] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
       unlinking does not wipe). **Done 2026-11-03:** Ajustes → «Desvincular esta caja» offers
       «Desvincular y borrar» (board MvDesvincularBorrar). It refuses while anything is unsent or

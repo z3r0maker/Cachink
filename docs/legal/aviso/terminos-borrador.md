@@ -139,10 +139,13 @@ Consumidor.
 ## 10. Tus datos
 
 - **Son tuyos.** No los vendemos ni los rentamos. Cómo los tratamos está en el Aviso de Privacidad.
-- **Puedes exportarlos** en cualquier momento (Excel y PDF) desde Ajustes, incluso después de
-  cancelar, mientras tu cuenta exista.
-- **Al cancelar** aplicamos los plazos de conservación y supresión del Aviso de Privacidad §7. Puedes
-  pedir el borrado anticipado con los procedimientos de la sección 9 de ese aviso.
+- **Puedes exportarlos** en cualquier momento (Excel y JSON) con **Mi negocio › General › Descargar
+  todo**, incluso después de cancelar tu plan, mientras tu cuenta exista.
+- **Al cancelar** aplicamos los plazos de conservación y supresión del Aviso de Privacidad §7.
+- **Puedes eliminar tu cuenta tú mismo** en **Mi negocio › General › Eliminar mi cuenta**: se cierra
+  al momento, con todos tus negocios, y se borra a los 30 días. Hasta entonces la puedes recuperar con
+  el enlace del correo que te mandamos. También puedes pedirlo con los procedimientos de la sección 9
+  del Aviso de Privacidad.
 - **Respaldos.** Mantenemos respaldos del servicio, pero **te recomendamos exportar periódicamente**.
 - **Contenido de tu negocio.** Nos autorizas únicamente a alojar, procesar y transmitir tu contenido
   para prestarte el servicio, y a usar datos **agregados o disociados** para operar y mejorar el

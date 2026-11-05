@@ -170,6 +170,7 @@ Links to discussion, docs, prior art.
 | [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
 | [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
 | [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
+| [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9579,3 +9580,68 @@ account exists.
 **References**
 
 - ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.
+
+---
+
+## ADR-136
+
+**Title:** Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years
+
+**Date:** 2026-11-05
+
+**Status:** Accepted — decided with the owner 2026-11-04 on the El Mostrador canvas («Eliminar la cuenta»: ElNegocio, ElEliminar, ElProgramada, ElCorreo)
+
+**Context**
+
+The aviso de privacidad promises a titular can cancel their data (LFPDPPP arts. 21–24) and LFPC art.
+76 Bis IX asks a service to be left as easily as it was joined. Until now the portal only offered
+«Archivar negocio», which locked a business and erased nothing; a cancelación request went to staff
+through the ARCO form and was carried out by hand. The aviso also promised an «Excel y JSON» export
+that did not exist. It was a launch blocker in `docs/launch/production-readiness.md` §3.
+
+**Decision**
+
+1. **One action deletes the account and every business it owns.** «Eliminar mi cuenta» lives at the
+   end of Mi negocio › General and replaces «Archivar negocio». Memberships in someone else's
+   business are removed, not their businesses.
+2. **Locked at once, erased in 30 days.** On confirm (`xangarro.account_delete_request`, 0051) every
+   owned business is soft-deleted, every caja revoked, every portal session of the account and of
+   those businesses ended, and the account signs in nowhere (`memberships_for_user` and
+   `negocios_for_user` skip an account with a pending deletion). A daily cron
+   (`/api/cron/borrar-cuentas`) erases on day 30: every `public` table keyed by `business_id`,
+   except the billing and CFDI tables, the memberships, the sessions, the sign-in links and the
+   `auth.users` row.
+3. **Undo by email, once.** The confirmation (with a folio, `EL-XXXXXX`, as the acuse) and a
+   reminder three days before the erase each carry a single-use link of their own to `/eliminacion`;
+   opening it only reads, the tap reopens the businesses and resumes the plans the deletion stopped.
+   Cajas stay unlinked. A third email says when it is done.
+4. **What stays, blocked, for 10 years.** Subscriptions, billing customers, the cancellation acuse,
+   the Checkout and aviso consents and the CFDI payments are not deleted (no role may, by design), and
+   the ledger keeps the defensive minimum to tie them to someone: the account's email and name and
+   each business's name and fiscal identity. Ten years is the longer of Código de Comercio art. 38
+   (a merchant's vouchers) and CFF art. 30 (five years from the return); the aviso §7 says so now.
+5. **The plan stops renewing on confirm** (cancel at period end, as «Cancelar suscripción»), resumes
+   on undo, and is ended outright at the erase. No refund (Términos §9).
+6. **Confirmed with the password, once,** throttled per account like a sign-in, so a stolen session
+   is neither enough nor a password oracle.
+7. **«Descargar todo»** (`/api/export/todo`, owner only): one .zip per business with the five
+   workbooks and `datos.json` (every row the tenant can read, money as exact strings, hashes and
+   binaries left out). Step 1 of the deletion page, optional, and also in Mi negocio.
+
+**Alternatives considered**
+
+- *Erase on confirm.* Rejected: no undo, and a hijacked session wipes a business in a minute.
+- *Keep «Archivar» beside it.* Rejected: two exits that sound alike; the 30-day lock is the archive.
+- *Five years for billing, as the aviso said.* Rejected for MEXIA's own records: below CCom art. 38.
+- *Re-authenticate with an emailed code (ARCO B.3).* Rejected for self-service: the password plus
+  the 30-day undo email cover it with one field.
+
+**Consequences**
+
+- Counsel (O-17) confirms the 10 years and the 30 calendar days beside the ARCO deadlines.
+- The backoffice inbox lives in another database and is not erased by the job: an ARCO file keeps its
+  own retention. Sentry events expire on their own.
+- The purge of the blocked rows at 10 years (`blocked_until`) is the retention calendar's job, still
+  open in readiness §3.
+- Removed: the portal's archive row, its action and use case, and the domain's archive rules. The
+  `business_archive` SQL function stays for support.
