@@ -6,6 +6,7 @@ import { cfdiXml, RFC_MEXIA_PRUEBA, uuidDePrueba } from '@xangarro/testing/corp'
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
+import { createPgBlobStore } from '../src/queries/blobs';
 import { createDocumentRepository } from '../src/queries/documentos';
 import { createReceivedInvoiceRepository } from '../src/queries/facturas';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
@@ -26,7 +27,7 @@ describe('corp received invoices asked of the SAT again', () => {
     return {
       facturas: createReceivedInvoiceRepository(db),
       ledger: createCorpLedgerRepository(db),
-      documentos: createDocumentRepository(db),
+      documentos: createDocumentRepository(db, createPgBlobStore(db)),
       sat: { estado: async () => satDice },
       rfcMexia: async () => RFC_MEXIA_PRUEBA,
       sha256: async () => 'c'.repeat(64),

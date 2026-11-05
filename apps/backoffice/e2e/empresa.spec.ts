@@ -560,7 +560,8 @@ test('a founder asks the SAT again, and cancels the invoice it says was cancelle
 }) => {
   await fijarRfcMexia();
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Facturas', exact: true }).click();
+  await abrirEntrada(page, 'Dinero');
+  await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
   const uuids = await registrarParaConsultar(page);
   await fijarEstadoSat(uuids.hosting, 'sin_verificar');
   await fijarEstadoSat(uuids.disenador, 'cancelado');
