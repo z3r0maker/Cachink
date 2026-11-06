@@ -7,6 +7,9 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
+/** A path as a literal inside a RegExp. */
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Metro needs to watch the monorepo root so changes in workspace packages
 // (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
@@ -14,9 +17,16 @@ config.watchFolders = [workspaceRoot];
 // Exclude the pnpm virtual store from Metro resolution. With
 // node-linker=hoisted all packages are real directories in
 // node_modules/ — the .pnpm store should never be traversed.
+// Other checkouts under the root are never this app's source: the agents'
+// worktrees (.claude/worktrees, .e2e) each carry a full node_modules, and
+// crawling and watching them pinned Metro at a full core until it stopped
+// answering the dev client.
 config.resolver.blockList = [
   ...(Array.isArray(config.resolver.blockList) ? config.resolver.blockList : []),
   /node_modules\/\.pnpm\/.*/,
+  new RegExp(`^${escapeRegExp(path.join(workspaceRoot, '.claude', 'worktrees'))}\\/.*`),
+  new RegExp(`^${escapeRegExp(path.join(workspaceRoot, '.e2e'))}\\/.*`),
+  new RegExp(`^${escapeRegExp(path.join(workspaceRoot, 'archive'))}\\/.*`),
 ];
 
 // Resolve node_modules from the app first, then the workspace root, then

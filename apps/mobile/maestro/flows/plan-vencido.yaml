@@ -57,7 +57,7 @@ tags:
     visible:
       id: 'ventas-product-grid'
     timeout: 10000
-- assertNotVisible: 'Quedan \d+'
+- assertNotVisible: 'Agregar .*, quedan \d+'
 
 - runScript:
     file: shared/mock-scenario.js
@@ -74,5 +74,5 @@ tags:
 - tapOn:
     id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
-    visible: 'Quedan \d+'
+    visible: 'Agregar .*, quedan \d+'
     timeout: 30000

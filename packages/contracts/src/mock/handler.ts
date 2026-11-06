@@ -24,6 +24,7 @@ import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
 import { mockSnapshotPage } from './snapshot.js';
 import { referenceTables } from './tables.js';
+import { usageOf } from './usage.js';
 
 export interface MockRequest {
   readonly method: string;
@@ -181,6 +182,7 @@ export class MockApi {
       entitlement: await sign(
         entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
+      usage: usageOf(this.state, now),
       tables: page?.tables ?? referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,
       ...(page === null ? {} : { snapshot: page.snapshot }),

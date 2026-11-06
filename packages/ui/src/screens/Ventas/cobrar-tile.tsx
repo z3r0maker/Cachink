@@ -115,11 +115,14 @@ export function CobrarTile(props: {
 }): ReactElement {
   const { p } = props;
   const precio = formatMoney(p.precio);
+  // The tile is one accessible element: its label carries the chip too, or
+  // neither VoiceOver nor the E2E hierarchy ever hears «Quedan N».
+  const quedan = p.quedan !== null ? `, quedan ${p.quedan}` : '';
   return (
     <Pressable
       testID={`cobrar-tile-${p.id}`}
       role="button"
-      aria-label={`Agregar ${p.nombre}, ${precio}`}
+      aria-label={`Agregar ${p.nombre}, ${precio}${quedan}`}
       onPress={props.onAdd}
       style={({ pressed }) => [
         TILE,

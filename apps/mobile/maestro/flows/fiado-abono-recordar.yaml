@@ -49,25 +49,7 @@ tags:
     visibilityPercentage: 60
     centerElement: true
 - tapOn: { id: 'cobrar-tile-01JPRD00000000000000000005' }
-- runFlow:
-    when:
-      visible:
-        id: 'cart-checkout-btn'
-    commands:
-      - tapOn: { id: 'cart-checkout-btn' }
-      - extendedWaitUntil: { visible: { id: 'ticket-sheet' }, timeout: 5000 }
-      - tapOn: { id: 'ticket-cobrar' }
-- runFlow:
-    when:
-      # The tablet's own panel, never «the bar is gone» — a beat after the
-      # phone branch opens the checkout the bar is gone there too, and this
-      # branch would tap a ticket-cobrar that no longer exists.
-      visible:
-        id: 'ticket-panel'
-    commands:
-      # The tablet's TicketPanel goes straight to the checkout, no sheet.
-      - tapOn: { id: 'ticket-cobrar' }
-- extendedWaitUntil: { visible: { id: 'checkout-cobro' }, timeout: 8000 }
+- runFlow: shared/abrir-cobro.yaml
 - tapOn: { id: 'cobro-fiado' }
 - extendedWaitUntil: { visible: { id: 'checkout-fiado' }, timeout: 5000 }
 - tapOn: { id: 'fiado-nuevo' }

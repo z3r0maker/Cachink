@@ -31,7 +31,7 @@ env:
 # The chip also needs the snapshot's stock baseline, which a fresh activation
 # is still pulling in the background: give it a while.
 - extendedWaitUntil:
-    visible: 'Quedan \d+'
+    visible: 'Agregar .*, quedan \d+'
     timeout: 120000
 - runScript:
     file: shared/mock-scenario.js
@@ -54,7 +54,7 @@ env:
     visible:
       id: 'ventas-product-grid'
     timeout: 10000
-- assertNotVisible: 'Quedan \d+'
+- assertNotVisible: 'Agregar .*, quedan \d+'
 - runScript:
     file: shared/mock-scenario.js
     env:
@@ -70,5 +70,5 @@ env:
 - tapOn:
     id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
-    visible: 'Quedan \d+'
+    visible: 'Agregar .*, quedan \d+'
     timeout: 30000

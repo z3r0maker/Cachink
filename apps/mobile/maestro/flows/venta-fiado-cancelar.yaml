@@ -1,0 +1,145 @@
+# Cancelling a fiado ticket explains the saldo a favor (catalogue J4-16; the
+# phone half of operador-detalle-venta.spec «a fiado ticket shows the client,
+# and cancelling explains the saldo a favor»): a Gringa on Don Pedro's account
+# (a fixture client, no saldo); its sheet carries the fiado note «Esta venta
+# se fue a la cuenta de Don Pedro» with «Recibir un abono»; «Cancelar venta»
+# — PIN, then motivo — shows the consequence BEFORE confirming: the saldo
+# drops $35.00, and anything already paid against it stays as saldo a favor
+# for the next purchase. No cash step (nothing came into the caja); the sale
+# stays on the list, cancelled.
+#
+# Cancelling needs Ana (NIP 5678, canCancelSales — Toni may not), so the
+# flow locks the caja, signs her in and opens her turno, as
+# venta-detalle-cancelar.yaml does.
+#
+# Precondition: activated device against the mock on MOCK_API.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - fiado
+  - cancelaciones
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Switch to Ana: the cancel dialog checks her PIN and her permission.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
+- tapOn: { id: 'bloqueo-cambiar' }
+- extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
+- tapOn: { id: 'acceso-operador-01JPRS00000000000000000002' }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil: { visible: { id: 'mobile-inicio-tab' }, timeout: 15000 }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-cerrado'
+    commands:
+      - tapOn: { id: 'inicio-hero-accion' }
+      - extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+      - tapOn: { id: 'fondo-rapido-500' }
+      - tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
+
+# A Gringa ($35.00, PRD-5) on Don Pedro's account.
+- tapOn: { id: 'tab-cobrar|rail-cobrar|sidebar-cobrar' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000005'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000005' }
+- runFlow: shared/abrir-cobro.yaml
+- tapOn: { id: 'cobro-fiado' }
+- extendedWaitUntil: { visible: { id: 'checkout-fiado' }, timeout: 5000 }
+- scrollUntilVisible:
+    element:
+      id: 'fiado-cliente-01JCNT00000000000000000001'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: 'fiado-cliente-01JCNT00000000000000000001'
+- waitForAnimationToEnd
+- tapOn: { id: 'fiado-anotar' }
+- extendedWaitUntil: { visible: { id: 'venta-hecha' }, timeout: 8000 }
+- waitForAnimationToEnd
+- assertVisible: ".*Anotaste \\$35\\.00 a Don Pedro.*"
+- tapOn: { id: 'venta-hecha-nueva' }
+- extendedWaitUntil: { visible: { id: 'ventas-product-grid' }, timeout: 8000 }
+
+# Its sheet: the newest row heads the list. The fiado note names the client
+# and offers the abono.
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
+- extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
+- tapOn:
+    id: 'venta-fila-.*'
+    index: 0
+- extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
+- extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
+- assertVisible: '.*Gringa.*'
+- scrollUntilVisible:
+    element:
+      id: 'venta-detalle-nota'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 60
+- assertVisible: '.*Esta venta se fue a la cuenta de Don Pedro\. No entró dinero a tu caja\..*'
+- assertVisible: { id: 'venta-detalle-abono' }
+
+# «Cancelar venta»: PIN, then the motivo step says what cancelling a fiado
+# does — before anything is confirmed.
+- scrollUntilVisible:
+    element:
+      id: 'venta-detalle-cancelar'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 60
+- tapOn: { id: 'venta-detalle-cancelar' }
+- extendedWaitUntil: { visible: { id: 'venta-cancelar' }, timeout: 5000 }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- extendedWaitUntil: { visible: { id: 'cancelar-motivo-El cliente se arrepintió' }, timeout: 5000 }
+- scrollUntilVisible:
+    element:
+      id: 'cancelar-aviso'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 60
+- assertVisible: '.*Esta venta es fiada\. Al cancelarla, el saldo de Don Pedro baja \$35\.00\..*'
+- assertVisible: '.*queda como saldo a favor suyo y se aplica solo a su siguiente compra\..*'
+- scrollUntilVisible:
+    element:
+      id: 'cancelar-motivo-El cliente se arrepintió'
+    direction: UP
+    timeout: 5000
+    visibilityPercentage: 60
+- tapOn: { id: 'cancelar-motivo-El cliente se arrepintió' }
+- scrollUntilVisible:
+    element:
+      id: 'cancelar-confirmar'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 60
+- tapOn: { id: 'cancelar-confirmar' }
+# No cash to hand back on a fiado: straight to the sheet's aviso.
+- extendedWaitUntil: { visible: { id: 'venta-detalle-aviso' }, timeout: 8000 }
+- assertNotVisible: { id: 'cancel-cash-confirm' }
+- assertVisible: '.*Se canceló por: El cliente se arrepintió.*'
+- tapOn: { id: 'venta-detalle-listo' }
+
+# Still on the list, cancelled, still fiado, still Don Pedro's: the row folds
+# into one accessible element («Ver venta V-0001, $35.00, Fiado, Don Pedro, cancelada»).
+- assertVisible: '.*\$35\.00, Fiado, Don Pedro, cancelada.*'
