@@ -147,7 +147,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:522`
 - [~] `Media` **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: «Fecha de pago» bounds, dropped when PR #76 took main's E-11 (2026-11-03). `registrarPagoFactura` refuses only a day before the invoice. It should also refuse a day after today in Mexico (a typed error with its Spanish message) and an impossible day such as 2026-11-31, which today fails only by chance, as the ledger's `PeriodoCerradoError`. Test-first in `facturas-pago.test.ts`: both ends of the range, the user-facing message and the bancos amount, not just the error class. Also drop the `hoy` that `resultados.integration.test.ts` passes to `registrarPagoFactura`, which ignores it. · `20-command-center.md:537`
 - [~] `Media` **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 (answered 2026-10-30) · `20-command-center.md:625`
-- [ ] `Media` **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:657`
+- [ ] `Media` **E-13** Impuestos — Bloqueada por: E-12 (the portal's RESICO persona moral estimate it reuses landed with ADR-129: `packages/domain/src/financials/isr-regimen.ts`) · `20-command-center.md:657`
 - [ ] `Media` **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:668`
 - [ ] `Media` **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:746`
 - [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:830`
