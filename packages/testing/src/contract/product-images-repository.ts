@@ -5,7 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, NewProductImage, ProductId } from '@xangarro/domain';
+import type { BusinessId, DeviceId, NewProductImage, ProductId } from '@xangarro/domain';
 import type { ProductImagesRepository } from '@xangarro/data';
 import { TEST_DEVICE_ID } from './_shared.js';
 
@@ -23,9 +23,15 @@ function tombstone(productoId: ProductId): NewProductImage {
   return { productoId, bytes: null, width: null, height: null, businessId: BIZ };
 }
 
+/**
+ * `deviceId` is the device the implementation stamps on the rows it creates:
+ * {@link TEST_DEVICE_ID} for the phone's repositories under test, the
+ * portal's own device id for its Postgres one.
+ */
 export function describeProductImagesRepositoryContract(
   implName: string,
   makeRepo: () => ProductImagesRepository,
+  deviceId: DeviceId = TEST_DEVICE_ID,
 ): void {
   describe(`ProductImagesRepository contract — ${implName}`, () => {
     let repo: ProductImagesRepository;
@@ -38,7 +44,7 @@ export function describeProductImagesRepositoryContract(
       const row = await repo.create(photo(REFRESCO));
       expect(row.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
       expect(row.mime).toBe('image/webp');
-      expect(row.deviceId).toBe(TEST_DEVICE_ID);
+      expect(row.deviceId).toBe(deviceId);
       expect(row.createdAt).toBe(row.updatedAt);
       expect(row.deletedAt).toBeNull();
       expect(await repo.latestForProduct(REFRESCO)).toEqual(row);
