@@ -1,7 +1,7 @@
 /**
- * Existencias (M-09): one quiet panel of rows — the product's glyph on its
- * tint, its name, «Umbral 15 · kg», the state pill («Reponer» red /
- * «Suficiente» green), the count, and the two quick squares that open the
+ * Existencias (M-09): one quiet panel of rows — the product's photo or glyph
+ * on its tint (the square takes the photo, M-13), its name, «Umbral 15 ·
+ * kg», the state pill («Reponer» red / «Suficiente» green), the count, and the two quick squares that open the
  * sheets with the product picked. The board's no-results answer when the
  * search filters everything out.
  */
@@ -19,7 +19,7 @@ import { QuietPanel } from '../../components/Panel/index';
 import { PathIcon } from '../../components/PathIcon/index';
 import { borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { BotonFila } from './mover-botones';
-import { ProductoTile } from './mover-glifos';
+import { FotoTile } from '../../foto-producto/foto-tile';
 
 /** «Reponer» at or under the threshold, «Suficiente» above it. */
 export function EstadoPill(p: { readonly it: Existencia }): ReactElement {
@@ -40,13 +40,32 @@ export function EstadoPill(p: { readonly it: Existencia }): ReactElement {
   );
 }
 
+/** The square's tap (told whether it has a photo) or long press, on a product. */
+export type OnFoto = (it: Existencia, gesto: 'tap' | 'tapConFoto' | 'larga') => void;
+
+/** The row's photo square, its gestures said as the screen's. */
+function Cuadro(p: { readonly it: Existencia; readonly onFoto: OnFoto }): ReactElement {
+  const { it } = p;
+  return (
+    <FotoTile
+      id={it.id}
+      nombre={it.nombre}
+      icono={it.icono}
+      tint={it.tint}
+      onPress={(conFoto) => p.onFoto(it, conFoto ? 'tapConFoto' : 'tap')}
+      onLongPress={() => p.onFoto(it, 'larga')}
+    />
+  );
+}
+
 function Fila(p: {
   readonly it: Existencia;
   readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onFoto: OnFoto;
 }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={14} paddingVertical={12}>
-      <ProductoTile icono={p.it.icono} tint={p.it.tint} />
+      <Cuadro it={p.it} onFoto={p.onFoto} />
       <View flex={1} gap={2}>
         <MText size="md" weight="extraBold" letterSpacing={-0.2}>
           {p.it.nombre}
@@ -83,6 +102,7 @@ export function ExistenciasLista(p: {
   readonly items: readonly Existencia[];
   readonly query: string;
   readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onFoto: OnFoto;
 }): ReactElement {
   return (
     <QuietPanel label="Existencias" count={p.items.length} testID="inventario-existencias">
@@ -93,7 +113,7 @@ export function ExistenciasLista(p: {
           borderTopColor={colors.gray100}
           paddingHorizontal={14}
         >
-          <Fila it={it} onMover={p.onMover} />
+          <Fila it={it} onMover={p.onMover} onFoto={p.onFoto} />
         </View>
       ))}
       {p.items.length === 0 ? (

@@ -11,6 +11,8 @@ import { PRODUCT_ICONS, type ProductIcon } from '@xangarro/caja';
 import { borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
 import { PathIcon } from '../../components/PathIcon/index';
+import { FotoCuadro } from '../../foto-producto/foto-cuadro';
+import { useFotoProducto } from '../../foto-producto/fotos-context';
 
 /** The board's `M12 19V5M5 12l7-7 7 7` — what arrived goes up. */
 export const FLECHA_ENTRADA = 'M12 19V5M5 12l7-7 7 7';
@@ -46,26 +48,36 @@ export function GlifoProducto(p: {
   );
 }
 
-/** The product's tile: its glyph on its tint, the thin black edge (42 px). */
+/**
+ * The product's tile: its photo (M-13) or its glyph on its tint, the thin
+ * black edge (42 px). Pass `productoId` for the photo to show.
+ */
 export function ProductoTile(p: {
   readonly icono: ProductIcon;
   readonly tint: string;
   readonly size?: number;
+  readonly productoId?: string;
 }): ReactElement {
   const size = p.size ?? 42;
+  const foto = useFotoProducto(p.productoId);
   return (
     <View
       width={size}
       height={size}
       alignItems="center"
       justifyContent="center"
+      overflow="hidden"
       borderRadius={radii[2]}
       borderWidth={borderWidths.thin}
       borderColor={colors.black}
       backgroundColor={p.tint}
       aria-hidden
     >
-      <GlifoProducto icono={p.icono} size={Math.round(size * 0.5)} />
+      {foto ? (
+        <FotoCuadro uri={foto.uri} side={size - 2 * borderWidths.thin} />
+      ) : (
+        <GlifoProducto icono={p.icono} size={Math.round(size * 0.5)} />
+      )}
     </View>
   );
 }

@@ -3,7 +3,8 @@
  * `InventarioScreen` said on the phone): what there is and what moved in
  * this turno — the three figures, the two tabs, the search — and the two
  * entries the phone allows, «Entrada de mercancía» and «Registrar merma»,
- * as sheets over it. Presentational: the route hands it `useInventario()`,
+ * as sheets over it; and each product's square takes its photo (M-13).
+ * Presentational: the route hands it `useInventario()`, `useFotoFlujo()`,
  * the retry and, when Inicio's «Para hoy» sent one, the product whose
  * llegada sheet opens on arrival.
  */
@@ -19,7 +20,10 @@ import {
 } from '@xangarro/caja/inventario';
 import { ErrorState, Spinner } from '../../components/index';
 import { Buscador, Cabeza, Kpis, Pestanas, Regla } from './inventario-cifras';
-import { ExistenciasLista, SinProductos } from './existencias-lista';
+import { FotoHojas } from '../../foto-producto/foto-hojas';
+import { PistaFoto } from '../../foto-producto/foto-tile';
+import type { FotoFlujo } from '../../foto-producto/use-foto-flujo';
+import { ExistenciasLista, SinProductos, type OnFoto } from './existencias-lista';
 import { LlegoMercanciaSheet } from './llego-mercancia-sheet';
 import { MermaSheet } from './merma-sheet';
 import { BotonMov } from './mover-botones';
@@ -37,6 +41,8 @@ export interface InventarioScreenProps {
   /** A product to restock now: its «Llegó mercancía» opens (Inicio's «Para hoy»). */
   readonly reponer?: string | null;
   readonly registrar: (m: NuevoMovimientoVivo) => Promise<void>;
+  /** The product photo's steps (M-13, `useFotoFlujo()`); without it the squares only show. */
+  readonly foto?: FotoFlujo;
   readonly onRetry: () => void;
   readonly testID?: string;
 }
@@ -55,6 +61,7 @@ function Barra(p: {
     <>
       <Pestanas tab={p.tab} items={p.items} movs={p.movs} onElegir={p.onTab} />
       {p.tab === 'existencias' ? <Buscador q={p.query} onQ={p.onQuery} /> : null}
+      {p.tab === 'existencias' ? <PistaFoto /> : null}
       <View flexDirection="column" gap={10}>
         <BotonMov tipo="Entrada" onPress={() => p.onAbrir('Entrada')} />
         <BotonMov tipo="Merma" onPress={() => p.onAbrir('Merma')} />
@@ -70,6 +77,7 @@ function Cuerpo(p: {
   readonly query: string;
   readonly dueno: string;
   readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onFoto: OnFoto;
 }): ReactElement {
   if (p.data.existencias.length === 0) return <SinProductos dueno={p.dueno} />;
   if (p.tab === 'movimientos') {
@@ -81,6 +89,7 @@ function Cuerpo(p: {
         items={buscar(p.data.existencias, p.query)}
         query={p.query}
         onMover={p.onMover}
+        onFoto={p.onFoto}
       />
       <Regla dueno={p.dueno} />
     </>
@@ -110,6 +119,16 @@ function Hojas(p: {
   );
 }
 
+/** A row's square to the photo's steps: tap, tap with a photo, long press. */
+function porFoto(flujo: FotoFlujo | undefined): OnFoto {
+  return (it, gesto) => {
+    if (flujo === undefined) return;
+    const s = { id: it.id, nombre: it.nombre, icono: it.icono, tint: it.tint };
+    if (gesto === 'larga') flujo.galeria(s);
+    else flujo.abrir(s, gesto === 'tapConFoto');
+  };
+}
+
 function Contenido(p: InventarioScreenProps & { readonly data: InventarioData }): ReactElement {
   const [tab, setTab] = useState<Pestana>(p.tabInicial ?? 'existencias');
   const [query, setQuery] = useState('');
@@ -134,10 +153,18 @@ function Contenido(p: InventarioScreenProps & { readonly data: InventarioData })
           onTab={setTab}
           onAbrir={(tipo) => abrir(tipo, null)}
         />
-        <Cuerpo tab={tab} data={p.data} query={query} dueno={p.dueno} onMover={abrir} />
+        <Cuerpo
+          tab={tab}
+          data={p.data}
+          query={query}
+          dueno={p.dueno}
+          onMover={abrir}
+          onFoto={porFoto(p.foto)}
+        />
       </ScrollView>
       <Hojas hoja={hoja} data={p.data} onGuardar={onGuardar} onClose={cerrar} />
       {toast === null ? null : <MovToast x={toast} onClose={cerrarToast} />}
+      {p.foto ? <FotoHojas flujo={p.foto} dueno={p.dueno} caja={p.data.caja} /> : null}
     </>
   );
 }

@@ -14,6 +14,7 @@
  */
 
 import { z } from 'zod';
+import type { IsoTimestamp } from '../dates/index.js';
 import type { BusinessId, ProductId, ProductImageId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
@@ -107,4 +108,19 @@ export function latestProductImages(
     if (current === undefined || newer(row, current)) out.set(row.productoId, row);
   }
   return out;
+}
+
+/**
+ * The `createdAt` a new row takes so it is newer than `previous`, the row it
+ * replaces: the clock, or one millisecond past `previous` when the clock has
+ * not passed it (the same millisecond, or a row stamped ahead by another
+ * phone's clock). Without this, «Quitar foto» right after a photo could lose
+ * to it on the ULID tiebreak.
+ */
+export function productImageStamp(
+  clock: IsoTimestamp,
+  previous: IsoTimestamp | null,
+): IsoTimestamp {
+  if (previous === null || clock > previous) return clock;
+  return new Date(Date.parse(previous) + 1).toISOString() as IsoTimestamp;
 }

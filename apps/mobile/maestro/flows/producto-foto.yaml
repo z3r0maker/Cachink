@@ -1,0 +1,117 @@
+# Foto del producto (M-13, ADR-134; boards MvFotoLista, MvFotoListo,
+# MvFotoSinRecorte, MvFotoCambiar, MvFotoQuitar): in Inventario a product's
+# square takes its photo. The simulator has no camera, so this goes the
+# gallery way — the square's long press — with a fixture photo added to the
+# library first; the photo comes back, «Listo» (lifted) or «Guardar así»
+# (not lifted) saves it, and the square turns into the photo
+# (`producto-foto-<id>`). Then «Cambiar o quitar» → «Quitar foto» →
+# «Sí, quitarla» puts the icon back, which also leaves the flow re-runnable.
+#
+# Whether the background comes off is the device's call (Vision on iOS 17,
+# ML Kit on Android); both buttons carry `foto-guardar`, so the flow holds
+# either way. The lift itself is verified on a real phone, not here.
+#
+# The product is «Agua de horchata» (PRD-7), the list's first row (es-MX
+# order, see inventario-llego-merma.yaml).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- addMedia:
+    - '../fixtures/producto-foto.png'
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+# The hint under the search says what the square does (MvFotoLista).
+- assertVisible:
+    id: 'inventario-pista-foto'
+- scrollUntilVisible:
+    element:
+      id: 'producto-sin-foto-01JPRD00000000000000000007'
+    direction: DOWN
+    timeout: 5000
+# Long press: the gallery (the boards' secondary path).
+- longPressOn:
+    id: 'producto-sin-foto-01JPRD00000000000000000007'
+# The system picker: the newest photo is the fixture; any photo proves the
+# path, so the first one the picker lists is taken.
+- extendedWaitUntil:
+    visible: '.*(Photo|Foto|Imagen).*'
+    timeout: 10000
+- tapOn:
+    text: '.*(Photo|Foto|Imagen).*'
+    index: 0
+# iOS's picker may ask to confirm the pick («Agregar» / «Add»).
+- runFlow:
+    when:
+      visible: '^(Add|Agregar)$'
+    commands:
+      - tapOn: '^(Add|Agregar)$'
+# The lift and the encoder run; the sheet shows the result.
+- extendedWaitUntil:
+    visible:
+      id: 'foto-listo-sheet'
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: 'foto-asi-se-vera'
+    timeout: 15000
+- assertVisible: '.*Así se verá en la caja.*'
+- tapOn:
+    id: 'foto-guardar'
+# The square is the photo now.
+- extendedWaitUntil:
+    visible:
+      id: 'producto-foto-01JPRD00000000000000000007'
+    timeout: 8000
+- assertNotVisible:
+    id: 'producto-sin-foto-01JPRD00000000000000000007'
+# A tap on a square with a photo: «Cambiar o quitar».
+- tapOn:
+    id: 'producto-foto-01JPRD00000000000000000007'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-cambiar-sheet'
+    timeout: 5000
+- assertVisible: '.*Tomada el.*'
+- assertVisible:
+    id: 'foto-cambiar-camara'
+- assertVisible:
+    id: 'foto-cambiar-galeria'
+- tapOn:
+    id: 'foto-cambiar-quitar'
+# «¿Quitar la foto?» — «Mejor no» first goes back, then «Sí, quitarla».
+- extendedWaitUntil:
+    visible:
+      id: 'foto-quitar-dialog'
+    timeout: 5000
+- assertVisible: '.*¿Quitar la foto\?.*'
+- tapOn:
+    id: 'foto-quitar-no'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-cambiar-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'foto-cambiar-quitar'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-quitar-dialog'
+    timeout: 5000
+- tapOn:
+    id: 'foto-quitar-si'
+# The icon is back.
+- extendedWaitUntil:
+    visible:
+      id: 'producto-sin-foto-01JPRD00000000000000000007'
+    timeout: 8000
+- assertNotVisible:
+    id: 'producto-foto-01JPRD00000000000000000007'

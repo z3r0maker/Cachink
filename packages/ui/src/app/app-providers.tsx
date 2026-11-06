@@ -20,6 +20,7 @@ import { ActivationProvider } from '../activation/activation-context';
 import { CloudSyncBridge } from './cloud-sync-bridge';
 import type { ActivationConfig } from '../activation/activation-config';
 import { AppErrorBoundary } from './error-boundary';
+import { FotosProductoProvider, type FotoPuertos } from '../foto-producto/fotos-context';
 import {
   DrizzleAppConfigBridge,
   DrizzleRepositoryBridge,
@@ -39,6 +40,8 @@ export interface AppProvidersProps {
   readonly getFeatureFlags?: () => Record<string, boolean> | null;
   /** API base, secure token store and device info (A-04). Defaults to an in-memory dev config. */
   readonly activation?: ActivationConfig;
+  /** The phone's camera lift, encoder and gallery for product photos (M-13). */
+  readonly fotoPuertos?: FotoPuertos | null;
 }
 
 /**
@@ -49,12 +52,17 @@ export interface AppProvidersProps {
 function SessionLayer(props: {
   readonly activation?: ActivationConfig;
   readonly overlays?: ReactNode;
+  readonly fotoPuertos?: FotoPuertos | null;
   readonly children: ReactNode;
 }): ReactElement {
   return (
     <TelemetryBridge>
       <ActivationProvider config={props.activation}>
-        <CloudSyncBridge>{props.children}</CloudSyncBridge>
+        <CloudSyncBridge>
+          <FotosProductoProvider puertos={props.fotoPuertos}>
+            {props.children}
+          </FotosProductoProvider>
+        </CloudSyncBridge>
       </ActivationProvider>
       {props.overlays}
       <GlobalErrorToast />
@@ -86,7 +94,11 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
                     deviceContext={props.deviceContext}
                     getFeatureFlags={props.getFeatureFlags}
                   >
-                    <SessionLayer activation={props.activation} overlays={props.overlays}>
+                    <SessionLayer
+                      activation={props.activation}
+                      overlays={props.overlays}
+                      fotoPuertos={props.fotoPuertos}
+                    >
                       {content}
                     </SessionLayer>
                   </ObservabilityBridge>

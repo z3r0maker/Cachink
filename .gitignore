@@ -32,6 +32,11 @@ ios/
 android/
 !apps/*/ios/
 !apps/*/android/
+# Local Expo modules keep their native sources (M-13's subject-lift), not their builds.
+!apps/mobile/modules/*/ios/
+!apps/mobile/modules/*/android/
+apps/mobile/modules/*/android/build/
+apps/mobile/modules/*/android/.gradle/
 
 # Tauri
 target/
