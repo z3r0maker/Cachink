@@ -128,14 +128,20 @@ export const ROUTES = [
     outDir: 'dist/soporte',
     title: 'Soporte · Xangarro',
     description:
-      'Cómo pedir ayuda con Xangarro: el correo de soporte, qué hacer si no puedes vincular un dispositivo o olvidaste tu NIP, y cómo exportar o borrar tus datos.',
-    smoke: 'soporte@xangarro.mx',
-    // A link the page renderer failed to parse would show its Markdown.
-    absent: ['](http'],
+      'Cómo pedir ayuda con Xangarro: el correo de soporte, vincular un dispositivo, un NIP olvidado, y cómo llevarte tus datos o eliminar tu cuenta.',
+    // Google Play's account-deletion URL points at this section (ADR-136).
+    smoke: 'id="eliminar-tu-cuenta"',
+    // A link or bold the page renderer failed to parse would show its Markdown.
+    absent: ['](http', '](#', '**'],
     type: 'website',
     changefreq: 'monthly',
     priority: '0.4',
-    sources: ['src/pages/Soporte.jsx', 'src/pages/legal', '../../docs/store/soporte.md'],
+    sources: [
+      'src/pages/Soporte.jsx',
+      'src/pages/soporte',
+      'src/pages/legal',
+      '../../docs/store/soporte.md',
+    ],
   },
   {
     path: '/acerca/',
