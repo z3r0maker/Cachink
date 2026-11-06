@@ -6,7 +6,7 @@ import type {
 } from '@xangarro/domain/corp';
 
 /**
- * The ledger's storage port (E-02, ADR-124 §4). `@xangarro/data-corp`
+ * The ledger's storage port (E-02, ADR-125 §4). `@xangarro/data-corp`
  * implements it over the corp schema; tests fake it in memory.
  */
 export type EntrySource = 'manual' | 'billing' | 'statement' | 'recurring' | 'agent' | 'cfdi';

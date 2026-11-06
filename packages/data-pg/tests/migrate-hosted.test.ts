@@ -162,7 +162,7 @@ describe('pendingMigrations', () => {
 });
 
 describe('roles', () => {
-  it('provisions exactly the app logins, with the corp pair of ADR-124 last', () => {
+  it('provisions exactly the app logins, with the corp pair of ADR-125 last', () => {
     assert.deepEqual(
       LOGIN_ROLES.map((r) => r.role),
       [

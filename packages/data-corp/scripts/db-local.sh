@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The corp schema on the LOCAL Postgres that data-pg's db-local.sh runs
-# (ADR-124 §2). Same container, same overrides (XG_PG_NAME / XG_PG_PORT), its
+# (ADR-125 §2). Same container, same overrides (XG_PG_NAME / XG_PG_PORT), its
 # own migration set: local/ first (the corp logins), then drizzle/ in order.
 #
 #   ./scripts/db-local.sh apply      # apply the corp set (after data-pg's `up`)

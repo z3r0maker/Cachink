@@ -1,7 +1,7 @@
 import type { Founder } from '@xangarro/data-corp';
 
 /**
- * The founder permission as plain functions (E-01, ADR-124 §1), so it is
+ * The founder permission as plain functions (E-01, ADR-125 §1), so it is
  * unit-tested without a database. `founder.ts` binds them to the corp
  * connection and to Next's redirects.
  *

@@ -1,8 +1,8 @@
--- Who may touch the corp schema (ADR-124 §2). Hand-written, like data-pg's
+-- Who may touch the corp schema (ADR-125 §2). Hand-written, like data-pg's
 -- grants files: Drizzle Kit does not model roles or privileges.
 --
 -- * xangarro_corp       the console's CORP_DATABASE_URL: reads and writes,
---                       never deletes (a correction is a new row, ADR-124 §4).
+--                       never deletes (a correction is a new row, ADR-125 §4).
 -- * xangarro_corp_agent the agents' login (corp-tools, E-30): reads only. E-31
 --                       will add INSERT on corp.agent_proposals and nothing else.
 -- * everyone else       nothing — not the portal, not the console's platform
@@ -44,7 +44,7 @@ GRANT USAGE ON SCHEMA corp TO xangarro_corp, xangarro_corp_agent;
 GRANT SELECT, INSERT, UPDATE ON corp.projects, corp.founders TO xangarro_corp;
 GRANT SELECT ON corp.projects, corp.founders TO xangarro_corp_agent;
 
--- Xangarro is the first project (ADR-124 §3).
+-- Xangarro is the first project (ADR-125 §3).
 INSERT INTO corp.projects (id, slug, nombre, created_at)
 VALUES ('xangarro', 'xangarro', 'Xangarro', now())
 ON CONFLICT (slug) DO NOTHING;

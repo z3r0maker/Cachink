@@ -49,7 +49,7 @@ export default defineConfig({
     timeout: 240_000,
     env: {
       DATABASE_URL: databaseUrl(),
-      // «Empresa» (ADR-124): the corp login. Unset, the area simply does not exist.
+      // «Empresa» (ADR-125): the corp login. Unset, the area simply does not exist.
       CORP_DATABASE_URL: process.env.CORP_DATABASE_URL ?? '',
       // E-11: the SAT's CFDI status service answers without the network (sat-consulta.ts).
       CORP_SAT_CONSULTA: 'simulada',

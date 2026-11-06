@@ -6,7 +6,7 @@ import type { CorpLedgerRepository, LedgerEntry } from './ports.js';
 import { assertPrestamosCubiertos } from './prestamos.js';
 
 /**
- * Undoes a movement the only way the ledger allows (E-02, ADR-124 §4): a new
+ * Undoes a movement the only way the ledger allows (E-02, ADR-125 §4): a new
  * entry with the sides swapped, dated when the correction happens, pointing at
  * the one it reverses. The original stays, so the history is complete.
  */

@@ -2,7 +2,7 @@ import type { Money } from '../../money/index.js';
 import type { AccountKey, CategoriaGasto } from './accounts.js';
 
 /**
- * What a founder captures (E-02, ADR-124 §4): single-entry movements. The
+ * What a founder captures (E-02, ADR-125 §4): single-entry movements. The
  * ledger turns each into balanced journal lines (`posting.ts`); nobody types a
  * debit or a credit except in an `ajuste`.
  *

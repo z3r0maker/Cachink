@@ -19,7 +19,7 @@ import { auditOfEntry, auditOfRecurrente, failed } from '../empresa/fallas';
 import { field, type FormState } from './form-state';
 
 /**
- * The ledger's two writes from the console (E-02, ADR-124 §4): record a
+ * The ledger's two writes from the console (E-02, ADR-125 §4): record a
  * movement, reverse one. Founders only. The corp schema lives in its own
  * database, so its write cannot share the audit row's transaction: the entry
  * commits first and carries a form nonce as `sourceRef`, so a retry after a

@@ -14,7 +14,7 @@ import {
 import { FakeLedger } from './fake-ledger.js';
 
 /**
- * E-02 (ADR-124 §4): recording and reversing a movement. The repository is
+ * E-02 (ADR-125 §4): recording and reversing a movement. The repository is
  * faked in memory; the posting rules themselves are the domain's.
  */
 

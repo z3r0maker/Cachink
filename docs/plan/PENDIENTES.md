@@ -20,6 +20,8 @@ listas de abajo.
 - **M-10** The owner corrects a sale. (Colas de tracks) — destraba 13: N-24, N-22, N-25, N-44, N-29, N-30, … · `19-movil-mostrador.md:33`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1031`
 - **X-01** Entorno de staging (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
+- **K-01** Registro de MEXIA como tercero desarrollador CoDi (Colas de tracks) — destraba 6: K-20, K-21, K-22, K-23, K-24, K-25 · `22-codi.md:84`
+- **K-10** Dominio: CoDi vuelve como método (Colas de tracks) — destraba 6: K-11, K-15, K-12, K-13, K-14, K-31 · `22-codi.md:181`
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1011`
 - **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:336`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
@@ -28,9 +30,7 @@ listas de abajo.
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1302`
 - **X-07** Masters de marca + derivados (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1322`
-- **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
-- **N-19** Logo + color de marca `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:561`
-- **N-26** Auditoría de seguridad `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:735`
+- **K-02** Opinión legal sobre CoDi (Colas de tracks) — destraba 1: K-31 · `22-codi.md:168`
 
 ## Bloquea producción (39)
 
@@ -87,11 +87,11 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (102)
+## Código y técnico (113)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (6)
+### Teléfono (8)
 
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + color de marca `[LAUNCH]` — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [~] `Alta` **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: N-20 (hecho) · web half landed 2026-09-20 · Falta: solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. · `09-next-features.md:621`
@@ -99,8 +99,10 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `⛔ bloquea prod` `Alta` **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
+- [ ] **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
+- [ ] **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
 
-### Portal (13)
+### Portal (15)
 
 - [ ] `Alta` **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) — Bloqueada por: — · `04-portal.md:1639`
 - [~] `⛔ bloquea prod` `Alta` **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` — Bloqueada por: N-02, N-08, B-14 · Falta: sin banner de uso en el portal; sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
@@ -115,12 +117,15 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
 - [ ] `Baja` **P-40** Primer diagnóstico gratis a los 90 días — Bloqueada por: P-28 · `04-portal.md:1925`
 - [ ] `Baja` **P-41** Funciones avanzadas de inventario — Bloqueada por: — · `04-portal.md:1939`
+- [ ] **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
+- [ ] **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · `22-codi.md:285`
 
-### Caja web (1)
+### Caja web (2)
 
 - [!] `Baja` **P-37** Impresión de tickets desde la caja · `04-portal.md:1877`
+- [ ] **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · `22-codi.md:234`
 
-### Pagos y conciliación (12)
+### Pagos y conciliación (18)
 
 - [ ] `Media` **C-13** API de intenciones de pago — Disparador: que N-40 decida avanzar · `02-contracts.md:336`
 - [ ] `Media` **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? · `09-next-features.md:1031`
@@ -134,6 +139,12 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **N-44** Cobrar en terminal (app y caja web) — Bloqueada por: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1122`
 - [ ] `Baja` **N-78** Salud de la terminal en la caja — Bloqueada por: N-79 · `09-next-features.md:1133`
 - [ ] `Baja` **N-53** Adaptador de Clip — Bloqueada por: N-41, N-40 (go de Clip), N-75 (go de Clip) · `09-next-features.md:1212`
+- [ ] **K-10** Dominio: CoDi vuelve como método — Bloqueada por: — · `22-codi.md:181`
+- [ ] **K-11** Datos: la configuración CoDi del negocio — Bloqueada por: K-10 · `22-codi.md:197`
+- [ ] **K-15** Reportes: CoDi en su propia línea — Bloqueada por: K-10, board KD-06 · `22-codi.md:240`
+- [ ] **K-20** Spike: el sandbox de Banxico — Bloqueada por: K-01 (the technical documentation and sandbox) · `22-codi.md:250`
+- [ ] **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · `22-codi.md:261`
+- [ ] **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · `22-codi.md:271`
 
 ### Consola (backoffice) (33)
 
@@ -217,12 +228,13 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes,… · `../launch/production-readiness.md:146`
 - [ ] `Baja` Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)). · `../launch/production-readiness.md:148`
 
-### Landing (2)
+### Landing (3)
 
 - [ ] `Media` **L-05** Badges de tienda + páginas legales — Bloqueada por: X-05 (URLs reales de tienda) · Falta: `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. · `06-landing.md:89`
 - [~] `Media` **N-58** Etapa 4 — compras + landing. · `09-next-features.md:1250`
+- [ ] **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · `22-codi.md:319`
 
-## Corporativo, legal y terceros (35)
+## Corporativo, legal y terceros (38)
 
 Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/INDAUTOR, seguros, Clip y Mercado Pago, y las decisiones de negocio.
 
@@ -258,6 +270,12 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 - [ ] `Media` **O-27** Crear una app de desarrollador de Mercado Pago (Tus integraciones), copiar su access token de prueba y correr… · `11-pre-launch-and-deferred.md:58`
 - [ ] `Media` **O-28** Clip: terminar el KYC, revisar el modelo de terminal (Total 3 / Ultra / PinPad / Stand 2; no Plus), crear lla… · `11-pre-launch-and-deferred.md:59`
 - [ ] `Baja` **O-32** Nota para la migración a Azure (owner, 2026-09-26): cuando Postgres pase a Azure (Flexible Server), revisar u… · `11-pre-launch-and-deferred.md:31`
+
+### `22-codi.md` · 4. Tasks (3)
+
+- [~] **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
+- [ ] **K-02** Opinión legal sobre CoDi — Bloqueada por: — · `22-codi.md:168`
+- [ ] **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:301`
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
@@ -328,7 +346,7 @@ Configuración en consolas de terceros — Vercel, Supabase, Stripe, Resend, DNS
 
 - [~] `⛔ bloquea prod` `Alta` ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad; formulario de Data Safety de Play… · `../launch/production-readiness.md:130`
 
-## Espera datos reales (18)
+## Espera datos reales (19)
 
 No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral de escala o tiempo después del lanzamiento. Cada una dice su disparador.
 
@@ -362,6 +380,10 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - [ ] `Baja` **N-73** Salud de la cuenta y microencuesta NPS — Bloqueada por: N-64, N-47 · Disparador: 50 inquilinos activos. · `09-next-features.md:1392`
 - [ ] `Baja` **N-74** Códigos promocionales y de referidos con atribución — Bloqueada por: N-64, N-01 · Disparador: lanzamiento de X-10. · `09-next-features.md:1402`
 
+### `22-codi.md` · 4. Tasks (1)
+
+- [ ] **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:310`
+
 ## Por archivo
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 22 hechos)
@@ -377,4 +399,5 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 1 abiertos (0 en curso, 0 bloqueados, 12 hechos)
 - `20-command-center.md` — 25 abiertos (4 en curso, 0 bloqueados, 7 hechos)
+- `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 36 abiertos (7 en curso, 0 bloqueados, 19 hechos)

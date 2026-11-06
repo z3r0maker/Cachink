@@ -1,7 +1,7 @@
 import postgres from 'postgres';
 
 /**
- * The corp role cannot delete (ADR-124 §4), so each integration file removes
+ * The corp role cannot delete (ADR-125 §4), so each integration file removes
  * what it wrote through the owner login, by its own author id. Files run in
  * parallel; an id per file keeps one from deleting another's rows mid-test.
  */

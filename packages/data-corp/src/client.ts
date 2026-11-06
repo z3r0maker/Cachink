@@ -6,7 +6,7 @@ import * as schema from './schema/index.js';
 /**
  * The corp database client. The console connects as `xangarro_corp`
  * (`CORP_DATABASE_URL`), never as its platform login: the platform role
- * cannot see this schema at all, and that is the point (ADR-124 §2).
+ * cannot see this schema at all, and that is the point (ADR-125 §2).
  *
  * `prepare: false` for the same reason as data-pg's client: Supabase's
  * transaction pooler may hand each transaction a different connection.

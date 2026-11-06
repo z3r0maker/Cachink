@@ -1,4 +1,4 @@
--- Funding calls' privileges (E-03, ADR-124 §2). Hand-written: Drizzle Kit
+-- Funding calls' privileges (E-03, ADR-125 §2). Hand-written: Drizzle Kit
 -- models no privileges. Applied after 0002_corp_fondeo.sql.
 --
 -- A call is written once and never changed: its halves live in the ledger

@@ -13,7 +13,7 @@ import {
 import { PHONE } from '@/shell/shell.css';
 
 /**
- * El Mostrador in the console (ADR-117, ADR-124): the «Empresa» area's
+ * El Mostrador in the console (ADR-117, ADR-125): the «Empresa» area's
  * surfaces, after `docs/design/el-mostrador.md`. Light only; the area wraps
  * itself in `torreLight`, so these never meet the dark roles.
  */
