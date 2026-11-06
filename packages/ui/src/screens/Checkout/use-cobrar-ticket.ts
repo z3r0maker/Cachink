@@ -21,6 +21,8 @@ import {
   useTicketsRepository,
 } from '../../app/index';
 import { useCurrentBusinessId, useUserId } from '../../app-config/index';
+import { warnAfterCapture } from '../../entitlement/plan-limit-store';
+import { useRecordQuota } from '../../entitlement/use-record-quota';
 import { useFeatureFlag } from '../../hooks/use-feature-flags';
 import { estadosKeys } from '../../hooks/query-keys';
 import { useAuditedUseCase } from '../../observability/index';
@@ -130,12 +132,14 @@ export function useCobrarTicket() {
   const useCase = useAuditedUseCase(useTicketUseCase(), AUDIT_COBRAR_TICKET);
   const businessId = useCurrentBusinessId();
   const queryClient = useQueryClient();
+  const quota = useRecordQuota();
   return useMutation<VentaHecha, Error, CobrarTicketInput>({
     async mutationFn(input) {
       if (!businessId) throw new Error('No hay negocio en esta caja');
       return ventaHechaDe(input, await useCase.execute(ticketInput(input, businessId)));
     },
     async onSuccess() {
+      await warnAfterCapture(quota);
       await Promise.all([
         queryClient.invalidateQueries({ predicate: (q) => TOCADAS.has(String(q.queryKey[0])) }),
         ...estadosKeys

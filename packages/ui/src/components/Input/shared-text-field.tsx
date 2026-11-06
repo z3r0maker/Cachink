@@ -54,6 +54,7 @@ export function TextField(props: FieldProps): ReactElement {
       onChangeText={props.onChange}
       placeholder={props.placeholder}
       aria-label={props.ariaLabel}
+      testID={props.inputTestID}
       type={hints.htmlType}
       keyboardType={hints.keyboardType}
       secureTextEntry={hints.secureTextEntry}

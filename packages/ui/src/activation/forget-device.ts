@@ -10,6 +10,7 @@
 
 import type { QueryClient } from '@tanstack/react-query';
 import type { AppConfigRepository } from '@xangarro/data';
+import { useCajaLock } from '../app/caja-lock';
 import { APP_CONFIG_KEYS } from '../app-config/types';
 import { useAppConfigStore } from '../app-config/use-app-config';
 import type { DeviceTokenStore } from './activation-config';
@@ -23,5 +24,10 @@ export async function forgetDevice(deps: {
   await deps.tokenStore.clear();
   await deps.appConfig.delete(APP_CONFIG_KEYS.activation);
   useAppConfigStore.getState().setUserId(null);
+  // Unlinking is not a lock: the sign-out above reads as «Toni locked the
+  // caja» to the lock's subscription, and the gate would show Bloqueo for a
+  // device already on its way back to Vincular. Released after, so the
+  // subscription has already fired (M-11).
+  useCajaLock.getState().soltar();
   await deps.queryClient.invalidateQueries({ queryKey: ACTIVATION_QUERY_KEY });
 }
