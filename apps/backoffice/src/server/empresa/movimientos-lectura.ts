@@ -9,7 +9,8 @@ import { requireCorpDb } from '../db/corp';
 
 /**
  * What Movimientos reads for one month (E-02): its entries, and each recurring
- * template's charge in it, registered, suggested or still to come.
+ * template's charge in it, registered (by its charge, or by its supplier's
+ * invoice, E-11), suggested, waiting for its invoice or still to come.
  */
 export interface MesDeMovimientos {
   readonly movimientos: readonly Movimiento[];
@@ -21,14 +22,15 @@ export interface MesDeMovimientos {
 export async function leerMes(mes: string, hoy: string): Promise<MesDeMovimientos> {
   const db = requireCorpDb();
   const plantillas = createRecurringTemplateRepository(db);
-  const [movimientos, todas, registradas] = await Promise.all([
+  const [movimientos, todas, registradas, facturadas] = await Promise.all([
     listMovimientos(db, mes),
     plantillas.list(),
     plantillas.registradasEn(mes),
+    plantillas.facturadasEn(mes),
   ]);
   return {
     movimientos,
-    recurrentes: recurrentesDelMes(todas, registradas, mes, hoy),
+    recurrentes: recurrentesDelMes(todas, registradas, mes, hoy, facturadas),
     activos: new Set(todas.filter((p) => p.activo).map((p) => p.id)),
   };
 }

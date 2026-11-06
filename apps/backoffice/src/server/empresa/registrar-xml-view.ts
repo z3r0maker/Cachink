@@ -100,6 +100,15 @@ export function notaRetenciones(fecha: string, pagada: boolean): string {
   return `${base} debe al SAT y las paga con la declaración del ${mes === null ? 'mes siguiente' : `17 de ${mes}`}.`;
 }
 
+/**
+ * «Hacer recurrente cada mes» with an XML (board CD-06h): the supplier's
+ * invoice is expected each month near the day of this one, `YYYY-MM-DD`.
+ */
+export function notaRecurrente(fechaFactura: string): string {
+  const dia = Number(fechaFactura.slice(8, 10));
+  return `Cada mes esperamos la factura de este RFC cerca del ${dia}. En cuanto registres la del mes, queda lista; si no llega, te recordamos pedirla.`;
+}
+
 /** One attached XML that cannot be registered: the review's label and reason, in one line. */
 export function mensajeDeRechazo(r: Rechazo): string {
   const f = fueraDe(r);

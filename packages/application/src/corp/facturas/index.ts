@@ -1,9 +1,11 @@
 export { consultarSatFactura, type ConsultarSatDeps } from './consultar-sat.js';
+export { hacerRecurrenteFactura, type HacerRecurrenteFacturaDeps } from './recurrente.js';
 export {
   FacturaDesconocidaError,
   FacturaNoPendienteError,
   FacturaNoPorPagarError,
   FacturaNoPorVerificarError,
+  FacturaSinRegistrarError,
   FechaPagoAnteriorError,
   RfcMexiaPendienteError,
   SinArchivosError,

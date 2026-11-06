@@ -23,7 +23,7 @@ listas de abajo.
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1011`
 - **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:336`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1024`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1033`
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1291`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1302`
 - **X-07** Masters de marca + derivados (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -140,7 +140,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 ### Consola (backoffice) (33)
 
-- [ ] `Alta` **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:726`
+- [ ] `Alta` **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · `20-command-center.md:735`
 - [~] `Media` **B-16** Back-office: consultas guardadas de Studio + funciones de soporte — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:293`
 - [ ] `Media` **N-46** Salud de la sincronización y dispositivos — Disparador: lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos. · `09-next-features.md:1150`
 - [ ] `Media` **N-65** Línea de tiempo del inquilino — Bloqueada por: N-08 · Disparador: ya (todas las tablas fuente existen). · `09-next-features.md:1313`
@@ -148,31 +148,31 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **N-67** `/auditoria` — Bloqueada por: N-05 · Disparador: ya. · `09-next-features.md:1332`
 - [~] `Media` **E-02** Ledger core and Movimientos — Bloqueada por: E-01 · Falta: only the contador's código agrupador mapping, which waits on the contador. The project filter moves to E-41: with one project the list has nothing to filter, and Registrar already asks Xangarro or Compartido. · `20-command-center.md:311`
 - [ ] `Media` **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · `20-command-center.md:522`
-- [~] `Media` **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be both yet. It needs a decision on how a template knows its month was registered by an invoice. «Fecha de pago» bounds, dropped when PR #76 took main's E-11 (2026-11-03). `registrarPagoFactura` refuses only a day before the invoice. It should also refuse a day after today in Mexico (a typed error with its Spanish message) and an impossible day such as 2026-11-31, which today fails only by chance, as the ledger's `PeriodoCerradoError`. Test-first in `facturas-pago.test.ts`: both ends of the range, the user-facing message and the bancos amount, not just the error class. Also drop the `hoy` that `resultados.integration.test.ts` passes to `registrarPagoFactura`, which ignores it. · `20-command-center.md:537`
-- [~] `Media` **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 (answered 2026-10-30) · `20-command-center.md:616`
-- [ ] `Media` **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:648`
-- [ ] `Media` **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:659`
-- [ ] `Media` **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:737`
-- [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:821`
-- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:1024`
+- [~] `Media` **E-11** Facturas recibidas — Bloqueada por: E-02, E-05 · Falta: «Fecha de pago» bounds, dropped when PR #76 took main's E-11 (2026-11-03). `registrarPagoFactura` refuses only a day before the invoice. It should also refuse a day after today in Mexico (a typed error with its Spanish message) and an impossible day such as 2026-11-31, which today fails only by chance, as the ledger's `PeriodoCerradoError`. Test-first in `facturas-pago.test.ts`: both ends of the range, the user-facing message and the bancos amount, not just the error class. Also drop the `hoy` that `resultados.integration.test.ts` passes to `registrarPagoFactura`, which ignores it. · `20-command-center.md:537`
+- [~] `Media` **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 (answered 2026-10-30) · `20-command-center.md:625`
+- [ ] `Media` **E-13** Impuestos — Bloqueada por: E-12, the portal's RESICO persona moral fix (session task 2026-10-08) · `20-command-center.md:657`
+- [ ] `Media` **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:668`
+- [ ] `Media` **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:746`
+- [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:830`
+- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:1033`
 - [ ] `Baja` **N-62** Métricas de cohortes desde el domicilio fiscal, no desde la IP. · `09-next-features.md:1271`
 - [ ] `Baja` **N-68** «Ver como» — suplantación de solo lectura con límite de tiempo — Bloqueada por: N-66, N-67 · Disparador: lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda resolver desde `/tenants/[id]` + N-65. · `09-next-features.md:1341`
 - [ ] `Baja` **N-70** Decisiones — Bloqueada por: N-07, N-63 · Disparador: N-63 `[x]`. · `09-next-features.md:1364`
-- [ ] `Baja` **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:676`
-- [ ] `Baja` **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:746`
-- [ ] `Baja` **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:754`
-- [ ] `Baja` **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:764`
-- [ ] `Baja` **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:773`
-- [ ] `Baja` **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:782`
-- [ ] `Baja` **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:791`
-- [ ] `Baja` **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:802`
-- [ ] `Baja` **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:808`
-- [ ] `Baja` **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:815`
-- [ ] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:827`
-- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:917`
-- [ ] `Baja` **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:932`
-- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:949`
-- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:1056`
+- [ ] `Baja` **E-15** Límites — Bloqueada por: E-10 · `20-command-center.md:685`
+- [ ] `Baja` **E-22** Presupuesto — Bloqueada por: E-12 · `20-command-center.md:755`
+- [ ] `Baja` **E-23** Caja — Bloqueada por: E-12 · `20-command-center.md:763`
+- [ ] `Baja` **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · `20-command-center.md:773`
+- [ ] `Baja` **E-31** Propuestas — Bloqueada por: E-30 · `20-command-center.md:782`
+- [ ] `Baja` **E-32** The agents of §6 — Bloqueada por: E-31 · `20-command-center.md:791`
+- [ ] `Baja` **E-33** Foundry runtime — Bloqueada por: E-32 · `20-command-center.md:800`
+- [ ] `Baja` **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:811`
+- [ ] `Baja` **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:817`
+- [ ] `Baja` **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:824`
+- [ ] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:836`
+- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:926`
+- [ ] `Baja` **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:941`
+- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:958`
+- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:1065`
 
 ### Backend, sync y datos (6)
 

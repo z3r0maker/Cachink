@@ -1,0 +1,1 @@
+ALTER TABLE "corp"."recurring_templates" ADD COLUMN "rfc" text;
