@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 52 flows + 18 shared subflows and scripts; `full-regression.sh` runs the curated 30 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 54 flows + 18 shared subflows and scripts; `full-regression.sh` runs the curated 31 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -204,7 +204,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — 30 per-screen flows — in dependency
+now runs the M-11 curated suite — 31 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
@@ -219,8 +219,8 @@ turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 | 18–21 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, venta-fiado-cancelar (the caja's edge cases) |
 | 22–23 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                               |
 | 24–27 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)           |
-| 28    | settings-desvincular (leaves the device unlinked)                                                             |
-| 29–30 | activation, login-operator-pin (fresh entry)                                                                  |
+| 28–29 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                            |
+| 30–31 | activation, login-operator-pin (fresh entry)                                                                  |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).
@@ -229,7 +229,7 @@ the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ## Flow Inventory (grouped by feature area)
 
-Generated from each flow's header on 2026-11-03; «Suite» marks the thirty `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
+Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-one `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
 
 ### Vincular y acceso
 
@@ -270,14 +270,15 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty `ful
 
 ### Inventario y productos
 
-| Flow                             | Entry     | Suite | What it proves                                                                                                          |
-| -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
-| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; board MvInventario): /productos lists the existencias; a row's entrada square opens «Entrada |
-| `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                  |
-| `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says |
-| `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the |
-| `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                        |
-| `notificaciones-stock-bajo.yaml` | activated |       | Verify the Director can toggle stock-low notifications in Settings (P1C-M11-T01..T03, S4-C13).                          |
+| Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
+| -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; board MvInventario): /productos lists the existencias; a row's entrada square opens «Entrada                                                             |
+| `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                                                                              |
+| `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
+| `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
+| `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                                                                                    |
+| `producto-foto.yaml`             | activated |       | Foto del producto (M-13, ADR-134; MvFoto\* boards): the Inventario square takes a photo from the gallery, «Listo» or «Guardar así» saves it, then «Quitar foto» puts the icon back. |
+| `notificaciones-stock-bajo.yaml` | activated |       | Verify the Director can toggle stock-low notifications in Settings (P1C-M11-T01..T03, S4-C13).                                                                                      |
 
 ### Mi turno y cierre
 
@@ -307,13 +308,14 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty `ful
 
 ### Plan y dispositivo
 
-| Flow                             | Entry     | Suite | What it proves                                                                                                           |
-| -------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
-| `entitlement-feature-gates.yaml` | activated | ✓     | Feature flags from the verified plan (A-14; catalogue J8-04): on Xangarrito stock is off — Productos is a plain catalog  |
-| `plan-pago-pendiente.yaml`       | activated | ✓     | Payment grace (ADR-053 §5, A-10; catalogue J8-05): the server says the plan's validUntil passed three days ago and grace |
-| `plan-vencido.yaml`              | activated | ✓     | Lapsed payment (ADR-053 §5, A-10; catalogue J8-06): both the plan's validUntil and its graceUntil are past (mock scenari |
-| `dispositivo-revocado.yaml`      | activated | ✓     | The owner revokes this caja mid-shift (B-12, catalogue J3-15 / J10-14 phone half): the next sync answers DEVICE_REVOKED, |
-| `settings-desvincular.yaml`      | activated | ✓     | Device-only Ajustes (A-12, MvAjustes): Esta caja / Sincronización / En este teléfono / Privacidad y términos, and «Desvi |
+| Flow                             | Entry     | Suite | What it proves                                                                                                                                                                                                                      |
+| -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `entitlement-feature-gates.yaml` | activated | ✓     | Feature flags from the verified plan (A-14; catalogue J8-04): on Xangarrito stock is off — Productos is a plain catalog                                                                                                             |
+| `plan-pago-pendiente.yaml`       | activated | ✓     | Payment grace (ADR-053 §5, A-10; catalogue J8-05): the server says the plan's validUntil passed three days ago and grace                                                                                                            |
+| `plan-vencido.yaml`              | activated | ✓     | Lapsed payment (ADR-053 §5, A-10; catalogue J8-06): both the plan's validUntil and its graceUntil are past (mock scenari                                                                                                            |
+| `dispositivo-revocado.yaml`      | activated | ✓     | The owner revokes this caja mid-shift (B-12, catalogue J3-15 / J10-14 phone half): the next sync answers DEVICE_REVOKED,                                                                                                            |
+| `settings-borrar.yaml`           | activated | ✓     | «Desvincular y borrar» (MvDesvincularBorrar): the second card of the unlink sheet empties the phone once nothing is unsent; the app restarts on the connect screen with «Listo, se borraron los datos», then the flow re-activates. |
+| `settings-desvincular.yaml`      | activated | ✓     | Device-only Ajustes (A-12, MvAjustes): Esta caja / Sincronización / En este teléfono / Privacidad y términos, and «Desvi                                                                                                            |
 
 ### Ajustes y observabilidad
 

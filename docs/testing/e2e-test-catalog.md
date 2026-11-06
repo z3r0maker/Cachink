@@ -382,5 +382,5 @@ J8-12, J9-10. Each carries its scenario here so the spec is written with the fea
   parked; a flow that passes once and fails once is a harness bug until proven otherwise
   (`E2E-SESSION-NOTES.md` §3).
 - **CI.** `portal-e2e` and `backoffice-e2e` gate every PR. `maestro-e2e` is dispatch-only and
-  runs the curated 30; the goal for launch is a nightly on the iPhone runner with the suite
+  runs the curated 31; the goal for launch is a nightly on the iPhone runner with the suite
   going red on any failure, and the sync project's chains promoted to required.
