@@ -72,8 +72,10 @@ The camera is used only to scan the owner's QR code and product barcodes.
 
 ACCOUNTS AND DATA
 Employees do not create accounts in the app; the business owner adds them on
-the website. A business can request deletion of its account and data at
-soporte@xangarro.mx or through https://xangarro.mx/privacidad/arco/.
+the website. The owner deletes the account and its data there too, in
+Mi negocio > General > "Eliminar mi cuenta"; the steps are public at
+https://xangarro.mx/soporte/#eliminar-tu-cuenta, with soporte@xangarro.mx
+as the fallback.
 The privacy policy and the terms open from Mi turno > Ajustes > "Privacidad
 y términos", and from the privacy notice on the linking screen.
 

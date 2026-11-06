@@ -1,0 +1,424 @@
+/* The support page (ElSoporte board): El Mostrador's cards, borders and hard
+ * shadows over the landing's tokens. Cards stack on their own at phone width
+ * (auto-fit grids); only Don leaves below 640 px. */
+
+.sp {
+  min-height: 100vh;
+  background: var(--offwhite);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+.sp-wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 5vw, 32px);
+}
+.sp h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--black);
+}
+.sp h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--black);
+}
+.sp-sub {
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.sp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: var(--border-thin);
+  border-radius: var(--r-12);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  color: var(--black);
+  font: 800 15px/1 var(--font-sans);
+  text-decoration: none;
+  align-self: flex-start;
+  transition:
+    transform 100ms var(--press-ease),
+    box-shadow 100ms var(--press-ease);
+}
+.sp-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-card);
+}
+.sp-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-pressed);
+}
+.sp-btn-amarillo {
+  background: var(--yellow);
+}
+.sp-btn-negro {
+  min-height: 52px;
+  padding: 0 20px;
+  border: var(--border-thick);
+  border-radius: var(--r-14);
+  background: var(--black);
+  color: var(--yellow);
+  font-size: 16px;
+  box-shadow: 3px 3px 0 var(--white);
+}
+.sp-btn-negro:hover {
+  box-shadow: 4px 4px 0 var(--white);
+}
+.sp a:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.sp-cabecera {
+  background: var(--white);
+  border-bottom: var(--border-thick);
+}
+.sp-cabecera-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-block: 12px;
+}
+
+.sp-hero {
+  background: var(--yellow);
+  border-bottom: var(--border-thick);
+  overflow: hidden;
+}
+.sp-hero-fila {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 40px 36px;
+}
+.sp-hero-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 600px;
+}
+.sp-ceja {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+}
+.sp-hero h1 {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 48px);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  color: var(--black);
+}
+.sp-hero-intro {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--ink);
+}
+.sp-hero-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 4px;
+}
+.sp-hero-correo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--black);
+}
+.sp-hero-nota {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--ink);
+}
+.sp-don {
+  margin-bottom: -36px;
+}
+
+.sp-main {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-block: 36px 64px;
+}
+.sp-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-margin-top: 16px;
+}
+.sp-rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 14px;
+}
+.sp-rejilla-ancha {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+.sp-rejilla-tres {
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+.sp-quien {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: var(--border-thick);
+  border-radius: var(--r-20);
+  background: var(--white);
+  box-shadow: var(--shadow-card);
+  color: var(--black);
+  text-decoration: none;
+}
+.sp-quien:hover {
+  background: #fffbcc;
+}
+.sp-quien-icono {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: var(--r-14);
+  background: var(--yellow);
+}
+.sp-quien-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.sp-quien-titulo {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.sp-tarjeta {
+  padding: 18px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-18);
+  background: var(--white);
+}
+.sp-pregunta {
+  display: flex;
+  gap: 14px;
+}
+.sp-pregunta-icono {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-12);
+  background: var(--gray-100);
+  color: var(--black);
+}
+.sp-pregunta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.sp-duenio {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sp-duenio-texto {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.sp-eliminar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(18px, 4vw, 28px);
+  border: var(--border-thick);
+  border-radius: var(--r-22);
+  background: var(--white);
+  box-shadow: 6px 6px 0 var(--black);
+  scroll-margin-top: 16px;
+}
+.sp-eliminar h2 {
+  font-size: 26px;
+  letter-spacing: -0.035em;
+}
+.sp-eliminar-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sp-eliminar-cabeza p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sp-pasos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 12px;
+}
+.sp-pasos li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-16);
+  background: var(--offwhite);
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 700;
+  color: var(--black);
+}
+.sp-paso-n {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: 9999px;
+  background: var(--yellow);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sp-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-16);
+}
+.sp-lista-dentro {
+  padding: 0;
+  border: 0;
+}
+.sp-lista-guarda {
+  background: var(--offwhite);
+}
+.sp-lista-titulo {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+.sp-lista-borra .sp-lista-titulo {
+  color: var(--red-ink);
+}
+.sp-lista-item {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--ink);
+}
+.sp-lista-item svg {
+  flex: none;
+  margin-top: 2px;
+}
+.sp-lista-borra .sp-lista-item svg {
+  color: var(--red-ink);
+}
+
+.sp-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--black);
+  border-radius: var(--r-14);
+  background: #fffbcc;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--black);
+}
+.sp-aviso svg {
+  flex: none;
+  margin-top: 2px;
+}
+.sp-sin-portal {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.sp-pie {
+  border-top: var(--border-thick);
+  background: var(--white);
+}
+.sp-pie-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-block: 20px;
+}
+.sp-pie-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.sp-pie-links a {
+  color: var(--black);
+}
+
+@media (max-width: 640px) {
+  .sp-don {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-btn,
+  .sp-btn:hover,
+  .sp-btn:active {
+    transition: none;
+    transform: none;
+  }
+}
