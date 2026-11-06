@@ -3,7 +3,7 @@ import { founderForLayout } from '@/server/founder';
 import { requireStaffPage } from '@/server/staff';
 import { OPEN_ITEMS_CAP, openInboxItems } from '@/server/torre/readings';
 import { column, footer, frame, main, who } from '@/shell/shell.css';
-import { EMPRESA_NAV_ITEMS } from '@/shell/nav-items';
+import { EMPRESA_NAV } from '@/shell/empresa-nav';
 import { Sidebar, type NavCount } from '@/shell/sidebar';
 import { StatusBar } from '@/shell/status-bar';
 import { torreDark } from '@/styles/theme.css';
@@ -28,7 +28,7 @@ export default async function ConsolaLayout({ children }: { children: React.Reac
     <div className={`${torreDark} ${frame}`}>
       <Sidebar
         counts={inbox === undefined ? {} : { '/inbox': inbox }}
-        empresa={founder === null ? [] : EMPRESA_NAV_ITEMS}
+        empresa={founder === null ? [] : EMPRESA_NAV}
       >
         <div className={footer}>
           <span className={muted}>Turno</span>

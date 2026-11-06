@@ -189,10 +189,13 @@ pnpm --filter @xangarro/data-pg exec tsx scripts/seed-demo.ts
 ```
 
 It creates **Tacos La Esquina** (`demo@xangarro.mx`, operator PINs 1234 and
-5678, activation code `DEMXK7M3`, a month of ventas and gastos, the Xangarro
-plan) and is idempotent by upsert: a re-run adds nothing, re-mints the code if
-a reviewer redeemed it, and keeps the password from the first run (the app
-role cannot rewrite `auth.users`; rotate it with the portal's reset link).
+5678, activation codes `DEMXK7M3` and `DEMXPAD2`, one per device slot, a month
+of ventas and gastos, the Xangarro plan) and is idempotent by upsert: a re-run
+adds nothing, re-mints any code a reviewer redeemed, revokes the demo's linked
+devices so both slots are free, and keeps the password from the first run (the
+app role cannot rewrite `auth.users`; rotate it with the portal's reset link).
+Run it before every store submission; `app-registration/apple/REVIEW-NOTES.md`
+has the rest of that checklist.
 Locally, `pnpm --filter @xangarro/data-pg db:seed:demo` does the same against
 the dev container with a default password.
 

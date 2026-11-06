@@ -3,11 +3,12 @@ import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 
 import * as asesor from '../src/app/api/cron/asesor/route';
 import * as cfdiClose from '../src/app/api/cron/cfdi-close/route';
+import * as purgarFotos from '../src/app/api/cron/purgar-fotos/route';
 import * as trialEmails from '../src/app/api/cron/trial-emails/route';
 import * as usage from '../src/app/api/cron/usage/route';
 
 /**
- * The four Vercel Cron routes, each wired to its real guard (`handleCron`)
+ * The Vercel Cron routes, each wired to its real guard (`handleCron`)
  * with the job behind it swapped out: which job runs, with which clock, and
  * under which endpoint a failure is reported. The E2E server has no
  * `CRON_SECRET`, so no browser run ever gets past the guard.
@@ -48,6 +49,7 @@ vi.mock('../src/server/billing/cfdi', () => ({
   }),
 }));
 vi.mock('../src/server/usage/live', () => ({ runUsageRecompute: run('runUsageRecompute') }));
+vi.mock('../src/server/productos/purgar-fotos', () => ({ runPurgarFotos: run('runPurgarFotos') }));
 vi.mock('../src/server/email/trial-emails', () => ({ runTrialEmails: run('runTrialEmails') }));
 
 // Named for `.gitleaks.toml`'s allowlist, like trial-cron.test.ts's.
@@ -75,6 +77,12 @@ const ROUTES = [
   { path: 'asesor', GET: asesor.GET, job: 'fanOutAsesor', failure: 'asesor_fanout_failed' },
   { path: 'cfdi-close', GET: cfdiClose.GET, job: 'closeCfdiPeriod', failure: 'cfdi_close_failed' },
   { path: 'usage', GET: usage.GET, job: 'runUsageRecompute', failure: 'usage_failed' },
+  {
+    path: 'purgar-fotos',
+    GET: purgarFotos.GET,
+    job: 'runPurgarFotos',
+    failure: 'purgar_fotos_failed',
+  },
   {
     path: 'trial-emails',
     GET: trialEmails.GET,

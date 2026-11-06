@@ -1,64 +1,31 @@
 'use server';
 
-import { createHash } from 'node:crypto';
-
 import {
-  cancelarFactura,
   descartarRevision,
   registrarFacturas,
-  registrarPagoFactura,
   subirFacturas,
-  type ArchivoXml,
   type Seleccion,
 } from '@xangarro/application/corp';
-import {
-  createCorpLedgerRepository,
-  createDocumentRepository,
-  createReceivedInvoiceRepository,
-} from '@xangarro/data-corp';
 import { CATEGORIAS_GASTO } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auditedMutation } from '../audited';
-import { hoyEnMexico, requireCorpDb } from '../db/corp';
+import { hoyEnMexico } from '../db/corp';
+import { archivosDe, facturasDeps as deps } from '../empresa/facturas-deps';
 import { failed } from '../empresa/fallas';
-import { rfcDeMexia } from '../empresa/facturas-lectura';
 import { RECHAZOS_COOKIE } from '../empresa/facturas-rutas';
 import { serializarRechazos } from '../empresa/revision-view';
-import { consultaSat } from '../empresa/sat-consulta';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
 
 /**
  * Facturas recibidas' writes (E-11): upload XML, register what was
- * reviewed, leave the review, and pay or cancel an invoice on credit.
- * Founders only, each with its staff audit row. Nothing here deletes.
+ * reviewed and leave the review; paying or cancelling an invoice on credit
+ * is empresa-factura-por-pagar.ts. Founders only, each with its staff audit row. Nothing here deletes.
  */
 const FACTURAS = '/empresa/facturas';
-
-const deps = () => {
-  const db = requireCorpDb();
-  return {
-    facturas: createReceivedInvoiceRepository(db),
-    ledger: createCorpLedgerRepository(db),
-    documentos: createDocumentRepository(db),
-    sat: consultaSat(),
-    rfcMexia: () => rfcDeMexia(db),
-    sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
-  };
-};
-
-async function archivosDe(form: FormData): Promise<ArchivoXml[]> {
-  const files = form.getAll('xml').filter((f): f is File => f instanceof File && f.size > 0);
-  return Promise.all(
-    files.map(async (f) => {
-      const contenido = new Uint8Array(await f.arrayBuffer());
-      return { nombre: f.name, contenido, texto: new TextDecoder().decode(contenido) };
-    }),
-  );
-}
 
 export async function subirFacturasAction(_p: FormState, form: FormData): Promise<FormState> {
   try {
@@ -127,34 +94,4 @@ export async function descartarRevisionAction(): Promise<FormState> {
     return failed(error, 'descartarRevision');
   }
   redirect(FACTURAS);
-}
-
-async function porPagar(form: FormData, accion: 'pago' | 'cancelar'): Promise<FormState> {
-  const uuid = field(form, 'uuid');
-  try {
-    const { founder } = await requireFounder();
-    const input = { uuid, fecha: hoyEnMexico(), founderId: founder.id };
-    await auditedMutation(
-      (entry) => ({
-        action: accion === 'pago' ? 'empresa.factura_pagada' : 'empresa.factura_cancelada',
-        payload: { uuid, entryId: entry.id },
-      }),
-      () =>
-        accion === 'pago'
-          ? registrarPagoFactura(deps(), input)
-          : cancelarFactura(deps(), { ...input, motivo: 'Factura cancelada desde Facturas' }),
-    );
-  } catch (error) {
-    return failed(error, accion === 'pago' ? 'registrarPagoFactura' : 'cancelarFactura');
-  }
-  revalidatePath('/empresa', 'layout');
-  return { ok: true, message: accion === 'pago' ? 'Pago registrado.' : 'Factura cancelada.' };
-}
-
-export async function registrarPagoAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'pago');
-}
-
-export async function cancelarFacturaAction(_p: FormState, form: FormData): Promise<FormState> {
-  return porPagar(form, 'cancelar');
 }

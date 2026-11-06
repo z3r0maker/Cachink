@@ -1,6 +1,7 @@
 import { isCarpeta } from '@xangarro/domain/corp';
 import Link from 'next/link';
 
+import { limiteMb } from '@/server/blobs';
 import { requireFounderPage } from '@/server/founder';
 import * as m from '@/styles/mostrador.css';
 
@@ -29,6 +30,7 @@ export default async function SubirPage(props: { searchParams: Promise<{ carpeta
       <section className={`${m.hero} ${m.narrow}`} aria-label="Subir documento">
         <SubirDocumentoForm
           carpeta={carpeta !== undefined && isCarpeta(carpeta) ? carpeta : 'constitucion'}
+          limiteMb={limiteMb()}
         />
       </section>
     </div>

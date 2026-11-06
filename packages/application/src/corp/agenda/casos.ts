@@ -75,7 +75,7 @@ export async function subirEvidencia(
   },
   input: SubirEvidenciaInput,
 ): Promise<DocumentoMeta> {
-  assertArchivo(input.nombre, input.mime, input.contenido.byteLength);
+  assertArchivo(input.nombre, input.mime, input.contenido.byteLength, deps.documentos.maxBytes);
   const p = plantillaVigente(input.plantillaId);
   const instancia = await instanciaDe(deps.agenda, p, input.periodo, input.founderId);
   return deps.documentos.guardar({

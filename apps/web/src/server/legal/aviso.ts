@@ -1,13 +1,9 @@
 import 'server-only';
 
-import {
-  AVISO_VINCULACION_VERSION,
-  avisoVinculacionTexto,
-  type AvisoVigente,
-} from '@xangarro/domain';
+import { avisoVinculacionTextoDe, type AvisoVigente } from '@xangarro/domain';
 import { createHash } from 'node:crypto';
 
-import { AVISO_VERSION, avisoTextoCanonico } from '../../legal/aviso-simplificado';
+import { AVISO_VERSION, avisoTextoCanonico, avisoTextoDe } from '../../legal/aviso-simplificado';
 
 /**
  * The aviso the signup use case records: its version and the SHA-256 of the
@@ -23,6 +19,17 @@ export function avisoVigente(): AvisoVigente {
   return cached;
 }
 
+/**
+ * Any published version as the ledger records it (its label and the hash of
+ * its text): a change of the novedades switch is recorded against the aviso
+ * the person accepted, which may be an older one. `null` for one never published.
+ */
+export function avisoDeVersion(version: string): AvisoVigente | null {
+  const texto = avisoTextoDe(version);
+  if (texto === undefined) return null;
+  return { version, sha256: createHash('sha256').update(texto, 'utf8').digest('hex') };
+}
+
 /** The IP as the ledger stores it (ADR-079): a hash, never the address. */
 export function ipHash(ip: string): string {
   return ip === '' ? '' : createHash('sha256').update(ip, 'utf8').digest('hex');
@@ -30,15 +37,18 @@ export function ipHash(ip: string): string {
 
 /**
  * What a device row keeps about the aviso shown at linking (N-34): the version
- * the device sent, and the hash of the text the server knows for it. A version
- * this server does not know keeps no hash; an app that sent none keeps nulls.
+ * the device sent, and the hash of the text the server knows for it — any
+ * version ever published, so a phone on an older build keeps its hash. A
+ * version this server does not know keeps no hash; an app that sent none
+ * keeps nulls.
  */
 export function avisoDeVinculacion(version: string | undefined): {
   avisoVersion: string | null;
   avisoSha256: string | null;
 } {
   if (version === undefined) return { avisoVersion: null, avisoSha256: null };
-  if (version !== AVISO_VINCULACION_VERSION) return { avisoVersion: version, avisoSha256: null };
-  const sha = createHash('sha256').update(avisoVinculacionTexto(), 'utf8').digest('hex');
+  const texto = avisoVinculacionTextoDe(version);
+  if (texto === undefined) return { avisoVersion: version, avisoSha256: null };
+  const sha = createHash('sha256').update(texto, 'utf8').digest('hex');
   return { avisoVersion: version, avisoSha256: sha };
 }

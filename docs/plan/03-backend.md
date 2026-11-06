@@ -112,6 +112,7 @@
 
 - [x] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
       Done: 2026-09-23 · `scripts/seed-demo.ts` seeds the App Review tenant **Tacos La Esquina** (its own ULID prefix, owner `demo@xangarro.mx`, two operators with PINs 1234/5678, 20 products with icons, 3 clients, 30 days × 3 tickets, 13 gastos, opening stock so nothing nets negative, the Xangarro plan through the billing role) in ~0.3 s locally; `pnpm --filter @xangarro/data-pg db:seed:demo` locally, the same script with `DATABASE_URL`/`BILLING_DATABASE_URL`/`DEMO_OWNER_PASSWORD` against the hosted pooler before each store submission (`docs/ops/provisioning.md` «Demo tenant»). Proven by `tests/seed-demo.integration.test.ts` (< 10 s, owner signs in, code live and contract-valid, rows pass the domain schemas, no product nets negative, idempotent, invisible to the dev tenant). Three deviations from the Steps: the code is **`DEMXK7M3`**, not `DEMOK7M3` — the step's own regex excludes O; idempotency is by upsert, not «wipe and recreate» — the app role cannot DELETE since 0036, and a re-run only re-mints a redeemed code; the owner's password is set on the first run only (the app role cannot rewrite `auth.users`), which is what review notes need anyway. The dev seed (Taquería Don Pedro) already had operators, employees and members since 2026-09-17.
+  - 2026-10-30 · The App Review tenant mints **two** codes, `DEMXK7M3` and `DEMXPAD2` (one per device slot of the Xangarro plan), and each run revokes the demo's linked devices: a code links one device once and slots are counted on unrevoked devices, so a review on iPhone + iPad, or a second submission, could not link. `seed-demo.integration.test.ts` asserts one live code per slot and that a re-run frees the slots.
   - 2026-09-17 · Seed rewritten to satisfy its own domain schemas — ULID ids (was `p-tac`, `s1`), `'producto'`/`'semanal'` casing, two portal members (owner + viewer). `seed-contract.integration.test.ts` enforces it. **Still to do:** App Review data.
   - In progress: 2026-09-17 · `pnpm --filter @xangarro/data-pg db:seed` populates Taquería Don
     Pedro — the business every design file uses — with 6 ventas, 5 gastos, 6 productos, their
@@ -337,3 +338,24 @@
   - **Ops, not code:** set `SENTRY_DSN` in production. Browser-side Sentry is not wired.
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.
+
+### B-19 The product photo's image route and the purge of superseded rows (ADR-134) [media]
+
+- [x] Status · **Blocked by:** C-24 · **Blocks:** P-42
+      Done: 2026-11-06 · `GET /api/productos/[productId]/imagen` (session + `withTenant`, ULID-checked id, 404 on none or tombstone, `private, no-cache` with a sha256 ETag and 304); `0052_product_images_purge.sql`, a SECURITY DEFINER `xangarro.product_images_purge(days)` that runs across tenants because the app role may not DELETE, wrapped as `purgeSupersededImages(db, 30)` (it takes the pool, not a `Tx`) and run nightly by `/api/cron/purgar-fotos` at 11:00 UTC; the seed gives «Agua de horchata» a 6 KB photo (`scripts/fixtures/horchata.webp`, id `…FT001`). A row goes once a newer row of its product is 30 days old; superseded rows' `sync_log` entries stay, and the pull skips an id whose row is gone. Account erase (ADR-136) already covers the table, being generic over every `business_id` table.
+- **Context:** C-24 already shipped the Postgres half: migration `0050_product_images.sql` (CHECKs
+  for WebP, `octet_length(bytes) <= 40960` and sizes up to 512, RLS, append-only grants), the
+  `productImages` table with its base64 ↔ `bytea` column type, `SYNCED_TABLES.product_images`,
+  the snapshot section and the queries `newestPhotoIds`, `newestProductImages` and
+  `latestProductImage`. What is left is serving the photo and keeping the table small.
+- **Files:** `apps/web/src/app/api/productos/[productId]/imagen/route.ts` (`withTenant`,
+  `latestProductImage`, 404 on none or tombstone, ETag = sha256 of the bytes, private
+  `Cache-Control`); `packages/data-pg/src/queries/product-images.ts` gains
+  `purgeSupersededImages(tx, olderThanDays = 30)`, run from a cron or the existing maintenance
+  entry point (it needs a role that may DELETE, since `xangarro_app` may not); the seed gains one
+  product with a photo.
+- **Steps:** integration test for the purge (a superseded row older than 30 days goes, the newest
+  never does, a tombstone stays until superseded); route test that builds two photos and a
+  tombstone for one product and asserts what the route returns for each state.
+- **Acceptance:** `pnpm --filter @xangarro/data-pg test` green; `db:reset` seeds one product
+  with a photo so the Playwright sentinel of P-42 has data to find.

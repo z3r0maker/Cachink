@@ -174,22 +174,4 @@ export const compactaSub = style({
   color: colors.gray600,
 });
 
-/** Archivar: a quiet row at the bottom, behind a rule. */
-export const archivar = style({
-  marginTop: 6,
-  paddingTop: 18,
-  borderTop: borders.quiet,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 16,
-  flexWrap: 'wrap',
-});
-
-export const archivarTitulo = style({
-  margin: 0,
-  fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.extraBold,
-  color: colors.black,
-});
-
 export const nota = style({ margin: 0, fontWeight: typography.weights.bold });

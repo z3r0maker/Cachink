@@ -264,8 +264,9 @@ trap finalize_on_exit INT TERM
 # demo/wizard phase ladder retired with its flows (A-16); the state cache in
 # run_setup (lib/entry-setup.sh) still seeds exactly twice per run.
 #
-# settings-desvincular closes the activated bucket on purpose: it leaves the
-# device unlinked, and the fresh bucket that follows re-seeds anyway.
+# settings-borrar wipes the phone and links it again; settings-desvincular
+# closes the activated bucket on purpose: it leaves the device unlinked, and
+# the fresh bucket that follows re-seeds anyway.
 run_curated_suite() {
   CURRENT_PHASE="M-11 suite"
   echo "🧡  M-11 curated suite (fresh entry state per flow)"
@@ -294,6 +295,7 @@ run_curated_suite() {
     cierre-cuadra
     caja-cierre-discrepancia
     cierre-faltante
+    settings-borrar
     settings-desvincular
     activation
     login-operator-pin

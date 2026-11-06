@@ -25,24 +25,6 @@ export class NegocioInvalidoError extends Error {
   }
 }
 
-export class ConfirmacionNombreError extends Error {
-  readonly code = 'CONFIRMACION_NOMBRE' as const;
-
-  constructor() {
-    super('Escribe el nombre del negocio tal cual para confirmar.');
-    this.name = 'ConfirmacionNombreError';
-  }
-}
-
-export class SuscripcionActivaError extends Error {
-  readonly code = 'SUSCRIPCION_ACTIVA' as const;
-
-  constructor() {
-    super('Tu suscripción sigue activa. Cancélala en Suscripción antes de archivar.');
-    this.name = 'SuscripcionActivaError';
-  }
-}
-
 /** Typed errors for the payroll roster (P-12). */
 export class EmpleadoInvalidoError extends Error {
   readonly code = 'EMPLEADO_INVALIDO' as const;

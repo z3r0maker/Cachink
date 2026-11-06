@@ -16,6 +16,7 @@ import { AccesoScreen, type AccesoOperador } from '../screens/Login/index';
 import { BloqueoScreen } from '../screens/Bloqueo/index';
 import { inicialesDe } from '../screens/AppShell/use-shell-data';
 import { AppLoadingSkeleton } from './app-loading-skeleton';
+import { useMarcarArranqueListo } from './splash/arranque';
 import { useCajaLock } from './caja-lock';
 import { useCloudSync } from './cloud-sync-bridge';
 import { useAccesoContexto, type AccesoContexto } from './use-acceso-contexto';
@@ -87,6 +88,7 @@ export function QuickSwitchGate(props: QuickSwitchGateProps): ReactElement {
   const ctx = useAccesoContexto(props.businessId);
   const bloqueadaPor = useCajaLock((s) => s.bloqueadaPor);
   const operadores = useOperadores(auth.users, ctx);
+  useMarcarArranqueListo(!auth.loading);
   if (auth.loading) return <AppLoadingSkeleton />;
   if (auth.users.length === 0) return <NoOperators />;
   const bloqueo = operadores.find((o) => o.id === bloqueadaPor);

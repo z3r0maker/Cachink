@@ -10,6 +10,8 @@ export {
 export { InscripcionFuturaError } from './errors.js';
 export type {
   AgendaRepository,
+  Almacen,
+  BlobStore,
   DocumentoMeta,
   DocumentRepository,
   NuevoDocumento,

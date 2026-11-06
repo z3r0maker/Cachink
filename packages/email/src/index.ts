@@ -51,3 +51,13 @@ export {
   type EmailTransport,
   type FromEnvOptions,
 } from './adapters/from-env.js';
+export { renderRenewalEmail, type RenewalEmailProps } from './templates/renewal.js';
+export { renderCancellationEmail, type CancellationEmailProps } from './templates/cancellation.js';
+export {
+  renderDeletionErasedEmail,
+  renderDeletionReminderEmail,
+  renderDeletionRequestedEmail,
+  type DeletionErasedEmailProps,
+  type DeletionReminderEmailProps,
+  type DeletionRequestedEmailProps,
+} from './templates/account-deletion.js';

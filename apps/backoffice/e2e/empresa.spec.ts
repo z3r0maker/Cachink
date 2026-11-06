@@ -7,17 +7,33 @@ import {
   presentarConAcuse,
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
+import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
+import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
+import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
+import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
+import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
+  adjuntar,
   AGENCIA,
+  CONTADORA,
   DESPACHO,
   fijarRfcMexia,
   fila,
   HONORARIOS,
+  hoyMx,
   IMPRENTA,
   registrarTres,
   subirCinco,
 } from './empresa-facturas';
+import {
+  DISENADOR,
+  fijarEstadoSat,
+  HOSTING,
+  MENSAJERIA,
+  registrarParaConsultar,
+} from './empresa-sat';
+import { MENSUAL, recurrente, registrarMensual } from './empresa-recurrente-factura';
 import {
   E2E_RECURRENTE,
   mesesDePrueba,
@@ -61,6 +77,7 @@ test.use({ extraHTTPHeaders: { 'x-forwarded-for': '203.0.113.24' } });
 let empresa: Awaited<ReturnType<typeof sacarEmpresa>> | null = null;
 
 test.beforeAll(async () => {
+  if (CON_AZURE) await prepararAzurite(`http://localhost:${process.env.E2E_PORT ?? 3200}`);
   await clearLedgerFixture();
   await resetSocioFixture();
   empresa = await sacarEmpresa();
@@ -92,7 +109,10 @@ test('a founder gets the group and the partners and projects from corp', async (
   await expect(empresaGroup(page)).toBeVisible();
 
   await page.goto('/empresa/corporativo');
-  await expect(page.getByRole('heading', { name: 'Libro corporativo' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Cumplimiento', level: 1 })).toBeVisible();
+  await expect(
+    secciones(page, 'Cumplimiento').getByRole('link', { name: 'Corporativo' }),
+  ).toHaveAttribute('aria-current', 'page');
   // Real rows: the founder corp names, and corp's seeded registries.
   await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
   await expect(page.getByTestId('registro').filter({ hasText: 'Marca Xangarro' })).toBeVisible();
@@ -100,9 +120,8 @@ test('a founder gets the group and the partners and projects from corp', async (
 
 test('a founder records a USD expense and reverses it', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.goto('/empresa');
-  await expect(page).toHaveURL(/\/empresa\/movimientos$/);
-  await expect(page.getByRole('heading', { name: 'Movimientos', level: 1 })).toBeVisible();
+  await page.goto('/empresa/movimientos');
+  await expect(page.getByRole('heading', { name: 'Dinero', level: 1 })).toBeVisible();
 
   await registrarGastoEnDolares(page);
   await expect(page).toHaveURL(/\/empresa\/movimientos\?mes=\d{4}-\d{2}$/);
@@ -196,7 +215,7 @@ test('a founder funds by halves, puts in more and closes the quarter', async ({ 
 
 test('a founder files an obligation with its acuse and adds an expiry', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
   const inscripcion = inscripcionPasada();
   await fijarInscripcion(page, inscripcion.fecha);
   await expect(page.getByTestId('exenta').filter({ hasText: 'DIOT' })).toContainText(
@@ -224,7 +243,8 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
   page,
 }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Expediente', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
+  await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
   // The acuse filed on the Agenda is here, linked to its obligation.
   await expect(
     page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
@@ -235,12 +255,13 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
 
 test('a founder records shares, updates a registry and keeps a CSD expiry', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Corporativo', exact: true }).click();
+  await abrirEntrada(page, 'Cumplimiento');
+  await abrirPestana(page, 'Corporativo', /\/empresa\/corporativo$/);
   await suscribirAcciones(page);
   await actualizarMarca(page);
   await guardarCsd(page);
   // The share event put its 15-business-day notice on the Agenda.
-  await page.getByRole('link', { name: 'Agenda', exact: true }).click();
+  await abrirPestana(page, 'Agenda', /\/empresa\/agenda$/);
   await expect(
     page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
   ).toBeVisible();
@@ -251,8 +272,9 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
 }) => {
   await fijarRfcMexia();
   await signInAsStaff(page, SOCIO);
-  await page.getByRole('link', { name: 'Facturas', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Facturas', level: 1 })).toBeVisible();
+  await abrirEntrada(page, 'Dinero');
+  await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
+  await expect(page.getByRole('heading', { name: 'Facturas recibidas en' })).toBeVisible();
 
   const honorarios = await subirCinco(page);
   await expect(page.getByRole('heading', { name: 'Revisa antes de registrar' })).toBeVisible();
@@ -274,11 +296,27 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   await expect(page.getByTestId('facturas-recibidas')).toContainText('2 por pagar: $8,700.00');
   await expect(page.getByTestId('facturas-retenciones')).toContainText('$723.33');
 
-  // Owner decision 9: the invoice on credit is paid; the other one came wrong.
+  // Owner decision 9: the invoice on credit is paid on a date (CD-06e); the other one came wrong
+  // and is cancelled once confirmed (CD-06f).
   await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
-  await expect(fila(page, DESPACHO.nombre)).toContainText('a crédito, pagada');
+  const pago = page.getByRole('form', { name: `Registrar el pago a ${DESPACHO.nombre}` });
+  await expect(pago).toContainText('Sale del banco$4,640.00');
+  const fecha = pago.getByLabel('Fecha de pago');
+  await expect(fecha).toHaveValue(hoyMx());
+  await expect(fecha).toHaveAttribute('min', `${hoyMx().slice(0, 7)}-01`);
+  await pago.getByRole('button', { name: 'No, regresar' }).click();
+  await expect(pago).toBeHidden();
+  await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();
+  await pago.getByRole('button', { name: 'Confirmar pago' }).click();
+  await expect(fila(page, DESPACHO.nombre)).toContainText('a crédito, pagada el');
+
   await page.getByRole('button', { name: `Cancelar la factura de ${IMPRENTA.nombre}` }).click();
-  await expect(fila(page, IMPRENTA.nombre)).toContainText('Se revirtió');
+  const cancelar = page.getByRole('form', { name: `¿Cancelar la factura de ${IMPRENTA.nombre}?` });
+  await expect(cancelar).toContainText('No se puede deshacer');
+  await cancelar.getByRole('button', { name: 'Sí, cancelar la factura' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Factura cancelada' })).toBeVisible();
+  await expect(fila(page, IMPRENTA.nombre)).toContainText('a crédito, cancelada el');
+  await expect(fila(page, IMPRENTA.nombre).getByRole('link', { name: 'Revertido' })).toBeVisible();
   await expect(page.getByTestId('facturas-recibidas')).toContainText('Ninguna por pagar');
 
   // The same XML again is refused, pointing at its movement; leaving the review keeps nothing.
@@ -288,5 +326,310 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ver movimiento' })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page).toHaveURL(/\/empresa\/facturas$/);
+});
+
+test('a founder attaches one XML on Registrar gasto, rewords it and registers it', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  // Through the links, as a founder gets there: a file chosen before the page hydrates is lost.
+  await abrirEntrada(page, 'Dinero');
+  await page.getByRole('link', { name: '+ Registrar' }).click();
+  await expect(page.getByRole('heading', { name: 'Registrar', level: 1 })).toBeVisible();
+
+  // Another RFC's invoice is refused right there, with the review's reason.
+  await adjuntar(page, 'papeleria.xml', { receptor: 'OTR010101AA1' });
+  await expect(page.getByRole('alert').filter({ hasText: 'No es de MEXIA' })).toContainText(
+    'Está a nombre de otro RFC',
+  );
+
+  // «Quitar» sets the XML aside and gives back the blank form.
+  await adjuntar(page, 'quitar.xml', { emisor: CONTADORA, concepto: 'Para quitar' });
+  await expect(page.getByText('quitar.xml leído · vigente en el SAT')).toBeVisible();
+  await page.getByRole('button', { name: 'Quitar' }).click();
+  await expect(page.getByRole('heading', { name: 'Registrar', level: 1 })).toBeVisible();
+
+  await adjuntar(page, 'contadora.xml', { emisor: CONTADORA });
+  await expect(page.getByText('contadora.xml leído · vigente en el SAT')).toBeVisible();
+  await expect(page.getByLabel('Proveedor')).toHaveValue(
+    `${CONTADORA.nombre} · RFC ${CONTADORA.rfc}`,
+  );
+  const delXml = page.getByRole('region', { name: 'Del XML' });
+  await expect(delXml).toContainText('IVA retenido−$373.33');
+  await expect(delXml).toContainText('Salió del banco$3,336.67');
+  await expect(delXml).toContainText('la declaración del 17 de');
+  await page.getByLabel('Concepto').fill('Honorarios E2E de octubre');
+  await page.getByLabel('Fecha de pago').fill(hoyMx());
+  await page.getByText('Administración', { exact: true }).click();
+  await page.getByRole('button', { name: 'Registrar gasto' }).click();
+
+  // Real rows: the movement in its month, and the invoice in Facturas, pointing at it.
+  await expect(page).toHaveURL(/\/empresa\/movimientos\?mes=\d{4}-\d{2}$/);
+  await expect(page.getByText('Honorarios E2E de octubre')).toBeVisible();
+  await page.goto('/empresa/facturas');
+  await expect(fila(page, CONTADORA.nombre)).toContainText('Vigente');
+  await expect(fila(page, CONTADORA.nombre)).toContainText('−$723.33');
+  await expect(
+    fila(page, CONTADORA.nombre).getByRole('link', { name: 'Administración' }),
+  ).toBeVisible();
+});
+
+test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ page }) => {
+  await signInAsStaff(page, SOCIO);
+  // The rail shows the built entries; their screens are tabs, not entries.
+  for (const entrada of ['Resumen', 'Dinero', 'Resultados', 'Socios', 'Cumplimiento']) {
+    await expect(rail(page).getByRole('link', { name: entrada, exact: true })).toBeVisible();
+  }
+  for (const pantalla of ['Movimientos', 'Facturas', 'Agenda', 'Expediente', 'Corporativo']) {
+    await expect(rail(page).getByRole('link', { name: pantalla, exact: true })).toHaveCount(0);
+  }
+
+  // Cumplimiento: three tabs, each with the rows earlier tests left.
+  await abrirEntrada(page, 'Cumplimiento');
+  await expect(page).toHaveURL(/\/empresa\/agenda$/);
+  await expect(secciones(page, 'Cumplimiento').getByRole('link')).toHaveText([
+    'Agenda',
+    'Expediente',
+    'Corporativo',
+  ]);
+  await expect(
+    page.getByTestId('obligacion').filter({ hasText: 'Beneficiario controlador' }),
+  ).toBeVisible();
+  await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
+  await expect(
+    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
+  ).toBeVisible();
+  await abrirPestana(page, 'Corporativo', /\/empresa\/corporativo$/);
+  await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
+  // A sub-page keeps its entry lit.
+  await page.getByRole('link', { name: 'Registrar acciones' }).click();
+  await expect(rail(page).getByRole('link', { name: 'Cumplimiento', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+
+  // Dinero: Movimientos and Facturas.
+  await abrirEntrada(page, 'Dinero');
+  await expect(page).toHaveURL(/\/empresa\/movimientos/);
+  await expect(secciones(page, 'Dinero').getByRole('link')).toHaveText(['Movimientos', 'Facturas']);
+  await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
+
+  // One built tab is no choice: Resultados and Socios draw no bar.
+  await abrirEntrada(page, 'Resultados');
+  await expect(page).toHaveURL(/\/empresa\/resultados$/);
+  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
+  await abrirEntrada(page, 'Socios');
+  await expect(page).toHaveURL(/\/empresa\/socios$/);
+  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
+
+  // Every URL the area had still opens its screen.
+  for (const [ruta, titulo] of RUTAS) {
+    const response = await page.goto(ruta);
+    expect(response?.status(), ruta).toBe(200);
+    await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible();
+  }
+});
+
+test('a founder files a 20 MB document straight to the blob store (E-26)', async ({ page }) => {
+  test.skip(!CON_AZURE, 'needs CORP_BLOB_* pointed at a blob store (Azurite locally)');
+  test.setTimeout(180_000);
+  await signInAsStaff(page, SOCIO);
+  const id = await subirVeinteMegas(page);
+  await expect(
+    page.getByTestId('documento-expediente').filter({ hasText: 'E2E Deck de 20 MB' }),
+  ).toBeVisible();
+  await verDesdeElAlmacen(page, id);
+});
+
+test('a founder reads a month of results, opens a line, and switches basis and period (E-12)', async ({
+  page,
+}) => {
+  await sembrarCobros();
+  await signInAsStaff(page, SOCIO);
+  await registrarHonorarios(page);
+  await abrirEntrada(page, 'Resultados');
+  await expect(page.getByRole('heading', { name: 'Resultados', level: 1 })).toBeVisible();
+
+  // Real rows: two cobros the use case posted and the fee Registrar took, worked by hand.
+  await page.goto(`/empresa/resultados?periodo=${MES}`);
+  await expect(page.getByText('Marzo de 2024 vs febrero')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'De $10,000 de ingresos a $4,900 de utilidad' }),
+  ).toBeVisible();
+  await expect(renglon(page, 'ingresos')).toContainText('$10,000.00');
+  await expect(renglon(page, 'administracion')).toContainText('($3,000.00)');
+  await expect(renglon(page, 'ebitda')).toContainText('$7,000.00');
+  await expect(renglon(page, 'ebitda')).toContainText('70.0 %');
+  await expect(renglon(page, 'isr_estimado')).toContainText('($2,100.00)');
+  await expect(renglon(page, 'utilidad_neta')).toContainText('$4,900.00');
+  await expect(page.getByText('De $8,000 en febrero a $7,000 en marzo.')).toBeVisible();
+  await expect(page.getByTestId('puente-paso')).toHaveCount(4);
+
+  // A line opens into the movements behind it.
+  await renglon(page, 'administracion').getByRole('link').click();
+  await expect(
+    page.getByTestId('estado-movimiento').filter({ hasText: 'E2E Contador de marzo' }),
+  ).toContainText('($3,000.00)');
+
+  await page.getByRole('navigation', { name: 'Base' }).getByRole('link', { name: 'Flujo' }).click();
+  await expect(page.getByText('Flujo: lo cobrado y pagado')).toBeVisible();
+  await expect(renglon(page, 'ebitda')).toContainText('$7,000.00');
+  await page
+    .getByRole('navigation', { name: 'Periodo' })
+    .getByRole('link', { name: 'Trimestre' })
+    .click();
+  await expect(page).toHaveURL(/periodo=2024-T1/);
+  await expect(renglon(page, 'ingresos')).toContainText('$18,000.00');
+});
+
+test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-16)', async ({
+  page,
+}) => {
+  await signInAsStaff(page, SOCIO);
+  await abrirEntrada(page, 'Resumen');
+  await expect(page).toHaveURL(/\/empresa$/);
+  await expect(page.getByRole('heading', { name: 'Resumen', level: 1 })).toBeVisible();
+  // Autonomía is today's cash: every movement the earlier tests left.
+  await revisarAutonomia(page);
+
+  // Real rows: E-12's March, two cobros and the contador's fee, worked by hand.
+  await page.goto(`/empresa?periodo=${MES}`);
+  await expect(page.getByText('Marzo de 2024', { exact: true })).toBeVisible();
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$10,000');
+  await expect(kpi(page, 'Ingresos netos')).toContainText('+$2,000 vs febrero');
+  await expect(kpi(page, 'Margen bruto')).toContainText('Sin datos de febrero');
+  await expect(kpi(page, 'EBITDA')).toContainText('$7,000');
+  await expect(kpi(page, 'Utilidad neta')).toContainText('$4,900');
+  await expect(kpi(page, 'Utilidad neta')).toContainText('Después de ISR estimado');
+  await expect(page.getByTestId('utilidad-fila')).toHaveCount(8);
+  await expect(filaUtilidad(page, 'Administración')).toContainText('−$3,000');
+  await expect(filaUtilidad(page, 'ISR estimado')).toContainText('−$2,100');
+  await expect(
+    page.getByText('Los costos de marzo suman $3,000: 30 % de los ingresos.'),
+  ).toBeVisible();
+  // E-04's Agenda puts its next items here; the late ones are signals.
+  await expect(page.getByTestId('vencimiento').first()).toBeVisible();
+
+  await page
+    .getByRole('navigation', { name: 'Periodo' })
+    .getByRole('link', { name: 'Trimestre' })
+    .click();
+  await expect(page).toHaveURL(/periodo=2024-T1/);
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$18,000');
+  await kpi(page, 'Ingresos netos').click();
+  await expect(page).toHaveURL(/\/empresa\/resultados\?periodo=2024-T1$/);
+
+  // E-06's CSD, 41 days out, is a signal that opens the certificates.
+  await page.goto('/empresa');
+  const csd = page.getByTestId('senal').filter({ hasText: 'El CSD vence en 41 días' });
+  await expect(csd).toContainText('Si vence, no se puede facturar.');
+  await csd.getByRole('link', { name: 'Ver certificados' }).click();
+  await expect(page).toHaveURL(/\/empresa\/corporativo$/);
+});
+
+test('on a phone the rail folds into «Menú» and no Empresa page scrolls sideways', async ({
+  page,
+}) => {
+  await signInAsStaff(page, SOCIO);
+  await page.setViewportSize(TELEFONO);
+
+  // Real rows: E-12's March, the busiest month the suite leaves.
+  await page.goto(`/empresa?periodo=${MES}`);
+  await expect(kpi(page, 'Ingresos netos')).toContainText('$10,000');
+  await sinScrollLateral(page);
+  await page.goto(`/empresa/resultados?periodo=${MES}`);
+  await expect(renglon(page, 'utilidad_neta')).toContainText('$4,900.00');
+  await sinScrollLateral(page);
+
+  // The menu is the rail: the same links, the entry lit, closed by a tap.
+  await abrirMenu(page);
+  const enMenu = (nombre: string) => menu(page).getByRole('link', { name: nombre, exact: true });
+  await expect(enMenu('Resultados')).toHaveAttribute('aria-current', 'page');
+  await enMenu('Resumen').click();
+  await expect(page).toHaveURL(/\/empresa$/);
+  await expect(menu(page)).toBeHidden();
+  await abrirMenu(page);
+  await expect(enMenu('Resumen')).toHaveAttribute('aria-current', 'page');
+  await page.keyboard.press('Escape');
+  await expect(menu(page)).toBeHidden();
+});
+
+test('a founder asks the SAT again, and cancels the invoice it says was cancelled', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  await abrirEntrada(page, 'Dinero');
+  await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
+  const uuids = await registrarParaConsultar(page);
+  await fijarEstadoSat(uuids.hosting, 'sin_verificar');
+  await fijarEstadoSat(uuids.disenador, 'cancelado');
+  await page.reload();
+
+  // No answer again: it stays unverified and says why, in place (board CD-06g).
+  await expect(fila(page, MENSAJERIA.nombre)).toContainText('Sin verificar');
+  await page
+    .getByRole('button', { name: `Consultar al SAT la factura de ${MENSAJERIA.nombre}` })
+    .click();
+  await expect(fila(page, MENSAJERIA.nombre).getByRole('alert')).toHaveText(
+    'El SAT no respondió. Intenta en unos minutos.',
+  );
+
+  // It answers «vigente»: the row says so, today.
+  await page
+    .getByRole('button', { name: `Consultar al SAT la factura de ${HOSTING.nombre}` })
+    .click();
+  await expect(page).toHaveURL(/consultada=/);
+  await expect(fila(page, HOSTING.nombre)).toContainText('VigenteEl SAT la confirmó hoy');
+  await expect(fila(page, MENSAJERIA.nombre)).not.toContainText('El SAT la confirmó hoy');
+
+  // The supplier cancelled one still owed: a warning, and nothing reversed until a founder confirms.
+  await expect(fila(page, DISENADOR.nombre)).toContainText('Cancelada en el SAT');
+  await expect(
+    page.getByRole('button', { name: `Registrar pago a ${DISENADOR.nombre}` }),
+  ).toBeHidden();
+  const aviso = page.getByRole('alert').filter({ hasText: 'El proveedor canceló esta factura' });
+  await expect(aviso).toContainText('Su gasto de $1,000.00 y su IVA de $160.00 siguen registrados');
+  await aviso.getByRole('button', { name: `Cancelar la factura de ${DISENADOR.nombre}` }).click();
+  const cancelar = page.getByRole('form', { name: `¿Cancelar la factura de ${DISENADOR.nombre}?` });
+  await cancelar.getByRole('button', { name: 'Sí, cancelar la factura' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Factura cancelada' })).toBeVisible();
+  await expect(fila(page, DISENADOR.nombre)).toContainText('Cancelada');
+  await expect(fila(page, DISENADOR.nombre).getByRole('link', { name: 'Revertido' })).toBeVisible();
+  await expect(page.getByText('El proveedor canceló esta factura')).toBeHidden();
+
+  // A paid one is only warned about: its money did leave the bank (owner, 2026-10-31).
+  await fijarEstadoSat(uuids.hosting, 'cancelado');
+  await page.reload();
+  const pagada = page.getByRole('alert').filter({ hasText: 'Ya la pagaste' });
+  await expect(pagada).toContainText(
+    'Pide al proveedor la factura que la sustituye o el reembolso',
+  );
+  await expect(pagada.getByRole('button')).toHaveCount(0);
+});
+
+test('a founder repeats a supplier who invoices every month, by its XML (CD-06h, CD-01f)', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  const meses = await registrarMensual(page);
+
+  // The invoice's month is registered by it, with its date and its movement.
+  await page.goto(`/empresa/movimientos?mes=${meses.anterior}&ver=recurrentes`);
+  const pasado = recurrente(page, MENSUAL.nombre);
+  await expect(pasado).toContainText(`RFC ${MENSUAL.rfc} · factura cada mes`);
+  await expect(pasado).toContainText('Registrado');
+  await expect(pasado).toContainText(/Con su factura del 1 \p{L}+/u);
+  await expect(pasado.getByRole('link', { name: 'Ver' })).toBeVisible();
+
+  // This month waits for the next invoice, and takes you to upload it.
+  await page.goto(`/empresa/movimientos?mes=${meses.actual}&ver=recurrentes`);
+  const actual = recurrente(page, MENSUAL.nombre);
+  await expect(actual).toContainText('Falta su factura');
+  await expect(actual).toContainText(`Pídela a ${MENSUAL.nombre}`);
+  await actual.getByRole('link', { name: 'Subir su XML' }).click();
   await expect(page).toHaveURL(/\/empresa\/facturas$/);
 });

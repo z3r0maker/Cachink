@@ -108,7 +108,7 @@ b) Analizar cómo se usa el producto para mejorarlo, únicamente con datos **dis
 c) Pedirte un testimonio o caso de éxito (solo con tu aceptación en cada caso).
 
 Si no quieres que usemos tus datos para estas finalidades, indícalo al registrarte, cámbialo en
-**Configuración → Privacidad** o escribe a **[CORREO PRIVACIDAD]**. Negarte **no** afecta tu servicio.
+**Privacidad y mis datos** (en el menú de tu cuenta) o escribe a **[CORREO PRIVACIDAD]**. Negarte **no** afecta tu servicio.
 Tienes 5 días hábiles desde que te registras para manifestarlo antes de que tratemos tus datos para
 estas finalidades, y puedes hacerlo en cualquier momento después.
 
@@ -124,7 +124,7 @@ estas finalidades, y puedes hacerlo en cualquier momento después.
 - Algunos tratamientos no requieren consentimiento porque son necesarios para cumplir la relación
   jurídica entre tú y Xangarro o una obligación legal (art. 9, fracciones I y IV de la Ley).
 - **Revocación.** Puedes revocar tu consentimiento en cualquier momento, sin efectos retroactivos
-  (art. 7), con el mismo procedimiento de la sección 9 o desde **Configuración → Privacidad**. Si
+  (art. 7), con el mismo procedimiento de la sección 9 o desde **Privacidad y mis datos** (en el menú de tu cuenta). Si
   revocas el consentimiento para una finalidad necesaria, no podremos seguir prestándote el servicio y
   procederemos como en una solicitud de cancelación.
 
@@ -184,9 +184,10 @@ este aviso._ → **Hoy no existe ninguna; esta casilla no se muestra.**
 | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cuenta y registros del negocio (plan de pago)                   | Mientras la cuenta esté activa. Si la suscripción termina, el negocio pasa al plan gratuito y aplica la regla de inactividad.                                                                                                                                                                                                                                                                                                                                                                                           |
 | Registros del negocio en el plan gratuito                       | Si no hay acceso al portal **ni** sincronización de ningún dispositivo durante **90 días**, te avisamos por correo a los 90 y a los 150 días, con la opción "Descarga tus datos". A los **180 días** exportamos todo (Excel + JSON) a un almacenamiento privado y cifrado, verificamos la copia y borramos los registros de la base de datos activa. Ese archivo se conserva **6 años**, bloqueado: solo se usa para restaurarlo si vuelves ("Restaurar mis datos") o para atender a una autoridad. Después se suprime. |
-| Datos de facturación y CFDI de la suscripción                   | 5 años, contados como lo dispone el artículo 30 del Código Fiscal de la Federación.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Datos de facturación y CFDI de la suscripción                   | 10 años, bloqueados: el plazo más largo entre el artículo 38 del Código de Comercio y el artículo 30 del Código Fiscal de la Federación.                                                                                                                                                                                                                                                                                                                                                                                |
+| Cuenta y negocios cuando pides eliminarlos                      | Se cierran al pedirlo en **Mi negocio › General › Eliminar mi cuenta** y se borran a los **30 días**; hasta entonces puedes arrepentirte con el enlace del correo. Quedan bloqueados 10 años tus facturas y pagos de la suscripción, tu comprobante de cancelación, tus consentimientos y tu nombre, RFC y correo para identificarlos; después se suprimen.                                                                                                                                                             |
 | Datos sobre incumplimiento de pago                              | Se eliminan a más tardar 72 meses después del incumplimiento (art. 10 de la Ley).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Datos en el teléfono o navegador                                | La app guarda en el dispositivo los movimientos de los últimos **90 días**. La caja web guarda sus registros en el almacenamiento del navegador hasta enviarlos. Desvincular un dispositivo no borra lo que ya está en él: para borrarlo, desinstala la app o borra los datos del sitio.                                                                                                                                                                                                                                |
+| Datos en el teléfono o navegador                                | La app guarda en el dispositivo los movimientos de los últimos **90 días**. La caja web guarda sus registros en el almacenamiento del navegador hasta enviarlos. En la app, **Ajustes → Desvincular esta caja → Desvincular y borrar** borra del teléfono todo lo que guarda, después de enviar lo pendiente; solo desvincular no lo borra. En la caja web, borra los datos del sitio.                                                                                                                                  |
 | Registros técnicos, de soporte, de seguridad y solicitudes ARCO | Por el tiempo necesario para su finalidad y para acreditar su atención, conforme a plazos internos documentados; puedes pedir el detalle en **[CORREO PRIVACIDAD]**.                                                                                                                                                                                                                                                                                                                                                    |
 | Respaldos                                                       | Se sobrescriben periódicamente; un dato suprimido puede permanecer en un respaldo hasta entonces, sin usarse.                                                                                                                                                                                                                                                                                                                                                                                                           |
 
@@ -196,13 +197,13 @@ posibles responsabilidades, sin tratarlo para ninguna otra finalidad— y al ter
 
 **Importante sobre tus obligaciones fiscales.** Guardar tu contabilidad durante el plazo del
 artículo 30 del CFF es obligación **tuya** como contribuyente, no de Xangarro. Te recomendamos
-descargar tus datos con regularidad desde **Configuración → Exportar**.
+descargar tus datos con regularidad con **Mi negocio › General › Descargar todo** (Excel y JSON).
 
 ## 8. Cómo limitar el uso o divulgación de tus datos
 
 Además de negarte a las finalidades secundarias (sección 4.2), puedes:
 
-- desactivar los correos de novedades con el enlace de cada correo o en **Configuración → Privacidad**;
+- desactivar los correos de novedades con el enlace de cada correo o en **Privacidad y mis datos** (en el menú de tu cuenta);
 - desactivar los reportes de fallas de la app en **Ajustes → Dispositivo → Reportes de errores**;
 - pedirnos por **[CORREO PRIVACIDAD]** que te inscribamos en nuestro listado interno de exclusión para
   no recibir comunicaciones que no sean del servicio.
@@ -214,12 +215,12 @@ son inexactos o están incompletos, **cancelarlos** y **oponerte** a su tratamie
 la Ley). También puedes revocar tu consentimiento (sección 5).
 
 **Muchas cosas las puedes hacer tú mismo, al instante:** corregir tus datos en **Configuración**,
-descargar todos los registros del negocio en **Configuración → Exportar** (Excel y JSON) y desactivar
-comunicaciones.
+descargar todos los registros del negocio con **Mi negocio › General › Descargar todo** (Excel y JSON),
+desactivar comunicaciones y eliminar tu cuenta en **Mi negocio › General › Eliminar mi cuenta**.
 
 **Cómo presentar una solicitud:**
 
-1. **Si tienes cuenta:** en el portal, **Ayuda → Privacidad y mis datos → Nueva solicitud**. Tu sesión
+1. **Si tienes cuenta:** en el portal, **Privacidad y mis datos → Hacer una solicitud**. Tu sesión
    iniciada sirve para acreditar tu identidad; para cancelaciones te pediremos confirmar con tu
    contraseña y un código enviado a tu correo.
 2. **Si no tienes cuenta o no puedes entrar:** escribe a **[CORREO PRIVACIDAD]** o usa el formulario

@@ -167,8 +167,9 @@ el plan**.
       granted bool, method ('casilla'|'tacito'), ip, user_agent, created_at)`, append-only.
 - [ ] `[nuevo]` Casilla **expresa** separada de la de términos, sin marcar por defecto (art. 7 datos
       patrimoniales), y casillas opcionales por finalidad secundaria.
-- [ ] `[nuevo]` Pantalla **Configuración → Privacidad**: ver versión aceptada, activar/desactivar
-      finalidades secundarias (revocación, art. 7 último párrafo), enlace a solicitudes.
+- [x] `[nuevo]` Pantalla **Privacidad y mis datos** (menú de tu cuenta, ADR-137): ver versión
+      aceptada y su texto, activar/desactivar novedades (revocación, art. 7 último párrafo), enlace a
+      solicitudes, descargar todo y eliminar la cuenta.
 - [ ] `[nuevo]` Re-consentimiento al entrar cuando cambia una versión con finalidad nueva (art. 11);
       aviso previo por correo y banner para cualquier cambio (art. 15 VI).
 - [ ] `[nuevo]` Correos de novedades separados de los del servicio, con baja en un clic y listado de
@@ -205,8 +206,10 @@ el plan**.
 - [ ] `[nuevo]` Calendario de retención por tabla y log (SEC-PRIV-01 lo pide): soporte, ARCO,
       `staff_audit_log`, `bug-report` (90 días, SEC-FN-01), importaciones (30 días, fila 18), logs de
       Vercel, respaldos.
-- [ ] `[nuevo]` Decisión sobre respaldos del teléfono (SEC-MOB-02) y "revocar y borrar" en el
-      dispositivo: el aviso hoy dice que desvincular no borra.
+- [~] `[nuevo]` Decisión sobre respaldos del teléfono (SEC-MOB-02) y "revocar y borrar" en el
+      dispositivo. Hecho 2026-11-03: «Desvincular y borrar» en Ajustes de la app (espera a que no
+      quede nada sin enviar), y el aviso §7 y los términos §4 ya lo dicen. Falta: los respaldos del
+      sistema (iCloud, Android) y borrar cuando el dueño revoca desde el portal.
 
 ### Encargado y proveedores
 

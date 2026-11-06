@@ -6,7 +6,7 @@ import {
   type PullableTable,
   type SnapshotCursor,
 } from '@xangarro/contracts';
-import { SYNCED_TABLES } from '@xangarro/data-pg';
+import { newestPhotoIds, SYNCED_TABLES } from '@xangarro/data-pg';
 import { getTableName, sql, type SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
 
@@ -26,6 +26,7 @@ function cuenta(section: PullableTable, cursor: SnapshotCursor): SQL {
   const where: SQL[] = section === 'businesses' ? [sql`true`] : [sql`deleted_at IS NULL`];
   if (section === 'inventory_movements')
     where.push(sql`created_at >= ${cursor.cutoff}::timestamptz`);
+  if (section === 'product_images') where.push(sql`id IN ${newestPhotoIds()}`);
   return sql`(SELECT count(*) FROM ${tabla} WHERE ${sql.join(where, sql` AND `)})`;
 }
 

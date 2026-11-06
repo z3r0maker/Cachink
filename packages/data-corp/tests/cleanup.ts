@@ -13,6 +13,9 @@ export async function borrarLoDe(createdBy: string): Promise<void> {
     await sql.begin(async (tx) => {
       await tx`UPDATE corp.registries SET document_id = NULL WHERE document_id IN (
                  SELECT id FROM corp.documents WHERE uploaded_by = ${createdBy})`;
+      await tx`DELETE FROM corp.blobs WHERE key IN (
+                 SELECT blob_key FROM corp.documents
+                  WHERE uploaded_by = ${createdBy} AND storage = 'pg')`;
       await tx`DELETE FROM corp.documents WHERE uploaded_by = ${createdBy}`;
       await tx`DELETE FROM corp.received_invoices WHERE created_by = ${createdBy}`;
       await tx`DELETE FROM corp.share_events WHERE created_by = ${createdBy}`;

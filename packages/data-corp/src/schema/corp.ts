@@ -10,7 +10,7 @@ export const corp = pgSchema('corp');
 /** An instant as an ISO string, the way data-pg's tables carry them. */
 export const at = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' });
 
-/** Raw bytes: evidence is kept in the schema, not in a bucket (ADR-126). */
+/** Raw bytes: evidence is kept in the schema, not in a bucket (ADR-127). */
 export const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   dataType() {
     return 'bytea';

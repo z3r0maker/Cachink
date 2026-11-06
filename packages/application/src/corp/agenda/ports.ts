@@ -58,8 +58,27 @@ export interface NuevoDocumento {
   readonly subidoPor: string;
 }
 
+/** Which `BlobStore` holds a document's bytes (E-26, ADR-127 §5). */
+export type Almacen = 'pg' | 'azure';
+
+/**
+ * Where a document's bytes are kept, by key (E-26, ADR-127 §5): Postgres
+ * (`corp.blobs`) today, Azure Blob immutable storage once it exists. A key is
+ * written once and never changed or deleted; the store refuses a second write.
+ */
+export interface BlobStore {
+  readonly almacen: Almacen;
+  /** The largest file this store takes, in bytes. */
+  readonly maxBytes: number;
+  guardar(key: string, bytes: Uint8Array, mime: string): Promise<void>;
+  leer(key: string): Promise<Uint8Array | null>;
+}
+
 export interface DocumentoMeta {
   readonly id: string;
+  /** Which store holds the bytes, and under what key. */
+  readonly almacen: Almacen;
+  readonly blobKey: string;
   readonly tipo: TipoEvidencia;
   readonly carpeta: Carpeta;
   readonly titulo: string;
@@ -78,6 +97,9 @@ export interface DocumentoMeta {
 }
 
 export interface DocumentRepository {
+  /** The largest file the store behind this repository takes, in bytes. */
+  readonly maxBytes: number;
+  /** Stores the bytes, then the row: a failed insert leaves only an unread blob. */
   guardar(doc: NuevoDocumento): Promise<DocumentoMeta>;
   /** The current (not superseded) documents of an obligation. */
   porObligacion(obligacionId: string): Promise<readonly DocumentoMeta[]>;

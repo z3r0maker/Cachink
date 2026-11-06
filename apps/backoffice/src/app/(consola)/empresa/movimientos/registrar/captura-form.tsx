@@ -8,6 +8,7 @@ import * as d from '@/styles/mostrador-data.css';
 import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
 
+import { AdjuntarXml } from './adjuntar-xml';
 import { DeSocios } from './de-socios';
 import { DelGasto, Montos, type Prefill } from './del-gasto';
 import { Campo, Opciones, submitWith, type Opcion } from './opciones';
@@ -150,6 +151,7 @@ export function CapturaForm(props: {
     <form onSubmit={submitWith(action)} className={d.form}>
       <input type="hidden" name="nonce" value={props.nonce} />
       <QueSeRegistra prefill={prefill} tipo={tipo} onTipo={setTipo} />
+      {tipo === 'gasto' && prefill === null ? <AdjuntarXml /> : null}
       <ConceptoYFecha concepto={prefill?.concepto} fecha={fecha} onFecha={setFecha} />
       <Detalle
         tipo={tipo}

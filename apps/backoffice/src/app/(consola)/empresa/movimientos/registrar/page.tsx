@@ -9,11 +9,13 @@ import {
 import { newUlid } from '@xangarro/domain';
 
 import { hoyEnMexico, requireCorpDb } from '@/server/db/corp';
+import { leerPanelXml } from '@/server/empresa/facturas-lectura';
 import { prefillDe } from '@/server/empresa/prefill';
 import { requireFounderPage } from '@/server/founder';
 import * as m from '@/styles/mostrador.css';
 
 import { CapturaForm } from './captura-form';
+import { ConXml } from './con-xml';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,37 +48,45 @@ function opcionesDe(proyectos: readonly Project[], founders: readonly Founder[])
  * Registrar (E-02, board CD-03; partner money from E-03). The nonce makes a
  * double submit, or a retry after a failed audit, land on the same entry.
  * `?tipo=socios` opens on partner money, as Socios' button does, and
- * `?plantilla=&mes=` on a recurring charge, prefilled.
+ * `?plantilla=&mes=` on a recurring charge, prefilled. `?factura=` opens
+ * on the XML just attached (E-11, board CD-06d) while it still waits.
  */
 export default async function RegistrarPage(props: {
-  searchParams: Promise<{ tipo?: string; plantilla?: string; mes?: string }>;
+  searchParams: Promise<{ tipo?: string; plantilla?: string; mes?: string; factura?: string }>;
 }) {
   await requireFounderPage();
   const db = requireCorpDb();
-  const [{ tipo, plantilla, mes }, proyectos, founders] = await Promise.all([
+  const [{ tipo, plantilla, mes, factura }, proyectos, founders] = await Promise.all([
     props.searchParams,
     listProjects(db),
     listFounders(db),
   ]);
-  const prefill = await prefillDeLaUrl(db, plantilla, mes);
+  const [prefill, panel] = await Promise.all([
+    prefillDeLaUrl(db, plantilla, mes),
+    factura === undefined ? null : leerPanelXml(factura),
+  ]);
   const { opciones, socios } = opcionesDe(proyectos, founders);
   return (
     <div className={m.page}>
       <header className={m.head}>
         <div className={m.headText}>
           <span className={m.eyebrow}>Empresa · Movimientos</span>
-          <h1 className={m.title}>Registrar</h1>
+          <h1 className={m.title}>{panel === null ? 'Registrar' : 'Registrar gasto'}</h1>
         </div>
       </header>
       <section className={`${m.hero} ${m.narrow}`} aria-label="Registrar movimiento">
-        <CapturaForm
-          nonce={`manual-${newUlid()}`}
-          hoy={hoyEnMexico()}
-          tipo={tipo !== undefined && TIPOS.has(tipo) ? tipo : 'gasto'}
-          prefill={prefill}
-          proyectos={opciones}
-          socios={socios}
-        />
+        {panel === null ? (
+          <CapturaForm
+            nonce={`manual-${newUlid()}`}
+            hoy={hoyEnMexico()}
+            tipo={tipo !== undefined && TIPOS.has(tipo) ? tipo : 'gasto'}
+            prefill={prefill}
+            proyectos={opciones}
+            socios={socios}
+          />
+        ) : (
+          <ConXml panel={panel} proyectos={opciones} />
+        )}
       </section>
     </div>
   );

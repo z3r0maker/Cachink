@@ -167,11 +167,15 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 > **Amended 2026-09-18 (ADR-081):** `inventory_movements` moved from UP to HYBRID and joined
 > `ReferenceTablesSchema` (default `[]`).
+>
+> **Amended 2026-11-03 (ADR-134, C-24):** `product_images` joins HYBRID — append-only, inserted by
+> phones and the portal, never updated; a row with `bytes = null` is the tombstone; the newest
+> row per product wins; 64 KB row limit; its own snapshot section after `products`.
 
 | Direction                                              | Tables                                                                                                                                                                     |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **UP** (device → cloud, insert + update)               | `sales`, `expenses`, `caja_turnos`, `caja_movimientos`, `cancelacion_logs`, `day_closes`, `client_payments`, `entregas_credito`†, `conversions`†, `auditorias_inventario`† |
-| **HYBRID** (insert up; updates portal-only, flow down) | `products`, `clients`, `inventory_movements` (never updated)                                                                                                               |
+| **HYBRID** (insert up; updates portal-only, flow down) | `products`, `clients`, `inventory_movements` (never updated), `product_images` (never updated; tombstone = `bytes null`, ADR-134)                                          |
 | **DOWN** (cloud → device only)                         | `businesses`, `users`, `employees`, `recurring_expenses`, `conversion_recetas`†, `feature_flags` (virtual), entitlement (virtual)                                          |
 | **Never synced**                                       | `app_config` (device settings), `director_alerts` (dead), `__cachink_change_log` / sync state                                                                              |
 
@@ -542,3 +546,38 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
       `tests/snapshot.test.ts` (token, pager, old↔new compatibility), conformance
       `snapshot.test.ts` (baseline + rows = every movement; pages chain at one cursor; forged
       token → 400), green against the mock and the portal.
+
+### C-24 `product_images`: a fourth HYBRID table, append-only, 64 KB rows (ADR-134)
+
+- [x] Status · **Blocked by:** — · **Blocks:** B-19, M-13, P-42
+  - Done: 2026-11-03 · `ProductImageSchema` + `latestProductImages` in the domain (12 tests);
+    `product_images` in `HYBRID_TABLES`, 64 KB row, `ReferenceTablesSchema` (default `[]`), the
+    push delta union, snapshot section after `products`; the mock stores, pulls and snapshots it
+    (newest photo per product, no tombstones). **Wider than planned, so every compile-time guard
+    stays green:** the table also landed on both databases — SQLite 0014 (triggers into the
+    change log, migration test, `SCHEMA_VERSION` 15) and Postgres 0050 (`bytea` behind a
+    base64 column type so the row shape is the device's, RLS, append-only grants, CHECKs, the
+    `newestPhotoIds` / `latestProductImage` queries, an integration test on a fresh database) —
+    and on the wire's consumers: `SYNCED_TABLES`, the portal's bootstrap, pull, snapshot reader
+    and page estimate, the phone's push map and reference applier (which now prunes superseded
+    rows it has already pushed). B-19 keeps the image route and the 30-day purge; M-13 the
+    capture. Conformance `product-images.test.ts` green against the mock.
+- **Context:** the product photo is a row, not a file (ADR-134). The wire learns one table and
+  nothing else changes shape; additive at protocol 1 (an older server answers without it, an
+  older device ignores it).
+- **Files:** `packages/domain/src/entities/product-image.ts` (`ProductImageSchema`: `id`,
+  `businessId`, `productId`, `deviceId` nullable, `mime` literal `image/webp`, `bytes` base64
+  string nullable — `null` is the tombstone —, `width`, `height` ≤ 512, `createdAt`; the
+  «newest wins» derivation `latestImagePerProduct(rows)` lives here, tested);
+  `packages/contracts/src/scope.ts` (`HYBRID_TABLES` += `product_images`), `row-size.ts`
+  (`product_images: 65_536`), `activate.ts` (`ReferenceTablesSchema.product_images`, default
+  `[]`), `snapshot.ts` (section after `products`, newest row per product only), `snapshot-page.ts`,
+  the mock server (`MockState` + pager) and `tests/`.
+- **Steps:** entity + derivation under TDD (1 happy, 3 unhappy: a PNG mime, bytes over the
+  limit, width over 512, two rows the same second → the greater ULID wins); scope, row size and
+  schemas; amend §8's table (a row for `product_images (append-only; tombstone = bytes null)`);
+  mock pager; conformance spec: insert flows down, an `update` delta is refused as
+  `HYBRID_UPDATE_FORBIDDEN`, a photo over the entity's 40 KB fails the schema (400 for the batch; the
+  device refuses it before sending), the snapshot carries only the newest row per product.
+- **Acceptance:** `pnpm --filter @xangarro/contracts test` and `test:conformance` green against
+  the mock; an old device's pull still parses (default `[]`).

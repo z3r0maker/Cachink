@@ -10,26 +10,33 @@ import {
   typography,
 } from '@xangarro/tokens';
 
+import { PHONE } from '@/shell/shell.css';
+
 /**
  * El Mostrador in the console (ADR-117, ADR-125): the «Empresa» area's
  * surfaces, after `docs/design/el-mostrador.md`. Light only; the area wraps
  * itself in `torreLight`, so these never meet the dark roles.
  */
 
-/** Covers the work area edge to edge: `main`'s padding is undone and redone. */
+/**
+ * Covers the work area edge to edge: `main`'s padding is undone and redone,
+ * at both of `main`'s paddings (`shell.css.ts`), the phone's 16 px gutters too.
+ */
 export const sheet = style({
   margin: '-22px -24px -32px',
   padding: '22px 24px 40px',
   minHeight: 'calc(100vh - 48px)',
   background: colors.gray200,
   color: colors.ink,
+  '@media': { [PHONE]: { margin: '-20px -16px -24px', padding: '20px 16px 32px' } },
 });
 
 export const page = style({ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1240 });
 
 export const head = style({ display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' });
 
-export const headText = style({ flex: 1, minWidth: 0 });
+/** The title keeps a column of its own: on a phone the actions wrap below it. */
+export const headText = style({ flex: 1, minWidth: 'min(100%, 240px)' });
 
 export const eyebrow = style({
   display: 'block',

@@ -52,6 +52,8 @@ export function plantillaDe(m: RegistrarMovimientoInput, id: string): NuevaPlant
     id,
     nombre: m.concepto.trim(),
     contraparte: m.contraparte?.trim() || null,
+    // A charge typed by hand has no supplier RFC; one made from an invoice does.
+    rfc: null,
     categoria: g.categoria,
     moneda: m.usd === null ? 'MXN' : 'USD',
     montoEstimado: m.usd?.montoOriginal ?? g.subtotal + g.iva,

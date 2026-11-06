@@ -57,7 +57,7 @@
 ### L-04 Dominio + DNS + dominio de correo [critica] [bloq]
 
 - [ ] Status · **Blocked by:** — (hacerlo temprano; seguimiento del ADR-054)
-      **Remaining (2026-09-23, verified against the code):** Solo del lado del dueño — registrador, zona DNS y consola de Resend (O-4 … O-6, O-13 en `11-pre-launch-and-deferred.md`); nada en el repo puede comprobarlo.
+      **Remaining (2026-11-03, re-verificado por DoH y HTTP):** sólo falta un envío de prueba. `xangarro.mx` responde 200, `app.xangarro.mx` y `admin.xangarro.mx` responden 307 al login, los tres desde Vercel, y los cuatro registros de correo están publicados (O-4 … O-6, O-13 cerrados). Lo único que no se ve desde fuera es si `RESEND_API_KEY` está en los dos proyectos de Vercel, que es la segunda mitad de la Acceptance; nada en el repo puede comprobarlo.
 
 - **State (2026-09-24, verified over DNS-over-HTTPS):** registrar GoDaddy, zone on Cloudflare
   (`elle`/`leland.ns.cloudflare.com`), apex `xangarro.mx` CNAME-flattened to Vercel (DNS only), `www`
@@ -74,19 +74,20 @@
   `node apps/landing/scripts/indexnow.mjs` so Bing fetches the changed pages at once (IndexNow;
   Google needs Search Console's «Request indexing» instead). Or add
   the commit author's email to the Vercel account.
-  **Missing:** `app.xangarro.mx` and `admin.xangarro.mx` are NXDOMAIN, so every signup CTA is a
-  dead link until the portal and console projects get their domains (Add domain in Vercel, then a
-  CNAME `app` / `admin` in Cloudflare, DNS only) — or the CTAs point at a waitlist. **Gotcha:** the
+  **Resuelto 2026-11-03:** `app.xangarro.mx` y `admin.xangarro.mx` ya no son NXDOMAIN — los dos
+  resuelven y responden 307 al login desde Vercel, así que los CTA de signup del landing dejaron de
+  ser enlaces muertos. Esta nota decía lo contrario cinco semanas después de que dejara de ser
+  cierto. **Gotcha:** the
   owner's ISP intercepts port 53 and serves stale answers; check DNS with `dns.google/resolve` or
   `cloudflare-dns.com/dns-query`, never plain `dig` (the second audit's "apex on GoDaddy" finding
   was that artefact). Full detail in memory `domain-dns-email-setup.md`.
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
-### L-05 Badges de tienda + páginas legales
+### L-05 Badges de tienda + páginas legales [media]
 
 - [ ] Status · **Blocked by:** X-05 (URLs reales de tienda)
-      **Remaining (2026-10-05, verified against the code):** `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. [ ] [tiendas] [alta]
+      **Remaining (2026-10-05, verified against the code):** `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05.
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.
 

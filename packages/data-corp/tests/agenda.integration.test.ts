@@ -8,13 +8,14 @@ import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
 import { createAgendaRepository } from '../src/queries/agenda';
-import { contenidoDe, createDocumentRepository, documentosDe } from '../src/queries/documentos';
+import { createPgBlobStore } from '../src/queries/blobs';
+import { createDocumentRepository, documentosDe } from '../src/queries/documentos';
 import { borrarLoDe } from './cleanup';
 
 /**
  * E-04's storage: the registration, an obligation's row and state, and its
- * evidence kept as bytes in corp, which the console can never change or
- * delete and the agents can read only as metadata (ADR-127).
+ * evidence kept as bytes in corp's blob store (E-26), which the console can
+ * never change or delete and the agents can read only as metadata (ADR-127).
  */
 const { url, describe } = integrationSuite();
 const AUTOR = 'f-agenda-test';
@@ -30,7 +31,7 @@ describe('corp agenda storage', () => {
   const db = () => createCorpDb(url as string);
   const deps = () => ({
     agenda: createAgendaRepository(db()),
-    documentos: createDocumentRepository(db()),
+    documentos: createDocumentRepository(db(), createPgBlobStore(db())),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   });
   let antes: string | null = null;
@@ -79,8 +80,9 @@ describe('corp agenda storage', () => {
       listed.map((d) => d.nombre),
       ['acuse-iva.pdf'],
     );
-    const back = await contenidoDe(db(), doc.id);
-    assert.equal(back?.contenido.toString('utf8'), '%PDF-1.7 acuse');
+    assert.deepEqual([doc.almacen, doc.blobKey], ['pg', doc.id]);
+    const back = await createPgBlobStore(db()).leer(doc.blobKey);
+    assert.equal(new TextDecoder().decode(back ?? undefined), '%PDF-1.7 acuse');
   });
 
   it('never lets the console change or delete a document', async () => {
@@ -89,6 +91,8 @@ describe('corp agenda storage', () => {
       await assert.rejects(corp`UPDATE corp.documents SET filename = 'x'`, /permission denied/);
       await assert.rejects(corp`DELETE FROM corp.documents`, /permission denied/);
       await assert.rejects(corp`DELETE FROM corp.obligations`, /permission denied/);
+      await assert.rejects(corp`UPDATE corp.blobs SET key = key`, /permission denied/);
+      await assert.rejects(corp`DELETE FROM corp.blobs`, /permission denied/);
     } finally {
       await corp.end();
     }
@@ -98,7 +102,7 @@ describe('corp agenda storage', () => {
     const agent = postgres(env('CORP_AGENT_URL'), { max: 1, onnotice: () => {} });
     try {
       await agent`SELECT id, filename, sha256 FROM corp.documents LIMIT 1`;
-      await assert.rejects(agent`SELECT content FROM corp.documents LIMIT 1`, /permission denied/);
+      await assert.rejects(agent`SELECT content FROM corp.blobs LIMIT 1`, /permission denied/);
     } finally {
       await agent.end();
     }

@@ -54,6 +54,12 @@ describe('table scope', () => {
     assert.equal(isPullable('inventory_movements'), true);
   });
 
+  it('product photos are append-only rows: pushed as inserts, never updated, pulled (ADR-134)', () => {
+    assert.equal(isPushable('product_images', 'insert'), true);
+    assert.equal(isPushable('product_images', 'update'), false);
+    assert.equal(isPullable('product_images'), true);
+  });
+
   it('down-only tables are never pushable and up-only tables are never pullable', () => {
     assert.equal(isPushable('users', 'insert'), false);
     assert.equal(isPullable('sales'), false);

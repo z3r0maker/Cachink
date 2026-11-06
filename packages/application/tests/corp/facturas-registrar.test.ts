@@ -9,39 +9,10 @@ import {
   FacturaNoPorPagarError,
   registrarFacturas,
   registrarPagoFactura,
-  subirFacturas,
 } from '../../src/corp/index.js';
-import { FakeDocumentos } from './fake-agenda.js';
-import { cfdiXml, RFC_MEXIA_PRUEBA, type CfdiDePrueba } from './cfdi-xml.js';
-import { FakeFacturas, FakeSat } from './fake-facturas.js';
-import { FakeLedger } from './fake-ledger.js';
+import { A, conSubida, ctx, cuenta, seleccion } from './facturas-escenario.js';
 
 /** E-11 and owner decision 9: registering, paying and cancelling received invoices. */
-const A = 'AAAAAAAA-0000-4000-8000-000000000001';
-
-async function conSubida(o: CfdiDePrueba = {}) {
-  const d = {
-    facturas: new FakeFacturas(),
-    sat: new FakeSat(),
-    ledger: new FakeLedger(),
-    documentos: new FakeDocumentos(),
-    sha256: async () => 'c'.repeat(64),
-    rfcMexia: async () => RFC_MEXIA_PRUEBA,
-  };
-  const texto = cfdiXml({ uuid: A, ...o });
-  const contenido = new TextEncoder().encode(texto);
-  await subirFacturas(d, {
-    archivos: [{ nombre: 'contador.xml', contenido, texto }],
-    founderId: 'f1',
-  });
-  return d;
-}
-
-const seleccion = { uuid: A, categoria: 'administracion', projectId: null } as const;
-const ctx = { founderId: 'f1', hoy: '2026-10-29' };
-const cuenta = (lines: readonly { cuenta: string; debe: bigint; haber: bigint }[], c: string) =>
-  lines.find((l) => l.cuenta === c);
-
 describe('registrarFacturas (E-11)', () => {
   it('posts a paid invoice from its XML and files the XML next to the movement', async () => {
     const d = await conSubida();
@@ -102,14 +73,19 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
     const [gasto] = await registrarFacturas(d, { selecciones: [seleccion], ...ctx });
     assert.equal(cuenta(gasto?.lines ?? [], 'proveedores')?.haber, 4_060_00n);
     assert.equal(cuenta(gasto?.lines ?? [], 'iva_acreditable'), undefined);
-    const pago = await registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', founderId: 'f1' });
+    const pago = await registrarPagoFactura(d, {
+      uuid: A,
+      fecha: '2026-11-20',
+      hoy: '2026-11-30',
+      founderId: 'f1',
+    });
     assert.equal(pago.sourceRef, `${A}:pago`);
     assert.equal(pago.fecha, '2026-11-20');
     assert.equal(cuenta(pago.lines, 'bancos')?.haber, 3_336_67n);
     assert.equal(cuenta(pago.lines, 'iva_acreditable')?.debe, 560_00n);
     assert.equal((await d.facturas.porUuid(A))?.pagoEntryId, pago.id);
     await assert.rejects(
-      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-21', founderId: 'f1' }),
+      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-21', hoy: '2026-11-30', founderId: 'f1' }),
       FacturaNoPorPagarError,
     );
   });
@@ -126,7 +102,7 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
     assert.equal(reversa.reversesEntryId, gasto?.id);
     assert.equal((await d.facturas.porUuid(A))?.estado, 'cancelada');
     await assert.rejects(
-      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', founderId: 'f1' }),
+      registrarPagoFactura(d, { uuid: A, fecha: '2026-11-20', hoy: '2026-11-30', founderId: 'f1' }),
       FacturaNoPorPagarError,
     );
   });
@@ -134,7 +110,12 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
   it('refuses to pay or cancel a paid (PUE) invoice, or one not registered yet', async () => {
     const pue = await conSubida();
     await assert.rejects(
-      registrarPagoFactura(pue, { uuid: A, fecha: '2026-11-20', founderId: 'f1' }),
+      registrarPagoFactura(pue, {
+        uuid: A,
+        fecha: '2026-11-20',
+        hoy: '2026-11-30',
+        founderId: 'f1',
+      }),
       FacturaNoPorPagarError,
     );
     await registrarFacturas(pue, { selecciones: [seleccion], ...ctx });

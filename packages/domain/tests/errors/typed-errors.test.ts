@@ -7,7 +7,6 @@ import {
   CajaNoAbiertaError,
   ClientInvalidError,
   ClientNotFoundError,
-  ConfirmacionNombreError,
   CorteInvalidoError,
   DuplicateOperatorError,
   EmpleadoInvalidoError,
@@ -32,7 +31,6 @@ import {
   SaldosBloqueadosError,
   SaldosInvalidosError,
   StockNotEmptyError,
-  SuscripcionActivaError,
   UnknownPlanError,
 } from '../../src/index.js';
 
@@ -70,8 +68,6 @@ describe('typed errors carry their code and their sentence', () => {
       new NegocioInvalidoError({ campos: { rfc: 'RFC inválido' }, atributos: {} }),
       'NEGOCIO_INVALIDO',
     ],
-    ['confirmación', new ConfirmacionNombreError(), 'CONFIRMACION_NOMBRE'],
-    ['suscripción viva', new SuscripcionActivaError(), 'SUSCRIPCION_ACTIVA'],
     ['empleado mal', new EmpleadoInvalidoError({ nombre: 'Falta el nombre' }), 'EMPLEADO_INVALIDO'],
     ['empleado gone', new EmpleadoNoEncontradoError(), 'EMPLEADO_NO_ENCONTRADO'],
     ['límite operadores', new OperatorLimitError(2), 'OPERATOR_LIMIT'],

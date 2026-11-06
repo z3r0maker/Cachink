@@ -9,7 +9,8 @@ import type { CfdiRecibido, EstadoSat } from '@xangarro/domain/corp';
  * `sin_respuesta`, and the founder goes on with the invoice unverified.
  *
  * `CORP_SAT_CONSULTA=simulada` answers without the network, for e2e: a UUID
- * starting `00000000` is cancelled, `FFFFFFFF` not found, anything else valid.
+ * starting `00000000` is cancelled, `FFFFFFFF` not found, `EEEEEEEE` gets no
+ * answer, anything else valid.
  * Production never sets it.
  */
 export const SAT_URL = 'https://consultaqr.facturaelectronica.sat.gob.mx/ConsultaCFDIService.svc';
@@ -48,6 +49,7 @@ export function estadoDeRespuesta(xml: string): EstadoSat {
 export function simulada(c: CfdiRecibido): EstadoSat {
   if (c.uuid.startsWith('00000000')) return 'cancelado';
   if (c.uuid.startsWith('FFFFFFFF')) return 'no_encontrado';
+  if (c.uuid.startsWith('EEEEEEEE')) return 'sin_respuesta';
   return 'vigente';
 }
 

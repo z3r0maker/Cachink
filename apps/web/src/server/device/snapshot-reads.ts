@@ -7,7 +7,7 @@ import type {
   SnapshotReader,
   SnapshotSection,
 } from '@xangarro/contracts';
-import { inventoryMovements, SYNCED_TABLES } from '@xangarro/data-pg';
+import { inventoryMovements, newestPhotoIds, SYNCED_TABLES } from '@xangarro/data-pg';
 import { and, asc, gt, gte, isNull, sql, type SQL } from 'drizzle-orm';
 import type { AnyPgColumn, PgTable } from 'drizzle-orm/pg-core';
 
@@ -74,6 +74,8 @@ async function readTable(
   const where: SQL[] = table === 'businesses' ? [] : [isNull(t.deletedAt)];
   if (after !== null) where.push(gt(t.id, after));
   if (table === 'inventory_movements') where.push(gte(inventoryMovements.createdAt, cursor.cutoff));
+  // The newest photo per product only (ADR-134): no history, no tombstones.
+  if (table === 'product_images') where.push(sql`${t.id} IN ${newestPhotoIds()}`);
   const rows = await tx
     .select()
     .from(t)

@@ -16,6 +16,7 @@ import {
   EntregaCreditoSchema,
   ExpenseSchema,
   InventoryMovementSchema,
+  ProductImageSchema,
   ProductSchema,
   RespuestaOperadorSchema,
   SaleSchema,
@@ -55,6 +56,7 @@ export const PUSH_ROW_SCHEMAS = {
   respuestas_operador: RespuestaOperadorSchema,
   products: ProductSchema,
   clients: ClientSchema,
+  product_images: ProductImageSchema,
 } as const satisfies Record<PushableTable, z.ZodType>;
 
 export const DeltaSchema = z.discriminatedUnion('table', [
@@ -73,6 +75,7 @@ export const DeltaSchema = z.discriminatedUnion('table', [
   delta('respuestas_operador', RespuestaOperadorSchema),
   delta('products', ProductSchema),
   delta('clients', ClientSchema),
+  delta('product_images', ProductImageSchema),
 ]);
 export type Delta = z.infer<typeof DeltaSchema>;
 

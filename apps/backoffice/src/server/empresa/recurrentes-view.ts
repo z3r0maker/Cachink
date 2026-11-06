@@ -7,6 +7,7 @@ import {
   type RecurrenteDelMes,
 } from '@xangarro/domain/corp';
 
+import { fechaCorta } from './fechas';
 import type { FilaMovimiento, Filtro } from './movimiento-view';
 
 /**
@@ -14,7 +15,7 @@ import type { FilaMovimiento, Filtro } from './movimiento-view';
  * suggested charge as a row of the month's table, and each template's line
  * on the «Recurrentes» tab.
  */
-export type EstadoRecurrenteVista = 'Registrado' | 'Sugerido' | 'Próximo';
+export type EstadoRecurrenteVista = 'Registrado' | 'Sugerido' | 'Falta su factura' | 'Próximo';
 
 export interface FilaRecurrente {
   readonly id: string;
@@ -25,7 +26,10 @@ export interface FilaRecurrente {
   readonly monto: string;
   readonly fecha: string;
   readonly estado: EstadoRecurrenteVista;
-  /** The entry that registered it, or the Registrar form prefilled with it. */
+  /** Under the state: «Pídela a …» or «Con su factura del 2 nov» (board CD-01f). */
+  readonly nota: string;
+  /** The row's button and where it goes: its entry, Registrar prefilled, or Facturas. */
+  readonly accion: 'Registrar' | 'Ver' | 'Subir su XML' | null;
   readonly href: string | null;
 }
 
@@ -42,13 +46,30 @@ export function registrarHref(plantillaId: string, mes: string): string {
 const ESTADO: Record<RecurrenteDelMes['estado'], EstadoRecurrenteVista> = {
   registrado: 'Registrado',
   sugerido: 'Sugerido',
+  falta_factura: 'Falta su factura',
   proximo: 'Próximo',
 };
 
+/** «Vercel Inc. · cada mes», or a supplier who invoices by its RFC: «RFC … · factura cada mes». */
 function detalleDe(p: PlantillaRecurrente): string {
-  return [p.contraparte, p.activo ? 'cada mes' : 'ya no se repite']
+  const cada = p.rfc === null ? 'cada mes' : 'factura cada mes';
+  return [p.rfc === null ? p.contraparte : `RFC ${p.rfc}`, p.activo ? cada : 'ya no se repite']
     .filter((x): x is string => x !== null && x !== '')
     .join(' · ');
+}
+
+function notaDe(r: RecurrenteDelMes): string {
+  if (r.facturaDel !== null) return `Con su factura del ${fechaCorta(r.facturaDel)}`;
+  if (r.estado !== 'falta_factura') return '';
+  return `Pídela a ${r.plantilla.contraparte ?? r.plantilla.nombre}`;
+}
+
+function accionDe(r: RecurrenteDelMes, mes: string): Pick<FilaRecurrente, 'accion' | 'href'> {
+  if (r.entryId !== null) return { accion: 'Ver', href: `/empresa/movimientos/${r.entryId}` };
+  if (r.estado === 'sugerido')
+    return { accion: 'Registrar', href: registrarHref(r.plantilla.id, mes) };
+  if (r.estado === 'falta_factura') return { accion: 'Subir su XML', href: '/empresa/facturas' };
+  return { accion: null, href: null };
 }
 
 export function filaRecurrente(r: RecurrenteDelMes, mes: string): FilaRecurrente {
@@ -61,12 +82,8 @@ export function filaRecurrente(r: RecurrenteDelMes, mes: string): FilaRecurrente
     monto: montoEstimado(p),
     fecha: formatDate(parseIsoDate(r.fecha)),
     estado: ESTADO[r.estado],
-    href:
-      r.entryId !== null
-        ? `/empresa/movimientos/${r.entryId}`
-        : r.estado === 'sugerido'
-          ? registrarHref(p.id, mes)
-          : null,
+    nota: notaDe(r),
+    ...accionDe(r, mes),
   };
 }
 

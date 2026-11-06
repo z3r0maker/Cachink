@@ -39,3 +39,27 @@ export class FacturaNoPorPagarError extends Error {
     this.name = 'FacturaNoPorPagarError';
   }
 }
+
+export class FacturaNoPorVerificarError extends Error {
+  readonly code = 'FACTURA_NO_POR_VERIFICAR' as const;
+  constructor(readonly uuid: string) {
+    super('Esa factura ya no está sin verificar.');
+    this.name = 'FacturaNoPorVerificarError';
+  }
+}
+
+export class FacturaSinRegistrarError extends Error {
+  readonly code = 'FACTURA_SIN_REGISTRAR' as const;
+  constructor(readonly uuid: string) {
+    super('Registra la factura antes de hacerla recurrente.');
+    this.name = 'FacturaSinRegistrarError';
+  }
+}
+
+export class FechaPagoAnteriorError extends Error {
+  readonly code = 'FECHA_PAGO_ANTERIOR' as const;
+  constructor(readonly fecha: string) {
+    super('La fecha de pago no puede ser antes de la fecha de la factura.');
+    this.name = 'FechaPagoAnteriorError';
+  }
+}

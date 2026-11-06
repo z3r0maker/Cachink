@@ -11,6 +11,8 @@ import {
 
 /** E-05's Expediente in the board's words. */
 const doc = (over: Partial<DocumentoMeta> & Pick<DocumentoMeta, 'id'>): DocumentoMeta => ({
+  almacen: 'pg',
+  blobKey: over.id,
   tipo: 'otro',
   carpeta: 'sat',
   titulo: 'Constancia de situación fiscal',

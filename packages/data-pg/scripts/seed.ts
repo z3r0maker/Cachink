@@ -18,6 +18,7 @@ import { seedPortal } from './seed-portal.js';
 import { seedRevision } from './seed-revision.js';
 import { seedDayClose, seedMovements } from './seed-extra.js';
 import { seedFinanzas } from './seed-finanzas.js';
+import { seedFotos } from './seed-fotos.js';
 import { hash } from 'bcryptjs';
 import postgres from 'postgres';
 
@@ -187,6 +188,7 @@ async function main(): Promise<void> {
     await seedCortes(sql);
     await seedRevision(sql);
     await seedConformance(sql);
+    await seedFotos(sql);
 
     const [{ count }] = await sql<{ count: string }[]>`SELECT count(*)::text FROM sales`;
     console.log(

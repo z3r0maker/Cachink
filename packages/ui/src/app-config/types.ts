@@ -32,6 +32,11 @@ export const APP_CONFIG_KEYS = {
   activation: 'activation',
   /** JSON `{ failures, lockedUntil }` — wrong-PIN cooldown survives restarts (A-05). */
   pinLockout: 'pinLockout',
+  /**
+   * ISO time of a «Desvincular y borrar»: the one row written after the wipe,
+   * so the connect screen can say «Listo». Read once, then deleted.
+   */
+  avisoBorrado: 'avisoBorrado',
   /** Cloud-sync keys (entitlement, server time, cursors) are owned by @xangarro/sync. */
   ...SYNC_CONFIG_KEYS,
 } as const;

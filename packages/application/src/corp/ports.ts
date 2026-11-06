@@ -1,4 +1,9 @@
-import type { JournalLine, Movement, PlantillaRecurrente } from '@xangarro/domain/corp';
+import type {
+  FacturaDeRecurrente,
+  JournalLine,
+  Movement,
+  PlantillaRecurrente,
+} from '@xangarro/domain/corp';
 
 /**
  * The ledger's storage port (E-02, ADR-125 §4). `@xangarro/data-corp`
@@ -83,4 +88,9 @@ export interface RecurringTemplateRepository {
   setActivo(id: string, activo: boolean): Promise<void>;
   /** Template id → the entry of its standing charge for `mes` (a reversed one does not count). */
   registradasEn(mes: string): Promise<ReadonlyMap<string, string>>;
+  /**
+   * Template id → the registered invoice of its RFC dated in `mes`, and its
+   * date (E-11, board CD-01f). A reversed one does not count.
+   */
+  facturadasEn(mes: string): Promise<ReadonlyMap<string, FacturaDeRecurrente>>;
 }

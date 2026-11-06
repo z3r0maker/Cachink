@@ -23,11 +23,18 @@ function importsPlaywrightTest(source: string): boolean {
   );
 }
 
+/**
+ * Every spec and helper with its text, read while the file is collected: the
+ * reads inside the test were 256 ms alone, the profile that timed out
+ * `rutas.test.ts` under `pnpm test` on 2026-10-28.
+ */
+const SPECS = readdirSync(E2E)
+  .filter((f) => f.endsWith('.ts') && f !== 'test.ts')
+  .map((f) => ({ f, source: readFileSync(path.join(E2E, f), 'utf8') }));
+
 describe('E2E specs record coverage (ADR-102)', () => {
   it('no spec or helper takes `test` from @playwright/test', () => {
-    const offenders = readdirSync(E2E)
-      .filter((f) => f.endsWith('.ts') && f !== 'test.ts')
-      .filter((f) => importsPlaywrightTest(readFileSync(path.join(E2E, f), 'utf8')));
+    const offenders = SPECS.filter(({ source }) => importsPlaywrightTest(source)).map(({ f }) => f);
     assert.deepEqual(offenders, [], `import { test } from './test' in: ${offenders.join(', ')}`);
   });
 

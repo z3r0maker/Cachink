@@ -3,7 +3,6 @@
 import * as Menu from '@radix-ui/react-dropdown-menu';
 import Link from 'next/link';
 
-import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
 import { logout } from '@/server/actions/auth';
 
 import { Icon } from './icon';
@@ -18,6 +17,8 @@ export interface UserMenuProps {
   readonly planLabel: string;
   /** Rows a device could not send; shown beside Sincronización. */
   readonly pendingRows: number;
+  /** The current aviso is one this account has not accepted (ADR-137). */
+  readonly avisoNuevo: boolean;
 }
 
 function Extra({ href, p }: { readonly href: string; readonly p: UserMenuProps }) {
@@ -67,10 +68,13 @@ export function UserMenu(p: UserMenuProps) {
             <Row key={item.href} item={item} p={p} />
           ))}
           <Menu.Item asChild>
-            <a href={AVISO_INTEGRAL_URL} className={s.itemLink}>
+            <Link href="/privacidad" className={s.itemLink} data-testid="menu-privacidad">
               <Icon path={PRIVACY_ICON} size={19} />
-              Aviso de privacidad
-            </a>
+              Privacidad y mis datos
+              {p.avisoNuevo ? (
+                <span className={`${s.pill} ${s.pillTone.nuevo}`}>Aviso nuevo</span>
+              ) : null}
+            </Link>
           </Menu.Item>
           <div className={s.separator} role="separator" />
           <form action={logout}>

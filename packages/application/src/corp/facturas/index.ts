@@ -1,7 +1,12 @@
+export { consultarSatFactura, type ConsultarSatDeps } from './consultar-sat.js';
+export { hacerRecurrenteFactura, type HacerRecurrenteFacturaDeps } from './recurrente.js';
 export {
   FacturaDesconocidaError,
   FacturaNoPendienteError,
   FacturaNoPorPagarError,
+  FacturaNoPorVerificarError,
+  FacturaSinRegistrarError,
+  FechaPagoAnteriorError,
   RfcMexiaPendienteError,
   SinArchivosError,
 } from './errors.js';
@@ -29,6 +34,7 @@ export {
   MAX_ARCHIVOS,
   MAX_BYTES_XML,
   descartarRevision,
+  quitarFactura,
   subirFacturas,
   type ArchivoXml,
   type MotivoRechazo,

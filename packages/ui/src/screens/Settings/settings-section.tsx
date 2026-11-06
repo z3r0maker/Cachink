@@ -8,6 +8,23 @@ import { Text, View } from '@tamagui/core';
 import { Card } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 
+/** The uppercase title over each section. */
+export function SettingsSectionTitle(props: { readonly title: string }): ReactElement {
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.bold}
+      fontSize={fontSizes.xs}
+      letterSpacing={typography.letterSpacing.wide}
+      color={colors.gray600}
+      role="heading"
+      style={{ textTransform: 'uppercase' }}
+    >
+      {props.title}
+    </Text>
+  );
+}
+
 export function SettingsSection(props: {
   readonly title: string;
   readonly children: ReactNode;
@@ -15,16 +32,7 @@ export function SettingsSection(props: {
 }): ReactElement {
   return (
     <View gap={8} testID={props.testID}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={fontSizes.xs}
-        letterSpacing={typography.letterSpacing.wide}
-        color={colors.gray600}
-        style={{ textTransform: 'uppercase' }}
-      >
-        {props.title}
-      </Text>
+      <SettingsSectionTitle title={props.title} />
       <Card padding="md" fullWidth>
         <View gap={12}>{props.children}</View>
       </Card>

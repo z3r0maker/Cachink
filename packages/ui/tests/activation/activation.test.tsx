@@ -81,6 +81,24 @@ describe('persistActivation (real SQLite + mock server)', () => {
     expect(ops.map((u) => u.nombre).sort()).toEqual(['Ana', 'Toni']);
   });
 
+  it('linking a wiped phone again retires its «Listo» notice', async () => {
+    // Its own slot: the mock business has two, and the tests below need one.
+    mock.api.state.reset();
+    const res = await new ApiClient({ baseUrl: mock.url }).activate({
+      email: 'dueno@tacoslaesquina.mx',
+      code: mock.api.state.issueCode(),
+      device: { name: 'Test', platform: 'ios', appVersion: '0.1.0', osVersion: '18' },
+    });
+    if (!res.ok) throw new Error(res.code);
+    const db = makeFreshDb();
+    const appConfig = new DrizzleAppConfigRepository(db);
+    await appConfig.set(APP_CONFIG_KEYS.avisoBorrado, '2026-11-03T18:00:00.000Z');
+    const referenceData = new DrizzleReferenceDataRepository(db);
+    await persistActivation({ referenceData, appConfig, tokenStore: memoryTokenStore() }, res.data);
+    expect(await appConfig.get(APP_CONFIG_KEYS.avisoBorrado)).toBeNull();
+    mock.api.state.reset();
+  });
+
   it('keeps an opted-in snapshot open after the first page, and the first sync finishes it (C-23)', async () => {
     mock.api.state.snapshotBudget = { rows: 5, bytes: 1_000_000 };
     const client = new ApiClient({ baseUrl: mock.url });

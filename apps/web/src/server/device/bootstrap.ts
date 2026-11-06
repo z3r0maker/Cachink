@@ -13,6 +13,7 @@ import {
   openingBalanceClients,
   openingBalances,
   ownerNombre,
+  newestProductImages,
 } from '@xangarro/data-pg';
 import { MAX_PULL_ROWS_PER_TABLE } from '@xangarro/contracts';
 import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
@@ -70,7 +71,7 @@ export async function legacyBootstrapFits(tx: Tx): Promise<boolean> {
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
 
-  const [b, p, c, u, e, r, cr, m, mo, ob, obc] = await Promise.all([
+  const [b, p, c, u, e, r, cr, m, mo, ob, obc, pi] = await Promise.all([
     tx.select().from(businesses),
     tx.select().from(products).where(live(products)),
     tx.select().from(clients).where(live(clients)),
@@ -84,6 +85,8 @@ export async function referenceTables(tx: Tx) {
     // Day-one facts (C-20); an empty list is the common case.
     tx.select().from(openingBalances).where(live(openingBalances)),
     tx.select().from(openingBalanceClients).where(live(openingBalanceClients)),
+    // The newest photo per product (ADR-134); tombstones and history stay behind.
+    newestProductImages(tx),
   ]);
 
   return {
@@ -98,6 +101,7 @@ export async function referenceTables(tx: Tx) {
     mensajes_operador: mo.map((row) => rowToWire('mensajes_operador', row)),
     opening_balances: ob.map((row) => rowToWire('opening_balances', row)),
     opening_balance_clients: obc.map((row) => rowToWire('opening_balance_clients', row)),
+    product_images: pi.map((row) => rowToWire('product_images', row)),
     feature_flags: await tenantFeatureFlags(tx),
     dueno_nombre: await ownerNombre(tx),
   };

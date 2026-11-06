@@ -7,13 +7,13 @@ import {
   LOGIN_PER_IP,
   minutes,
   throttleKey,
-  verifyPassword,
 } from '@xangarro/auth-core';
-import { loginLookup, throttleStore } from '@xangarro/data-pg';
+import { throttleStore } from '@xangarro/data-pg';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { db } from '../db';
+import { passwordMatches } from '../password';
 import { endSession } from '../session';
 import { NO_BUSINESS, signInUser } from '../sign-in';
 
@@ -35,12 +35,6 @@ const tooMany = (wait: number): LoginResult => ({
   ok: false,
   message: `Demasiados intentos. Vuelve a intentar en ${minutes(wait)} min.`,
 });
-
-/** The account, if the password is its — the dummy compare is `verifyPassword`'s. */
-async function passwordMatches(email: string, password: string) {
-  const user = await loginLookup(db(), email);
-  return (await verifyPassword(password, user?.hash ?? null)) && user?.hash ? user : null;
-}
 
 export async function login(email: string, password: string): Promise<LoginResult> {
   const address = email.trim().toLowerCase();
