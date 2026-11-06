@@ -534,11 +534,18 @@ with property tests:
 
 ### E-11 Facturas recibidas `[media]`
 
-- [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-10-31):**
-  - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
-    known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
-    both yet. It needs a decision on how a template knows its month was registered by an invoice.
+- [x] Status · **Blocked by:** E-02, E-05 · **Done:** 2026-11-06
+      **Done 2026-11-06, boards CD-01f and CD-06h (round 12, approved 2026-11-04):**
+  - Owner decision: a supplier who invoices every month is known by its RFC. «Hacer recurrente
+    cada mes» on Registrar with an XML makes its template (`hacerRecurrenteFactura`; 0009 adds
+    `recurring_templates.rfc`): the invoice's day and month, what left the bank, one template
+    per RFC. A month counts as registered by the registered, standing invoice of that RFC dated
+    in it (`facturadasEn`), so nothing is counted twice.
+  - Recurrentes: once its day comes without that invoice, «Falta su factura» with «Pídela a …»
+    and «Subir su XML» (to Facturas); once it came, «Registrado» with «Con su factura del …».
+    The morning email asks for it on its day («Hoy esperamos la factura de …»).
+  - Playwright: last month's invoice registered with the box ticked, that month registered by
+    it, this month asking for the next one.
     **Done 2026-10-31, board CD-06g (round 9, approved the same day):**
   - «Consultar al SAT» next to a registered invoice's «Sin verificar» (`consultarSatFactura`).
     «vigente» and «cancelado» are kept (`marcarEstadoSat`, only from `sin_verificar`); no answer
@@ -599,8 +606,9 @@ with property tests:
 - **Design:** canvas round 6, boards CD-06b (Recibidas), CD-06c (Revisa antes de registrar) and
   CD-06d (Registrar con XML), drawn 2026-10-29 and approved by the owner the same day; round 8,
   CD-06e (Registrar pago con fecha) and CD-06f (Cancelar con confirmación), approved 2026-10-30;
-  round 9, CD-06g (Consultar de nuevo al SAT), approved 2026-10-31. The Emitidas tab stays out of
-  the screen until E-10.
+  round 9, CD-06g (Consultar de nuevo al SAT), approved 2026-10-31; round 12, CD-01f
+  (Recurrentes con factura) and CD-06h (Registrar con XML, recurrente), approved 2026-11-04. The
+  Emitidas tab stays out of the screen until E-10.
 - **Acceptance:** a duplicate UUID is rejected; a cancelled CFDI is flagged and posts nothing; a
   retención appears as a liability; a PPD invoice's IVA is creditable only once it is paid.
 

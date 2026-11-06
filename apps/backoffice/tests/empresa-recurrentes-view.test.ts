@@ -16,6 +16,7 @@ const vercel: PlantillaRecurrente = {
   id: 'rec-1',
   nombre: 'Vercel',
   contraparte: 'Vercel Inc.',
+  rfc: null,
   categoria: 'costo_servicio',
   moneda: 'USD',
   montoEstimado: 20_00n,
@@ -34,6 +35,7 @@ const del = (
   fecha: '2026-10-28',
   estado,
   entryId,
+  facturaDel: null,
 });
 
 describe('montoEstimado', () => {
