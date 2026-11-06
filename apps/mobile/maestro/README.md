@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 175 standalone flows + 11 shared subflows.
+**Suite size:** 54 flows + 18 shared subflows and scripts; `full-regression.sh` runs the curated 31 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -17,18 +17,20 @@ before any change that touches the wizard, tabs, or onboarding flows.
   pnpm --filter @xangarro/mobile ios   # or `android`
   ```
 
-### Required env vars (set before running cloud / LAN flows)
+### What must be running
 
-| Variable                   | Used by                                                 | Notes                                                                       |
-| -------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `MAESTRO_LAN_URL`          | `lan-pair.yaml`                                         | LAN URL the desktop host is broadcasting (e.g. `http://192.168.1.5:43812`). |
-| `MAESTRO_CLOUD_EMAIL_A`    | `cloud-signup-signin.yaml`, `cloud-offline-replay.yaml` | First test account email — sign-up creates this one.                        |
-| `MAESTRO_CLOUD_PASSWORD_A` | same                                                    | Password for `*_EMAIL_A`.                                                   |
-| `MAESTRO_CLOUD_EMAIL_B`    | `cloud-offline-replay.yaml`                             | Second test account (signs in on a 2nd device for sync replay).             |
-| `MAESTRO_CLOUD_PASSWORD_B` | same                                                    | Password for `*_EMAIL_B`.                                                   |
+| Thing                                              | How                                                                                                          | Check                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| The contracts mock on `:3000`                      | `PORT=3000 pnpm mock:api`                                                                                    | `curl -X POST 127.0.0.1:3000/__mock/up` → `{"down":false}` |
+| Metro for the dev client                           | `cd apps/mobile && EXPO_PUBLIC_E2E=1 EXPO_PUBLIC_API_BASE=http://127.0.0.1:3000 npx expo start --dev-client` | `curl localhost:8081/status` → `packager-status:running`   |
+| One booted simulator with the dev client installed | `pnpm --filter @xangarro/mobile ios`                                                                         | `xcrun simctl list devices booted`                         |
 
-The cloud-mode tests need a live Supabase project — point them at the
-hosted Xangarro dev instance documented in `supabase/README.md`.
+The mock's control routes (`packages/contracts/src/mock/control-routes.ts`) put the
+server in the state a flow needs: `/__mock/reset`, `/code`, `/qr`, `/forget`,
+`/restore`, `/scenario` (`xangarro` · `xangarrito` · `over-limit` · `grace` ·
+`lapsed` · `revoked` · `flaky`), `/snapshot-budget`, and `/down` · `/up` (the server
+vanishes: every contract route drops the socket, which the phone reads as no
+network). The `shared/mock-*.js` scripts call them from a flow.
 
 ## Running the suite
 
@@ -45,130 +47,88 @@ hosted Xangarro dev instance documented in `supabase/README.md`.
 ./apps/mobile/maestro/scripts/full-regression.sh --device-class ipad
 
 # A single flow (auto-detects and runs the correct setup):
-./apps/mobile/maestro/scripts/run-flow.sh apps/mobile/maestro/flows/venta-efectivo.yaml
+./apps/mobile/maestro/scripts/run-flow.sh apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Multiple flows (state is cached between runs with the same entry point):
-./apps/mobile/maestro/scripts/run-flow.sh apps/mobile/maestro/flows/venta-efectivo.yaml \
-    apps/mobile/maestro/flows/venta-tarjeta.yaml
-
-# Force a specific entry point:
-./apps/mobile/maestro/scripts/run-flow.sh --entry demo apps/mobile/maestro/flows/smoke-launch.yaml
+./apps/mobile/maestro/scripts/run-flow.sh apps/mobile/maestro/flows/ventas-lista.yaml \
+    apps/mobile/maestro/flows/cierre-cuadra.yaml
 
 # Dry-run (show detected entry points without executing):
 ./apps/mobile/maestro/scripts/run-flow.sh --dry-run apps/mobile/maestro/flows/*.yaml
 
 # Skip setup (assume the simulator is already in the right state):
-./apps/mobile/maestro/scripts/run-flow.sh --skip-setup apps/mobile/maestro/flows/venta-efectivo.yaml
+./apps/mobile/maestro/scripts/run-flow.sh --skip-setup apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Direct maestro test (no auto-setup — you manage state yourself):
-maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+maestro test apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Tag-filtered run:
 maestro test --includeTags smoke apps/mobile/maestro/flows/
-maestro test --excludeTags wizard,cloud apps/mobile/maestro/flows/
+maestro test --excludeTags offline apps/mobile/maestro/flows/
 ```
 
 ### Entry points
 
-Each flow has a `# x-entrypoint:` comment that declares the app state it
-needs. `run-flow.sh` reads this and runs the correct setup automatically.
+Each flow declares `# x-entrypoint:` in its header; `run-flow.sh` and
+`full-regression.sh` read it and put the app in that state first
+(`scripts/lib/entry-setup.sh`), caching the current state in
+`/tmp/maestro-entry-state` so consecutive same-entry flows skip the setup.
+**Delete that file after restarting the mock**: the cache says «activated» while
+the fresh mock no longer knows the device's token, so the app is back on Vincular.
 
-| Entry point | Setup action                            | State after                                    |
-| ----------- | --------------------------------------- | ---------------------------------------------- |
-| `fresh`     | DB reset only                           | Clean slate, wizard screen visible             |
-| `demo`      | DB reset + demo-mode seeding (~2-3 min) | QuickSwitch login, demo data (PIN 000000)      |
-| `wizard`    | DB reset + wizard-local-standalone      | Director Test user (PIN 123456), Director Home |
+| Entry point | Setup action                                                           | State after                                   |
+| ----------- | ---------------------------------------------------------------------- | --------------------------------------------- |
+| `fresh`     | local database reset, mock reset                                       | Vincular (the activation screen)              |
+| `activated` | the above + `shared/setup-activated.yaml` (activation, Toni, one sync) | Inicio, Toni signed in, reference data pulled |
 
 Run `run-flow.sh --dry-run <flow>` to see which entry point a flow uses.
 
-### Fresh-install flows (wizard, smoke)
+### Fresh-install flows
 
-Flows that need a clean database (no prior wizard completion) **must not**
-use Maestro's `clearState: true`. On iOS 18+ with Expo SDK 55 dev-clients,
-`clearState` wipes the stored Metro bundler URL and the app fails to
-reconnect ("No script URL provided").
-
-Instead, use the wrapper script which does an `xcrun simctl uninstall` +
-`xcrun simctl install` — this gives a fresh SQLite database while
-preserving Metro connectivity:
-
-```sh
-# Single fresh-install flow:
-./apps/mobile/maestro/scripts/fresh-install.sh \
-    apps/mobile/maestro/flows/smoke-launch.yaml
-
-# Chain: wizard sets up state, then venta flow runs on it:
-./apps/mobile/maestro/scripts/fresh-install.sh \
-    apps/mobile/maestro/flows/wizard-local-standalone.yaml
-maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
-
-# Just reinstall (no test):
-./apps/mobile/maestro/scripts/fresh-install.sh --install-only
-```
-
-> **Affected flows:** `smoke-launch.yaml`, `wizard-local-standalone.yaml`,
-> `wizard-cloud-solo.yaml`, `wizard-mobile-disabled-host.yaml`,
-> `wizard-help-modal.yaml`, `wizard-multi-branch.yaml`,
-> `wizard-join-existing-link.yaml`, `wizard-business-full-form.yaml`.
-> All other flows assume the wizard has already completed and can be run
-> with plain `maestro test`.
+Flows that need a clean database **must not** use Maestro's `clearState: true`.
+On iOS 18+ with Expo SDK 55 dev-clients, `clearState` wipes the stored Metro
+bundler URL and the app fails to reconnect ("No script URL provided").
+`fresh-install.sh --reset-only` wipes the database and keychain while keeping
+Metro connectivity; the entry setup calls it.
 
 ---
 
-## Auth Gate Boot Flow
+## Auth model
 
-Phase 13 introduced authentication gates that changed the app's boot flow:
+The device has no accounts (ADR-053): a fresh install shows **Vincular**, the
+owner's code links it to the business, and every launch after that shows
+**Acceso** — the operators the portal created, each with a four-digit NIP. The
+mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 
-1. **First run:** Wizard → BusinessForm → **DirectorSetupGate** (create user + password + PIN) → auto-login → Director Home
-2. **Subsequent launch:** **QuickSwitchGate** (avatar + PIN) → tabs
-3. **Auto-lock after 5min inactivity:** → QuickSwitch re-shown
+### Shared subflows and scripts
 
-This means ALL flows that expect tabs now require authentication.
+| File                               | Purpose                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| `shared/dismiss-modals.yaml`       | Dismisses the dev-client sheets on cold boot                              |
+| `shared/prime-dev-client.yaml`     | Points the dev client at Metro and waits for the bundle                   |
+| `shared/setup-activated.yaml`      | The `activated` entry: mock reset, activation, Toni, one sync cycle       |
+| `shared/login-operator.yaml`       | Picks Toni on Acceso and types 1234; no-op when already signed in         |
+| `shared/ensure-caja-open.yaml`     | Opens a turno with the $500 fondo when none is open                       |
+| `shared/lock-caja.yaml`            | «Bloquear la caja» from Mi turno                                          |
+| `shared/create-venta.yaml`         | One cash sale of the first catalogue tile                                 |
+| `shared/cobrar-ticket.yaml`        | Charges the ticket on Cobrar with `${METODO}` (phone and tablet branches) |
+| `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)    |
+| `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                   |
+| `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                              |
+| `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                     |
+| `shared/mock-reset.js`             | `POST /__mock/reset`                                                      |
+| `shared/mock-row.js`               | `POST /__mock/forget` or `/restore` for one row                           |
+| `shared/mock-scenario.js`          | `POST /__mock/scenario` with an optional records-per-month override       |
+| `shared/mock-down.js`              | `POST /__mock/down` or `/up`                                              |
+| `shared/mock-snapshot-budget.js`   | `POST /__mock/snapshot-budget`                                            |
 
-### Two Authentication Paths
+### Test credentials (the contracts mock)
 
-| Path          | User                          | PIN    | Created by                   | Use case                                   |
-| ------------- | ----------------------------- | ------ | ---------------------------- | ------------------------------------------ |
-| **Wizard**    | Director Test                 | 123456 | `shared/director-setup.yaml` | Regression runs (via `full-regression.sh`) |
-| **Demo mode** | Ana Operativa / Juan Director | 000000 | `demo-mode-setup.yaml`       | Standalone demo flows                      |
-
-The **regression script** starts from `wizard-local-standalone.yaml` which creates "Director Test" (PIN 123456). All subsequent flows in the regression chain use this state.
-
-The **demo mode** path is for standalone flows that test demo-specific features.
-
-### Shared subflows
-
-| Subflow                                | Purpose                                                     | Auth path         |
-| -------------------------------------- | ----------------------------------------------------------- | ----------------- |
-| `shared/dismiss-modals.yaml`           | Dismisses consent modals on cold boot                       | —                 |
-| `shared/authenticate.yaml`             | Logs in as Ana Operativa (demo PIN 000000)                  | Demo              |
-| `shared/authenticate-operativo.yaml`   | Same as authenticate.yaml (alias)                           | Demo              |
-| `shared/authenticate-director.yaml`    | Logs in as Juan Director (demo PIN 000000)                  | Demo              |
-| `shared/authenticate-wizard.yaml`      | Logs in as Director Test (wizard PIN 123456)                | Wizard/Regression |
-| `shared/director-setup.yaml`           | Completes DirectorSetup during wizard with test credentials | Wizard            |
-| `shared/select-operativo.yaml`         | Switches to Operativo role from Director Home               | —                 |
-| `shared/navigate-to-clientes.yaml`     | Navigates to Clientes screen                                | —                 |
-| `shared/enable-conversion-flag.yaml`   | Enables the conversion feature flag                         | —                 |
-| `shared/enable-auditoria-flag.yaml`    | Enables the auditoria feature flag                          | —                 |
-| `shared/create-product-operativo.yaml` | Creates a test product as Operativo                         | —                 |
-
-### Test credentials
-
-**Wizard path** (created by `shared/director-setup.yaml`):
-
-| Field             | Value              |
-| ----------------- | ------------------ |
-| Name              | Director Test      |
-| Email             | test@xangarro.test |
-| Recovery Password | Test1234           |
-| PIN               | 123456             |
-
-**Demo path** (created by `demo-mode-setup.yaml`):
-
-| Field             | Value  |
-| ----------------- | ------ |
-| Ana Operativa PIN | 000000 |
-| Juan Director PIN | 000000 |
+| Field            | Value                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| Owner email      | `dueno@tacoslaesquina.mx`                                                                      |
+| Activation codes | `VALDK7M3` valid (single-use) · `USEDK7M3` redeemed · `EXPRK7M3` expired · `NSLTK7M3` no slots |
+| Operator         | Toni, NIP `1234` (`acceso-operador-01JPRS00000000000000000001`)                                |
 
 ### Flow authoring pattern
 
@@ -179,12 +139,14 @@ appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml # or authenticate-wizard.yaml
+- runFlow: shared/login-operator.yaml
 # ... flow-specific steps
 ```
 
-The `authenticate*.yaml` steps are all `optional: true` — they are a no-op
-when the app is already past auth (e.g., warm launch in the same session).
+`login-operator.yaml` is a no-op when someone is already signed in (a warm
+launch in the same session), so a flow never assumes the gate's state. A flow
+that changes the mock (a scenario, a forgotten row, `down`) restores it before
+it ends, and says so in its header when it leaves the device in another state.
 
 ---
 
@@ -242,20 +204,23 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — the 21 per-screen flows — in dependency
+now runs the M-11 curated suite — 31 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 
-| Order | Flows                                                                              |
-| ----- | ---------------------------------------------------------------------------------- |
-| 1–3   | smoke-launch, login-lockout, bloqueo                                               |
-| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar      |
-| 8–9   | gastos-registrar, gastos-pagar-recurrente                                          |
-| 10–14 | mi-turno, por-enviar, cancelaciones-nav, avisos-responder, inventario-llego-merma  |
-| 15–17 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante                           |
-| 18–19 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked) |
-| 20–21 | activation, login-operator-pin (fresh entry)                                       |
+| Order | Flows                                                                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------- |
+| 1–3   | smoke-launch, login-lockout, bloqueo                                                                          |
+| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar                                 |
+| 8–9   | gastos-registrar, gastos-pagar-recurrente                                                                     |
+| 10–14 | mi-turno, por-enviar, cancelaciones-nav, avisos-responder, inventario-llego-merma                             |
+| 15–17 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante                                                      |
+| 18–21 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, venta-fiado-cancelar (the caja's edge cases) |
+| 22–23 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                               |
+| 24–27 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)           |
+| 28–29 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                            |
+| 30–31 | activation, login-operator-pin (fresh entry)                                                                  |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).
@@ -264,274 +229,101 @@ the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ## Flow Inventory (grouped by feature area)
 
-### Smoke + Onboarding (Phase W)
+Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-one `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
 
-| Flow                               | What it proves                                       |
-| ---------------------------------- | ---------------------------------------------------- |
-| `smoke-launch.yaml`                | App boots, wizard renders, no crash path             |
-| `wizard-local-standalone.yaml`     | Wizard → Local → BusinessForm → DirectorSetup → tabs |
-| `wizard-cloud-solo.yaml`           | Solo + Cloud-as-backup path                          |
-| `wizard-mobile-disabled-host.yaml` | LAN server card disabled for mobile                  |
-| `wizard-help-modal.yaml`           | Help modal opens, scenario picks                     |
-| `wizard-rerun-with-data.yaml`      | Re-run with data shows green callout                 |
-| `wizard-multi-branch.yaml`         | Multi-branch wizard path                             |
-| `wizard-join-existing-link.yaml`   | Join existing via link                               |
-| `wizard-business-full-form.yaml`   | Business form with all fields                        |
-| `wizard-business-back.yaml`        | Back navigation in wizard                            |
-| `wizard-confirm-mode-change.yaml`  | Confirm mode change dialog                           |
-| `crash-screen.yaml`                | Error boundary renders friendly fallback             |
-| `a11y-smoke.yaml`                  | All tab targets have a11y labels; ≥ 44×44            |
+### Vincular y acceso
 
-### Ventas + Checkout
+| Flow                       | Entry     | Suite | What it proves                                                                                                           |
+| -------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| `activation.yaml`          | fresh     | ✓     | Vincular — happy path (A-04; MvVincular, M-06): a fresh install opens on the camera; the typed path («Escribe el código» |
+| `activation-errors.yaml`   | fresh     |       | Activation — error path (A-04).                                                                                          |
+| `activation-descarga.yaml` | fresh     |       | Activation of a big business (DS-10, EsMvDescarga): the snapshot comes in pages, the activation screen says «Descargando |
+| `login-operator-pin.yaml`  | fresh     | ✓     | Operator NIP sign-in (A-16; Acceso, MvAcceso M-06): on a freshly linked device «¿Quién va a cobrar?» asks for the operat |
+| `login-lockout.yaml`       | activated | ✓     | Operator sign-in guard (A-05): no PIN recovery on the device, and five wrong PINs lock PIN entry for 30 s.               |
+| `bloqueo.yaml`             | activated | ✓     | Bloqueo (MvBloqueo, M-06): «Bloquear la caja» on Mi turno locks the caja without closing the turno — the lock screen nam |
+| `inicio-entrar.yaml`       | activated |       | Entrar y empezar (Track M, M-06): the caja lands on Inicio, «Abrir turno» opens the fondo sheet, the card turns to «La c |
+| `auto-lock-smoke.yaml`     | activated |       | Auto-lock smoke test — verifies Bloqueo (MvBloqueo) appears after timeout.                                               |
+| `smoke-launch.yaml`        | activated | ✓     | Smoke: the activated caja opens on Inicio and the phone's four tabs — Inicio, Cobrar, Ventas, Mi turno — sit on the bar  |
+| `ipad-smoke.yaml`          | activated |       | iPad smoke test — launch, authenticate, assert all major layout regions are accessible on an iPad simulator.             |
 
-| Flow                           | What it proves                            |
-| ------------------------------ | ----------------------------------------- |
-| `venta-efectivo.yaml`          | Inline POS → Efectivo → sale appears      |
-| `venta-otros-metodos.yaml`     | Non-cash payment methods                  |
-| `venta-cantidad-multiple.yaml` | Multiple quantity selection               |
-| `venta-search-product.yaml`    | POS product search                        |
-| `checkout-method-picker.yaml`  | **NEW** Multi-step checkout method picker |
-| `ventas-caja-gate.yaml`        | Caja gate blocks venta                    |
+### Cobrar y ventas
 
-### Egresos (Gasto / Nómina / Inventario / Recurrente)
+| Flow                           | Entry     | Suite | What it proves                                                                                                            |
+| ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------- |
+| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the three-figure KPI row,   |
+| `venta-cantidad-multiple.yaml` | activated |       | Sell multiple units by tapping the same product 3 times.                                                                  |
+| `venta-detalle-cancelar.yaml`  | activated | ✓     | A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas «detalle»/«cancelar-venta»): the lines and tiles, «Ma  |
+| `cancelaciones-nav.yaml`       | activated | ✓     | The Ventas tab (Track M-11): /cancelaciones became /ventas (M-05; the old route redirects, apps/mobile/src/app/cancelaci  |
+| `ventas-caja-gate.yaml`        | activated |       | Verify the Caja gate blocks venta when caja is not open.                                                                  |
+| `cobrar-escaner.yaml`          | activated |       | The escáner (Track M, M-07; MvEscaner): typing an unknown code offers «Darlo de alta», which opens Producto nuevo with t  |
+| `empty-ventas.yaml`            | activated |       | Cobrar with no products (Track M, M-07): the catalogue says there is nothing yet and offers «Producto nuevo» right there  |
+| `fiado-abono-recordar.yaml`    | activated | ✓     | Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza\*): Inicio's atajo opens /fiado; a client's account opens its |
 
-| Flow                                 | What it proves                |
-| ------------------------------------ | ----------------------------- |
-| `egreso-gasto.yaml`                  | Simple gasto creation         |
-| `egreso-gasto-via-fab.yaml`          | Gasto via FAB button          |
-| `egreso-gasto-full-form.yaml`        | Gasto with all fields         |
-| `egreso-inventario.yaml`             | Egreso + inventory dual-write |
-| `egreso-inventario-empty-state.yaml` | Inventario egreso empty state |
-| `egreso-recurrente.yaml`             | Mark gasto as recurrente      |
-| `egreso-recurrente-mensual.yaml`     | Monthly recurrence            |
-| `egreso-recurrente-semanal.yaml`     | Weekly recurrence             |
-| `egreso-recurrente-descartar.yaml`   | Discard recurring entry       |
-| `egresos-total-y-fecha.yaml`         | Egresos total + date filter   |
-| `nuevo-egreso-cancel.yaml`           | Cancel new egreso creation    |
-| `validation-egreso.yaml`             | Egreso form validation errors |
+### Gastos
 
-### Productos (Catálogo / Stock / Movimientos)
+| Flow                           | Entry     | Suite | What it proves                                                                                                           |
+| ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| `gastos-registrar.yaml`        | activated | ✓     | Gastos del turno (Track M-11, M-08; board MvGastos): Inicio's atajo opens /gastos, «Registrar gasto» records what left t |
+| `gastos-pagar-recurrente.yaml` | activated | ✓     | Pagar un gasto recurrente vencido (Track M-11, M-08; board MvGastos «pagar»): the seeded «Renta local» (mensual, vence e |
+| `nuevo-egreso-cancel.yaml`     | activated |       | Closing «Registrar gasto» without saving records nothing (Track M, M-08).                                                |
+| `empty-egresos.yaml`           | activated |       | Gastos with nothing recorded yet (Track M, M-08; MvGastos): Don and the empty state, and «Registrar gasto» still in the  |
 
-| Flow                                | What it proves                                                 |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `inventario-producto.yaml`          | NuevoProductoModal happy path                                  |
-| `producto-entrada-stock.yaml`       | Stock entry                                                    |
-| `producto-movimientos.yaml`         | Movement history                                               |
-| `producto-full-form.yaml`           | Product with all fields                                        |
-| `producto-via-fab.yaml`             | Product creation via FAB                                       |
-| `producto-uso-selector.yaml`        | Product uso selector                                           |
-| `nuevo-producto-icon-picker.yaml`   | Icon picker for new product                                    |
-| `stock-buscar.yaml`                 | Stock search                                                   |
-| `editar-producto.yaml`              | Edit product                                                   |
-| `editar-producto-full-form.yaml`    | Edit product all fields                                        |
-| `movimiento-salida-con-motivo.yaml` | Salida with reason                                             |
-| `movimiento-entrada-con-nota.yaml`  | Entrada with note                                              |
-| `validation-producto.yaml`          | Product form validation                                        |
-| `inventario-salida.yaml`            | Salida via Movimientos                                         |
-| `inventario-barcode.yaml`           | Barcode scanner wired in                                       |
-| `producto-foto.yaml`                | Product photo via the gallery (M-13): save, then «Quitar foto» |
+### Inventario y productos
 
-### Clientes + Cuentas por Cobrar
+| Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
+| -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; board MvInventario): /productos lists the existencias; a row's entrada square opens «Entrada                                                             |
+| `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                                                                              |
+| `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
+| `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
+| `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                                                                                    |
+| `producto-foto.yaml`             | activated |       | Foto del producto (M-13, ADR-134; MvFoto\* boards): the Inventario square takes a photo from the gallery, «Listo» or «Guardar así» saves it, then «Quitar foto» puts the icon back. |
+| `notificaciones-stock-bajo.yaml` | activated |       | Verify the Director can toggle stock-low notifications in Settings (P1C-M11-T01..T03, S4-C13).                                                                                      |
 
-| Flow                              | What it proves            |
-| --------------------------------- | ------------------------- |
-| `cliente-crear.yaml`              | New cliente creation      |
-| `cliente-crear-via-fab.yaml`      | Cliente via FAB           |
-| `cliente-crear-full-form.yaml`    | Cliente with all fields   |
-| `cliente-buscar.yaml`             | Client search             |
-| `cliente-detail-screen.yaml`      | Client detail             |
-| `cliente-detail-empty-state.yaml` | Client detail empty state |
-| `cliente-editar.yaml`             | Edit client               |
-| `cliente-pago-completo.yaml`      | Full payment              |
-| `cliente-pago-parcial.yaml`       | Partial payment           |
+### Mi turno y cierre
 
-### Corte de Día
+| Flow                            | Entry     | Suite | What it proves                                                                                                                                                                    |
+| ------------------------------- | --------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mi-turno.yaml`                 | activated | ✓     | Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno — the hero with the cash that must be in the draw                                                          |
+| `caja-abrir-cerrar.yaml`        | activated | ✓     | Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old CajaContent flow — caja-status-card, blind-c                                                          |
+| `cierre-cuadra.yaml`            | activated | ✓     | Cierre que cuadra (Track M, M-09; boards MvCierre/MvCierreHecho): from Mi turno's «Cerrar mi turno», count the drawer by                                                          |
+| `cierre-faltante.yaml`          | activated | ✓     | Cierre con faltante (Track M, M-09): count short of the expected, the diferencia turns red, asks its motivo and names th                                                          |
+| `cobrar-efectivo-falta.yaml`    | activated | ✓     | Short cash (J4-06): $20 typed against $25 turns the card red «Todavía falta» and keeps «Cobrar» disabled; $30 pays, «Venta hecha» says «Pagó con $30.00».                         |
+| `cobrar-ticket-largo.yaml`      | activated | ✓     | A long ticket (J4-10): twelve products, the bar counts twelve pieces, the sheet opens with total and «Cobrar $482.50» pinned; no phone «Deshacer» — a sale is undone from Ventas. |
+| `cobrar-ultima-pieza.yaml`      | activated | ✓     | Last unit and one more (J4-13, ADR-065): «Llegó mercancía» +1 Torta → «Quedan 1» → sale → «Quedan 0» → second sale goes through; every surface clamps at 0.                       |
+| `venta-fiado-cancelar.yaml`     | activated | ✓     | Cancelling a fiado (J4-16): a Gringa on Don Pedro's account, the sheet's fiado note, PIN → motivo shows the saldo-a-favor consequence, no cash step, the row stays, cancelled.    |
+| `caja-cierre-discrepancia.yaml` | activated | ✓     | Cierre with a diferencia explained by its own note (M-09; the old flow's CountResultStep dropdown + explicación is gone)                                                          |
+| `caja-movimientos-nav.yaml`     | activated |       | Navigate to Caja Movimientos screen and verify empty state.                                                                                                                       |
+| `avisos-responder.yaml`         | activated | ✓     | Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread count, /avisos lists the owner's messages, and                                                           |
 
-| Flow                            | What it proves               |
-| ------------------------------- | ---------------------------- |
-| `corte-historial-director.yaml` | Director views corte history |
+### Sincronización y sin internet
 
-### Director Home + Reports
+| Flow                        | Entry     | Suite | What it proves                                                                                                             |
+| --------------------------- | --------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
+| `sync-actualizar.yaml`      | activated |       | Cloud sync (A-07): a local write is pushed within seconds and the pill reports it; tapping the pill ("Actualizar") runs    |
+| `por-enviar.yaml`           | activated | ✓     | Registros por enviar (Track M, M-09; board MvPorEnviar): the queue's whole face, not only its rejections.                  |
+| `pendientes-reintento.yaml` | activated |       | Registros por enviar while rows retry (DS-07, EsMvReintentando): a sale the server refuses for a moment (the mock's `fla   |
+| `sin-internet-cobrar.yaml`  | activated | ✓     | Sin internet, sigue cobrando (CLAUDE.md §2.2; catalogue J10-07 phone half, J4-26): the server vanishes mid-shift (`/\_\_mo |
+| `sin-internet-cierre.yaml`  | activated | ✓     | The close goes ahead with records still to send (ADR-123; catalogue J4-26, the phone half of cierre.sync.spec): with the   |
 
-| Flow                              | What it proves                      |
-| --------------------------------- | ----------------------------------- |
-| `director-home.yaml`              | UtilidadHero + HoyKpi + CxC + cards |
-| `director-home-structure.yaml`    | Full dashboard structure            |
-| `director-home-ver-ventas.yaml`   | Ver ventas navigation               |
-| `director-home-cxc-nav.yaml`      | CxC navigation from home            |
-| `director-home-cxc-strip.yaml`    | CxC strip widget                    |
-| `director-home-utilidad-nav.yaml` | Utilidad navigation                 |
-| `director-home-stock-bajo.yaml`   | Low stock card                      |
-| `director-home-actividad.yaml`    | Activity feed                       |
-| `informe-mensual.yaml`            | Estados → Informe PDF               |
+### Plan y dispositivo
 
-### Estados Financieros + Indicadores
+| Flow                             | Entry     | Suite | What it proves                                                                                                                                                                                                                      |
+| -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `entitlement-feature-gates.yaml` | activated | ✓     | Feature flags from the verified plan (A-14; catalogue J8-04): on Xangarrito stock is off — Productos is a plain catalog                                                                                                             |
+| `plan-pago-pendiente.yaml`       | activated | ✓     | Payment grace (ADR-053 §5, A-10; catalogue J8-05): the server says the plan's validUntil passed three days ago and grace                                                                                                            |
+| `plan-vencido.yaml`              | activated | ✓     | Lapsed payment (ADR-053 §5, A-10; catalogue J8-06): both the plan's validUntil and its graceUntil are past (mock scenari                                                                                                            |
+| `dispositivo-revocado.yaml`      | activated | ✓     | The owner revokes this caja mid-shift (B-12, catalogue J3-15 / J10-14 phone half): the next sync answers DEVICE_REVOKED,                                                                                                            |
+| `settings-borrar.yaml`           | activated | ✓     | «Desvincular y borrar» (MvDesvincularBorrar): the second card of the unlink sheet empties the phone once nothing is unsent; the app restarts on the connect screen with «Listo, se borraron los datos», then the flow re-activates. |
+| `settings-desvincular.yaml`      | activated | ✓     | Device-only Ajustes (A-12, MvAjustes): Esta caja / Sincronización / En este teléfono / Privacidad y términos, and «Desvi                                                                                                            |
 
-| Flow                               | What it proves            |
-| ---------------------------------- | ------------------------- |
-| `estados-subtabs.yaml`             | Sub-tab navigation        |
-| `estados-resultados-data.yaml`     | Estado de Resultados data |
-| `estados-resultados-all-rows.yaml` | All result rows           |
-| `estados-period-picker.yaml`       | Period picker             |
-| `estados-balance-data.yaml`        | Balance General data      |
-| `balance-general-all-rows.yaml`    | All balance rows          |
-| `balance-general-pasivo.yaml`      | Pasivo section            |
-| `estados-flujo-efectivo.yaml`      | Flujo de Efectivo         |
-| `flujo-efectivo-all-rows.yaml`     | All cash flow rows        |
-| `indicadores-screen.yaml`          | KPIs screen               |
+### Ajustes y observabilidad
 
-### Caja (Cash Drawer)
-
-| Flow                            | What it proves                |
-| ------------------------------- | ----------------------------- |
-| `caja-abrir-cerrar.yaml`        | Open → status → close         |
-| `caja-con-adicional.yaml`       | Additional deposits           |
-| `caja-cierre-discrepancia.yaml` | Cierre with discrepancy       |
-| `caja-movimientos-nav.yaml`     | **NEW** Caja movements screen |
-
-### Cancelaciones
-
-| Flow                     | What it proves                        |
-| ------------------------ | ------------------------------------- |
-| `cancelaciones-nav.yaml` | **NEW** Navigate + verify empty state |
-
-### Otros Tab Navigation
-
-| Flow                            | What it proves                     |
-| ------------------------------- | ---------------------------------- |
-| `otros-nav.yaml`                | Otros grid renders, items navigate |
-| `otros-empleados-empty.yaml`    | Empleados empty state              |
-| `otros-conversion-nav.yaml`     | Conversion navigation              |
-| `otros-auditoria-nav.yaml`      | Auditoria navigation               |
-| `otros-caja-reportes-nav.yaml`  | Caja reportes navigation           |
-| `otros-ventas-credito-nav.yaml` | Ventas crédito navigation          |
-| `otros-merma-reportes-nav.yaml` | Merma reportes navigation          |
-
-### Auth + Feature Flags
-
-| Flow                                   | What it proves                        |
-| -------------------------------------- | ------------------------------------- |
-| `quick-switch-login.yaml`              | Acceso: wrong NIP, then the right one |
-| `inicio-entrar.yaml`                   | Inicio landing, abrir turno, Bloqueo  |
-| `role-switch.yaml`                     | Director ↔ Operativo switch           |
-| `change-password.yaml`                 | Forced password change                |
-| `recovery-back-and-factory-reset.yaml` | Recovery + factory reset              |
-| `recovery-pin.yaml`                    | PIN recovery                          |
-| `funciones-toggle.yaml`                | Toggle feature flags                  |
-| `funciones-stock-disabled.yaml`        | Stock OFF → no stock UI               |
-| `funciones-cascade-disable.yaml`       | Flag cascade disable                  |
-| `funciones-cant-enable-child.yaml`     | Child flag requires parent            |
-| `funciones-conversion-auto-chain.yaml` | Conversion auto-chain                 |
-| `funciones-ventas-credito-toggle.yaml` | Ventas crédito toggle                 |
-| `auto-lock-smoke.yaml`                 | Inactivity → QuickSwitch              |
-
-### User Management
-
-| Flow                                  | What it proves              |
-| ------------------------------------- | --------------------------- |
-| `usuario-crear.yaml`                  | Create new user             |
-| `usuario-crear-cancel.yaml`           | Cancel user creation        |
-| `usuario-multi-switch.yaml`           | Switch between users        |
-| `usuario-last-director-guard.yaml`    | Cannot delete last Director |
-| `usuario-eliminar.yaml`               | Delete user                 |
-| `usuario-wrong-password-lockout.yaml` | Wrong password lockout      |
-| `empleado-editar.yaml`                | Edit employee               |
-| `empleado-eliminar.yaml`              | Delete employee             |
-
-### Settings
-
-| Flow                              | What it proves                 |
-| --------------------------------- | ------------------------------ |
-| `settings-hub-nav.yaml`           | Settings hub renders cards     |
-| `settings-negocio-editar.yaml`    | Edit business info             |
-| `settings-edit-business-isr.yaml` | ISR business settings          |
-| `settings-tasas-isr.yaml`         | ISR rate tables                |
-| `settings-funciones-nav.yaml`     | Funciones navigation           |
-| `settings-check-updates.yaml`     | Check for updates              |
-| `settings-tipos-de-pago.yaml`     | **NEW** Payment method toggles |
-| `advanced-backend-screen.yaml`    | Advanced backend settings      |
-
-### Observability + Bug Reporting
-
-| Flow                           | What it proves                  |
-| ------------------------------ | ------------------------------- |
-| `telemetria-dev-nav.yaml`      | **NEW** Dev telemetry dashboard |
-| `bug-report-sheet.yaml`        | **NEW** Bug report sheet opens  |
-| `crash-screen.yaml`            | Error boundary renders          |
-| `otros-auditoria-nav.yaml`     | Audit log navigation            |
-| `director-notificaciones.yaml` | Notification inbox + config     |
-
-### Notifications
-
-| Flow                             | What it proves                |
-| -------------------------------- | ----------------------------- |
-| `notificaciones-stock-bajo.yaml` | Stock-low push (mocked clock) |
-| `director-notificaciones.yaml`   | Notification inbox            |
-
-### Merma (Shrinkage)
-
-| Flow | What it proves |
-| ---- | -------------- |
-
-### Conversión (Materia Prima)
-
-| Flow | What it proves |
-| ---- | -------------- |
-
-### Checkout
-
-| Flow                          | What it proves                       |
-| ----------------------------- | ------------------------------------ |
-| `checkout-method-picker.yaml` | **NEW** Payment method picker screen |
-
-### Deletions (State-Destroying)
-
-| Flow                     | What it proves |
-| ------------------------ | -------------- |
-| `eliminar-producto.yaml` | Delete product |
-
-### Empty States
-
-| Flow                   | What it proves        |
-| ---------------------- | --------------------- |
-| `empty-ventas.yaml`    | Ventas empty state    |
-| `empty-productos.yaml` | Productos empty state |
-| `empty-estados.yaml`   | Estados empty state   |
-| `empty-egresos.yaml`   | Egresos empty state   |
-| `empty-clientes.yaml`  | Clientes empty state  |
-
-### LAN Mode
-
-| Flow            | What it proves                         |
-| --------------- | -------------------------------------- |
-| `lan-pair.yaml` | Wizard → LAN client → scan QR → paired |
-
-### Cloud Mode
-
-| Flow                          | What it proves                     |
-| ----------------------------- | ---------------------------------- |
-| `cloud-signup-signin.yaml`    | Wizard → Cloud → sign-up → sign-in |
-| `cloud-signin-bootstrap.yaml` | Reusable sub-flow: cloud sign-in   |
-| `cloud-offline-replay.yaml`   | Two devices, offline replay        |
-| `cloud-signup-error.yaml`     | Cloud signup error handling        |
-
-### iPad Form-Factor
-
-| Flow                          | What it proves                   |
-| ----------------------------- | -------------------------------- |
-| `ipad-smoke.yaml`             | Launch + auth + all tabs on iPad |
-| `ipad-form-factor-audit.yaml` | Responsive testID accessibility  |
-
-### Debug / Development
-
-| Flow                        | What it proves          |
-| --------------------------- | ----------------------- |
-| `debug-speed.yaml`          | Speed test assertions   |
-| `debug-operativo-auth.yaml` | Operativo auth debug    |
-| `debug-auth.yaml`           | Auth debug flow         |
-| `demo-mode-setup.yaml`      | Demo mode initial setup |
-
----
+| Flow                                   | Entry     | Suite | What it proves                                                                                                           |
+| -------------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| `settings-check-updates.yaml`          | activated |       | Settings → Sistema → assert settings-check-for-updates visible.                                                          |
+| `settings-crash-reporting-toggle.yaml` | activated |       | Settings → Sistema → Crash Reporting Toggle Verifies: - CrashReportingToggle is visible on the Sistema sub-screen - Togg |
+| `bug-report-sheet.yaml`                | activated |       | Open the Bug Report sheet from Settings → Sistema → "Reportar un problema".                                              |
 
 ## Running via MCP (Claude / Cursor)
 
@@ -610,20 +402,22 @@ Tags are declared in flow YAML headers and usable with `--includeTags` /
 
 | Tag             | Purpose                            |
 | --------------- | ---------------------------------- |
-| `smoke`         | Quick sanity check (< 2 min total) |
-| `regression`    | Full regression set                |
-| `wizard`        | Needs fresh install                |
-| `cloud`         | Needs Supabase credentials         |
-| `lan`           | Needs LAN server running           |
-| `ipad`          | iPad-specific                      |
-| `debug`         | Developer-only                     |
+| `regression`    | The curated set                    |
+| `offline`       | Takes the mock down and up         |
+| `sync`          | The queue and the pill             |
+| `entitlement`   | Plan scenarios on the mock         |
+| `devices`       | Linking and revocation             |
 | `observability` | Telemetry, audit, bug-report flows |
 | `ventas`        | Sales-related                      |
-| `egresos`       | Expense-related                    |
+| `cancelaciones` | Cancel with a reason               |
+| `gastos`        | Expense-related                    |
+| `fiado`         | Credit sales and abonos            |
 | `settings`      | Settings flows                     |
-| `otros`         | Otros tab navigation               |
 | `caja`          | Cash drawer                        |
-| `auth`          | Authentication/PIN                 |
+| `cierre`        | The close                          |
+| `escaner`       | The barcode scanner                |
+
+Only some flows carry tags today; tag a flow when you touch it.
 
 ---
 

@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
-import { PLAN_LIMITS } from '@xangarro/domain';
+import { entitlementState, PLAN_LIMITS } from '@xangarro/domain';
 
 import { entitlementFor, isFlakyReject, isScenario, scenarioOf } from '../src/mock/scenarios.js';
 import { encodeJson } from '../src/wire.js';
@@ -34,11 +34,19 @@ describe('entitlementFor · every scenario answers for itself', () => {
     assert.equal(new Date(e.validUntil).getTime(), NOW.getTime() + 36_500 * 86_400_000);
   });
 
-  it('grace sits twelve days in the past; lapsed forty', () => {
+  it('grace is three days past validUntil and inside the seven of grace; lapsed is past both', () => {
     const g = entitlementFor('grace', 'b-1', NOW);
     const l = entitlementFor('lapsed', 'b-1', NOW);
-    assert.equal(new Date(g.validUntil).getTime(), NOW.getTime() + 18 * 86_400_000);
+    assert.equal(new Date(g.validUntil).getTime(), NOW.getTime() - 3 * 86_400_000);
+    assert.equal(new Date(g.graceUntil).getTime(), NOW.getTime() + 4 * 86_400_000);
     assert.equal(new Date(l.validUntil).getTime(), NOW.getTime() - 10 * 86_400_000);
+    // What the phone derives from each, with a pull this instant: the whole
+    // point of the scenarios, and what the old -12-day shift never produced
+    // (validUntil eighteen days AHEAD read as `active`).
+    const clock = { nowAnchored: NOW.toISOString(), lastPullAt: NOW.toISOString() };
+    assert.equal(entitlementState(g, clock), 'grace');
+    assert.equal(entitlementState(l, clock), 'lapsed');
+    assert.equal(entitlementState(entitlementFor('xangarro', 'b-1', NOW), clock), 'active');
   });
 
   it('over-limit reads as five records whatever the plan says; an override wins otherwise', () => {

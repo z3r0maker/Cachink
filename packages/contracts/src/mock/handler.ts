@@ -24,6 +24,7 @@ import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
 import { mockSnapshotPage } from './snapshot.js';
 import { referenceTables } from './tables.js';
+import { usageOf } from './usage.js';
 
 export interface MockRequest {
   readonly method: string;
@@ -36,6 +37,14 @@ export interface MockResponse {
   readonly status: number;
   readonly body: unknown;
 }
+
+/**
+ * What `handle` answers while `/__mock/down` holds: no HTTP status at all. The
+ * Node wrapper drops the socket and the msw adapter answers a network error,
+ * so the client sees what a phone with no signal sees (`NETWORK`), never a
+ * 5xx it could mistake for the server's own refusal.
+ */
+export const MOCK_DOWN: MockResponse = { status: 0, body: null };
 
 function err(
   code: ErrorCode,
@@ -66,6 +75,7 @@ export class MockApi {
   async handle(req: MockRequest): Promise<MockResponse> {
     const control = controlRoute(this.state, req);
     if (control) return control;
+    if (this.state.down) return MOCK_DOWN;
     if (req.headers[HEADER_PROTOCOL.toLowerCase()] !== String(PROTOCOL_VERSION)) {
       return err('PROTOCOL_UNSUPPORTED', 'send X-Xangarro-Protocol: 1');
     }
@@ -172,6 +182,7 @@ export class MockApi {
       entitlement: await sign(
         entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
+      usage: usageOf(this.state, now),
       tables: page?.tables ?? referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,
       ...(page === null ? {} : { snapshot: page.snapshot }),

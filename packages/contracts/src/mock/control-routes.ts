@@ -14,6 +14,10 @@
  *                                  optional record-limit override (A-10)
  *   POST /__mock/snapshot-budget {rows, bytes?} a smaller snapshot page, so a
  *                                  small fixture pages (C-23); {} restores it
+ *   POST /__mock/down              the server vanishes: every contract route
+ *                                  drops the socket (the phone sees NETWORK),
+ *                                  the controls keep answering
+ *   POST /__mock/up                the server is back
  */
 
 import type { MockRequest, MockResponse } from './handler.js';
@@ -76,8 +80,18 @@ function setSnapshotBudget(state: MockState, body: unknown): MockResponse {
   return { status: 200, body: { snapshotBudget: state.snapshotBudget ?? 'contract default' } };
 }
 
+/** `/__mock/down` and `/__mock/up`: the one switch the phone reads as no network. */
+function setDown(state: MockState, path: string): MockResponse | null {
+  const m = /^\/__mock\/(down|up)$/.exec(path);
+  if (!m) return null;
+  state.down = m[1] === 'down';
+  return { status: 200, body: { down: state.down } };
+}
+
 export function controlRoute(state: MockState, req: MockRequest): MockResponse | null {
   if (req.method !== 'POST') return null;
+  const down = setDown(state, req.path);
+  if (down) return down;
   switch (req.path) {
     case '/__mock/reset':
       state.reset();

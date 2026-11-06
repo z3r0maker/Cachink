@@ -24,7 +24,7 @@ import { useCurrentBusinessId, useUserId } from '../../app-config/index';
 import { warnAfterCapture } from '../../entitlement/plan-limit-store';
 import { useRecordQuota } from '../../entitlement/use-record-quota';
 import { useFeatureFlag } from '../../hooks/use-feature-flags';
-import { estadosKeys } from '../../hooks/query-keys';
+import { cajaKeys, estadosKeys } from '../../hooks/query-keys';
 import { useAuditedUseCase } from '../../observability/index';
 import { folioTexto, metodoDominio, type MetodoCobro } from './cobro-logic';
 import type { VentaHecha } from './venta-hecha';
@@ -122,10 +122,13 @@ function useTicketUseCase(): RegistrarTicketUseCase {
 
 /**
  * The key-prefixes a sale invalidates besides TOCADAS's first-word matches:
- * the turno's ventas list lives under caja's keys, which TOCADAS cannot see.
+ * every read under caja's keys — the turno's ventas, Mi turno, Inicio,
+ * Inventario, the fiado accounts — which TOCADAS cannot see and which never
+ * go stale on their own. The caja's other writes (gasto, abono, entrada,
+ * cierre) sweep the same prefix.
  */
 export function teclasAlCobrar(businessId: BusinessId | null): readonly (readonly unknown[])[] {
-  return [['caja', businessId, 'ventas-turno']];
+  return [cajaKeys.byBusiness(businessId)];
 }
 
 export function useCobrarTicket() {

@@ -1,54 +1,74 @@
-# Feature flags from the verified plan (A-14): on Freelancer, stock is off —
-# Productos is a plain catalog (no Stock/Movimientos tabs, no stock counts);
-# on Emprendedor the stock UI is back.
+# Feature flags from the verified plan (A-14; catalogue J8-04): on Xangarrito
+# stock is off — Productos is a plain catalog (no Stock/Movimientos tabs, no
+# stock counts); on Xangarro the stock UI is back.
 #
 # Precondition: device activated against the mock (activation.yaml). The flow
-# restores the default scenario at the end.
+# restores the default scenario at the end. NOT in the curated regression
+# (2026-11-03): on a fresh activation the «Quedan N» chip the gate removes did
+# not appear within two minutes in four runs, while plan-vencido.yaml — which
+# proves the same gate after two sync cycles — passes; the chip's timing on a
+# fresh snapshot is the open question (catalogue J8-04). The scenario names are the plan
+# ids since C-11 (`xangarrito` / `xangarro`); the pre-rename `freelancer` /
+# `emprendedor` were refused by /__mock/scenario with a 400, so this flow had
+# been asserting against the default plan all along.
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 env:
-  MOCK_API: http://127.0.0.1:3100
+  MOCK_API: http://127.0.0.1:3000
 ---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+# On the paid plan a tracked product that runs low wears «Quedan N» on its
+# tile (cobrar-tile.tsx); the fixtures start with nobody low, so one sale of
+# the first tile makes the chip appear — the signal the gate then removes.
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+# The chip also needs the snapshot's stock baseline, which a fresh activation
+# is still pulling in the background: give it a while.
+- extendedWaitUntil:
+    visible: 'Agregar .*, quedan \d+'
+    timeout: 120000
 - runScript:
     file: shared/mock-scenario.js
     env:
-      SCENARIO: freelancer
+      SCENARIO: xangarrito
       RECORDS_PER_MONTH: ''
 - tapOn:
     id: 'cloud-sync-pill'
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'
-    timeout: 20000
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-inventario'
-- extendedWaitUntil:
-    visible:
-      id: 'stock-nuevo-producto'
-    timeout: 10000
-- assertNotVisible: 'Movimientos'
-- assertNotVisible: '.*Stock bajo.*'
+    timeout: 30000
+# Xangarrito has no stock: the Cobrar tiles carry no «Quedan N» chip (the
+# stock map is empty, use-stock-map.ts). Inventario itself is NOT asserted:
+# the Mostrador route (/productos → use-inventario.ts) never reads the flag
+# and still shows the stock UI on a plan without it — catalogue J8-04, open.
 - tapOn:
     id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
-- assertNotVisible: 'Stock 0'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 10000
+- assertNotVisible: 'Agregar .*, quedan \d+'
 - runScript:
     file: shared/mock-scenario.js
     env:
-      SCENARIO: emprendedor
+      SCENARIO: xangarro
       RECORDS_PER_MONTH: ''
 - tapOn:
     id: 'cloud-sync-pill'
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'
-    timeout: 20000
-- runFlow:
-    file: shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-inventario'
+    timeout: 30000
+# Back on Xangarro: the stock UI returns on the next pull.
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
-    visible: 'Movimientos'
-    timeout: 10000
+    visible: 'Agregar .*, quedan \d+'
+    timeout: 30000

@@ -1,0 +1,61 @@
+# Payment grace (ADR-053 §5, A-10; catalogue J8-05): the server says the
+# plan's validUntil passed three days ago and graceUntil is four days ahead
+# (mock scenario `grace`). The yellow banner «Tu pago está pendiente — tienes
+# hasta el <fecha>» sits under the header and capture goes on untouched: a
+# sale still goes through. Back on the paid scenario the banner is gone.
+#
+# Precondition: activated device against the mock on MOCK_API. Restores the
+# default scenario at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - entitlement
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+- assertNotVisible:
+    id: 'plan-banner-grace'
+
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: grace
+      RECORDS_PER_MONTH: ''
+# The entitlement rides on the pull: «Actualizar» refreshes it.
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'plan-banner-grace'
+    timeout: 30000
+- assertVisible: 'Tu pago está pendiente — tienes hasta el .*\.'
+
+# Full capture continues (ADR-053 §5: banner, never a lock).
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+- assertVisible:
+    id: 'plan-banner-grace'
+
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: xangarro
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    notVisible:
+      id: 'plan-banner-grace'
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000

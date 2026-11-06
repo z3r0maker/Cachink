@@ -1,0 +1,186 @@
+# Selling the last unit, and one more (catalogue J4-13; ADR-065): one Torta
+# arrives through «Llegó mercancía», so its tile reads «Quedan 1»; the first
+# sale leaves «Quedan 0»; the second is NOT refused — «Venta hecha» as any
+# other — and the shelf stays at 0. The ledger is at −1 underneath, but the
+# phone clamps every surface at zero (stockDeCaja in the tile, inventario
+# vivo.ts in the list): there is no «−1» to show, only the sale that went
+# through. The web caja has the same «Quedan 0» (operador-inventario.spec).
+#
+# Precondition: activated device against the mock on MOCK_API, Torta (PRD-6)
+# never moved by another flow — stock is 0 on a fresh sync (no ledger rows),
+# the same baseline inventario-llego-merma.yaml relies on.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - ventas
+  - inventario
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# One Torta arrives: the labelled «Llegó mercancía» above the list, pick the
+# product, one piece (inventario-llego-merma.yaml's steps).
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'inventario-abrir-entrada'
+    direction: UP
+    timeout: 5000
+- tapOn:
+    id: 'inventario-abrir-entrada'
+- extendedWaitUntil:
+    visible:
+      id: 'llego-mercancia-sheet'
+    timeout: 5000
+# Let the sheet finish sliding in and the scroll settle before the radio:
+# a tap mid-motion leaves it unchecked and «Registrar entrada» disabled.
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      id: 'mover-producto-Torta'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 100
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-producto-Torta'
+# iOS folds aria-checked into the element's value («radio button, checked»);
+# Maestro's own `checked` flag stays false on it.
+- assertVisible:
+    id: 'mover-producto-Torta'
+    text: 'radio button, checked'
+- tapOn:
+    id: 'mover-cantidad'
+- inputText: '1'
+# One drag in the sheet body dismisses the keyboard (keyboardDismissMode
+# on-drag); hideKeyboard alone leaves the save footer under it.
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- assertVisible: '.*\+1 de Torta\. Queda en tu turno\..*'
+- tapOn:
+    id: 'mov-toast-entendido'
+- waitForAnimationToEnd
+# Torta is the list's second-to-last row: three swipes away, each one about
+# three seconds with its settle, so the default-sized timeout runs out one
+# swipe short. No centring either: at the list's end it can never settle.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000006'
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 60
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-cantidad-01JPRD00000000000000000006'
+      text: '1'
+    timeout: 10000
+
+# Cobrar: the tile carries the red «Quedan 1» (1 ≤ the umbral of 3). The tile
+# is one accessible element, so the chip is read from its label.
+- runFlow:
+    when:
+      visible:
+        id: 'top-bar-back'
+    commands:
+      - tapOn: { id: 'top-bar-back' }
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 60
+    centerElement: true
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+      text: 'Agregar Torta, \$37\.50, quedan 1'
+    timeout: 10000
+
+# The last one sells; the shelf reads «Quedan 0».
+- tapOn:
+    id: 'cobrar-tile-01JPRD00000000000000000006'
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 60
+    centerElement: true
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+      text: 'Agregar Torta, \$37\.50, quedan 0'
+    timeout: 10000
+
+# One more than there is: never a refusal (ADR-065) — the subflow asserts
+# «Venta hecha» on the way — and the tile stays at zero, not «−1».
+- tapOn:
+    id: 'cobrar-tile-01JPRD00000000000000000006'
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 60
+    centerElement: true
+- extendedWaitUntil:
+    visible:
+      id: 'cobrar-tile-01JPRD00000000000000000006'
+      text: 'Agregar Torta, \$37\.50, quedan 0'
+    timeout: 10000
+
+# Inventario agrees: 0, clamped, with «Reponer» on the row.
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000006'
+    direction: DOWN
+    timeout: 30000
+    visibilityPercentage: 60
+- extendedWaitUntil:
+    visible:
+      id: 'inventario-cantidad-01JPRD00000000000000000006'
+      text: '0'
+    timeout: 10000

@@ -6,7 +6,7 @@
 
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { http, HttpResponse } from 'msw';
-import { MockApi, type MockRequest } from './handler.js';
+import { MOCK_DOWN, MockApi, type MockRequest } from './handler.js';
 
 async function readBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -45,6 +45,11 @@ export function startMockServer(port = 0, api = new MockApi()): Promise<RunningM
         body: { error: { code: 'INTERNAL', message: e instanceof Error ? e.message : String(e) } },
       };
     }
+    // `/__mock/down`: no answer at all, the way a dead network behaves.
+    if (out.status === MOCK_DOWN.status) {
+      req.socket.destroy();
+      return;
+    }
     res.writeHead(out.status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(out.body));
   });
@@ -73,6 +78,7 @@ export function mswHandlers(api: MockApi, base = 'http://localhost:3000') {
       const text = await request.text();
       const body = text ? (JSON.parse(text) as unknown) : undefined;
       const out = await api.handle(toMockRequest(request.method, url, headers, body));
+      if (out.status === MOCK_DOWN.status) return HttpResponse.error();
       return HttpResponse.json(out.body as Record<string, unknown>, { status: out.status });
     }),
   ];

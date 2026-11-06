@@ -1,0 +1,107 @@
+# Short cash (catalogue J4-06; the phone half of operador-caja.spec «short
+# cash keeps Registrar venta disabled»): a $25 Taco al pastor, $20 typed on
+# the keypad — the change card turns red «Todavía falta $5.00 · Pídele el
+# resto», and «Cobrar» stays disabled. «Borrar» twice and $30 make it «Su
+# cambio $5.00», the sale goes through and «Venta hecha» says what it was
+# paid with. Nothing is ever recorded short.
+#
+# Precondition: activated device against the mock on MOCK_API; opens a
+# turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+# Taco al pastor, $25.00 (PRD-1). The grid lists alphabetically; it is below
+# the fold.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000001'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000001' }
+- runFlow: shared/abrir-cobro.yaml
+- scrollUntilVisible:
+    element:
+      id: 'cobro-metodo-Efectivo'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobro-metodo-Efectivo' }
+- waitForAnimationToEnd
+
+# $20 on the keypad: the card goes red, the footer's «Cobrar» is disabled.
+# Centre the keypad's BOTTOM row first: at the scroll's natural end it sits
+# under the pinned footer, where a tap on «0» lands on the disabled «Cobrar».
+- scrollUntilVisible:
+    element:
+      id: 'cobro-tecla-0'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 100
+    centerElement: true
+# One key at a time: the first digit makes the «$» figure appear above the
+# keypad and the keys shift; a second tap on the old coordinates misses.
+- tapOn: { id: 'cobro-tecla-2' }
+- waitForAnimationToEnd
+- tapOn: { id: 'cobro-tecla-0' }
+- waitForAnimationToEnd
+- assertVisible:
+    id: 'cobro-recibido'
+    text: '\$20'
+- extendedWaitUntil:
+    visible: '.*Todavía falta.*'
+    timeout: 5000
+- assertVisible: '.*Pídele el resto\..*'
+# The footer names what is missing and stays disabled.
+- assertVisible:
+    id: 'cobro-submit'
+    text: 'Falta \$5\.00'
+    enabled: false
+
+# «Borrar» twice, then $30: $5.00 of change, «Cobrar» enabled.
+- tapOn: { id: 'cobro-tecla-borrar' }
+- waitForAnimationToEnd
+- tapOn: { id: 'cobro-tecla-borrar' }
+- waitForAnimationToEnd
+- tapOn: { id: 'cobro-tecla-3' }
+- waitForAnimationToEnd
+- tapOn: { id: 'cobro-tecla-0' }
+- waitForAnimationToEnd
+- assertVisible:
+    id: 'cobro-recibido'
+    text: '\$30'
+- extendedWaitUntil:
+    visible: '.*Su cambio.*'
+    timeout: 5000
+- assertVisible: '.*Cuéntalo frente al cliente\..*'
+- assertVisible:
+    id: 'cobro-submit'
+    text: 'Cobrar y dar \$5\.00'
+    enabled: true
+- tapOn: { id: 'cobro-submit' }
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- assertVisible: '.*Pagó con \$30\.00.*'
+- tapOn: { id: 'venta-hecha-nueva' }
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
