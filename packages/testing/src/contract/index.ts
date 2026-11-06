@@ -25,3 +25,4 @@ export * from './conversions-repository.js';
 export * from './auditorias-inventario-repository.js';
 export * from './entregas-credito-repository.js';
 export * from './director-alerts-repository.js';
+export * from './product-images-repository.js';

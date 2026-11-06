@@ -31,7 +31,7 @@ export function Articulo({ e }: { readonly e: ExistenciaMovil }): ReactElement {
       borderRadius={radii[4]}
       backgroundColor={colors.offwhite}
     >
-      <ProductoIcono icono={e.glifo} tint={e.tint} size={52} />
+      <ProductoIcono icono={e.glifo} tint={e.tint} size={52} productoId={e.id} />
       <View flex={1} minWidth={0}>
         <MText size="lgx" weight="extraBold">
           {e.nombre}

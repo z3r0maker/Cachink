@@ -312,23 +312,24 @@ the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ### Productos (Catálogo / Stock / Movimientos)
 
-| Flow                                | What it proves                |
-| ----------------------------------- | ----------------------------- |
-| `inventario-producto.yaml`          | NuevoProductoModal happy path |
-| `producto-entrada-stock.yaml`       | Stock entry                   |
-| `producto-movimientos.yaml`         | Movement history              |
-| `producto-full-form.yaml`           | Product with all fields       |
-| `producto-via-fab.yaml`             | Product creation via FAB      |
-| `producto-uso-selector.yaml`        | Product uso selector          |
-| `nuevo-producto-icon-picker.yaml`   | Icon picker for new product   |
-| `stock-buscar.yaml`                 | Stock search                  |
-| `editar-producto.yaml`              | Edit product                  |
-| `editar-producto-full-form.yaml`    | Edit product all fields       |
-| `movimiento-salida-con-motivo.yaml` | Salida with reason            |
-| `movimiento-entrada-con-nota.yaml`  | Entrada with note             |
-| `validation-producto.yaml`          | Product form validation       |
-| `inventario-salida.yaml`            | Salida via Movimientos        |
-| `inventario-barcode.yaml`           | Barcode scanner wired in      |
+| Flow                                | What it proves                                                 |
+| ----------------------------------- | -------------------------------------------------------------- |
+| `inventario-producto.yaml`          | NuevoProductoModal happy path                                  |
+| `producto-entrada-stock.yaml`       | Stock entry                                                    |
+| `producto-movimientos.yaml`         | Movement history                                               |
+| `producto-full-form.yaml`           | Product with all fields                                        |
+| `producto-via-fab.yaml`             | Product creation via FAB                                       |
+| `producto-uso-selector.yaml`        | Product uso selector                                           |
+| `nuevo-producto-icon-picker.yaml`   | Icon picker for new product                                    |
+| `stock-buscar.yaml`                 | Stock search                                                   |
+| `editar-producto.yaml`              | Edit product                                                   |
+| `editar-producto-full-form.yaml`    | Edit product all fields                                        |
+| `movimiento-salida-con-motivo.yaml` | Salida with reason                                             |
+| `movimiento-entrada-con-nota.yaml`  | Entrada with note                                              |
+| `validation-producto.yaml`          | Product form validation                                        |
+| `inventario-salida.yaml`            | Salida via Movimientos                                         |
+| `inventario-barcode.yaml`           | Barcode scanner wired in                                       |
+| `producto-foto.yaml`                | Product photo via the gallery (M-13): save, then «Quitar foto» |
 
 ### Clientes + Cuentas por Cobrar
 

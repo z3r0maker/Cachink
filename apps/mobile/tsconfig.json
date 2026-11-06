@@ -17,6 +17,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "modules/**/*.ts",
     "app.json",
     "../../packages/ui/src/assets/images.d.ts"
   ],

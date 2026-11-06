@@ -35,6 +35,7 @@ import type {
   DirectorAlertsRepository,
   MensajesOperadorRepository,
   RespuestasOperadorRepository,
+  ProductImagesRepository,
 } from '@xangarro/data';
 import {
   DrizzleAppConfigRepository,
@@ -61,6 +62,7 @@ import {
   DrizzleCancelacionLogsRepository,
   DrizzleMensajesOperadorRepository,
   DrizzleRespuestasOperadorRepository,
+  DrizzleProductImagesRepository,
 } from '@xangarro/data';
 
 /**
@@ -96,6 +98,8 @@ export interface Repositories {
   /** Avisos (M-09): the owner's messages to this operator, and its replies. */
   readonly mensajesOperador: MensajesOperadorRepository;
   readonly respuestasOperador: RespuestasOperadorRepository;
+  /** The product photo (M-13): append-only rows, the newest per product wins. */
+  readonly productImages: ProductImagesRepository;
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
@@ -136,6 +140,7 @@ export function buildDrizzleRepositories(
     cancelacionLogs: new DrizzleCancelacionLogsRepository(db, deviceId, uid),
     mensajesOperador: new DrizzleMensajesOperadorRepository(db),
     respuestasOperador: new DrizzleRespuestasOperadorRepository(db, deviceId, uid),
+    productImages: new DrizzleProductImagesRepository(db, deviceId, uid),
   };
 }
 
@@ -167,6 +172,14 @@ export function useRepositories(): Repositories {
     );
   }
   return repos;
+}
+
+/**
+ * The repository record, or null outside a provider — for app-wide layers
+ * that mount before the database is ready (the product photos, M-13).
+ */
+export function useRepositoriesOrNull(): Repositories | null {
+  return useContext(RepositoryContext);
 }
 
 export const useAppConfigRepository = (): AppConfigRepository => useRepositories().appConfig;
