@@ -48,11 +48,20 @@
       `playwright.config.ts`).
 - [ ] [media] **PRONTO — Trabajo nocturno de sellado:** llamar `xangarro.privacy_consents_day_root(day)` y obtener una
       NOM-151 constancia (PSC) or an RFC 3161 timestamp; archive it with the day. Decide the PSC.
-- [ ] [alta] [bloq] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
-      simplest: a `consent_versions` table or a versioned file kept forever.
-- [ ] [alta] [bloq] Configuración → Privacidad: mostrar la versión aceptada, alternar novedades (escribe una
-      `surface='configuracion'` row), link to ARCO.
+- [x] [alta] [bloq] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
+      simplest: a `consent_versions` table or a versioned file kept forever. **Done 2026-11-06
+      (ADR-137):** every published version stays in `apps/web/src/legal/aviso-simplificado.ts`
+      (`PUBLICADOS`), unedited; `tests/legal-aviso.test.ts` pins each version's hash.
+- [x] [alta] [bloq] Configuración → Privacidad: mostrar la versión aceptada, alternar novedades (escribe una
+      `surface='configuracion'` row), link to ARCO. **Done 2026-11-06 (ADR-137):** «Privacidad y mis
+      datos» in the account menu, for every member: the accepted version and its exact text, the
+      novedades switch, ARCO, Descargar todo and Eliminar mi cuenta (owner), and «Acepto el aviso
+      nuevo» with a banner across the portal until accepted. Aviso 0.3 fixes the path.
+- [ ] [media] The Asesor switch the aviso (§ on the Asesor) and Términos §5 promise «en Configuración →
+      Privacidad» does not exist yet: build it on «Privacidad y mis datos», or change the text.
 - [ ] [media] Bloqueo de re-consentimiento al iniciar sesión cuando una versión agregue una finalidad (art. 11); banner en caso contrario.
+      Progress 2026-11-06 (ADR-137): the banner and «Acepto el aviso nuevo» exist; the sign-in block waits for the
+      first version that adds a purpose.
 - [ ] [media] Decidir casilla vs. botón como consentimiento con el abogado (OQ-N7); hoy: casilla.
 
 ## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)

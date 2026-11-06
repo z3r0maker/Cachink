@@ -1,4 +1,4 @@
-import type { ConsentGrant } from '@xangarro/domain';
+import type { ConsentGrant, ConsentimientoGuardado } from '@xangarro/domain';
 import { sql } from 'drizzle-orm';
 
 import type { Db } from '../client.js';
@@ -32,4 +32,28 @@ export async function recordPrivacyConsent(
       ${ctx.ipHash}, ${ctx.userAgent})`,
   );
   return rows[0]?.privacy_consent_record ?? '';
+}
+
+/**
+ * The account's latest consent row per purpose (`privacy_consents_of_user`,
+ * 0052): what «Privacidad y mis datos» shows. Pass the session's user only.
+ */
+export async function consentsOfUser(
+  conn: Conn,
+  userId: string,
+): Promise<ConsentimientoGuardado[]> {
+  const rows = await conn.execute<{
+    purpose: ConsentimientoGuardado['purpose'];
+    granted: boolean;
+    aviso_version: string;
+    created_at: string;
+  }>(sql`
+    SELECT c.purpose, c.granted, c.aviso_version, to_json(c.created_at) #>> '{}' AS created_at
+      FROM xangarro.privacy_consents_of_user(${userId}::uuid) c`);
+  return rows.map((r) => ({
+    purpose: r.purpose,
+    granted: r.granted,
+    avisoVersion: r.aviso_version,
+    createdAt: new Date(r.created_at).toISOString(),
+  }));
 }
