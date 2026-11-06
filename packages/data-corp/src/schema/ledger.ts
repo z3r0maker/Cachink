@@ -113,6 +113,11 @@ export const recurringTemplates = corp.table(
     projectId: text('project_id').references(() => projects.id),
     nombre: text('nombre').notNull(),
     contraparte: text('contraparte'),
+    /**
+     * The supplier's RFC when it invoices every month (E-11, board CD-01f):
+     * a registered invoice of this RFC dated in a month registers that month.
+     */
+    rfc: text('rfc'),
     /** A `CategoriaGasto` of `@xangarro/domain/corp`. */
     categoria: text('categoria').notNull(),
     moneda: text('moneda', { enum: ['MXN', 'USD'] })

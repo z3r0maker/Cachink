@@ -4,12 +4,17 @@ import Link from 'next/link';
 import { startTransition, useActionState, useState } from 'react';
 
 import { quitarXmlAction, registrarConXmlAction } from '@/server/actions/empresa-registrar-xml';
-import { notaRetenciones, type PanelXml } from '@/server/empresa/registrar-xml-view';
+import type { FormState } from '@/server/actions/form-state';
+import {
+  notaRecurrente,
+  notaRetenciones,
+  type PanelXml,
+} from '@/server/empresa/registrar-xml-view';
 import * as d from '@/styles/mostrador-data.css';
 import * as mx from '@/styles/mostrador-registrar-xml.css';
 import * as m from '@/styles/mostrador.css';
 
-import { CATEGORIAS } from './del-gasto';
+import { CATEGORIAS, HacerRecurrente } from './del-gasto';
 import { Campo, Opciones, submitWith, type Opcion } from './opciones';
 
 /** «contador.xml leído · vigente en el SAT», with «Quitar» to start over without it. */
@@ -138,6 +143,16 @@ export function ConXml({
       />
       <span className={d.hint}>{panel.nota}</span>
       <Opciones legend="Proyecto" name="proyecto" opciones={proyectos} value={panel.proyecto} />
+      <HacerRecurrente fecha={panel.fecha} nota={notaRecurrente(panel.fecha)} />
+      <Pie state={state} pending={pending} />
+    </form>
+  );
+}
+
+/** Where the XML goes, what went wrong, and the form's two buttons. */
+function Pie({ state, pending }: { readonly state: FormState; readonly pending: boolean }) {
+  return (
+    <>
       <span className={d.hint}>El XML se guarda en el Expediente junto con el movimiento.</span>
       {state !== null && !state.ok ? (
         <p className={d.messageBad} role="alert">
@@ -152,6 +167,6 @@ export function ConXml({
           Registrar gasto
         </button>
       </div>
-    </form>
+    </>
   );
 }

@@ -9672,7 +9672,7 @@ proved nothing. Two launch blockers in `docs/launch/production-readiness.md` §2
    person, not the business. It shows the aviso accepted and when, its exact text in a side panel with
    its fingerprint, the novedades switch, an ARCO request, and for the owner «Descargar todo» and
    «Eliminar mi cuenta».
-2. **The ledger is read through one definer** (`privacy_consents_of_user`, 0052): the latest row per
+2. **The ledger is read through one definer** (`privacy_consents_of_user`, 0053): the latest row per
    purpose for the session's account. Changing a choice is still a new row through
    `privacy_consent_record`; the table stays unreadable and append-only.
 3. **Novedades** is a switch that saves at once: one explicit row (`configuracion`, `boton`), recorded

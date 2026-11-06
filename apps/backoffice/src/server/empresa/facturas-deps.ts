@@ -5,6 +5,7 @@ import {
   createCorpLedgerRepository,
   createDocumentRepository,
   createReceivedInvoiceRepository,
+  createRecurringTemplateRepository,
 } from '@xangarro/data-corp';
 
 import { almacenParaNuevos } from '../blobs';
@@ -12,13 +13,18 @@ import { requireCorpDb } from '../db/corp';
 import { rfcDeMexia } from './facturas-lectura';
 import { consultaSat } from './sat-consulta';
 
-/** What every received-invoice write needs (E-11): the corp repositories, the SAT, MEXIA's RFC. */
+/**
+ * What every received-invoice write needs (E-11): the corp repositories (the
+ * recurring templates too, for «Hacer recurrente» with an XML), the SAT,
+ * MEXIA's RFC.
+ */
 export const facturasDeps = () => {
   const db = requireCorpDb();
   return {
     facturas: createReceivedInvoiceRepository(db),
     ledger: createCorpLedgerRepository(db),
     documentos: createDocumentRepository(db, almacenParaNuevos(db)),
+    plantillas: createRecurringTemplateRepository(db),
     sat: consultaSat(),
     rfcMexia: () => rfcDeMexia(db),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),

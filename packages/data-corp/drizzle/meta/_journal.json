@@ -64,6 +64,13 @@
       "when": 1793407027828,
       "tag": "0008_corp_documents_blob_ref",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793989712824,
+      "tag": "0009_corp_recurrentes_rfc",
+      "breakpoints": true
     }
   ]
 }

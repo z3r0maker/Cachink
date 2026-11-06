@@ -11,6 +11,7 @@ const vercel: PlantillaRecurrente = {
   id: 'rec-1',
   nombre: 'Vercel',
   contraparte: null,
+  rfc: null,
   categoria: 'costo_servicio',
   moneda: 'USD',
   montoEstimado: 20_00n,
@@ -26,12 +27,13 @@ const del = (fecha: string, estado: RecurrenteDelMes['estado']): RecurrenteDelMe
   fecha,
   estado,
   entryId: estado === 'registrado' ? 'E1' : null,
+  facturaDel: null,
 });
 
 describe('cargosDeHoy', () => {
   it('picks a suggested charge whose day is today', () => {
     assert.deepEqual(cargosDeHoy([del('2026-10-28', 'sugerido')], '2026-10-28'), [
-      { nombre: 'Vercel', monto: 'USD 20.00' },
+      { nombre: 'Vercel', monto: 'USD 20.00', factura: false },
     ]);
   });
 
@@ -44,7 +46,9 @@ describe('cargosDeHoy', () => {
 
 describe('correoDe with recurring charges', () => {
   it('writes the charge alone, opening Recurrentes', () => {
-    const c = correoDe([], 'https://admin.x', [{ nombre: 'Vercel', monto: 'USD 20.00' }]);
+    const c = correoDe([], 'https://admin.x', [
+      { nombre: 'Vercel', monto: 'USD 20.00', factura: false },
+    ]);
     assert.equal(c.subject, 'MEXIA: hoy toca registrar Vercel');
     assert.ok(c.paragraphs.some((p) => p.includes('Vercel (USD 20.00)')));
     assert.equal(c.cta?.href, 'https://admin.x/empresa/movimientos?ver=recurrentes');
@@ -52,8 +56,8 @@ describe('correoDe with recurring charges', () => {
 
   it('counts several charges', () => {
     const c = correoDe([], 'https://admin.x', [
-      { nombre: 'Vercel', monto: 'USD 20.00' },
-      { nombre: 'Contador', monto: '$3,500.00' },
+      { nombre: 'Vercel', monto: 'USD 20.00', factura: false },
+      { nombre: 'Contador', monto: '$3,500.00', factura: false },
     ]);
     assert.equal(c.subject, 'MEXIA: hoy toca registrar 2 gastos recurrentes');
   });

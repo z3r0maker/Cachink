@@ -33,6 +33,7 @@ import {
   MENSAJERIA,
   registrarParaConsultar,
 } from './empresa-sat';
+import { MENSUAL, recurrente, registrarMensual } from './empresa-recurrente-factura';
 import {
   E2E_RECURRENTE,
   mesesDePrueba,
@@ -607,4 +608,28 @@ test('a founder asks the SAT again, and cancels the invoice it says was cancelle
     'Pide al proveedor la factura que la sustituye o el reembolso',
   );
   await expect(pagada.getByRole('button')).toHaveCount(0);
+});
+
+test('a founder repeats a supplier who invoices every month, by its XML (CD-06h, CD-01f)', async ({
+  page,
+}) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  const meses = await registrarMensual(page);
+
+  // The invoice's month is registered by it, with its date and its movement.
+  await page.goto(`/empresa/movimientos?mes=${meses.anterior}&ver=recurrentes`);
+  const pasado = recurrente(page, MENSUAL.nombre);
+  await expect(pasado).toContainText(`RFC ${MENSUAL.rfc} · factura cada mes`);
+  await expect(pasado).toContainText('Registrado');
+  await expect(pasado).toContainText(/Con su factura del 1 \p{L}+/u);
+  await expect(pasado.getByRole('link', { name: 'Ver' })).toBeVisible();
+
+  // This month waits for the next invoice, and takes you to upload it.
+  await page.goto(`/empresa/movimientos?mes=${meses.actual}&ver=recurrentes`);
+  const actual = recurrente(page, MENSUAL.nombre);
+  await expect(actual).toContainText('Falta su factura');
+  await expect(actual).toContainText(`Pídela a ${MENSUAL.nombre}`);
+  await actual.getByRole('link', { name: 'Subir su XML' }).click();
+  await expect(page).toHaveURL(/\/empresa\/facturas$/);
 });

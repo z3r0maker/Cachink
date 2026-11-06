@@ -36,7 +36,7 @@ export async function recordPrivacyConsent(
 
 /**
  * The account's latest consent row per purpose (`privacy_consents_of_user`,
- * 0052): what «Privacidad y mis datos» shows. Pass the session's user only.
+ * 0053): what «Privacidad y mis datos» shows. Pass the session's user only.
  */
 export async function consentsOfUser(
   conn: Conn,

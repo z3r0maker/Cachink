@@ -11,7 +11,7 @@ import { reportError } from '../observability/report';
 /**
  * The signed-in account's privacy state (ADR-137): the aviso it accepted last,
  * its novedades choice, and whether the current aviso is new to it. Read from
- * the ledger through `privacy_consents_of_user` (0052), for the session's
+ * the ledger through `privacy_consents_of_user` (0053), for the session's
  * account only.
  */
 export async function estadoPrivacidadDe(userId: string): Promise<EstadoPrivacidad> {

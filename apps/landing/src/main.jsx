@@ -3,6 +3,7 @@ import '../colors_and_type.css';
 import './global.css';
 import '../home/home.css';
 import './pages/not-found.css';
+import './pages/soporte/soporte.css';
 import { UtmPassthrough } from './utm.jsx';
 
 /**

@@ -51,6 +51,7 @@
   --green-soft: #d6fff4; /* ingresos       */
   --red: #ff4757;
   --red-soft: #ffe8ea; /* egresos        */
+  --red-ink: #da0013; /* red text on white (5.3:1), the portal's danger */
   --blue: #3b6fff;
   --blue-soft: #e5ecff; /* nómina/info    */
   --warning: #ffb800;

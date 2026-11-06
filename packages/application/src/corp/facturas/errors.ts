@@ -48,6 +48,14 @@ export class FacturaNoPorVerificarError extends Error {
   }
 }
 
+export class FacturaSinRegistrarError extends Error {
+  readonly code = 'FACTURA_SIN_REGISTRAR' as const;
+  constructor(readonly uuid: string) {
+    super('Registra la factura antes de hacerla recurrente.');
+    this.name = 'FacturaSinRegistrarError';
+  }
+}
+
 export class FechaPagoAnteriorError extends Error {
   readonly code = 'FECHA_PAGO_ANTERIOR' as const;
   constructor(readonly fecha: string) {

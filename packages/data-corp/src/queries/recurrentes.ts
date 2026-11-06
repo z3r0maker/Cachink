@@ -3,13 +3,16 @@ import {
   CATEGORIAS_GASTO,
   leerRefRecurrente,
   type CategoriaGasto,
+  type FacturaDeRecurrente,
   type PlantillaRecurrente,
 } from '@xangarro/domain/corp';
-import { and, asc, eq, isNull, like } from 'drizzle-orm';
+import { and, asc, eq, gte, isNotNull, isNull, like, lt } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 import type { CorpDb } from '../client.js';
+import { receivedInvoices } from '../schema/facturas.js';
 import { entries, recurringTemplates } from '../schema/ledger.js';
+import { monthBounds } from './movimientos.js';
 
 /**
  * E-02's recurring templates over the corp schema. A charge is linked to its
@@ -29,6 +32,7 @@ function toPlantilla(r: Row): PlantillaRecurrente {
     id: r.id,
     nombre: r.nombre,
     contraparte: r.contraparte,
+    rfc: r.rfc,
     categoria: categoriaDe(r.categoria),
     moneda: r.moneda,
     montoEstimado: r.montoEstimado,
@@ -84,6 +88,43 @@ async function registradasEn(db: CorpDb, mes: string): Promise<ReadonlyMap<strin
   return out;
 }
 
+/**
+ * Template → the registered invoice of its RFC dated in `mes` (E-11, board
+ * CD-01f), the earliest when there are several. A reversed one does not count.
+ */
+async function facturadasEn(
+  db: CorpDb,
+  mes: string,
+): Promise<ReadonlyMap<string, FacturaDeRecurrente>> {
+  const bounds = monthBounds(mes);
+  if (bounds === null) throw new Error(`not a month: ${mes}`);
+  const reversal = alias(entries, 'reversal');
+  const rows = await db
+    .select({
+      id: recurringTemplates.id,
+      entryId: receivedInvoices.entryId,
+      fecha: receivedInvoices.fecha,
+    })
+    .from(recurringTemplates)
+    .innerJoin(receivedInvoices, eq(receivedInvoices.emisorRfc, recurringTemplates.rfc))
+    .leftJoin(reversal, eq(reversal.reversesEntryId, receivedInvoices.entryId))
+    .where(
+      and(
+        eq(receivedInvoices.estado, 'registrada'),
+        isNotNull(receivedInvoices.entryId),
+        gte(receivedInvoices.fecha, bounds[0]),
+        lt(receivedInvoices.fecha, bounds[1]),
+        isNull(reversal.id),
+      ),
+    )
+    .orderBy(asc(receivedInvoices.fecha));
+  const out = new Map<string, FacturaDeRecurrente>();
+  for (const r of rows) {
+    if (r.entryId !== null && !out.has(r.id)) out.set(r.id, { entryId: r.entryId, fecha: r.fecha });
+  }
+  return out;
+}
+
 export function createRecurringTemplateRepository(db: CorpDb): RecurringTemplateRepository {
   return {
     ensure: (p) => ensure(db, p),
@@ -96,5 +137,6 @@ export function createRecurringTemplateRepository(db: CorpDb): RecurringTemplate
       await db.update(recurringTemplates).set({ activo }).where(eq(recurringTemplates.id, id));
     },
     registradasEn: (mes) => registradasEn(db, mes),
+    facturadasEn: (mes) => facturadasEn(db, mes),
   };
 }

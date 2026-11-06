@@ -1,4 +1,4 @@
--- 0052: «Privacidad y mis datos» reads a person's own consent rows (ADR-137).
+-- 0053: «Privacidad y mis datos» reads a person's own consent rows (ADR-137).
 --
 -- The ledger (0034) has no read path for the app: no role may SELECT it, only
 -- append through `privacy_consent_record`. The privacy page needs the latest

@@ -13,6 +13,11 @@ export interface PlantillaRecurrente {
   /** The movement's concepto, e.g. «Vercel». */
   readonly nombre: string;
   readonly contraparte: string | null;
+  /**
+   * The supplier's RFC when it invoices every month (E-11, board CD-01f): an
+   * invoice of this RFC dated in a month registers that month.
+   */
+  readonly rfc: string | null;
   readonly categoria: CategoriaGasto;
   readonly moneda: 'MXN' | 'USD';
   /** The usual charge, IVA included, in `moneda` centavos. */
@@ -27,7 +32,8 @@ export interface PlantillaRecurrente {
   readonly desde: string;
 }
 
-export type EstadoRecurrente = 'registrado' | 'sugerido' | 'proximo';
+/** `falta_factura`: a supplier with an RFC whose day came without its invoice. */
+export type EstadoRecurrente = 'registrado' | 'sugerido' | 'falta_factura' | 'proximo';
 
 export interface RecurrenteDelMes {
   readonly plantilla: PlantillaRecurrente;
@@ -36,6 +42,14 @@ export interface RecurrenteDelMes {
   readonly estado: EstadoRecurrente;
   /** The entry that registered it, when `estado` is `registrado`. */
   readonly entryId: string | null;
+  /** `YYYY-MM-DD` of the invoice that registered it, when one did. */
+  readonly facturaDel: string | null;
+}
+
+/** The registered invoice of a template's RFC in a month: its expense and its date. */
+export interface FacturaDeRecurrente {
+  readonly entryId: string;
+  readonly fecha: string;
 }
 
 const MES = /^(\d{4})-(0[1-9]|1[0-2])$/;
@@ -86,30 +100,42 @@ export function leerRefRecurrente(
   return m === null ? null : { plantillaId: m[1] as string, mes: m[2] as string };
 }
 
-function estadoDe(fecha: string, mes: string, hoy: string): EstadoRecurrente {
-  if (mes < hoy.slice(0, 7)) return 'sugerido';
-  return fecha <= hoy ? 'sugerido' : 'proximo';
+/** Due once its day has come (any day of a past month); a supplier with an RFC owes its invoice. */
+function estadoDe(p: PlantillaRecurrente, fecha: string, mes: string, hoy: string) {
+  const vencido = mes < hoy.slice(0, 7) || fecha <= hoy;
+  if (!vencido) return 'proximo';
+  return p.rfc === null ? 'sugerido' : 'falta_factura';
+}
+
+function delMes(
+  plantilla: PlantillaRecurrente,
+  mes: string,
+  hoy: string,
+  registrada: string | null,
+  factura: FacturaDeRecurrente | null,
+): RecurrenteDelMes {
+  const fecha = fechaDeCargo(plantilla.diaCargo, mes);
+  const entryId = factura?.entryId ?? registrada;
+  const estado = entryId === null ? estadoDe(plantilla, fecha, mes, hoy) : 'registrado';
+  return { plantilla, fecha, estado, entryId, facturaDel: factura?.fecha ?? null };
 }
 
 /**
- * Each template's charge in `mes`, by date: registered (with its entry),
- * suggested once its day has come, or still to come. A stopped template only
- * shows in a month it was registered.
+ * Each template's charge in `mes`, by date: registered (with its entry, or
+ * with the invoice of its RFC dated in the month), suggested once its day has
+ * come (asking for the invoice when it has an RFC), or still to come. A
+ * stopped template only shows in a month it was registered.
  */
 export function recurrentesDelMes(
   plantillas: readonly PlantillaRecurrente[],
   registradas: ReadonlyMap<string, string>,
   mes: string,
   hoy: string,
+  facturadas: ReadonlyMap<string, FacturaDeRecurrente> = new Map(),
 ): readonly RecurrenteDelMes[] {
   return plantillas
-    .filter((p) => p.desde <= mes && (p.activo || registradas.has(p.id)))
-    .map((plantilla): RecurrenteDelMes => {
-      const fecha = fechaDeCargo(plantilla.diaCargo, mes);
-      const entryId = registradas.get(plantilla.id) ?? null;
-      const estado = entryId === null ? estadoDe(fecha, mes, hoy) : 'registrado';
-      return { plantilla, fecha, estado, entryId };
-    })
+    .filter((p) => p.desde <= mes && (p.activo || registradas.has(p.id) || facturadas.has(p.id)))
+    .map((p) => delMes(p, mes, hoy, registradas.get(p.id) ?? null, facturadas.get(p.id) ?? null))
     .sort(
       (a, b) =>
         a.fecha.localeCompare(b.fecha) || a.plantilla.nombre.localeCompare(b.plantilla.nombre),

@@ -8,7 +8,7 @@ import { consentsOfUser, recordPrivacyConsent } from '../src/security';
 import { integrationSuite } from './support/db';
 
 /**
- * `0052_privacy_consents_read.sql` (ADR-137): «Privacidad y mis datos» reads
+ * `0053_privacy_consents_read.sql` (ADR-137): «Privacidad y mis datos» reads
  * the account's latest row per purpose and nobody else's; the ledger stays
  * unreadable to the app role and append-only. Rows the seed never writes (a
  * signup, then a change of mind) are built here.

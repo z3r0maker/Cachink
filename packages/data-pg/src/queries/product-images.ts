@@ -1,5 +1,6 @@
 import { sql, type SQL } from 'drizzle-orm';
 
+import type { Db } from '../client.js';
 import { productImages } from '../schema/catalog.js';
 import type { Tx } from '../sync/cursor.js';
 
@@ -45,4 +46,31 @@ export async function latestProductImage(tx: Tx, productoId: string) {
     .limit(1);
   if (row === undefined || row.bytes === null) return null;
   return row;
+}
+
+/** How long a superseded row is kept before the purge takes it (ADR-134). */
+export const PRODUCT_IMAGE_RETENTION_DAYS = 30;
+
+/**
+ * Delete, across every business, each row a newer row of the same product
+ * superseded at least `olderThanDays` ago, and return how many went (B-19).
+ * The newest row of a product never goes. Runs through
+ * `xangarro.product_images_purge` (0052) because the app role may not DELETE
+ * here, so it takes the pool, not a tenant transaction.
+ */
+export async function purgeSupersededImages(
+  db: Db,
+  olderThanDays: number = PRODUCT_IMAGE_RETENTION_DAYS,
+): Promise<number> {
+  if (!Number.isSafeInteger(olderThanDays) || olderThanDays < 1) {
+    throw new RangeError(`purgeSupersededImages: olderThanDays=${olderThanDays}`);
+  }
+  const [row] = await db.execute<{ n: number | string }>(
+    sql`SELECT xangarro.product_images_purge(${olderThanDays}::int) AS n`,
+  );
+  const purged = Number(row?.n);
+  if (!Number.isSafeInteger(purged) || purged < 0) {
+    throw new Error(`product_images_purge returned ${String(row?.n)}`);
+  }
+  return purged;
 }
