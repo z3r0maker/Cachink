@@ -69,7 +69,12 @@ export async function subirDocumento(
   input: SubirDocumentoInput,
 ): Promise<DocumentoMeta> {
   const { archivo } = input;
-  assertArchivo(archivo.nombre, archivo.mime, archivo.contenido.byteLength);
+  assertArchivo(
+    archivo.nombre,
+    archivo.mime,
+    archivo.contenido.byteLength,
+    deps.documentos.maxBytes,
+  );
   if (!isCarpeta(input.carpeta)) throw new DocumentoInvalidoError('Elige la carpeta.');
   const titulo = input.titulo.trim();
   if (titulo === '') throw new DocumentoInvalidoError('Escribe el nombre del documento.');
@@ -107,7 +112,12 @@ export async function subirVersion(
   },
 ): Promise<DocumentoMeta> {
   const { archivo } = input;
-  assertArchivo(archivo.nombre, archivo.mime, archivo.contenido.byteLength);
+  assertArchivo(
+    archivo.nombre,
+    archivo.mime,
+    archivo.contenido.byteLength,
+    deps.documentos.maxBytes,
+  );
   const anterior = await deps.documentos.porId(input.documentoId);
   if (anterior === null) throw new DocumentoDesconocidoError(input.documentoId);
   if ((await deps.documentos.reemplazadoPor(anterior.id)) !== null) {

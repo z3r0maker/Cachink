@@ -53,6 +53,8 @@ export interface ReceivedInvoiceRepository {
   marcarRegistrada(uuid: string, registro: RegistroFactura): Promise<void>;
   marcarPagada(uuid: string, pagoEntryId: string): Promise<void>;
   marcarCancelada(uuid: string): Promise<void>;
+  /** The SAT's later answer for an unverified invoice; a verified one keeps its status. */
+  marcarEstadoSat(uuid: string, estado: 'vigente' | 'cancelado'): Promise<void>;
   /** Sets aside an upload still waiting for review; a registered or cancelled one stays. */
   descartar(uuid: string): Promise<void>;
   /** The category and project of the supplier's last registered invoice. */

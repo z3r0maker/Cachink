@@ -40,7 +40,13 @@ test('the account menu reaches the business settings', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Menú de usuario' }).click();
   const menu = page.getByRole('menu');
-  for (const name of ['Mi negocio', 'Plan y pagos', 'Sincronización', 'Ayuda']) {
+  for (const name of [
+    'Mi negocio',
+    'Plan y pagos',
+    'Sincronización',
+    'Ayuda',
+    'Privacidad y mis datos',
+  ]) {
     await expect(menu.getByRole('menuitem', { name: new RegExp(name) })).toBeVisible();
   }
   await menu.getByRole('menuitem', { name: /Mi negocio/ }).click();

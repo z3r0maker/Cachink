@@ -78,19 +78,28 @@ export function Montos(props: {
   );
 }
 
-/** «Te recordamos registrarlo cada 28»: the day comes from the payment date. */
-function HacerRecurrente({ fecha }: { readonly fecha: string }) {
+/**
+ * «Te recordamos registrarlo cada 28»: the day comes from the payment date.
+ * With an XML, `nota` says the supplier's invoice is expected instead (CD-06h).
+ */
+export function HacerRecurrente({
+  fecha,
+  nota,
+}: {
+  readonly fecha: string;
+  readonly nota?: string;
+}) {
   const dia = Number(fecha.slice(8, 10));
+  const cada =
+    dia >= 1 && dia <= 31
+      ? `Te recordamos registrarlo cada ${dia}.`
+      : 'Te recordamos registrarlo cada mes.';
   return (
     <label className={mv.casilla}>
       <input className={mv.casillaInput} type="checkbox" name="recurrente" value="si" />
       <span className={mv.casillaText}>
         <span className={mv.casillaTitle}>Hacer recurrente cada mes</span>
-        <span className={d.hint}>
-          {dia >= 1 && dia <= 31
-            ? `Te recordamos registrarlo cada ${dia}.`
-            : 'Te recordamos registrarlo cada mes.'}
-        </span>
+        <span className={d.hint}>{nota ?? cada}</span>
       </span>
     </label>
   );

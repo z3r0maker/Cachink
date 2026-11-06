@@ -7,23 +7,23 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [~] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both now `0.2-borrador`) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[critica]` `[bloq]` `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
+- [~] [critica] [bloq] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.**, domicilio Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco (contrato social, folio SAS20261038080), filled in the aviso drafts, `aviso-simplificado.ts`, `aviso-vinculacion.ts` (both then `0.2-borrador`; the linking one is `0.3-borrador` since 2026-10-31) and the landing's `empresa.js`. Still open: `[RFC]`, `[TELÉFONO]`, `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]`, `[NOMBRE O ÁREA]` (art. 29). Required by LFPDPPP
   art. 15 I and LFPC 76 Bis III; it is also who signs every DPA. A domicilio convencional is fine.
   When it lands: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts`, bump
   `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
 
 ## 1. Textos legales
 
-- [~] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based). `[alta]`
-- [~] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`.
-- [~] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`).
-- [~] Anexo de encargado — `docs/legal/aviso/encargado-clausulas.md`.
-- [~] Procedimiento ARCO — `docs/legal/aviso/arco-procedimiento.md`.
-- [ ] **BLOQUEANTE — Revisión del abogado** de los cinco textos + las cinco confirmaciones en
+- [~] [alta] Aviso de privacidad integral — `docs/legal/aviso/aviso-integral.md` (generic, category-based).
+- [~] [alta] [bloq] Aviso simplificado (3 variantes) — `docs/legal/aviso/aviso-simplificado.md`.
+- [~] [alta] [bloq] Términos y Condiciones — `docs/legal/aviso/terminos-borrador.md` (replaces `docs/legal/terms.md`).
+- [~] [alta] Anexo de encargado — `docs/legal/aviso/encargado-clausulas.md`.
+- [~] [alta] Procedimiento ARCO — `docs/legal/aviso/arco-procedimiento.md`.
+- [ ] [critica] [bloq] **BLOQUEANTE — Revisión del abogado** de los cinco textos + las cinco confirmaciones en
       `docs/legal/aviso/respuestas-oq-borrador.md` §0.
-- [ ] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
-- [ ] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
-- [ ] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
+- [ ] [media] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
+- [ ] [media] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
+- [ ] [alta] [bloq] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
 
 ## 2. Captura de consentimiento (PRIV-REG-01) — implementado 2026-09-22
 
@@ -46,31 +46,53 @@
       every push — the `portal-e2e` job in `.github/workflows/ci.yml` starts postgres:17, applies and
       seeds the schema, and `test:e2e:coverage` includes `onboarding.spec.ts` (not excluded by
       `playwright.config.ts`).
-- [ ] **PRONTO — Trabajo nocturno de sellado:** llamar `xangarro.privacy_consents_day_root(day)` y obtener una
+- [ ] [media] **PRONTO — Trabajo nocturno de sellado:** llamar `xangarro.privacy_consents_day_root(day)` y obtener una
       NOM-151 constancia (PSC) or an RFC 3161 timestamp; archive it with the day. Decide the PSC.
-- [ ] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
-      simplest: a `consent_versions` table or a versioned file kept forever.
-- [ ] Configuración → Privacidad: mostrar la versión aceptada, alternar novedades (escribe una
-      `surface='configuracion'` row), link to ARCO.
-- [ ] Bloqueo de re-consentimiento al iniciar sesión cuando una versión agregue una finalidad (art. 11); banner en caso contrario.
-- [ ] Decidir casilla vs. botón como consentimiento con el abogado (OQ-N7); hoy: casilla.
+- [x] [alta] [bloq] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
+      simplest: a `consent_versions` table or a versioned file kept forever. **Done 2026-11-06
+      (ADR-137):** every published version stays in `apps/web/src/legal/aviso-simplificado.ts`
+      (`PUBLICADOS`), unedited; `tests/legal-aviso.test.ts` pins each version's hash.
+- [x] [alta] [bloq] Configuración → Privacidad: mostrar la versión aceptada, alternar novedades (escribe una
+      `surface='configuracion'` row), link to ARCO. **Done 2026-11-06 (ADR-137):** «Privacidad y mis
+      datos» in the account menu, for every member: the accepted version and its exact text, the
+      novedades switch, ARCO, Descargar todo and Eliminar mi cuenta (owner), and «Acepto el aviso
+      nuevo» with a banner across the portal until accepted. Aviso 0.3 fixes the path.
+- [ ] [media] The Asesor switch the aviso (§ on the Asesor) and Términos §5 promise «en Configuración →
+      Privacidad» does not exist yet: build it on «Privacidad y mis datos», or change the text.
+- [ ] [media] Bloqueo de re-consentimiento al iniciar sesión cuando una versión agregue una finalidad (art. 11); banner en caso contrario.
+      Progress 2026-11-06 (ADR-137): the banner and «Acepto el aviso nuevo» exist; the sign-in block waits for the
+      first version that adds a purpose.
+- [ ] [media] Decidir casilla vs. botón como consentimiento con el abogado (OQ-N7); hoy: casilla.
 
 ## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)
 
-- [ ] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe → `[critica]` `[bloq]`
+- [x] [critica] [bloq] **BLOQUEANTE — Eliminación de cuenta por autoservicio en el portal** (exportar → confirmar → cancelar Stripe →
       delete; LFPDPPP arts. 21–24, LFPC 76 Bis IX). Not required in the mobile app (no in-app account
-      creation) — see OQ-N4.
-- [ ] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
-      unlinking does not wipe).
+      creation) — see OQ-N4. **Done 2026-11-05 (ADR-136, `feat/eliminar-cuenta`):** Mi negocio ›
+      General › «Eliminar mi cuenta» (replaces «Archivar negocio»): «Descargar todo» (.zip, Excel +
+      JSON), the password once, then the account and every business it owns close at once and are
+      erased 30 days later by `/api/cron/borrar-cuentas`; the folio'd email and a reminder 3 days
+      before carry single-use undo links. Billing, CFDI and consents stay blocked 10 years
+      (`xangarro.account_deletions`, 0051).
+- [ ] [alta] Counsel (O-17) confirms the deletion's figures: 10 years for billing and CFDI (CCom art.
+      38 over CFF art. 30's 5; the aviso §7 now says 10), and 30 calendar days for a self-service
+      erase alongside the ARCO procedure's own deadlines. The backoffice support inbox (a separate
+      database) is not erased by the job: an ARCO file follows its own retention.
+- [x] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
+      unlinking does not wipe). **Done 2026-11-03:** Ajustes → «Desvincular esta caja» offers
+      «Desvincular y borrar» (board MvDesvincularBorrar). It refuses while anything is unsent or
+      refused, empties every local table with `secure_delete` and `VACUUM`
+      (`packages/data/src/wipe-local-data.ts`), clears the token and restarts on the connect screen.
+      Aviso §7 and términos §4 updated. A portal revocation still does not wipe the phone.
 - [x] ARCO intake without a session (`/privacidad/solicitud`) + console handling with business-day
       clock (LFPA art. 28 calendar) and acuse. **Done 2026-10-05, verified against the code:** the
       public form (`apps/web/src/app/privacidad/solicitud/page.tsx`), `solicitar-arco.ts` (folio,
       `kind='arco'`, `dueAt` on the `dias-habiles.ts` CDMX calendar with `plazosArco`'s 20th business
       day), console handling in the inbox (`apps/backoffice/…/inbox/`), and the
       `privacidad-arco.spec.ts` e2e.
-- [ ] Calendario de retención implementado por tabla (cifras de OQ-L13 una vez confirmadas); regla de 72 meses para
+- [ ] [alta] Calendario de retención implementado por tabla (cifras de OQ-L13 una vez confirmadas); regla de 72 meses para
       payment-default data (art. 10).
-- [ ] Protocolo de brechas con la lista de campos del Reglamento art. 65, una persona designada y la cláusula de 72 h para
+- [ ] [alta] Protocolo de brechas con la lista de campos del Reglamento art. 65, una persona designada y la cláusula de 72 h para
       negocios; `security.txt` + vulnerability-disclosure page.
 - [x] Verify Sentry server-side captures no PII before the aviso says so. **Done 2026-10-05:**
       `apps/web/src/server/observability/sentry.ts` inits with `sendDefaultPii: false` and scrubs the
@@ -80,38 +102,59 @@
 
 ## 4. Suscripciones (LFPC art. 76 Bis VIII–IX, en vigor 2025-12-13)
 
-- [ ] **BLOQUEANTE — Cancelar en un clic** desde Configuración → Suscripción. `[critica]` `[bloq]` **Decided 2026-09-26 (owner): an in-app «Cancelar suscripción» button** that calls Stripe
-      directly and confirms inline — not a deep link into the Customer Portal, which is a redirect
-      plus a confirm and leaves «one click» to a lawyer's reading. Today the screen offers only
-      «Administrar pago» → the portal (`administrarSuscripcion`), which is three clicks. We own the
-      copy, the confirmation and the edge cases (already cancelled, past due).
-- [ ] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de cancelación en un clic
-      cancel link (tokenised).
-- [ ] Pantalla de consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa.
-- [ ] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
-- [ ] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout).
-- [ ] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
+- [x] [critica] [bloq] **BLOQUEANTE — Cancelar en un clic** desde Mi negocio › Plan y pagos. **Done 2026-10-31
+      (ADR-132, `feat/billing-cancelar-76bis`):** «Cancelar suscripción» is one tap that sets
+      `cancel_at_period_end` in Stripe, with a folio'd acuse (`billing_cancellations`) and a
+      confirmation email; «Seguir con mi plan» undoes it until the period ends. Replaces «¿Quieres
+      pausar tu suscripción?». Decided 2026-09-26 (owner): in-app, not a Customer Portal deep link.
+- [x] **BLOQUEANTE — Correo de recordatorio de renovación ≥ 5 días hábiles antes de cada cargo**, con un enlace de
+      cancelación en un clic. **Done 2026-10-31 (ADR-132):** `/api/cron/renewal-emails`, daily, from
+      the sixth día hábil before each charge, monthly included, with a SPEI variant; the single-use
+      link opens `/cancelar`, which cancels on the tap, never on open.
+- [x] Consentimiento de cargos recurrentes en el checkout: frecuencia, monto, fecha, aceptación expresa. **Done
+      2026-10-31 (ADR-132):** a required «Acepto…» box inside Stripe Checkout with the total with IVA,
+      the cadence and how to cancel; the webhook copies it to `billing_consents` with
+      `TERMINOS_VERSION`.
+- [ ] [critica] [bloq] **Operador — set the Términos URL in Stripe's Dashboard** (Settings › Public details →
+      `https://xangarro.mx/terminos`) in test and live mode. Until it is set, Stripe refuses the
+      Checkout consent and no paid Checkout opens (ADR-132).
+- [ ] [media] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
+- [ ] [alta] [bloq] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Progress
+      2026-10-31: Checkout shows the domicilio and the quejas address under the pay button
+      (`PROVEEDOR`, ADR-132). Open: the landing, and the phone number, which does not exist yet.
+- [ ] [alta] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
+      Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`).
 
 ## 5. Tiendas de apps
 
-- [ ] **ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad**; formulario de Data Safety de Play —
-      both derived from aviso §3 so they cannot disagree.
-- [ ] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
-      linked inside the app binary + App Store Connect (Guideline 3.1.2).
-- [ ] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
-      Sign in with Apple/Google, deletion via the portal).
-- [ ] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes, sin
+- [~] [alta] [bloq] **ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad**; formulario de Data Safety de Play —
+  both derived from aviso §3 so they cannot disagree. **Answers written 2026-10-30:**
+  `app-registration/apple/PRIVACY-LABEL.md` and `app-registration/google-play/DATA-SAFETY.md`, derived
+  from the code and cross-referenced row by row. Still to do: type them into App Store Connect and Play
+  Console; the manifest is merged by EAS (see PRIVACY-LABEL.md if `ITMS-91053` comes back).
+- [x] **ANTES DE STORES — URLs de términos y privacidad activas** (`xangarro.mx/privacidad`, `/terminos`) y
+      linked inside the app binary + App Store Connect (Guideline 5.1.1(i); 3.1.2 only binds apps that sell
+      subscriptions, which this one does not). Live since 2026-09-24; `/soporte/` links both since
+      2026-10-29; both listings carry them. Done 2026-10-31 in the app: Ajustes has «Privacidad y términos»
+      (both pages open in the browser), and the linking notice opens the aviso from a «Leer el aviso
+      completo» button instead of showing the address as text (boards MvAjustes and MvVincularAviso). The
+      notice's text changed, so `aviso-vinculacion.ts` is `0.3-borrador`; the server still hashes 0.2 for
+      phones on an older build.
+- [x] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
+      Sign in with Apple/Google, deletion via the portal). **Done 2026-10-30:** `app-registration/apple/REVIEW-NOTES.md`
+      and the App access text in `app-registration/google-play/README.md`.
+- [ ] [media] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes, sin
       copyleft; resolve the 2 `Unknown`: `@tamagui/native`, `buffers`).
-- [ ] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)).
+- [ ] [baja] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)).
 
 ## 6. Terceros y contratos
 
-- [ ] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, **Microsoft (Foundry)**, `[alta]` `[bloq]`
+- [ ] [alta] [bloq] DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, **Microsoft (Foundry)**,
       **Anthropic**. Named list delivered to negocios via the Anexo, and on request.
-- [ ] Opción de hosting de Foundry decidida y configurada (recomendada: **Hosted on Azure, US DataZone**);
+- [ ] [media] Opción de hosting de Foundry decidida y configurada (recomendada: **Hosted on Azure, US DataZone**);
       written confirmation of the retention figure before the IA section publishes a number.
-- [ ] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda).
-- [ ] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
+- [ ] [media] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda).
+- [ ] [media] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
       at that boundary.
 
 ## 7. Higiene de producto con peso legal
@@ -122,18 +165,18 @@
       as issuer, on the portal's papel and ticket (`negocio/comprobantes/muestra.ts` →
       `papel.tsx`/`ticket.tsx`), the register (`operador/caja/receipt.ts`, `share-recibo.tsx`) and the
       phone (`packages/ui/src/screens/Checkout/comprobante.ts`).
-- [ ] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo).
-- [ ] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto).
-- [ ] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
-- [ ] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
+- [ ] [media] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo).
+- [ ] [media] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto).
+- [ ] [media] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
+- [ ] [media] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
 
 ## 8. Propiedad intelectual y gobernanza
 
-- [ ] **BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro»** (clases 9, 35, 36, 42) antes `[critica]` `[bloq]`
+- [ ] [critica] [bloq] **BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro»** (clases 9, 35, 36, 42) antes
       public launch; ADR-054 is still "pending clearance".
-- [ ] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa).
-- [ ] Seguro de ciberresponsabilidad — decisión de negocio.
-- [ ] Registro de software ante el INDAUTOR — opcional.
+- [ ] [media] Licencias registradas para imágenes hero/ilustraciones/tipografías (activos aparte de sonidos y datos de mapa).
+- [ ] [baja] Seguro de ciberresponsabilidad — decisión de negocio.
+- [ ] [baja] Registro de software ante el INDAUTOR — opcional.
 
 ## 9. Diferido por decisión (no reabrir sin motivo)
 

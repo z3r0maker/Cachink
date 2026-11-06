@@ -93,6 +93,57 @@ export async function administrarSuscripcion(): Promise<BillingActionResult> {
   }
 }
 
+/** What cancelling or resuming answers the screen: the end date, or a sentence. */
+export type CancelActionResult =
+  | { ok: true; endsAt: string | null }
+  | { ok: false; message: string };
+
+const NO_CAMBIO =
+  'No pudimos cancelar tu suscripción y no se cambió nada. Revisa tu conexión e intenta otra vez; si sigue, escríbenos a hola@xangarro.mx.';
+
+/** A refusal keeps its own sentence; anything else is reported and says nothing changed. */
+function failCancel(error: unknown, where: string, fallback: string): CancelActionResult {
+  const code = (error as { code?: string } | null)?.code;
+  if (error instanceof BillingError || code === 'NOT_PERMITTED') {
+    return { ok: false, message: (error as Error).message };
+  }
+  reportError(error, { endpoint: where });
+  return { ok: false, message: fallback };
+}
+
+/**
+ * [Cancelar suscripción] (LFPC 76 Bis, ADR-132): one tap, no confirmation;
+ * the plan ends at the end of the paid period. Owner only.
+ */
+export async function cancelarSuscripcion(): Promise<CancelActionResult> {
+  try {
+    const session = await requireMember('owner');
+    const r = await liveBillingUseCases().cancel.execute({
+      businessId: session.business_id,
+      channel: 'portal',
+      requestedBy: session.sub,
+    });
+    return { ok: true, endsAt: r.endsAt };
+  } catch (error) {
+    return failCancel(error, 'cancelarSuscripcion', NO_CAMBIO);
+  }
+}
+
+/** [Seguir con mi plan]: takes the cancellation back until the plan's end. Owner only. */
+export async function seguirConMiPlan(): Promise<CancelActionResult> {
+  try {
+    const session = await requireMember('owner');
+    await liveBillingUseCases().resume.execute({ businessId: session.business_id });
+    return { ok: true, endsAt: null };
+  } catch (error) {
+    return failCancel(
+      error,
+      'seguirConMiPlan',
+      'No pudimos reanudar tu plan y no se cambió nada. Intenta otra vez en un momento.',
+    );
+  }
+}
+
 /**
  * What the Suscripción screen shows: plan, status, interval, next charge (or
  * trial end). `null` is the free plan. Any member may look.

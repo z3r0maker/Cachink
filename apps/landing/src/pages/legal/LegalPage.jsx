@@ -9,7 +9,7 @@ const INLINE = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|`[^`]+`|(?<![\w])_[^_]+_(?!
 const LINK = /^\[([^\]]+)\]\(([^)\s]+)\)$/;
 
 /** Links, bold, code and emphasis; everything else is text. */
-function Inline({ text }) {
+export function Inline({ text }) {
   return text.split(INLINE).map((part, i) => {
     const link = LINK.exec(part);
     if (link) {

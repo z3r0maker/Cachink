@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
+  cancelarFactura,
   descartarRevision,
   registrarFacturas,
   registrarPagoFactura,
@@ -15,9 +14,11 @@ import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
 import { documentosDelMovimiento } from '../src/queries/documentos';
+import { createPgBlobStore } from '../src/queries/blobs';
 import { createDocumentRepository } from '../src/queries/documentos';
 import { createReceivedInvoiceRepository, facturasDelMes } from '../src/queries/facturas';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
+import { crearBaseDesechable } from './base-desechable';
 import { borrarLoDe } from './cleanup';
 
 /**
@@ -27,7 +28,6 @@ import { borrarLoDe } from './cleanup';
  */
 const { url, describe } = integrationSuite();
 const AUTOR = 'f-facturas-test';
-const DIR = join(import.meta.dirname, '../drizzle');
 
 let seq = 0;
 /** A month no other run uses, so the month's list is this test's alone. */
@@ -50,7 +50,7 @@ describe('corp received invoices', () => {
       db,
       facturas: createReceivedInvoiceRepository(db),
       ledger: createCorpLedgerRepository(db),
-      documentos: createDocumentRepository(db),
+      documentos: createDocumentRepository(db, createPgBlobStore(db)),
       sat: { estado: async () => 'vigente' as const },
       rfcMexia: async () => RFC_MEXIA_PRUEBA,
       sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
@@ -74,7 +74,7 @@ describe('corp received invoices', () => {
     const uuid = uuidDePrueba();
     const emisor = { rfc: `PPD${mes.replace('-', '').slice(2)}AB1`, nombre: 'Despacho, S.C.' };
     assert.deepEqual(
-      (await subir(d, { uuid, emisor, fecha: `${mes}-30`, metodoPago: 'PPD' })).listas,
+      (await subir(d, { uuid, emisor, fecha: `${mes}-28`, metodoPago: 'PPD' })).listas,
       [uuid],
     );
     const [gasto] = await registrarFacturas(d, {
@@ -90,13 +90,32 @@ describe('corp received invoices', () => {
       categoria: 'administracion',
       projectId: 'xangarro',
     });
-    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-30`, founderId: AUTOR });
+    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-28`, founderId: AUTOR });
     const [delMes] = await facturasDelMes(d.db, mes);
     assert.deepEqual(
       [delMes?.factura.cfdi.uuid, delMes?.factura.pagoEntryId, delMes?.revertida],
       [uuid, pago.id, false],
     );
+    assert.deepEqual([delMes?.pagadaEl, delMes?.revertidaEl], [`${mes}-28`, null]);
     assert.equal(delMes?.factura.cfdi.total, 3_336_67n);
+  });
+
+  it('lists a cancelled invoice on credit with the day its expense was reversed', async () => {
+    const d = deps();
+    const mes = mesLibre();
+    const uuid = uuidDePrueba();
+    await subir(d, { uuid, fecha: `${mes}-02`, metodoPago: 'PPD' });
+    await registrarFacturas(d, {
+      selecciones: [{ uuid, categoria: 'administracion', projectId: null }],
+      founderId: AUTOR,
+      hoy: '2026-10-29',
+    });
+    await cancelarFactura(d, { uuid, fecha: `${mes}-09`, motivo: 'Vino mal', founderId: AUTOR });
+    const [delMes] = await facturasDelMes(d.db, mes);
+    assert.deepEqual(
+      [delMes?.factura.estado, delMes?.revertida, delMes?.pagadaEl, delMes?.revertidaEl],
+      ['cancelada', true, null, `${mes}-09`],
+    );
   });
 
   it('takes a discarded upload again, and never lists one waiting or discarded', async () => {
@@ -134,28 +153,26 @@ describe('corp received invoices', () => {
   });
 
   it('0006 applies over a schema that already has entries', async () => {
-    const ROLLBACK = new Error('rollback');
-    await assert.rejects(
-      // Repeatable read: the other files' rows come and go while this one counts.
-      owner.begin('isolation level repeatable read', async (tx) => {
-        const [antes] = await tx<{ n: string }[]>`SELECT count(*)::text AS n FROM corp.entries`;
-        await tx.unsafe('DROP TABLE corp.received_invoices');
-        await tx.unsafe(
-          readFileSync(join(DIR, '0006_corp_facturas.sql'), 'utf8').replaceAll(
-            '--> statement-breakpoint',
-            '',
-          ),
-        );
-        await tx.unsafe(readFileSync(join(DIR, '0006_zz_corp_facturas_guards.sql'), 'utf8'));
-        const [despues] = await tx<{ n: string }[]>`SELECT count(*)::text AS n FROM corp.entries`;
-        assert.equal(despues?.n, antes?.n);
-        const [vacia] = await tx<
-          { n: string }[]
-        >`SELECT count(*)::text AS n FROM corp.received_invoices`;
-        assert.equal(vacia?.n, '0');
-        throw ROLLBACK;
-      }),
-      (e) => e === ROLLBACK,
-    );
+    // A throwaway database: dropping the table here would lock `entries` for every other file.
+    const base = await crearBaseDesechable();
+    try {
+      await base.aplicar((f) => f < '0006');
+      await base.sql.begin(async (tx) => {
+        await tx`INSERT INTO corp.entries (id, fecha, kind, concepto, source, payload, created_by, created_at)
+                 VALUES ('e-viejo', '2026-09-30', 'comision_bancaria', 'Comisión', 'manual', '{}', ${AUTOR}, now())`;
+        await tx`INSERT INTO corp.entry_lines (id, entry_id, cuenta, debe, haber) VALUES
+                   ('l1', 'e-viejo', 'financiero', 1250, 0), ('l2', 'e-viejo', 'bancos', 0, 1250)`;
+      });
+      await base.aplicar((f) => f.startsWith('0006'));
+      const [entradas] = await base.sql<
+        { n: string }[]
+      >`SELECT count(*)::text AS n FROM corp.entries`;
+      const [facturas] = await base.sql<
+        { n: string }[]
+      >`SELECT count(*)::text AS n FROM corp.received_invoices`;
+      assert.deepEqual([entradas?.n, facturas?.n], ['1', '0']);
+    } finally {
+      await base.cerrar();
+    }
   });
 });

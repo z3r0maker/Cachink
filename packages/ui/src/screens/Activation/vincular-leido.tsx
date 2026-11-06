@@ -10,7 +10,7 @@ import { View } from '@tamagui/core';
 import { BottomSheet, Btn, MText } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
-import { AvisoVinculacion } from './vincular-partes';
+import { AvisoVinculacion } from './aviso-vinculacion';
 
 export interface VincularLeidoProps {
   readonly open: boolean;

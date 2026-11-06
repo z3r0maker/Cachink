@@ -3,7 +3,8 @@
  *
  * Everything about the business (negocio, ISR, empleados, operadores,
  * productos) is managed in the portal; the phone keeps only what belongs to
- * it: Cuenta, Sincronización and Dispositivo.
+ * it: Esta caja, Sincronización, En este teléfono, and the aviso and
+ * términos it opens in the browser (MvAjustes).
  */
 
 import type { ReactElement, ReactNode } from 'react';
@@ -13,11 +14,14 @@ import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import { SettingsAccountSection } from './settings-account-section';
 import { SettingsDeviceSection, type DeviceSettings } from './settings-device-section';
+import { SettingsPrivacySection } from './settings-privacy-section';
 import { SettingsSyncSection } from './settings-sync-section';
 
 export interface SettingsScreenProps {
   readonly device: DeviceSettings;
   readonly onOpenRejected: () => void;
+  /** Restarts the app after «Desvincular y borrar» (the mobile shell's). */
+  readonly restartApp?: () => void;
   /** Dev-only tools (reset database). */
   readonly footer?: ReactNode;
   readonly testID?: string;
@@ -32,9 +36,10 @@ export function SettingsScreen(props: SettingsScreenProps): ReactElement {
       contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 32 }}
     >
       <SectionTitle title={t('settings.hubTitle')} />
-      <SettingsAccountSection />
+      <SettingsAccountSection onOpenRejected={props.onOpenRejected} restartApp={props.restartApp} />
       <SettingsSyncSection onOpenRejected={props.onOpenRejected} />
       <SettingsDeviceSection device={props.device} />
+      <SettingsPrivacySection />
       {props.footer}
     </ScrollView>
   );

@@ -19,7 +19,7 @@ import type { RawRow } from './raw-row.js';
  * Current schema version. Must match the number of entries in
  * `_journal.json`. After consolidation this starts at 1.
  */
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 15;
 
 /**
  * Reads with `all`, not `get`: Drizzle's expo driver steps a `get` once and

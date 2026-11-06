@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import type { FacturaRecibida } from '@xangarro/application/corp';
-import type { FacturaDelMes, Movimiento } from '@xangarro/data-corp';
-import { leerCfdi } from '@xangarro/domain/corp';
-import { cfdiXml, type CfdiDePrueba } from '@xangarro/testing/corp';
+import type { Movimiento } from '@xangarro/data-corp';
 
 import {
   esSinCfdi,
@@ -11,39 +8,10 @@ import {
   filaSinCfdi,
   resumenFacturas,
 } from '../src/server/empresa/facturas-view';
+import { delMes, despacho, factura } from './empresa-facturas-fixture';
 
 /** E-11, board CD-06b: the received invoices of a month, in the board's words. */
-const factura = (o: CfdiDePrueba, f: Partial<FacturaRecibida> = {}): FacturaRecibida => ({
-  cfdi: leerCfdi(cfdiXml(o)),
-  archivo: 'f.xml',
-  estado: 'registrada',
-  estadoSat: 'vigente',
-  categoria: 'administracion',
-  projectId: null,
-  entryId: 'e1',
-  pagoEntryId: null,
-  ...f,
-});
-const delMes = (f: FacturaRecibida, revertida = false): FacturaDelMes => ({
-  factura: f,
-  revertida,
-});
-
 const honorarios = delMes(factura({ fecha: '2026-10-28' }));
-const despacho = delMes(
-  factura(
-    {
-      fecha: '2026-10-30',
-      metodoPago: 'PPD',
-      emisor: { rfc: 'DJU010101AB1', nombre: 'Despacho jurídico, S.C.' },
-      subtotal: '4000.00',
-      iva: '640.00',
-      isr: '0.00',
-      ivaRetenido: '0.00',
-    },
-    { entryId: 'e2' },
-  ),
-);
 const cancelada = delMes(
   factura(
     { fecha: '2026-10-09' },
@@ -92,9 +60,27 @@ describe('filaFactura (E-11)', () => {
 
   it('offers «Registrar pago» and «Cancelar» for an invoice on credit still owed', () => {
     const f = filaFactura(despacho);
-    assert.equal(f.destino.tipo, 'por_pagar');
+    assert.deepEqual(f.destino, {
+      tipo: 'por_pagar',
+      pago: {
+        uuid: despacho.factura.cfdi.uuid,
+        desde: '2026-10-30',
+        desdeTexto: '30 de octubre',
+        montos: [
+          { label: 'Sale del banco', value: '$4,640.00' },
+          { label: 'IVA acreditable', value: '$640.00' },
+        ],
+      },
+    });
     assert.match(f.sub, /a crédito \(PPD\)/);
     assert.equal(f.retenciones, '$0.00');
+  });
+
+  it('says when an invoice on credit was paid (board CD-06e)', () => {
+    const pagada = delMes({ ...despacho.factura, pagoEntryId: 'p1' }, false, {
+      pagadaEl: '2026-11-05',
+    });
+    assert.match(filaFactura(pagada).sub, /a crédito, pagada el 5 nov/);
   });
 
   it('flags a cancelled invoice as never registered, and a reversed one as reversed', () => {
@@ -103,8 +89,21 @@ describe('filaFactura (E-11)', () => {
       ['Cancelada', { tipo: 'texto', texto: 'No se registró' }],
     );
     assert.deepEqual(filaFactura(delMes(despacho.factura, true)).destino, {
-      tipo: 'texto',
-      texto: 'Se revirtió',
+      tipo: 'enlace',
+      href: '/empresa/movimientos/e2',
+      texto: 'Revertido',
+    });
+  });
+
+  it('says when an invoice on credit was cancelled, linking its reversed expense (CD-06f)', () => {
+    const f = filaFactura(
+      delMes({ ...despacho.factura, estado: 'cancelada' }, true, { revertidaEl: '2026-10-31' }),
+    );
+    assert.match(f.sub, /a crédito, cancelada el 31 oct/);
+    assert.deepEqual(f.destino, {
+      tipo: 'enlace',
+      href: '/empresa/movimientos/e2',
+      texto: 'Revertido',
     });
   });
 

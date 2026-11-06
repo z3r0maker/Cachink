@@ -55,6 +55,8 @@ export async function persistActivation(
   await c.set(APP_CONFIG_KEYS.currentBusinessId, data.businessId);
   await c.set(APP_CONFIG_KEYS.mode, 'local');
   await c.set(APP_CONFIG_KEYS.discoveryShown, 'true');
+  // A wiped phone said «Listo» until it was linked again (wipe-device.ts).
+  await c.delete(APP_CONFIG_KEYS.avisoBorrado);
   // Written last: the gate opens only once everything above is in place.
   await c.set(APP_CONFIG_KEYS.activation, JSON.stringify(record));
   return record;

@@ -2,18 +2,15 @@
 
 import { createHash } from 'node:crypto';
 
-import {
-  subirDocumento,
-  subirVersion,
-  type Archivo,
-  type DocumentoMeta,
-} from '@xangarro/application/corp';
+import { subirDocumento, subirVersion, type DocumentoMeta } from '@xangarro/application/corp';
 import { createCorpLedgerRepository, createDocumentRepository } from '@xangarro/data-corp';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { auditedMutation } from '../audited';
+import { almacenParaNuevos } from '../blobs';
 import { hoyEnMexico, requireCorpDb } from '../db/corp';
+import { archivoDelForm } from '../empresa/archivo';
 import { failed } from '../empresa/fallas';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
@@ -26,17 +23,11 @@ import { field, type FormState } from './form-state';
 const deps = () => {
   const db = requireCorpDb();
   return {
-    documentos: createDocumentRepository(db),
+    documentos: createDocumentRepository(db, almacenParaNuevos(db)),
     ledger: createCorpLedgerRepository(db),
     sha256: async (b: Uint8Array) => createHash('sha256').update(b).digest('hex'),
   };
 };
-
-async function archivoDe(form: FormData): Promise<Archivo | null> {
-  const f = form.get('archivo');
-  if (!(f instanceof File)) return null;
-  return { nombre: f.name, mime: f.type, contenido: new Uint8Array(await f.arrayBuffer()) };
-}
 
 const audit = (action: string) => (d: DocumentoMeta) => ({
   action,
@@ -47,7 +38,7 @@ const SIN_ARCHIVO: FormState = { ok: false, message: 'Elige el archivo.' };
 
 async function subir(form: FormData, entryId: string | null): Promise<DocumentoMeta | FormState> {
   const { founder } = await requireFounder();
-  const archivo = await archivoDe(form);
+  const archivo = await archivoDelForm(form);
   if (archivo === null) return SIN_ARCHIVO;
   const { result } = await auditedMutation(audit('empresa.documento_subido'), () =>
     subirDocumento(deps(), {
@@ -89,7 +80,7 @@ export async function adjuntarAMovimientoAction(_p: FormState, form: FormData): 
 export async function subirVersionAction(_p: FormState, form: FormData): Promise<FormState> {
   try {
     const { founder } = await requireFounder();
-    const archivo = await archivoDe(form);
+    const archivo = await archivoDelForm(form);
     if (archivo === null) return SIN_ARCHIVO;
     const { result } = await auditedMutation(audit('empresa.version_subida'), () =>
       subirVersion(deps(), {

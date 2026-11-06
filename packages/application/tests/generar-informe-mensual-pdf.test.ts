@@ -3,6 +3,10 @@ import { describe, expect, it } from 'vitest';
 import type { InformeMensual } from '../src/generar-informe-mensual/generar-informe-mensual-use-case.js';
 import { buildInformeMensualPdf } from '../src/generar-informe-mensual/build-pdf.js';
 
+// `buildInformeMensualPdf` imports the renderer lazily. Loading it here puts
+// that ~140 ms (alone) in collection, not inside the test's timeout.
+await import('@react-pdf/renderer');
+
 const LOGO =
   'data:image/svg+xml;base64,' +
   Buffer.from(
@@ -39,5 +43,6 @@ describe('buildInformeMensualPdf (P-34 + N-19 tail: the logo)', () => {
     expect(conLogo.slice(0, 4)).toEqual(new TextEncoder().encode('%PDF'));
     // The embedded logo makes the document strictly bigger.
     expect(conLogo.length).toBeGreaterThan(sinLogo.length);
-  });
+    // Two real renders, ~50 ms alone; the default 5 s is overrun on a loaded runner.
+  }, 20_000);
 });

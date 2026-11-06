@@ -52,8 +52,30 @@ function baseline(state: MockState, cursor: SnapshotCursor): SnapshotItem[] {
     .map(([productoId, cantidad]) => ({ key: productoId, row: { productoId, cantidad } }));
 }
 
+/**
+ * The newest live row per product, and only when it is a photo: a fresh
+ * device needs no history and no tombstones (ADR-134).
+ */
+function newestPhotos(state: MockState): StoredRow[] {
+  const newest = new Map<string, StoredRow>();
+  for (const r of state.rowsOf('product_images').filter(live)) {
+    const p = String(r.row['productoId']);
+    const cur = newest.get(p);
+    const later =
+      cur === undefined ||
+      String(r.row['createdAt']) > String(cur.row['createdAt']) ||
+      (String(r.row['createdAt']) === String(cur.row['createdAt']) && r.id > cur.id);
+    if (later) newest.set(p, r);
+  }
+  return [...newest.values()].filter((r) => r.row['bytes'] !== null);
+}
+
 function sectionItems(state: MockState, section: SnapshotSection, cursor: SnapshotCursor) {
   if (section === 'stock_baseline') return baseline(state, cursor);
+  if (section === 'product_images')
+    return newestPhotos(state)
+      .sort((a, b) => (a.id < b.id ? -1 : 1))
+      .map((r) => ({ key: r.id, row: r.row }));
   return state
     .rowsOf(section)
     .filter(live)

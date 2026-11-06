@@ -57,7 +57,8 @@ Las decisiones de negocio que tomes con la información de Xangarro son tuyas.
 - Respecto de los datos personales que tú capturas (tus clientes, tus operadores), **tú eres el
   responsable y Xangarro es el encargado**. Las reglas están en el **Anexo A**.
 - Si desvinculas o revocas un dispositivo, los datos ya descargados pueden permanecer en él hasta que
-  lo borres. Lo explicamos en el Aviso de Privacidad.
+  lo borres. En la app puedes borrarlos al desvincular («Desvincular y borrar»). Lo explicamos en el
+  Aviso de Privacidad.
 
 ## 5. Uso permitido y prohibido
 
@@ -118,8 +119,9 @@ Consumidor.
   de cada renovación automática, indicando la fecha y el monto, **con un enlace para cancelar en un
   clic desde el propio correo**. **Puedes cancelar sin penalización** en ese plazo.
 - **Cancelación inmediata.** Puedes cancelar **en cualquier momento** desde el portal, en
-  **Configuración → Suscripción**, sin llamadas, sin trámites y sin tener que escribirnos. Cancelar
-  nunca será más difícil que suscribirse.
+  **Mi negocio › Plan y pagos**, con un solo botón, sin llamadas, sin trámites y sin tener que
+  escribirnos. Cancelar nunca será más difícil que suscribirse. Te mandamos un comprobante con folio
+  a tu correo.
 - **Efecto de la cancelación.** Conservas el servicio hasta el final del periodo que ya pagaste; no se
   renueva después. Puedes exportar todos tus datos antes o después (sección 10).
 - Si cambias de plan a media suscripción, el ajuste se calcula de forma proporcional.
@@ -137,10 +139,13 @@ Consumidor.
 ## 10. Tus datos
 
 - **Son tuyos.** No los vendemos ni los rentamos. Cómo los tratamos está en el Aviso de Privacidad.
-- **Puedes exportarlos** en cualquier momento (Excel y PDF) desde Ajustes, incluso después de
-  cancelar, mientras tu cuenta exista.
-- **Al cancelar** aplicamos los plazos de conservación y supresión del Aviso de Privacidad §7. Puedes
-  pedir el borrado anticipado con los procedimientos de la sección 9 de ese aviso.
+- **Puedes exportarlos** en cualquier momento (Excel y JSON) con **Mi negocio › General › Descargar
+  todo**, incluso después de cancelar tu plan, mientras tu cuenta exista.
+- **Al cancelar** aplicamos los plazos de conservación y supresión del Aviso de Privacidad §7.
+- **Puedes eliminar tu cuenta tú mismo** en **Mi negocio › General › Eliminar mi cuenta**: se cierra
+  al momento, con todos tus negocios, y se borra a los 30 días. Hasta entonces la puedes recuperar con
+  el enlace del correo que te mandamos. También puedes pedirlo con los procedimientos de la sección 9
+  del Aviso de Privacidad.
 - **Respaldos.** Mantenemos respaldos del servicio, pero **te recomendamos exportar periódicamente**.
 - **Contenido de tu negocio.** Nos autorizas únicamente a alojar, procesar y transmitir tu contenido
   para prestarte el servicio, y a usar datos **agregados o disociados** para operar y mejorar el

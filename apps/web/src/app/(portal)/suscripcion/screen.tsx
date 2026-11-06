@@ -12,15 +12,28 @@ import { useSession } from '@/session/provider';
 import { MiNegocioHead } from '../negocio/hub';
 import { AvisoPago } from './aviso';
 import { Consumo } from './consumo';
-import { estadoCopy, estadoTono } from './estado';
+import { estadoCopy, estadoTono, seCancela } from './estado';
 import { Facturas } from './facturas';
 import { fechaLarga } from './fecha';
 import { PlanHero } from './hero';
 import { Incluye } from './incluye';
-import { AsesorBlock, PauseRow } from './parts';
+import { CancelarRow } from './cancelar';
+import { AsesorBlock } from './parts';
 import { Planes } from './planes';
 import { fila } from './resumen.css';
 import { recibe } from './suscripcion.css';
+
+/** The entitlement the phones are signed right now (P-10's debug line). */
+function Recibe({ data }: { readonly data: SuscripcionData }) {
+  const plan = PLAN_NOMBRE[data.recibe.plan];
+  return (
+    <p className={recibe} data-testid="entitlement-debug">
+      {seCancela(data.estado)
+        ? `Tus cajas siguen con el plan ${plan} hasta el ${fechaLarga(data.estado.cancelAt)}; después pasan a Xangarrito.`
+        : `Tus cajas reciben el plan ${plan}, válido hasta el ${fechaLarga(data.recibe.validUntil)}.`}
+    </p>
+  );
+}
 
 /**
  * Mi negocio · Plan y pagos (CfgPlan, P-10): your plan, what you use of it,
@@ -54,12 +67,14 @@ function Contenido(props: {
         mayWrite={mayWrite}
         fiscalCompleto={data.fiscalCompleto}
       />
-      {owner && data.estado !== null ? <PauseRow /> : null}
-      {/* The entitlement the phones are signed right now (P-10's debug line). */}
-      <p className={recibe} data-testid="entitlement-debug">
-        Tus cajas reciben el plan {PLAN_NOMBRE[data.recibe.plan]}, válido hasta el{' '}
-        {fechaLarga(data.recibe.validUntil)}.
-      </p>
+      {owner && data.estado !== null && data.estado.status !== 'lapsed' ? (
+        <CancelarRow
+          planNombre={PLAN_NOMBRE[data.estado.planId]}
+          finPeriodo={data.estado.currentPeriodEnd}
+          cancelAt={data.estado.cancelAt}
+        />
+      ) : null}
+      <Recibe data={data} />
     </>
   );
 }

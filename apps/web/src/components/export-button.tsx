@@ -23,13 +23,13 @@ import { formato as formatoClase } from './export-aviso.css';
 type Dataset = 'ventas' | 'gastos' | 'productos' | 'movimientos' | 'empleados';
 
 const FALLO = 'No pudimos generar el archivo. Intenta de nuevo.';
-const LIMITE = 'Espera unos minutos: hiciste varias exportaciones seguidas.';
+export const LIMITE = 'Espera unos minutos: hiciste varias exportaciones seguidas.';
 
 /** `attachment; filename="x.xlsx"` → `x.xlsx`. */
 const nombreDe = (disposition: string | null, dataset: Dataset) =>
   /filename="([^"]+)"/.exec(disposition ?? '')?.[1] ?? `xangarro-${dataset}.xlsx`;
 
-function guardar(blob: Blob, nombre: string) {
+export function guardar(blob: Blob, nombre: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

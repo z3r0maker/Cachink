@@ -1,0 +1,59 @@
+# «Desvincular y borrar» (MvDesvincularBorrar): the second card of the
+# unlink sheet empties the phone. It waits until nothing is unsent («Enviar
+# ahora» when something is), then the app restarts on the connect screen
+# with «Listo, se borraron los datos». The flow then resets the mock,
+# re-activates and signs Toni back in, leaving the device as the
+# `activated` entrypoint expects.
+#
+# Precondition: activated + signed in (Toni, NIP 1234); starts on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/navigate-to-settings.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'settings-unlink'
+    direction: UP
+- tapOn:
+    id: 'settings-unlink'
+- assertVisible: '.*¿Desvincular esta caja?.*'
+- tapOn:
+    id: 'option-card-borrar'
+# Anything unsent blocks the wipe: send it first (use-desvincular.ts).
+- runFlow:
+    when:
+      visible:
+        id: 'unlink-enviar'
+    commands:
+      - tapOn:
+          id: 'unlink-enviar'
+- extendedWaitUntil:
+    visible:
+      id: 'unlink-todo-enviado'
+    timeout: 20000
+- assertVisible: '.*Desvincular y borrar.*'
+- tapOn:
+    id: 'unlink-confirm'
+# The app restarts after the wipe and lands on the connect screen, empty.
+- extendedWaitUntil:
+    visible:
+      id: 'vincular-borrado'
+    timeout: 30000
+- assertVisible: '.*Listo, se borraron los datos.*'
+- assertVisible:
+    id: 'activation-screen'
+# Leave the device as it was found: the code is single-use, so reset the
+# mock first, then link again and sign Toni in.
+- runScript:
+    file: shared/mock-reset.js
+- runFlow: activation.yaml
+- runFlow: shared/login-operator.yaml

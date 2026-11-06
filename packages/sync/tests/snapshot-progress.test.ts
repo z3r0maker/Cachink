@@ -30,6 +30,7 @@ const tables = (over: Record<string, unknown> = {}) =>
     mensajes_operador: [],
     opening_balances: [],
     opening_balance_clients: [],
+    product_images: [],
     inventory_movements: [],
     feature_flags: {},
     ...over,

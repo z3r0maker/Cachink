@@ -167,6 +167,12 @@ Links to discussion, docs, prior art.
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
 | [129](#adr-129) | 2026-10-08 | RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross | Accepted |
+| [132](#adr-132) | 2026-10-31 | Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout | Accepted |
+| [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
+| [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
+| [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
+| [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
+| [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9327,3 +9333,434 @@ So a persona moral in 626 was shown roughly a fortieth of its estimate.
   The notice says so; O-14's contador sign-off still covers the nuances.
 - The phone and the monthly report pass no régime, so they keep the owner's
   rate, as ADR-089 left them.
+
+---
+
+## ADR-132
+
+**Title:** Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout
+
+**Date:** 2026-10-31
+
+**Status:** Accepted — decided with the owner 2026-10-30 on the El Mostrador canvas («Cancelar y renovar»: SbPlan, SbCancelarEnlace, SbCorreo)
+
+**Context**
+
+The LFPC reform in force since 2025-12-13 (art. 76 Bis VIII–IX) asks a
+subscription to be cancellable as easily as it was bought, to be announced
+before each automatic renewal with a way to cancel from that notice, and to
+rest on an express, informed consent to the recurring charge. Plan y pagos
+offered only «¿Quieres pausar tu suscripción?», a detour into Stripe's
+Customer Portal of three clicks; no email went out before a renewal; and
+Checkout asked for no consent beyond paying. Three of the five subscription
+lines of `docs/launch/production-readiness.md` §4 were launch blockers.
+
+**Decision**
+
+1. **Cancel is one tap and ends at the period's end.** «Cancelar suscripción»
+   on Mi negocio › Plan y pagos calls Stripe directly
+   (`subscriptions.update({ cancel_at_period_end: true })`), with no «¿seguro?»
+   step. Nothing is refunded and nothing more is charged; the business keeps
+   the plan until `cancel_at` and then falls to Xangarrito with its records.
+   «Seguir con mi plan» undoes it until then. The row is rewritten from
+   Stripe's answer at once, so the screen does not wait for the webhook. The
+   immediate `cancelSubscription` stays for its one caller (a SPEI year
+   replacing a card subscription).
+2. **Every cancellation has an acuse.** `billing_cancellations` keeps one
+   append-only row per act (folio `CX-XXXXXX`, channel `portal | correo`, who,
+   when, when the plan ends) and the owner gets a confirmation email with the
+   folio. A confirmation that cannot be sent is reported and never undoes the
+   cancellation.
+3. **Every renewal is announced, monthly included.** A daily cron
+   (`/api/cron/renewal-emails`, 16:00 UTC) emails each active, uncancelled
+   subscription from the sixth día hábil before its charge (LFT art. 74
+   calendar, `restarDiasHabiles`): five clear días hábiles plus a day's margin
+   for a failed run. A renewal first seen inside the window is announced late
+   rather than never. The email states plan, period, date and total with IVA;
+   a SPEI year speaks of its invoice and CLABE instead of a card.
+4. **The reminder's link cancels in one tap, never on open.** Mail scanners
+   open links, so `/cancelar?t=…` (public, no session) only reads and shows one
+   button; the tap cancels through the same use case and spends the link. A
+   link is 256 random bits, stored as its SHA-256 in
+   `billing_renewal_notices`, valid until the charge it announced and only for
+   the subscription it was sent for. A renewal whose email never went out is
+   re-claimed with a new link; the message key carries the link's prefix so the
+   provider never answers a retry with an email whose link no longer works.
+5. **The consent lives inside Stripe Checkout.** `consent_collection:
+   { terms_of_service: 'required' }` with our `custom_text`: the total with
+   IVA, «hoy y el mismo día de cada mes» (or each year), how to cancel, the
+   Términos and the aviso; under the pay button, the supplier's name, address
+   and complaints address. No screen of ours. The webhook copies the tick to
+   `billing_consents` with `TERMINOS_VERSION`, so the proof does not live only
+   at Stripe.
+6. **The supplier is written once.** `PROVEEDOR` in `@xangarro/domain` feeds
+   Checkout, the billing emails' footer and the public page. The phone number
+   is still missing; nothing prints a placeholder in its place.
+
+The three tables are written only by `xangarro_billing`, read by no tenant,
+deleted by nobody (`0049_billing_cancel_76bis.sql`).
+
+**Alternatives considered**
+
+- *Deep-link into Stripe's Customer Portal.* Rejected 2026-09-26: a redirect
+  plus a confirm leaves «one click» to a lawyer's reading, and the copy is not
+  ours.
+- *Cancel immediately with a prorated refund.* Rejected: the owner paid for the
+  period, and Términos §8 already promise service to its end.
+- *A consent screen of our own before Checkout.* Rejected: one more step for
+  every buyer, when Checkout records the tick itself.
+- *Cancel on opening the email link.* Rejected: link scanners would cancel
+  subscriptions nobody asked to cancel.
+
+**Consequences**
+
+- Stripe refuses `terms_of_service: 'required'` until the Términos URL is set in
+  the Dashboard (Settings › Public details): an operator step before Checkout
+  works, listed in `docs/launch/production-readiness.md` §4.
+- The e2e server has no Stripe key, so Playwright proves the reads and the
+  failure states («no se cambió nada»); the successful taps are covered by the
+  unit suites over Stripe fakes.
+- Not in this round: self-service account deletion (its own retention ADR),
+  the 30-day notice for price increases, and the landing's footer.
+
+## ADR-133
+
+**Title:** A `dataviz` token group for charts, separate from the brand palette
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision OD-6 of 2026-10-08 (canvas board «Paleta de datos»)
+
+**Context**
+
+«Empresa»'s Resultados (E-12, board CD-07) is the first screen with charts: a cascade from
+income to net profit, an EBITDA bridge and a six-month trend. The brand palette was built for
+interface, not data. Yellow and black mark actions and selection, and the soft tints are too
+close to each other to tell series apart, above all for colour-blind readers. A chart coloured
+from it would either reuse the action colour for data or pick hex values inline, which
+`pnpm lint:design` forbids.
+
+**Decision**
+
+1. `@xangarro/tokens` gains `dataviz`, eight colours by role: `ingreso`, `restante`, `perdida`,
+   `impuesto`, and one per expense category (`costoServicio`, `ventasMarketing`, `desarrollo`,
+   `administracion`). The values are the board's, after the owner moved income from green to
+   aqua.
+2. Charts take their colours only from `dataviz`; interface surfaces never do. Yellow and black
+   never encode data.
+3. `ingreso` and `administracion` sit below 3:1 on white, so a mark in either always carries its
+   label. Up and down next to each other (`ingreso` beside `perdida`) always carry a + or − sign.
+4. `DESIGN_CONTRACT.md` lists the group under Color, generated like the rest.
+
+**Consequences**
+
+- Every adjacent pair passed the dataviz validator on the board (worst colour-vision-deficiency
+  ΔE 9.2, worst normal-vision ΔE 16.3). A new series colour is added here and re-validated,
+  never picked on a screen.
+- The phone has no charts today; when it does, it reads the same group.
+
+**References**
+
+- OD-6 in `docs/plan/20-command-center.md` §10; E-12; ADR-057 (tokens); ADR-117 (El Mostrador).
+
+## ADR-134
+
+**Title:** Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table
+
+**Date:** 2026-11-03
+
+**Status:** Accepted — owner decision of 2026-11-03 («Yes, via sync»); amends contract §8 (a fourth HYBRID table), Track M's «no product management on the phone» (a photo is capture, not management) and ADR-083 D3's bucket (the same mechanism can carry receipt photos later); tasks C-24, B-19, M-13, P-42
+
+**Context**
+
+A product's visual is two strings: a Lucide icon name (`icono`) and one of eight tints
+(`colorFondo`). The owner wants the real product on the tile, captured on the phone where the
+product is in hand, and explicitly not «the traditional upload»: no file dialog, no crop handles,
+no progress bar. The portal shows the photo; it does not take one for now.
+
+Three facts of the codebase shape the design:
+
+1. **The sync carries JSON rows only.** A pushed row is capped at 16 KB (`MAX_PUSH_ROW_BYTES`),
+   a body at 2 MB, a snapshot page at 1.9 MB. Bytes cannot ride the `products` row.
+2. **Products are HYBRID: a phone inserts, never updates.** Attaching a photo to an existing
+   product is, naively, an update the server refuses (`HYBRID_UPDATE_FORBIDDEN`).
+3. **There is no object storage.** Supabase Storage was ruled out (N-19: its REST needs a JWT our
+   auth never mints); ADR-127 keeps files as `bytea` behind a `BlobStore` port with Azure Blob as
+   the destination after about twenty clients. ADR-083 D3 planned a bucket for receipt photos and
+   nothing was built.
+
+On the device side, both platforms already ship the segmentation this needs, free and offline:
+Apple Vision's `VNGenerateForegroundInstanceMaskRequest` (iOS 17, the model ships with the OS)
+and ML Kit Subject Segmentation on Android (API 24, a one-time ~5 MB model from Play services,
+about 200 ms on a mid-range phone). The four npm wrappers around them are each ~200 lines of
+Swift and Kotlin with no maintenance record (one unpublished since 2024, one at v0.1.0 with no
+history, one whose README admits iOS is unverified). Models we would ship ourselves are worse for
+this market: RMBG-2.0 is non-commercial, BiRefNet is 40 MB or more in the binary and slow on the
+Android phones most emprendedores carry. `@shopify/react-native-skia`, already a dependency,
+encodes WebP with alpha on both platforms.
+
+**Decision**
+
+1. **The photo is a row, not a file.** A new table `product_images` — `id` (ULID), `businessId`,
+   `productId`, `deviceId` (who took it; `null` from the portal), `mime` (`image/webp` only),
+   `bytes` (base64 text on the wire and in SQLite, `bytea` in Postgres), `width`, `height`,
+   `createdAt`. **`bytes = null` is the tombstone**: «Quitar foto» inserts one. The domain entity
+   is `ProductImage` in `packages/domain`; `products` gains no column.
+2. **Append-only, HYBRID.** `product_images` joins `HYBRID_TABLES` beside `inventory_movements`:
+   phones and the portal insert, nobody updates or deletes a row. Replacing a photo is a new row.
+   This sidesteps the hybrid-update ban without touching it, and rides the outbox, the
+   entitlement auth, the pull and the snapshot as they are. The row limit for this table is
+   **64 KB** (`maxPushRowBytes`), its own entry beside `auditorias_inventario`.
+3. **The newest row per product wins**, by `createdAt` then `id` (ULIDs order by time). Two
+   phones photographing the same product within the same second is the only conflict and either
+   photo is right, so nothing is surfaced; this is a deliberate, written carve-out from «never
+   silently merge», confined to this table. Superseded rows are purged server-side 30 days after
+   they are superseded and on the device as soon as a newer one is applied.
+4. **Capture is two taps.** The tile's camera affordance opens `expo-camera` with a square guide;
+   one shot; the subject lifts off the background onto the product's tint (the «lift» motion of
+   `docs/design/el-mostrador.md` §6), and «Listo» saves it. A gallery pick sits behind a long
+   press as the secondary path. No crop UI: the mask's bounding box is the crop.
+5. **Segmentation is ours, on-device, with a fallback that never blocks.** An Expo module in
+   `apps/mobile/modules/subject-lift` (Swift over Vision, Kotlin over ML Kit) returns a PNG cutout
+   cropped to the subject's bounding box, at most 1024 px, and `lifted: boolean`. iOS 16, Android
+   without Play services, a model not yet downloaded, or no subject found → `lifted: false` and a
+   centred square crop of the plain photo. The Android model is requested at app start
+   (`ModuleInstallClient`), so the first capture does not wait for it.
+6. **One asset, 512 px, WebP.** Skia draws the cutout into a 512 × 512 transparent canvas with an
+   8 % margin and encodes WebP at quality 80, stepping down to 70 and 60 until the bytes are
+   under 40 KB (base64 ≈ 55 KB, under the row limit). No thumbnails: a tile is drawn at 120 pt
+   and 512 px covers 4× density. A 4 MB camera JPEG becomes about 30 KB.
+7. **Rendering.** The phone's `ProductoIcono` draws the photo on the tint when the product has
+   one, from a `data:` URI; the icon stays the fallback. The portal serves the newest row from
+   `GET /api/productos/[productId]/imagen` inside `withTenant`, with an ETag of the bytes' hash,
+   and draws it in the catalogue rows and the product sheet; the sheet offers «Quitar foto». The
+   web caja keeps icons until its own sync learns the table (out of scope here).
+8. **The bytes stay behind the ADR-127 port.** `bytea` now; when the tenant data moves to Azure
+   Blob the Postgres side becomes a reference and the wire does not change — the device never
+   learns where the cloud keeps the bytes.
+
+**Alternatives considered**
+
+- *A separate media endpoint and a second outbox* (ADR-083 D3's shape): the path that scales to
+  Azure Blob first and would serve receipt photos too, but it needs a second auth path, a lazy
+  download cache on every phone and a key on the product row (a hybrid update) before one photo
+  shows. Rejected for now; it remains the shape to grow into if a tenant's catalogue outgrows
+  the snapshot (see consequences).
+- *Base64 in the `products` row*: zero new tables, but every pull of a product carries its image,
+  a product edit from the portal re-sends it, and a phone still cannot attach a photo to an
+  existing product. Rejected.
+- *A shipped segmentation model* (RMBG-2.0, BiRefNet via ExecuTorch or ONNX): licence and binary
+  size, above. Rejected.
+- *An npm wrapper*: the same 200 lines, without a maintainer. Rejected; the code lives in the app.
+- *Portal upload with in-browser removal* (`@imgly/background-removal`, a 40–80 MB model
+  download per browser): deferred; the owner wants the phone first.
+
+**Consequences**
+
+- A 1,000-photo catalogue adds about 30 MB to the tenant and about 25 pages to a snapshot
+  activation (the snapshot sends only the newest row per product). Incremental pulls carry only
+  new photos. If a tenant ever outgrows that, the move is to lazy fetch by id over the same
+  table, not a new shape.
+- The export includes the photos: the data is never held hostage (ADR-053 §5).
+- Capture works offline end to end; the only download is Android's segmentation model, once.
+- `expo-camera`'s permission string must name product photos, not only barcodes.
+- Track M's «no product management on the phone» is narrowed: creating a product and giving it
+  a photo are capture; editing its name, price or icon is still the portal's.
+- A new SQLite migration (triggers into the change log), a Postgres migration with RLS, a snapshot
+  section after `products`, and the mock server all learn one table — each with its migration
+  and conformance test, per CLAUDE.md §2.9.
+
+**References**
+
+- Apple Vision `VNGenerateForegroundInstanceMaskRequest` (iOS 17); ML Kit Subject Segmentation
+  (`play-services-mlkit-subject-segmentation:16.0.0-beta1`, API 24).
+- ADR-053 §5 (data never held hostage), ADR-081 (HYBRID insert-only precedent), ADR-083 D3
+  (receipt photos), ADR-103/ADR-128 (what a spec that writes must do), ADR-117 (El Mostrador:
+  the capture boards go on the canvas first), ADR-121 (snapshot paging), ADR-127 (`BlobStore`
+  port, Azure Blob later).
+- C-24, B-19, M-13, P-42 in `docs/plan/`.
+
+## ADR-135
+
+**Title:** «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy
+
+**Date:** 2026-10-30
+
+**Status:** Accepted — owner decision of 2026-10-30 to build E-26 before an Azure account
+exists; details ADR-127 §4 and §5
+
+**Context**
+
+ADR-127 put a `BlobStore` port in front of «Empresa»'s files, with a Postgres adapter for today
+and an Azure Blob adapter for later, and asked for direct browser uploads with short-lived SAS
+URLs, a container under a five-year immutability policy, and a console identity that can create
+and read blobs but never delete them. MEXIA has no Azure account yet. The code has to be ready
+and tested now (Postgres stays the live store), and the move has to be one command once the
+account exists.
+
+**Decision**
+
+1. **The Postgres store is its own table.** `corp.blobs (key, content)` holds the bytes; the
+   console may insert and select, never update or delete. `corp.documents` loses `content` and
+   gains `storage` (`pg` | `azure`) and `blob_key` (unique). Migration 0007 copies every file into
+   `corp.blobs` under its document's id and points the row at it; 0008 drops `content`. Both
+   adapters therefore look alike, and the move to Azure is a copy between two stores.
+2. **Browsers upload into an inbox, not into the kept container.** `corp-entrantes` takes a
+   one-time `cw` SAS PUT (ten minutes) signed after the founder gate and the domain's file check.
+   The console then reads the file (25 MB at most), hashes it, runs the same use case as a form
+   upload and writes it into `corp-docs` with `If-None-Match: *`. Only the console writes the kept
+   container, and only after validation; a lifecycle rule empties the inbox after a day.
+3. **Limits follow the store.** 4 MB on Postgres (the request cap), 25 MB on Azure
+   (`MAX_BYTES_DIRECTO`); the repository exposes its store's limit and the use cases apply it.
+4. **«Ver» on an Azure file redirects** to a ten-minute `r` SAS URL with the name and type set by
+   the SAS. The storage account's origin is not the console's, so the `sandbox` CSP the console
+   puts on Postgres files is not needed for isolation; a Vercel function could not return 25 MB
+   anyway.
+5. **The console signs with the account key.** Delete and overwrite are refused by the container's
+   **locked** time-based immutability policy (1826 days), which binds every caller, the key
+   included. This replaces the plan's «console identity that may create and read, never delete»:
+   there is no Azure-hosted identity on Vercel, and a service principal with a custom role would
+   add a secret and a moving part without adding a refusal the lock does not already give.
+6. **The move is a use case** (`moverDocumentos`): check the SHA-256 recorded at upload, copy,
+   check the copy, then point the row at Azure as the schema's owner. A second run checks and does
+   not rewrite. Emptying `corp.blobs` is a separate command that checks each copy again first.
+
+**Consequences**
+
+- Until Azure is configured nothing changes for the founders; the browser asks for a signed URL,
+  gets none, and the file travels in the form as before.
+- `pg_dump -n corp` still carries every file while they live in `corp.blobs`. After the move,
+  the lift-out (E-44) adds a container copy, verified against the SHA-256 column.
+- The account key is a production secret with the power to write; leaking it cannot destroy a
+  kept file, but it can fill the containers. Rotating it is the response.
+- A failed row insert after a successful blob write leaves an unreferenced blob; nothing reads
+  it, and on Azure it cannot be removed before its retention ends.
+- Azurite does not enforce immutability, so the lock is proven by
+  `scripts/corp-blob-provision.sh --bloquear` against the real container.
+
+**References**
+
+- ADR-127 §4–§5; ADR-125 §2; E-26 and E-44 in `docs/plan/20-command-center.md`; CFF art. 30.
+
+---
+
+## ADR-136
+
+**Title:** Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years
+
+**Date:** 2026-11-05
+
+**Status:** Accepted — decided with the owner 2026-11-04 on the El Mostrador canvas («Eliminar la cuenta»: ElNegocio, ElEliminar, ElProgramada, ElCorreo)
+
+**Context**
+
+The aviso de privacidad promises a titular can cancel their data (LFPDPPP arts. 21–24) and LFPC art.
+76 Bis IX asks a service to be left as easily as it was joined. Until now the portal only offered
+«Archivar negocio», which locked a business and erased nothing; a cancelación request went to staff
+through the ARCO form and was carried out by hand. The aviso also promised an «Excel y JSON» export
+that did not exist. It was a launch blocker in `docs/launch/production-readiness.md` §3.
+
+**Decision**
+
+1. **One action deletes the account and every business it owns.** «Eliminar mi cuenta» lives at the
+   end of Mi negocio › General and replaces «Archivar negocio». Memberships in someone else's
+   business are removed, not their businesses.
+2. **Locked at once, erased in 30 days.** On confirm (`xangarro.account_delete_request`, 0051) every
+   owned business is soft-deleted, every caja revoked, every portal session of the account and of
+   those businesses ended, and the account signs in nowhere (`memberships_for_user` and
+   `negocios_for_user` skip an account with a pending deletion). A daily cron
+   (`/api/cron/borrar-cuentas`) erases on day 30: every `public` table keyed by `business_id`,
+   except the billing and CFDI tables, the memberships, the sessions, the sign-in links and the
+   `auth.users` row.
+3. **Undo by email, once.** The confirmation (with a folio, `EL-XXXXXX`, as the acuse) and a
+   reminder three days before the erase each carry a single-use link of their own to `/eliminacion`;
+   opening it only reads, the tap reopens the businesses and resumes the plans the deletion stopped.
+   Cajas stay unlinked. A third email says when it is done.
+4. **What stays, blocked, for 10 years.** Subscriptions, billing customers, the cancellation acuse,
+   the Checkout and aviso consents and the CFDI payments are not deleted (no role may, by design), and
+   the ledger keeps the defensive minimum to tie them to someone: the account's email and name and
+   each business's name and fiscal identity. Ten years is the longer of Código de Comercio art. 38
+   (a merchant's vouchers) and CFF art. 30 (five years from the return); the aviso §7 says so now.
+5. **The plan stops renewing on confirm** (cancel at period end, as «Cancelar suscripción»), resumes
+   on undo, and is ended outright at the erase. No refund (Términos §9).
+6. **Confirmed with the password, once,** throttled per account like a sign-in, so a stolen session
+   is neither enough nor a password oracle.
+7. **«Descargar todo»** (`/api/export/todo`, owner only): one .zip per business with the five
+   workbooks and `datos.json` (every row the tenant can read, money as exact strings, hashes and
+   binaries left out). Step 1 of the deletion page, optional, and also in Mi negocio.
+
+**Alternatives considered**
+
+- *Erase on confirm.* Rejected: no undo, and a hijacked session wipes a business in a minute.
+- *Keep «Archivar» beside it.* Rejected: two exits that sound alike; the 30-day lock is the archive.
+- *Five years for billing, as the aviso said.* Rejected for MEXIA's own records: below CCom art. 38.
+- *Re-authenticate with an emailed code (ARCO B.3).* Rejected for self-service: the password plus
+  the 30-day undo email cover it with one field.
+
+**Consequences**
+
+- Counsel (O-17) confirms the 10 years and the 30 calendar days beside the ARCO deadlines.
+- The backoffice inbox lives in another database and is not erased by the job: an ARCO file keeps its
+  own retention. Sentry events expire on their own.
+- The purge of the blocked rows at 10 years (`blocked_until`) is the retention calendar's job, still
+  open in readiness §3.
+- Removed: the portal's archive row, its action and use case, and the domain's archive rules. The
+  `business_archive` SQL function stays for support.
+
+---
+
+## ADR-137
+
+**Title:** «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned
+
+**Date:** 2026-11-06
+
+**Status:** Accepted — decided with the owner 2026-11-06 on the El Mostrador canvas («Privacidad y mis datos»: PvPagina, PvMenu)
+
+**Context**
+
+The aviso de privacidad told people to turn off novedades «en Configuración → Privacidad» and to file
+requests from «Ayuda → Privacidad y mis datos»; neither existed. The consent ledger (0034) could be
+appended to but not read by the app, so nobody could see which aviso they had accepted. And only the
+hash of each aviso version was recorded: the text behind an old hash was kept nowhere, so the hash
+proved nothing. Two launch blockers in `docs/launch/production-readiness.md` §2.
+
+**Decision**
+
+1. **One page per person, in the account menu.** «Privacidad y mis datos» (`/privacidad`) replaces the
+   menu's external «Aviso de privacidad» link and is open to every role: consent belongs to the
+   person, not the business. It shows the aviso accepted and when, its exact text in a side panel with
+   its fingerprint, the novedades switch, an ARCO request, and for the owner «Descargar todo» and
+   «Eliminar mi cuenta».
+2. **The ledger is read through one definer** (`privacy_consents_of_user`, 0053): the latest row per
+   purpose for the session's account. Changing a choice is still a new row through
+   `privacy_consent_record`; the table stays unreadable and append-only.
+3. **Novedades** is a switch that saves at once: one explicit row (`configuracion`, `boton`), recorded
+   against the aviso the person accepted.
+4. **Withdrawing the necessary purposes** is not a button here: without them there is no service. The
+   page explains it and routes there: the owner to «Eliminar mi cuenta» (ADR-136), anyone else to the
+   ARCO form.
+5. **Every published aviso version stays in code, unedited.** `PUBLICADOS` in
+   `apps/web/src/legal/aviso-simplificado.ts` keeps each version's paragraphs, publication day and
+   what changed; a test pins each version's SHA-256, so an old text cannot be edited quietly. 0.3 is
+   the first new version: its «Cómo limitar el uso» names «Privacidad y mis datos».
+6. **A new aviso** is accepted on the page («Acepto el aviso nuevo»: express for necesarias, novedades
+   carried over as they were), and a strip above every portal page leads there until then. An account
+   with no acceptance on record sees the same. The sign-in block for a version that adds a purpose
+   (art. 11) waits for the first version that adds one.
+
+**Alternatives considered**
+
+- *A «Privacidad» tab in Mi negocio.* Rejected: admins and viewers could not reach it, and consent is
+  not the business's.
+- *A table of aviso versions in the database.* Rejected: the database would be the only copy and
+  would need seeding; the code is versioned, reviewed and shipped with the text it hashes.
+- *A button that revokes the necessary purposes.* Rejected: a second destructive path beside account
+  deletion, for the same outcome.
+
+**Consequences**
+
+- Every account with no acceptance on record, the seeded ones included, sees the strip until it
+  accepts: that is the honest state.
+- The aviso and the Términos still promise an Asesor switch «en Configuración → Privacidad» that does
+  not exist; a readiness item tracks building it here or changing the text.

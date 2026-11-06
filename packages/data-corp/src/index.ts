@@ -1,7 +1,7 @@
 export { createAgendaRepository } from './queries/agenda.js';
 export { createCorporativoRepository } from './queries/corporativo.js';
+export { createPgBlobStore, documentosEnAlmacen, marcarAlmacen } from './queries/blobs.js';
 export {
-  contenidoDe,
   createDocumentRepository,
   documentosDe,
   documentosDelMovimiento,
@@ -22,6 +22,8 @@ export {
   monthBounds,
   type Movimiento,
 } from './queries/movimientos.js';
+export { importesDeResultados } from './queries/resultados.js';
+export { movimientosDeCaja, type MovimientoCajaDeEntrada } from './queries/caja.js';
 export {
   createFundingCallRepository,
   listFundingCalls,

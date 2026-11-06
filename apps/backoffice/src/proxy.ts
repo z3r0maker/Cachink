@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { ADMIN_COOKIE } from './server/auth/config';
+import { blobOrigins } from './server/blobs/config';
 import { FORBIDDEN_PATH, isMachinePath, isPublicPath, type GateDecision } from './server/gate';
 import { resolveGate } from './server/resolve-gate';
 import { buildCsp, newNonce } from './server/security/csp';
@@ -34,7 +35,7 @@ function respond(decision: GateDecision, request: NextRequest, headers: Headers)
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const nonce = newNonce();
-  const csp = buildCsp(nonce, process.env.NODE_ENV === 'development');
+  const csp = buildCsp(nonce, process.env.NODE_ENV === 'development', blobOrigins());
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);
   headers.set('Content-Security-Policy', csp);

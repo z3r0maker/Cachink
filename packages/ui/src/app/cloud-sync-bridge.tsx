@@ -23,7 +23,7 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { SyncEngine, type RejectedRow, type SyncRunResult } from '@xangarro/sync';
+import { SyncEngine, type RejectedRow, type SyncCounts, type SyncRunResult } from '@xangarro/sync';
 import { useActivationContext } from '../activation/activation-context';
 import { forgetDevice } from '../activation/forget-device';
 import { useActivationState } from '../activation/use-activation-state';
@@ -44,6 +44,8 @@ export interface CloudSyncContextValue {
   readonly listRejected: () => Promise<readonly RejectedRow[]>;
   /** Manual retry of rejected rows: all due now, then one push. */
   readonly requeue: (rows: readonly RowRef[]) => Promise<void>;
+  /** Counts read now from the database, not the last run's («Desvincular y borrar»). */
+  readonly contar: () => Promise<SyncCounts>;
 }
 
 const CloudSyncContext = createContext<CloudSyncContextValue>({
@@ -51,6 +53,7 @@ const CloudSyncContext = createContext<CloudSyncContextValue>({
   syncNow: () => undefined,
   listRejected: async () => [],
   requeue: async () => undefined,
+  contar: async () => INITIAL_CLOUD_SYNC_STATE.counts,
 });
 
 export interface RowRef {
@@ -173,6 +176,7 @@ export function CloudSyncBridge(props: { readonly children: ReactNode }): ReactE
         for (const r of rows) await engine.requeue(r.tableName, r.rowId);
         runner.runManual('push');
       },
+      contar: () => engine.counts(),
     }),
     [state, runner, engine],
   );

@@ -17,6 +17,7 @@ import {
   entregasCredito,
   expenses,
   inventoryMovements,
+  productImages,
   products,
   sales,
   tickets,
@@ -39,6 +40,7 @@ export const PUSH_TABLES: Readonly<Record<PushableTable, SQLiteTable>> = {
   respuestas_operador: respuestasOperador,
   products,
   clients,
+  product_images: productImages,
 };
 
 /** Stable key for a (table, row) pair. */

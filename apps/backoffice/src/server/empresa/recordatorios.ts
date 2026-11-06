@@ -22,11 +22,13 @@ export interface Recordatorio {
   readonly href: string;
 }
 
-/** A recurring charge to register today. */
+/** A recurring charge to register today, or a supplier's invoice to ask for (board CD-06h). */
 export interface CargoDeHoy {
   readonly nombre: string;
   /** In the template's currency: «USD 20.00». */
   readonly monto: string;
+  /** A supplier who invoices every month and has not yet: ask for it, do not register it. */
+  readonly factura: boolean;
 }
 
 export function recordatoriosDe(
@@ -41,14 +43,21 @@ export function recordatoriosDe(
     .sort((a, b) => a.dias - b.dias);
 }
 
-/** Only on the day itself: a charge left unregistered is in Movimientos as «Sugerido». */
+/**
+ * Only on the day itself: a charge left unregistered is in Movimientos as
+ * «Sugerido», an invoice still missing in Recurrentes as «Falta su factura».
+ */
 export function cargosDeHoy(
   recurrentes: readonly RecurrenteDelMes[],
   hoy: string,
 ): readonly CargoDeHoy[] {
   return recurrentes
-    .filter((r) => r.estado === 'sugerido' && r.fecha === hoy)
-    .map((r) => ({ nombre: r.plantilla.nombre, monto: montoEstimado(r.plantilla) }));
+    .filter((r) => (r.estado === 'sugerido' || r.estado === 'falta_factura') && r.fecha === hoy)
+    .map((r) => ({
+      nombre: r.plantilla.nombre,
+      monto: montoEstimado(r.plantilla),
+      factura: r.estado === 'falta_factura',
+    }));
 }
 
 const cuando = (dias: number) => (dias === 1 ? 'mañana' : `en ${dias} días`);
@@ -60,9 +69,32 @@ function asuntoDe(recordatorios: readonly Recordatorio[], cargos: readonly Cargo
   }
   if (recordatorios.length > 1) return `MEXIA: ${recordatorios.length} obligaciones vencen pronto`;
   const cargo = cargos[0];
-  return cargos.length === 1 && cargo !== undefined
-    ? `MEXIA: hoy toca registrar ${cargo.nombre}`
-    : `MEXIA: hoy toca registrar ${cargos.length} gastos recurrentes`;
+  if (cargos.length !== 1 || cargo === undefined) {
+    return `MEXIA: hoy toca registrar ${cargos.length} gastos recurrentes`;
+  }
+  return cargo.factura
+    ? `MEXIA: hoy toca pedir la factura de ${cargo.nombre}`
+    : `MEXIA: hoy toca registrar ${cargo.nombre}`;
+}
+
+/** Charges to register, then invoices to ask for, each in its own words. */
+function deCargos(cargos: readonly CargoDeHoy[]): readonly string[] {
+  const registrar = cargos.filter((c) => !c.factura);
+  const pedir = cargos.filter((c) => c.factura);
+  return [
+    ...(registrar.length === 0
+      ? []
+      : [
+          `Hoy toca registrar: ${registrar.map((c) => `${c.nombre} (${c.monto})`).join(', ')}.`,
+          'Regístralo con el monto de tu estado de cuenta.',
+        ]),
+    ...(pedir.length === 0
+      ? []
+      : [
+          `Hoy esperamos la factura de: ${pedir.map((c) => c.nombre).join(', ')}.`,
+          'Pídela y regístrala en Facturas: con ella el mes queda listo.',
+        ]),
+  ];
 }
 
 function parrafosDe(
@@ -80,14 +112,7 @@ function parrafosDe(
           ),
           'Recuerda: se marca presentada con su acuse y pagada con su comprobante.',
         ];
-  const gastos =
-    cargos.length === 0
-      ? []
-      : [
-          `Hoy toca registrar: ${cargos.map((c) => `${c.nombre} (${c.monto})`).join(', ')}.`,
-          'Regístralo con el monto de tu estado de cuenta.',
-        ];
-  return [...agenda, ...gastos];
+  return [...agenda, ...deCargos(cargos)];
 }
 
 export function correoDe(

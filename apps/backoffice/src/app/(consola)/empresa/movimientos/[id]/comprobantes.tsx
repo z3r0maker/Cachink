@@ -1,6 +1,7 @@
 import type { DocumentoMeta } from '@xangarro/application/corp';
 import type { Movimiento } from '@xangarro/data-corp';
 
+import { limiteMb } from '@/server/blobs';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
 
@@ -30,6 +31,7 @@ export function Comprobantes(props: {
         entryId={mov.id}
         titulo={`Comprobante · ${mov.concepto}`}
         periodo={mov.fecha.slice(0, 7)}
+        limiteMb={limiteMb()}
       />
     </section>
   );

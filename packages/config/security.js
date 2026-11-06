@@ -42,6 +42,7 @@ export function securityHeaders(o) {
  *   blobs?: boolean;
  *   workers?: boolean;
  *   formAction?: readonly string[];
+ *   connect?: readonly string[];
  *   reportUri?: string;
  * }} o
  */
@@ -56,7 +57,7 @@ export function buildCsp(o) {
     `style-src ${style}`,
     `img-src 'self' data:${o.blobs ? ' blob:' : ''}`,
     `font-src 'self'`,
-    `connect-src 'self'`,
+    `connect-src ${["'self'", ...(o.connect ?? [])].join(' ')}`,
     ...(o.workers ? [`worker-src 'self' blob:`, `manifest-src 'self'`] : []),
     `object-src 'none'`,
     `base-uri 'none'`,

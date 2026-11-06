@@ -11,6 +11,7 @@
     "./cfdi": "./src/cfdi/index.ts",
     "./billing": "./src/billing/index.ts",
     "./email": "./src/email/index.ts",
+    "./cuenta": "./src/cuenta/index.ts",
     "./support-inbox": "./src/support-inbox/index.ts",
     "./usage": "./src/usage/index.ts",
     "./corp": "./src/corp/index.ts"
@@ -30,7 +31,7 @@
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "bcryptjs": "3.0.3",
-    "zod": "^4.6.2",
+    "zod": "^4.6.7",
     "@react-pdf/renderer": "^4.5.1",
     "@xangarro/tokens": "workspace:*",
     "react": "^19.3.0"

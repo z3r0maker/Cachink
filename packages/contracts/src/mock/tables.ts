@@ -25,6 +25,7 @@ export function referenceTables(state: MockState, since: number): PullResponse['
     recurring_expenses: pick('recurring_expenses'),
     conversion_recetas: pick('conversion_recetas'),
     inventory_movements: pick('inventory_movements'),
+    product_images: pick('product_images'),
     mensajes_operador: pick('mensajes_operador'),
     opening_balances: pick('opening_balances'),
     opening_balance_clients: pick('opening_balance_clients'),

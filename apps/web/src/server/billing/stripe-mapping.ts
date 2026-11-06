@@ -100,6 +100,10 @@ export function toBillingEvent(event: Stripe.Event): BillingEvent | null {
         businessId: session.client_reference_id,
         customerId: idOf(session.customer),
         subscriptionId: idOf(session.subscription),
+        checkoutSessionId: session.id,
+        // LFPC 76 Bis: the required Términos box; Stripe does not stamp the tick, the event does.
+        termsAcceptedAt:
+          session.consent?.terms_of_service === 'accepted' ? iso(event.created) : null,
       };
     }
     case 'customer.subscription.created':

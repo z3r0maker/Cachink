@@ -48,6 +48,9 @@ export class FakeFacturas implements ReceivedInvoiceRepository {
   async marcarCancelada(uuid: string) {
     this.#cambiar(uuid, { estado: 'cancelada' });
   }
+  async marcarEstadoSat(uuid: string, estadoSat: 'vigente' | 'cancelado') {
+    if (this.filas.get(uuid)?.estadoSat === 'sin_verificar') this.#cambiar(uuid, { estadoSat });
+  }
   async descartar(uuid: string) {
     if (this.filas.get(uuid)?.estado === 'por_revisar')
       this.#cambiar(uuid, { estado: 'descartada' });
