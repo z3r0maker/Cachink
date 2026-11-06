@@ -341,7 +341,8 @@
 
 ### B-19 The product photo's image route and the purge of superseded rows (ADR-134) [media]
 
-- [ ] Status · **Blocked by:** C-24 · **Blocks:** P-42
+- [x] Status · **Blocked by:** C-24 · **Blocks:** P-42
+      Done: 2026-11-06 · `GET /api/productos/[productId]/imagen` (session + `withTenant`, ULID-checked id, 404 on none or tombstone, `private, no-cache` with a sha256 ETag and 304); `0052_product_images_purge.sql`, a SECURITY DEFINER `xangarro.product_images_purge(days)` that runs across tenants because the app role may not DELETE, wrapped as `purgeSupersededImages(db, 30)` (it takes the pool, not a `Tx`) and run nightly by `/api/cron/purgar-fotos` at 11:00 UTC; the seed gives «Agua de horchata» a 6 KB photo (`scripts/fixtures/horchata.webp`, id `…FT001`). A row goes once a newer row of its product is 30 days old; superseded rows' `sync_log` entries stay, and the pull skips an id whose row is gone. Account erase (ADR-136) already covers the table, being generic over every `business_id` table.
 - **Context:** C-24 already shipped the Postgres half: migration `0050_product_images.sql` (CHECKs
   for WebP, `octet_length(bytes) <= 40960` and sizes up to 512, RLS, append-only grants), the
   `productImages` table with its base64 ↔ `bytea` column type, `SYNCED_TABLES.product_images`,
