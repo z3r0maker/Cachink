@@ -4,7 +4,7 @@ import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
   cancelarFactura,
-  descartarRevision,
+  quitarFactura,
   registrarFacturas,
   registrarPagoFactura,
   subirFacturas,
@@ -90,7 +90,13 @@ describe('corp received invoices', () => {
       categoria: 'administracion',
       projectId: 'xangarro',
     });
-    const pago = await registrarPagoFactura(d, { uuid, fecha: `${mes}-28`, founderId: AUTOR });
+    const pago = await registrarPagoFactura(d, {
+      uuid,
+      fecha: `${mes}-28`,
+      founderId: AUTOR,
+      // The test's months are far ahead; paid on the day itself.
+      hoy: `${mes}-28`,
+    });
     const [delMes] = await facturasDelMes(d.db, mes);
     assert.deepEqual(
       [delMes?.factura.cfdi.uuid, delMes?.factura.pagoEntryId, delMes?.revertida],
@@ -123,7 +129,8 @@ describe('corp received invoices', () => {
     const mes = mesLibre();
     const uuid = uuidDePrueba();
     await subir(d, { uuid, fecha: `${mes}-02` });
-    await descartarRevision(d.facturas);
+    // This upload only: «Cancelar» on the review sets aside every waiting one, other files' too.
+    await quitarFactura(d.facturas, uuid);
     assert.equal((await d.facturas.porUuid(uuid))?.estado, 'descartada');
     assert.deepEqual(await facturasDelMes(d.db, mes), []);
     assert.deepEqual((await subir(d, { uuid, fecha: `${mes}-02` })).listas, [uuid]);

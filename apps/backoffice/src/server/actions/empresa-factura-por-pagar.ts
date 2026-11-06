@@ -34,7 +34,8 @@ export async function registrarPagoAction(_p: FormState, form: FormData): Promis
         action: 'empresa.factura_pagada',
         payload: { uuid, entryId: entry.id, fecha },
       }),
-      () => registrarPagoFactura(deps(), { uuid, fecha, founderId: founder.id }),
+      () =>
+        registrarPagoFactura(deps(), { uuid, fecha, founderId: founder.id, hoy: hoyEnMexico() }),
     );
   } catch (error) {
     if (codigo(error) === 'PERIODO_CERRADO')

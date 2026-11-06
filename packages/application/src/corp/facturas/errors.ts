@@ -56,6 +56,23 @@ export class FacturaSinRegistrarError extends Error {
   }
 }
 
+export class FechaPagoFuturaError extends Error {
+  readonly code = 'FECHA_PAGO_FUTURA' as const;
+  constructor(readonly fecha: string) {
+    super('La fecha de pago no puede ser después de hoy.');
+    this.name = 'FechaPagoFuturaError';
+  }
+}
+
+/** A day the month does not have (`2026-11-31`), or no date at all. */
+export class FechaPagoInvalidaError extends Error {
+  readonly code = 'FECHA_PAGO_INVALIDA' as const;
+  constructor(readonly fecha: string) {
+    super('Elige una fecha de pago válida.');
+    this.name = 'FechaPagoInvalidaError';
+  }
+}
+
 export class FechaPagoAnteriorError extends Error {
   readonly code = 'FECHA_PAGO_ANTERIOR' as const;
   constructor(readonly fecha: string) {
