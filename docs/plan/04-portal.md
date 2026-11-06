@@ -1943,7 +1943,8 @@ WhatsApp).
 
 ### P-42 La foto del producto en el catálogo y en la ficha (ADR-134) [media]
 
-- [ ] Status · **Blocked by:** B-19 · **Blocks:** —
+- [x] Status · **Blocked by:** B-19 · **Blocks:** —
+      Done: 2026-11-06 · the catalogue row and the sheet's Apariencia draw the photo through a shared `ProductPhoto` (the image route with the row id as `?v=`, a fixed pixel size, the glyph on no photo or a failed load); `listProductPhotos` (data-pg) gives each catalogue row its photo, date and register; «Quitar foto» confirms and runs M-13's `QuitarFotoProductoUseCase` over a new Postgres `ProductImagesRepository` that stamps with `productImageStamp` and logs to `sync_log`, and it passes the shared `describeProductImagesRepositoryContract` on Postgres; the sheet remembers a removal locally, so no unsaved edit is lost. `e2e/producto-foto.spec.ts` on a minted tenant (`addProductPhoto` in `tenant-rows.ts`) is green in desktop, laptop and tablet.
 - **Context:** the phone takes the photo (M-13); the portal shows it and can remove it. No upload
   here yet (ADR-134 alternatives).
 - **Files:** `apps/web/src/app/(portal)/productos/celdas.tsx` (the row's glyph becomes the photo
