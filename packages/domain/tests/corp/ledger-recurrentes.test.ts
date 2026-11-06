@@ -16,6 +16,7 @@ const vercel: PlantillaRecurrente = {
   id: 'rec-vercel',
   nombre: 'Vercel',
   contraparte: 'Vercel Inc.',
+  rfc: null,
   categoria: 'costo_servicio',
   moneda: 'USD',
   montoEstimado: 20_00n,

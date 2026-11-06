@@ -49,6 +49,7 @@ export {
   recurrentesDelMes,
   refRecurrente,
   type EstadoRecurrente,
+  type FacturaDeRecurrente,
   type PlantillaRecurrente,
   type RecurrenteDelMes,
 } from './recurrentes.js';

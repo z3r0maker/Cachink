@@ -1,4 +1,8 @@
-import { leerRefRecurrente, type PlantillaRecurrente } from '@xangarro/domain/corp';
+import {
+  leerRefRecurrente,
+  type FacturaDeRecurrente,
+  type PlantillaRecurrente,
+} from '@xangarro/domain/corp';
 
 import type { NuevaPlantilla, RecurringTemplateRepository } from '../../src/corp/index.js';
 import type { FakeLedger } from './fake-ledger.js';
@@ -6,6 +10,8 @@ import type { FakeLedger } from './fake-ledger.js';
 /** E-02's recurring templates in memory, reading their charges off the fake ledger. */
 export class FakePlantillas implements RecurringTemplateRepository {
   readonly plantillas: PlantillaRecurrente[] = [];
+  /** Template → its RFC's invoice in a month, as a test sets it. */
+  readonly facturadas = new Map<string, ReadonlyMap<string, FacturaDeRecurrente>>();
 
   constructor(private readonly ledger: FakeLedger) {}
 
@@ -38,5 +44,8 @@ export class FakePlantillas implements RecurringTemplateRepository {
       out.set(ref.plantillaId, e.id);
     }
     return out;
+  }
+  async facturadasEn(mes: string) {
+    return this.facturadas.get(mes) ?? new Map<string, FacturaDeRecurrente>();
   }
 }
