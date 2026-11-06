@@ -5,9 +5,11 @@ import { currentSession } from '@/server/current-session';
 import { loadChecklistSignals } from '@/server/onboarding/load';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
+import { avisoNuevoPara } from '@/server/privacidad/estado';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
 import { ROLE_LABEL, type Session } from '@/session/types';
+import { AvisoNuevoFranja } from '@/shell/aviso-nuevo';
 import { initials } from '@/shell/initials';
 import { Header } from '@/shell/header';
 import type { UserMenuProps } from '@/shell/user-menu';
@@ -47,7 +49,7 @@ async function guiaPrimero(role: string, businessId: string): Promise<Pasos | nu
 }
 
 /** What the account menu shows: the business, the role, the plan and pending rows. */
-function accountOf(session: Session, pendingRows: number): UserMenuProps {
+function accountOf(session: Session, pendingRows: number, avisoNuevo: boolean): UserMenuProps {
   return {
     initials: initials(session.businessName),
     businessName: session.businessName,
@@ -55,6 +57,7 @@ function accountOf(session: Session, pendingRows: number): UserMenuProps {
     // The plan from the business's entitlement (B-10), as people name it.
     planLabel: PLAN_NOMBRE[session.planId],
     pendingRows,
+    avisoNuevo,
   };
 }
 
@@ -67,6 +70,7 @@ export default async function PortalLayout({ children }: { children: React.React
   const logoUrl = await loadShellLogo(session.businessId);
   const claims = await readSession();
   const negocios = claims === null ? [] : await negociosOf(claims.sub);
+  const avisoNuevo = claims === null ? false : await avisoNuevoPara(claims.sub);
   const current = {
     businessId: session.businessId,
     nombre: session.businessName,
@@ -87,10 +91,11 @@ export default async function PortalLayout({ children }: { children: React.React
         />
         <div className={column}>
           <Header
-            account={accountOf(session, counts.pendingRows)}
+            account={accountOf(session, counts.pendingRows, avisoNuevo)}
             pendingRows={counts.pendingRows}
             unreadNotices={counts.unreadNotices}
           />
+          <AvisoNuevoFranja visible={avisoNuevo} />
           <main className={main}>
             <div className={content}>{children}</div>
           </main>

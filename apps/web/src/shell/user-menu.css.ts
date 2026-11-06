@@ -70,6 +70,8 @@ export const pill = style({
 
 export const pillTone = {
   plan: style({ background: colors.yellow, color: colors.black }),
+  /** A selected-chip pairing: black with yellow text. */
+  nuevo: style({ background: colors.black, color: colors.yellow, whiteSpace: 'nowrap' }),
   warn: style({
     background: colors.warningSoft,
     color: colors.warningText,

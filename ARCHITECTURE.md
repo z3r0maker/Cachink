@@ -171,6 +171,7 @@ Links to discussion, docs, prior art.
 | [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
 | [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 | [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
+| [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9645,3 +9646,61 @@ that did not exist. It was a launch blocker in `docs/launch/production-readiness
   open in readiness §3.
 - Removed: the portal's archive row, its action and use case, and the domain's archive rules. The
   `business_archive` SQL function stays for support.
+
+---
+
+## ADR-137
+
+**Title:** «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned
+
+**Date:** 2026-11-06
+
+**Status:** Accepted — decided with the owner 2026-11-06 on the El Mostrador canvas («Privacidad y mis datos»: PvPagina, PvMenu)
+
+**Context**
+
+The aviso de privacidad told people to turn off novedades «en Configuración → Privacidad» and to file
+requests from «Ayuda → Privacidad y mis datos»; neither existed. The consent ledger (0034) could be
+appended to but not read by the app, so nobody could see which aviso they had accepted. And only the
+hash of each aviso version was recorded: the text behind an old hash was kept nowhere, so the hash
+proved nothing. Two launch blockers in `docs/launch/production-readiness.md` §2.
+
+**Decision**
+
+1. **One page per person, in the account menu.** «Privacidad y mis datos» (`/privacidad`) replaces the
+   menu's external «Aviso de privacidad» link and is open to every role: consent belongs to the
+   person, not the business. It shows the aviso accepted and when, its exact text in a side panel with
+   its fingerprint, the novedades switch, an ARCO request, and for the owner «Descargar todo» and
+   «Eliminar mi cuenta».
+2. **The ledger is read through one definer** (`privacy_consents_of_user`, 0053): the latest row per
+   purpose for the session's account. Changing a choice is still a new row through
+   `privacy_consent_record`; the table stays unreadable and append-only.
+3. **Novedades** is a switch that saves at once: one explicit row (`configuracion`, `boton`), recorded
+   against the aviso the person accepted.
+4. **Withdrawing the necessary purposes** is not a button here: without them there is no service. The
+   page explains it and routes there: the owner to «Eliminar mi cuenta» (ADR-136), anyone else to the
+   ARCO form.
+5. **Every published aviso version stays in code, unedited.** `PUBLICADOS` in
+   `apps/web/src/legal/aviso-simplificado.ts` keeps each version's paragraphs, publication day and
+   what changed; a test pins each version's SHA-256, so an old text cannot be edited quietly. 0.3 is
+   the first new version: its «Cómo limitar el uso» names «Privacidad y mis datos».
+6. **A new aviso** is accepted on the page («Acepto el aviso nuevo»: express for necesarias, novedades
+   carried over as they were), and a strip above every portal page leads there until then. An account
+   with no acceptance on record sees the same. The sign-in block for a version that adds a purpose
+   (art. 11) waits for the first version that adds one.
+
+**Alternatives considered**
+
+- *A «Privacidad» tab in Mi negocio.* Rejected: admins and viewers could not reach it, and consent is
+  not the business's.
+- *A table of aviso versions in the database.* Rejected: the database would be the only copy and
+  would need seeding; the code is versioned, reviewed and shipped with the text it hashes.
+- *A button that revokes the necessary purposes.* Rejected: a second destructive path beside account
+  deletion, for the same outcome.
+
+**Consequences**
+
+- Every account with no acceptance on record, the seeded ones included, sees the strip until it
+  accepts: that is the honest state.
+- The aviso and the Términos still promise an Asesor switch «en Configuración → Privacidad» that does
+  not exist; a readiness item tracks building it here or changing the text.

@@ -3,7 +3,7 @@ import 'server-only';
 import { avisoVinculacionTextoDe, type AvisoVigente } from '@xangarro/domain';
 import { createHash } from 'node:crypto';
 
-import { AVISO_VERSION, avisoTextoCanonico } from '../../legal/aviso-simplificado';
+import { AVISO_VERSION, avisoTextoCanonico, avisoTextoDe } from '../../legal/aviso-simplificado';
 
 /**
  * The aviso the signup use case records: its version and the SHA-256 of the
@@ -17,6 +17,17 @@ export function avisoVigente(): AvisoVigente {
     sha256: createHash('sha256').update(avisoTextoCanonico(), 'utf8').digest('hex'),
   };
   return cached;
+}
+
+/**
+ * Any published version as the ledger records it (its label and the hash of
+ * its text): a change of the novedades switch is recorded against the aviso
+ * the person accepted, which may be an older one. `null` for one never published.
+ */
+export function avisoDeVersion(version: string): AvisoVigente | null {
+  const texto = avisoTextoDe(version);
+  if (texto === undefined) return null;
+  return { version, sha256: createHash('sha256').update(texto, 'utf8').digest('hex') };
 }
 
 /** The IP as the ledger stores it (ADR-079): a hash, never the address. */

@@ -167,8 +167,9 @@ el plan**.
       granted bool, method ('casilla'|'tacito'), ip, user_agent, created_at)`, append-only.
 - [ ] `[nuevo]` Casilla **expresa** separada de la de términos, sin marcar por defecto (art. 7 datos
       patrimoniales), y casillas opcionales por finalidad secundaria.
-- [ ] `[nuevo]` Pantalla **Configuración → Privacidad**: ver versión aceptada, activar/desactivar
-      finalidades secundarias (revocación, art. 7 último párrafo), enlace a solicitudes.
+- [x] `[nuevo]` Pantalla **Privacidad y mis datos** (menú de tu cuenta, ADR-137): ver versión
+      aceptada y su texto, activar/desactivar novedades (revocación, art. 7 último párrafo), enlace a
+      solicitudes, descargar todo y eliminar la cuenta.
 - [ ] `[nuevo]` Re-consentimiento al entrar cuando cambia una versión con finalidad nueva (art. 11);
       aviso previo por correo y banner para cualquier cambio (art. 15 VI).
 - [ ] `[nuevo]` Correos de novedades separados de los del servicio, con baja en un clic y listado de
