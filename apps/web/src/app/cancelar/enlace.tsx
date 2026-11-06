@@ -1,50 +1,23 @@
 'use client';
 
 import type { CancelLinkView } from '@xangarro/application/billing';
-import { formatMoney, PROVEEDOR } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { CircleCheck, LinkIcon, OctagonX } from 'lucide-react';
-import Link from 'next/link';
 import { useState, useTransition } from 'react';
 
-import { Banner, Card } from '@/components';
-import { button } from '@/components/button.css';
+import { Banner } from '@/components';
 import { confirmarCancelacionPorEnlace } from '@/server/billing/cancel-link-actions';
 
-import { ceja, pila, placaTono } from '../_publico/publico.css';
+import { ceja, pila } from '../_publico/publico.css';
+import { IrA as Ir, TarjetaAviso as Marco } from '../_publico/tarjeta-aviso';
 import { fechaLarga } from '../(portal)/suscripcion/fecha';
 import { btn } from '../(portal)/suscripcion/suscripcion.css';
 import { tituloAcceso } from '../login/auth-card.css';
-import * as s from './cancelar.css';
+import * as s from '../_publico/tarjeta-aviso.css';
 
 type Confirmar = Extract<CancelLinkView, { state: 'confirmar' }>;
 
 const NOMBRE = { xangarro: 'Xangarro', xangarrote: 'Xangarrote' } as const;
-
-function Marco(props: { readonly icono: React.ReactNode; readonly children: React.ReactNode }) {
-  return (
-    <div className={s.marco}>
-      <Card emphasis="hero">
-        <div className={pila}>
-          <span className={placaTono.amarilla} aria-hidden="true">
-            {props.icono}
-          </span>
-          {props.children}
-          <p className={s.pie}>
-            ¿Dudas? Escríbenos a {PROVEEDOR.correo}. {PROVEEDOR.razonSocial}, {PROVEEDOR.domicilio}.
-          </p>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function Ir({ href, label }: { readonly href: string; readonly label: string }) {
-  return (
-    <Link href={href} className={button({ variant: 'secondary', full: true })}>
-      {label}
-    </Link>
-  );
-}
 
 function Datos({ v }: { readonly v: Confirmar }) {
   const filas = [

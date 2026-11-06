@@ -11,13 +11,13 @@
 
 ### A.1 Qué puedes pedir
 
-| Derecho                                    | Qué significa                                                                                | Lo puedes hacer tú mismo                                                          |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Acceso** (art. 22)                       | Saber qué datos tuyos tenemos y cómo los tratamos.                                           | Configuración → Exportar (Excel + JSON) descarga todos los registros del negocio. |
-| **Rectificación** (art. 23)                | Corregir datos inexactos, incompletos o desactualizados.                                     | Configuración → Cuenta / Negocio.                                                 |
-| **Cancelación** (art. 24)                  | Que dejemos de tener tus datos. Pasan por un periodo de bloqueo y después se suprimen.       | No; requiere solicitud (ver A.5).                                                 |
-| **Oposición** (art. 26)                    | Que dejemos de tratarlos por una causa legítima, o si un tratamiento automatizado te afecta. | Configuración → Privacidad para las finalidades secundarias.                      |
-| **Revocación del consentimiento** (art. 7) | Retirar tu consentimiento, sin efectos hacia atrás.                                          | Configuración → Privacidad (finalidades secundarias).                             |
+| Derecho                                    | Qué significa                                                                                | Lo puedes hacer tú mismo                                                           |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Acceso** (art. 22)                       | Saber qué datos tuyos tenemos y cómo los tratamos.                                           | Mi negocio › General › Descargar todo (Excel + JSON) descarga todos los registros. |
+| **Rectificación** (art. 23)                | Corregir datos inexactos, incompletos o desactualizados.                                     | Configuración → Cuenta / Negocio.                                                  |
+| **Cancelación** (art. 24)                  | Que dejemos de tener tus datos. Pasan por un periodo de bloqueo y después se suprimen.       | Sí: Mi negocio › General › Eliminar mi cuenta (se borra a los 30 días). O A.5.     |
+| **Oposición** (art. 26)                    | Que dejemos de tratarlos por una causa legítima, o si un tratamiento automatizado te afecta. | Configuración → Privacidad para las finalidades secundarias.                       |
+| **Revocación del consentimiento** (art. 7) | Retirar tu consentimiento, sin efectos hacia atrás.                                          | Configuración → Privacidad (finalidades secundarias).                              |
 
 ### A.2 Quién la presenta
 

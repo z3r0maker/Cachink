@@ -20,7 +20,6 @@ export * from './errors/cobranza-errors.js';
 export * from './onboarding/index.js';
 export * from './preferencias/index.js';
 export * from './errors/negocio-errors.js';
-export * from './negocio/index.js';
 export * from './nomina/index.js';
 export * from './avisos/index.js';
 export * from './asesor/index.js';

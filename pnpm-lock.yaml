@@ -435,6 +435,9 @@ importers:
       exceljs:
         specifier: ^4.4.0
         version: 4.4.0
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
       jose:
         specifier: 6.2.12
         version: 6.2.12
@@ -495,7 +498,7 @@ importers:
         version: 1.4.11
       '@vanilla-extract/next-plugin':
         specifier: ^2.5.2
-        version: 2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))(yaml@2.9.1)
+        version: 2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))(yaml@2.9.1)
       '@xangarro/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -7779,6 +7782,9 @@ packages:
 
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
+
+  fflate@0.8.3:
+    resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
 
   figures@2.0.0:
     resolution: {integrity: sha512-Oa2M9atig69ZkfwiApY8F2Yy+tzMbazyvqv21R0NsSC8floSOC09BbT1ITWAdoMGQvJ/aZnR1KMwdx9tvHnTNA==}
@@ -16919,10 +16925,10 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0))(yaml@2.9.1)':
+  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))(yaml@2.9.1)':
     dependencies:
-      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
-      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0))
+      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
+      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))
       next: 16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       semver: 7.8.5
     transitivePeerDependencies:
@@ -16943,10 +16949,10 @@ snapshots:
       - webpack
       - yaml
 
-  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))(yaml@2.9.1)':
+  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0))(yaml@2.9.1)':
     dependencies:
-      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
-      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.5(@types/node@22.19.17)))
+      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
+      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0))
       next: 16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       semver: 7.8.5
     transitivePeerDependencies:
@@ -16973,7 +16979,7 @@ snapshots:
     dependencies:
       '@vanilla-extract/css': 1.21.2
 
-  '@vanilla-extract/turbopack-plugin@0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)':
+  '@vanilla-extract/turbopack-plugin@0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.4.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)':
     dependencies:
       '@swc/core': 1.16.2(@swc/helpers@0.5.23)
       '@vanilla-extract/compiler': 0.7.2(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
@@ -19497,6 +19503,8 @@ snapshots:
   fetch-nodeshim@0.4.10: {}
 
   fflate@0.8.2: {}
+
+  fflate@0.8.3: {}
 
   figures@2.0.0:
     dependencies:

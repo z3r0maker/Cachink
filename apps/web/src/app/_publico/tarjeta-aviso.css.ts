@@ -1,3 +1,4 @@
+/** The public one-card pages that answer an emailed link (/cancelar, /eliminacion): ADR-132, ADR-136. */
 import { style } from '@vanilla-extract/css';
 import { borders, colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
