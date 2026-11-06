@@ -93,6 +93,22 @@ export async function addOperator(t: Tenant, row: OperatorRow = {}): Promise<str
   return id;
 }
 
+/** An 8 × 8 lossless WebP: small, but a real image the browser decodes. */
+const TINY_WEBP = 'UklGRh4AAABXRUJQVlA4TBEAAAAvB8ABAAdQ7sLXt/+BiOh/AAA=';
+
+/** A product's photo, as the phone's sync would leave it (P-42, ADR-134). */
+export async function addProductPhoto(t: Tenant, productoId: string): Promise<string> {
+  const id = newUlid();
+  await asTenant(t.biz, async (sql) => {
+    await sql`
+      INSERT INTO product_images (id, producto_id, mime, bytes, width, height,
+                                  business_id, device_id, created_at, updated_at)
+      VALUES (${id}, ${productoId}, 'image/webp', decode(${TINY_WEBP}, 'base64'), 8, 8,
+              ${t.biz}, ${t.deviceId}, now(), now())`;
+  });
+  return id;
+}
+
 /** A second device, for the specs about slots and pairing. */
 export async function addDevice(t: Tenant, nombre = 'Caja norte'): Promise<string> {
   const id = newUlid();

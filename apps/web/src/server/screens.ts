@@ -8,6 +8,7 @@ import {
   listMovimientosInventario,
   listNotices,
   listOperadores,
+  listProductPhotos,
   listProductos,
   historialSync,
   listRejections,
@@ -29,10 +30,16 @@ import { withTenant } from './db';
  * Ventas y gastos has its own, filter-bounded loader in `./movimientos`.
  */
 export const loadProductos = (biz: string) =>
-  withTenant(biz, async (tx) => ({
-    catalogo: await listProductos(tx),
-    movimientos: await listMovimientosInventario(tx),
-  }));
+  withTenant(biz, async (tx) => {
+    // Each row carries its current photo, or null (P-42, ADR-134): the
+    // catalogue asks the image route only for products that have one.
+    const fotos = new Map((await listProductPhotos(tx)).map((f) => [f.productoId, f]));
+    const catalogo = (await listProductos(tx)).map((p) => ({
+      ...p,
+      foto: fotos.get(p.id) ?? null,
+    }));
+    return { catalogo, movimientos: await listMovimientosInventario(tx) };
+  });
 
 export const loadEquipo = (biz: string, hoy: string) =>
   withTenant(biz, async (tx) => ({

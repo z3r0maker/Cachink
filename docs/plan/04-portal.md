@@ -1943,7 +1943,8 @@ WhatsApp).
 
 ### P-42 La foto del producto en el catálogo y en la ficha (ADR-134) [media]
 
-- [ ] Status · **Blocked by:** B-19 · **Blocks:** —
+- [x] Status · **Blocked by:** B-19 · **Blocks:** —
+      Done: 2026-11-06 · the catalogue row and the sheet's Apariencia draw the photo through a shared `ProductPhoto` (the image route with the row id as `?v=`, a fixed pixel size, the glyph on no photo or a failed load); `listProductPhotos` (data-pg) gives each catalogue row its photo, date and register; «Quitar foto» confirms and runs M-13's `QuitarFotoProductoUseCase` over a new Postgres `ProductImagesRepository` that stamps with `productImageStamp` and logs to `sync_log`, and it passes the shared `describeProductImagesRepositoryContract` on Postgres; the sheet remembers a removal locally, so no unsaved edit is lost. `e2e/producto-foto.spec.ts` on a minted tenant (`addProductPhoto` in `tenant-rows.ts`) is green in desktop, laptop and tablet.
 - **Context:** the phone takes the photo (M-13); the portal shows it and can remove it. No upload
   here yet (ADR-134 alternatives).
 - **Files:** `apps/web/src/app/(portal)/productos/celdas.tsx` (the row's glyph becomes the photo
@@ -1952,7 +1953,13 @@ WhatsApp).
   through a `'use server'` action → `recordChange`, so every phone drops it on the next pull),
   `nuevo/vista.tsx` (preview unchanged: a new product has no photo).
 - **Steps:** canvas first — the catalogue row and the Apariencia section with a photo go on the
-  «Portal» page of the canvas and are approved before code (ADR-117); then the two screens; a
+  «Portal» page of the canvas and are approved before code (ADR-117). **Approved by the owner
+  2026-11-06** (boards `PtFotoCatalogo`, `PtFotoEditar`, `PtFotoQuitar`, `PtFotoSinFoto` on
+  «Portal del dueño», with the decisions note beside the row: «Quitar foto» confirms and applies
+  at once, apart from «Guardar cambios»; colour and icon stay, the colour as the photo's ground
+  and the icon as its fallback; a photo that fails to load falls back to the icon without a
+  notice; without a photo, Apariencia says how to take one on the phone, so ship after M-13).
+  Then the two screens; a
   Playwright spec on a minted tenant (`mintTenant()` + a `product_images` row from
   `tenant-rows.ts`) that asserts the image request returns 200 with `image/webp` and that
   «Quitar foto» makes it 404.
