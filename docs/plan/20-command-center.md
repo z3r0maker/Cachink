@@ -539,6 +539,13 @@ with property tests:
   - «Hacer recurrente cada mes» with an XML attached (on board CD-06d): a recurring charge is
     known by `source = 'recurring'` and an invoice by `source = 'cfdi'`, so one entry cannot be
     both yet. It needs a decision on how a template knows its month was registered by an invoice.
+  - «Fecha de pago» bounds, dropped when PR #76 took main's E-11 (2026-11-03).
+    `registrarPagoFactura` refuses only a day before the invoice. It should also refuse a day
+    after today in Mexico (a typed error with its Spanish message) and an impossible day such as
+    2026-11-31, which today fails only by chance, as the ledger's `PeriodoCerradoError`.
+    Test-first in `facturas-pago.test.ts`: both ends of the range, the user-facing message and the
+    bancos amount, not just the error class. Also drop the `hoy` that
+    `resultados.integration.test.ts` passes to `registrarPagoFactura`, which ignores it.
     **Done 2026-10-31, board CD-06g (round 9, approved the same day):**
   - «Consultar al SAT» next to a registered invoice's «Sin verificar» (`consultarSatFactura`).
     «vigente» and «cancelado» are kept (`marcarEstadoSat`, only from `sin_verificar`); no answer
