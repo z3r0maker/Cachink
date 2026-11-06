@@ -113,3 +113,16 @@ describe('Input', () => {
     expect(screen.getAllByTestId('venta-concepto').length).toBeGreaterThan(0);
   });
 });
+
+describe('Input field testID (M-11)', () => {
+  it("puts the base id on the wrapper and '<base>-input' on the field itself", () => {
+    renderWithProviders(
+      <Input testID="inventario-costo" label="Costo" value="" onChange={() => undefined} />,
+    );
+    // The wrapper keeps the base id (existing selectors still match once)…
+    expect(screen.getByTestId('inventario-costo')).toBeTruthy();
+    // …and the field carries the derived id, so a tap lands on the input
+    // and not the label/note padding around it.
+    expect(screen.getByTestId('inventario-costo-input')).toBeTruthy();
+  });
+});

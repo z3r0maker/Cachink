@@ -11,7 +11,8 @@
  *   4. Pass the activation config (API base, secure token store) into
  *      `<AppProviders>`; cloud sync mounts there (A-04, A-07).
  *   5. Mount `<MobileScannerHost />` inside the provider tree so
- *      `openScannerForResult()` has a `<Scanner>` to show.
+ *      `openScannerForResult()` has a `<Scanner>` to show, and hand the
+ *      product photo's native half (`fotoPuertos`, M-13) to the providers.
  *   6. Mount `` for Cloud overlay sub-screens
  *      (Advanced Backend, Password Reset).
  *   7. Wrap the tree in `<GestureHandlerRootView>` (Phase C1) so
@@ -36,7 +37,7 @@ import 'react-native-get-random-values';
 import '../shell/text-decoder-polyfill';
 
 import { LogBox } from 'react-native';
-import { StrictMode, type ReactElement } from 'react';
+import { StrictMode, useEffect, type ReactElement } from 'react';
 
 // Victory Native XL + react-native-reanimated use deprecated StrictMode
 // APIs internally — harmless but noisy. Suppress until upstream fixes land.
@@ -65,6 +66,8 @@ import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { useMobileDeviceContext } from '../shell/use-device-context';
 import { mobileActivationConfig } from '../shell/activation-config';
+import { fotoPuertos } from '../shell/foto-puertos';
+import { prepareSubjectLift } from '../../modules/subject-lift';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
 // Refresh re-evaluations are safe.
@@ -110,11 +113,15 @@ export default function RootLayout(): ReactElement {
 function MobileApp(props: {
   readonly deviceContext: ReturnType<typeof useMobileDeviceContext>;
 }): ReactElement {
+  // Android asks Play services for the product-photo lift's model now, so the
+  // first photo finds it there (M-13); iOS has nothing to fetch.
+  useEffect(() => void prepareSubjectLift(), []);
   return (
     <AppProviders
       platform="mobile"
       deviceContext={props.deviceContext}
       activation={mobileActivationConfig}
+      fotoPuertos={fotoPuertos}
       overlays={
         <>
           <MobileScannerHost />

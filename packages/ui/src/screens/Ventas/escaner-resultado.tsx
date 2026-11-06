@@ -28,7 +28,7 @@ function Agregado({ e }: { e: UseEscaner }): ReactElement | null {
   const { p } = e.estado;
   return (
     <View testID="escaner-agregado" style={{ ...CARD, flexDirection: 'row', alignItems: 'center' }}>
-      <ProductoIcono icono={p.icono} tint={p.tint} />
+      <ProductoIcono icono={p.icono} tint={p.tint} productoId={p.id} />
       <View flex={1} minWidth={0}>
         <MText
           size="md"

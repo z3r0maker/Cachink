@@ -38,6 +38,7 @@ export * from './in-memory-caja-movimientos-repository.js';
 export * from './in-memory-cancelacion-logs-repository.js';
 export * from './in-memory-mensajes-operador-repository.js';
 export * from './in-memory-respuestas-operador-repository.js';
+export * from './in-memory-product-images-repository.js';
 export * from './fixtures/index.js';
 // `TEST_DEVICE_ID` is a shared runtime constant used by both the in-memory
 // tests inside this package and downstream contract tests. Re-exported

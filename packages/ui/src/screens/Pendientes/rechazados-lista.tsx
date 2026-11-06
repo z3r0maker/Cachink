@@ -100,7 +100,7 @@ export function RechazadosLista(p: {
     <QuietPanel
       label="No se pudieron enviar"
       count={p.rows.length}
-      action={Todos(p)}
+      action={<Todos rows={p.rows} onRetry={p.onRetry} />}
       testID="no-enviados-screen"
     >
       <MText

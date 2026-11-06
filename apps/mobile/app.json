@@ -49,9 +49,17 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Xangarro usa la cámara para escanear el código QR que vincula este dispositivo a tu negocio y los códigos de barras de tus productos.",
+          "cameraPermission": "Xangarro usa la cámara para escanear el código QR que vincula este dispositivo a tu negocio y los códigos de barras de tus productos, y para tomar la foto de cada producto.",
           "microphonePermission": false,
           "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Xangarro abre tu galería para que elijas la foto de un producto.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ],
       "./plugins/with-min-pod-deployment-target.js"

@@ -29,6 +29,7 @@ import {
   InMemoryCancelacionLogsRepository,
   InMemoryMensajesOperadorRepository,
   InMemoryRespuestasOperadorRepository,
+  InMemoryProductImagesRepository,
 } from '@xangarro/testing';
 import type { Repositories } from '../src/app/repository-provider';
 
@@ -60,6 +61,7 @@ export function buildTestRepos(overrides?: Partial<Repositories>): Repositories 
     cancelacionLogs: new InMemoryCancelacionLogsRepository(),
     mensajesOperador: new InMemoryMensajesOperadorRepository(),
     respuestasOperador: new InMemoryRespuestasOperadorRepository(),
+    productImages: new InMemoryProductImagesRepository(),
     ...overrides,
   };
 }

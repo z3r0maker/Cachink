@@ -93,7 +93,9 @@ function LineaAmplia(p: TicketLineasProps & { readonly l: LineaTicket }): ReactE
   const info = p.info.get(l.productoId);
   return (
     <View testID={`ticket-linea-${l.productoId}`} flexDirection="row" gap={12} paddingVertical={12}>
-      {info ? <ProductoIcono icono={info.icono} tint={info.tint} /> : null}
+      {info ? (
+        <ProductoIcono icono={info.icono} tint={info.tint} productoId={l.productoId} />
+      ) : null}
       <View flex={1} gap={8}>
         <View flexDirection="row" gap={8}>
           <Nombre l={l} />

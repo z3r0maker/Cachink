@@ -51,6 +51,7 @@ export function Concepto({ f }: { readonly f: GastoForm }): ReactElement {
   return (
     <Campo label="¿Qué compraste?">
       <TextInput
+        autoCorrect={false}
         testID="gasto-concepto"
         aria-label="¿Qué compraste?"
         placeholder="Cilindro de gas"
@@ -107,6 +108,7 @@ export function Proveedor({ f }: { readonly f: GastoForm }): ReactElement {
   return (
     <Campo label="¿A quién le pagaste? (opcional)">
       <TextInput
+        autoCorrect={false}
         testID="gasto-proveedor"
         aria-label="¿A quién le pagaste? (opcional)"
         placeholder="La tienda, el gasero, el taxista"
