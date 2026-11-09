@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'mx.xangarro'
+version = '1.0.0'
+
+android {
+  namespace "mx.xangarro.subjectlift"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  // ML Kit Subject Segmentation (ADR-134): the model is unbundled, served by
+  // Google Play services and requested at app start through ModuleInstallClient.
+  implementation 'com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1'
+  implementation 'com.google.android.gms:play-services-base:18.11.1'
+  implementation 'androidx.exifinterface:exifinterface:1.4.2'
+}

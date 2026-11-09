@@ -163,14 +163,19 @@ Links to discussion, docs, prior art.
 | [121](#adr-121) | 2026-09-26 | The device bootstrap is a paged snapshot — a stock baseline plus 90 days of movements — not the tenant's whole history | Accepted |
 | [122](#adr-122) | 2026-09-26 | Heavy portal reads are bounded: streamed exports on their own pool, a 13-month Estados, and device requests shed with 503 instead of queued | Accepted |
 | [123](#adr-123) | 2026-09-26 | The browser caja is one tab, counts «por enviar» the one way the phone does, closes with records still to send, and pulls while idle | Accepted |
+| [124](#adr-124) | 2026-09-28 | The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal | Accepted |
 | [125](#adr-125) | 2026-10-08 | The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post | Accepted |
 | [127](#adr-127) | 2026-10-08 | «Empresa»'s documents: bytea in `corp` for now, Azure Blob immutable storage before the Tablero's attachments | Accepted |
 | [128](#adr-128) | 2026-10-28 | A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest | Accepted |
+| [129](#adr-129) | 2026-10-08 | RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross | Accepted |
+| [130](#adr-130) | 2026-10-08 | CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan | Accepted |
+| [131](#adr-131) | 2026-10-08 | No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it | Accepted |
 | [132](#adr-132) | 2026-10-31 | Cancelling and renewing under LFPC art. 76 Bis: one tap at period end, a reminder with a one-click link before every charge, and the consent inside Stripe Checkout | Accepted |
 | [133](#adr-133) | 2026-10-30 | A `dataviz` token group for charts, separate from the brand palette | Accepted |
 | [134](#adr-134) | 2026-11-03 | Product photos: lifted off the background on the phone, 512 px WebP, and synced as an append-only `product_images` table | Accepted |
 | [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 | [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
+| [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -8995,6 +9000,41 @@ misreports data:
 
 ---
 
+## ADR-124
+
+**Title:** The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal
+
+**Date:** 2026-09-28
+
+**Status:** Accepted — Track M (M-12); amends ADR-027's consent surface, keeps its rules
+
+**Context**
+
+ADR-027 put Sentry behind explicit consent through a first-launch `ConsentModal`.
+The Track M rebuild (M-01…M-09) left that modal unmounted: the phone now shows
+the aviso de privacidad when the caja is linked (N-34 variante B, the same
+`AvisoVinculacion` the web caja shows), and that aviso already says crash reports
+are optional and are turned on in Ajustes, where `CrashReportingToggle` lives.
+A second, earlier modal would ask the same thing before the operator has seen
+the aviso.
+
+**Decision**
+
+- `ConsentModal` is removed. The consent surface is the linking aviso plus the
+  Ajustes switch.
+- Everything else in ADR-027 holds: reporting is off by default, PII scrubbing is
+  always on, and Sentry never starts partially; it starts only once the switch
+  is on.
+
+**Consequences**
+
+- A phone reports nothing until someone turns the switch on in Ajustes.
+- `docs/legal/aviso/aviso-simplificado.md` still mentions a "pantalla de
+  consentimiento de reportes de fallas"; counsel's review (O-17) should word it
+  as the Ajustes switch.
+
+---
+
 ## ADR-125
 
 **Title:** The founders' command center («Empresa») lives in the console for now, keeps its own `corp` schema so it can move out, keeps books as a simplified double-entry ledger, and lets LLM agents propose but never post
@@ -9123,10 +9163,10 @@ and E-27 (minutas)
 
 E-04's rule is that an obligation is not marked presentada without its acuse, nor pagada without
 its proof of payment, so the evidence has to be stored with E-04, not later. The plan named a
-private `corp-docs` storage bucket. But ADR-124 §2 makes the area movable by one dump:
+private `corp-docs` storage bucket. But ADR-125 §2 makes the area movable by one dump:
 `pg_dump -n corp` is the whole of it. A bucket would split the books from their evidence, and the
 console's corp role (`xangarro_corp`) cannot reach Supabase Storage without the service-role key,
-which ADR-124 keeps away from corp. The repository already keeps small files as bytea (logos,
+which ADR-125 keeps away from corp. The repository already keeps small files as bytea (logos,
 assisted imports).
 
 Phase 0's volume is small: a few PDFs a month (acuses, the 32-D opinion, payment proofs, actas)
@@ -9171,37 +9211,11 @@ twenty clients (owner, 2026-10-08), so a Supabase Storage bucket would be migrat
 
 **References**
 
-- ADR-124 §2 (one schema, one dump); CFF art. 30 (five years); E-04, E-05, E-20, E-26, E-27,
-  E-31 and E-32 in `docs/plan/20-command-center.md`.**Title:** The phone asks about crash reports at linking and in Ajustes, not in a first-launch modal
+- ADR-125 §2 (one schema, one dump); CFF art. 30 (five years); E-04, E-05, E-20, E-26, E-27,
+  E-31 and E-32 in `docs/plan/20-command-center.md`.
 
-**Date:** 2026-09-28
+---
 
-**Status:** Accepted — Track M (M-12); amends ADR-027's consent surface, keeps its rules
-
-**Context**
-
-ADR-027 put Sentry behind explicit consent through a first-launch `ConsentModal`.
-The Track M rebuild (M-01…M-09) left that modal unmounted: the phone now shows
-the aviso de privacidad when the caja is linked (N-34 variante B, the same
-`AvisoVinculacion` the web caja shows), and that aviso already says crash reports
-are optional and are turned on in Ajustes, where `CrashReportingToggle` lives.
-A second, earlier modal would ask the same thing before the operator has seen
-the aviso.
-
-**Decision**
-
-- `ConsentModal` is removed. The consent surface is the linking aviso plus the
-  Ajustes switch.
-- Everything else in ADR-027 holds: reporting is off by default, PII scrubbing is
-  always on, and Sentry never starts partially; it starts only once the switch
-  is on.
-
-**Consequences**
-
-- A phone reports nothing until someone turns the switch on in Ajustes.
-- `docs/legal/aviso/aviso-simplificado.md` still mentions a "pantalla de
-  consentimiento de reportes de fallas"; counsel's review (O-17) should word it
-  as the Ajustes switch.
 ## ADR-128
 
 **Title:** A spec that writes owns its tenant; the seed is reference data, and one factory mints the rest
@@ -9272,6 +9286,249 @@ the usual job and two causes behind nearly all of it.
   one tenant and still run one file at a time. Giving the door a tenant of its
   own is what would let those projects run in parallel, and it is the next step,
   not this one.
+
+---
+
+## ADR-129
+
+**Title:** RESICO is estimated by persona: a persona moral in 626 owes 30 % on utilidad, not the física's rate on gross
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — amends ADR-089 §1 (the 626 row)
+
+**Context**
+
+ADR-089 estimated every 626 business with the Art. 113-E table: 1.00 %–2.50 %
+over the month's gross income. That table is RESICO **de personas físicas**
+(Título IV). The SAT catalogue opens 626 to personas morales too
+(`REGIMEN_FISCAL['626']` is `['moral', 'fisica']`), and their RESICO is a
+different chapter — LISR Título VII, **Capítulo XII**, arts. 206–215 (verified
+against the Cámara de Diputados text, última reforma DOF 01-04-2024; the 2026
+package left these articles as they were):
+
+- Art. 207: income is accumulated when **efectivamente percibido** (cash basis).
+- Art. 211: the monthly provisional payment is the **Art. 9 rate (30 %)** over
+  the year-to-date ingresos efectivamente percibidos less the deducciones
+  autorizadas efectivamente erogadas (and PTU paid, and prior losses), crediting
+  the provisional payments already made.
+
+So a persona moral in 626 was shown roughly a fortieth of its estimate.
+
+**Decision**
+
+1. `calcularIsrPorRegimen` and `calculateEstadoDeResultados` take an optional
+   `persona: TipoPersona | null`. The portal derives it from the business's RFC
+   with `tipoPersona` (12 characters: moral). `metodoIsr(regimenSat, persona)`
+   is the one routing rule; the estimate and the notice both read it.
+2. **626 + moral → `resicoMoral`:** 30 % of the period's utilidad operativa, base
+   `utilidad`, zero on a loss. Utilidad operativa stands in for the cash-basis
+   profit, as it stands in for the base gravable under 612. Because Art. 211 is
+   cumulative and credits earlier payments, a multi-month period is **one**
+   base — months offset each other — not a sum of monthly estimates.
+3. **626 + física, or persona unknown (no RFC yet) → `resico`,** unchanged. The
+   seed and most owners have no RFC on file; the física table is the common case
+   and was the behavior before this ADR.
+4. The notice names the method: «ISR referencial (RESICO persona moral, 30% sobre
+   tu utilidad)», says that the SAT's base is what was cobrado less what was
+   pagado in the year, and keeps ADR-089's disclaimer. The «no hubo utilidad»
+   variant now applies to every profit-based method, `resicoMoral` included.
+
+**Consequences**
+
+- A RESICO persona moral sees an estimate of the right order. It stays an
+  estimate: the statements are accrual (every venta counts, paid or not), there
+  is no PTU or prior-loss offset, and a custom period does not start in January.
+  The notice says so; O-14's contador sign-off still covers the nuances.
+- The phone and the monthly report pass no régime, so they keep the owner's
+  rate, as ADR-089 left them.
+
+---
+
+## ADR-130
+
+**Title:** CoDi returns as a real cobro: Xangarro certifies with Banxico as a tercero desarrollador, a manual bridge ships first on the shop's own bank QR, and CoDi is on every plan
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — owner decisions of 2026-10-08; supersedes ADR-108; amends ADR-066 (CoDi is not
+`cobrosIntegrados`) and ADR-117 (a QR/CoDi ticket reads «CoDi» again); tasks K-01 … K-31 in
+`docs/plan/22-codi.md`, design brief `docs/plan/23-codi-design.md`
+
+**Context**
+
+ADR-108 retired QR/CoDi because it was only a label: the cashier tapped it and «Pago recibido»,
+nothing drew a QR or confirmed the money. That was right then, and it stays the bar: CoDi comes
+back only as something the product actually does.
+
+Three things changed in September and October 2026:
+
+- The **Ley de Economía Digital** passed the Cámara de Diputados on 2026-10-06 and goes to the
+  Senado. It does not oblige a small shop to stop taking cash; Hacienda will name the sectors
+  where digital payment can become the only one (gasolineras and carreteras first). It frames
+  SPEI and CoDi as free for buyer and seller, and the government's pitch is the small shop
+  charging with a QR on its phone.
+- **Banks must ship CoDi in their apps by December**, and several committed to the first half
+  of November, before El Buen Fin (2026-11-13 … 17).
+- Banxico's SPEI rules of 2026-06-17 create the **Cuenta Nivel 2 Bis** for micro-merchants
+  (15,000 UDIs a month, at least 12,000 from SPEI/CoDi/DiMo), so a shop's digital receipts
+  start to matter to the shop.
+
+Banxico's _Guía de participación en CoDi® para comercios y terceros desarrolladores_ (last
+updated 2023-05-02) sets the terms for software that generates cobros: the developer is a
+persona moral that registers and certifies with Banxico (carta de intención with notarised
+company papers delivered in person in CDMX, Banxico may take up to 4 months to comment;
+confidentiality agreement; technical documentation; trademark licence; sandbox; pre-check;
+certification, with information-security requirements). The developer may not charge per
+cobro or by amount, may not surcharge a CoDi payment, must pay the beneficiary directly with
+no concentrating account, and any extra service must be optional. MEXIA, S.A.S. (ADR-125) is the
+persona moral that applies.
+
+**Decision**
+
+1. **Certify, and ship an honest bridge first.** MEXIA registers and certifies Xangarro as a
+   tercero desarrollador (K-01). Until certification, a **bridge** ships: the shop's own bank
+   generates its static CoDi QR, the owner scans it into the portal once, and Xangarro shows it at
+   the counter. The bridge never claims to confirm anything: its screen says the cashier checks
+   their bank app, and its button is «Ya me llegó». That is the difference from what ADR-108
+   retired: no promise the product does not keep.
+2. **Certified flow: live QR, bridge as fallback.** Once certified, tapping CoDi asks the server
+   for a cobro (amount and concepto inside the QR); the server signs the request to Banxico,
+   holds the intent, and verifies Banxico's signed result notification. The device polls, and on
+   «pagado» **writes the venta itself** with the CoDi folio as its `payment_ref` (ADR-066's
+   one-writer rule). Offline, a Banxico timeout or an expired code drop the same screen to the
+   bridge QR with «Ya me llegó». A sale is never blocked (§2.2). Push to the customer's phone
+   number is not built: one more field and personal data, for orders we do not take.
+3. **CoDi is on every plan, Xangarrito included,** under its own capability `codi` and its own
+   kill switch, separate from `cobrosIntegrados` (card terminals stay paid, ADR-066). Banxico's
+   rule against charging for CoDi is read strictly: no plan price buys it.
+4. **The money model is ADR-066's:** money settles to the shop's own CLABE, Xangarro takes no fee
+   and never holds funds. Banxico's credentials and MEXIA's signing keys live server-side only.
+5. **One method, one label.** The enum value `QR/CoDi` already in `PaymentMethodEnum` and both
+   `CHECK`s is reused: no migration for the method itself. It leaves `RETIRED_PAYMENT_METHODS`
+   and returns to `METODOS_CONFIGURABLES` once the shop has set CoDi up. Every surface labels it
+   «CoDi», historical tickets included (they were cashier-declared, as a bridge sale is). A sale's
+   detail says how it was confirmed: «Confirmado por Banxico» with the folio, or «Confirmado en
+   caja».
+6. **Scope:** portal setup (scan, check, activate), the phone's Cobrar, the web caja (through
+   `@xangarro/caja`, ADR-118), a printable «Aquí aceptamos CoDi» sign, CoDi as its own line in
+   cierre, flujo and Ventas y gastos, a Nivel 2 Bis meter on the portal's Inicio once the law's
+   limits are final, and a landing section.
+
+**Alternatives considered**
+
+- *Certify only, ship nothing until then.* Rejected: misses El Buen Fin and the first wave of
+  shops the law moves, for a delay measured in months.
+- *Through a certified partner (a SPEI participant or PSP) behind the `PaymentProvider` port.*
+  Kept as the fallback if certification stalls; not chosen first because it adds a dependency and
+  Banxico's no-concentrating-account rule leaves the partner little room.
+- *Bridge only.* Rejected as the destination: it is close to what ADR-108 retired.
+- *CoDi on the paid plans.* Rejected: Banxico may read a plan price as a CoDi fee, which could
+  stop certification; and free digital cobros are what bring the smallest shops in.
+- *A new enum value «CoDi».* Rejected: a migration on both databases and a sync-schema change for
+  a name the label layer already gives.
+
+**Consequences**
+
+- ADR-108's retirement is reversed; its reasoning stands as the bar for the bridge's copy.
+- CLAUDE.md §1's method list and `docs/design/el-mostrador.md` («never QR/CoDi») change, the style
+  guide once the canvas boards are approved (ADR-117: canvas first).
+- `payment_ref` is new on the venta: a sync-schema and contract change (C-task under K-21) with a
+  migration test on both databases (§2.9).
+- New owner actions: the Banxico file (K-01) and a counsel opinion (K-02). New secrets: MEXIA's
+  Banxico certificates per environment.
+- The landing and the bridge can say «sin comisiones» about CoDi because Banxico and the law do;
+  they may not say «confirmación automática» until K-24 ships.
+
+**References**
+
+- Banxico, _Guía de participación en CoDi® para comercios y terceros desarrolladores_ (2023-05-02).
+- Infobae 2026-09-24, El Financiero 2026-09-24 and 2026-06-19, Alto Nivel (Ley de Economía Digital).
+- ADR-066, ADR-108, ADR-117, ADR-118, ADR-125.
+
+## ADR-131
+
+**Title:** No paid gateway for CoDi: automatic confirmation waits for MEXIA's own Banxico certification, and the file starts by asking Banxico how to submit it
+
+**Date:** 2026-10-08
+
+**Status:** Accepted — owner decision of 2026-10-08; amends ADR-130 (drops its certified-partner fallback, and «delivered in person» reads «on paper, if Banxico still asks for it»); tasks K-01 in `docs/plan/22-codi.md`
+
+**Context**
+
+Banxico's certification (ADR-130, K-01) is slow: a paper file, then up to four months for
+Banxico's comments, then sandbox, pre-check and certification. The owner asked whether a paid
+service could deliver automatic confirmation sooner, with the direct integration later.
+
+What we found on 2026-10-08:
+
+- No provider publishes a CoDi price or a CoDi API that a platform can use for many shops.
+  STP's «Contratar CoDi» page returns 404.
+- The nearest thing is a gateway confirming a SPEI transfer:
+  - Conekta: $12.50 + IVA ($14.50) per transfer, on its official pricing page;
+  - Stripe México: about 1.8%, from comparison blogs only, not verified;
+  - Openpay: no published price.
+- On a $160 ticket, Conekta's fee is 9.1%, more than a card through Conekta (3.4% + $3 + IVA,
+  about 6.1%).
+- The money settles to the gateway's account and is paid out to the shop later.
+- If MEXIA contracted the service, MEXIA would receive shops' money, which ADR-066 forbids and
+  which can make it a regulated payment institution under the Ley Fintech.
+- CoDi itself is free for buyer and seller (Banxico, and the law's pitch). The fees above pay for
+  the gateway's own service, not for CoDi.
+
+Two things about how the file is submitted:
+
+- The 2023 guide says the carta de intención and Anexo 1 are delivered on paper to Banxico's
+  Gerencia de Continuidad, Control y Soporte de Sistemas de Pagos e Infraestructuras de Mercados
+  (5 de Mayo 6, piso 7, CDMX). It does not say the representative has to attend in person.
+- The owner saw online that email may be accepted; we found no official confirmation.
+  codi.org.mx lists `codi@banxico.org.mx` and 800 226 9426 (option 3) for questions.
+
+**Decision**
+
+1. **No paid gateway or partner for CoDi.** Automatic confirmation comes only from MEXIA's own
+   certification as a tercero desarrollador. ADR-130's fallback («a certified partner behind the
+   `PaymentProvider` port») is withdrawn, to be reopened only if Banxico declines the file.
+2. **The bridge is not affected.** The shop's own bank QR with «Ya me llegó» (ADR-130 §1)
+   involves neither a gateway nor Banxico, and costs the shop nothing.
+3. **K-01 starts with a written question to `codi@banxico.org.mx`:**
+   - can the carta de intención and Anexo 1 be filed digitally with an e.firma?
+   - if on paper, can a third party or a courier deliver them?
+   - is there a guide or annex newer than 2023-05-02?
+
+   The file goes on paper only if Banxico says so.
+4. **Gather the short-lived papers last.** The SAT opinión de cumplimiento, the constancia and
+   the Buró report expire after 15 business days, and the power of attorney after 20, so they
+   are pulled once Banxico has answered how to file.
+
+**Alternatives considered**
+
+- *A SPEI gateway now (Conekta, Stripe, Openpay), direct later.* Rejected:
+  - a per-transfer fee that costs more than a card on small tickets, which breaks «sin
+    comisiones»;
+  - money that reaches the shop late;
+  - and, contracted by MEXIA, money held by MEXIA.
+- *Each shop contracts a gateway itself, the ADR-066 card model.* Rejected for CoDi: it asks an
+  informal shop to open an account and pass identity checks to pay fees on something free.
+- *Wait for Banxico's answer before deciding.* Unnecessary: neither answer changes the decision
+  against a gateway; it only changes how the file is delivered.
+
+**Consequences**
+
+- **Timing:** automatic confirmation (K-20 … K-25) follows Banxico's clock, so plan on months,
+  not weeks.
+- **What can be claimed:** «sin comisiones» stays true everywhere CoDi is offered.
+- **Nothing new to run:** no new vendor, contract or secret.
+- **Bookkeeping:** K-01 is in progress, with the Anexo 1 and Anexo 2 checklist in its task; the
+  research is in `22-codi.md` §2.
+
+**References**
+
+- Banxico, _Guía de participación en CoDi® para comercios y terceros desarrolladores_
+  (2023-05-02), and its format for the carta de intención.
+- codi.org.mx, «Contacta a tu desarrollador».
+- Conekta's pricing page, consulted 2026-10-08.
+- ADR-066, ADR-125, ADR-130.
 
 ---
 
@@ -9645,3 +9902,61 @@ that did not exist. It was a launch blocker in `docs/launch/production-readiness
   open in readiness §3.
 - Removed: the portal's archive row, its action and use case, and the domain's archive rules. The
   `business_archive` SQL function stays for support.
+
+---
+
+## ADR-137
+
+**Title:** «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned
+
+**Date:** 2026-11-06
+
+**Status:** Accepted — decided with the owner 2026-11-06 on the El Mostrador canvas («Privacidad y mis datos»: PvPagina, PvMenu)
+
+**Context**
+
+The aviso de privacidad told people to turn off novedades «en Configuración → Privacidad» and to file
+requests from «Ayuda → Privacidad y mis datos»; neither existed. The consent ledger (0034) could be
+appended to but not read by the app, so nobody could see which aviso they had accepted. And only the
+hash of each aviso version was recorded: the text behind an old hash was kept nowhere, so the hash
+proved nothing. Two launch blockers in `docs/launch/production-readiness.md` §2.
+
+**Decision**
+
+1. **One page per person, in the account menu.** «Privacidad y mis datos» (`/privacidad`) replaces the
+   menu's external «Aviso de privacidad» link and is open to every role: consent belongs to the
+   person, not the business. It shows the aviso accepted and when, its exact text in a side panel with
+   its fingerprint, the novedades switch, an ARCO request, and for the owner «Descargar todo» and
+   «Eliminar mi cuenta».
+2. **The ledger is read through one definer** (`privacy_consents_of_user`, 0053): the latest row per
+   purpose for the session's account. Changing a choice is still a new row through
+   `privacy_consent_record`; the table stays unreadable and append-only.
+3. **Novedades** is a switch that saves at once: one explicit row (`configuracion`, `boton`), recorded
+   against the aviso the person accepted.
+4. **Withdrawing the necessary purposes** is not a button here: without them there is no service. The
+   page explains it and routes there: the owner to «Eliminar mi cuenta» (ADR-136), anyone else to the
+   ARCO form.
+5. **Every published aviso version stays in code, unedited.** `PUBLICADOS` in
+   `apps/web/src/legal/aviso-simplificado.ts` keeps each version's paragraphs, publication day and
+   what changed; a test pins each version's SHA-256, so an old text cannot be edited quietly. 0.3 is
+   the first new version: its «Cómo limitar el uso» names «Privacidad y mis datos».
+6. **A new aviso** is accepted on the page («Acepto el aviso nuevo»: express for necesarias, novedades
+   carried over as they were), and a strip above every portal page leads there until then. An account
+   with no acceptance on record sees the same. The sign-in block for a version that adds a purpose
+   (art. 11) waits for the first version that adds one.
+
+**Alternatives considered**
+
+- *A «Privacidad» tab in Mi negocio.* Rejected: admins and viewers could not reach it, and consent is
+  not the business's.
+- *A table of aviso versions in the database.* Rejected: the database would be the only copy and
+  would need seeding; the code is versioned, reviewed and shipped with the text it hashes.
+- *A button that revokes the necessary purposes.* Rejected: a second destructive path beside account
+  deletion, for the same outcome.
+
+**Consequences**
+
+- Every account with no acceptance on record, the seeded ones included, sees the strip until it
+  accepts: that is the honest state.
+- The aviso and the Términos still promise an Asesor switch «en Configuración → Privacidad» that does
+  not exist; a readiness item tracks building it here or changing the text.

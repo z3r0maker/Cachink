@@ -5,7 +5,7 @@ import { staffMembers } from './schema';
 
 /**
  * The email of each staff member still allowed in, by id. The corp database
- * knows founders by staff id only; their address lives here (ADR-124 §1).
+ * knows founders by staff id only; their address lives here (ADR-125 §1).
  */
 export async function emailsDeStaff(
   db: Db,

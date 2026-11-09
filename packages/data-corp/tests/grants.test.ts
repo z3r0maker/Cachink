@@ -6,7 +6,7 @@ import { describe, it } from 'vitest';
 
 /**
  * The corp migration set's privilege rules, checked as text so no database is
- * needed (ADR-124 §2): no login or password in a migration, no DELETE for any
+ * needed (ADR-125 §2): no login or password in a migration, no DELETE for any
  * role, nothing for PUBLIC, and no reach into another schema.
  */
 const HERE = dirname(fileURLToPath(import.meta.url));

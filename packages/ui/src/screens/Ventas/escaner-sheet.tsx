@@ -36,6 +36,38 @@ export interface EscanerSheetProps {
   readonly onCobrar: () => void;
 }
 
+function CodigoInput(p: {
+  readonly codigo: string;
+  readonly setCodigo: (t: string) => void;
+  readonly onSubmit: () => void;
+}): ReactElement {
+  return (
+    <TextInput
+      autoCorrect={false}
+      testID="escaner-codigo"
+      aria-label="Números del código de barras"
+      inputMode="numeric"
+      placeholder="7501234567897"
+      placeholderTextColor={colors.textMuted}
+      value={p.codigo}
+      onChangeText={(t) => p.setCodigo(t.replace(/[^0-9]/g, ''))}
+      onSubmitEditing={p.onSubmit}
+      style={{
+        flex: 1,
+        height: 48,
+        paddingHorizontal: 14,
+        borderRadius: radii[3],
+        borderWidth: borderWidths.thin,
+        borderColor: colors.black,
+        fontFamily: typography.fontFamily,
+        fontWeight: '700',
+        fontSize: portalFontSizes.lg,
+        color: colors.black,
+      }}
+    />
+  );
+}
+
 function Manual({ onBuscar }: { onBuscar: (c: string) => void }): ReactElement {
   const [codigo, setCodigo] = useState('');
   const buscar = (): void => {
@@ -47,28 +79,7 @@ function Manual({ onBuscar }: { onBuscar: (c: string) => void }): ReactElement {
     <View gap={6}>
       <Eyebrow>Escribe los números del código</Eyebrow>
       <View flexDirection="row" gap={8}>
-        <TextInput
-          testID="escaner-codigo"
-          aria-label="Números del código de barras"
-          inputMode="numeric"
-          placeholder="7501234567897"
-          placeholderTextColor={colors.textMuted}
-          value={codigo}
-          onChangeText={(t) => setCodigo(t.replace(/[^0-9]/g, ''))}
-          onSubmitEditing={buscar}
-          style={{
-            flex: 1,
-            height: 48,
-            paddingHorizontal: 14,
-            borderRadius: radii[3],
-            borderWidth: borderWidths.thin,
-            borderColor: colors.black,
-            fontFamily: typography.fontFamily,
-            fontWeight: '700',
-            fontSize: portalFontSizes.lg,
-            color: colors.black,
-          }}
-        />
+        <CodigoInput codigo={codigo} setCodigo={setCodigo} onSubmit={buscar} />
         <Btn variant="primary" size="lg" sentence onPress={buscar} testID="escaner-buscar">
           Buscar
         </Btn>

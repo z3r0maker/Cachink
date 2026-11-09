@@ -4,7 +4,7 @@ import type { FormState } from '../actions/form-state';
 import { NotPermitted } from '../staff';
 
 /**
- * How «Empresa»'s actions answer a failure (ADR-124): the ledger's and the
+ * How «Empresa»'s actions answer a failure (ADR-125): the ledger's and the
  * agreement's typed errors already speak Spanish, so their message is shown;
  * anything else is logged and answered generically.
  */

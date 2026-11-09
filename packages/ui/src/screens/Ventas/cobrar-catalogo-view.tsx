@@ -62,6 +62,7 @@ function Busqueda(p: CatalogoViewProps): ReactElement {
       <View style={CAMPO}>
         <PathIcon d={COBRAR_GLYPHS.buscar} size={18} color={colors.gray600} />
         <TextInput
+          autoCorrect={false}
           testID="cobrar-search"
           aria-label="Buscar producto"
           placeholder="Busca un producto o su precio"

@@ -1,4 +1,4 @@
--- The ledger's guards (E-02, ADR-124 §4). Hand-written: Drizzle Kit models
+-- The ledger's guards (E-02, ADR-125 §4). Hand-written: Drizzle Kit models
 -- neither privileges nor triggers. Applied after 0001_corp_ledger.sql.
 --
 -- 1. Immutable by grant: the console inserts and reads entries and lines; it

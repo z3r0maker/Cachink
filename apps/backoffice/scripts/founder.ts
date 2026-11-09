@@ -1,6 +1,6 @@
 /**
  * Operator CLI: name a staff member as one of MEXIA's founders (E-01,
- * ADR-124 §1). The console never writes corp.founders; this runs with
+ * ADR-125 §1). The console never writes corp.founders; this runs with
  * `DATABASE_URL` pointing at the **owner** role, from a trusted machine, once
  * per founder. The staff member must already exist (`pnpm … staff create`).
  *

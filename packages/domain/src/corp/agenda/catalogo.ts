@@ -1,7 +1,7 @@
 import type { Paso, Plantilla, TipoEvidencia } from './obligaciones.js';
 
 /**
- * MEXIA's obligations as a SAS in RESICO (E-04's seed, ADR-124). The
+ * MEXIA's obligations as a SAS in RESICO (E-04's seed, ADR-125). The
  * contador confirms the list once a year against the RMF; a change is a
  * commit here, reviewed like code. The agreement's own deadlines (funding
  * calls) come from Socios, not from this list.

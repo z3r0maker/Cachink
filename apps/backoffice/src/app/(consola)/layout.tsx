@@ -12,7 +12,7 @@ import { buttonQuiet, muted } from '@/styles/ui.css';
 /**
  * The console shell, «Torre de Control»: dark rail, status bar, work area.
  * `requireStaffPage()` re-applies the gate here: the proxy is the first
- * check, not the only one. Founders also get the «Empresa» group (ADR-124).
+ * check, not the only one. Founders also get the «Empresa» group (ADR-125).
  */
 export default async function ConsolaLayout({ children }: { children: React.ReactNode }) {
   const { staff } = await requireStaffPage();

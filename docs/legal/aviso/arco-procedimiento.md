@@ -27,7 +27,7 @@ Reglamento).
 
 ### A.3 Por dónde
 
-1. **Portal (con cuenta):** `app.xangarro.mx` → Ayuda → Privacidad y mis datos → Nueva solicitud.
+1. **Portal (con cuenta):** `app.xangarro.mx` → Privacidad y mis datos (menú de tu cuenta) → Hacer una solicitud.
 2. **Sin cuenta o sin acceso:** formulario público `xangarro.mx/privacidad/solicitud` o correo a
    **[CORREO PRIVACIDAD]**.
 

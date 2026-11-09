@@ -9,7 +9,7 @@ import { findFounderByStaffId, listFounders } from '../src/queries/founders';
 import { listProjects } from '../src/queries/projects';
 
 /**
- * E-01's foundation (ADR-124 §1–§2): the corp schema exists with Xangarro as
+ * E-01's foundation (ADR-125 §1–§2): the corp schema exists with Xangarro as
  * its first project; only the console's corp login writes it, the agents'
  * login only reads, and neither the portal's nor the console's platform login
  * can see it at all. Nobody deletes a founder.

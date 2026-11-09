@@ -28,7 +28,8 @@ Se muestra completa, arriba del botón "Crear cuenta", sin necesidad de abrir ot
 > Para prestarte el servicio usamos proveedores, algunos en **Estados Unidos** (Supabase, Vercel,
 > Stripe, entre otros). No vendemos tus datos.
 >
-> **Cómo limitar el uso:** desmarca la casilla de novedades, cámbialo en Configuración → Privacidad o
+> **Cómo limitar el uso:** desmarca la casilla de novedades, cámbialo en Privacidad y mis datos (en el
+> menú de tu cuenta) o
 > escribe a **[CORREO PRIVACIDAD]**.
 >
 > Aviso integral y derechos ARCO: **xangarro.mx/privacidad**

@@ -1,7 +1,7 @@
 import type { Carpeta, Estado, TipoEvidencia } from '@xangarro/domain/corp';
 
 /**
- * The Agenda's storage ports (E-04, ADR-124). `@xangarro/data-corp`
+ * The Agenda's storage ports (E-04, ADR-125). `@xangarro/data-corp`
  * implements them over the corp schema; tests fake them in memory.
  */
 export interface ObligacionGuardada {

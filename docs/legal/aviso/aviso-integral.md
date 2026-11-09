@@ -108,7 +108,7 @@ b) Analizar cómo se usa el producto para mejorarlo, únicamente con datos **dis
 c) Pedirte un testimonio o caso de éxito (solo con tu aceptación en cada caso).
 
 Si no quieres que usemos tus datos para estas finalidades, indícalo al registrarte, cámbialo en
-**Configuración → Privacidad** o escribe a **[CORREO PRIVACIDAD]**. Negarte **no** afecta tu servicio.
+**Privacidad y mis datos** (en el menú de tu cuenta) o escribe a **[CORREO PRIVACIDAD]**. Negarte **no** afecta tu servicio.
 Tienes 5 días hábiles desde que te registras para manifestarlo antes de que tratemos tus datos para
 estas finalidades, y puedes hacerlo en cualquier momento después.
 
@@ -124,7 +124,7 @@ estas finalidades, y puedes hacerlo en cualquier momento después.
 - Algunos tratamientos no requieren consentimiento porque son necesarios para cumplir la relación
   jurídica entre tú y Xangarro o una obligación legal (art. 9, fracciones I y IV de la Ley).
 - **Revocación.** Puedes revocar tu consentimiento en cualquier momento, sin efectos retroactivos
-  (art. 7), con el mismo procedimiento de la sección 9 o desde **Configuración → Privacidad**. Si
+  (art. 7), con el mismo procedimiento de la sección 9 o desde **Privacidad y mis datos** (en el menú de tu cuenta). Si
   revocas el consentimiento para una finalidad necesaria, no podremos seguir prestándote el servicio y
   procederemos como en una solicitud de cancelación.
 
@@ -203,7 +203,7 @@ descargar tus datos con regularidad con **Mi negocio › General › Descargar t
 
 Además de negarte a las finalidades secundarias (sección 4.2), puedes:
 
-- desactivar los correos de novedades con el enlace de cada correo o en **Configuración → Privacidad**;
+- desactivar los correos de novedades con el enlace de cada correo o en **Privacidad y mis datos** (en el menú de tu cuenta);
 - desactivar los reportes de fallas de la app en **Ajustes → Dispositivo → Reportes de errores**;
 - pedirnos por **[CORREO PRIVACIDAD]** que te inscribamos en nuestro listado interno de exclusión para
   no recibir comunicaciones que no sean del servicio.
@@ -220,7 +220,7 @@ desactivar comunicaciones y eliminar tu cuenta en **Mi negocio › General › E
 
 **Cómo presentar una solicitud:**
 
-1. **Si tienes cuenta:** en el portal, **Ayuda → Privacidad y mis datos → Nueva solicitud**. Tu sesión
+1. **Si tienes cuenta:** en el portal, **Privacidad y mis datos → Hacer una solicitud**. Tu sesión
    iniciada sirve para acreditar tu identidad; para cancelaciones te pediremos confirmar con tu
    contraseña y un código enviado a tu correo.
 2. **Si no tienes cuenta o no puedes entrar:** escribe a **[CORREO PRIVACIDAD]** o usa el formulario

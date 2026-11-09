@@ -295,6 +295,16 @@ run_curated_suite() {
     cierre-cuadra
     caja-cierre-discrepancia
     cierre-faltante
+    cobrar-efectivo-falta
+    cobrar-ticket-largo
+    cobrar-ultima-pieza
+    venta-fiado-cancelar
+    sin-internet-cobrar
+    sin-internet-cierre
+    plan-pago-pendiente
+    plan-vencido
+    entitlement-feature-gates
+    dispositivo-revocado
     settings-borrar
     settings-desvincular
     activation

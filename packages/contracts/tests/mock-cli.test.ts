@@ -1,13 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
+import { createServer } from 'node:net';
 import { resolve } from 'node:path';
 
 /**
  * `pnpm mock:api`'s entrypoint: it boots on the port the env names and says
  * where it is; spoken to once over HTTP, then stopped. The default-port side
  * of the `??` needs an env with no PORT at all — 3000 may be taken locally,
- * so that boot is only asserted to speak, never re-fetched.
+ * so that boot is only asserted to speak, never re-fetched, and it is skipped
+ * while something already listens there (a developer's own `pnpm mock:api`),
+ * rather than failing every push made while it runs.
  */
+
+/** Whether `port` on 127.0.0.1 is free to listen on right now. */
+function puertoLibre(port: number): Promise<boolean> {
+  return new Promise((done) => {
+    const s = createServer();
+    s.once('error', () => done(false));
+    s.listen(port, '127.0.0.1', () => s.close(() => done(true)));
+  });
+}
 
 function boot(
   env: NodeJS.ProcessEnv,
@@ -50,7 +62,8 @@ describe('the mock:api CLI', () => {
     }
   }, 20_000);
 
-  it('with no PORT in the env it still speaks its banner', async () => {
+  it('with no PORT in the env it still speaks its banner', async (ctx) => {
+    if (!(await puertoLibre(3000))) ctx.skip('port 3000 is taken (a running mock:api?)');
     const b = await boot({ PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '' });
     expect(b.url).toMatch(/:\d+$/);
     await b.kill();

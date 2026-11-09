@@ -15,7 +15,7 @@ import { at, corp } from './corp.js';
 import { projects } from './projects.js';
 
 /**
- * MEXIA's management ledger (E-02, ADR-124 §4). A founder captures a
+ * MEXIA's management ledger (E-02, ADR-125 §4). A founder captures a
  * movement; the domain posts its balanced lines (`@xangarro/domain/corp`).
  *
  * Immutable by grant: the console may INSERT and SELECT, never UPDATE or
@@ -27,7 +27,7 @@ export const entries = corp.table(
   'entries',
   {
     id: text('id').primaryKey(),
-    /** Null for a cost shared by every project (ADR-124 §3). */
+    /** Null for a cost shared by every project (ADR-125 §3). */
     projectId: text('project_id').references(() => projects.id),
     /** The day the money moved, `YYYY-MM-DD`. */
     fecha: date('fecha', { mode: 'string' }).notNull(),

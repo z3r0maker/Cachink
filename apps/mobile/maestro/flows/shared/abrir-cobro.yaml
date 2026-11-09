@@ -1,0 +1,37 @@
+# Reusable subflow: from a Cobrar grid with lines on the ticket, open
+# «¿Cómo paga?» (checkout-cobro). Form-factor aware: the phone's bottom bar
+# opens «Revisa el ticket» first, then the sheet's own «Cobrar»; the tablet's
+# TicketPanel goes straight to the checkout with no sheet in between.
+#
+# Usage:
+#   - runFlow: shared/abrir-cobro.yaml        # from flows/
+#   - runFlow: abrir-cobro.yaml               # from flows/shared/
+#
+# Leaves the app on checkout-cobro, no method chosen yet.
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      visible:
+        id: 'cart-checkout-btn'
+    commands:
+      - tapOn: { id: 'cart-checkout-btn' }
+      - extendedWaitUntil:
+          visible:
+            id: 'ticket-sheet'
+          timeout: 10000
+      - tapOn: { id: 'ticket-cobrar' }
+- runFlow:
+    when:
+      visible:
+        id: 'ticket-panel'
+    commands:
+      # Gated on the tablet's own panel, never on «the bar is gone»: once the
+      # phone branch opens the checkout the bar is gone TOO, and a fast
+      # transition let this branch fire there and tap a ticket-cobrar that no
+      # longer existed (a slow one hid the race — flaky by construction).
+      - tapOn: { id: 'ticket-cobrar' }
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-cobro'
+    timeout: 8000

@@ -232,6 +232,36 @@ describe('device routes', () => {
     assert.equal(codigo(malSince.body), 'VALIDATION');
   });
 
+  it('while the mock is down every contract route is unreachable, the controls still answer, and up or reset restore it', async () => {
+    const { api, token } = await dispositivo();
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    const abajo = await llamada(api, 'POST', '/__mock/down');
+    assert.deepEqual(abajo.body, { down: true });
+    // The sentinel the transports turn into a dropped socket (MOCK_DOWN).
+    for (const [method, path] of [
+      ['GET', API_PATHS.syncPull],
+      ['POST', API_PATHS.syncPush],
+      ['GET', API_PATHS.entitlement],
+      ['POST', API_PATHS.activate],
+    ] as const) {
+      const r = await llamada(api, method, path, { ...auth, query: { since: '0' }, body: {} });
+      assert.equal(r.status, 0, `${method} ${path} answered while down`);
+      assert.equal(r.body, null);
+    }
+    // Controls are how the test brings it back, so they never go down.
+    const codigoNuevo = await llamada(api, 'POST', '/__mock/code');
+    assert.equal(codigoNuevo.status, 200);
+    const arriba = await llamada(api, 'POST', '/__mock/up');
+    assert.deepEqual(arriba.body, { down: false });
+    const pull = await llamada(api, 'GET', API_PATHS.syncPull, { ...auth, query: { since: '0' } });
+    assert.equal(pull.status, 200);
+
+    await llamada(api, 'POST', '/__mock/down');
+    assert.equal(api.state.down, true);
+    await llamada(api, 'POST', '/__mock/reset');
+    assert.equal(api.state.down, false);
+  });
+
   it('a path nobody serves is a 404 that names itself', async () => {
     const { api, token } = await dispositivo();
     const r = await llamada(api, 'GET', '/api/v1/nadie', {

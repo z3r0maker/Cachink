@@ -8,7 +8,7 @@ import { founderForNav, founderOrNull } from './founder-gate';
 import { NotPermitted, requireStaff, requireStaffPage, type StaffContext } from './staff';
 
 /**
- * The founder gate on top of the staff gate (E-01, ADR-124 §1). Every
+ * The founder gate on top of the staff gate (E-01, ADR-125 §1). Every
  * `/empresa` page and action calls one of these; the proxy knows nothing about
  * founders, so this is the only check, re-run on every request.
  *

@@ -13,7 +13,7 @@ import {
 } from '../../src/corp/ledger/index.js';
 
 /**
- * E-02 (ADR-124 §4): a founder captures a movement, the ledger posts balanced
+ * E-02 (ADR-125 §4): a founder captures a movement, the ledger posts balanced
  * lines. Every movement type must balance; the interesting ones are checked
  * line by line.
  */

@@ -3,7 +3,7 @@ import { createCorpDb, findFounderByStaffId, type CorpDb } from '@xangarro/data-
 import type { FounderLookup } from '../founder-gate';
 
 /**
- * The command center's database handle (ADR-124 §2). `CORP_DATABASE_URL`
+ * The command center's database handle (ADR-125 §2). `CORP_DATABASE_URL`
  * connects as `xangarro_corp`; the console's platform login (`DATABASE_URL`,
  * `xangarro_admin`) cannot see the corp schema at all.
  *

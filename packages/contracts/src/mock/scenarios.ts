@@ -43,7 +43,10 @@ export function entitlementFor(
   const plan: PlanId = scenario === 'xangarrito' ? 'xangarrito' : 'xangarro';
   const limits = PLAN_LIMITS[plan];
   const t = now.getTime();
-  const shift = scenario === 'grace' ? -12 * DAY : scenario === 'lapsed' ? -40 * DAY : 0;
+  // `grace`: validUntil three days ago, graceUntil (seven days on) four days
+  // ahead — the payment window the banner names. `lapsed`: past both. The
+  // shift is from the +30-day validUntil, so -33 lands at -3.
+  const shift = scenario === 'grace' ? -33 * DAY : scenario === 'lapsed' ? -40 * DAY : 0;
   const validUntil = plan === 'xangarrito' ? t + 36_500 * DAY : t + 30 * DAY + shift;
   return {
     businessId,

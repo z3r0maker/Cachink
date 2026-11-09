@@ -1,0 +1,109 @@
+# A long ticket (catalogue J4-10; the phone half of operador-caja.spec «a long
+# ticket never pushes the total or COBRAR out of view»): twelve different
+# products on one ticket. The bar counts twelve pieces; «Revisa el ticket»
+# opens with its total and «Cobrar $482.50» on screen WITHOUT scrolling the
+# lines — the footer is pinned; and the sale goes through as any other.
+#
+# The web caja's «Deshacer» after cobro has no phone counterpart: «Venta
+# hecha» offers only «Mandar comprobante» and «Nueva venta», and a sale is
+# undone from Ventas (venta-detalle-cancelar.yaml, J4-15).
+#
+# Precondition: activated device against the mock on MOCK_API; opens a
+# turno when none is open. Tiles are tapped in the grid's es-MX order, each
+# once, so every scroll goes down.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  TILE: 'cobrar-tile-01JPRD0000000000000000000'
+tags:
+  - ventas
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+
+# Alphabetical: Agua de horchata (7) $40, Agua de jamaica (8) $42.50,
+# Cerveza (A) $47.50, Consomé (D) $55, Frijoles charros (C) $52.50,
+# Gringa (5) $35, Orden de guacamole (B) $50, Quesadilla (4) $32.50,
+# Refresco 600ml (9) $45, Taco al pastor (1) $25, Taco de bistec (2) $27.50,
+# Taco de suadero (3) $30 — $482.50.
+- repeat:
+    times: 12
+    commands:
+      - evalScript: ${output.suffix = ['7','8','A','D','C','5','B','4','9','1','2','3'][output.i || 0]; output.i = (output.i || 0) + 1}
+      - scrollUntilVisible:
+          element:
+            id: ${TILE + output.suffix}
+          direction: DOWN
+          timeout: 15000
+          visibilityPercentage: 60
+          centerElement: true
+      - tapOn:
+          id: ${TILE + output.suffix}
+
+# Phone: the bar counts the pieces and opens the sheet, whose footer carries
+# the total and «Cobrar» without any scroll.
+- runFlow:
+    when:
+      visible:
+        id: 'cart-checkout-btn'
+    commands:
+      - assertVisible: '12 piezas ·'
+      - tapOn: { id: 'cart-checkout-btn' }
+      - extendedWaitUntil:
+          visible:
+            id: 'ticket-sheet'
+          timeout: 10000
+      - assertVisible:
+          id: 'ticket-total'
+      - assertVisible: '\$482\.50'
+      - assertVisible:
+          id: 'ticket-cobrar'
+          enabled: true
+      - tapOn: { id: 'ticket-cobrar' }
+# Tablet: the panel beside the catalogue keeps «Cobrar» in view.
+- runFlow:
+    when:
+      visible:
+        id: 'ticket-panel'
+    commands:
+      - assertVisible:
+          id: 'ticket-cobrar'
+          enabled: true
+      - tapOn: { id: 'ticket-cobrar' }
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-cobro'
+    timeout: 8000
+
+# Exact cash, as any sale.
+- scrollUntilVisible:
+    element:
+      id: 'cobro-metodo-Efectivo'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobro-metodo-Efectivo' }
+- waitForAnimationToEnd
+- tapOn: { id: 'cobro-rapido-0' }
+- tapOn: { id: 'cobro-submit' }
+- extendedWaitUntil:
+    visible:
+      id: 'venta-hecha'
+    timeout: 8000
+- assertVisible: '.*\$482\.50.*'
+- tapOn: { id: 'venta-hecha-nueva' }
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000

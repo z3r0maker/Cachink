@@ -1,5 +1,5 @@
 /**
- * MEXIA's management chart of accounts (E-02, ADR-124 §4). Small on purpose:
+ * MEXIA's management chart of accounts (E-02, ADR-125 §4). Small on purpose:
  * the contador keeps the legal books; this chart only has to produce the P&L
  * cascade, the balance sheet, the partner accounts and the IVA position.
  *

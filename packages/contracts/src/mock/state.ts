@@ -53,6 +53,11 @@ export class MockState {
   deviceSlots = 2;
   /** Snapshot page budget override (`/__mock/snapshot-budget`); `undefined` = the contract's. */
   snapshotBudget: SnapshotBudget | undefined = undefined;
+  /**
+   * `/__mock/down`: every contract route drops the socket, as a phone with no
+   * signal sees it; the controls keep answering. `/__mock/up` or a reset ends it.
+   */
+  down = false;
   #deviceCounter = 0;
 
   constructor() {
@@ -65,6 +70,7 @@ export class MockState {
     this.defaultScenario = 'xangarro';
     this.transactionsPerMonth = undefined;
     this.snapshotBudget = undefined;
+    this.down = false;
     this.devices.clear();
     this.codes.clear();
     this.pairingTokens.clear();

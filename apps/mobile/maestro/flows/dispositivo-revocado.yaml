@@ -1,0 +1,60 @@
+# The owner revokes this caja mid-shift (B-12, catalogue J3-15 / J10-14 phone
+# half): the next sync answers DEVICE_REVOKED, the device forgets its token
+# and activation record (cloud-sync-bridge.tsx forgetDevice) and the gate
+# shows Vincular again — with every local record kept: after linking again
+# with a fresh code, the sale made before the revocation is still in Ventas.
+#
+# Precondition: activated device against the mock on MOCK_API. Leaves the
+# device re-linked and Toni signed in, as the `activated` entry expects.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - entitlement
+  - devices
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# The portal revokes the device: every call with its bearer is DEVICE_REVOKED.
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: revoked
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+# forgetDevice drops the token: the gate swaps the shell for Vincular
+# (gated-navigation.tsx: not activated → ActivationScreen).
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 30000
+
+# A fresh code links it again (the scenario goes back first: `revoked`
+# refuses /activate too). The mock is reset for the single-use code.
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: xangarro
+      RECORDS_PER_MONTH: ''
+- runScript:
+    file: shared/mock-reset.js
+- runFlow: activation.yaml
+- runFlow: shared/login-operator.yaml
+
+# Nothing was lost: the sale from before the revocation is still here.
+- tapOn:
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
+- extendedWaitUntil:
+    visible: 'Ver venta V-\d{4}, .*'
+    timeout: 15000
