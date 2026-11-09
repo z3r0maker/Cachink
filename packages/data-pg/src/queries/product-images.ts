@@ -1,7 +1,8 @@
-import { sql, type SQL } from 'drizzle-orm';
+import { eq, sql, type SQL } from 'drizzle-orm';
 
 import type { Db } from '../client.js';
 import { productImages } from '../schema/catalog.js';
+import { devices } from '../schema/portal.js';
 import type { Tx } from '../sync/cursor.js';
 
 /**
@@ -46,6 +47,35 @@ export async function latestProductImage(tx: Tx, productoId: string) {
     .limit(1);
   if (row === undefined || row.bytes === null) return null;
   return row;
+}
+
+/** A product's current photo as the portal's catalogue lists it (P-42). */
+export interface ProductPhotoRow {
+  readonly productoId: string;
+  /** The row's id: it changes with the photo, so it versions the image URL. */
+  readonly id: string;
+  /** When the phone took it, ISO-8601. */
+  readonly tomadaEl: string;
+  /** The register's name, or null when the device row is gone. */
+  readonly caja: string | null;
+}
+
+/**
+ * The newest live photo of every product that has one, with the register
+ * that took it. A product whose newest row is a tombstone is absent.
+ */
+export async function listProductPhotos(tx: Tx): Promise<readonly ProductPhotoRow[]> {
+  const rows = await tx
+    .select({
+      productoId: productImages.productoId,
+      id: productImages.id,
+      tomadaEl: productImages.createdAt,
+      caja: devices.nombre,
+    })
+    .from(productImages)
+    .leftJoin(devices, eq(devices.id, productImages.deviceId))
+    .where(sql`${productImages.id} IN ${newestPhotoIds()}`);
+  return rows.map((r) => ({ ...r, tomadaEl: new Date(r.tomadaEl).toISOString() }));
 }
 
 /** How long a superseded row is kept before the purge takes it (ADR-134). */

@@ -43,7 +43,7 @@ function ProductoSheet(props: {
       <Uso {...section} />
       <Precio {...section} />
       <Inventario {...section} />
-      <Apariencia {...section} />
+      <Apariencia key={props.editing?.id ?? 'nuevo'} {...section} producto={props.editing} />
     </Drawer>
   );
 }

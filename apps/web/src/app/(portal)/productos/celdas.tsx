@@ -1,7 +1,7 @@
 import type { ProductColor, ProductIcon } from '@xangarro/domain';
 import { colors, productTints } from '@xangarro/tokens';
 
-import { ProductGlyph } from '@/components/product-glyph';
+import { ProductPhoto } from '@/components/product-photo';
 import { adivinaIcono } from '@/lib/adivina-icono';
 
 import { llenadoStock } from './derive';
@@ -34,8 +34,16 @@ export function ProductoCell({ p }: { readonly p: Producto }) {
   return (
     <span className={productCell}>
       <span className={tile} style={{ background: fondo(p) }} aria-hidden="true">
-        {/* The caja's own glyph (ADR-107); a product saved before icons gets one from its name. */}
-        <ProductGlyph icon={(p.icono as ProductIcon | null) ?? adivinaIcono(p.nombre)} size={20} />
+        {/* Its photo on its tint (P-42); else the caja's own glyph (ADR-107), and a
+            product saved before icons gets one from its name. */}
+        <ProductPhoto
+          productoId={p.id}
+          fotoId={p.foto?.id ?? null}
+          icon={(p.icono as ProductIcon | null) ?? adivinaIcono(p.nombre)}
+          glyphSize={20}
+          size={30}
+          alt=""
+        />
       </span>
       <span style={{ minWidth: 0 }}>
         <span style={{ display: 'block', fontWeight: 800 }}>{p.nombre}</span>
