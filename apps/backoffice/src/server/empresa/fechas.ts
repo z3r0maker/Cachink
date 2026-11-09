@@ -16,6 +16,9 @@ export function sumarDias(fecha: string, n: number): string {
 /** «8 oct»: a date in this year's lists. */
 export const fechaCorta = (iso: string) => formatDate(parseIsoDate(iso)).replace(/ \d{4}$/, '');
 
+/** «octubre»: a month named in a sentence, `YYYY-MM`. */
+export const nombreMes = (mes: string) => formatMonth(mes).split(' ')[0] ?? mes;
+
 /** «30 de octubre»: a day named in a sentence. */
 export const fechaLarga = (iso: string) =>
-  `${Number(iso.slice(8, 10))} de ${formatMonth(iso.slice(0, 7)).split(' ')[0] ?? ''}`;
+  `${Number(iso.slice(8, 10))} de ${nombreMes(iso.slice(0, 7))}`;

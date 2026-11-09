@@ -10,7 +10,7 @@ import type { EmailSender } from '@xangarro/application/email';
 import type { RecurrenteDelMes } from '@xangarro/domain/corp';
 import { renderGenericNoticeEmail } from '@xangarro/email';
 
-import { secretMatches } from '../ingest/secret';
+import { rechazo, reply } from './cron-http';
 import {
   cargosDeHoy,
   correoDe,
@@ -35,14 +35,6 @@ export interface AgendaCronDeps {
   readonly sender: EmailSender;
   readonly consoleUrl: string;
   readonly log?: (message: string, error: unknown) => void;
-}
-
-const reply = (status: number, body: Record<string, unknown>) =>
-  Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
-
-function bearer(req: Request): string | null {
-  const header = req.headers.get('authorization') ?? '';
-  return header.startsWith('Bearer ') ? header.slice('Bearer '.length) : null;
 }
 
 interface Aviso {
@@ -75,8 +67,8 @@ async function enviar(
 }
 
 export async function handleAgendaCron(req: Request, deps: AgendaCronDeps): Promise<Response> {
-  if (!deps.secret) return reply(503, { error: 'cron_disabled' });
-  if (!secretMatches(bearer(req), deps.secret)) return reply(401, { error: 'unauthorized' });
+  const refused = rechazo(req, deps.secret);
+  if (refused !== null) return refused;
   const { leer } = deps;
   if (leer === null) return reply(200, { ok: true, sent: 0, reason: 'corp_disabled' });
   const hoy = deps.hoy();
