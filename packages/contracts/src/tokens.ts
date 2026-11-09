@@ -5,10 +5,18 @@
 
 import { z } from 'zod';
 
+/**
+ * Xangarro's own issuer and audience for device tokens (ADR-138, audit
+ * SEC-DATA-01): never Supabase's `authenticated`, so a device token can never
+ * double as a Supabase REST credential.
+ */
+export const DEVICE_TOKEN_ISSUER = 'https://app.xangarro.mx' as const;
+export const DEVICE_TOKEN_AUDIENCE = 'xangarro:device' as const;
+
 export const DeviceTokenClaimsSchema = z.object({
   sub: z.string().min(1),
-  role: z.literal('authenticated'),
-  aud: z.literal('authenticated'),
+  iss: z.literal(DEVICE_TOKEN_ISSUER),
+  aud: z.literal(DEVICE_TOKEN_AUDIENCE),
   business_id: z.string().min(1),
   device_id: z.string().min(1),
   kind: z.literal('device'),

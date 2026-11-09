@@ -176,6 +176,7 @@ Links to discussion, docs, prior art.
 | [135](#adr-135) | 2026-10-30 | «Empresa»'s blob stores: Postgres bytes in `corp.blobs`, an Azure inbox for browser uploads, and the account key behind a locked policy | Accepted |
 | [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
 | [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
+| [138](#adr-138) | 2026-11-09 | Supabase's Data API gets nothing of ours: the API roles lose every grant, and device tokens carry Xangarro's own issuer and audience | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -9960,3 +9961,52 @@ proved nothing. Two launch blockers in `docs/launch/production-readiness.md` §2
   accepts: that is the honest state.
 - The aviso and the Términos still promise an Asesor switch «en Configuración → Privacidad» that does
   not exist; a readiness item tracks building it here or changing the text.
+
+---
+
+## ADR-138
+
+**Title:** Supabase's Data API gets nothing of ours: the API roles lose every grant, and device tokens carry Xangarro's own issuer and audience
+
+**Date:** 2026-11-09
+
+**Status:** Accepted — closes the code side of audit SEC-DATA-01; amends ADR-061's «Supabase shape on purpose» for device tokens
+
+**Context**
+
+A hosted Supabase project exposes `public` over its Data API (PostgREST) and grants every table to
+`anon` and `authenticated` by default, including tables created later. Xangarro never uses that door:
+the portal, the console and the push API connect as their own logins, and the phone's bug reports go
+through an edge function that writes with the service role. Turning the API off in the dashboard (O-2)
+was the only defence, unverified, and the repo itself said both that it was done and that it wasn't.
+Device tokens carried Supabase's own shape (`aud: 'authenticated'`, no issuer), so if
+`DEVICE_TOKEN_SECRET` were ever the project's JWT secret, every phone would hold a REST credential that
+could delete its business's sales directly.
+
+**Decision**
+
+1. **The API roles lose everything** (`0054_revoke_supabase_api_roles.sql`): every privilege on tables,
+   sequences and functions in `public` and `xangarro`, the `xangarro` schema itself, and the default
+   privileges that would hand later tables to them. Guarded, so it applies on Supabase and locally;
+   `xangarro_app`'s direct grants are untouched. O-2 stays the first wall; this is the second.
+2. **Device tokens name Xangarro**: issuer `https://app.xangarro.mx`, audience `xangarro:device`,
+   defined once in `@xangarro/contracts`. Neither PostgREST nor GoTrue accepts them. Tokens are minted
+   once, at activation, and live a year, so the old shape is honoured only when issued before
+   2026-11-16; nothing mints it any more, and `LEGACY_AUDIENCE` goes when the last one expires.
+3. **A check proves it on the hosted project**: `pnpm --filter @xangarro/data-pg check:data-api` asks
+   the REST API for rows with the anon key, and with a device token if given, and fails unless every
+   answer is a refusal or empty.
+
+**Alternatives considered**
+
+- *Only the dashboard toggle.* Rejected: one forgotten switch away from an open door, and nothing could
+  tell whether it was on.
+- *Write every RLS policy `TO xangarro_app`.* Not needed once the roles hold no privilege at all: no
+  grant, no access, whatever a policy says. Left for a policy rewrite if one ever happens.
+- *Re-mint every device token.* Rejected: tokens are revoked server-side, and a phone offline at the
+  time would be locked out; the dated legacy window does the same job safely.
+
+**Consequences**
+
+- After O-2 and after every hosted migration, run `check:data-api`.
+- `LEGACY_AUDIENCE` and its branch in `token-shape.ts` can be deleted after 2027-11-16.

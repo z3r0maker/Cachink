@@ -5,6 +5,8 @@ import { canonicalize, DEVICE_TOKEN_TTL_SECONDS } from '@xangarro/contracts';
 import { EntitlementSchema, type Entitlement } from '@xangarro/domain';
 import { SignJWT } from 'jose';
 
+import { DEVICE_TOKEN_AUDIENCE, DEVICE_TOKEN_ISSUER } from './token-shape';
+
 /**
  * What a phone is handed when it joins a business: a device token and a signed
  * entitlement.
@@ -39,8 +41,9 @@ export function deviceTokenSecret(): Uint8Array {
 /**
  * The device token (contract §2).
  *
- * `sub`/`role`/`aud` are the Supabase shape on purpose, as with the portal
- * session (ADR-061): a GoTrue-issued token would carry the same claims.
+ * It names Xangarro as issuer and its own audience (`token-shape.ts`,
+ * ADR-138), never Supabase's shape: a token one shared secret away from being
+ * a Supabase REST credential was audit SEC-DATA-01.
  * Revocation is server-side on the `devices` row, which is why the lifetime can
  * be a year — the token is not the thing that gets revoked.
  */
@@ -50,7 +53,8 @@ export async function mintDeviceToken(businessId: string, deviceId: string): Pro
   return new SignJWT({ business_id: businessId, device_id: deviceId, kind: 'device' })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(deviceId)
-    .setAudience('authenticated')
+    .setIssuer(DEVICE_TOKEN_ISSUER)
+    .setAudience(DEVICE_TOKEN_AUDIENCE)
     .setIssuedAt(now)
     .setExpirationTime(now + DEVICE_TOKEN_TTL_SECONDS)
     .sign(secret);
