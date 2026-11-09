@@ -14,6 +14,7 @@ export {
   facturasDelMes,
   type FacturaDelMes,
 } from './queries/facturas.js';
+export { cobrosDePagos, type CobroDePago } from './queries/cobros.js';
 export { createCorpLedgerRepository } from './queries/ledger.js';
 export {
   conceptosDe,
