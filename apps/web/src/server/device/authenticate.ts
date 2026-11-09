@@ -7,6 +7,7 @@ import { jwtVerify } from 'jose';
 
 import { db, withTenant } from '../db';
 import { deviceTokenSecret } from './credentials';
+import { DEVICE_TOKEN_AUDIENCE, deviceClaimsOf, LEGACY_AUDIENCE } from './token-shape';
 
 /**
  * Who is calling: the device behind a `Bearer` device token (contract §2).
@@ -43,16 +44,13 @@ async function claims(request: Request): Promise<DeviceCaller> {
   if (token === undefined) throw new DeviceAuthError('UNAUTHENTICATED');
   const { payload } = await jwtVerify(token, deviceTokenSecret(), {
     algorithms: ['HS256'],
-    audience: 'authenticated',
+    audience: [DEVICE_TOKEN_AUDIENCE, LEGACY_AUDIENCE],
   }).catch(() => {
     throw new DeviceAuthError('UNAUTHENTICATED');
   });
-  const { business_id: businessId, device_id: deviceId, kind, sub } = payload;
-  if (kind !== 'device' || typeof businessId !== 'string' || typeof deviceId !== 'string') {
-    throw new DeviceAuthError('UNAUTHENTICATED');
-  }
-  if (sub !== deviceId) throw new DeviceAuthError('UNAUTHENTICATED');
-  return { businessId, deviceId };
+  const caller = deviceClaimsOf(payload);
+  if (caller === null) throw new DeviceAuthError('UNAUTHENTICATED');
+  return caller;
 }
 
 export async function authenticateDevice(request: Request): Promise<DeviceCaller> {

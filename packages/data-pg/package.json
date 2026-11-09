@@ -27,7 +27,8 @@
     "db:seed:demo": "DATABASE_URL=$(./scripts/db-local.sh url) BILLING_DATABASE_URL=$(./scripts/db-local.sh billing-url) DEMO_OWNER_PASSWORD=${DEMO_OWNER_PASSWORD:-revisor-xangarro-2026} tsx ./scripts/seed-demo.ts",
     "db:reset": "./scripts/db-local.sh down && ./scripts/db-local.sh up && pnpm db:seed",
     "db:migrate:hosted": "tsx ./scripts/migrate-hosted.ts",
-    "db:migrate:hosted:selftest": "./scripts/hosted/selftest.sh"
+    "db:migrate:hosted:selftest": "./scripts/hosted/selftest.sh",
+    "check:data-api": "tsx ./scripts/check-data-api.ts"
   },
   "dependencies": {
     "@xangarro/auth-core": "workspace:*",
