@@ -16,6 +16,8 @@
 --
 -- EXECUTE: `xangarro_admin` (the backoffice) only.
 
+SET LOCAL lock_timeout = '200ms';
+
 CREATE OR REPLACE FUNCTION xangarro.ingresos_del_periodo(p_period text)
 RETURNS TABLE (
   payment_id text,
