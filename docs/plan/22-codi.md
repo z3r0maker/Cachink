@@ -79,7 +79,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 
 **Phase 0 — the Banxico file (owner actions, start now)**
 
-### K-01 Registro de MEXIA como tercero desarrollador CoDi
+### K-01 Registro de MEXIA como tercero desarrollador CoDi [alta]
 
 - [~] Status · **Blocked by:** MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125)
   **Remaining (2026-10-08):** el dueño revisa el expediente. Investigación completa en
@@ -163,7 +163,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 
 - **Acceptance:** Banxico's production certification letter, filed in the Expediente (E-05).
 
-### K-02 Opinión legal sobre CoDi
+### K-02 Opinión legal sobre CoDi [alta]
 
 - [ ] Status · **Blocked by:** —
 - **What:** a written opinion from Mexican counsel (it can share the engagement with O-18) on:
@@ -176,7 +176,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 
 **Phase 1 — the bridge (target: live before 2026-11-13)**
 
-### K-10 Dominio: CoDi vuelve como método
+### K-10 Dominio: CoDi vuelve como método [alta]
 
 - [ ] Status · **Blocked by:** —
 - **What:**
@@ -192,7 +192,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
   - `parseCodiQr` is tested on real samples from at least 4 bank apps (the owner collects them
     once the banks ship).
 
-### K-11 Datos: la configuración CoDi del negocio
+### K-11 Datos: la configuración CoDi del negocio [alta]
 
 - [ ] Status · **Blocked by:** K-10
 - **What:**
@@ -206,7 +206,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
     `withTenant`;
   - an old device that ignores the field keeps syncing.
 
-### K-12 Portal: Negocio → Cobros → CoDi
+### K-12 Portal: Negocio → Cobros → CoDi [media]
 
 - [ ] Status · **Blocked by:** K-11, boards KD-01 … KD-03
 - **What:**
@@ -219,7 +219,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
     assert the phone's reference data carries it;
   - a wrong image shows the refusal state.
 
-### K-13 Teléfono: cobrar con CoDi (puente)
+### K-13 Teléfono: cobrar con CoDi (puente) [media]
 
 - [ ] Status · **Blocked by:** K-11, board KD-04
 - **What:**
@@ -229,13 +229,13 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
   - the comprobante says «Pagado con CoDi».
 - **Acceptance:** a Maestro flow `cobrar-codi-puente.yaml` that uses the shared subflows.
 
-### K-14 Caja web: cobrar con CoDi (puente)
+### K-14 Caja web: cobrar con CoDi (puente) [media]
 
 - [ ] Status · **Blocked by:** K-13
 - **What:** the same screen through `@xangarro/caja` (ADR-118), at the web caja's size.
 - **Acceptance:** a Playwright spec that charges with CoDi and sees the venta in Ventas y gastos.
 
-### K-15 Reportes: CoDi en su propia línea
+### K-15 Reportes: CoDi en su propia línea [media]
 
 - [ ] Status · **Blocked by:** K-10, board KD-06
 - **What:** CoDi as its own line in cierre, Mi turno, flujo de efectivo, Ventas y gastos (a
@@ -245,7 +245,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 
 **Phase 2 — certified**
 
-### K-20 Spike: el sandbox de Banxico
+### K-20 Spike: el sandbox de Banxico [baja]
 
 - [ ] Status · **Blocked by:** K-01 (the technical documentation and sandbox)
 - **What:**
@@ -256,7 +256,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 - **Acceptance:** a sandbox cobro goes from created to paid, and both a forged and a replayed
   notification are refused.
 
-### K-21 Contrato: la intención de cobro CoDi
+### K-21 Contrato: la intención de cobro CoDi [baja]
 
 - [ ] Status · **Blocked by:** K-20
 - **What:**
@@ -266,7 +266,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
   - the mock server.
 - **Acceptance:** contract tests, and an old → new sync test for `payment_ref`.
 
-### K-22 Backend: adaptador CoDi
+### K-22 Backend: adaptador CoDi [baja]
 
 - [ ] Status · **Blocked by:** K-21
 - **What:**
@@ -280,14 +280,14 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
   - integration tests for paid, expired, duplicate notification and forged notification;
   - reconciliation finds an orphan.
 
-### K-23 Portal: pasar a confirmación automática
+### K-23 Portal: pasar a confirmación automática [baja]
 
 - [ ] Status · **Blocked by:** K-22, board KD-02 (certified state)
 - **What:** the setup gains «Confirmación automática»: enrol the shop with Banxico through
   Xangarro, check the CLABE belongs to the business, and keep the bridge QR as the fallback.
 - **Acceptance:** a Playwright spec through the enrolment states against the mock.
 
-### K-24 Teléfono y caja: QR en vivo
+### K-24 Teléfono y caja: QR en vivo [baja]
 
 - [ ] Status · **Blocked by:** K-22, board KD-05
 - **What:** the live flow (create cobro → QR with the amount → wait → «Pago recibido», then the
@@ -296,7 +296,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 - **Acceptance:** Maestro and Playwright flows for paid, expired→bridge and offline→bridge
   against the mock.
 
-### K-25 Pentest y certificación final
+### K-25 Pentest y certificación final [baja]
 
 - [ ] Status · **Blocked by:** K-24
 - **What:** the external pentest covers the CoDi endpoints (with N-45's), then Banxico's
@@ -305,7 +305,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 
 **Phase 3 — around it**
 
-### K-30 Portal: medidor Nivel 2 Bis
+### K-30 Portal: medidor Nivel 2 Bis [baja]
 
 - [ ] Status · **Blocked by:** the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07
 - **What:**
@@ -314,7 +314,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
   - a pure function in `@xangarro/domain` for the conversion and the thresholds.
 - **Acceptance:** domain tests at the edges, and Playwright on seeded data.
 
-### K-31 Landing: «Cobra con CoDi»
+### K-31 Landing: «Cobra con CoDi» [media]
 
 - [ ] Status · **Blocked by:** K-02 (the claims), K-13
 - **What:** a section on xangarro.mx (board KD-08): free CoDi cobros, no terminal, on every plan.

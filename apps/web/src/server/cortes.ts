@@ -2,7 +2,8 @@
  * Cortes de turno's read (O-37): the business's closed turnos with their
  * figures and stats, straight from Postgres. The calculator's answer is the
  * stored `efectivo_esperado`; the parts shown beside it are derived from the
- * same rows (the abono part is day-granular, exactly as O-03 computes it).
+ * same rows (the abono part is day-granular, exactly as O-03 computes it, and
+ * bounded by what the close stored — see `partes`).
  */
 
 import { and, desc, eq, isNotNull, isNull } from 'drizzle-orm';
@@ -86,10 +87,6 @@ function aCorte(
   f: Figuras,
 ): CorteRow {
   const { t, nombre, color } = r;
-  const fondo = t.montoAperturaCentavos + t.efectivoAdicionalCentavos;
-  const gastosCaja = f.gastos.get(t.id) ?? 0n;
-  const abonosEfe = f.abonos.get(t.fecha) ?? 0n;
-  const esperado = t.efectivoEsperadoCentavos ?? fondo;
   return {
     id: t.id,
     operador: nombre,
@@ -98,16 +95,40 @@ function aCorte(
     caja: 'Caja 1',
     dia: dia(t.cierreAt ?? t.aperturaAt),
     horario: `${hhmm(t.aperturaAt)} a ${hhmm(t.cierreAt ?? t.aperturaAt)}`,
-    fondo,
-    ventasEfectivo: esperado - fondo - abonosEfe + gastosCaja,
-    abonosEfectivo: abonosEfe,
-    gastosCaja,
+    ...partes(t, f),
     conteo: safeConteo(t.denominaciones),
     motivo: t.discrepancyReason ?? null,
     nota: t.explicacion ?? null,
     estado: estadoDe(t),
     turno: statsDe(t.id, f),
   } satisfies CorteRow;
+}
+
+/**
+ * The four parts of the stored esperado. Fondo and gastos are exact. An abono
+ * has no turno, so its part is the day's Efectivo abonos — but only as much as
+ * the stored esperado has room for once the turno's own Efectivo sales are in:
+ * an abono received after the close, or by another caja that day, was never
+ * in this corte. Ventas are the rest, so the parts still add up to what the
+ * close stored, and none of them can go negative (the domain refuses a
+ * negative part, and with it would go the whole list).
+ */
+function partes(
+  t: (typeof cajaTurnos)['$inferSelect'],
+  f: Figuras,
+): Pick<CorteRow, 'fondo' | 'ventasEfectivo' | 'abonosEfectivo' | 'gastosCaja'> {
+  const fondo = t.montoAperturaCentavos + t.efectivoAdicionalCentavos;
+  const gastosCaja = f.gastos.get(t.id) ?? 0n;
+  const esperado = t.efectivoEsperadoCentavos ?? fondo;
+  const hueco = esperado - fondo + gastosCaja - (f.efectivo.get(t.id)?.monto ?? 0n);
+  const delDia = f.abonos.get(t.fecha) ?? 0n;
+  const abonosEfectivo = hueco <= 0n ? 0n : delDia < hueco ? delDia : hueco;
+  return {
+    fondo,
+    ventasEfectivo: esperado - fondo - abonosEfectivo + gastosCaja,
+    abonosEfectivo,
+    gastosCaja,
+  };
 }
 
 /** Cuadró / Por aclarar / Aclarado, from the stored difference and stamp. */

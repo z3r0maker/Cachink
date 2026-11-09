@@ -99,8 +99,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `⛔ bloquea prod` `Alta` **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
-- [ ] **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
-- [ ] **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
+- [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
+- [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
 
 ### Portal (14)
 
@@ -112,24 +112,27 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **P-28** Diagnóstico + estrategia — «Próximamente» en producción — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [~] `Media` **P-30** Runtime de generación del Asesor — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
 - [ ] `Media` **P-38** Don Cuentas explica una diferencia de caja — Bloqueada por: — · `04-portal.md:1891`
+- [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
 - [ ] `Baja` **P-40** Primer diagnóstico gratis a los 90 días — Bloqueada por: P-28 · `04-portal.md:1925`
 - [ ] `Baja` **P-41** Funciones avanzadas de inventario — Bloqueada por: — · `04-portal.md:1939`
-- [ ] **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
-- [ ] **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · `22-codi.md:285`
+- [ ] `Baja` **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · `22-codi.md:285`
 
 ### Caja web (2)
 
+- [ ] `Media` **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · `22-codi.md:234`
 - [!] `Baja` **P-37** Impresión de tickets desde la caja · `04-portal.md:1877`
-- [ ] **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · `22-codi.md:234`
 
 ### Pagos y conciliación (18)
 
+- [ ] `Alta` **K-10** Dominio: CoDi vuelve como método — Bloqueada por: — · `22-codi.md:181`
+- [ ] `Alta` **K-11** Datos: la configuración CoDi del negocio — Bloqueada por: K-10 · `22-codi.md:197`
 - [ ] `Media` **C-13** API de intenciones de pago — Disparador: que N-40 decida avanzar · `02-contracts.md:336`
 - [ ] `Media` **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? · `09-next-features.md:1031`
 - [ ] `Media` **N-41** Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago — Bloqueada por: N-75, ADR-109 · `09-next-features.md:1047`
 - [ ] `Media` **N-43** Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago — Bloqueada por: N-41 · `09-next-features.md:1055`
+- [ ] `Media` **K-15** Reportes: CoDi en su propia línea — Bloqueada por: K-10, board KD-06 · `22-codi.md:240`
 - [ ] `Baja` **N-76** Conciliación de tarjeta — Bloqueada por: N-41, N-43 · `09-next-features.md:1068`
 - [ ] `Baja` **N-77** Paso del checklist e invitaciones — Bloqueada por: N-43 · `09-next-features.md:1081`
 - [ ] `Baja` **N-80** Puerto `PaymentProvider` — lado de escritura + Mercado Pago Point — Bloqueada por: N-41, N-40 (go de MP), C-13 · `09-next-features.md:1094`
@@ -138,12 +141,9 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **N-44** Cobrar en terminal (app y caja web) — Bloqueada por: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1122`
 - [ ] `Baja` **N-78** Salud de la terminal en la caja — Bloqueada por: N-79 · `09-next-features.md:1133`
 - [ ] `Baja` **N-53** Adaptador de Clip — Bloqueada por: N-41, N-40 (go de Clip), N-75 (go de Clip) · `09-next-features.md:1212`
-- [ ] **K-10** Dominio: CoDi vuelve como método — Bloqueada por: — · `22-codi.md:181`
-- [ ] **K-11** Datos: la configuración CoDi del negocio — Bloqueada por: K-10 · `22-codi.md:197`
-- [ ] **K-15** Reportes: CoDi en su propia línea — Bloqueada por: K-10, board KD-06 · `22-codi.md:240`
-- [ ] **K-20** Spike: el sandbox de Banxico — Bloqueada por: K-01 (the technical documentation and sandbox) · `22-codi.md:250`
-- [ ] **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · `22-codi.md:261`
-- [ ] **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · `22-codi.md:271`
+- [ ] `Baja` **K-20** Spike: el sandbox de Banxico — Bloqueada por: K-01 (the technical documentation and sandbox) · `22-codi.md:250`
+- [ ] `Baja` **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · `22-codi.md:261`
+- [ ] `Baja` **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · `22-codi.md:271`
 
 ### Consola (backoffice) (33)
 
@@ -231,7 +231,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 - [ ] `Media` **L-05** Badges de tienda + páginas legales — Bloqueada por: X-05 (URLs reales de tienda) · Falta: `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. · `06-landing.md:89`
 - [~] `Media` **N-58** Etapa 4 — compras + landing. · `09-next-features.md:1250`
-- [ ] **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · `22-codi.md:319`
+- [ ] `Media` **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · `22-codi.md:319`
 
 ## Corporativo, legal y terceros (38)
 
@@ -272,9 +272,9 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `22-codi.md` · 4. Tasks (3)
 
-- [~] **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
-- [ ] **K-02** Opinión legal sobre CoDi — Bloqueada por: — · `22-codi.md:168`
-- [ ] **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:301`
+- [~] `Alta` **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
+- [ ] `Alta` **K-02** Opinión legal sobre CoDi — Bloqueada por: — · `22-codi.md:168`
+- [ ] `Baja` **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:301`
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
@@ -381,7 +381,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 ### `22-codi.md` · 4. Tasks (1)
 
-- [ ] **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:310`
+- [ ] `Baja` **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:310`
 
 ## Por archivo
 
