@@ -7,6 +7,8 @@ export {
   FacturaNoPorVerificarError,
   FacturaSinRegistrarError,
   FechaPagoAnteriorError,
+  FechaPagoFuturaError,
+  FechaPagoInvalidaError,
   RfcMexiaPendienteError,
   SinArchivosError,
 } from './errors.js';

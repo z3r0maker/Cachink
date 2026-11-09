@@ -23,7 +23,7 @@ function Montos({ montos }: { readonly montos: readonly MontoPago[] }) {
   );
 }
 
-/** Today, unless the invoice is newer; never before the invoice. */
+/** Today, unless the invoice is newer; never before the invoice nor after today. */
 function FechaPago({ desde, hoy }: { readonly desde: string; readonly hoy: string }) {
   return (
     <div className={pp.fecha}>
@@ -34,6 +34,7 @@ function FechaPago({ desde, hoy }: { readonly desde: string; readonly hoy: strin
         required
         autoFocus
         min={desde}
+        max={hoy}
         defaultValue={hoy < desde ? desde : hoy}
       />
     </div>

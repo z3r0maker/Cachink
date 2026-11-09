@@ -534,15 +534,18 @@ with property tests:
 
 ### E-11 Facturas recibidas `[media]`
 
-- [~] Status · **Blocked by:** E-02, E-05
-  **Remaining (2026-11-06):**
-  - «Fecha de pago» bounds, dropped when PR #76 took main's E-11 (2026-11-03).
-    `registrarPagoFactura` refuses only a day before the invoice. It should also refuse a day
-    after today in Mexico (a typed error with its Spanish message) and an impossible day such as
-    2026-11-31, which today fails only by chance, as the ledger's `PeriodoCerradoError`.
-    Test-first in `facturas-pago.test.ts`: both ends of the range, the user-facing message and the
-    bancos amount, not just the error class. Also drop the `hoy` that
-    `resultados.integration.test.ts` passes to `registrarPagoFactura`, which ignores it.
+- [x] Status · **Blocked by:** E-02, E-05 · **Done:** 2026-11-06
+      **Done 2026-11-06, «Fecha de pago» bounds (no new board: the field and its message only):**
+  - `registrarPagoFactura` takes `hoy` (Mexico) and accepts a real day from the invoice's own day
+    to today, both included: `FechaPagoInvalidaError` («Elige una fecha de pago válida.») for an
+    impossible day or none, `FechaPagoAnteriorError` before the invoice, `FechaPagoFuturaError`
+    («La fecha de pago no puede ser después de hoy.») after today. The `hoy` that
+    `resultados.integration.test.ts` passed is now the one it uses. The field gains `max`.
+  - Tests: both ends with the bancos amount, each refusal with its message.
+  - Two shared-database races in data-corp's tests, found while running the suite repeatedly:
+    `descartarRevision` set aside other files' waiting uploads (the test now quits its own),
+    and scratch databases granted to cluster roles at once («tuple concurrently updated»; their
+    migrations now take an advisory lock).
     **Done 2026-11-06, boards CD-01f and CD-06h (round 12, approved 2026-11-04):**
   - Owner decision: a supplier who invoices every month is known by its RFC. «Hacer recurrente
     cada mes» on Registrar with an XML makes its template (`hacerRecurrenteFactura`; 0009 adds

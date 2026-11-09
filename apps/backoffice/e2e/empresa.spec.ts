@@ -304,6 +304,7 @@ test('a founder uploads invoices, registers three, pays one on credit and cancel
   const fecha = pago.getByLabel('Fecha de pago');
   await expect(fecha).toHaveValue(hoyMx());
   await expect(fecha).toHaveAttribute('min', `${hoyMx().slice(0, 7)}-01`);
+  await expect(fecha).toHaveAttribute('max', hoyMx());
   await pago.getByRole('button', { name: 'No, regresar' }).click();
   await expect(pago).toBeHidden();
   await page.getByRole('button', { name: `Registrar pago a ${DESPACHO.nombre}` }).click();

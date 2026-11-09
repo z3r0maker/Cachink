@@ -1,9 +1,15 @@
+import { esIsoDate } from '@xangarro/domain';
 import { gastoDeCfdi, pagoDeGasto, refPagoFactura } from '@xangarro/domain/corp';
 
 import type { LedgerEntry } from '../ports.js';
 import { RegistrarMovimientoUseCase } from '../registrar-movimiento.js';
 import { RevertirMovimientoUseCase } from '../revertir-movimiento.js';
-import { FacturaNoPorPagarError, FechaPagoAnteriorError } from './errors.js';
+import {
+  FacturaNoPorPagarError,
+  FechaPagoAnteriorError,
+  FechaPagoFuturaError,
+  FechaPagoInvalidaError,
+} from './errors.js';
 import { factura, proveedor, type FacturasDeps } from './registrar.js';
 
 /**
@@ -34,17 +40,27 @@ export interface MovimientoDeFacturaInput {
   readonly founderId: string;
 }
 
+/** A real day, from the invoice's own day to today in Mexico, both included. */
+function assertFechaDePago(fecha: string, factura: string, hoy: string): void {
+  if (!esIsoDate(fecha)) throw new FechaPagoInvalidaError(fecha);
+  if (fecha < factura.slice(0, 10)) throw new FechaPagoAnteriorError(fecha);
+  if (fecha > hoy) throw new FechaPagoFuturaError(fecha);
+}
+
 /**
  * «Registrar pago» on the day the money left the bank (board CD-06e): the bank
  * pays the net, withholdings are owed, the IVA turns creditable. Never before
- * the invoice itself; a closed month is the ledger's to refuse.
+ * the invoice itself nor after today; a closed month is the ledger's to refuse.
  */
 export async function registrarPagoFactura(
   deps: FacturasDeps,
-  input: MovimientoDeFacturaInput,
+  input: MovimientoDeFacturaInput & {
+    /** `YYYY-MM-DD` in Mexico: a payment cannot be dated after it. */
+    readonly hoy: string;
+  },
 ): Promise<LedgerEntry> {
   const { f, categoria } = await porPagar(deps, input.uuid);
-  if (input.fecha < f.cfdi.fecha.slice(0, 10)) throw new FechaPagoAnteriorError(input.fecha);
+  assertFechaDePago(input.fecha, f.cfdi.fecha, input.hoy);
   const entry = await new RegistrarMovimientoUseCase(deps.ledger).execute({
     fecha: input.fecha,
     projectId: f.projectId,

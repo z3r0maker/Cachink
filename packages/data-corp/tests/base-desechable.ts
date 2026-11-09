@@ -25,6 +25,9 @@ export interface BaseDesechable {
   cerrar(): Promise<void>;
 }
 
+/** Serializes the scratch databases' migrations, which grant to cluster-wide roles. */
+const CANDADO = 7_300_009;
+
 /** A new database with the local logins applied and no corp migration yet. */
 export async function crearBaseDesechable(): Promise<BaseDesechable> {
   const superUrl = process.env.DATABASE_SUPER_URL ?? '';
@@ -34,8 +37,15 @@ export async function crearBaseDesechable(): Promise<BaseDesechable> {
   const u = new URL(superUrl);
   u.pathname = `/${nombre}`;
   const sql = postgres(u.toString(), { max: 1, onnotice: () => {} });
+  // Roles are the cluster's, not the database's: two files granting to them at once fail with
+  // «tuple concurrently updated». The lock is taken in the suite's database, which all share.
   const correr = async (rutas: readonly string[]) => {
-    for (const r of rutas) await sql.unsafe(readFileSync(r, 'utf8'));
+    await admin`SELECT pg_advisory_lock(${CANDADO})`;
+    try {
+      for (const r of rutas) await sql.unsafe(readFileSync(r, 'utf8'));
+    } finally {
+      await admin`SELECT pg_advisory_unlock(${CANDADO})`;
+    }
   };
   await correr(sqlFiles('local').map((f) => f.ruta));
   return {
