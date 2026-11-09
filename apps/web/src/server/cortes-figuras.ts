@@ -64,13 +64,17 @@ export async function leerFiguras(
 
 /**
  * Ticket counts and line-total sums per turno, for the stats card — live,
- * fiado (live Crédito) and cancelled, one pass. `count(ticket id)` over the
- * line join counts what it always did; money is cast to text and parsed.
+ * fiado (live Crédito) and cancelled, one pass — plus the live Efectivo lines,
+ * the turno's own part of its esperado (scoped as `esperadoDelTurno` scopes
+ * it). `count(ticket id)` over the line join counts what it always did; money
+ * is cast to text and parsed.
  */
 async function statsPorTurno(tx: Tx, ids: readonly string[]) {
   const vivo = sql`${ticketsTable.cancelledAt} IS NULL`;
   const fiado = sql`${ticketsTable.cancelledAt} IS NULL AND ${ticketsTable.metodo} = 'Crédito'`;
   const cancelado = sql`${ticketsTable.cancelledAt} IS NOT NULL`;
+  const efectivo = sql`${ticketsTable.cancelledAt} IS NULL AND ${ticketsTable.metodo} = 'Efectivo'
+    AND ${salesTable.deletedAt} IS NULL`;
   const par = (cond: ReturnType<typeof sql>) => ({
     n: sql<string>`(count(${ticketsTable.id}) FILTER (WHERE ${cond}))::text`,
     monto: sql<string>`coalesce(sum(${salesTable.monto}) FILTER (WHERE ${cond}), 0)::text`,
@@ -81,6 +85,7 @@ async function statsPorTurno(tx: Tx, ids: readonly string[]) {
       vivas: par(vivo),
       fiado: par(fiado),
       canceladas: par(cancelado),
+      efectivo: par(efectivo),
     })
     .from(ticketsTable)
     .leftJoin(salesTable, eq(salesTable.ticketId, ticketsTable.id))
@@ -90,10 +95,11 @@ async function statsPorTurno(tx: Tx, ids: readonly string[]) {
     vivas: new Map() as Stats,
     fiado: new Map() as Stats,
     canceladas: new Map() as Stats,
+    efectivo: new Map() as Stats,
   };
   for (const r of rows) {
     if (r.turno === null) continue;
-    for (const k of ['vivas', 'fiado', 'canceladas'] as const) {
+    for (const k of ['vivas', 'fiado', 'canceladas', 'efectivo'] as const) {
       // A turno with none of a kind has no entry, as before: the readers default to 0.
       if (Number(r[k].n) > 0) out[k].set(r.turno, { n: Number(r[k].n), monto: BigInt(r[k].monto) });
     }

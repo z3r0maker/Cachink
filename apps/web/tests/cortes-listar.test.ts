@@ -90,7 +90,7 @@ function turno(over: Partial<TurnoFila> = {}): TurnoFila {
 }
 
 type Par = { readonly n: string; readonly monto: string };
-type FilaStats = { turno: string; vivas: Par; fiado: Par; canceladas: Par };
+type FilaStats = { turno: string; vivas: Par; fiado: Par; canceladas: Par; efectivo: Par };
 const CERO: Par = { n: '0', monto: '0' };
 
 /**
@@ -107,17 +107,24 @@ function poblado(
     vivas?: { turno: string; n: number; monto: string }[];
     fiado?: { turno: string; n: number; monto: string }[];
     canceladas?: { turno: string; n: number; monto: string }[];
+    efectivo?: { turno: string; n: number; monto: string }[];
     gastos?: unknown[];
     abonos?: unknown[];
   } = {},
 ): void {
   const porTurno = new Map<string, FilaStats>();
   const fila = (id: string): FilaStats => {
-    const actual = porTurno.get(id) ?? { turno: id, vivas: CERO, fiado: CERO, canceladas: CERO };
+    const actual = porTurno.get(id) ?? {
+      turno: id,
+      vivas: CERO,
+      fiado: CERO,
+      canceladas: CERO,
+      efectivo: CERO,
+    };
     porTurno.set(id, actual);
     return actual;
   };
-  for (const clase of ['vivas', 'fiado', 'canceladas'] as const) {
+  for (const clase of ['vivas', 'fiado', 'canceladas', 'efectivo'] as const) {
     for (const r of extras[clase] ?? []) {
       fila(r.turno)[clase] = { n: String(r.n), monto: String(r.monto) };
     }
@@ -177,6 +184,33 @@ describe('listarCortes', () => {
         creados: 0,
       },
     });
+  });
+
+  // $500 fondo, one $45 Efectivo sale, and $60 of Efectivo abonos that day —
+  // more than a close counts when some came in later or at another caja. The
+  // old residual read the ventas part as negative and the domain threw.
+  it.each([
+    { caso: "none of the day's abonos", esperado: 545_00n, ventas: 45_00n, abonos: 0n },
+    { caso: 'the $40 the close counted', esperado: 585_00n, ventas: 45_00n, abonos: 40_00n },
+    { caso: 'an esperado below its own sales', esperado: 520_00n, ventas: 20_00n, abonos: 0n },
+  ])('the abono part is bounded by the stored esperado: $caso', async (c) => {
+    poblado(
+      [
+        turno({
+          id: 't-1',
+          montoAperturaCentavos: 500_00n,
+          efectivoAdicionalCentavos: 0n,
+          efectivoEsperadoCentavos: c.esperado,
+        }),
+      ],
+      {
+        efectivo: [{ turno: 't-1', n: 1, monto: '4500' }],
+        abonos: [{ fecha: '2026-05-12', monto: 60_00n }],
+      },
+    );
+    const [corte] = await listarCortes('biz-1');
+    assert.equal(corte?.ventasEfectivo, c.ventas);
+    assert.equal(corte?.abonosEfectivo, c.abonos);
   });
 
   it('the estado reads the stamp first, then the difference', async () => {
