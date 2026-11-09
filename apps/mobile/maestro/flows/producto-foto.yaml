@@ -41,13 +41,15 @@ appId: mx.xangarro.mobile
 # Long press: the gallery (the boards' secondary path).
 - longPressOn:
     id: 'producto-sin-foto-01JPRD00000000000000000007'
-# The system picker: the newest photo is the fixture; any photo proves the
-# path, so the first one the picker lists is taken.
+# The system picker: the newest photo is the fixture, and the grid lists it
+# first. Each cell reads «Photo, <date>, <time>» («Foto, …» in Spanish); the
+# pattern takes one cell only, never the «Photos» tab or the grid itself,
+# whose label strings every cell's together.
 - extendedWaitUntil:
-    visible: '.*(Photo|Foto|Imagen).*'
+    visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
     timeout: 10000
 - tapOn:
-    text: '.*(Photo|Foto|Imagen).*'
+    text: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
     index: 0
 # iOS's picker may ask to confirm the pick («Agregar» / «Add»).
 - runFlow:
