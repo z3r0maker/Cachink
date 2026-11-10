@@ -826,6 +826,8 @@ export const esMX = {
         'Este negocio ya no tiene lugar para otro dispositivo. Pide al dueño del negocio que revise su cuenta.',
       suspended: 'La cuenta de este negocio está suspendida.',
       network: 'No hay conexión. Revisa tu internet e intenta de nuevo.',
+      config:
+        'Esta versión de la app no quedó lista para conectarse. Actualiza la app e intenta de nuevo.',
       unknown: 'Algo salió mal. Intenta de nuevo en un momento.',
     },
   },

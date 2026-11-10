@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import type * as DataModule from '@xangarro/data';
 import type { XangarroDatabase } from '@xangarro/data';
+import { activateTestDevice } from '../activated-device';
 import { DatabaseContext } from '../../src/database/index';
 import { InMemoryAppConfigRepository, seedTestEntitlement } from '@xangarro/testing';
 import { ActivationProvider } from '../../src/activation/activation-context';
@@ -71,7 +72,7 @@ async function mount(opts: { rejected?: number; unsent?: number } = {}) {
   };
   const appConfig = new InMemoryAppConfigRepository();
   await seedTestEntitlement(appConfig, 'xangarro');
-  await appConfig.set('activation', '{"deviceId":"D","businessId":"B","activatedAt":"x"}');
+  await activateTestDevice(appConfig);
   const tokenStore = memoryTokenStore('tok');
   const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
   const onOpenRejected = vi.fn();

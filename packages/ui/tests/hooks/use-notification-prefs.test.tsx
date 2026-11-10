@@ -23,6 +23,7 @@ import {
   type NotificationPreferences,
 } from '@xangarro/domain';
 import type { BusinessId } from '@xangarro/domain';
+import { activateTestDevice } from '../activated-device';
 import { RepositoryProvider, type Repositories } from '../../src/app/repository-provider';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import {
@@ -65,6 +66,7 @@ describe('useNotificationPrefs', () => {
     appConfig = new InMemoryAppConfigRepository();
     // Default prefs derive from effective flags, which need a verified plan (A-14).
     await seedTestEntitlement(appConfig);
+    await activateTestDevice(appConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,
@@ -133,6 +135,7 @@ describe('useUpdateNotificationPrefs', () => {
     appConfig = new InMemoryAppConfigRepository();
     // Default prefs derive from effective flags, which need a verified plan (A-14).
     await seedTestEntitlement(appConfig);
+    await activateTestDevice(appConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,

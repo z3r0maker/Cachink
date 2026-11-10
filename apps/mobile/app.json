@@ -22,6 +22,7 @@
     },
     "android": {
       "package": "mx.xangarro.mobile",
+      "allowBackup": false,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

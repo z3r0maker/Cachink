@@ -25,6 +25,7 @@ import { AppState } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { SyncEngine, type RejectedRow, type SyncCounts, type SyncRunResult } from '@xangarro/sync';
 import { useActivationContext } from '../activation/activation-context';
+import { deviceBusinessId } from '../activation/device-business';
 import { forgetDevice } from '../activation/forget-device';
 import { useActivationState } from '../activation/use-activation-state';
 import { useDatabase } from '../database/index';
@@ -160,9 +161,17 @@ export function CloudSyncBridge(props: { readonly children: ReactNode }): ReactE
   const { client, config } = useActivationContext();
   const { record } = useActivationState();
   const [state, setState] = useState<CloudSyncState>(INITIAL_CLOUD_SYNC_STATE);
+  const appConfig = useAppConfigRepository();
   const engine = useMemo(
-    () => new SyncEngine({ db, client, getToken: () => config.tokenStore.get() }),
-    [db, client, config.tokenStore],
+    () =>
+      new SyncEngine({
+        db,
+        client,
+        getToken: () => config.tokenStore.get(),
+        // Pages are applied under this phone's own business (audit F-15c).
+        getBusinessId: () => deviceBusinessId(appConfig),
+      }),
+    [db, client, config.tokenStore, appConfig],
   );
   const retryIn = useRef<(ms: number) => void>(() => undefined);
   const runner = useSyncRunner(engine, setState, retryIn);

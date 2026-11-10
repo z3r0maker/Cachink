@@ -5,7 +5,7 @@
  * header, no tab bar.
  *
  * Presentational: the gate hands it the operators, the session's caja and
- * date, and checks the NIP (`useQuickSwitchAuth`, the device-wide cooldown).
+ * date, and checks the NIP (`useQuickSwitchAuth`, each operator's lockout).
  * The root keeps the `quick-switch` testID the Maestro flows wait for.
  */
 import { useEffect, useState, type ReactElement } from 'react';
@@ -43,6 +43,8 @@ export function preseleccion(ops: readonly AccesoOperador[]): string | null {
 function useAcceso(props: AccesoScreenProps) {
   const [elegido, setElegido] = useState<string | null>(() => preseleccion(props.operadores));
   const [nip, setNip] = useState('');
+  // Whose NIP the error is about (F-08: a lockout is one person's, not the caja's).
+  const [intentado, setIntentado] = useState<string | null>(null);
   // A wrong NIP empties the dots for the next try.
   useEffect(() => {
     if (props.error !== null) setNip('');
@@ -50,13 +52,16 @@ function useAcceso(props: AccesoScreenProps) {
   return {
     elegido,
     nip,
+    error: intentado === elegido ? props.error : null,
     elegir: (id: string) => {
       setElegido(id);
       setNip('');
     },
     teclear: (t: TeclaNip) => setNip((n) => teclearNip(n, t)),
     enviar: () => {
-      if (elegido !== null) props.onAuthenticate(elegido as UserId, nip);
+      if (elegido === null) return;
+      setIntentado(elegido);
+      props.onAuthenticate(elegido as UserId, nip);
     },
   };
 }
@@ -92,11 +97,7 @@ function TituloNip(): ReactElement {
   );
 }
 
-function SeccionNip(p: {
-  a: ReturnType<typeof useAcceso>;
-  submitting: boolean;
-  error: string | null;
-}): ReactElement {
+function SeccionNip(p: { a: ReturnType<typeof useAcceso>; submitting: boolean }): ReactElement {
   return (
     <View gap={10}>
       <TituloNip />
@@ -106,7 +107,7 @@ function SeccionNip(p: {
         onEnviar={p.a.enviar}
         accion="entrar"
         bloqueado={p.submitting}
-        error={p.error}
+        error={p.a.error}
       />
     </View>
   );
@@ -135,7 +136,7 @@ export function AccesoScreen(props: AccesoScreenProps): ReactElement {
             <OperadorFila key={o.id} o={o} on={o.id === a.elegido} onPress={() => a.elegir(o.id)} />
           ))}
         </View>
-        {actual ? <SeccionNip a={a} submitting={props.submitting} error={props.error} /> : null}
+        {actual ? <SeccionNip a={a} submitting={props.submitting} /> : null}
         <OlvideNip aQuien={props.dueno ? `a ${props.dueno}` : t('entrar.acceso.alDueno')} />
       </ScrollView>
     </View>

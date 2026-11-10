@@ -54,6 +54,7 @@ function setup(d: Device) {
     db: d.db,
     client,
     getToken: async () => d.token,
+    getBusinessId: async () => d.businessId,
     now: () => new Date(clock.ms),
     random: () => 1,
   });

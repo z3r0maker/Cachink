@@ -47,6 +47,9 @@ vi.mock('@xangarro/sync', () => ({
   spread: (ms: number) => ms,
 }));
 vi.mock('../../src/activation/forget-device', () => ({ forgetDevice }));
+vi.mock('../../src/activation/device-business', () => ({
+  deviceBusinessId: vi.fn(async () => 'b-1'),
+}));
 vi.mock('../../src/activation/activation-context', () => ({
   useActivationContext: () => ({
     client: { fetch: vi.fn() },
@@ -112,6 +115,16 @@ describe('CloudSyncBridge', () => {
     montar();
     expect(await screen.findByText('puente')).toBeInTheDocument();
     await waitFor(() => expect(valor.state.phase).toBe('idle'));
+  });
+
+  it('hands the engine this phone’s own business, read when asked (F-15c)', async () => {
+    montar();
+    const deps = SyncEngine.mock.calls.at(-1)?.[0] as {
+      getBusinessId: () => Promise<string | null>;
+      getToken: () => unknown;
+    };
+    expect(await deps.getBusinessId()).toBe('b-1');
+    expect(deps.getToken()).toBe('tok');
   });
 
   it('«Actualizar» runs a manual sync and records when the push reached the server', async () => {

@@ -7,6 +7,7 @@ import type { Descarga } from './descarga';
 import { abrirTurno, reanudarDescarga, useReentrada, vincularYPasar } from './flujo';
 import { Marco } from './marco';
 import { Nip } from './nip';
+import type { Verificado } from './nip-estado';
 import { Vincular, type Vinculo } from './vincular';
 import * as a from './acceso.css';
 import { registerRuntime } from '../runtime/client';
@@ -29,7 +30,7 @@ function ErrorAcceso(p: { readonly error: string | null }): ReactNode {
   );
 }
 
-function verificar(nombre: string, nip: string): Promise<{ success: boolean }> {
+function verificar(nombre: string, nip: string): Promise<Verificado> {
   const device = readDevice();
   if (device === null) return Promise.resolve({ success: false });
   return registerRuntime().autenticar(device.businessId, device.deviceId, nombre, nip);

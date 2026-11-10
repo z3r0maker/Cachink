@@ -3,19 +3,21 @@
  *
  * Operators and their PINs come down from the portal (A-05, Q2): the device
  * only authenticates. No create, no change PIN, no recovery. Five wrong PINs
- * lock PIN entry for 30 s (`pin-lockout.ts`), persisted in app_config so a
- * restart does not reset the counter.
+ * for an operator lock that operator's NIP, longer each time in a row
+ * (`pin-lockout.ts`, audit F-08): the count is theirs, shared by every path
+ * that checks their NIP, and kept in app_config so a restart does not reset
+ * it. Other operators keep signing in, and their NIPs do not clear it.
  */
 
 import { useState } from 'react';
 import type { BusinessId, User, UserId } from '@xangarro/domain';
 import { useQuery } from '@tanstack/react-query';
 import { AutenticarUsuarioUseCase } from '@xangarro/application';
+import { attemptNip, type NipCheck } from '@xangarro/caja/nip';
 import type { AppConfigRepository } from '@xangarro/data';
-import { APP_CONFIG_KEYS } from '../app-config/index';
 import { useSetUserId } from '../app-config/use-app-config';
 import { useTranslation } from '../i18n/index';
-import { NO_LOCKOUT, parsePinLockout, recordPinFailure, remainingLockMs } from './pin-lockout';
+import { deviceNipGuard, nipRefusal } from './pin-lockout';
 import { USERS_KEY } from './query-keys-auth';
 import { useAppConfigRepository, useUsersRepository } from './repository-provider';
 
@@ -33,18 +35,14 @@ interface AuthDeps {
   readonly usersRepo: UsersRepo;
   readonly appConfig: AppConfigRepository;
   readonly businessId: BusinessId;
-  readonly messages: { readonly wrongPin: string; readonly lockedOut: (s: number) => string };
+  readonly wrongPin: string;
   readonly setSubmitting: (v: boolean) => void;
   readonly setError: (v: string | null) => void;
   readonly signIn: (userId: UserId) => void;
 }
 
-/** Verifies a PIN; returns the error message to show, or null on success. */
-async function verifyPin(deps: AuthDeps, userId: UserId, pin: string): Promise<string | null> {
-  const now = new Date();
-  const lockout = parsePinLockout(await deps.appConfig.get(APP_CONFIG_KEYS.pinLockout));
-  const lockedMs = remainingLockMs(lockout, now);
-  if (lockedMs > 0) return deps.messages.lockedOut(Math.ceil(lockedMs / 1000));
+/** What `AutenticarUsuarioUseCase` answers, as the guard reads it. */
+async function checkPin(deps: AuthDeps, userId: UserId, pin: string): Promise<NipCheck<UserId>> {
   const user = await deps.usersRepo.findById(userId);
   const result = user
     ? await new AutenticarUsuarioUseCase(deps.usersRepo).execute({
@@ -53,16 +51,17 @@ async function verifyPin(deps: AuthDeps, userId: UserId, pin: string): Promise<s
         businessId: deps.businessId,
       })
     : null;
-  if (!result?.success || !result.userId) {
-    const next = recordPinFailure(lockout, now);
-    await deps.appConfig.set(APP_CONFIG_KEYS.pinLockout, JSON.stringify(next));
-    const nowLocked = remainingLockMs(next, now);
-    return nowLocked > 0
-      ? deps.messages.lockedOut(Math.ceil(nowLocked / 1000))
-      : deps.messages.wrongPin;
-  }
-  await deps.appConfig.set(APP_CONFIG_KEYS.pinLockout, JSON.stringify(NO_LOCKOUT));
-  deps.signIn(result.userId);
+  return result?.success && result.userId ? { ok: true, value: result.userId } : { ok: false };
+}
+
+/** Verifies a PIN; returns the error message to show, or null on success. */
+async function verifyPin(deps: AuthDeps, userId: UserId, pin: string): Promise<string | null> {
+  // Counted against the operator picked: it is their NIP that is being tried.
+  const attempt = await attemptNip(deviceNipGuard(deps.appConfig), userId, () =>
+    checkPin(deps, userId, pin),
+  );
+  if (attempt.status !== 'ok') return nipRefusal(attempt, deps.wrongPin);
+  deps.signIn(attempt.value);
   return null;
 }
 
@@ -98,10 +97,7 @@ export function useQuickSwitchAuth(businessId: BusinessId): QuickSwitchAuthResul
     usersRepo,
     appConfig,
     businessId,
-    messages: {
-      wrongPin: t('entrar.nip.error'),
-      lockedOut: (seconds) => t('entrar.nip.esperando', { seconds }),
-    },
+    wrongPin: t('entrar.nip.error'),
     setSubmitting,
     setError,
     signIn,

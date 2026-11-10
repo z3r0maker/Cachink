@@ -1,7 +1,8 @@
 /**
  * CancelarTicketUseCase — cancel a ticket atomically (ADR-073): permission
  * + PIN check, the header takes the cancellation, every line's stock comes
- * back, and one audit log records the whole ticket.
+ * back, and one audit log records the whole ticket. Every refusal is a
+ * `CancelarTicketError` with a `code` (`cancelar-ticket-errors.ts`).
  */
 
 import { compare } from 'bcryptjs';
@@ -22,6 +23,7 @@ import type {
   UsersRepository,
 } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { CancelarTicketError } from './cancelar-ticket-errors.js';
 
 export interface CancelarTicketInput {
   readonly ticketId: TicketId;
@@ -68,8 +70,8 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
   async execute(input: CancelarTicketInput): Promise<CancelarTicketResult> {
     await this.#verifyUserAndPin(input.userId, input.pin);
     const ticket = await this.#tickets.findById(input.ticketId);
-    if (!ticket) throw new TypeError('Venta no encontrada');
-    if (ticket.cancelledAt !== null) throw new TypeError('Esta venta ya fue cancelada');
+    if (!ticket) throw new CancelarTicketError('VENTA_NO_ENCONTRADA');
+    if (ticket.cancelledAt !== null) throw new CancelarTicketError('VENTA_YA_CANCELADA');
 
     const lineas = await this.#sales.findByTicket(input.ticketId);
     const total = lineas.reduce((acc, l) => acc + (l.monto as Money), 0n as Money);
@@ -82,7 +84,7 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
       input.motivo,
       input.userId as string,
     );
-    if (!cancelled) throw new TypeError('Esta venta ya fue cancelada');
+    if (!cancelled) throw new CancelarTicketError('VENTA_YA_CANCELADA');
 
     await this.#logs.create({
       ticketId: input.ticketId,
@@ -102,9 +104,9 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
 
   async #verifyUserAndPin(userId: UserId, pin: string): Promise<void> {
     const user = await this.#users.findById(userId);
-    if (!user) throw new TypeError('Usuario no encontrado');
+    if (!user) throw new CancelarTicketError('USUARIO_NO_ENCONTRADO');
     const pinOk = await compare(pin, user.pinHash);
-    if (!pinOk) throw new TypeError('PIN incorrecto');
+    if (!pinOk) throw new CancelarTicketError('PIN_INCORRECTO');
 
     // The row carries permissions parsed (drizzle) or as JSON text (pg).
     const raw = (user as Record<string, unknown>).permissions;
@@ -112,9 +114,7 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
       typeof raw === 'string'
         ? parseUserPermissions(raw)
         : parseUserPermissions(JSON.stringify(raw ?? {}));
-    if (!canUserCancelSales(perms)) {
-      throw new TypeError('No tienes permiso para cancelar ventas');
-    }
+    if (!canUserCancelSales(perms)) throw new CancelarTicketError('SIN_PERMISO');
   }
 
   async #reverseStock(

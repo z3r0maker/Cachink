@@ -5,18 +5,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * The shell's platform plumbing (A-04), all Expo surfaces mocked: the
  * ActivationConfig assembles from the environment (the mock's base URL by
  * default, the scenario header only in dev, the entitlement key or the dev
- * fallback), the token store never touches SQLite, and the device context
- * reports what the OS says — with 'unknown' when the version is missing.
+ * fallback), the token store is the keychain's (`device-token-store.test.ts`),
+ * and the device context reports what the OS says — with 'unknown' when the
+ * version is missing.
  */
 
-const getItemAsync = vi.fn(async () => 'tok-viejo');
-const setItemAsync = vi.fn(async () => undefined);
-const deleteItemAsync = vi.fn(async () => undefined);
-
+// The keychain itself is `device-token-store.test.ts`'s subject.
 vi.mock('expo-secure-store', () => ({
-  getItemAsync: (...a: unknown[]) => getItemAsync(...a),
-  setItemAsync: (...a: unknown[]) => setItemAsync(...a),
-  deleteItemAsync: (...a: unknown[]) => deleteItemAsync(...a),
+  AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 1,
+  getItemAsync: vi.fn(async () => null),
+  setItemAsync: vi.fn(async () => undefined),
+  deleteItemAsync: vi.fn(async () => undefined),
 }));
 vi.mock('expo-application', () => ({
   nativeApplicationVersion: '3.1.4',
@@ -28,9 +27,12 @@ vi.mock('expo-device', () => ({
   osVersion: '15',
 }));
 vi.mock('react-native', () => ({ Platform: { OS: 'android', Version: 15 } }));
-vi.mock('@xangarro/ui', () => ({
-  DEV_ENTITLEMENT_PUBLIC_KEY_HEX: 'ab'.repeat(32),
-}));
+// The shell reads two things from the UI package, both in one import-free
+// file: the real rules run here, the rest of the package stays out.
+vi.mock(
+  '@xangarro/ui',
+  async () => await import('../../../../packages/ui/src/activation/release-config'),
+);
 vi.mock('@xangarro/observability', () => ({}));
 vi.mock('react', () => ({ useMemo: <T>(f: () => T) => f() }));
 
@@ -57,17 +59,6 @@ afterEach(() => {
   delete process.env.EXPO_PUBLIC_ENTITLEMENT_PUBKEY;
 });
 
-describe('secureDeviceTokenStore', () => {
-  it('reads, writes and clears the one keychain key — never SQLite', async () => {
-    await secureDeviceTokenStore.set('tok-nuevo');
-    expect(setItemAsync).toHaveBeenCalledWith('xangarro.deviceToken', 'tok-nuevo');
-    expect(await secureDeviceTokenStore.get()).toBe('tok-viejo');
-    expect(getItemAsync).toHaveBeenCalledWith('xangarro.deviceToken');
-    await secureDeviceTokenStore.clear();
-    expect(deleteItemAsync).toHaveBeenCalledWith('xangarro.deviceToken');
-  });
-});
-
 describe('mobileActivationConfig', () => {
   it('defaults to the contracts mock on IPv4, not localhost', () => {
     expect(mobileActivationConfig.apiBase).toBe('http://127.0.0.1:3000');
@@ -85,6 +76,61 @@ describe('mobileActivationConfig', () => {
     // In dev (__DEV__ pinned true for the runner), the scenario header
     // exists only when the env names one; it does not here.
     expect(mobileActivationConfig.extraHeaders).toBeUndefined();
+  });
+});
+
+/** The shell as a bundle built with `env` boots it; `dev` is Metro's `__DEV__`. */
+async function boot(dev: boolean, env: Readonly<Record<string, string>>) {
+  vi.resetModules();
+  (globalThis as { __DEV__?: boolean }).__DEV__ = dev;
+  Object.assign(process.env, env);
+  try {
+    return (await import('../../src/shell/activation-config')).mobileActivationConfig;
+  } finally {
+    (globalThis as { __DEV__?: boolean }).__DEV__ = true;
+  }
+}
+
+describe('mobileActivationConfig in a release bundle (audit F-15d)', () => {
+  const KEY = '3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c';
+
+  it('never falls back to the mock or to a key that verifies nothing in silence', async () => {
+    const config = await boot(false, {});
+    expect(config.apiBase).toBe('');
+    expect(config.entitlementPublicKeyHex).toBe('');
+    expect(config.configProblems?.map((p) => p.code)).toEqual([
+      'API_BASE_MISSING',
+      'PUBKEY_MALFORMED',
+    ]);
+  });
+
+  it('reports a value EAS handed over unfilled', async () => {
+    const config = await boot(false, {
+      EXPO_PUBLIC_API_BASE: '$PRODUCTION_API_BASE',
+      EXPO_PUBLIC_ENTITLEMENT_PUBKEY: '$PRODUCTION_ENTITLEMENT_PUBKEY',
+    });
+    expect(config.apiBase).toBe('');
+    expect(config.configProblems?.map((p) => p.code)).toEqual([
+      'API_BASE_INVALID',
+      'PUBKEY_MALFORMED',
+    ]);
+  });
+
+  it('runs with a complete configuration and reports nothing', async () => {
+    const config = await boot(false, {
+      EXPO_PUBLIC_API_BASE: 'https://app.xangarro.mx',
+      EXPO_PUBLIC_ENTITLEMENT_PUBKEY: KEY,
+    });
+    expect(config.apiBase).toBe('https://app.xangarro.mx');
+    expect(config.entitlementPublicKeyHex).toBe(KEY);
+    expect(config.configProblems).toEqual([]);
+  });
+
+  it('in development keeps the mock default and reports nothing', async () => {
+    const config = await boot(true, {});
+    expect(config.apiBase).toBe('http://127.0.0.1:3000');
+    expect(config.entitlementPublicKeyHex).toHaveLength(64);
+    expect(config.configProblems).toEqual([]);
   });
 });
 

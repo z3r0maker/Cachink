@@ -16,6 +16,7 @@
     "./inicio": "./src/inicio/index.ts",
     "./inventario": "./src/inventario/index.ts",
     "./lectura": "./src/lectura/index.ts",
+    "./nip": "./src/nip/index.ts",
     "./pendientes": "./src/pendientes/index.ts",
     "./turno": "./src/turno/index.ts",
     "./ventas": "./src/ventas/index.ts",

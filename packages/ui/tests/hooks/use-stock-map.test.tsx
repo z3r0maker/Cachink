@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { InMemoryAppConfigRepository, seedTestEntitlement } from '@xangarro/testing';
 import type { PlanId } from '@xangarro/domain';
+import { activateTestDevice } from '../activated-device';
 import { useEntitlement } from '../../src/entitlement/use-entitlement';
 import { useStockMap } from '../../src/hooks/use-stock-map';
 
@@ -23,6 +24,7 @@ const ROWS = {
 async function render(plan: PlanId | null) {
   const appConfig = new InMemoryAppConfigRepository();
   if (plan) await seedTestEntitlement(appConfig, plan);
+  await activateTestDevice(appConfig);
   const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={qc}>

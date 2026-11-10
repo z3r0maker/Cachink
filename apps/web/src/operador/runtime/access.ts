@@ -10,10 +10,13 @@ import { AbrirCajaUseCase, AutenticarUsuarioUseCase } from '@xangarro/applicatio
 import { DrizzleCajaTurnosRepository, DrizzleUsersRepository } from '@xangarro/data';
 import type { BusinessId } from '@xangarro/domain';
 import { applyBootstrap } from '@xangarro/sync';
+import { attemptNip, type NipCheck } from '@xangarro/caja/nip';
 import type { Bootstrap } from '@xangarro/contracts';
 
 import { hoyLocal } from '@xangarro/caja';
 import type { Db } from './db-types';
+import { guardiaNip } from './nip-guard';
+import type { Autenticado } from './protocol';
 
 export interface OperadorPara {
   readonly id: string;
@@ -53,18 +56,34 @@ export async function operadores(
     .map((u) => ({ id: u.id, nombre: u.nombre, avatarColor: u.avatarColor }));
 }
 
-/** Four digits against the operator's hash — on the device (ADR-072 §3). */
+/**
+ * Four digits against the operator's hash, on the device (ADR-072 §3) and
+ * behind that operator's NIP lockout (audit F-08): a miss counts against
+ * the operator named, and while their lockout runs the hash is not looked
+ * at. A name that is nobody's has no NIP to guess: it fails and counts
+ * nothing.
+ */
 export async function autenticar(
   db: Db,
   businessId: BusinessId,
   deviceId: string,
   nombre: string,
   nip: string,
-): Promise<{ success: boolean; userId: string | null }> {
-  const result = await new AutenticarUsuarioUseCase(
-    new DrizzleUsersRepository(db as never, deviceId as never),
-  ).execute({ nombre, pin: nip, businessId });
-  return { success: result.success, userId: result.success ? result.userId : null };
+): Promise<Autenticado> {
+  const users = new DrizzleUsersRepository(db as never, deviceId as never);
+  const subject = await users.findByNombre(nombre, businessId);
+  if (subject === null) return { success: false, userId: null, esperaMs: 0 };
+  const check = async (): Promise<NipCheck<string>> => {
+    const result = await new AutenticarUsuarioUseCase(users).execute({
+      nombre,
+      pin: nip,
+      businessId,
+    });
+    return result.success && result.userId ? { ok: true, value: result.userId } : { ok: false };
+  };
+  const attempt = await attemptNip(guardiaNip(db), subject.id, check);
+  if (attempt.status === 'ok') return { success: true, userId: attempt.value, esperaMs: 0 };
+  return { success: false, userId: null, esperaMs: attempt.lockedMs };
 }
 
 /** The fondo counted opens the turno — the gate O-12 contributes. */

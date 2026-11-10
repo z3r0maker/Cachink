@@ -6,6 +6,8 @@
  * app_config. Tests and web use the in-memory store.
  */
 
+import { DEV_ENTITLEMENT_PUBLIC_KEY_HEX, type ReleaseConfigProblem } from './release-config';
+
 export interface DeviceTokenStore {
   get(): Promise<string | null>;
   set(token: string): Promise<void>;
@@ -31,11 +33,16 @@ export interface ActivationConfig {
    * key means nothing verifies → Freelancer limits, never a lock.
    */
   readonly entitlementPublicKeyHex: string;
+  /**
+   * Why this release build cannot link a device (audit F-15d): a missing API
+   * base or public key. Activation shows it instead of trying; absent or
+   * empty everywhere else.
+   */
+  readonly configProblems?: readonly ReleaseConfigProblem[];
 }
 
-/** DEV ONLY — the contracts mock's signing key (`packages/contracts/src/mock/dev-keys.json`). */
-export const DEV_ENTITLEMENT_PUBLIC_KEY_HEX =
-  'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a';
+// The dev key lives with the rules that forbid it in production (F-15d).
+export { DEV_ENTITLEMENT_PUBLIC_KEY_HEX };
 
 /** Persisted in app_config under `activation`. */
 export interface ActivationRecord {

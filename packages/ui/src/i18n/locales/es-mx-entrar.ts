@@ -65,7 +65,6 @@ export const entrar = {
     desbloquear: 'Desbloquear',
     desbloquearFalta: 'Desbloquear, falta completar el NIP',
     error: 'Ese NIP no es. Revísalo e intenta otra vez.',
-    esperando: 'Demasiados intentos. Espera {{seconds}} s.',
   },
   bloqueo: {
     seguir: 'Pon tu NIP para seguir',

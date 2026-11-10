@@ -2,13 +2,13 @@
  * useVentasTurno — Ventas del turno's data for the signed-in operator (M-08):
  * the open turno's tickets as `VentasData` (the session around them), the
  * ticket a folio opens, and the cancel itself through `CancelarTicketUseCase`
- * (permission + PIN + stock back + the audit log, ADR-073). Keyed under the
+ * (permission + PIN + stock back + the audit log, ADR-073) behind the
+ * authorising user's NIP lockout (`cancelar-con-nip`). Keyed under the
  * caja's queries, so a sale captured on Cobrar refreshes this list too.
  */
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
-import { CancelarTicketUseCase } from '@xangarro/application';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, TicketId, UserId } from '@xangarro/domain';
 import type { CargaTicket, VentasData, VentaTurno } from '@xangarro/caja/ventas';
@@ -16,6 +16,7 @@ import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
 import { cajaKeys } from '../../hooks/query-keys';
 import { useShellData } from '../AppShell/use-shell-data';
+import { cancelarConNip } from './cancelar-con-nip';
 import { leerVentaDetalle, leerVentasTurno, type FilasVentas } from './ventas-lectura';
 import type { VentasEstado } from './ventas-mostrador-screen';
 
@@ -80,7 +81,7 @@ function useCargarDetalle(
   );
 }
 
-/** Cancels through `CancelarTicketUseCase`, then sweeps the caja's queries. */
+/** Cancels behind the device's NIP guard, then sweeps the caja's queries. */
 function useCancelarTicket(
   repos: ReturnType<typeof useRepositories>,
   businessId: BusinessId | null,
@@ -90,25 +91,14 @@ function useCancelarTicket(
   return useCallback(
     async (venta: VentaTurno, motivo: string, pin: string): Promise<string | null> => {
       if (venta.id === undefined) return 'Esta venta no se puede cancelar desde aquí.';
-      const uc = new CancelarTicketUseCase(
-        repos.tickets,
-        repos.sales,
-        repos.users,
-        repos.products,
-        repos.inventoryMovements,
-        repos.cancelacionLogs,
-      );
-      try {
-        await uc.execute({
-          ticketId: venta.id as TicketId,
-          userId: userId as UserId,
-          pin,
-          motivo,
-          businessId: businessId as BusinessId,
-        });
-      } catch (e: unknown) {
-        return `No se pudo cancelar: ${e instanceof Error ? e.message : String(e)}`;
-      }
+      const error = await cancelarConNip(repos, {
+        ticketId: venta.id as TicketId,
+        userId: userId as UserId,
+        businessId: businessId as BusinessId,
+        pin,
+        motivo,
+      });
+      if (error !== null) return error;
       await queryClient.invalidateQueries({ queryKey: cajaKeys.byBusiness(businessId) });
       return null;
     },

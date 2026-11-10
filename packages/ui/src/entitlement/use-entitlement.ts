@@ -2,14 +2,16 @@
  * useEntitlement — the verified plan this device enforces (A-10).
  *
  * Reads what sync stored (signed entitlement, last server time, last pull)
- * and resolves it with `@xangarro/sync`'s verifier. Keyed under the cloud
- * sync prefix so it refreshes after every sync run.
+ * and resolves it with `@xangarro/sync`'s verifier, bound to the business
+ * this phone was activated for (audit F-15c). Keyed under the cloud sync
+ * prefix so it refreshes after every sync run.
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { resolveEntitlement, type ResolvedEntitlement } from '@xangarro/sync';
 import { APP_CONFIG_KEYS } from '../app-config/index';
 import { useActivationContext } from '../activation/activation-context';
+import { deviceBusinessId } from '../activation/device-business';
 import { CLOUD_SYNC_QUERY_KEY } from '../app/cloud-sync-bridge';
 import { useAppConfigRepository } from '../app/repository-provider';
 
@@ -22,10 +24,11 @@ export function useEntitlement(): ResolvedEntitlement | undefined {
   const query = useQuery({
     queryKey: ENTITLEMENT_QUERY_KEY,
     queryFn: async () => {
-      const [storedJson, lastServerTime, lastPullAt] = await Promise.all([
+      const [storedJson, lastServerTime, lastPullAt, businessId] = await Promise.all([
         appConfig.get(APP_CONFIG_KEYS.entitlement),
         appConfig.get(APP_CONFIG_KEYS.lastServerTime),
         appConfig.get(APP_CONFIG_KEYS.lastPullAt),
+        deviceBusinessId(appConfig),
       ]);
       return resolveEntitlement({
         storedJson,
@@ -33,6 +36,7 @@ export function useEntitlement(): ResolvedEntitlement | undefined {
         lastPullAt,
         deviceNow: new Date(),
         publicKeyHex: config.entitlementPublicKeyHex,
+        businessId,
       });
     },
   });

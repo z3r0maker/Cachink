@@ -43,6 +43,13 @@ export interface SesionAbierta {
   readonly turnoId: string;
 }
 
+/** What a NIP entry answers; `esperaMs` is above zero while the lockout runs (F-08). */
+export interface Autenticado {
+  readonly success: boolean;
+  readonly userId: string | null;
+  readonly esperaMs: number;
+}
+
 /** One ticket of the open turno, as Operador · Ventas lists it (money as centavos string). */
 
 /** A fiado ticket of an account, and an abono on it (O-33; money as centavos string). */
@@ -79,6 +86,8 @@ export type WorkerRequest =
       readonly id: number;
       readonly method: 'sync';
       readonly token: string | null;
+      /** The register's own business: pulled pages are applied under it (F-15c). */
+      readonly businessId: string | null;
       readonly mode: SyncMode;
       readonly manual: boolean;
     }

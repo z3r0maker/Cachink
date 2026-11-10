@@ -140,6 +140,35 @@ describe('Acceso', () => {
   });
 });
 
+describe('Acceso: the error line is about one person’s NIP (F-08)', () => {
+  const ESPERA = 'Demasiados intentos. Espera 30 s.';
+  const pantalla = (error: string | null, onAuthenticate = vi.fn()) => (
+    <AccesoScreen
+      operadores={OPS}
+      contexto={null}
+      fecha="Jueves 14 de mayo"
+      dueno={null}
+      onAuthenticate={onAuthenticate}
+      error={error}
+      submitting={false}
+    />
+  );
+
+  it('shows the wait to whoever was locked, and not to the next person picked', () => {
+    const { rerender } = renderWithProviders(pantalla(null));
+    teclear('9999');
+    tap('nip-enviar');
+    rerender(pantalla(ESPERA));
+    expect(screen.getByTestId('nip-error')).toHaveTextContent(ESPERA);
+    // Luis is not locked: his pad comes up without Ana's line.
+    tap('acceso-operador-luis');
+    expect(screen.queryByTestId('nip-error')).toBeNull();
+    // Back on Ana, her line is still hers.
+    tap('acceso-operador-ana');
+    expect(screen.getByTestId('nip-error')).toHaveTextContent(ESPERA);
+  });
+});
+
 describe('Bloqueo', () => {
   it('unlocks the same person, or hands over to Acceso', () => {
     const onUnlock = vi.fn();

@@ -12,6 +12,7 @@ import type { Bootstrap } from '@xangarro/contracts';
 import type { SnapshotProgress, SyncCounts, SyncRunResult } from '@xangarro/sync';
 
 import type {
+  Autenticado,
   BootInfo,
   CierrePara,
   CuentaPara,
@@ -100,7 +101,7 @@ export class RegisterRuntime {
     token: string | null,
     opts: { readonly mode: SyncMode; readonly manual: boolean },
   ): Promise<SyncRunResult> {
-    return this.#call<SyncRunResult>({ method: 'sync', token, ...opts });
+    return this.#call<SyncRunResult>(calls.sync(token, opts));
   }
 
   counts(): Promise<RuntimeCounts> {
@@ -126,7 +127,7 @@ export class RegisterRuntime {
     deviceId: string,
     nombre: string,
     nip: string,
-  ): Promise<{ success: boolean; userId: string | null }> {
+  ): Promise<Autenticado> {
     return this.#call(calls.autenticar(businessId, deviceId, nombre, nip));
   }
 

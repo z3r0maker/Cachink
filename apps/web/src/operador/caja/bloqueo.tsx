@@ -29,6 +29,7 @@ function hacerEntrar(p: {
   readonly nip: string;
   readonly sesion: SesionCaja;
   readonly setError: (v: boolean) => void;
+  readonly setEspera: (ms: number) => void;
   readonly setNip: (v: string) => void;
 }): () => Promise<void> {
   return async () => {
@@ -42,6 +43,7 @@ function hacerEntrar(p: {
     );
     if (!r.success) {
       p.setError(true);
+      p.setEspera(r.esperaMs ?? 0);
       p.setNip('');
       return;
     }
@@ -76,15 +78,18 @@ function useCandado(sesion: SesionCaja) {
   const [elegido, setElegido] = useState<Operador>({ id: sesion.userId, nombre: sesion.nombre });
   const [cambiando, setCambiando] = useState(false);
   const [nip, setNip] = useState('');
-  const entrar = hacerEntrar({ elegido, nip, sesion, setError, setNip });
+  const [espera, setEspera] = useState(0);
+  const entrar = hacerEntrar({ elegido, nip, sesion, setError, setEspera, setNip });
   const onKey = teclaDe(setNip, nip, () => void entrar());
   useTeclado(onKey);
   const elegir = (o: Operador) => {
     setElegido(o);
     setNip('');
     setError(false);
+    setEspera(0);
   };
-  return { error, operadores, elegido, elegir, cambiando, setCambiando, nip, entrar, onKey };
+  const vista = { error, espera, operadores, elegido, cambiando, nip };
+  return { ...vista, elegir, setCambiando, entrar, onKey };
 }
 
 /** Whoever holds the turno unlocks with their NIP; «No soy …» lets someone else in. */
@@ -103,6 +108,7 @@ function Candado({ sesion }: { readonly sesion: SesionCaja }): ReactNode {
       <NipPad
         nip={c.nip}
         error={c.error}
+        esperaMs={c.espera}
         onKey={c.onKey}
         accion={
           <Entrar

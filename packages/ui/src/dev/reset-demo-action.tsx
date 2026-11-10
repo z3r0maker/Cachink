@@ -8,8 +8,10 @@
 import { useCallback, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { compare } from 'bcryptjs';
+import { attemptNip } from '@xangarro/caja/nip';
 import type { UserId } from '@xangarro/domain';
 import { Btn, Card, ConfirmDialog, Modal, PinCodeInput, SectionTitle } from '../components/index';
+import { deviceNipGuard, nipRefusal } from '../app/pin-lockout';
 import { useRepositories } from '../app/repository-provider';
 import { useUserId } from '../app-config/use-app-config';
 import { useTranslation } from '../i18n/index';
@@ -43,16 +45,19 @@ function usePinSubmit(
         setPinError('Usuario no encontrado');
         return;
       }
-      const valid = await compare(pin, user.pinHash);
-      if (!valid) {
-        setPinError(t('dev.resetPinError'));
+      // This user's NIP lockout (audit F-08): a miss here counts toward it too.
+      const attempt = await attemptNip(deviceNipGuard(repos.appConfig), userId, async () =>
+        (await compare(pin, user.pinHash)) ? { ok: true, value: null } : { ok: false },
+      );
+      if (attempt.status !== 'ok') {
+        setPinError(nipRefusal(attempt, t('dev.resetPinError')));
         setPinAttempt((n) => n + 1);
         return;
       }
       setPinError(null);
       setStep('confirm');
     },
-    [userId, repos.users, t, setPinError, setPinAttempt, setStep],
+    [userId, repos.users, repos.appConfig, t, setPinError, setPinAttempt, setStep],
   );
 }
 
