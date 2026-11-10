@@ -11,6 +11,10 @@
  * last one through `bootstrapNext`, then the ordinary pull from the
  * snapshot's cursor. An unfinished snapshot resumes where it stopped. Each
  * page is applied, cursors included, in one transaction.
+ *
+ * A page is applied under the device's own business (audit F-15c), never
+ * under the one its entitlement names; a page whose entitlement names
+ * another business is refused whole, before anything is written.
  */
 
 import { SNAPSHOT_START, type PullResponse } from '@xangarro/contracts';
@@ -25,7 +29,14 @@ export interface PullDeps {
   readonly appConfig: AppConfigRepository;
   readonly client: ApiClient;
   readonly token: string;
+  /** The device's own business, from its activation record. */
+  readonly businessId: string;
 }
+
+/** A pulled page carried a plan signed for another business; nothing of it was applied. */
+export const ENTITLEMENT_BUSINESS_MISMATCH = 'ENTITLEMENT_BUSINESS_MISMATCH';
+
+const FOREIGN_PAGE: SyncError = { code: ENTITLEMENT_BUSINESS_MISMATCH, status: 0 };
 
 export interface PullOutcome {
   readonly pages: number;
@@ -77,7 +88,8 @@ async function pullOnce(deps: PullDeps): Promise<Step> {
   const res = await deps.client.pull(deps.token, req.since, req.snapshot ?? undefined);
   if (!res.ok) return { error: toSyncError(res) };
   const page = res.data;
-  await applyPulledPage(deps.db, page, page.entitlement.payload.businessId, pageWrites(page));
+  if (page.entitlement.payload.businessId !== deps.businessId) return { error: FOREIGN_PAGE };
+  await applyPulledPage(deps.db, page, deps.businessId, pageWrites(page));
   const rows = countRows(page);
   if (req.snapshot === null) {
     return { rows, snapshot: false, more: rows > 0 && page.serverSeq > req.since };

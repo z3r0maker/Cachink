@@ -14,7 +14,7 @@ import { sql } from 'drizzle-orm';
 
 import { hashPairingToken } from '../../lib/pairing-token';
 import { avisoDeVinculacion } from '../legal/aviso';
-import { db, withTenant, type Tx } from '../db';
+import { rlsBoundDb, withTenant, type Tx } from '../db';
 import { reportError } from '../observability/report';
 import { entitlementFor, legacyBootstrapFits, referenceTables } from './bootstrap';
 import { assertCredentialsConfigured, mintDeviceToken, signEntitlement } from './credentials';
@@ -168,7 +168,9 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
   assertCredentialsConfigured();
   // The lock on the business row lasts from the slot count to this commit —
   // no bootstrap read, no parse, no signature inside it (audit DB3-BOOT-01).
-  const { businessId, entitlement } = await db().transaction((tx) =>
+  // `register` sets the tenant claim itself, so the pool's role is checked here (F-02).
+  const pool = await rlsBoundDb();
+  const { businessId, entitlement } = await pool.transaction((tx) =>
     register(tx as Tx, input, deviceId, now),
   );
   const [bootstrap, deviceToken, signed] = await Promise.all([

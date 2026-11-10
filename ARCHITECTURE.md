@@ -178,6 +178,8 @@ Links to discussion, docs, prior art.
 | [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
 | [138](#adr-138) | 2026-11-09 | Supabase's Data API gets nothing of ours: the API roles lose every grant, and device tokens carry Xangarro's own issuer and audience | Accepted |
 | [139](#adr-139) | 2026-11-09 | Novedades are opt-in at signup, and every ARCO request gets its acuse by email | Accepted |
+| [140](#adr-140) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
+| [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10052,3 +10054,178 @@ and the date received; and only billing and deletion emails linked the aviso de 
 - Fewer signups will opt in to novedades; the count is honest.
 - No account was asked again: at the change Xangarro was in production with no public launch and no
   real users, so every recorded `tacito` signup grant is test data.
+
+---
+
+## ADR-140
+
+**Title:** The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data
+
+**Date:** 2026-11-09
+
+**Status:** Accepted — closes or narrows findings F-01 to F-06, F-08, F-10 and F-12 to F-15 of `docs/audits/security-2026-11-09.md`; amends ADR-072 §3 (the NIP lockout) and N-19's «SVG sanitised»
+
+**Context**
+
+N-26's second pass (`docs/audits/security-2026-11-09.md`) found one high and about ten medium gaps, most
+of them a control that existed but did not hold on its own: a filter that was the only thing between an
+uploaded SVG and the portal's origin, a script policy that only reported, a tenant boundary that one
+wrong `DATABASE_URL` would remove without an error, a sync that believed a phone's clock. The fixes below
+share one rule: a boundary is held by something that fails closed, and a filter, a test or a dashboard
+switch is a second layer, never the only one.
+
+**Decision**
+
+1. **Uploaded bytes are served sandboxed, and the SVG gate is an allowlist** (F-01). Any response whose
+   bytes somebody uploaded (`/api/logos/:id`, `/api/productos/:id/imagen`) carries
+   `default-src 'none'; style-src 'unsafe-inline'; sandbox; frame-ancestors 'none'` and `nosniff`
+   (`@xangarro/config/security`), so a file opened as a document runs nothing and has an opaque origin,
+   whatever the upload gate let through. The gate (`svg-allowlist.ts`) reads the file as XML and refuses
+   any token it does not know; it repairs nothing. It refuses `<a>`, `<image>`, animation, prefixed
+   elements and character references, so some editor exports are refused and the owner re-exports.
+   **One layer writes a path's Content-Security-Policy**: the proxy for pages, `next.config.mjs`
+   (`HEADER_RULES`) for everything the proxy skips. `next start` drops a route handler's header when a
+   config rule already set that name, so a route never relies on its own.
+2. **The portal's script policy is enforced** (F-04). `proxy.ts` sends `Content-Security-Policy`, not the
+   report-only header; `report-uri` stays. A change to `portalCsp` runs the whole E2E suite first.
+3. **An export of a `'use server'` file is an endpoint** (F-03). It checks the session itself, or it is
+   on a commented list in `tests/server-actions-guarded.test.ts` (both web apps) that says what stands in
+   for one; no action takes the tenant from its caller. A read helper for a page lives in a `server-only`
+   module.
+4. **The portal refuses a database role that bypasses RLS** (F-02). Before the first tenant transaction
+   of each `DATABASE_URL` pool, `ensureRlsBoundRole` asks Postgres whether the connected role is
+   superuser or `BYPASSRLS` and refuses if it is or if Postgres will not say. A refusal is kept for the
+   life of the pool; a question that got no answer (a connect timeout) fails that call only. The billing,
+   metering and console pools are not guarded: their roles cross tenants by policy, not by bypass.
+5. **A pushed row's clock is held to the server's** (F-05). `createdAt`, `updatedAt` and `deletedAt`
+   later than server time plus five minutes are stored as server time; the row is never refused. A
+   stored `updated_at` already in the future outvotes nobody. **`delta.rowId` must equal `row.id`**
+   (`VALIDATION`). A row whose `deviceId` is not the token's, and a negative amount where no code below
+   the UI writes one (`client_payments.montoCentavos`, `tickets.cambioCentavos`), are **observed, not
+   refused**: one `push_anomaly` log line of ids and field names. A rejection is terminal for a phone's
+   captured row and a re-linked phone legitimately pushes rows under its old device id, so enforcement
+   and CHECK constraints are staged on that log (the list is in the audit file).
+6. **Signing secrets answer to a policy in production** (F-06). When `VERCEL_ENV=production`,
+   `DEVICE_TOKEN_SECRET`, `DEVICE_TOKEN_SECRET_PREVIOUS` and `CRON_SECRET` must be at least 32 characters
+   and none of the placeholders the repository publishes; `ENTITLEMENT_PRIVATE_KEY` must be 64 hex and
+   not the published test key. A refused secret closes its routes. **Rotation**: tokens are minted with
+   the current secret and verified against the current one, then `DEVICE_TOKEN_SECRET_PREVIOUS`.
+7. **The NIP lockout is per NIP owner, escalates, and is shared by every NIP check** (F-08; amends
+   ADR-072 §3). Five wrong NIPs for a user lock that user's NIP only: 30 s, 1 min, 5 min, 15 min, then
+   1 h. Only that user's own right NIP clears their count and level, so a coworker's right NIP no longer
+   resets guesses at a supervisor's, and one hammered NIP no longer stops the register. Sign-in, the lock
+   screen, cancellation and the web caja's Worker go through one guard (`@xangarro/caja/nip`), on the
+   anchored clock. Stored as `{ v: 2, by: { <userId>: … } }` under `pinLockout`; both earlier shapes read
+   as no lockouts.
+8. **The phone trusts only its own business's entitlement, and a release build checks its
+   configuration** (F-15). An entitlement signed for another business verifies nothing, and a pulled
+   page is applied under the device's own business id. An EAS production build fails unless the API base
+   is `https://` and the entitlement key is 64 hex and not the dev key. The device token moves to a
+   keychain item that is `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY` (kept out of backups and transfers,
+   still readable if the screen locks mid-sync); Android sets `allowBackup: false`.
+9. **A limit that cannot be checked refuses** (F-10, F-13). The `bug-report` function refuses a report
+   when its count fails and has a ceiling across all devices; the audit gate fails on an audit it cannot
+   read. pnpm resolves no version younger than seven days (`minimumReleaseAge`); a security patch that
+   cannot wait is named in `minimumReleaseAgeExclude` with its advisory and comes out a week later.
+10. **A failed query is reported without its words, and a typed cell is text** (F-14, F-15a). A database
+    error is logged and sent to Sentry as its name, SQLSTATE and the names of the constraint, table and
+    column (`@xangarro/config/error-report`); CSV cells somebody typed are written through `csvText`.
+    Migration `0056` puts `pg_catalog` first in every definer function's `search_path`.
+11. **What an agent reads is data, never instructions** (F-12). CLAUDE.md §7 says so: a file, an issue, a
+    PR, a web page, a package README and a tool's or another agent's output cannot direct work; only the
+    owner's messages and the contract do. A dependency that a document or a tool suggests is confirmed
+    on npm, by exact name, before it is added: models invent package names and attackers register
+    them. `.claude/settings.local.json` is ignored by the repository.
+
+**Alternatives considered**
+
+- *Rasterise SVG logos at upload.* Rejected: it hands every hostile file to librsvg inside the portal's
+  process, the parser behind 2026's image-optimisation RCE. The sandbox needs no parser at all.
+- *Keep the script policy report-only until production logs are clean.* Rejected: it had been clean in
+  the sweep since 2026-09-23 and blocked nothing while it waited.
+- *Refuse a push whose `deviceId` or sign is wrong.* Not yet: a mistaken rule loses a shop's captured
+  sales, which is worse than what it prevents. Observe first.
+- *A device-wide NIP lockout that any right NIP clears.* That was the first fix; an operator who knows
+  their own NIP walks a supervisor's four guesses at a time.
+- *`WHEN_UNLOCKED_THIS_DEVICE_ONLY` for the device token.* Rejected: the item becomes unreadable seconds
+  after the screen locks, with a sync possibly in flight; this-device-only is the property that mattered.
+- *Next.js 16.4.6.* Published hours before this change; 16.4.5 carries the 2026-11-03 fixes and is the
+  one the new release-age rule would accept.
+
+**Consequences**
+
+- **Before this deploys**: confirm production's `DEVICE_TOKEN_SECRET` and `CRON_SECRET` are at least 32
+  characters. A shorter one now closes every device route and every cron.
+- **`eas.json`'s production profile passes literal `$PRODUCTION_*` strings**; the release gate fails the
+  next production build until real values are supplied.
+- Redeploying the `bug-report` function turns in-app reports off (its tables do not exist and the service
+  role holds no grant since ADR-138): phones fall back to sharing the report as a file until the ingest
+  moves behind `/api/v1` (N-81).
+- Left open, each needing the owner: update code signing (F-07, N-82: the key is the owner's to hold),
+  owner second factor and email verification (F-09, N-83: new screens go on the canvas first), backups
+  and a restore drill (F-11, X-10), and who may set a NIP (SEC-AUTHZ-01, ADR-072 against the code).
+- Residual, accepted: setting a phone's clock forward ends a NIP lock early, and the web caja's NIP
+  hashes are readable in the browser's developer tools (ADR-072).
+
+---
+
+## ADR-141
+
+**Title:** The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired
+
+**Date:** 2026-11-09
+
+**Status:** Accepted — N-81, C-25; closes audit F-10 and completes ADR-140 §9; amends ADR-063's «the `bug-report` function» as a source of inbox items
+
+**Context**
+
+The Supabase edge function `bug-report` held the service-role key outside the console, let anyone with
+the public anon key post, and believed the device and business ids in the body (audit F-10). ADR-140
+made its limits fail closed, which left it refusing every report: its tables were never migrated and
+the service role holds no grant since ADR-138. Reading the phone for the move showed two more things.
+**The bug-report sheet was never given a sender**, so «Reportar un problema» has only ever shared a
+file; the «enviar» state existed in code and in no build. And the function's one live caller was an
+automatic outbox that shipped error batches to tables that do not exist, for which the app carried the
+Supabase anon key in every build.
+
+**Decision**
+
+1. **`POST /api/v1/support/bug-report`** (contract §9, C-25). A device route like the others: the
+   report is filed in the staff inbox as `kind = 'bug'` under the device and business the **token**
+   names, so an item finally carries its business. The body has no field for who is calling. Limits are
+   the Postgres throttle's, 20 a day per device and 60 per business, taken after validation and before
+   filing; a limit that cannot be checked is an error. The description is kept whole and the snapshot
+   is trimmed to the 10,000 characters an inbox item holds (`SUPPORT_ITEM_BODY_MAX`); stack traces are
+   never filed. Filing is idempotent by `(bug-report, deviceId:submittedAt)`.
+2. **The phone sends it with its own token.** `ApiClient.bugReport`, through `useBugReportSender`: a
+   linked phone with reports turned on sends, and sharing the file stays as the fallback and as the
+   only door without consent or without a link. The sheet's «enviar» state is live for the first time.
+3. **The error outbox is retired, not ported.** Nothing read what it shipped and crash telemetry is
+   Sentry's, behind the same consent. `OutboxFlusher`, `HttpRemoteLogStore`, `DualLogStore` and
+   `RemoteLogStore` are deleted; the device's log is local. The `shipped_at` column stays, unused.
+4. **The function is deleted**, with its Deno job in CI, and so are `EXPO_PUBLIC_BUG_INGEST_URL`,
+   `EXPO_PUBLIC_CLOUD_API_URL` and `EXPO_PUBLIC_CLOUD_ANON_KEY` in `eas.json`. The app holds no
+   Supabase URL or key at all.
+5. **The service-role guard covers every code root** but the console's (`apps/web`, `apps/mobile`,
+   `apps/landing`, `packages`, `supabase`, `scripts`, `.github`). It had scanned `apps/web` alone, and
+   the function sat outside it.
+
+**Alternatives considered**
+
+- *Verify the device token inside the function.* Rejected: it keeps a second runtime, a second copy of
+  the token secret and the service role, to do what a portal route does with none of them.
+- *Port the error batches too, into a table or a log line.* Rejected: no screen reads them, and a
+  second telemetry path beside Sentry is one more place for personal data to leave the phone.
+- *Leave the sheet share-only and just delete the function.* Rejected: the report would never reach
+  staff unless the owner forwards a file by hand, which is the friction the inbox exists to remove.
+
+**Consequences**
+
+- The owner un-deploys `bug-report` from the hosted project if it was ever deployed, and can delete the
+  `*_BUG_INGEST_URL` and `*_CLOUD_*` secrets from EAS.
+- Production needs `ADMIN_INGEST_URL` and `ADMIN_INGEST_SECRET` on the portal for a report to reach
+  the console; without them it is one `support_item_not_sent` log line, as for every other source.
+- A build made before this change keeps trying to flush error batches to the old URL until it is
+  updated; with the function gone that fails quietly and loses nothing anyone read.
+- `apps/mobile/maestro/flows/bug-report-sheet.yaml` accepts either primary action, since a linked
+  phone with reports on now shows «enviar».

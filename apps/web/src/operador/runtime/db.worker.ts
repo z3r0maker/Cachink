@@ -35,6 +35,8 @@ interface Runtime {
 let runtime: Runtime | null = null;
 const NO_ARRANCADO = 'runtime not booted';
 let deviceToken: string | null = null;
+/** The business this register was linked to; the engine pulls under it and no other (F-15c). */
+let deviceBusiness: string | null = null;
 /** Opening, once: a second `boot` while the first reads OPFS joins it (never two copies). */
 let arranque: Promise<boolean> | null = null;
 /** The tail of the OPFS writes: each waits for the one before (DB3-CAJA-04, partial). */
@@ -72,6 +74,7 @@ async function openRuntime(): Promise<Runtime> {
     db: db as never,
     client: new ApiClient({ baseUrl: '' }),
     getToken: async () => deviceToken,
+    getBusinessId: async () => deviceBusiness,
   });
   return { sql, db, engine };
 }
@@ -124,6 +127,7 @@ async function registrar(
 async function sync(request: SyncRequest): Promise<SyncRunResult> {
   if (runtime === null) throw new Error(NO_ARRANCADO);
   deviceToken = request.token;
+  deviceBusiness = request.businessId;
   const opts = { manual: request.manual };
   let result: SyncRunResult | null = null;
   try {

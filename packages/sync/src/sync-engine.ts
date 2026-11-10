@@ -44,6 +44,11 @@ export interface SyncEngineDeps {
   readonly client: ApiClient;
   /** Device token from secure storage; `null` = not activated. */
   readonly getToken: () => Promise<string | null>;
+  /**
+   * The device's own business, from its activation record; `null` = not
+   * activated. Pages are applied under it and no other (audit F-15c).
+   */
+  readonly getBusinessId: () => Promise<string | null>;
   readonly now?: () => Date;
   /** Injected for tests; spreads backoffs so devices don't retry in step. */
   readonly random?: Random;
@@ -63,6 +68,12 @@ export interface RejectedRow extends RejectedEntry {
 }
 
 const MAX_REJECTED_LISTED = 200;
+
+/** Who is syncing: the token it presents and the business it was activated for. */
+interface Device {
+  readonly token: string;
+  readonly businessId: string;
+}
 
 interface Trailing {
   readonly promise: Promise<SyncRunResult>;
@@ -147,10 +158,11 @@ export class SyncEngine {
 
   async #run(mode: RunMode, manual: boolean): Promise<SyncRunResult> {
     const token = await this.#deps.getToken();
-    if (!token) return NOT_ACTIVATED;
+    const businessId = token ? await this.#deps.getBusinessId() : null;
+    if (!token || !businessId) return NOT_ACTIVATED;
     const blocked = this.#backoff.blockedUntil(this.#now().getTime(), manual);
     if (blocked !== null) return deferredResult(this.#backoff.lastError, blocked);
-    const result = await this.#exchange(mode, token);
+    const result = await this.#exchange(mode, { token, businessId });
     const error = result.revoked ? null : firstError(result);
     if (error === null) {
       this.#backoff.succeeded();
@@ -160,14 +172,14 @@ export class SyncEngine {
     return { ...result, retryAt: new Date(until).toISOString() };
   }
 
-  async #exchange(mode: RunMode, token: string): Promise<SyncRunResult> {
+  async #exchange(mode: RunMode, device: Device): Promise<SyncRunResult> {
     const appConfig = new DrizzleAppConfigRepository(this.#deps.db);
-    const base = { db: this.#deps.db, appConfig, client: this.#deps.client, token };
+    const base = { db: this.#deps.db, appConfig, client: this.#deps.client, token: device.token };
     const push = await drainPush({ ...base, now: this.#now });
     if (push.error?.code === 'DEVICE_REVOKED') return { push, pull: null, revoked: true };
     if (!this.#wantsPull(mode) || (push.error !== null && isTransient(push.error)))
       return { push, pull: null, revoked: false };
-    const pull = await pullAll(base);
+    const pull = await pullAll({ ...base, businessId: device.businessId });
     if (pull.error) return { push, pull, revoked: pull.error.code === 'DEVICE_REVOKED' };
     this.#lastPullMs = this.#now().getTime();
     return { push, pull, revoked: false, purge: await purgeIfDue(this.#deps.db, appConfig) };

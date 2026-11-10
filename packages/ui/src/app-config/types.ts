@@ -7,6 +7,7 @@
  * cloud); retired values are normalised by {@link parseMode}.
  */
 
+import { PIN_LOCKOUT_KEY } from '@xangarro/caja/nip';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, DeviceId, UserId } from '@xangarro/domain';
 
@@ -30,8 +31,8 @@ export const APP_CONFIG_KEYS = {
   notificationPrefs: 'notificationPrefs',
   /** JSON `{ deviceId, businessId, activatedAt }` once the device is activated (A-04). */
   activation: 'activation',
-  /** JSON `{ failures, lockedUntil }` — wrong-PIN cooldown survives restarts (A-05). */
-  pinLockout: 'pinLockout',
+  /** JSON `{ v: 2, by: { userId: { failures, lockedUntil, level } } }`: each NIP's lockout survives restarts (A-05, F-08). */
+  pinLockout: PIN_LOCKOUT_KEY,
   /**
    * ISO time of a «Desvincular y borrar»: the one row written after the wipe,
    * so the connect screen can say «Listo». Read once, then deleted.

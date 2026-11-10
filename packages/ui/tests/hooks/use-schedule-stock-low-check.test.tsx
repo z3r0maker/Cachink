@@ -18,6 +18,7 @@ import {
   STOCK_LOW_NOTIFICATION_ID,
 } from '../../src/index';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
+import { activateTestDevice } from '../activated-device';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, waitFor } from '../test-utils';
@@ -86,6 +87,7 @@ describe('useScheduleStockLowCheck', () => {
     };
     // Stock must be on for the plan (A-14) and the device toggle on (A-13).
     await seedTestEntitlement(harness.appConfig, 'xangarro');
+    await activateTestDevice(harness.appConfig);
     scheduler = new InMemoryNotificationScheduler();
     useAppConfigStore.getState().setCurrentBusinessId(BIZ);
     useAppConfigStore.getState().setNotificationsEnabled(true);

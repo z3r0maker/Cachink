@@ -74,5 +74,12 @@ export function pushDeps(
 ) {
   const client = opts.client ?? new ApiClient({ baseUrl: mockUrl, extraHeaders: opts.headers });
   const appConfig = new DrizzleAppConfigRepository(d.db);
-  return { db: d.db, appConfig, client, token: d.token, now: () => opts.now ?? new Date() };
+  return {
+    db: d.db,
+    appConfig,
+    client,
+    token: d.token,
+    businessId: d.businessId,
+    now: () => opts.now ?? new Date(),
+  };
 }

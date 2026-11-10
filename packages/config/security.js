@@ -29,6 +29,28 @@ export function securityHeaders(o) {
 }
 
 /**
+ * The policy for a response whose bytes somebody uploaded: a logo, a product
+ * photo, a document (audit F-01). Shown in an `<img>` it changes nothing.
+ * Opened as a document, an SVG or HTML file gets `sandbox` with no allowance:
+ * no script, and an opaque origin, so nothing in it can read a cookie or call
+ * the app as its viewer. `default-src 'none'` stops it loading anything;
+ * inline styles stay, since an SVG paints with them.
+ *
+ * It does not depend on the upload filter, by design: a filter is a second
+ * layer, and this one holds when the filter is wrong.
+ */
+export const UPLOADED_BYTES_CSP =
+  "default-src 'none'; style-src 'unsafe-inline'; sandbox; frame-ancestors 'none'";
+
+/** The headers a route sets on uploaded bytes, whatever their type claims to be. */
+export function uploadedBytesHeaders() {
+  return {
+    'Content-Security-Policy': UPLOADED_BYTES_CSP,
+    'X-Content-Type-Options': 'nosniff',
+  };
+}
+
+/**
  * The per-request policy. Scripts run only with the request's nonce
  * (`'strict-dynamic'` lets them load Next's chunks), so an injected
  * `<script>` does nothing. `'unsafe-eval'` only in development, where React

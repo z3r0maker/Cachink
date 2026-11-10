@@ -3,6 +3,7 @@ import { getTableColumns, sql, type SQL } from 'drizzle-orm';
 import type { AnyPgColumn, PgTable } from 'drizzle-orm/pg-core';
 
 import type { Tx } from './cursor.js';
+import { clampRowClock, futureLimit } from './push-clock.js';
 import { SYNCED_TABLES } from './tables.js';
 
 /**
@@ -10,7 +11,9 @@ import { SYNCED_TABLES } from './tables.js';
  * DB2-SYNC-01; ADR-120).
  *
  * - An UP row is upserted, last write wins by the row's own clock: an older
- *   push keeps the newer row (`kept`).
+ *   push keeps the newer row (`kept`). That clock is held to the server's
+ *   (`push-clock.ts`, audit F-05 a): a timestamp from the future is stored as
+ *   the server's time, and a row already stored in the future outvotes nobody.
  * - A HYBRID row is insert-only: one already here is `kept` as it is, with
  *   whatever the portal changed since.
  * - An id that exists in **another** business is invisible under RLS. An
@@ -66,19 +69,31 @@ export function chunkByParams<T>(rows: readonly T[], columns: number, budget: nu
   return out;
 }
 
+export interface WriteOptions {
+  /**
+   * The server's time for this write. Required, so no caller can store a
+   * pushed row without holding its clock to it; tests pass a fixed one.
+   */
+  readonly now: Date;
+  /** Bind parameters a statement may carry. Default {@link PARAM_BUDGET}. */
+  readonly paramBudget?: number;
+}
+
 export async function writeSyncedRows(
   tx: Tx,
   table: PushableTable,
-  rows: readonly Row[],
+  pushed: readonly Row[],
   insertOnly: boolean,
-  paramBudget = PARAM_BUDGET,
+  { now, paramBudget = PARAM_BUDGET }: WriteOptions,
 ): Promise<RowWrite[]> {
   const t = tableOf(table);
   const columns = Object.keys(getTableColumns(t)).length;
+  const rows = pushed.map((row) => clampRowClock(row, now));
+  const limit = futureLimit(now);
   const written = new Set<string>();
   for (const group of byShape(rows)) {
     for (const chunk of chunkByParams(group, columns, paramBudget)) {
-      const ids = insertOnly ? await insertNew(tx, t, chunk) : await upsertNewer(tx, t, chunk);
+      const ids = await (insertOnly ? insertNew(tx, t, chunk) : upsertNewer(tx, t, chunk, limit));
       for (const id of ids) written.add(id);
     }
   }
@@ -118,7 +133,17 @@ async function insertNew(tx: Tx, t: SyncTable, rows: readonly Row[]): Promise<st
   return out.map((r) => String(r.id));
 }
 
-async function upsertNewer(tx: Tx, t: SyncTable, rows: readonly Row[]): Promise<string[]> {
+/**
+ * The newer row wins. A stored `updated_at` past `futureLimit` is a clock from
+ * before the clamp (or a forged one): it is not newer than anything, so the
+ * pushed row replaces it and the row's clock is the server's again.
+ */
+async function upsertNewer(
+  tx: Tx,
+  t: SyncTable,
+  rows: readonly Row[],
+  futureLimit: string,
+): Promise<string[]> {
   const columns = getTableColumns(t) as Record<string, AnyPgColumn>;
   const first = rows[0] ?? {};
   const set = Object.fromEntries(
@@ -132,7 +157,7 @@ async function upsertNewer(tx: Tx, t: SyncTable, rows: readonly Row[]): Promise<
     .onConflictDoUpdate({
       target: t.id,
       set: set as never,
-      setWhere: sql`${t.updatedAt} < excluded.updated_at`,
+      setWhere: sql`(${t.updatedAt} < excluded.updated_at OR ${t.updatedAt} > ${futureLimit}::timestamptz)`,
     })
     .returning({ id: t.id });
   return out.map((r) => String(r.id));

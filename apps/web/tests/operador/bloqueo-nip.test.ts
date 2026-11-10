@@ -63,6 +63,20 @@ describe('NipPad', () => {
     assert.ok(screen.getByRole('alert').textContent?.includes('NIP incorrecto'));
   });
 
+  it('while the lockout runs, the line says how long to wait (F-08)', () => {
+    render(
+      createElement(NipPad, {
+        nip: '',
+        error: true,
+        esperaMs: 300_000,
+        onKey: vi.fn(),
+        accion: createElement('span'),
+      }),
+    );
+    assert.equal(screen.getByRole('alert').textContent, 'Demasiados intentos. Espera 5 min.');
+    assert.equal(screen.getByRole('alert').getAttribute('data-testid'), 'bloqueo-error');
+  });
+
   it('every key reports itself', () => {
     const onKey = vi.fn();
     render(createElement(NipPad, { nip: '', error: false, onKey, accion: createElement('span') }));

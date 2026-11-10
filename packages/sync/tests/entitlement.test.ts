@@ -50,26 +50,27 @@ function resolve(over: Partial<Parameters<typeof resolveEntitlement>[0]> = {}) {
     lastPullAt: '2026-09-16T00:00:00.000Z',
     deviceNow: at('2026-09-20T00:00:00.000Z'),
     publicKeyHex: PUB,
+    businessId: 'BIZ',
     ...over,
   });
 }
 
 describe('verifyEntitlement', () => {
   it('accepts a valid signature', () => {
-    expect(verifyEntitlement(sign(PAYLOAD), PUB)?.plan).toBe('xangarro');
+    expect(verifyEntitlement(sign(PAYLOAD), PUB, 'BIZ')?.plan).toBe('xangarro');
   });
 
   it('rejects a tampered payload', () => {
     const signed = sign(PAYLOAD);
     expect(
-      verifyEntitlement({ ...signed, payload: { ...PAYLOAD, plan: 'xangarrote' } }, PUB),
+      verifyEntitlement({ ...signed, payload: { ...PAYLOAD, plan: 'xangarrote' } }, PUB, 'BIZ'),
     ).toBeNull();
   });
 
   it('rejects a signature from another key and malformed envelopes', () => {
-    expect(verifyEntitlement(sign(PAYLOAD), OTHER_PUB)).toBeNull();
-    expect(verifyEntitlement({ payload: PAYLOAD, signature: 'AAAA' }, PUB)).toBeNull();
-    expect(verifyEntitlement(null, PUB)).toBeNull();
+    expect(verifyEntitlement(sign(PAYLOAD), OTHER_PUB, 'BIZ')).toBeNull();
+    expect(verifyEntitlement({ payload: PAYLOAD, signature: 'AAAA' }, PUB, 'BIZ')).toBeNull();
+    expect(verifyEntitlement(null, PUB, 'BIZ')).toBeNull();
   });
 
   it('decodes base64 like Buffer does', () => {

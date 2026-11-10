@@ -5,6 +5,7 @@
  */
 
 import {
+  deltaNamesItsRow,
   ERROR_CATALOG,
   isPushable,
   maxPushRowBytes,
@@ -50,8 +51,10 @@ export const accepted = (d: Delta, serverSeq: number): Outcome => ({
 });
 
 /**
- * What a row fails before any lookup: its table and op, its business, text
- * Postgres cannot store, and a size past the row limit — refused here,
+ * What a row fails before any lookup: its table and op, its business, a
+ * `rowId` that is not the id of the row it carries (security audit 2026-11,
+ * F-05 b — the receipt and the pull log key on one, the write on the other),
+ * text Postgres cannot store, and a size past the row limit — refused here,
  * terminally, before it can fail a write or the rejection that would keep it,
  * or grow a pull page past the response limit (DB3-SYNC-01 a, b).
  */
@@ -63,6 +66,7 @@ export function precheck(d: Delta, businessId: string): Outcome | null {
   if (rowOf(d)['businessId'] !== businessId) {
     return rejected(d, 'BUSINESS_MISMATCH', 'row.businessId ≠ token');
   }
+  if (!deltaNamesItsRow(d)) return rejected(d, 'VALIDATION', 'rowId ≠ row.id');
   const bad = unstorableText(d.rowId, 'rowId') ?? unstorableText(d.row, 'row');
   if (bad !== null) {
     return rejected(d, 'VALIDATION', `${bad}: a NUL character or an unpaired surrogate`);

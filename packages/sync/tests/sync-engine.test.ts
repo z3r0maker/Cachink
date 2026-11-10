@@ -111,6 +111,7 @@ describe('SyncEngine', () => {
       db: d.db,
       client: new ApiClient({ baseUrl: mock.url }),
       getToken: async () => d.token,
+      getBusinessId: async () => d.businessId,
     });
     const [a, b] = await Promise.all([engine.syncNow(), engine.syncNow()]);
     assert.equal(a, b);
@@ -119,6 +120,7 @@ describe('SyncEngine', () => {
       db: d.db,
       client: new ApiClient({ baseUrl: mock.url, extraHeaders: { 'X-Mock-Scenario': 'revoked' } }),
       getToken: async () => d.token,
+      getBusinessId: async () => d.businessId,
     });
     await ringSale(d);
     assert.equal((await revoked.syncNow()).revoked, true);
@@ -138,6 +140,7 @@ describe('SyncEngine', () => {
       db: d.db,
       client: new ApiClient({ baseUrl: mock.url }),
       getToken: async () => d.token,
+      getBusinessId: async () => d.businessId,
     });
     await engine.syncNow();
     const [row] = await engine.rejected();
@@ -169,6 +172,7 @@ describe('SyncEngine', () => {
       db: d.db,
       client: new ApiClient({ baseUrl: mock.url }),
       getToken: async () => d.token,
+      getBusinessId: async () => d.businessId,
     });
     const first = await engine.syncNow();
     assert.deepEqual(first.purge, { skipped: null, cutoff: first.purge?.cutoff, deleted: {} });
@@ -180,6 +184,7 @@ describe('SyncEngine', () => {
       db: makeFreshDb(),
       client: new ApiClient({ baseUrl: mock.url }),
       getToken: async () => null,
+      getBusinessId: async () => d.businessId,
     });
     assert.deepEqual(await engine.syncNow(), { push: null, pull: null, revoked: false });
   });

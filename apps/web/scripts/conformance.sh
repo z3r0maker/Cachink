@@ -57,6 +57,7 @@ suite tests/conformance/activate.test.ts
 suite tests/conformance/activate-scan.test.ts
 suite tests/conformance/sync.test.ts
 suite tests/conformance/snapshot.test.ts
+suite tests/conformance/bug-report.test.ts
 
 # B-18's other acceptance, on the log this very run produced: every push wrote
 # one structured line with its counts, and no email reached the log at all.
@@ -65,5 +66,16 @@ grep -Eq '"evt":"api".*"endpoint":"sync/push".*"accepted":[0-9]+' "$LOG" ||
   { echo "conformance: no structured sync/push log line in $LOG" >&2; exit 1; }
 if grep -q 'conformance@xangarro.mx' "$LOG"; then
   echo "conformance: an email reached the server log ($LOG)" >&2
+  exit 1
+fi
+
+# N-81 (§9): the accepted reports were filed for the staff inbox as `bug`
+# items (logged, since this run has no console to post to), each under the
+# business the device token names. The suite also sent a forged `businessId`
+# in a body: it must not be what was filed.
+grep -Eq '"evt":"support_item_not_sent".*"kind":"bug".*"businessId":"[0-9A-HJKMNP-TV-Z]{26}"' "$LOG" ||
+  { echo "conformance: no bug report was filed under a device's business in $LOG" >&2; exit 1; }
+if grep -q 'another-business\|somebody-else' "$LOG"; then
+  echo "conformance: an id from a report's body reached the inbox ($LOG)" >&2
   exit 1
 fi

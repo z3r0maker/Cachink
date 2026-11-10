@@ -1,13 +1,20 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
+import { fraseEsperaNip } from '@xangarro/caja/nip';
 import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
 import type { OperadorPara } from '../runtime/protocol';
 import * as a from './acceso.css';
 import { Marco } from './marco';
-import { useNip, useTecladoFisico, type EstadoNip, type Tecla } from './nip-estado';
+import {
+  useNip,
+  useTecladoFisico,
+  type EstadoNip,
+  type Tecla,
+  type Verificado,
+} from './nip-estado';
 import * as n from './nip.css';
 
 const CHECK = 'M20 6 9 17l-5-5';
@@ -107,12 +114,18 @@ function Teclado(p: { readonly s: EstadoNip }) {
   );
 }
 
-/** «NIP incorrecto. Te quedan N intentos.» */
-function Intentos(p: { readonly fallidos: number; readonly restantes: number }): ReactNode {
-  if (p.fallidos <= 0 || p.restantes <= 0) return null;
+/** «NIP incorrecto. Te quedan N intentos.», or how long to wait while the lockout runs. */
+function Intentos(p: {
+  readonly fallidos: number;
+  readonly restantes: number;
+  readonly esperaMs: number;
+}): ReactNode {
+  if (p.esperaMs <= 0 && (p.fallidos <= 0 || p.restantes <= 0)) return null;
   return (
     <p className={a.fallo} role="alert" data-testid="nip-error">
-      NIP incorrecto. Te quedan {p.restantes} intento{p.restantes === 1 ? '' : 's'}.
+      {p.esperaMs > 0
+        ? fraseEsperaNip(p.esperaMs)
+        : `NIP incorrecto. Te quedan ${p.restantes} intento${p.restantes === 1 ? '' : 's'}.`}
     </p>
   );
 }
@@ -150,7 +163,7 @@ function BloqueNip(p: { readonly s: EstadoNip }): ReactNode {
         </span>
       </div>
       <Puntos llenos={s.nip.length} />
-      <Intentos fallidos={s.fallidos} restantes={s.restantes} />
+      <Intentos fallidos={s.fallidos} restantes={s.restantes} esperaMs={s.esperaMs} />
       <Teclado s={s} />
     </div>
   );
@@ -173,7 +186,7 @@ function hoy(): string {
 export function Nip(p: {
   readonly operadores: readonly OperadorPara[];
   readonly onAutenticado: (userId: string) => void;
-  readonly verificar: (nombre: string, nip: string) => Promise<{ success: boolean }>;
+  readonly verificar: (nombre: string, nip: string) => Promise<Verificado>;
   readonly caja: string;
   /** The screen's own error line (loading the operators, opening the turno). */
   readonly pie?: ReactNode;

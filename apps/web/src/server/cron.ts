@@ -1,11 +1,17 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 
+import { SecretPolicyError, secretProblem } from './device/secret-policy';
+
 /**
  * The guard every portal Vercel Cron route shares (trial emails, usage
  * recompute, CFDI close). Vercel sends `Authorization: Bearer $CRON_SECRET`;
  * anything else is refused, and an unset secret closes the route rather than
  * opening it (the admin console's digest cron does the same). A failed run is
  * reported and answered 500, so it shows in Vercel's cron log.
+ *
+ * In production a secret the policy refuses — shorter than 32 characters, or
+ * one of the repository's published placeholders (audit F-06) — is no secret:
+ * the route closes exactly as if it were unset, and `handleCron` reports why.
  */
 export interface CronDeps<T extends object> {
   /** `CRON_SECRET`. */
@@ -42,7 +48,7 @@ export function cronAuth(
   req: Request,
   secret: string | undefined,
 ): 'ok' | 'disabled' | 'unauthorized' {
-  if (!secret) return 'disabled';
+  if (!secret || secretProblem('CRON_SECRET', secret) !== null) return 'disabled';
   return matches(bearer(req), secret) ? 'ok' : 'unauthorized';
 }
 
@@ -60,7 +66,12 @@ export async function handleCron<T extends object>(
   deps: CronDeps<T>,
 ): Promise<Response> {
   const estado = cronAuth(req, deps.secret);
-  if (estado !== 'ok') return cronRefusal(estado);
+  if (estado !== 'ok') {
+    // Closed by the policy, not by absence: say which variable and which rule.
+    const rule = deps.secret ? secretProblem('CRON_SECRET', deps.secret) : null;
+    if (rule !== null) deps.report(new SecretPolicyError('CRON_SECRET', rule));
+    return cronRefusal(estado);
+  }
   try {
     return reply(200, { ok: true, ...(await deps.run(deps.now())) });
   } catch (error) {

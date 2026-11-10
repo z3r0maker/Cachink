@@ -51,6 +51,22 @@ describe('the product photo route', () => {
     assert.equal(latestProductImage.mock.calls[0]?.[1], PRODUCT);
   });
 
+  it('sandboxes the bytes a device pushed, whatever they turn out to be (audit F-01)', async () => {
+    latestProductImage.mockResolvedValue({
+      mime: 'image/svg+xml',
+      bytes: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>').toString(
+        'base64',
+      ),
+    });
+    const res = await get(PRODUCT);
+    assert.equal(res.status, 200);
+    assert.equal(
+      res.headers.get('Content-Security-Policy'),
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox; frame-ancestors 'none'",
+    );
+    assert.equal(res.headers.get('X-Content-Type-Options'), 'nosniff');
+  });
+
   it('answers 304 with no body when the browser already holds these bytes', async () => {
     const etag = (await get(PRODUCT)).headers.get('ETag') ?? '';
     const res = await get(PRODUCT, { 'If-None-Match': etag });

@@ -5,7 +5,13 @@ import {
   ActivationCodeSchema,
   ReferenceTablesSchema,
 } from '../src/activate.js';
-import { DeltaSchema, PushRequestSchema, PushResponseSchema } from '../src/sync-push.js';
+import {
+  deltaNamesItsRow,
+  DeltaSchema,
+  PUSH_ROW_SCHEMAS,
+  PushRequestSchema,
+  PushResponseSchema,
+} from '../src/sync-push.js';
 import { PullQuerySchema, PullResponseSchema } from '../src/sync-pull.js';
 import { MAX_PUSH_DELTAS } from '../src/transport.js';
 
@@ -162,6 +168,25 @@ describe('sync push', () => {
       }),
     );
   });
+  it('a delta names its row twice, and the two must agree (audit F-05 b)', () => {
+    const d = DeltaSchema.parse(delta());
+    assert.equal(deltaNamesItsRow(d), true);
+    const other = DeltaSchema.parse(delta({ rowId: '01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' }));
+    assert.equal(
+      deltaNamesItsRow(other),
+      false,
+      'the schema allows it; the server refuses the row',
+    );
+  });
+
+  it('every pushable row carries an id, so the check has something to compare', () => {
+    for (const [table, schema] of Object.entries(PUSH_ROW_SCHEMAS)) {
+      const shape = (schema as unknown as { _zod: { def: { shape?: Record<string, unknown> } } })
+        ._zod.def.shape;
+      assert.ok(shape !== undefined && 'id' in shape, `${table} has no id`);
+    }
+  });
+
   it('rejects an empty batch and a batch over the cap', () => {
     assert.throws(() => PushRequestSchema.parse({ deltas: [] }));
     assert.throws(() =>

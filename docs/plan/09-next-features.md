@@ -747,6 +747,18 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   ADR-063), aviso + ARCO (N-34). Backend highs (session expiry SEC-AUTH-01, login hardening
   SEC-AUTH-02, Data API exposure SEC-DATA-01) belong to Track B. **Still to do:** pre-launch re-run
   on hosted B-01 with the built sync, register and webhooks; live rate-limit and PostgREST tests.
+- Progress: 2026-11-09 · branch `fix/security-audit-2026-11-09` · second pass
+  `docs/audits/security-2026-11-09.md` (static, on `main` at 91cc4474; three independent reads, each
+  top finding re-read and the SVG filter run): 0 critical, 1 high, 11 medium, 3 low. Fixed on the
+  branch (ADR-140): the SVG logo XSS (F-01, high), the runtime RLS-bypass refusal (F-02), unguarded
+  `'use server'` exports (F-03), the enforced script CSP (F-04), the push clock and row identity
+  (F-05 a/b), the production secret policy and token rotation (F-06), the per-owner NIP lockout
+  (F-08), the fail-closed bug-report limits (F-10), the audit gate, release-age delay and Next.js
+  16.4.5 (F-13), query text out of logs (F-14), and the low items (F-15). **Open, each with its
+  task:** OTA signing (F-07, N-82), owner 2FA and email verification (F-09, N-83), backups (F-11,
+  X-10), push constraints after observation (N-84). The bug-report move (N-81) is done on
+  `feat/n81-bug-report-api` (ADR-141). **Still to do:** the same hosted re-run as above, and an
+  outside penetration test.
 
 ### N-27 Auditoría de base de datos `[LAUNCH]` [deuda] [alta] [bloq]
 
@@ -1406,6 +1418,91 @@ micro-POS than location does.
   both once the referred tenant pays. Portal and email only — zero upsell in the app (ADR-069).
 - **Acceptance:** a redeemed code shows its campaign, activation and paid state on `/campanas`; a
   referrer credit is applied through N-71's audited path.
+
+### N-81 El reporte del teléfono entra por `/api/v1` y la función `bug-report` se retira [media]
+
+- [x] Status · **Surfaced by:** N-26 (F-10, ADR-140 §9) · **Trigger:** ya; es un cambio de contrato (`C-`), entra a `main` primero
+  - Done: 2026-11-09 · branch `feat/n81-bug-report-api`, stacked on `fix/security-audit-2026-11-09`
+    (ADR-141, C-25). The route is `apps/web/src/app/api/v1/support/bug-report/route.ts` over
+    `server/support/bug-report.ts`: device and business from the token, 20 reports a day per device
+    and 60 per business through the Postgres throttle (taken after validation, failing closed), the
+    description kept whole and the snapshot trimmed to an inbox item's 10,000 characters, stack
+    traces never filed. The phone sends through `ApiClient.bugReport` and `useBugReportSender`; the
+    sheet's «enviar» state, built long ago, is live for the first time (it was never given a
+    sender, so reports had only ever been shared as a file). **Wider than planned:** the function's
+    one live caller was the automatic error outbox, which shipped to tables that never existed, so
+    it is retired rather than ported (`OutboxFlusher`, `HttpRemoteLogStore`, `DualLogStore`), and
+    with it `EXPO_PUBLIC_BUG_INGEST_URL` and the `EXPO_PUBLIC_CLOUD_*` pair: the app carries no
+    Supabase key. The function, its Deno CI job and its test/lint wiring are deleted, and the
+    service-role guard now scans every code root outside `apps/backoffice`. Verified: contracts,
+    sync, ui, mobile, observability, application, domain and web suites; `test:conformance`
+    against the built portal on a seeded Postgres (5 suites, the two accepted reports logged as
+    `bug` items under the token's business). Maestro, 2026-11-10, iPhone 17 Pro simulator (iOS 26.5)
+    against the contracts mock: `bug-report-sheet.yaml` (reports off: sharing is the only action)
+    and the new `bug-report-enviar.yaml` (reports on: the report is sent with the device token and
+    the sheet closes) both pass. **Not run:** the app on a physical device. **Owner:** un-deploy the
+    function if it was deployed; delete the `*_BUG_INGEST_URL` and `*_CLOUD_*` EAS secrets; the
+    portal needs `ADMIN_INGEST_URL` and `ADMIN_INGEST_SECRET` in production.
+- **What:** `POST /api/v1/support/bug-report` under `deviceRoute`, ids taken from the device token;
+  limits through `throttleTake` per device and per business; the report is filed with
+  `supportInboxFromEnv().file(...)` to the console's `handleIngest`; the schema lives in
+  `@xangarro/contracts` with the mock and a conformance case; the phone's `HttpRemoteLogStore` sends
+  the device token instead of the anon key. Then `supabase/functions/bug-report` and its service-role
+  key are deleted, with the Deno job in CI.
+- **Why now:** since ADR-138 the function's service role holds no grant and its tables were never
+  migrated, so with ADR-140's fail-closed limits a redeployed function refuses every report and the
+  phone falls back to sharing the report as a file.
+- **Acceptance:** a report from a linked phone reaches the staff inbox with the token's device and
+  business; a caller without a device token gets 401; the service-role guard finds the key nowhere
+  outside `apps/backoffice`.
+
+### N-82 Firma de las actualizaciones OTA [media]
+
+- [ ] Status · **Surfaced by:** N-26 (F-07, SEC-MOB-01) · **Trigger:** antes de la primera compilación de tienda · **Blocks:** X-10
+- **What:** Expo update code signing, so an EAS account or token alone cannot ship JavaScript to
+  every register. The private key is the owner's to hold, outside EAS and outside the repo. From
+  `apps/mobile`: (1) `npx expo-updates codesigning:generate --key-output-directory keys
+--certificate-output-directory certs --certificate-validity-duration-years 10
+--certificate-common-name "Xangarro"`; ignore `keys/`, commit `certs/certificate.pem`; (2) `npx
+expo-updates codesigning:configure --certificate-input-directory certs --key-input-directory keys`
+  writes `updates.codeSigningCertificate` and `codeSigningMetadata` into `app.json`; (3) a new store
+  build, since the certificate is embedded at prebuild; (4) every update is then published with `eas
+update --channel production --private-key-path keys/private-key.pem`.
+- **Know before starting:** builds already in the field carry no certificate and keep accepting
+  unsigned updates until replaced; a lost key or an expired certificate means no OTA for those builds
+  ever again, only a new binary. Decide where the key lives and who else holds a copy first. 2FA on
+  the EAS organisation and a short list of who may publish to `production` go with it.
+- **Acceptance:** an unsigned update is rejected by a production build; the runbook
+  (`docs/ops/provisioning.md`) names where the key is kept.
+
+### N-83 Segundo factor del dueño y verificación del correo al registrarse [media]
+
+- [ ] Status · **Surfaced by:** N-26 (F-09, SEC-AUTH-02) · **Trigger:** los tableros del canvas aprobados (pantallas y correo nuevos)
+- **What:** (a) signup does not open a session until the address is confirmed by an emailed link, so
+  nobody can register somebody else's email first; an unconfirmed account that is later reached
+  through a magic link has its password and other sessions cleared. (b) Optional TOTP for owners and
+  admins, reusing `@xangarro/auth-core`'s TOTP (the console already requires it): enrol with a QR,
+  recovery codes shown once, asked at sign-in and again before changing operators, devices or
+  billing.
+- **Design first:** the «revisa tu correo» state, the confirmation email, the enrolment and the
+  sign-in challenge are screens nobody has drawn (CLAUDE.md §6, ADR-117).
+- **Acceptance:** an account whose email was never confirmed cannot sign in with a password; an
+  owner with TOTP on cannot reach `/equipo` after a password-only sign-in.
+
+### N-84 Push: del registro de anomalías a los rechazos y las restricciones [baja]
+
+- [ ] Status · **Surfaced by:** N-26 (F-05 c/d, ADR-140 §5) · **Trigger:** 30 días de `push_anomaly` en producción con dispositivos reales
+- **What:** read the `evt: 'push_anomaly'` log. If `NEGATIVE_MONEY` never fired: add, as `NOT VALID`
+  then validated, `client_payments.monto_centavos > 0` and `tickets.cambio_centavos IS NULL OR
+cambio_centavos >= 0`. Widen the detector before any further column (`caja_movimientos.monto`,
+  `caja_turnos` apertura/cierre/conteo, `expenses.monto`, product cost and price,
+  `inventory_movements.costo_unit`, `tickets.efectivo_recibido`, `clients.limite`): today only forms
+  keep those positive. Never constrain `sales.monto_centavos`, the differences, expected cash, turno
+  totals or the cancellation log: a refund is a negative sale. For `DEVICE_MISMATCH`, decide from the
+  log whether a re-linked phone's backlog explains every case before binding a new row's `deviceId`
+  to the token.
+- **Acceptance:** each constraint ships with a migration test and a conformance case; a phone that
+  re-links with unsent rows loses none of them.
 
 ---
 

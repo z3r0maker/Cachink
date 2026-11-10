@@ -8,6 +8,7 @@ import { drizzleCapacityProbe } from '@/server/db/capacity';
 import { db } from '@/server/db/client';
 import { drizzleSupportItems } from '@/server/db/support-items';
 import { listSupportItems } from '@/server/inbox/list';
+import { reportError } from '@/server/observability/report';
 
 /**
  * What the frame (status bar, sidebar counts) and Inicio both read. `cache`
@@ -22,7 +23,7 @@ export const capacityNow = cache(async (): Promise<CapacityReading | null> => {
   try {
     return await drizzleCapacityProbe(db()).read();
   } catch (error) {
-    console.error('capacity probe failed', error);
+    reportError(error, 'capacity probe failed');
     return null;
   }
 });
@@ -35,7 +36,7 @@ export const openInboxItems = cache(async (): Promise<readonly SupportItem[] | n
     });
     return items;
   } catch (error) {
-    console.error('inbox count failed', error);
+    reportError(error, 'inbox count failed');
     return null;
   }
 });

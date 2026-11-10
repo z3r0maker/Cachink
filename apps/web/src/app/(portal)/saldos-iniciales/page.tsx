@@ -1,7 +1,7 @@
 import { isNull } from 'drizzle-orm';
 import { clients as clientsTable } from '@xangarro/data-pg';
 
-import { saldosActuales } from '@/server/actions/apertura';
+import { saldosActuales } from '@/server/apertura';
 import { requireMember } from '@/server/auth';
 import { hoy } from '@/server/clock';
 import { withTenant } from '@/server/db';

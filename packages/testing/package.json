@@ -11,7 +11,8 @@
     "./contract": "./src/contract/index.ts",
     "./ui": "./src/ui/index.ts",
     "./integration": "./src/integration.ts",
-    "./corp": "./src/corp/cfdi.ts"
+    "./corp": "./src/corp/cfdi.ts",
+    "./server-actions": "./src/server-actions.ts"
   },
   "scripts": {
     "build": "tsc --build",

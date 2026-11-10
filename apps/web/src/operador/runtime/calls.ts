@@ -4,11 +4,21 @@
  */
 
 import type { Bootstrap } from '@xangarro/contracts';
-import type { TicketPara, VentaPara, WorkerRequest } from './protocol';
+import { readDevice } from './device-store';
+import type { SyncMode, TicketPara, VentaPara, WorkerRequest } from './protocol';
 
 /** A request minus its RPC id — kept derived so it can never drift. */
 export type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
 export type Call = DistributiveOmit<WorkerRequest, 'id'>;
+
+/**
+ * A sync run, with the business this register was linked to: the engine
+ * applies pulled pages under it and refuses any other's (audit F-15c).
+ */
+export const sync = (
+  token: string | null,
+  opts: { readonly mode: SyncMode; readonly manual: boolean },
+): Call => ({ method: 'sync', token, businessId: readDevice()?.businessId ?? null, ...opts });
 
 export interface ProductoPara {
   readonly id: string;

@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { founderLookup } from './db/corp';
 import { founderForNav, founderOrNull } from './founder-gate';
 import { NotPermitted, requireStaff, requireStaffPage, type StaffContext } from './staff';
+import { reportError } from './observability/report';
 
 /**
  * The founder gate on top of the staff gate (E-01, ADR-125 §1). Every
@@ -37,6 +38,6 @@ export async function requireFounder(): Promise<FounderContext> {
 /** The console layout's question: draw the «Empresa» group for this staff member? */
 export async function founderForLayout(staffId: string): Promise<Founder | null> {
   return founderForNav(staffId, founderLookup(), (error) => {
-    console.error('[empresa] founder lookup failed; hiding the area', error);
+    reportError(error, '[empresa] founder lookup failed; hiding the area');
   });
 }

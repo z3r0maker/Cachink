@@ -15,6 +15,7 @@ import {
   seedTestEntitlement,
 } from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
+import { activateTestDevice } from '../activated-device';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEmitDirectorAlert } from '../../src/hooks/use-emit-director-alert';
 import { useEntitlement } from '../../src/entitlement/use-entitlement';
@@ -58,6 +59,7 @@ describe('useEmitDirectorAlert', () => {
     // Alerts are filtered by effective feature flags, which need a verified plan (A-14).
     planConfig = new InMemoryAppConfigRepository();
     await seedTestEntitlement(planConfig);
+    await activateTestDevice(planConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,

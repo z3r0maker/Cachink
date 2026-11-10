@@ -16,6 +16,7 @@ import { dbFingerprint } from '../db/fingerprint';
 import { LOGIN_PATH } from '../gate';
 import { resolveGate } from '../resolve-gate';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /** What the banner may say beyond the generic refusal; dev phase only. */
 function diagnostics(): Diagnostics {
@@ -35,7 +36,7 @@ async function attemptSignIn(input: SignInInput): Promise<Attempt> {
     return await signIn(authDeps(), input);
   } catch (error) {
     const failure = classifyInfraFailure(error);
-    console.error(`[login] infra ${failure.cause}/${failure.detail} db=${dbFingerprint()}`, error);
+    reportError(error, `[login] infra ${failure.cause}/${failure.detail} db=${dbFingerprint()}`);
     return { kind: 'infra', failure };
   }
 }
@@ -85,7 +86,7 @@ export async function logout(): Promise<never> {
     await signOut(authDeps(), token, session?.staffId ?? null);
   } catch (error) {
     const failure = classifyInfraFailure(error);
-    console.error(`[logout] infra ${failure.cause}/${failure.detail}`, error);
+    reportError(error, `[logout] infra ${failure.cause}/${failure.detail}`);
   }
   await clearSessionCookie();
   redirect(LOGIN_PATH);

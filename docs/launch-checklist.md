@@ -35,25 +35,15 @@ certificate, or a submission to a human-operated review queue.
 - [ ] **Apple Developer** — $99/year. Enrol `mx.xangarro` team.
 - [ ] Run `eas credentials` once per team to set up provisioning.
 
-### ☐ 4. Supabase bug database
+### ☑ 4. Bug reports (nothing to provision)
 
-Cloud sync is **off** for the MVP, but the error-logging pipeline needs
-a Supabase project to receive crash reports and bug submissions.
-
-1. [ ] Create a Supabase project (free tier) — `us-east-1` region.
-2. [ ] Export your PAT: `export SUPABASE_ACCESS_TOKEN="sbp_…"`
-3. [ ] Link: `cd supabase && supabase link --project-ref <ref>`
-4. [ ] Push schema: `supabase db push`
-       — runs `0001_schema.sql` (required — defines `xangarro_generate_ulid()`)
-       and `0002_bug_database.sql` (error_events + bug_reports tables,
-       deny-by-default RLS, pg_cron nightly prune).
-5. [ ] Deploy the Edge Function:
-       `supabase functions deploy bug-report --project-ref <ref>`
-       Set the service-role key as a function secret.
-6. [ ] Run the ULID smoke check:
-   ```sh
-   supabase test db supabase/tests/ulid.spec.sql
-   ```
+The phone's «Reportar un problema» goes to the portal
+(`POST /api/v1/support/bug-report`, device token) and lands in the staff
+inbox; crash telemetry is Sentry's (step 5). The Supabase `bug-report` edge
+function and its tables were retired by N-81 (ADR-141): there is no function
+to deploy and no Supabase key in the app. The portal needs `ADMIN_INGEST_URL`
+and `ADMIN_INGEST_SECRET` (`docs/ops/provisioning.md`) for reports to reach
+the console.
 
 ### ☐ 5. Sentry (optional)
 
@@ -64,13 +54,17 @@ a Supabase project to receive crash reports and bug submissions.
 
 Set these via `eas secret:create` (one-time per environment):
 
-| Secret                      | Value                                                              |
-| --------------------------- | ------------------------------------------------------------------ |
-| `PRODUCTION_CLOUD_ANON_KEY` | Supabase publishable anon key (doubles as bug-ingest auth header). |
-| `PRODUCTION_BUG_INGEST_URL` | `https://<ref>.supabase.co/functions/v1/bug-report`                |
-| `PRODUCTION_SENTRY_DSN`     | Sentry DSN (optional — omit if no Sentry account yet).             |
-| `PRODUCTION_CLOUD_API_URL`  | Supabase project URL (harmless — cloud sync unreachable in MVP).   |
-| `PRODUCTION_POWERSYNC_URL`  | PowerSync URL (harmless — cloud sync unreachable in MVP).          |
+| Secret                          | Value                                                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `PRODUCTION_API_BASE`           | The portal's origin, `https://…`. The release gate refuses anything else (ADR-140).  |
+| `PRODUCTION_ENTITLEMENT_PUBKEY` | The entitlement public key, 64 hex (`docs/ops/provisioning.md` §2). Never a dev key. |
+| `PRODUCTION_SENTRY_DSN`         | Sentry DSN (optional — omit if no Sentry account yet).                               |
+
+The app reads no Supabase URL or key since N-81; `PRODUCTION_CLOUD_*` and
+`PRODUCTION_BUG_INGEST_URL` can be deleted from EAS. `apps/mobile/eas.json`
+passes these as literal `$PRODUCTION_*` strings, which EAS may not
+substitute: confirm the first production build reads real values (the
+release gate fails it if not).
 
 Preview variants (`PREVIEW_*`) follow the same pattern if needed.
 

@@ -95,6 +95,32 @@ describe('ApiClient · being told to wait (DB2-DEV-02)', () => {
     }
   });
 
+  it('files a bug report with the device token (§9), and maps its refusals', async () => {
+    const client = new ApiClient({ baseUrl: mock.url });
+    const fresh = await fetch(`${mock.url}/__mock/code`, { method: 'POST' });
+    const { code } = (await fresh.json()) as { code: string };
+    const act = await client.activate({ email: EMAIL, code, device: DEVICE });
+    assert.equal(act.ok, true);
+    if (!act.ok) return;
+    const report = { description: 'Se cerró al cobrar', submittedAt: '2026-11-10T02:15:00.000Z' };
+
+    const sent = await client.bugReport(act.data.deviceToken, report);
+    assert.deepEqual(sent.ok ? sent.data : sent.code, { accepted: true });
+    assert.deepEqual(
+      mock.api.state.bugReports.map((r) => [r.deviceId, r.report.description]),
+      [[act.data.deviceId, 'Se cerró al cobrar']],
+    );
+
+    const stranger = await client.bugReport('mock-device:nobody', report);
+    assert.deepEqual(stranger.ok ? null : [stranger.status, stranger.code], [
+      401,
+      'DEVICE_REVOKED',
+    ]);
+
+    const empty = await client.bugReport(act.data.deviceToken, { ...report, description: ' ' });
+    assert.deepEqual(empty.ok ? null : [empty.status, empty.code], [400, 'VALIDATION']);
+  });
+
   it('gives up on a request that hangs past its timeout', async () => {
     const fetchImpl = ((_url: string, init?: RequestInit) =>
       new Promise((_resolve, reject) => {

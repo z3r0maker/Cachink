@@ -15,8 +15,38 @@ export interface EstadoNip {
   readonly nip: string;
   readonly fallidos: number;
   readonly restantes: number;
+  /** Above zero while the picked operator's NIP lockout runs (audit F-08). */
+  readonly esperaMs: number;
   readonly ocupado: boolean;
   readonly press: (k: Tecla) => void;
+}
+
+/** What the Worker answers a NIP with; `esperaMs` is the lockout's wait, if one runs. */
+export interface Verificado {
+  readonly success: boolean;
+  readonly esperaMs?: number;
+}
+
+/**
+ * The misses. Three strikes clear the pick; a try the lockout refused is not
+ * a strike, it only carries how long to wait.
+ */
+function useFallos() {
+  const [fallidos, setFallidos] = useState(0);
+  const [esperaMs, setEsperaMs] = useState(0);
+  /** Records a refused NIP; true when the pick must be cleared. */
+  const fallar = (espera: number): boolean => {
+    setEsperaMs(espera);
+    if (espera > 0) return false;
+    const siguiente = fallidos + 1;
+    setFallidos(siguiente >= INTENTOS ? 0 : siguiente);
+    return siguiente >= INTENTOS;
+  };
+  const limpiar = (): void => {
+    setFallidos(0);
+    setEsperaMs(0);
+  };
+  return { fallidos, esperaMs, fallar, limpiar };
 }
 
 /**
@@ -25,12 +55,12 @@ export interface EstadoNip {
  */
 export function useNip(p: {
   readonly operadores: readonly OperadorPara[];
-  readonly verificar: (nombre: string, nip: string) => Promise<{ success: boolean }>;
+  readonly verificar: (nombre: string, nip: string) => Promise<Verificado>;
   readonly onAutenticado: (userId: string) => void;
 }): EstadoNip {
   const [elegidoId, setElegidoId] = useState<string | null>(null);
   const [nip, setNip] = useState('');
-  const [fallidos, setFallidos] = useState(0);
+  const f = useFallos();
   const [ocupado, setOcupado] = useState(false);
   const solo = p.operadores.length === 1 ? (p.operadores[0] ?? null) : null;
   const elegido = p.operadores.find((o) => o.id === elegidoId) ?? solo;
@@ -41,10 +71,8 @@ export function useNip(p: {
     try {
       const result = await p.verificar(elegido.nombre, nip);
       if (result.success) return p.onAutenticado(elegido.id);
-      const siguiente = fallidos + 1;
       setNip('');
-      setFallidos(siguiente >= INTENTOS ? 0 : siguiente);
-      if (siguiente >= INTENTOS) setElegidoId(null);
+      if (f.fallar(result.esperaMs ?? 0)) setElegidoId(null);
     } finally {
       setOcupado(false);
     }
@@ -60,11 +88,12 @@ export function useNip(p: {
   function elegir(o: OperadorPara): void {
     setElegidoId(o.id);
     setNip('');
-    setFallidos(0);
+    f.limpiar();
   }
 
+  const { fallidos, esperaMs } = f;
   const restantes = INTENTOS - fallidos;
-  return { elegido, elegir, nip, fallidos, restantes, ocupado, press };
+  return { elegido, elegir, nip, fallidos, restantes, esperaMs, ocupado, press };
 }
 
 /** A physical keyboard works too: digits, Backspace and Enter. */

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createHash } from 'node:crypto';
 
+import { uploadedBytesHeaders } from '@xangarro/config/security';
 import { latestProductImage } from '@xangarro/data-pg';
 
 import { withTenant } from '@/server/db';
@@ -13,6 +14,10 @@ import { readSession } from '@/server/session';
  * sees the catalogue sees its photos. The cache is private and revalidated
  * on every view, so «Quitar foto» shows at once; the ETag is the bytes'
  * hash, so an unchanged photo costs a 304 and no body.
+ *
+ * The bytes came from a device's push. The table only takes `image/webp`,
+ * but this response does not lean on that: it is sandboxed like every other
+ * upload (audit F-01).
  */
 const CACHE = 'private, no-cache';
 const ULID = /^[0-9A-HJKMNP-TV-Z]{26}$/;
@@ -39,7 +44,7 @@ export async function GET(
 
   const bytes = Buffer.from(photo.bytes, 'base64');
   const etag = `"${createHash('sha256').update(bytes).digest('base64url').slice(0, 22)}"`;
-  const headers = { ETag: etag, 'Cache-Control': CACHE };
+  const headers = { ...uploadedBytesHeaders(), ETag: etag, 'Cache-Control': CACHE };
   if (request.headers.get('if-none-match') === etag) {
     return new NextResponse(null, { status: 304, headers });
   }

@@ -1,13 +1,13 @@
 /**
  * The register's ticket operations (O-06 capture, O-32 Ventas): register a
- * sale, list the open turno's tickets, cancel one — the same use cases the
- * phone runs, over the same Drizzle repositories in the Worker's database.
+ * sale and list the open turno's tickets — the same use cases the phone
+ * runs, over the same Drizzle repositories in the Worker's database.
+ * Cancelling one lives in `cancelar.ts`, behind the NIP lockout.
  */
 
 import {
   DrizzleBusinessesRepository,
   DrizzleCajaTurnosRepository,
-  DrizzleCancelacionLogsRepository,
   DrizzleClientsRepository,
   DrizzleInventoryMovementsRepository,
   DrizzleProductsRepository,
@@ -15,9 +15,9 @@ import {
   DrizzleTicketsRepository,
   DrizzleUsersRepository,
 } from '@xangarro/data';
-import { CancelarTicketUseCase, RegistrarTicketUseCase } from '@xangarro/application';
+import { RegistrarTicketUseCase } from '@xangarro/application';
 import type { RegistrarTicketInput } from '@xangarro/application';
-import { parseFeatureFlags, type BusinessId, type TicketId, type UserId } from '@xangarro/domain';
+import { parseFeatureFlags, type BusinessId } from '@xangarro/domain';
 
 import { cuentasDelNegocio } from './cuentas';
 import { hhmmLocal } from '@xangarro/caja';
@@ -29,7 +29,11 @@ import type { LineaPara, RegistrarContext, TicketPara, VentaPara } from './proto
  * y stock» switch (Mi negocio › Funciones), read here in the Worker so the
  * screen can't get it wrong. Products that don't track stock never move.
  */
-async function stockDelNegocio(db: Db, businessId: BusinessId, deviceId: string): Promise<boolean> {
+export async function stockDelNegocio(
+  db: Db,
+  businessId: BusinessId,
+  deviceId: string,
+): Promise<boolean> {
   const b = await new DrizzleBusinessesRepository(db as never, deviceId as never).findById(
     businessId,
   );
@@ -181,29 +185,4 @@ async function fiadoDe(
   const cuentas = await cuentasDelNegocio(db, businessId, deviceId);
   const cuenta = cuentas.find((c) => c.id === clienteId);
   return cuenta === undefined ? null : { nombre: cuenta.nombre, saldo: cuenta.saldoCentavos };
-}
-
-/** Cancel a ticket through the real use case: PIN, permission, audit log (O-32). */
-export async function cancelarTicket(
-  db: Db,
-  p: {
-    readonly businessId: BusinessId;
-    readonly deviceId: string;
-    readonly userId: UserId;
-    readonly ticketId: TicketId;
-    readonly pin: string;
-    readonly motivo: string;
-  },
-): Promise<{ readonly folio: number; readonly cashToReturnCentavos: string | null }> {
-  const useCase = new CancelarTicketUseCase(
-    new DrizzleTicketsRepository(db as never, p.deviceId as never, p.userId as never),
-    new DrizzleSalesRepository(db as never, p.deviceId as never, p.userId as never),
-    new DrizzleUsersRepository(db as never, p.deviceId as never),
-    new DrizzleProductsRepository(db as never, p.deviceId as never),
-    new DrizzleInventoryMovementsRepository(db as never, p.deviceId as never),
-    new DrizzleCancelacionLogsRepository(db as never, p.deviceId as never, p.userId as never),
-  );
-  const stockEnabled = await stockDelNegocio(db, p.businessId, p.deviceId);
-  const r = await useCase.execute({ ...p, stockEnabled });
-  return { folio: r.ticket.folio, cashToReturnCentavos: r.cashToReturn?.toString() ?? null };
 }

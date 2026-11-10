@@ -13,9 +13,10 @@ import { buildCsp } from '@xangarro/config/security';
  * - `form-action` Stripe — Checkout and the Customer Portal are reached by a
  *   redirect after a form post (B-10).
  *
- * Served **report-only** (`src/proxy.ts`): violations land in the log through
- * `/api/csp-report`, and the header name flips to enforcing once that log is
- * clean in production. A wrong policy on the register would stop sales.
+ * Served **enforcing** (`src/proxy.ts`, audit F-04): the browser blocks what
+ * the policy forbids and still reports it to `/api/csp-report` through
+ * `report-uri`. A wrong policy on the register stops sales, so a change here
+ * runs the whole E2E suite before it ships.
  */
 export const CSP_REPORT_PATH = '/api/csp-report';
 

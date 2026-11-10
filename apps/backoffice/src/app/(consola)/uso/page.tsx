@@ -20,6 +20,7 @@ import { notice, wide } from '../tenants/tenants.css';
 import { UsageCounters } from './counters';
 import { parseUsageFilter, toUsageListInput, usageHref } from './params';
 import { UsageTable } from './usage-table';
+import { reportError } from '@/server/observability/report';
 
 /** N-07 · Uso: each tenant's usage this month against its plan's limits (ADR-065). */
 export const dynamic = 'force-dynamic';
@@ -44,7 +45,7 @@ async function counters(now: Date): Promise<Counters | null> {
   try {
     return usageCounters(await listUsage(usageDeps(db()), { limit: 100 }, now));
   } catch (error) {
-    console.error('uso: counters failed', error);
+    reportError(error, 'uso: counters failed');
     return null;
   }
 }

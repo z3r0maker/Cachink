@@ -84,6 +84,41 @@ describe('useNip', () => {
     assert.equal(hook.result.current.nip, '');
   });
 
+  it('while the lockout runs the wait is carried, and the three strikes stand still (F-08)', async () => {
+    const respuestas = [
+      { success: false, esperaMs: 0 },
+      { success: false, esperaMs: 30_000 },
+      { success: false, esperaMs: 21_000 },
+    ];
+    const verificar = vi.fn(async () => respuestas.shift() ?? { success: false, esperaMs: 0 });
+    const hook = renderHook(() =>
+      useNip({ operadores: [ANA, PEDRO], verificar, onAutenticado: vi.fn() }),
+    );
+    await act(async () => hook.result.current.elegir(PEDRO));
+
+    await teclear(hook, '1111');
+    await act(async () => hook.result.current.press('→'));
+    assert.equal(hook.result.current.esperaMs, 0);
+    assert.equal(hook.result.current.fallidos, 1);
+
+    for (const espera of [30_000, 21_000]) {
+      await teclear(hook, '1111');
+      await act(async () => hook.result.current.press('→'));
+      assert.equal(hook.result.current.esperaMs, espera);
+      assert.equal(hook.result.current.fallidos, 1, 'a refused try is not a strike');
+      assert.equal(hook.result.current.elegido?.id, 'op-2');
+      assert.equal(hook.result.current.nip, '');
+    }
+
+    await teclear(hook, '1111');
+    await act(async () => hook.result.current.press('→'));
+    assert.equal(hook.result.current.esperaMs, 0, 'the wait leaves with the lockout');
+    assert.equal(hook.result.current.fallidos, 2);
+
+    await act(async () => hook.result.current.elegir(ANA));
+    assert.equal(hook.result.current.esperaMs, 0);
+  });
+
   it('a partial NIP does not ask the verifier; a new pick resets everything', async () => {
     const { hook, verificar } = montar([ANA, PEDRO]);
     const estado = hook.result.current;

@@ -2,6 +2,7 @@ import type { LedgerEntry, RecurrenteRegistrado } from '@xangarro/application/co
 
 import type { FormState } from '../actions/form-state';
 import { NotPermitted } from '../staff';
+import { reportError } from '../observability/report';
 
 /**
  * How «Empresa»'s actions answer a failure (ADR-125): the ledger's and the
@@ -63,7 +64,7 @@ export function failed(error: unknown, what: string): FormState {
   if (own !== undefined) return { ok: false, message: own };
   if (DOMAIN_CODES.has(code) && error instanceof Error)
     return { ok: false, message: error.message };
-  console.error(`[empresa] ${what} failed`, error);
+  reportError(error, `[empresa] ${what} failed`);
   return { ok: false, message: 'No se pudo guardar. Intenta de nuevo.' };
 }
 

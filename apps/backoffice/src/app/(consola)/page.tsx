@@ -15,6 +15,7 @@ import * as u from '@/styles/torre.css';
 import { RevisarForm } from './revisar-form';
 import * as s from './inicio.css';
 import { Attention, Bitacora, BriefCard, Kpi } from './turno';
+import { reportError } from '@/server/observability/report';
 
 /** Every reading on this page is live: nothing here may be a cached number. */
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,7 @@ async function soft<T>(what: string, run: () => Promise<T>): Promise<T | null> {
     return await run();
   } catch (error) {
     // Inicio stays usable with one panel short; the panel says it could not read.
-    console.error(`inicio: ${what} failed`, error);
+    reportError(error, `inicio: ${what} failed`);
     return null;
   }
 }

@@ -181,6 +181,44 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 † dormant (flag off in v1) but in scope so no protocol change is needed later.
 
+## §9 `POST /support/bug-report`
+
+> **Added 2026-11-09 (C-25, N-81, ADR-141).** Additive at protocol 1: an older server answers 404
+> and the app falls back to sharing the report as a file.
+
+The phone's «Reportar un problema». Device-token authed like every route but `/activate`; the server
+files the report in the staff inbox under the device and business **the token names**.
+
+Request:
+
+```json
+{
+  "description": "La app se cerró al cobrar",
+  "submittedAt": "2026-11-10T02:15:00.000Z",
+  "appVersion": "1.4.2",
+  "platform": "ios",
+  "osName": "iOS",
+  "osVersion": "26.1",
+  "deviceModel": "iPhone 15",
+  "snapshot": { "auditEvents": [], "errors": [] }
+}
+```
+
+- `description` (1 to 5000 characters after trimming) and `submittedAt` (an ISO instant) are required;
+  the rest is optional. `snapshot` holds at most 50 audit events and 20 errors, already scrubbed by
+  the phone: no stack traces, no personal data.
+- **The body has no field for who is calling.** `deviceId`, `businessId` or `userId` sent anyway are
+  dropped, never read.
+- The whole body is at most 100 KB.
+
+Response `200 { "accepted": true }`. A resend of the same report (same device, same `submittedAt`)
+files nothing new.
+
+Errors: `UNAUTHENTICATED` / `DEVICE_REVOKED` (401); `VALIDATION` with **400** for a body that is not
+a report or is too large (as `/sync/pull` answers a bad query); `RATE_LIMITED` (429, `Retry-After`)
+past 20 reports per device per day, or past the business's own daily ceiling; `INTERNAL` (5xx,
+retryable) when the inbox could not be reached. A limit that cannot be checked refuses.
+
 ---
 
 ### C-01 Encode §1–§2 (transport, headers, error envelope, token claim shapes)
@@ -581,3 +619,18 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
   device refuses it before sending), the snapshot carries only the newest row per product.
 - **Acceptance:** `pnpm --filter @xangarro/contracts test` and `test:conformance` green against
   the mock; an old device's pull still parses (default `[]`).
+
+### C-25 `POST /support/bug-report`: the phone's report, under the token's device (N-81, ADR-141)
+
+- [x] Status · **Blocked by:** — · **Blocks:** N-81
+  - Done: 2026-11-09 · `packages/contracts/src/support.ts` (`BugReportRequestSchema`,
+    `BugReportResponseSchema`, the size and row limits, `BUG_REPORTS_PER_DEVICE_PER_DAY`),
+    `API_PATHS.bugReport`, the mock's route (it keeps each report with the device the token named,
+    in `MockState.bugReports`), `tests/support.test.ts` and conformance `bug-report.test.ts`
+    (no token, a token nobody issued, an accepted report, ids in the body ignored, an empty
+    report), green against the mock and against the real portal (`test:conformance`).
+- **Context:** §9. The route replaces the `bug-report` edge function, which authenticated callers
+  by the public anon key and believed the device id in the body (audit F-10). Additive at
+  protocol 1.
+- **Files:** `packages/contracts/src/{support,transport,index}.ts`, `src/mock/{handler,state}.ts`,
+  `tests/support.test.ts`, `tests/conformance/bug-report.test.ts`.

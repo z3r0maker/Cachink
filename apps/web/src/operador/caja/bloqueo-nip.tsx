@@ -2,6 +2,8 @@
 
 import { useEffect, type ReactNode } from 'react';
 
+import { fraseEsperaNip } from '@xangarro/caja/nip';
+
 import * as b from './bloqueo-nip.css';
 
 export const BLOQUEO_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'OK'] as const;
@@ -18,6 +20,8 @@ const BORRAR = [
 export function NipPad(p: {
   readonly nip: string;
   readonly error: boolean;
+  /** Above zero while this operator's NIP lockout runs (audit F-08): the line says the wait. */
+  readonly esperaMs?: number;
   readonly onKey: (k: Tecla) => void;
   /** The keypad's last key: «Desbloquear» or «Entrar como …». */
   readonly accion: ReactNode;
@@ -31,7 +35,9 @@ export function NipPad(p: {
       <Puntos n={p.nip.length} />
       {p.error ? (
         <p className={b.error} role="alert" data-testid="bloqueo-error">
-          NIP incorrecto. Vuelve a intentarlo.
+          {p.esperaMs !== undefined && p.esperaMs > 0
+            ? fraseEsperaNip(p.esperaMs)
+            : 'NIP incorrecto. Vuelve a intentarlo.'}
         </p>
       ) : null}
       <div className={b.teclado}>

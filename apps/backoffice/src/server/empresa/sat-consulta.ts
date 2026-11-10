@@ -1,5 +1,6 @@
 import type { ConsultaSat } from '@xangarro/application/corp';
 import type { CfdiRecibido, EstadoSat } from '@xangarro/domain/corp';
+import { reportError } from '../observability/report';
 
 /**
  * The SAT's public CFDI status service (E-11): «Vigente», «Cancelado» or «No
@@ -67,7 +68,7 @@ export function consultaSat(fetcher: typeof fetch = fetch): ConsultaSat {
         });
         return res.ok ? estadoDeRespuesta(await res.text()) : 'sin_respuesta';
       } catch (error) {
-        console.warn('[empresa] la consulta al SAT no respondió', error);
+        reportError(error, '[empresa] la consulta al SAT no respondió');
         return 'sin_respuesta';
       }
     },

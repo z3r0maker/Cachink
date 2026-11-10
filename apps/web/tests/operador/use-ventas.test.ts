@@ -159,6 +159,19 @@ describe('useVentas · linked', () => {
     });
     assert.match(error ?? '', /NIP incorrecto/);
     assert.equal(result.current.capa, 'cajon', 'back to the drawer, the error carried');
+
+    // The Worker hands an error over as text, its class names first: the
+    // dialog shows the sentence, not «Error: TypeError: …» (F-08's lockout).
+    cancelar.mockRejectedValue(new Error('Error: Demasiados intentos. Espera 30 s.'));
+    await act(async () => {
+      error = await result.current.cancelar('otro', '9999', '');
+    });
+    assert.equal(error, 'No se pudo cancelar: Demasiados intentos. Espera 30 s.');
+    cancelar.mockRejectedValue(new Error('TypeError: PIN incorrecto'));
+    await act(async () => {
+      error = await result.current.cancelar('otro', '9999', '');
+    });
+    assert.equal(error, 'No se pudo cancelar: PIN incorrecto');
   });
 
   it('offline, the queue is left for the next flush', async () => {

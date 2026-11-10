@@ -9,7 +9,9 @@ import * as schema from './schema/index.js';
  * **Always connect as a non-superuser.** Superusers bypass RLS entirely and
  * `FORCE ROW LEVEL SECURITY` does not apply to them, so a superuser connection
  * silently reads every tenant — see `tests/rls.integration.test.ts`, which
- * asserts `rolsuper = false` before trusting anything else.
+ * asserts `rolsuper = false` before trusting anything else. At run time the
+ * portal refuses such a pool before its first tenant transaction
+ * (`ensureRlsBoundRole`, `security/rls-role.ts`).
  */
 export type Db = ReturnType<typeof createDb>;
 

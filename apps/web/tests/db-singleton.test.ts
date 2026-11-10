@@ -12,6 +12,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@xangarro/data-pg', () => ({
   createDb: vi.fn(() => ({ pool: Symbol('pool') })),
   withBusiness: vi.fn(),
+  // The role check (F-02) is `db-rls-guard.test.ts`'s; here it passes.
+  ensureRlsBoundRole: vi.fn(async () => undefined),
 }));
 
 const GLOBAL_KEY = '__xangarroDb';

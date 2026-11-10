@@ -8,6 +8,7 @@ import type { PreviewRow } from '@/server/import/templates';
 import { ENVUELVE } from '../_primeros/boton';
 import { IconoBajar, IconoFlecha } from '../_primeros/iconos';
 import * as p from '../_primeros/primeros.css';
+import { erroresCsv } from './errores-csv';
 import type { TemplateMeta } from './plantillas';
 import { TablaRevision } from './tabla-revision';
 import type { Importar } from './use-importar';
@@ -15,11 +16,7 @@ import * as s from './revision.css';
 
 /** Step 2's review (P-07): what the file will do, row by row, before anything is written. */
 function descargarErrores(rows: readonly PreviewRow[]): void {
-  const quote = (v: string) => `"${v.replace(/"/g, '""')}"`;
-  const lines = rows
-    .filter((r) => r.kind === 'error')
-    .map((r) => [String(r.line), r.sku, r.nombre, r.errors.join('; ')].map(quote).join(','));
-  const csv = ['fila,sku,nombre,motivo', ...lines].join('\n');
+  const csv = erroresCsv(rows);
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const a = Object.assign(document.createElement('a'), {
     href: url,

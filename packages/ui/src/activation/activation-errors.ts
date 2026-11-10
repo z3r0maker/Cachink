@@ -1,7 +1,8 @@
 /**
  * Maps an activation failure to the i18n key the screen shows.
  * Contract codes come from ERROR_CATALOG (single source); NETWORK and
- * BAD_RESPONSE are client-side conditions.
+ * BAD_RESPONSE are client-side conditions. `config` is the app's own: a
+ * release build whose configuration cannot link a device (audit F-15d).
  */
 
 import { ERROR_CATALOG, isKnownErrorCode } from '@xangarro/contracts';
@@ -13,6 +14,7 @@ export type ActivationErrorKey =
   | 'activate.errors.noSlots'
   | 'activate.errors.suspended'
   | 'activate.errors.network'
+  | 'activate.errors.config'
   | 'activate.errors.unknown';
 
 const ACTIVATION_KEYS: ReadonlySet<string> = new Set([

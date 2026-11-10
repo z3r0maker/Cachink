@@ -13,7 +13,7 @@ import type { ReferenceDataRepository } from '@xangarro/sync';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId, useSetMode } from '../app-config/index';
 import { useAppConfigRepository, useReferenceDataRepository } from '../app/repository-provider';
 import { useActivationContext } from './activation-context';
-import type { ActivationRecord, DeviceTokenStore } from './activation-config';
+import type { ActivationConfig, ActivationRecord, DeviceTokenStore } from './activation-config';
 import { activationErrorKey, type ActivationErrorKey } from './activation-errors';
 import { ACTIVATION_QUERY_KEY } from './use-activation-state';
 
@@ -29,6 +29,17 @@ export class ActivationError extends Error {
     this.name = 'ActivationError';
     this.key = key;
   }
+}
+
+/**
+ * A release build with no usable API base or public key (audit F-15d) does
+ * not try: there is no mock to fall back to and no plan it could verify.
+ */
+function refuseUnusableConfig(config: ActivationConfig): void {
+  const problems = config.configProblems ?? [];
+  if (problems.length === 0) return;
+  const codes = problems.map((p) => p.code).join(', ');
+  throw new ActivationError('activate.errors.config', `Release configuration: ${codes}`);
 }
 
 /** Everything the device needs to run offline after a successful activation. */
@@ -71,6 +82,7 @@ export function useActivate() {
   const setMode = useSetMode();
   return useMutation<ActivationRecord, ActivationError, ActivateInput>({
     async mutationFn(input) {
+      refuseUnusableConfig(config);
       // N-34: the aviso this screen showed goes with the request.
       const res = await client.activate({
         ...input,

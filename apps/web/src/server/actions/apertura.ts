@@ -13,7 +13,6 @@ import {
 import {
   inventoryMovements,
   lockOpeningBalance,
-  openingBalanceClientsOf,
   openingBalanceOf,
   saveOpeningBalance,
 } from '@xangarro/data-pg';
@@ -29,7 +28,8 @@ import { failure, refusal, type FailurePolicy } from '../action-errors';
  * N-17's portal side: the saldos iniciales screen and the one-time
  * inventario inicial capture — every write inside the tenant transaction, so
  * the phones learn of it (§5) and the usage rules see apertura movements the
- * day they land.
+ * day they land. What the screens read is in `../apertura.ts`: a read that
+ * takes the business from its caller is no export for this file (audit F-03).
  */
 
 /** The use cases' refusals — the owner's to correct, not incidents. */
@@ -182,28 +182,4 @@ export async function capturarInventarioInicial(
   } catch (error) {
     return failure(error, 'capturarInventarioInicial', REFUSALS);
   }
-}
-
-/** Read-side for the screens (no 'use server' mutation semantics needed). */
-export async function saldosActuales(businessId: string) {
-  return withTenant(businessId, async (tx) => ({
-    header: await openingBalanceOf(tx, businessId),
-    lines: await openingBalanceClientsOf(tx, businessId),
-  }));
-}
-
-export async function inventarioInicialYaCapturado(businessId: string): Promise<boolean> {
-  return withTenant(businessId, async (tx) => {
-    const rows = await tx
-      .select({ id: inventoryMovements.id })
-      .from(inventoryMovements)
-      .where(
-        and(
-          eq(inventoryMovements.businessId, businessId),
-          eq(inventoryMovements.motivo, APERTURA_MOTIVO),
-        ),
-      )
-      .limit(1);
-    return rows.length > 0;
-  });
 }

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, it } from 'vitest';
 
-import { FORBIDDEN_NAME, scanText, scanTree } from '../scripts/service-role-guard';
+import { FORBIDDEN_NAME, scanRepo, scanText, scanTree } from '../scripts/service-role-guard';
 
 const dirs: string[] = [];
 
@@ -56,5 +56,51 @@ describe('service-role guard', () => {
   it('holds for the real apps/web today', { timeout: 60_000 }, () => {
     const portal = resolve(import.meta.dirname, '..', '..', 'web');
     assert.deepEqual(scanTree(portal), []);
+  });
+
+  // N-81: the `bug-report` edge function held the key under `supabase/`, a
+  // tree the guard never looked at. Every root but the console's is guarded.
+  it('guards every code root of the repository, not only the portal', () => {
+    const repo = tree({
+      [join('supabase', 'functions', 'x', 'index.ts')]: `Deno.env.get('${FORBIDDEN_NAME}')`,
+      [join('packages', 'sync', 'src', 'a.ts')]: `// ${FORBIDDEN_NAME}`,
+      [join('apps', 'mobile', 'eas.json')]: `{"${FORBIDDEN_NAME}": "x"}`,
+      [join('.github', 'workflows', 'ci.yml')]: `env: ${FORBIDDEN_NAME}`,
+      [join('scripts', 'release.sh')]: `echo $${FORBIDDEN_NAME}`,
+    });
+    assert.deepEqual(
+      scanRepo(repo)
+        .map((f) => f.file)
+        .sort(),
+      [
+        join('.github', 'workflows', 'ci.yml'),
+        join('apps', 'mobile', 'eas.json'),
+        join('packages', 'sync', 'src', 'a.ts'),
+        join('scripts', 'release.sh'),
+        join('supabase', 'functions', 'x', 'index.ts'),
+      ],
+    );
+  });
+
+  it('leaves the console alone, where the key belongs, and the docs that say so', () => {
+    const repo = tree({
+      [join('apps', 'backoffice', 'src', 'server', 'admin.ts')]: FORBIDDEN_NAME,
+      [join('docs', 'ops', 'provisioning.md')]: `never put ${FORBIDDEN_NAME} in the portal`,
+      'ARCHITECTURE.md': FORBIDDEN_NAME,
+    });
+    assert.deepEqual(scanRepo(repo), []);
+  });
+
+  it('skips a guarded root that a checkout does not have, and native build output', () => {
+    const repo = tree({
+      [join('apps', 'mobile', 'ios', 'Pods', 'x.m')]: FORBIDDEN_NAME,
+      [join('packages', 'ui', 'dist', 'a.js')]: FORBIDDEN_NAME,
+    });
+    assert.deepEqual(scanRepo(repo), []);
+  });
+
+  it('holds for the whole repository today', { timeout: 120_000 }, () => {
+    const repo = resolve(import.meta.dirname, '..', '..', '..');
+    assert.deepEqual(scanRepo(repo), []);
   });
 });

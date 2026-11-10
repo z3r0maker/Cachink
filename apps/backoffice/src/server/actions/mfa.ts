@@ -14,6 +14,7 @@ import { dbFingerprint } from '../db/fingerprint';
 import { MFA_ENROLL_PATH, MFA_VERIFY_PATH } from '../gate';
 import { requireStaffPage } from '../staff';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /**
  * The MFA half of the same problem `attemptSignIn` solves (actions/auth.ts):
@@ -22,7 +23,7 @@ import { field, type FormState } from './form-state';
  */
 function infraState(error: unknown, step: string): FormState {
   const failure = classifyInfraFailure(error);
-  console.error(`[mfa:${step}] infra ${failure.cause}/${failure.detail}`, error);
+  reportError(error, `[mfa:${step}] infra ${failure.cause}/${failure.detail}`);
   return {
     ok: false,
     message: infraFailureMessage(failure, {

@@ -2,7 +2,9 @@
  * Entitlement on the device (A-10, ADR-053 §5, Q9/Q14).
  *
  * `verifyEntitlement` checks the Ed25519 signature over `canonicalize(payload)`
- * with synchronous SHA-512 from `@noble/hashes` (Hermes has no WebCrypto).
+ * with synchronous SHA-512 from `@noble/hashes` (Hermes has no WebCrypto),
+ * and that the plan is this device's own business's (audit F-15c): one
+ * validly signed for another business verifies nothing here.
  * `resolveEntitlement` turns what sync stored into the plan the app enforces:
  * anything unverifiable or lapsed falls back to Freelancer limits — never a
  * crash, never a lock. Time is anchored: `max(device clock, last server time)`
@@ -45,10 +47,19 @@ export function base64ToBytes(b64: string): Uint8Array {
   return Uint8Array.from(out);
 }
 
-/** The verified payload, or `null` when the envelope is malformed or the signature fails. */
-export function verifyEntitlement(raw: unknown, publicKeyHex: string): Entitlement | null {
+/**
+ * The verified payload, or `null` when the envelope is malformed, the
+ * signature fails, or it names a business other than `businessId` (the
+ * device's own, from activation; `null` verifies nothing).
+ */
+export function verifyEntitlement(
+  raw: unknown,
+  publicKeyHex: string,
+  businessId: string | null,
+): Entitlement | null {
   const parsed = SignedEntitlementSchema.safeParse(raw);
   if (!parsed.success) return null;
+  if (businessId === null || parsed.data.payload.businessId !== businessId) return null;
   try {
     const message = new TextEncoder().encode(canonicalize(parsed.data.payload));
     const signature = base64ToBytes(parsed.data.signature);
@@ -88,6 +99,8 @@ export interface ResolveEntitlementInput {
   readonly lastPullAt: string | null;
   readonly deviceNow: Date;
   readonly publicKeyHex: string;
+  /** The device's own business, from its activation record (audit F-15c). */
+  readonly businessId: string | null;
 }
 
 export function anchoredNow(deviceNow: Date, lastServerTime: string | null): Date {
@@ -105,7 +118,11 @@ function parseJson(json: string | null): unknown {
 
 export function resolveEntitlement(input: ResolveEntitlementInput): ResolvedEntitlement {
   const nowAnchored = anchoredNow(input.deviceNow, input.lastServerTime).toISOString();
-  const payload = verifyEntitlement(parseJson(input.storedJson), input.publicKeyHex);
+  const payload = verifyEntitlement(
+    parseJson(input.storedJson),
+    input.publicKeyHex,
+    input.businessId,
+  );
   if (!payload) {
     const limits = PLAN_LIMITS[FALLBACK_PLAN];
     return {

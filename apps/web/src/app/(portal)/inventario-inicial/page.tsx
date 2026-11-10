@@ -1,7 +1,7 @@
 import { isNull } from 'drizzle-orm';
 import { products } from '@xangarro/data-pg';
 
-import { inventarioInicialYaCapturado } from '@/server/actions/apertura';
+import { inventarioInicialYaCapturado } from '@/server/apertura';
 import { requireMember } from '@/server/auth';
 import { withTenant } from '@/server/db';
 import { hoy } from '@/server/clock';

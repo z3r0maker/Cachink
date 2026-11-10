@@ -15,6 +15,7 @@ export * from './unsent.js';
 export * from './push.js';
 export * from './pull.js';
 export * from './entitlement.js';
+export * from './anchored-clock.js';
 export * from './backoff.js';
 export * from './retention-rules.js';
 export * from './retention.js';

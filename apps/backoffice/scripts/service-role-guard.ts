@@ -8,16 +8,39 @@
  * reference in a comment or an example env file is how a real one starts.
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 export const FORBIDDEN_NAME = 'SUPABASE_SERVICE_ROLE_KEY';
+
+/**
+ * Every root that holds code or configuration, except the console's own
+ * (`apps/backoffice`), where the key belongs. It was `apps/web` alone until
+ * N-81: the `bug-report` edge function held the key under `supabase/`, a tree
+ * this never looked at. `docs/` and the decision log are left out on purpose:
+ * they name the variable to say where it must not be.
+ */
+export const GUARDED_ROOTS = [
+  'apps/web',
+  'apps/mobile',
+  'apps/landing',
+  'packages',
+  'supabase',
+  'scripts',
+  '.github',
+] as const;
 
 /** Build output and dependencies are not source; everything else is scanned. */
 const SKIP_DIRS: ReadonlySet<string> = new Set([
   'node_modules',
   '.next',
+  '.next-e2e',
   '.turbo',
+  '.expo',
+  'dist',
+  'coverage',
+  'ios',
+  'android',
   'test-results',
   'playwright-report',
 ]);
@@ -51,4 +74,15 @@ function walk(dir: string): readonly string[] {
 /** Scan a whole tree. Paths in the result are relative to `root`. */
 export function scanTree(root: string): readonly Finding[] {
   return walk(root).flatMap((file) => scanText(relative(root, file), readFileSync(file, 'utf8')));
+}
+
+/**
+ * Scan every guarded root of a repository. Paths are relative to `repo`. A
+ * root this checkout does not have is skipped: `guard-service-role.ts` checks
+ * that the portal, the one that must exist, does.
+ */
+export function scanRepo(repo: string): readonly Finding[] {
+  return GUARDED_ROOTS.filter((root) => existsSync(join(repo, root))).flatMap((root) =>
+    scanTree(join(repo, root)).map((f) => ({ ...f, file: join(root, f.file) })),
+  );
 }

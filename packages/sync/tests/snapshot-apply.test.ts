@@ -142,7 +142,13 @@ describe('snapshot bootstrap on the device (C-23)', () => {
 
     const fresh = makeFreshDb();
     const appConfig = new DrizzleAppConfigRepository(fresh);
-    const out = await pullAll({ db: fresh, appConfig, client, token: d.token });
+    const out = await pullAll({
+      db: fresh,
+      appConfig,
+      client,
+      token: d.token,
+      businessId: d.businessId,
+    });
     assert.equal(out.error, null);
     // ~360 recent movements + the catalogue + the baseline, 100 rows a page, then one delta pull.
     assert.ok(out.pages >= 5, `${out.pages} pages at 100 rows a page`);
@@ -271,7 +277,7 @@ describe('snapshot bootstrap on the device (C-23)', () => {
         };
       },
     } as unknown as ApiClient;
-    const out = await pullAll({ db, appConfig, client, token: 't' });
+    const out = await pullAll({ db, appConfig, client, token: 't', businessId: BIZ });
     assert.equal(out.error, null);
     assert.deepEqual(calls, ['stale-token', undefined]);
     assert.equal(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext), null);

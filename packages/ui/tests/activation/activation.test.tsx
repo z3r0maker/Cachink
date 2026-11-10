@@ -118,7 +118,13 @@ describe('persistActivation (real SQLite + mock server)', () => {
       res.data.bootstrap.snapshot?.next,
     );
     expect(res.data.bootstrap.snapshot?.next).toBeTruthy();
-    const out = await pullAll({ db, appConfig, client, token: res.data.deviceToken });
+    const out = await pullAll({
+      db,
+      appConfig,
+      client,
+      token: res.data.deviceToken,
+      businessId: res.data.businessId,
+    });
     expect(out.error).toBeNull();
     expect(await appConfig.get(SYNC_CONFIG_KEYS.bootstrapNext)).toBeNull();
     const products = await new DrizzleProductsRepository(db, 'DEV' as never).listForBusiness(

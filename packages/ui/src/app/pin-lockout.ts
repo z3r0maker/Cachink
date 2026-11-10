@@ -1,40 +1,32 @@
 /**
- * Wrong-PIN cooldown (A-05): after 5 failed PINs the device refuses PIN
- * attempts for 30 s. Device-wide, not per operator — otherwise tapping a
- * different avatar would reset the counter. Pure; persistence lives in
- * `use-quick-switch-auth`.
+ * The phone's NIP guard (A-05, audit F-08). The lockout itself, its ladder
+ * and its stored map live in `@xangarro/caja/nip`, shared with the web
+ * caja; this binds it to this device: the map in app_config, so a restart
+ * does not reset it, and the anchored clock, so setting the phone's date
+ * back does not shorten a lock.
+ *
+ * Every NIP check on the phone goes through
+ * `attemptNip(deviceNipGuard(…), subject, …)`, where the subject is the
+ * user whose NIP is checked: the sign-in and the lock screen
+ * (`use-quick-switch-auth`), a cancellation (`cancelar-con-nip`) and the
+ * dev reset. One count per person, whichever path it is tried on.
  */
 
-export const MAX_PIN_FAILURES = 5;
-export const PIN_COOLDOWN_MS = 30_000;
+import { fraseEsperaNip, nipGuardOver, type NipGuardDeps } from '@xangarro/caja/nip';
+import type { AppConfigRepository } from '@xangarro/data';
+import { anchoredClock } from '@xangarro/sync';
 
-export interface PinLockoutState {
-  readonly failures: number;
-  /** ISO time until which attempts are refused, or null. */
-  readonly lockedUntil: string | null;
+export function deviceNipGuard(
+  appConfig: AppConfigRepository,
+  deviceNow?: () => Date,
+): NipGuardDeps {
+  return nipGuardOver(appConfig, anchoredClock(appConfig, deviceNow));
 }
 
-export const NO_LOCKOUT: PinLockoutState = { failures: 0, lockedUntil: null };
-
-export function remainingLockMs(state: PinLockoutState, now: Date): number {
-  if (!state.lockedUntil) return 0;
-  return Math.max(0, new Date(state.lockedUntil).getTime() - now.getTime());
-}
-
-export function recordPinFailure(state: PinLockoutState, now: Date): PinLockoutState {
-  const failures = state.failures + 1;
-  if (failures < MAX_PIN_FAILURES) return { failures, lockedUntil: null };
-  return { failures: 0, lockedUntil: new Date(now.getTime() + PIN_COOLDOWN_MS).toISOString() };
-}
-
-export function parsePinLockout(raw: string | null): PinLockoutState {
-  if (!raw) return NO_LOCKOUT;
-  try {
-    const v = JSON.parse(raw) as Partial<PinLockoutState>;
-    const failures = typeof v.failures === 'number' && v.failures >= 0 ? v.failures : 0;
-    const lockedUntil = typeof v.lockedUntil === 'string' ? v.lockedUntil : null;
-    return { failures, lockedUntil };
-  } catch {
-    return NO_LOCKOUT;
-  }
+/**
+ * What to show for a NIP that did not go through: how long to wait while a
+ * lockout runs, the screen's own «wrong NIP» words otherwise.
+ */
+export function nipRefusal(attempt: { readonly lockedMs: number }, wrongPin: string): string {
+  return attempt.lockedMs > 0 ? fraseEsperaNip(attempt.lockedMs) : wrongPin;
 }

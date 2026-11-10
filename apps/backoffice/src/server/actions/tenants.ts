@@ -10,6 +10,7 @@ import { createPlanOverride } from '../tenants/overrides';
 import { tenantDeps } from '../tenants/wiring';
 import { NotPermitted } from '../staff';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /**
  * The tenant page's one mutation (N-06): record a plan override. It goes
@@ -33,7 +34,7 @@ const DONE: Record<PlanOverride['kind'], string> = {
 function failed(error: unknown): FormState {
   if (error instanceof TenantError) return { ok: false, message: MESSAGES[error.code] };
   if (error instanceof NotPermitted) return { ok: false, message: error.message };
-  console.error('aplicarAjuste failed', error);
+  reportError(error, 'aplicarAjuste failed');
   return { ok: false, message: 'No se pudo guardar. Intenta de nuevo.' };
 }
 

@@ -8,6 +8,12 @@ export function securityHeaders(o: {
   readonly permissions: string;
   readonly hstsPreload?: boolean;
 }): SecurityHeader[];
+/** The policy for a response whose bytes somebody uploaded (audit F-01). */
+export const UPLOADED_BYTES_CSP: string;
+export function uploadedBytesHeaders(): {
+  readonly 'Content-Security-Policy': string;
+  readonly 'X-Content-Type-Options': 'nosniff';
+};
 export function buildCsp(o: {
   readonly nonce: string;
   readonly isDev: boolean;

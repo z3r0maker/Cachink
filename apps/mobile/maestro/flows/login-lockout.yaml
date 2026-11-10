@@ -1,6 +1,11 @@
 # Operator sign-in guard (A-05): no PIN recovery on the device, and five
 # wrong PINs lock PIN entry for 30 s.
 #
+# The lockout is the operator's own (audit F-08): it is Toni's NIP that locks,
+# Ana can still sign in, and only Toni's right NIP clears it. It escalates: a
+# second one in a row lasts 1 min, then 5 min, 15 min and 1 h. This flow trips
+# only the first, and the suite re-seeds the device before the next flow.
+#
 # Precondition: device activated against the mock (activation.yaml); starts
 # on the operator list or signed in (it locks the screen first).
 # x-entrypoint: activated

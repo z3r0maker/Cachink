@@ -21,6 +21,7 @@ import {
   type Entitlement,
   type PlanId,
 } from '@xangarro/domain';
+import { activateTestDevice } from '../activated-device';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useFeatureFlag, useFeatureFlags } from '../../src/hooks/use-feature-flags';
 
@@ -40,6 +41,7 @@ function wrapper(overrides: Record<string, unknown>) {
 async function setup(opts: { plan?: PlanId; tenant?: Partial<typeof DEFAULT_FEATURE_FLAGS> }) {
   const appConfig = new InMemoryAppConfigRepository();
   if (opts.plan) await seedTestEntitlement(appConfig, opts.plan);
+  await activateTestDevice(appConfig);
   return setupWith(appConfig, opts.tenant ?? {});
 }
 
@@ -49,6 +51,7 @@ async function seedSignedPayload(appConfig: InMemoryAppConfigRepository, payload
   await appConfig.set('entitlement', JSON.stringify(signTestPayload(payload)));
   await appConfig.set('lastServerTime', now);
   await appConfig.set('lastPullAt', now);
+  await activateTestDevice(appConfig);
 }
 
 async function setupWith(

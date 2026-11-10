@@ -125,6 +125,14 @@ function useCapas(abierta: Abierta | undefined) {
   return { sel, capa, setCapa, aviso, setAviso, abrir, cerrar: () => setCapa(null) };
 }
 
+/**
+ * The Worker hands an error over as text, its class names first («Error:
+ * TypeError: PIN incorrecto»): the dialog shows the sentence alone.
+ */
+function sinClase(e: unknown): string {
+  return (e instanceof Error ? e.message : String(e)).replace(/^(?:\w*Error: )+/, '');
+}
+
 /** Resolves to the error to show in the dialog, or null once cancelled. */
 function useCancelar(p: {
   readonly fila: VentaTurno | undefined;
@@ -142,7 +150,7 @@ function useCancelar(p: {
       try {
         capas.setAviso(await cancelarEnVivo(p.cred, fila, nip, completo));
       } catch (e: unknown) {
-        return `No se pudo cancelar: ${String(e)}`;
+        return `No se pudo cancelar: ${sinClase(e)}`;
       }
       await p.recargar();
       if (navigator.onLine) void desencolar();

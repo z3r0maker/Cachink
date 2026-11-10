@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { sql } from 'drizzle-orm';
-import { createDb, withBusiness, type Db } from '@xangarro/data-pg';
+import { createDb, ensureRlsBoundRole, withBusiness, type Db } from '@xangarro/data-pg';
 
 import { currentDeadline } from './db-deadline';
 
@@ -15,6 +15,9 @@ import { currentDeadline } from './db-deadline';
  * tenant claim for its duration. Outside that wrapper the RLS policies see no
  * claim and return nothing — which is the failure mode we want: an empty
  * screen is recoverable, another tenant's data is not.
+ *
+ * That holds only for a role RLS applies to, so every entry that hands out a
+ * tenant transaction goes through {@link bound} first (audit F-02).
  */
 let cached: Db | undefined;
 
@@ -87,17 +90,44 @@ function exportDb(): Db {
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 /**
+ * The pool, once Postgres has said its role is bound by RLS (audit F-02).
+ *
+ * A superuser or BYPASSRLS `DATABASE_URL` would read every tenant without one
+ * error, so the first tenant transaction of each pool asks
+ * (`ensureRlsBoundRole`) and a refusal opens nothing — on this pool, for good.
+ * Every later call awaits a settled promise: no statement, no round trip.
+ */
+async function bound(pool: Db): Promise<Db> {
+  await ensureRlsBoundRole(pool);
+  return pool;
+}
+
+/**
+ * The shared pool, role-checked, for a transaction that only learns its tenant
+ * inside and sets the claim itself — a phone's activation claims its code
+ * first. Anything that already knows its tenant uses `withTenant`.
+ */
+export const rlsBoundDb = (): Promise<Db> => bound(db());
+
+/**
  * A tenant transaction. Inside a device route it carries a deadline
  * (`db-deadline.ts`): past it, the caller gets a `ServiceBusyError` and the
- * transaction rolls back rather than commit behind a 503.
+ * transaction rolls back rather than commit behind a 503. The clock starts
+ * when the transaction is asked for, so a pool's one role check counts
+ * against it.
  */
-export function withTenant<T>(businessId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
-  return withBusiness(db(), businessId, fn, currentDeadline());
+export async function withTenant<T>(businessId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  const deadline = currentDeadline();
+  return withBusiness(await bound(db()), businessId, fn, deadline);
 }
 
 /** `withTenant` on the exports' pool — one short transaction per batch. */
-export function withExportTenant<T>(businessId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
-  return withBusiness(exportDb(), businessId, fn, currentDeadline());
+export async function withExportTenant<T>(
+  businessId: string,
+  fn: (tx: Tx) => Promise<T>,
+): Promise<T> {
+  const deadline = currentDeadline();
+  return withBusiness(await bound(exportDb()), businessId, fn, deadline);
 }
 
 /**
@@ -116,7 +146,8 @@ export function withExportTenant<T>(businessId: string, fn: (tx: Tx) => Promise<
 export async function withSession<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   const { requireSession } = await import('./auth');
   const claims = await requireSession();
-  return db().transaction(async (tx) => {
+  const pool = await bound(db());
+  return pool.transaction(async (tx) => {
     await tx.execute(sql`SELECT set_config('request.jwt.claims', ${JSON.stringify(claims)}, true)`);
     return fn(tx as Tx);
   });

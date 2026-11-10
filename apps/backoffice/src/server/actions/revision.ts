@@ -2,6 +2,7 @@
 
 import { auditedMutation } from '../audited';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /**
  * «Marcar como revisado» — a deliberately trivial mutation that proves the
@@ -18,7 +19,7 @@ export async function marcarRevisado(_prev: FormState, form: FormData): Promise<
     );
     return { ok: true, message: 'Marcado como revisado. Quedó registrado en la bitácora.' };
   } catch (error) {
-    console.error('marcarRevisado failed', error);
+    reportError(error, 'marcarRevisado failed');
     return { ok: false, message: 'No se pudo registrar. Intenta de nuevo.' };
   }
 }
