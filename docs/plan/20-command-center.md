@@ -527,7 +527,7 @@ with property tests:
     depositar» until then; the data needs N-63's `billing_events`.
   - a partial refund (credit notes below the payment) posts nothing yet; a full one reverses.
     **Done 2026-11-09, board CD-06i (round 13, approved the same day):**
-  - `xangarro.ingresos_del_periodo()` (data-pg 0054, `xangarro_admin` only): a month of
+  - `xangarro.ingresos_del_periodo()` (data-pg 0055, `xangarro_admin` only): a month of
     `cfdi_payments` with receptor, UUIDs, the global's folio and the credit notes' total.
   - `RevenueSource` and `importarCobros`: owner decision, one «Cobro» per payment keyed by its
     Stripe id (source `billing`), subtotal and IVA split, waiting in «Stripe por depositar»;

@@ -10,7 +10,7 @@ import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
 /**
- * 0054: the backoffice reads a month of Xangarro's own subscription payments
+ * 0055: the backoffice reads a month of Xangarro's own subscription payments
  * and their CFDIs (E-10, board CD-06i) through
  * `xangarro.ingresos_del_periodo()`: who paid, what was issued, the global
  * that took a payment without fiscal data and what a refund gave back. Only

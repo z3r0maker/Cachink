@@ -1,6 +1,6 @@
 /**
  * A month of Xangarro's own subscription payments and their CFDIs, for the
- * backoffice's «Empresa» (E-10, board CD-06i; 0054_ingresos_del_periodo.sql).
+ * backoffice's «Empresa» (E-10, board CD-06i; 0055_ingresos_del_periodo.sql).
  * Runs on the `xangarro_admin` connection, which has no grant on
  * `cfdi_payments` itself: the function is its only way in.
  */
