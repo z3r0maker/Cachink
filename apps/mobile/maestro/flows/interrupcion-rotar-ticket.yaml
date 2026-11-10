@@ -1,0 +1,34 @@
+# Rotation mid-ticket (J4-31): the ticket is a module store
+# (Ventas/ticket-en-curso.ts), so turning the phone to landscape and back
+# re-lays the screen without losing a line, and the ticket still opens.
+#
+# Precondition: activated device against the mock on MOCK_API; opens a
+# turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/ticket-dos-aguas.yaml
+
+- setOrientation: LANDSCAPE_LEFT
+- waitForAnimationToEnd
+- assertVisible: '\$82\.50'
+- setOrientation: PORTRAIT
+- waitForAnimationToEnd
+- assertVisible: '2 piezas ·'
+- assertVisible: '\$82\.50'
+
+# The same two lines open in «Revisa el ticket».
+- tapOn:
+    id: 'cart-checkout-btn'
+- extendedWaitUntil:
+    visible:
+      id: 'ticket-sheet'
+    timeout: 10000
+- assertVisible: '.*Agua de horchata.*'
+- assertVisible: '.*Agua de jamaica.*'

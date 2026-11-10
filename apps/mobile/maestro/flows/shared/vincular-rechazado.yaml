@@ -1,0 +1,23 @@
+# Types one code on Vincular's typed path and waits for its own refusal.
+#
+# Env: CODE (8 characters) and SENTENCE (a regex fragment of the refusal,
+# es-mx.ts `activation.errors`). Waiting on the sentence, not on
+# `activation-error`, keeps a second call from passing on the first call's
+# error. Precondition: the typed path is open and the email is filled.
+appId: mx.xangarro.mobile
+---
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
+- tapOn:
+    id: 'activation-code'
+    point: '95%,50%'
+- eraseText: 12
+- inputText: ${CODE}
+- hideKeyboard
+- tapOn:
+    id: 'activation-submit'
+- extendedWaitUntil:
+    visible:
+      text: '.*${SENTENCE}.*'
+    timeout: 15000
+- assertVisible:
+    id: 'activation-screen'

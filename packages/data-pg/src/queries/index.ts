@@ -12,6 +12,7 @@ export * from './metering.js';
 export * from './cfdi.js';
 export * from './fiscal.js';
 export * from './facturas.js';
+export * from './ingresos.js';
 export * from './avisos.js';
 export * from './historial.js';
 export * from './serie.js';

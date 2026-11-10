@@ -7,7 +7,9 @@ import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { typ
 import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
 import { billingDatabaseUrl, superDatabaseUrl } from './e2e/db-url';
+import { DIAS_LIMITE } from './e2e/dias-limite';
 import { SERIAL_TAG } from './e2e/shared-tenant';
+import type { OpcionesWebkit } from './e2e/webkit-profile';
 import { INSPECT_PORT, SERVER_V8_DIR, coverageEnabled } from './scripts/coverage-gate/options';
 
 /** The contract's published test key — never a production fallback. */
@@ -47,14 +49,31 @@ function databaseUrl(): string {
 }
 
 /** Files that belong to a project of their own, never to a viewport. */
-const OTHER_PROJECTS = /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/;
+const OTHER_PROJECTS =
+  /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts|ancho-telefono\.spec\.ts|fechas-limite\.spec\.ts/;
 
-/** The viewport projects: the whole parallel phase. */
-const VIEWPORTS = ['desktop', 'laptop', 'tablet'] as const;
+/**
+ * The route sweep the phone and WebKit projects run (J1-21, J1-22): every
+ * route renders seeded data, and at 390 px nothing is clipped.
+ */
+const ROUTE_SWEEP = /data\.spec\.ts|ancho-telefono\.spec\.ts/;
+
+/**
+ * The projects that read the seeded tenant while its write lock is on: the
+ * whole parallel phase. `phone` and `webkit` run only the route sweep.
+ */
+const VIEWPORTS = ['desktop', 'laptop', 'tablet', 'phone', 'webkit'] as const;
 
 /** The desktop browser the non-viewport projects use. */
 const DESKTOP = {
   ...devices['Desktop Chrome'],
+  viewport: { width: 1440, height: 900 },
+  storageState: OWNER_STORAGE,
+} as const;
+
+/** Safari at the desktop's size (J1-22, J5-24). */
+const SAFARI = {
+  ...devices['Desktop Safari'],
   viewport: { width: 1440, height: 900 },
   storageState: OWNER_STORAGE,
 } as const;
@@ -86,7 +105,44 @@ function serverCommand(): string {
   return process.env.CI ? start : `pnpm build && ${start}`;
 }
 
-export default defineConfig({
+/**
+ * What every server is started with. Redundant with env inheritance, and kept
+ * anyway: it is the only place a reader learns the server is database-backed.
+ * `today` is the one thing the edge-day servers change (e2e/dias-limite.ts).
+ */
+function serverEnv(today: string): Record<string, string> {
+  return {
+    // Locally, a build of its own (see next.config.mjs): other sessions'
+    // builds in this directory cannot swap it out mid-run. CI builds `.next`
+    // in its own step and is alone on the runner.
+    ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
+    DATABASE_URL: databaseUrl(),
+    DATABASE_SUPER_URL: superDatabaseUrl(),
+    // The business's today (server/clock.ts).
+    PORTAL_TODAY: today,
+    // The local build keeps the dev galleries (/inventario) for visual.spec;
+    // any other production build answers 404 there.
+    DEV_PAGES: '1',
+    // /activate signs a device token and an entitlement. The entitlement key
+    // is the contract's published TEST key, passed explicitly: the portal has
+    // no default for it on purpose (server/device/credentials.ts).
+    DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
+    ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
+    BILLING_DATABASE_URL: billingDatabaseUrl(),
+    // One long-lived server for every worker, not a serverless instance:
+    // it keeps the pool it had before `createDb` defaulted to 2 (DB2-CONN-01).
+    DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX ?? '5',
+    // Every viewport project exports the seeded tenant several times inside
+    // ten minutes; production's five-per-ten-minutes would 429 the suite
+    // (DB3-EXP-01). The limit itself is unit-tested (export-route.test.ts).
+    EXPORTS_PER_TENANT: process.env.EXPORTS_PER_TENANT ?? '1000',
+  };
+}
+
+/** The seed's day (seed-data.ts `TODAY`): its May rows are "this month". */
+const SEED_TODAY = process.env.PORTAL_TODAY ?? '2026-05-12';
+
+export default defineConfig<OpcionesWebkit>({
   testDir: './e2e',
   fullyParallel: true,
   reporter: process.env.CI
@@ -95,40 +151,25 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   globalSetup: './e2e/global-setup.ts',
   globalTeardown: './e2e/global-teardown.ts',
-  webServer: {
-    command: serverCommand(),
-    url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
-    timeout: process.env.CI ? 60_000 : 240_000,
-    // Redundant with env inheritance, and kept anyway: it is the only place a
-    // reader learns this server is database-backed.
-    env: {
-      // Locally, a build of its own (see next.config.mjs): other sessions'
-      // builds in this directory cannot swap it out mid-run. CI builds `.next`
-      // in its own step and is alone on the runner.
-      ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
-      DATABASE_URL: databaseUrl(),
-      DATABASE_SUPER_URL: superDatabaseUrl(),
-      // The seed's day (seed-data.ts `TODAY`): its May rows are "this month".
-      PORTAL_TODAY: process.env.PORTAL_TODAY ?? '2026-05-12',
-      // The local build keeps the dev galleries (/inventario) for visual.spec;
-      // any other production build answers 404 there.
-      DEV_PAGES: '1',
-      // /activate signs a device token and an entitlement. The entitlement key
-      // is the contract's published TEST key, passed explicitly: the portal has
-      // no default for it on purpose (server/device/credentials.ts).
-      DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
-      ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
-      BILLING_DATABASE_URL: billingDatabaseUrl(),
-      // One long-lived server for every worker, not a serverless instance:
-      // it keeps the pool it had before `createDb` defaulted to 2 (DB2-CONN-01).
-      DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX ?? '5',
-      // Every viewport project exports the seeded tenant several times inside
-      // ten minutes; production's five-per-ten-minutes would 429 the suite
-      // (DB3-EXP-01). The limit itself is unit-tested (export-route.test.ts).
-      EXPORTS_PER_TENANT: process.env.EXPORTS_PER_TENANT ?? '1000',
+  webServer: [
+    {
+      command: serverCommand(),
+      url: BASE_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: process.env.CI ? 60_000 : 240_000,
+      env: serverEnv(SEED_TODAY),
     },
-  },
+    // The edge days (J7-22): the same build, another port, another today.
+    // Started after the first, which is the one that builds; `next start` alone
+    // is a couple of seconds and a few hundred MB.
+    ...DIAS_LIMITE.map((dia) => ({
+      command: `pnpm exec next start -p ${dia.port}`,
+      url: `http://localhost:${dia.port}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+      env: serverEnv(dia.hoy),
+    })),
+  ],
   use: {
     baseURL: BASE_URL,
     // No retries locally, so `retain-on-failure`: the first failure is the one
@@ -171,6 +212,40 @@ export default defineConfig({
       grepInvert: new RegExp(SERIAL_TAG),
       use: { ...DESKTOP, viewport: { width: 768, height: 1024 } },
     },
+    // A phone (J1-21): 390 × 844, touch, Chromium — the width, not the engine,
+    // is what this project is about; WebKit has its own below.
+    {
+      name: 'phone',
+      dependencies: ['setup'],
+      testMatch: ROUTE_SWEEP,
+      grepInvert: new RegExp(SERIAL_TAG),
+      use: {
+        ...DESKTOP,
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 3,
+      },
+    },
+    // The portal in Safari (J1-22): the route sweep, read-only like the rest.
+    {
+      name: 'webkit',
+      dependencies: ['setup'],
+      testMatch: /data\.spec\.ts/,
+      grepInvert: new RegExp(SERIAL_TAG),
+      use: { ...SAFARI },
+    },
+    // The edge days (J7-22): each its own server (`webServer` above) and its
+    // own minted tenant, so they run beside everything and wait for nothing.
+    ...DIAS_LIMITE.map((dia) => ({
+      name: dia.project,
+      testMatch: /fechas-limite\.spec\.ts/,
+      use: {
+        ...DESKTOP,
+        storageState: { cookies: [], origins: [] },
+        baseURL: `http://localhost:${dia.port}`,
+      },
+    })),
     // One step, between the two phases: it takes the write lock off the seeded
     // tenant for everything that follows.
     {
@@ -228,6 +303,16 @@ export default defineConfig({
       // device slots, and revokes the previous file's.
       workers: 1,
       use: { ...devices['Desktop Chrome'], storageState: OWNER_STORAGE },
+    },
+    // The register in Safari (J5-24): the real door and the caja, OPFS and
+    // all. Last, after `sync`, for the reason `devices` is after `operador`:
+    // every door here revokes Taquería's devices and takes a slot again.
+    {
+      name: 'webkit-operador',
+      dependencies: ['sync'],
+      testMatch: /acceso\.sync\.spec\.ts|operador-caja\.spec\.ts/,
+      workers: 1,
+      use: { ...SAFARI, vaciarOpfs: true },
     },
   ],
 });

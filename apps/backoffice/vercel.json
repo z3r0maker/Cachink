@@ -5,6 +5,7 @@
   "git": { "deploymentEnabled": false },
   "crons": [
     { "path": "/api/cron/digest", "schedule": "0 14 * * *" },
-    { "path": "/api/cron/agenda", "schedule": "0 14 * * *" }
+    { "path": "/api/cron/agenda", "schedule": "0 14 * * *" },
+    { "path": "/api/cron/empresa-cobros", "schedule": "0 12 * * *" }
   ]
 }
