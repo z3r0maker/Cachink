@@ -756,8 +756,9 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   (F-08), the fail-closed bug-report limits (F-10), the audit gate, release-age delay and Next.js
   16.4.5 (F-13), query text out of logs (F-14), and the low items (F-15). **Open, each with its
   task:** OTA signing (F-07, N-82), owner 2FA and email verification (F-09, N-83), backups (F-11,
-  X-10), the bug-report move (N-81), push constraints after observation (N-84). **Still to do:** the
-  same hosted re-run as above, and an outside penetration test.
+  X-10), push constraints after observation (N-84). The bug-report move (N-81) is done on
+  `feat/n81-bug-report-api` (ADR-141). **Still to do:** the same hosted re-run as above, and an
+  outside penetration test.
 
 ### N-27 Auditoría de base de datos `[LAUNCH]` [deuda] [alta] [bloq]
 
