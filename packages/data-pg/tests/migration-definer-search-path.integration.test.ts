@@ -7,14 +7,14 @@ import postgres from 'postgres';
 import { integrationSuite } from './support/db';
 
 /**
- * `0055_definer_search_path.sql` (audit F-15b): a SECURITY DEFINER function
+ * `0056_definer_search_path.sql` (audit F-15b): a SECURITY DEFINER function
  * runs with its owner's rights, so what its unqualified names resolve to is
  * part of its privilege. Six of them pinned `search_path = public, pg_catalog`
  * — `public` first, where anything able to create an object could shadow a
  * built-in. The file reorders them; the posture test below holds every definer
  * the repository owns, so a later `CREATE OR REPLACE` cannot bring it back.
  */
-const MIGRATION = join(import.meta.dirname, '../drizzle/0055_definer_search_path.sql');
+const MIGRATION = join(import.meta.dirname, '../drizzle/0056_definer_search_path.sql');
 const { describe } = integrationSuite();
 
 /** The six functions the file alters, by exact signature, as `regprocedure` spells them. */
