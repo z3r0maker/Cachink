@@ -12,6 +12,7 @@ export const API_PATHS = {
   syncPush: `${API_PREFIX}/sync/push`,
   syncPull: `${API_PREFIX}/sync/pull`,
   entitlement: `${API_PREFIX}/entitlement`,
+  bugReport: `${API_PREFIX}/support/bug-report`,
 } as const;
 
 /** Per-device token bucket the server enforces (§1). */

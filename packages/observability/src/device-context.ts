@@ -1,5 +1,5 @@
 /**
- * DeviceContext — device & app metadata attached to outbox payloads.
+ * DeviceContext — device & app metadata a bug report says it comes from.
  *
  * Injected via bridges: mobile supplies expo-device/expo-application
  * values; desktop supplies navigator.userAgent-derived values.

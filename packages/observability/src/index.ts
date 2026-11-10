@@ -3,7 +3,7 @@
  *
  * This package provides:
  *   - `AuditEvent` / `ErrorLogEntry` types for structured logging
- *   - `LogStore` interface with `SqliteLogStore` (local) and `DualLogStore` impls
+ *   - `LogStore` interface with its local `SqliteLogStore` implementation
  *   - `AuditedUseCase` decorator for instrumenting use cases
  *   - `createLogStore` factory for environment-aware initialization
  *   - `scrubRecord` / `scrubLogMetadata` for PII removal before export
@@ -17,7 +17,6 @@ export type { AuditOperation, AuditEvent } from './audit-event.js';
 export type { ErrorLogEntry, ErrorSource } from './error-log.js';
 export type { LogStats } from './log-stats.js';
 export type { LogStore, LogQueryOptions, TimelineEntry, LogSnapshot } from './log-store.js';
-export type { RemoteLogStore, BugReport } from './remote-log-store.js';
 
 // Implementations
 export {
@@ -25,8 +24,6 @@ export {
   type SqliteDatabase,
   type SqliteLogStoreConfig,
 } from './sqlite-log-store.js';
-export { DualLogStore } from './dual-log-store.js';
-export { HttpRemoteLogStore, type HttpRemoteLogStoreConfig } from './http-remote-log-store.js';
 
 // Decorator
 export {
@@ -55,6 +52,3 @@ export { verifyAuditChain, type AuditChainResult } from './verify-audit-chain.js
 
 // Device context
 export type { DeviceContext } from './device-context.js';
-
-// Outbox flusher
-export { OutboxFlusher, type OutboxFlusherConfig } from './outbox-flusher.js';

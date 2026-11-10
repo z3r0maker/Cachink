@@ -179,6 +179,7 @@ Links to discussion, docs, prior art.
 | [138](#adr-138) | 2026-11-09 | Supabase's Data API gets nothing of ours: the API roles lose every grant, and device tokens carry Xangarro's own issuer and audience | Accepted |
 | [139](#adr-139) | 2026-11-09 | Novedades are opt-in at signup, and every ARCO request gets its acuse by email | Accepted |
 | [140](#adr-140) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
+| [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10165,3 +10166,66 @@ switch is a second layer, never the only one.
   and a restore drill (F-11, X-10), and who may set a NIP (SEC-AUTHZ-01, ADR-072 against the code).
 - Residual, accepted: setting a phone's clock forward ends a NIP lock early, and the web caja's NIP
   hashes are readable in the browser's developer tools (ADR-072).
+
+---
+
+## ADR-141
+
+**Title:** The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired
+
+**Date:** 2026-11-09
+
+**Status:** Accepted — N-81, C-25; closes audit F-10 and completes ADR-140 §9; amends ADR-063's «the `bug-report` function» as a source of inbox items
+
+**Context**
+
+The Supabase edge function `bug-report` held the service-role key outside the console, let anyone with
+the public anon key post, and believed the device and business ids in the body (audit F-10). ADR-140
+made its limits fail closed, which left it refusing every report: its tables were never migrated and
+the service role holds no grant since ADR-138. Reading the phone for the move showed two more things.
+**The bug-report sheet was never given a sender**, so «Reportar un problema» has only ever shared a
+file; the «enviar» state existed in code and in no build. And the function's one live caller was an
+automatic outbox that shipped error batches to tables that do not exist, for which the app carried the
+Supabase anon key in every build.
+
+**Decision**
+
+1. **`POST /api/v1/support/bug-report`** (contract §9, C-25). A device route like the others: the
+   report is filed in the staff inbox as `kind = 'bug'` under the device and business the **token**
+   names, so an item finally carries its business. The body has no field for who is calling. Limits are
+   the Postgres throttle's, 20 a day per device and 60 per business, taken after validation and before
+   filing; a limit that cannot be checked is an error. The description is kept whole and the snapshot
+   is trimmed to the 10,000 characters an inbox item holds (`SUPPORT_ITEM_BODY_MAX`); stack traces are
+   never filed. Filing is idempotent by `(bug-report, deviceId:submittedAt)`.
+2. **The phone sends it with its own token.** `ApiClient.bugReport`, through `useBugReportSender`: a
+   linked phone with reports turned on sends, and sharing the file stays as the fallback and as the
+   only door without consent or without a link. The sheet's «enviar» state is live for the first time.
+3. **The error outbox is retired, not ported.** Nothing read what it shipped and crash telemetry is
+   Sentry's, behind the same consent. `OutboxFlusher`, `HttpRemoteLogStore`, `DualLogStore` and
+   `RemoteLogStore` are deleted; the device's log is local. The `shipped_at` column stays, unused.
+4. **The function is deleted**, with its Deno job in CI, and so are `EXPO_PUBLIC_BUG_INGEST_URL`,
+   `EXPO_PUBLIC_CLOUD_API_URL` and `EXPO_PUBLIC_CLOUD_ANON_KEY` in `eas.json`. The app holds no
+   Supabase URL or key at all.
+5. **The service-role guard covers every code root** but the console's (`apps/web`, `apps/mobile`,
+   `apps/landing`, `packages`, `supabase`, `scripts`, `.github`). It had scanned `apps/web` alone, and
+   the function sat outside it.
+
+**Alternatives considered**
+
+- *Verify the device token inside the function.* Rejected: it keeps a second runtime, a second copy of
+  the token secret and the service role, to do what a portal route does with none of them.
+- *Port the error batches too, into a table or a log line.* Rejected: no screen reads them, and a
+  second telemetry path beside Sentry is one more place for personal data to leave the phone.
+- *Leave the sheet share-only and just delete the function.* Rejected: the report would never reach
+  staff unless the owner forwards a file by hand, which is the friction the inbox exists to remove.
+
+**Consequences**
+
+- The owner un-deploys `bug-report` from the hosted project if it was ever deployed, and can delete the
+  `*_BUG_INGEST_URL` and `*_CLOUD_*` secrets from EAS.
+- Production needs `ADMIN_INGEST_URL` and `ADMIN_INGEST_SECRET` on the portal for a report to reach
+  the console; without them it is one `support_item_not_sent` log line, as for every other source.
+- A build made before this change keeps trying to flush error batches to the old URL until it is
+  updated; with the function gone that fails quietly and loses nothing anyone read.
+- `apps/mobile/maestro/flows/bug-report-sheet.yaml` accepts either primary action, since a linked
+  phone with reports on now shows «enviar».

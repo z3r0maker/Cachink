@@ -5,7 +5,6 @@
 import { describe, it, expect } from 'vitest';
 import { createLogStore } from '../src/create-log-store.js';
 import { SqliteLogStore } from '../src/sqlite-log-store.js';
-import { DualLogStore } from '../src/dual-log-store.js';
 import type { SqliteDatabase } from '../src/sqlite-log-store-sql.js';
 
 function createMockDb(): SqliteDatabase {
@@ -23,25 +22,20 @@ function createMockDb(): SqliteDatabase {
 }
 
 describe('createLogStore', () => {
-  it('returns a SqliteLogStore when no remote config is provided', async () => {
+  it('returns the local SqliteLogStore', async () => {
     const db = createMockDb();
     const store = await createLogStore({ db, deviceId: 'dev-001' });
 
     expect(store).toBeInstanceOf(SqliteLogStore);
   });
 
-  it('returns a DualLogStore when remote config is provided', async () => {
+  it('stays local whatever else a caller passes: there is no remote log to write to (N-81)', async () => {
     const db = createMockDb();
-    const store = await createLogStore({
-      db,
-      deviceId: 'dev-001',
-      remote: {
-        baseUrl: 'https://api.test.com',
-        apiKey: 'test-key',
-      },
-    });
+    // What a caller built before N-81 would still send.
+    const older: object = { remote: { baseUrl: 'https://api.test.com', apiKey: 'test-key' } };
+    const store = await createLogStore({ db, deviceId: 'dev-001', ...older });
 
-    expect(store).toBeInstanceOf(DualLogStore);
+    expect(store).toBeInstanceOf(SqliteLogStore);
   });
 
   it('uses 30-day retention in dev mode', async () => {

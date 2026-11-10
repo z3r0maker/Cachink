@@ -109,7 +109,7 @@ Every tenant query runs inside `withTenant`. **RLS is the enforcement, not appli
 
 ```bash
 pnpm test              # unit + integration (turbo, all workspaces)
-pnpm test:scripts      # repo tooling under scripts/ + supabase/functions
+pnpm test:scripts      # repo tooling under scripts/
 pnpm lint              # ESLint, incl. the layer + budget rules
 pnpm typecheck         # strict TS everywhere
 pnpm format:check      # Prettier

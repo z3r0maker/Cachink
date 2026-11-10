@@ -32,8 +32,20 @@ tags:
     timeout: 5000
 - assertVisible:
     id: 'bug-report-description-input'
+# The primary action depends on the device, not on this flow (N-81): a linked
+# phone with reports turned on sends through the device API («enviar») and
+# keeps sharing as the fallback row; otherwise sharing is the only door. One of
+# the two must be there (ids are regular expressions): a sheet with no way out
+# is the failure.
 - assertVisible:
-    id: 'bug-report-share-btn'
+    id: 'bug-report-(submit|share)-btn'
+- runFlow:
+    when:
+      visible:
+        id: 'bug-report-submit-btn'
+    commands:
+      - assertVisible:
+          id: 'bug-report-share-fallback-btn'
 - tapOn:
     text: '✕'
 - extendedWaitUntil:

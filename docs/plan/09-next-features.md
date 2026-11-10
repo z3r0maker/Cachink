@@ -756,8 +756,9 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
   (F-08), the fail-closed bug-report limits (F-10), the audit gate, release-age delay and Next.js
   16.4.5 (F-13), query text out of logs (F-14), and the low items (F-15). **Open, each with its
   task:** OTA signing (F-07, N-82), owner 2FA and email verification (F-09, N-83), backups (F-11,
-  X-10), the bug-report move (N-81), push constraints after observation (N-84). **Still to do:** the
-  same hosted re-run as above, and an outside penetration test.
+  X-10), push constraints after observation (N-84). The bug-report move (N-81) is done on
+  `feat/n81-bug-report-api` (ADR-141). **Still to do:** the same hosted re-run as above, and an
+  outside penetration test.
 
 ### N-27 Auditoría de base de datos `[LAUNCH]` [deuda] [alta] [bloq]
 
@@ -1420,7 +1421,28 @@ micro-POS than location does.
 
 ### N-81 El reporte del teléfono entra por `/api/v1` y la función `bug-report` se retira [media]
 
-- [ ] Status · **Surfaced by:** N-26 (F-10, ADR-140 §9) · **Trigger:** ya; es un cambio de contrato (`C-`), entra a `main` primero
+- [x] Status · **Surfaced by:** N-26 (F-10, ADR-140 §9) · **Trigger:** ya; es un cambio de contrato (`C-`), entra a `main` primero
+  - Done: 2026-11-09 · branch `feat/n81-bug-report-api`, stacked on `fix/security-audit-2026-11-09`
+    (ADR-141, C-25). The route is `apps/web/src/app/api/v1/support/bug-report/route.ts` over
+    `server/support/bug-report.ts`: device and business from the token, 20 reports a day per device
+    and 60 per business through the Postgres throttle (taken after validation, failing closed), the
+    description kept whole and the snapshot trimmed to an inbox item's 10,000 characters, stack
+    traces never filed. The phone sends through `ApiClient.bugReport` and `useBugReportSender`; the
+    sheet's «enviar» state, built long ago, is live for the first time (it was never given a
+    sender, so reports had only ever been shared as a file). **Wider than planned:** the function's
+    one live caller was the automatic error outbox, which shipped to tables that never existed, so
+    it is retired rather than ported (`OutboxFlusher`, `HttpRemoteLogStore`, `DualLogStore`), and
+    with it `EXPO_PUBLIC_BUG_INGEST_URL` and the `EXPO_PUBLIC_CLOUD_*` pair: the app carries no
+    Supabase key. The function, its Deno CI job and its test/lint wiring are deleted, and the
+    service-role guard now scans every code root outside `apps/backoffice`. Verified: contracts,
+    sync, ui, mobile, observability, application, domain and web suites; `test:conformance`
+    against the built portal on a seeded Postgres (5 suites, the two accepted reports logged as
+    `bug` items under the token's business). Maestro, 2026-11-10, iPhone 17 Pro simulator (iOS 26.5)
+    against the contracts mock: `bug-report-sheet.yaml` (reports off: sharing is the only action)
+    and the new `bug-report-enviar.yaml` (reports on: the report is sent with the device token and
+    the sheet closes) both pass. **Not run:** the app on a physical device. **Owner:** un-deploy the
+    function if it was deployed; delete the `*_BUG_INGEST_URL` and `*_CLOUD_*` EAS secrets; the
+    portal needs `ADMIN_INGEST_URL` and `ADMIN_INGEST_SECRET` in production.
 - **What:** `POST /api/v1/support/bug-report` under `deviceRoute`, ids taken from the device token;
   limits through `throttleTake` per device and per business; the report is filed with
   `supportInboxFromEnv().file(...)` to the console's `handleIngest`; the schema lives in
