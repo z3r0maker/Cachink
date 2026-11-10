@@ -153,20 +153,26 @@ export interface LayoutProps {
 
 const DEFAULT_REASON = 'Recibes este correo porque tienes una cuenta de Xangarro.';
 
+/** Every email, legal footer or not, links the aviso and the términos. */
+function Enlaces() {
+  return (
+    <Small>
+      <Link href={AVISO_PUBLICO_URL} style={s.link}>
+        Aviso de privacidad
+      </Link>
+      {' · '}
+      <Link href={TERMINOS_PUBLICO_URL} style={s.link}>
+        Términos y condiciones
+      </Link>
+    </Small>
+  );
+}
+
 function PieLegal() {
   return (
     <>
       <Small>¿Dudas o quejas? Responde a este correo o escribe a {PROVEEDOR.correo}.</Small>
       <Small>{PROVEEDOR_LINEA}</Small>
-      <Small>
-        <Link href={AVISO_PUBLICO_URL} style={s.link}>
-          Aviso de privacidad
-        </Link>
-        {' · '}
-        <Link href={TERMINOS_PUBLICO_URL} style={s.link}>
-          Términos y condiciones
-        </Link>
-      </Small>
     </>
   );
 }
@@ -190,6 +196,7 @@ export function Layout({ preview, children, reason = DEFAULT_REASON, legal = fal
               <Small>Xangarro · Finanzas para emprendedores</Small>
             </>
           )}
+          <Enlaces />
         </Container>
       </Body>
     </Html>

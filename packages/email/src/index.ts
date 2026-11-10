@@ -61,3 +61,4 @@ export {
   type DeletionReminderEmailProps,
   type DeletionRequestedEmailProps,
 } from './templates/account-deletion.js';
+export { renderArcoAcuseEmail, type ArcoAcuseEmailProps } from './templates/arco-acuse.js';

@@ -141,7 +141,12 @@ describe('generic notice', () => {
       preview: 'Aviso',
       paragraphs: ['Solo texto.'],
     });
-    assert.doesNotMatch(e.html, /<a /);
+    const links = [...e.html.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(
+      links,
+      ['https://xangarro.mx/privacidad/', 'https://xangarro.mx/terminos/'],
+      'only the footer links: no button',
+    );
   });
 });
 

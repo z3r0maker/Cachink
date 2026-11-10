@@ -214,6 +214,9 @@ día se custodian fondos — Ley Fintech.
   casilla sin marcar o el botón de registro con el texto de consentimiento; **nunca premarcada**.
   Analítica disociada: sin casilla (art. 9 III). Para el abogado: confirmar que el botón-con-texto
   (clickwrap) basta como "expreso por medios electrónicos" si se opta por cero casillas.
+  **Enmienda 2026-11-09 (ADR-139):** la casilla de novedades también empieza **sin marcar**. Es
+  publicidad, y la LFPC art. 76 Bis VI exige consentimiento expreso para mandarla por medios
+  electrónicos, aunque la LFPDPPP admita el tácito para la finalidad.
 - **OQ-N8 — Nivel de detalle (decidido 2026-09-22).** El aviso publica lo mínimo del art. 15 y describe
   por categorías: proveedores por tipo y país, datos por categoría con ejemplos, medidas de seguridad
   sin detalle (art. 18 exige tenerlas, no publicarlas), plazos internos "conforme a política documentada

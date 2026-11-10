@@ -24,7 +24,7 @@
 ## §2 Tokens
 
 **Device token** — JWT signed with the Supabase project JWT secret so PostgREST/RLS accept it. Claims:
-`{ sub: <device_id>, role: 'authenticated', aud: 'authenticated', business_id, device_id, kind: 'device', iat, exp: iat + 365d }`.
+`{ sub: <device_id>, iss: 'https://app.xangarro.mx', aud: 'xangarro:device', business_id, device_id, kind: 'device', iat, exp: iat + 365d }` (ADR-138: Xangarro's own issuer and audience, never Supabase's `authenticated`; tokens issued before 2026-11-16 with `aud: 'authenticated'` are honoured until they expire).
 Revocation is server-side: every handler checks `tenant.devices.status = 'active'` for `device_id` before doing work; a revoked device gets `401 DEVICE_REVOKED` and the app returns to the activation screen (data kept locally, per Q9).
 
 **Portal session** — Supabase Auth session (magic link or password). A custom-claims hook adds `memberships: [{business_id, role}]`. The active business is chosen client-side and sent as `X-Business-Id` on portal server actions; server code re-checks membership on every request.
