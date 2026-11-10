@@ -173,8 +173,8 @@
 - [x] [media] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx`
       (hecho: `apps/landing/home/CtaFooter.jsx`).
 - [ ] [media] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
-      Progress 2026-11-09 (ADR-139): the signup box starts unticked, so new accounts opt in expressly
-      and the window applies only to the tacit grants recorded before.
+      Progress 2026-11-09 (ADR-139): the signup box starts unticked, so every account opts in
+      expressly; the 5-day window no longer applies to signups.
 - [ ] [media] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
 
 ## 8. Propiedad intelectual y gobernanza

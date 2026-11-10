@@ -10050,5 +10050,5 @@ and the date received; and only billing and deletion emails linked the aviso de 
 **Consequences**
 
 - Fewer signups will opt in to novedades; the count is honest.
-- Accounts created before this change keep their recorded `tacito` grants; whether to ask them again is
-  for the lawyer (O-17).
+- No account was asked again: at the change Xangarro was in production with no public launch and no
+  real users, so every recorded `tacito` signup grant is test data.
