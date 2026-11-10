@@ -362,7 +362,9 @@ jobs:
     name: portal-e2e
     runs-on: ubuntu-latest
     # 25 before ADR-102; the coverage steps add unit coverage and the merge.
-    timeout-minutes: 30
+    # 35 with the phone, WebKit and edge-day projects (J1-21, J1-22, J5-24,
+    # J7-22): the E2E step already took ~21 of the 30 minutes.
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:17-alpine
