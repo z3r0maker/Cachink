@@ -177,8 +177,9 @@ Links to discussion, docs, prior art.
 | [136](#adr-136) | 2026-11-05 | Self-service account deletion: locked at once, erased in 30 days with an undo link, billing and CFDI kept blocked for 10 years | Accepted |
 | [137](#adr-137) | 2026-11-06 | «Privacidad y mis datos»: each member's own page, reading the consent ledger; every aviso version kept in code with its hash pinned | Accepted |
 | [138](#adr-138) | 2026-11-09 | Supabase's Data API gets nothing of ours: the API roles lose every grant, and device tokens carry Xangarro's own issuer and audience | Accepted |
-| [139](#adr-139) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
-| [140](#adr-140) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
+| [139](#adr-139) | 2026-11-09 | Novedades are opt-in at signup, and every ARCO request gets its acuse by email | Accepted |
+| [140](#adr-140) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
+| [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10012,6 +10013,47 @@ could delete its business's sales directly.
 
 - After O-2 and after every hosted migration, run `check:data-api`.
 - `LEGACY_AUDIENCE` and its branch in `token-shape.ts` can be deleted after 2027-11-16.
+
+## ADR-139
+
+**Title:** Novedades are opt-in at signup, and every ARCO request gets its acuse by email
+
+**Date:** 2026-11-09
+
+**Status:** Accepted — amends OQ-N7 (`docs/legal/aviso/respuestas-oq-borrador.md`) for the novedades box; board PvCorreos
+
+**Context**
+
+OQ-N7 let the signup's «Quiero recibir novedades y consejos» box start ticked: under the LFPDPPP
+(art. 7) a secondary purpose may run on tacit consent. But novedades are publicity, and the LFPC
+(art. 76 Bis VI) lets a supplier send publicity in electronic commerce only to a consumer who expressly
+agreed, so a pre-ticked box is the wrong default for that purpose. Separately, an ARCO request showed
+its folio and deadline only on screen, while the Reglamento (art. 95) asks for an acuse with the folio
+and the date received; and only billing and deletion emails linked the aviso de privacidad.
+
+**Decision**
+
+1. **The box starts unticked.** Ticking it is the express act; both outcomes are recorded with method
+   `casilla`. `tacito` stays valid only for a choice carried over to a new aviso version
+   (`reconsentimiento`). The wording does not change.
+2. **The ARCO acuse is an email** to the address the titular gave: folio, the moment received, the
+   right and the answer deadline, with the full legal footer. `SolicitarArcoUseCase` sends it through an
+   `acuse` port after filing; a failed send never fails the request, because the request is filed and
+   its clock runs, and the screen carries the same facts.
+3. **Every email links the aviso and the términos** in its footer, legal footer or not.
+
+**Alternatives considered**
+
+- *Keep the box ticked and lean on the easy unsubscribe.* Rejected: the unsubscribe does not cure a
+  missing express consent under the LFPC.
+- *Fail the request when the acuse cannot be sent.* Rejected: the titular would file it twice, and the
+  legal clock counts from receipt either way.
+
+**Consequences**
+
+- Fewer signups will opt in to novedades; the count is honest.
+- No account was asked again: at the change Xangarro was in production with no public launch and no
+  real users, so every recorded `tacito` signup grant is test data.
 
 ---
 

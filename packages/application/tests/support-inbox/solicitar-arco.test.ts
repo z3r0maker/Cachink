@@ -9,6 +9,7 @@ import { beforeEach, describe, it } from 'vitest';
 import {
   RecordingSupportInbox,
   SolicitarArcoUseCase,
+  type AcuseArco,
   SupportInboxError,
   type InboxItemRequest,
   type SupportInbox,
@@ -27,14 +28,20 @@ describe('SolicitarArcoUseCase', () => {
   let inbox: RecordingSupportInbox;
   let n: number;
   let useCase: SolicitarArcoUseCase;
+  let acuses: AcuseArco[];
 
   beforeEach(() => {
     inbox = new RecordingSupportInbox();
     n = 0;
+    acuses = [];
     useCase = new SolicitarArcoUseCase({
       inbox,
       now: () => NOW,
       newFolio: () => `ARCO-${++n}`,
+      acuse: (a) => {
+        acuses.push(a);
+        return Promise.resolve();
+      },
     });
   });
 
@@ -87,10 +94,46 @@ describe('SolicitarArcoUseCase', () => {
       inbox: failing,
       now: () => NOW,
       newFolio: () => 'X',
+      acuse: (a) => {
+        acuses.push(a);
+        return Promise.resolve();
+      },
     });
     await assert.rejects(
       broken.execute({ solicitud: SOLICITUD, businessId: null }),
       SupportInboxError,
     );
+    assert.equal(acuses.length, 0, 'no acuse for a request that was not filed');
+  });
+
+  it('sends the titular the acuse: folio, moment received, right and deadline (art. 95)', async () => {
+    await useCase.execute({ solicitud: SOLICITUD, businessId: null });
+    assert.deepEqual(acuses, [
+      {
+        folio: 'ARCO-1',
+        nombre: 'Ana López',
+        correo: 'ana@example.mx',
+        derecho: 'cancelacion',
+        recibidaEn: '2026-09-23T17:00:00.000Z',
+        responderA: '2026-10-21',
+      },
+    ]);
+  });
+
+  it('sends no acuse for an invalid request', async () => {
+    await useCase.execute({ solicitud: { ...SOLICITUD, nombre: '' }, businessId: null });
+    assert.equal(acuses.length, 0);
+  });
+
+  it('still answers with the folio when the acuse fails: the request is filed', async () => {
+    const sinCorreo = new SolicitarArcoUseCase({
+      inbox,
+      now: () => NOW,
+      newFolio: () => 'ARCO-9',
+      acuse: () => Promise.reject(new Error('smtp down')),
+    });
+    const result = await sinCorreo.execute({ solicitud: SOLICITUD, businessId: null });
+    assert.equal(result.ok, true);
+    assert.equal(inbox.items.length, 1);
   });
 });

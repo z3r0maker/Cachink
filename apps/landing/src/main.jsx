@@ -4,6 +4,7 @@ import './global.css';
 import '../home/home.css';
 import './pages/not-found.css';
 import './pages/soporte/soporte.css';
+import { HashScroll } from './hash-scroll.jsx';
 import { UtmPassthrough } from './utm.jsx';
 
 /**
@@ -52,7 +53,9 @@ async function mountApp() {
   // UtmPassthrough wraps every route, not just the home page (N-57).
   createRoot(document.getElementById('root')).render(
     <UtmPassthrough>
-      <Component />
+      <HashScroll>
+        <Component />
+      </HashScroll>
     </UtmPassthrough>,
   );
 }

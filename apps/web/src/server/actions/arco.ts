@@ -8,6 +8,7 @@ import { headers } from 'next/headers';
 
 import { failure } from '../action-errors';
 import { db } from '../db';
+import { enviarAcuseArco } from '../privacidad/acuse-arco';
 import { readSession } from '../session';
 import { supportInboxFromEnv } from '../support-inbox';
 
@@ -16,7 +17,8 @@ import { supportInboxFromEnv } from '../support-inbox';
  * open to anyone, with or without an account. Filed in the admin inbox as
  * `kind = 'arco'` with its legal deadline; a signed-in member's business goes
  * with it so staff have context. Throttled per IP with the sign-in limit: the
- * form is public, and each submit is an item a person must read.
+ * form is public, and each submit is an item a person must read. The titular
+ * gets the acuse by email too.
  */
 export type ArcoResult =
   | { readonly ok: true; readonly folio: string; readonly responderA: string }
@@ -46,6 +48,7 @@ export async function enviarSolicitudArco(form: unknown): Promise<ArcoResult> {
       inbox: supportInboxFromEnv(),
       now: () => new Date(),
       newFolio: () => `ARCO-${newUlid()}`,
+      acuse: enviarAcuseArco,
     }).execute({ solicitud: form, businessId: session?.business_id ?? null });
     if (!result.ok) return { ok: false, message: FIELD_MESSAGE[result.field] ?? FALLO };
     return { ok: true, folio: result.folio, responderA: result.plazos.responderA };
