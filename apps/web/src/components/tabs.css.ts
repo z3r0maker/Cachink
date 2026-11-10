@@ -21,7 +21,12 @@ export const tabList = style({
   borderRadius: radii[4],
   background: colors.white,
   boxShadow: shadows.card,
-  overflow: 'hidden',
+  // Narrower than its tabs (a phone, J1-21), the bar scrolls sideways: it used
+  // to clip, and Estados' «Posición», «Flujo» and «Indicadores» sat past the
+  // edge where no tap could reach them. Wide enough, nothing scrolls and this
+  // clips the tabs to the rounded border exactly as `hidden` did.
+  overflowX: 'auto',
+  overflowY: 'hidden',
   maxWidth: '100%',
 });
 

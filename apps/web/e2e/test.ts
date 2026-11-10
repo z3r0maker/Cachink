@@ -3,6 +3,7 @@ import { test as base, type Page } from '@playwright/test';
 import { coverageEnabled } from '../scripts/coverage-gate/options';
 import { addPageCoverage } from './coverage';
 import { recordPageCoverage } from './page-coverage';
+import { webkitConPerfil, type OpcionesWebkit } from './webkit-profile';
 import { recordWorkerCoverage } from './worker-coverage';
 
 /**
@@ -74,7 +75,45 @@ async function waitForPageHydration(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
-const hydrated = base.extend({
+const hydrated = base.extend<OpcionesWebkit>({
+  vaciarOpfs: [false, { option: true }],
+  // WebKit on a real profile, or OPFS does not open (webkit-profile.ts). The
+  // fixtures are named one by one: Playwright reads them from this signature.
+  context: async (
+    {
+      context,
+      vaciarOpfs,
+      browserName,
+      playwright,
+      launchOptions,
+      headless,
+      contextOptions,
+      viewport,
+      userAgent,
+      deviceScaleFactor,
+      isMobile,
+      hasTouch,
+      baseURL,
+      storageState,
+    },
+    use,
+    testInfo,
+  ) => {
+    if (browserName !== 'webkit') return use(context);
+    const options = { ...contextOptions, viewport, userAgent, deviceScaleFactor, isMobile };
+    const perfil = await webkitConPerfil(
+      {
+        playwright,
+        launchOptions,
+        headless,
+        options: { ...options, hasTouch, baseURL, storageState },
+        vaciar: vaciarOpfs,
+      },
+      testInfo,
+    );
+    await use(perfil);
+    await perfil.close();
+  },
   page: async ({ page }, use) => {
     const goto = page.goto.bind(page);
     page.goto = async (url, options) => {
