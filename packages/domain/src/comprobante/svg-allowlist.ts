@@ -28,10 +28,25 @@ const ELEMENTS: ReadonlySet<string> = new Set([
 
 /** `<name`: the name runs to the first character that cannot be part of one. */
 const OPEN = /<([^ \t\r\n<>"'=/!?]+)/y;
-/** One ` name="value"`. A value holds no `<`, as XML requires. */
-const ATTRIBUTE = /[ \t\r\n]+([A-Za-z_:][-\w.:]*)[ \t\r\n]*=[ \t\r\n]*(?:"([^"<]*)"|'([^'<]*)')/y;
-const TAG_END = /[ \t\r\n]*(\/?)>/y;
-const CLOSE = /<\/([^ \t\r\n<>"'=/]+)[ \t\r\n]*>/y;
+const CLOSE = /<\/([^ \t\r\n<>"'=/]+)/y;
+const ATTRIBUTE_NAME = /[A-Za-z_:][-\w.:]*/y;
+/** A quoted value. It holds no `<`, as XML requires. */
+const ATTRIBUTE_VALUE = /"([^"<]*)"|'([^'<]*)'/y;
+
+/**
+ * The index of the first character at or after `from` that is not XML
+ * whitespace. A loop, and no `[ \t\r\n]*` inside a larger expression: a run of
+ * spaces is read once whatever follows it, which a reader (and a static
+ * analyser) can see without knowing how a sticky expression backtracks.
+ */
+function skipSpace(svg: string, from: number): number {
+  let at = from;
+  for (; at < svg.length; at += 1) {
+    const c = svg.charCodeAt(at);
+    if (c !== 0x20 && c !== 0x09 && c !== 0x0a && c !== 0x0d) break;
+  }
+  return at;
+}
 
 /** A reference that is not one of XML's five predefined entities. */
 const FOREIGN_REFERENCE = /&(?!(?:amp|lt|gt|quot|apos);)/;
@@ -95,15 +110,30 @@ function textIsSafe(text: string, walk: Walk): boolean {
   return innermost(walk) === 'style' ? cssIsSafe(text) : true;
 }
 
+/** One ` name="value"` at `from`: where it ends and whether it may stay; null when none is there. */
+function readAttribute(svg: string, from: number): { end: number; safe: boolean } | null {
+  const nameAt = skipSpace(svg, from);
+  if (nameAt === from) return null; // whitespace sets an attribute off
+  ATTRIBUTE_NAME.lastIndex = nameAt;
+  const name = ATTRIBUTE_NAME.exec(svg)?.[0];
+  if (name === undefined) return null;
+  const equals = skipSpace(svg, ATTRIBUTE_NAME.lastIndex);
+  if (svg[equals] !== '=') return null;
+  ATTRIBUTE_VALUE.lastIndex = skipSpace(svg, equals + 1);
+  const value = ATTRIBUTE_VALUE.exec(svg);
+  if (value === null) return null;
+  const safe = attributeIsSafe(name, value[1] ?? value[2] ?? '');
+  return { end: ATTRIBUTE_VALUE.lastIndex, safe };
+}
+
 /** The index after the attributes of the tag that starts at `from`, or -1. */
 function readAttributes(svg: string, from: number): number {
   let at = from;
   for (;;) {
-    ATTRIBUTE.lastIndex = at;
-    const found = ATTRIBUTE.exec(svg);
-    if (found === null) return at;
-    if (!attributeIsSafe(found[1] ?? '', found[2] ?? found[3] ?? '')) return -1;
-    at = ATTRIBUTE.lastIndex;
+    const attribute = readAttribute(svg, at);
+    if (attribute === null) return at;
+    if (!attribute.safe) return -1;
+    at = attribute.end;
   }
 }
 
@@ -121,21 +151,25 @@ function readOpenTag(svg: string, lt: number, walk: Walk): number {
   if (name === undefined || !mayOpen(name, walk)) return -1;
   const afterAttributes = readAttributes(svg, OPEN.lastIndex);
   if (afterAttributes === -1) return -1;
-  TAG_END.lastIndex = afterAttributes;
-  const end = TAG_END.exec(svg);
-  if (end === null) return -1;
-  if (end[1] !== '/') walk.stack.push(name);
+  // `>` or `/>`, after any space.
+  const slash = skipSpace(svg, afterAttributes);
+  const selfClosing = svg[slash] === '/';
+  const gt = selfClosing ? slash + 1 : slash;
+  if (svg[gt] !== '>') return -1;
+  if (!selfClosing) walk.stack.push(name);
   else if (walk.stack.length === 0) walk.done = true;
-  return TAG_END.lastIndex;
+  return gt + 1;
 }
 
 /** The index after the end tag at `lt`, or -1 when it closes the wrong element. */
 function readCloseTag(svg: string, lt: number, walk: Walk): number {
   CLOSE.lastIndex = lt;
   const name = CLOSE.exec(svg)?.[1];
-  if (name === undefined || walk.stack.pop() !== name) return -1;
+  if (name === undefined) return -1;
+  const gt = skipSpace(svg, CLOSE.lastIndex);
+  if (svg[gt] !== '>' || walk.stack.pop() !== name) return -1;
   if (walk.stack.length === 0) walk.done = true;
-  return CLOSE.lastIndex;
+  return gt + 1;
 }
 
 /**

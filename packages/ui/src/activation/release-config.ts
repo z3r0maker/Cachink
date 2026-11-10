@@ -57,7 +57,7 @@ function apiBaseProblem(raw: string | undefined, rules: ReleaseRules): ReleaseCo
   if (value === '') return { code: 'API_BASE_MISSING', field, message: 'The API base is not set.' };
   if (/^https:\/\/\S+$/i.test(value)) return null;
   if (rules === 'production') {
-    const message = `The API base must start with https://.${asRead(value)}`;
+    const message = `The API base must be an https address.${asRead(value)}`;
     return { code: 'API_BASE_NOT_HTTPS', field, message };
   }
   if (/^http:\/\/\S+$/i.test(value)) return null;
@@ -78,7 +78,7 @@ function publicKeyProblem(
   }
   if (rules === 'production' && value.toLowerCase() === DEV_ENTITLEMENT_PUBLIC_KEY_HEX) {
     const message =
-      'The entitlement public key is the published dev key (RFC 8032 test vector 1): anyone can sign a plan for it.';
+      'The entitlement public key is the published dev key (RFC 8032 test vector 1): anyone can sign an entitlement for it.';
     return { code: 'PUBKEY_IS_DEV_KEY', field, message };
   }
   return null;

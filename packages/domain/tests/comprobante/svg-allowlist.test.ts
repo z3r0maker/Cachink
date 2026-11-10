@@ -157,6 +157,20 @@ describe('svgIsSafe (audit F-01: the gate is an allowlist)', () => {
     assert.equal(svgIsSafe(big), false);
     assert.ok(Date.now() - started < 1000, 'the tokeniser must not backtrack');
   });
+
+  it('skips a long run of whitespace once, wherever a tag may hold one', () => {
+    const tabs = '\t'.repeat(1_000_000);
+    const started = Date.now();
+    // Before a tag's end, around an equals sign, and before an end tag's `>`.
+    const roomy = `<svg ${NS}${tabs}><g id${tabs}=${tabs}"a"${tabs}/></svg${tabs}>`;
+    assert.equal(svgIsSafe(roomy), true);
+    // The same runs in front of what no tag may hold.
+    assert.equal(svgIsSafe(`<svg ${NS}${tabs}!></svg>`), false);
+    assert.equal(svgIsSafe(wrap(`<g${tabs}id${tabs}"a"/>`)), false);
+    assert.equal(svgIsSafe(wrap(`<g${tabs}id=${tabs}a/>`)), false);
+    assert.equal(svgIsSafe(wrap(`<g></g${tabs}x>`)), false);
+    assert.ok(Date.now() - started < 1000, 'whitespace must not be scanned again and again');
+  });
 });
 
 describe('sanitiseSvg then svgIsSafe (what the upload stores)', () => {
