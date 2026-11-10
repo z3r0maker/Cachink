@@ -80,7 +80,7 @@ const WAITS = new Set(
 const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   Teléfono: ids('N-19 N-21 N-22 N-24 N-25 A-16 M-08 M-09 M-10 M-11 M-12 M-13 DS-10 K-13 K-24'),
   Portal: ids(
-    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 DS-01 DS-02 DS-03 DS-04 DS-09 K-12 K-23',
+    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 DS-01 DS-02 DS-03 DS-04 DS-09 K-12 K-23 N-83',
   ),
   'Caja web': ids('P-37 DS-05 DS-06 DS-07 DS-08 K-14'),
   'Pagos y conciliación': ids(
@@ -89,10 +89,10 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   'Consola (backoffice)': ids(
     'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44',
   ),
-  'Backend, sync y datos': ids('C-21 C-24 B-19 N-47 N-48 N-69'),
+  'Backend, sync y datos': ids('C-21 C-24 B-19 N-47 N-48 N-69 N-81 N-84'),
   'Privacidad y LFPC': ids('N-34 N-60'),
   'Auditorías y calidad': ids('N-26 N-27 N-28 N-29 N-49'),
-  'Lanzamiento, stores e integración': ids('X-02 X-03 X-05 X-09 X-10 N-32'),
+  'Lanzamiento, stores e integración': ids('X-02 X-03 X-05 X-09 X-10 N-32 N-82'),
   Landing: ids('N-58 L-05 K-31'),
 };
 
