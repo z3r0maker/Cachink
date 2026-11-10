@@ -28,7 +28,7 @@ export default async function MigracionesPage() {
       <h1 className={heading}>Migraciones asistidas</h1>
       <p className={body}>
         Solicitudes de «Hazlo por mí». Descarga los archivos, mápealos a una plantilla y envíalos al
-        negocio para su aprobación — el negocio aplica, nunca el equipo.
+        negocio para su aprobación. El negocio aplica, nunca el equipo.
       </p>
       <TablaMigraciones rows={rows} />
     </main>
