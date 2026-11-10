@@ -9,7 +9,9 @@
  * The legal shape (LFPDPPP 2025, art. 7): consent is **tácito** by default —
  * aviso shown, no objection — but datos financieros o patrimoniales require
  * **expreso**, an act of the titular. The core purpose (`necesarias`) therefore
- * needs an explicit method; `novedades` may be tacit (a pre-ticked box).
+ * needs an explicit method. `novedades` is publicity, which the LFPC (art. 76
+ * Bis VI) allows only with express consent: the signup box starts unticked.
+ * `tacito` stays valid for a choice carried over to a new aviso version.
  */
 
 import { z } from 'zod';
@@ -48,19 +50,19 @@ export const ConsentGrantSchema = z
   });
 export type ConsentGrant = z.infer<typeof ConsentGrantSchema>;
 
-/** What the signup form hands over: the express act, and the pre-ticked toggle. */
+/** What the signup form hands over: the express act, and the novedades box. */
 export const RegistroConsentimientoSchema = z.object({
   /** The affirmative act on the aviso + términos. Anything but `true` refuses signup. */
   acepto: z.boolean(),
-  /** Novedades toggle, ticked by default (tacit consent, art. 7 párrafo tercero). */
+  /** Novedades box, unticked by default: ticked means the person ticked it. */
   novedades: z.boolean(),
 });
 export type RegistroConsentimiento = z.infer<typeof RegistroConsentimientoSchema>;
 
 /**
- * The two grants a signup produces. The core one is express by construction;
- * the novedades one records tacit consent when left ticked and an explicit
- * refusal when unticked — both are facts worth keeping.
+ * The two grants a signup produces, both express by construction: the box is
+ * the act. A novedades box left unticked is recorded as a refusal, a fact
+ * worth keeping.
  */
 export function consentimientosDeRegistro(
   aviso: AvisoVigente,
@@ -77,7 +79,7 @@ export function consentimientosDeRegistro(
       ...base,
       purpose: 'novedades',
       granted: input.novedades,
-      method: input.novedades ? 'tacito' : 'casilla',
+      method: 'casilla',
     },
   ];
 }

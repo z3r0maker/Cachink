@@ -1,15 +1,19 @@
 import { expect, test } from './test';
 import { plazosArco } from '@xangarro/domain';
 
+import { latestMailTo } from './outbox';
+import { stamp } from './tenant';
+
 /**
  * N-34: the public ARCO form. No account needed; a valid request gets a folio
  * and the legal deadline (20 días hábiles), and an invalid one says which
- * field is wrong. The item it files is checked in the console's own tests;
- * here the inbox is the log fallback.
+ * field is wrong. The titular also gets the acuse by email (Reglamento
+ * art. 95). The item it files is checked in the console's own tests; here the
+ * inbox is the log fallback.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test('anyone can file an ARCO request and is told the folio and the deadline', async ({
+test('anyone can file an ARCO request and is told the folio and the deadline, on screen and by email', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'one public form, one run');
@@ -25,7 +29,8 @@ test('anyone can file an ARCO request and is told the folio and the deadline', a
   await page.getByRole('button', { name: 'Enviar solicitud' }).click();
   await expect(page.getByText('Escribe un correo válido')).toBeVisible();
 
-  await page.getByLabel('Correo para la respuesta').fill('ana@example.mx');
+  const correo = `ana-${stamp()}@example.mx`;
+  await page.getByLabel('Correo para la respuesta').fill(correo);
   await page.getByRole('button', { name: 'Enviar solicitud' }).click();
   await expect(page.getByTestId('arco-recibida')).toBeVisible();
   await expect(page.getByTestId('arco-folio')).toHaveText(/^ARCO-[0-9A-Z]{26}$/);
@@ -35,4 +40,12 @@ test('anyone can file an ARCO request and is told the folio and the deadline', a
     new Date(`${responderA}T12:00:00Z`),
   );
   await expect(page.getByTestId('arco-plazo')).toHaveText(dia);
+
+  const folio = (await page.getByTestId('arco-folio').textContent()) ?? '——';
+  await expect.poll(() => latestMailTo(correo)).toContain(folio);
+  const acuse = await latestMailTo(correo);
+  expect(acuse).toContain('Hola, Ana López');
+  expect(acuse).toContain('Cancelación de tus datos');
+  expect(acuse).toContain(dia);
+  expect(acuse).toContain('https://xangarro.mx/privacidad/');
 });

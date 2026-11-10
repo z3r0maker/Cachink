@@ -9,7 +9,7 @@ import * as s from './consent.css';
 export interface ConsentState {
   /** The express act on aviso + términos: unticked by default, required. */
   readonly acepto: boolean;
-  /** Novedades: ticked by default (tacit consent, art. 7 LFPDPPP). */
+  /** Novedades: unticked by default; publicity needs express consent (LFPC art. 76 Bis VI). */
   readonly novedades: boolean;
 }
 
@@ -78,7 +78,7 @@ function Check(props: {
 /**
  * The aviso and the two controls the ledger records. One affirmative act — the
  * core consent covers datos patrimoniales and must be the person's own (art. 7
- * párrafo quinto); the novedades toggle may default on.
+ * párrafo quinto). The novedades box starts unticked: publicity is opt-in.
  */
 export function Consent({
   value,

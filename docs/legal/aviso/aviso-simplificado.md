@@ -43,10 +43,9 @@ Controles (debajo del texto) — **un solo acto afirmativo, lo demás por defect
   Alternativa sin casilla: que el propio botón lleve el texto **"Crear cuenta y aceptar el aviso de
   privacidad y los Términos"** (consentimiento expreso por medios electrónicos, art. 7 ¶2). Confirmar
   con el abogado cuál de las dos.
-- ☑ **Quiero recibir novedades y consejos de Xangarro.** _(opcional, **marcada por defecto**: finalidad
-  secundaria con consentimiento tácito, art. 7 ¶3–4; baja en un clic en cada correo y en Configuración →
-  Privacidad; 5 días hábiles para negarse antes del primer envío)_. Si se prefiere la redacción en
-  negativo ("☐ No quiero recibir novedades"), el efecto legal es el mismo.
+- ☐ **Quiero recibir novedades y consejos de Xangarro.** _(opcional, **sin marcar por defecto**: es
+  publicidad, y la LFPC art. 76 Bis VI pide consentimiento expreso para mandarla (ADR-139); baja en un
+  clic en cada correo y en Privacidad y mis datos)_
 - La analítica de uso **no lleva casilla**: es disociada y no requiere consentimiento (art. 9 III).
 
 > Nota: se combinan aviso y términos en una casilla para reducir fricción; el abogado puede pedir
