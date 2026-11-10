@@ -1,0 +1,60 @@
+# Backgrounded with a ticket open until the auto-lock (J4-33): the app goes
+# behind Settings for longer than the fixed five-minute timer
+# (DEFAULT_AUTO_LOCK_TIMEOUT, hooks/use-auto-lock.ts), comes back on Bloqueo,
+# and after the PIN the same ticket is still there: the lock signs the
+# operator out but the ticket's module store is not the operator's.
+#
+# SLOW: about six minutes of wall time, all of it the real timer (there is
+# no test override, and an EXPO_PUBLIC_ one would be bundled into every other
+# flow's run). Not in the curated regression; run it on its own.
+#
+# Precondition: activated device against the mock on MOCK_API; opens a
+# turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - slow
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/ticket-dos-aguas.yaml
+
+# Behind another app: AppState goes to background and the timer stops.
+- launchApp:
+    appId: com.apple.Preferences
+# A five-minute-and-change sleep: wait for a text that never appears, and
+# let the wait time out without failing the flow.
+- extendedWaitUntil:
+    visible: 'xangarro-nunca-aparece'
+    timeout: 310000
+    optional: true
+- launchApp:
+    appId: mx.xangarro.mobile
+    stopApp: false
+
+# Bloqueo for the same operator; the PIN brings back the same ticket.
+- extendedWaitUntil:
+    visible:
+      id: 'bloqueo'
+    timeout: 15000
+- assertVisible: '.*Pon tu NIP para seguir.*'
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-2' }
+- tapOn: { id: 'numpad-3' }
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil:
+    visible:
+      id: 'tab-turno|rail-turno|sidebar-turno'
+    timeout: 15000
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- assertVisible: '2 piezas ·'
+- assertVisible: '\$82\.50'

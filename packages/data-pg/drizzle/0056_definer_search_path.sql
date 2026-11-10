@@ -1,4 +1,4 @@
--- 0055: no SECURITY DEFINER function searches `public` first (audit F-15b).
+-- 0056: no SECURITY DEFINER function searches `public` first (audit F-15b).
 --
 -- A definer runs with its owner's rights — here an owner that bypasses RLS —
 -- so the schemas its unqualified names resolve through are part of what it is

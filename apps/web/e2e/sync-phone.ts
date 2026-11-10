@@ -46,6 +46,8 @@ export interface Phone {
   readonly token: string;
   readonly deviceId: string;
   readonly cursor: number;
+  /** The business the code joined: Taquería's, or a minted tenant's (`tenant-phone.ts`). */
+  readonly businessId: string;
 }
 
 /** Frees Taquería's slots, then activates a phone with a code minted for it. */
@@ -59,17 +61,31 @@ export async function activatePhone(request: APIRequestContext, code: string): P
         business_id = EXCLUDED.business_id, redeemed_at = NULL, redeemed_by_device_id = NULL,
         updated_at = now()`;
   });
+  return redeemCode(request, 'pedro@taqueria.mx', code);
+}
+
+/** The real `/activate` for a code already minted, as the phone sends it. */
+export async function redeemCode(
+  request: APIRequestContext,
+  email: string,
+  code: string,
+): Promise<Phone> {
   const r = await request.post(API_PATHS.activate, {
     headers: deviceHeaders(),
     data: {
-      email: 'pedro@taqueria.mx',
+      email,
       code,
       device: { name: code, platform: 'android', appVersion: '0.1.0', osVersion: '15' },
     },
   });
   if (r.status() !== 200) throw new Error(`activate ${r.status()}: ${await r.text()}`);
   const body = await r.json();
-  return { token: body.deviceToken, deviceId: body.deviceId, cursor: body.bootstrap.serverSeq };
+  return {
+    token: body.deviceToken,
+    deviceId: body.deviceId,
+    cursor: body.bootstrap.serverSeq,
+    businessId: body.businessId,
+  };
 }
 
 export const push = (request: APIRequestContext, phone: Phone, deltas: unknown[]) =>
@@ -88,7 +104,7 @@ export async function pull(request: APIRequestContext, phone: Phone, since: numb
 
 const AT = '2026-09-17T18:30:00.000Z';
 const audit = (phone: Phone) => ({
-  businessId: BIZ,
+  businessId: phone.businessId,
   deviceId: phone.deviceId,
   createdByUserId: null,
   createdAt: AT,

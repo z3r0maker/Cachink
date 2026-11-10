@@ -1,0 +1,36 @@
+# The app killed mid-ticket (J4-32): two lines on the ticket, the process
+# dies, the app comes back. The ticket lives in memory only
+# (Ventas/ticket-en-curso.ts), so it comes back empty, never half-charged,
+# and the open turno survives: Cobrar opens with no «abre la caja» gate.
+#
+# Precondition: activated device against the mock on MOCK_API; opens a
+# turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/ticket-dos-aguas.yaml
+
+# The process dies with the ticket open (launchApp's default stopApp).
+- stopApp
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# Same turno, empty ticket: no gate, the bar's empty sentence.
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- assertNotVisible:
+    id: 'caja-gate-banner'
+- assertVisible: 'Toca un producto para empezar'
+- assertNotVisible: '2 piezas ·'

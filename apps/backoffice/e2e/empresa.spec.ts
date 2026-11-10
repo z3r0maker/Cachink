@@ -35,6 +35,17 @@ import {
 } from './empresa-sat';
 import { MENSUAL, recurrente, registrarMensual } from './empresa-recurrente-factura';
 import {
+  ABARROTES,
+  importarCobros,
+  ITEM_GLOBAL,
+  ITEM_MANUAL,
+  limpiarPagos,
+  PAPELERIA,
+  reembolsarTaqueria,
+  sembrarPagos,
+  TAQUERIA,
+} from './empresa-emitidas';
+import {
   E2E_RECURRENTE,
   mesesDePrueba,
   registrarGastoEnDolares,
@@ -633,4 +644,57 @@ test('a founder repeats a supplier who invoices every month, by its XML (CD-06h,
   await expect(actual).toContainText(`Pídela a ${MENSUAL.nombre}`);
   await actual.getByRole('link', { name: 'Subir su XML' }).click();
   await expect(page).toHaveURL(/\/empresa\/facturas$/);
+});
+
+test('a founder reads the issued invoices, each with its CFDI and its cobro (E-10, CD-06i)', async ({
+  page,
+}) => {
+  await limpiarPagos();
+  await sembrarPagos();
+  try {
+    // The daily import posts each payment once; a full refund reverses its cobro.
+    expect((await importarCobros(page.request)).registrados).toBeGreaterThanOrEqual(4);
+    expect((await importarCobros(page.request)).registrados).toBe(0);
+    await reembolsarTaqueria();
+    expect((await importarCobros(page.request)).revertidos).toBe(1);
+
+    await signInAsStaff(page, SOCIO);
+    await abrirEntrada(page, 'Dinero');
+    await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
+    await page
+      .getByRole('navigation', { name: 'Facturas' })
+      .getByRole('link', { name: 'Emitidas' })
+      .click();
+    await expect(page).toHaveURL(/\/empresa\/facturas\/emitidas\?mes=\d{4}-\d{2}$/);
+    await expect(page.getByTestId('emitidas-cobrado')).toContainText('pagos de Stripe');
+
+    // Real rows: who paid, the CFDI each got, and its cobro.
+    const emitida = (nombre: string) =>
+      page.getByTestId('factura-emitida').filter({ hasText: nombre });
+    await expect(emitida(TAQUERIA)).toContainText(
+      'CanceladaReembolso · nota de crédito por $499.00',
+    );
+    await expect(emitida(TAQUERIA).getByRole('link', { name: 'Revertido' })).toBeVisible();
+    await expect(emitida(PAPELERIA)).toContainText(
+      'RFC PAP010101AB1 · Plan Negocio · transferencia',
+    );
+    await expect(emitida(PAPELERIA)).toContainText(
+      '$430.17$68.83$499.00TimbradaCon su complemento de pago',
+    );
+    await expect(
+      emitida(ABARROTES).getByRole('link', { name: 'Emitir desde la bandeja' }),
+    ).toHaveAttribute('href', `/inbox/${ITEM_MANUAL}`);
+    const global = page.getByRole('region', { name: /Factura global de/ });
+    await expect(global).toContainText('Por emitir');
+    await expect(global.getByRole('link', { name: 'Ver en la bandeja' })).toHaveAttribute(
+      'href',
+      `/inbox/${ITEM_GLOBAL}`,
+    );
+
+    // The cobro is in Movimientos, named by its customer.
+    await emitida(PAPELERIA).getByRole('link', { name: 'Cobro' }).click();
+    await expect(page.getByText(`Cobro · ${PAPELERIA}`)).toBeVisible();
+  } finally {
+    await limpiarPagos();
+  }
 });

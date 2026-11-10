@@ -1,7 +1,8 @@
-import { formatMoney, formatMonth } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 
 import { hoyEnMexico } from '@/server/db/corp';
 import { leerFacturas } from '@/server/empresa/facturas-lectura';
+import { nombreMes } from '@/server/empresa/fechas';
 import {
   filaFactura,
   filaSinCfdi,
@@ -15,12 +16,11 @@ import * as m from '@/styles/mostrador.css';
 
 import { EncabezadoDinero } from '../encabezado-dinero';
 
+import { PestanasFacturas } from './pestanas';
 import { Subir } from './subir';
 import { Tabla } from './tabla';
 
 export const dynamic = 'force-dynamic';
-
-const nombreMes = (mes: string) => formatMonth(mes).split(' ')[0] ?? mes;
 
 function tilesDe(r: ResumenFacturas, mes: string) {
   const siguiente = nombreMes(mesesVecinos(mes).siguiente);
@@ -72,7 +72,7 @@ function Totales({ r, mes }: { readonly r: ResumenFacturas; readonly mes: string
  * SAT status and movement, the XML drop zone, each invoice on credit still
  * owed with «Registrar pago» and «Cancelar», and «Consultar al SAT» for an
  * unverified one with the warning when the supplier cancelled it (CD-06g).
- * The Emitidas tab waits for E-10; the screen is Dinero's second tab (plan §2).
+ * Beside «Emitidas» (E-10, CD-06i); the screen is Dinero's second tab (plan §2).
  */
 export default async function FacturasPage(props: {
   searchParams: Promise<{ mes?: string; aviso?: string; consultada?: string }>;
@@ -87,6 +87,7 @@ export default async function FacturasPage(props: {
   return (
     <div className={m.page}>
       <EncabezadoDinero actual="/empresa/facturas" mes={mes} />
+      <PestanasFacturas actual="recibidas" mes={mes} />
       <Totales r={resumenFacturas(facturas, sinCfdi)} mes={mes} />
       <Subir />
       <section className={m.panel} aria-labelledby="lista">

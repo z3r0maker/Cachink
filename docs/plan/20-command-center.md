@@ -35,7 +35,9 @@
    is paid. Its row offers «Registrar pago», which posts the bank outflow, and «Cancelar», which
    reverses it when the supplier cancels or it came wrong (E-11). An invoice MEXIA issues before
    being paid posts as «por cobrar», with «Marcar cobrada» and «Cancelar» (E-10). A paid (PUE)
-   invoice posts paid, as today.
+   invoice posts paid, as today. **Amended 2026-11-09:** every invoice Xangarro issues comes from
+   a Stripe payment already collected, so «por cobrar» is left out of E-10 until MEXIA invoices a
+   customer outside Stripe.
 
 ### Open owner decisions (answer before the task that needs it)
 
@@ -519,15 +521,32 @@ with property tests:
 
 ### E-10 Ingresos y facturas emitidas `[media]`
 
-- [ ] Status · **Blocked by:** E-02, B-10
+- [~] Status · **Blocked by:** E-02, B-10
+  **Remaining (2026-11-09):**
+  - the «payout» movements: Stripe's deposits to the bank and its fee. Cobros wait in «Stripe por
+    depositar» until then; the data needs N-63's `billing_events`.
+  - a partial refund (credit notes below the payment) posts nothing yet; a full one reverses.
+    **Done 2026-11-09, board CD-06i (round 13, approved the same day):**
+  - `xangarro.ingresos_del_periodo()` (data-pg 0055, `xangarro_admin` only): a month of
+    `cfdi_payments` with receptor, UUIDs, the global's folio and the credit notes' total.
+  - `RevenueSource` and `importarCobros`: owner decision, one «Cobro» per payment keyed by its
+    Stripe id (source `billing`), subtotal and IVA split, waiting in «Stripe por depositar»;
+    idempotent, a late payment gets in, a full refund reverses exactly its entry, a closed month
+    is skipped and counted. Daily at 06:00 in Mexico City (`/api/cron/empresa-cobros`), last
+    month and this one.
+  - `/empresa/facturas/emitidas` beside Recibidas: tiles (cobrado sin IVA, IVA trasladado, por
+    emitir, canceladas), the month's «Público en general» global with its folio or «Ver en la
+    bandeja», and each payment with its CFDI state and its cobro. Read-only: what is left to
+    issue links to its inbox item (ADR-070).
+  - «por cobrar» is left out (decision 9, amended 2026-11-09).
+  - Playwright: payments written as the webhook would, the cron run twice and after a refund,
+    the rows' CFDI states, the inbox links, and the cobro in Movimientos.
 - **What:**
   - the `RevenueSource` port over `billing.cfdi_payments` (and N-63's `billing_events` once they
     exist);
   - a daily import posting the «cobro» and «payout» movements per project;
   - `/empresa/facturas`, «Emitidas» tab: CFDI status, global CFDI, credit notes (read from ADR-070
-    tables, never Stripe live);
-  - an invoice issued before payment (PPD) posts as «por cobrar», with «Marcar cobrada» and
-    «Cancelar» (owner decision 9). The Emitidas board is still to draw.
+    tables, never Stripe live).
 - **Acceptance:** a month's imported income equals the month's `cfdi_payments` total without IVA;
   re-running the import posts nothing new (idempotent per payment id); a «por cobrar» invoice
   counts as income in its month and moves to the bank only when marked collected.
