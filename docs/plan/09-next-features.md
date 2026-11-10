@@ -1463,7 +1463,33 @@ update --channel production --private-key-path keys/private-key.pem`.
   recovery codes shown once, asked at sign-in and again before changing operators, devices or
   billing.
 - **Design first:** the «revisa tu correo» state, the confirmation email, the enrolment and the
-  sign-in challenge are screens nobody has drawn (CLAUDE.md §6, ADR-117).
+  sign-in challenge are screens nobody had drawn (CLAUDE.md §6, ADR-117). **Round 1 drawn
+  2026-11-10, waiting for the owner's approval:** page «Seguridad de la cuenta» of the El Mostrador
+  canvas (https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt), eight boards, each with its states as
+  tabs: `SgRevisaCorreo` (after signup: resend, «Corregir mi correo», and a password sign-in before
+  confirming), `SgConfirmar` (the page the link opens: confirm, expired, already used, and the new
+  password after a magic link on an unconfirmed account), `SgCorreo` (the email), `SgMenu` (the
+  account menu, the one-time invitation, the notice after a recovery-code sign-in), `SgSeguridad`
+  (off, on, few codes left, turning it off), `SgActivar` (password, QR and typed code, recovery
+  codes shown once, new codes), `SgDesafio` (step 2 of sign-in, a recovery code, lost access) and
+  `SgReconfirmar` (the re-ask dialog). Two notes beside the first row record the decisions and what
+  is left to review.
+- **Decided with the owner, 2026-11-10:** (1) TOTP is optional for owners and admins, offered by a
+  one-time invitation; (2) it lives in the account menu, «Seguridad», per person, next to
+  «Privacidad y mis datos»; (3) the confirmation link lasts 24 hours and works once; (4) with TOTP
+  on, one code unlocks changes to operators, cajas and billing for 15 minutes; (5) with the phone
+  and the recovery codes both lost, support confirms identity and switches it off from the console,
+  and no emailed link can switch it off.
+- **Drawn but not asked, to confirm on review:** the emailed link opens a page with a button, and
+  opening it confirms nothing (as `/login/entrar` and `/cancelar` already work); confirming opens
+  the session, and the welcome email moves from signup to confirmation; «Corregir mi correo» works
+  only in the browser that signed up, or after the password; enrolment asks for the password first;
+  «Seguridad» is shown to owner and admin, not to `viewer`; a new phone is «Desactivar» then
+  «Activar».
+- **Still to draw or decide:** the console action that switches a locked-out owner's TOTP off (its
+  board belongs on the console's canvas, https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq); whether
+  turning TOTP on or off sends a notice email; whether accounts created before this ships count as
+  confirmed.
 - **Acceptance:** an account whose email was never confirmed cannot sign in with a password; an
   owner with TOTP on cannot reach `/equipo` after a password-only sign-in.
 
