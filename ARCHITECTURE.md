@@ -10014,7 +10014,7 @@ could delete its business's sales directly.
 
 ---
 
-## ADR-139
+## ADR-140
 
 **Title:** The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data
 
