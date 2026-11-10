@@ -43,6 +43,9 @@ export const fila = style({
   gap: 14,
   padding: '16px 18px',
   borderBottom: `2px solid ${colors.gray100}`,
+  // On a phone the figure and the exits wrap under the name instead of running
+  // past the list's clipped edge, where «Revisar» could not be tapped (J1-21).
+  '@media': { 'screen and (max-width: 767px)': { flexWrap: 'wrap' } },
   selectors: {
     '&:last-child': { borderBottom: 'none' },
     '&:hover': { background: colors.yellowSoft },

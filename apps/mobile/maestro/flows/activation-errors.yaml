@@ -1,10 +1,11 @@
-# Activation — error path (A-04).
+# Activation — error paths (A-04, J3-06): a code that does not exist, one that
+# expired and one already redeemed are each refused with their own sentence
+# (es-mx.ts `activation.errors`), and the phone stays on Vincular.
 #
 # Precondition: fresh install (no activation record) showing
-# `activation-screen`; contracts mock running and reset:
-#   PORT=3100 pnpm mock:api   ·   curl -X POST http://127.0.0.1:3100/__mock/reset
-# App bundled with EXPO_PUBLIC_API_BASE=http://127.0.0.1:3100.
-# Mock codes: USEDK7M3 (already redeemed) → "ya se usó".
+# `activation-screen`; contracts mock running and reset. Mock codes
+# (contracts/src/mock/state.ts): EXPRK7M3 (expired) → «ya venció»,
+# USEDK7M3 (already redeemed) → «ya se usó»; any other code → «no coinciden».
 # x-entrypoint: fresh
 appId: mx.xangarro.mobile
 ---
@@ -20,19 +21,20 @@ appId: mx.xangarro.mobile
     id: 'activation-email'
     point: '95%,50%'
 - inputText: 'dueno@tacoslaesquina.mx'
-# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
-- tapOn:
-    id: 'activation-code'
-    point: '95%,50%'
-- inputText: 'USEDK7M3'
 - hideKeyboard
-- tapOn:
-    id: 'activation-submit'
-- extendedWaitUntil:
-    visible:
-      id: 'activation-error'
-    timeout: 15000
-- assertVisible:
-    text: '.*ya se usó.*'
-- assertVisible:
-    id: 'activation-screen'
+
+- runFlow:
+    file: shared/vincular-rechazado.yaml
+    env:
+      CODE: 'ZZZZK7M3'
+      SENTENCE: 'El correo o el código no coinciden\.'
+- runFlow:
+    file: shared/vincular-rechazado.yaml
+    env:
+      CODE: 'EXPRK7M3'
+      SENTENCE: 'Ese código ya venció\.'
+- runFlow:
+    file: shared/vincular-rechazado.yaml
+    env:
+      CODE: 'USEDK7M3'
+      SENTENCE: 'Ese código ya se usó en otro dispositivo\.'

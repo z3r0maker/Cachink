@@ -12,11 +12,13 @@ const reportError = vi.fn();
 const revalidatePath = vi.fn();
 let turno: { userId: string } | undefined;
 const inserted = vi.fn();
+const recordChange = vi.fn();
 
 vi.mock('next/cache', () => ({ revalidatePath }));
 vi.mock('../../src/server/auth', () => ({ requireMember }));
 vi.mock('../../src/server/observability/report', () => ({ reportError }));
 vi.mock('../../src/server/repositories/portal-device', () => ({ PORTAL_DEVICE_ID: 'portal' }));
+vi.mock('../../src/server/repositories/sync-log', () => ({ recordChange }));
 vi.mock('@xangarro/data-pg', () => ({ cajaTurnos: {}, mensajesOperador: {} }));
 vi.mock('../../src/server/db', () => ({
   withTenant: (_biz: string, fn: (tx: unknown) => unknown) =>
@@ -40,6 +42,24 @@ describe('pedirAclaracion', () => {
     const row = inserted.mock.calls[0]?.[0] as { operadorId: string; cuerpo: string };
     assert.equal(row.operadorId, 'op-1');
     assert.equal(row.cuerpo, '¿Y los $50?');
+  });
+
+  it('tells the phones, in the same transaction, so a linked caja pulls it (ADR-075)', async () => {
+    assert.deepEqual(await pedirAclaracion('t-1', 'Hola'), { ok: true });
+    const row = inserted.mock.calls[0]?.[0] as { id: string };
+    assert.equal(recordChange.mock.calls.length, 1);
+    assert.deepEqual(recordChange.mock.calls[0]?.slice(1), [
+      'biz-1',
+      'mensajes_operador',
+      row.id,
+      'insert',
+    ]);
+  });
+
+  it('a turno that is gone tells the phones nothing', async () => {
+    turno = undefined;
+    await pedirAclaracion('t-gone', 'Hola');
+    assert.equal(recordChange.mock.calls.length, 0);
   });
 
   it('a turno that no longer exists says so, and is not an incident', async () => {

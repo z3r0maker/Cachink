@@ -1,7 +1,9 @@
 import { expect, test, type Page } from './test';
 
 import { cobrarCon } from './cobrar';
+import { clickUntil } from './interact';
 import { puertaOperador } from './puerta-operador';
+import { asTenant, BIZ } from './sync-phone';
 
 test.beforeEach(() => test.setTimeout(120_000));
 
@@ -98,3 +100,50 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
     page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),
   ).toBeAttached();
 });
+
+/**
+ * J5-04: a Transferencia sale registers at once, like Tarjeta, and reaches the
+ * owner's ledger with its method — the push, the server's accept, the
+ * Movimientos row and its drawer, not just the register's toast.
+ */
+test('a Transferencia sale reaches the owner’s Movimientos as Transferencia', async ({ page }) => {
+  const nombre = 'Agua de jamaica transferida';
+  await puertaOperador(page, [{ nombre, precioCentavos: 3700, sku: 'OPCAJA2' }]);
+  await page.goto('/operador/caja');
+  await page
+    .getByRole('button', { name: new RegExp(nombre) })
+    .first()
+    .click();
+  const antes = await ticketsCon(nombre);
+  await cobrarCon(page, 'Transferencia');
+  await expect(page.getByRole('status')).toContainText('Venta registrada · $37.00');
+
+  // The outbox flushes on its own: the ticket is in Postgres, as Transferencia.
+  await expect
+    .poll(async () => (await ticketsCon(nombre)).length, { timeout: 20_000 })
+    .toBe(antes.length + 1);
+  const nuevo = (await ticketsCon(nombre)).find((t) => !antes.some((a) => a.id === t.id));
+  expect(nuevo?.metodo).toBe('Transferencia');
+
+  // The register dates the sale by the device's own clock, not the portal's
+  // pinned day, so the owner looks it up by name over the whole history.
+  await page.goto(`/movimientos?rango=personalizado&q=${encodeURIComponent(nombre)}`);
+  const fila = page.locator('main tbody tr').filter({ hasText: nombre }).first();
+  await expect(fila).toContainText('Transferencia');
+  await expect(fila).toContainText('+$37.00');
+  const cajon = page.getByRole('dialog');
+  await clickUntil(fila, cajon);
+  await expect(cajon.getByText('Cómo pagaron')).toBeVisible();
+  await expect(cajon.getByText('Transferencia').first()).toBeVisible();
+});
+
+/** The tickets whose line names `concepto`, with their method. */
+function ticketsCon(concepto: string): Promise<{ id: string; metodo: string }[]> {
+  return asTenant(BIZ, async (sql) => {
+    const rows = await sql<{ id: string; metodo: string }[]>`
+      SELECT t.id, t.metodo FROM tickets t
+      WHERE EXISTS (SELECT 1 FROM sales s WHERE s.ticket_id = t.id
+                    AND s.concepto LIKE ${`%${concepto}%`})`;
+    return [...rows];
+  });
+}

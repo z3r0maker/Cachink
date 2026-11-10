@@ -295,10 +295,13 @@ run_curated_suite() {
     cierre-cuadra
     caja-cierre-discrepancia
     cierre-faltante
+    cierre-sobrante
     cobrar-efectivo-falta
     cobrar-ticket-largo
     cobrar-ultima-pieza
     venta-fiado-cancelar
+    interrupcion-matar-ticket
+    interrupcion-rotar-ticket
     sin-internet-cobrar
     sin-internet-cierre
     plan-pago-pendiente
@@ -307,6 +310,7 @@ run_curated_suite() {
     dispositivo-revocado
     settings-borrar
     settings-desvincular
+    activation-errors
     activation
     login-operator-pin
   )

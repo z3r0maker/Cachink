@@ -1,0 +1,26 @@
+# Reusable subflow: from anywhere past login with a turno open, put two lines
+# on the ticket (the grid's first two tiles in es-MX order: Agua de horchata
+# $40 and Agua de jamaica $42.50) and check the bar says so.
+#
+# Leaves the app on the Cobrar grid with «2 piezas · $82.50» on the ticket.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+# A ticket left over from an earlier flow would change the count.
+- runFlow:
+    when:
+      visible:
+        id: 'cobrar-bar-vaciar'
+    commands:
+      - tapOn: { id: 'cobrar-bar-vaciar' }
+- tapOn:
+    id: 'cobrar-tile-01JPRD00000000000000000007'
+- tapOn:
+    id: 'cobrar-tile-01JPRD00000000000000000008'
+- assertVisible: '2 piezas ·'
+- assertVisible: '\$82\.50'
