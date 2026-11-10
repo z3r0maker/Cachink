@@ -1437,8 +1437,10 @@ micro-POS than location does.
     service-role guard now scans every code root outside `apps/backoffice`. Verified: contracts,
     sync, ui, mobile, observability, application, domain and web suites; `test:conformance`
     against the built portal on a seeded Postgres (5 suites, the two accepted reports logged as
-    `bug` items under the token's business). **Not run:** Maestro (`bug-report-sheet.yaml` was
-    updated to accept either primary action) and the app on a device. **Owner:** un-deploy the
+    `bug` items under the token's business). Maestro, 2026-11-10, iPhone 17 Pro simulator (iOS 26.5)
+    against the contracts mock: `bug-report-sheet.yaml` (reports off: sharing is the only action)
+    and the new `bug-report-enviar.yaml` (reports on: the report is sent with the device token and
+    the sheet closes) both pass. **Not run:** the app on a physical device. **Owner:** un-deploy the
     function if it was deployed; delete the `*_BUG_INGEST_URL` and `*_CLOUD_*` EAS secrets; the
     portal needs `ADMIN_INGEST_URL` and `ADMIN_INGEST_SECRET` in production.
 - **What:** `POST /api/v1/support/bug-report` under `deviceRoute`, ids taken from the device token;

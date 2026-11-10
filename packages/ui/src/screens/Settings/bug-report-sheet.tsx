@@ -5,10 +5,12 @@
  *   1. User writes a description of the issue
  *   2. App auto-attaches last 50 audit + 20 error entries
  *   3. PII is scrubbed via @xangarro/observability/pii-scrubber
- *   4. When consent is on → POST to Edge Function → user sees "Reporte enviado"
- *   5. On network failure → report is silently queued for retry
+ *   4. When consent is on and the phone is linked → the device API
+ *      (`POST /api/v1/support/bug-report`, N-81) → user sees "Reporte enviado"
+ *   5. On a failure or a refusal → the sheet says so and points at sharing as
+ *      a file; nothing is queued
  *   6. "Compartir como archivo" remains as secondary button (and the only
- *      path when consent is off)
+ *      path when consent is off or the phone is not linked)
  */
 
 import React, { type ReactElement } from 'react';
