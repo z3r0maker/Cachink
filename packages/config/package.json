@@ -13,6 +13,10 @@
     "./security": {
       "types": "./security.d.ts",
       "default": "./security.js"
+    },
+    "./error-report": {
+      "types": "./error-report.d.ts",
+      "default": "./error-report.js"
     }
   },
   "files": [
@@ -23,7 +27,9 @@
     "tsconfig.base.json",
     "tsconfig.lib.json",
     "security.js",
-    "security.d.ts"
+    "security.d.ts",
+    "error-report.js",
+    "error-report.d.ts"
   ],
   "dependencies": {
     "eslint-plugin-boundaries": "^6.0.2",

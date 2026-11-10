@@ -10,6 +10,7 @@ import { setPlatformFlag, type FlagChange } from '../flags/set-flag';
 import { flagDeps } from '../flags/wiring';
 import { NotPermitted } from '../staff';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /**
  * The flag page's one mutation (N-09): append a platform-flag event. It goes
@@ -28,7 +29,7 @@ const MESSAGES: Record<FlagErrorCode, string> = {
 function failed(error: unknown): FormState {
   if (error instanceof FlagError) return { ok: false, message: MESSAGES[error.code] };
   if (error instanceof NotPermitted) return { ok: false, message: error.message };
-  console.error('cambiarFlag failed', error);
+  reportError(error, 'cambiarFlag failed');
   return { ok: false, message: 'No se pudo guardar. Intenta de nuevo.' };
 }
 

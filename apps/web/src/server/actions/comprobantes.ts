@@ -10,7 +10,7 @@ import { requireMember } from '../auth';
 import { LOGO_INVALIDO, processLogo } from '../branding/logo';
 import { portalOrigin } from '../billing/origin';
 import { withTenant } from '../db';
-import { logoPublico, upsertLogo } from '@xangarro/data-pg';
+import { upsertLogo } from '@xangarro/data-pg';
 import { pgBusinessesRepository } from '../repositories/businesses';
 
 /**
@@ -112,9 +112,4 @@ export async function guardarComprobantes(
   } catch (error) {
     return failure(error, 'guardarComprobantes');
   }
-}
-
-/** Read-side for the screen without touching the action file's clients. */
-export async function logoActual(businessId: string): Promise<boolean> {
-  return withTenant(businessId, (tx) => logoPublico(tx, businessId)).then((l) => l !== null);
 }

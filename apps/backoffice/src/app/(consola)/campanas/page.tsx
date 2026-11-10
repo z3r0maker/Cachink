@@ -23,6 +23,7 @@ import { one, oneOf, type SearchParams } from '../search-params';
 import { table, tableWrap, td, th, wide } from '../tenants/tenants.css';
 import { campanasNota, type Embudo } from './embudo';
 import { EmbudoView } from './embudo-view';
+import { reportError } from '@/server/observability/report';
 
 /**
  * N-57 · Campañas: which campaign brought each business in, and from where.
@@ -50,7 +51,7 @@ async function load(rango: AttributionRangeId): Promise<AttributionView | string
       return 'Esa vista no es válida.';
     }
     const failure = classifyInfraFailure(error);
-    console.error(`[campanas] ${failure.cause}/${failure.detail} db=${dbFingerprint()}`, error);
+    reportError(error, `[campanas] ${failure.cause}/${failure.detail} db=${dbFingerprint()}`);
     return infraFailureMessage(failure, {
       on: process.env.ADMIN_DIAGNOSTICS === '1',
       db: dbFingerprint(),
@@ -68,7 +69,7 @@ async function loadEmbudo(rango: AttributionRangeId, altas: number): Promise<Emb
     ]);
     return { visitas: v.national ?? 0, checkouts: c.national ?? 0, altas };
   } catch (error) {
-    console.error('[campanas] embudo failed', error);
+    reportError(error, '[campanas] embudo failed');
     return null;
   }
 }

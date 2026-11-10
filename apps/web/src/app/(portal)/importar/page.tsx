@@ -1,6 +1,6 @@
 import { HazloPorMi } from './hazlo-por-mi';
 import { ImportarScreen } from './parts';
-import { importacionAsistidaActual, planDelNegocio } from '@/server/actions/hazlo-por-mi';
+import { importacionAsistidaActual, planDelNegocio } from '@/server/import/asistida';
 import { requireMember } from '@/server/auth';
 import type { TemplateId } from '@/server/import/templates';
 

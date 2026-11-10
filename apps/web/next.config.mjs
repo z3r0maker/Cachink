@@ -1,5 +1,5 @@
 import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
-import { securityHeaders } from '@xangarro/config/security';
+import { securityHeaders, UPLOADED_BYTES_CSP } from '@xangarro/config/security';
 
 /**
  * The vanilla-extract plugin is a **webpack** integration, and Next 16 builds
@@ -15,16 +15,56 @@ const withVanillaExtract = createVanillaExtractPlugin();
  * Every response, static assets included (SEC-WEB-01, N-26). Enforced from
  * day one because none of them can break a page: no framing (clickjacking of
  * «Revocar» and «Generar código»), no MIME sniffing, HSTS, a referrer that
- * never leaves the origin with a path. `frame-ancestors` is also sent as an
- * enforced one-directive CSP; the full script policy is `src/proxy.ts`'s,
- * report-only until its violation log is clean.
+ * never leaves the origin with a path.
  */
-export const SECURITY_HEADERS = [
-  ...securityHeaders({
-    referrer: 'strict-origin-when-cross-origin',
-    permissions: 'camera=(), microphone=(), geolocation=(), payment=()',
-  }),
-  { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+export const SECURITY_HEADERS = securityHeaders({
+  referrer: 'strict-origin-when-cross-origin',
+  permissions: 'camera=(), microphone=(), geolocation=(), payment=()',
+});
+
+/**
+ * The path prefixes `src/proxy.ts` leaves alone: API responses and static
+ * files. Next reads the proxy's `matcher` statically, so it is a literal
+ * there; `tests/security-headers.test.ts` holds it to this list.
+ */
+export const PROXY_SKIPS = [
+  'api/',
+  '_next/static',
+  '_next/image',
+  'favicon.ico',
+  'icon.svg',
+  'apple-icon.png',
+  'sw.js',
+  'sql-wasm.wasm',
+  'sin-conexion.html',
+];
+
+const CSP = 'Content-Security-Policy';
+
+/**
+ * One Content-Security-Policy per response, written by exactly one layer
+ * (audit F-01, F-04), so the result never depends on how a host merges a
+ * header set twice. `next start` drops a route handler's header when a rule
+ * here already set that name, and lets the proxy's replace it; another host
+ * need not do either.
+ *
+ * - Pages: the proxy's enforced policy, and nothing from here.
+ * - What the proxy skips: no framing.
+ * - Uploaded bytes (logos, product photos): the sandbox. A later rule
+ *   overrides an earlier one, so these come last. Their route handlers send
+ *   the same value, which is what reaches the wire if a rule here is lost.
+ */
+export const HEADER_RULES = [
+  { source: '/:path*', headers: [...SECURITY_HEADERS] },
+  {
+    source: `/((?:${PROXY_SKIPS.join('|')}).*)`,
+    headers: [{ key: CSP, value: "frame-ancestors 'none'" }],
+  },
+  { source: '/api/logos/:businessId', headers: [{ key: CSP, value: UPLOADED_BYTES_CSP }] },
+  {
+    source: '/api/productos/:productId/imagen',
+    headers: [{ key: CSP, value: UPLOADED_BYTES_CSP }],
+  },
 ];
 
 /** @type {import('next').NextConfig} */
@@ -32,7 +72,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: '/:path*', headers: [...SECURITY_HEADERS] }];
+    return HEADER_RULES;
   },
   // Where the build goes. The E2E suite sets NEXT_DIST_DIR=.next-e2e/<port>:
   // several sessions build in this directory, and a `next build` that replaces

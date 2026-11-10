@@ -78,6 +78,19 @@ describe('processLogo — refused, each in the owner’s words', () => {
     );
   });
 
+  it('an SVG the old filter stored: script under a prefix, an encoded javascript: link (audit F-01)', async () => {
+    const hostile = [
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://www.w3.org/2000/svg"><x:script>alert(1)</x:script></svg>',
+      '<svg xmlns="http://www.w3.org/2000/svg"><a href="java&#115;cript:alert(1)"><text>x</text></a></svg>',
+    ];
+    for (const svg of hostile) {
+      assert.equal(
+        await refusal(new File([svg], 'logo.svg', { type: 'image/svg+xml' })),
+        'Ese SVG trae elementos que no permitimos.',
+      );
+    }
+  });
+
   it('bytes that claim to be a PNG and are not: the owner’s file, not an outage', async () => {
     const fake = new File([new Uint8Array([1, 2, 3, 4, 5])], 'logo.png', { type: 'image/png' });
     assert.equal(await refusal(fake), 'No pudimos leer esa imagen. Prueba con otro archivo.');

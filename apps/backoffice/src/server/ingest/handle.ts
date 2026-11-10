@@ -12,6 +12,7 @@ import { createSupportItem, type CreateDeps } from '../inbox/create';
 import { SupportItemError } from '../inbox/errors';
 import type { SupportItemRepository } from '../inbox/port';
 import { secretMatches } from './secret';
+import { reportError } from '../observability/report';
 
 export const INGEST_SECRET_HEADER = 'x-admin-ingest-secret';
 export const MAX_BODY_BYTES = 64 * 1024;
@@ -44,7 +45,7 @@ function failure(error: unknown): Response {
   if (error instanceof SupportItemError && error.code === 'VALIDATION') {
     return reply(400, { error: 'invalid_item', message: error.message });
   }
-  console.error('support item ingest failed', error);
+  reportError(error, 'support item ingest failed');
   return reply(500, { error: 'store_failed' });
 }
 

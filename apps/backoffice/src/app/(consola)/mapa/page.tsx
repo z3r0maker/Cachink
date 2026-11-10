@@ -27,6 +27,7 @@ import { formatValue } from './format';
 import { legend, swatch } from './mapa.css';
 import { mapaNota } from './nota';
 import { mapaHref, parseMetric, parseRange } from './params';
+import { reportError } from '@/server/observability/report';
 
 /**
  * N-56 · Mapa: where people log in, buy and arrive from, by state.
@@ -59,7 +60,7 @@ async function load(metrica: MetricId, rango: GeoRange): Promise<GeoView | strin
       return 'Esa vista no es válida.';
     }
     const failure = classifyInfraFailure(error);
-    console.error(`[mapa] ${failure.cause}/${failure.detail} db=${dbFingerprint()}`, error);
+    reportError(error, `[mapa] ${failure.cause}/${failure.detail} db=${dbFingerprint()}`);
     return infraFailureMessage(failure, {
       on: process.env.ADMIN_DIAGNOSTICS === '1',
       db: dbFingerprint(),

@@ -12,6 +12,7 @@ import { SupportItemError, type SupportItemErrorCode } from '../inbox/errors';
 import { changeSupportItemStatus, type StatusResult } from '../inbox/status';
 import { NotPermitted } from '../staff';
 import { field, type FormState } from './form-state';
+import { reportError } from '../observability/report';
 
 /**
  * The inbox's two mutations (N-08). Both go through `auditedMutation`: the
@@ -31,7 +32,7 @@ const MESSAGES: Record<SupportItemErrorCode, string> = {
 function failed(where: string, error: unknown): FormState {
   if (error instanceof SupportItemError) return { ok: false, message: MESSAGES[error.code] };
   if (error instanceof NotPermitted) return { ok: false, message: error.message };
-  console.error(`${where} failed`, error);
+  reportError(error, `${where} failed`);
   return { ok: false, message: 'No se pudo guardar. Intenta de nuevo.' };
 }
 

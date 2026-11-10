@@ -3,8 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { auditedMutation } from '../audited';
-import { db } from '../db/client';
-import { fileBytes, markForApproval } from '../db/assisted-imports';
+import { markForApproval } from '../db/assisted-imports';
 import { requireStaff } from '../staff';
 
 /**
@@ -69,9 +68,4 @@ function validarFormulario(form: FormData):
   if (!MIMES.has(file.type)) return 'Solo .xlsx o .csv.';
   if (file.size > 20 * 1024 * 1024) return 'El archivo pesa más de 20 MB.';
   return { id, businessId, plantilla, file };
-}
-
-/** Staff never apply; this read exists only for the detail page's preview link. */
-export async function archivoMapeado(fileId: string) {
-  return fileBytes(db(), fileId);
 }

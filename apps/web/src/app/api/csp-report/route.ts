@@ -1,8 +1,8 @@
 import { parseViolations } from '@/server/security/csp-report';
 
 /**
- * `POST /api/csp-report` — where the browser sends CSP violations while the
- * portal's policy is report-only (SEC-WEB-01). One structured log line per
+ * `POST /api/csp-report` — where the browser sends what the portal's policy
+ * blocked (SEC-WEB-01; enforced since audit F-04). One structured log line per
  * violation, and always 204: a reporting endpoint that errors teaches nothing.
  */
 const MAX_BYTES = 16_384;

@@ -1,51 +1,14 @@
 /**
- * Brand helpers for N-19: sanitising an uploaded SVG and pulling the brand
- * colour out of a decoded logo. Pure string/pixel work, no I/O — the server
- * decodes the raster (sharp) and hands pixels here, where every rule is
- * tested.
+ * Brand helpers for N-19: an uploaded SVG's gate and the brand colour pulled
+ * out of a decoded logo. Pure string/pixel work, no I/O — the server decodes
+ * the raster (sharp) and hands pixels here, where every rule is tested.
+ *
+ * The SVG half lives beside this file (audit F-01): `svg-tidy.ts` drops what
+ * an editor exports around a drawing, and `svg-allowlist.ts` is the gate that
+ * decides whether the result is stored.
  */
-
-/** Everything an SVG must not carry into our origin (N-19 acceptance). */
-export function sanitiseSvg(source: string): string {
-  let svg = source
-    // Entity tricks that could smuggle markup past the tag filters below.
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<\?[\s\S]*?\?>/g, '');
-
-  // Drop the dangerous elements outright, with whatever they contain.
-  svg = svg.replace(
-    /<\s*(script|foreignObject|iframe|embed|object|animate|set|handler|use)\b[\s\S]*?<\s*\/\s*\1\s*>/gi,
-    '',
-  );
-  svg = svg.replace(
-    /<\s*(script|foreignObject|iframe|embed|object|animate|set|handler|use)\b[^>]*\/?>/gi,
-    '',
-  );
-
-  // Event handlers and javascript/data URLs, on any element that survives.
-  svg = svg.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '');
-  svg = svg.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '');
-  svg = svg.replace(/(?:xlink:href|href)\s*=\s*"(?:javascript|data):[^"]*"/gi, '');
-  svg = svg.replace(/(?:xlink:href|href)\s*=\s*'(?:javascript|data):[^']*'/gi, '');
-  svg = svg.replace(/\bstyle\s*=\s*"[^"]*(?:javascript:|expression\()[^"]*"/gi, '');
-
-  return svg.trim();
-}
-
-/** True when nothing dangerous survived — the upload's final gate. */
-export function svgIsSafe(svg: string): boolean {
-  const lower = svg.toLowerCase();
-  return !(
-    lower.includes('<script') ||
-    lower.includes('foreignobject') ||
-    /\son[a-z]+\s*=/.test(lower) ||
-    lower.includes('javascript:') ||
-    lower.includes('<iframe') ||
-    lower.includes('<embed') ||
-    lower.includes('<object')
-  );
-}
+export { svgIsSafe } from './svg-allowlist';
+export { sanitiseSvg } from './svg-tidy';
 
 interface Rgb {
   readonly r: number;

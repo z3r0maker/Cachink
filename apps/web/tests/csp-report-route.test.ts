@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { afterEach, describe, it, vi } from 'vitest';
 
 /**
- * `POST /api/csp-report` (SEC-WEB-01): the browser's CSP-violation firehose
- * while the policy is report-only. One structured line per violation — at
+ * `POST /api/csp-report` (SEC-WEB-01): the browser's CSP-violation firehose,
+ * now of what the enforced policy blocked. One structured line per violation — at
  * most ten, at most 16 KB — and always 204, because a reporting endpoint
  * that errors teaches the browser nothing.
  */

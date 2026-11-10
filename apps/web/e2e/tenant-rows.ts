@@ -109,6 +109,19 @@ export async function addProductPhoto(t: Tenant, productoId: string): Promise<st
   return id;
 }
 
+/**
+ * A logo's bytes exactly as given, written past the upload gate. For the spec
+ * that proves the serving route holds on its own (audit F-01): what is stored
+ * here is whatever a wrong gate would have let through.
+ */
+export async function addLogo(t: Tenant, svg: string): Promise<void> {
+  await asTenant(t.biz, async (sql) => {
+    await sql`
+      INSERT INTO business_logos (business_id, mime, bytes, updated_at)
+      VALUES (${t.biz}, 'image/svg+xml', convert_to(${svg}, 'UTF8'), now())`;
+  });
+}
+
 /** A second device, for the specs about slots and pairing. */
 export async function addDevice(t: Tenant, nombre = 'Caja norte'): Promise<string> {
   const id = newUlid();

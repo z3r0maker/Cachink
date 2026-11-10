@@ -120,4 +120,29 @@ describe('exportarCortes', () => {
     assert.equal(faltanteCeldas[9], 'Revisar entrega');
     assert.deepEqual(revocadas, ['blob:cortes']);
   });
+
+  it('writes what an operator typed as text, never as a formula (audit F-15a)', async () => {
+    const hostil = corte({
+      operador: '=HYPERLINK("http://evil.example","Ana")',
+      caja: '+52 55 0000',
+      conteo: { 'billete-100': 1 },
+      motivo: '-2+3',
+      nota: '@SUM(E2:E9)',
+      estado: 'Por aclarar',
+    });
+    exportarCortes([hostil], (c) => c.estado);
+    const csv = await (creados[0] as Blob).text();
+    const celdasHostil = celdas(csv.split('\n')[1] ?? '');
+
+    // Each free-text cell opens on a quote mark, which a spreadsheet reads as «text follows».
+    assert.equal(celdasHostil[0], `"'=HYPERLINK(""http://evil.example"",""Ana"")"`);
+    assert.equal(celdasHostil[1], `'+52 55 0000`);
+    assert.equal(celdasHostil[8], `'-2+3`);
+    assert.equal(celdasHostil[9], `'@SUM(E2:E9)`);
+    // The amounts are the app's own and stay numbers, the shortfall's minus included.
+    assert.equal(celdasHostil[4], toPesosString(esperado(hostil)));
+    assert.equal(celdasHostil[5], toPesosString(contado(hostil)));
+    assert.equal(celdasHostil[6], `-${toPesosString(diferencia(hostil).monto)}`);
+    assert.match(celdasHostil[6] ?? '', /^-\d+\.\d{2}$/);
+  });
 });

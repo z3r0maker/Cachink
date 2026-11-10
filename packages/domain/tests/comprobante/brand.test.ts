@@ -8,36 +8,51 @@ import {
   svgIsSafe,
 } from '../../src/comprobante/index.js';
 
-describe('sanitiseSvg (N-19: malicious SVG is neutralised)', () => {
-  it('strips a script element and its payload', () => {
-    const dirty =
-      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><circle r="9"/></svg>';
-    const clean = sanitiseSvg(dirty);
-    assert.equal(svgIsSafe(clean), true);
-    assert.equal(clean.includes('alert'), false);
-    assert.match(clean, /circle/);
+/**
+ * N-19: a malicious SVG never reaches storage. Since audit F-01 it is refused
+ * rather than repaired: the old filter stripped what it recognised and stored
+ * the rest, which is how `<x:script>` got through. The corpus is in
+ * `svg-allowlist.test.ts`; these are the three files N-19 was accepted with.
+ */
+describe('sanitiseSvg then svgIsSafe (N-19: a malicious SVG is refused)', () => {
+  const stored = (dirty: string) => svgIsSafe(sanitiseSvg(dirty));
+
+  it('refuses a script element', () => {
+    assert.equal(
+      stored(
+        '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><circle r="9"/></svg>',
+      ),
+      false,
+    );
   });
 
-  it('strips foreignObject and event handlers', () => {
-    const dirty =
-      '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" onload="steal()"/>' +
-      '<foreignObject><body>x</body></foreignObject></svg>';
-    const clean = sanitiseSvg(dirty);
-    assert.equal(svgIsSafe(clean), true);
-    assert.equal(clean.includes('onload'), false);
-    assert.equal(clean.toLowerCase().includes('foreignobject'), false);
+  it('refuses foreignObject and event handlers', () => {
+    assert.equal(
+      stored(
+        '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" onload="steal()"/></svg>',
+      ),
+      false,
+    );
+    assert.equal(
+      stored(
+        '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><body>x</body></foreignObject></svg>',
+      ),
+      false,
+    );
   });
 
-  it('strips javascript: and data: hrefs, self-closing script and DOCTYPE tricks', () => {
-    const dirty =
-      '<!DOCTYPE svg [<!ENTITY x "<script>bad()</script>">]>' +
-      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-      '<a xlink:href="javascript:bad()"><text>hi</text></a><script xlink:href="data:text/js,bad()"/>' +
-      '</svg>';
-    const clean = sanitiseSvg(dirty);
-    assert.equal(svgIsSafe(clean), true);
-    assert.equal(clean.toLowerCase().includes('javascript:'), false);
-    assert.equal(clean.toLowerCase().includes('data:text'), false);
+  it('refuses javascript: and data: hrefs, a self-closing script and DOCTYPE tricks', () => {
+    const open =
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+    assert.equal(
+      stored(`${open}<a xlink:href="javascript:bad()"><text>hi</text></a></svg>`),
+      false,
+    );
+    assert.equal(stored(`${open}<script xlink:href="data:text/js,bad()"/></svg>`), false);
+    assert.equal(
+      stored(`<!DOCTYPE svg [<!ENTITY x "<script>bad()</script>">]>${open}<text>&x;</text></svg>`),
+      false,
+    );
   });
 
   it('keeps an honest logo intact', () => {

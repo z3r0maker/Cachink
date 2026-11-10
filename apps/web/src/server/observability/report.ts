@@ -1,14 +1,19 @@
 import 'server-only';
 
 import * as Sentry from '@sentry/node';
+import { describeError, redactError } from '@xangarro/config/error-report';
 
 /**
  * Where every server-side failure goes (B-18): Sentry, tagged so it can be
  * found by business and device, and one structured line on stdout.
  *
  * Only ids and codes are written — never an email, a PIN, a name or a row's
- * contents (the plan's no-PII rule). A Postgres error's `detail` can carry
- * column values, so it is not copied; its SQLSTATE `code` is.
+ * contents (the plan's no-PII rule). A failed query is where that rule is
+ * easiest to break (audit F-14): Drizzle's message is the SQL **and its bound
+ * parameters**, and Postgres' `detail` quotes the row. So a database error is
+ * logged and sent as its name, its SQLSTATE and the names of the constraint,
+ * table and column, and nothing else; any other error keeps its message. The
+ * rule itself is `@xangarro/config/error-report`, shared with the console.
  */
 export interface ReportScope {
   /** What was running: a route (`sync/push`) or an action (`crearOperador`). */
@@ -17,22 +22,12 @@ export interface ReportScope {
   readonly deviceId?: string;
 }
 
-function describe(error: unknown): { name: string; message: string; code?: string } {
-  const e = error as { name?: string; message?: string; code?: string; cause?: { code?: string } };
-  const code = e?.code ?? e?.cause?.code;
-  return {
-    name: e?.name ?? typeof error,
-    message: e?.message ?? String(error),
-    ...(typeof code === 'string' ? { code } : {}),
-  };
-}
-
 export function reportError(error: unknown, scope: ReportScope): void {
   Sentry.withScope((s) => {
     s.setTag('endpoint', scope.endpoint);
     if (scope.businessId !== undefined) s.setTag('business_id', scope.businessId);
     if (scope.deviceId !== undefined) s.setTag('device_id', scope.deviceId);
-    Sentry.captureException(error);
+    Sentry.captureException(redactError(error));
   });
   console.error(
     JSON.stringify({
@@ -40,7 +35,7 @@ export function reportError(error: unknown, scope: ReportScope): void {
       endpoint: scope.endpoint,
       business_id: scope.businessId,
       device_id: scope.deviceId,
-      ...describe(error),
+      ...describeError(error),
     }),
   );
 }

@@ -1,13 +1,11 @@
 'use server';
 
-import type { BusinessId, PlanId } from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { SolicitarImportacionAsistidaUseCase } from '@xangarro/application';
 import {
-  assistedFilesOf,
   claimForApproval,
   createAssistedImport,
   hasActiveAssistedImport,
-  latestAssistedImport,
   rejectAssistedImport,
 } from '@xangarro/data-pg';
 import { revalidatePath } from 'next/cache';
@@ -25,6 +23,7 @@ import { TEMPLATES } from '../import/templates';
  * `kind=migracion`. The approval is the data layer's claim — staff cannot
  * apply anything — and the commit runs the same template registry the
  * self-service import uses, over the staff-mapped file, in one transaction.
+ * What the /importar card reads is in `../import/asistida.ts` (audit F-03).
  */
 
 /** The use case's and the data layer's refusals; anything else is an incident. */
@@ -163,19 +162,4 @@ async function aplicarPendiente(
   }
   await template.apply(tx, businessId, planned as readonly unknown[]);
   return { outcome: 'aplicada', plantilla: claim.plantilla };
-}
-
-/** Read side for the /importar card. */
-export async function importacionAsistidaActual(businessId: string) {
-  return withTenant(businessId, async (tx) => {
-    const row = await latestAssistedImport(tx, businessId);
-    if (row === null) return null;
-    return { ...row, files: await assistedFilesOf(tx, row.id) };
-  });
-}
-
-export async function planDelNegocio(businessId: string): Promise<PlanId> {
-  return withTenant(businessId, (tx) => tenantEntitlement(tx, businessId, new Date())).then(
-    (e) => e.plan,
-  );
 }
