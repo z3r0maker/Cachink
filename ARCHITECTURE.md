@@ -10015,7 +10015,7 @@ could delete its business's sales directly.
 
 ---
 
-## ADR-139
+## ADR-140
 
 **Title:** The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data
 
@@ -10127,18 +10127,18 @@ switch is a second layer, never the only one.
 
 ---
 
-## ADR-140
+## ADR-141
 
 **Title:** The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired
 
 **Date:** 2026-11-09
 
-**Status:** Accepted — N-81, C-25; closes audit F-10 and completes ADR-139 §9; amends ADR-063's «the `bug-report` function» as a source of inbox items
+**Status:** Accepted — N-81, C-25; closes audit F-10 and completes ADR-140 §9; amends ADR-063's «the `bug-report` function» as a source of inbox items
 
 **Context**
 
 The Supabase edge function `bug-report` held the service-role key outside the console, let anyone with
-the public anon key post, and believed the device and business ids in the body (audit F-10). ADR-139
+the public anon key post, and believed the device and business ids in the body (audit F-10). ADR-140
 made its limits fail closed, which left it refusing every report: its tables were never migrated and
 the service role holds no grant since ADR-138. Reading the phone for the move showed two more things.
 **The bug-report sheet was never given a sender**, so «Reportar un problema» has only ever shared a

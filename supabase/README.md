@@ -15,7 +15,7 @@ Everything else that once lived here is gone:
 - **The schema** is `packages/data-pg` (Drizzle, `drizzle/*.sql`), applied to the hosted project by
   `pnpm --filter @xangarro/data-pg db:migrate:hosted`. See `docs/ops/provisioning.md`. Never run
   `supabase db push` against the hosted project.
-- **The `bug-report` edge function** was retired by N-81 (ADR-140). The phone's «Reportar un
+- **The `bug-report` edge function** was retired by N-81 (ADR-141). The phone's «Reportar un
   problema» goes to the portal's `POST /api/v1/support/bug-report` with the device token, and the
   portal files it in the staff inbox. No function is deployed, nothing outside `apps/backoffice`
   holds the service-role key, and the app carries no Supabase URL or key at all.

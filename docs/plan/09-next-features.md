@@ -750,7 +750,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - Progress: 2026-11-09 · branch `fix/security-audit-2026-11-09` · second pass
   `docs/audits/security-2026-11-09.md` (static, on `main` at 91cc4474; three independent reads, each
   top finding re-read and the SVG filter run): 0 critical, 1 high, 11 medium, 3 low. Fixed on the
-  branch (ADR-139): the SVG logo XSS (F-01, high), the runtime RLS-bypass refusal (F-02), unguarded
+  branch (ADR-140): the SVG logo XSS (F-01, high), the runtime RLS-bypass refusal (F-02), unguarded
   `'use server'` exports (F-03), the enforced script CSP (F-04), the push clock and row identity
   (F-05 a/b), the production secret policy and token rotation (F-06), the per-owner NIP lockout
   (F-08), the fail-closed bug-report limits (F-10), the audit gate, release-age delay and Next.js
@@ -1420,9 +1420,9 @@ micro-POS than location does.
 
 ### N-81 El reporte del teléfono entra por `/api/v1` y la función `bug-report` se retira [media]
 
-- [x] Status · **Surfaced by:** N-26 (F-10, ADR-139 §9) · **Trigger:** ya; es un cambio de contrato (`C-`), entra a `main` primero
+- [x] Status · **Surfaced by:** N-26 (F-10, ADR-140 §9) · **Trigger:** ya; es un cambio de contrato (`C-`), entra a `main` primero
   - Done: 2026-11-09 · branch `feat/n81-bug-report-api`, stacked on `fix/security-audit-2026-11-09`
-    (ADR-140, C-25). The route is `apps/web/src/app/api/v1/support/bug-report/route.ts` over
+    (ADR-141, C-25). The route is `apps/web/src/app/api/v1/support/bug-report/route.ts` over
     `server/support/bug-report.ts`: device and business from the token, 20 reports a day per device
     and 60 per business through the Postgres throttle (taken after validation, failing closed), the
     description kept whole and the snapshot trimmed to an inbox item's 10,000 characters, stack
@@ -1447,7 +1447,7 @@ micro-POS than location does.
   the device token instead of the anon key. Then `supabase/functions/bug-report` and its service-role
   key are deleted, with the Deno job in CI.
 - **Why now:** since ADR-138 the function's service role holds no grant and its tables were never
-  migrated, so with ADR-139's fail-closed limits a redeployed function refuses every report and the
+  migrated, so with ADR-140's fail-closed limits a redeployed function refuses every report and the
   phone falls back to sharing the report as a file.
 - **Acceptance:** a report from a linked phone reaches the staff inbox with the token's device and
   business; a caller without a device token gets 401; the service-role guard finds the key nowhere
@@ -1488,7 +1488,7 @@ update --channel production --private-key-path keys/private-key.pem`.
 
 ### N-84 Push: del registro de anomalías a los rechazos y las restricciones [baja]
 
-- [ ] Status · **Surfaced by:** N-26 (F-05 c/d, ADR-139 §5) · **Trigger:** 30 días de `push_anomaly` en producción con dispositivos reales
+- [ ] Status · **Surfaced by:** N-26 (F-05 c/d, ADR-140 §5) · **Trigger:** 30 días de `push_anomaly` en producción con dispositivos reales
 - **What:** read the `evt: 'push_anomaly'` log. If `NEGATIVE_MONEY` never fired: add, as `NOT VALID`
   then validated, `client_payments.monto_centavos > 0` and `tickets.cambio_centavos IS NULL OR
 cambio_centavos >= 0`. Widen the detector before any further column (`caja_movimientos.monto`,

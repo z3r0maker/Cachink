@@ -5,7 +5,7 @@
  * - Production: SqliteLogStore with 7-day retention.
  *
  * The log is local. It once could also be dual-written to an HTTP backend;
- * that path was retired with the `bug-report` edge function (N-81, ADR-140).
+ * that path was retired with the `bug-report` edge function (N-81, ADR-141).
  *
  * The factory initializes the SQLite table on first call.
  */

@@ -40,7 +40,7 @@ certificate, or a submission to a human-operated review queue.
 The phone's «Reportar un problema» goes to the portal
 (`POST /api/v1/support/bug-report`, device token) and lands in the staff
 inbox; crash telemetry is Sentry's (step 5). The Supabase `bug-report` edge
-function and its tables were retired by N-81 (ADR-140): there is no function
+function and its tables were retired by N-81 (ADR-141): there is no function
 to deploy and no Supabase key in the app. The portal needs `ADMIN_INGEST_URL`
 and `ADMIN_INGEST_SECRET` (`docs/ops/provisioning.md`) for reports to reach
 the console.
@@ -56,7 +56,7 @@ Set these via `eas secret:create` (one-time per environment):
 
 | Secret                          | Value                                                                                |
 | ------------------------------- | ------------------------------------------------------------------------------------ |
-| `PRODUCTION_API_BASE`           | The portal's origin, `https://…`. The release gate refuses anything else (ADR-139).  |
+| `PRODUCTION_API_BASE`           | The portal's origin, `https://…`. The release gate refuses anything else (ADR-140).  |
 | `PRODUCTION_ENTITLEMENT_PUBKEY` | The entitlement public key, 64 hex (`docs/ops/provisioning.md` §2). Never a dev key. |
 | `PRODUCTION_SENTRY_DSN`         | Sentry DSN (optional — omit if no Sentry account yet).                               |
 

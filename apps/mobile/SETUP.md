@@ -200,7 +200,7 @@ plain env vars in `app.config.ts` for local dev. Without them, the
 wizard's Cloud card renders the disabled-notice variant pointing at
 **Settings → Avanzado** for the BYO-backend flow.
 
-> **Since N-81 (ADR-140):** the app reads none of these. Bug reports go to
+> **Since N-81 (ADR-141):** the app reads none of these. Bug reports go to
 > the portal with the device token (`EXPO_PUBLIC_API_BASE`), and
 > `EXPO_PUBLIC_CLOUD_ANON_KEY` and `EXPO_PUBLIC_BUG_INGEST_URL` are no longer
 > in `eas.json`. The table above is kept for the parked Cloud card only.

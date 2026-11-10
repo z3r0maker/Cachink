@@ -353,7 +353,7 @@ At the DNS host of `xangarro.mx`:
 - A role password: change it in `.env.local`, re-run `db:migrate:hosted`
   (updates the role), update the matching URL in Vercel, redeploy.
 - `CRON_SECRET`, `ADMIN_INGEST_SECRET`, `RESEND_API_KEY`: Vercel only.
-- `DEVICE_TOKEN_SECRET` (ADR-139 §6): move the current value to
+- `DEVICE_TOKEN_SECRET` (ADR-140 §6): move the current value to
   `DEVICE_TOKEN_SECRET_PREVIOUS`, set a new `DEVICE_TOKEN_SECRET`, redeploy.
   Phones linked under the old secret keep working and every new token is
   signed with the new one. Tokens live a year, so remove the previous value a
@@ -362,7 +362,7 @@ At the DNS host of `xangarro.mx`:
 - `ENTITLEMENT_PRIVATE_KEY`: needs a phone release with the new public key
   first. `ADMIN_TOTP_KEY`: every staff member re-enrols.
 
-**Production refuses weak signing secrets** (ADR-139 §6). When
+**Production refuses weak signing secrets** (ADR-140 §6). When
 `VERCEL_ENV=production`, `DEVICE_TOKEN_SECRET`, `DEVICE_TOKEN_SECRET_PREVIOUS`
 and `CRON_SECRET` must be at least 32 characters and not one of the
 repository's dev placeholders, and `ENTITLEMENT_PRIVATE_KEY` must be 64 hex

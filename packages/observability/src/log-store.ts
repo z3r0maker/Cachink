@@ -3,7 +3,7 @@
  *
  * One implementation ships: `SqliteLogStore`, which writes to the
  * `__xangarro_observability_log` table on the device. The log is local; the
- * remote copy was retired with the `bug-report` edge function (N-81, ADR-140).
+ * remote copy was retired with the `bug-report` edge function (N-81, ADR-141).
  *
  * The interface is kept small: write + query + prune + export. Consumers
  * (UI, error handlers, AuditedUseCase) code against this interface only.

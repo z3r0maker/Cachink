@@ -3,7 +3,7 @@
  * known and mounts the lifecycle observer. Split from app-provider-bridges.tsx
  * to keep both files under the 200-line cap (CLAUDE.md §2.6).
  *
- * The log stays on the device (N-81, ADR-140). This bridge once also flushed
+ * The log stays on the device (N-81, ADR-141). This bridge once also flushed
  * error batches to a Supabase edge function with the public anon key; that
  * function is gone and nothing replaces the flush. What leaves the phone is a
  * bug report the person sends («Reportar un problema», through the device

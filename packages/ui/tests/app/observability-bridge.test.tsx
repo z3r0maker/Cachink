@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
  * lands in the provider and in the ref the bug report reads. Without a device
  * id, nothing is created and the children still render.
  *
- * The log stays on the device (N-81, ADR-140). The bridge once shipped error
+ * The log stays on the device (N-81, ADR-141). The bridge once shipped error
  * batches to a Supabase edge function with the public anon key; nothing does
  * that now. What leaves is a bug report the person sends, through the device
  * API, and crash telemetry through Sentry, both behind the same consent.

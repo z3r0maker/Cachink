@@ -183,7 +183,7 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ## §9 `POST /support/bug-report`
 
-> **Added 2026-11-09 (C-25, N-81, ADR-140).** Additive at protocol 1: an older server answers 404
+> **Added 2026-11-09 (C-25, N-81, ADR-141).** Additive at protocol 1: an older server answers 404
 > and the app falls back to sharing the report as a file.
 
 The phone's «Reportar un problema». Device-token authed like every route but `/activate`; the server
@@ -620,7 +620,7 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 - **Acceptance:** `pnpm --filter @xangarro/contracts test` and `test:conformance` green against
   the mock; an old device's pull still parses (default `[]`).
 
-### C-25 `POST /support/bug-report`: the phone's report, under the token's device (N-81, ADR-140)
+### C-25 `POST /support/bug-report`: the phone's report, under the token's device (N-81, ADR-141)
 
 - [x] Status · **Blocked by:** — · **Blocks:** N-81
   - Done: 2026-11-09 · `packages/contracts/src/support.ts` (`BugReportRequestSchema`,

@@ -1,5 +1,5 @@
 /**
- * How «Reportar un problema» leaves the phone (N-81, contract §9, ADR-140):
+ * How «Reportar un problema» leaves the phone (N-81, contract §9, ADR-141):
  * through the device API, with the device's own token.
  *
  * It replaces the Supabase edge function the app once posted to with the

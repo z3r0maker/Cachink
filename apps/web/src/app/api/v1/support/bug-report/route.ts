@@ -9,7 +9,7 @@ import { supportInboxFromEnv } from '@/server/support-inbox';
 
 /**
  * `POST /api/v1/support/bug-report` — the phone's «Reportar un problema»
- * (contract §9, N-81, ADR-140).
+ * (contract §9, N-81, ADR-141).
  *
  * Device-token authed like every `/api/v1` route, so the report is filed
  * under the device and business the **token** names; the body has no say in

@@ -11,7 +11,7 @@ import { SUPPORT_ITEM_BODY_MAX } from '@xangarro/domain';
 
 /**
  * The phone's «Reportar un problema», filed into the staff inbox (N-81,
- * contract §9, ADR-140). It replaces the `bug-report` edge function, which
+ * contract §9, ADR-141). It replaces the `bug-report` edge function, which
  * held the service-role key and believed whatever device id a caller sent.
  *
  * - **Who** is the device token's: the device and its business are the

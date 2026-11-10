@@ -1,7 +1,7 @@
 /**
  * CI guard: fails if the Supabase service-role key is referenced anywhere in
  * the repository's code outside `apps/backoffice/` (N-05, ADR-063; widened
- * from `apps/web/` by N-81, ADR-140).
+ * from `apps/web/` by N-81, ADR-141).
  *
  * Runs as the tail of `@xangarro/backoffice`'s `lint` task, so `pnpm lint` — which
  * CI already gates on — enforces it with no workflow change.
