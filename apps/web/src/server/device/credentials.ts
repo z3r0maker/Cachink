@@ -5,6 +5,7 @@ import { canonicalize, DEVICE_TOKEN_TTL_SECONDS } from '@xangarro/contracts';
 import { EntitlementSchema, type Entitlement } from '@xangarro/domain';
 import { SignJWT } from 'jose';
 
+import { assertSecretPolicy, type SecretName } from './secret-policy';
 import { DEVICE_TOKEN_AUDIENCE, DEVICE_TOKEN_ISSUER } from './token-shape';
 
 /**
@@ -16,14 +17,16 @@ import { DEVICE_TOKEN_AUDIENCE, DEVICE_TOKEN_ISSUER } from './token-shape';
  * (`packages/contracts/src/mock/dev-keys.json`) — correct for a mock, and a
  * disaster if the portal could ever fall back to it: anyone could mint an
  * entitlement for any plan. So an unset key is an error, and local runs pass
- * the dev key explicitly.
+ * the dev key explicitly. In production a key must also pass
+ * `secret-policy.ts` (audit F-06): long enough, and never a published value.
  */
 
-function required(name: string): string {
+function required(name: SecretName): string {
   const value = process.env[name];
   if (value === undefined || value === '') {
     throw new Error(`${name} is not set. Device credentials are signed with it.`);
   }
+  assertSecretPolicy(name, value);
   return value;
 }
 
@@ -33,9 +36,30 @@ export function assertCredentialsConfigured(): void {
   required('ENTITLEMENT_PRIVATE_KEY');
 }
 
-/** The HS256 key device tokens are signed and verified with. */
+/** The HS256 key device tokens are signed with — always the current secret. */
 export function deviceTokenSecret(): Uint8Array {
   return new TextEncoder().encode(required('DEVICE_TOKEN_SECRET'));
+}
+
+/**
+ * The keys a device token may verify against: the current secret, then
+ * `DEVICE_TOKEN_SECRET_PREVIOUS` while a rotation is under way (audit F-06).
+ *
+ * To rotate: move the current value to `DEVICE_TOKEN_SECRET_PREVIOUS`, set a
+ * new `DEVICE_TOKEN_SECRET`, deploy. Phones linked under the old secret keep
+ * working; every new token is signed with the new one. Tokens live a year, so
+ * the previous secret is removed a year after the rotation — or sooner to cut
+ * off the old tokens, whose phones then link again. The previous secret
+ * answers to the same production policy as the current one.
+ */
+export function deviceTokenVerificationKeys(): Uint8Array[] {
+  const keys = [deviceTokenSecret()];
+  const previous = process.env.DEVICE_TOKEN_SECRET_PREVIOUS;
+  if (previous !== undefined && previous !== '') {
+    assertSecretPolicy('DEVICE_TOKEN_SECRET_PREVIOUS', previous);
+    keys.push(new TextEncoder().encode(previous));
+  }
+  return keys;
 }
 
 /**

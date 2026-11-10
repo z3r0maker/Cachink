@@ -1,7 +1,13 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
-import { MAX_ERRORS_PER_DAY, MAX_REPORTS_PER_DAY, type IngestStore } from './handlers.ts';
+import {
+  MAX_ERRORS_PER_DAY,
+  MAX_ERRORS_PER_DAY_ALL_DEVICES,
+  MAX_REPORTS_PER_DAY,
+  MAX_REPORTS_PER_DAY_ALL_DEVICES,
+  type IngestStore,
+} from './handlers.ts';
 import { MAX_BODY_BYTES, route } from './router.ts';
 import type { Json } from './validate.ts';
 
@@ -9,16 +15,26 @@ import type { Json } from './validate.ts';
  * The bug-report ingest, end to end through `route`, over an in-memory store
  * (F-10). The function had no tests; it validates untrusted input and
  * enforces per-device limits, so those are what these pin.
+ *
+ * The store counts what it holds, like the tables do: `already` and
+ * `alreadyAll` stand for rows sent earlier in the day, by this device and by
+ * every device.
  */
 class MemoryStore implements IngestStore {
   rows: { table: string; row: Json }[] = [];
   inbox: Parameters<IngestStore['fileInboxItem']>[0][] = [];
   already = 0;
+  alreadyAll = 0;
+  failCount = false;
   failInsert = false;
   failInbox = false;
 
-  async countSince(): Promise<number> {
-    return this.already;
+  async countSince(table: string, deviceId: string | null): Promise<number | null> {
+    if (this.failCount) return null;
+    const held = this.rows.filter(
+      (r) => r.table === table && (deviceId === null || r.row['device_id'] === deviceId),
+    ).length;
+    return held + (deviceId === null ? this.alreadyAll : this.already);
   }
 
   async insert(table: string, rows: readonly Json[]): Promise<boolean> {
@@ -96,6 +112,25 @@ describe('POST /errors', () => {
     store.failInsert = true;
     assert.equal((await send('errors', { entries: [event()] }, store)).status, 500);
   });
+
+  it('fails closed: a count that cannot be made refuses the batch, it is not read as zero', async () => {
+    const store = new MemoryStore();
+    store.failCount = true;
+    const { status, body } = await send('errors', { entries: [event()] }, store);
+    assert.equal(status, 503);
+    assert.deepEqual(body, { error: 'Rate limit unavailable, try later' });
+    assert.equal(store.rows.length, 0);
+  });
+
+  it('holds a daily ceiling across every device, whatever deviceId the caller picks', async () => {
+    const store = new MemoryStore();
+    store.alreadyAll = MAX_ERRORS_PER_DAY_ALL_DEVICES - 1;
+    const fresh = (n: number) => event({ deviceId: `nunca-visto-${n}` });
+    assert.equal((await send('errors', { entries: [fresh(1), fresh(2)] }, store)).status, 429);
+    assert.equal(store.rows.length, 0, 'a batch that would cross the ceiling stores nothing');
+    assert.equal((await send('errors', { entries: [fresh(3)] }, store)).status, 201);
+    assert.equal((await send('errors', { entries: [fresh(4)] }, store)).status, 429);
+  });
 });
 
 describe('POST /bug-reports', () => {
@@ -116,7 +151,35 @@ describe('POST /bug-reports', () => {
     failing.failInbox = true;
     const refused = await send('bug-reports', report(), failing);
     assert.equal(refused.status, 502);
-    assert.equal(failing.rows.length, 0, 'nothing archived when staff cannot see it');
+    assert.equal(failing.rows.length, 1, 'the attempt is counted before anything is filed');
+  });
+
+  it('fails closed: a count that cannot be made files nothing', async () => {
+    const store = new MemoryStore();
+    store.failCount = true;
+    const { status, body } = await send('bug-reports', report(), store);
+    assert.equal(status, 503);
+    assert.deepEqual(body, { error: 'Rate limit unavailable, try later' });
+    assert.deepEqual([store.inbox.length, store.rows.length], [0, 0]);
+  });
+
+  it('fails closed: a report the counter cannot record is not filed either', async () => {
+    // Otherwise a payload the table refuses would reach the inbox uncounted, without end.
+    const store = new MemoryStore();
+    store.failInsert = true;
+    assert.equal((await send('bug-reports', report(), store)).status, 503);
+    assert.equal(store.inbox.length, 0);
+  });
+
+  it('a caller rotating deviceId cannot file past the daily ceiling for all devices', async () => {
+    const store = new MemoryStore();
+    store.alreadyAll = MAX_REPORTS_PER_DAY_ALL_DEVICES - 3;
+    const statuses: number[] = [];
+    for (let n = 0; n < 6; n += 1) {
+      statuses.push((await send('bug-reports', report({ deviceId: `rotado-${n}` }), store)).status);
+    }
+    assert.deepEqual(statuses, [201, 201, 201, 429, 429, 429]);
+    assert.equal(store.inbox.length, 3, 'the staff inbox receives the ceiling and no more');
   });
 
   it('refuses a report without a description, device or date, and past the daily limit', async () => {

@@ -79,6 +79,21 @@ export const DeltaSchema = z.discriminatedUnion('table', [
 ]);
 export type Delta = z.infer<typeof DeltaSchema>;
 
+/**
+ * A delta names its row twice: `rowId`, which the answer, the receipt and the
+ * pull log are keyed on, and `row.id`, which is what gets written. They must
+ * be the same row (security audit 2026-11, F-05 b): a delta that named one and
+ * carried another would leave a receipt for a row it never wrote and write a
+ * row no receipt answers for.
+ *
+ * Checked per row by the server and the mock — never by `DeltaSchema`, where
+ * one bad row would fail the whole batch with a 400. Every client builds the
+ * delta from the row it read by that id (`packages/sync` `push.ts`), so an
+ * honest one cannot differ.
+ */
+export const deltaNamesItsRow = (d: Pick<Delta, 'rowId' | 'row'>): boolean =>
+  (d.row as { readonly id?: unknown }).id === d.rowId;
+
 export const PushRequestSchema = z.object({
   deltas: z.array(DeltaSchema).min(1).max(MAX_PUSH_DELTAS),
 });

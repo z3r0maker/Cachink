@@ -1,8 +1,10 @@
 import 'server-only';
 
 import {
+  pushAnomalies,
   rowKey,
   storableString,
+  type PushAnomaly,
   type PushReceipt,
   type PushStore,
   type Rejection,
@@ -30,6 +32,7 @@ import {
 } from '@xangarro/data-pg';
 
 import type { Tx } from '../db';
+import { logPushAnomalies, type AnomalyLogger } from './anomaly-log';
 import { rowFromWire, type Row } from './codec';
 import { rejectionPayload } from './rejection-payload';
 import { storeError } from './store-error';
@@ -47,12 +50,42 @@ const OUTCOME: Record<RowWrite, (insertOnly: boolean) => WriteOutcome> = {
   invisible: () => 'foreign',
 };
 
+export interface PushStoreOptions {
+  /** The server's clock, which pushed rows' own timestamps are held to (F-05 a). */
+  readonly now?: () => Date;
+  /** Where a push's anomalies go (F-05 c). Default: one structured log line. */
+  readonly logAnomalies?: AnomalyLogger;
+}
+
+/** What one push's stores share — the root and every savepoint's. */
+interface PushState {
+  readonly anomalies: PushAnomaly[];
+  /** Epoch ms of the last write's clock. */
+  lastWrite: number;
+}
+
 export class PgPushStore implements PushStore {
+  private push: PushState = { anomalies: [], lastWrite: 0 };
+
   constructor(
     private readonly tx: Tx,
     private readonly businessId: string,
     private readonly deviceId: string,
+    private readonly options: PushStoreOptions = {},
   ) {}
+
+  /**
+   * The server's time for a write, **strictly later than this push's last
+   * one**. Two versions of one row in a push (a turno opened, then closed) are
+   * two writes; from a phone whose clock is in the future both are stored at
+   * the server's time, and at the same instant the second would lose to the
+   * first.
+   */
+  private writeClock(): Date {
+    const now = (this.options.now ?? (() => new Date()))().getTime();
+    this.push.lastWrite = Math.max(now, this.push.lastWrite + 1);
+    return new Date(this.push.lastWrite);
+  }
 
   async receipts(keys: readonly RowKey[]): Promise<ReadonlyMap<string, PushReceipt>> {
     const rows = await receiptsOf(this.tx, this.businessId, keys);
@@ -70,14 +103,19 @@ export class PgPushStore implements PushStore {
    * first conformance run lost a whole batch to one bad row that way.
    */
   isolated<T>(fn: (store: PushStore) => Promise<T>): Promise<T> {
-    return this.tx.transaction((sp) => fn(new PgPushStore(sp, this.businessId, this.deviceId)));
+    return this.tx.transaction((sp) => {
+      const inner = new PgPushStore(sp, this.businessId, this.deviceId, this.options);
+      inner.push = this.push;
+      return fn(inner);
+    });
   }
 
   async write(table: PushableTable, deltas: readonly Delta[]): Promise<readonly WriteOutcome[]> {
     const insertOnly = HYBRID.has(table);
     const rows = deltas.map((d) => rowFromWire(d.row as Row));
     try {
-      const written = await writeSyncedRows(this.tx, table, rows, insertOnly);
+      const now = this.writeClock();
+      const written = await writeSyncedRows(this.tx, table, rows, insertOnly, { now });
       return written.map((w) => OUTCOME[w](insertOnly));
     } catch (error) {
       throw storeError(error, table, deltas);
@@ -89,10 +127,15 @@ export class PgPushStore implements PushStore {
    * closing of these rows' open rejections (DB3-SYNC-04) together: postgres.js
    * pipelines the three statements, so accepting 500 rows is two round trips,
    * with the tenant's cursor lock held from the first to commit.
+   *
+   * What these rows carry that an honest device would not is noted here — for
+   * rows accepted now, so a retry answered from its receipt is not noted twice
+   * — and logged once, in `finish`. They are stored all the same (F-05 c).
    */
   async accept(deltas: readonly Delta[]): Promise<readonly number[]> {
     const { tx, businessId, deviceId } = this;
     if (deltas.length === 0) return [];
+    this.push.anomalies.push(...pushAnomalies(deltas, deviceId));
     const first = await allocateSeqs(tx, businessId, deltas.length);
     const seqs = deltas.map((_, i) => first + i);
     const entries = deltas.map((d, i) => ({ d, seq: seqs[i] as number }));
@@ -151,6 +194,11 @@ export class PgPushStore implements PushStore {
    * cursor from pull responses only — UP rows are not in the pull stream.
    */
   finish(acknowledgedThrough: number): Promise<number> {
-    return finishPush(this.tx, this.deviceId, acknowledgedThrough);
+    const { businessId, deviceId } = this;
+    const { anomalies } = this.push;
+    if (anomalies.length > 0) {
+      (this.options.logAnomalies ?? logPushAnomalies)({ businessId, deviceId }, anomalies);
+    }
+    return finishPush(this.tx, deviceId, acknowledgedThrough);
   }
 }

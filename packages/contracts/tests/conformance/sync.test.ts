@@ -207,6 +207,23 @@ describe('POST /sync/push', () => {
     );
   });
 
+  it('refuses a delta whose rowId is not its row’s id, alone (audit F-05 b)', async () => {
+    const honest = sale('01JSA0000000000000000000D1');
+    const written = sale('01JSA0000000000000000000D2');
+    const named = '01JSA0000000000000000000D3';
+    const r = await push([delta(honest, 1), { ...delta(written, 2), rowId: named }]);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const body = PushResponseSchema.parse(r.body);
+    assert.deepEqual(
+      body.accepted.map((a) => a.rowId),
+      [honest.id],
+    );
+    assert.deepEqual(
+      body.rejected.map((x) => [x.rowId, x.code, x.retryable]),
+      [[named, 'VALIDATION', false]],
+    );
+  });
+
   it('is idempotent: re-pushing an accepted row returns the same serverSeq', async () => {
     const row = sale('01JSA0000000000000000000B1');
     const first = PushResponseSchema.parse((await push([delta(row, 10)])).body);

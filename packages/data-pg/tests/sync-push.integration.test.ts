@@ -32,6 +32,8 @@ const TOUCHED = [
   'devices',
 ];
 const T2 = '2026-09-26T11:00:00.000Z';
+/** The server's clock for every write here: after both, so no row's clock is touched (F-05 a). */
+const AT = { now: new Date('2026-09-26T12:00:00.000Z') };
 
 const expense = (biz: string, id: string, updatedAt = T1, concepto = 'Renta') => ({
   id,
@@ -89,6 +91,7 @@ describe('batched push SQL', () => {
         'expenses',
         ids.map((id) => expense(A, id, T2, 'nuevo')),
         false,
+        AT,
       ),
     );
     assert.deepEqual(new Set(first), new Set(['written']));
@@ -98,6 +101,7 @@ describe('batched push SQL', () => {
         'expenses',
         ids.map((id) => expense(A, id, T1, 'viejo')),
         false,
+        AT,
       ),
     );
     assert.deepEqual(new Set(older), new Set(['kept']));
@@ -114,7 +118,7 @@ describe('batched push SQL', () => {
         'expenses',
         ids.map((id) => expense(A, id, T2, 'troceado')),
         false,
-        tiny,
+        { ...AT, paramBudget: tiny },
       ),
     );
     assert.deepEqual(first, Array(7).fill('written'));
@@ -124,7 +128,7 @@ describe('batched push SQL', () => {
         'expenses',
         ids.map((id) => expense(A, id, T1)),
         false,
-        tiny,
+        { ...AT, paramBudget: tiny },
       ),
     );
     assert.deepEqual(older, Array(7).fill('kept'));
@@ -135,7 +139,7 @@ describe('batched push SQL', () => {
         'inventory_movements',
         moves.map((id) => movement(A, id)),
         true,
-        tiny,
+        { ...AT, paramBudget: tiny },
       ),
     );
     assert.deepEqual(inserted, ['written', 'written', 'written']);
@@ -144,10 +148,10 @@ describe('batched push SQL', () => {
   it('leaves out a field a row does not carry, rather than nulling it', async () => {
     const id = testId('Y');
     await inA((tx) =>
-      writeSyncedRows(tx, 'expenses', [{ ...expense(A, id), proveedor: 'Don Beto' }], false),
+      writeSyncedRows(tx, 'expenses', [{ ...expense(A, id), proveedor: 'Don Beto' }], false, AT),
     );
     const out = await inA((tx) =>
-      writeSyncedRows(tx, 'expenses', [expense(A, id, T2, 'otro')], false),
+      writeSyncedRows(tx, 'expenses', [expense(A, id, T2, 'otro')], false, AT),
     );
     assert.deepEqual(out, ['written']);
     const [row] = await owner`SELECT proveedor, concepto FROM expenses WHERE id = ${id}`;
@@ -156,11 +160,13 @@ describe('batched push SQL', () => {
 
   it('refuses an upsert batch holding another tenant’s id (42501), and writes none of it', async () => {
     const theirs = testId('Y');
-    await withBusiness(db, B, (tx) => writeSyncedRows(tx, 'expenses', [expense(B, theirs)], false));
+    await withBusiness(db, B, (tx) =>
+      writeSyncedRows(tx, 'expenses', [expense(B, theirs)], false, AT),
+    );
     const mine = testId('Y');
     await assert.rejects(
       inA((tx) =>
-        writeSyncedRows(tx, 'expenses', [expense(A, mine, T2), expense(A, theirs, T2)], false),
+        writeSyncedRows(tx, 'expenses', [expense(A, mine, T2), expense(A, theirs, T2)], false, AT),
       ),
       (e: unknown) => (e as { cause?: { code?: string } }).cause?.code === '42501',
     );
@@ -173,9 +179,9 @@ describe('batched push SQL', () => {
 
   it('answers insert-only rows: new ones written, ours kept, another tenant’s invisible', async () => {
     const [ours, theirs, fresh] = [testId('Y'), testId('Y'), testId('Y')];
-    await inA((tx) => writeSyncedRows(tx, 'inventory_movements', [movement(A, ours)], true));
+    await inA((tx) => writeSyncedRows(tx, 'inventory_movements', [movement(A, ours)], true, AT));
     await withBusiness(db, B, (tx) =>
-      writeSyncedRows(tx, 'inventory_movements', [movement(B, theirs)], true),
+      writeSyncedRows(tx, 'inventory_movements', [movement(B, theirs)], true, AT),
     );
     const out = await inA((tx) =>
       writeSyncedRows(
@@ -183,6 +189,7 @@ describe('batched push SQL', () => {
         'inventory_movements',
         [movement(A, ours), movement(A, theirs), movement(A, fresh)],
         true,
+        AT,
       ),
     );
     assert.deepEqual(out, ['kept', 'invisible', 'written']);

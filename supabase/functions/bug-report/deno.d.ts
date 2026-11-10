@@ -10,9 +10,13 @@ declare const Deno: {
 
 // `deno.json` maps this to esm.sh; Deno checks it against the real types.
 declare module '@supabase/supabase-js' {
-  interface Filter {
+  interface Counted {
+    count: number | null;
+    error: unknown;
+  }
+  interface Filter extends PromiseLike<Counted> {
     eq(column: string, value: string): Filter;
-    gte(column: string, value: string): Promise<{ count: number | null }>;
+    gte(column: string, value: string): Filter;
   }
   interface Table {
     select(columns: string, options: { count: 'exact'; head: true }): Filter;

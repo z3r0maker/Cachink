@@ -3,11 +3,9 @@ import 'server-only';
 import { DEVICE_CALLS_PER_MINUTE } from '@xangarro/auth-core';
 import { devices, throttleKey, throttleTake } from '@xangarro/data-pg';
 import { eq } from 'drizzle-orm';
-import { jwtVerify } from 'jose';
 
 import { db, withTenant } from '../db';
-import { deviceTokenSecret } from './credentials';
-import { DEVICE_TOKEN_AUDIENCE, deviceClaimsOf, LEGACY_AUDIENCE } from './token-shape';
+import { verifyDeviceToken } from './verify-token';
 
 /**
  * Who is calling: the device behind a `Bearer` device token (contract §2).
@@ -42,13 +40,7 @@ export class DeviceAuthError extends Error {
 async function claims(request: Request): Promise<DeviceCaller> {
   const token = /^Bearer (.+)$/.exec(request.headers.get('authorization') ?? '')?.[1];
   if (token === undefined) throw new DeviceAuthError('UNAUTHENTICATED');
-  const { payload } = await jwtVerify(token, deviceTokenSecret(), {
-    algorithms: ['HS256'],
-    audience: [DEVICE_TOKEN_AUDIENCE, LEGACY_AUDIENCE],
-  }).catch(() => {
-    throw new DeviceAuthError('UNAUTHENTICATED');
-  });
-  const caller = deviceClaimsOf(payload);
+  const caller = await verifyDeviceToken(token);
   if (caller === null) throw new DeviceAuthError('UNAUTHENTICATED');
   return caller;
 }

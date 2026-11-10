@@ -10,6 +10,9 @@
  *   - Inserts via service-role client (env secret, never shipped to devices)
  *   - Body size capped at ~100KB
  *   - Per-device rate limits: 200 errors/day, 20 bug reports/day
+ *   - A ceiling across all devices: 20,000 errors/day, 200 bug reports/day
+ *   - The limits fail closed: a count or a counter row that fails refuses the
+ *     request (`handlers.ts`). Without the two tables, nothing is accepted.
  *   - Every field validated; no stack traces accepted (defensively stripped)
  *
  * This file is only the Deno wiring: URL imports, the environment, the
@@ -29,13 +32,20 @@ function serviceStore(): IngestStore {
   if (!url || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   const client = createClient(url, key);
   return {
+    // A count that fails is `null`, never zero: the limits fail closed.
     async countSince(table, deviceId, sinceIso) {
-      const { count } = await client
+      const recent = client
         .from(table)
         .select('id', { count: 'exact', head: true })
-        .eq('device_id', deviceId)
         .gte('received_at', sinceIso);
-      return count ?? 0;
+      const { count, error } = await (deviceId === null
+        ? recent
+        : recent.eq('device_id', deviceId));
+      if (error || typeof count !== 'number') {
+        console.error(`Count ${table} failed:`, error);
+        return null;
+      }
+      return count;
     },
     async insert(table, rows) {
       const { error } = await client.from(table).insert(rows);

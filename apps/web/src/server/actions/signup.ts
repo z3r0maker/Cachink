@@ -8,7 +8,7 @@ import { headers } from 'next/headers';
 
 import { failure } from '../action-errors';
 import { EMPTY_UTM, type Utm } from '../attribution/utm';
-import { db } from '../db';
+import { db, rlsBoundDb } from '../db';
 import { regionFromHeaders } from '../geo/headers';
 import { avisoVigente, ipHash } from '../legal/aviso';
 import { reportError } from '../observability/report';
@@ -85,7 +85,9 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
   try {
     const h = await headers();
     const evidence = { ipHash: ipHash(clientIp(h)), userAgent: h.get('user-agent') ?? '' };
-    const owner = await db().transaction((tx) =>
+    // The signup store sets the new tenant's claim itself, so the pool's role is checked here (F-02).
+    const pool = await rlsBoundDb();
+    const owner = await pool.transaction((tx) =>
       new RegistrarCuentaUseCase(pgSignupStore(tx, evidence), randomUUID, avisoVigente()).execute(
         fields,
       ),

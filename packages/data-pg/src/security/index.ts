@@ -8,3 +8,4 @@ export * from './attribution.js';
 export * from './consents.js';
 export * from './api-latency.js';
 export * from './account-deletion.js';
+export * from './rls-role.js';
