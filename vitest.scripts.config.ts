@@ -5,13 +5,12 @@ import { defineConfig } from 'vitest/config';
  *
  * `scripts/` is not a pnpm workspace, so `turbo run test` never reaches it.
  * This config gives that code a home without changing the workspace pipeline;
- * `pnpm test:scripts` runs it, and CI runs it alongside `pnpm test`. The
- * Supabase edge functions are here for the same reason (F-10).
+ * `pnpm test:scripts` runs it, and CI runs it alongside `pnpm test`.
  */
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['scripts/**/*.test.ts', 'supabase/functions/**/*.test.ts'],
+    include: ['scripts/**/*.test.ts'],
     /**
      * These tests read the repository — every tracked file, the ESLint config,
      * the workflow, the `.env.example` files — so they are I/O bound and slow

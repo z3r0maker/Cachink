@@ -14,7 +14,8 @@
 import React, { type ReactElement } from 'react';
 import { ScrollView, TextInput } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import type { DeviceContext, RemoteLogStore } from '@xangarro/observability';
+import type { DeviceContext } from '@xangarro/observability';
+import type { BugReportSender } from '../../observability/bug-report-sender';
 import { Btn } from '../../components/index';
 import { useBugReportSubmit } from './use-bug-report-submit';
 import { colors, fontSizes, radii, shadows, typography } from '../../theme';
@@ -26,8 +27,8 @@ export interface BugReportSheetProps {
   readonly onShare: (json: string, filename: string, readableTimeline?: string) => void;
   /** Whether user has consented to remote submission. */
   readonly consentEnabled?: boolean;
-  /** Remote log store for server-first submit. */
-  readonly remote?: RemoteLogStore | null;
+  /** Sends the report through the device API; absent on a phone that is not linked. */
+  readonly remote?: BugReportSender | null;
   /** Device context for enriching the report payload. */
   readonly deviceContext?: DeviceContext | null;
   /** Current feature flags state. */

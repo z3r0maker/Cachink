@@ -1,9 +1,11 @@
 /**
- * createLogStore — factory that builds the correct LogStore for the environment.
+ * createLogStore — factory that builds the device's LogStore.
  *
  * - Development: SqliteLogStore with 30-day retention.
  * - Production: SqliteLogStore with 7-day retention.
- * - Production + remote: DualLogStore (local + HTTP remote).
+ *
+ * The log is local. It once could also be dual-written to an HTTP backend;
+ * that path was retired with the `bug-report` edge function (N-81, ADR-140).
  *
  * The factory initializes the SQLite table on first call.
  */
@@ -13,8 +15,6 @@ import {
   type SqliteDatabase,
   type SqliteLogStoreConfig,
 } from './sqlite-log-store.js';
-import { DualLogStore } from './dual-log-store.js';
-import { HttpRemoteLogStore, type HttpRemoteLogStoreConfig } from './http-remote-log-store.js';
 import type { LogStore } from './log-store.js';
 
 export interface CreateLogStoreOptions {
@@ -22,8 +22,6 @@ export interface CreateLogStoreOptions {
   readonly deviceId: string;
   /** Defaults to false (production). */
   readonly isDev?: boolean;
-  /** If provided, enables dual-write to remote. */
-  readonly remote?: HttpRemoteLogStoreConfig;
 }
 
 export async function createLogStore(opts: CreateLogStoreOptions): Promise<LogStore> {
@@ -39,11 +37,6 @@ export async function createLogStore(opts: CreateLogStoreOptions): Promise<LogSt
 
   // Auto-prune on startup
   void local.prune(retentionDays).catch(() => {});
-
-  if (opts.remote) {
-    const remote = new HttpRemoteLogStore(opts.remote);
-    return new DualLogStore(local, remote);
-  }
 
   return local;
 }

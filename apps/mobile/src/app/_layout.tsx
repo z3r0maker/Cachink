@@ -64,7 +64,6 @@ import { AppProviders, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui'
 import { bootstrapI18n } from '../shell/i18n';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
-import { useMobileDeviceContext } from '../shell/use-device-context';
 import { mobileActivationConfig } from '../shell/activation-config';
 import { fotoPuertos } from '../shell/foto-puertos';
 import { prepareSubjectLift } from '../../modules/subject-lift';
@@ -95,12 +94,11 @@ export default function RootLayout(): ReactElement {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
-  const deviceContext = useMobileDeviceContext();
   return (
     <StrictMode>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          {fontsLoaded ? <MobileApp deviceContext={deviceContext} /> : null}
+          {fontsLoaded ? <MobileApp /> : null}
           {/* Above everything from the first frame, drawn like the native
               splash; it fades once the first real screen is up. */}
           <SplashAnimado />
@@ -110,16 +108,13 @@ export default function RootLayout(): ReactElement {
   );
 }
 
-function MobileApp(props: {
-  readonly deviceContext: ReturnType<typeof useMobileDeviceContext>;
-}): ReactElement {
+function MobileApp(): ReactElement {
   // Android asks Play services for the product-photo lift's model now, so the
   // first photo finds it there (M-13); iOS has nothing to fetch.
   useEffect(() => void prepareSubjectLift(), []);
   return (
     <AppProviders
       platform="mobile"
-      deviceContext={props.deviceContext}
       activation={mobileActivationConfig}
       fotoPuertos={fotoPuertos}
       overlays={

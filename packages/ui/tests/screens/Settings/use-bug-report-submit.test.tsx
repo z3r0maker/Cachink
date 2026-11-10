@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
+import { BugReportRequestSchema } from '@xangarro/contracts';
 
 /**
  * The bug-report sheet's submit logic (split out of the sheet for the §2.6
@@ -149,8 +150,22 @@ describe('handleRemoteSubmit', () => {
       await hook.result.current.handleRemoteSubmit();
     });
     expect(sendBugReport).toHaveBeenCalledTimes(1);
-    const payload = sendBugReport.mock.calls[0]?.[0] as { snapshot: typeof snapshot };
+    const payload = sendBugReport.mock.calls[0]?.[0] as unknown as {
+      snapshot: typeof snapshot;
+    } & Record<string, unknown>;
     expect(payload.snapshot.errors[0]?.errorStack).toBeUndefined();
+    // The contract's request (§9, N-81): what happened and from what build.
+    // Who is reporting is the device token's to say, so no id travels here.
+    expect(BugReportRequestSchema.safeParse(payload).success).toBe(true);
+    expect(payload).toMatchObject({
+      description: 'No guarda el ticket',
+      appVersion: '1.2.0',
+      platform: 'ios',
+      osName: 'iOS',
+      osVersion: '18.1',
+      deviceModel: 'iPhone 16',
+    });
+    for (const id of ['deviceId', 'businessId', 'userId']) expect(payload).not.toHaveProperty(id);
     expect(hook.result.current.statusMessage).toBe('✓ Reporte enviado');
     expect(hook.result.current.description).toBe('');
     expect(onClose).not.toHaveBeenCalled();
