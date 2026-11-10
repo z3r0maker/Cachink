@@ -38,7 +38,7 @@ export function useSignup(plan: PlanId | null, utm: Utm) {
     email: '',
     password: '',
   });
-  const [consent, setConsent] = useState<ConsentState>({ acepto: false, novedades: true });
+  const [consent, setConsent] = useState<ConsentState>({ acepto: false, novedades: false });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();

@@ -25,11 +25,15 @@ describe('consentimiento (N-34 / PRIV-REG-01)', () => {
     });
     assert.equal(novedades!.purpose, 'novedades');
     assert.equal(novedades!.granted, true);
-    assert.equal(novedades!.method, 'tacito', 'a pre-ticked box left alone is tacit consent');
+    assert.equal(
+      novedades!.method,
+      'casilla',
+      'the box starts unticked: ticking it is an express act (LFPC art. 76 Bis VI)',
+    );
     for (const g of grants) assert.ok(ConsentGrantSchema.safeParse(g).success);
   });
 
-  it('unticking novedades records an explicit refusal, not an absence', () => {
+  it('leaving novedades unticked records a refusal, not an absence', () => {
     const [, novedades] = consentimientosDeRegistro(AVISO, { acepto: true, novedades: false });
     assert.equal(novedades!.granted, false);
     assert.equal(novedades!.method, 'casilla');

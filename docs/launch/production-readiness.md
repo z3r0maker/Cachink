@@ -94,6 +94,8 @@
       payment-default data (art. 10).
 - [ ] [alta] Protocolo de brechas con la lista de campos del Reglamento art. 65, una persona designada y la cláusula de 72 h para
       negocios; `security.txt` + vulnerability-disclosure page.
+      Progress 2026-11-09 (ADR-139): `xangarro.mx/.well-known/security.txt` is published, and
+      `scripts/security-txt.test.ts` fails a month before its `Expires`. Open: the protocol itself.
 - [x] Verify Sentry server-side captures no PII before the aviso says so. **Done 2026-10-05:**
       `apps/web/src/server/observability/sentry.ts` inits with `sendDefaultPii: false` and scrubs the
       request (except method + query-less URL), the user and the breadcrumbs in `beforeSend`; pinned
@@ -122,8 +124,10 @@
 - [ ] [alta] [bloq] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Progress
       2026-10-31: Checkout shows the domicilio and the quejas address under the pay button
       (`PROVEEDOR`, ADR-132). Open: the landing, and the phone number, which does not exist yet.
-- [ ] [alta] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
-      Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`).
+- [x] [alta] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
+      Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`). **Done
+      2026-11-09 (ADR-139):** every email's footer links both; the landing (`home/CtaFooter.jsx`) and the
+      portal's sidebar already did.
 
 ## 5. Tiendas de apps
 
@@ -166,8 +170,11 @@
       `papel.tsx`/`ticket.tsx`), the register (`operador/caja/receipt.ts`, `share-recibo.tsx`) and the
       phone (`packages/ui/src/screens/Checkout/comprobante.ts`).
 - [ ] [media] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo).
-- [ ] [media] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx` (abierto).
+- [x] [media] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx`
+      (hecho: `apps/landing/home/CtaFooter.jsx`).
 - [ ] [media] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
+      Progress 2026-11-09 (ADR-139): the signup box starts unticked, so new accounts opt in expressly
+      and the window applies only to the tacit grants recorded before.
 - [ ] [media] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
 
 ## 8. Propiedad intelectual y gobernanza

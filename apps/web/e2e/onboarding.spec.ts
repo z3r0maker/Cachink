@@ -40,7 +40,7 @@ test('signup refuses to proceed until the aviso is accepted', async ({ page }) =
   await page.goto('/signup');
   await expect(page.getByTestId('signup-aviso')).toContainText('Aviso de privacidad simplificado');
   await expect(page.getByTestId('signup-acepto')).not.toBeChecked();
-  await expect(page.getByTestId('signup-novedades')).toBeChecked();
+  await expect(page.getByTestId('signup-novedades')).not.toBeChecked();
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
   await page.getByTestId('signup-email').fill(`aviso+${stamp()}@ejemplo.mx`);
   await page.getByTestId('signup-password').fill('tortas-2026');

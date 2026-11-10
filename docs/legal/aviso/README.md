@@ -146,44 +146,55 @@ el plan**.
 
 ### Publicación y superficies
 
-- [ ] `[plan]` Aviso integral en `xangarro.mx/privacidad` y enlazado en el pie del portal.
+- [x] `[plan]` Aviso integral en `xangarro.mx/privacidad` y enlazado en el pie del portal (y en el de
+      `xangarro.mx`).
 - [ ] `[nuevo]` Página de versiones anteriores (`/privacidad/versiones`) y lista de proveedores
       (`/privacidad/proveedores`) con fecha de actualización.
-- [ ] `[nuevo]` Procedimiento ARCO público en `/privacidad/arco` y formulario público **sin cuenta**
+- [x] `[nuevo]` Procedimiento ARCO público en `/privacidad/arco` y formulario público **sin cuenta**
       en `/privacidad/solicitud` (el plan solo prevé el formulario del portal; un exusuario, un
       operador o un cliente final no tiene sesión).
-- [ ] `[plan]` Simplificado A en el registro; B en la pantalla de vincular (app y caja web).
+- [x] `[plan]` Simplificado A en el registro; B en la pantalla de vincular (app y caja web).
 - [ ] `[nuevo]` Variante C en la entrada con NIP (si el abogado la conserva).
-- [ ] `[nuevo]` En la app, el enlace apunta a `xangarro.mx`, **nunca** a `app.xangarro.mx`, para no
+- [x] `[nuevo]` En la app, el enlace apunta a `xangarro.mx`, **nunca** a `app.xangarro.mx`, para no
       chocar con el chequeo de N-32 (ADR-069). Añadir `xangarro.mx/privacidad` a la lista permitida.
-- [ ] `[nuevo]` URL de política de privacidad en las fichas de App Store y Play (X-05).
-- [ ] `[nuevo]` Pie de los correos (B-14) y de los formularios de ayuda con enlace al aviso.
+- [~] `[nuevo]` URL de política de privacidad en las fichas de App Store y Play (X-05). El texto está
+      listo; falta capturarlo en las dos consolas al publicar.
+- [x] `[nuevo]` Pie de los correos (B-14) y de los formularios de ayuda con enlace al aviso. Todos los
+      correos llevan aviso y términos (ADR-139).
 
 ### Consentimiento
 
-- [ ] `[plan]` Registro versionado por usuario. Propuesta de tabla solo portal:
+- [x] `[plan]` Registro versionado por usuario (`0034_privacy_consents`, lectura en `0053`). Propuesta
+      original de tabla solo portal:
       `privacy_consents (id, user_id, business_id, aviso_version, aviso_sha256, surface
       ('registro'|'reconsentimiento'|'configuracion'), purpose ('necesarias'|'novedades'|'analitica'),
       granted bool, method ('casilla'|'tacito'), ip, user_agent, created_at)`, append-only.
-- [ ] `[nuevo]` Casilla **expresa** separada de la de términos, sin marcar por defecto (art. 7 datos
-      patrimoniales), y casillas opcionales por finalidad secundaria.
+- [~] `[nuevo]` Casilla **expresa** separada de la de términos, sin marcar por defecto (art. 7 datos
+      patrimoniales), y casillas opcionales por finalidad secundaria. Hecho: las dos casillas empiezan
+      sin marcar, también la de novedades (ADR-139). Falta: aviso y términos van en una sola casilla
+      hasta que el abogado decida (§2).
 - [x] `[nuevo]` Pantalla **Privacidad y mis datos** (menú de tu cuenta, ADR-137): ver versión
       aceptada y su texto, activar/desactivar novedades (revocación, art. 7 último párrafo), enlace a
       solicitudes, descargar todo y eliminar la cuenta.
-- [ ] `[nuevo]` Re-consentimiento al entrar cuando cambia una versión con finalidad nueva (art. 11);
-      aviso previo por correo y banner para cualquier cambio (art. 15 VI).
+- [~] `[nuevo]` Re-consentimiento al entrar cuando cambia una versión con finalidad nueva (art. 11);
+      aviso previo por correo y banner para cualquier cambio (art. 15 VI). Hecho: la franja y «Acepto
+      el aviso nuevo» en Privacidad y mis datos (ADR-137). Falta: el correo previo y el bloqueo al
+      entrar cuando hay finalidad nueva.
 - [ ] `[nuevo]` Correos de novedades separados de los del servicio, con baja en un clic y listado de
       exclusión.
 
 ### ARCO en la consola (N-08)
 
-- [ ] `[plan]` `support_items.kind` admite `arco` y el item lleva sus fechas de vencimiento.
+- [x] `[plan]` `support_items.kind` admite `arco` y el item lleva sus fechas de vencimiento (`due_at`).
 - [ ] `[nuevo]` Campos: derecho, subtipo (`propio` / `encargado`), estado de identidad, fechas
       `due_requerimiento` / `due_respuesta` / `due_ejecucion`, ampliaciones, determinación, evidencia.
-- [ ] `[nuevo]` Cálculo de días hábiles con tabla de días inhábiles configurable (OQ-L12), con pruebas.
-- [ ] `[nuevo]` Acuse automático con folio y fecha de recepción al solicitante (art. 95 Reglamento).
-- [ ] `[nuevo]` Recordatorios en el resumen diario (N-10) a 5 y 2 días; urgente el día del
-      vencimiento.
+- [~] `[nuevo]` Cálculo de días hábiles con tabla de días inhábiles configurable (OQ-L12), con pruebas.
+      Hecho: el cálculo y sus pruebas, con los días inhábiles de ley. Falta: que la tabla se configure.
+- [x] `[nuevo]` Acuse automático con folio y fecha de recepción al solicitante (art. 95 Reglamento):
+      correo con folio, fecha y hora, derecho y plazo (ADR-139).
+- [~] `[nuevo]` Recordatorios en el resumen diario (N-10) a 5 y 2 días; urgente el día del
+      vencimiento. Hecho: cada ARCO abierto sale en el resumen diario con su fecha. Falta: los avisos a
+      5 y 2 días y el urgente.
 - [ ] `[nuevo]` Re-autenticación (contraseña + código por correo) para cancelación y oposición.
 - [ ] `[nuevo]` Adjuntos de identificación cifrados y con supresión automática.
 - [ ] `[nuevo]` Remisión al negocio de las solicitudes de sus clientes/operadores (correo + aviso en el
@@ -191,11 +202,12 @@ el plan**.
 
 ### Cancelación, bloqueo y retención
 
-- [ ] `[nuevo]` **Eliminar cuenta/negocio** de autoservicio en el portal (exportar → confirmar →
-      cancelar Stripe → borrar), hoy inexistente. Sin esto cada cancelación es manual.
+- [x] `[nuevo]` **Eliminar cuenta/negocio** de autoservicio en el portal (exportar → confirmar →
+      cancelar Stripe → borrar): se cierra hoy y se borra en 30 días (ADR-136).
 - [ ] `[nuevo]` Almacén de **bloqueo** separado del archivo de inactividad, con fecha de fin por
       conjunto y tarea de supresión programada.
-- [ ] `[nuevo]` Aviso al titular cuando la cancelación queda hecha (art. 24).
+- [x] `[nuevo]` Aviso al titular cuando la cancelación queda hecha (art. 24): el correo «Eliminamos tu
+      cuenta» (ADR-136).
 - [ ] `[nuevo]` Borrado en proveedores: cliente de Stripe, contacto de correo, eventos de Sentry por
       `business_id`.
 - [ ] `[plan]` N-48: los correos de d90/d150 y el aviso mencionan el archivo de 6 años. `[nuevo]`
@@ -225,5 +237,6 @@ el plan**.
 
 - [ ] `[nuevo]` Designar la persona o área de datos personales (art. 29) y el buzón
       `[CORREO PRIVACIDAD]` (p. ej. `privacidad@xangarro.mx`), revisado a diario.
-- [ ] `[nuevo]` Revisar que Sentry del portal/API no capture PII (B-18) antes de declararlo en el aviso.
+- [x] `[nuevo]` Revisar que Sentry del portal/API no capture PII (B-18) antes de declararlo en el aviso:
+      `sendDefaultPii: false` y `scrubEvent` en cada evento.
 - [ ] `[plan]` Revisión del abogado antes de publicar (criterio de aceptación de N-34).
