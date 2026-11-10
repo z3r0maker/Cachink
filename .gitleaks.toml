@@ -24,4 +24,12 @@ paths = [
 regexes = [
   # Named placeholders for local, CI and conformance runs.
   '''(dev|e2e|ci|conformance)-only(-not-a-real-secret)?''',
+  # RFC 8032 test vectors 1 and 2, the PUBLIC keys: the first is the published
+  # dev entitlement key above, the second stands in for «a real key» wherever a
+  # test proves a release build refuses the dev one (audit F-15). Both are
+  # printed in the RFC; neither signs anything. By value, not by path or
+  # fingerprint: the scan reads commits, and a squash gives the same lines a
+  # new fingerprint.
+  '''d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a''',
+  '''3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c''',
 ]
