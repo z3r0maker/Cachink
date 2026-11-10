@@ -7,6 +7,7 @@ import { buildFixtures, FIXTURE_BUSINESS_ID, FIXTURE_EMAIL } from './fixtures.js
 import { ulidOf } from './ids.js';
 import type { Scenario } from './scenarios.js';
 import type { SnapshotBudget } from '../snapshot-page.js';
+import type { BugReportRequest } from '../support.js';
 
 export interface StoredRow {
   readonly table: string;
@@ -58,6 +59,8 @@ export class MockState {
    * signal sees it; the controls keep answering. `/__mock/up` or a reset ends it.
    */
   down = false;
+  /** Reports filed through `/support/bug-report` (§9), with the device the token named. */
+  bugReports: { readonly deviceId: string; readonly report: BugReportRequest }[] = [];
   #deviceCounter = 0;
 
   constructor() {
@@ -65,6 +68,7 @@ export class MockState {
   }
 
   reset(): void {
+    this.bugReports = [];
     this.rows.clear();
     this.forgotten.clear();
     this.defaultScenario = 'xangarro';
