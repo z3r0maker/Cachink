@@ -54,24 +54,47 @@ export function blocking(
   );
 }
 
-interface AuditJson {
-  readonly advisories?: Record<
-    string,
-    {
-      readonly github_advisory_id?: string;
-      readonly module_name: string;
-      readonly severity: string;
-      readonly findings?: readonly { readonly paths?: readonly string[] }[];
-    }
-  >;
+/**
+ * The audit could not be read, so the gate cannot say the tree is clean. A
+ * registry error body (`{"error": …}`), a missing `advisories` map or an
+ * advisory with no name all land here: an unreadable audit fails the build
+ * rather than passing as zero findings.
+ */
+export class AuditUnreadableError extends Error {
+  readonly code = 'AUDIT_UNREADABLE';
+  constructor(why: string) {
+    super(`pnpm audit output is not readable: ${why}`);
+    this.name = 'AuditUnreadableError';
+  }
 }
 
-/** `pnpm audit --json` → findings. */
-export function findingsOf(audit: AuditJson): Finding[] {
-  return Object.values(audit.advisories ?? {}).map((a) => ({
-    ghsa: a.github_advisory_id ?? '',
-    module: a.module_name,
-    severity: a.severity,
-    paths: (a.findings ?? []).flatMap((f) => f.paths ?? []),
-  }));
+type Json = Record<string, unknown>;
+
+const isObject = (v: unknown): v is Json =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+function pathsOf(advisory: Json): string[] {
+  const findings: readonly unknown[] = Array.isArray(advisory.findings) ? advisory.findings : [];
+  return findings.flatMap((f) =>
+    isObject(f) && Array.isArray(f.paths)
+      ? f.paths.filter((p): p is string => typeof p === 'string')
+      : [],
+  );
+}
+
+function findingOf(key: string, advisory: unknown): Finding {
+  if (!isObject(advisory)) throw new AuditUnreadableError(`advisory ${key} is not an object`);
+  const { module_name: module, severity, github_advisory_id: ghsa } = advisory;
+  if (typeof module !== 'string' || typeof severity !== 'string') {
+    throw new AuditUnreadableError(`advisory ${key} has no module name or severity`);
+  }
+  return { ghsa: typeof ghsa === 'string' ? ghsa : '', module, severity, paths: pathsOf(advisory) };
+}
+
+/** `pnpm audit --json` → findings. Parsed, never assumed: see {@link AuditUnreadableError}. */
+export function findingsOf(audit: unknown): Finding[] {
+  if (!isObject(audit)) throw new AuditUnreadableError('not a JSON object');
+  if ('error' in audit) throw new AuditUnreadableError('pnpm reported an error, not a result');
+  if (!isObject(audit.advisories)) throw new AuditUnreadableError('no advisories map');
+  return Object.entries(audit.advisories).map(([key, a]) => findingOf(key, a));
 }

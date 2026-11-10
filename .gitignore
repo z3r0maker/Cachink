@@ -17,6 +17,18 @@ coverage/
 .env.local
 .env.*.local
 
+# Signing material and service files: never tracked (audit 2026-11-09, F-12/F-13).
+*.p12
+*.p8
+*.jks
+*.keystore
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# A coding agent's local permission allowlist is per-machine, never shared.
+.claude/settings.local.json
+
 # IDE / OS
 .DS_Store
 .vscode/*

@@ -14,7 +14,7 @@ import { blocking, findingsOf, type AllowEntry } from './audit-gate-rules.js';
 const ROOT = join(fileURLToPath(import.meta.url), '../..');
 
 function main(auditPath: string): number {
-  const audit = JSON.parse(readFileSync(auditPath, 'utf8')) as Parameters<typeof findingsOf>[0];
+  const audit: unknown = JSON.parse(readFileSync(auditPath, 'utf8'));
   const allow = JSON.parse(
     readFileSync(join(ROOT, 'security/audit-allowlist.json'), 'utf8'),
   ) as AllowEntry[];

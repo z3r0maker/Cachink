@@ -52,4 +52,22 @@ describe('audit gate', () => {
     assert.equal(isBuildOnly('packages__config>vitest>vite'), true);
     assert.equal(isBuildOnly('apps__web>next'), false);
   });
+
+  it('refuses an audit it cannot read: a registry error is not a clean bill', () => {
+    const unreadable = { code: 'AUDIT_UNREADABLE' };
+    // What `pnpm audit --json` prints when the registry answers badly.
+    assert.throws(
+      () => findingsOf({ error: { code: 'ERR_PNPM_AUDIT_BAD_RESPONSE', message: 'HTTP 503' } }),
+      unreadable,
+    );
+    assert.throws(() => findingsOf({}), unreadable, 'no advisories key');
+    assert.throws(() => findingsOf({ advisories: [] }), unreadable, 'advisories is not a map');
+    assert.throws(() => findingsOf(null), unreadable);
+    assert.throws(
+      () => findingsOf({ advisories: { '1': { severity: 'high' } } }),
+      unreadable,
+      'an advisory with no module name is one the gate cannot judge',
+    );
+    assert.deepEqual(findingsOf({ advisories: {}, metadata: {} }), [], 'a clean audit is empty');
+  });
 });

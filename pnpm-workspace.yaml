@@ -29,6 +29,13 @@ peerDependencyRules:
     react-dom: 19.2.6
     typescript: 6.0.3
 
+# A version must have been public for 7 days before pnpm will resolve it (audit
+# 2026-11-09, F-13): the npm worms of 2025-26 were caught and unpublished well
+# inside that window. Versions already in the lockfile are unaffected. A security
+# patch that cannot wait goes in `minimumReleaseAgeExclude`, with the advisory
+# id beside it, and comes out again once it is a week old.
+minimumReleaseAge: 10080
+
 onlyBuiltDependencies:
   - '@shopify/react-native-skia'
   - '@swc/core'
