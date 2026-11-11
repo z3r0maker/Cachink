@@ -50,7 +50,7 @@ trabajo, que es quien tiene que moverla.
 - [ ] `⛔ bloquea prod` `Crítica` **O-30** Configurar `CRON_SECRET` en Vercel (xangarro-web, Production, Sensitive) y volver a desplegar. Lo encontró el… · `11-pre-launch-and-deferred.md:37`
 - [ ] `⛔ bloquea prod` `Crítica` **O-12** Te toca a ti (manual, 2026-09-23): llaves de prueba de Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, … · `11-pre-launch-and-deferred.md:44`
 - [ ] `⛔ bloquea prod` `Crítica` **O-17** Revisión del abogado sobre `docs/legal/aviso/*` (16 preguntas abiertas en su README), incl. si el archivo de … · `11-pre-launch-and-deferred.md:54`
-- [~] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S., domicilio Paseo Lomas Altas 524, inter… · `../launch/production-readiness.md:10`
+- [~] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S. (contrato social, folio SAS20261038080)… · `../launch/production-readiness.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Revisión del abogado de los cinco textos + las cinco confirmaciones en · `../launch/production-readiness.md:22`
 - [ ] `⛔ bloquea prod` `Crítica` Operador — set the Términos URL in Stripe's Dashboard (Settings › Public details → · `../launch/production-readiness.md:120`
 - [ ] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Búsqueda y registro de marca ante el IMPI para «Xangarro» (clases 9, 35, 36, 42) antes · `../launch/production-readiness.md:182`
@@ -278,7 +278,7 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
-- [~] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S., domicilio Paseo Lomas Altas 524, inter… · `../launch/production-readiness.md:10`
+- [~] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S. (contrato social, folio SAS20261038080)… · `../launch/production-readiness.md:10`
 
 ### `../launch/production-readiness.md` · 1. Textos legales (7)
 

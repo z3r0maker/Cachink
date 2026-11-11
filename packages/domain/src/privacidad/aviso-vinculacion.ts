@@ -23,10 +23,18 @@ export const TERMINOS_PUBLICO_URL = 'https://xangarro.mx/terminos/' as const;
 /** The button under the aviso that opens it in full (5.1.1(i): a tappable link). */
 export const AVISO_VINCULACION_ENLACE = 'Leer el aviso completo' as const;
 
-const RESPONSABLE =
+const QUE_TRATA =
+  'trata los datos técnicos de este dispositivo (identificador, modelo, sistema y versión) y los ' +
+  'registros que captures, para sincronizarlos con tu negocio y mantener el servicio seguro.';
+
+/** 0.2 and 0.3: the domicilio of the contrato social. */
+const RESPONSABLE_CONTRATO =
   'Tu privacidad. MEXIA, S.A.S. (Xangarro), Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco, trata los datos técnicos de este ' +
   'dispositivo (identificador, modelo, sistema y versión) y los registros que captures, para ' +
   'sincronizarlos con tu negocio y mantener el servicio seguro.';
+
+/** 0.4 on: the domicilio fiscal, from the constancia de situación fiscal. */
+const RESPONSABLE = `Tu privacidad. MEXIA, S.A.S. (Xangarro), Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, ${QUE_TRATA}`;
 
 const ENCARGADO =
   'Los datos de clientes y operadores los trata Xangarro por cuenta del negocio, que es su ' +
@@ -40,11 +48,17 @@ const ENCARGADO =
  */
 const PUBLICADOS = {
   '0.2-borrador': [
-    RESPONSABLE,
+    RESPONSABLE_CONTRATO,
     ENCARGADO,
     'Aviso completo y derechos ARCO: xangarro.mx/privacidad',
   ],
   '0.3-borrador': [
+    RESPONSABLE_CONTRATO,
+    ENCARGADO,
+    'El aviso completo explica tus derechos ARCO.',
+    `${AVISO_VINCULACION_ENLACE}: ${AVISO_PUBLICO_URL}`,
+  ],
+  '0.4-borrador': [
     RESPONSABLE,
     ENCARGADO,
     'El aviso completo explica tus derechos ARCO.',
@@ -52,7 +66,7 @@ const PUBLICADOS = {
   ],
 } as const satisfies Record<string, readonly string[]>;
 
-export const AVISO_VINCULACION_VERSION = '0.3-borrador' as const satisfies keyof typeof PUBLICADOS;
+export const AVISO_VINCULACION_VERSION = '0.4-borrador' as const satisfies keyof typeof PUBLICADOS;
 
 /** The paragraphs the current version shows; the button follows them. */
 export const AVISO_VINCULACION = PUBLICADOS[AVISO_VINCULACION_VERSION].slice(0, 3);

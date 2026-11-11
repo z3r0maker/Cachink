@@ -26,6 +26,7 @@ import { avisoDeVinculacion, avisoVigente, ipHash } from '../src/server/legal/av
 const HUELLAS: Readonly<Record<string, string>> = {
   '0.2-borrador': '93d2b81f6639e003e45ced8ccc9b26749db76ff1a52b4ad1c289b5f1a48c62ce',
   '0.3-borrador': 'adc31ccd26f95d8709880e40cec7827d18357d26c18987cf139613cf5583457a',
+  '0.4-borrador': 'e711a71449470328cba0ada3aefb611a2bb4eea9e0fd21890295a786bf5344fb',
 };
 const sha = (t: string) => createHash('sha256').update(t, 'utf8').digest('hex');
 
@@ -76,10 +77,10 @@ describe('aviso simplificado at signup (N-34, PRIV-REG-01)', () => {
     assert.match(text, /Cómo limitar el uso/);
   });
 
-  it('names the responsable by its razón social and domicilio (2026-10-28)', () => {
+  it('names the responsable by its razón social and domicilio fiscal (2026-11-11)', () => {
     assert.match(
       avisoTextoCanonico(),
-      /MEXIA, S\.A\.S\. \(Xangarro\), con domicilio en Paseo Lomas Altas 524/,
+      /MEXIA, S\.A\.S\. \(Xangarro\), con domicilio en Paseo Puesta del Sol 4150, colonia Lomas Altas, C\.P\. 45128/,
     );
     assert.doesNotMatch(avisoTextoCanonico(), /\[RAZÓN SOCIAL\]|\[DOMICILIO\]/);
   });
@@ -103,6 +104,11 @@ describe('aviso shown at device linking (N-34, variante B)', () => {
       avisoVersion: AVISO_VINCULACION_VERSION,
       avisoSha256: expected,
     });
+  });
+
+  it('0.4 names the domicilio fiscal; 0.3 keeps the one it showed', () => {
+    assert.match(avisoVinculacionTexto(), /Paseo Puesta del Sol 4150/);
+    assert.match(avisoVinculacionTextoDe('0.3-borrador') ?? '', /Paseo Lomas Altas 524/);
   });
 
   it('still hashes 0.2, so a phone on an older build keeps its record', () => {

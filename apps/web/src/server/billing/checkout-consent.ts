@@ -37,7 +37,9 @@ export function checkoutConsent(
     consent_collection: { terms_of_service: 'required' },
     custom_text: {
       terms_of_service_acceptance: { message: consentText(lookupKey) },
-      submit: { message: `${PROVEEDOR_LINEA} · Dudas y quejas: ${PROVEEDOR.correo}` },
+      submit: {
+        message: `${PROVEEDOR_LINEA} · Dudas y quejas: ${PROVEEDOR.correo}, ${PROVEEDOR.telefono}`,
+      },
     },
   };
 }
