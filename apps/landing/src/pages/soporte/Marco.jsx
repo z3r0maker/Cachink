@@ -3,6 +3,7 @@
  * with «Escríbenos», the «¿Quién eres?» choice and the footer.
  */
 import { Brand } from '../../../home/Nav.jsx';
+import { ContactoLegal } from '../../../home/ContactoLegal.jsx';
 import { Don } from '../../../home/Don.jsx';
 import { LOGIN_URL } from '../../../landing/planes.js';
 import { Inline } from '../legal/LegalPage.jsx';
@@ -91,7 +92,7 @@ export function Pie({ legal }) {
             </a>
           ))}
         </nav>
-        <span className="sp-sub">Xangarro es un servicio de MEXIA, S.A.S.</span>
+        <ContactoLegal className="sp-sub sp-pie-contacto" />
       </div>
     </footer>
   );

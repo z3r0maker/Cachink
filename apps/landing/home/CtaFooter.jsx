@@ -1,4 +1,5 @@
 import { Brand } from './Nav.jsx';
+import { ContactoLegal } from './ContactoLegal.jsx';
 import { Don } from './Don.jsx';
 import { LOGIN_URL, signupUrl } from '../landing/planes.js';
 
@@ -78,7 +79,7 @@ export default function CtaFooter() {
               ))}
             </div>
           </div>
-          <div className="foot-legal">© 2026 Xangarro · hola@xangarro.mx</div>
+          <ContactoLegal className="foot-legal" prefijo="© 2026 " />
         </div>
       </footer>
     </>

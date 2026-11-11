@@ -104,10 +104,10 @@ en **xangarro.mx/privacidad/proveedores** (arts. 54 y 55 del Reglamento). A la f
 
 | Subencargado                       | Servicio                                                                          | Ubicación           |
 | ---------------------------------- | --------------------------------------------------------------------------------- | ------------------- |
-| Supabase, Inc.                     | Base de datos, autenticación, almacenamiento (incluido el archivo de inactividad) | EE. UU. (us-east-1) |
-| Vercel Inc.                        | Alojamiento del portal y de la API                                                | EE. UU. (iad1)      |
+| Supabase, Inc.                     | Base de datos, autenticación, almacenamiento (incluido el archivo de inactividad) | EE. UU. (us-west-2) |
+| Vercel Inc.                        | Alojamiento del portal y de la API                                                | EE. UU. (pdx1)      |
 | Functional Software, Inc. (Sentry) | Reportes de fallas (sin contenido capturado por el usuario en la app)             | [REGIÓN]            |
-| [PROVEEDOR DE CORREO]              | Correos del servicio                                                              | [PAÍS]              |
+| Resend, Inc.                       | Correos del servicio                                                              | EE. UU. (us-east-1) |
 | Mercado Pago / Clip                | Solo si el Negocio conecta su cuenta, para cobros                                 | [PAÍS]              |
 
 > Nota: Stripe y el PAC tratan datos de la cuenta y facturación del Negocio (Xangarro responsable), no
