@@ -86,7 +86,7 @@ test.describe('the reminder email link', () => {
     await expect(datos).toContainText('$230.84 con IVA');
     await expect(datos).toContainText('Xangarrito, gratis');
     await expect(page.getByRole('button', { name: 'Sí, cancelar mi suscripción' })).toBeEnabled();
-    await expect(page.getByText(/MEXIA, S\.A\.S\., Paseo Lomas Altas 524/)).toBeVisible();
+    await expect(page.getByText(/MEXIA, S\.A\.S\., Paseo Puesta del Sol 4150/)).toBeVisible();
   });
 
   test('a tap that cannot reach Stripe changes nothing and says so', async ({ page }) => {

@@ -32,7 +32,7 @@ test.describe('the owner', () => {
     await expect(page.getByTestId('aviso-nuevo-franja')).toHaveCount(0);
 
     const card = page.getByTestId('pv-aviso-nuevo');
-    await expect(card).toContainText('Versión 0.3');
+    await expect(card).toContainText('Versión 0.4');
     await expect(page.getByTestId('pv-aceptado')).toHaveText(
       'Todavía no tenemos registrado que aceptaste el aviso.',
     );
@@ -45,7 +45,7 @@ test.describe('the owner', () => {
     await card.getByRole('button', { name: 'Acepto el aviso nuevo' }).click();
     await expect(page.getByTestId('pv-aviso-nuevo')).toHaveCount(0);
     await expect(page.getByTestId('pv-aceptado')).toHaveText(
-      /^Aceptaste la versión 0\.3 el \d{1,2} de \w+ de \d{4}\.$/,
+      /^Aceptaste la versión 0\.4 el \d{1,2} de \w+ de \d{4}\.$/,
     );
     await page.goto('/');
     await expect(page.getByTestId('aviso-nuevo-franja')).toHaveCount(0);

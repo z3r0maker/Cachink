@@ -32,7 +32,8 @@ describe('renewal reminder', () => {
     assert.match(e.text, /\$230\.84 MXN, IVA incluido/);
     assert.match(e.html, /href="https:\/\/app\.xangarro\.mx\/cancelar\?t=abc"/);
     assert.match(e.text, /Cancelar mi suscripción/);
-    assert.match(e.text, /MEXIA, S\.A\.S\. · Paseo Lomas Altas 524/);
+    assert.match(e.text, /MEXIA, S\.A\.S\. · Paseo Puesta del Sol 4150/);
+    assert.match(e.text, /llama al 33 3190 0937/, 'LFPC art. 76 Bis III: a phone');
     assert.match(e.text, /¿Dudas o quejas\?/);
     assert.doesNotMatch(e.text, /TELÉFONO/);
     expect(e).toMatchSnapshot();
