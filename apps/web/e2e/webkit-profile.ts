@@ -1,4 +1,5 @@
 import { mkdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type {
   BrowserContext,
@@ -54,7 +55,7 @@ export async function webkitConPerfil(
   { playwright, launchOptions, headless, options, vaciar }: ProfileArgs,
   testInfo: TestInfo,
 ): Promise<BrowserContext> {
-  const dir = testInfo.outputPath('webkit-profile');
+  const dir = profileDir(testInfo);
   mkdirSync(dir, { recursive: true });
   const { storageState, ...rest } = options;
   const context = await playwright.webkit.launchPersistentContext(dir, {
@@ -65,6 +66,22 @@ export async function webkitConPerfil(
   if (storageState !== undefined) await context.setStorageState(sinSecure(storageState));
   if (vaciar && rest.baseURL !== undefined) await vaciarOpfs(context, rest.baseURL);
   return context;
+}
+
+/**
+ * The profile's directory, named by the test's id and attempt, never its
+ * title. `outputPath` is a slug of the title, and the titles are Spanish
+ * («Acceso (O-12)», «Deshacer»): Linux WebKit refuses to start with a
+ * non-ASCII `--user-data-dir` («Cannot parse arguments: Invalid byte sequence
+ * in conversion input») — every `webkit-operador` test failed on CI that way
+ * while macOS took the same paths happily.
+ */
+function profileDir(testInfo: TestInfo): string {
+  return join(
+    testInfo.project.outputDir,
+    'webkit-profiles',
+    `${testInfo.testId}-${testInfo.retry}`,
+  );
 }
 
 type Estado = Exclude<BrowserContextOptions['storageState'], string | undefined>;
