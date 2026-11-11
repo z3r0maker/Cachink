@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 
 import { expect, type APIRequestContext } from '@playwright/test';
 import postgres from 'postgres';
@@ -17,10 +17,14 @@ export const ABARROTES = 'Abarrotes emitidos E2E';
 const NEGOCIO = 'e2e-emitidas';
 const run = randomBytes(4).toString('hex');
 export const pagoId = (tag: string) => `in_e2e_${run}_${tag}`;
-/** A ULID the inbox accepts: Crockford's alphabet, no I, L, O or U. */
+/**
+ * A ULID the inbox accepts: Crockford's alphabet, no I, L, O or U. Each
+ * character from `randomInt`, which is uniform by construction (CodeQL
+ * js/biased-cryptographic-random flags a modulo over random bytes).
+ */
 const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const itemId = () =>
-  `01${[...randomBytes(24)].map((b) => CROCKFORD[b % CROCKFORD.length]).join('')}`;
+  `01${Array.from({ length: 24 }, () => CROCKFORD[randomInt(CROCKFORD.length)]).join('')}`;
 export const ITEM_MANUAL = itemId();
 export const ITEM_GLOBAL = itemId();
 
