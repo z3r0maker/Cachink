@@ -8,12 +8,14 @@ import { beforeEach, describe, it, vi } from 'vitest';
  */
 
 const requireMember = vi.fn();
+const requireStepUp = vi.fn();
 const reportError = vi.fn();
 const revalidatePath = vi.fn();
 let revoked: () => Promise<{ id: string }[]>;
 
 vi.mock('next/cache', () => ({ revalidatePath }));
 vi.mock('../../src/server/auth', () => ({ requireMember }));
+vi.mock('../../src/server/acceso/reconfirmar', () => ({ requireStepUp }));
 vi.mock('../../src/server/observability/report', () => ({ reportError }));
 vi.mock('@xangarro/data-pg', () => ({ devices: {} }));
 vi.mock('../../src/server/db', () => ({
@@ -22,14 +24,27 @@ vi.mock('../../src/server/db', () => ({
 }));
 
 const { revocarDispositivo } = await import('../../src/server/actions/dispositivos');
+const { refusal, STEP_UP_REQUIRED } = await import('../../src/server/action-errors');
 
 beforeEach(() => {
   vi.clearAllMocks();
   requireMember.mockResolvedValue({ business_id: 'biz-1' });
+  requireStepUp.mockResolvedValue(undefined);
   revoked = async () => [{ id: 'dev-1' }];
 });
 
 describe('revocarDispositivo', () => {
+  it('asks for the second factor again first, and revokes nothing until then (N-83)', async () => {
+    requireStepUp.mockRejectedValue(refusal(STEP_UP_REQUIRED, 'Confirma que eres tú para seguir.'));
+    assert.deepEqual(await revocarDispositivo('dev-1'), {
+      ok: false,
+      message: 'Confirma que eres tú para seguir.',
+      reconfirmar: true,
+    });
+    assert.equal(revalidatePath.mock.calls.length, 0);
+    assert.equal(reportError.mock.calls.length, 0, 'a refusal, not an incident');
+  });
+
   it('revokes the device and refreshes Equipo', async () => {
     assert.deepEqual(await revocarDispositivo('dev-1'), { ok: true });
     assert.deepEqual(revalidatePath.mock.calls, [['/equipo']]);

@@ -12,6 +12,7 @@ import {
   restablecerPin,
   type OperadorResult,
 } from '@/server/actions/operadores';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 import { NipInput } from './nip-input';
 
@@ -33,10 +34,13 @@ function useAction(onDone: (r: OperadorResult & { ok: true }) => void) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const { protegido } = useReconfirmar();
 
+  /** `null`: the re-ask dialog was closed (N-83); nothing changed and nothing to say. */
   const run = (action: () => Promise<OperadorResult>): void =>
     startTransition(async () => {
-      const result = await action();
+      const result = await protegido(action, 'Vas a cambiar tus operadores.');
+      if (result === null) return;
       if (!result.ok) return setError(result.message);
       setError(null);
       onDone(result);

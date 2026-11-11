@@ -2,7 +2,6 @@
 
 import { activationCodes, liveActivationCode } from '@xangarro/data-pg';
 import { eq } from 'drizzle-orm';
-import QRCode from 'qrcode';
 
 import {
   hashPairingToken,
@@ -11,9 +10,11 @@ import {
   pairingLink,
 } from '../../lib/pairing-token';
 import { failure } from '../action-errors';
+import { requireStepUp } from '../acceso/reconfirmar';
 import { requireMember } from '../auth';
 import { portalOrigin } from '../billing/origin';
 import { withTenant } from '../db';
+import { qrSvgDataUri } from '../qr';
 
 /**
  * «Mostrar QR» — a scannable pairing link for the live code (C-14, P-06).
@@ -35,6 +36,7 @@ const SIN_CODIGO = 'Primero genera un código de vinculación.';
 export async function generarQr(): Promise<QrResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const now = new Date();
     const token = mintPairingToken();
     const minted = await withTenant(session.business_id, async (tx) => {
@@ -53,9 +55,7 @@ export async function generarQr(): Promise<QrResult> {
     });
     if (minted === null) return { ok: false, message: SIN_CODIGO };
     const link = pairingLink(await portalOrigin(), token);
-    const svg = await QRCode.toString(link, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
-    const svgDataUri = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-    return { ok: true, link, svgDataUri, expiresAt: minted.expiresAt };
+    return { ok: true, link, svgDataUri: await qrSvgDataUri(link), expiresAt: minted.expiresAt };
   } catch (error) {
     return failure(error, 'generarQr', { retry: 'No pudimos generar el QR. Intenta de nuevo.' });
   }

@@ -1,4 +1,4 @@
-import type { SessionStore, ThrottleStore } from '@xangarro/auth-core';
+import type { SecondFactorRepo, SessionStore, ThrottleStore, TotpState } from '@xangarro/auth-core';
 import type { StaffMemberId } from '@xangarro/domain';
 
 import type { Aal } from '../gate';
@@ -32,37 +32,17 @@ export interface LoginRecord {
   readonly passwordHash: string | null;
 }
 
-export interface TotpState {
-  /** Sealed seed; present while enrolling and once enrolled. */
-  readonly secretEnc: string | null;
-  readonly enrolledAt: string | null;
-  readonly lastStep: number | null;
-}
+export type { TotpState };
 
-/** Every write is conditional, so two tabs or a replay can never both win. */
-export interface StaffAuthRepo {
+/**
+ * The staff row's sign-in half, plus the second-factor writes both apps share
+ * (`SecondFactorRepo` in `@xangarro/auth-core`): a pending seed, enrolment,
+ * the TOTP step and the recovery codes. Every write is conditional, so two
+ * tabs or a replay can never both win.
+ */
+export interface StaffAuthRepo extends SecondFactorRepo<StaffMemberId> {
   /** The live staff row for an address (already lower-cased), or null. */
   findForLogin(email: string): Promise<LoginRecord | null>;
-  totpState(staffId: StaffMemberId): Promise<TotpState | null>;
-  /**
-   * Store a pending seed — only while not enrolled and the stored one is still
-   * `previous` (compare-and-swap), so two tabs cannot each show a different QR.
-   */
-  savePendingSecret(
-    staffId: StaffMemberId,
-    previous: string | null,
-    sealed: string,
-  ): Promise<boolean>;
-  /** Mark enrolled with its first step and recovery hashes — only if not yet enrolled. */
-  completeEnrolment(
-    staffId: StaffMemberId,
-    step: number,
-    recoveryHashes: readonly string[],
-  ): Promise<boolean>;
-  /** Record `step` as used — only if it is newer than the last one. */
-  advanceStep(staffId: StaffMemberId, step: number): Promise<boolean>;
-  /** Remove one recovery-code hash; the number left, or null if it was not there. */
-  consumeRecoveryCode(staffId: StaffMemberId, hash: string): Promise<number | null>;
 }
 
 /** Writes one `staff_audit_log` row (`auth.*` actions). */

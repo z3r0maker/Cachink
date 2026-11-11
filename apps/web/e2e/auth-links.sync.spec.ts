@@ -29,7 +29,9 @@ const email = `links-${workerStamp}@test.mx`;
 test.beforeAll(async () => {
   const userId = randomUUID();
   await asTenant(BIZ, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, 'x')`;
+    // Confirmed, like any account that has signed in before (N-83): these specs are about the links.
+    await sql`INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at)
+              VALUES (${userId}::uuid, ${email}, 'x', now())`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${userId}, 'viewer', ${BIZ}, now(), now())`;

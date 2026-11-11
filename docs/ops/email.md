@@ -98,6 +98,9 @@ To send for real from a laptop, export a **test** Resend key in your shell
 - **ADR-080 reset / magic link** (portal auth owner): call
   `sendPasswordReset(email, url)` / `sendMagicLink(email, url)` from
   `apps/web/src/server/email/auth-links.ts` after minting the token.
+- **N-83 email confirmation** (ADR-142): `sendEmailConfirmation(to, url, …)` in the same file,
+  sent by `apps/web/src/server/acceso/correo-de-confirmacion.ts` at signup, on «Mandar otro
+  enlace», and when an unconfirmed account types its password. Three per address in 15 minutes.
 - **N-03 owner emails** (N-02 wiring): call `notifyUsageThreshold(notice)` from
   `apps/web/src/server/email/usage.ts` for each owner crossing.
 - **N-34 / N-48** (ARCO, dormancy): `renderGenericNoticeEmail` until they get
@@ -106,7 +109,8 @@ To send for real from a laptop, export a **test** Resend key in your shell
   (`apps/web/src/server/email/payment-failed.ts`) is the webhook's
   `PaymentFailedListener`; `liveFacturaIssuedListener()`
   (`email/factura-issued.ts`) is the CFDI flow's `IssuedCfdiListener`;
-  `sendWelcome()` (`email/welcome.ts`) is called by the signup action. All
+  `sendWelcome()` (`email/welcome.ts`) goes out when the new account's address is confirmed
+  (N-83, `server/acceso/confirmacion.ts`), no longer from the signup action. All
   three take an `owners`/`sender` override for tests.
 
 ## 6. Open items

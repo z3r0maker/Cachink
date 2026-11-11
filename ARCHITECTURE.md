@@ -180,6 +180,7 @@ Links to discussion, docs, prior art.
 | [139](#adr-139) | 2026-11-09 | Novedades are opt-in at signup, and every ARCO request gets its acuse by email | Accepted |
 | [140](#adr-140) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
 | [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
+| [142](#adr-142) | 2026-11-11 | A new account confirms its email before it has a session, and owners and admins may add a TOTP second factor; both live in the portal's own auth, on the link table and the console's TOTP code | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10229,3 +10230,89 @@ Supabase anon key in every build.
   updated; with the function gone that fails quietly and loses nothing anyone read.
 - `apps/mobile/maestro/flows/bug-report-sheet.yaml` accepts either primary action, since a linked
   phone with reports on now shows «enviar».
+
+---
+
+## ADR-142
+
+**Title:** A new account confirms its email before it has a session, and owners and admins may add a TOTP second factor; both live in the portal's own auth, on the link table and the console's TOTP code
+
+**Date:** 2026-11-11
+
+**Status:** Accepted — N-83; closes audit F-09 (SEC-AUTH-02). Five decisions by the owner on 2026-11-10 and one on 2026-11-11; the eight boards «Seguridad de la cuenta» were approved on 2026-11-10. Amends ADR-079 (sessions gain a re-ask stamp) and ADR-080 (three more kinds of link)
+
+**Context**
+
+Signup opened a session the moment the form was sent, so anyone could register somebody else's address
+and sit on it, and an owner account was one password away from the business's ledger, its cajas and its
+billing. The console already required TOTP (N-05, on `@xangarro/auth-core`); the portal had none. The
+screens did not exist, so they were drawn and approved first (ADR-117).
+
+**Decision**
+
+1. **No session until the address is confirmed.** `account_create` leaves `auth.users.email_confirmed_at`
+   null. Signup mails a `confirm` link (24 hours, single use, hashed like every link) and hands the
+   browser a `pending` pass in an `httpOnly` cookie. The link opens a page with a button, and only the
+   button confirms: mail filters open links. Confirming stamps the address, opens the session and sends
+   the welcome email, which no longer goes out at signup.
+2. **A password is refused on an unconfirmed address**, after it is checked, so the answer still tells
+   a stranger nothing: the visitor gets «Falta confirmar tu correo», a fresh link and a pending pass.
+3. **The pending pass is what allows «Mandar otro enlace» and «Corregir mi correo».** An address can be
+   corrected only while unconfirmed, only by the browser that signed up or by someone who just typed the
+   password, and never to an address another account has.
+4. **A sign-in link claims an unconfirmed account** (`account_claim`): the link proves the inbox, so the
+   address is confirmed, and the password and sessions of whoever registered it are removed. The visitor
+   is sent to «Crea una contraseña nueva» with a reset link minted on the spot.
+5. **Accounts that existed before 0057 count as confirmed** (owner, 2026-11-11): the migration stamps
+   them with their creation date.
+6. **TOTP is optional, per person, for owner and admin** (owner, 2026-11-10), under the account menu's
+   «Seguridad». The seed, its sealing, the first code, the replay guard and the recovery codes are one
+   implementation in `@xangarro/auth-core` (`second-factor.ts`), which the console now calls too. The
+   portal's storage is `xangarro.portal_second_factor`, reached only through definer functions; the seed
+   is sealed with `PORTAL_TOTP_KEY` and bound to the account id.
+7. **A sign-in with TOTP on has no session after the password, only a `challenge`** (10 minutes, in an
+   `httpOnly` cookie). The session is opened when a code or a recovery code is accepted. So a
+   password-only sign-in reaches nothing, and there is no half-session whose every reader must remember
+   to distrust it. Sign-in links and password resets pass through the same challenge.
+8. **The re-ask.** With TOTP on, changing operators, cajas or billing, new recovery codes and turning
+   TOTP off need a code no older than 15 minutes on this session (`portal_sessions.stepped_up_at`).
+   Signing in with a code and enrolling both count. The check is in the server actions
+   (`requireStepUp`); the dialog is how the screen answers it.
+9. **Enrolment asks for the password first**, so an unattended session cannot bind someone else's phone.
+   Turning TOTP off and new codes ask for the re-ask instead.
+10. **No emailed link turns TOTP off** (owner, 2026-11-10). With the phone and the recovery codes both
+    lost, support confirms identity and switches it off from the console. That console action is not
+    built here: it needs its own board first.
+11. **Limits are the ones in use:** 5 wrong codes per account in 15 minutes lock it for 15 (auth-core's
+    `TOTP_PER_ACCOUNT`), ten recovery codes, confirmation emails 3 per address and 10 per IP in 15 minutes
+    like the other links.
+
+**Alternatives considered**
+
+- *A session marked «second factor pending», as the console's AAL1.* Rejected for the portal: every
+  layout, action and route would have to check the mark, and one that forgot would hand over a tenant.
+  The console has a single gate; the portal gates in many places.
+- *Supabase Auth for confirmation and MFA.* Rejected again (ADR-080): the portal's sessions, throttle
+  and links are its own, and a second issuer for two features is two systems to keep in step.
+- *Confirm the address at the first paid action instead of at signup.* Rejected: the squatting problem
+  is at signup, and an unconfirmed account already holds a business and its data.
+- *Require TOTP for owners.* Rejected by the owner: many shop owners have no authenticator app, and a
+  forced install on day one costs signups.
+- *An emailed link that turns TOTP off.* Rejected by the owner: then the mailbox alone is enough, which
+  is what the second factor is for.
+- *A foreign key from `portal_second_factor` to `auth.users` with `ON DELETE CASCADE`.* Rejected: it
+  needs `REFERENCES` on a table Supabase owns, which the hosted preflight does not check. `account_erase`
+  deletes the row itself.
+
+**Consequences**
+
+- Production needs `PORTAL_TOTP_KEY` (32 bytes, base64) on the portal before anyone enrols. Rotating it
+  without re-sealing makes every enrolled owner unable to pass the second step; the way back is support.
+- The seed and e2e fixtures insert accounts already confirmed; a fixture that inserts into `auth.users`
+  without the stamp cannot sign in with a password.
+- `link_issue` retires an account's earlier links of the same kind, so a second tab that signs in while
+  the first waits on a code replaces the first tab's challenge.
+- Operator, caja and billing actions answer `STEP_UP_REQUIRED` to a session whose proof is older than
+  15 minutes; a new sensitive action must call `requireStepUp` or it is not covered.
+- Still open, each needing the owner or a board: the console action for a locked-out owner, and whether
+  turning TOTP on or off sends a notice email.

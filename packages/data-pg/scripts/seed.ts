@@ -164,6 +164,10 @@ async function seedMembers(sql: Sql): Promise<void> {
     // member row decides: ON CONFLICT absorbs our own prior row, while an
     // address owned by a real account fails the member insert's FK loudly.
     await sql`SELECT xangarro.account_create(${m.id}::uuid, ${m.email}, ${encrypted}, ${m.nombre}, ${CREATED})`;
+    // A new account is unconfirmed and a password does not open it (N-83,
+    // ADR-142). No inbox stands behind a seeded address, so it is confirmed
+    // here, keeping the password just set; a no-op on a re-run.
+    await sql`SELECT xangarro.account_claim(${m.id}::uuid, true)`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${m.memberId}, ${m.id}, ${m.role}, ${BIZ}, ${CREATED}, ${CREATED})

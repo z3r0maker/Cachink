@@ -15,7 +15,18 @@ import { reportError } from './observability/report';
  * gets the action's retry line — never the error's own text, which for a
  * database failure is the database's words, and for a TypeError is a bug's.
  */
-export type Failure = { ok: false; message: string };
+export type Failure = {
+  ok: false;
+  message: string;
+  /**
+   * The action needs the second factor proven again first (N-83, ADR-142 §8).
+   * The screen opens the re-ask dialog and repeats the action once it passes.
+   */
+  reconfirmar?: true;
+};
+
+/** `requireStepUp`'s refusal (`acceso/reconfirmar.ts`). */
+export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
 
 export interface FailurePolicy {
   /**
@@ -78,7 +89,10 @@ function schemaField(error: unknown): string | undefined {
 export function failure(error: unknown, endpoint: string, policy: FailurePolicy = {}): Failure {
   const code = shownCode(error, policy.shown ?? []);
   if (code !== undefined) {
-    return { ok: false, message: policy.copy?.[code] ?? (error as Error).message };
+    const message = policy.copy?.[code] ?? (error as Error).message;
+    return code === STEP_UP_REQUIRED
+      ? { ok: false, message, reconfirmar: true }
+      : { ok: false, message };
   }
   const field = schemaField(error);
   if (policy.invalid !== undefined && field !== undefined) {

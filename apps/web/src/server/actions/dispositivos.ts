@@ -5,6 +5,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { failure } from '../action-errors';
+import { requireStepUp } from '../acceso/reconfirmar';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 
@@ -29,6 +30,7 @@ export type RevokeResult = { ok: true } | { ok: false; message: string };
 export async function revocarDispositivo(deviceId: string): Promise<RevokeResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
 
     const revoked = await withTenant(session.business_id, async (tx) => {
       const now = new Date().toISOString();

@@ -167,6 +167,9 @@ describe('account deletion', () => {
     assert.ok(reminderToken);
     assert.equal((await peekAccountDeletion(db, reminderToken))?.folio, due.folio, 'its own link');
     assert.equal(await markDeletionReminded(db, due.folio), null, 'once');
+    // The owner's second factor (0057, N-83): a sealed seed and code hashes are theirs too.
+    await su`INSERT INTO xangarro.portal_second_factor (user_id, secret_enc, enrolled_at, recovery_codes)
+             VALUES (${owner}::uuid, 'sealed', now(), ARRAY['h1'])`;
     const until = await eraseAccount(db, due.folio);
     assert.ok(Date.parse(until) - Date.now() > 9.9 * 365 * 86_400_000, 'blocked 10 years');
 
@@ -175,12 +178,23 @@ describe('account deletion', () => {
              (SELECT count(*)::int FROM devices WHERE business_id IN (${A}, ${B})) AS devices,
              (SELECT count(*)::int FROM business_members WHERE user_id = ${owner}) AS members,
              (SELECT count(*)::int FROM auth.users WHERE id = ${owner}::uuid) AS account,
+             (SELECT count(*)::int FROM xangarro.portal_second_factor
+               WHERE user_id = ${owner}::uuid) AS factor,
              (SELECT count(*)::int FROM subscriptions WHERE business_id = ${A}) AS subscriptions,
              (SELECT count(*)::int FROM cfdi_payments WHERE business_id = ${A}) AS cfdi,
              (SELECT count(*)::int FROM businesses WHERE id = ${OTHER}) AS other`;
     assert.deepEqual(
       { ...left },
-      { businesses: 0, devices: 0, members: 0, account: 0, subscriptions: 1, cfdi: 1, other: 1 },
+      {
+        businesses: 0,
+        devices: 0,
+        members: 0,
+        account: 0,
+        factor: 0,
+        subscriptions: 1,
+        cfdi: 1,
+        other: 1,
+      },
     );
     const [kept] = await su<{ rfc: string; erased: boolean }[]>`
       SELECT identidad->'negocios'->0->>'rfc' AS rfc, erased_at IS NOT NULL AS erased

@@ -33,3 +33,44 @@ export async function createAccount(
   );
   return row?.created === true;
 }
+
+/** Whether the account's address is confirmed (N-83); `null` when there is no such account. */
+export async function accountConfirmed(db: Conn, userId: string): Promise<boolean | null> {
+  const [row] = await db.execute<{ ok: boolean | null }>(
+    sql`SELECT xangarro.account_confirmed(${userId}::uuid) AS ok`,
+  );
+  return row?.ok ?? null;
+}
+
+/**
+ * An emailed link reached an account nobody had confirmed: the address is
+ * confirmed and its sessions end. After a sign-in link the password of whoever
+ * registered it goes too; after a reset (`keepPassword`) it is the one just
+ * chosen, and stays. False when the account was already confirmed, and then
+ * nothing changed.
+ */
+export async function claimAccount(
+  db: Conn,
+  userId: string,
+  keepPassword: boolean,
+): Promise<boolean> {
+  const [row] = await db.execute<{ claimed: boolean }>(
+    sql`SELECT xangarro.account_claim(${userId}::uuid, ${keepPassword}::boolean) AS claimed`,
+  );
+  return row?.claimed === true;
+}
+
+/**
+ * Correct a mistyped address while it is unconfirmed. False when the account
+ * is confirmed already or another account has the new address.
+ */
+export async function changeAccountEmail(
+  db: Conn,
+  userId: string,
+  email: string,
+): Promise<boolean> {
+  const [row] = await db.execute<{ changed: boolean }>(
+    sql`SELECT xangarro.account_change_email(${userId}::uuid, ${email}) AS changed`,
+  );
+  return row?.changed === true;
+}

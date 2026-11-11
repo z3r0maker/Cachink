@@ -5,18 +5,13 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 
 import { Button, Input } from '@/components';
+import { enmascararCorreo } from '@/lib/correo';
 import { pedirEnlace } from '@/server/actions/auth-links';
 
 import { enlace, pila } from '../../_publico/publico.css';
 import { rutaDeDueno } from '../puertas';
 import * as s from './recuperar.css';
 import { TarjetaAcceso } from './tarjeta';
-
-/** `pedro@taqueria.mx` → `p***@taqueria.mx`: the receipt names the inbox, not the person. */
-function enmascarar(correo: string): string {
-  const [usuario = '', dominio = ''] = correo.trim().toLowerCase().split('@');
-  return dominio === '' ? usuario : `${usuario.charAt(0)}***@${dominio}`;
-}
 
 /**
  * Ask for a reset link (ADR-080). The confirmation reads the same whether or
@@ -53,8 +48,8 @@ function Enviado({ email, otro }: { readonly email: string; readonly otro: () =>
       <div className={s.enviado}>
         <Mail size={22} aria-hidden="true" />
         <p className={s.enviadoTexto}>
-          Te mandamos un enlace a <strong className={s.correo}>{enmascarar(email)}</strong> si tiene
-          cuenta. Dura 30 minutos.
+          Te mandamos un enlace a <strong className={s.correo}>{enmascararCorreo(email)}</strong> si
+          tiene cuenta. Dura 30 minutos.
         </p>
       </div>
       <p className={s.aparte}>

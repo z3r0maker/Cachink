@@ -11,6 +11,7 @@ import { beforeEach, describe, it, vi } from 'vitest';
  */
 
 const requireMember = vi.fn();
+const requireStepUp = vi.fn();
 const withTenant = vi.fn();
 const getBusiness = vi.fn();
 const recordGeo = vi.fn();
@@ -21,6 +22,7 @@ const spei = { execute: vi.fn() };
 const portal = { execute: vi.fn() };
 
 vi.mock('../../src/server/auth', () => ({ requireMember }));
+vi.mock('../../src/server/acceso/reconfirmar', () => ({ requireStepUp }));
 vi.mock('../../src/server/db', () => ({
   withTenant: (b: string, fn: (tx: unknown) => unknown) => withTenant(b, fn),
 }));
@@ -63,6 +65,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(betaNoCharge).mockReturnValue(false);
   requireMember.mockResolvedValue(OWNER);
+  requireStepUp.mockResolvedValue(undefined);
   withTenant.mockImplementation(async (_b: string, fn: (tx: unknown) => unknown) => fn({}));
   getBusiness.mockResolvedValue({ nombre: 'Taquería Don Pedro' });
 });
@@ -95,6 +98,20 @@ describe('iniciarPrueba', () => {
     );
     const r = await iniciarPrueba('xangarro', 'monthly');
     assert.deepEqual(r, { ok: false, message: 'Solo el dueño puede contratar.' });
+    assert.equal(reportError.mock.calls.length, 0);
+  });
+
+  it('asks for the second factor again first, and opens no Checkout until then (N-83)', async () => {
+    requireStepUp.mockRejectedValue(
+      Object.assign(new Error('Confirma que eres tú para seguir.'), { code: 'STEP_UP_REQUIRED' }),
+    );
+    const r = await iniciarPrueba('xangarro', 'monthly');
+    assert.deepEqual(r, {
+      ok: false,
+      message: 'Confirma que eres tú para seguir.',
+      reconfirmar: true,
+    });
+    assert.equal(trial.execute.mock.calls.length, 0);
     assert.equal(reportError.mock.calls.length, 0);
   });
 

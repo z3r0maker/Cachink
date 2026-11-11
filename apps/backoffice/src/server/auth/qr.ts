@@ -10,7 +10,5 @@ export function qrDataUri(text: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-/** A base32 seed in groups of four, for typing by hand. */
-export function groupKey(secret: string): string {
-  return (secret.match(/.{1,4}/g) ?? []).join(' ');
-}
+/** A base32 seed in groups of four, for typing by hand: auth-core's, shared with the portal. */
+export { groupSecret as groupKey } from '@xangarro/auth-core';

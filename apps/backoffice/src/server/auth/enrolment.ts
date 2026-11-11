@@ -1,59 +1,27 @@
 import {
-  AuthCoreError,
-  generateRecoveryCodes,
-  generateTotpSecret,
+  confirmTotpEnrolment,
   guardAttempt,
-  openSecret,
-  otpauthUri,
-  sealSecret,
-  verifyTotp,
+  prepareTotpEnrolment,
+  type EnrolmentView,
 } from '@xangarro/auth-core';
-import type { StaffMemberId } from '@xangarro/domain';
 
 import { TOTP_ISSUER } from './config';
 import type { AuthDeps, StaffSession } from './ports';
 import { auditRefusal, factorSubjects, type Refused } from './second-factor';
 
 /**
- * What /mfa/enroll shows: the seed as a QR (`uri`) and as a key to type.
- *
- * The seed is generated once and stored sealed (pending) until a code
- * confirms it, so reloading the page shows the **same** QR the app may
- * already have scanned. A pending seed that no longer opens (the key was
- * rotated) is simply replaced — nothing depends on it yet.
+ * What /mfa/enroll shows: the seed as a QR (`uri`) and as a key to type. The
+ * seed, its sealing and the compare-and-swap are `@xangarro/auth-core`'s
+ * (`prepareTotpEnrolment`), shared with the owner portal (N-83).
  */
-export interface EnrolmentView {
-  readonly secret: string;
-  readonly uri: string;
-}
-
-function openPending(deps: AuthDeps, id: StaffMemberId, sealed: string | null): string | null {
-  if (sealed === null) return null;
-  try {
-    return openSecret(deps.totpKey, sealed, id);
-  } catch (error) {
-    if (error instanceof AuthCoreError) return null;
-    throw error;
-  }
-}
+export type { EnrolmentView };
 
 /** Null when there is nothing to enrol: already enrolled, revoked, or a concurrent enrolment. */
-export async function prepareEnrolment(
+export function prepareEnrolment(
   deps: AuthDeps,
   staff: StaffSession,
 ): Promise<EnrolmentView | null> {
-  const id = staff.staffId;
-  const state = await deps.repo.totpState(id);
-  if (state === null || state.enrolledAt !== null) return null;
-
-  let secret = openPending(deps, id, state.secretEnc);
-  if (secret === null) {
-    secret = generateTotpSecret();
-    const sealed = sealSecret(deps.totpKey, secret, id);
-    const saved = await deps.repo.savePendingSecret(id, state.secretEnc, sealed);
-    if (!saved) return null;
-  }
-  return { secret, uri: otpauthUri({ secret, account: staff.email, issuer: TOTP_ISSUER }) };
+  return prepareTotpEnrolment(deps, staff.staffId, { account: staff.email, issuer: TOTP_ISSUER });
 }
 
 export type EnrolmentResult =
@@ -72,14 +40,9 @@ export async function confirmEnrolment(
   code: string,
 ): Promise<EnrolmentResult> {
   const id = staff.staffId;
-  const result = await guardAttempt(deps.throttle, factorSubjects(id), async () => {
-    const state = await deps.repo.totpState(id);
-    if (!state?.secretEnc || state.enrolledAt !== null) return null;
-    const step = verifyTotp(openSecret(deps.totpKey, state.secretEnc, id), code, deps.now());
-    if (step === null) return null;
-    const set = generateRecoveryCodes();
-    return (await deps.repo.completeEnrolment(id, step, set.hashes)) ? set : null;
-  });
+  const result = await guardAttempt(deps.throttle, factorSubjects(id), () =>
+    confirmTotpEnrolment(deps, id, code),
+  );
   if (result.kind !== 'ok') {
     await auditRefusal(deps, id, 'enrolar', result.kind === 'locked');
     return result;

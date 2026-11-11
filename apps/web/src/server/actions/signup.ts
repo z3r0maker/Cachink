@@ -6,20 +6,25 @@ import { recordSignupAttribution, throttleKey, throttleTake } from '@xangarro/da
 import { randomUUID } from 'node:crypto';
 import { headers } from 'next/headers';
 
+import { aplicarEntrada } from '../acceso/aplicar';
+import { trasCredencial } from '../acceso/entrar';
+import { accessDeps } from '../acceso/live';
 import { failure } from '../action-errors';
 import { EMPTY_UTM, type Utm } from '../attribution/utm';
 import { db, rlsBoundDb } from '../db';
 import { regionFromHeaders } from '../geo/headers';
 import { avisoVigente, ipHash } from '../legal/aviso';
 import { reportError } from '../observability/report';
-import { sendWelcome } from '../email/welcome';
 import { pgSignupStore } from '../onboarding/signup-store';
-import { startSession } from '../session';
 
 /**
  * Signup (P-03, reordered by N-13): account + business + owner membership,
- * then a session, then the wizard. No plan and no payment here.
+ * then «Revisa tu correo». No plan and no payment here.
  *
+ * - **No session yet** (N-83, ADR-142; audit F-09): the account is created
+ *   unconfirmed, the confirmation link is mailed and this browser gets the
+ *   pending pass. The session, the welcome email and the wizard come when the
+ *   link's button is pressed, so nobody can sit on somebody else's address.
  * - **Throttled** per address and per IP with the sign-in limits
  *   (`@xangarro/auth-core` policies), counted on every attempt — a signup that succeeds
  *   is still a request someone could repeat.
@@ -93,16 +98,10 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
       ),
     );
     await recordAttribution(owner.businessId, fields.utm);
-    await startSession(owner.userId, owner.businessId);
-    // B-14: the welcome; a send failure is reported, never shown — the account exists.
-    await sendWelcome({
-      to: fields.email.trim().toLowerCase(),
-      name: fields.tuNombre?.trim() || null,
-      nombreNegocio: fields.nombre.trim(),
-      businessId: owner.businessId,
-      origin: `https://${h.get('host') ?? 'app.xangarro.mx'}`,
-    });
-    return { ok: true };
+    // A new account is unconfirmed, so this mails the link and sets the pass; it opens nothing.
+    const cuenta = { id: owner.userId, email: fields.email.trim().toLowerCase() };
+    const destino = await aplicarEntrada(await trasCredencial(accessDeps(), cuenta, 'password'));
+    return destino.ok ? { ok: true } : destino;
   } catch (error) {
     return failure(error, 'registrarse', {
       shown: SIGNUP_ERROR_CODES,

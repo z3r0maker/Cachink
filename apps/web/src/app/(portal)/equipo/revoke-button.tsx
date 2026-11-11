@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 
 import { Button, ConfirmDialog } from '@/components';
 import { revocarDispositivo } from '@/server/actions/dispositivos';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 /**
  * "Revocar", behind a confirmation.
@@ -14,6 +15,29 @@ import { revocarDispositivo } from '@/server/actions/dispositivos';
  * synced yet is lost with it. That last part is the irreversible bit, so it is
  * said before the click rather than discovered after.
  */
+function useRevocar(deviceId: string, nombre: string) {
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const { protegido } = useReconfirmar();
+
+  /** `null`: the re-ask dialog was closed (N-83); nothing was revoked. */
+  function revoke(): void {
+    startTransition(async () => {
+      const result = await protegido(
+        () => revocarDispositivo(deviceId),
+        `Vas a desvincular ${nombre}.`,
+      );
+      if (result === null) return;
+      if (!result.ok) return setError(result.message);
+      setOpen(false);
+      router.refresh();
+    });
+  }
+  return { open, setOpen, error, pending, revoke };
+}
+
 export function RevokeButton({
   deviceId,
   nombre,
@@ -24,20 +48,7 @@ export function RevokeButton({
   /** «Desvincular» in the drawer, as the design names it there. */
   readonly label?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
-
-  function revoke(): void {
-    startTransition(async () => {
-      const result = await revocarDispositivo(deviceId);
-      if (!result.ok) return setError(result.message);
-      setOpen(false);
-      router.refresh();
-    });
-  }
-
+  const { open, setOpen, error, pending, revoke } = useRevocar(deviceId, nombre);
   return (
     <>
       <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>

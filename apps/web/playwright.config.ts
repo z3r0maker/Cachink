@@ -9,6 +9,7 @@ import { BASE_URL, E2E_PORT } from './e2e/base-url';
 import { billingDatabaseUrl, superDatabaseUrl } from './e2e/db-url';
 import { DIAS_LIMITE } from './e2e/dias-limite';
 import { SERIAL_TAG } from './e2e/shared-tenant';
+import { E2E_TOTP_KEY } from './e2e/totp-key';
 import type { OpcionesWebkit } from './e2e/webkit-profile';
 import { INSPECT_PORT, SERVER_V8_DIR, coverageEnabled } from './scripts/coverage-gate/options';
 
@@ -128,6 +129,8 @@ function serverEnv(today: string): Record<string, string> {
     // no default for it on purpose (server/device/credentials.ts).
     DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
     ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
+    // Seals the TOTP seeds the second-factor specs enrol (N-83, e2e/totp-key.ts).
+    PORTAL_TOTP_KEY: E2E_TOTP_KEY,
     BILLING_DATABASE_URL: billingDatabaseUrl(),
     // One long-lived server for every worker, not a serverless instance:
     // it keeps the pool it had before `createDb` defaulted to 2 (DB2-CONN-01).

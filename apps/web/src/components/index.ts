@@ -34,6 +34,7 @@ export {
 export { OptionCards, type OptionDef, type OptionCardsProps } from './option-card';
 export { UsageBar, type UsageBarProps } from './usage-bar';
 export { Switch, type SwitchProps } from './switch';
+export { CampoCodigo, type CampoCodigoProps } from './campo-codigo';
 export { ConfirmDialog, type ConfirmDialogProps } from './dialog';
 export { Seal, type SealLevel, type SealProps } from './seal';
 export { DonCuentasAvatar, DON_CUENTAS, type DonCuentasSize } from './don-cuentas';

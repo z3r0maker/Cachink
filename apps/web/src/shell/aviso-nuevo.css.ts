@@ -35,3 +35,19 @@ export const boton = style({
   color: colors.black,
   textDecoration: 'none',
 });
+
+/** «Ahora no»: the quiet answer beside a strip's action (board SgMenu). */
+export const botonQuieto = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  height: 40,
+  padding: '0 14px',
+  borderRadius: radii[1],
+  border: borders.quiet,
+  background: colors.white,
+  fontFamily: typography.fontFamily,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+  color: colors.ink,
+  cursor: 'pointer',
+});

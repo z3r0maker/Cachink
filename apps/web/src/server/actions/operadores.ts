@@ -10,6 +10,7 @@ import type { BusinessId, UserId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
 import { failure, type FailurePolicy } from '../action-errors';
+import { requireStepUp } from '../acceso/reconfirmar';
 import { requireMember } from '../auth';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
@@ -43,6 +44,7 @@ const REFUSALS: FailurePolicy = {
 export async function crearOperador(nombre: string, pin: string): Promise<OperadorResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const businessId = session.business_id as BusinessId;
     await withTenant(businessId, async (tx) =>
       new CrearOperadorUseCase(pgUsersRepository(tx, businessId)).execute({
@@ -63,6 +65,7 @@ export async function crearOperador(nombre: string, pin: string): Promise<Operad
 export async function restablecerPin(operatorId: string, pin: string): Promise<OperadorResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const businessId = session.business_id as BusinessId;
     await withTenant(businessId, (tx) =>
       new RestablecerPinOperadorUseCase(pgUsersRepository(tx, businessId)).execute({
@@ -80,6 +83,7 @@ export async function restablecerPin(operatorId: string, pin: string): Promise<O
 export async function desactivarOperador(operatorId: string): Promise<OperadorResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const businessId = session.business_id as BusinessId;
     const { lastActive } = await withTenant(businessId, (tx) =>
       new DesactivarOperadorUseCase(pgUsersRepository(tx, businessId)).execute({
@@ -106,6 +110,7 @@ export async function cambiarPermisos(
 ): Promise<OperadorResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const businessId = session.business_id as BusinessId;
     await withTenant(businessId, async (tx) =>
       new CambiarPermisosOperadorUseCase(pgUsersRepository(tx, businessId)).execute({

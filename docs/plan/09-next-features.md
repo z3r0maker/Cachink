@@ -1477,7 +1477,8 @@ update --channel production --private-key-path keys/private-key.pem`.
 
 ### N-83 Segundo factor del dueño y verificación del correo al registrarse [media]
 
-- [ ] Status · **Surfaced by:** N-26 (F-09, SEC-AUTH-02) · **Trigger:** los tableros del canvas aprobados (pantallas y correo nuevos)
+- [x] Status · **Surfaced by:** N-26 (F-09, SEC-AUTH-02) · **Trigger:** ya (el dueño aprobó los tableros el 2026-11-10)
+      Done: 2026-11-11 · branch `worktree-n83-2fa-boards` · ADR-142. Migration `0057`: the `confirm`, `pending` and `challenge` links, `xangarro.portal_second_factor`, and `portal_sessions.stepped_up_at`. The second factor's logic was lifted into `@xangarro/auth-core` (`second-factor.ts`) and the console now calls it too. Portal: `server/acceso/` holds the use cases; the screens are `/signup/revisa`, `/signup/confirmar`, `/login/verificar` and `/seguridad`; the re-ask is `requireStepUp` in the operator, device, pairing and billing actions, answered by the dialog in `shell/reconfirmar.tsx`. Playwright: `confirmar-correo`, `segundo-paso`, `seguridad` and `reconfirmar` specs, each on accounts it mints. Needs `PORTAL_TOTP_KEY` in the portal's production environment before it deploys (`docs/ops/provisioning.md`).
 - **What:** (a) signup does not open a session until the address is confirmed by an emailed link, so
   nobody can register somebody else's email first; an unconfirmed account that is later reached
   through a magic link has its password and other sessions cleared. (b) Optional TOTP for owners and
@@ -1485,7 +1486,35 @@ update --channel production --private-key-path keys/private-key.pem`.
   recovery codes shown once, asked at sign-in and again before changing operators, devices or
   billing.
 - **Design first:** the «revisa tu correo» state, the confirmation email, the enrolment and the
-  sign-in challenge are screens nobody has drawn (CLAUDE.md §6, ADR-117).
+  sign-in challenge are screens nobody had drawn (CLAUDE.md §6, ADR-117). **Round 1 drawn and
+  approved by the owner on 2026-11-10:** page «Seguridad de la cuenta» of the El Mostrador
+  canvas (https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt), eight boards, each with its states as
+  tabs: `SgRevisaCorreo` (after signup: resend, «Corregir mi correo», and a password sign-in before
+  confirming), `SgConfirmar` (the page the link opens: confirm, expired, already used, and the new
+  password after a magic link on an unconfirmed account), `SgCorreo` (the email), `SgMenu` (the
+  account menu, the one-time invitation, the notice after a recovery-code sign-in), `SgSeguridad`
+  (off, on, few codes left, turning it off), `SgActivar` (password, QR and typed code, recovery
+  codes shown once, new codes), `SgDesafio` (step 2 of sign-in, a recovery code, lost access) and
+  `SgReconfirmar` (the re-ask dialog). Two notes beside the first row record the decisions and what
+  was approved with the boards.
+- **Decided with the owner, 2026-11-10:** (1) TOTP is optional for owners and admins, offered by a
+  one-time invitation; (2) it lives in the account menu, «Seguridad», per person, next to
+  «Privacidad y mis datos»; (3) the confirmation link lasts 24 hours and works once; (4) with TOTP
+  on, one code unlocks changes to operators, cajas and billing for 15 minutes; (5) with the phone
+  and the recovery codes both lost, support confirms identity and switches it off from the console,
+  and no emailed link can switch it off.
+- **Approved with the boards (drawn without a question):** the emailed link opens a page with a
+  button, and opening it confirms nothing (as `/login/entrar` and `/cancelar` already work);
+  confirming opens the session, and the welcome email moves from signup to confirmation; «Corregir
+  mi correo» works only in the browser that signed up, or after the password; enrolment asks for
+  the password first; «Seguridad» is shown to owner and admin, not to `viewer`; a new phone is
+  «Desactivar» then «Activar».
+- **Decided with the owner, 2026-11-11:** accounts that existed before the migration count as
+  confirmed, so nobody already inside is locked out.
+- **Still to draw or decide:** the console action that switches a locked-out owner's TOTP off (its
+  board belongs on the console's canvas, https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): until
+  it exists, support does it by hand with `xangarro.second_factor_disable`; whether turning TOTP on
+  or off sends a notice email.
 - **Acceptance:** an account whose email was never confirmed cannot sign in with a password; an
   owner with TOTP on cannot reach `/equipo` after a password-only sign-in.
 

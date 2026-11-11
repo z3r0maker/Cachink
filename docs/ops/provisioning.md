@@ -63,6 +63,7 @@ destination (§3 for the role passwords, §7 for the rest).
 | `CRON_SECRET` (one per project)                                            | `openssl rand -base64 32`                        | portal, admin                 |
 | `ADMIN_INGEST_SECRET` (same value in both)                                 | `openssl rand -base64 32`                        | portal, admin                 |
 | `ADMIN_TOTP_KEY`                                                           | `openssl rand -base64 32`                        | admin                         |
+| `PORTAL_TOTP_KEY` (not the admin's)                                        | `openssl rand -base64 32`                        | portal                        |
 
 `entitlement:keygen` prints two lines: `ENTITLEMENT_PRIVATE_KEY` (64 hex, the
 format `apps/web/src/server/device/credentials.ts` reads) for the portal
@@ -313,6 +314,7 @@ and its meaning is in `apps/web/.env.example` and `apps/backoffice/.env.example`
 | `ADMIN_INGEST_SECRET`                                                  |   ✓    |   ✓   | same value in both                                                                                                                                      |
 | `SENTRY_DSN`                                                           |  opt.  |       |                                                                                                                                                         |
 | `ADMIN_TOTP_KEY`                                                       |        |   ✓   | §2; rotating it forces every staff member to re-enrol                                                                                                   |
+| `PORTAL_TOTP_KEY`                                                      |   ✓    |       | §2; seals owners' second-factor seeds (N-83). Unset: nobody can turn it on. Rotated: see below                                                          |
 | `ADMIN_BASE_URL`                                                       |        | opt.  | default `https://admin.xangarro.mx`                                                                                                                     |
 | `DIGEST_TO`, `ALERT_WEBHOOK_URL`                                       |        | opt.  |                                                                                                                                                         |
 
@@ -361,6 +363,12 @@ At the DNS host of `xangarro.mx`:
   again. Changing it without the previous value still unlinks every phone.
 - `ENTITLEMENT_PRIVATE_KEY`: needs a phone release with the new public key
   first. `ADMIN_TOTP_KEY`: every staff member re-enrols.
+- `PORTAL_TOTP_KEY` (ADR-142): do not rotate it casually. Every owner and admin
+  with the second factor on is sealed under it, and a new key cannot open their
+  seeds: the app code stops working at step two of their sign-in. Recovery codes
+  do not depend on the key, so each of them can still get in with one, turn the
+  second factor off and on again. Someone with no codes left needs support
+  (ADR-142 §10).
 
 **Production refuses weak signing secrets** (ADR-140 §6). When
 `VERCEL_ENV=production`, `DEVICE_TOKEN_SECRET`, `DEVICE_TOKEN_SECRET_PREVIOUS`

@@ -4,9 +4,12 @@ import { useState, useTransition } from 'react';
 
 import { Button, Card, Input } from '@/components';
 import { enviarCodigoPorCorreo, generarCodigo } from '@/server/actions/equipo';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 import { codeBox, codeRow, enviadoLine, panelTitle } from './equipo.css';
 import { PairingQr } from './pairing-qr';
+
+const VINCULAR = 'Vas a vincular una caja.';
 
 export interface LiveCode {
   readonly code: string;
@@ -69,10 +72,11 @@ function DondeCapturar({ url }: { readonly url: string }) {
 function EnviarCorreo({ onEnviado }: { readonly onEnviado: (to: string) => void }) {
   const [correo, setCorreo] = useState('');
   const [enviando, startEnvio] = useTransition();
+  const { protegido } = useReconfirmar();
   const enviar = () => {
     startEnvio(async () => {
-      const result = await enviarCodigoPorCorreo(correo);
-      if (result.ok) onEnviado(result.sentTo);
+      const result = await protegido(() => enviarCodigoPorCorreo(correo), VINCULAR);
+      if (result?.ok) onEnviado(result.sentTo);
     });
   };
   return (
@@ -135,10 +139,12 @@ export function PairingPanel({
   const [live, setLive] = useState<LiveCode | null>(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { protegido } = useReconfirmar();
 
   const generate = () =>
     startTransition(async () => {
-      const result = await generarCodigo();
+      const result = await protegido(generarCodigo, VINCULAR);
+      if (result === null) return;
       if (!result.ok) return setError(result.message);
       setError(null);
       setLive({ code: result.code, expiresAt: result.expiresAt });
