@@ -1,0 +1,105 @@
+# «Reportar un problema», sent (N-81, contract §9, ADR-141): on a linked phone
+# with reports turned on, the sheet's primary action is «Enviar Reporte». It
+# sends the report through the device API (`POST /api/v1/support/bug-report`
+# on the mock, with the device's own token), and the sheet closes on its own.
+# «Compartir como archivo» stays as the fallback row.
+#
+# The proof is the sheet closing: a refused or failed send keeps it open with
+# «No se pudo enviar». «✓ Reporte enviado» is on screen for 1.5 s only, so it
+# is looked for but not required.
+#
+# Leaves the device as it found it: reports are off on a freshly linked phone,
+# the flow turns them on for itself and off again at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - settings
+  - observability
+---
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/navigate-to-settings.yaml
+
+# Reports on: without consent the sheet only shares a file.
+- scrollUntilVisible:
+    element:
+      id: 'settings-crash-reporting-btn'
+    direction: DOWN
+    timeout: 8000
+    centerElement: true
+- runFlow:
+    when:
+      visible:
+        id: 'settings-crash-reporting-btn'
+        text: 'No'
+    commands:
+      - tapOn:
+          id: 'settings-crash-reporting-btn'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-crash-reporting-btn'
+      text: 'Sí'
+    timeout: 5000
+
+- scrollUntilVisible:
+    element:
+      id: 'settings-open-bug-report'
+    direction: DOWN
+    timeout: 8000
+    centerElement: true
+- tapOn:
+    id: 'settings-open-bug-report'
+- extendedWaitUntil:
+    visible:
+      id: 'bug-report-sheet'
+    timeout: 5000
+
+# A linked phone with reports on: sending is the primary action, sharing the
+# fallback.
+- assertVisible:
+    id: 'bug-report-submit-btn'
+- assertVisible:
+    id: 'bug-report-share-fallback-btn'
+
+- tapOn:
+    id: 'bug-report-description-input'
+- inputText: 'La app se cerro al cobrar'
+# The intro text sits outside the input: tapping it puts the keyboard away,
+# which `hideKeyboard` alone does not do for a multiline field.
+- tapOn:
+    text: 'Describe el problema.*'
+- hideKeyboard:
+    optional: true
+
+- tapOn:
+    id: 'bug-report-submit-btn'
+- extendedWaitUntil:
+    visible: '.*Reporte enviado.*'
+    timeout: 8000
+    optional: true
+- extendedWaitUntil:
+    notVisible:
+      id: 'bug-report-sheet'
+    timeout: 10000
+- assertNotVisible: 'No se pudo enviar.*'
+
+# Reports off again, as a freshly linked phone has them.
+- scrollUntilVisible:
+    element:
+      id: 'settings-crash-reporting-btn'
+    direction: UP
+    timeout: 8000
+    centerElement: true
+- runFlow:
+    when:
+      visible:
+        id: 'settings-crash-reporting-btn'
+        text: 'Sí'
+    commands:
+      - tapOn:
+          id: 'settings-crash-reporting-btn'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-crash-reporting-btn'
+      text: 'No'
+    timeout: 5000

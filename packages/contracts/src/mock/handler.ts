@@ -14,6 +14,7 @@ import { ERROR_CATALOG, type ErrorCode } from '../errors.js';
 import type { PullResponse } from '../sync-pull.js';
 import { PullQuerySchema } from '../sync-pull.js';
 import { SNAPSHOT_START } from '../snapshot.js';
+import { BugReportRequestSchema } from '../support.js';
 import { API_PATHS, HEADER_PROTOCOL, PROTOCOL_VERSION } from '../transport.js';
 import { encodeJson } from '../wire.js';
 import devKeys from './dev-keys.json' with { type: 'json' };
@@ -96,6 +97,7 @@ export class MockApi {
     if (key === `POST ${API_PATHS.syncPush}`)
       return applyPush(this.state, req.body, device, scenario);
     if (key === `GET ${API_PATHS.syncPull}`) return this.pull(req, device, scenario);
+    if (key === `POST ${API_PATHS.bugReport}`) return this.bugReport(req, device);
     if (key === `GET ${API_PATHS.entitlement}`) {
       return {
         status: 200,
@@ -112,6 +114,14 @@ export class MockApi {
       };
     }
     return { status: 404, body: { error: { code: 'NOT_FOUND', message: req.path } } };
+  }
+
+  /** §9: the report is kept with the device the **token** named; ids in the body are not read. */
+  private bugReport(req: MockRequest, device: Device): MockResponse {
+    const parsed = BugReportRequestSchema.safeParse(req.body);
+    if (!parsed.success) return err('VALIDATION', 'a report needs a description and a date', 400);
+    this.state.bugReports.push({ deviceId: device.id, report: parsed.data });
+    return { status: 200, body: { accepted: true } };
   }
 
   /** Bearer token is `mock-device:<deviceId>`; the `revoked` scenario always fails. */

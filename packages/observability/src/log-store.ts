@@ -1,9 +1,9 @@
 /**
  * LogStore — abstract interface for reading/writing observability entries.
  *
- * Two implementations ship:
- *   - `SqliteLogStore` — writes to `__xangarro_observability_log` table.
- *   - `DualLogStore` — writes to both local SQLite and a remote backend.
+ * One implementation ships: `SqliteLogStore`, which writes to the
+ * `__xangarro_observability_log` table on the device. The log is local; the
+ * remote copy was retired with the `bug-report` edge function (N-81, ADR-141).
  *
  * The interface is kept small: write + query + prune + export. Consumers
  * (UI, error handlers, AuditedUseCase) code against this interface only.
@@ -62,7 +62,7 @@ export interface LogStore {
     readonly errorLimit?: number;
   }): Promise<LogSnapshot>;
 
-  /** Query unshipped error entries for the outbox flusher. */
+  /** Error entries not yet marked shipped. Nothing ships them since N-81; kept with the column. */
   queryUnshippedErrors?(limit?: number): Promise<readonly ErrorLogEntry[]>;
 
   /** Mark error entries as shipped (by IDs). */

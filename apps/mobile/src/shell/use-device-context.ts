@@ -1,5 +1,5 @@
 /**
- * useMobileDeviceContext — provides device context for outbox enrichment.
+ * useMobileDeviceContext — the build a bug report says it comes from (N-81).
  *
  * Uses expo-device + expo-application to get real device info instead
  * of hardcoded values.

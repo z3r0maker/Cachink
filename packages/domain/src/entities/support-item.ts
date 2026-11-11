@@ -63,6 +63,9 @@ export const SupportSourceSchema = z.string().regex(/^[a-z][a-z0-9-]{1,39}$/);
 
 const isoInstant = z.iso.datetime({ offset: true });
 
+/** The longest body an item holds, in characters. A source that files more is refused. */
+export const SUPPORT_ITEM_BODY_MAX = 10_000;
+
 const SupportItemShape = z.object({
   id: SupportItemIdSchema,
   kind: SupportKindSchema,
@@ -71,7 +74,7 @@ const SupportItemShape = z.object({
   ownerStaffId: ulidField<StaffMemberId>().nullable(),
   businessId: ulidField<BusinessId>().nullable(),
   title: z.string().trim().min(1).max(200),
-  body: z.string().max(10_000),
+  body: z.string().max(SUPPORT_ITEM_BODY_MAX),
   attachments: z.array(SupportAttachmentPathSchema).max(20),
   source: SupportSourceSchema,
   sourceRef: z.string().trim().min(1).max(200),

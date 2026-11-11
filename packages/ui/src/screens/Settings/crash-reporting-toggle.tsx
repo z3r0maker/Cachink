@@ -1,6 +1,6 @@
 /**
  * CrashReportingToggle — Settings card for opting in/out of crash
- * reporting and bug data submission (Sentry + Supabase bug database).
+ * reporting (Sentry) and sending a bug report through the device API (N-81).
  *
  * Mirrors the NotificationsToggle pattern. Pure UI: parent route
  * wires the appConfig write + Sentry init/close side-effect.

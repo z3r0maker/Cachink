@@ -8,7 +8,7 @@
  */
 
 /** The kinds this package files; the console accepts more (`SUPPORT_KINDS`). */
-export type InboxKind = 'arco' | 'ayuda' | 'factura' | 'limite' | 'migracion' | 'sistema';
+export type InboxKind = 'arco' | 'ayuda' | 'bug' | 'factura' | 'limite' | 'migracion' | 'sistema';
 
 export interface InboxItemRequest {
   readonly kind: InboxKind;

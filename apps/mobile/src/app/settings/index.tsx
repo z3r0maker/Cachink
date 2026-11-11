@@ -15,6 +15,7 @@ import {
   ResetDemoAction,
   SettingsScreen,
   useAppConfigRepository,
+  useBugReportSender,
   useCheckForUpdates,
   useCrashReportingEnabled,
   useNotificationsEnabled,
@@ -26,6 +27,7 @@ import {
 import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
 import { restartApp } from '../../shell/restart-app';
+import { useMobileDeviceContext } from '../../shell/use-device-context';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
 /** Persist a device toggle, then update the in-memory store. */
@@ -90,6 +92,10 @@ export default function SettingsRoute(): ReactElement {
   const back = useBackTo('/turno');
   const [bugReportVisible, setBugReportVisible] = useState(false);
   const device = useDeviceSettings(() => setBugReportVisible(true));
+  // With consent on, a linked phone sends the report through the device API
+  // (N-81); otherwise, and as the fallback, it is shared as a file.
+  const bugReportSender = useBugReportSender();
+  const deviceContext = useMobileDeviceContext();
   return (
     <AppShellWrapper title={t('shell.turno.ajustes')} onBack={back}>
       <SettingsScreen
@@ -105,6 +111,8 @@ export default function SettingsRoute(): ReactElement {
           void Share.share({ message: json, title: filename });
         }}
         consentEnabled={device.crashReportingEnabled}
+        remote={bugReportSender}
+        deviceContext={deviceContext}
       />
     </AppShellWrapper>
   );

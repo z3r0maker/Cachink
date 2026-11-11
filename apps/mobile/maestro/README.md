@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 58 flows + 20 shared subflows and scripts; `full-regression.sh` runs the curated 35 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 59 flows + 20 shared subflows and scripts; `full-regression.sh` runs the curated 35 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -330,6 +330,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-five
 | `settings-check-updates.yaml`          | activated |       | Settings → Sistema → assert settings-check-for-updates visible.                                                          |
 | `settings-crash-reporting-toggle.yaml` | activated |       | Settings → Sistema → Crash Reporting Toggle Verifies: - CrashReportingToggle is visible on the Sistema sub-screen - Togg |
 | `bug-report-sheet.yaml`                | activated |       | Open the Bug Report sheet from Settings → Sistema → "Reportar un problema".                                              |
+| `bug-report-enviar.yaml`               | activated |       | «Reportar un problema», sent (N-81): with reports on, «Enviar Reporte» goes through the device API and the sheet closes. |
 
 ## Running via MCP (Claude / Cursor)
 

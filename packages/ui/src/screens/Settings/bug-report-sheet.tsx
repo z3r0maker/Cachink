@@ -5,16 +5,19 @@
  *   1. User writes a description of the issue
  *   2. App auto-attaches last 50 audit + 20 error entries
  *   3. PII is scrubbed via @xangarro/observability/pii-scrubber
- *   4. When consent is on → POST to Edge Function → user sees "Reporte enviado"
- *   5. On network failure → report is silently queued for retry
+ *   4. When consent is on and the phone is linked → the device API
+ *      (`POST /api/v1/support/bug-report`, N-81) → user sees "Reporte enviado"
+ *   5. On a failure or a refusal → the sheet says so and points at sharing as
+ *      a file; nothing is queued
  *   6. "Compartir como archivo" remains as secondary button (and the only
- *      path when consent is off)
+ *      path when consent is off or the phone is not linked)
  */
 
 import React, { type ReactElement } from 'react';
 import { ScrollView, TextInput } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import type { DeviceContext, RemoteLogStore } from '@xangarro/observability';
+import type { DeviceContext } from '@xangarro/observability';
+import type { BugReportSender } from '../../observability/bug-report-sender';
 import { Btn } from '../../components/index';
 import { useBugReportSubmit } from './use-bug-report-submit';
 import { colors, fontSizes, radii, shadows, typography } from '../../theme';
@@ -26,8 +29,8 @@ export interface BugReportSheetProps {
   readonly onShare: (json: string, filename: string, readableTimeline?: string) => void;
   /** Whether user has consented to remote submission. */
   readonly consentEnabled?: boolean;
-  /** Remote log store for server-first submit. */
-  readonly remote?: RemoteLogStore | null;
+  /** Sends the report through the device API; absent on a phone that is not linked. */
+  readonly remote?: BugReportSender | null;
   /** Device context for enriching the report payload. */
   readonly deviceContext?: DeviceContext | null;
   /** Current feature flags state. */

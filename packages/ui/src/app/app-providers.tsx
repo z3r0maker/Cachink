@@ -9,7 +9,7 @@ import { useMemo, useRef, type ReactElement, type ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { DeviceContext, LogStore } from '@xangarro/observability';
+import type { LogStore } from '@xangarro/observability';
 import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
@@ -34,10 +34,6 @@ export interface AppProvidersProps {
   readonly platform?: 'mobile' | 'desktop';
   readonly gated?: boolean;
   readonly overlays?: ReactNode;
-  /** Device context for outbox enrichment (supplied by mobile/desktop shell). */
-  readonly deviceContext?: DeviceContext | null;
-  /** Live accessor for current feature-flag state. */
-  readonly getFeatureFlags?: () => Record<string, boolean> | null;
   /** API base, secure token store and device info (A-04). Defaults to an in-memory dev config. */
   readonly activation?: ActivationConfig;
   /** The phone's camera lift, encoder and gallery for product photos (M-13). */
@@ -89,11 +85,7 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
             <DatabaseProvider>
               <DrizzleAppConfigBridge>
                 <DrizzleRepositoryBridge>
-                  <ObservabilityBridge
-                    logStoreRef={logStoreRef}
-                    deviceContext={props.deviceContext}
-                    getFeatureFlags={props.getFeatureFlags}
-                  >
+                  <ObservabilityBridge logStoreRef={logStoreRef}>
                     <SessionLayer
                       activation={props.activation}
                       overlays={props.overlays}

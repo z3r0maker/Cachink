@@ -12,6 +12,7 @@
 import {
   API_PATHS,
   ActivateResponseSchema,
+  BugReportResponseSchema,
   EntitlementResponseSchema,
   ErrorEnvelopeSchema,
   PullResponseSchema,
@@ -20,6 +21,8 @@ import {
   encodeJson,
   type ActivateRequest,
   type ActivateResponse,
+  type BugReportRequest,
+  type BugReportResponse,
   type Delta,
   type EntitlementResponse,
   type PullResponse,
@@ -163,6 +166,17 @@ export class ApiClient {
       path: `${API_PATHS.syncPull}?since=${since}${page}`,
       token,
       schema: PullResponseSchema,
+    });
+  }
+
+  /** «Reportar un problema» (§9): who reports is the token's, never the body's. */
+  bugReport(token: string, report: BugReportRequest): Promise<ApiResult<BugReportResponse>> {
+    return this.#call({
+      method: 'POST',
+      path: API_PATHS.bugReport,
+      token,
+      body: report,
+      schema: BugReportResponseSchema,
     });
   }
 
