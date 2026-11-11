@@ -104,7 +104,8 @@ describe('email confirmation (N-83, board SgCorreo)', () => {
     assert.match(e.text, /Creaste una cuenta de Xangarro para Taquería Don Pedro\./);
     assert.match(e.text, /una sola vez durante 24 horas/);
     assert.match(e.html, /Confirmar mi correo/);
-    assert.ok(e.html.includes(url.replace('&', '&amp;')));
+    // The link has one parameter, so nothing in it is HTML-escaped: it appears as written.
+    assert.ok(e.html.includes(url));
     expect(e).toMatchSnapshot();
   });
 
