@@ -25,5 +25,7 @@ export function buildCsp(o: {
   /** Origins the page may fetch from besides its own (the console's blob store, E-26). */
   readonly connect?: readonly string[];
   readonly reportUri?: string;
+  /** `false` on a page served over plain http, where the upgrade breaks its own scripts. */
+  readonly upgradeInsecure?: boolean;
 }): string;
 export function newNonce(): string;

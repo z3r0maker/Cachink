@@ -18,9 +18,26 @@ import { portalCsp } from './server/security/csp';
  */
 const CSP = 'Content-Security-Policy';
 
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/**
+ * A page this server sent over plain http to this machine: the E2E suite's
+ * `next start`. `upgrade-insecure-requests` there sends every script to an
+ * https nobody serves, and WebKit (unlike Chromium, which exempts localhost)
+ * obeys, so the portal ran with no JavaScript in Safari. Production is https
+ * on a real host and keeps the directive.
+ */
+function plainOnLoopback(url: URL): boolean {
+  return url.protocol === 'http:' && LOOPBACK.has(url.hostname);
+}
+
 export function proxy(request: NextRequest): NextResponse {
   const nonce = newNonce();
-  const csp = portalCsp(nonce, process.env.NODE_ENV === 'development');
+  const csp = portalCsp(
+    nonce,
+    process.env.NODE_ENV === 'development',
+    !plainOnLoopback(request.nextUrl),
+  );
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);
   headers.set(CSP, csp);

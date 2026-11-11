@@ -54,7 +54,9 @@ export function uploadedBytesHeaders() {
  * The per-request policy. Scripts run only with the request's nonce
  * (`'strict-dynamic'` lets them load Next's chunks), so an injected
  * `<script>` does nothing. `'unsafe-eval'` only in development, where React
- * needs it to rebuild server error stacks.
+ * needs it to rebuild server error stacks. `upgradeInsecure: false` drops
+ * `upgrade-insecure-requests` for a page that was itself served over plain
+ * http, where upgrading its own scripts points them at an https nobody serves.
  *
  * @param {{
  *   nonce: string;
@@ -66,6 +68,7 @@ export function uploadedBytesHeaders() {
  *   formAction?: readonly string[];
  *   connect?: readonly string[];
  *   reportUri?: string;
+ *   upgradeInsecure?: boolean;
  * }} o
  */
 export function buildCsp(o) {
@@ -85,7 +88,7 @@ export function buildCsp(o) {
     `base-uri 'none'`,
     `form-action ${["'self'", ...(o.formAction ?? [])].join(' ')}`,
     `frame-ancestors 'none'`,
-    ...(o.isDev ? [] : ['upgrade-insecure-requests']),
+    ...(o.isDev || o.upgradeInsecure === false ? [] : ['upgrade-insecure-requests']),
     ...(o.reportUri ? [`report-uri ${o.reportUri}`] : []),
   ];
   return directives.join('; ');
