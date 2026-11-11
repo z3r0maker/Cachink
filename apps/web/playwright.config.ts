@@ -176,6 +176,12 @@ export default defineConfig<OpcionesWebkit>({
     // that has to be debuggable.
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // The portal shell registers the offline service worker (N-23), and once it
+    // controls the page its fetches leave through the worker, where
+    // `page.route` cannot see them: a mocked 429 became the real file
+    // (export.spec on main, 2026-11-10). Off for every spec;
+    // `offline-page.spec.ts`, the one that tests the worker, turns it back on.
+    serviceWorkers: 'block',
   },
   projects: [
     // Signs in once; every other project reuses the cookie. `auth.spec.ts`

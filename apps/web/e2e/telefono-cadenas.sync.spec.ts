@@ -289,7 +289,10 @@ test("a revoked phone's push is refused, and after re-pairing the same rows land
     .last();
   await caja.getByRole('button', { name: 'Revocar' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Revocar' }).click();
-  await expect(page.getByText('Revocado').first()).toBeVisible();
+  // This card's own pill: a «Revocado» from an earlier test's card passed at
+  // once, and the push below raced the revoke and was accepted.
+  const cabecera = page.locator('main').getByText(CODE_A, { exact: true }).locator('..');
+  await expect(cabecera.getByText('Revocado', { exact: true })).toBeVisible();
 
   // Its token is dead for pushes and pulls alike: nothing of this ticket lands.
   const refused = await push(request, a, [t, linea]);

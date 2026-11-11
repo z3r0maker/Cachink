@@ -6,7 +6,12 @@ import { expect, test } from './test';
  * the network is answered with the branded «Sin conexión» page instead of a
  * browser error — while `/operador`, which owns its own offline outbox
  * (ADR-071), is left to fail on its own and is never replaced.
+ *
+ * The suite blocks service workers (playwright.config.ts); this file is the
+ * one that needs it.
  */
+test.use({ serviceWorkers: 'allow' });
+
 test('a failed navigation shows the branded offline page', async ({ page, context }) => {
   await page.goto('/');
   await page.evaluate(() => navigator.serviceWorker.ready);
