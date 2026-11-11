@@ -15,7 +15,7 @@ Se muestra completa, arriba del botón "Crear cuenta", sin necesidad de abrir ot
 
 > **Aviso de privacidad simplificado**
 >
-> **MEXIA, S.A.S.** (Xangarro), con domicilio en **Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco**, es responsable de tus datos.
+> **MEXIA, S.A.S.** (Xangarro), con domicilio en **Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, es responsable de tus datos.
 >
 > **Qué datos usamos:** tu nombre, correo, teléfono y contraseña; los datos fiscales y del negocio
 > (RFC, régimen, código postal); tus pagos y los registros de tu negocio, que pueden ser **datos
@@ -60,7 +60,7 @@ lleva casillas porque quien vincula ya aceptó el aviso al crear la cuenta, o es
 datos trata el negocio (Xangarro es encargado). **Sin nombres de plan, precios ni enlaces a
 app.xangarro.mx** (ADR-069): el enlace apunta al sitio público.
 
-> **Tu privacidad.** MEXIA, S.A.S. (Xangarro), Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco, trata los datos técnicos de este
+> **Tu privacidad.** MEXIA, S.A.S. (Xangarro), Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, trata los datos técnicos de este
 > dispositivo (identificador, modelo, sistema y versión) y los registros que captures, para
 > sincronizarlos con tu negocio y mantener el servicio seguro. Los datos de clientes y operadores los
 > trata Xangarro por cuenta del negocio, que es su responsable. No usamos datos sensibles. Los reportes
@@ -74,7 +74,7 @@ app.xangarro.mx** (ADR-069): el enlace apunta al sitio público.
 Una línea fija bajo el teclado del NIP, con enlace. El operador no crea cuenta; sus datos (nombre,
 NIP) los registró el dueño del negocio.
 
-> Tus datos como operador los trata **[NOMBRE DEL NEGOCIO]**; Xangarro (MEXIA, S.A.S., Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco)
+> Tus datos como operador los trata **[NOMBRE DEL NEGOCIO]**; Xangarro (MEXIA, S.A.S., Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco)
 > solo los procesa por cuenta del negocio. Más información: **xangarro.mx/privacidad**
 
 > Nota: esta variante no es un aviso de Xangarro como responsable; informa al operador quién es su

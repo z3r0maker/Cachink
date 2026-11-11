@@ -9,7 +9,7 @@ _Versión: [VERSIÓN] · Última actualización: [FECHA]_
 
 ## 1. Quién es responsable de tus datos
 
-**MEXIA, S.A.S.** ("Xangarro", "nosotros"), con domicilio en **Paseo Lomas Altas 524, interior 9, colonia Loma Real, C.P. 45129, Zapopan, Jalisco**, es responsable del
+**MEXIA, S.A.S.** ("Xangarro", "nosotros"), con domicilio en **Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, es responsable del
 tratamiento de los datos personales que se describen en este aviso, en términos del artículo 15,
 fracción I de la Ley.
 
@@ -17,7 +17,7 @@ fracción I de la Ley.
 > para oír y recibir notificaciones** (oficina registrada, oficina virtual o despacho), no la sede
 > operativa ni un domicilio particular.
 
-Nuestra área de datos personales (art. 29 de la Ley) es **[NOMBRE O ÁREA]**. Puedes escribirle a
+Nuestra área de datos personales (art. 29 de la Ley) es el **Área de Protección de Datos Personales**. Puedes escribirle a
 **[CORREO PRIVACIDAD]**.
 
 Este aviso aplica a:

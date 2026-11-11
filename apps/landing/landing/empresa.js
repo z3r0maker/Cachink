@@ -7,8 +7,9 @@
 export const EMPRESA = {
   nombre: 'Xangarro',
   razonSocial: 'MEXIA, S.A.S.',
-  domicilio: 'Paseo Lomas Altas 524, interior 9, colonia Loma Real',
-  codigoPostal: '45129',
+  rfc: 'MEX261015US8',
+  domicilio: 'Paseo Puesta del Sol 4150, colonia Lomas Altas',
+  codigoPostal: '45128',
   ciudad: 'Zapopan',
   estado: 'Jalisco',
   pais: 'México',
