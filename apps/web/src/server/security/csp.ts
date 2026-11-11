@@ -15,12 +15,13 @@ import { buildCsp } from '@xangarro/config/security';
  *
  * Served **enforcing** (`src/proxy.ts`, audit F-04): the browser blocks what
  * the policy forbids and still reports it to `/api/csp-report` through
- * `report-uri`. A wrong policy on the register stops sales, so a change here
+ * `report-uri`. `upgradeInsecure` is false only for a page served over plain
+ * http on this machine (`src/proxy.ts`). A wrong policy on the register stops sales, so a change here
  * runs the whole E2E suite before it ships.
  */
 export const CSP_REPORT_PATH = '/api/csp-report';
 
-export function portalCsp(nonce: string, isDev: boolean): string {
+export function portalCsp(nonce: string, isDev: boolean, upgradeInsecure = true): string {
   return buildCsp({
     nonce,
     isDev,
@@ -30,5 +31,6 @@ export function portalCsp(nonce: string, isDev: boolean): string {
     workers: true,
     formAction: ['https://checkout.stripe.com', 'https://billing.stripe.com'],
     reportUri: CSP_REPORT_PATH,
+    upgradeInsecure,
   });
 }
