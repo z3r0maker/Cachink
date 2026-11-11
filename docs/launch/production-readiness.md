@@ -24,6 +24,12 @@
 - [ ] [media] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
 - [ ] [media] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
 - [ ] [alta] [bloq] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
+      Progress 2026-11-11: correo and mensajería are EE. UU. (Resend in us-east-1, `docs/ops/email.md`;
+      the urgent alerts go to a Slack or Discord webhook, both US). The DPA template's subencargados
+      table (`encargado-clausulas.md` §7) now names Resend and carries the real regions (Supabase
+      us-west-2, Vercel pdx1). Open: Sentry's region, which only its console shows (Settings ›
+      Organization › Data Storage Location; the DSN host says `ingest.us.` or `ingest.de.`), the card
+      processors' cell, and the `[PLAZO]`s.
 
 ## 2. Captura de consentimiento (PRIV-REG-01) — implementado 2026-09-22
 
