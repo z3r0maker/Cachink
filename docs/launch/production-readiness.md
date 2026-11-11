@@ -7,7 +7,7 @@
 
 ## 0. Lo único que todo lo demás espera
 
-- [~] [critica] [bloq] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.** (contrato social, folio SAS20261038080). Done 2026-11-11, from the constancia de situación fiscal (inicio de operaciones 2026-10-15): RFC **MEX261015US8**, domicilio fiscal **Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, teléfono **33 3190 0937**, and the art. 29 area named «Área de Protección de Datos Personales». They live in `PROVEEDOR` (`packages/domain/src/privacidad/proveedor.ts`), the landing's `empresa.js`, the aviso drafts and the términos; the signup and device-linking avisos are `0.4-borrador`, with the old versions kept. Still open: `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]` (the soporte@/privacidad@ aliases), and moving the domicilio and phone to the company's own once it has them (the aviso may use a domicilio convencional, never a particular one; a change is a new aviso version). Required by LFPDPPP
+- [~] [critica] [bloq] **BLOQUEANTE — Razón social constituida.** Done 2026-10-28: **MEXIA, S.A.S.** (contrato social, folio SAS20261038080). Done 2026-11-11, from the constancia de situación fiscal (inicio de operaciones 2026-10-15): RFC **MEX261015US8**, domicilio fiscal **Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, teléfono **33 3190 0937**, and the art. 29 area named «Área de Protección de Datos Personales». They live in `PROVEEDOR` (`packages/domain/src/privacidad/proveedor.ts`), the landing's `empresa.js`, the aviso drafts and the términos; the signup and device-linking avisos are `0.4-borrador`, with the old versions kept. Still open: `[CORREO SOPORTE]`, `[CORREO PRIVACIDAD]` (the soporte@/privacidad@ aliases), and moving the domicilio and phone to the company's own once it has them (the aviso may use a domicilio convencional, never a particular one; a change is a new aviso version). Required by LFPDPPP
   art. 15 I and LFPC 76 Bis III; it is also who signs every DPA.
   When the emails land: replace the brackets in `apps/web/src/legal/aviso-simplificado.ts` as a new
   `AVISO_VERSION`, and delete the placeholder assertion in `apps/web/tests/legal-aviso.test.ts`.
@@ -127,9 +127,11 @@
       `https://xangarro.mx/terminos`) in test and live mode. Until it is set, Stripe refuses the
       Checkout consent and no paid Checkout opens (ADR-132).
 - [ ] [media] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
-- [ ] [alta] [bloq] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Progress
-      2026-10-31: Checkout shows the domicilio and the quejas address under the pay button
-      (`PROVEEDOR`, ADR-132). Open: the landing, and the phone number, which does not exist yet.
+- [x] [alta] [bloq] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Done
+      2026-11-11: checkout shows the domicilio, correo and teléfono under the pay button (`PROVEEDOR`,
+      ADR-132), and both landing footers (home and /soporte) show the razón social, the domicilio and
+      «¿Dudas o quejas?» with the correo and teléfono (`home/ContactoLegal.jsx`, board PvPieLanding).
+      `scripts/landing-empresa.test.ts` keeps the landing's `EMPRESA` equal to `PROVEEDOR`.
 - [x] [alta] Enlaces legales (aviso, términos) en el pie del landing, el pie del portal y los pies de los correos.
       Progress 2026-10-31: the renewal and cancellation emails carry them (`Layout legal`). **Done
       2026-11-09 (ADR-139):** every email's footer links both; the landing (`home/CtaFooter.jsx`) and the

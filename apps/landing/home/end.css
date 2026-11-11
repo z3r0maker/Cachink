@@ -29,7 +29,8 @@
 .foot-cols .xeyebrow { color: var(--yellow); }
 .foot-cols a { color: var(--gray-200); text-decoration: none; }
 .foot-cols a:hover { text-decoration: underline; }
-.foot-legal { margin-top: 40px; border-top: 2px solid var(--gray-600); padding-top: 22px; font-size: 13px; font-weight: 600; color: var(--gray-400); }
+.foot-legal { margin-top: 40px; border-top: 2px solid var(--gray-600); padding-top: 22px; display: flex; flex-direction: column; gap: 2px; font-size: 13px; font-weight: 600; line-height: 1.6; color: var(--gray-400); }
+.foot-legal a { color: var(--gray-200); text-decoration: underline; }
 
 @media (max-width: 999px) { .faq-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 @media (max-width: 699px) {
@@ -38,4 +39,5 @@
   .faq-item p { font-size: 14px; }
   .cta-actions { align-items: stretch; width: 100%; text-align: center; }
   .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .foot-legal { gap: 6px; }
 }

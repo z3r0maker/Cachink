@@ -9,7 +9,7 @@ _Versión: [VERSIÓN] · Última actualización: [FECHA]_
 
 ## 1. Quién es responsable de tus datos
 
-**MEXIA, S.A.S.** ("Xangarro", "nosotros"), con domicilio en **Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, es responsable del
+**MEXIA, S.A.S.** ("Xangarro", "nosotros"), con domicilio en **Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco**, es responsable del
 tratamiento de los datos personales que se describen en este aviso, en términos del artículo 15,
 fracción I de la Ley.
 

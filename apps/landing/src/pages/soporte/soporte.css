@@ -408,10 +408,23 @@
 .sp-pie-links a {
   color: var(--black);
 }
+.sp-pie-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+.sp-pie-contacto a {
+  color: var(--black);
+}
 
 @media (max-width: 640px) {
   .sp-don {
     display: none;
+  }
+  .sp-pie-contacto {
+    gap: 6px;
+    text-align: left;
   }
 }
 @media (prefers-reduced-motion: reduce) {

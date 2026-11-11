@@ -11,7 +11,7 @@
 export const PROVEEDOR = {
   razonSocial: 'MEXIA, S.A.S.',
   rfc: 'MEX261015US8',
-  domicilio: 'Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco',
+  domicilio: 'Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco',
   correo: 'hola@xangarro.mx',
   /** As written for people: «33 3190 0937». */
   telefono: '33 3190 0937',
