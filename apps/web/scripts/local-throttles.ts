@@ -30,7 +30,8 @@ const SUITE_BAD_EMAILS = ['nobody@example.com', '<script>alert(1)</script>@x.com
 
 export async function clearLocalThrottles(sql: postgres.Sql): Promise<void> {
   for (const ip of LOOPBACK) {
-    for (const door of ['login', 'activate', 'signup']) {
+    // `confirm`: the confirmation email's resend and correction (N-83).
+    for (const door of ['login', 'activate', 'signup', 'confirm']) {
       await sql`SELECT xangarro.throttle_clear(${throttleKey(door, 'ip', ip)})`;
     }
   }

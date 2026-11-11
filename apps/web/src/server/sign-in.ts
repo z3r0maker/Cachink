@@ -6,8 +6,12 @@ import { startSession } from './session';
 
 /**
  * Open a portal session for an account whose credential was already checked —
- * a password, a sign-in link, or a reset link — on its first business. False
- * when the account belongs to no (unarchived) business.
+ * a password, a sign-in link, or a reset link — on its first business. Null
+ * when the account belongs to no (unarchived) business; otherwise the new
+ * session's token, for the caller that stamps the second factor on it (N-83).
+ *
+ * Its one caller is `acceso/live.ts`: every way in goes through
+ * `trasCredencial`, which decides whether a session may open at all.
  *
  * Not a server action on purpose: exported from a `'use server'` file it would
  * be a public endpoint that signs in any user id.
@@ -18,12 +22,12 @@ import { startSession } from './session';
  * failed attempt must not record a location for an address that may not belong
  * to whoever is typing. `recordGeo` never throws.
  */
-export async function signInUser(userId: string): Promise<boolean> {
+export async function signInUser(userId: string): Promise<string | null> {
   const [first] = await membershipsOf(userId);
-  if (first === undefined) return false;
-  await startSession(userId, first.businessId);
+  if (first === undefined) return null;
+  const token = await startSession(userId, first.businessId);
   await recordGeo('login');
-  return true;
+  return token;
 }
 
 export const NO_BUSINESS = 'Tu cuenta aún no pertenece a ningún negocio.';

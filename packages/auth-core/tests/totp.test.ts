@@ -5,6 +5,7 @@ import {
   AuthCoreError,
   base32Encode,
   generateTotpSecret,
+  groupSecret,
   hotp,
   otpauthUri,
   totpCode,
@@ -160,5 +161,16 @@ describe('otpauthUri', () => {
 
   it('refuses a secret that is not base32', () => {
     assert.throws(() => otpauthUri({ ...input, secret: 'nope!' }), { code: 'INVALID_BASE32' });
+  });
+});
+
+describe('groupSecret', () => {
+  it('splits a seed into groups of four for typing', () => {
+    assert.equal(groupSecret('JBSWY3DPEHPK3PXP'), 'JBSW Y3DP EHPK 3PXP');
+  });
+
+  it('keeps a short tail and an empty seed as they are', () => {
+    assert.equal(groupSecret('ABCDEFGHIJ'), 'ABCD EFGH IJ');
+    assert.equal(groupSecret(''), '');
   });
 });

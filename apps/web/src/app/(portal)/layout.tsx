@@ -1,10 +1,13 @@
 import { PLAN_NOMBRE } from '@xangarro/domain';
+import { Suspense } from 'react';
 
 import { buildChecklist } from '@/onboarding/checklist';
+import { accessDeps } from '@/server/acceso/live';
+import { estadoSeguridad, type EstadoSeguridad } from '@/server/acceso/seguridad';
 import { currentSession } from '@/server/current-session';
 import { loadChecklistSignals } from '@/server/onboarding/load';
 import { negociosOf } from '@/server/memberships';
-import { readSession } from '@/server/session';
+import { readSession, type SessionClaims } from '@/server/session';
 import { avisoNuevoPara } from '@/server/privacidad/estado';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
@@ -14,6 +17,8 @@ import { initials } from '@/shell/initials';
 import { Header } from '@/shell/header';
 import type { UserMenuProps } from '@/shell/user-menu';
 import { OfflineRegister } from '@/shell/offline-register';
+import { ReconfirmarProvider } from '@/shell/reconfirmar';
+import { InvitacionFranja, RecuperacionFranja } from '@/shell/seguridad-franjas';
 import { Sidebar, type Pasos } from '@/shell/sidebar';
 
 import { column, content, frame, main } from '@/shell/shell.css';
@@ -30,7 +35,8 @@ import { column, content, frame, main } from '@/shell/shell.css';
  * `global-error`. The Revisión badge was a fixture length until 2026-09-25 —
  * it read 6 in production over a page that said there was nothing to review. The **identity**
  * comes from the session; the switcher lists every business the account
- * belongs to (P-02).
+ * belongs to (P-02). `ReconfirmarProvider` holds the second factor's re-ask
+ * dialog, which any screen below may open (N-83).
  */
 /**
  * The sidebar's «Primeros pasos» card (ADR-107): every step, optional ones
@@ -49,7 +55,12 @@ async function guiaPrimero(role: string, businessId: string): Promise<Pasos | nu
 }
 
 /** What the account menu shows: the business, the role, the plan and pending rows. */
-function accountOf(session: Session, pendingRows: number, avisoNuevo: boolean): UserMenuProps {
+function accountOf(
+  session: Session,
+  pendingRows: number,
+  avisoNuevo: boolean,
+  seguridad: boolean,
+): UserMenuProps {
   return {
     initials: initials(session.businessName),
     businessName: session.businessName,
@@ -58,7 +69,45 @@ function accountOf(session: Session, pendingRows: number, avisoNuevo: boolean): 
     planLabel: PLAN_NOMBRE[session.planId],
     pendingRows,
     avisoNuevo,
+    seguridad,
   };
+}
+
+/**
+ * The account's second factor (N-83), for the menu's «Seguridad» and its two
+ * strips. Owner and admin only; a failed read hides them rather than taking
+ * the shell down with it.
+ */
+async function seguridadDe(claims: SessionClaims | null): Promise<EstadoSeguridad | null> {
+  if (claims === null || claims.member_role === 'viewer') return null;
+  return estadoSeguridad(accessDeps(), claims.sub).catch(() => null);
+}
+
+/** What is the person's rather than the business's: memberships, the aviso, the second factor. */
+async function deLaPersona(claims: SessionClaims | null) {
+  if (claims === null) return { negocios: [], avisoNuevo: false, seguridad: null };
+  return {
+    negocios: await negociosOf(claims.sub),
+    avisoNuevo: await avisoNuevoPara(claims.sub),
+    seguridad: await seguridadDe(claims),
+  };
+}
+
+/** The strips above every page: the new aviso, and the second factor's two (N-83). */
+function Franjas(props: {
+  readonly avisoNuevo: boolean;
+  readonly seguridad: EstadoSeguridad | null;
+}) {
+  const { seguridad } = props;
+  return (
+    <>
+      <AvisoNuevoFranja visible={props.avisoNuevo} />
+      <InvitacionFranja visible={seguridad?.invitar === true} />
+      <Suspense fallback={null}>
+        <RecuperacionFranja codigos={seguridad?.activa ? seguridad.codigos : null} />
+      </Suspense>
+    </>
+  );
 }
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
@@ -68,9 +117,7 @@ export default async function PortalLayout({ children }: { children: React.React
   const pasos = await guiaPrimero(session.role, session.businessId);
   const counts = await loadShellCounts(session.businessId);
   const logoUrl = await loadShellLogo(session.businessId);
-  const claims = await readSession();
-  const negocios = claims === null ? [] : await negociosOf(claims.sub);
-  const avisoNuevo = claims === null ? false : await avisoNuevoPara(claims.sub);
+  const { negocios, avisoNuevo, seguridad } = await deLaPersona(await readSession());
   const current = {
     businessId: session.businessId,
     nombre: session.businessName,
@@ -81,26 +128,28 @@ export default async function PortalLayout({ children }: { children: React.React
     <SessionProvider session={session}>
       {/* N-23: the offline page's service worker, on the Director surface only. */}
       <OfflineRegister />
-      <div className={frame}>
-        <Sidebar
-          logoUrl={logoUrl}
-          badges={{ '/revision-caja': counts.revisionPendiente }}
-          current={current}
-          negocios={negocios}
-          pasos={pasos}
-        />
-        <div className={column}>
-          <Header
-            account={accountOf(session, counts.pendingRows, avisoNuevo)}
-            pendingRows={counts.pendingRows}
-            unreadNotices={counts.unreadNotices}
+      <ReconfirmarProvider>
+        <div className={frame}>
+          <Sidebar
+            logoUrl={logoUrl}
+            badges={{ '/revision-caja': counts.revisionPendiente }}
+            current={current}
+            negocios={negocios}
+            pasos={pasos}
           />
-          <AvisoNuevoFranja visible={avisoNuevo} />
-          <main className={main}>
-            <div className={content}>{children}</div>
-          </main>
+          <div className={column}>
+            <Header
+              account={accountOf(session, counts.pendingRows, avisoNuevo, seguridad !== null)}
+              pendingRows={counts.pendingRows}
+              unreadNotices={counts.unreadNotices}
+            />
+            <Franjas avisoNuevo={avisoNuevo} seguridad={seguridad} />
+            <main className={main}>
+              <div className={content}>{children}</div>
+            </main>
+          </div>
         </div>
-      </div>
+      </ReconfirmarProvider>
     </SessionProvider>
   );
 }

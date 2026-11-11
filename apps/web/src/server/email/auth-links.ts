@@ -3,7 +3,11 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 
 import type { EmailSendResult, EmailSender } from '@xangarro/application/email';
-import { renderMagicLinkEmail, renderPasswordResetEmail } from '@xangarro/email';
+import {
+  renderEmailConfirmationEmail,
+  renderMagicLinkEmail,
+  renderPasswordResetEmail,
+} from '@xangarro/email';
 
 import { portalEmailSender, sendReported } from './sender';
 
@@ -69,5 +73,37 @@ export async function sendMagicLink(
       idempotencyKey: keyOf('magic-link', url),
     },
     { endpoint: 'email/magic-link' },
+  );
+}
+
+/**
+ * «Confirma tu correo» (N-83): the first email of a new account. Keyed by the
+ * URL like its siblings, so the token never reaches the provider's logs.
+ */
+export async function sendEmailConfirmation(
+  to: string,
+  url: string,
+  args: {
+    readonly name: string | null;
+    readonly nombreNegocio: string;
+    readonly expiresInHours: number;
+    readonly sender?: EmailSender;
+  },
+): Promise<EmailSendResult> {
+  const content = await renderEmailConfirmationEmail({
+    url,
+    name: args.name,
+    nombreNegocio: args.nombreNegocio,
+    expiresInHours: args.expiresInHours,
+  });
+  return sendReported(
+    args.sender ?? portalEmailSender(),
+    {
+      ...content,
+      to,
+      tags: [{ name: 'kind', value: 'email-confirmation' }],
+      idempotencyKey: keyOf('email-confirmation', url),
+    },
+    { endpoint: 'email/confirmation' },
   );
 }

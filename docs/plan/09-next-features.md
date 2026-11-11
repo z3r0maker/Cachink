@@ -1477,7 +1477,8 @@ update --channel production --private-key-path keys/private-key.pem`.
 
 ### N-83 Segundo factor del dueño y verificación del correo al registrarse [media]
 
-- [ ] Status · **Surfaced by:** N-26 (F-09, SEC-AUTH-02) · **Trigger:** ya (el dueño aprobó los tableros el 2026-11-10)
+- [x] Status · **Surfaced by:** N-26 (F-09, SEC-AUTH-02) · **Trigger:** ya (el dueño aprobó los tableros el 2026-11-10)
+      Done: 2026-11-11 · branch `worktree-n83-2fa-boards` · ADR-142. Migration `0057`: the `confirm`, `pending` and `challenge` links, `xangarro.portal_second_factor`, and `portal_sessions.stepped_up_at`. The second factor's logic was lifted into `@xangarro/auth-core` (`second-factor.ts`) and the console now calls it too. Portal: `server/acceso/` holds the use cases; the screens are `/signup/revisa`, `/signup/confirmar`, `/login/verificar` and `/seguridad`; the re-ask is `requireStepUp` in the operator, device, pairing and billing actions, answered by the dialog in `shell/reconfirmar.tsx`. Playwright: `confirmar-correo`, `segundo-paso`, `seguridad` and `reconfirmar` specs, each on accounts it mints. Needs `PORTAL_TOTP_KEY` in the portal's production environment before it deploys (`docs/ops/provisioning.md`).
 - **What:** (a) signup does not open a session until the address is confirmed by an emailed link, so
   nobody can register somebody else's email first; an unconfirmed account that is later reached
   through a magic link has its password and other sessions cleared. (b) Optional TOTP for owners and
@@ -1508,10 +1509,12 @@ update --channel production --private-key-path keys/private-key.pem`.
   mi correo» works only in the browser that signed up, or after the password; enrolment asks for
   the password first; «Seguridad» is shown to owner and admin, not to `viewer`; a new phone is
   «Desactivar» then «Activar».
+- **Decided with the owner, 2026-11-11:** accounts that existed before the migration count as
+  confirmed, so nobody already inside is locked out.
 - **Still to draw or decide:** the console action that switches a locked-out owner's TOTP off (its
-  board belongs on the console's canvas, https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq); whether
-  turning TOTP on or off sends a notice email; whether accounts created before this ships count as
-  confirmed.
+  board belongs on the console's canvas, https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): until
+  it exists, support does it by hand with `xangarro.second_factor_disable`; whether turning TOTP on
+  or off sends a notice email.
 - **Acceptance:** an account whose email was never confirmed cannot sign in with a password; an
   owner with TOTP on cannot reach `/equipo` after a password-only sign-in.
 

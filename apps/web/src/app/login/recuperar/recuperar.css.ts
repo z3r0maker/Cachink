@@ -5,6 +5,24 @@ export const marco = style({ width: '100%', maxWidth: 460, margin: '0 auto' });
 
 export const cabezaTarjeta = style({ display: 'flex', flexDirection: 'column', gap: 6 });
 
+/** The glyph tile, with «Paso 2 de 2» beside it when a card has one. */
+export const placaConCeja = style({ display: 'flex', alignItems: 'center', gap: 14 });
+
+/** The two secondary actions of a card, side by side; stacked on a phone. */
+export const acciones = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: 10,
+  '@media': { '(max-width: 599px)': { gridTemplateColumns: 'minmax(0, 1fr)' } },
+});
+
+/** A bold address inside a card's paragraph: it may be long, so it may break. */
+export const destacado = style({
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+  overflowWrap: 'anywhere',
+});
+
 globalStyle(`${cabezaTarjeta} > h1`, { margin: 0 });
 globalStyle(`${cabezaTarjeta} > p`, {
   margin: 0,

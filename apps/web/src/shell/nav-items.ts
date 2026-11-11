@@ -89,4 +89,6 @@ export const ACCOUNT_ITEMS: readonly NavItem[] = [
 ];
 
 export const PRIVACY_ICON = ICON.privacidad;
+/** «Seguridad» in the account menu (N-83): a padlock, beside the privacy shield. */
+export const SECURITY_ICON = 'M6 11h12v9H6v-9Zm2.5 0V8a3.5 3.5 0 0 1 7 0v3M12 15v2';
 export const AYUDA_ICON = ICON.ayuda;

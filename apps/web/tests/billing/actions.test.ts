@@ -34,6 +34,9 @@ vi.mock('../../src/server/auth', () => ({
   })),
 }));
 
+// The re-ask (N-83) has its own cases in actions-wiring.test.ts; here the proof is always fresh.
+vi.mock('../../src/server/acceso/reconfirmar', () => ({ requireStepUp: vi.fn(async () => {}) }));
+
 vi.mock('../../src/server/db', () => ({
   withTenant: vi.fn(async (_biz: string, fn: (tx: unknown) => unknown) => fn({})),
 }));

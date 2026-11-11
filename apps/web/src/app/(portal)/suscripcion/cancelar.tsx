@@ -9,6 +9,7 @@ import {
   seguirConMiPlan,
   type CancelActionResult,
 } from '@/server/billing/actions';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 import { fechaLarga } from './fecha';
 import { btn, errorTexto, lleno } from './suscripcion.css';
@@ -21,12 +22,14 @@ import * as s from './suscripcion.css';
  */
 function useAccion(accion: () => Promise<CancelActionResult>) {
   const router = useRouter();
+  const { protegido } = useReconfirmar();
   const [error, setError] = useState<string | null>(null);
   const [hecho, setHecho] = useState(false);
   const [pending, startTransition] = useTransition();
   const run = () =>
     startTransition(async () => {
-      const r = await accion();
+      const r = await protegido(accion, 'Vas a cambiar tu suscripción.');
+      if (r === null) return;
       if (!r.ok) return setError(r.message);
       setError(null);
       setHecho(true);

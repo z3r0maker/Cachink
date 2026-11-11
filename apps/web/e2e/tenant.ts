@@ -146,8 +146,8 @@ export async function mintTenant(options: MintOptions = {}): Promise<Tenant> {
   await asTenant(t.biz, async (sql) => {
     if (options.owner === undefined) {
       await sql`
-        INSERT INTO auth.users (id, email, encrypted_password, nombre)
-        VALUES (${t.ownerId}::uuid, ${t.email}, ${hash}, ${label})`;
+        INSERT INTO auth.users (id, email, encrypted_password, nombre, email_confirmed_at)
+        VALUES (${t.ownerId}::uuid, ${t.email}, ${hash}, ${label}, now())`;
     }
     await sql`
       INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id,
@@ -194,8 +194,8 @@ export async function addMember(
   const hash = await hashPassword(member.password);
   await asTenant(t.biz, async (sql) => {
     await sql`
-      INSERT INTO auth.users (id, email, encrypted_password, nombre)
-      VALUES (${member.ownerId}::uuid, ${member.email}, ${hash}, ${label})`;
+      INSERT INTO auth.users (id, email, encrypted_password, nombre, email_confirmed_at)
+      VALUES (${member.ownerId}::uuid, ${member.email}, ${hash}, ${label}, now())`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${member.ownerId}, ${role}, ${t.biz}, now(), now())`;

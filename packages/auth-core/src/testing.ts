@@ -1,3 +1,4 @@
+import type { SecondFactorRepo } from './second-factor.js';
 import type { FailurePolicy, ThrottleStore } from './throttle.js';
 
 /**
@@ -35,5 +36,56 @@ export function memoryThrottleStore(clock: FakeClock = { t: 0 }): ThrottleStore 
       return 0;
     },
     clear: async (key) => void rows.delete(key),
+  };
+}
+
+/** One account's second-factor row, as the stores keep it. */
+export interface MemoryFactorRow {
+  secretEnc: string | null;
+  enrolledAt: string | null;
+  lastStep: number | null;
+  recoveryCodes: string[];
+}
+
+/**
+ * A `SecondFactorRepo` with the conditional-write semantics of the Postgres
+ * adapters: a pending seed is compare-and-swapped, enrolment happens once, a
+ * TOTP step only moves forward and a recovery code is removed once. An id with
+ * no row is an account that does not exist.
+ */
+export function memorySecondFactorRepo<Id extends string = string>(
+  rows: Map<string, MemoryFactorRow>,
+): SecondFactorRepo<Id> {
+  return {
+    totpState: async (id) => {
+      const r = rows.get(id);
+      return r ? { secretEnc: r.secretEnc, enrolledAt: r.enrolledAt, lastStep: r.lastStep } : null;
+    },
+    savePendingSecret: async (id, previous, sealed) => {
+      const r = rows.get(id);
+      if (!r || r.enrolledAt !== null || r.secretEnc !== previous) return false;
+      r.secretEnc = sealed;
+      return true;
+    },
+    completeEnrolment: async (id, step, hashes) => {
+      const r = rows.get(id);
+      if (!r || r.enrolledAt !== null || r.secretEnc === null) return false;
+      r.enrolledAt = new Date().toISOString();
+      r.lastStep = step;
+      r.recoveryCodes = [...hashes];
+      return true;
+    },
+    advanceStep: async (id, step) => {
+      const r = rows.get(id);
+      if (!r || r.enrolledAt === null || (r.lastStep !== null && r.lastStep >= step)) return false;
+      r.lastStep = step;
+      return true;
+    },
+    consumeRecoveryCode: async (id, hash) => {
+      const r = rows.get(id);
+      if (!r || r.enrolledAt === null || !r.recoveryCodes.includes(hash)) return null;
+      r.recoveryCodes = r.recoveryCodes.filter((h) => h !== hash);
+      return r.recoveryCodes.length;
+    },
   };
 }

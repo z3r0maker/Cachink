@@ -10,6 +10,7 @@ import {
   pagarAnualPorSpei,
   type BillingActionResult,
 } from '@/server/billing/actions';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 import { btn, errorTexto, lleno } from './suscripcion.css';
 
@@ -21,9 +22,11 @@ import { btn, errorTexto, lleno } from './suscripcion.css';
 function useIr() {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { protegido } = useReconfirmar();
   const ir = (accion: () => Promise<BillingActionResult>) =>
     startTransition(async () => {
-      const r = await accion();
+      const r = await protegido(accion, 'Vas a cambiar tu plan.');
+      if (r === null) return;
       if (!r.ok) return setError(r.message);
       window.location.assign(r.url);
     });

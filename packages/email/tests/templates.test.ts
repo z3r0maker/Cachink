@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import {
   pesos,
   renderActivationCodeEmail,
+  renderEmailConfirmationEmail,
   renderFacturaIssuedEmail,
   renderGenericNoticeEmail,
   renderPaymentFailedEmail,
@@ -89,6 +90,42 @@ describe('auth links (ADR-080)', () => {
     assert.equal(e.subject, 'Tu enlace para entrar a Xangarro');
     assert.ok(e.html.includes(url));
     expect(e).toMatchSnapshot();
+  });
+});
+
+describe('email confirmation (N-83, board SgCorreo)', () => {
+  const url = 'https://portal.xangarro.mx/signup/confirmar?token=abc';
+  const base = { url, expiresInHours: 24, nombreNegocio: 'Taquería Don Pedro' } as const;
+
+  it('greets by name, names the business, carries the link and its lifetime', async () => {
+    const e = await renderEmailConfirmationEmail({ ...base, name: 'Pedro' });
+    assert.equal(e.subject, 'Confirma tu correo de Xangarro');
+    assert.match(e.text, /Hola, Pedro:/);
+    assert.match(e.text, /Creaste una cuenta de Xangarro para Taquería Don Pedro\./);
+    assert.match(e.text, /una sola vez durante 24 horas/);
+    assert.match(e.html, /Confirmar mi correo/);
+    assert.ok(e.html.includes(url.replace('&', '&amp;')));
+    expect(e).toMatchSnapshot();
+  });
+
+  it('says what to do when the reader did not create the account', async () => {
+    const e = await renderEmailConfirmationEmail({ ...base, name: 'Pedro' });
+    assert.match(e.text, /Si no creaste esta cuenta, ignora este correo/);
+    assert.match(e.text, /sin confirmar, nadie puede entrar con tu dirección/);
+    assert.match(e.text, /alguien creó una cuenta de Xangarro con esta dirección/);
+  });
+
+  it('greets without a name when the person gave none', async () => {
+    const e = await renderEmailConfirmationEmail({ ...base, name: null });
+    assert.match(e.text, /Hola:/);
+    assert.doesNotMatch(e.text, /Hola, /);
+  });
+
+  it('keeps the plain-text fallback link for when the button does not work', async () => {
+    const e = await renderEmailConfirmationEmail({ ...base, name: null });
+    assert.match(e.text, /Si el botón no funciona, copia este enlace en tu navegador/);
+    assert.ok(e.text.includes(url));
+    assert.doesNotMatch(e.text, /—/, 'no em dash in copy');
   });
 });
 

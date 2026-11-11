@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { Button } from '@/components';
+import { Banner, Button } from '@/components';
+import { rutaSiguiente } from '@/lib/acceso-rutas';
 import { restablecerContrasena } from '@/server/actions/auth-links';
 
 import { CampoContrasena } from '../../_publico/contrasena';
@@ -30,7 +31,7 @@ function useReset(token: string) {
     startTransition(async () => {
       const r = await restablecerContrasena(token, password);
       if (!r.ok) return setError(r.message);
-      router.replace('/');
+      router.replace(rutaSiguiente(r));
       router.refresh();
     });
   };
@@ -73,10 +74,23 @@ function Campos({ f }: { readonly f: ReturnType<typeof useReset> }) {
   );
 }
 
-export function ResetForm({ token }: { readonly token: string }) {
+/** Board SgConfirmar, «Entró con enlace sin confirmar»: why there is no password to keep. */
+const RECLAMADA =
+  'Entraste con un enlace a tu correo, así que ya quedó confirmado. Como nadie lo había ' +
+  'confirmado antes, borramos la contraseña que tenía la cuenta y cerramos sus otras sesiones.';
+
+export function ResetForm({
+  token,
+  confirmado = false,
+}: {
+  readonly token: string;
+  /** A sign-in link just claimed an unconfirmed account (N-83): say what happened to the password. */
+  readonly confirmado?: boolean;
+}) {
   const f = useReset(token);
   return (
     <TarjetaAcceso icono={<LockKeyhole size={24} />} titulo="Crea una contraseña nueva">
+      {confirmado ? <Banner tone="warning" title={RECLAMADA} /> : null}
       <form onSubmit={f.submit} noValidate className={form}>
         <Campos f={f} />
         <p className={`${nota} ${hueco}`} role="note">

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { Banner, Button } from '@/components';
+import { rutaSiguiente } from '@/lib/acceso-rutas';
 import { entrarConEnlace } from '@/server/actions/auth-links';
 
 import { AuthCard } from '../auth-card';
@@ -17,7 +18,7 @@ export function EnterButton({ token }: { readonly token: string }) {
     startTransition(async () => {
       const r = await entrarConEnlace(token);
       if (!r.ok) return setError(r.message);
-      router.replace('/');
+      router.replace(rutaSiguiente(r));
       router.refresh();
     });
 

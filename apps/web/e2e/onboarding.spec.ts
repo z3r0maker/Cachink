@@ -1,12 +1,14 @@
 import { expect, test, type Page } from './test';
 
+import { confirmarYSeguir, crearCuenta } from './confirmacion';
 import { stamp } from './tenant';
 
 /**
- * Signup → "Platícanos de ti" → "Tu plan ideal" → "¿Cómo empiezo?" → re-run
- * (P-03, P-04, N-12 … N-15), as a brand-new visitor: a **fresh context**, no
- * cookie from `auth.setup.ts`. Each run and each viewport signs up its own
- * address, so reruns never collide on `auth.users.email`.
+ * Signup → the emailed confirmation (N-83) → "Platícanos de ti" → "Tu plan
+ * ideal" → "¿Cómo empiezo?" → re-run (P-03, P-04, N-12 … N-15), as a brand-new
+ * visitor: a **fresh context**, no cookie from `auth.setup.ts`. Each run and
+ * each viewport signs up its own address, so reruns never collide on
+ * `auth.users.email`.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -53,12 +55,15 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   page,
 }, info) => {
   const email = `lupita+${stamp()}-${info.project.name}@ejemplo.mx`;
-  await page.goto('/signup?plan=xangarro');
-  await page.getByTestId('signup-nombre').fill('Tortas Lupita');
-  await page.getByTestId('signup-email').fill(email);
-  await page.getByTestId('signup-password').fill('tortas-2026');
-  await page.getByTestId('signup-acepto').check();
-  await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
+  await crearCuenta(page, {
+    negocio: 'Tortas Lupita',
+    email,
+    password: 'tortas-2026',
+    plan: 'xangarro',
+  });
+  // No session until the emailed link is confirmed (N-83); the plan picked on
+  // the landing rides through the confirmation to the wizard.
+  await confirmarYSeguir(page, email);
 
   await expect(page.getByRole('heading', { name: 'Platícanos de ti' })).toBeVisible();
   await answerWizard(page);

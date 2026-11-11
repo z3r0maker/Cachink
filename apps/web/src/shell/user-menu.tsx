@@ -3,11 +3,12 @@
 import * as Menu from '@radix-ui/react-dropdown-menu';
 import Link from 'next/link';
 
+import { RUTA_SEGURIDAD } from '@/lib/acceso-rutas';
 import { logout } from '@/server/actions/auth';
 
 import { Icon } from './icon';
 import { avatar, avatarHit } from './header.css';
-import { ACCOUNT_ITEMS, PRIVACY_ICON, type NavItem } from './nav-items';
+import { ACCOUNT_ITEMS, PRIVACY_ICON, SECURITY_ICON, type NavItem } from './nav-items';
 import * as s from './user-menu.css';
 
 export interface UserMenuProps {
@@ -19,6 +20,8 @@ export interface UserMenuProps {
   readonly pendingRows: number;
   /** The current aviso is one this account has not accepted (ADR-137). */
   readonly avisoNuevo: boolean;
+  /** «Seguridad» is each owner's and admin's own (N-83); a read-only member has no such page. */
+  readonly seguridad: boolean;
 }
 
 function Extra({ href, p }: { readonly href: string; readonly p: UserMenuProps }) {
@@ -40,6 +43,34 @@ function Row({ item, p }: { readonly item: NavItem; readonly p: UserMenuProps })
         <Extra href={item.href} p={p} />
       </Link>
     </Menu.Item>
+  );
+}
+
+/**
+ * What is the person's own, not the business's: «Seguridad» (N-83; owner and
+ * admin) and «Privacidad y mis datos» (ADR-137; everyone).
+ */
+function Personales({ p }: { readonly p: UserMenuProps }) {
+  return (
+    <>
+      {p.seguridad ? (
+        <Menu.Item asChild>
+          <Link href={RUTA_SEGURIDAD} className={s.itemLink} data-testid="menu-seguridad">
+            <Icon path={SECURITY_ICON} size={19} />
+            Seguridad
+          </Link>
+        </Menu.Item>
+      ) : null}
+      <Menu.Item asChild>
+        <Link href="/privacidad" className={s.itemLink} data-testid="menu-privacidad">
+          <Icon path={PRIVACY_ICON} size={19} />
+          Privacidad y mis datos
+          {p.avisoNuevo ? (
+            <span className={`${s.pill} ${s.pillTone.nuevo}`}>Aviso nuevo</span>
+          ) : null}
+        </Link>
+      </Menu.Item>
+    </>
   );
 }
 
@@ -67,15 +98,7 @@ export function UserMenu(p: UserMenuProps) {
           {ACCOUNT_ITEMS.map((item) => (
             <Row key={item.href} item={item} p={p} />
           ))}
-          <Menu.Item asChild>
-            <Link href="/privacidad" className={s.itemLink} data-testid="menu-privacidad">
-              <Icon path={PRIVACY_ICON} size={19} />
-              Privacidad y mis datos
-              {p.avisoNuevo ? (
-                <span className={`${s.pill} ${s.pillTone.nuevo}`}>Aviso nuevo</span>
-              ) : null}
-            </Link>
-          </Menu.Item>
+          <Personales p={p} />
           <div className={s.separator} role="separator" />
           <form action={logout}>
             <Menu.Item asChild onSelect={(e) => e.preventDefault()}>

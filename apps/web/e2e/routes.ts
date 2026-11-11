@@ -114,6 +114,14 @@ export const ROUTES: readonly Route[] = [
     heading: 'Mi negocio',
     data: { kind: 'db', sentinel: 'Funciones de tu negocio' },
   },
+  // `xangarro.portal_second_factor` → `seguridad/tarjetas.tsx` (N-83): the card
+  // renders only once the account's own row was read; a failed read is the
+  // error state. Pedro's second factor is off, as the seed leaves it.
+  {
+    path: '/seguridad',
+    heading: 'Seguridad',
+    data: { kind: 'db', sentinel: 'Ponle un segundo paso a tu cuenta' },
+  },
   {
     path: '/suscripcion',
     heading: 'Mi negocio',

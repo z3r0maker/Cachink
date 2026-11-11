@@ -1,14 +1,22 @@
 'use server';
 
 import { clientIp, hashPassword, MAX_PASSWORD_BYTES, throttleKey } from '@xangarro/auth-core';
-import { consumeMagicLink, issueLink, resetPassword, throttleTake } from '@xangarro/data-pg';
+import {
+  consumeMagicLink,
+  issueLink,
+  peekLink,
+  resetPassword,
+  throttleTake,
+} from '@xangarro/data-pg';
 import { headers } from 'next/headers';
 
+import { aplicarEntrada, type Destino } from '../acceso/aplicar';
+import { trasCredencial } from '../acceso/entrar';
+import { accessDeps } from '../acceso/live';
 import { failure } from '../action-errors';
 import { db } from '../db';
 import { sendMagicLink, sendPasswordReset } from '../email/auth-links';
 import { portalUrl } from '../email/sender';
-import { NO_BUSINESS, signInUser } from '../sign-in';
 
 /**
  * Emailed links (ADR-080): «¿Olvidaste tu contraseña?» and «Entrar con un
@@ -17,6 +25,10 @@ import { NO_BUSINESS, signInUser } from '../sign-in';
  *
  * **The request answers the same whether or not the address has an account**,
  * so the form cannot be used to find out who uses Xangarro.
+ *
+ * A spent link is a proven credential like a password, so what opens next is
+ * `trasCredencial`'s call (N-83, ADR-142): a session, the second step, or, for
+ * a sign-in link on an address nobody had confirmed, a new password.
  */
 export type LinkKind = 'reset' | 'magic';
 export type LinkResult = { ok: true } | { ok: false; message: string };
@@ -70,13 +82,16 @@ function passwordProblem(password: string): string | null {
   return null;
 }
 
-export async function restablecerContrasena(token: string, password: string): Promise<LinkResult> {
+export async function restablecerContrasena(token: string, password: string): Promise<Destino> {
   const problem = passwordProblem(password);
   if (problem !== null) return { ok: false, message: problem };
   try {
+    // Read before spending: the link names the account, and what opens next needs its address.
+    const view = await peekLink(db(), token, 'reset');
     const userId = await resetPassword(db(), token, await hashPassword(password));
-    if (userId === null) return { ok: false, message: EXPIRED };
-    return (await signInUser(userId)) ? { ok: true } : { ok: false, message: NO_BUSINESS };
+    if (userId === null || view === null) return { ok: false, message: EXPIRED };
+    const cuenta = { id: userId, email: view.email };
+    return await aplicarEntrada(await trasCredencial(accessDeps(), cuenta, 'reset'));
   } catch (error) {
     return failure(error, 'restablecerContrasena', {
       retry: 'No pudimos cambiar tu contraseña. Intenta de nuevo.',
@@ -84,11 +99,13 @@ export async function restablecerContrasena(token: string, password: string): Pr
   }
 }
 
-export async function entrarConEnlace(token: string): Promise<LinkResult> {
+export async function entrarConEnlace(token: string): Promise<Destino> {
   try {
+    const view = await peekLink(db(), token, 'magic');
     const userId = await consumeMagicLink(db(), token);
-    if (userId === null) return { ok: false, message: EXPIRED };
-    return (await signInUser(userId)) ? { ok: true } : { ok: false, message: NO_BUSINESS };
+    if (userId === null || view === null) return { ok: false, message: EXPIRED };
+    const cuenta = { id: userId, email: view.email };
+    return await aplicarEntrada(await trasCredencial(accessDeps(), cuenta, 'enlace'));
   } catch (error) {
     return failure(error, 'entrarConEnlace', {
       retry: 'No pudimos abrir tu sesión. Intenta de nuevo.',

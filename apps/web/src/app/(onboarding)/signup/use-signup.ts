@@ -4,10 +4,12 @@ import type { PlanId } from '@xangarro/domain';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { RUTA_REVISA } from '@/lib/acceso-rutas';
 import type { Utm } from '@/server/attribution/utm';
 import { registrarse, type SignupFields } from '@/server/actions/signup';
 
 import type { ConsentState } from './consent';
+import { planElegido } from './plan-elegido';
 
 const SIN_CONSENTIMIENTO = 'Para crear tu cuenta, acepta el aviso de privacidad y los Términos.';
 
@@ -56,8 +58,9 @@ export function useSignup(plan: PlanId | null, utm: Utm) {
     startTransition(async () => {
       const r = await registrarse({ ...fields, utm, consentimiento: consent });
       if (!r.ok) return setError(r.message);
-      router.replace(plan === null ? '/bienvenida' : `/bienvenida?plan=${plan}`);
-      router.refresh();
+      // No session yet (N-83): the wizard starts once the emailed link is confirmed.
+      planElegido.guardar(plan);
+      router.replace(RUTA_REVISA);
     });
   };
   const falta = loQueFalta(fields, consent.acepto);

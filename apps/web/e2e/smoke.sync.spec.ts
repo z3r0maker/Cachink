@@ -4,6 +4,7 @@ import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 import { API_PATHS, deviceHeaders, encodeJson } from '@xangarro/contracts';
 
+import { confirmarYSeguir } from './confirmacion';
 import { subirParaRevisar } from './interact';
 import { asTenant } from './sync-phone';
 
@@ -80,6 +81,9 @@ test('signup → wizard → operator → import → code → activate → push �
   // had been skipping this project entirely.
   await page.getByTestId('signup-acepto').check();
   await page.getByRole('button', { name: 'Crear mi cuenta' }).click();
+  // Signing up opens no session (N-83): the emailed link does, and leads here.
+  await expect(page.getByRole('heading', { name: 'Revisa tu correo' })).toBeVisible();
+  await confirmarYSeguir(page, email);
   await wizardMinimo(page);
 
   // Free plan: no checkout — the plan screen only confirms, then the checklist.

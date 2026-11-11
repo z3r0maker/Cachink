@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 
 import { Button, Input, MonedaGirando } from '@/components';
+import { rutaSiguiente } from '@/lib/acceso-rutas';
 import { login } from '@/server/actions/auth';
 
 import { AuthCard } from './auth-card';
@@ -70,8 +71,9 @@ function useLogin() {
       }
       // `refresh` as well as `replace`: the layout is a server component and
       // has already rendered without a session, so the client cache holds a
-      // signed-out tree.
-      router.replace('/');
+      // signed-out tree. The password may open the portal, the second step or
+      // «Revisa tu correo» (N-83): the action says which.
+      router.replace(rutaSiguiente(result));
       router.refresh();
     });
   }

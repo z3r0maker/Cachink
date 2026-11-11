@@ -9,3 +9,4 @@ export * from './consents.js';
 export * from './api-latency.js';
 export * from './account-deletion.js';
 export * from './rls-role.js';
+export * from './second-factor.js';

@@ -12,7 +12,7 @@ import { z } from 'zod';
 const reportError = vi.fn();
 vi.mock('../src/server/observability/report', () => ({ reportError }));
 
-const { failure, refusal, RETRY } = await import('../src/server/action-errors');
+const { failure, refusal, RETRY, STEP_UP_REQUIRED } = await import('../src/server/action-errors');
 
 const coded = (code: string, message: string) => Object.assign(new Error(message), { code });
 
@@ -128,5 +128,38 @@ describe('failure — an incident: reported, never shown in its own words', () =
       businessId: 'biz-1',
     });
     assert.deepEqual(reportError.mock.calls[1]?.[1], { endpoint: 'guardarPaso' });
+  });
+});
+
+describe('failure — the re-ask (N-83)', () => {
+  it('marks a step-up refusal so the screen can open the dialog, and does not report it', () => {
+    const r = failure(
+      refusal(STEP_UP_REQUIRED, 'Confirma que eres tú para seguir.'),
+      'crearOperador',
+    );
+    assert.deepEqual(r, {
+      ok: false,
+      message: 'Confirma que eres tú para seguir.',
+      reconfirmar: true,
+    });
+    assert.equal(reportError.mock.calls.length, 0);
+  });
+
+  it('marks nothing else: an ordinary refusal carries no flag', () => {
+    const r = failure(refusal('OTRO', 'No se puede.'), 'crearOperador');
+    assert.deepEqual(r, { ok: false, message: 'No se puede.' });
+  });
+
+  it('a step-up code on a plain Error, not a refusal, is still shown and marked', () => {
+    const r = failure(coded(STEP_UP_REQUIRED, 'Confirma que eres tú para seguir.'), 'x', {
+      shown: [STEP_UP_REQUIRED],
+    });
+    assert.equal(r.reconfirmar, true);
+  });
+
+  it('an unlisted step-up code on a plain Error is an incident like any other', () => {
+    const r = failure(coded(STEP_UP_REQUIRED, 'texto interno'), 'x');
+    assert.deepEqual(r, { ok: false, message: RETRY });
+    assert.equal(reportError.mock.calls.length, 1);
   });
 });

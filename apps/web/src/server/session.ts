@@ -57,7 +57,8 @@ export const readSession = cache(async (): Promise<SessionClaims | null> => {
   };
 });
 
-export async function startSession(userId: string, businessId: string): Promise<void> {
+/** Opens the session and sets its cookie. The token is returned for a caller that must stamp it at once. */
+export async function startSession(userId: string, businessId: string): Promise<string> {
   const token = await openSession(db(), userId, businessId, SESSION_TTL_SECONDS);
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -66,6 +67,13 @@ export async function startSession(userId: string, businessId: string): Promise<
     path: '/',
     maxAge: SESSION_TTL_SECONDS,
   });
+  return token;
+}
+
+/** The request's own session token, plausible or not; for the re-ask stamp (N-83). */
+export async function sessionToken(): Promise<string | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return token !== undefined && isPlausibleToken(token) ? token : null;
 }
 
 export async function endSession(): Promise<void> {

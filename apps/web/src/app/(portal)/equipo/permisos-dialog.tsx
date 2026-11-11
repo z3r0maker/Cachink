@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 
 import { ConfirmDialog, Switch } from '@/components';
 import { cambiarPermisos } from '@/server/actions/operadores';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 /**
  * «Editar permisos» (P-05). v1 has one permission: cancelling sales from the
@@ -21,9 +22,14 @@ export function PermisosDialog(props: {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const { protegido } = useReconfirmar();
   const save = () =>
     startTransition(async () => {
-      const r = await cambiarPermisos(props.id, { canCancelSales: cancelar });
+      const r = await protegido(
+        () => cambiarPermisos(props.id, { canCancelSales: cancelar }),
+        `Vas a cambiar los permisos de ${props.nombre}.`,
+      );
+      if (r === null) return;
       if (!r.ok) return setError(r.message);
       props.onOpenChange(false);
       router.refresh();

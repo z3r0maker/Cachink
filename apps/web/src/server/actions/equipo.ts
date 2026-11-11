@@ -5,6 +5,7 @@ import { isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { CODE_TTL_MS, mintActivationCode } from '../activation';
+import { requireStepUp } from '../acceso/reconfirmar';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { failure } from '../action-errors';
@@ -38,6 +39,7 @@ const ATTEMPTS = 3;
 export async function generarCodigo(): Promise<CodeResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const now = new Date();
     const expiresAt = new Date(now.getTime() + CODE_TTL_MS).toISOString();
 
@@ -89,6 +91,7 @@ export type EnviarCodigoResult = { ok: true; sentTo: string } | { ok: false; mes
 export async function enviarCodigoPorCorreo(address: string): Promise<EnviarCodigoResult> {
   try {
     const session = await requireMember('admin');
+    await requireStepUp(session);
     const to = address.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
       return { ok: false, message: 'Escribe un correo válido.' };

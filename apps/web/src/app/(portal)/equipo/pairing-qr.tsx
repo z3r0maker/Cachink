@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 import { Button } from '@/components';
 import { button } from '@/components/button.css';
 import { generarQr } from '@/server/actions/pairing-qr';
+import { useReconfirmar } from '@/shell/reconfirmar';
 
 /**
  * The scan half of the pairing panel (C-14, P-06): «Mostrar QR» mints a
@@ -15,6 +16,8 @@ import { generarQr } from '@/server/actions/pairing-qr';
  * Copy follows ADR-069: «Vincular este teléfono a tu negocio», never
  * «activar» or «licencia».
  */
+const VINCULAR = 'Vas a vincular una caja.';
+
 interface Qr {
   readonly link: string;
   readonly svgDataUri: string;
@@ -69,9 +72,11 @@ export function PairingQr({ codeKey }: { readonly codeKey: string }) {
   const [qr, setQr] = useState<{ readonly forCode: string; readonly value: Qr } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { protegido } = useReconfirmar();
   const mostrar = () =>
     startTransition(async () => {
-      const r = await generarQr();
+      const r = await protegido(generarQr, VINCULAR);
+      if (r === null) return;
       if (!r.ok) return setError(r.message);
       setError(null);
       setQr({ forCode: codeKey, value: r });

@@ -76,6 +76,9 @@ async function seedOwner(sql: Sql, password: string): Promise<void> {
   const o = DEMO.owner;
   const encrypted = await hash(password, 10);
   await sql`SELECT xangarro.account_create(${o.id}::uuid, ${o.email}, ${encrypted}, ${o.nombre}, ${CREATED})`;
+  // The store reviewer signs in with a password and has no inbox behind the
+  // demo address: confirmed here (N-83, ADR-142), password kept. A no-op later.
+  await sql`SELECT xangarro.account_claim(${o.id}::uuid, true)`;
   await sql`
     INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
     VALUES (${o.memberId}, ${o.id}, 'owner', ${DEMO.businessId}, ${CREATED}, ${CREATED})

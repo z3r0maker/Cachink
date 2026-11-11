@@ -68,3 +68,26 @@ export async function loginLookup(
   );
   return row === undefined ? null : { id: row.id, email: row.email, hash: row.encrypted_password };
 }
+
+/**
+ * This session just proved the second factor (N-83): at sign-in, at enrolment,
+ * or in the re-ask dialog. False when the session is not live.
+ */
+export async function stepUpSession(db: Db, token: string): Promise<boolean> {
+  const [row] = await db.execute<{ ok: boolean }>(
+    sql`SELECT xangarro.session_step_up(${hash(token)}) AS ok`,
+  );
+  return row?.ok === true;
+}
+
+/** Whether that proof is younger than `windowSeconds`. */
+export async function sessionSteppedUp(
+  db: Db,
+  token: string,
+  windowSeconds: number,
+): Promise<boolean> {
+  const [row] = await db.execute<{ ok: boolean }>(
+    sql`SELECT xangarro.session_stepped_up(${hash(token)}, ${windowSeconds}::int) AS ok`,
+  );
+  return row?.ok === true;
+}

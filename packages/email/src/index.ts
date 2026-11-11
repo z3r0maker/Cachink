@@ -29,7 +29,9 @@ export {
 export {
   renderPasswordResetEmail,
   renderMagicLinkEmail,
+  renderEmailConfirmationEmail,
   type AuthLinkEmailProps,
+  type EmailConfirmationEmailProps,
 } from './templates/auth-links.js';
 export { renderGenericNoticeEmail, type GenericNoticeProps } from './templates/generic-notice.js';
 export {

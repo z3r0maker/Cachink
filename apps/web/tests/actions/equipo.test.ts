@@ -9,6 +9,7 @@ import { beforeEach, describe, it, vi } from 'vitest';
  */
 
 const requireMember = vi.fn();
+const requireStepUp = vi.fn();
 const reportError = vi.fn();
 const revalidatePath = vi.fn();
 const mintActivationCode = vi.fn();
@@ -19,6 +20,7 @@ const withTenant = vi.fn();
 
 vi.mock('next/cache', () => ({ revalidatePath }));
 vi.mock('../../src/server/auth', () => ({ requireMember }));
+vi.mock('../../src/server/acceso/reconfirmar', () => ({ requireStepUp }));
 vi.mock('../../src/server/db', () => ({ withTenant }));
 vi.mock('../../src/server/observability/report', () => ({ reportError }));
 vi.mock('../../src/server/activation', () => ({ CODE_TTL_MS: 48 * 3_600_000, mintActivationCode }));
@@ -26,6 +28,7 @@ vi.mock('../../src/server/email/activation-code', () => ({ sendActivationCode })
 vi.mock('@xangarro/data-pg', () => ({ activationCodes: {}, getBusiness, liveActivationCode }));
 
 const { generarCodigo, enviarCodigoPorCorreo } = await import('../../src/server/actions/equipo');
+const { refusal, STEP_UP_REQUIRED } = await import('../../src/server/action-errors');
 
 const coded = (code: string, message: string) => Object.assign(new Error(message), { code });
 
@@ -49,6 +52,7 @@ function txColliding(collisions: number) {
 beforeEach(() => {
   vi.clearAllMocks();
   requireMember.mockResolvedValue({ business_id: 'biz-1', email: 'pedro@taqueria.mx' });
+  requireStepUp.mockResolvedValue(undefined);
   // clearAllMocks keeps queued once-values; a test that used fewer would shift the next.
   mintActivationCode
     .mockReset()
@@ -102,6 +106,17 @@ describe('generarCodigo', () => {
   it('a member without the role is told so, and it is not an incident', async () => {
     requireMember.mockRejectedValue(coded('NOT_PERMITTED', 'Solo el dueño o un admin.'));
     assert.deepEqual(await generarCodigo(), { ok: false, message: 'Solo el dueño o un admin.' });
+    assert.equal(reportError.mock.calls.length, 0);
+  });
+
+  it('asks for the second factor again first, and mints nothing until then (N-83)', async () => {
+    requireStepUp.mockRejectedValue(refusal(STEP_UP_REQUIRED, 'Confirma que eres tú para seguir.'));
+    assert.deepEqual(await generarCodigo(), {
+      ok: false,
+      message: 'Confirma que eres tú para seguir.',
+      reconfirmar: true,
+    });
+    assert.equal(mintActivationCode.mock.calls.length, 0);
     assert.equal(reportError.mock.calls.length, 0);
   });
 });

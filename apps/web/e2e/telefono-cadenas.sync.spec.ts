@@ -289,6 +289,10 @@ test("a revoked phone's push is refused, and after re-pairing the same rows land
     .last();
   await caja.getByRole('button', { name: 'Revocar' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Revocar' }).click();
+  // The dialog closes once the action has answered. «Revocado» alone proves
+  // nothing: earlier files' cajas already read it, and the push below used to
+  // win the race against a revoke that had not landed yet.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByText('Revocado').first()).toBeVisible();
 
   // Its token is dead for pushes and pulls alike: nothing of this ticket lands.

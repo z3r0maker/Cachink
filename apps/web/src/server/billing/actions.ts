@@ -8,6 +8,8 @@ import {
 import { getBusiness, subscriptionsOfBusiness } from '@xangarro/data-pg';
 
 import { BETA_NO_CHARGE_MESSAGE, betaNoCharge } from './beta';
+import { STEP_UP_REQUIRED } from '../action-errors';
+import { requireStepUp } from '../acceso/reconfirmar';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
@@ -25,12 +27,15 @@ import { portalOrigin as origin } from './origin';
  * business and the owner's email come from the signed session, never from the
  * caller.
  */
-export type BillingActionResult = { ok: true; url: string } | { ok: false; message: string };
+export type BillingActionResult =
+  | { ok: true; url: string }
+  | { ok: false; message: string; reconfirmar?: true };
 
 const SUSCRIPCION = '/suscripcion';
 
 async function owner() {
   const session = await requireMember('owner');
+  await requireStepUp(session);
   const business = await withTenant(session.business_id, (tx) => getBusiness(tx));
   return {
     id: session.business_id,
@@ -39,7 +44,16 @@ async function owner() {
   };
 }
 
+/** The re-ask's refusal (N-83) passes through as it is, flag included, and is never reported. */
+function reconfirmar(error: unknown) {
+  const code = (error as { code?: string } | null)?.code;
+  if (code !== STEP_UP_REQUIRED) return null;
+  return { ok: false, message: (error as Error).message, reconfirmar: true } as const;
+}
+
 function fail(error: unknown, where: string): BillingActionResult {
+  const stepUp = reconfirmar(error);
+  if (stepUp !== null) return stepUp;
   const code = (error as { code?: string } | null)?.code;
   if (error instanceof BillingError || code === 'NOT_PERMITTED') {
     return { ok: false, message: (error as Error).message };
@@ -83,6 +97,7 @@ export async function pagarAnualPorSpei(plan: string): Promise<BillingActionResu
 export async function administrarSuscripcion(): Promise<BillingActionResult> {
   try {
     const session = await requireMember('owner');
+    await requireStepUp(session);
     const url = await liveBillingUseCases().portal.execute({
       businessId: session.business_id,
       returnUrl: `${await origin()}${SUSCRIPCION}`,
@@ -96,13 +111,15 @@ export async function administrarSuscripcion(): Promise<BillingActionResult> {
 /** What cancelling or resuming answers the screen: the end date, or a sentence. */
 export type CancelActionResult =
   | { ok: true; endsAt: string | null }
-  | { ok: false; message: string };
+  | { ok: false; message: string; reconfirmar?: true };
 
 const NO_CAMBIO =
   'No pudimos cancelar tu suscripción y no se cambió nada. Revisa tu conexión e intenta otra vez; si sigue, escríbenos a hola@xangarro.mx.';
 
 /** A refusal keeps its own sentence; anything else is reported and says nothing changed. */
 function failCancel(error: unknown, where: string, fallback: string): CancelActionResult {
+  const stepUp = reconfirmar(error);
+  if (stepUp !== null) return stepUp;
   const code = (error as { code?: string } | null)?.code;
   if (error instanceof BillingError || code === 'NOT_PERMITTED') {
     return { ok: false, message: (error as Error).message };
@@ -118,6 +135,7 @@ function failCancel(error: unknown, where: string, fallback: string): CancelActi
 export async function cancelarSuscripcion(): Promise<CancelActionResult> {
   try {
     const session = await requireMember('owner');
+    await requireStepUp(session);
     const r = await liveBillingUseCases().cancel.execute({
       businessId: session.business_id,
       channel: 'portal',
@@ -133,6 +151,7 @@ export async function cancelarSuscripcion(): Promise<CancelActionResult> {
 export async function seguirConMiPlan(): Promise<CancelActionResult> {
   try {
     const session = await requireMember('owner');
+    await requireStepUp(session);
     await liveBillingUseCases().resume.execute({ businessId: session.business_id });
     return { ok: true, endsAt: null };
   } catch (error) {

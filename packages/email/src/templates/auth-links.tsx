@@ -55,6 +55,47 @@ export function MagicLinkEmail({ url, expiresInMinutes }: AuthLinkEmailProps) {
   );
 }
 
+export interface EmailConfirmationEmailProps {
+  readonly url: string;
+  /** How long the link works, in hours. */
+  readonly expiresInHours: number;
+  /** The person's own name; null greets with «Hola:». */
+  readonly name: string | null;
+  readonly nombreNegocio: string;
+}
+
+const CONFIRM_REASON =
+  'Recibes este correo porque alguien creó una cuenta de Xangarro con esta dirección.';
+
+/**
+ * «Confirma tu correo» (N-83, board SgCorreo): sent at signup, on «Mandar otro
+ * enlace» and when someone signs in before confirming. It replaces the welcome
+ * as the first email; the welcome goes out once the address is confirmed.
+ */
+export function EmailConfirmationEmail(p: EmailConfirmationEmailProps) {
+  return (
+    <Layout preview="Un toque y tu negocio queda listo." reason={CONFIRM_REASON}>
+      <P>{p.name ? `Hola, ${p.name}:` : 'Hola:'}</P>
+      <P>
+        Creaste una cuenta de Xangarro para {p.nombreNegocio}. Confirma que este correo es tuyo para
+        abrir tu changarro.
+      </P>
+      <Cta href={p.url}>Confirmar mi correo</Cta>
+      <P>
+        El enlace funciona una sola vez durante {p.expiresInHours} horas. Si no creaste esta cuenta,
+        ignora este correo: sin confirmar, nadie puede entrar con tu dirección.
+      </P>
+      <Fallback url={p.url} />
+    </Layout>
+  );
+}
+
+export function renderEmailConfirmationEmail(
+  p: EmailConfirmationEmailProps,
+): Promise<EmailContent> {
+  return renderEmail('Confirma tu correo de Xangarro', <EmailConfirmationEmail {...p} />);
+}
+
 export function renderPasswordResetEmail(p: AuthLinkEmailProps): Promise<EmailContent> {
   return renderEmail('Restablece tu contraseña de Xangarro', <PasswordResetEmail {...p} />);
 }

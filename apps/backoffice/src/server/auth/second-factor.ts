@@ -1,13 +1,10 @@
 import {
   endSession,
   guardAttempt,
-  hashRecoveryCode,
   issueSession,
-  looksLikeRecoveryCode,
-  openSecret,
   throttleKey,
   TOTP_PER_ACCOUNT,
-  verifyTotp,
+  useSecondFactor,
   type ThrottleSubject,
 } from '@xangarro/auth-core';
 import type { StaffMemberId } from '@xangarro/domain';
@@ -17,7 +14,9 @@ import type { AuthDeps, StaffSession } from './ports';
 
 /**
  * Step two, every sign-in: a TOTP code (or a recovery code) raises the session
- * to AAL2.
+ * to AAL2. Checking the code is `@xangarro/auth-core`'s `useSecondFactor`,
+ * shared with the owner portal (N-83); the throttle subject, the audit rows
+ * and the session swap are the console's.
  *
  * Success **replaces** the AAL1 session with a fresh AAL2 one — a new token,
  * the old one revoked — so a token captured before the second factor is
@@ -48,23 +47,6 @@ export async function auditRefusal(
   await deps.audit(staffId, 'auth.segundo_factor_fallido', { paso: step, bloqueo: locked });
 }
 
-type Used = { readonly method: 'totp' } | { readonly method: 'recuperacion'; left: number };
-
-async function useTotp(deps: AuthDeps, id: StaffMemberId, code: string): Promise<Used | null> {
-  const state = await deps.repo.totpState(id);
-  if (!state?.secretEnc || state.enrolledAt === null) return null;
-  const secret = openSecret(deps.totpKey, state.secretEnc, id);
-  const step = verifyTotp(secret, code, deps.now(), state.lastStep);
-  if (step === null) return null;
-  return (await deps.repo.advanceStep(id, step)) ? { method: 'totp' } : null;
-}
-
-async function useRecovery(deps: AuthDeps, id: StaffMemberId, code: string): Promise<Used | null> {
-  const hash = hashRecoveryCode(code);
-  const left = hash === null ? null : await deps.repo.consumeRecoveryCode(id, hash);
-  return left === null ? null : { method: 'recuperacion', left };
-}
-
 /** Every later sign-in: a current TOTP code, or one unused recovery code. */
 export async function verifySecondFactor(
   deps: AuthDeps,
@@ -74,7 +56,7 @@ export async function verifySecondFactor(
 ): Promise<FactorResult> {
   const id = staff.staffId;
   const result = await guardAttempt(deps.throttle, factorSubjects(id), () =>
-    looksLikeRecoveryCode(input) ? useRecovery(deps, id, input) : useTotp(deps, id, input),
+    useSecondFactor(deps, id, input),
   );
   if (result.kind !== 'ok') {
     await auditRefusal(deps, id, 'verificar', result.kind === 'locked');
@@ -82,7 +64,7 @@ export async function verifySecondFactor(
   }
   const token = await elevate(deps, id, oldToken);
   const used = result.value;
-  if (used.method === 'recuperacion') {
+  if (used.method === 'recovery') {
     await deps.audit(id, 'auth.usar_codigo_recuperacion', { restantes: used.left });
   } else {
     await deps.audit(id, 'auth.verificar_totp');

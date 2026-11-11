@@ -102,3 +102,8 @@ export function otpauthUri(input: {
   });
   return `otpauth://totp/${label}?${params.toString()}`;
 }
+
+/** A base32 seed in groups of four, for typing by hand when the QR cannot be scanned. */
+export function groupSecret(secret: string): string {
+  return (secret.match(/.{1,4}/g) ?? []).join(' ');
+}

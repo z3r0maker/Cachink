@@ -41,7 +41,7 @@ const READS_SESSION: Readonly<Record<string, string>> = {
 
 /**
  * Callable with no session, on purpose. Each says what stands in for one.
- * «Throttled» is `xangarro.throttle` per address and/or per IP; the four that
+ * «Throttled» is `xangarro.throttle` per address and/or per IP; the five that
  * are not take a 256-bit single-use token from an emailed link.
  */
 const PUBLIC: Readonly<Record<string, string>> = {
@@ -51,6 +51,17 @@ const PUBLIC: Readonly<Record<string, string>> = {
   'server/actions/auth-links.ts#pedirEnlace': 'asks for an emailed link. Throttled per address/IP',
   'server/actions/auth-links.ts#restablecerContrasena': 'spends a reset link. Not throttled',
   'server/actions/auth-links.ts#entrarConEnlace': 'spends a magic link. Not throttled',
+  'server/actions/confirmar-correo.ts#confirmarCorreo':
+    'spends the emailed confirmation link (N-83): there is no session before it. Not throttled',
+  'server/actions/confirmar-correo.ts#reenviarConfirmacion':
+    'needs the pending pass in an httpOnly cookie, set at signup. Throttled per address/IP',
+  'server/actions/confirmar-correo.ts#reenviarEnlaceVencido':
+    'names an expired confirmation link; mails only that link’s account. Throttled as above',
+  'server/actions/confirmar-correo.ts#corregirCorreo':
+    'needs the pending pass; only an unconfirmed account’s address moves. Throttled as above',
+  'server/actions/segundo-paso.ts#verificarSegundoPaso':
+    'step 2 of sign-in: the challenge cookie stands in, set after the right password. ' +
+    'Wrong codes lock the account (5 in 15 min)',
   'server/actions/cancelar-eliminacion.ts#cancelarEliminacion':
     'spends a deletion email’s link (ADR-136). Not throttled',
   'server/billing/cancel-link-actions.ts#confirmarCancelacionPorEnlace':
