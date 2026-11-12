@@ -128,7 +128,7 @@ function Total(p: { readonly data: TurnoData }): ReactElement {
       <MText size="body" weight="extraBold" flex={1}>
         Debe haber
       </MText>
-      <MText size="xl3" weight="extraBold" fontVariant={['tabular-nums']}>
+      <MText size="xl3" weight="extraBold" fontVariant={['tabular-nums']} testID="turno-debe-haber">
         {formatMoney(p.data.esperado)}
       </MText>
     </View>

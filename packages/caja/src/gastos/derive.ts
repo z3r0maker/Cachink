@@ -36,8 +36,10 @@ export const montoCrudo = (m: bigint): string => `${m / 100n}.${String(m % 100n)
 
 /**
  * The phone's Expense rows as the board's list (M-08): the turno's own
- * expenses plus the unstamped ones of its day — the same rows Inicio counts
- * — newest first. Receipt photos wait for the storage bucket (ADR-083 D3),
+ * expenses — the rows its corte subtracts (`esperadoDelTurno`), so the list,
+ * Mi turno's Gastos and the esperado agree — newest first. An unstamped row
+ * (an entrada's «Compra inventario», a gasto with no turno open) left no
+ * drawer and stays out, as on the web caja. Receipt photos wait for the storage bucket (ADR-083 D3),
  * so a phone row never says it carries one; who was paid is its detail.
  */
 export function gastosDelTurno(
@@ -46,7 +48,7 @@ export function gastosDelTurno(
 ): readonly GastoTurno[] {
   if (turnoId === null) return [];
   return gastos
-    .filter((g) => g.deletedAt === null && (g.cajaTurnoId === null || g.cajaTurnoId === turnoId))
+    .filter((g) => g.deletedAt === null && g.cajaTurnoId === turnoId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((g) => ({
       id: g.id,

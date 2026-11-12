@@ -1,0 +1,125 @@
+# One expected cash after «Llegó mercancía» (catalogue F23; O-03): an entrada
+# also records its «Compra inventario» gasto, with no turno (the goods may
+# have been paid from elsewhere), so the corte never subtracts it. Inicio's
+# «Efectivo esperado» and Mi turno's «Debe haber» read the same figure before
+# and after the entrada, and Gastos (what left this turno's drawer) does not
+# list the purchase.
+#
+# Precondition: activated device against the mock on MOCK_API, Toni signed in
+# or on Acceso; opens a turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - caja
+  - inventario
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# The figure before: Inicio's yellow tile. The text asserts are regexes, so
+# every non-digit («$», «,», «.») becomes a one-character wildcard: the same
+# digits in the same places. (A «$» inside `${…}` breaks Maestro's parser.)
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-kpi-fuerte'
+    timeout: 8000
+- copyTextFrom:
+    id: 'inicio-kpi-fuerte'
+- evalScript: ${output.esperado = maestro.copiedText.replace(/[^0-9]/g, '.')}
+
+# One Torta arrives through «Llegó mercancía» (inventario-llego-merma.yaml's
+# steps), which also writes the unstamped «Compra inventario» gasto.
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'inventario-abrir-entrada'
+    direction: UP
+    timeout: 5000
+- tapOn:
+    id: 'inventario-abrir-entrada'
+- extendedWaitUntil:
+    visible:
+      id: 'llego-mercancia-sheet'
+    timeout: 5000
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      id: 'mover-producto-Torta'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 100
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-producto-Torta'
+- assertVisible:
+    id: 'mover-producto-Torta'
+    text: 'radio button, checked'
+- tapOn:
+    id: 'mover-cantidad'
+- inputText: '1'
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- tapOn:
+    id: 'mov-toast-entendido'
+- waitForAnimationToEnd
+
+# Inicio: the same figure, the purchase not subtracted.
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-kpi-fuerte'
+      text: '${output.esperado}'
+    timeout: 8000
+
+# Mi turno: «Debe haber» says it too. Mi turno keeps the scroll the
+# Inventario row left it at, so the hero is above.
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-turno'
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: 'turno-debe-haber'
+    direction: UP
+    timeout: 10000
+    visibilityPercentage: 100
+- assertVisible:
+    id: 'turno-debe-haber'
+    text: '${output.esperado}'
+
+# Gastos lists what left this turno's drawer: the purchase is not there.
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
+- assertNotVisible: '.*Compra inventario.*'

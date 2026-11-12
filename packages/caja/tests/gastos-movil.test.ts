@@ -38,17 +38,18 @@ describe('gastosDelTurno (las filas del teléfono como la lista del board)', () 
       proveedor: 'Taxi del sitio',
     }),
     gasto({ id: 'e-1', createdAt: T('15:00') }),
-    // Another turno's stamp and a deleted row stay out, unstamped ones ride along.
+    // Another turno's stamp, an unstamped row (a «Compra inventario») and a
+    // deleted one stay out: the list is what left this turno's drawer.
     gasto({ id: 'e-3', cajaTurnoId: 'tu-2', createdAt: T('17:00') }),
     gasto({ id: 'e-4', cajaTurnoId: null, createdAt: T('14:00'), concepto: 'Hielo' }),
     gasto({ id: 'e-5', deletedAt: T('18:00'), createdAt: T('18:00') }),
   ];
 
-  it('lists the rows of the turno and the unstamped ones, newest first', () => {
+  it('lists only the rows stamped with the turno, newest first', () => {
     const lista = gastosDelTurno(filas, 'tu-1');
     assert.deepEqual(
       lista.map((g) => g.id),
-      ['e-2', 'e-1', 'e-4'],
+      ['e-2', 'e-1'],
     );
   });
 
