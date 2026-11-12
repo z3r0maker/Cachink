@@ -26,7 +26,6 @@ type R = Pick<
   | 'tickets'
   | 'sales'
   | 'expenses'
-  | 'cajaMovimientos'
   | 'recurringExpenses'
   | 'products'
   | 'inventoryMovements'
@@ -62,14 +61,13 @@ export async function leerFilasInicio(
   const anterior = await r.cajaTurnos.findLatest(businessId);
   const turno = abierto ?? (anterior !== null && anterior.cierreAt !== null ? anterior : null);
   const fecha = turno?.fecha ?? hoy;
-  const [tickets, lineas, gastos, movimientos, turnos, recurrentes, stock] = await Promise.all([
+  const [tickets, lineas, gastos, turnos, recurrentes, stock] = await Promise.all([
     r.tickets.findByDateRange(fecha, fecha, businessId),
     r.sales.findByDateRange(fecha, fecha, businessId),
     r.expenses.findByDateRange(fecha, fecha, businessId),
-    turno ? r.cajaMovimientos.findByTurno(turno.id) : Promise.resolve([]),
     r.cajaTurnos.findByDateRange(haceDias(hoy, DIAS_CORTES), hoy, businessId),
     r.recurringExpenses.findDue(hoy as IsoDate, businessId),
     leerStock(r, businessId),
   ]);
-  return { turno, tickets, lineas, gastos, movimientos, turnos, recurrentes, stock };
+  return { turno, tickets, lineas, gastos, turnos, recurrentes, stock };
 }

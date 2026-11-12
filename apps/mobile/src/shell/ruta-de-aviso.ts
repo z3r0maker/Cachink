@@ -1,7 +1,7 @@
 /**
  * Where a tapped notification lands (Track M, M-12). Alerts and scheduled
  * notifications carry an `actionRoute`; builds before the redesign wrote
- * routes that no longer exist (`/caja-reportes`, `/merma-reportes`,
+ * routes that no longer exist (`/caja-reportes`, `/merma-reportes`, `/egresos`,
  * `/productos`, …), and those payloads can outlive an update in the OS
  * tray or the alerts table. Each maps to the screen that does that job now;
  * a missing route opens Avisos. Pure.
@@ -10,6 +10,7 @@
 const RUTAS_ANTERIORES: Readonly<Record<string, string>> = {
   '/caja': '/turno',
   '/caja-reportes': '/turno',
+  '/egresos': '/gastos',
   '/cancelaciones': '/ventas',
   '/merma-reportes': '/inventario',
   '/no-enviados': '/pendientes',

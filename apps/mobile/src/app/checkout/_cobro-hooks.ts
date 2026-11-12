@@ -2,7 +2,9 @@
  * The cobro's registration for /checkout and /checkout/fiado (Track M,
  * M-07): the ticket in progress goes through `useCobrarTicket` as one
  * ticket; on success the ticket empties, «Venta hecha» is set for the
- * Cobrar tab and the stack pops back to Cobrar.
+ * Cobrar tab, the stack pops and the Cobrar tab is the one in front: the
+ * sheet shows only there, so the operator never lands on another tab with it
+ * waiting behind.
  * Underscore prefix: Expo Router ignores this file.
  */
 import { useRef, useState } from 'react';
@@ -41,6 +43,7 @@ export function useRegistrarCobro() {
       vaciar();
       mostrar(venta);
       router.dismissAll();
+      router.navigate('/cobrar' as never);
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {

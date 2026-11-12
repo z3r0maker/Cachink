@@ -292,6 +292,7 @@ run_curated_suite() {
     cancelaciones-nav
     avisos-responder
     inventario-llego-merma
+    esperado-tras-llegada
     cierre-cuadra
     caja-cierre-discrepancia
     cierre-faltante
@@ -299,6 +300,7 @@ run_curated_suite() {
     cobrar-efectivo-falta
     cobrar-ticket-largo
     cobrar-ultima-pieza
+    cobrar-desde-inventario
     venta-fiado-cancelar
     interrupcion-matar-ticket
     interrupcion-rotar-ticket

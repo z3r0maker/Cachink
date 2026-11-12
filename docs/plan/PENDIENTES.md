@@ -392,7 +392,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `11-pre-launch-and-deferred.md` — 21 abiertos (0 en curso, 0 bloqueados, 12 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
-- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 12 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 13 hechos)
 - `20-command-center.md` — 24 abiertos (4 en curso, 0 bloqueados, 8 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 22 hechos)

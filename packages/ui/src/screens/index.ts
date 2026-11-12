@@ -8,7 +8,6 @@
 export * from './AppShell/index';
 export * from './Settings/index';
 export * from './Ventas/index';
-export * from './Egresos/index';
 export * from './Productos/index';
 export * from './ConsentModal/index';
 // AppShellRouteWrapper lives in components/ but imports from

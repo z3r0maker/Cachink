@@ -2,7 +2,7 @@
  * Inicio's four figures (MvInicio 2 × 2, TbInicio in one row): `kpisFor()`
  * from the caja package, the open turno's or, with none, the last one's.
  * The figure to act on («Efectivo esperado», «Fondo sugerido») is the soft
- * yellow tile with the black edge.
+ * yellow tile with the black edge; its value is `inicio-kpi-fuerte`.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
@@ -40,6 +40,7 @@ function Kpi({ k }: { k: StatItem }): ReactElement {
         weight="extraBold"
         letterSpacing={-0.7}
         color={k.color}
+        testID={fuerte ? 'inicio-kpi-fuerte' : undefined}
         numberOfLines={1}
         adjustsFontSizeToFit
         fontVariant={['tabular-nums']}

@@ -3,39 +3,28 @@
  * phone keeps are shaped as the web caja's live read (`TurnoVivoPara`,
  * ADR-118), so `comoInicio` from `@xangarro/caja/inicio` says them exactly
  * as the web does: the same greeting, «Lo primero», KPIs and «Para hoy».
- * The turno's figures come from the caja package's `resumenDelTurno` and
- * `detalleDelTurno`; the expected cash from the phone's own calculator
- * (`computeCajaBalance`, the one Mi turno and Cierre use). Pure.
+ * The turno's figures come from the caja package's `detalleDelTurno`; the
+ * expected cash from `cierreDeFilas`, the derivation Mi turno and Cierre
+ * read and the corte stores (O-03). Pure.
  */
-import { hhmmLocal } from '@xangarro/caja';
+import { cierreDeFilas } from '@xangarro/caja/cierre';
 import { comoInicio, type Entorno, type InicioData, type StockTarea } from '@xangarro/caja/inicio';
 import {
   detalleDelTurno,
-  resumenDelTurno,
   type CierrePara,
   type CortePara,
   type RecurrentePara,
   type TurnoVivoPara,
 } from '@xangarro/caja/lectura';
-import {
-  computeCajaBalance,
-  type CajaMovimiento,
-  type CajaTurno,
-  type Expense,
-  type RecurringExpense,
-  type Sale,
-  type Ticket,
-} from '@xangarro/domain';
-import { buildBalanceInput } from '../Caja/build-balance-input';
+import type { CajaTurno, Expense, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
 
 export interface FilasInicio {
   /** The operator's open turno, or else the newest one on this device (closed). */
   readonly turno: CajaTurno | null;
-  /** The turno day's tickets, lines, gastos, and the turno's cash movements. */
+  /** The turno day's tickets, lines and gastos. */
   readonly tickets: readonly Ticket[];
   readonly lineas: readonly Sale[];
   readonly gastos: readonly Expense[];
-  readonly movimientos: readonly CajaMovimiento[];
   /** Recent turnos on this device, for «Tus últimos cortes». */
   readonly turnos: readonly CajaTurno[];
   /** Recurring gastos already due. */
@@ -43,12 +32,15 @@ export interface FilasInicio {
   readonly stock: readonly StockTarea[];
 }
 
-/** Rows that belong to this turno: stamped with it, or older rows with no stamp. */
+/**
+ * Rows that belong to this turno: alive and stamped with it, the rows its
+ * corte counts. An unstamped gasto (an entrada's «Compra inventario») left no
+ * drawer.
+ */
 const delTurno = <T extends { cajaTurnoId: string | null; deletedAt: string | null }>(
   xs: readonly T[],
   turnoId: string,
-): T[] =>
-  xs.filter((x) => x.deletedAt === null && (x.cajaTurnoId === null || x.cajaTurnoId === turnoId));
+): T[] => xs.filter((x) => x.deletedAt === null && x.cajaTurnoId === turnoId);
 
 const DIA_MS = 86_400_000;
 
@@ -86,21 +78,17 @@ const CERO: CierrePara['resumen'] = {
   mermas: 0,
 };
 
-function cierreDe(f: FilasInicio, t: CajaTurno): CierrePara {
-  const tickets = delTurno(f.tickets, t.id);
-  const gastos = delTurno(f.gastos, t.id);
-  const saldo = computeCajaBalance(buildBalanceInput(t, tickets, f.lineas, gastos, f.movimientos));
-  return {
-    desde: hhmmLocal(t.aperturaAt),
-    cerrado: t.cierreAt !== null,
-    fondoCentavos: t.montoAperturaCentavos.toString(),
-    ventasEfectivoCentavos: saldo.desglose.ventasEfectivo.toString(),
-    abonosEfectivoCentavos: '0',
-    gastosEfectivoCentavos: saldo.desglose.egresosEfectivo.toString(),
-    esperadoCentavos: saldo.efectivoEnCaja.toString(),
-    resumen: resumenDelTurno(tickets, f.lineas),
-  };
-}
+/** Mi turno's and Cierre's figures over the same rows (abonos wait for M-08). */
+const cierreDe = (f: FilasInicio, t: CajaTurno): CierrePara => ({
+  ...cierreDeFilas({
+    turno: t,
+    delTurno: delTurno(f.tickets, t.id),
+    lineas: f.lineas,
+    abonos: [],
+    gastos: delTurno(f.gastos, t.id),
+  }),
+  cerrado: t.cierreAt !== null,
+});
 
 const SIN_TURNO: CierrePara = {
   desde: '',

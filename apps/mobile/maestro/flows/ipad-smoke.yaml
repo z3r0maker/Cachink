@@ -76,15 +76,17 @@ appId: mx.xangarro.mobile
       id: 'rail-cobrar'
     timeout: 5000
 
-# ── 4. Egresos tab ───────────────────────────────────────────────
+# ── 4. Gastos (MvGastos) ─────────────────────────────────────────
 - runFlow:
     file: shared/open-turno-row.yaml
     env:
       ROW: 'otros-gastos'
 - extendedWaitUntil:
     visible:
-      id: 'rail-gastos'
+      id: 'mobile-gastos'
     timeout: 5000
+- assertVisible:
+    id: 'rail-gastos'
 
 # ── 5. Productos tab ─────────────────────────────────────────────
 - runFlow:

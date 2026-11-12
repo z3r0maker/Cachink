@@ -72,7 +72,7 @@ function emitCajaAlerts(
       severity: 'info',
       titleKey: 'notificaciones.cajaEgresoAuto',
       message: 'Se creó un egreso automático para registrar la diferencia de caja.',
-      actionRoute: '/egresos',
+      actionRoute: '/gastos',
       metadata: JSON.stringify({ egresoId: turno.egresoAutoId }),
     });
   }

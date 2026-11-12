@@ -1,0 +1,72 @@
+# «Venta hecha» after a sale started from a stack route (Track M, M-07): Mi
+# turno opens Inventario (a stack route that wears the tab bar), the operator
+# taps Cobrar while Inventario is still open, and charges a sale. The cobro
+# lands on the Cobrar tab with «Venta hecha» on it, not on Mi turno with the
+# sheet waiting for the next visit to Cobrar; and Cobrar is the tab's own
+# screen then, with no way back to Inventario under it.
+#
+# Precondition: activated device against the mock on MOCK_API, Toni signed in
+# or on Acceso; opens a turno when none is open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3000
+tags:
+  - ventas
+  - navegacion
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# Inventario from «Lo de tu turno»: a stack route, with the way back.
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+- assertVisible:
+    id: 'top-bar-back'
+
+# Cobrar from the tab bar (the rail or the sidebar on a tablet) while
+# Inventario is still open: the tab's own screen, Inventario gone from under it.
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- assertNotVisible:
+    id: 'top-bar-back'
+
+# One sale; the subflow waits for «Venta hecha» on the way and closes it with
+# «Nueva venta», back on the grid.
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-01JPRD00000000000000000001'
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+    centerElement: true
+- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000001' }
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo
+- assertNotVisible:
+    id: 'venta-hecha'
+
+# Mi turno still opens as itself afterwards: no «Venta hecha» left over there.
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-turno'
+    timeout: 8000
+- assertNotVisible:
+    id: 'venta-hecha'

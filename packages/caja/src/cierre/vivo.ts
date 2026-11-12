@@ -17,6 +17,7 @@ import {
 import { motivoDominio } from '../vocabulario';
 import { hhmmLocal } from '../comun/fechas';
 import { resumenDelTurno } from '../lectura/cierre-resumen';
+import { partesDelTurno } from '../lectura/partes-turno';
 import type { CierrePara } from '../lectura/shapes';
 import { esperadoDe, type PartesEsperado } from '../turno/desglose';
 import type { CerrarVivo, CierreData, MotivoDiferencia } from './types';
@@ -54,29 +55,18 @@ export interface FilasCierre {
   }[];
 }
 
-function sum(xs: readonly bigint[]): bigint {
-  return xs.reduce((a, b) => a + b, 0n);
-}
-
-/** The calculator's four inputs, so the screen can show how it was formed. */
-export function partesDeFilas(f: FilasCierre): PartesEsperado {
-  const vivas = f.delTurno.filter((t) => t.cancelledAt === null && t.metodo === 'Efectivo');
-  const deTicket = new Map<string, bigint>();
-  for (const l of f.lineas) {
-    if (l.deletedAt !== null) continue;
-    deTicket.set(l.ticketId, (deTicket.get(l.ticketId) ?? 0n) + (l.monto as bigint));
-  }
-  return {
-    fondo: f.turno.montoAperturaCentavos + f.turno.efectivoAdicionalCentavos,
-    ventasEfectivo: sum(vivas.map((t) => deTicket.get(t.id) ?? 0n)),
-    abonosEfectivo: sum(
-      f.abonos
-        .filter((a) => a.deletedAt === null && a.metodo === 'Efectivo')
-        .map((a) => a.montoCentavos as bigint),
-    ),
-    gastosEfectivo: sum(f.gastos.map((g) => g.monto as bigint)),
-  };
-}
+/**
+ * The calculator's four inputs, so the screen can show how it was formed:
+ * scoped exactly as `esperadoDelTurno` scopes them (`partesDelTurno`), so the
+ * parts always add up to the esperado, whatever rows the caller passes.
+ */
+export const partesDeFilas = (f: FilasCierre): PartesEsperado =>
+  partesDelTurno(f.turno, {
+    tickets: f.delTurno,
+    lineas: f.lineas,
+    abonos: f.abonos,
+    gastos: f.gastos,
+  });
 
 /** The close figures over the turno's rows: the four parts, the esperado, the resumen. */
 export function cierreDeFilas(f: FilasCierre): CierrePara {

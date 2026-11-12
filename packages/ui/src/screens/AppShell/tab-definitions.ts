@@ -37,7 +37,7 @@ export const NAV: Readonly<Record<NavKey, TabDefinition>> = {
   inicio: def('inicio', ICONS.inicio, '/inicio'),
   cobrar: def('cobrar', ICONS.caja, '/cobrar'),
   ventas: def('ventas', ICONS.ventas, '/ventas'),
-  gastos: def('gastos', ICONS.gastos, '/egresos'),
+  gastos: def('gastos', ICONS.gastos, '/gastos'),
   turno: def('turno', ICONS.turno, '/turno'),
   inventario: def('inventario', ICONS.inventario, '/productos'),
 };
@@ -80,6 +80,7 @@ export function navGroups(): readonly NavGroup[] {
     case 'ventas':
     case 'cancelaciones':
       return 'ventas';
+    case 'gastos':
     case 'egresos':
       return 'gastos';
     case 'productos':

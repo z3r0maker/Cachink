@@ -4,7 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { heroFor, kpisFor } from '@xangarro/caja/inicio';
-import type { CajaTurno, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
+import { cierreDeFilas } from '@xangarro/caja/cierre';
+import type { CajaTurno, Expense, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
 import {
   cortesDe,
   diasEntre,
@@ -114,7 +115,6 @@ function filas(p: Partial<FilasInicio> = {}): FilasInicio {
     ],
     lineas: [linea('A', 16_000n), linea('B', 9_000n), linea('C', 5_000n)],
     gastos: [],
-    movimientos: [],
     turnos: [
       turno({
         id: 'T0',
@@ -204,6 +204,77 @@ describe('inicioMovil', () => {
     const off = inicioMovil(filas(), { ...ENTORNO, offline: true, pendientes: 3 }, HOY);
     expect(heroFor(off).tono).toBe('offline');
     expect(heroFor(off).title).toContain('3 registros esperan');
+  });
+});
+
+const gasto = (id: string, monto: bigint, p: Partial<Expense> = {}): Expense =>
+  ({
+    id,
+    fecha: HOY,
+    concepto: 'Hielo',
+    categoria: 'Materia Prima',
+    monto,
+    proveedor: null,
+    empleadoId: null,
+    gastoRecurrenteId: null,
+    cajaTurnoId: 'T1',
+    createdAt: new Date(2026, 4, 14, 13, 0).toISOString(),
+    ...AUDIT,
+    ...p,
+  }) as Expense;
+
+/**
+ * «Efectivo esperado» on Inicio is Mi turno's «Debe haber» and the corte's
+ * esperado (O-03): the same rows, the same derivation. An entrada's
+ * «Compra inventario» gasto carries no turno, so neither counts it.
+ */
+describe('Inicio and Mi turno read one esperado', () => {
+  const T1 = turno({});
+  const COMPRA = gasto('G2', 196_600n, {
+    concepto: 'Compra inventario: Compra',
+    cajaTurnoId: null,
+  });
+  const deMiTurno = (f: FilasInicio): bigint =>
+    BigInt(
+      cierreDeFilas({
+        turno: T1,
+        delTurno: f.tickets.filter((t) => t.cajaTurnoId === T1.id),
+        lineas: f.lineas,
+        abonos: [],
+        gastos: f.gastos.filter((g) => g.cajaTurnoId === T1.id),
+      }).esperadoCentavos,
+    );
+
+  it('a gasto of the turno lowers both by the same amount', () => {
+    const f = filas({ gastos: [gasto('G1', 10_000n)] });
+    expect(inicioMovil(f, ENTORNO, HOY).turno?.esperado).toBe(86_000n);
+    expect(deMiTurno(f)).toBe(86_000n);
+  });
+
+  it('an unstamped «Compra inventario» lowers neither', () => {
+    const f = filas({ gastos: [gasto('G1', 10_000n), COMPRA] });
+    expect(inicioMovil(f, ENTORNO, HOY).turno?.esperado).toBe(86_000n);
+    expect(deMiTurno(f)).toBe(86_000n);
+  });
+
+  it("another turno's gasto and a deleted one stay out of Inicio too", () => {
+    const f = filas({
+      gastos: [
+        gasto('G1', 10_000n),
+        gasto('G3', 5_000n, { cajaTurnoId: 'T0' }),
+        gasto('G4', 7_000n, { deletedAt: new Date(2026, 4, 14, 14, 0).toISOString() }),
+      ],
+    });
+    expect(inicioMovil(f, ENTORNO, HOY).turno?.esperado).toBe(86_000n);
+  });
+
+  it("an unstamped Efectivo ticket adds to neither (the corte counts this turno's)", () => {
+    const f = filas({
+      tickets: [...filas().tickets, ticket('D', 'Efectivo', { cajaTurnoId: null })],
+      lineas: [...filas().lineas, linea('D', 3_000n)],
+    });
+    expect(inicioMovil(f, ENTORNO, HOY).turno?.esperado).toBe(96_000n);
+    expect(deMiTurno(f)).toBe(96_000n);
   });
 });
 

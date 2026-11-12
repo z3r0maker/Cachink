@@ -93,6 +93,7 @@ describe('routes the phone names', () => {
     expect(rutaDeAviso('/caja-reportes')).toBe('/turno');
     expect(rutaDeAviso('/merma-reportes')).toBe('/inventario');
     expect(rutaDeAviso('/productos/p-1')).toBe('/inventario');
-    expect(rutaDeAviso('/egresos')).toBe('/egresos');
+    expect(rutaDeAviso('/egresos')).toBe('/gastos');
+    expect(rutaDeAviso('/gastos')).toBe('/gastos');
   });
 });

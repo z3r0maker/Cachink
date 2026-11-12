@@ -84,6 +84,69 @@ describe('cierreDeFilas', () => {
   });
 });
 
+/**
+ * Inicio, Mi turno and the corte read one esperado (O-03): only this turno's
+ * standing rows count. A «Compra inventario» gasto has no turno (an entrada's
+ * goods may have been paid from elsewhere), so it never lowers the cash.
+ */
+describe('cierreDeFilas: one esperado for Inicio, Mi turno and the corte', () => {
+  const COMPRA = { cajaTurnoId: null, monto: 196_600n, deletedAt: null };
+  const conGastos = (gastos: FilasCierre['gastos']): FilasCierre => ({ ...FILAS, gastos });
+  const sumaDePartes = (c: ReturnType<typeof cierreDeFilas>): bigint =>
+    BigInt(c.fondoCentavos) +
+    BigInt(c.ventasEfectivoCentavos) +
+    BigInt(c.abonosEfectivoCentavos) -
+    BigInt(c.gastosEfectivoCentavos);
+
+  it('a gasto of the turno lowers the esperado, and the parts add up to it', () => {
+    const c = cierreDeFilas(FILAS);
+    assert.equal(c.esperadoCentavos, '77800');
+    assert.equal(sumaDePartes(c), 77_800n);
+  });
+
+  it('an unstamped «Compra inventario» gasto neither lowers the esperado nor shows as a part', () => {
+    const c = cierreDeFilas(conGastos([...FILAS.gastos, COMPRA]));
+    assert.equal(c.gastosEfectivoCentavos, '62000');
+    assert.equal(c.esperadoCentavos, '77800');
+    assert.equal(sumaDePartes(c), 77_800n);
+  });
+
+  it("another turno's gasto and a deleted one stay out", () => {
+    const c = cierreDeFilas(
+      conGastos([
+        ...FILAS.gastos,
+        { cajaTurnoId: 't0', monto: 5_000n, deletedAt: null },
+        { cajaTurnoId: 't1', monto: 7_000n, deletedAt: '2026-10-06T16:00:00.000Z' },
+      ]),
+    );
+    assert.equal(c.gastosEfectivoCentavos, '62000');
+    assert.equal(c.esperadoCentavos, '77800');
+  });
+
+  it("an unstamped or another turno's Efectivo ticket adds no ventas en efectivo", () => {
+    const ajeno = (id: string, cajaTurnoId: string | null) => ({
+      id,
+      cajaTurnoId,
+      metodo: 'Efectivo',
+      estadoPago: 'pagado',
+      cancelledAt: null,
+      deletedAt: null,
+    });
+    const c = cierreDeFilas({
+      ...FILAS,
+      delTurno: [...FILAS.delTurno, ajeno('tk3', null), ajeno('tk4', 't0')],
+      lineas: [
+        ...FILAS.lineas,
+        { ticketId: 'tk3', monto: 9_000n, deletedAt: null },
+        { ticketId: 'tk4', monto: 4_000n, deletedAt: null },
+      ],
+    });
+    assert.equal(c.ventasEfectivoCentavos, '19800');
+    assert.equal(c.esperadoCentavos, '77800');
+    assert.equal(sumaDePartes(c), 77_800n);
+  });
+});
+
 describe('estadoDelConteo', () => {
   it('a cuadra count closes; a difference waits for its motivo', () => {
     const bien = estadoDelConteo(CONTEO_CUADRA, CIERRE_FIXTURE.partes, null, '');

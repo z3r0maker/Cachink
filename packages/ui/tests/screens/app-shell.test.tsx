@@ -40,6 +40,7 @@ describe('the caja navigation model', () => {
     expect(navKeyFor('/cobrar')).toBe('cobrar');
     expect(navKeyFor('/checkout/efectivo')).toBe('cobrar');
     expect(navKeyFor('/productos/p-1')).toBe('inventario');
+    expect(navKeyFor('/gastos')).toBe('gastos');
     expect(navKeyFor('/egresos')).toBe('gastos');
     expect(navKeyFor('/cancelaciones')).toBe('ventas');
     expect(navKeyFor('/settings')).toBe('turno');
@@ -119,7 +120,7 @@ describe('AppShell on a phone', () => {
   });
 
   it('lights Mi turno on a route opened from it', () => {
-    mount({ activeTabKey: '/egresos' });
+    mount({ activeTabKey: '/gastos' });
     expect(screen.getByTestId('tab-turno').getAttribute('aria-selected')).toBe('true');
   });
 
@@ -169,7 +170,7 @@ describe('AppShell on a tablet', () => {
     expect(getComputedStyle(screen.getByTestId('app-header')).height).toBe('72px');
     expect(screen.getByTestId('rail-cobrar').getAttribute('aria-current')).toBe('page');
     fireEvent.click(screen.getByTestId('rail-gastos'));
-    expect(onNavigate).toHaveBeenCalledWith('/egresos');
+    expect(onNavigate).toHaveBeenCalledWith('/gastos');
     fireEvent.click(screen.getByTestId('rail-bloquear'));
     expect(onLock).toHaveBeenCalledTimes(1);
   });
