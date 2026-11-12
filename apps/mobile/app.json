@@ -63,7 +63,8 @@
           "microphonePermission": false
         }
       ],
-      "./plugins/with-min-pod-deployment-target.js"
+      "./plugins/with-min-pod-deployment-target.js",
+      "./plugins/with-mlkit-dependencies.js"
     ],
     "updates": {
       "url": "https://u.expo.dev/819fa99a-ea6b-44f8-ab3f-c3d168504967",

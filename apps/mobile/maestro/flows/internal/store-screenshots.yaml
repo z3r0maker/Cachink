@@ -1,0 +1,142 @@
+# The store screenshots (X-05): the real app against the contracts mock, eight
+# screens, saved to ${OUT}/0N-<name>.png. One flow for every device: the App
+# Store's iPhone 6.9" and iPad 13", Play's phone and tablet.
+#
+# Run with -e OUT=<folder> -e FORMA=telefono|tableta (a floating sheet on a
+# tablet closes on the drag that hides a phone's keyboard).
+#
+# Before it (README «Reproducing» in app-registration/apple/SCREENSHOTS.md):
+# the mock on :3000, Metro with EXPO_PUBLIC_E2E=1, the database reset with
+# fresh-install.sh (never clearState: it forgets the dev client's settings),
+# the dev menu's «Tools button» off, the status bar at 9:41.
+#
+# The story: a taquería's morning. The turno opens with a $2,000 fondo, ten
+# products arrive (paid from the drawer, so the fondo has to cover them or
+# «Efectivo esperado» goes negative), then three sales: cash with change,
+# transfer, card.
+appId: mx.xangarro.mobile
+---
+- runScript:
+    file: ../shared/mock-reset.js
+    env:
+      MOCK_API: 'http://127.0.0.1:3000'
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 120000
+- tapOn:
+    id: 'vincular-escribir'
+- tapOn:
+    id: 'activation-email'
+    point: '95%,50%'
+- eraseText: 60
+- inputText: 'dueno@tacoslaesquina.mx'
+# Android shrinks the screen for the keyboard: the code field leaves the view.
+- scrollUntilVisible:
+    element:
+      id: 'activation-code'
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: 'activation-code'
+    point: '95%,50%'
+- eraseText: 20
+- inputText: 'VALDK7M3'
+- hideKeyboard
+# Back to the top, so the shot opens on the title and the correo.
+- repeat:
+    times: 2
+    commands:
+      - swipe:
+          start: '50%, 30%'
+          end: '50%, 80%'
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/01-activacion
+
+- tapOn:
+    id: 'activation-submit'
+- runFlow: ../shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 120000
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- tapOn:
+    id: 'inicio-hero-accion'
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 5000
+- tapOn:
+    id: 'fondo-rapido-2000'
+- tapOn:
+    id: 'caja-abrir-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 10000
+
+- runFlow: store-surtir.yaml
+- runFlow: store-ventas.yaml
+
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 10000
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/02-inicio
+
+- tapOn:
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/06-ventas
+
+# Gastos from Inicio's atajo (the phone) or its deep link (the tablet drops the
+# atajos): Mi turno's «Gastos» row still opens the older /egresos screen.
+- tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-atajo-gastos'
+    commands:
+      - tapOn: { id: 'inicio-atajo-gastos' }
+- runFlow:
+    when:
+      visible:
+        id: 'inicio-hero-listo'
+    commands:
+      - openLink: 'xangarro://gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/07-gastos
+
+- runFlow:
+    when:
+      visible:
+        id: 'top-bar-back'
+    commands:
+      - tapOn: { id: 'top-bar-back' }
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-turno'
+    timeout: 10000
+# Mi turno keeps the scroll the Inventario row left it at: back to the top.
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: '50%, 35%'
+          end: '50%, 85%'
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/08-mi-turno

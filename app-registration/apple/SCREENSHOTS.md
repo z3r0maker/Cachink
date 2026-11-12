@@ -1,23 +1,27 @@
 # Screenshots manifest — `screenshots/`
 
-Captured 2026-10-20 from the real app (Maestro-driven on the simulator, the
-contracts mock as the business data, `simctl status_bar` set to 9:41 / full
-battery, the dev client's floating gear parked off-screen). No compositing,
-no fixture screens — what the app shows against the demo taquería
-(«Tacos La Esquina») is what the shots contain.
+Captured 2026-11-11 from the real app by one Maestro flow,
+[`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
+against the contracts mock. No compositing, no fixture screens: what the app
+shows for the demo taquería («Tacos La Esquina») is what the shots contain. Play's set is meant to come
+from the same flow once the app runs end to end on Android.
 
-## The set (8 per device)
+## The story
 
-| Shot             | Screen                                   | Story it tells                     |
-| ---------------- | ---------------------------------------- | ---------------------------------- |
-| `01-activacion`  | The activation screen (manual-code view) | This app joins an existing negocio |
-| `02-inicio`      | Inicio, hero with the turno open         | The operator's morning view        |
-| `03-cobrar`      | Cobrar: catalogue + ticket building      | The money screen                   |
-| `04-checkout`    | «¿Cómo paga?» with the method tiles      | Cash, card, transfer, fiado        |
-| `05-venta-hecha` | Venta hecha + the comprobante share      | The sale closes, receipt goes out  |
-| `06-ventas`      | The day's Ventas list                    | What the turno recorded            |
-| `07-gastos`      | Gastos (cifras + the due recurrente)     | What left the drawer               |
-| `08-mi-turno`    | Mi turno KPIs                            | The turno at a glance              |
+The turno opens with a $2,000 fondo; ten products arrive (paid from the
+drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
+1 Café, $265.00 paid with $500), transfer ($150.00) and card ($227.50).
+
+| Shot             | Screen                                | What it shows                      |
+| ---------------- | ------------------------------------- | ---------------------------------- |
+| `01-activacion`  | Vincular, the typed code              | This app joins an existing negocio |
+| `02-inicio`      | Inicio with the turno open            | The operator's view of the day     |
+| `03-cobrar`      | Cobrar: catalogue + ticket building   | The money screen                   |
+| `04-checkout`    | «¿Cómo paga?», $500 and the change    | Cash, card, transfer, fiado        |
+| `05-venta-hecha` | Venta hecha with «Dale de cambio»     | The sale closes, receipt goes out  |
+| `06-ventas`      | Ventas del turno                      | What the turno recorded            |
+| `07-gastos`      | Gastos (cifras, the due recurrente)   | What left the drawer               |
+| `08-mi-turno`    | Mi turno: the cash that must be there | The turno at a glance              |
 
 ## Devices and sizes (Apple's required sets)
 
@@ -28,21 +32,27 @@ no fixture screens — what the app shows against the demo taquería
 
 ## Known imperfections (for the next re-shoot)
 
-- **«Quedan 0» on every product tile** in `03-cobrar`: the mock seeds a
-  catalogue with no inventory movements, so stock reads zero everywhere.
-  Realistic shelves want an inventory entrada driven before shot 03 (the
-  `inventario-llego-merma` flow's steps do exactly that).
-- The iPad captures fought the XCUITest tree-blindness wedge (the known
-  CoreSimulator killall cure, several recoveries mid-set) — shots came out
-  of a split run; verify visual continuity before submission.
+- **Inicio and Mi turno disagree on the cash.** Inicio's «Efectivo esperado»
+  ($299.00) subtracts the stock bought from the drawer; Mi turno's «Debe
+  haber» ($2,265.00) does not. The shots show what the app shows; re-shoot
+  once the app agrees with itself.
+- **The type is the system font**, not Plus Jakarta Sans: the phone passes the
+  tokens' CSS stack as `fontFamily`, which no native platform resolves.
+- **The iPad's Cobrar** shows ten more products below the stocked ones, with
+  «Quedan 0»; Inicio's «Para hoy» asks to restock them.
 
 ## Reproducing
 
-Metro must run with `EXPO_PUBLIC_E2E=1` (the sale sound's expo-audio replay
-throws an unhandled native rejection on a second sale — see
-[METADATA.md](./METADATA.md)'s checklist), the mock on :3000, the FAB parked
-off-screen (`DevMenuFAB.positionX/Y -float -80`), camera permission granted
-(`xcrun simctl privacy <udid> grant camera mx.xangarro.mobile`), and the
-status bar overridden to 9:41. The capture drove: activation → login (Toni)
-→ turno ($500 fondo) → two sales (Efectivo + Transferencia) → the eight
-screens, screenshotting each.
+1. The contracts mock on :3000 (`PORT=3000 pnpm mock:api`) and Metro with
+   `EXPO_PUBLIC_E2E=1 EXPO_PUBLIC_API_BASE=http://127.0.0.1:3000` (see the
+   Maestro README). Start Metro with `--clear` after switching branches: a
+   stale Metro serves the old modules.
+2. Per simulator, once: the dev menu's «Tools button» off (the floating gear),
+   `xcrun simctl status_bar <udid> override --time 9:41 --batteryState discharging --batteryLevel 100`.
+3. Per run: `MAESTRO_DEVICE_UDID=<udid> apps/mobile/maestro/scripts/fresh-install.sh --kill --reset-only`
+   (never `clearState`: it also forgets the dev client's settings), then from
+   `apps/mobile/maestro/flows/internal/`:
+   `maestro --device <udid> test -e OUT=<folder> -e FORMA=telefono store-screenshots.yaml`
+   (`FORMA=tableta` on the iPad).
+4. Look at every shot before copying it here: a capture can catch the
+   Dynamic Island's momentary blob (`store-pausa.yaml` waits it out).

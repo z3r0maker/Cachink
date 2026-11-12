@@ -1,0 +1,60 @@
+# Store-screenshot helper: one «Llegó mercancía» for ${PRODUCTO} × ${CANTIDAD}
+# (${BUSCAR}: a short, accent-free piece of the name; the simulator keyboard
+# drops letters from a long one),
+# from the Inventario screen (so the shelves in the store shots don't read
+# «Quedan 0»: the mock seeds a catalogue with no inventory movements).
+#
+# Precondition: on Inventario (mobile-inventario), turno open.
+appId: mx.xangarro.mobile
+---
+- scrollUntilVisible:
+    element:
+      id: 'inventario-abrir-entrada'
+    direction: UP
+    timeout: 5000
+- tapOn:
+    id: 'inventario-abrir-entrada'
+- extendedWaitUntil:
+    visible:
+      id: 'llego-mercancia-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'mover-buscar'
+- inputText: ${BUSCAR}
+- repeat:
+    while:
+      visible:
+        id: 'mover-sin-resultados'
+    times: 5
+    commands:
+      - eraseText: 30
+      - inputText: ${BUSCAR}
+# With the keyboard up, the first tap only closes it; the second selects (a
+# radio, so a repeated tap is harmless).
+- tapOn:
+    id: 'mover-producto-${PRODUCTO}'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-producto-${PRODUCTO}'
+- tapOn:
+    id: 'mover-cantidad'
+- inputText: ${CANTIDAD}
+# Phone: one drag in the sheet body dismisses the keyboard (keyboardDismissMode
+# on-drag), so the save footer is not under it. Tablet: the sheet floats and
+# that drag (or hideKeyboard) dismisses the sheet itself; the footer is clear.
+- runFlow:
+    when:
+      true: ${FORMA == 'telefono'}
+    commands:
+      - swipe:
+          start: '50%, 45%'
+          end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- tapOn:
+    id: 'mov-toast-entendido'
