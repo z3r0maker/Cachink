@@ -1,4 +1,4 @@
-# Tour: Egresos list.
+# Tour: Gastos (MvGastos), from Mi turno's row.
 appId: mx.xangarro.mobile
 tags: [internal]
 ---
@@ -9,5 +9,7 @@ tags: [internal]
     file: ../shared/open-turno-row.yaml
     env:
       ROW: 'otros-gastos'
-- assertVisible:
-    id: 'gastos'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000

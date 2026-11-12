@@ -1,7 +1,7 @@
 /**
  * `useProcesarGastoRecurrente` — TanStack mutation wrapping
- * `ProcesarGastoRecurrenteUseCase`. Called when the user taps
- * Confirmar on a row of the PendientesCard.
+ * `ProcesarGastoRecurrenteUseCase`. Called when the operator pays a due
+ * recurring gasto from Gastos («Pagar», MvGastos).
  *
  * On success the use-case has (a) created an Egreso linked to the
  * template via gastoRecurrenteId, and (b) advanced the template's
@@ -60,7 +60,7 @@ export function useProcesarGastoRecurrente(): ProcesarGastoRecurrenteHookResult 
           severity: 'info',
           titleKey: 'notificaciones.gastoRecurrentePendiente',
           message: `Se confirmó el gasto recurrente: ${result.egreso.concepto}.`,
-          actionRoute: '/egresos',
+          actionRoute: '/gastos',
           metadata: JSON.stringify({ egresoId: result.egreso.id }),
         });
       }
