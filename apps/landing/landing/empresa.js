@@ -19,12 +19,12 @@ export const EMPRESA = {
   fundacion: '2026',
   /** For questions and complaints (LFPC art. 76 Bis III), as in `PROVEEDOR`. */
   correo: 'hola@xangarro.mx',
-  /** As written for people; `telHref` makes it dialable. */
-  telefono: '33 3190 0937',
+  /** As written for people; `telHref` makes it dialable. A placeholder, as in `PROVEEDOR`. */
+  telefono: '99 9999 9999',
 };
 
 /** «Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco». */
 export const DOMICILIO_COMPLETO = `${EMPRESA.domicilio}, C.P. ${EMPRESA.codigoPostal}, ${EMPRESA.ciudad}, ${EMPRESA.estado}`;
 
-/** `tel:+523331900937`: Mexican numbers dial with +52 and no spaces. */
+/** `tel:+529999999999`: Mexican numbers dial with +52 and no spaces. */
 export const telHref = (telefono) => `tel:+52${telefono.replace(/\D/g, '')}`;
