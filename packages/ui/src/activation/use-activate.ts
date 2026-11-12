@@ -42,6 +42,18 @@ function refuseUnusableConfig(config: ActivationConfig): void {
   throw new ActivationError('activate.errors.config', `Release configuration: ${codes}`);
 }
 
+/**
+ * Any failure the server did not name still reaches the screen's error line:
+ * a native SQLite rejection while saving the link (X-05) left «Conectar esta
+ * caja» enabled again with no word, because the screen reads `error.key`.
+ */
+export function asActivationError(error: unknown): ActivationError {
+  if (error instanceof ActivationError) return error;
+  console.error('[useActivate] activation failed:', error);
+  const message = error instanceof Error ? error.message : String(error);
+  return new ActivationError('activate.errors.unknown', message);
+}
+
 /** Everything the device needs to run offline after a successful activation. */
 export async function persistActivation(
   deps: {
@@ -82,19 +94,21 @@ export function useActivate() {
   const setMode = useSetMode();
   return useMutation<ActivationRecord, ActivationError, ActivateInput>({
     async mutationFn(input) {
-      refuseUnusableConfig(config);
-      // N-34: the aviso this screen showed goes with the request.
-      const res = await client.activate({
-        ...input,
-        device: config.deviceInfo,
-        avisoVersion: AVISO_VINCULACION_VERSION,
-        bootstrap: 'snapshot',
-      });
-      if (!res.ok) throw new ActivationError(activationErrorKey(res.code), res.message);
-      return persistActivation(
-        { referenceData, appConfig, tokenStore: config.tokenStore },
-        res.data,
-      );
+      try {
+        refuseUnusableConfig(config);
+        // N-34: the aviso this screen showed goes with the request.
+        const res = await client.activate({
+          ...input,
+          device: config.deviceInfo,
+          avisoVersion: AVISO_VINCULACION_VERSION,
+          bootstrap: 'snapshot',
+        });
+        if (!res.ok) throw new ActivationError(activationErrorKey(res.code), res.message);
+        const deps = { referenceData, appConfig, tokenStore: config.tokenStore };
+        return await persistActivation(deps, res.data);
+      } catch (error: unknown) {
+        throw asActivationError(error);
+      }
     },
     async onSuccess(record) {
       setMode('local');

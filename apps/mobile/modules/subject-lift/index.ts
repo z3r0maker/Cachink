@@ -9,16 +9,6 @@ import type { SubjectLiftResult } from './src/subject-lift.types';
 
 export type { SubjectLiftResult } from './src/subject-lift.types';
 
-/** Called once at app start: on Android it requests the segmentation model. */
-export async function prepareSubjectLift(): Promise<boolean> {
-  if (SubjectLift === null) return false;
-  try {
-    return await SubjectLift.prepare();
-  } catch {
-    return false;
-  }
-}
-
 /**
  * The photo at `uri` lifted, or squared. Without the native module (web)
  * the photo comes back as it is and the encoder crops it square.

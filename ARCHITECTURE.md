@@ -181,6 +181,7 @@ Links to discussion, docs, prior art.
 | [140](#adr-140) | 2026-11-09 | The security re-audit of 2026-11-09: uploaded bytes are sandboxed, the script policy is enforced, the app refuses a role that bypasses RLS, a push's clock is the server's, and what an agent reads is data | Accepted |
 | [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
 | [142](#adr-142) | 2026-11-11 | A new account confirms its email before it has a session, and owners and admins may add a TOTP second factor; both live in the portal's own auth, on the link table and the console's TOTP code | Accepted |
+| [143](#adr-143) | 2026-11-12 | The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10316,3 +10317,64 @@ screens did not exist, so they were drawn and approved first (ADR-117).
   15 minutes; a new sensitive action must call `requireStepUp` or it is not covered.
 - Still open, each needing the owner or a board: the console action for a locked-out owner, and whether
   turning TOTP on or off sends a notice email.
+
+## ADR-143
+
+**Title:** The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process
+
+**Date:** 2026-11-12
+
+**Status:** Accepted — X-05 (the first end-to-end Android run). Amends ADR-134 §5 (the model is no longer requested at app start)
+
+**Context**
+
+The first full Android run, for Play's screenshots, hit two failures the iPhone never showed.
+
+1. **A SIGILL about 10 s after launch**, on an ML Kit thread («drishti») inside Play services'
+   subject-segmentation module. The faulting instruction is `rdsvl x0, #1`, an SME instruction, in
+   the module's vector-length probe. The emulator runs on an Apple M5, whose guest kernel advertises
+   SME but cannot execute it; a real phone reports SME only when it has it, so the crash itself is
+   the emulator's. What started ML Kit at all was ours: `prepare()` built a `SubjectSegmenter` at
+   app start to name it in a `ModuleInstallRequest`, and building one loads the model in the
+   background (ML Kit's `MobileVisionBase` constructor calls `callAfterLoad`). The 17 MB model was
+   mapped into every launch and the client was never closed.
+2. **«Abrir turno» and «Conectar esta caja» failing with `NativeDatabase.prepareSync … NullPointerException`**,
+   or the activation simply coming back with no word. expo-sqlite 55 on Android hands a second
+   `openDatabaseSync` of the same file the same native connection, while each JS wrapper keeps its own
+   shared-object id; when either wrapper is collected, `sharedObjectDidRelease()` closes the connection
+   under the other. React's StrictMode ran the provider's open twice on every dev launch and dropped
+   the first wrapper. Reproduced on demand by calling Hermes' `gc()` after the open; the activation
+   hook then failed with an error that had no `key`, which the screen does not show.
+
+**Decision**
+
+1. **No ML Kit at app start.** `prepare()` and `prepareSubjectLift()` are gone, on both platforms.
+   `lift(uri)` builds one segmenter, asks `ModuleInstallClient` whether the model is there (and, when
+   not, requests it and leaves the download running), uses it, and closes it. A store install still
+   gets the model with the app through the manifest's `subject_segment` entry (ADR-134); any other
+   install's first photo goes as the square crop, `lifted: false`, as ADR-134 already allows.
+2. **The phone opens its SQLite file once per process.** `openNativeOnce` in
+   `packages/ui/src/database/database-native-handle.ts` hands a second caller the first open; a
+   failed open and a reset forget it. Nothing else may call `openDatabaseSync` on the app's file.
+3. **Activation never fails without a word.** Any failure the server did not name reaches the screen
+   as `activate.errors.unknown` («Algo salió mal») and is logged for the bug report.
+4. **The status bar draws dark icons on Android too** (`expo-status-bar`, `style="dark"`), as iOS
+   does; the AppCompat theme left them white on white screens.
+
+**Alternatives considered**
+
+- *Close the discarded handle in the effect's cleanup*: closing one wrapper still leaves the other
+  wrapper's release able to close the shared connection later. Rejected.
+- *`useNewConnection: true`*: two connections to one file in WAL mode on every dev launch, and the
+  same trap for anyone who opens it again. Rejected.
+- *Drop StrictMode*: hides the double open; the next remount would bring it back. Rejected.
+- *Keep `prepare()` and close its client at once*: the load starts in the constructor, so the
+  model is still read at launch. Rejected.
+
+**Consequences**
+
+- A sideloaded or internal-track install lifts from its second photo, not its first.
+- On an Apple-silicon emulator with SME (M4 and later) the lift itself still crashes; the capture
+  flows never lift, and the lift is verified on a real phone.
+- Metro's watcher does not run in the agent sandboxes: restart it with `--clear` after an edit
+  before trusting a run.

@@ -6,6 +6,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.moduleinstall.ModuleInstall
 import com.google.android.gms.common.moduleinstall.ModuleInstallRequest
 import com.google.android.gms.tasks.Tasks
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -13,12 +14,13 @@ import expo.modules.kotlin.modules.ModuleDefinition
 /**
  * The product photo's lift (M-13, ADR-134), as JavaScript calls it.
  *
- * `prepare()` runs at app start: with Google Play services present it asks
- * ModuleInstallClient for the subject-segmentation model, so the first photo
- * usually finds it there. `lift(uri)` writes a PNG to the cache directory —
- * the subject cropped to its mask (`lifted: true`) or a centred square crop
- * (`lifted: false`) when there is no Play services, no model yet or no
- * subject. Neither ever blocks the photo.
+ * `lift(uri)` writes a PNG to the cache directory: the subject cropped to its
+ * mask (`lifted: true`) or a centred square crop (`lifted: false`) when there
+ * is no Play services, no model yet or no subject. It never blocks the photo.
+ *
+ * Nothing runs at app start (ADR-143). A store install gets the model through
+ * the manifest's `DEPENDENCIES` entry; any other install asks for it on the
+ * first lift that finds it missing, and that photo goes as a square crop.
  */
 class SubjectLiftModule : Module() {
   private val context: Context
@@ -27,20 +29,15 @@ class SubjectLiftModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("SubjectLift")
 
-    AsyncFunction("prepare") {
-      val ctx = context
-      if (!hasPlayServices(ctx)) return@AsyncFunction false
-      val request = ModuleInstallRequest.newBuilder()
-        .addApi(SubjectLifter.segmenter())
-        .build()
-      // Fire and forget: the download carries on without the app watching.
-      ModuleInstall.getClient(ctx).installModules(request)
-      true
-    }
-
     AsyncFunction("lift") { uri: String ->
       val ctx = context
-      val result = SubjectLifter(ctx).lift(uri, canSegment = modelReady(ctx))
+      val segmenter = if (hasPlayServices(ctx)) SubjectLifter.segmenter() else null
+      val result = try {
+        val ready = segmenter != null && modelReady(ctx, segmenter)
+        SubjectLifter(ctx).lift(uri, if (ready) segmenter else null)
+      } finally {
+        segmenter?.close()
+      }
       mapOf(
         "uri" to result.uri,
         "lifted" to result.lifted,
@@ -54,12 +51,16 @@ class SubjectLiftModule : Module() {
     GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ctx) ==
       ConnectionResult.SUCCESS
 
-  /** The model is on the phone; asking ML Kit without it only fails slower. */
-  private fun modelReady(ctx: Context): Boolean {
-    if (!hasPlayServices(ctx)) return false
+  /**
+   * The model is on the phone; asking ML Kit without it only fails slower.
+   * When it is missing, the download is requested and left to run.
+   */
+  private fun modelReady(ctx: Context, segmenter: SubjectSegmenter): Boolean {
+    val client = ModuleInstall.getClient(ctx)
     return try {
-      Tasks.await(ModuleInstall.getClient(ctx).areModulesAvailable(SubjectLifter.segmenter()))
-        .areModulesAvailable()
+      val ready = Tasks.await(client.areModulesAvailable(segmenter)).areModulesAvailable()
+      if (!ready) client.installModules(ModuleInstallRequest.newBuilder().addApi(segmenter).build())
+      ready
     } catch (_: Exception) {
       false
     }

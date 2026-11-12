@@ -14,7 +14,5 @@ export interface SubjectLiftResult {
 }
 
 export interface SubjectLiftNative {
-  /** Asks for the on-device model where one is downloaded (Android); true when lifting can work. */
-  prepare(): Promise<boolean>;
   lift(uri: string): Promise<SubjectLiftResult>;
 }

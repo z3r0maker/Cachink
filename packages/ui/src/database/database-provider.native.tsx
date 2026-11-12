@@ -31,7 +31,7 @@ import {
 import { nativeResetDatabase } from './database-reset.native';
 import { resolveDatabaseFileName } from './database-file.shared';
 import { loadNativeDatabaseFileOps } from './database-file.native';
-import { registerNativeHandle } from './database-native-handle';
+import { openNativeOnce, registerNativeHandle } from './database-native-handle';
 import { runMigrations } from './run-migrations';
 import {
   getSchemaVersion,
@@ -59,7 +59,12 @@ async function openNativeFile(): Promise<ReturnType<typeof openDatabaseSync>> {
   return openDatabaseSync(await resolveDatabaseFileName(await loadNativeDatabaseFileOps()));
 }
 
-async function createNativeDatabase(): Promise<XangarroDatabase> {
+/** One open per process, however often the provider mounts (X-05). */
+function createNativeDatabase(): Promise<XangarroDatabase> {
+  return openNativeOnce(openAndMigrate);
+}
+
+async function openAndMigrate(): Promise<XangarroDatabase> {
   const native = await openNativeFile();
   registerNativeHandle(native);
   try {
