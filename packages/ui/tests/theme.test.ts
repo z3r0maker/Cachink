@@ -15,7 +15,6 @@ describe('theme re-exports @xangarro/tokens', () => {
     'colors',
     'fontSizes',
     'emojiSizes',
-    'typography',
     'portalFontSizes',
     'radii',
     'denseRadii',
@@ -34,6 +33,28 @@ describe('theme re-exports @xangarro/tokens', () => {
     expect(theme.borders.quiet).toBe(`2px solid ${theme.colors.gray200}`);
     expect(theme.denseRadii).toEqual({ r11: 11, r13: 13 });
     expect(theme.portalFontSizes.total).toBe(38);
+  });
+});
+
+describe('native typography', () => {
+  it('gives every letterSpacing as a number, which Android requires', () => {
+    // A CSS string («0.05em») throws in Android's Text: the app could not start.
+    for (const value of Object.values(theme.typography.letterSpacing)) {
+      expect(typeof value).toBe('number');
+      expect(Number.isFinite(value)).toBe(true);
+    }
+  });
+
+  it('keeps what iOS drew from the CSS string, so iOS does not change', () => {
+    for (const [name, css] of Object.entries(tokens.typography.letterSpacing)) {
+      const key = name as keyof typeof theme.typography.letterSpacing;
+      expect(theme.typography.letterSpacing[key]).toBe(Number.parseFloat(css));
+    }
+  });
+
+  it('reads the rest of typography from the tokens', () => {
+    expect(theme.typography.fontFamily).toBe(tokens.typography.fontFamily);
+    expect(theme.typography.weights).toBe(tokens.typography.weights);
   });
 });
 

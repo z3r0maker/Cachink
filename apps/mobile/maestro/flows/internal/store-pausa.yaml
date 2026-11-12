@@ -1,0 +1,10 @@
+# Store-screenshot helper: let the screen settle before a takeScreenshot
+# (animations, the Dynamic Island's momentary blob on iOS).
+appId: mx.xangarro.mobile
+---
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: 'store-pausa-nunca-existe'
+    timeout: 2500
+    optional: true

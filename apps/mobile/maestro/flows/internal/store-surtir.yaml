@@ -1,0 +1,81 @@
+# Store-screenshot helper: stock the ten products Cobrar shows first, so the
+# shots don't read «Quedan 0» (the mock seeds no inventory movements).
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    file: ../shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Agua de horchata'
+      BUSCAR: 'horch'
+      CANTIDAD: '12'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Agua de jamaica'
+      BUSCAR: 'jamai'
+      CANTIDAD: '10'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Alambre'
+      BUSCAR: 'alamb'
+      CANTIDAD: '6'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Arroz con leche'
+      BUSCAR: 'arroz'
+      CANTIDAD: '5'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Bolsa de hielo'
+      BUSCAR: 'hielo'
+      CANTIDAD: '8'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Café'
+      BUSCAR: 'caf'
+      CANTIDAD: '10'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Cerveza'
+      BUSCAR: 'cerve'
+      CANTIDAD: '12'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Consomé'
+      BUSCAR: 'consom'
+      CANTIDAD: '6'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Costra'
+      BUSCAR: 'costr'
+      CANTIDAD: '5'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Flan'
+      BUSCAR: 'flan'
+      CANTIDAD: '4'
+# Back to Mi turno before Cobrar: a sale charged while Inventario is still on
+# the stack pops back to Mi turno and «Venta hecha» never shows (the same
+# step cobrar-ultima-pieza.yaml takes).
+- runFlow:
+    when:
+      visible:
+        id: 'top-bar-back'
+    commands:
+      - tapOn: { id: 'top-bar-back' }

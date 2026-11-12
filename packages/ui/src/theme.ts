@@ -14,14 +14,13 @@
  * from a token rather than restated.
  */
 
-import { borders } from '@xangarro/tokens';
+import { borders, typography as webTypography } from '@xangarro/tokens';
 
 export {
   colors,
   type ColorToken,
   fontSizes,
   emojiSizes,
-  typography,
   portalFontSizes,
   type FontSize,
   type PortalFontSize,
@@ -42,6 +41,31 @@ export {
 // ---------------------------------------------------------------------------
 // Native only
 // ---------------------------------------------------------------------------
+
+type TrackingName = keyof typeof webTypography.letterSpacing;
+
+/** Reads `0.05em` (or `0`) as the number in front, the way iOS's Text did. */
+function trackingNumber(css: string): number {
+  const match = /^(-?[\d.]+)(em)?$/.exec(css);
+  if (!match) throw new Error(`Unexpected letterSpacing token: ${css}`);
+  return Number(match[1]);
+}
+
+const nativeTracking = {} as Record<TrackingName, number>;
+for (const name of Object.keys(webTypography.letterSpacing) as TrackingName[]) {
+  nativeTracking[name] = trackingNumber(webTypography.letterSpacing[name]);
+}
+
+/**
+ * Native only. The tokens' `typography` with `letterSpacing` as numbers. The
+ * web's are CSS strings (`0.05em`): Android's Text throws on one, and the app
+ * could not start; iOS read the number in front and drew 0.05 pt. These keep
+ * exactly what iOS drew, so nothing on the iPhone moves.
+ */
+export const typography = {
+  ...webTypography,
+  letterSpacing: nativeTracking as Readonly<Record<TrackingName, number>>,
+} as const;
 
 type BorderName = keyof typeof borders;
 
