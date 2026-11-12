@@ -5,16 +5,17 @@
  * from here.
  *
  * From the constancia de situación fiscal (inicio de operaciones 2026-10-15).
- * The domicilio is the fiscal one; it and the phone change once the company has
- * its own (`docs/launch/production-readiness.md` §0).
+ * The domicilio is the fiscal one; it changes once the company has its own.
+ * The phone is a placeholder until the company has its own line: the number on
+ * the constancia is not one to publish (`docs/launch/production-readiness.md` §0).
  */
 export const PROVEEDOR = {
   razonSocial: 'MEXIA, S.A.S.',
   rfc: 'MEX261015US8',
   domicilio: 'Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco',
   correo: 'hola@xangarro.mx',
-  /** As written for people: «33 3190 0937». */
-  telefono: '33 3190 0937',
+  /** As written for people. A placeholder until the company's own line exists. */
+  telefono: '99 9999 9999',
 } as const;
 
 /** «MEXIA, S.A.S. · Paseo Puesta del Sol 4150, …, Zapopan, Jalisco». */

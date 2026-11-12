@@ -18,7 +18,7 @@ _Vigentes desde: [FECHA]. Versión: [VERSIÓN]._
 ## 1. Quién te presta el servicio
 
 Xangarro es un servicio de **MEXIA, S.A.S.**, con domicilio en **Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco** y RFC **MEX261015US8**
-("Xangarro", "nosotros"). Puedes escribirnos a **[CORREO SOPORTE]** o llamarnos al **33 3190 0937**
+("Xangarro", "nosotros"). Puedes escribirnos a **[CORREO SOPORTE]** o llamarnos al **[TELÉFONO SOPORTE]**
 (LFPC art. 76 Bis III: estos datos se muestran también antes de contratar, en xangarro.mx).
 
 ## 2. Aceptación

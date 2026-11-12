@@ -24,8 +24,8 @@ describe('the landing names the same supplier as checkout', () => {
   });
 
   it('dials the phone with +52 and no spaces', () => {
-    assert.equal(telHref('33 3190 0937'), 'tel:+523331900937');
-    assert.equal(telHref(EMPRESA.telefono), 'tel:+523331900937');
+    assert.equal(telHref('33 1234 5678'), 'tel:+523312345678');
+    assert.equal(telHref(EMPRESA.telefono), 'tel:+529999999999');
   });
 
   it('both footers mount the contact block', () => {
