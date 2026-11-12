@@ -48,6 +48,9 @@ LogBox.ignoreLogs([
   // ScrollView — legal on iOS, but the dev LogBox overlay then covers the
   // app and eats taps. The warning is noise for E2E (M-11).
   'VirtualizedLists should never be nested',
+  // expo-router's NavigationContainer sets state before its first mount on
+  // Android dev builds; the dev overlay it raises covers the screen (X-05).
+  "Can't perform a React state update on a component that hasn't mounted yet",
 ]);
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

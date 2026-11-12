@@ -1,5 +1,7 @@
 # Store-screenshot helper: stock the ten products Cobrar shows first, so the
-# shots don't read «Quedan 0» (the mock seeds no inventory movements).
+# shots don't read «Quedan 0» (the mock seeds no inventory movements). A
+# tablet's Cobrar shows every row and its Inicio lists what needs restocking,
+# so FORMA=tableta stocks the other ten as well.
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -70,3 +72,67 @@ appId: mx.xangarro.mobile
       PRODUCTO: 'Flan'
       BUSCAR: 'flan'
       CANTIDAD: '4'
+- runFlow:
+    when:
+      true: ${FORMA == 'tableta'}
+    commands:
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Frijoles charros'
+            BUSCAR: 'frijol'
+            CANTIDAD: '6'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Gringa'
+            BUSCAR: 'gring'
+            CANTIDAD: '8'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Orden de guacamole'
+            BUSCAR: 'guaca'
+            CANTIDAD: '5'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Quesadilla'
+            BUSCAR: 'quesad'
+            CANTIDAD: '10'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Refresco 600ml'
+            BUSCAR: 'refres'
+            CANTIDAD: '12'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Taco al pastor'
+            BUSCAR: 'pastor'
+            CANTIDAD: '15'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Taco de bistec'
+            BUSCAR: 'bistec'
+            CANTIDAD: '15'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Taco de suadero'
+            BUSCAR: 'suader'
+            CANTIDAD: '15'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Torta'
+            BUSCAR: 'torta'
+            CANTIDAD: '8'
+      - runFlow:
+          file: store-entrada.yaml
+          env:
+            PRODUCTO: 'Volcán'
+            BUSCAR: 'volc'
+            CANTIDAD: '10'

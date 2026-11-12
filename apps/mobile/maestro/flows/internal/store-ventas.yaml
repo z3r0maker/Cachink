@@ -1,8 +1,9 @@
 # Store-screenshot helper: three sales and shots 03–05. Cash with change
 # (2 Alambre, 2 Agua de horchata, 1 Café: $265.00, pays with $500), transfer
 # (2 Cerveza, 1 Consomé), card (1 Arroz con leche, 2 Agua de jamaica, 1 Bolsa de hielo):
-# every tile in the first four rows, which every screen size shows. Tile ids
-# are the mock's ULIDs (Crockford base 32: PRD-15 is …0F).
+# the first sale's tiles are in the three rows every screen size shows; the
+# later sales scroll to theirs (store-tile.yaml). Tile ids are the mock's
+# ULIDs (Crockford base 32: PRD-15 is …0F).
 appId: mx.xangarro.mobile
 ---
 - tapOn:
@@ -38,18 +39,18 @@ appId: mx.xangarro.mobile
       id: 'ventas-product-grid'
     timeout: 8000
 
-- tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000A' }
-- tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000A' }
-- tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000D' }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD0000000000000000000A } }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD0000000000000000000A } }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD0000000000000000000D } }
 - runFlow:
     file: ../shared/cobrar-ticket.yaml
     env:
       METODO: Transferencia
 
-- tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000K' }
-- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000008' }
-- tapOn: { id: 'cobrar-tile-01JPRD00000000000000000008' }
-- tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000M' }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD0000000000000000000K } }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD00000000000000000008 } }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD00000000000000000008 } }
+- runFlow: { file: store-tile.yaml, env: { TILE: 01JPRD0000000000000000000M } }
 - runFlow:
     file: ../shared/cobrar-ticket.yaml
     env:

@@ -72,12 +72,13 @@ https://xangarro.mx/privacidad/
 
 ## Gráficos
 
-| Asset                 | Play's rule                                  | Status                                                                                                                                                                                                    |
-| --------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ícono (512 × 512 PNG) | 32-bit PNG, ≤ 1 MB                           | Ready: `assets/brand/icons/app-icon-512.png`                                                                                                                                                              |
-| Gráfico de funciones  | 1024 × 500, JPEG or 24-bit PNG, no alpha     | Ready: `app-registration/google-play/feature-graphic.png` (canvas board `MarcaPlayGrafico`, approved 2026-11-03)                                                                                          |
-| Capturas de teléfono  | 2–8, each side 320–3840 px, at most 2:1      | **Missing.** The App Store set (`app-registration/apple/screenshots/iphone-6.9/`, 1320 × 2868) is 2.17:1, over Play's limit, and shows the iOS status bar. Re-shoot the same eight on an Android emulator |
-| Capturas de tablet    | 7" and 10" sets, needed for the tablet badge | **Missing.** The iPad set (2064 × 2752) fits the size rule but shows iPadOS; re-shoot on an Android tablet emulator                                                                                       |
+| Asset                 | Play's rule                              | Status                                                                                                                |
+| --------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Ícono (512 × 512 PNG) | 32-bit PNG, ≤ 1 MB                       | Ready: `assets/brand/icons/app-icon-512.png`                                                                          |
+| Gráfico de funciones  | 1024 × 500, JPEG or 24-bit PNG, no alpha | Ready: `app-registration/google-play/feature-graphic.png` (canvas board `MarcaPlayGrafico`, approved 2026-11-03)      |
+| Capturas de teléfono  | 2–8, each side 320–3840 px, at most 2:1  | Ready: `app-registration/google-play/screenshots/phone/`, eight at 1080 × 1920 (9:16) from the Android emulator       |
+| Capturas de tablet    | 16:9 or 9:16, each side 1080–7680 px     | Ready: `app-registration/google-play/screenshots/tablet/`, eight at 1440 × 2560 (9:16) from the Pixel Tablet emulator |
 
-The eight shots and their story are in `app-registration/apple/SCREENSHOTS.md`;
-the Android set should tell the same story in the same order.
+The eight shots, their story and how to re-take them are in
+`app-registration/google-play/SCREENSHOTS.md` (the App Store's story, in the
+same order, from the same flow).

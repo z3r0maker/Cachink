@@ -3,7 +3,8 @@
 # Store's iPhone 6.9" and iPad 13", Play's phone and tablet.
 #
 # Run with -e OUT=<folder> -e FORMA=telefono|tableta (a floating sheet on a
-# tablet closes on the drag that hides a phone's keyboard).
+# tablet closes on the drag that hides a phone's keyboard), and -e MOCK=<url>
+# when the mock is not on :3000 (another run already holds it).
 #
 # Before it (README «Reproducing» in app-registration/apple/SCREENSHOTS.md):
 # the mock on :3000, Metro with EXPO_PUBLIC_E2E=1, the database reset with
@@ -19,7 +20,7 @@ appId: mx.xangarro.mobile
 - runScript:
     file: ../shared/mock-reset.js
     env:
-      MOCK_API: 'http://127.0.0.1:3000'
+      MOCK_API: ${MOCK || 'http://127.0.0.1:3000'}
 - launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - extendedWaitUntil:
@@ -45,13 +46,22 @@ appId: mx.xangarro.mobile
 - eraseText: 20
 - inputText: 'VALDK7M3'
 - hideKeyboard
-# Back to the top, so the shot opens on the title and the correo.
+# A portrait Android tablet keeps Gboard up after hideKeyboard; a tap on the
+# title (keyboardShouldPersistTaps="handled") puts it away.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: 'Escribe el código'
+# Back to the top, so the shot opens on the title and the correo. The swipe
+# runs down the left margin: mid-screen it can start on the code's boxes (a
+# portrait tablet) and focus them again.
 - repeat:
     times: 2
     commands:
       - swipe:
-          start: '50%, 30%'
-          end: '50%, 80%'
+          start: '5%, 30%'
+          end: '5%, 80%'
 - runFlow: store-pausa.yaml
 - takeScreenshot: ${OUT}/01-activacion
 
@@ -108,6 +118,14 @@ appId: mx.xangarro.mobile
 - runFlow: store-pausa.yaml
 - takeScreenshot: ${OUT}/07-gastos
 
+# Gastos sits on Mi turno's stack: Android's tab bar does not pop to the
+# root when the tab is already selected, so «‹» goes back first.
+- runFlow:
+    when:
+      visible:
+        id: 'top-bar-back'
+    commands:
+      - tapOn: { id: 'top-bar-back' }
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:

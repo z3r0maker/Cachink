@@ -40,8 +40,10 @@ appId: mx.xangarro.mobile
     id: 'mover-cantidad'
 - inputText: ${CANTIDAD}
 # Phone: one drag in the sheet body dismisses the keyboard (keyboardDismissMode
-# on-drag), so the save footer is not under it. Tablet: the sheet floats and
+# on-drag), so the save footer is not under it. iPad: the sheet floats and
 # that drag (or hideKeyboard) dismisses the sheet itself; the footer is clear.
+# An Android tablet draws the phone's bottom sheet with the keyboard over the
+# footer: Back (hideKeyboard) closes only the keyboard there.
 - runFlow:
     when:
       true: ${FORMA == 'telefono'}
@@ -49,6 +51,12 @@ appId: mx.xangarro.mobile
       - swipe:
           start: '50%, 45%'
           end: '50%, 20%'
+- runFlow:
+    when:
+      platform: Android
+      true: ${FORMA != 'telefono'}
+    commands:
+      - hideKeyboard
 - waitForAnimationToEnd
 - tapOn:
     id: 'mover-guardar'

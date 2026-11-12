@@ -1,0 +1,22 @@
+# Store-screenshot helper: tap the Cobrar tile of product ${TILE} (its ULID),
+# scrolling the grid to it first. A 1080 × 1920 Android phone shows three rows,
+# not four; the tile is centred so the ticket's bar does not cover it. A tile
+# already in view is tapped where it is.
+appId: mx.xangarro.mobile
+---
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-${TILE}'
+    direction: DOWN
+    centerElement: true
+    timeout: 10000
+    optional: true
+- scrollUntilVisible:
+    element:
+      id: 'cobrar-tile-${TILE}'
+    direction: UP
+    centerElement: true
+    timeout: 10000
+    optional: true
+- tapOn:
+    id: 'cobrar-tile-${TILE}'
