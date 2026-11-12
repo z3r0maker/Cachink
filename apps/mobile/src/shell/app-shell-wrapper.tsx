@@ -3,9 +3,12 @@
  * `<AppShellRouteWrapper>` from `@xangarro/ui`.
  *
  * Injects Expo Router: `router.navigate` for every destination (it switches
- * tabs in place and pops back to a screen already on the stack instead of
- * piling copies), and the pathname, which lights the current destination in
- * the tab bar, the rail and the sidebar. App-shell code per CLAUDE.md §5.6.
+ * tabs in place), and the pathname, which lights the current destination in
+ * the tab bar, the rail and the sidebar. A destination is a place, not a
+ * step: from a stack route (Inventario over Mi turno) the stack is dismissed
+ * first, or the tabs would open a second time on top of it and a later
+ * `dismissAll` (the cobro's) would land on the first copy, still on Mi turno.
+ * App-shell code per CLAUDE.md §5.6.
  */
 
 import type { ReactElement } from 'react';
@@ -20,7 +23,10 @@ export type AppShellWrapperProps = Omit<
 export function AppShellWrapper(props: AppShellWrapperProps): ReactElement | null {
   const router = useRouter();
   const pathname = usePathname();
-  const go = (path: string): void => router.navigate(path as never);
+  const go = (path: string): void => {
+    if (router.canDismiss()) router.dismissAll();
+    router.navigate(path as never);
+  };
   return (
     <AppShellRouteWrapper {...props} activeTabKey={pathname} navigate={go} replaceRoute={go} />
   );

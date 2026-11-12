@@ -97,13 +97,9 @@ tags:
     timeout: 10000
 
 # Cobrar: the tile carries the red «Quedan 1» (1 ≤ the umbral of 3). The tile
-# is one accessible element, so the chip is read from its label.
-- runFlow:
-    when:
-      visible:
-        id: 'top-bar-back'
-    commands:
-      - tapOn: { id: 'top-bar-back' }
+# is one accessible element, so the chip is read from its label. Straight
+# from Inventario: the tab clears the stack, so «Venta hecha» lands on Cobrar
+# (cobrar-desde-inventario.yaml).
 - tapOn:
     id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
 - extendedWaitUntil:
