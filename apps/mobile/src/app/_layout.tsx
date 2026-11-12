@@ -37,7 +37,7 @@ import 'react-native-get-random-values';
 import '../shell/text-decoder-polyfill';
 
 import { LogBox } from 'react-native';
-import { StrictMode, useEffect, type ReactElement } from 'react';
+import { StrictMode, type ReactElement } from 'react';
 
 // Victory Native XL + react-native-reanimated use deprecated StrictMode
 // APIs internally — harmless but noisy. Suppress until upstream fixes land.
@@ -50,6 +50,7 @@ LogBox.ignoreLogs([
   'VirtualizedLists should never be nested',
 ]);
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -66,7 +67,6 @@ import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { mobileActivationConfig } from '../shell/activation-config';
 import { fotoPuertos } from '../shell/foto-puertos';
-import { prepareSubjectLift } from '../../modules/subject-lift';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
 // Refresh re-evaluations are safe.
@@ -98,6 +98,9 @@ export default function RootLayout(): ReactElement {
     <StrictMode>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
+          {/* Dark icons, as iOS draws them: Android's AppCompat theme leaves
+              them white, invisible on the app's white screens (X-05). */}
+          <StatusBar style="dark" />
           {fontsLoaded ? <MobileApp /> : null}
           {/* Above everything from the first frame, drawn like the native
               splash; it fades once the first real screen is up. */}
@@ -109,9 +112,6 @@ export default function RootLayout(): ReactElement {
 }
 
 function MobileApp(): ReactElement {
-  // Android asks Play services for the product-photo lift's model now, so the
-  // first photo finds it there (M-13); iOS has nothing to fetch.
-  useEffect(() => void prepareSubjectLift(), []);
   return (
     <AppProviders
       platform="mobile"

@@ -39,15 +39,21 @@ class SubjectLifter(private val context: Context) {
     /** Alpha above this counts as subject when finding the crop box. */
     private const val OPAQUE = 8
 
+    /**
+     * A new client. Building one starts loading the model in the background
+     * (ML Kit's `MobileVisionBase` constructor), so it is made only for a
+     * lift and closed after it, never at app start (ADR-143).
+     */
     fun segmenter(): SubjectSegmenter =
       SubjectSegmentation.getClient(
         SubjectSegmenterOptions.Builder().enableForegroundBitmap().build()
       )
   }
 
-  fun lift(uri: String, canSegment: Boolean): LiftResult {
+  /** `segmenter` is null when it cannot work (no Play services, no model yet). */
+  fun lift(uri: String, segmenter: SubjectSegmenter?): LiftResult {
     val photo = loadUpright(uri) ?: throw PhotoUnreadableException(uri)
-    val cutout = if (canSegment) foreground(photo) else null
+    val cutout = segmenter?.let { foreground(it, photo) }
     return if (cutout != null) {
       write(fitted(cutout), lifted = true)
     } else {
@@ -76,8 +82,7 @@ class SubjectLifter(private val context: Context) {
   }
 
   /** The subject on transparency, cropped to it, or null when there is none. */
-  private fun foreground(photo: Bitmap): Bitmap? {
-    val segmenter = segmenter()
+  private fun foreground(segmenter: SubjectSegmenter, photo: Bitmap): Bitmap? {
     return try {
       val result = Tasks.await(segmenter.process(InputImage.fromBitmap(photo, 0)))
       val fg = result.foregroundBitmap ?: return null
@@ -86,8 +91,6 @@ class SubjectLifter(private val context: Context) {
     } catch (_: Exception) {
       // Model still downloading, or no subject: the square crop goes instead.
       null
-    } finally {
-      segmenter.close()
     }
   }
 

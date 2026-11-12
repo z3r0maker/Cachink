@@ -12,12 +12,6 @@ public class SubjectLiftModule: Module {
   public func definition() -> ModuleDefinition {
     Name("SubjectLift")
 
-    /// iOS has nothing to download: Vision ships with the OS. True on iOS 17+.
-    AsyncFunction("prepare") { () -> Bool in
-      if #available(iOS 17.0, *) { return true }
-      return false
-    }
-
     AsyncFunction("lift") { (uri: String) -> [String: Any] in
       let result = try SubjectLifter.lift(uri: uri)
       return [
