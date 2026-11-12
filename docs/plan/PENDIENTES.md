@@ -25,7 +25,7 @@ listas de abajo.
 - **N-40** Validación de proveedores + alianza con Clip + opinión legal (Post-lanzamiento) — destraba 6: N-80, N-53, N-42, N-79, N-44, N-78 · `09-next-features.md:1023`
 - **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:374`
 - **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) (Colas de tracks) — destraba 5: P-30, P-28, P-29, P-39, P-40 · `04-portal.md:1639`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1055`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1068`
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1303`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1314`
 - **X-07** Masters de marca + derivados (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:101`
@@ -159,7 +159,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **E-14** Cierre del mes — Bloqueada por: E-10, E-11, E-13 · `20-command-center.md:690`
 - [ ] `Media` **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · `20-command-center.md:768`
 - [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · `20-command-center.md:852`
-- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:1055`
+- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · `20-command-center.md:1068`
 - [ ] `Baja` **N-62** Métricas de cohortes desde el domicilio fiscal, no desde la IP. · `09-next-features.md:1283`
 - [ ] `Baja` **N-68** «Ver como» — suplantación de solo lectura con límite de tiempo — Bloqueada por: N-66, N-67 · Disparador: lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda resolver desde `/tenants/[id]` + N-65. · `09-next-features.md:1353`
 - [ ] `Baja` **N-70** Decisiones — Bloqueada por: N-07, N-63 · Disparador: N-63 `[x]`. · `09-next-features.md:1376`
@@ -173,11 +173,11 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · `20-command-center.md:833`
 - [ ] `Baja` **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · `20-command-center.md:839`
 - [ ] `Baja` **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · `20-command-center.md:846`
-- [ ] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:858`
-- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:948`
-- [ ] `Baja` **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:963`
-- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:980`
-- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:1087`
+- [~] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · `20-command-center.md:858`
+- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · `20-command-center.md:961`
+- [ ] `Baja` **E-24** Servicios — Bloqueada por: E-02 · `20-command-center.md:976`
+- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · `20-command-center.md:993`
+- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · `20-command-center.md:1100`
 
 ### Backend, sync y datos (7)
 
@@ -393,6 +393,6 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 13 hechos)
-- `20-command-center.md` — 24 abiertos (4 en curso, 0 bloqueados, 8 hechos)
+- `20-command-center.md` — 24 abiertos (5 en curso, 0 bloqueados, 8 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 22 hechos)
