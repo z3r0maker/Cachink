@@ -32,10 +32,11 @@ drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
 
 ## Known imperfections (for the next re-shoot)
 
-- **Inicio and Mi turno disagree on the cash.** Inicio's «Efectivo esperado»
-  ($299.00) subtracts the stock bought from the drawer; Mi turno's «Debe
-  haber» ($2,265.00) does not. The shots show what the app shows; re-shoot
-  once the app agrees with itself.
+- **Inicio and Mi turno disagree on the cash in shots 02 and 08.** Inicio's
+  «Efectivo esperado» ($299.00) subtracted the stock bought through «Llegó
+  mercancía»; Mi turno's «Debe haber» ($2,265.00) did not. The app agrees
+  with itself since M-15 (catalogue F23: the corte never subtracts an
+  entrada's purchase, so both read $2,265.00); re-shoot 02 and 08.
 - **The type is the system font**, not Plus Jakarta Sans: the phone passes the
   tokens' CSS stack as `fontFamily`, which no native platform resolves.
 - **The iPad's Cobrar** shows ten more products below the stocked ones, with

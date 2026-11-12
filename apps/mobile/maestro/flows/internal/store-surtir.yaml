@@ -70,12 +70,3 @@ appId: mx.xangarro.mobile
       PRODUCTO: 'Flan'
       BUSCAR: 'flan'
       CANTIDAD: '4'
-# Back to Mi turno before Cobrar: a sale charged while Inventario is still on
-# the stack pops back to Mi turno and «Venta hecha» never shows (the same
-# step cobrar-ultima-pieza.yaml takes).
-- runFlow:
-    when:
-      visible:
-        id: 'top-bar-back'
-    commands:
-      - tapOn: { id: 'top-bar-back' }

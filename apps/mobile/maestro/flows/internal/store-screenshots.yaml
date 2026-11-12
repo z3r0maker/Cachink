@@ -11,9 +11,9 @@
 # the dev menu's «Tools button» off, the status bar at 9:41.
 #
 # The story: a taquería's morning. The turno opens with a $2,000 fondo, ten
-# products arrive (paid from the drawer, so the fondo has to cover them or
-# «Efectivo esperado» goes negative), then three sales: cash with change,
-# transfer, card.
+# products arrive (their «Compra inventario» carries no turno, so the expected
+# cash never subtracts it), then three sales: cash with change, transfer,
+# card.
 appId: mx.xangarro.mobile
 ---
 - runScript:
@@ -96,22 +96,11 @@ appId: mx.xangarro.mobile
 - runFlow: store-pausa.yaml
 - takeScreenshot: ${OUT}/06-ventas
 
-# Gastos from Inicio's atajo (the phone) or its deep link (the tablet drops the
-# atajos): Mi turno's «Gastos» row still opens the older /egresos screen.
-- tapOn:
-    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+# Gastos from Mi turno's row (the phone) or the rail and the sidebar (a tablet).
 - runFlow:
-    when:
-      visible:
-        id: 'inicio-atajo-gastos'
-    commands:
-      - tapOn: { id: 'inicio-atajo-gastos' }
-- runFlow:
-    when:
-      visible:
-        id: 'inicio-hero-listo'
-    commands:
-      - openLink: 'xangarro://gastos'
+    file: ../shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-gastos'
 - extendedWaitUntil:
     visible:
       id: 'mobile-gastos'
@@ -119,19 +108,13 @@ appId: mx.xangarro.mobile
 - runFlow: store-pausa.yaml
 - takeScreenshot: ${OUT}/07-gastos
 
-- runFlow:
-    when:
-      visible:
-        id: 'top-bar-back'
-    commands:
-      - tapOn: { id: 'top-bar-back' }
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'mobile-turno'
     timeout: 10000
-# Mi turno keeps the scroll the Inventario row left it at: back to the top.
+# Mi turno keeps the scroll the Gastos row left it at: back to the top.
 - repeat:
     times: 3
     commands:
