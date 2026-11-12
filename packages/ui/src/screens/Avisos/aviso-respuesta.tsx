@@ -9,7 +9,7 @@ import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
 import { aDueno } from '@xangarro/caja/avisos';
 import { Btn, Chip, MText, PathIcon } from '../../components/index';
-import { borderWidths, colors, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 
 /** Quick answers: a short label, the sentence it writes. */
 export const RAPIDAS: readonly (readonly [string, string])[] = [
@@ -40,8 +40,7 @@ const CAMPO = {
   borderRadius: radii[3],
   borderWidth: borderWidths.thin,
   borderColor: colors.black,
-  fontFamily: typography.fontFamily,
-  fontWeight: '600',
+  ...fontFace(typography.weights.semibold),
   fontSize: portalFontSizes.body,
   color: colors.black,
 } as const;

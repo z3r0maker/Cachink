@@ -14,7 +14,7 @@ import { Eyebrow } from '../../components/Panel/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
 import { Spinner } from '../../components/Spinner/index';
-import { borderWidths, colors, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 import { ClienteNuevo, ClienteRadio, type NuevoCliente } from './fiado-partes';
 import { PieAccion } from './pie-accion';
@@ -82,8 +82,7 @@ function Buscador(p: { q: string; onQ: (q: string) => void }): ReactElement {
         style={{
           flex: 1,
           height: 44,
-          fontFamily: typography.fontFamily,
-          fontWeight: '600',
+          ...fontFace(typography.weights.semibold),
           fontSize: portalFontSizes.body,
           color: colors.black,
         }}

@@ -54,14 +54,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from '@expo-google-fonts/plus-jakarta-sans';
-import { AppProviders, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
+import * as plusJakartaSans from '@expo-google-fonts/plus-jakarta-sans';
+import { AppProviders, fontFaces, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
@@ -72,10 +66,18 @@ import { fotoPuertos } from '../shell/foto-puertos';
 // Refresh re-evaluations are safe.
 bootstrapI18n();
 
-// Plus Jakarta Sans ships weights 200–800 on Google Fonts. CLAUDE.md
-// §8.2 mentions 900 as the heading weight; when the CSS requests 900
-// the browser / RN runtime snaps to the closest available weight (800
-// ExtraBold).
+/**
+ * Every weight file the UI names (`fontFaces`), registered under that name.
+ * The family ships 200–800; `fontFaces` sends 900 to 800 ExtraBold. A name
+ * the package does not export fails `packages/ui/tests/font-faces.test.ts`.
+ */
+const BRAND_FONTS: Record<string, number> = Object.fromEntries(
+  [...new Set(Object.values(fontFaces))].map((name) => [
+    name,
+    (plusJakartaSans as unknown as Record<string, number>)[name] as number,
+  ]),
+);
+
 /** All Expo Router screens — extracted to keep RootLayout under 40 lines. */
 function MobileStack(): ReactElement {
   return (
@@ -87,13 +89,7 @@ function MobileStack(): ReactElement {
 }
 
 export default function RootLayout(): ReactElement {
-  const [fontsLoaded] = useFonts({
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-  });
+  const [fontsLoaded] = useFonts(BRAND_FONTS);
   return (
     <StrictMode>
       <GestureHandlerRootView style={{ flex: 1 }}>

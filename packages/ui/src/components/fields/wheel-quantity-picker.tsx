@@ -10,7 +10,7 @@ import { useMemo, type ReactElement } from 'react';
 import { Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import WheelPicker from 'react-native-wheely';
-import { colors, fontSizes, radii, typography } from '../../theme';
+import { colors, fontFace, fontSizes, radii, typography } from '../../theme';
 import { InputError } from '../Input/input-shared';
 
 export interface WheelQuantityPickerProps {
@@ -73,8 +73,7 @@ const INDICATOR_STYLE = {
 };
 
 const ITEM_TEXT_STYLE = {
-  fontFamily: typography.fontFamily,
-  fontWeight: String(typography.weights.black) as unknown as TextStyleWeight,
+  ...fontFace(typography.weights.black),
   fontSize: fontSizes.xl2,
   color: colors.black,
 };
@@ -144,21 +143,3 @@ export function WheelQuantityPicker(props: WheelQuantityPickerProps): ReactEleme
     </View>
   );
 }
-
-/**
- * react-native-wheely types `fontWeight` as `TextStyle['fontWeight']`
- * which is `string | number`. The inline cast avoids a TS error when
- * passing the numeric weight from our tokens as a string.
- */
-type TextStyleWeight =
-  | 'normal'
-  | 'bold'
-  | '100'
-  | '200'
-  | '300'
-  | '400'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900';

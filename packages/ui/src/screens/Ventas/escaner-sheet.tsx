@@ -13,7 +13,7 @@ import { Btn } from '../../components/Btn/index';
 import { Eyebrow } from '../../components/Panel/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, colors, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 import { CobrarBar } from './cobrar-bar';
 import type { ProductoCobrar } from './cobrar-catalogo';
 import { COBRAR_GLYPHS } from './cobrar-glyphs';
@@ -59,8 +59,7 @@ function CodigoInput(p: {
         borderRadius: radii[3],
         borderWidth: borderWidths.thin,
         borderColor: colors.black,
-        fontFamily: typography.fontFamily,
-        fontWeight: '700',
+        ...fontFace(typography.weights.bold),
         fontSize: portalFontSizes.lg,
         color: colors.black,
       }}

@@ -53,6 +53,8 @@ describe('native typography', () => {
   });
 
   it('reads the rest of typography from the tokens', () => {
+    // The CSS stack under Vitest, which resolves Tamagui's web build; the
+    // phone's per-weight file names are pinned in font-faces.test.ts.
     expect(theme.typography.fontFamily).toBe(tokens.typography.fontFamily);
     expect(theme.typography.weights).toBe(tokens.typography.weights);
   });
