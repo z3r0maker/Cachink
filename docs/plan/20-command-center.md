@@ -855,10 +855,23 @@ with property tests:
 
 ### E-44 Salida a otro sistema `[baja]`
 
-- [ ] Status · **Blocked by:** E-01
+- [~] Status · **Blocked by:** E-01 · **Falta:** the files' half, with E-26's Azure account: a
+  runner of `moverDocumentos` between two accounts, rehearsed against a locked container.
 - **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
   container and check every file against `corp.documents.sha256` (E-26, ADR-135), swap the two
   ports, cut the console routes over.
+- **Progress (2026-11-12):** the runbook is `docs/ops/empresa-lift-out.md`, for both ways out
+  (a new database under the same console, or another system). The database half is
+  `packages/data-corp/scripts/salida.sh`:
+  - `congelar` / `descongelar`;
+  - `exportar`, which carries the files kept in `corp.blobs` and the ledger's `corp/…` rows;
+  - `importar`, in one transaction;
+  - `verificar`, which checks rows, DDL, grants, outside readers, each file's SHA-256 and the
+    ledger.
+
+  `salida-ensayo.sh` rehearses it against the Empresa e2e's data, in a throwaway container,
+  and proves `verificar` catches seven kinds of damage. The ledger's DDL is held to the hosted
+  runner's by `data-pg/tests/salida-ledger.test.ts`. Rehearsed green on 2026-11-12.
 
 ## 9. Canvas round 2 (owner review, 2026-10-08)
 
