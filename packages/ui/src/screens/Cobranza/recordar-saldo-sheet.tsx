@@ -17,9 +17,10 @@ import {
   borderColors,
   borderWidths,
   colors,
+  fontFace,
+  portalFontSizes,
   radii,
   typography,
-  portalFontSizes,
 } from '../../theme';
 
 export interface RecordarSaldoSheetProps {
@@ -62,8 +63,7 @@ function Telefono(p: { readonly tel: string; readonly setTel: (t: string) => voi
           style={{
             flex: 1,
             height: 48,
-            fontFamily: typography.fontFamily,
-            fontWeight: '700',
+            ...fontFace(typography.weights.bold),
             fontSize: portalFontSizes.body,
             color: colors.black,
           }}
@@ -85,8 +85,7 @@ const MENSAJE_STYLE = {
   borderWidth: borderWidths.quiet,
   borderColor: borderColors.quiet,
   backgroundColor: colors.greenSoft,
-  fontFamily: typography.fontFamily,
-  fontWeight: '600',
+  ...fontFace(typography.weights.semibold),
   fontSize: portalFontSizes.body,
   color: colors.black,
   textAlignVertical: 'top',
