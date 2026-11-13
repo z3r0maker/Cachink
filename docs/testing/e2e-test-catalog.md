@@ -400,6 +400,8 @@ J8-12, J9-10. Each carries its scenario here so the spec is written with the fea
   on ids, never text, on the phone; `EXPO_PUBLIC_E2E=1` kills the particle animation; the FAB is
   parked; a flow that passes once and fails once is a harness bug until proven otherwise
   (`E2E-SESSION-NOTES.md` §3).
-- **CI.** `portal-e2e` and `backoffice-e2e` gate every PR. `maestro-e2e` is dispatch-only and
+- **CI.** `portal-e2e` and `backoffice-e2e` gate every PR. The portal suite runs on three runners
+  (the parallel phase in two shards, the serial phase whole, each on its own Postgres) and
+  `portal-e2e` merges their coverage (ADR-144). `maestro-e2e` is dispatch-only and
   runs the curated 35; the goal for launch is a nightly on the iPhone runner with the suite
   going red on any failure, and the sync project's chains promoted to required.
