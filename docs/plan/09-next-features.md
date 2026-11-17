@@ -1458,7 +1458,8 @@ micro-POS than location does.
 
 ### N-82 Firma de las actualizaciones OTA [media]
 
-- [ ] Status · **Surfaced by:** N-26 (F-07, SEC-MOB-01) · **Trigger:** antes de la primera compilación de tienda · **Blocks:** X-10
+- [~] Status · **Surfaced by:** N-26 (F-07, SEC-MOB-01) · **Trigger:** antes de la primera compilación de tienda · **Blocks:** X-10
+  **Remaining (2026-11-17, ADR-145):** Hecho: el par de llaves se generó en la máquina del dueño (la privada en `~/.xangarro/ota-signing/keys/`, fuera del repo y de EAS); `apps/mobile/certs/certificate.pem` (RSA, vigente a 2036-11) está en el repo y `app.json` lo declara con `codeSigningMetadata`; `pnpm --filter @xangarro/mobile ota:publish` es el único camino para publicar y rechaza una llave ausente, ilegible o que no es la del certificado antes de llamar a EAS; el runbook es `docs/ops/provisioning.md` §11. Falta (dueño): guardar la llave privada en el gestor de contraseñas y un respaldo fuera de línea; 2FA en la organización de EAS y sólo el dueño con rol Admin o Developer; en el primer build de tienda, la prueba del §11 (una actualización sin firma se rechaza en un build de `preview`).
 - **What:** Expo update code signing, so an EAS account or token alone cannot ship JavaScript to
   every register. The private key is the owner's to hold, outside EAS and outside the repo. From
   `apps/mobile`: (1) `npx expo-updates codesigning:generate --key-output-directory keys

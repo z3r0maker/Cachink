@@ -39,3 +39,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# OTA signing (N-82, ADR-145): the private key never enters the repo; the
+# public certificate must, or EAS builds without it
+keys/
+!certs/certificate.pem

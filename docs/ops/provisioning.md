@@ -378,3 +378,50 @@ and not the published test key. The commands in §2 produce values that pass.
 A value that does not closes the device routes (500) or the crons (503), and
 the error names the variable and the rule, never the value. Check the lengths
 in Vercel before the first deploy that carries this rule.
+
+## 11. OTA updates are signed (N-82, ADR-145)
+
+Every build embeds `apps/mobile/certs/certificate.pem` (public, committed)
+and refuses an update that its private key did not sign. An EAS account or
+token alone can no longer ship JavaScript to the registers.
+
+**Where the key is kept.** The master copy of `private-key.pem` is in the
+owner's password manager, plus one offline backup (an encrypted USB drive)
+that does not live with the laptop. The working copy is at
+`~/.xangarro/ota-signing/keys/private-key.pem` on the machine that publishes,
+mode `600`. It is never in the repo (`apps/mobile/.gitignore` ignores
+`keys/`), in EAS, in GitHub Actions or in Vercel. Anyone else given a copy
+is named here, with the date.
+
+**Publishing.** Only through the script, which checks the key against the
+certificate before EAS is called:
+
+```bash
+pnpm --filter @xangarro/mobile ota:publish --channel production --message "…"
+```
+
+On another machine, restore the key from the password manager to the path
+above, or point `XANGARRO_OTA_KEY` at it. `--dry-run` prints the command
+without publishing.
+
+**Proving it on the first store build** (the N-82 acceptance). With a
+`preview` build that carries the certificate installed:
+
+1. `npx eas-cli update --channel preview --message "sin firma"` with no
+   `--private-key-path`. The app must keep running the bundle it has: the
+   update is rejected.
+2. `pnpm --filter @xangarro/mobile ota:publish --channel preview --message "firmado"`.
+   After two launches the app runs it.
+3. Republish the previous preview update so the channel is back where it was.
+
+**Who may publish to `production`.** The EAS organisation keeps 2FA on, and
+only the owner holds the Admin or Developer role: those are the roles that can
+publish. Builds already in the field
+before this change carry no certificate and accept unsigned updates until
+they are replaced.
+
+**If the key is lost or the certificate expires** (it is good for ten
+years, to 2036-11), no update reaches those builds again: only a new store
+binary does. To rotate, generate a new pair (the commands are in N-82),
+configure it, ship a store build, and keep publishing with the old key
+until the old builds are gone; `ota:publish` warns a year before expiry.

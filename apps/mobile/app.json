@@ -68,7 +68,12 @@
     ],
     "updates": {
       "url": "https://u.expo.dev/819fa99a-ea6b-44f8-ab3f-c3d168504967",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "codeSigningCertificate": "./certs/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "main",
+        "alg": "rsa-v1_5-sha256"
+      }
     },
     "runtimeVersion": {
       "policy": "appVersion"
