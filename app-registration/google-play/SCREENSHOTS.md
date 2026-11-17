@@ -38,8 +38,6 @@ the entrada sheet and the keyboard cover «Guardar».
 - **The phone's Inicio** leaves «Efectivo esperado» ($2,265.00) below the
   tab bar: 1920 px is shorter than an iPhone, and Plus Jakarta Sans sets the
   cards a little taller. Mi turno (08) shows the figure.
-- **Venta hecha (05)**: in Plus Jakarta Sans «$235.00» runs over the change
-  box's right border and touches «Pagó con $500.00»; worst on the phone.
 - **Gastos** shows no gasto: the story records none, so its cifras read zero.
 - The shots were taken from a debug build (the dev client), which draws
   exactly what a release build draws on these screens.

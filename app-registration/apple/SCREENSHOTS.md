@@ -37,8 +37,6 @@ iPad, whose Cobrar shows every row); then three sales: cash with change (2 Alamb
   gastos, and the story records none, so its cifras read zero and the empty
   state's search badge peeks above the tab bar. Only «Renta local», the due
   recurrente, fills the screen.
-- **Venta hecha (05)**: in Plus Jakarta Sans «$235.00» runs into the
-  change box's right border and touches «Pagó con $500.00».
 - **The iPad's code boxes** show the typed code faintly behind the first box
   («VALDK7M3»): the hidden field's own text bleeds through (shot 01).
 
@@ -60,6 +58,8 @@ iPad, whose Cobrar shows every row); then three sales: cash with change (2 Alamb
    every device host port 7001: an Android run takes it from an iOS driver
    mid-flow, and an iOS driver left running (`xcodebuild test-without-building`)
    answers for the simulator it was started on, not the one passed to
-   `--device`. Stop leftover drivers before an iOS run.
+   `--device`. Stop leftover drivers before an iOS run, and shut the Android
+   emulators down first: on a loaded Mac the simulator keyboard drops letters
+   («jmai» for «jamaica») and the entradas fail.
 5. Look at every shot before copying it here: a capture can catch the
    Dynamic Island's momentary blob (`store-pausa.yaml` waits it out).

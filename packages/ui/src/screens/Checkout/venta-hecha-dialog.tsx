@@ -25,25 +25,33 @@ export interface VentaHechaDialogProps {
   readonly onNueva: () => void;
 }
 
-function Cifra(p: {
-  label: string;
-  nota?: string;
-  monto: string;
-  tinta: string;
-  fondo: string;
-}): ReactElement {
+interface CifraProps {
+  readonly label: string;
+  readonly nota?: string;
+  readonly monto: string;
+  readonly tinta: string;
+  readonly fondo: string;
+}
+
+/**
+ * «Dale de cambio» / «Ahora debe» (MvVentaHecha): the words on the left give
+ * way and wrap; the amount the cashier hands over keeps its size.
+ */
+function Cifra(p: CifraProps): ReactElement {
   return (
     <View
       flexDirection="row"
       alignItems="center"
       justifyContent="space-between"
-      padding={14}
+      gap={10}
+      paddingVertical={14}
+      paddingHorizontal={16}
       borderRadius={radii[4]}
       borderWidth={borderWidths.thin}
       borderColor={p.tinta}
       backgroundColor={p.fondo}
     >
-      <View>
+      <View flexShrink={1}>
         <MText size="md" weight="extraBold" color={p.tinta}>
           {p.label}
         </MText>
@@ -53,7 +61,14 @@ function Cifra(p: {
           </MText>
         ) : null}
       </View>
-      <MText size="total" weight="extraBold" color={p.tinta} testID="venta-hecha-cifra">
+      <MText
+        size="total"
+        weight="extraBold"
+        color={p.tinta}
+        flexShrink={0}
+        numberOfLines={1}
+        testID="venta-hecha-cifra"
+      >
         {p.monto}
       </MText>
     </View>
