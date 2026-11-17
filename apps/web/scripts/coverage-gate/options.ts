@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -121,4 +121,19 @@ export const sharedOptions = {
 /** Raw data only: stages write it, `merge.ts` reads it. */
 export function rawStage(name: string, outputDir: string): CoverageReportOptions {
   return { ...sharedOptions, name, outputDir, reports: [['raw', { outputDir: 'raw' }]] };
+}
+
+/**
+ * A stage's raw data, wherever a run left it: this checkout's own
+ * `<stage>/raw`, then each CI shard's copy (ADR-144). CI downloads every
+ * shard's artifact into `shards/<name>/`, laid out as a local run writes it.
+ */
+export function rawDirs(stage: 'unit' | 'e2e', coverageDir: string = COVERAGE_DIR): string[] {
+  const shardsDir = path.join(coverageDir, 'shards');
+  const shards = existsSync(shardsDir)
+    ? readdirSync(shardsDir)
+        .sort()
+        .map((shard) => path.join(shardsDir, shard, stage, 'raw'))
+    : [];
+  return [path.join(coverageDir, stage, 'raw'), ...shards].filter((dir) => existsSync(dir));
 }

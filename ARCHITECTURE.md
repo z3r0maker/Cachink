@@ -182,6 +182,7 @@ Links to discussion, docs, prior art.
 | [141](#adr-141) | 2026-11-09 | The phone's bug reports enter through `/api/v1`; the `bug-report` edge function, the error outbox and the app's Supabase key are retired | Accepted |
 | [142](#adr-142) | 2026-11-11 | A new account confirms its email before it has a session, and owners and admins may add a TOTP second factor; both live in the portal's own auth, on the link table and the console's TOTP code | Accepted |
 | [143](#adr-143) | 2026-11-12 | The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process | Accepted |
+| [144](#adr-144) | 2026-11-13 | The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10378,3 +10379,76 @@ The first full Android run, for Play's screenshots, hit two failures the iPhone 
   flows never lift, and the lift is verified on a real phone.
 - Metro's watcher does not run in the agent sandboxes: restart it with `--clear` after an edit
   before trusting a run.
+
+---
+
+## ADR-144
+
+**Title:** The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them
+
+**Date:** 2026-11-13
+
+**Status:** Accepted — amends ADR-103 (the serial phase no longer waits for the viewports in CI) and ADR-102 (the coverage merge reads every shard's raw data)
+
+**Context**
+
+`portal-e2e` was one job: setup, the coverage build, unit coverage, then 875 Playwright tests on two
+workers, the coverage merge and the contract's conformance suite. On 2026-11-12 it was cancelled by its
+own 35-minute timeout three times (runs 43259994653, 43268162880, 43284851668) after every test had
+passed and the coverage floor had held. Ten runs of the same 875 tests, with no retries, measured:
+
+- **~4 min of setup** before the E2E step (install, browsers, schema, seed, build), plus ~1 min of unit
+  coverage. Steady from run to run.
+- **The E2E step itself: 18.5 to 28.4 minutes.** Same tests, same counts. The runner, not the suite,
+  is the variable: every project was ~1.5× slower on the slow runs.
+- Inside it, from the HTML reports of a fast and a slow run: **the parallel phase** (`desktop`,
+  `laptop`, `tablet`, `phone`, `webkit`, the edge days: 701 tests, read-only on the seeded tenant)
+  took 10.3 and 15.9 minutes; **the serial phase** (`serial` → `operador` → `devices` → `sync` →
+  `webkit-operador`: 175 tests, one worker) took 7.7 and 11.3 more, after it.
+
+The serial phase waited for the parallel one only because both shared one Postgres (ADR-103). Raising the
+timeout would have bought a few months of growth and kept a 30-minute wait on every PR; cutting setup has
+little to cut.
+
+**Decision**
+
+1. **`XG_E2E_PHASE=parallel|serial`** limits a Playwright run to one phase (`apps/web/e2e/phases.ts`).
+   The parallel phase is the viewports and the edge days; the serial phase is everything else, so a
+   project added later runs somewhere without a thought for phases. Unset, the config is the whole
+   suite in one run, locally and anywhere else, exactly as before.
+2. **CI runs three shards** (`portal-e2e-shard`, a matrix), each with its own Postgres, build and seed:
+   the parallel phase in two Playwright shards (`--shard=1/2`, `--shard=2/2`, Playwright running the
+   `setup` dependency in each), and the serial phase whole. In the serial shard, `unlock` depends on
+   nothing: no viewport reads that database. Unit coverage rides with the first parallel shard; the
+   Postgres integration suite and the conformance suite with the serial one.
+3. **`portal-e2e` keeps its name and stays the required check.** It needs the shards, always runs,
+   merges every shard's raw coverage (`rawDirs` in `scripts/coverage-gate/options.ts` reads
+   `coverage/shards/<name>/{unit,e2e}/raw`), holds the floor when every shard passed and only
+   reports when one did not, refuses a verdict with fewer than three shards' data, and fails unless
+   every shard was green. A job skipped because a `needs` failed reports as passed, which is why it
+   cannot simply be skipped.
+4. **Timeouts are backstops sized to the measurement:** 25 minutes a shard, 10 for the merge. A hung
+   test dies at its own Playwright timeout long before either.
+
+**Alternatives considered**
+
+- *Raise `timeout-minutes` to 45.* Rejected as the fix: the slowest run measured was already 35, so
+  the margin would be ten minutes of a suite that keeps growing, and every PR still waits half
+  an hour.
+- *Playwright `--shard` over the whole suite.* Rejected: it splits the serial chain across runners,
+  and that chain is ordered on purpose (`devices` counts slots after `operador`, `sync` after
+  `devices`). Splitting by phase keeps each chain whole on one database.
+- *Build once and hand `.next` to the shards as an artifact.* Not now: the coverage build with source
+  maps is large, and uploading then downloading it would cost about what the 2.5-minute build does,
+  in series instead of in parallel.
+- *More workers on one runner.* Rejected: the four-vCPU runner already hosts the Next server, the edge
+  days' servers and Postgres beside the browsers.
+
+**Consequences**
+
+- Three runners per PR instead of one, and the setup minutes three times over.
+- The serial shard is the long pole (~11 minutes of tests on a slow runner). When it outgrows its
+  budget, the next split is the serial chain itself into two databases, or more parallel shards.
+- Three HTML reports (`playwright-report-<shard>`) instead of one; the merged coverage artifact is
+  unchanged.
+- `XG_E2E_NO_VIEWPORTS=1` stays for focused local runs of one serial project.

@@ -1,10 +1,9 @@
-import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import MCR from 'monocart-coverage-reports';
 
-import { ALL_FILES, E2E_DIR, MERGED_DIR, UNIT_DIR, WEB_ROOT, sharedOptions } from './options';
+import { ALL_FILES, MERGED_DIR, WEB_ROOT, rawDirs, sharedOptions } from './options';
 
 /**
  * The portal's one coverage number: unit + E2E, merged (ADR-102).
@@ -29,15 +28,17 @@ const FLOOR_FILE = path.join(WEB_ROOT, 'coverage-floor.json');
 
 /** Both stages, or the number means nothing: a unit-only 24% is how this began. */
 function inputDirs(): string[] {
-  const dirs = [path.join(UNIT_DIR, 'raw'), path.join(E2E_DIR, 'raw')];
-  const missing = dirs.filter((d) => !existsSync(d));
+  const unit = rawDirs('unit');
+  const e2e = rawDirs('e2e');
+  const missing = [unit.length === 0 && 'unit', e2e.length === 0 && 'e2e'].filter(Boolean);
   if (missing.length > 0) {
     throw new Error(
-      `No raw coverage in ${missing.map((d) => path.relative(WEB_ROOT, d)).join(', ')}.\n` +
+      `No raw coverage for ${missing.join(' and ')} (looked in coverage/ and coverage/shards/).\n` +
         'Run `pnpm test:coverage` and `pnpm test:e2e:coverage` first.',
     );
   }
-  return dirs;
+  for (const dir of [...unit, ...e2e]) console.log(`merging ${path.relative(WEB_ROOT, dir)}`);
+  return [...unit, ...e2e];
 }
 
 /** One decimal, floored, so a floor written today holds on a re-run today. */

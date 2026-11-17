@@ -8,6 +8,7 @@ import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
 import { billingDatabaseUrl, superDatabaseUrl } from './e2e/db-url';
 import { DIAS_LIMITE } from './e2e/dias-limite';
+import { e2ePhase, projectsForPhase } from './e2e/phases';
 import { SERIAL_TAG } from './e2e/shared-tenant';
 import { E2E_TOTP_KEY } from './e2e/totp-key';
 import type { OpcionesWebkit } from './e2e/webkit-profile';
@@ -79,16 +80,25 @@ const SAFARI = {
   storageState: OWNER_STORAGE,
 } as const;
 
+/** The phase this run is limited to (e2e/phases.ts, ADR-144); unset is all. */
+const PHASE = e2ePhase();
+
+/** The parallel phase's projects: the viewports and the edge days. */
+const PARALLEL_PHASE: ReadonlySet<string> = new Set([
+  ...VIEWPORTS,
+  ...DIAS_LIMITE.map((dia) => dia.project),
+]);
+
 /**
  * What `unlock` waits for: the whole parallel phase, so the seeded tenant's
  * write lock comes off only once those projects have finished reading it.
  *
- * `XG_E2E_NO_VIEWPORTS=1` drops the dependency, for a focused run of one serial
- * project while working on it (`--project=operador`). Opt-in on purpose: several
- * `sync` specs read state the viewport phase leaves behind, so the honest
- * default is to run it, exactly as `sync` always did.
+ * Nothing when the serial phase runs on a database of its own (CI, ADR-144):
+ * no viewport reads it. `XG_E2E_NO_VIEWPORTS=1` drops it too, for a focused
+ * run of one serial project while working on it (`--project=operador`).
  */
-const AFTER_VIEWPORTS = process.env.XG_E2E_NO_VIEWPORTS === '1' ? [] : [...VIEWPORTS];
+const AFTER_VIEWPORTS =
+  PHASE === 'serial' || process.env.XG_E2E_NO_VIEWPORTS === '1' ? [] : [...VIEWPORTS];
 
 /**
  * The server command. Under coverage (ADR-102) it is `next start` run by
@@ -145,7 +155,7 @@ function serverEnv(today: string): Record<string, string> {
 /** The seed's day (seed-data.ts `TODAY`): its May rows are "this month". */
 const SEED_TODAY = process.env.PORTAL_TODAY ?? '2026-05-12';
 
-export default defineConfig<OpcionesWebkit>({
+const config = defineConfig<OpcionesWebkit>({
   testDir: './e2e',
   fullyParallel: true,
   reporter: process.env.CI
@@ -324,4 +334,10 @@ export default defineConfig<OpcionesWebkit>({
       use: { ...SAFARI, vaciarOpfs: true },
     },
   ],
+});
+
+/** The whole suite, or one phase of it when CI splits the run (ADR-144). */
+export default defineConfig<OpcionesWebkit>({
+  ...config,
+  projects: projectsForPhase(config.projects ?? [], PARALLEL_PHASE, PHASE),
 });
