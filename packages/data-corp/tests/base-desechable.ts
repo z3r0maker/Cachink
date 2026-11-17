@@ -20,6 +20,8 @@ const sqlFiles = (dir: string) =>
 
 export interface BaseDesechable {
   readonly sql: postgres.Sql;
+  /** The scratch database's name, to connect to it as another login. */
+  readonly nombre: string;
   /** Applies the corp migrations whose file name passes `cuales`, in order. */
   aplicar(cuales: (nombre: string) => boolean): Promise<void>;
   cerrar(): Promise<void>;
@@ -50,6 +52,7 @@ export async function crearBaseDesechable(): Promise<BaseDesechable> {
   await correr(sqlFiles('local').map((f) => f.ruta));
   return {
     sql,
+    nombre,
     aplicar: (cuales) =>
       correr(
         sqlFiles('drizzle')

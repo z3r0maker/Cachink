@@ -11,6 +11,7 @@ export type EmpresaHref =
   | '/empresa/movimientos'
   | '/empresa/facturas'
   | '/empresa/resultados'
+  | '/empresa/balance'
   | '/empresa/socios'
   | '/empresa/agenda'
   | '/empresa/expediente'
@@ -53,7 +54,10 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
     id: 'resultados',
     label: 'Resultados',
     summary: '¿Ganamos dinero y qué le debemos al SAT?',
-    tabs: [{ label: 'Estado de resultados', href: '/empresa/resultados', task: 'E-12' }],
+    tabs: [
+      { label: 'Estado de resultados', href: '/empresa/resultados', task: 'E-12' },
+      { label: 'Balance', href: '/empresa/balance', task: 'E-12' },
+    ],
   },
   {
     id: 'socios',

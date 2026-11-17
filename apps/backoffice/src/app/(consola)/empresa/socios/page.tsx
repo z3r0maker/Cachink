@@ -3,7 +3,6 @@ import {
   listFounders,
   listFundingCalls,
   listPartnerEntries,
-  type Founder,
   type Movimiento,
 } from '@xangarro/data-corp';
 import { formatDateLong, parseIsoDate } from '@xangarro/domain';
@@ -16,7 +15,7 @@ import {
 import Link from 'next/link';
 
 import { hoyEnMexico, requireCorpDb } from '@/server/db/corp';
-import { filaSocio, llamadaAbierta } from '@/server/empresa/socios-view';
+import { filaSocio, llamadaAbierta, nombresDe, type Nombres } from '@/server/empresa/socios-view';
 import { requireFounderPage } from '@/server/founder';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
@@ -39,14 +38,6 @@ function cierres(entries: readonly Movimiento[], trimestre: string, nombres: Nom
         previo === null ? null : { bolsa: adicional - previo.prestamo, prestamo: previo.prestamo },
     };
   });
-}
-
-type Nombres = Record<1 | 2, string>;
-
-function nombresDe(founders: readonly Founder[]): Nombres {
-  const nombres: Nombres = { 1: 'Fundador 1', 2: 'Fundador 2' };
-  for (const f of founders) nombres[f.numero] = `Fundador ${f.numero} · ${f.nombre}`;
-  return nombres;
 }
 
 function Encabezado({ hoy }: { readonly hoy: string }) {

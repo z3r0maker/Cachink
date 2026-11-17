@@ -644,11 +644,32 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Falta:** Balance, whose board
-  CD-08 is not on the canvas yet (draw it, owner review, then build `/empresa/balance` and its
-  «Activo = Pasivo + Capital» check); the sweat-cost memo, which reads the Tablero's accepted
-  value (E-20); the bridge's drivers («8 negocios nuevos…»), which need E-10's billing import.
-  **Progress (2026-10-30, board CD-07):**
+- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Falta:** the sweat-cost memo,
+  which reads the Tablero's accepted value (E-20); the bridge's drivers («8 negocios nuevos…»),
+  which need E-10's billing import.
+  **Progress (2026-11-17, board CD-08, round 14 approved by the owner):**
+  - `@xangarro/domain/corp` `balance/`: `balanceGeneral` groups the ledger's sums per account
+    into Activo, Pasivo and Capital from the chart itself (`cuentasDelGrupo`). There are no
+    closing entries, so the year's result is read from the P&L accounts and a past year's is
+    added to Resultados acumulados. A line in an account outside the chart is named
+    (`sinClasificar`) and its amount is the sheet's `diferencia`. The fixture is the board's
+    31 October.
+  - `sumasAl` and `lineasDeCuenta` (data-corp), tested in a throwaway database as
+    `xangarro_corp`: a cobro of last year, this year's capital and expense, one after the day,
+    and a line in an unknown account.
+  - `/empresa/balance`, Resultados' second tab:
+    - the «Activo = Pasivo + Capital» strip;
+    - the two sides against the previous month's last day (today in this month), each account
+      opening into its month of movements;
+    - «Lo que pusieron los socios» from `cuentasDeSocios`.
+      «Stripe por depositar» grows until N-63 imports the payouts (owner decision, round 14).
+  - **Departs from the board:** «No cuadra» names the movement (date, concept, account) rather
+    than linking to it, because a movement in an unknown account is a row the movement pages
+    refuse to read.
+  - Playwright: a partner's capital in May 2023, then June's cobro and the other partner's
+    loan. The check, the accounts, the partners' table, an opened account, the year's result
+    and an empty April all reach the page.
+    **Progress (2026-10-30, board CD-07):**
   - `@xangarro/domain/corp` `resultados/`: periods (month, quarter, year and the one before),
     `estadoDeResultados` (§4's cascade; each P&L line carries its invoice date and the day its
     money moved, so devengado and flujo are one function; margins are null without income or

@@ -10,6 +10,7 @@ import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corpor
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
 import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
+import { cuentaDelBalance, MES_BALANCE, sembrarBalance } from './empresa-balance';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
@@ -428,10 +429,16 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   await expect(secciones(page, 'Dinero').getByRole('link')).toHaveText(['Movimientos', 'Facturas']);
   await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
 
-  // One built tab is no choice: Resultados and Socios draw no bar.
+  // Resultados: the statement and the balance sheet.
   await abrirEntrada(page, 'Resultados');
   await expect(page).toHaveURL(/\/empresa\/resultados$/);
-  await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
+  await expect(secciones(page, 'Resultados').getByRole('link')).toHaveText([
+    'Estado de resultados',
+    'Balance',
+  ]);
+  await abrirPestana(page, 'Balance', /\/empresa\/balance$/, 'Resultados');
+
+  // One built tab is no choice: Socios draws no bar.
   await abrirEntrada(page, 'Socios');
   await expect(page).toHaveURL(/\/empresa\/socios$/);
   await expect(page.getByRole('navigation', { name: /^Secciones de / })).toHaveCount(0);
@@ -494,6 +501,46 @@ test('a founder reads a month of results, opens a line, and switches basis and p
     .click();
   await expect(page).toHaveURL(/periodo=2024-T1/);
   await expect(renglon(page, 'ingresos')).toContainText('$18,000.00');
+});
+
+test('a founder reads a balance sheet that balances, opens an account and walks back (E-12)', async ({
+  page,
+}) => {
+  await sembrarBalance();
+  await signInAsStaff(page, SOCIO);
+  await page.goto(`/empresa/balance?mes=${MES_BALANCE}`);
+  await expect(page.getByText('Al 30 de junio de 2023')).toBeVisible();
+
+  // Real rows, worked by hand in empresa-balance.ts.
+  const cuadre = page.getByTestId('balance-cuadre');
+  await expect(cuadre).toContainText('$9,160.00 = $2,160.00 + $7,000.00');
+  await expect(cuadre).toContainText('Cuadra');
+  await expect(cuentaDelBalance(page, 'bancos')).toContainText('$9,160.00');
+  await expect(cuentaDelBalance(page, 'bancos')).toContainText('$6,000.00');
+  await expect(cuentaDelBalance(page, 'iva_trasladado')).toContainText('$160.00');
+  await expect(cuentaDelBalance(page, 'prestamos_socios')).toContainText('$2,000.00');
+  await expect(cuentaDelBalance(page, 'resultado')).toContainText('$1,000.00');
+  await expect(page.getByTestId('balance-socio-F1')).toContainText('$6,000.00');
+  await expect(page.getByTestId('balance-socio-F2')).toContainText('$2,000.00');
+  await expect(page.getByTestId('balance-socio-total')).toContainText('$8,000.00');
+
+  // An account opens into its month; the year's result opens Resultados.
+  await cuentaDelBalance(page, 'bancos').click();
+  await expect(page).toHaveURL(/abrir=bancos/);
+  await expect(page.getByTestId('balance-movimiento')).toHaveCount(2);
+  await expect(page.getByTestId('balance-movimiento').first()).toContainText('E2E Balance cobro');
+  await expect(page.getByTestId('balance-movimiento').first()).toContainText('$1,160.00');
+  await cuentaDelBalance(page, 'resultado').click();
+  await expect(page).toHaveURL(/\/empresa\/resultados\?periodo=2023$/);
+
+  // May holds the capital alone; April, nothing yet.
+  await page.goto('/empresa/balance?mes=2023-05');
+  await expect(page.getByTestId('balance-cuadre')).toContainText('$6,000.00 = $0.00 + $6,000.00');
+  await page.getByRole('link', { name: 'Mes anterior' }).click();
+  await expect(page).toHaveURL(/mes=2023-04/);
+  await expect(
+    page.getByRole('heading', { name: 'Aún no hay movimientos al 30 de abril' }),
+  ).toBeVisible();
 });
 
 test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-16)', async ({
