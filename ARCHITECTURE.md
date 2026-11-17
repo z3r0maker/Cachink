@@ -10427,7 +10427,7 @@ little to cut.
    reports when one did not, refuses a verdict with fewer than three shards' data, and fails unless
    every shard was green. A job skipped because a `needs` failed reports as passed, which is why it
    cannot simply be skipped.
-4. **Timeouts are backstops sized to the measurement:** 25 minutes a shard, 10 for the merge. A hung
+4. **Timeouts are backstops sized to the measurement:** 30 minutes a shard, 10 for the merge. A hung
    test dies at its own Playwright timeout long before either.
 
 **Alternatives considered**
@@ -10447,7 +10447,9 @@ little to cut.
 **Consequences**
 
 - Three runners per PR instead of one, and the setup minutes three times over.
-- The serial shard is the long pole (~11 minutes of tests on a slow runner). When it outgrows its
+- The serial shard is the long pole. The first split run (43467119336) took 19 minutes end to end:
+  the parallel shards 9.4 and 12.0, the serial shard 17.6 (12.0 of it tests), the merge 1.3, with the
+  same coverage to the decimal as the single run. When the serial shard outgrows its
   budget, the next split is the serial chain itself into two databases, or more parallel shards.
 - Three HTML reports (`playwright-report-<shard>`) instead of one; the merged coverage artifact is
   unchanged.
