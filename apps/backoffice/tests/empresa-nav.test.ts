@@ -14,7 +14,7 @@ const entry = (id: string) => {
 };
 
 describe('EMPRESA_NAV', () => {
-  it('lists the built entries in the plan order, with Dinero’s and Cumplimiento’s tabs', () => {
+  it('lists the built entries in the plan order, with their tabs', () => {
     assert.deepEqual(
       EMPRESA_NAV.map((e) => e.label),
       ['Resumen', 'Dinero', 'Resultados', 'Socios', 'Cumplimiento'],
@@ -22,6 +22,10 @@ describe('EMPRESA_NAV', () => {
     assert.deepEqual(
       entry('dinero').tabs.map((t) => t.label),
       ['Movimientos', 'Facturas'],
+    );
+    assert.deepEqual(
+      entry('resultados').tabs.map((t) => t.label),
+      ['Estado de resultados', 'Balance'],
     );
     assert.deepEqual(
       entry('cumplimiento').tabs.map((t) => t.label),

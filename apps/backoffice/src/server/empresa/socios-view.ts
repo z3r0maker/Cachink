@@ -1,4 +1,4 @@
-import type { LlamadaConEstado, MitadPagada, Movimiento } from '@xangarro/data-corp';
+import type { Founder, LlamadaConEstado, MitadPagada, Movimiento } from '@xangarro/data-corp';
 import { formatMoney } from '@xangarro/domain';
 import type { MovementKind } from '@xangarro/domain/corp';
 
@@ -9,6 +9,15 @@ import { diasEntre, fechaCorta } from './fechas';
  * call's halves, and the partner movements' history.
  */
 export type Tono = 'ok' | 'warn' | 'bad';
+
+export type Nombres = Record<1 | 2, string>;
+
+/** «Fundador 1 · Ana»: how every partner screen names one, even before corp.founders has both. */
+export function nombresDe(founders: readonly Founder[]): Nombres {
+  const nombres: Nombres = { 1: 'Fundador 1', 2: 'Fundador 2' };
+  for (const f of founders) nombres[f.numero] = `Fundador ${f.numero} · ${f.nombre}`;
+  return nombres;
+}
 
 export interface EstadoMitad {
   readonly label: 'Pagado' | 'Pendiente' | 'Vencido';

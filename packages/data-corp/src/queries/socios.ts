@@ -19,7 +19,8 @@ import { withDetail, type Movimiento } from './movimientos.js';
  */
 export async function listPartnerEntries(
   db: CorpDb,
-  range?: { readonly desde: string; readonly hasta: string },
+  /** `desde` inclusive, `hasta` exclusive; no `desde` reads from the first entry. */
+  range?: { readonly desde?: string; readonly hasta: string },
 ): Promise<readonly Movimiento[]> {
   const where: SQL[] = [
     exists(
@@ -30,7 +31,8 @@ export async function listPartnerEntries(
     ),
   ];
   if (range !== undefined) {
-    where.push(gte(entries.fecha, range.desde), lt(entries.fecha, range.hasta));
+    if (range.desde !== undefined) where.push(gte(entries.fecha, range.desde));
+    where.push(lt(entries.fecha, range.hasta));
   }
   const rows = await db
     .select()
