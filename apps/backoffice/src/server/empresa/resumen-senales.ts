@@ -7,8 +7,8 @@ import { puntos } from './resumen-view';
 /**
  * Resumen's «Señales» and «Próximos vencimientos» (E-16, board CD-12b). A
  * signal says what crossed which line and links to the screen that explains
- * it (plan E-16's acceptance). The infra ÷ MRR and SAS-cap signals wait for
- * E-10 and E-15. Pure.
+ * it (plan E-16's acceptance). The infra ÷ MRR signal waits for N-63; the
+ * caps' signals are Límites' own (`limites-view.ts`, E-15). Pure.
  */
 export type TonoSenal = 'info' | 'warn' | 'bad';
 

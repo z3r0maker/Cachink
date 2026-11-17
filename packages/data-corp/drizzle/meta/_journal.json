@@ -71,6 +71,13 @@
       "when": 1793989712824,
       "tag": "0009_corp_recurrentes_rfc",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794932873564,
+      "tag": "0010_corp_limites",
+      "breakpoints": true
     }
   ]
 }

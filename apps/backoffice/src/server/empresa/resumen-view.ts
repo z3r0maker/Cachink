@@ -52,6 +52,8 @@ export interface Kpi {
   readonly tono: Tono;
   readonly ref: string;
   readonly href: string;
+  /** The tope tile opens a drawer (`abre`), and warns at 80 % or without its caps (`aviso`). */
+  readonly variante?: 'abre' | 'aviso';
 }
 
 const tonoDe = (d: number | bigint): Tono => (d > 0 ? 'bien' : d < 0 ? 'mal' : 'igual');

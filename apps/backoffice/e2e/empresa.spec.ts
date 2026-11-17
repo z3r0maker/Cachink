@@ -11,6 +11,7 @@ import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from 
 import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { cuentaDelBalance, MES_BALANCE, sembrarBalance } from './empresa-balance';
+import { asegurarTopes, hoyEnMexico, quitarTopes, sembrarCobroDelAnio } from './empresa-limites';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
@@ -586,6 +587,49 @@ test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-
   await expect(csd).toContainText('Si vence, no se puede facturar.');
   await csd.getByRole('link', { name: 'Ver certificados' }).click();
   await expect(page).toHaveURL(/\/empresa\/corporativo$/);
+});
+
+test('a founder reads the year’s limits from the Resumen, and captures caps a year lacks (E-15)', async ({
+  page,
+}) => {
+  const hoy = hoyEnMexico();
+  const anio = hoy.slice(0, 4);
+  await asegurarTopes(anio);
+  await sembrarCobroDelAnio(hoy);
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa');
+  const tile = page.getByTestId('kpi').filter({ hasText: 'Tope de la SAS' });
+  await expect(tile).toContainText('de $7.68 M');
+
+  // The tile opens the drawer; its project sits beside Xangarro's in one gauge.
+  await tile.click();
+  await expect(page).toHaveURL(/limites=1/);
+  const cajon = page.getByRole('dialog', { name: new RegExp(`^${anio}, a `) });
+  await expect(cajon.getByTestId('limite-sas')).toContainText('de $7,678,849.94');
+  await expect(cajon.getByTestId('limite-resico')).toContainText('de $35,000,000.00');
+  await expect(cajon.getByTestId('limite-fuente').filter({ hasText: 'E2E Límites' })).toContainText(
+    '$1,234.00',
+  );
+  await expect(cajon.getByTestId(`tope-${anio}`)).toContainText('$7,678,849.94');
+  await page.keyboard.press('Escape');
+  await expect(page).toHaveURL(/\/empresa\?periodo=/);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  // A year without its caps says so, and asks for them: last year's are never used.
+  await quitarTopes(anio);
+  await page.goto('/empresa');
+  await expect(
+    page.getByTestId('senal').filter({ hasText: `Faltan los topes de ${anio}` }),
+  ).toBeVisible();
+  await expect(tile).toContainText(`Falta ${anio}`);
+  await tile.click();
+  const sin = page.getByRole('dialog', { name: anio, exact: true });
+  await sin.getByLabel(`Tope de la SAS para ${anio}`).fill('7678849.94');
+  await sin.getByLabel(`Tope de RESICO persona moral para ${anio}`).fill('35000000');
+  await sin.getByRole('button', { name: `Guardar los topes de ${anio}` }).click();
+  await expect(page.getByRole('dialog').getByTestId('limite-sas')).toContainText(
+    'de $7,678,849.94',
+  );
 });
 
 test('on a phone the rail folds into «Menú» and no Empresa page scrolls sideways', async ({

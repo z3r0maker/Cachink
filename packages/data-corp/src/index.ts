@@ -36,3 +36,8 @@ export {
 export { listProjects, type Project } from './queries/projects.js';
 export { createRecurringTemplateRepository } from './queries/recurrentes.js';
 export * from './schema/index.js';
+export {
+  createTopesRepository,
+  ingresosPorProyecto,
+  type IngresoDeProyecto,
+} from './queries/limites.js';

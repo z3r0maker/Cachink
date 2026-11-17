@@ -87,6 +87,11 @@ export async function clearLedgerFixture(): Promise<void> {
                                              WHERE lower(s.email) = ${SOCIO.email})`;
       await tx`DELETE FROM corp.entry_lines WHERE entry_id IN (${mine})`;
       await tx`DELETE FROM corp.entries WHERE id IN (${mine})`;
+      // E-15: the Límites test's own project, and 2026's caps if it left them out.
+      await tx`DELETE FROM corp.projects WHERE id LIKE 'e2e-%'`;
+      await tx`INSERT INTO corp.annual_caps (anio, tope_sas, tope_resico, updated_by, updated_at)
+               VALUES (2026, 767884994, 3500000000, 'e2e-fixture', now())
+               ON CONFLICT (anio) DO NOTHING`;
       await tx`DELETE FROM corp.funding_calls WHERE concepto LIKE 'E2E %'`;
       await tx`DELETE FROM corp.recurring_templates
                 WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;

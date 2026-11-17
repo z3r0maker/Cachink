@@ -84,6 +84,7 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 | `ventasMarketing` | `#4A3AA7` |
 | `desarrollo` | `#008300` |
 | `administracion` | `#E87BA4` |
+| `proyeccion` | `#B9D3F2` |
 
 ## 4. Shape
 
