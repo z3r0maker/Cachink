@@ -16,7 +16,7 @@ import {
 import { colors } from '@xangarro/tokens';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, fontFace, portalFontSizes, radii, typography } from '../../theme';
 
 const MENOS = 'M5 12h14';
 const MAS = 'M12 5v14M5 12h14';
@@ -82,8 +82,7 @@ const ENTRADA = {
   borderColor: colors.black,
   borderRadius: radii[2],
   backgroundColor: colors.white,
-  fontFamily: typography.fontFamily,
-  fontWeight: '700' as const,
+  ...fontFace(typography.weights.bold),
   fontSize: portalFontSizes.lgx,
   color: colors.black,
 };

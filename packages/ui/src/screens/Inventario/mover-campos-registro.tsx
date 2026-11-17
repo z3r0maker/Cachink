@@ -13,6 +13,7 @@ import {
   borderColors,
   borderWidths,
   colors,
+  fontFace,
   portalFontSizes,
   radii,
   typography,
@@ -98,8 +99,7 @@ export function Opcional(p: {
           borderRadius: radii[3],
           borderWidth: borderWidths.quiet,
           borderColor: borderColors.quiet,
-          fontFamily: typography.fontFamily,
-          fontWeight: '600',
+          ...fontFace(typography.weights.semibold),
           fontSize: portalFontSizes.body,
           color: colors.black,
         }}

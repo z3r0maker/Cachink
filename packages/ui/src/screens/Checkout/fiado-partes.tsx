@@ -15,6 +15,7 @@ import {
   borderColors,
   borderWidths,
   colors,
+  fontFace,
   portalFontSizes,
   radii,
   shadows,
@@ -113,8 +114,7 @@ const CAMPO = {
   borderWidth: borderWidths.thin,
   borderColor: colors.black,
   backgroundColor: colors.white,
-  fontFamily: typography.fontFamily,
-  fontWeight: '700',
+  ...fontFace(typography.weights.bold),
   fontSize: portalFontSizes.body,
   color: colors.black,
 } as const;

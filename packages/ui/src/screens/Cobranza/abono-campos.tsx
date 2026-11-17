@@ -16,6 +16,7 @@ import {
   borderColors,
   borderWidths,
   colors,
+  fontFace,
   portalFontSizes,
   radii,
   typography,
@@ -37,8 +38,7 @@ const CAMPO = {
 const ENTRADA = {
   flex: 1,
   height: 52,
-  fontFamily: typography.fontFamily,
-  fontWeight: '700',
+  ...fontFace(typography.weights.bold),
   fontSize: portalFontSizes.xl2,
   color: colors.black,
 } as const;

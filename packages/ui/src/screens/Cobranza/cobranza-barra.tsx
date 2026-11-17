@@ -9,7 +9,7 @@ import { View } from '@tamagui/core';
 import type { FiltroCobranza } from '@xangarro/caja/cobranza';
 import { Chip } from '../../components/Chip/index';
 import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, colors, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 
 export const FILTROS: readonly FiltroCobranza[] = ['Todos', 'Con saldo', 'Atrasados'];
@@ -41,8 +41,7 @@ export function Buscador(p: {
         style={{
           flex: 1,
           height: 44,
-          fontFamily: typography.fontFamily,
-          fontWeight: '600',
+          ...fontFace(typography.weights.semibold),
           fontSize: portalFontSizes.body,
           color: colors.black,
         }}

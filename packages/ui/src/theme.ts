@@ -14,6 +14,7 @@
  * from a token rather than restated.
  */
 
+import { isWeb } from '@tamagui/core';
 import { borders, typography as webTypography } from '@xangarro/tokens';
 
 export {
@@ -56,14 +57,73 @@ for (const name of Object.keys(webTypography.letterSpacing) as TrackingName[]) {
   nativeTracking[name] = trackingNumber(webTypography.letterSpacing[name]);
 }
 
+/** A weight in the type ramp: 400, 500, 600, 700, 800 or 900. */
+export type FontWeight = (typeof webTypography.weights)[keyof typeof webTypography.weights];
+
+/**
+ * The file `@expo-google-fonts` names each weight after. The family ships
+ * 200–800; 900 (`weights.black`) has no file and snaps to 800, exactly as the
+ * browser snaps it on the portal.
+ */
+const FILE_BY_WEIGHT: Readonly<Record<FontWeight, string>> = {
+  400: '400Regular',
+  500: '500Medium',
+  600: '600SemiBold',
+  700: '700Bold',
+  800: '800ExtraBold',
+  900: '800ExtraBold',
+};
+
+/** `'Plus Jakarta Sans', sans-serif` → `PlusJakartaSans`: the first family, unquoted, unspaced. */
+function familyStem(stack: string): string {
+  const first = (stack.split(',')[0] ?? '').trim().replace(/^['"]|['"]$/g, '');
+  if (!first) throw new Error(`Unexpected font family token: ${stack}`);
+  return first.replace(/\s+/g, '');
+}
+
+/**
+ * Native only. The name each weight is registered under by `useFonts` in
+ * `apps/mobile/src/app/_layout.tsx`: `fontFaces[700]` is
+ * `PlusJakartaSans_700Bold`. iOS and Android resolve a font by that name; the
+ * CSS stack in the token matches nothing, and the phone fell back to SF and
+ * Roboto. Derived from the token, never restated.
+ */
+export const fontFaces: Readonly<Record<FontWeight, string>> = (() => {
+  const stem = familyStem(webTypography.fontFamily);
+  const out = {} as Record<FontWeight, string>;
+  for (const weight of Object.values(webTypography.weights)) {
+    out[weight] = `${stem}_${FILE_BY_WEIGHT[weight]}`;
+  }
+  return out;
+})();
+
+/**
+ * Family and weight for a plain React Native `style` (a `TextInput`, a
+ * `StyleSheet`), which never reaches Tamagui's `face` map. On the phone a
+ * weight is its own file, so this returns that file and no `fontWeight`:
+ * Android shows the system font when given both. On the web (Storybook) it
+ * returns the CSS stack and the weight.
+ */
+export function fontFace(weight: FontWeight): { fontFamily: string; fontWeight?: `${FontWeight}` } {
+  if (isWeb) return { fontFamily: webTypography.fontFamily, fontWeight: `${weight}` };
+  return { fontFamily: fontFaces[weight] };
+}
+
 /**
  * Native only. The tokens' `typography` with `letterSpacing` as numbers. The
  * web's are CSS strings (`0.05em`): Android's Text throws on one, and the app
  * could not start; iOS read the number in front and drew 0.05 pt. These keep
  * exactly what iOS drew, so nothing on the iPhone moves.
+ *
+ * `fontFamily` is the regular file's name on the phone and the CSS stack on
+ * the web. Tamagui's font carries a `face` map keyed by weight
+ * (`tamagui.config.ts`), so `<Text fontFamily={typography.fontFamily}
+ * fontWeight="700">` picks the bold file; text that sets no weight gets the
+ * regular one.
  */
 export const typography = {
   ...webTypography,
+  fontFamily: isWeb ? webTypography.fontFamily : fontFaces[webTypography.weights.regular],
   letterSpacing: nativeTracking as Readonly<Record<TrackingName, number>>,
 } as const;
 

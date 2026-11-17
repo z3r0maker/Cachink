@@ -5,7 +5,8 @@
  * primitive renders. Every value here comes from `./theme`, which re-exports
  * `@xangarro/tokens` (M-03): the palette (so `$yellow`, `$yellowRule`,
  * `$gray200` exist as colour tokens), the radius ladder plus the dense and
- * shape radii, and the font family, sizes and weights. Only the space, size
+ * shape radii, and the font family, sizes and weights (the family as the
+ * phone's per-weight file names, `fontFaces`). Only the space, size
  * and zIndex ramps are native-only, and they also live in `./theme`.
  *
  * Shadows and the press-transform are NOT expressed as Tamagui tokens —
@@ -20,6 +21,7 @@ import {
   breakpoints,
   colors,
   denseRadii,
+  fontFaces,
   fontSizes,
   radii,
   shapeRadii,
@@ -46,8 +48,19 @@ const fontSize = {
 
 const { weights } = typography;
 
+/*
+ * One file per weight on the phone. Tamagui swaps `fontFamily` for the face
+ * matching `fontWeight` and drops the weight, so `fontWeight="700"` renders
+ * `PlusJakartaSans_700Bold` rather than the regular file, faux-bolded or not
+ * at all. The web ignores `face` and keeps the CSS stack.
+ */
+const face = Object.fromEntries(
+  Object.values(weights).map((w) => [w, { normal: fontFaces[w] }]),
+) as Record<(typeof weights)[keyof typeof weights], { normal: string }>;
+
 const plusJakartaSans = createFont({
   family: typography.fontFamily,
+  face,
   size: fontSize,
   lineHeight: { 1: 16, 2: 20, 3: 24, 4: 28, 5: 32, 6: 36, 7: 40, 8: 44 },
   weight: {

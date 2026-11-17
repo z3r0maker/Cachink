@@ -11,7 +11,7 @@ import { MOTIVOS_DIFERENCIA, type MotivoDiferencia } from '@xangarro/caja/cierre
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow } from '../../components/Panel/index';
-import { borderWidths, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, fontFace, portalFontSizes, radii, typography } from '../../theme';
 
 /** The note «Otra razón» asks for, with the warning that travels with it. */
 function Nota(p: {
@@ -26,8 +26,7 @@ function Nota(p: {
     borderColor: colors.black,
     borderRadius: radii[3],
     backgroundColor: colors.white,
-    fontFamily: typography.fontFamily,
-    fontWeight: '600',
+    ...fontFace(typography.weights.semibold),
     fontSize: portalFontSizes.body,
     color: colors.black,
   } as const;

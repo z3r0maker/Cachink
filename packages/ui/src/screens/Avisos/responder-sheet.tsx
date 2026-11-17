@@ -14,7 +14,7 @@ import { Btn } from '../../components/Btn/index';
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow } from '../../components/Panel/index';
-import { borderWidths, colors, portalFontSizes, radii, typography } from '../../theme';
+import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 
 const CAMPO = {
   minHeight: 52,
@@ -22,8 +22,7 @@ const CAMPO = {
   paddingHorizontal: 14,
   borderRadius: radii[3],
   borderWidth: borderWidths.thin,
-  fontFamily: typography.fontFamily,
-  fontWeight: '700',
+  ...fontFace(typography.weights.bold),
   fontSize: portalFontSizes.lg,
   color: colors.black,
   backgroundColor: colors.white,

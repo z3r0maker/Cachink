@@ -13,6 +13,7 @@ import {
   borderColors,
   borderWidths,
   colors,
+  fontFace,
   portalFontSizes,
   radii,
   typography,
@@ -73,8 +74,7 @@ function Buscador(p: { q: string; onQ: (q: string) => void }): ReactElement {
         style={{
           flex: 1,
           height: 44,
-          fontFamily: typography.fontFamily,
-          fontWeight: '600',
+          ...fontFace(typography.weights.semibold),
           fontSize: portalFontSizes.body,
           color: colors.black,
         }}
