@@ -46,6 +46,11 @@ register their employees use at the counter. Business owners buy the service
 on our website. The app has no purchases, prices, plans or links to buy, and
 it does not let anyone create an account.
 
+This is an enterprise service under guideline 3.1.3(c): every plan is sold
+to a business (its owner and the employees they add), and the people who use
+the app are those employees. The app is free to use: a business on our free
+plan links its first device at no cost. No employee buys anything.
+
 HOW TO SIGN IN (demo business "Tacos La Esquina")
 1. On the first screen, tap "Escribe el código".
 2. "Correo del dueño": demo@xangarro.mx

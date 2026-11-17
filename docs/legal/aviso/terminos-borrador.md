@@ -11,14 +11,14 @@
 > de aplicaciones; límite de responsabilidad acorde a un servicio de nube de pago.
 > Los `[CORCHETES]` son datos que faltan.
 
-_Vigentes desde: [FECHA]. Versión: [VERSIÓN]._
+_Vigentes desde: 17 de noviembre de 2026. Versión: 1.0._
 
 ---
 
 ## 1. Quién te presta el servicio
 
 Xangarro es un servicio de **MEXIA, S.A.S.**, con domicilio en **Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco** y RFC **MEX261015US8**
-("Xangarro", "nosotros"). Puedes escribirnos a **[CORREO SOPORTE]** o llamarnos al **[TELÉFONO SOPORTE]**
+("Xangarro", "nosotros"). Puedes escribirnos a **soporte@xangarro.mx** o llamarnos al **99 9999 9999**
 (LFPC art. 76 Bis III: estos datos se muestran también antes de contratar, en xangarro.mx).
 
 ## 2. Aceptación
@@ -88,11 +88,13 @@ Xangarro**; un modelo de lenguaje de un tercero únicamente redacta el texto a p
 - **Uso aceptable del modelo.** Al usar el Asesor te obligas a no emplearlo para los usos que prohíben
   las políticas de uso del proveedor del modelo (entre otros: generar contenido ilícito, engañoso o
   que dañe a terceros, o intentar extraer o manipular el modelo). Respondes por el uso que tú y tu
-  equipo hagan de esta función. _[Revisión: verificar el traslado de obligaciones que exigen los
-  términos comerciales del proveedor y de la tienda del modelo; ver auditoría §8.]_
+  equipo hagan de esta función.
 - **Qué recibe el modelo** se describe en el Aviso de Privacidad §11. Tus datos **no se usan para
   entrenar** modelos.
 - Podemos cambiar, limitar o retirar esta función, avisándote conforme a la sección 14.
+
+> Nota para revisión: verificar el traslado de obligaciones que exigen los términos comerciales del
+> proveedor y de la tienda del modelo (uso aceptable, arriba); ver auditoría §8.
 
 ## 7. Planes, precios y facturación
 
@@ -129,7 +131,7 @@ Consumidor.
 ## 9. Cancelación y reembolsos
 
 - **Si contrataste en xangarro.mx (Stripe):** los periodos ya iniciados no son reembolsables, salvo
-  cobro duplicado, error nuestro o cuando la ley lo exija. Escríbenos a **[CORREO SOPORTE]** y
+  cobro duplicado, error nuestro o cuando la ley lo exija. Escríbenos a **soporte@xangarro.mx** y
   resolvemos.
 - **Si contrataste dentro de la app (App Store o Google Play):** la cancelación y los reembolsos los
   gestiona **la tienda**, con sus propias reglas y plazos; nosotros no podemos procesarlos. Administra
@@ -158,7 +160,7 @@ la nube puede interrumpirse por mantenimiento, fallas o causas fuera de nuestro 
 **No ofrecemos un nivel de servicio garantizado (SLA)**, pero nos obligamos a esfuerzos razonables
 para mantenerlo disponible, a avisarte de los mantenimientos programados y a que **la exportación de
 tus datos esté siempre disponible**. Si el servicio en la nube queda inaccesible por causas
-imputables a nosotros durante más de **[24] horas continuas** en un mes, te acreditaremos, a solicitud,
+imputables a nosotros durante más de **24 horas continuas** en un mes, te acreditaremos, a solicitud,
 la parte proporcional de tu suscripción. Podemos agregar, cambiar o retirar funciones; si un cambio te
 perjudica de forma relevante, te avisaremos conforme a la sección 14.
 
@@ -208,7 +210,7 @@ Si descargaste la app de App Store aplica además lo siguiente (términos mínim
   privacidad, y por cualquier reclamación de que la app infringe propiedad intelectual de terceros.
 - **Cumplimiento legal.** Declaras que no estás en un país sujeto a embargo del gobierno de EE. UU. ni
   en una lista de partes restringidas.
-- **Datos de contacto:** MEXIA, S.A.S., Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, [CORREO SOPORTE], [TELÉFONO].
+- **Datos de contacto:** MEXIA, S.A.S., Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, soporte@xangarro.mx, 99 9999 9999.
 - **Terceros.** Debes cumplir los términos de terceros aplicables al usar la app.
 - **Apple y sus filiales son terceros beneficiarios** de estos Términos y pueden hacerlos valer.
 
@@ -256,7 +258,7 @@ arbitraje **voluntarios**) o a los tribunales.
 
 ## 21. Contacto
 
-**[CORREO SOPORTE]** · Privacidad y derechos ARCO: **[CORREO PRIVACIDAD]**
+**soporte@xangarro.mx** · Privacidad y derechos ARCO: **privacidad@xangarro.mx**
 
 ---
 

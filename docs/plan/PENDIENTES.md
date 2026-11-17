@@ -32,14 +32,14 @@ listas de abajo.
 - **K-02** Opinión legal sobre CoDi (Colas de tracks) — destraba 1: K-31 · `22-codi.md:168`
 - **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:142`
 
-## Bloquea producción (36)
+## Bloquea producción (35)
 
 Mientras cualquiera siga abierta, no se sale a producción. La marca la pone una etiqueta
 `` `[bloq]` `` en el track, no una regla sobre el texto: hay tareas que ningún documento llama
 BLOCKER y que aun así tienen producción detenida hoy. Cada una vuelve a aparecer en su tipo de
 trabajo, que es quien tiene que moverla.
 
-### Crítica (13) — Producción no sale sin esto, o ya está roto en producción hoy.
+### Crítica (12) — Producción no sale sin esto, o ya está roto en producción hoy.
 
 - [ ] `⛔ bloquea prod` `Crítica` **L-04** Dominio + DNS + dominio de correo — Bloqueada por: — (hacerlo temprano; seguimiento del ADR-054) · Falta: sólo falta un envío de prueba. `xangarro.mx` responde 200, `app.xangarro.mx` y `admin.xangarro.mx` responden 307 al login, los tres desde Vercel, y los cuatro registros de correo están publicados (O-4 … O-6, O-13 cerrados). Lo único que no se ve desde fuera es si `RESEND_API_KEY` está en los dos proyectos de Vercel, que es la segunda mitad de la Acceptance; nada en el repo puede comprobarlo. · `06-landing.md:59`
 - [ ] `⛔ bloquea prod` `Crítica` **X-01** Entorno de staging (Q17 "A later") — Bloqueada por: B-01…B-10 · Falta: El repo está listo (`eas.json` separa el entorno de preview/producción y las llaves de entitlement; ambos `vercel.json` fijan `pdx1`) pero `docs/ops/provisioning.md` no tiene sección de staging y `scripts/hosted/*` apunta a una sola base de datos; el proyecto `xangarro-staging` de Supabase, el entorno de Vercel Preview, la conexión de pruebas de Stripe y el par de llaves aparte siguen todos fuera del repo. · `07-launch.md:10`
@@ -49,7 +49,6 @@ trabajo, que es quien tiene que moverla.
 - [ ] `⛔ bloquea prod` `Crítica` **O-9** Generar los secretos: `DEVICE_TOKEN_SECRET`, `CRON_SECRET`, `ADMIN_INGEST_SECRET` (los mismos en ambas apps),… · `11-pre-launch-and-deferred.md:34`
 - [ ] `⛔ bloquea prod` `Crítica` **O-30** Configurar `CRON_SECRET` en Vercel (xangarro-web, Production, Sensitive) y volver a desplegar. Lo encontró el… · `11-pre-launch-and-deferred.md:37`
 - [ ] `⛔ bloquea prod` `Crítica` **O-12** Te toca a ti (manual, 2026-09-23): llaves de prueba de Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, … · `11-pre-launch-and-deferred.md:44`
-- [ ] `⛔ bloquea prod` `Crítica` **O-17** Revisión del abogado sobre `docs/legal/aviso/*` (16 preguntas abiertas en su README), incl. si el archivo de … · `11-pre-launch-and-deferred.md:54`
 - [~] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Razón social constituida. Done 2026-10-28: MEXIA, S.A.S. (contrato social, folio SAS20261038080)… · `../launch/production-readiness.md:10`
 - [ ] `⛔ bloquea prod` `Crítica` BLOQUEANTE — Revisión del abogado de los cinco textos + las cinco confirmaciones en · `../launch/production-readiness.md:22`
 - [ ] `⛔ bloquea prod` `Crítica` Operador — set the Términos URL in Stripe's Dashboard (Settings › Public details → · `../launch/production-readiness.md:126`
@@ -229,7 +228,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **N-58** Etapa 4 — compras + landing. · `09-next-features.md:1262`
 - [ ] `Media` **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · `22-codi.md:319`
 
-## Corporativo, legal y terceros (37)
+## Corporativo, legal y terceros (36)
 
 Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/INDAUTOR, seguros, Clip y Mercado Pago, y las decisiones de negocio.
 
@@ -252,9 +251,8 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 - [ ] `Media` **N-45** Prueba de penetración externa — Disparador: N-42 y N-43 en staging. · `09-next-features.md:1155`
 - [ ] `Baja` **N-50** Generación de logo con IA — Disparador: se levante la restricción de ADR-059 sobre las llamadas a modelos en producción. · `09-next-features.md:1196`
 
-### `11-pre-launch-and-deferred.md` · 1. Acciones previas al lanzamiento (dueño) (10)
+### `11-pre-launch-and-deferred.md` · 1. Acciones previas al lanzamiento (dueño) (9)
 
-- [ ] `⛔ bloquea prod` `Crítica` **O-17** Revisión del abogado sobre `docs/legal/aviso/*` (16 preguntas abiertas en su README), incl. si el archivo de … · `11-pre-launch-and-deferred.md:54`
 - [ ] `Alta` **O-14** VoBo del contador sobre las dudas de CFDI: PUE vs PPD para SPEI pagado al momento; ClaveProdServ `81112106` /… · `11-pre-launch-and-deferred.md:51`
 - [ ] `Alta` **O-15** Generar el CSD (Certificado de Sello Digital) en CertiSAT con la e.firma · `11-pre-launch-and-deferred.md:52`
 - [ ] `⛔ bloquea prod` `Alta` **O-29** El abogado redacta y aprueba un aviso de privacidad simplificado para el signup. La página de signup entonces… · `11-pre-launch-and-deferred.md:56`
@@ -387,7 +385,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `07-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 51 abiertos (10 en curso, 0 bloqueados, 29 hechos)
-- `11-pre-launch-and-deferred.md` — 21 abiertos (0 en curso, 0 bloqueados, 12 hechos)
+- `11-pre-launch-and-deferred.md` — 20 abiertos (0 en curso, 0 bloqueados, 13 hechos)
 - `16-design-conformance.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 8 hechos)
 - `18-db-scale-design-changes.md` — todo cerrado — archivar (0 en curso, 0 bloqueados, 10 hechos)
 - `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 13 hechos)

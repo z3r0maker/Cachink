@@ -10,8 +10,8 @@
  * old one cannot be edited quietly. «Privacidad y mis datos» shows the exact
  * text a person accepted from here.
  *
- * **Bracketed values are production gaps** — see
- * `docs/launch/production-readiness.md`.
+ * Versions up to 0.4 kept a `[CORREO PRIVACIDAD]` gap; 1.0 fills it. A new
+ * version carries no bracket: the published texts are checked for them.
  */
 
 import { TERMINOS_PUBLICO_URL } from '@xangarro/domain';
@@ -96,11 +96,33 @@ const PUBLICADOS = {
         '[CORREO PRIVACIDAD].',
     },
   },
+  '1.0': {
+    publicado: '2026-11-17',
+    cambios:
+      'Agregamos el correo para tus solicitudes de privacidad, privacidad@xangarro.mx. Las finalidades son las mismas.',
+    parrafos: {
+      responsable:
+        'MEXIA, S.A.S. (Xangarro), con domicilio en Paseo Puesta del Sol 4150, colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, es responsable de tus datos.',
+      datos:
+        'Qué datos usamos: tu nombre, correo, teléfono y contraseña; los datos fiscales y del negocio ' +
+        '(RFC, régimen, código postal); tus pagos y los registros de tu negocio, que pueden ser datos ' +
+        'patrimoniales o financieros; y datos técnicos de tus dispositivos. No te pedimos datos sensibles.',
+      finalidades:
+        'Para qué: crear y proteger tu cuenta, prestarte el servicio y sincronizar tus registros, cobrar ' +
+        'tu suscripción y emitir tu CFDI, darte soporte, avisarte del servicio y cumplir la ley. Además, ' +
+        'si lo aceptas: enviarte novedades y consejos.',
+      proveedores:
+        'Para prestarte el servicio usamos proveedores, algunos en Estados Unidos. No vendemos tus datos.',
+      limitar:
+        'Cómo limitar el uso: desactiva las novedades aquí o en Privacidad y mis datos, en el menú de tu ' +
+        'cuenta, o escribe a privacidad@xangarro.mx.',
+    },
+  },
 } as const satisfies Record<string, Publicado>;
 
 export type AvisoVersion = keyof typeof PUBLICADOS;
 
-export const AVISO_VERSION = '0.4-borrador' as const satisfies AvisoVersion;
+export const AVISO_VERSION = '1.0' as const satisfies AvisoVersion;
 
 export const AVISO_SIMPLIFICADO = PUBLICADOS[AVISO_VERSION].parrafos;
 

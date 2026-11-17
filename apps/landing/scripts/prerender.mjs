@@ -21,6 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROUTES } from '../src/routes.js';
 import { PLANES } from '../landing/planes.js';
 import { ARTICLE_BY_SLUG, ogImagePath } from '../src/articles.js';
+import { placeholdersIn } from './placeholders.mjs';
 import { SOCIAL_PROFILES } from '../landing/social.js';
 import { AUTHORS } from '../landing/authors.js';
 import {
@@ -112,7 +113,10 @@ for (const route of ROUTES) {
         );
       html = html.replaceAll(`${SITE_URL}/og-image.${ext}`, `${SITE_URL}${ogImagePath(slug, ext)}`);
     }
-    html = html.replaceAll('Xangarro — El mostrador cobra. Tú ves todo.', `${article.title} · Xangarro`);
+    html = html.replaceAll(
+      'Xangarro — El mostrador cobra. Tú ves todo.',
+      `${article.title} · Xangarro`,
+    );
   }
 
   // A page that must not be indexed (the 404) says so and carries no canonical
@@ -129,6 +133,9 @@ for (const route of ROUTES) {
   // Smoke test
   for (const text of route.absent ?? []) {
     if (html.includes(text)) failures.push(`✗  ${route.path} — must not publish "${text}"`);
+  }
+  for (const gap of placeholdersIn(html)) {
+    failures.push(`✗  ${route.path} — unfilled placeholder ${gap}`);
   }
   if (!html.includes(route.smoke)) {
     failures.push(`✗  ${route.path} — expected "${route.smoke}" not found in output`);
