@@ -60,11 +60,14 @@ money.
 
 ## Datos de contacto
 
-| Campo              | Valor                       |
-| ------------------ | --------------------------- |
-| Correo electrónico | soporte@xangarro.mx         |
-| Sitio web          | https://xangarro.mx         |
-| Teléfono           | (opcional; vacío por ahora) |
+| Campo              | Valor                        |
+| ------------------ | ---------------------------- |
+| Correo electrónico | soporte@xangarro.mx          |
+| Sitio web          | https://xangarro.mx/soporte/ |
+| Teléfono           | (opcional; vacío por ahora)  |
+
+El sitio es `/soporte/`, no la portada: la portada muestra planes y precios, y Play
+no deja que la ficha lleve a otro medio de pago (Payments policy, sección 4).
 
 ## Política de privacidad (App content → Privacy policy)
 

@@ -50,11 +50,13 @@ the native one from three layers rendered from the same layout:
 are in `packages/ui/src/app/splash/splash-capas.ts`. Re-render all four
 together, or the coin no longer lands on the native splash's.
 
-### Still to land (X-07)
+### The logo is the coin
 
-| File       | What it is                     | Consumed by                                                                      |
-| ---------- | ------------------------------ | -------------------------------------------------------------------------------- |
-| `logo.png` | In-app brand logo (~1536×1024) | **Copied once** into `packages/ui/src/assets/logo.png`, used by `<BrandLogo />`. |
+The yellow coin with the X is the final logo (owner, 2026-11-17). Every
+surface already draws it from `icons/`: the app icon, the splash, the
+favicons and the store art. The in-app `logo.png` and `<BrandLogo />` this
+README once planned were never built, and nothing needs them. The emails'
+hosted logo is L-04 (`packages/email/src/templates/layout.tsx`).
 
 `icon-padded.png` predates the kit and fed the archived Tauri desktop app.
 
