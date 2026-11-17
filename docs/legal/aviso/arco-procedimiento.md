@@ -29,7 +29,7 @@ Reglamento).
 
 1. **Portal (con cuenta):** `app.xangarro.mx` → Privacidad y mis datos (menú de tu cuenta) → Hacer una solicitud.
 2. **Sin cuenta o sin acceso:** formulario público `xangarro.mx/privacidad/solicitud` o correo a
-   **[CORREO PRIVACIDAD]**.
+   **privacidad@xangarro.mx**.
 
 Ambas vías son gratuitas. Recibirás un **acuse con folio y fecha de recepción**; los plazos corren
 desde esa fecha.
@@ -73,7 +73,7 @@ En **acceso**, te entregamos los datos después de acreditar tu identidad, en ar
    se suprime al terminar el plazo (arts. 2, fracción III y 24 de la Ley).
 4. Pedimos a nuestros proveedores que borren lo que tengan (correo, reportes de fallas). Si alguien
    recibió tus datos antes de la cancelación, le comunicamos tu solicitud (art. 24, párrafo cuarto).
-5. Las copias de seguridad se sobrescriben en un máximo de [N] días.
+5. Las copias de seguridad se sobrescriben en un máximo de 7 días.
 6. **Te avisamos cuando la cancelación quede hecha** (art. 24, párrafo tercero).
 
 Lo que está en tus dispositivos no lo podemos borrar a distancia: desinstala la app y borra los datos
@@ -118,11 +118,11 @@ venza el plazo sin respuesta (art. 40).
 
 ### B.1 Entrada
 
-| Canal                                             | Qué crea                                                                                                                                                                           |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Formulario del portal (sesión iniciada)           | `support_items` con `kind = 'arco'`, `business_id` y `user_id` del solicitante, identidad `verificada_sesion`.                                                                     |
-| Formulario público / correo a [CORREO PRIVACIDAD] | `kind = 'arco'`, `business_id = null` hasta vincularlo, identidad `pendiente`. Los correos se capturan a mano el mismo día en que llegan (la fecha de recepción es la del correo). |
-| Solicitud de un cliente u operador de un negocio  | `kind = 'arco'`, `subtipo = 'encargado'` (ver B.6).                                                                                                                                |
+| Canal                                                | Qué crea                                                                                                                                                                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Formulario del portal (sesión iniciada)              | `support_items` con `kind = 'arco'`, `business_id` y `user_id` del solicitante, identidad `verificada_sesion`.                                                                     |
+| Formulario público / correo a privacidad@xangarro.mx | `kind = 'arco'`, `business_id = null` hasta vincularlo, identidad `pendiente`. Los correos se capturan a mano el mismo día en que llegan (la fecha de recepción es la del correo). |
+| Solicitud de un cliente u operador de un negocio     | `kind = 'arco'`, `subtipo = 'encargado'` (ver B.6).                                                                                                                                |
 
 Campos mínimos del item: folio, derecho (A/R/C/O/revocación), titular, medio de notificación,
 fecha de recepción, identidad (estado + método), descripción, adjuntos, `due_respuesta`,

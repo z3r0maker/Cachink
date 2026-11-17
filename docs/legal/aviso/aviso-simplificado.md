@@ -30,7 +30,7 @@ Se muestra completa, arriba del botón "Crear cuenta", sin necesidad de abrir ot
 >
 > **Cómo limitar el uso:** desmarca la casilla de novedades, cámbialo en Privacidad y mis datos (en el
 > menú de tu cuenta) o
-> escribe a **[CORREO PRIVACIDAD]**.
+> escribe a **privacidad@xangarro.mx**.
 >
 > Aviso integral y derechos ARCO: **xangarro.mx/privacidad**
 

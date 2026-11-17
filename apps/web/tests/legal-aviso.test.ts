@@ -27,6 +27,7 @@ const HUELLAS: Readonly<Record<string, string>> = {
   '0.2-borrador': '93d2b81f6639e003e45ced8ccc9b26749db76ff1a52b4ad1c289b5f1a48c62ce',
   '0.3-borrador': 'adc31ccd26f95d8709880e40cec7827d18357d26c18987cf139613cf5583457a',
   '0.4-borrador': 'e711a71449470328cba0ada3aefb611a2bb4eea9e0fd21890295a786bf5344fb',
+  '1.0': 'db35f77bf6b3aecee5903778740ada7ccd1ba08c842431b7fe5977f2bc5b3e92',
 };
 const sha = (t: string) => createHash('sha256').update(t, 'utf8').digest('hex');
 
@@ -40,6 +41,10 @@ describe('every published aviso version is kept, unedited (ADR-137)', () => {
   it('the current version is one of them, and the signup hashes exactly its text', () => {
     assert.ok(AVISO_VERSION in HUELLAS, 'pin the new version in HUELLAS');
     assert.equal(avisoTextoCanonico(), avisoTextoDe(AVISO_VERSION));
+  });
+
+  it('the current version publishes no [GAP] (the earlier ones kept one)', () => {
+    assert.doesNotMatch(avisoTextoCanonico(), /\[[A-ZÁÉÍÓÚÑ0-9]+(?:[\s/—–-][^\]]*)?\]/);
   });
 
   it('a version never published has no text', () => {
@@ -83,11 +88,6 @@ describe('aviso simplificado at signup (N-34, PRIV-REG-01)', () => {
       /MEXIA, S\.A\.S\. \(Xangarro\), con domicilio en Paseo Puesta del Sol 4150, colonia Lomas Altas, C\.P\. 45128/,
     );
     assert.doesNotMatch(avisoTextoCanonico(), /\[RAZÓN SOCIAL\]|\[DOMICILIO\]/);
-  });
-
-  it('still carries production placeholders — this test is the reminder to close them', () => {
-    // Remove this assertion when docs/launch/production-readiness.md closes the legal-entity items.
-    assert.match(avisoTextoCanonico(), /\[CORREO PRIVACIDAD\]/);
   });
 
   it('hashes an IP and leaves an unknown one empty', () => {

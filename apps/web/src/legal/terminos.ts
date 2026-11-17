@@ -5,4 +5,4 @@
  * new version: bump it, because `billing_consents` must say which one was
  * accepted.
  */
-export const TERMINOS_VERSION = '0.1-borrador' as const;
+export const TERMINOS_VERSION = '1.0' as const;

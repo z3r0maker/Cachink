@@ -5,7 +5,7 @@
 > eliminan antes de publicar. Fundamento: Ley Federal de Protección de Datos Personales en Posesión de
 > los Particulares, DOF 20-03-2025, última reforma DOF 14-11-2025 ("la Ley"). Ver `README.md`.
 
-_Versión: [VERSIÓN] · Última actualización: [FECHA]_
+_Versión: 1.0 · Última actualización: 17 de noviembre de 2026_
 
 ## 1. Quién es responsable de tus datos
 
@@ -18,7 +18,7 @@ fracción I de la Ley.
 > operativa ni un domicilio particular.
 
 Nuestra área de datos personales (art. 29 de la Ley) es el **Área de Protección de Datos Personales**. Puedes escribirle a
-**[CORREO PRIVACIDAD]**.
+**privacidad@xangarro.mx**.
 
 Este aviso aplica a:
 
@@ -108,7 +108,7 @@ b) Analizar cómo se usa el producto para mejorarlo, únicamente con datos **dis
 c) Pedirte un testimonio o caso de éxito (solo con tu aceptación en cada caso).
 
 Si no quieres que usemos tus datos para estas finalidades, indícalo al registrarte, cámbialo en
-**Privacidad y mis datos** (en el menú de tu cuenta) o escribe a **[CORREO PRIVACIDAD]**. Negarte **no** afecta tu servicio.
+**Privacidad y mis datos** (en el menú de tu cuenta) o escribe a **privacidad@xangarro.mx**. Negarte **no** afecta tu servicio.
 Tienes 5 días hábiles desde que te registras para manifestarlo antes de que tratemos tus datos para
 estas finalidades, y puedes hacerlo en cualquier momento después.
 
@@ -143,16 +143,16 @@ fuera de México.
 | Alojamiento del sitio, el portal y la API                                        | Servir la aplicación; registros técnicos de acceso.                                                                                                   | EE. UU.          |
 | Procesador de pagos                                                              | Cobrar la suscripción con tarjeta o SPEI. Los datos completos de la tarjeta nunca llegan a Xangarro.                                                  | EE. UU. y México |
 | Proveedor autorizado de certificación (PAC)                                      | Timbrar los CFDI de tu suscripción.                                                                                                                   | México           |
-| Monitoreo de errores                                                             | Reportes de fallas (en la app, sólo si lo autorizas).                                                                                                 | [PAÍS / REGIÓN]  |
+| Monitoreo de errores                                                             | Reportes de fallas (en la app, sólo si lo autorizas).                                                                                                 | EE. UU.          |
 | Correo transaccional                                                             | Enviar los correos del servicio.                                                                                                                      | EE. UU.          |
 | Mensajería interna                                                               | Alertas urgentes al personal de Xangarro.                                                                                                             | EE. UU.          |
-| Procesadores de cobro con tarjeta _(cuando el negocio los conecte)_              | Sólo si el negocio conecta su cuenta: crear y confirmar cobros. El dinero va directo a la cuenta del negocio.                                         | [PAÍS]           |
+| Procesadores de cobro con tarjeta _(cuando el negocio los conecte)_              | Sólo si el negocio conecta su cuenta: crear y confirmar cobros. El dinero va directo a la cuenta del negocio.                                         | México           |
 | Plataforma de nube y proveedor de modelos de lenguaje _(al activarse el Asesor)_ | Redactar el texto del Asesor a partir de cifras ya calculadas (sección 11). El proveedor del modelo es encargado independiente de entradas y salidas. | EE. UU.          |
 
 Si eres un negocio para el que tratamos datos como **encargados**, la **lista nominal** de estos
 proveedores (subencargados) forma parte de tu Anexo de tratamiento de datos y te avisamos con 30 días
 de anticipación antes de incorporar uno nuevo. Cualquier titular puede pedir la lista vigente en
-**[CORREO PRIVACIDAD]**.
+**privacidad@xangarro.mx**.
 
 > Nota para revisión legal: la Ley (art. 15) no exige nombrar a los encargados y el Reglamento (art. 53) exime de informar las remisiones. Se publican por **categoría y país** por decisión del
 > responsable; la lista nominal se entrega contractualmente a los negocios y a solicitud. Confirmar.
@@ -188,7 +188,7 @@ este aviso._ → **Hoy no existe ninguna; esta casilla no se muestra.**
 | Cuenta y negocios cuando pides eliminarlos                      | Se cierran al pedirlo en **Mi negocio › General › Eliminar mi cuenta** y se borran a los **30 días**; hasta entonces puedes arrepentirte con el enlace del correo. Quedan bloqueados 10 años tus facturas y pagos de la suscripción, tu comprobante de cancelación, tus consentimientos y tu nombre, RFC y correo para identificarlos; después se suprimen.                                                                                                                                                             |
 | Datos sobre incumplimiento de pago                              | Se eliminan a más tardar 72 meses después del incumplimiento (art. 10 de la Ley).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Datos en el teléfono o navegador                                | La app guarda en el dispositivo los movimientos de los últimos **90 días**. La caja web guarda sus registros en el almacenamiento del navegador hasta enviarlos. En la app, **Ajustes → Desvincular esta caja → Desvincular y borrar** borra del teléfono todo lo que guarda, después de enviar lo pendiente; solo desvincular no lo borra. En la caja web, borra los datos del sitio.                                                                                                                                  |
-| Registros técnicos, de soporte, de seguridad y solicitudes ARCO | Por el tiempo necesario para su finalidad y para acreditar su atención, conforme a plazos internos documentados; puedes pedir el detalle en **[CORREO PRIVACIDAD]**.                                                                                                                                                                                                                                                                                                                                                    |
+| Registros técnicos, de soporte, de seguridad y solicitudes ARCO | Por el tiempo necesario para su finalidad y para acreditar su atención, conforme a plazos internos documentados; puedes pedir el detalle en **privacidad@xangarro.mx**.                                                                                                                                                                                                                                                                                                                                                 |
 | Respaldos                                                       | Se sobrescriben periódicamente; un dato suprimido puede permanecer en un respaldo hasta entonces, sin usarse.                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 Cuando un dato deja de ser necesario, primero lo **bloqueamos** —lo conservamos solo para determinar
@@ -205,7 +205,7 @@ Además de negarte a las finalidades secundarias (sección 4.2), puedes:
 
 - desactivar los correos de novedades con el enlace de cada correo o en **Privacidad y mis datos** (en el menú de tu cuenta);
 - desactivar los reportes de fallas de la app en **Ajustes → Dispositivo → Reportes de errores**;
-- pedirnos por **[CORREO PRIVACIDAD]** que te inscribamos en nuestro listado interno de exclusión para
+- pedirnos por **privacidad@xangarro.mx** que te inscribamos en nuestro listado interno de exclusión para
   no recibir comunicaciones que no sean del servicio.
 
 ## 9. Derechos ARCO: acceso, rectificación, cancelación y oposición
@@ -223,7 +223,7 @@ desactivar comunicaciones y eliminar tu cuenta en **Mi negocio › General › E
 1. **Si tienes cuenta:** en el portal, **Privacidad y mis datos → Hacer una solicitud**. Tu sesión
    iniciada sirve para acreditar tu identidad; para cancelaciones te pediremos confirmar con tu
    contraseña y un código enviado a tu correo.
-2. **Si no tienes cuenta o no puedes entrar:** escribe a **[CORREO PRIVACIDAD]** o usa el formulario
+2. **Si no tienes cuenta o no puedes entrar:** escribe a **privacidad@xangarro.mx** o usa el formulario
    público en **xangarro.mx/privacidad/solicitud**.
 
 Tu solicitud debe incluir (art. 28 de la Ley): tu nombre y un medio para recibir la respuesta; un
@@ -300,8 +300,8 @@ El Asesor detecta situaciones relevantes en tus propios registros y te las expli
   las entradas y salidas.
 - **No se usa para entrenar.** Tus datos no se utilizan para entrenar ni mejorar los modelos del
   proveedor ni de ningún tercero.
-- **Cuánto se conserva.** _[PLAZO — confirmar por escrito con el proveedor antes de publicar; ver la
-  nota de revisión al final de esta sección.]_ Además, los mecanismos de seguridad del proveedor
+- **Cuánto se conserva.** El plazo lo publicamos aquí antes de activar el Asesor; mientras esté
+  apagado no enviamos nada al modelo. Además, los mecanismos de seguridad del proveedor
   pueden marcar contenido y personal del proveedor del modelo puede revisarlo **solo por excepción**, para
   investigar posibles violaciones a sus políticas de uso.
 - **Siempre decides tú.** El Asesor sugiere; no cobra, no bloquea, no reporta a nadie y no toma
@@ -342,4 +342,4 @@ presentaremos antes de que las actives; hasta que las actives, no tratamos tus d
 
 ---
 
-_Fecha de la versión anterior: [FECHA] · Autoridad: Secretaría Anticorrupción y Buen Gobierno._
+_Primera versión publicada · Autoridad: Secretaría Anticorrupción y Buen Gobierno._

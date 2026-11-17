@@ -117,7 +117,15 @@ export const ROUTES = [
       'Las condiciones para usar Xangarro: tu cuenta, planes y cobros recurrentes, cancelación, el Asesor con IA y tus datos.',
     smoke: 'Quién te presta el servicio',
     // The draft's title note, banner and open questions for counsel are never published.
-    absent: ['borrador', 'Borrador', 'Preguntas abiertas', 'OQ-T1', '](http'],
+    absent: [
+      'borrador',
+      'Borrador',
+      'Preguntas abiertas',
+      'OQ-T1',
+      '](http',
+      'Revisión:',
+      'Nota para revisión',
+    ],
     type: 'website',
     changefreq: 'monthly',
     priority: '0.3',
