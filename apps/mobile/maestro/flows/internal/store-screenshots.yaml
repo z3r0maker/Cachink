@@ -47,12 +47,16 @@ appId: mx.xangarro.mobile
 - inputText: 'VALDK7M3'
 - hideKeyboard
 # A portrait Android tablet keeps Gboard up after hideKeyboard; a tap on the
-# title (keyboardShouldPersistTaps="handled") puts it away.
+# title (keyboardShouldPersistTaps="handled") puts it away. Optional: on a
+# phone the scroll to the code field has already taken the title off screen,
+# and there hideKeyboard is enough.
 - runFlow:
     when:
       platform: Android
     commands:
-      - tapOn: 'Escribe el código'
+      - tapOn:
+          text: 'Escribe el código'
+          optional: true
 # Back to the top, so the shot opens on the title and the correo. The swipe
 # runs down the left margin: mid-screen it can start on the code's boxes (a
 # portrait tablet) and focus them again.
