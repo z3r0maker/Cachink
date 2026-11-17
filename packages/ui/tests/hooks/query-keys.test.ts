@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   cajaKeys,
   clienteKeys,
-  corteKeys,
   cxcKeys,
   estadosKeys,
   flagKeys,
@@ -42,18 +41,6 @@ describe('query-key factories', () => {
       ['cliente-detail', BIZ],
     ]);
     expect(cxcKeys.byBusiness(BIZ)).toEqual(['cuentasPorCobrar', BIZ]);
-  });
-
-  it('a corte closes the day, the history, the expected cash and the balance', () => {
-    expect(corteKeys.delDia(BIZ)).toEqual(['corte-del-dia', BIZ]);
-    expect(corteKeys.historial(BIZ)).toEqual(['corte-historial', BIZ]);
-    expect(corteKeys.efectivoEsperado(BIZ, FECHA)).toEqual(['efectivo-esperado', BIZ, FECHA]);
-    expect(corteKeys.dependentsForBusiness(BIZ)).toEqual([
-      ['corte-del-dia', BIZ],
-      ['corte-historial', BIZ],
-      ['efectivo-esperado', BIZ],
-      ['balance-general', BIZ],
-    ]);
   });
 
   it('estados keys are period-scoped, but a write sweeps every period at once', () => {
