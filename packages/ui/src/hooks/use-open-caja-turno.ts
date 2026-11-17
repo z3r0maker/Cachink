@@ -6,7 +6,7 @@
  *   - The user hasn't opened a turno yet
  *   - The user's turno has been closed
  *
- * Shared between CajaContent and the Ventas route caja gate.
+ * Shared by the shell and the Cobrar route's caja gate.
  */
 import { useQuery } from '@tanstack/react-query';
 import type { BusinessId, CajaTurno, UserId } from '@xangarro/domain';

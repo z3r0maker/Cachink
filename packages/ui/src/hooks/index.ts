@@ -16,7 +16,6 @@ export * from './use-productos-con-stock';
 export * from './use-movimientos-recientes';
 export * from './use-crear-producto';
 export * from './query-keys';
-export * from './use-efectivo-esperado';
 export * from './use-schedule-stock-low-check';
 export * from './use-check-for-updates';
 // Phase 1 — User Management + Auth

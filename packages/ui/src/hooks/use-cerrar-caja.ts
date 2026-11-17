@@ -106,7 +106,6 @@ export function useCerrarCaja(): CerrarCajaResult {
         queryClient.invalidateQueries({ queryKey: cajaKeys.byBusiness(businessId as BusinessId) }),
         queryClient.invalidateQueries({ queryKey: ['caja-open'] }),
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId] }),
-        queryClient.invalidateQueries({ queryKey: ['efectivo-esperado', businessId] }),
         ...estadosKeys
           .dependentsForBusiness(businessId)
           .map((queryKey) => queryClient.invalidateQueries({ queryKey })),

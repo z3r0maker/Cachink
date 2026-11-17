@@ -44,22 +44,6 @@ export const pagoKeys = {
   ],
 } as const;
 
-export const corteKeys = {
-  delDia: (businessId: BusinessId | null): readonly unknown[] =>
-    ['corte-del-dia', businessId] as const,
-  historial: (businessId: BusinessId | null): readonly unknown[] =>
-    ['corte-historial', businessId] as const,
-  efectivoEsperado: (businessId: BusinessId | null, fecha: IsoDate | string): readonly unknown[] =>
-    ['efectivo-esperado', businessId, fecha] as const,
-  /** Surfaces that MUST invalidate after a corte closes. */
-  dependentsForBusiness: (businessId: BusinessId | null): readonly (readonly unknown[])[] => [
-    ['corte-del-dia', businessId] as const,
-    ['corte-historial', businessId] as const,
-    ['efectivo-esperado', businessId] as const,
-    ['balance-general', businessId] as const,
-  ],
-} as const;
-
 export const estadosKeys = {
   resultados: (businessId: BusinessId | null, from: string, to: string): readonly unknown[] =>
     ['estado-resultados', businessId, from, to] as const,

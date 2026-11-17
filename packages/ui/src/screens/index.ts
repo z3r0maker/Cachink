@@ -25,7 +25,6 @@ export * from './Activation/index';
 export * from './Inicio/index';
 export * from './AbrirTurno/index';
 export * from './Bloqueo/index';
-export * from './Caja/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';
 export * from './Cancelaciones/index';
