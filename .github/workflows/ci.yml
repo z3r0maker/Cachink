@@ -342,7 +342,7 @@ jobs:
   # `sync` → `webkit-operador`, one worker) whole. In one run the serial phase
   # waited for the parallel one because they shared a database; apart, they
   # run side by side. One job was 25–35 minutes and met its timeout after
-  # every test had passed; the slowest shard now measures in the PR's notes.
+  # every test had passed; the first split run took 19 minutes end to end.
   #
   # This suite refuses to run without a database (see playwright.config.ts).
   # That is deliberate: it previously passed with none, because every page
@@ -351,10 +351,12 @@ jobs:
   portal-e2e-shard:
     name: portal-e2e (${{ matrix.shard.name }})
     runs-on: ubuntu-latest
-    # The slowest shard on the slowest runner measured is ~17 minutes (ADR-144).
+    # The serial shard is the long pole: 17.6 minutes on the first split run,
+    # 12 of them its tests (ADR-144). 30 leaves ~12 minutes for runner variance
+    # (±50% measured) and growth.
     # A hung test dies at its own Playwright timeout long before this; this
     # is the backstop for a hung server or step.
-    timeout-minutes: 25
+    timeout-minutes: 30
     strategy:
       # Every shard reports its failures, as the single run did.
       fail-fast: false
