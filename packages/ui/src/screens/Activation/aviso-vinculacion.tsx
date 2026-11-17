@@ -6,7 +6,7 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { AVISO_PUBLICO_URL, AVISO_VINCULACION, AVISO_VINCULACION_ENLACE } from '@xangarro/domain';
+import { AVISO_DESDE_APP_URL, AVISO_VINCULACION, AVISO_VINCULACION_ENLACE } from '@xangarro/domain';
 import { abrirEnNavegador } from '../../app/abrir-en-navegador';
 import { Btn, GLYPHS, MText, PathIcon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -33,7 +33,7 @@ export function AvisoVinculacion(): ReactElement {
         <Btn
           variant="secondary"
           size="md"
-          onPress={() => abrirEnNavegador(AVISO_PUBLICO_URL)}
+          onPress={() => abrirEnNavegador(AVISO_DESDE_APP_URL)}
           icon={<PathIcon d={GLYPHS.externo} size={16} strokeWidth={2.4} />}
           testID="activation-aviso-enlace"
         >
