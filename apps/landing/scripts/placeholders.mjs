@@ -11,11 +11,15 @@
  */
 const GAP = /\[[A-ZÁÉÍÓÚÑ0-9]+(?:[\s/—–-][^\]]*)?\]/g;
 
-/** The gaps left in a page's visible text (scripts and tags removed). */
+/**
+ * The gaps left in a page's visible text. Scripts and styles are dropped
+ * whatever their case or closing-tag spacing; this reads our own build output
+ * and sanitises nothing.
+ */
 export function placeholdersIn(html) {
   const text = html
-    .replace(/<script[\s\S]*?<\/script>/g, ' ')
-    .replace(/<style[\s\S]*?<\/style>/g, ' ')
+    .replace(/<script\b[\s\S]*?<\/script[^>]*>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style[^>]*>/gi, ' ')
     .replace(/<[^>]+>/g, ' ');
   return [...new Set(text.match(GAP) ?? [])];
 }
