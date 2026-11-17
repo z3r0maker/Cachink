@@ -90,7 +90,6 @@ export const entrar = {
     error: 'No se pudo abrir el turno. Intenta otra vez.',
   },
   inicio: {
-    listo: 'La caja está lista.',
     turnoAbierto: 'Turno abierto desde las {{hora}}',
     turnoCerrado: 'Turno cerrado',
     atajos: 'Atajos',
