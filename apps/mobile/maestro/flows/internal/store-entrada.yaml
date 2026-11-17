@@ -30,8 +30,11 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'mover-buscar'
 - inputText: ${BUSCAR}
+- waitForAnimationToEnd
 # Retype until the product itself shows: a dropped letter can match nothing
-# («pastorp») or another product («tra» finds Costra, not Torta).
+# («pastorp») or another product («tra» finds Costra, not Torta). Each check
+# waits for the list to settle: an erased search lists every product for a
+# moment, the one sought among them.
 - repeat:
     while:
       notVisible:
@@ -40,6 +43,7 @@ appId: mx.xangarro.mobile
     commands:
       - eraseText: 30
       - inputText: ${BUSCAR}
+      - waitForAnimationToEnd
 # With the keyboard up, the first tap only closes it; the second selects (a
 # radio, so a repeated tap is harmless).
 - tapOn:
