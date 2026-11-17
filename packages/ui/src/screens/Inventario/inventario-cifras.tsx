@@ -92,6 +92,11 @@ export function Kpis(p: {
   );
 }
 
+/**
+ * «Existencias» / «Movimientos», worded as the phone board (MvInventario) words
+ * them; the long «Movimientos de mi turno» wraps on a phone and stays the
+ * panel's title below.
+ */
 export function Pestanas(p: {
   readonly tab: Pestana;
   readonly items: number;
@@ -106,7 +111,7 @@ export function Pestanas(p: {
       onChange={p.onElegir}
       tabs={[
         { key: 'existencias', label: 'Existencias', count: p.items },
-        { key: 'movimientos', label: 'Movimientos de mi turno', count: p.movs },
+        { key: 'movimientos', label: 'Movimientos', count: p.movs },
       ]}
     />
   );

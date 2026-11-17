@@ -71,8 +71,16 @@ describe('InventarioScreen · existencias', () => {
 
 describe('InventarioScreen · movimientos', () => {
   function aMovimientos(): void {
-    fireEvent.click(screen.getByText('Movimientos de mi turno'));
+    fireEvent.click(screen.getByTestId('inventario-tabs-movimientos'));
   }
+
+  it('names the tab as the board does, and keeps «de mi turno» on the panel', () => {
+    montar();
+    const tab = screen.getByTestId('inventario-tabs-movimientos');
+    expect(tab).toHaveTextContent(/^Movimientos\d+$/);
+    aMovimientos();
+    expect(screen.getByText('Movimientos de mi turno')).toBeInTheDocument();
+  });
 
   it('can open straight on the movements tab, as the route or a story hands it', () => {
     montar({ tabInicial: 'movimientos' });
