@@ -21,6 +21,12 @@ export const dataviz = {
   ventasMarketing: '#4A3AA7',
   desarrollo: '#008300',
   administracion: '#E87BA4',
+  /**
+   * What a gauge projects beyond what it measured: `restante`'s tint (board
+   * CD-12d, round 14). Only ever drawn under its `restante` mark, never as a
+   * series of its own.
+   */
+  proyeccion: '#B9D3F2',
 } as const;
 
 export type DatavizToken = keyof typeof dataviz;

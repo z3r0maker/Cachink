@@ -5,6 +5,7 @@ import type { ItemAgenda } from '@/server/empresa/agenda-view';
 import type { Senal } from '@/server/empresa/resumen-senales';
 import type { FilaPuente, Kpi } from '@/server/empresa/resumen-view';
 import * as a from '@/styles/mostrador-agenda.css';
+import * as l from '@/styles/mostrador-limites.css';
 import * as g from '@/styles/mostrador-graficas.css';
 import * as p from '@/styles/mostrador-resumen-paneles.css';
 import * as r from '@/styles/mostrador-resumen.css';
@@ -15,7 +16,12 @@ export function Indicadores({ kpis }: { readonly kpis: readonly Kpi[] }) {
   return (
     <section className={m.tiles} aria-label="Indicadores">
       {kpis.map((k) => (
-        <Link key={k.label} className={r.kpi} href={k.href as Route} data-testid="kpi">
+        <Link
+          key={k.label}
+          className={k.variante === undefined ? r.kpi : `${r.kpi} ${l.tile[k.variante]}`}
+          href={k.href as Route}
+          data-testid="kpi"
+        >
           <span className={m.eyebrow}>{k.label}</span>
           <span className={r.cifra}>{k.valor}</span>
           <span className={r.cambio[k.tono]}>{k.cambio}</span>

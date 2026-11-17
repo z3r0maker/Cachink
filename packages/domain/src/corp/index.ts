@@ -12,3 +12,4 @@ export * from './facturas/index.js';
 export * from './resultados/index.js';
 export * from './caja/index.js';
 export * from './balance/index.js';
+export * from './limites/index.js';

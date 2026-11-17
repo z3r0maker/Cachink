@@ -725,7 +725,32 @@ with property tests:
 
 ### E-15 Límites `[baja]`
 
-- [ ] Status · **Blocked by:** E-10
+- [x] Status · **Blocked by:** E-10 · **Done:** 2026-11-17 (board CD-12d, round 14 approved)
+- **Progress (2026-11-17):**
+  - `@xangarro/domain/corp` `limites/`:
+    - `medidorDe` measures income against a cap in millionths, and reports the highest of
+      60/80/95 % reached and whether the projection passes the cap.
+    - `proyeccionAlCierre` adds last month's income for every month after this one. This is
+      the owner's round-14 stand-in until N-63's MRR.
+    - `assertTopes` validates a year's caps.
+  - `corp.annual_caps` (data-corp 0010, with its grants): one row per year, 2026's seeded.
+    The console may insert and update; the agents read. `guardarTopes` (application) writes
+    it, audited as `empresa.topes_guardados`. `ingresosPorProyecto` sums the `ingresos`
+    account per project. The integration test runs 0010 from old to new and adds a second
+    project.
+  - Resumen gains the «Tope de la SAS» tile. It opens «Límites del año», a modal `<dialog>`
+    drawer (`components/cajon.tsx`), which shows:
+    - the two gauges, SVG over the new `dataviz.proyeccion` tint;
+    - «De dónde salen las cifras», project by project;
+    - «Topes por año».
+  - A year without its caps shows «Falta {año}» on the tile, a signal, and the capture form.
+    It never measures against last year's caps.
+  - Signals at 60/80/95 % reuse the drawer's alerts, in the same words.
+  - Playwright:
+    - a project of its own with a cobro today sits beside Xangarro in one gauge;
+    - Esc closes the drawer;
+    - with the year's caps removed, the drawer asks for them, and saving them brings the
+      gauges back.
 - **What:** company-wide income year to date against the SAS cap and the RESICO PM cap, projected
   to year end from MRR, with signals at 60/80/95 %. Cap values are kept per year (the DOF update
   each December).

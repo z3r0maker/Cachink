@@ -6,3 +6,4 @@ export { fundingCalls } from './socios.js';
 export { blobs, company, documents, obligations } from './agenda.js';
 export { certificates, registries, shareEvents } from './corporativo.js';
 export { receivedInvoices } from './facturas.js';
+export { annualCaps } from './limites.js';

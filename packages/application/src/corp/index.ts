@@ -53,3 +53,4 @@ export * from './expediente/mudanza.js';
 export * from './corporativo/index.js';
 export * from './facturas/index.js';
 export * from './ingresos/importar.js';
+export { guardarTopes, type TopesRepository } from './limites.js';
