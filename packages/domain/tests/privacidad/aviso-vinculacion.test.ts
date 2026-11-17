@@ -2,10 +2,12 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
+  AVISO_DESDE_APP_URL,
   AVISO_PUBLICO_URL,
   AVISO_VINCULACION,
   AVISO_VINCULACION_ENLACE,
   AVISO_VINCULACION_VERSION,
+  TERMINOS_DESDE_APP_URL,
   TERMINOS_PUBLICO_URL,
   avisoVinculacionTexto,
   avisoVinculacionTextoDe,
@@ -51,5 +53,16 @@ describe('aviso de vinculación', () => {
   it('points at the public site, not the portal (ADR-069)', () => {
     assert.equal(AVISO_PUBLICO_URL, 'https://xangarro.mx/privacidad/');
     assert.equal(TERMINOS_PUBLICO_URL, 'https://xangarro.mx/terminos/');
+  });
+
+  it('opens the same pages from the phone, marked so they drop the home link (X-05)', () => {
+    assert.equal(AVISO_DESDE_APP_URL, 'https://xangarro.mx/privacidad/?desde=app');
+    assert.equal(TERMINOS_DESDE_APP_URL, 'https://xangarro.mx/terminos/?desde=app');
+  });
+
+  it('keeps the public address in the hashed text, not the app one', () => {
+    const texto = avisoVinculacionTexto();
+    assert.ok(texto.includes(AVISO_PUBLICO_URL));
+    assert.ok(!texto.includes('?desde=app'));
   });
 });

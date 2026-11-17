@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { AVISO_PUBLICO_URL, TERMINOS_PUBLICO_URL } from '@xangarro/domain';
+import { AVISO_DESDE_APP_URL, TERMINOS_DESDE_APP_URL } from '@xangarro/domain';
 import { abrirEnNavegador } from '../../app/abrir-en-navegador';
 import { GLYPHS, NavRows, type NavRowItem } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -23,7 +23,7 @@ export function SettingsPrivacySection(): ReactElement {
       icon: GLYPHS.privacidad,
       tint: colors.blueSoft,
       external: true,
-      onPress: () => abrirEnNavegador(AVISO_PUBLICO_URL),
+      onPress: () => abrirEnNavegador(AVISO_DESDE_APP_URL),
       testID: 'settings-aviso-privacidad',
     },
     {
@@ -33,7 +33,7 @@ export function SettingsPrivacySection(): ReactElement {
       icon: GLYPHS.terminos,
       tint: colors.gray100,
       external: true,
-      onPress: () => abrirEnNavegador(TERMINOS_PUBLICO_URL),
+      onPress: () => abrirEnNavegador(TERMINOS_DESDE_APP_URL),
       testID: 'settings-terminos',
     },
   ];

@@ -20,6 +20,15 @@ export const AVISO_PUBLICO_URL = 'https://xangarro.mx/privacidad/' as const;
 /** The public terms, next to the aviso in the phone's Ajustes. */
 export const TERMINOS_PUBLICO_URL = 'https://xangarro.mx/terminos/' as const;
 
+/**
+ * What the phone opens (X-05): the same pages, marked as reached from the app,
+ * so they drop their link to the home page, which shows plans and prices
+ * (3.1.1(a), Play's Payments policy). The aviso's own text keeps the public
+ * address: it is hashed, and the hash must not move.
+ */
+export const AVISO_DESDE_APP_URL = `${AVISO_PUBLICO_URL}?desde=app` as const;
+export const TERMINOS_DESDE_APP_URL = `${TERMINOS_PUBLICO_URL}?desde=app` as const;
+
 /** The button under the aviso that opens it in full (5.1.1(i): a tappable link). */
 export const AVISO_VINCULACION_ENLACE = 'Leer el aviso completo' as const;
 

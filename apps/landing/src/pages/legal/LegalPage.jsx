@@ -3,6 +3,9 @@
  * ARCO procedure, rendered from their Markdown source in docs/legal/aviso,
  * so the published text is the reviewed text and there is no second copy.
  */
+import { useEffect, useState } from 'react';
+
+import { almacenDeLaPestana, vieneDeLaApp } from './desde-app.js';
 import { parseLegalMarkdown } from './markdown.js';
 
 const INLINE = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|`[^`]+`|(?<![\w])_[^_]+_(?![\w]))/g;
@@ -97,6 +100,25 @@ function Block({ block }) {
   );
 }
 
+/**
+ * «← Xangarro» back to the home page; from the app, the name alone (board
+ * TrLegal). The prerender has no URL, so it draws the link and the page
+ * settles on mount.
+ */
+function Cabecera() {
+  const [desdeApp, setDesdeApp] = useState(false);
+  useEffect(() => {
+    setDesdeApp(vieneDeLaApp(window.location.search, almacenDeLaPestana()));
+  }, []);
+  const estilo = { fontWeight: 900, color: 'var(--black)', textDecoration: 'none' };
+  if (desdeApp) return <span style={estilo}>Xangarro</span>;
+  return (
+    <a href="/" style={estilo}>
+      ← Xangarro
+    </a>
+  );
+}
+
 export function LegalPage({ source, schema }) {
   const blocks = parseLegalMarkdown(source);
   return (
@@ -111,9 +133,7 @@ export function LegalPage({ source, schema }) {
       )}
       <header style={{ borderBottom: '2.5px solid var(--black)', background: 'var(--white)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '14px clamp(16px, 5vw, 28px)' }}>
-          <a href="/" style={{ fontWeight: 900, color: 'var(--black)', textDecoration: 'none' }}>
-            ← Xangarro
-          </a>
+          <Cabecera />
         </div>
       </header>
       <main

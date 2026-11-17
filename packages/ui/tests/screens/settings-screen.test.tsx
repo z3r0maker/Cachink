@@ -168,14 +168,14 @@ describe('SettingsScreen (A-12)', () => {
     expect(onOpenRejected).toHaveBeenCalled();
   });
 
-  it('opens the aviso and the términos on xangarro.mx, not the portal', async () => {
+  it('opens the aviso and the términos on xangarro.mx, marked as from the app (X-05)', async () => {
     const open = vi.spyOn(Linking, 'openURL').mockResolvedValue(true);
     await mount();
     fireEvent.click(screen.getByTestId('settings-aviso-privacidad'));
     fireEvent.click(screen.getByTestId('settings-terminos'));
     expect(open.mock.calls).toEqual([
-      ['https://xangarro.mx/privacidad/'],
-      ['https://xangarro.mx/terminos/'],
+      ['https://xangarro.mx/privacidad/?desde=app'],
+      ['https://xangarro.mx/terminos/?desde=app'],
     ]);
     open.mockRestore();
   });
