@@ -183,6 +183,7 @@ Links to discussion, docs, prior art.
 | [142](#adr-142) | 2026-11-11 | A new account confirms its email before it has a session, and owners and admins may add a TOTP second factor; both live in the portal's own auth, on the link table and the console's TOTP code | Accepted |
 | [143](#adr-143) | 2026-11-12 | The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process | Accepted |
 | [144](#adr-144) | 2026-11-13 | The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them | Accepted |
+| [145](#adr-145) | 2026-11-17 | OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10454,3 +10455,51 @@ little to cut.
 - Three HTML reports (`playwright-report-<shard>`) instead of one; the merged coverage artifact is
   unchanged.
 - `XG_E2E_NO_VIEWPORTS=1` stays for focused local runs of one serial project.
+
+## ADR-145
+
+**Title:** OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS
+
+**Date:** 2026-11-17
+
+**Status:** Accepted — N-82; closes audit SEC-MOB-01 (F-07) once a store build carries the certificate
+
+**Context**
+
+`expo-updates` ships JavaScript to every register over the air. Without update code signing, whoever
+holds the EAS account or an EAS token can publish to the `production` channel, and every phone runs it
+on its next launch: the ledger, the NIP hashes and the device token are all within that JavaScript's
+reach (audit 2026-09-17, SEC-MOB-01). The certificate is embedded at prebuild, so this has to be in
+place before the first store build, or the first builds in the field accept unsigned updates for as
+long as they live.
+
+**Decision**
+
+1. **The builds trust one certificate:** `apps/mobile/certs/certificate.pem`, self-signed, RSA,
+   `rsa-v1_5-sha256`, key id `main`, CN «Xangarro», valid ten years (to 2036-11). `app.json`
+   `updates.codeSigningCertificate` and `codeSigningMetadata` point at it. It is public and committed.
+2. **The private key is the owner's.** Master copy in the owner's password manager, one offline backup,
+   a working copy at `~/.xangarro/ota-signing/keys/private-key.pem` (mode 600) on the machine that
+   publishes. Never in the repo, EAS, GitHub Actions or Vercel. `docs/ops/provisioning.md` §11 names
+   where it is and who else holds a copy.
+3. **Updates go out only through `pnpm --filter @xangarro/mobile ota:publish`**
+   (`apps/mobile/scripts/ota-publish.mjs`). It refuses a missing or unreadable key and a key that is not
+   the certificate's before EAS is called, refuses an expired certificate, warns a year before expiry,
+   then runs `eas-cli update --private-key-path`. CI does not publish updates.
+
+**Alternatives considered**
+
+- *The key as a GitHub Actions secret, CI publishing.* Rejected: whoever controls the repository's CI
+  could then ship JavaScript to every register, which is most of what this ADR stops.
+- *No signing, relying on EAS account 2FA.* Rejected: a leaked EAS token bypasses 2FA, and the token is
+  exactly the credential CI and laptops carry.
+
+**Consequences**
+
+- A lost key or an expired certificate means no update ever reaches the builds that carry it: only a
+  new store binary. That is the price, and why the key has two copies away from the laptop.
+- Builds installed before the certificate keep accepting unsigned updates until they are replaced.
+- Every channel is signed by the same key, `preview` included, because every build carries the
+  certificate. Development builds load from Metro and are unaffected.
+- Rotation is a store release: new pair, configured, shipped; the old key keeps publishing for the old
+  builds until they are gone.
