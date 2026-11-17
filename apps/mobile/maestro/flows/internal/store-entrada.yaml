@@ -7,10 +7,19 @@
 # Precondition: on Inventario (mobile-inventario), turno open.
 appId: mx.xangarro.mobile
 ---
+# Up first (the last entrada left the list scrolled), then down: «Entradas de
+# hoy» names every product stocked so far, and on a phone that card grows
+# until it pushes the button below the fold.
 - scrollUntilVisible:
     element:
       id: 'inventario-abrir-entrada'
     direction: UP
+    timeout: 5000
+    optional: true
+- scrollUntilVisible:
+    element:
+      id: 'inventario-abrir-entrada'
+    direction: DOWN
     timeout: 5000
 - tapOn:
     id: 'inventario-abrir-entrada'
@@ -21,10 +30,12 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'mover-buscar'
 - inputText: ${BUSCAR}
+# Retype until the product itself shows: a dropped letter can match nothing
+# («pastorp») or another product («tra» finds Costra, not Torta).
 - repeat:
     while:
-      visible:
-        id: 'mover-sin-resultados'
+      notVisible:
+        id: 'mover-producto-${PRODUCTO}'
     times: 5
     commands:
       - eraseText: 30

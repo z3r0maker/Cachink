@@ -1,6 +1,7 @@
 # Screenshots manifest — `screenshots/`
 
-Captured 2026-11-12 from the real app on the Android emulator by the same
+Captured 2026-11-17 from the real app on the Android emulator, with the
+brand font (PR #117), by the same
 Maestro flow as the App Store set,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
 against the contracts mock. No compositing, no fixture screens. The story,
@@ -34,10 +35,11 @@ the entrada sheet and the keyboard cover «Guardar».
 
 ## Known imperfections (for the next re-shoot)
 
-- **The type is the system font**, not Plus Jakarta Sans, as in the App Store
-  set: re-shoot both stores once the phone loads the brand font (PR #117).
-- **The phone's Inicio** cuts «Efectivo esperado» ($2,265.00) at the tab bar:
-  1920 px is shorter than an iPhone, and the figure is still readable.
+- **The phone's Inicio** leaves «Efectivo esperado» ($2,265.00) below the
+  tab bar: 1920 px is shorter than an iPhone, and Plus Jakarta Sans sets the
+  cards a little taller. Mi turno (08) shows the figure.
+- **Venta hecha (05)**: in Plus Jakarta Sans «$235.00» runs over the change
+  box's right border and touches «Pagó con $500.00»; worst on the phone.
 - **Gastos** shows no gasto: the story records none, so its cifras read zero.
 - The shots were taken from a debug build (the dev client), which draws
   exactly what a release build draws on these screens.
@@ -49,7 +51,9 @@ the entrada sheet and the keyboard cover «Guardar».
    with `--clear`. `10.0.2.2` is the host from the emulator: Maestro restarts
    adb, which drops any `adb reverse`. In an agent sandbox Metro's file
    watcher does not run, so restart it with `--clear` after every edit.
-2. Per emulator, once: `hw.keyboard=no` in its AVD `config.ini` (with a
+2. Boot each emulator with `-no-window`: with a window, the Mac's pointer
+   resting over it hovers Android 15's app handle, and every shot gets a grey
+   box behind the bar at the top. Per emulator, once: `hw.keyboard=no` in its AVD `config.ini` (with a
    hardware keyboard Gboard shows only a floating bar, and the flow's
    `hideKeyboard` then presses Back and closes the app), and
    `adb shell settings put secure stylus_handwriting_enabled 0` (the Play

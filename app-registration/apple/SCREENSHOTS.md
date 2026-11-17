@@ -1,15 +1,16 @@
 # Screenshots manifest — `screenshots/`
 
-Captured 2026-11-11 from the real app by one Maestro flow,
+Captured 2026-11-17 from the real app by one Maestro flow,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
-against the contracts mock. No compositing, no fixture screens: what the app
-shows for the demo taquería («Tacos La Esquina») is what the shots contain. Play's set is meant to come
-from the same flow once the app runs end to end on Android.
+against the contracts mock, on `main` with the brand font (PR #117). No
+compositing, no fixture screens: what the app shows for the demo taquería
+(«Tacos La Esquina») is what the shots contain. Play's set comes from the same
+flow ([`../google-play/SCREENSHOTS.md`](../google-play/SCREENSHOTS.md)).
 
 ## The story
 
-The turno opens with a $2,000 fondo; ten products arrive (paid from the
-drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
+The turno opens with a $2,000 fondo; ten products arrive (all twenty on the
+iPad, whose Cobrar shows every row); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
 1 Café, $265.00 paid with $500), transfer ($150.00) and card ($227.50).
 
 | Shot             | Screen                                | What it shows                      |
@@ -20,7 +21,7 @@ drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
 | `04-checkout`    | «¿Cómo paga?», $500 and the change    | Cash, card, transfer, fiado        |
 | `05-venta-hecha` | Venta hecha with «Dale de cambio»     | The sale closes, receipt goes out  |
 | `06-ventas`      | Ventas del turno                      | What the turno recorded            |
-| `07-gastos`      | Gastos (cifras, the due recurrente)   | What left the drawer               |
+| `07-gastos`      | Gastos del turno (cifras, recurrente) | What left the drawer               |
 | `08-mi-turno`    | Mi turno: the cash that must be there | The turno at a glance              |
 
 ## Devices and sizes (Apple's required sets)
@@ -32,15 +33,14 @@ drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
 
 ## Known imperfections (for the next re-shoot)
 
-- **Inicio and Mi turno disagree on the cash in shots 02 and 08.** Inicio's
-  «Efectivo esperado» ($299.00) subtracted the stock bought through «Llegó
-  mercancía»; Mi turno's «Debe haber» ($2,265.00) did not. The app agrees
-  with itself since M-15 (catalogue F23: the corte never subtracts an
-  entrada's purchase, so both read $2,265.00); re-shoot 02 and 08.
-- **The type is the system font**, not Plus Jakarta Sans: the phone passes the
-  tokens' CSS stack as `fontFamily`, which no native platform resolves.
-- **The iPad's Cobrar** shows ten more products below the stocked ones, with
-  «Quedan 0»; Inicio's «Para hoy» asks to restock them.
+- **Gastos shows no gasto**: since M-15 it lists only the turno's stamped
+  gastos, and the story records none, so its cifras read zero and the empty
+  state's search badge peeks above the tab bar. Only «Renta local», the due
+  recurrente, fills the screen.
+- **Venta hecha (05)**: in Plus Jakarta Sans «$235.00» runs into the
+  change box's right border and touches «Pagó con $500.00».
+- **The iPad's code boxes** show the typed code faintly behind the first box
+  («VALDK7M3»): the hidden field's own text bleeds through (shot 01).
 
 ## Reproducing
 
@@ -54,6 +54,12 @@ drawer); then three sales: cash with change (2 Alambre, 2 Agua de horchata,
    (never `clearState`: it also forgets the dev client's settings), then from
    `apps/mobile/maestro/flows/internal/`:
    `maestro --device <udid> test -e OUT=<folder> -e FORMA=telefono store-screenshots.yaml`
-   (`FORMA=tableta` on the iPad).
-4. Look at every shot before copying it here: a capture can catch the
+   (`FORMA=tableta` on the iPad; `-e MOCK=http://127.0.0.1:<port>` when the
+   mock is not on :3000).
+4. **One Maestro run at a time, iOS and Android together.** Maestro 2.5 gives
+   every device host port 7001: an Android run takes it from an iOS driver
+   mid-flow, and an iOS driver left running (`xcodebuild test-without-building`)
+   answers for the simulator it was started on, not the one passed to
+   `--device`. Stop leftover drivers before an iOS run.
+5. Look at every shot before copying it here: a capture can catch the
    Dynamic Island's momentary blob (`store-pausa.yaml` waits it out).
