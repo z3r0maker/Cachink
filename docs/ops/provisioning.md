@@ -407,18 +407,33 @@ without publishing.
 **Proving it on the first store build** (the N-82 acceptance). With a
 `preview` build that carries the certificate installed:
 
-1. `npx eas-cli update --channel preview --message "sin firma"` with no
+1. `npx eas-cli@latest update --channel preview --message "sin firma"` with no
    `--private-key-path`. The app must keep running the bundle it has: the
    update is rejected.
 2. `pnpm --filter @xangarro/mobile ota:publish --channel preview --message "firmado"`.
    After two launches the app runs it.
 3. Republish the previous preview update so the channel is back where it was.
 
-**Who may publish to `production`.** The EAS organisation keeps 2FA on, and
-only the owner holds the Admin or Developer role: those are the roles that can
-publish. Builds already in the field
-before this change carry no certificate and accept unsigned updates until
-they are replaced.
+**Who may publish.** Owner, Admin, Release Manager and Developer can all
+publish updates: each role includes the ones below it. Only the owner holds one
+of them, with 2FA on. The signature stops an update from running without the
+key, but these roles can still start builds and manage credentials.
+
+- **Testers are not members.** A `preview` build installs from its
+  internal-distribution link. An iPhone is registered first with
+  `eas device:create`, and only builds made after that install on it.
+- **Access tokens** carry their creator's full role unless limited when created.
+  Prefer the CLI's login on the publishing machine. A token that automation
+  really needs is limited to this organisation with the Developer role, and its
+  value is never written to a file.
+- **The GitHub App robot** has the Developer role by default and Expo restores it
+  if deleted. It stays as it is.
+- **Protect the channel** once `production` exists:
+  `npx eas-cli@latest channel:protect production` (EAS CLI 24 or later). Developers
+  then cannot publish to it; Release Manager and above can.
+
+Builds already in the field before this change carry no certificate and accept
+unsigned updates until they are replaced.
 
 **If the key is lost or the certificate expires** (it is good for ten
 years, to 2036-11), no update reaches those builds again: only a new store
