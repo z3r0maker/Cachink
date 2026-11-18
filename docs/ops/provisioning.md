@@ -428,9 +428,11 @@ key, but these roles can still start builds and manage credentials.
   value is never written to a file.
 - **The GitHub App robot** has the Developer role by default and Expo restores it
   if deleted. It stays as it is.
-- **Protect the channel** once `production` exists:
-  `npx eas-cli@latest channel:protect production` (EAS CLI 24 or later). Developers
-  then cannot publish to it; Release Manager and above can.
+- **`production` is a protected channel** (since 2026-11-18, EAS CLI 24 or later).
+  Developers cannot publish to it; Release Manager and above can. A new channel is
+  protected with `npx eas-cli@latest channel:protect <name>`.
+- **Run `eas` from `apps/mobile`.** From the repo root it finds no project and
+  offers to link one, which writes a project id into the root `app.json`.
 
 Builds already in the field before this change carry no certificate and accept
 unsigned updates until they are replaced.
