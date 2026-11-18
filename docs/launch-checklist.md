@@ -50,26 +50,22 @@ the console.
 - [ ] Create a Sentry project for `mx.xangarro.mobile`.
 - [ ] Grab the DSN — it goes into `PRODUCTION_SENTRY_DSN` (step 6).
 
-### ☐ 6. EAS secrets
+### ☑ 6. EAS production variables
 
-Set these via `eas secret:create` (one-time per environment):
+The `production` environment on EAS holds these, and the `production` build
+profile reads them from there:
 
-| Secret                          | Value                                                                                |
-| ------------------------------- | ------------------------------------------------------------------------------------ |
-| `PRODUCTION_API_BASE`           | The portal's origin, `https://…`. The release gate refuses anything else (ADR-140).  |
-| `PRODUCTION_ENTITLEMENT_PUBKEY` | The entitlement public key, 64 hex (`docs/ops/provisioning.md` §2). Never a dev key. |
-| `PRODUCTION_SENTRY_DSN`         | Sentry DSN (optional — omit if no Sentry account yet).                               |
+| Variable                         | Value                                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `EXPO_PUBLIC_API_BASE`           | The portal's origin, `https://…`. The release gate refuses anything else (ADR-140).  |
+| `EXPO_PUBLIC_ENTITLEMENT_PUBKEY` | The entitlement public key, 64 hex (`docs/ops/provisioning.md` §2). Never a dev key. |
+| `EXPO_PUBLIC_SENTRY_DSN`         | Sentry DSN (optional: omit it if there is no Sentry project yet).                    |
 
-The app reads no Supabase URL or key since N-81; `PRODUCTION_CLOUD_*` and
-`PRODUCTION_BUG_INGEST_URL` can be deleted from EAS. `apps/mobile/eas.json`
-passes these as literal `$PRODUCTION_*` strings, which EAS may not
-substitute: confirm the first production build reads real values (the
-release gate fails it if not).
+Do not repeat them in `apps/mobile/eas.json`: a value there wins over the EAS
+variable, and `$NAME` is not expanded, so a placeholder fails the release gate.
 
-Preview variants (`PREVIEW_*`) follow the same pattern if needed.
-
-> **Important:** After creating/changing secrets, rebuild the binary
-> (`eas build -p ios`) — env vars are compile-time in Expo.
+> **Important:** After changing a variable, rebuild the binary
+> (`eas build -p ios`): these values are compiled in.
 
 ### ☐ 7. Build + distribute (iOS)
 

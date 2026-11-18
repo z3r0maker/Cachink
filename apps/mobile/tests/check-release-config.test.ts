@@ -111,4 +111,22 @@ describe('the EAS hook', () => {
       assert.equal(command.includes('check-release-config'), false, name);
     }
   });
+
+  it('leaves the production values to EAS: eas.json does not override them', () => {
+    // A value in eas.json wins over an EAS variable and "$NAME" is not expanded,
+    // so one placeholder here fails every production build at this gate.
+    const eas = JSON.parse(readFileSync(resolve(APP, 'eas.json'), 'utf8')) as {
+      readonly build: {
+        readonly production: {
+          readonly environment?: string;
+          readonly env?: Record<string, string>;
+        };
+      };
+    };
+    const placeholders = Object.entries(eas.build.production.env ?? {}).filter(([, value]) =>
+      value.startsWith('$'),
+    );
+    assert.deepEqual(placeholders, []);
+    assert.equal(eas.build.production.environment, 'production');
+  });
 });
