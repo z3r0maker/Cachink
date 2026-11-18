@@ -393,8 +393,16 @@ mode `600`. It is never in the repo (`apps/mobile/.gitignore` ignores
 `keys/`), in EAS, in GitHub Actions or in Vercel. Anyone else given a copy
 is named here, with the date.
 
-**Publishing.** Only through the script, which checks the key against the
-certificate before EAS is called:
+**Publishing needs a paid EAS plan.** EAS accepts a signed update only from an
+account on the Production or Enterprise plan (Production was $199 a month plus
+usage on 2026-11-18). On the free plan the publish fails with «EAS Update code
+signing requires a subscription», and because every build refuses unsigned
+updates, **no OTA update can reach a phone**. The app and store releases are not
+affected: fixes go out as a new store version. The builds need no change when
+the plan starts, because they already carry the certificate.
+
+With the plan, publish only through the script, which checks the key against
+the certificate before EAS is called:
 
 ```bash
 pnpm --filter @xangarro/mobile ota:publish --channel production --message "…"
@@ -402,17 +410,38 @@ pnpm --filter @xangarro/mobile ota:publish --channel production --message "…"
 
 On another machine, restore the key from the password manager to the path
 above, or point `XANGARRO_OTA_KEY` at it. `--dry-run` prints the command
-without publishing.
+without publishing. A channel not named after an EAS environment also needs
+`--environment <name>`.
 
-**Proving it on the first store build** (the N-82 acceptance). With a
-`preview` build that carries the certificate installed:
+**What has been proved.** On 2026-11-18, on an Android internal build carrying
+the certificate, an unsigned update was refused across three launches: the app
+asks EAS for a signed update, EAS answers 400 («no code signing info found») and
+the app keeps the bundle it has. The same update is served to a client that does
+not ask for a signature, which is what a build without the certificate does.
+**Not proved yet:** that a correctly signed update is accepted, and that one
+signed by another key is refused. EAS will not publish either without the plan.
 
-1. `npx eas-cli@latest update --channel preview --message "sin firma"` with no
-   `--private-key-path`. The app must keep running the bundle it has: the
-   update is rejected.
-2. `pnpm --filter @xangarro/mobile ota:publish --channel preview --message "firmado"`.
-   After two launches the app runs it.
-3. Republish the previous preview update so the channel is back where it was.
+**Repeating the check, once the plan is active.** Use a throwaway channel so
+nothing real changes, and change something visible in each bundle:
+
+1. Add an uncommitted `eas.json` profile with `"channel": "ota-check"`, build an
+   Android `apk` from it, and install it.
+2. In a temporary copy of the project, remove `codeSigningCertificate` and
+   `codeSigningMetadata` from `app.json` (with them present, `eas update` refuses
+   to run without a key), then run
+   `npx eas-cli@latest update --channel ota-check --environment preview --message "sin firma"`.
+   The app must keep its bundle.
+3. Repeat with a certificate and key generated just for the test. The app must
+   keep its bundle.
+4. From the project itself, run
+   `pnpm --filter @xangarro/mobile ota:publish --channel ota-check --environment preview --message "firmado"`.
+   The app must show the new bundle by its second launch.
+5. Delete the channel and its branch with `npx eas-cli@latest channel:delete ota-check`
+   and `npx eas-cli@latest branch:delete ota-check`.
+
+**EAS builds read each `.gitignore` alone**, so an exception in a child file does
+not undo a parent's rule. The root and `apps/mobile` files must both let
+`apps/mobile/certs/certificate.pem` through, or every build fails at prebuild.
 
 **Who may publish.** Owner, Admin, Release Manager and Developer can all
 publish updates: each role includes the ones below it. Only the owner holds one
