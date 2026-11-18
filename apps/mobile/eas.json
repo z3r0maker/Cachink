@@ -31,17 +31,13 @@
     },
     "production": {
       "channel": "production",
+      "environment": "production",
       "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium"
       },
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_SENTRY_DSN": "$PRODUCTION_SENTRY_DSN",
-        "EXPO_PUBLIC_API_BASE": "$PRODUCTION_API_BASE",
-        "EXPO_PUBLIC_ENTITLEMENT_PUBKEY": "$PRODUCTION_ENTITLEMENT_PUBKEY"
       }
     }
   },
