@@ -65,7 +65,10 @@ describe('ota-publish', () => {
       { XANGARRO_OTA_KEY: key },
     );
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /eas-cli update --channel production --message Arreglo/);
+    assert.match(
+      r.out,
+      /eas-cli@latest update --channel production --environment production --message Arreglo/,
+    );
     assert.ok(r.out.includes(`--private-key-path ${key}`), r.out);
   });
 
@@ -85,7 +88,7 @@ describe('ota-publish', () => {
     );
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /\[KEY_MISMATCH\]/);
-    assert.doesNotMatch(r.out, /eas-cli update/);
+    assert.doesNotMatch(r.out, /eas-cli@latest update/);
   });
 
   it('refuses without a channel or a message, and with a file that is not a key', () => {
@@ -105,6 +108,18 @@ describe('ota-publish', () => {
     );
     assert.equal(bad.status, 1, bad.out);
     assert.match(bad.out, /\[KEY_UNREADABLE\]/);
+  });
+
+  it('needs an environment for a channel that does not name one', () => {
+    const { key, cert } = pair('channel', 3650);
+    const env = { XANGARRO_OTA_KEY: key };
+    const base = ['--channel', 'ota-check', '--message', 'x', '--certificate', cert, '--dry-run'];
+    const missing = publish(base, env);
+    assert.equal(missing.status, 1, missing.out);
+    assert.match(missing.out, /\[USAGE\].*--environment/);
+    const given = publish([...base, '--environment', 'preview'], env);
+    assert.equal(given.status, 0, given.out);
+    assert.match(given.out, /--channel ota-check --environment preview/);
   });
 
   it('warns when the certificate has under a year left', () => {

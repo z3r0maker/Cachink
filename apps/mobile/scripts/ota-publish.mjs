@@ -12,9 +12,13 @@
  * `XANGARRO_OTA_KEY`. Its master copy is the owner's password manager
  * (docs/ops/provisioning.md §11).
  *
- * Options: `--certificate <path>` checks against another certificate (a
- * rotation, before it is configured); `--dry-run` prints the EAS command and
- * stops.
+ * EAS only accepts a signed update from an account on its Production or
+ * Enterprise plan (§11).
+ *
+ * Options: `--environment <name>` picks the EAS environment, and is required
+ * for a channel not named after one; `--certificate <path>` checks against
+ * another certificate (a rotation, before it is configured); `--dry-run` prints
+ * the EAS command and stops.
  */
 import { spawnSync } from 'node:child_process';
 import { X509Certificate, createPrivateKey, createPublicKey } from 'node:crypto';
@@ -25,6 +29,7 @@ import { parseArgs } from 'node:util';
 
 const DEFAULT_CERT = new URL('../certs/certificate.pem', import.meta.url);
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const EAS_ENVIRONMENTS = ['development', 'preview', 'production'];
 
 class PublishError extends Error {
   constructor(code, message) {
@@ -39,6 +44,7 @@ function options(argv) {
     options: {
       channel: { type: 'string' },
       message: { type: 'string' },
+      environment: { type: 'string' },
       certificate: { type: 'string' },
       'dry-run': { type: 'boolean', default: false },
     },
@@ -46,7 +52,12 @@ function options(argv) {
   if (!values.channel || !values.message) {
     throw new PublishError('USAGE', 'ota:publish --channel <channel> --message "<what changed>"');
   }
-  return values;
+  const environment =
+    values.environment ?? (EAS_ENVIRONMENTS.includes(values.channel) ? values.channel : undefined);
+  if (!environment) {
+    throw new PublishError('USAGE', `channel ${values.channel} needs --environment <name>`);
+  }
+  return { ...values, environment };
 }
 
 function keyPath(env) {
@@ -95,10 +106,12 @@ function checkPair(key, cert) {
 
 function easArgs(values, key) {
   return [
-    'eas-cli',
+    'eas-cli@latest',
     'update',
     '--channel',
     values.channel,
+    '--environment',
+    values.environment,
     '--message',
     values.message,
     '--private-key-path',
