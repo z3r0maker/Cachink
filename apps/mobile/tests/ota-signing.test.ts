@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { X509Certificate } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, it } from 'vitest';
 
 /**
@@ -29,6 +30,24 @@ function certificate(): X509Certificate {
   const path = app.expo.updates?.codeSigningCertificate;
   assert.ok(path, 'updates.codeSigningCertificate is not set');
   return new X509Certificate(readFileSync(resolve(APP, path)));
+}
+
+/**
+ * Whether one `.gitignore`, read alone, ignores a path. EAS reads them this way
+ * when it copies the project for a build: unlike git, an exception in a child
+ * file does not undo a rule in its parent, so every level has to let the
+ * certificate through.
+ */
+function ignoredByAlone(gitignore: string, path: string): boolean {
+  const repo = mkdtempSync(join(tmpdir(), 'ota-ignore-'));
+  try {
+    execFileSync('git', ['init', '-q'], { cwd: repo });
+    copyFileSync(gitignore, join(repo, '.gitignore'));
+    const r = spawnSync('git', ['check-ignore', '-q', '--no-index', path], { cwd: repo });
+    return r.status === 0;
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 }
 
 describe('OTA code signing', () => {
@@ -67,5 +86,17 @@ describe('OTA code signing', () => {
       encoding: 'utf8',
     });
     assert.equal(ignored.trim(), 'keys/private-key.pem');
+  });
+
+  it('reaches EAS builds: no .gitignore level drops the certificate, each drops a key', () => {
+    const levels = [
+      { file: resolve(APP, '../../.gitignore'), prefix: 'apps/mobile/' },
+      { file: resolve(APP, '.gitignore'), prefix: '' },
+    ];
+    for (const { file, prefix } of levels) {
+      assert.equal(ignoredByAlone(file, `${prefix}certs/certificate.pem`), false, file);
+      assert.equal(ignoredByAlone(file, `${prefix}keys/private-key.pem`), true, file);
+      assert.equal(ignoredByAlone(file, `${prefix}certs/private-key.pem`), true, file);
+    }
   });
 });

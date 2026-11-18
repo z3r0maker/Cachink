@@ -61,6 +61,8 @@ src-tauri/target/
 
 # Misc
 *.pem
+# OTA signing (ADR-145): public, and EAS honours this file over any child exception
+!apps/mobile/certs/certificate.pem
 .rnstorybook/
 
 # Storybook + Playwright build artifacts (baselines under __snapshots__/
