@@ -30,19 +30,19 @@ Google's rules that shape the answers:
 Every row: **collected = yes**, **shared = no**, **not processed
 ephemerally**, **purpose = App functionality** only.
 
-| Play category → type                        | Required / optional | What it is in Xangarro                                                                                      | Same row on the App Store label                     |
-| ------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Personal info → Email address               | Required            | The owner's email, typed when linking a device                                                              | Contact Info → Email Address                        |
-| Personal info → Name                        | Optional            | Names of the business's fiado customers, only when fiado is used                                            | Contact Info → Name                                 |
-| Personal info → Phone number                | Optional            | Those customers' phone numbers, for WhatsApp reminders                                                      | Contact Info → Phone Number                         |
-| Personal info → User IDs                    | Required            | The operator's id on each shift, cash movement and record they create                                       | Identifiers → User ID                               |
-| Financial info → Other financial info       | Required            | The business's sales, expenses, cash counts and stock movements                                             | Financial Info → Other Financial Info               |
-| Messages → Other in-app messages            | Optional            | Operators' replies to the owner's messages (`respuestas_operador`)                                          | User Content → Other User Content                   |
-| App activity → Other user-generated content | Required            | Free text typed into records (concepts, notes) and the description sent with «Reportar un problema»         | User Content → Other User Content, Customer Support |
-| Photos and videos → Photos                  | Optional            | Product photos taken or picked in Inventario, reduced to 512 px and synced to the business's account        |
-| App info and performance → Crash logs       | Optional            | Crash reports, **only if the user turns them on**; scrubbed of names, phones, amounts and text              | Diagnostics → Crash Data                            |
-| App info and performance → Diagnostics      | Required            | Platform, OS version and device name at linking; the scrubbed event log sent with a bug report              | Diagnostics → Other Diagnostic Data                 |
-| Device or other IDs → Device or other IDs   | Required            | The device id Xangarro generates at linking, and `expo-updates`' random install id (not the advertising id) | Identifiers → Device ID                             |
+| Play category → type                        | Required / optional | What it is in Xangarro                                                                                                                   | Same row on the App Store label                     |
+| ------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Personal info → Email address               | Required            | The owner's email, typed when linking a device                                                                                           | Contact Info → Email Address                        |
+| Personal info → Name                        | Optional            | Names of the business's fiado customers, only when fiado is used                                                                         | Contact Info → Name                                 |
+| Personal info → Phone number                | Optional            | Those customers' phone numbers, for WhatsApp reminders                                                                                   | Contact Info → Phone Number                         |
+| Personal info → User IDs                    | Required            | The operator's id on each shift, cash movement and record they create                                                                    | Identifiers → User ID                               |
+| Financial info → Other financial info       | Required            | The business's sales, expenses, cash counts and stock movements                                                                          | Financial Info → Other Financial Info               |
+| Messages → Other in-app messages            | Optional            | Operators' replies to the owner's messages (`respuestas_operador`)                                                                       | User Content → Other User Content                   |
+| App activity → Other user-generated content | Required            | Free text typed into records (concepts, notes) and the description sent with «Reportar un problema»                                      | User Content → Other User Content, Customer Support |
+| Photos and videos → Photos                  | Optional            | Product photos (512 px) and gasto receipt photos (grayscale, 1024 px), taken or picked on the phone and synced to the business's account | User Content → Photos or Videos                     |
+| App info and performance → Crash logs       | Optional            | Crash reports, **only if the user turns them on**; scrubbed of names, phones, amounts and text                                           | Diagnostics → Crash Data                            |
+| App info and performance → Diagnostics      | Required            | Platform, OS version and device name at linking; the scrubbed event log sent with a bug report                                           | Diagnostics → Other Diagnostic Data                 |
+| Device or other IDs → Device or other IDs   | Required            | The device id Xangarro generates at linking, and `expo-updates`' random install id (not the advertising id)                              | Identifiers → Device ID                             |
 
 Play has a «Messages» category Apple lacks, so the operators' replies sit
 there instead of under user content; the data is the same.
@@ -62,6 +62,6 @@ Advertising ID (no ads SDK; don't add the `AD_ID` permission).
 ## The camera
 
 The camera reads QR and barcodes on the device, and those frames never leave
-it. It also takes product photos, which are synced to the business's account,
-so **Photos** is ticked above. `app.json` turns the microphone off
+it. It also takes product photos and gasto receipt photos, which are synced to
+the business's account, so **Photos** is ticked above. `app.json` turns the microphone off
 (`recordAudioAndroid: false`), so no audio permission ships either.
