@@ -1990,7 +1990,7 @@ WhatsApp).
   copies the corte and opens another turno with the counted cash; `pnpm lint:design` stays at
   zero.
 
-### P-44 El código de barras del producto: con lector y sin repetidos (ADR-149) [media]
+### P-44 El código de barras del producto: con lector y sin repetidos (ADR-150) [media]
 
 - [ ] Status · **Blocked by:** M-19 (`codigoCanonico`) · **Blocks:** P-45
 - **Context:** the product form calls the code «Código (SKU)» under «Más opciones», accepts any value,
@@ -2020,7 +2020,7 @@ WhatsApp).
   the data-pg integration test builds two coded products, an archived one and another tenant's;
   `pnpm lint:design` stays at zero.
 
-### P-45 Revisión de caja: el mismo código de barras (ADR-149) [media]
+### P-45 Revisión de caja: el mismo código de barras (ADR-150) [media]
 
 - [ ] Status · **Blocked by:** P-44 (`codigo_canonico`) · **Blocks:** —
 - **Context:** Revisión de caja offers a merge only for a pending product with the same name as an

@@ -187,7 +187,7 @@ Links to discussion, docs, prior art.
 | [146](#adr-146) | 2026-11-18 | An abono carries the turno whose drawer received it, as a gasto does | Accepted |
 | [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
-| [149](#adr-149) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
+| [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10660,7 +10660,7 @@ shown negative liabilities on Balance. No screen created that movement yet.
 - The withholdings are split into ISR and IVA by reading each movement's captured payload; the payable is one
   account.
 
-## ADR-149
+## ADR-150
 
 **Title:** A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión
 
@@ -10700,7 +10700,7 @@ with the same name, so a duplicate code under another name goes through.
    …» even when the names differ. Its review offers «Fusionar con …», as the name match does, or «Son distintos»,
    which clears the pending product's code. «Aprobar» waits until one of the two is done, so a duplicate never
    reaches the catalogue through Revisión.
-5. **Postgres carries the key.** The next Postgres migration (`0059_products_codigo_canonico` as of this ADR) adds a stored generated column
+5. **Postgres carries the key.** The next Postgres migration (`0060_products_codigo_canonico` as of this ADR) adds a stored generated column
    `codigo_canonico` (the same rule written in SQL) and a non-unique index on `(business_id, codigo_canonico)`
    where `deleted_at is null`. A test checks the SQL rule against `codigoCanonico` over the same fixture codes.
    SQLite gets no column: the phone compares its catalogue in memory, which it already does.

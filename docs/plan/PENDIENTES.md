@@ -29,7 +29,7 @@ listas de abajo.
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1305`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1316`
 - **B-20** El journal de drizzle de Postgres, al día y con guarda (Colas de tracks) — destraba 2: N-27, N-30 · `03-backend.md:365`
-- **M-19** Un código, un producto en el escáner (ADR-149). (Colas de tracks) — destraba 2: P-44, P-45 · `19-movil-mostrador.md:52`
+- **M-19** Un código, un producto en el escáner (ADR-150). (Colas de tracks) — destraba 2: P-44, P-45 · `19-movil-mostrador.md:52`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1336`
 
 ## Bloquea producción (34)
@@ -95,8 +95,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] `Media` **M-14** Foto del producto en teléfonos reales. · `19-movil-mostrador.md:48`
-- [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-149). · `19-movil-mostrador.md:52`
-- [ ] `Media` **M-20** Escanear en Inventario (ADR-149). · `19-movil-mostrador.md:53`
+- [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:52`
+- [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:53`
 - [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
 
@@ -110,8 +110,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **P-28** Diagnóstico + estrategia — «Próximamente» en producción — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [~] `Media` **P-30** Runtime de generación del Asesor — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
 - [ ] `Media` **P-38** Don Cuentas explica una diferencia de caja — Bloqueada por: — · `04-portal.md:1891`
-- [ ] `Media` **P-44** El código de barras del producto: con lector y sin repetidos (ADR-149) — Bloqueada por: M-19 (`codigoCanonico`) · `04-portal.md:1995`
-- [ ] `Media` **P-45** Revisión de caja: el mismo código de barras (ADR-149) — Bloqueada por: P-44 (`codigo_canonico`) · `04-portal.md:2025`
+- [ ] `Media` **P-44** El código de barras del producto: con lector y sin repetidos (ADR-150) — Bloqueada por: M-19 (`codigoCanonico`) · `04-portal.md:1995`
+- [ ] `Media` **P-45** Revisión de caja: el mismo código de barras (ADR-150) — Bloqueada por: P-44 (`codigo_canonico`) · `04-portal.md:2025`
 - [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
