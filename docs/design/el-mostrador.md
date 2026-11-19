@@ -105,6 +105,9 @@ Five motions, nothing else. All of them are wrapped in `@media (prefers-reduced-
 
 Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner.
 
+Synth Studio (`tools/synth/studio`, internal, never shipped) has a list of its own (ADR-154). None of it applies
+to `apps/*`.
+
 ## 7. Contrast
 
 - **4.5:1 minimum** for all text.
