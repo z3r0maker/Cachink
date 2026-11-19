@@ -43,5 +43,3 @@ export * from './Pendientes/index';
 export { ClienteScreen } from './Cobranza/cliente-screen';
 export { useClienteCobranza } from './Cobranza/use-cliente-cobranza';
 export { useCuentas } from './Cobranza/use-cuentas';
-export { useInventarioCaja } from './Inventario/use-inventario-caja';
-export { useInventarioVista } from './Inventario/use-inventario-vista';

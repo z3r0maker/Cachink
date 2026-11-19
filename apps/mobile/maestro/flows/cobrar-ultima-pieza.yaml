@@ -23,8 +23,8 @@ tags:
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
 
-# One Torta arrives: the labelled «Llegó mercancía» above the list, pick the
-# product, one piece (inventario-llego-merma.yaml's steps).
+# One Torta (PRD-6) arrives: its row's «Llegó mercancía», one piece
+# (shared/llego-mercancia.yaml).
 - runFlow:
     file: shared/open-turno-row.yaml
     env:
@@ -33,50 +33,11 @@ tags:
     visible:
       id: 'mobile-inventario'
     timeout: 10000
-- scrollUntilVisible:
-    element:
-      id: 'inventario-abrir-entrada'
-    direction: UP
-    timeout: 5000
-- tapOn:
-    id: 'inventario-abrir-entrada'
-- extendedWaitUntil:
-    visible:
-      id: 'llego-mercancia-sheet'
-    timeout: 5000
-# Let the sheet finish sliding in and the scroll settle before the radio:
-# a tap mid-motion leaves it unchecked and «Registrar entrada» disabled.
-- waitForAnimationToEnd
-- scrollUntilVisible:
-    element:
-      id: 'mover-producto-Torta'
-    direction: DOWN
-    timeout: 10000
-    visibilityPercentage: 100
-    centerElement: true
-- waitForAnimationToEnd
-- tapOn:
-    id: 'mover-producto-Torta'
-# iOS folds aria-checked into the element's value («radio button, checked»);
-# Maestro's own `checked` flag stays false on it.
-- assertVisible:
-    id: 'mover-producto-Torta'
-    text: 'radio button, checked'
-- tapOn:
-    id: 'mover-cantidad'
-- inputText: '1'
-# One drag in the sheet body dismisses the keyboard (keyboardDismissMode
-# on-drag); hideKeyboard alone leaves the save footer under it.
-- swipe:
-    start: '50%, 45%'
-    end: '50%, 20%'
-- waitForAnimationToEnd
-- tapOn:
-    id: 'mover-guardar'
-- extendedWaitUntil:
-    visible:
-      id: 'mov-toast'
-    timeout: 8000
+- runFlow:
+    file: shared/llego-mercancia.yaml
+    env:
+      ID: '01JPRD00000000000000000006'
+      CANTIDAD: '1'
 - assertVisible: '.*\+1 de Torta\. Queda en tu turno\..*'
 - tapOn:
     id: 'mov-toast-entendido'

@@ -1,0 +1,50 @@
+# Reusable subflow: one «Llegó mercancía» from Inventario (RvInventario). The
+# product's row is one tap that opens «¿Qué pasó con la mercancía?» on that
+# product; low stock already picks «Llegó mercancía», and the chip is tapped
+# anyway so a stocked product records an entrada too. The field opens with 5
+# written: it is erased before ${CANTIDAD} is typed.
+#
+# Usage:
+#   - runFlow:
+#       file: shared/llego-mercancia.yaml
+#       env:
+#         ID: '01JPRD00000000000000000006'   # the mock's Torta
+#         CANTIDAD: '1'
+#
+# Precondition: on Inventario (mobile-inventario), turno open. Leaves the
+# toast up: the caller asserts its words and closes it.
+appId: mx.xangarro.mobile
+---
+- scrollUntilVisible:
+    element:
+      id: 'inventario-fila-${ID}'
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 100
+    centerElement: true
+- tapOn:
+    id: 'inventario-fila-${ID}'
+- extendedWaitUntil:
+    visible:
+      id: 'mover-sheet'
+    timeout: 5000
+# Let the sheet finish sliding in: a tap mid-motion misses the chip.
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-tipo-Entrada'
+- tapOn:
+    id: 'mover-cantidad'
+- eraseText: 6
+- inputText: ${CANTIDAD}
+# One drag in the sheet body dismisses the keyboard (keyboardDismissMode
+# on-drag); hideKeyboard alone leaves the save footer under it.
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000

@@ -1,6 +1,6 @@
 /**
  * The two kinds of inventory move at the top of the sheet (MvInventario):
- * «Llegó mercancía» and «Se echó a perder o se dañó (merma)», a radio group
+ * «Llegó mercancía» and «Se echó a perder» (RvInventario), a radio group
  * whose chosen option is yellow with the black edge (El Mostrador §2).
  */
 import type { ReactElement } from 'react';
@@ -12,7 +12,7 @@ import { borderWidths, colors, radii, shadows } from '../../theme';
 
 const TIPOS: readonly (readonly [TipoMovimiento, string])[] = [
   ['Entrada', 'Llegó mercancía'],
-  ['Merma', 'Se echó a perder o se dañó (merma)'],
+  ['Merma', 'Se echó a perder'],
 ];
 
 const opcion = (on: boolean): ViewStyle => ({

@@ -16,61 +16,61 @@ appId: mx.xangarro.mobile
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Agua de horchata'
-      BUSCAR: 'horch'
+      ID: '01JPRD00000000000000000007'
       CANTIDAD: '12'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Agua de jamaica'
-      BUSCAR: 'jamai'
+      ID: '01JPRD00000000000000000008'
       CANTIDAD: '10'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Alambre'
-      BUSCAR: 'alamb'
+      ID: '01JPRD0000000000000000000F'
       CANTIDAD: '6'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Arroz con leche'
-      BUSCAR: 'arroz'
+      ID: '01JPRD0000000000000000000K'
       CANTIDAD: '5'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Bolsa de hielo'
-      BUSCAR: 'hielo'
+      ID: '01JPRD0000000000000000000M'
       CANTIDAD: '8'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Café'
-      BUSCAR: 'caf'
+      ID: '01JPRD0000000000000000000H'
       CANTIDAD: '10'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Cerveza'
-      BUSCAR: 'cerve'
+      ID: '01JPRD0000000000000000000A'
       CANTIDAD: '12'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Consomé'
-      BUSCAR: 'consom'
+      ID: '01JPRD0000000000000000000D'
       CANTIDAD: '6'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Costra'
-      BUSCAR: 'costr'
+      ID: '01JPRD0000000000000000000G'
       CANTIDAD: '5'
 - runFlow:
     file: store-entrada.yaml
     env:
       PRODUCTO: 'Flan'
-      BUSCAR: 'flan'
+      ID: '01JPRD0000000000000000000J'
       CANTIDAD: '4'
 - runFlow:
     when:
@@ -80,59 +80,59 @@ appId: mx.xangarro.mobile
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Frijoles charros'
-            BUSCAR: 'frijol'
+            ID: '01JPRD0000000000000000000C'
             CANTIDAD: '6'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Gringa'
-            BUSCAR: 'gring'
+            ID: '01JPRD00000000000000000005'
             CANTIDAD: '8'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Orden de guacamole'
-            BUSCAR: 'guaca'
+            ID: '01JPRD0000000000000000000B'
             CANTIDAD: '5'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Quesadilla'
-            BUSCAR: 'quesad'
+            ID: '01JPRD00000000000000000004'
             CANTIDAD: '10'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Refresco 600ml'
-            BUSCAR: 'refres'
+            ID: '01JPRD00000000000000000009'
             CANTIDAD: '12'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Taco al pastor'
-            BUSCAR: 'pastor'
+            ID: '01JPRD00000000000000000001'
             CANTIDAD: '15'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Taco de bistec'
-            BUSCAR: 'bistec'
+            ID: '01JPRD00000000000000000002'
             CANTIDAD: '15'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Taco de suadero'
-            BUSCAR: 'suader'
+            ID: '01JPRD00000000000000000003'
             CANTIDAD: '15'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Torta'
-            BUSCAR: 'torta'
+            ID: '01JPRD00000000000000000006'
             CANTIDAD: '8'
       - runFlow:
           file: store-entrada.yaml
           env:
             PRODUCTO: 'Volcán'
-            BUSCAR: 'volc'
+            ID: '01JPRD0000000000000000000E'
             CANTIDAD: '10'

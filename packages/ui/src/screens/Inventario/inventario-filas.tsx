@@ -1,25 +1,16 @@
 /**
- * Inventario's rows (MvInventario): a stocked product (its glyph on its
- * tint, the name, the level bar with the threshold marked at the middle,
- * «Aviso en …», how much there is and the Reponer / Suficiente chip; the row
- * opens its movement sheet), and one movement of the turno (time, «Llegó
- * mercancía» or «Merma», the product, what was noted, +/− the quantity).
+ * Inventario's row (RvInventario, item 6): the product's photo square (it
+ * takes the photo, M-13), then one tap target — the name with the room it
+ * needs, the level bar with the threshold marked at the middle, «Aviso en
+ * …», how much there is and the Reponer / Suficiente chip — that opens the
+ * movement sheet. No buttons on the row: the sheet picks the kind.
  */
 import type { ReactElement } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { View } from '@tamagui/core';
-import {
-  conUnidad,
-  delta,
-  nivel,
-  porReponer,
-  type Existencia,
-  type Movimiento,
-} from '@xangarro/caja/inventario';
+import { conUnidad, nivel, porReponer, type Existencia } from '@xangarro/caja/inventario';
 import { GLYPHS, MText, PathIcon } from '../../components/index';
 import { borderColors, borderWidths, colors, shapeRadii } from '../../theme';
-import { ProductoIcono } from '../Ventas/cobrar-tile';
-import type { ExistenciaMovil } from './inventario-registro';
 
 /** A small chip with its tint's edge and text. */
 function Pastilla(p: { texto: string; tinta: string; fondo: string }): ReactElement {
@@ -78,23 +69,21 @@ function Barra({ e }: { readonly e: Existencia }): ReactElement {
   );
 }
 
-const filaStyle = (marcada: boolean, ultima: boolean): ViewStyle => ({
+const filaStyle = (marcada: boolean): ViewStyle => ({
+  flex: 1,
+  minWidth: 0,
   flexDirection: 'row',
   alignItems: 'center',
-  gap: 12,
-  minHeight: 68,
+  gap: 10,
+  minHeight: 72,
   paddingVertical: 10,
-  paddingLeft: 14,
-  paddingRight: 12,
-  borderBottomWidth: ultima ? 0 : 1,
-  borderBottomColor: colors.gray100,
   backgroundColor: marcada ? colors.yellowSoft : colors.white,
 });
 
-function Nivel({ e }: { readonly e: ExistenciaMovil }): ReactElement {
+function Nivel({ e }: { readonly e: Existencia }): ReactElement {
   return (
     <View flex={1} minWidth={0} gap={4} alignItems="stretch">
-      <MText size="body" weight="extraBold" numberOfLines={1} textAlign="left">
+      <MText size="body" weight="extraBold" numberOfLines={2} textAlign="left">
         {e.nombre}
       </MText>
       <Barra e={e} />
@@ -111,10 +100,9 @@ function Nivel({ e }: { readonly e: ExistenciaMovil }): ReactElement {
   );
 }
 
+/** The tap target: everything on the row but the photo square. */
 export function ExistenciaFila(p: {
-  readonly e: ExistenciaMovil;
-  readonly abierta: boolean;
-  readonly ultima: boolean;
+  readonly e: Existencia;
   readonly onPress: () => void;
 }): ReactElement {
   const { e } = p;
@@ -125,69 +113,21 @@ export function ExistenciaFila(p: {
       role="button"
       aria-label={`${e.nombre}, hay ${hay}${porReponer(e) ? ', reponer' : ''}. Registrar un movimiento`}
       onPress={p.onPress}
-      style={({ pressed }) => filaStyle(pressed || p.abierta, p.ultima)}
+      style={({ pressed }) => filaStyle(pressed)}
     >
-      <ProductoIcono icono={e.glifo} tint={e.tint} size={44} />
       <Nivel e={e} />
       <View alignItems="flex-end" gap={4}>
-        <MText size="lgx" weight="extraBold" fontVariant={['tabular-nums']}>
+        <MText
+          size="lgx"
+          weight="extraBold"
+          fontVariant={['tabular-nums']}
+          testID={`inventario-cantidad-${e.id}`}
+        >
           {hay}
         </MText>
         <EstadoChip e={e} />
       </View>
       <PathIcon d={GLYPHS.chevronRight} size={18} strokeWidth={2.4} color={colors.textMuted} />
     </Pressable>
-  );
-}
-
-function QuePaso(p: { m: Movimiento; e: ExistenciaMovil | undefined }): ReactElement {
-  const entrada = p.m.tipo === 'Entrada';
-  return (
-    <View flex={1} minWidth={0} gap={3}>
-      <View flexDirection="row" alignItems="center" gap={6}>
-        <MText size="xs" color={colors.gray600} fontVariant={['tabular-nums']}>
-          {p.m.hora}
-        </MText>
-        {entrada ? (
-          <Pastilla texto="Llegó mercancía" tinta={colors.greenText} fondo={colors.greenSoft} />
-        ) : (
-          <Pastilla texto="Merma" tinta={colors.redText} fondo={colors.redSoft} />
-        )}
-      </View>
-      <MText size="body" weight="extraBold" numberOfLines={1}>
-        {p.e?.nombre ?? 'Producto'}
-      </MText>
-      {p.m.detalle ? (
-        <MText size="sm" weight="semibold" color={colors.textMuted} numberOfLines={1}>
-          {p.m.detalle}
-        </MText>
-      ) : null}
-    </View>
-  );
-}
-
-export function MovimientoFila(p: {
-  readonly m: Movimiento;
-  readonly e: ExistenciaMovil | undefined;
-  readonly ultima: boolean;
-}): ReactElement {
-  const entrada = p.m.tipo === 'Entrada';
-  return (
-    <View
-      testID={`inventario-mov-${p.m.id}`}
-      role="listitem"
-      style={{ ...filaStyle(false, p.ultima), minHeight: 72 }}
-    >
-      {p.e ? <ProductoIcono icono={p.e.glifo} tint={p.e.tint} size={44} /> : null}
-      <QuePaso m={p.m} e={p.e} />
-      <MText
-        size="lg"
-        weight="extraBold"
-        color={entrada ? colors.greenText : colors.redText}
-        fontVariant={['tabular-nums']}
-      >
-        {delta(p.m, p.e?.unidad ?? 'piezas')}
-      </MText>
-    </View>
   );
 }
