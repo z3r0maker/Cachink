@@ -15,6 +15,7 @@ gets filled from.
 | Apple ID         | `6836591900` (`ascAppId` in `apps/mobile/eas.json`)             |
 | Version          | `1.0.0`                                                         |
 | Availability     | Mexico only                                                     |
+| Seller           | The owner's Individual account, publishing for MEXIA, S.A.S.    |
 | Price            | Free, no in-app purchases                                       |
 
 The paste-ready text for every listing field (name, subtitle, promotional
