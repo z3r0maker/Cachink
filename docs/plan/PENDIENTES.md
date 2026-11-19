@@ -16,8 +16,8 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 `pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las
 listas de abajo.
 
-- **S-01** Paquetes `tools/synth/*` y su frontera (Colas de tracks) — destraba 22: S-03, S-04, S-05, S-06, S-07, S-08, … · `24-synth.md:107`
-- **S-02** `@xangarro/testing/tenant`: las fixtures de inquilino en un solo lugar (Colas de tracks) — destraba 21: S-04, S-05, S-06, S-07, S-08, S-09, … · `24-synth.md:121`
+- **S-01** Paquetes `tools/synth/*` y su frontera (Colas de tracks) — destraba 22: S-03, S-04, S-05, S-06, S-07, S-08, … · `24-synth.md:113`
+- **S-02** `@xangarro/testing/tenant`: las fixtures de inquilino en un solo lugar (Colas de tracks) — destraba 21: S-04, S-05, S-06, S-07, S-08, S-09, … · `24-synth.md:127`
 - **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 15: E-10, E-12, E-14, E-22, E-23, E-30, … · `20-command-center.md:313`
 - **M-10** The owner corrects a sale. (Colas de tracks) — destraba 13: N-24, N-22, N-25, N-44, N-29, N-30, … · `19-movil-mostrador.md:33`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1045`
@@ -212,31 +212,31 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `⛔ bloquea prod` `Alta` **N-27** Auditoría de base de datos `[LAUNCH]` — Bloqueada por: B-03, B-08, B-09 · Falta: la ronda 2 reverificó los 25 hallazgos de la primera ronda (9 corregidos, 9 parciales, 6 abiertos, 1 obsoleto; QRY-01 y MIG-01 quedaron solo parciales, SYNC-02 estaba hecho) y midió 24 hallazgos nuevos DB2-\* a escala. Corregidos en `perf/db-scale`: DB2-USE-01 (índices + reconteo con debounce), DB2-SYNC-01/-02 (push por lotes, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (migraciones sin transacción, ADR-119; no el journal desactualizado de drizzle), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Abiertos: DB-OPS-01/DB2-OPS-01 (PITR + simulacro = O-3), DB2-QRY-05 (rollup de `product_stock`; el bootstrap por snapshot ya está hecho, ADR-121), DB2-SYNC-03 (retención de recibos/logs, necesita un ADR), DB2-CHK-01 (las restricciones de integridad en la base: la tarea que la auditoría propuso como B-19 nunca se creó, y B-19 es hoy la foto de producto, ADR-134), la mitad del journal de drizzle de B-20, DB2-KEY-01, DB2-PART-01 (ADR de S2), contadores de uso incrementales; la UI en `docs/archive/18-db-scale-design-changes.md`. La ronda 3 (`docs/audits/db-2026-09-26-r3.html`) auditó la propia rama: 31 hallazgos (7 altos). Corregidos en `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Corregidos en `perf/db-launch`: DB3-BOOT-01 (el bootstrap rebasó el límite de 4.5 MB de Vercel tras alrededor de un mes con un negocio pesado; ahora es un snapshot paginado — línea base de stock + 90 días de movimientos, ≤ 2 MB por página — ADR-121, C-23; también la mitad bootstrap de DB2-QRY-05). DB3-EXP-01 (exportaciones en streaming), DB3-EST-01 (tope de 13 meses, sumas en SQL), DB3-SYNC-05 (503 + Retry-After en lugar de encolar), DB3-QRY-03 (resumen), ADR-122. DB3-SYNC-01 (b) (un lote rechazado en su totalidad se parte a la mitad hasta su fila; límite de tamaño de fila), DB3-L-02/03/07. También corregidos en `perf/db-launch`: DB3-CAJA-01/02/03 (una pestaña es la dueña de la caja, una «por enviar», el cierre con banner, pulls en reposo; ADR-123) y DB3-CAJA-04 en parte (escrituras OPFS encoladas; el VFS permanece abierto). La re-ejecución de `pg_stat_statements` todavía necesita el proyecto hospedado. **Verificado 2026-11-19 contra el repo**, los cuatro puntos que esta nota dejaba sin dueño o sin medir. (1) El journal de drizzle de Postgres sigue viejo y hasta ese día **no tenía tarea**: B-20 no existía en ningún track, y esta nota era el único lugar del repo que lo nombraba. Ya está escrita, con el nombre que esta nota le venía dando, en `03-backend.md`. `packages/data-pg/drizzle/meta/_journal.json` tiene 8 entradas (la última, `0013_business_regimen_sat`) y 8 snapshots, contra 69 archivos `.sql`, así que un `db:generate` diffearía contra el snapshot `0007` y emitiría una migración que recrea sesenta. Aplicar no se rompe por eso: el local recorre `drizzle/*.sql` (`scripts/db-local.sh`) y el hospedado va por su ledger (`scripts/hosted/plan.ts`); el riesgo es generar, no aplicar. El lado de SQLite está sano: journal de 16 entradas y barril generado, con el SQL en los `.ts` (`packages/data/drizzle/migrations/index.ts`). (2) DB2-CHK-01 está a medias y no como dice arriba: las tablas nuevas sí traen CHECK de enum (25 migraciones los tienen), pero las transaccionales del `0000` no tienen ninguno — `sales`, `expenses`, `inventory_movements`, `caja_movimientos`, `products`, `client_payments` —, que son justo las que la auditoría nombró. (3) DB2-SYNC-03 sigue sin ADR y sin purga: ningún ADR decide la retención, y nada borra `sync_receipts` ni `sync_log` (no hay cron ni migración que lo haga), así que las dos tablas crecen sin tope. (4) `pg_stat_statements` ya no espera a X-01: el proyecto hospedado existe en producción desde `447a6ef9` (2026-11-18). Falta correrlo, no tenerlo. · `09-next-features.md:765`
 - [ ] `⛔ bloquea prod` `Alta` **N-28** Auditoría de rendimiento `[LAUNCH]` — Bloqueada por: X-01 · Falta: sin empezar, y la nota no exageraba nada: no hay un solo archivo de k6 en el repo ni un `docs/audits/performance-*`, y `docs/archive/health-report-2026-04-30.md` sigue siendo lo único que existe. Espera a X-01. · `09-next-features.md:779`
 - [ ] `⛔ bloquea prod` `Alta` **N-29** Gate E2E determinista de toda la pila `[LAUNCH]` — Bloqueada por: P-17, A-16, N-22, N-25 · Falta: de las barreras sólo quedan dos abiertas: P-17 está cerrada y A-16 también, el 2026-10-20 (`docs/archive/05-app.md`), así que esperan N-22 y N-25. Nada del entregable de esta tarea existe todavía — no hay orquestador ni un escenario único —, pero sí existen, construidas para otras tareas, las dos mitades que va a usar. La cadena teléfono → portal **ya corre en CI contra el Postgres real**: `apps/web/e2e/telefono-cadenas.sync.spec.ts` activa un dispositivo y empuja y jala por HTTP (`sync-phone.ts`) para cuatro cadenas — una venta cancelada en el teléfono que llega a Movimientos con su stock de vuelta, un turno cerrado con faltante que llega a Cortes, un NIP reseteado en el portal que llega al siguiente pull, y el push de un dispositivo revocado que se rechaza y tras revincular aterriza una sola vez —, y los shards de `portal-e2e` la corren en cada push, de modo que un handler de push roto ya pone rojo el CI. La captura sin red es de Maestro (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`), pero contra el mock, no contra Supabase. Falta entonces: el escenario de punta a punta como una sola corrida (registro → asistente → operador → importación → código por QR → activar → vender en modo avión → reconectar → la venta en el portal → exportar), el script que secuencia Maestro y Playwright, y la mitad de Maestro en CI — `maestro-e2e.yml` sigue siendo `workflow_dispatch`, a la espera de un runner de macOS. · `09-next-features.md:788`
-- [ ] `Alta` **S-01** Paquetes `tools/synth/*` y su frontera · `24-synth.md:107`
-- [ ] `Alta` **S-02** `@xangarro/testing/tenant`: las fixtures de inquilino en un solo lugar · `24-synth.md:121`
-- [ ] `Alta` **S-03** Esquemas, `config.yaml` y `validate.ts` — Bloqueada por: S-01 · `24-synth.md:135`
-- [ ] `Alta` **S-04** La pila de una corrida — Bloqueada por: S-02, S-03 · `24-synth.md:149`
-- [ ] `Alta` **S-05** Runner web: Chromium por CDP, captura y actor — Bloqueada por: S-04 · `24-synth.md:164`
-- [ ] `Alta` **S-06** Runner de teléfono: emulador Android y Maestro MCP — Bloqueada por: S-04 · `24-synth.md:179`
-- [ ] `Alta` **S-07** Prueba de aislamiento del actor — Bloqueada por: S-05, S-06 · `24-synth.md:196`
-- [ ] `Alta` **S-08** Juez (`synth-judge`) — Bloqueada por: S-05 · `24-synth.md:206`
-- [ ] `Alta` **S-09** `aggregate.ts` y `report.md` — Bloqueada por: S-08 · `24-synth.md:219`
-- [ ] `Alta` **S-10** Personas y escenarios v1 — Bloqueada por: S-09 · `24-synth.md:231`
-- [ ] `Alta` **S-11** Matriz `smoke`, concurrencia y skill `synth-run` — Bloqueada por: S-10 · `24-synth.md:242`
-- [ ] `Alta` **S-12** Ocho bugs sembrados — Bloqueada por: S-11 · `24-synth.md:250`
-- [ ] `Alta` **S-13** `sensitivity.ts` y recall — Bloqueada por: S-12 · `24-synth.md:260`
-- [ ] `Media` **S-14** Estilo `walkthrough` — Bloqueada por: S-13 · `24-synth.md:271`
-- [ ] `Media` **S-15** Cinco interrupciones — Bloqueada por: S-13 · `24-synth.md:278`
-- [ ] `Media` **S-16** `synth-triage` — Bloqueada por: S-09 · `24-synth.md:291`
-- [ ] `Media` **S-17** `synth-persona` y evidencia pública — Bloqueada por: S-10 · `24-synth.md:305`
-- [ ] `Media` **S-18** `synth-research-prep` y línea base humana — Bloqueada por: S-09 · `24-synth.md:314`
-- [ ] `Media` **S-20** Studio de lectura — Bloqueada por: S-09 · `24-synth.md:333`
-- [ ] `Media` **S-21** Lanzar, En vivo, Comparar, Calibración — Bloqueada por: S-20, S-13 · `24-synth.md:346`
-- [ ] `Baja` **S-19** Resto de personas: núcleo, pool y anti-persona — Bloqueada por: S-17 · `24-synth.md:321`
-- [ ] `Baja` **S-22** Recorridos y memoria con olvido — Bloqueada por: S-11 · `24-synth.md:359`
-- [ ] `Baja` **S-23** Grafo de evidencia — Bloqueada por: S-17, S-20 · `24-synth.md:372`
-- [ ] `Baja` **S-24** Laboratorio de narrativa — Bloqueada por: S-23 · `24-synth.md:381`
-- [ ] `Baja` **S-25** Hallazgos al buzón `kind=explorador` — Disparador: the owner asks for Synth findings in the support inbox (N-05's source list). · `24-synth.md:392`
+- [ ] `Alta` **S-01** Paquetes `tools/synth/*` y su frontera · `24-synth.md:113`
+- [ ] `Alta` **S-02** `@xangarro/testing/tenant`: las fixtures de inquilino en un solo lugar · `24-synth.md:127`
+- [ ] `Alta` **S-03** Esquemas, `config.yaml` y `validate.ts` — Bloqueada por: S-01 · `24-synth.md:141`
+- [ ] `Alta` **S-04** La pila de una corrida — Bloqueada por: S-02, S-03 · `24-synth.md:156`
+- [ ] `Alta` **S-05** Runner web: Chromium por CDP, captura y actor — Bloqueada por: S-04 · `24-synth.md:171`
+- [ ] `Alta` **S-06** Runner de teléfono: emulador Android y Maestro MCP — Bloqueada por: S-04 · `24-synth.md:187`
+- [ ] `Alta` **S-07** Prueba de aislamiento del actor — Bloqueada por: S-05, S-06 · `24-synth.md:205`
+- [ ] `Alta` **S-08** Juez (`synth-judge`) — Bloqueada por: S-05 · `24-synth.md:215`
+- [ ] `Alta` **S-09** `aggregate.ts` y `report.md` — Bloqueada por: S-08 · `24-synth.md:228`
+- [ ] `Alta` **S-10** Personas y escenarios v1 — Bloqueada por: S-09 · `24-synth.md:240`
+- [ ] `Alta` **S-11** Matriz `smoke`, concurrencia y skill `synth-run` — Bloqueada por: S-10 · `24-synth.md:251`
+- [ ] `Alta` **S-12** Ocho bugs sembrados — Bloqueada por: S-11 · `24-synth.md:259`
+- [ ] `Alta` **S-13** `sensitivity.ts` y recall — Bloqueada por: S-12 · `24-synth.md:269`
+- [ ] `Media` **S-14** Estilo `walkthrough` — Bloqueada por: S-13 · `24-synth.md:280`
+- [ ] `Media` **S-15** Cinco interrupciones — Bloqueada por: S-13 · `24-synth.md:287`
+- [ ] `Media` **S-16** `synth-triage` — Bloqueada por: S-09 · `24-synth.md:300`
+- [ ] `Media` **S-17** `synth-persona` y evidencia pública — Bloqueada por: S-10 · `24-synth.md:314`
+- [ ] `Media` **S-18** `synth-research-prep` y línea base humana — Bloqueada por: S-09 · `24-synth.md:323`
+- [ ] `Media` **S-20** Studio de lectura — Bloqueada por: S-09 · `24-synth.md:342`
+- [ ] `Media` **S-21** Lanzar, En vivo, Comparar, Calibración — Bloqueada por: S-20, S-13 · `24-synth.md:362`
+- [ ] `Baja` **S-19** Resto de personas: núcleo, pool y anti-persona — Bloqueada por: S-17 · `24-synth.md:330`
+- [ ] `Baja` **S-22** Recorridos y memoria con olvido — Bloqueada por: S-11 · `24-synth.md:376`
+- [ ] `Baja` **S-23** Grafo de evidencia — Bloqueada por: S-17, S-20 · `24-synth.md:389`
+- [ ] `Baja` **S-24** Laboratorio de narrativa — Bloqueada por: S-23 · `24-synth.md:398`
+- [ ] `Baja` **S-25** Hallazgos al buzón `kind=explorador` — Disparador: the owner asks for Synth findings in the support inbox (N-05's source list). · `24-synth.md:409`
 
 ### Lanzamiento, stores e integración (8)
 

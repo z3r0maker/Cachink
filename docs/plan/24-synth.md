@@ -39,6 +39,12 @@ It is never shipped, never a CI gate, and never pointed at production. The desig
 12. **`market_weight`:** a first estimate, each value marked `source: estimate`:
     - lupita-abarrotes 0.30, taquero 0.25, emprendedora-cafe 0.15;
     - dueno-con-equipo 0.10, formal-con-contador 0.10, operador 0.10.
+13. **Studio's design (ADR-153):**
+    - A dark «Sala de control» look on `consoleTheme.dark`, where yellow means «en vivo».
+    - Studio has a motion list of its own, and each motion has a static state.
+    - Reactions come from runner signals only.
+    - Personas are geometric faces with a pictogram of the business type.
+    - The boards are on the Synth Studio canvas, https://claude.ai/artifact/HrVjKALmE6H7zTFaCDAFvp.
 
 ## 2. What Phase 0 found (corrections to the spec)
 
@@ -139,7 +145,8 @@ The full findings are in `tools/synth/ENV.md`.
   - `auth_as` is `owner | admin | viewer | operador`.
   - Success checks are named SQL assertions run under `withTenant`.
   - `config.yaml` holds `allowed_hosts`, models per role, `max_steps`, `max_turns`, time limits, concurrency
-    (web 3, phone 1), and the estimated-cost caps per corrida and per day.
+    (web 3, phone 1), the estimated-cost caps per corrida and per day, and the `reactions:` thresholds
+    (ADR-153 §4).
   - `validate.ts` checks every YAML file, including §6.1's rule that a `behaviors[].source` is a file under
     `personas/evidence/` or `hypothesis`.
 - **Acceptance:** an invalid YAML fails with a path and a reason. Tests: 1 happy and 3 unhappy paths per schema.
@@ -166,7 +173,8 @@ The full findings are in `tools/synth/ENV.md`.
   - `run.ts` launches Chromium with a temporary profile, the persona's viewport and network profile, and a CDP
     port.
   - `capture.ts` writes `console.jsonl`, `network.jsonl` (failures and slow requests), a screenshot per step and a
-    Playwright trace, all on one timeline.
+    Playwright trace, all on one timeline. Each step also records a screen fingerprint (URL plus DOM hash) for
+    Studio's reactions (ADR-153 §4).
   - The actor is `claude -p` with `actor-task.md`, run in an empty temporary directory. Its strict MCP config holds
     only Playwright MCP attached to that CDP endpoint, with an allow-list of that server's tools.
   - **Verify** the current `claude -p` flags and the Playwright MCP CDP option in their docs before writing this.
@@ -183,7 +191,8 @@ The full findings are in `tools/synth/ENV.md`.
     against the corrida's stack.
   - Each run starts with `pm clear` and links the device with an activation code minted by SQL.
   - Capture: logcat (errors only) to `console.jsonl`, the stack server's request log to `network.jsonl`, and a
-    screenshot plus `hierarchy.json` per step.
+    screenshot plus `hierarchy.json` per step, with the hash of `hierarchy.json` as the step's screen fingerprint
+    (ADR-153 §4).
   - The actor's strict MCP config holds only the Maestro MCP, with an allow-list of that server's tools.
   - Network profiles come from the emulator console.
   - **Verify** the Maestro MCP tool names and whether it can attach to a given device without the user's
@@ -334,10 +343,17 @@ The full findings are in `tools/synth/ENV.md`.
 - **What:**
   - **Server:** a SQLite indexer over `reports/` (`reindex`) and the read half of spec §16.4's API, bound to
     `127.0.0.1` only.
-  - **Studio:** Next.js with Radix and vanilla-extract, like the portal, with a sober look of its own. Screens:
+  - **Studio:** Next.js with Radix and vanilla-extract, like the portal. Screens:
     Inicio, Corridas, Reproductor (steps, thought, action and screenshot synced with console and network), and
     Bandeja with human review (spec §16.3).
-- **Acceptance:** spec Phase 8's acceptance, including the test that no product build contains `tools/synth`.
+  - **Look and motion:** the Synth Studio canvas is the spec, and ADR-153 is the rule. It sets a dark «Sala de
+    control» look and a closed list of twelve motions, values in `studio/src/motion.ts`.
+  - **Reactions:** `core/reaction.ts` maps a run's signals to the six faces. It is a pure function, built
+    test-first, and never reads the model's tone.
+  - **Fonts:** the console's `monoStack` moves from `apps/backoffice` into `@xangarro/tokens`, so Studio reads
+    the same stack.
+- **Acceptance:** spec Phase 8's acceptance, including the test that no product build contains `tools/synth`. A
+  Playwright spec under `reducedMotion: 'reduce'` shows each screen's static states.
 
 **Phase 9 — Studio launches and watches**
 
@@ -350,7 +366,8 @@ The full findings are in `tools/synth/ENV.md`.
   - Live view over SSE with CDP screencast frames. The phone is shown with screenshots per step.
   - Compare and Calibration screens.
 - **Acceptance:** spec Phase 9's acceptance. Cancelling kills the actor, the browser or emulator session, and the
-  corrida's stack.
+  corrida's stack. The live view's motions follow ADR-153, and a Playwright spec under
+  `reducedMotion: 'reduce'` shows their static states.
 
 **Phase 10 — Longitudinal sessions**
 

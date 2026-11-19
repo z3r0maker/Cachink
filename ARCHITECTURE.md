@@ -190,6 +190,7 @@ Links to discussion, docs, prior art.
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
 | [152](#adr-152) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
+| [153](#adr-153) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10888,3 +10889,120 @@ process. `mintTenant()` and its row builders already exist under `apps/web/e2e/`
 - The narrative lab (Phase 12) is in scope as the track's last phase. Every one of its outputs is labelled as a
   hypothesis to validate with real people.
 - N-49 is closed as superseded. The `kind=explorador` inbox source is a later `S-` task, if ever.
+
+## ADR-153
+
+**Title:** Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — owner design interview of 2026-11-19 on Synth Studio (track 24, S-20 and S-21). The spec is
+the Synth Studio canvas (https://claude.ai/artifact/HrVjKALmE6H7zTFaCDAFvp), rounds 1 to 3, with board
+`StLenguaje` as the language sheet. Amends nothing in ADR-117: El Mostrador §6 stays at five motions.
+
+**Context**
+
+El Mostrador §6 allows five motions and «nothing else», and ADR-117 makes it the style guide for every surface.
+The owner asked for Synth Studio to feel like a control room: see each persona react while a run is live, see
+progress, remaining time and cost at a glance, and have moments that land (a finding arriving, a report
+revealing its numbers). Five motions cannot carry that.
+
+Studio is not a product surface. ADR-152 puts it in `tools/synth/studio`, bound to `127.0.0.1`, for the owner
+only, never shipped. So a richer vocabulary there does not touch what an emprendedor sees, as long as it stays
+there.
+
+The owner's decisions in the same interview:
+
+- a dark «Sala de control» look built on `consoleTheme.dark`, where yellow means «en vivo»;
+- a motion vocabulary of Studio's own, recorded in an ADR, with a static state for every motion under reduced
+  motion;
+- a persona's reaction comes from runner signals only, never from what the model says it feels;
+- personas are drawn as geometric faces with a pictogram of the business type, a dashed outline for
+  `hypothesis` and a solid one for `grounded`.
+
+The canvas was drawn on those decisions: fifteen boards, every screen of spec §16.2.
+
+**Decision**
+
+1. **Scope.** This vocabulary applies to `tools/synth/studio` and nothing else. No motion on this list moves into
+   `apps/*` or `packages/ui` without an ADR of its own. Drawers and dialogs in Studio reuse the product's Panel
+   slide and Dialog pop unchanged.
+2. **Look.**
+   - Colours are `consoleTheme.dark` roles from `@xangarro/tokens`. Yellow (`accent`) means a run in flight or
+     the item you are on, and is never decoration. Red is a finding or a failure, green a success, `off` a run
+     not started.
+   - Type: Plus Jakarta Sans for the interface; the console's mono stack for console, network, traces and IDs;
+     Anton, beyond the lockup, for big figures only (remaining time, counters, step numbers).
+   - Contrast holds at 4.5:1 for all text, and selected chips stay black with yellow text, as in the product.
+3. **The list.** Twelve motions, nothing else.
+
+   | Motion | What it does | Driven by | Reduced motion |
+   | --- | --- | --- | --- |
+   | Pisada | The product's press: `pressTransform`, 100 ms | a click | as the product |
+   | Pulso en vivo | The live dot breathes | a corrida or run in flight | a solid dot |
+   | Clic del actor | A cursor glides to the target (400 ms), then a ring opens (500 ms) | the coordinates the runner recorded for the action | a fixed ring at the point |
+   | Pensamiento | The actor's thought types out, 28 ms a character | the step's `thought` | the whole line at once |
+   | Reacción | The face's loop for its state: breathes, glances, shakes with a drop, slumps, hops, dims | the reaction mapping, rule 4 | the static pose and its label |
+   | Chispa | The tile's border flashes red (600 ms) and a spark flies to the candidates tray (700 ms) | a console error, a 5xx, or a failed script check | a fixed red border; the count changes |
+   | Llenado | Bars and rings move to a value, linear, no bounce; memory strength falls the same way | steps over `max_steps`, stages done, patience spent, the forgetting script | the value, at once |
+   | Llegada | A new row slides and fades in, 220 ms: a queued run, a finding, a toast | the server's event | it appears |
+   | Sello | A verdict lands from 1.6× to its place with the press shadow, 220 ms | the judge's verdict, or a seeded bug found or missed | it appears |
+   | Aguja y trazo | Gauges sweep, lines and the optimal route draw in, the Venn circles meet, 900 ms ease-out, once per reveal | a computed result arriving | drawn at its value |
+   | Barrido | A line runs down the source as each quote is checked | the check's real progress | each verdict appears |
+   | Intercambio | Corrida A and B swap places, 400 ms | the owner's swap | the columns swap |
+
+   Every value lives in one module, `tools/synth/studio/src/motion.ts`, which reads `pressTransform` from
+   `@xangarro/tokens` and owns the rest. They do not go into `@xangarro/tokens`, because no product surface may
+   use them.
+4. **Reactions come from the runner, never from the model.** A pure function in `@xangarro/synth-core`,
+   `reaction.ts`, maps a run's signals to one of six states. It is built test-first, like the rest of `core`.
+   - **En cola:** the run has not started.
+   - **Tranquila:** the last step changed the screen and raised no error.
+   - **Dudando:** `doubt_after` steps in a row without a screen change (default 2), or the same action twice
+     on the same target.
+   - **Atorada:** `stuck_after` steps without a change (default 3), three failed attempts on one screen, a console
+     error or 5xx on the last step, or 75% of `max_steps` spent.
+   - **Se rindió:** `outcome` is `abandoned` or `blocked`, or `max_steps` ran out.
+   - **Lo logró:** `outcome` is `completed` and every success-criteria script passes. A `completed` whose
+     criteria fail ends in «Atorada», and its finding says why.
+
+   «Screen change» means the URL or the DOM fingerprint the runner records changed, and on the phone, Maestro's
+   hierarchy hash. The thresholds are `config.yaml` settings under `reactions:`. Nothing reads the tone of
+   `thought`, of the exit interview or of the judge's prose.
+5. **Motion never runs ahead of the data.**
+   - Progress, remaining time and cost move only when the server reports. Remaining time and cost always carry
+     «estimado».
+   - Only Pulso en vivo and the Reacción loops repeat, and both mean «this is live». They stop when the run
+     ends.
+   - No shimmer and no spinner, as in the product. A loading state is the empty frame or a Llenado at zero.
+6. **Reduced motion.** `prefers-reduced-motion: reduce` gives every motion the fallback in its row. Studio also
+   has its own «Reducir movimiento» switch, stored in the browser, because the owner may want it calm on one
+   screen and not on the OS. Every face's pose and label read without motion.
+7. **Built with CSS and the Web Animations API.** Only transform and opacity animate, never layout. The canvas
+   drives its boards with JS timers, but that is how the prototype was drawn, not how Studio is built. No
+   animation library and no Lottie or Rive asset is added: the faces are boxes and borders.
+8. **Adding a motion** means a board on the Synth Studio canvas first, then a new ADR that amends this list.
+
+**Alternatives considered**
+
+- *The product's five motions only:* rejected. Nothing would show a persona reacting or a finding arriving, which
+  is the point of watching a run live.
+- *Reactions from the model's own words* (sentiment of the thought, or a «feeling» field in the actor's output):
+  rejected by the owner. A model asked how it feels will perform a feeling, and the judge would then grade the
+  actor's performance instead of the app.
+- *Putting these motions in El Mostrador and in `@xangarro/tokens`:* rejected. They would read as allowed in the
+  product.
+- *An animation library, or characters in Lottie or Rive:* rejected. It adds a dependency and assets for twelve
+  motions that CSS and the Web Animations API already cover.
+- *The light brand look:* offered; the owner chose the dark control room.
+
+**Consequences**
+
+- El Mostrador §6 gains one line pointing here, so a reader of the five sees where Studio's list lives and that
+  it never applies to `apps/*`.
+- S-20 builds `reaction.ts` in `core` and `motion.ts` in `studio`, and moves the console's `monoStack` out of
+  `apps/backoffice` into `@xangarro/tokens`, so the two read one stack (CLAUDE.md §2.3).
+- S-20 and S-21 each add a Playwright spec that runs under `reducedMotion: 'reduce'` and checks the fallback
+  states.
+- The runners have to record a screen fingerprint per step for the mapping to work: URL plus DOM hash on the web
+  (S-05), the hash of `hierarchy.json` on the phone (S-06). `config.yaml` gains `reactions:` (S-03).
