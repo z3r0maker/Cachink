@@ -10,6 +10,7 @@ import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import type { AvisoGrupo, AvisosData, AvisosVivo } from '@xangarro/caja/avisos';
 import { deDueno, mayuscula, sinLeer } from '@xangarro/caja/avisos';
+import { EstadoVacio } from '../../components/CajaEstado/index';
 import { Toast } from '../../components/Toast/index';
 import { EstadosCaja } from '../Pendientes/estados';
 import { AvisosCabeza, AvisosTabs } from './avisos-cabeza';
@@ -77,28 +78,27 @@ function Estado(p: AvisosScreenProps): ReactElement {
       />
     );
   const dueno = p.data?.dueno ?? 'el dueño';
+  return <Nada cuerpo={`Ni mensajes ${deDueno(dueno)} ni avisos de tu caja.`} />;
+}
+
+/** «Nada por leer» with Don (RvPrimerUso), in whatever words the moment needs. */
+function Nada({ cuerpo }: { readonly cuerpo: string }): ReactElement {
   return (
-    <EstadosCaja
-      id="sin-nada"
-      titulo="Nada por leer"
-      cuerpo={`Ni mensajes ${deDueno(dueno)} ni avisos de tu caja.`}
-      testID="avisos"
-    />
+    <View testID="avisos-sin-nada">
+      <EstadoVacio id="avisos-vacio" title="Nada por leer" body={cuerpo} />
+    </View>
   );
 }
 
 /** The empty open tab: who has not written. */
 function NadaPorLeer(p: { readonly tab: AvisoGrupo; readonly dueno: string }): ReactElement {
   return (
-    <EstadosCaja
-      id="sin-nada"
-      titulo="Nada por leer"
+    <Nada
       cuerpo={
         p.tab === 'dueno'
           ? `${mayuscula(p.dueno)} no te ha escrito nada nuevo.`
           : 'Tu caja no tiene avisos del sistema.'
       }
-      testID="avisos"
     />
   );
 }

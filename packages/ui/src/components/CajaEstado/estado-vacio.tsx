@@ -1,6 +1,7 @@
 /**
- * EstadoVacio — the caja's empty moment (MvEstados): Don helping, what is
- * missing and, when there is one, the action that fills it. On its own it is
+ * EstadoVacio — the caja's empty moment (MvEstados): Don helping (or, where
+ * the next step is a place to go, pointing: RvPrimerUso), what is missing
+ * and, when there is one, the action that fills it. On its own it is
  * the card; with `encabezado` it is the whole screen, the card filling what
  * the heading leaves (MvTurnoCerrado). `compacto` is for a screen that has
  * more below it, like Mi turno's rows.
@@ -9,7 +10,7 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import { Btn } from '../Btn/index';
-import { Don } from '../Don/index';
+import { Don, type DonPose } from '../Don/index';
 import { MText } from '../Mostrador/mtext';
 import { PathIcon } from '../PathIcon/path-icon';
 import { Cuerpo, Tarjeta, Titulo } from './caja-estado-partes';
@@ -27,6 +28,8 @@ export interface EstadoVacioProps {
   readonly encabezado?: string;
   /** A smaller Don and no fill, for a screen that continues below. */
   readonly compacto?: boolean;
+  /** `ayuda` by default; `senalando` when the action is the way forward. */
+  readonly pose?: DonPose;
 }
 
 function Accion(p: {
@@ -63,7 +66,7 @@ export function EstadoVacio(p: EstadoVacioProps): ReactElement {
   const pantalla = p.encabezado !== undefined;
   const tarjeta = (
     <Tarjeta testID={p.id} label={title} llena={pantalla && p.compacto !== true}>
-      <Don pose="ayuda" size={p.compacto === true ? 96 : 170} />
+      <Don pose={p.pose ?? 'ayuda'} size={p.compacto === true ? 96 : 170} />
       <Titulo>{title}</Titulo>
       <Cuerpo>{p.body ?? 'En cuanto captures algo, aparece en esta lista.'}</Cuerpo>
       {p.cta ? <Accion id={p.id} cta={p.cta} /> : null}
