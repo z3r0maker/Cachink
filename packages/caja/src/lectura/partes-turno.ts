@@ -5,9 +5,8 @@
  *
  * - fondo: apertura + adicional;
  * - ventas en efectivo: the lines of this turno's standing Efectivo tickets;
- * - abonos en efectivo: every standing Efectivo abono the caller read (an
- *   abono has no turno; the caller reads the turno's days, as the use case
- *   does);
+ * - abonos en efectivo: this turno's standing Efectivo abonos (ADR-146: an
+ *   abono carries the turno whose drawer received it, as a gasto does);
  * - gastos: this turno's standing gastos (`cajaTurnoId` decides, never a date).
  *
  * The web caja, Inicio, Mi turno and Cierre on the phone read the same parts.
@@ -36,6 +35,7 @@ interface LineaFila {
   readonly deletedAt: string | null;
 }
 interface AbonoFila {
+  readonly cajaTurnoId: string | null;
   readonly metodo: string;
   readonly montoCentavos: Money;
   readonly deletedAt: string | null;
@@ -53,11 +53,15 @@ export interface FilasPartes {
   readonly gastos: readonly GastoFila[];
 }
 
-/** The standing Efectivo abonos' total: the part of the expected cash they add. */
-export const abonosEfectivo = (abonos: readonly AbonoFila[]): Money =>
+/**
+ * The standing Efectivo abonos this turno received (ADR-146): the part of the
+ * expected cash they add. Another turno's abono, or one taken with no turno
+ * open, is not in this drawer.
+ */
+export const abonosEfectivo = (abonos: readonly AbonoFila[], turnoId: string): Money =>
   sum(
     abonos
-      .filter((a) => a.deletedAt === null && a.metodo === 'Efectivo')
+      .filter((a) => a.deletedAt === null && a.cajaTurnoId === turnoId && a.metodo === 'Efectivo')
       .map((a) => a.montoCentavos),
   );
 
@@ -78,7 +82,7 @@ export function partesDelTurno(turno: TurnoFila, f: FilasPartes): PartesEsperado
     ventasEfectivo: sum(
       f.lineas.filter((l) => l.deletedAt === null && efectivo.has(l.ticketId)).map((l) => l.monto),
     ),
-    abonosEfectivo: abonosEfectivo(f.abonos),
+    abonosEfectivo: abonosEfectivo(f.abonos, turno.id),
     gastosEfectivo: sum(
       f.gastos
         .filter((g) => g.deletedAt === null && g.cajaTurnoId === turno.id)

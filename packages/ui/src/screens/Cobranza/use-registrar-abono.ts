@@ -1,17 +1,23 @@
 /**
  * «Recibir abono» on the phone (MvCobranza): the abono is recorded whole
  * through `RegistrarPagoClienteUseCase` (ADR-074; an excess is saldo a
- * favor, ADR-083 D5), audited like every capture, and the outbox carries it
- * up. Where it lands (oldest ticket first) is derived, never stored.
+ * favor, ADR-083 D5), stamped with the operator's open turno (ADR-146),
+ * audited like every capture, and the outbox carries it up. Where it lands
+ * (oldest ticket first) is derived, never stored.
  */
 import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RegistrarPagoClienteUseCase } from '@xangarro/application';
 import { hoyLocal } from '@xangarro/caja';
 import type { MetodoAbono } from '@xangarro/caja/cobranza';
-import type { BusinessId, ClientId, ClientPayment, IsoDate, Money } from '@xangarro/domain';
-import { useClientPaymentsRepository, useClientsRepository } from '../../app/index';
+import type { BusinessId, ClientId, ClientPayment, IsoDate, Money, UserId } from '@xangarro/domain';
+import {
+  useCajaTurnosRepository,
+  useClientPaymentsRepository,
+  useClientsRepository,
+} from '../../app/index';
 import { useCurrentBusinessId } from '../../app-config/index';
+import { useUserId } from '../../app-config/use-app-config';
 import { AUDIT_REGISTRAR_PAGO } from '../../observability/audit-configs';
 import { useAuditedUseCase } from '../../observability/use-audited-use-case';
 
@@ -27,6 +33,8 @@ const TOCADAS = new Set(['cobrar', 'caja', 'shell']);
 export function useRegistrarAbono() {
   const payments = useClientPaymentsRepository();
   const clients = useClientsRepository();
+  const turnos = useCajaTurnosRepository();
+  const userId = useUserId();
   const base = useMemo(
     () => new RegistrarPagoClienteUseCase(payments, clients),
     [payments, clients],
@@ -37,12 +45,15 @@ export function useRegistrarAbono() {
   return useMutation<ClientPayment, Error, AbonoInput>({
     async mutationFn(i) {
       if (!businessId) throw new Error('No hay negocio en esta caja');
+      // The drawer that receives it: the operator's open turno (ADR-146).
+      const turno = userId ? await turnos.findOpenByUser(userId as UserId) : null;
       return useCase.execute({
         clienteId: i.clienteId as ClientId,
         fecha: hoyLocal() as IsoDate,
         montoCentavos: i.monto,
         metodo: i.metodo,
         businessId: businessId as BusinessId,
+        ...(turno === null ? {} : { cajaTurnoId: turno.id }),
       });
     },
     async onSuccess() {

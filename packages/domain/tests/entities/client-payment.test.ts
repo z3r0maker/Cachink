@@ -25,6 +25,34 @@ describe('ClientPaymentSchema', () => {
     expect(() => ClientPaymentSchema.parse(validPayment)).not.toThrow();
   });
 
+  it('defaults the turno to none for a row written before ADR-146', () => {
+    expect(ClientPaymentSchema.parse(validPayment).cajaTurnoId).toBeNull();
+  });
+
+  it('keeps the turno that received the abono (ADR-146)', () => {
+    const turno = '01HZ8XQN9GZJXV8AKQ5X0C7TF5';
+    expect(ClientPaymentSchema.parse({ ...validPayment, cajaTurnoId: turno }).cajaTurnoId).toBe(
+      turno,
+    );
+  });
+
+  it('rejects a turno that is not a ULID', () => {
+    expect(() => ClientPaymentSchema.parse({ ...validPayment, cajaTurnoId: 'turno-1' })).toThrow();
+  });
+
+  it('lets a new abono carry its turno, or leave it out', () => {
+    const base = {
+      clienteId: CLI_ID,
+      fecha: '2026-04-23',
+      montoCentavos: 50_000n,
+      metodo: 'Efectivo' as const,
+      businessId: BIZ_ID,
+    };
+    expect(NewClientPaymentSchema.parse(base).cajaTurnoId).toBeUndefined();
+    const turno = '01HZ8XQN9GZJXV8AKQ5X0C7TF5';
+    expect(NewClientPaymentSchema.parse({ ...base, cajaTurnoId: turno }).cajaTurnoId).toBe(turno);
+  });
+
   it('accepts all five PaymentMethod values', () => {
     for (const metodo of ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'] as const) {
       expect(() => ClientPaymentSchema.parse({ ...validPayment, metodo })).not.toThrow();

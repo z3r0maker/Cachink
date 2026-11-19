@@ -67,6 +67,7 @@ function leerCuentas(request: CuentasRequest, rt: Rt): Promise<unknown> {
     montoCentavos: BigInt(request.montoCentavos),
     metodo: request.metodo as never,
     fecha: request.fecha,
+    turnoId: request.turnoId,
   });
 }
 

@@ -16,5 +16,7 @@ export const clientPayments = sqliteTable('client_payments', {
     enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'],
   }).notNull(),
   nota: text('nota'),
+  /** The turno whose drawer received it (ADR-146, migration 0015); null before. */
+  cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,
 });

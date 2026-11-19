@@ -44,6 +44,7 @@ export interface FilasCierre {
     readonly deletedAt: string | null;
   }[];
   readonly abonos: readonly {
+    readonly cajaTurnoId: string | null;
     readonly metodo: string;
     readonly montoCentavos: Money;
     readonly deletedAt: string | null;

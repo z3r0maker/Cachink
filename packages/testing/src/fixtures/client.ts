@@ -73,6 +73,7 @@ export function makeClientPayment(overrides: Partial<ClientPayment> = {}): Clien
     montoCentavos: 50_000n,
     metodo: 'Transferencia',
     nota: null,
+    cajaTurnoId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdByUserId: null,

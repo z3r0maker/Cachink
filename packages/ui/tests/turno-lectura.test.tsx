@@ -115,6 +115,8 @@ async function sembrar(): Promise<void> {
     montoCentavos: 100_00n,
     metodo: 'Efectivo',
     nota: null,
+    // Received in this turno's drawer (ADR-146), as the gasto below is.
+    cajaTurnoId: turno.id,
     businessId: BIZ,
   });
   await expenses.create(

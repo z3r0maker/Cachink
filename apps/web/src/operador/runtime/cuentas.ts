@@ -83,6 +83,8 @@ export async function abonar(
     readonly montoCentavos: bigint;
     readonly metodo: PaymentMethod;
     readonly fecha: string;
+    /** The turno whose drawer receives it (ADR-146); null with none open. */
+    readonly turnoId: string | null;
   },
 ): Promise<{ readonly id: string; readonly fecha: string }> {
   const useCase = new RegistrarPagoClienteUseCase(
@@ -95,6 +97,7 @@ export async function abonar(
     montoCentavos: p.montoCentavos,
     metodo: p.metodo,
     businessId: p.businessId,
+    ...(p.turnoId === null ? {} : { cajaTurnoId: p.turnoId as never }),
   });
   return { id: pago.id, fecha: pago.fecha };
 }
