@@ -55,6 +55,12 @@ tags:
 # moving sheet — once clear off it). Let it fully mount first, then type.
 - waitForAnimationToEnd
 - waitForAnimationToEnd
+# With the phone's keyboard up the sheet rides it but stays under the status
+# bar: its head and the field being typed in stay on screen (the sheet was
+# once capped at 92% of the whole screen and its head rode off the top).
+- assertVisible: { id: 'registrar-gasto-sheet-title' }
+- assertVisible: { id: 'registrar-gasto-sheet-close' }
+- assertVisible: { id: 'gasto-concepto' }
 - inputText: 'Cilindro de gas'
 - waitForAnimationToEnd
 # No dismissal step: the harness connects the sims' hardware keyboard, so no

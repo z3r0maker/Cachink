@@ -10,7 +10,7 @@
  * Android back button calls `onClose`.
  */
 import type { ReactElement, ReactNode } from 'react';
-import { Animated, ScrollView } from 'react-native';
+import { Animated, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
@@ -116,9 +116,25 @@ function Sheet(props: BottomSheetProps & { readonly id: string }): ReactElement 
   );
 }
 
+/** The gap kept between the status bar and the sheet's top edge. */
+const TOP_GAP = 8;
+
+/**
+ * The sheet's height cap: 92% of the screen, and never taller than the room
+ * between the status bar and the keyboard. Riding the keyboard on a bottom
+ * margin while capped at 92% of the whole screen pushed the head (title,
+ * close and the field being typed in) above the screen's top edge.
+ */
+function useSheetMaxHeight(teclado: number): number {
+  const { height } = useWindowDimensions();
+  const { top } = useSafeAreaInsets();
+  return Math.min(height * 0.92, height - teclado - top - TOP_GAP);
+}
+
 export function BottomSheet(props: BottomSheetProps): ReactElement {
   const id = props.testID ?? 'bottom-sheet';
   const teclado = useKeyboardHeight();
+  const maxHeight = useSheetMaxHeight(teclado);
   return (
     <Dialog modal open={props.open} onOpenChange={(next) => (next ? undefined : props.onClose())}>
       <Dialog.Portal>
@@ -137,7 +153,7 @@ export function BottomSheet(props: BottomSheetProps): ReactElement {
           right={0}
           bottom={0}
           marginBottom={teclado}
-          maxHeight="92%"
+          maxHeight={maxHeight}
           backgroundColor="transparent"
         >
           <Sheet {...props} id={id} />
