@@ -49,3 +49,10 @@ export {
   comisionesPorMes,
   type CargoDeServicio,
 } from './queries/servicios-costos.js';
+export { createCierreRepository, eventosDeCierre } from './queries/cierre.js';
+export {
+  recibidasDelMes,
+  saldoDeBancos,
+  type GastoSinFactura,
+  type RecibidasDelMes,
+} from './queries/cierre-fuentes.js';

@@ -29,7 +29,7 @@ describe('EMPRESA_NAV', () => {
     );
     assert.deepEqual(
       entry('cumplimiento').tabs.map((t) => t.label),
-      ['Agenda', 'Expediente', 'Corporativo'],
+      ['Agenda', 'Cierre del mes', 'Expediente', 'Corporativo'],
     );
   });
 

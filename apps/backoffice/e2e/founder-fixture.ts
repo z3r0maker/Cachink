@@ -98,6 +98,13 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.services WHERE nombre LIKE 'E2E %' OR updated_by IN (${suite})`;
       await tx`DELETE FROM corp.recurring_templates
                 WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;
+      // E-14: the Cierre test closes a month before 2010, which nothing else uses;
+      // a lock is lifted only with both founders, so its own goes with the
+      // triggers off, for this transaction alone.
+      await tx`DELETE FROM corp.bank_balances WHERE period < '2010-01'`;
+      await tx`DELETE FROM corp.period_events WHERE period < '2010-01'`;
+      await tx`SET LOCAL session_replication_role = replica`;
+      await tx`DELETE FROM corp.closed_periods WHERE period < '2010-01'`;
     });
   });
 }

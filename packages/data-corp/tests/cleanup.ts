@@ -29,6 +29,12 @@ export async function borrarLoDe(createdBy: string): Promise<void> {
       await tx`DELETE FROM corp.services WHERE updated_by = ${createdBy}`;
       await tx`DELETE FROM corp.tax_returns WHERE created_by = ${createdBy}`;
       await tx`DELETE FROM corp.recurring_templates WHERE created_by = ${createdBy}`;
+      await tx`DELETE FROM corp.bank_balances WHERE confirmed_by = ${createdBy}`;
+      await tx`DELETE FROM corp.period_events WHERE founder_id = ${createdBy}`;
+      // A lock is lifted only after both founders' approval (0013_zz); a test's
+      // own lock goes with the triggers off, for this transaction alone.
+      await tx`SET LOCAL session_replication_role = replica`;
+      await tx`DELETE FROM corp.closed_periods WHERE closed_by = ${createdBy}`;
     });
   } finally {
     await sql.end({ timeout: 5 });

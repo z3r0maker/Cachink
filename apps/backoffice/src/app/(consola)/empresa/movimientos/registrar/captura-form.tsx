@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useActionState, useState } from 'react';
 
 import { registrarMovimiento } from '@/server/actions/empresa';
+import type { FormState } from '@/server/actions/form-state';
 import * as d from '@/styles/mostrador-data.css';
 import * as mv from '@/styles/mostrador-movimientos.css';
 import * as m from '@/styles/mostrador.css';
@@ -135,6 +136,24 @@ function ConceptoYFecha(props: {
   );
 }
 
+/** A refusal, with the way to fix it when there is one (a closed month's Cierre, E-14). */
+function Falla({ state }: { readonly state: FormState }) {
+  if (state === null || state.ok) return null;
+  return (
+    <p className={d.messageBad} role="alert">
+      {state.message}
+      {state.enlace === undefined ? null : (
+        <>
+          {' '}
+          <a className={m.boton.quieto} href={state.enlace.href}>
+            {state.enlace.texto}
+          </a>
+        </>
+      )}
+    </p>
+  );
+}
+
 export function CapturaForm(props: {
   readonly nonce: string;
   readonly hoy: string;
@@ -160,11 +179,7 @@ export function CapturaForm(props: {
         proyectos={props.proyectos}
         socios={props.socios}
       />
-      {state !== null && !state.ok ? (
-        <p className={d.messageBad} role="alert">
-          {state.message}
-        </p>
-      ) : null}
+      <Falla state={state} />
       <Acciones tipo={tipo} inicial={props.tipo} pending={pending} />
     </form>
   );
