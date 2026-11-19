@@ -4,7 +4,8 @@
  * queue band (ADR-123: the close stays enabled with rows still to send), and
  * the hecho screen with the corte to send and «Abrir otro turno». A stack
  * route OUTSIDE the tabs: the count is a focused flow, and the tab bar under
- * the close button ate taps meant for it (M-11).
+ * the close button ate taps meant for it (M-11), so it shows none (`sinBarra`,
+ * as MvCierreFlujo draws it): the step's fixed foot owns the bottom.
  *
  * The header's back follows the step: from the result it returns to the
  * count, otherwise to Mi turno. With no open turno there is nothing to close:
@@ -35,7 +36,7 @@ export default function CierreRoute(): ReactElement {
     else router.navigate('/turno' as never);
   };
   return (
-    <AppShellWrapper title={titulo} onBack={atras}>
+    <AppShellWrapper title={titulo} onBack={atras} sinBarra>
       <CierreScreen
         testID="mobile-cierre"
         state={c.state}

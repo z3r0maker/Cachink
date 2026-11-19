@@ -33,6 +33,10 @@ appId: mx.xangarro.mobile
     visible:
       id: 'mobile-cierre'
     timeout: 10000
+# A focused flow: no tab bar under the count (MvCierreFlujo), the step's
+# fixed foot owns the bottom. The phone's bar only; the tablet keeps its rail.
+- assertNotVisible:
+    id: 'tab-inicio'
 - assertVisible: '.*Paso 1 de 2.*'
 - assertVisible: '.*Cuenta la caja.*'
 # Step 1 never shows what is expected.
