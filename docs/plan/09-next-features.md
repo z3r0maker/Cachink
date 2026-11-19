@@ -1172,6 +1172,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-46 Salud de la sincronización y dispositivos [media]
 
 - [ ] Status · **Trigger:** lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y el disparador no ha ocurrido. La consola tiene hoy nueve pantallas (inicio, campanas, capacidad, empresa, flags, inbox, mapa, migraciones, tenants, uso) y ninguna mira la sincronización. Lo que sí existe es la materia prima: la línea `push_anomaly` (ver N-84) y la consulta guardada `stale-devices.sql` de B-16, que es la misma pregunta hecha a mano desde Studio.
 - **What:** rejected rows across tenants by code; devices not seen in N days; force-revoke (B-12).
   Replaces the B-16 Studio saved queries for day-to-day use.
 
@@ -1302,6 +1303,7 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
 - [ ] **N-62 · Métricas de cohortes desde el domicilio fiscal, no desde la IP.** For "which states retain best" `[baja]` or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
       fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,
       better than an IP guess, and it adds no new collection.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Su premisa se sostiene: `businesses.codigo_postal` existe en el esquema de Postgres, así que esto no agrega recolección, como dice. Comparte la capa de consultas de cohortes con N-64, que tampoco existe, así que el que llegue primero la escribe.
 
 **Not recommended without evidence:** "we see a trend in Zapopan, so buy ads in Zapopan." That
 measures where we already won, favours big cities by construction, and at current volume cannot
@@ -1342,6 +1344,7 @@ micro-POS than location does.
 ### N-65 Línea de tiempo del inquilino [media]
 
 - [ ] Status · **Trigger:** ya (todas las tablas fuente existen). **Blocked by:** N-08
+  - **Remaining (2026-11-19, verificado contra el repo):** todo lo de la pantalla, pero el campo de arriba se contradice solo y hay que creerle al disparador: dice «ya», y **N-08 está cerrada**, así que esto no espera a nadie. Sus dos piezas de apoyo están: `/tenants/[id]` existe como ruta y `apps/backoffice/src/server/keyset.ts` es el paginador que su aceptación manda reusar. Lo que falta es la unión de tablas y el renglón por evento; ninguna tabla nueva, como dice su aceptación.
 - **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
   and revoked, plan and override changes, flag allowlist changes, inbox items, B-18 rejections,
   billing events, migrations. Each entry links to its source screen. Read-only.
@@ -1352,6 +1355,7 @@ micro-POS than location does.
 
 - [ ] Status · **Trigger:** que se agregue al segundo miembro del staff, o antes de que arranquen
       N-68 / N-71 — lo que ocurra primero. **Blocked by:** N-05 · **Blocks:** N-68, N-71
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y **N-05 ya está cerrada**, así que lo único que la detiene es su disparador: hoy hay un solo miembro del staff. Medido: `staff_members` (en el esquema propio del backoffice, `server/db/schema.ts`) tiene id, `user_id`, correo, nombre, fechas, el hash de contraseña y el TOTP — **ninguna columna de rol**; `ActiveStaff` lleva id, correo y nombre; y `requireStaff()` no toma un rol mínimo, sólo comprueba que la sesión entre a la consola. O sea que la forma del cambio es una columna, un campo en el contexto y un parámetro en la guardia, con las dos CLI que ya existen (`scripts/staff.ts`, `scripts/staff-cli.ts`) para fijarlo.
 - **What:** `staff_members.role ∈ { lector, operador, admin }`. Lector reads everything, writes
   nothing. Operador does inbox, migrations, overrides, trial extensions, "ver como". Admin also
   manages flags, staff and thresholds. Enforced in `requireStaff()` per action, not per page.
@@ -1361,6 +1365,7 @@ micro-POS than location does.
 ### N-67 `/auditoria` `[media]`
 
 - [ ] Status · **Trigger:** ya. **Blocked by:** N-05
+  - **Remaining (2026-11-19, verificado contra el repo):** falta la pantalla y nada más, y **N-05 ya está cerrada**, así que su disparador «ya» es literal. Los datos se están escribiendo desde hace tiempo: `staff_audit_log` existe en el esquema del backoffice con su llave al miembro del staff, y `recordStaffAction` los inserta por mutación, con un `auditSink` atado a la transacción de cada escritura. No hay ruta `auditoria` entre las nueve de la consola. Es un lector sobre una tabla que ya se llena: de las ocho de esta oleada, es la más barata.
 - **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
   origin. Filters by actor, action kind, tenant, date range; keyset paging; CSV export for an
   authority or the privacy audit (`docs/audits/privacidad-2026-09-22.md`).
@@ -1371,6 +1376,7 @@ micro-POS than location does.
 
 - [ ] Status · **Trigger:** lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda
       resolver desde `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y correctamente al final de la fila: sus dos barreras (N-66 y N-67) siguen abiertas, y su disparador pide un lanzamiento que no ha ocurrido más un caso concreto que no se pueda resolver sin esto. Nada que replantear.
 - **What:** an operador opens the portal as a tenant's dueño in **read-only** mode for ≤ 30 min,
   with a reason (free text, required). The portal renders a persistent banner («Soporte de
   Xangarro está viendo tu cuenta»), refuses every write, and the tenant sees the session in
@@ -1394,6 +1400,7 @@ micro-POS than location does.
 ### N-70 Decisiones `[baja]`
 
 - [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-07, N-63
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y de sus dos barreras sólo queda una: **N-07 está cerrada**, N-63 sigue abierta (y N-63 a su vez sólo espera datos reales). Así que el camino es N-63 y nada más.
 - **What:** `/decisiones` renders the table in `17-consola-crecimiento.md` §4: signal, source,
   threshold, current value, 8-week trend, projected crossing date, and the decision it forces.
   Thresholds are rows in a `decision_thresholds` table, editable by admin, audited. A crossed or
