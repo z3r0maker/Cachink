@@ -46,6 +46,9 @@ register their employees use at the counter. Business owners buy the service
 on our website. The app has no purchases, prices, plans or links to buy, and
 it does not let anyone create an account.
 
+Xangarro is operated by MEXIA, S.A.S. The holder of this developer account is
+the company's owner and publishes the app on its behalf.
+
 This is an enterprise service under guideline 3.1.3(c): every plan is sold
 to a business (its owner and the employees they add), and the people who use
 the app are those employees. The app is free to use: a business on our free
