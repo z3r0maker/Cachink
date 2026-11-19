@@ -50,7 +50,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Xangarro usa la cámara para escanear el código QR que vincula este dispositivo a tu negocio y los códigos de barras de tus productos, y para tomar la foto de cada producto.",
+          "cameraPermission": "Xangarro usa la cámara para escanear el código QR que vincula este dispositivo a tu negocio y los códigos de barras de tus productos, y para tomar la foto de cada producto y del comprobante de un gasto.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
@@ -58,7 +58,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Xangarro abre tu galería para que elijas la foto de un producto.",
+          "photosPermission": "Xangarro abre tu galería para que elijas la foto de un producto o del comprobante de un gasto.",
           "cameraPermission": false,
           "microphonePermission": false
         }
