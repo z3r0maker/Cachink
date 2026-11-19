@@ -57,6 +57,8 @@ export interface AbonoInput {
   readonly montoCentavos: bigint;
   readonly metodo: string;
   readonly fecha: string;
+  /** The session's turno, whose drawer receives the abono (ADR-146); null with none open. */
+  readonly turnoId: string | null;
 }
 
 export const vincular = (bootstrap: Bootstrap, businessId: string): Call => ({
@@ -137,6 +139,7 @@ export const abonar = (p: AbonoInput): Call => ({
   montoCentavos: p.montoCentavos.toString(),
   metodo: p.metodo,
   fecha: p.fecha,
+  turnoId: p.turnoId,
 });
 
 export const cancelar = (p: CancelarInput): Call => ({ method: 'cancelar', ...p });

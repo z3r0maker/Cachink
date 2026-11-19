@@ -16,7 +16,14 @@ import {
   type RecurrentePara,
   type TurnoVivoPara,
 } from '@xangarro/caja/lectura';
-import type { CajaTurno, Expense, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
+import type {
+  CajaTurno,
+  ClientPayment,
+  Expense,
+  RecurringExpense,
+  Sale,
+  Ticket,
+} from '@xangarro/domain';
 
 export interface FilasInicio {
   /** The operator's open turno, or else the newest one on this device (closed). */
@@ -24,6 +31,8 @@ export interface FilasInicio {
   /** The turno day's tickets, lines and gastos. */
   readonly tickets: readonly Ticket[];
   readonly lineas: readonly Sale[];
+  /** The turno's abonos (ADR-146): its drawer's part of the expected cash. */
+  readonly abonos: readonly ClientPayment[];
   readonly gastos: readonly Expense[];
   /** Recent turnos on this device, for «Tus últimos cortes». */
   readonly turnos: readonly CajaTurno[];
@@ -78,13 +87,13 @@ const CERO: CierrePara['resumen'] = {
   mermas: 0,
 };
 
-/** Mi turno's and Cierre's figures over the same rows (abonos wait for M-08). */
+/** Mi turno's and Cierre's figures over the same rows. */
 const cierreDe = (f: FilasInicio, t: CajaTurno): CierrePara => ({
   ...cierreDeFilas({
     turno: t,
     delTurno: delTurno(f.tickets, t.id),
     lineas: f.lineas,
-    abonos: [],
+    abonos: delTurno(f.abonos, t.id),
     gastos: delTurno(f.gastos, t.id),
   }),
   cerrado: t.cierreAt !== null,
@@ -109,7 +118,7 @@ export function turnoVivoMovil(f: FilasInicio, hoy: string, ahora: Date): TurnoV
     {
       delTurno: tickets,
       lineas: f.lineas,
-      abonos: [],
+      abonos: t === null ? [] : delTurno(f.abonos, t.id),
       gastos: t === null ? [] : delTurno(f.gastos, t.id),
     },
     new Map(),

@@ -3,10 +3,12 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
+import type { BusinessId, CajaTurnoId, ClientId, IsoDate } from '@xangarro/domain';
 import type { ClientPaymentsRepository } from '@xangarro/data';
 import { makeNewClientPayment } from '../fixtures/client.js';
 
+const TURNO_1 = '01HZ8XQN9GZJXV8AKQ5X0C7T01' as CajaTurnoId;
+const TURNO_2 = '01HZ8XQN9GZJXV8AKQ5X0C7T02' as CajaTurnoId;
 const CLIENTE_X = '01HZ8XQN9GZJXV8AKQ5X0C7V01' as ClientId;
 const CLIENTE_Y = '01HZ8XQN9GZJXV8AKQ5X0C7V02' as ClientId;
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -150,6 +152,28 @@ export function describeClientPaymentsRepositoryContract(
       );
       expect(rows[0]!.id).toBe(newest.id);
       expect(rows[rows.length - 1]!.id).toBe(oldest.id);
+    });
+
+    it('keeps the turno that received the abono, or none (ADR-146)', async () => {
+      const con = await repo.create(makeNewClientPayment({ cajaTurnoId: TURNO_1 }));
+      const sin = await repo.create(makeNewClientPayment());
+      expect((await repo.findById(con.id))?.cajaTurnoId).toBe(TURNO_1);
+      expect((await repo.findById(sin.id))?.cajaTurnoId).toBeNull();
+    });
+
+    it('findByCajaTurno returns only that turno’s live abonos (ADR-146)', async () => {
+      const mio = await repo.create(makeNewClientPayment({ cajaTurnoId: TURNO_1 }));
+      const borrado = await repo.create(makeNewClientPayment({ cajaTurnoId: TURNO_1 }));
+      await repo.delete(borrado.id);
+      await repo.create(makeNewClientPayment({ cajaTurnoId: TURNO_2 }));
+      await repo.create(makeNewClientPayment());
+      const rows = await repo.findByCajaTurno(TURNO_1);
+      expect(rows.map((r) => r.id)).toEqual([mio.id]);
+    });
+
+    it('findByCajaTurno is empty for a turno with no abonos', async () => {
+      await repo.create(makeNewClientPayment({ cajaTurnoId: TURNO_2 }));
+      expect(await repo.findByCajaTurno(TURNO_1)).toEqual([]);
     });
   });
 }

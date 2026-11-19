@@ -31,9 +31,10 @@ export async function abonarEnVivo(
   monto: bigint,
   hoy: string,
 ): Promise<void> {
-  const { device } = cred;
+  const { device, sesion } = cred;
   if (device === null) throw new Error('sin sesión');
   await registerRuntime().abonar({
+    turnoId: sesion?.turnoId ?? null,
     businessId: device.businessId,
     deviceId: device.deviceId,
     clienteId,

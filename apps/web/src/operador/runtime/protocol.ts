@@ -225,6 +225,7 @@ export type WorkerRequest =
       readonly montoCentavos: string;
       readonly metodo: string;
       readonly fecha: string;
+      readonly turnoId: string | null;
     };
 
 export type WorkerResponse =

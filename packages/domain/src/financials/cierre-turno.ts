@@ -30,11 +30,21 @@ export function efectivoEsperado(i: EsperadoTurnoInput): Money {
   return i.fondo + sum(i.ventasEfectivo) + sum(i.abonosEfectivo) - sum(i.gastosCaja);
 }
 
+/** An abono as the calculator reads it: the turno that received it (ADR-146) decides. */
+interface AbonoDelTurno {
+  readonly cajaTurnoId: string | null;
+  readonly metodo: string;
+  readonly montoCentavos: Money;
+  readonly deletedAt: string | null;
+}
+
 /**
  * The turno's expected cash from its own rows (O-03): fondo + adicional +
- * this turno's standing Efectivo tickets + Efectivo abonos − this turno's
- * gastos. Fiado, other turnos and cancelled tickets are excluded by the
- * scoping itself — `cajaTurnoId` decides, never a date range.
+ * this turno's standing Efectivo tickets + this turno's Efectivo abonos −
+ * this turno's gastos. Fiado, other turnos and cancelled tickets are excluded
+ * by the scoping itself — `cajaTurnoId` decides, never a date range. An abono
+ * counts in the turno that received it, like a gasto (ADR-146); one received
+ * with no turno open counts in none.
  */
 export function esperadoDelTurno(
   turno: {
@@ -55,11 +65,7 @@ export function esperadoDelTurno(
     readonly monto: Money;
     readonly deletedAt: string | null;
   }[],
-  abonos: readonly {
-    readonly metodo: string;
-    readonly montoCentavos: Money;
-    readonly deletedAt: string | null;
-  }[],
+  abonos: readonly AbonoDelTurno[],
   gastos: readonly {
     readonly cajaTurnoId: string | null;
     readonly monto: Money;
@@ -70,8 +76,8 @@ export function esperadoDelTurno(
   return efectivoEsperado({
     fondo: turno.montoAperturaCentavos + turno.efectivoAdicionalCentavos,
     ventasEfectivo: ventasEfectivoDelTurno(turno, tickets, lineas),
-    abonosEfectivo: abonos
-      .filter((a) => a.deletedAt === null && a.metodo === 'Efectivo')
+    abonosEfectivo: delTurno(turno, abonos)
+      .filter((a) => a.metodo === 'Efectivo')
       .map((a) => a.montoCentavos),
     gastosCaja: delTurno(turno, gastos).map((g) => g.monto),
   });

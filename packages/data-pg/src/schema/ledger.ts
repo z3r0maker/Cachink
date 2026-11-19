@@ -40,9 +40,14 @@ export const clientPayments = pgTable(
       enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'],
     }).notNull(),
     nota: text('nota'),
+    /** The turno whose drawer received it (ADR-146, 0058); null before, or with none open. */
+    cajaTurnoId: text('caja_turno_id'),
     ...auditColumns,
   },
-  (t) => [index('client_payments_business_idx').on(t.businessId, t.fecha)],
+  (t) => [
+    index('client_payments_business_idx').on(t.businessId, t.fecha),
+    index('client_payments_business_turno_idx').on(t.businessId, t.cajaTurnoId),
+  ],
 );
 
 export const entregasCredito = pgTable(

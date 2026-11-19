@@ -181,13 +181,36 @@ describe('esperadoDelTurno (O-03: scoped by cajaTurnoId)', () => {
       { ticketId: 'T5', monto: 7_000_00n, deletedAt: null }, // cancelado
     ] as never[];
     const abonos = [
-      { id: 'A1', cajaTurnoId: null, metodo: 'Efectivo', montoCentavos: 400_00n, deletedAt: null },
+      {
+        id: 'A1',
+        cajaTurnoId: TURNO_ID,
+        metodo: 'Efectivo',
+        montoCentavos: 400_00n,
+        deletedAt: null,
+      },
       {
         id: 'A2',
-        cajaTurnoId: null,
+        cajaTurnoId: TURNO_ID,
         metodo: 'Transferencia',
         montoCentavos: 150_00n,
         deletedAt: null,
+      },
+      // Another turno's drawer, the same day (M5).
+      {
+        id: 'A3',
+        cajaTurnoId: OTRO_TURNO,
+        metodo: 'Efectivo',
+        montoCentavos: 300_00n,
+        deletedAt: null,
+      },
+      // No turno open when it was received: no drawer counts it (ADR-146).
+      { id: 'A4', cajaTurnoId: null, metodo: 'Efectivo', montoCentavos: 200_00n, deletedAt: null },
+      {
+        id: 'A5',
+        cajaTurnoId: TURNO_ID,
+        metodo: 'Efectivo',
+        montoCentavos: 900_00n,
+        deletedAt: '2026-05-14T21:00:00.000Z',
       },
     ] as never[];
     const gastos = [
@@ -214,6 +237,13 @@ describe('esperadoDelTurno (O-03: scoped by cajaTurnoId)', () => {
       gastos.filter((g: { id: string }) => g.id === 'G1'),
     );
     assert.equal(soloEfectivo, 800_00n + 1_980_00n - 620_00n);
+  });
+
+  it('counts only the cash abonos received in this turno (M5)', () => {
+    const f = fixture();
+    const sinVentas = esperadoDelTurno(f.turno, [], [], f.abonos, []);
+    // A1 only: A2 is a transfer, A3 another turno, A4 no turno, A5 deleted.
+    assert.equal(sinVentas, 800_00n + 400_00n);
   });
 
   it('is the fondo + adicional when nothing else belongs to the turno', () => {

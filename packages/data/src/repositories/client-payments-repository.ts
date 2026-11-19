@@ -6,6 +6,7 @@
 
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   ClientPayment,
   ClientPaymentId,
@@ -30,5 +31,11 @@ export interface ClientPaymentsRepository {
     to: IsoDate,
     businessId: BusinessId,
   ): Promise<readonly ClientPayment[]>;
+  /**
+   * The live abonos a turno's drawer received (ADR-146), newest first: the
+   * abono part of its expected cash, as `ExpensesRepository.findByCajaTurno`
+   * is the gasto part.
+   */
+  findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly ClientPayment[]>;
   delete(id: ClientPaymentId): Promise<void>;
 }

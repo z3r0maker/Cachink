@@ -63,7 +63,7 @@ export async function leerTurnoVivo(
   const [delTurno, lineas, abonos, gastos, movimientos, recurrentes, turnos] = await Promise.all([
     r.tickets.findByCajaTurno(turno.id),
     r.sales.findByDateRange(turno.fecha, hoy as never, businessId),
-    r.clientPayments.findByDateRange(turno.fecha, hoy as never, businessId),
+    r.clientPayments.findByCajaTurno(turno.id),
     r.expenses.findByCajaTurno(turno.id),
     r.inventoryMovements.findByDateRange(turno.fecha, hoy as never, businessId),
     r.recurringExpenses.findDue(hoy as IsoDate, businessId),
