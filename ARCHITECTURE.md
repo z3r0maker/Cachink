@@ -188,6 +188,7 @@ Links to discussion, docs, prior art.
 | [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
+| [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10731,3 +10732,66 @@ drawer.
 - The push upserts UP rows, so `expense_receipts` is granted `UPDATE` as well as `INSERT` (unlike
   `product_images`); nothing updates a receipt, and `DELETE` stays revoked.
 - `docs/design/el-mostrador.md` §6 lists five motions.
+
+## ADR-150
+
+**Title:** A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — M-19, M-20, P-44, P-45; boards `EcDuplicado`, `EcInventario`, `EcPortalCodigo` and `EcRevision` (canvas page «Escáner de códigos») approved by the owner on 2026-11-19
+
+**Context**
+
+Scanning already works on the phone (ADR-022, M-07): in Cobrar a known code goes on the ticket, and an unknown
+one opens «Producto nuevo en caja» with the code filled in, saved as the product's `sku`. An audit on 2026-11-19
+found three ways it can ring up the wrong product. Nothing keeps a code to one product: `products.sku` has no
+index on either database, the portal's forms accept any value, and an offline phone can register a code the
+portal added minutes before. `porCodigo` (`packages/ui/src/screens/Ventas/cobrar-catalogo.ts`) then returns the
+first match without saying so. Codes are compared as exact strings, but the same UPC-A barcode reaches the app
+as 12 digits from Android's ML Kit and as a 13-digit EAN with a leading 0 from iOS, and an owner may type either
+form from the box. And Revisión de caja (`apps/web/src/server/revision.ts`) offers a merge only for a product
+with the same name, so a duplicate code under another name goes through.
+
+**Decision**
+
+1. **The comparison key is the domain's.** `codigoCanonico(raw)` in `@xangarro/domain` returns `null` for an
+   empty code. A code of only digits whose length is 8, 12, 13 or 14 is a GTIN: it is left-padded with zeros to
+   14 digits, the GS1 form, so UPC-A, EAN-13 with its leading 0 and GTIN-14 meet. Any other code (Code 128, Code
+   39, an owner's internal code) is trimmed and upper-cased. The `sku` keeps what was saved. Every match goes
+   through this key, on the phone and in Postgres. The check digit is not checked: a code a reader returns is
+   compared as it came.
+2. **The portal refuses a duplicate. The database does not.** `CrearProductoUseCase` and the portal's edit
+   throw `CodigoDuplicadoError` (code `CODIGO_DUPLICADO`, the other product's name in the message) when another
+   live product of the business has the same key. A product's own code, an archived product's code and another
+   tenant's code don't count. There is no unique index, because a phone that registered a product offline would
+   have its push bounce at sync, and ADR-053 §5 says capture never blocks.
+3. **The phone asks.** When 2+ catalogue products share a key, the escáner shows «Este código lo tienen N
+   productos» and puts nothing on the ticket until the operator taps one. The choice is not remembered:
+   the owner fixes the catalogue.
+4. **Revisión merges by code too.** A pending product whose key matches an approved one shows «Mismo código que
+   …» even when the names differ. Its review offers «Fusionar con …», as the name match does, or «Son distintos»,
+   which clears the pending product's code. «Aprobar» waits until one of the two is done, so a duplicate never
+   reaches the catalogue through Revisión.
+5. **Postgres carries the key.** The next Postgres migration (`0060_products_codigo_canonico` as of this ADR) adds a stored generated column
+   `codigo_canonico` (the same rule written in SQL) and a non-unique index on `(business_id, codigo_canonico)`
+   where `deleted_at is null`. A test checks the SQL rule against `codigoCanonico` over the same fixture codes.
+   SQLite gets no column: the phone compares its catalogue in memory, which it already does.
+
+**Alternatives considered**
+
+- *A unique index on `(business_id, sku)`.* Rejected: it bounces offline phone altas at sync, and it would not
+  catch UPC-A against EAN-13.
+- *Let the phone pick the most recent product silently.* Rejected: that is today's bug with a different winner.
+- *Normalise the `sku` on save.* Rejected: the owner would see a code different from the one on the box, and
+  rewriting existing rows is a data migration for no gain over a key.
+
+**Consequences**
+
+- The owner can't save a second product with a code the catalogue already has. Products saved before this
+  decision may already share one: Revisión shows only pending products, so a duplicate between two approved
+  products surfaces on the phone's chooser alone, until the owner edits one of them.
+- `porCodigo` becomes `productosPorCodigo`, which returns every match. The escáner gains a `duplicado` state.
+- The phone's typed entry keeps letters, since Code 128 and Code 39 carry them.
+- ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
+  unused `MobileScannerHost` go.

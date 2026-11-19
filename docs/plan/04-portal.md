@@ -1989,3 +1989,54 @@ WhatsApp).
 - **Acceptance:** `operador-cierre.spec.ts` closes a real turno, reads the corte's reminder,
   copies the corte and opens another turno with the counted cash; `pnpm lint:design` stays at
   zero.
+
+### P-44 El código de barras del producto: con lector y sin repetidos (ADR-150) [media]
+
+- [ ] Status · **Blocked by:** M-19 (`codigoCanonico`) · **Blocks:** P-45
+- **Context:** the product form calls the code «Código (SKU)» under «Más opciones», accepts any value,
+  and a USB or Bluetooth reader's trailing Enter may submit the form before the owner finishes. Two
+  products can carry the same code, and the phone then rings up whichever it finds first.
+- **Decided with the owner 2026-11-19** (board `EcPortalCodigo` on the canvas page «Escáner de
+  códigos», approved the same day): (1) the field is «Código de barras», still under «Más opciones»,
+  which opens by itself when a reader types on the page (a burst of digits ending in Enter outside
+  any field puts the code in it). (2) The reader's Enter in the field never saves: it confirms the
+  code with «Leímos el código…». (3) A code another live product already has is refused, and the
+  error names that product, with «Ver ese producto» and «Quitar el código». UPC-A and EAN-13 count
+  as the same code. «Siguiente» waits.
+- **Work:** `CrearProductoUseCase` and the portal's edit throw `CodigoDuplicadoError` (TDD: the
+  happy path; a duplicate; UPC-A against EAN-13; the product's own code, an archived product's
+  code and another tenant's code allowed). `findByCodigo(tx, key)` in `@xangarro/data-pg` inside
+  `withTenant`. The next Postgres migration adds the stored generated `codigo_canonico` column and
+  the `(business_id, codigo_canonico)` index where `deleted_at is null`, with a migration test from
+  old rows (a 12-digit and a 13-digit `sku`, a code with letters, a null) and a test that the SQL
+  rule agrees with `codigoCanonico` on the same fixtures. The form's copy, the Enter guard and the
+  reader burst in `productos/nuevo/preguntas.tsx` and `productos/sheet/sections.tsx`; the action's
+  error message comes back as a sentence, as `editar-producto.ts` already does.
+- **Files:** `packages/application/src/crear-producto/`, `apps/web/src/server/actions/editar-producto.ts`,
+  `packages/data-pg/src/schema/catalog.ts` and `drizzle/`, `apps/web/src/app/(portal)/productos/`.
+- **Acceptance:** `producto-codigo.spec.ts` on `mintTenant()` saves a product with a code and reads
+  it back, is refused a second product with the same code in its EAN-13 form and reads the first
+  product's name in the error, and types a code followed by Enter into the field without saving;
+  the data-pg integration test builds two coded products, an archived one and another tenant's;
+  `pnpm lint:design` stays at zero.
+
+### P-45 Revisión de caja: el mismo código de barras (ADR-150) [media]
+
+- [ ] Status · **Blocked by:** P-44 (`codigo_canonico`) · **Blocks:** —
+- **Context:** Revisión de caja offers a merge only for a pending product with the same name as an
+  approved one (`duplicados` in `apps/web/src/server/revision.ts`). A product the caja gave the
+  same code under another name goes through to the catalogue.
+- **Decided with the owner 2026-11-19** (board `EcRevision`, approved the same day): (1) a pending
+  product whose code matches an approved product shows «Mismo código que …» in the list, even when
+  the names differ. (2) Its review says so with the code and offers «Fusionar con …» (the existing
+  merge) or «Son distintos», which clears the pending product's code; the approved product keeps
+  it. (3) «Aprobar y agregar al catálogo» waits until one of the two is done.
+- **Work:** the read gains a code match next to the name match (a code match wins when both
+  differ). An action clears a pending product's code inside `withTenant` and logs it to `sync_log`
+  so the phones receive it. The list's chip and the modal's duplicate box take the code.
+- **Files:** `apps/web/src/server/revision.ts`, `apps/web/src/app/(portal)/revision-caja/`
+  (`fila.tsx`, `comun.tsx`, `producto.tsx`, `use-revision.ts`).
+- **Acceptance:** an integration test builds a pending phone product with an approved product's
+  code under another name and reads it as a duplicate; `revision-codigo.sync.spec.ts` composes that
+  row with `phone-rows.ts` on a minted tenant, sees «Mismo código que …», clears the code with «Son
+  distintos» and approves it.

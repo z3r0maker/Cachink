@@ -29,8 +29,8 @@ listas de abajo.
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1305`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1316`
 - **B-20** El journal de drizzle de Postgres, al día y con guarda (Colas de tracks) — destraba 2: N-27, N-30 · `03-backend.md:365`
+- **M-19** Un código, un producto en el escáner (ADR-150). (Colas de tracks) — destraba 2: P-44, P-45 · `19-movil-mostrador.md:53`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1336`
-- **K-02** Opinión legal sobre CoDi (Colas de tracks) — destraba 1: K-31 · `22-codi.md:168`
 
 ## Bloquea producción (34)
 
@@ -82,25 +82,27 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (111)
+## Código y técnico (115)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (11)
+### Teléfono (13)
 
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + color de marca `[LAUNCH]` — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo. `/api/logos` sigue teniendo un solo consumidor, el portal (`negocio/comprobantes/use-logo.ts` y sus pruebas); nada en `packages/ui`, `packages/sync` ni `apps/mobile` lo llama, y `businesses.logoUrl` en SQLite guarda la URL, no los bytes (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [~] `Alta` **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: N-20 (hecho) · web half landed 2026-09-20 · Falta: solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. · `09-next-features.md:621`
 - [ ] `⛔ bloquea prod` `Alta` **N-22** Banners de sincronización en la app `[LAUNCH]` — Bloqueada por: A-06, A-07 · `09-next-features.md:654`
 - [ ] `⛔ bloquea prod` `Alta` **N-24** La app del teléfono adopta el diseño de operador del Track O `[LAUNCH]` — Bloqueada por: lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · `09-next-features.md:700`
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
-- [ ] `Alta` **M-21** Un turno abierto por caja: quien entra sigue el turno o lo cierra (ADR-071 §3). · `19-movil-mostrador.md:53`
+- [ ] `Alta` **M-21** Un turno abierto por caja: quien entra sigue el turno o lo cierra (ADR-071 §3). · `19-movil-mostrador.md:55`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] `Media` **M-14** Foto del producto en teléfonos reales. · `19-movil-mostrador.md:48`
 - [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:52`
+- [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:53`
+- [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:54`
 - [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
 
-### Portal (14)
+### Portal (16)
 
 - [ ] `Alta` **P-35** Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) — Bloqueada por: — · `04-portal.md:1639`
 - [~] `⛔ bloquea prod` `Alta` **N-03** Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` — Bloqueada por: N-02, N-08, B-14 · Falta: los correos de umbral **ya están**: `NotifyUsageThresholdUseCase` + `renderUsageThresholdEmail` + `recompute-usage.ts` cubren 80/100 % al dueño y 100/150 % al buzón del proveedor, con pruebas de los dos umbrales. Lo que falta son las dos superficies. Sin banner de uso por métrica en el portal (existe el primitivo `UsageBar`, pero sólo se usa para contar operadores y dispositivos en Equipo); sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa). · `09-next-features.md:142`
@@ -110,6 +112,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **P-28** Diagnóstico + estrategia — «Próximamente» en producción — Bloqueada por: P-26, P-30 · Falta: sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios. En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido. Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor === · `04-portal.md:1170`
 - [~] `Media` **P-30** Runtime de generación del Asesor — Bloqueada por: — · Falta: la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo. **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia. 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. · `04-portal.md:1354`
 - [ ] `Media` **P-38** Don Cuentas explica una diferencia de caja — Bloqueada por: — · `04-portal.md:1891`
+- [ ] `Media` **P-44** El código de barras del producto: con lector y sin repetidos (ADR-150) — Bloqueada por: M-19 (`codigoCanonico`) · `04-portal.md:1995`
+- [ ] `Media` **P-45** Revisión de caja: el mismo código de barras (ADR-150) — Bloqueada por: P-44 (`codigo_canonico`) · `04-portal.md:2025`
 - [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · `04-portal.md:1907`
@@ -378,13 +382,13 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 23 hechos)
 - `03-backend.md` — 2 abiertos (1 en curso, 0 bloqueados, 18 hechos)
-- `04-portal.md` — 11 abiertos (3 en curso, 1 bloqueados, 32 hechos)
+- `04-portal.md` — 13 abiertos (3 en curso, 1 bloqueados, 32 hechos)
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `08-post-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 51 abiertos (11 en curso, 0 bloqueados, 29 hechos)
 - `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 14 hechos)
-- `19-movil-mostrador.md` — 4 abiertos (0 en curso, 0 bloqueados, 15 hechos)
+- `19-movil-mostrador.md` — 6 abiertos (0 en curso, 0 bloqueados, 15 hechos)
 - `20-command-center.md` — 21 abiertos (5 en curso, 0 bloqueados, 11 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 24 hechos)
