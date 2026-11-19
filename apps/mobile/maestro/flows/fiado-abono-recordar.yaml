@@ -112,6 +112,10 @@ tags:
 - tapOn: { text: 'Continue', optional: true }
 - assertVisible: { id: 'recordar-restaurar' }
 - tapOn: { id: 'recordar-restaurar' }
+# With the keyboard up the sheet rises to full height and its close sits
+# under the dev client's parked gear, which opens the dev menu instead. A tap
+# on the sheet's hint lowers the keyboard and the sheet with it.
+- tapOn: '.*Se abre WhatsApp con el mensaje listo.*'
 - tapOn: { id: 'recordar-sheet-close' }
 - extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
 
