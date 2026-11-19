@@ -7,6 +7,7 @@ import { CUENTAS } from '../src/cobranza/cuentas';
 import { HOY } from '../src/fixtures';
 import {
   abonosDeHoy,
+  conCuenta,
   estado,
   filtrar,
   rapidos,
@@ -15,6 +16,28 @@ import {
 } from '../src/cobranza/derive';
 
 const [mari, chuy, , delgado] = CUENTAS;
+
+describe('cobranza: only clients with an account are listed (M4)', () => {
+  it('keeps a client with fiado or with abonos', () => {
+    const soloAbono = { ...mari!, id: 'solo-abono', ventas: [] };
+    assert.deepEqual(
+      conCuenta([mari!, soloAbono]).map((c) => c.id),
+      [mari!.id, 'solo-abono'],
+    );
+  });
+
+  it('drops a client with neither', () => {
+    const nuevo = { ...mari!, id: 'nuevo', ventas: [], abonos: [] };
+    assert.deepEqual(
+      conCuenta([nuevo, chuy!]).map((c) => c.id),
+      [chuy!.id],
+    );
+  });
+
+  it('is empty when nobody has an account', () => {
+    assert.deepEqual(conCuenta([{ ...mari!, ventas: [], abonos: [] }]), []);
+  });
+});
 
 describe('cobranza: one account history (D7)', () => {
   it('agrees with Turno: $1,780.00 owed, $760.00 in abonos today, $550.00 of it cash', () => {
@@ -35,6 +58,8 @@ describe('cobranza: one account history (D7)', () => {
     assert.equal(resumenCliente(mari!), '3 ventas abiertas · la más antigua V-0361 del 8 may');
     assert.equal(resumenCliente(chuy!), '2 ventas abiertas · la más antigua V-0288 del 28 abr');
     assert.equal(resumenCliente(delgado!), 'No debe nada. Liquidó su última venta el 9 may.');
+    // A client with nothing owed and no abono on file: no empty date (M4).
+    assert.equal(resumenCliente({ ...delgado!, ventas: [], abonos: [] }), 'No debe nada.');
     assert.deepEqual(CUENTAS.map(estado), ['Al día', 'Atrasado', 'Al día', 'Sin saldo']);
   });
 

@@ -110,7 +110,7 @@ export function comoCuenta(f: FilaCuenta, hoy: string): CuentaCliente {
     desde: new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(
       new Date(f.creado),
     ),
-    limite: f.limite ?? 0n,
+    limite: f.limite,
     plazo,
     atrasado: false,
     ventas: f.ventas.map((v) => comoVenta(v, hoy)),
