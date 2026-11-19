@@ -49,9 +49,13 @@ gotchas that otherwise cost ~30 min of debugging.
 - **Demo seeding takes 3–5 min** (bcrypt on Hermes, debug build). Seed-wait
   timeouts must be ≥360s. `demo-mode-setup.yaml` waits on "Selecciona tu usuario".
 - **Maestro XCUITest driver** (`127.0.0.1:7001`) can disconnect under heavy seed
-  CPU load. If you see `ConnectException: 127.0.0.1:7001`, do a clean restart:
-  `pkill -9 -f maestro; sleep 3` then re-run. **Do not `pkill` mid-run** — it
-  leaves the driver in a bad state for the next run.
+  CPU load. If you see `ConnectException: 127.0.0.1:7001`, re-run through the
+  scripts or `scripts/maestro-locked.sh`: taking the lock clears the old driver.
+  **Never `pkill -9 -f maestro`** — it ends other sessions' runs and the
+  Maestro MCP server (README «One Maestro at a time»).
+- **One Maestro at a time on the machine.** Every iOS run shares port 7001, so
+  two runs on two simulators drive each other's. The scripts hold
+  `/tmp/xangarro-maestro.lock`; `cat /tmp/xangarro-maestro.lock/info` shows who.
 
 ## 3. Triage discipline (bug vs test issue)
 

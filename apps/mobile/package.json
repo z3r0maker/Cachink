@@ -16,7 +16,7 @@
     "android:preview": "expo run:android --variant release",
     "web": "expo start --web",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "maestro test maestro/flows --config maestro/.maestro-config.yaml",
+    "test:e2e": "maestro/scripts/maestro-locked.sh test maestro/flows --config maestro/.maestro-config.yaml",
     "lint": "eslint . --config ../../eslint.config.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .expo .turbo node_modules",
