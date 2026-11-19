@@ -1,5 +1,6 @@
 import {
   leerRefRecurrente,
+  type DatosDePlantilla,
   type FacturaDeRecurrente,
   type PlantillaRecurrente,
 } from '@xangarro/domain/corp';
@@ -33,6 +34,11 @@ export class FakePlantillas implements RecurringTemplateRepository {
     const i = this.plantillas.findIndex((p) => p.id === id);
     const p = this.plantillas[i];
     if (p !== undefined) this.plantillas[i] = { ...p, activo };
+  }
+  async actualizar(id: string, datos: DatosDePlantilla & { readonly activo: boolean }) {
+    const i = this.plantillas.findIndex((p) => p.id === id);
+    const p = this.plantillas[i];
+    if (p !== undefined) this.plantillas[i] = { ...p, ...datos };
   }
   async registradasEn(mes: string) {
     const out = new Map<string, string>();

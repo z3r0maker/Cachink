@@ -154,3 +154,33 @@ describe('the category and search params', () => {
     assert.equal(coincide(f, '  '), true);
   });
 });
+
+describe('a template a service owns (E-24)', () => {
+  const azure = {
+    ...vercel,
+    id: 'rec-azure',
+    nombre: 'Azure',
+    moneda: 'MXN' as const,
+    montoEstimado: 0n,
+  };
+  const apple = {
+    ...vercel,
+    id: 'rec-apple',
+    nombre: 'Apple Developer',
+    periodicidad: 'anual' as const,
+  };
+
+  it('says a usage one has no fixed amount, and suggests it without a minus', () => {
+    assert.equal(montoEstimado(azure), 'Sin monto fijo');
+    const r = { ...del('sugerido'), plantilla: azure };
+    assert.equal(filaRecurrente(r, '2026-10').monto, 'Sin monto fijo');
+    assert.equal(filaSugerida(r, '2026-10').monto, 'Sin monto fijo');
+  });
+
+  it('says an annual one repeats every year', () => {
+    assert.equal(
+      filaRecurrente({ ...del('proximo'), plantilla: apple }, '2026-10').detalle,
+      'Vercel Inc. · cada año',
+    );
+  });
+});

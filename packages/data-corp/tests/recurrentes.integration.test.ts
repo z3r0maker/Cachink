@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 import {
@@ -14,6 +12,7 @@ import { integrationSuite } from '@xangarro/testing/integration';
 import { createCorpDb } from '../src/client';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 import { createRecurringTemplateRepository } from '../src/queries/recurrentes';
+import { crearBaseDesechable } from './base-desechable';
 import { borrarLoDe } from './cleanup';
 
 /**
@@ -23,13 +22,6 @@ import { borrarLoDe } from './cleanup';
  */
 const { url, describe } = integrationSuite();
 const AUTOR = 'f-recurrentes-test';
-const MIGRATION = join(import.meta.dirname, '../drizzle/0005_corp_recurrentes.sql');
-
-const env = (name: string) => {
-  const v = process.env[name];
-  if (v === undefined || v === '') throw new Error(`${name} is required`);
-  return v;
-};
 
 let seq = 0;
 const mesLibre = () => {
@@ -61,7 +53,6 @@ const gasto = (fecha: string): RegistrarMovimientoInput => ({
 
 describe('corp recurring templates', () => {
   let corp: postgres.Sql;
-  let owner: postgres.Sql;
   const deps = () => {
     const db = createCorpDb(url as string);
     return {
@@ -72,10 +63,9 @@ describe('corp recurring templates', () => {
 
   beforeAll(() => {
     corp = postgres(url as string, { max: 1, onnotice: () => {} });
-    owner = postgres(env('DATABASE_SUPER_URL'), { max: 1, onnotice: () => {} });
   });
   afterAll(async () => {
-    await Promise.all([corp.end(), owner.end()]);
+    await corp.end();
     await borrarLoDe(AUTOR);
   });
 
@@ -144,32 +134,26 @@ describe('corp recurring templates', () => {
            VALUES (${`rec-${randomUUID()}`}, 'Mal', 'desarrollo', 'MXN', ${monto}, ${dia},
                    '2026-10', ${AUTOR}, now())`;
     await assert.rejects(insert(0, 100), /recurring_templates_dia_check/);
-    await assert.rejects(insert(10, 0), /recurring_templates_monto_check/);
+    // 0 is a usage service's «sin monto fijo» since 0011 (E-24); below it never.
+    await assert.rejects(insert(10, -1), /recurring_templates_monto_check/);
   });
 
   it('0005 starts a template of the old shape in the month it was made, in Mexico City', async () => {
-    const id = `rec-${randomUUID()}`;
-    const ROLLBACK = new Error('rollback');
-    await assert.rejects(
-      owner.begin(async (tx) => {
-        await tx.unsafe(`ALTER TABLE corp.recurring_templates
-          DROP CONSTRAINT recurring_templates_dia_check,
-          DROP CONSTRAINT recurring_templates_monto_check,
-          DROP CONSTRAINT recurring_templates_categoria_check,
-          DROP CONSTRAINT recurring_templates_desde_check,
-          DROP COLUMN contraparte, DROP COLUMN deducible, DROP COLUMN desde, DROP COLUMN created_by`);
-        // 03:00 UTC on 1 October is still 30 September in Mexico City.
-        await tx`INSERT INTO corp.recurring_templates
-                   (id, nombre, categoria, moneda, monto_estimado, dia_cargo, created_at)
-                 VALUES (${id}, 'Contador', 'administracion', 'MXN', 350000, 12,
-                         '2026-10-01T03:00:00Z')`;
-        await tx.unsafe(readFileSync(MIGRATION, 'utf8'));
-        const [row] = await tx<{ desde: string; deducible: boolean }[]>`
-          SELECT desde, deducible FROM corp.recurring_templates WHERE id = ${id}`;
-        assert.deepEqual({ ...row }, { desde: '2026-09', deducible: true });
-        throw ROLLBACK;
-      }),
-      (e) => e === ROLLBACK,
-    );
+    // In a database of its own: rewinding 0005 here would meet other files' templates.
+    const base = await crearBaseDesechable();
+    try {
+      await base.aplicar((f) => f < '0005');
+      // 03:00 UTC on 1 October is still 30 September in Mexico City.
+      await base.sql`INSERT INTO corp.recurring_templates
+                 (id, nombre, categoria, moneda, monto_estimado, dia_cargo, created_at)
+               VALUES ('rec-viejo', 'Contador', 'administracion', 'MXN', 350000, 12,
+                       '2026-10-01T03:00:00Z')`;
+      await base.aplicar((f) => f.startsWith('0005'));
+      const [row] = await base.sql<{ desde: string; deducible: boolean }[]>`
+        SELECT desde, deducible FROM corp.recurring_templates WHERE id = 'rec-viejo'`;
+      assert.deepEqual({ ...row }, { desde: '2026-09', deducible: true });
+    } finally {
+      await base.cerrar();
+    }
   });
 });
