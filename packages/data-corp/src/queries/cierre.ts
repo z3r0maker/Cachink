@@ -1,6 +1,6 @@
 import type { CierreRepository } from '@xangarro/application/corp';
 import type { EventoCierre, KindEventoCierre } from '@xangarro/domain/corp';
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import type { CorpDb } from '../client.js';
 import { bankBalances, periodEvents } from '../schema/cierre.js';
@@ -58,6 +58,21 @@ export async function eventosDeCierre(
     out.set(r.period, [...(out.get(r.period) ?? []), e]);
   }
   return out;
+}
+
+export interface SaldoConfirmado {
+  /** The month whose last day it was confirmed at, `YYYY-MM`. */
+  readonly periodo: string;
+  /** Centavos. */
+  readonly saldo: bigint;
+}
+
+/** The latest month-end bank balance a founder confirmed in Cierre del mes (Caja, E-23). */
+export async function ultimoSaldoConfirmado(db: CorpDb): Promise<SaldoConfirmado | null> {
+  const [row] = await db.select().from(bankBalances).orderBy(desc(bankBalances.period)).limit(1);
+  return row === undefined
+    ? null
+    : { periodo: row.period, saldo: bigintDe(row.saldo, `saldo of ${row.period}`) };
 }
 
 type Lecturas = Pick<

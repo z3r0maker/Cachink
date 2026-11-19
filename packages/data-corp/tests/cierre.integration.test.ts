@@ -27,7 +27,7 @@ const F2 = 'f-cierre-2';
 
 const mes = () => {
   const n = (Date.now() % 9_000) + 1;
-  return `${5000 + Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}`;
+  return `${6000 + Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}`;
 };
 
 const gasto = (fecha: string, concepto: string, deducible = true): RegistrarMovimientoInput => ({
@@ -90,8 +90,12 @@ describe('corp cierre', () => {
     );
     assert.equal(r.porRevisar, 0);
     // Each standing expense took 1,160.00 out of Bancos; the reversed one nets out.
-    const antes = await saldoDeBancos(db(), `${M}-02`);
-    assert.equal((await saldoDeBancos(db(), `${M}-28`)) - antes, -2_320_00n);
+    // One snapshot for both reads: other suites post earlier-dated rows in parallel.
+    const [antes, luego] = await db().transaction(
+      async (tx) => [await saldoDeBancos(tx, `${M}-02`), await saldoDeBancos(tx, `${M}-28`)],
+      { isolationLevel: 'repeatable read' },
+    );
+    assert.equal(luego - antes, -2_320_00n);
   });
 
   it('closes, keeps the history, and the ledger then refuses the month', async () => {
