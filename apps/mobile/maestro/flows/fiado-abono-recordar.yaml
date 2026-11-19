@@ -114,9 +114,7 @@ tags:
 - assertVisible: '.*5512345678.*'
 
 # «Recordarle por WhatsApp»: the number came prefilled and the message
-# composed (editing it offers the original back). A simulator has no WhatsApp,
-# so «Abrir WhatsApp» falls to the wa.me link in the browser; back in the app,
-# the sheet says so.
+# composed (editing it offers the original back).
 - tapOn: { id: 'cuenta-recordar' }
 - extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
 - assertVisible: '.*Recordarle su saldo a Don Beto.*'
@@ -124,8 +122,19 @@ tags:
 - assertVisible: '.*Se abre WhatsApp con el mensaje listo. Tú decides si lo mandas\..*'
 - tapOn: { id: 'recordar-mensaje' }
 - inputText: 'Nos vemos!'
+# On a fresh simulator iOS lays its one-time keyboard tip over the sheet.
+- tapOn: { text: 'Continue', optional: true }
 - assertVisible: { id: 'recordar-restaurar' }
 - tapOn: { id: 'recordar-restaurar' }
+- tapOn: { id: 'recordar-sheet-close' }
+- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+
+# «Abrir WhatsApp» on a fresh sheet. A simulator has no WhatsApp, so it falls
+# to the wa.me link in the browser; back in the app, the sheet says so. No
+# field is focused: with the keyboard up the sheet's close rides under the
+# status bar, where iOS now draws «◀ Safari» and takes the tap.
+- tapOn: { id: 'cuenta-recordar' }
+- extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
 - tapOn: { id: 'recordar-abrir' }
 - extendedWaitUntil:
     notVisible: { id: 'recordar-abrir' }
