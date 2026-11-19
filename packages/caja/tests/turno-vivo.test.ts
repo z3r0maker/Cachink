@@ -125,6 +125,12 @@ describe('the open turno, live (runtime detail)', () => {
     assert.equal(con.comprobantes, 1);
     assert.equal(comoTurno({ ...VIVO, comprobantes: 1 }, 'Ana', 'Caja 1').comprobantes, 1);
   });
+
+  it('says the apertura’s local day for the cabeza (MvTurno «jueves 14 de mayo»)', () => {
+    const aperturaAt = new Date(2026, 4, 14, 8, 15).toISOString();
+    assert.equal(comoTurno({ ...VIVO, aperturaAt }, 'Ana', 'Caja 1').dia, 'jueves 14 de mayo');
+    assert.equal(comoTurno({ ...VIVO, aperturaAt: '' }, 'Ana', 'Caja 1').dia, '');
+  });
 });
 
 const RENTA: RecurrentePara = {

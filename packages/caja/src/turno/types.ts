@@ -36,6 +36,8 @@ export interface TurnoData {
   readonly operador: string;
   readonly caja: string;
   readonly desde: string;
+  /** The apertura's local day, «jueves 14 de mayo» ('' when unknown). */
+  readonly dia: string;
   /**
    * Who opened the turno, when the operator continues someone else's
    * (M-21, ADR-071 §3: one open turno per caja). Absent on their own turno.

@@ -9,6 +9,7 @@ export const TURNO_FIXTURE: TurnoData = {
   operador: 'Ana Robledo',
   caja: 'Caja 1',
   desde: '08:15',
+  dia: 'jueves 14 de mayo',
   fondo: 80_000n,
   ventasEfectivo: 198_000n,
   abonosEfectivo: 55_000n,

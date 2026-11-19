@@ -10,8 +10,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
 import { estadoDelConteo, type EstadoConteo } from '@xangarro/caja/cierre';
 import { CIERRE_FIXTURE, CONTEO_CUADRA, CONTEO_FALTA, CONTEO_SOBRA } from '@xangarro/caja/cierre';
-import { TURNO_FIXTURE } from '@xangarro/caja/turno';
+import { filasDelTurno, TURNO_FIXTURE } from '@xangarro/caja/turno';
 import { initI18n } from '../../i18n/index';
+import { TurnoRows } from '../AppShell/turno-nav';
 import { Marco } from '../Inicio/story-marco';
 import { CierreHecho } from './cierre-hecho';
 import { CierreScreen, type PasoCierre } from './cierre-screen';
@@ -37,8 +38,7 @@ const ACCIONES = {
   onRetry: () => undefined,
   onIrAInicio: () => undefined,
   onAbrirTurno: () => undefined,
-  onVerVentas: () => undefined,
-  onRegistrar: () => undefined,
+  onBloquear: () => undefined,
 };
 
 /** The estado a count leaves: `estadoDelConteo` over the board's parts. */
@@ -54,6 +54,14 @@ function MiTurno(p: { readonly porEnviar?: boolean; readonly sinTurno?: boolean 
         data={p.sinTurno === true ? null : TURNO_FIXTURE}
         cola={p.porEnviar === true ? COLA_POR_ENVIAR : COLA}
         {...ACCIONES}
+        filas={
+          <TurnoRows
+            onNavigate={() => undefined}
+            vivas={filasDelTurno(p.sinTurno === true ? null : TURNO_FIXTURE, {
+              porEnviar: p.porEnviar === true ? COLA_POR_ENVIAR.porEnviar : 0,
+            })}
+          />
+        }
       />
     </Marco>
   );

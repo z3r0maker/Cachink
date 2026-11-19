@@ -1,7 +1,7 @@
 # Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old
 # CajaContent flow — caja-status-card, blind-count steps — is gone): Inicio's
 # «Abrir turno» opens the fondo sheet, the numpad types the fondo, Mi turno
-# says the cash that must be in the drawer, «Cerrar mi turno» counts it back,
+# says the cash that must be in the drawer, «Cerrar turno» counts it back,
 # the hecho screen closes the cycle, and Inicio returns to «Abre tu turno».
 #
 # Precondition: device activated against the mock, Toni signed in. This flow
@@ -53,8 +53,9 @@ appId: mx.xangarro.mobile
     visible:
       id: 'turno-hero'
     timeout: 10000
-- assertVisible: '.*Debe haber.*'
-- assertVisible: '.*\$500\.00.*'
+- assertVisible:
+    id: 'turno-debe-haber'
+    text: '.*\$500\.00.*'
 
 # Close: count the same $500 back — one bill — and close.
 - tapOn:

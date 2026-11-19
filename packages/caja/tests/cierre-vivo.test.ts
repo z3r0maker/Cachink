@@ -246,19 +246,19 @@ describe('comoCierre y el cierre dicho', () => {
     assert.equal(segundaLinea({ tipo: 'sobra', monto: 910_00n }), 'Con un sobrante de $910.00.');
   });
 
-  it('says Mi turno’s four figures, hints included', () => {
+  it('says Mi turno’s two figures (MvTurno: Ventas and Cobrado), hints included', () => {
     const k = kpisMiTurno(TURNO_FIXTURE);
     assert.deepEqual(
-      k.map((x) => [x.label, x.value]),
+      k.map((x) => [x.label, x.value, x.hint]),
       [
-        ['Ventas', '12'],
-        ['Cobrado', '$3,120.00'],
-        ['Fiado', '$182.00'],
-        ['Gastos', '$620.00'],
+        ['Ventas', '12', 'Una cancelada a las 12:58'],
+        ['Cobrado', '$3,120.00', 'Todos los métodos'],
       ],
     );
-    assert.equal(k[0]?.hint, 'Una cancelada a las 12:58');
-    assert.equal(k[2]?.hint, 'Dos clientes');
-    assert.equal(k[3]?.hint, 'Salieron de la caja · 4 comprobantes');
+  });
+
+  it('a turno with nothing cancelled says so under Ventas', () => {
+    const k = kpisMiTurno({ ...TURNO_FIXTURE, canceladas: 0, ultimaCancelada: null });
+    assert.equal(k[0]?.hint, 'Ninguna cancelada');
   });
 });
