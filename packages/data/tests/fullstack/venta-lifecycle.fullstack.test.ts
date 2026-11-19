@@ -161,7 +161,16 @@ describe('Venta Lifecycle [fullstack]', () => {
       makeNewSale({ businessId: BIZ, productoId: productId, cantidad: 2, monto: 7_000n }),
     );
 
-    // Another operator's turno on the same data — its ticket must not leak in.
+    // The next operator's turno on the same data — its ticket must not leak in.
+    // One turno is open per caja (M-21), so the first closes before it opens:
+    // $500.00 of apertura plus the two cash sales, counted exactly.
+    await h.useCases.cerrarCaja.execute({
+      turnoId: turno.id,
+      montoCierreCentavos: 500_00n + 3_500n + 7_000n,
+      discrepancyReason: null,
+      explicacion: null,
+      businessId: BIZ,
+    });
     const otra = await h.useCases.crearOperador.execute({
       nombre: 'Cajera Turno B',
       pin: '4321',
