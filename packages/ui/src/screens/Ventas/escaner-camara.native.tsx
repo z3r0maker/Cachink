@@ -5,9 +5,10 @@
  */
 import { useRef, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
+import { usePermisoCamara } from '../../hooks/use-permiso-camara';
 import { colors, radii } from '../../theme';
 import { REPETIDO_MS, type EscanerCamaraProps } from './escaner-camara.shared';
 import { EscanerVisor } from './escaner-visor';
@@ -37,7 +38,7 @@ function Permiso({ onPedir }: { onPedir: () => void }): ReactElement {
 }
 
 export function EscanerCamara(props: EscanerCamaraProps): ReactElement {
-  const [permiso, pedir] = useCameraPermissions();
+  const { permiso, solicitar } = usePermisoCamara();
   const leer = useUnaLectura(props.onCodigo);
   const concedido = permiso?.granted === true;
   return (
@@ -63,7 +64,7 @@ export function EscanerCamara(props: EscanerCamaraProps): ReactElement {
           <EscanerVisor />
         </>
       ) : (
-        <Permiso onPedir={() => void pedir()} />
+        <Permiso onPedir={solicitar} />
       )}
     </View>
   );
