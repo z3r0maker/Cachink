@@ -1,0 +1,238 @@
+{
+  "title": "Synth persona",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "human",
+        "chaos",
+        "device"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "core",
+        "pool",
+        "anti"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "hypothesis",
+        "grounded"
+      ]
+    },
+    "market_weight": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "estimate"
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "hypothesis"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^evidence\\/(?!.*\\.\\.)[A-Za-z0-9._/-]+\\.[a-z]+(?:#L\\d+(?:-L\\d+)?)?$"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "business": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "team": {
+          "type": "string",
+          "minLength": 1
+        },
+        "formality": {
+          "type": "string",
+          "enum": [
+            "informal",
+            "resico",
+            "formal-con-contador"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "team",
+        "formality"
+      ],
+      "additionalProperties": false
+    },
+    "device": {
+      "type": "object",
+      "properties": {
+        "viewport": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "network": {
+          "type": "string",
+          "enum": [
+            "wifi",
+            "4g",
+            "slow-3g",
+            "offline-intermitente"
+          ]
+        },
+        "input": {
+          "type": "string",
+          "enum": [
+            "touch",
+            "mouse"
+          ]
+        }
+      },
+      "required": [
+        "viewport",
+        "network",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "comparators": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "goals": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "knows": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "does_not_know": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "behaviors": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trait": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "hypothesis"
+              },
+              {
+                "type": "string",
+                "pattern": "^evidence\\/(?!.*\\.\\.)[A-Za-z0-9._/-]+\\.[a-z]+(?:#L\\d+(?:-L\\d+)?)?$"
+              }
+            ]
+          }
+        },
+        "required": [
+          "trait",
+          "source"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "patience": {
+      "type": "object",
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "abandon_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "max_steps",
+        "abandon_triggers"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "tier",
+    "status",
+    "market_weight",
+    "business",
+    "device",
+    "comparators",
+    "goals",
+    "knows",
+    "does_not_know",
+    "behaviors",
+    "patience"
+  ],
+  "additionalProperties": false
+}

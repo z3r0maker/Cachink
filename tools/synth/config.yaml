@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=./schemas/config.schema.json
+#
+# Xangarro Synth's settings (ADR-153, track S). Checked by
+# `pnpm --filter @xangarro/synth-core validate`.
+
+# Where a run or a seed may go. The list is closed in code (LOCAL_HOSTS):
+# this file can narrow it; widening it takes a code change and an ADR.
+allowed_hosts:
+  - 127.0.0.1
+  - localhost
+  - 10.0.2.2 # the Android emulator's alias for this machine
+
+# Owner decision 5: the actor uses Sonnet, the judge and triage use Opus.
+models:
+  actor: claude-sonnet-5-5
+  judge: claude-opus-5-5
+  triage: claude-opus-5-5
+
+# Per run. A persona's own patience.max_steps may be lower, never higher.
+limits:
+  max_steps: 60
+  max_turns: 80
+  run_timeout_s: 900
+
+# Bounded by the Claude Code login's rate limits and one Android emulator.
+concurrency:
+  web: 3
+  phone: 1
+
+# Owner decision 6: estimated from reported usage, in whole US cents.
+estimated_cost_caps:
+  per_corrida_usd_cents: 2000
+  per_day_usd_cents: 5000
+
+# ADR-154 §4: when Studio's faces change, read from runner signals only.
+reactions:
+  doubt_after: 2 # steps in a row without a screen change → «Dudando»
+  stuck_after: 3 # … → «Atorada»
+  patience_stuck_at: 0.75 # share of max_steps spent → «Atorada»
+
+# The phone runner's emulator (S-06).
+android:
+  avd: Xangarro_Phone # 1080×1920, android-35, hw.keyboard=no
