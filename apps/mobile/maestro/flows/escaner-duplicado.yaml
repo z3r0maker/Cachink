@@ -53,6 +53,15 @@ tags:
 - assertNotVisible:
     id: 'escaner-agregado'
 
+# The second option sits under the sheet's pinned «Cobrar» bar with the typed
+# field open, and Maestro counts it visible there: a tap lands on the bar.
+# One swipe on the sheet's own body (a centre-of-screen swipe can start on the
+# scrim) brings it clear.
+- swipe:
+    from:
+      id: 'escaner-sheet-body'
+    direction: UP
+- waitForAnimationToEnd
 # The option's label names it (an aria-label folds its texts on iOS).
 - tapOn:
     text: 'Vender Cerveza, .*'
