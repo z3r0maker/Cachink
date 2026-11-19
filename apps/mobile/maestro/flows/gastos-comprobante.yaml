@@ -16,7 +16,10 @@ tags:
 ---
 - addMedia:
     - '../fixtures/producto-foto.png'
-- launchApp
+# The camera is allowed up front: its buttons are pressed below.
+- launchApp:
+    permissions:
+      camera: allow
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 
@@ -51,6 +54,72 @@ tags:
     visible:
       id: 'gasto-comprobante-tomar'
     timeout: 5000
+# Every button of the receipt camera, pressed once. The simulator has no
+# camera: the shutter flashes and the camera stays, ready again (a real
+# phone hands the shot on, as the gallery does below).
+- tapOn:
+    id: 'gasto-comprobante-tomar'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- assertVisible: '.*Que se lean el total y la fecha.*'
+- tapOn:
+    id: 'foto-linterna'
+- tapOn:
+    id: 'foto-linterna'
+- tapOn:
+    id: 'foto-disparar'
+- waitForAnimationToEnd
+- assertVisible:
+    id: 'foto-camara-sheet'
+- assertVisible:
+    id: 'foto-disparar'
+- tapOn:
+    id: 'foto-camara-cerrar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'registrar-gasto-sheet'
+# The gallery from inside the camera: the picker opens over it.
+- tapOn:
+    id: 'gasto-comprobante-tomar'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'foto-camara-galeria'
+- runFlow: shared/elegir-foto-galeria.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-lista'
+    timeout: 15000
+# «Cambiar» opens the camera again; closing it keeps the photo.
+- tapOn:
+    id: 'gasto-comprobante-cambiar'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'foto-camara-cerrar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'gasto-comprobante-lista'
+# The cross drops the draft; the row asks for the photo again.
+- tapOn:
+    id: 'gasto-comprobante-quitar'
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-tomar'
+    timeout: 5000
+# And the long press goes straight to the gallery.
 - longPressOn:
     id: 'gasto-comprobante-tomar'
 - runFlow: shared/elegir-foto-galeria.yaml

@@ -29,10 +29,31 @@ function esquinas(w: number, h: number): readonly string[] {
   ];
 }
 
+/** The yellow corners, over the view and over the permission button: never taking its touch. */
+function Esquinas({ w, h }: { readonly w: number; readonly h: number }): ReactElement {
+  return (
+    <View testID="foto-guia-esquinas" position="absolute" pointerEvents="none">
+      <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+        {esquinas(w, h).map((d) => (
+          <Path
+            key={d}
+            d={d}
+            fill="none"
+            stroke={colors.yellow}
+            strokeWidth={5}
+            strokeLinecap="round"
+          />
+        ))}
+      </Svg>
+    </View>
+  );
+}
+
 export function FotoGuia(p: {
   readonly visor: RefObject<FotoVisorHandle | null>;
   readonly linterna: boolean;
   readonly forma: FormaGuia;
+  readonly permiso?: string;
 }): ReactElement {
   const { w, h } = MEDIDAS[p.forma];
   return (
@@ -46,23 +67,13 @@ export function FotoGuia(p: {
         borderRadius={radii[2]}
         overflow="hidden"
       >
-        <FotoVisor ref={p.visor} linterna={p.linterna} />
+        <FotoVisor
+          ref={p.visor}
+          linterna={p.linterna}
+          {...(p.permiso === undefined ? {} : { permiso: p.permiso })}
+        />
       </View>
-      {/* The corners sit over the view, and over the permission button: never take its touch. */}
-      <View testID="foto-guia-esquinas" position="absolute" pointerEvents="none">
-        <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-          {esquinas(w, h).map((d) => (
-            <Path
-              key={d}
-              d={d}
-              fill="none"
-              stroke={colors.yellow}
-              strokeWidth={5}
-              strokeLinecap="round"
-            />
-          ))}
-        </Svg>
-      </View>
+      <Esquinas w={w} h={h} />
     </View>
   );
 }

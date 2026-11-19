@@ -19,6 +19,9 @@ import { useDestello } from '../components/motion/use-captura-motion';
 import { borderWidths, colors, radii, shapeRadii } from '../theme';
 import { ControlesCamara } from './foto-camara-controles';
 import { FotoGuia, type FormaGuia } from './foto-guia';
+import { PISTA_PRODUCTO, type PistaCamara } from './foto-pista';
+
+export type { PistaCamara } from './foto-pista';
 import type { FotoVisorHandle } from './foto-visor-tipos';
 
 const CERRAR: ViewStyle = {
@@ -30,17 +33,6 @@ const CERRAR: ViewStyle = {
   borderWidth: borderWidths.quiet,
   borderColor: colors.gray600,
   backgroundColor: colors.ink,
-};
-
-/** What the hint under the guide says. */
-export interface PistaCamara {
-  readonly titulo: string;
-  readonly cuerpo: string;
-}
-
-const PISTA_PRODUCTO: PistaCamara = {
-  titulo: 'Ponlo sobre algo liso y con luz',
-  cuerpo: 'Se recorta el fondo solo. Si no se puede, se guarda la foto completa.',
 };
 
 export interface FotoCamaraSheetProps {
@@ -120,7 +112,7 @@ function Visor(p: {
       borderRadius={radii[6]}
       backgroundColor={colors.ink}
     >
-      <FotoGuia visor={p.visor} linterna={p.linterna} forma={p.forma} />
+      <FotoGuia visor={p.visor} linterna={p.linterna} forma={p.forma} permiso={p.pista.permiso} />
       <MText size="lg" weight="extraBold" color={colors.white} textAlign="center">
         {p.pista.titulo}
       </MText>
@@ -156,6 +148,8 @@ function useDisparo(onTomada: (uri: string) => void) {
     setOcupado(true);
     void (visor.current?.tomar() ?? Promise.resolve(null))
       .then((uri) => (uri ? onTomada(uri) : undefined))
+      // No still (a simulator has no camera): the camera stays, ready again.
+      .catch(() => undefined)
       .finally(() => setOcupado(false));
   };
   return { visor, ocupado, disparar, destello: destello.opacity };

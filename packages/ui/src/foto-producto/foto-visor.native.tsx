@@ -12,11 +12,13 @@ import { usePermisoCamara } from '../hooks/use-permiso-camara';
 import { colors } from '../theme';
 import type { FotoVisorProps } from './foto-visor-tipos';
 
-function Permiso(p: { readonly onPedir: () => void }): ReactElement {
+const PERMISO_PRODUCTO = 'Para la foto del producto, Xangarro necesita la cámara.';
+
+function Permiso(p: { readonly texto: string; readonly onPedir: () => void }): ReactElement {
   return (
     <View flex={1} alignItems="center" justifyContent="center" gap={12} padding={16}>
       <MText size="md" weight="semibold" color={colors.white} textAlign="center">
-        Para la foto del producto, Xangarro necesita la cámara.
+        {p.texto}
       </MText>
       <Btn variant="primary" size="lg" sentence onPress={p.onPedir} testID="foto-permiso">
         Permitir la cámara
@@ -39,7 +41,9 @@ export function FotoVisor(p: FotoVisorProps): ReactElement {
     [],
   );
   if (permiso === null) return <View testID="foto-visor" flex={1} />;
-  if (!permiso.granted) return <Permiso onPedir={solicitar} />;
+  if (!permiso.granted) {
+    return <Permiso texto={p.permiso ?? PERMISO_PRODUCTO} onPedir={solicitar} />;
+  }
   return (
     <CameraView
       ref={camara}
