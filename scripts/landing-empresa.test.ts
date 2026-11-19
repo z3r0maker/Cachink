@@ -10,22 +10,23 @@ import { join } from 'node:path';
 import { describe, it } from 'vitest';
 
 import { PROVEEDOR } from '../packages/domain/src/privacidad/proveedor';
-import { DOMICILIO_COMPLETO, EMPRESA, telHref } from '../apps/landing/landing/empresa.js';
+import { DOMICILIO_COMPLETO, EMPRESA } from '../apps/landing/landing/empresa.js';
 
 const fuente = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
 describe('the landing names the same supplier as checkout', () => {
-  it('razón social, RFC, domicilio, correo and teléfono are equal', () => {
+  it('razón social, RFC, domicilio and correo are equal', () => {
     assert.equal(EMPRESA.razonSocial, PROVEEDOR.razonSocial);
     assert.equal(EMPRESA.rfc, PROVEEDOR.rfc);
     assert.equal(DOMICILIO_COMPLETO, PROVEEDOR.domicilio);
     assert.equal(EMPRESA.correo, PROVEEDOR.correo);
-    assert.equal(EMPRESA.telefono, PROVEEDOR.telefono);
   });
 
-  it('dials the phone with +52 and no spaces', () => {
-    assert.equal(telHref('33 1234 5678'), 'tel:+523312345678');
-    assert.equal(telHref(EMPRESA.telefono), 'tel:+529999999999');
+  it('publishes no phone until the company has its own line', () => {
+    assert.equal('telefono' in EMPRESA, false);
+    assert.equal('telefono' in PROVEEDOR, false);
+    assert.doesNotMatch(fuente('apps/landing/home/ContactoLegal.jsx'), /tel:|llama/i);
+    assert.doesNotMatch(fuente('docs/legal/aviso/terminos-borrador.md'), /99 9999 9999/);
   });
 
   it('both footers mount the contact block', () => {

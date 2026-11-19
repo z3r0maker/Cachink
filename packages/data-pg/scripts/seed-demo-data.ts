@@ -18,7 +18,7 @@ export const DEMO = {
   owner: {
     id: '3f1c0e2a-0000-4000-8000-0000000000de',
     email: 'demo@xangarro.mx',
-    nombre: 'Reviewer',
+    nombre: 'Don Pepe',
     memberId: demoId('MEMB0'),
   },
   /** One per device slot of the Xangarro plan (2): a code links one device,
