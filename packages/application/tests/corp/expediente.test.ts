@@ -138,7 +138,7 @@ describe('the store behind the repository sets the size limit (E-26)', () => {
       subirEvidencia(
         { agenda: new FakeAgenda(), documentos: d.documentos, sha256: d.sha256 },
         {
-          plantillaId: 'isr_mensual',
+          plantillaId: 'impuestos_mensual',
           periodo: '2026-09',
           tipo: 'otro',
           ...grande(MAX_BYTES_EVIDENCIA + 1),
@@ -206,7 +206,7 @@ describe('subirVersion', () => {
   it('keeps an obligation showing only its current evidence', async () => {
     const d = { ...deps(), agenda: new FakeAgenda() };
     const acuse = await subirEvidencia(d, {
-      plantillaId: 'isr_mensual',
+      plantillaId: 'impuestos_mensual',
       periodo: '2026-09',
       tipo: 'acuse',
       nombre: 'acuse.pdf',
@@ -215,7 +215,7 @@ describe('subirVersion', () => {
       hoy: '2026-10-08',
       founderId: 'f1',
     });
-    assert.deepEqual([acuse.carpeta, acuse.titulo], ['sat', 'Acuse · ISR provisional']);
+    assert.deepEqual([acuse.carpeta, acuse.titulo], ['sat', 'Acuse · ISR e IVA']);
     await subirVersion(d, {
       documentoId: acuse.id,
       archivo: pdf('corregido'),

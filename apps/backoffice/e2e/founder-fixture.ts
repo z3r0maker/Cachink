@@ -80,6 +80,7 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.share_events WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.certificates WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.obligations WHERE created_by IN (${suite})`;
+      await tx`DELETE FROM corp.tax_returns WHERE created_by IN (${suite})`;
       const mine = tx`SELECT id FROM corp.entries
                        WHERE concepto LIKE 'E2E %' OR concepto LIKE 'Reversa: E2E %'
                           OR created_by IN (SELECT f.id FROM corp.founders f

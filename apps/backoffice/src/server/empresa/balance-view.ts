@@ -94,6 +94,7 @@ function nota(cuenta: AccountKey, v: VistaBalance): string {
     stripe_por_depositar: 'Cobros de Stripe que aún no llegan al banco',
     iva_acreditable: 'IVA de gastos pagados',
     iva_por_acreditar: 'IVA de facturas a crédito sin pagar',
+    isr_pagos_provisionales: 'Se acreditan en la declaración anual',
     proveedores: 'Facturas recibidas a crédito',
     iva_trasladado: `IVA de lo cobrado: ${sat}`,
     isr_por_pagar: `ISR del mes: ${sat}`,

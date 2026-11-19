@@ -22,18 +22,12 @@ const TRAMITE = {
 
 export const CATALOGO: readonly Plantilla[] = [
   {
-    id: 'isr_mensual',
-    titulo: 'ISR provisional',
+    // One federal declaration a month: ISR, IVA and withholdings, one acuse
+    // and one línea de captura (E-13, ADR-148; formerly isr_mensual + iva_mensual).
+    id: 'impuestos_mensual',
+    titulo: 'ISR e IVA',
     autoridad: 'SAT',
-    fundamento: 'LISR Título VII Cap. XI · pago provisional mensual',
-    regla: { tipo: 'mensual', dia: 17 },
-    ...DECLARACION,
-  },
-  {
-    id: 'iva_mensual',
-    titulo: 'IVA mensual',
-    autoridad: 'SAT',
-    fundamento: 'LIVA art. 5-D · declaración mensual',
+    fundamento: 'LISR Título VII Cap. XI · LIVA art. 5-D · declaración mensual',
     regla: { tipo: 'mensual', dia: 17 },
     ...DECLARACION,
   },
@@ -138,4 +132,15 @@ export const CATALOGO: readonly Plantilla[] = [
 
 export function plantilla(id: string): Plantilla | undefined {
   return CATALOGO.find((p) => p.id === id);
+}
+
+/** Templates merged into another (ADR-148): an old link still finds its obligation. */
+const RETIRADAS: Readonly<Record<string, string>> = {
+  isr_mensual: 'impuestos_mensual',
+  iva_mensual: 'impuestos_mensual',
+};
+
+/** The template id an old id now lives under, or null when it never was one. */
+export function plantillaRetirada(id: string): string | null {
+  return RETIRADAS[id] ?? null;
 }

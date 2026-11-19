@@ -8,11 +8,14 @@ export {
 } from './cerrar-dinero-trimestre.js';
 export {
   ConceptoRequeridoError,
+  DeclaracionFaltanteError,
+  DeclaracionPagadaError,
   LlamadaDesconocidaError,
   MovimientoDesconocidoError,
   PlantillaDesconocidaError,
   ProyectoDesconocidoError,
   RecurrenteYaRegistradoError,
+  SePagaDesdeImpuestosError,
   ServicioDesconocidoError,
   TrimestreEnCursoError,
   VencimientoInvalidoError,
@@ -63,3 +66,11 @@ export {
   type ServiceRepository,
   type ServiciosDeps,
 } from './servicios.js';
+export {
+  avanzarDeclaracion,
+  guardarDeclaracion,
+  pagarDeclaracion,
+  type DeclaracionRepository,
+  type ImpuestosDeps,
+  type PagarDeclaracionInput,
+} from './impuestos.js';

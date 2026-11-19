@@ -42,6 +42,8 @@ export {
   type IngresoDeProyecto,
 } from './queries/limites.js';
 export { createServiceRepository } from './queries/servicios.js';
+export { createDeclaracionRepository } from './queries/impuestos.js';
+export { fuentesFiscales } from './queries/impuestos-fuentes.js';
 export {
   cargosDeServicios,
   comisionesPorMes,

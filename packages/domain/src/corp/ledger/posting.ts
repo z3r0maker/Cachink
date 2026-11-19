@@ -114,14 +114,19 @@ function pagoProveedor(m: PagoProveedor): readonly JournalLine[] {
   ];
 }
 
+/**
+ * A month's declaration paid (E-13, ADR-148): the ISR provisional is an
+ * advance on the year's tax, the IVA settles what was collected (the IVA
+ * acreditable already reduced it), and the withholdings leave their payable.
+ */
 function pagoImpuestos(m: PagoImpuestos): readonly JournalLine[] {
   const isr = nonNegative(m.isr, 'el ISR');
   const iva = nonNegative(m.iva, 'el IVA');
   const ret = nonNegative(m.retenciones, 'las retenciones');
   positive(isr + iva + ret, 'el pago');
   return [
-    debe('isr_por_pagar', isr),
-    debe('iva_por_pagar', iva),
+    debe('isr_pagos_provisionales', isr),
+    debe('iva_trasladado', iva),
     debe('retenciones_por_pagar', ret),
     haber('bancos', isr + iva + ret),
   ];
