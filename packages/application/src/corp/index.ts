@@ -82,3 +82,12 @@ export {
   type CierreDeps,
   type CierreRepository,
 } from './cierre.js';
+export {
+  pedirGasto,
+  prepararPresupuesto,
+  responderPresupuesto,
+  responderSolicitud,
+  type NuevaSolicitud,
+  type PresupuestoDeps,
+  type PresupuestoRepository,
+} from './presupuesto.js';

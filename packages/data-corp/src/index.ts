@@ -61,3 +61,8 @@ export {
   type GastoSinFactura,
   type RecibidasDelMes,
 } from './queries/cierre-fuentes.js';
+export {
+  createPresupuestoRepository,
+  listarPresupuestos,
+  listarSolicitudes,
+} from './queries/presupuesto.js';
