@@ -29,6 +29,8 @@ export interface ChipProps {
   readonly role?: 'radio' | 'checkbox';
   /** A black edge while unchosen (the cancel dialog's motivos). */
   readonly marked?: boolean;
+  /** Side padding of 4 px, for a row split in equal parts: the label keeps the width. */
+  readonly ajustado?: boolean;
   readonly disabled?: boolean;
   readonly testID?: string;
 }
@@ -37,7 +39,7 @@ function chipStyle(p: ChipProps, pressed: boolean): ViewStyle {
   const edge = p.selected || p.marked === true;
   return {
     minHeight: 44,
-    paddingHorizontal: 16,
+    paddingHorizontal: p.ajustado === true ? 4 : 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: shapeRadii.pill,

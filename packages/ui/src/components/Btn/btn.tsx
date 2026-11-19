@@ -163,6 +163,10 @@ function BtnLabel({
       // phone widths and break the §8.3 hit-target geometry.
       numberOfLines={1}
       ellipsizeMode="tail"
+      // A label that carries a figure must not lose it to the ellipsis
+      // («Abrir turno con $1,0…»): it shrinks to fit first.
+      adjustsFontSizeToFit
+      minimumFontScale={0.7}
       // Audit 9.4 — older users who scale system text up to 130 % still
       // need the button label to fit. Without a cap, RN's
       // `allowFontScaling` (default true) makes labels overflow at

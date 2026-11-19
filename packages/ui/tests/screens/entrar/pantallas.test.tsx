@@ -221,6 +221,24 @@ describe('Abrir turno', () => {
     expect(onAbrir).toHaveBeenCalledWith(2_550n);
   });
 
+  it('leaves the quick amounts room to say their whole figure', () => {
+    renderWithProviders(
+      <AbrirTurnoSheet
+        open
+        onClose={vi.fn()}
+        nombre="Ana"
+        ultimo={null}
+        sugerido={null}
+        onAbrir={vi.fn()}
+        submitting={false}
+        error={null}
+      />,
+    );
+    for (const monto of ['500', '1000', '2000', '5000']) {
+      expect(getComputedStyle(screen.getByTestId(`fondo-rapido-${monto}`)).paddingLeft).toBe('4px');
+    }
+  });
+
   it('won’t open on an empty figure', () => {
     const onAbrir = vi.fn();
     renderWithProviders(
