@@ -235,8 +235,9 @@ el plan**.
 
 ### Operación
 
-- [ ] `[nuevo]` Designar la persona o área de datos personales (art. 29) y el buzón
-      `[CORREO PRIVACIDAD]` (p. ej. `privacidad@xangarro.mx`), revisado a diario.
+- [x] `[nuevo]` Designar la persona o área de datos personales (art. 29) y el buzón
+      `privacidad@xangarro.mx`, revisado a diario. Hecho 2026-11-18: el Área de Protección de Datos
+      Personales (aviso integral §1); el buzón es un alias en Zoho (`production-readiness.md` §1.1).
 - [x] `[nuevo]` Revisar que Sentry del portal/API no capture PII (B-18) antes de declararlo en el aviso:
       `sendDefaultPii: false` y `scrubEvent` en cada evento.
 - [ ] `[plan]` Revisión del abogado antes de publicar (criterio de aceptación de N-34).

@@ -31,6 +31,41 @@
       Organization › Data Storage Location; the DSN host says `ingest.us.` or `ingest.de.`), the card
       processors' cell, and the `[PLAZO]`s.
 
+### 1.1 Correos de contacto: `soporte@` y `privacidad@` (done 2026-11-18)
+
+The legal texts name `soporte@` (términos) and `privacidad@` (aviso integral and simplificado,
+ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are `eduardotorres@`
+(admin) and `antonio.alejo@`.
+
+- **Shape (done 2026-11-18): `soporte@` is a group, `privacidad@` an alias.** The options in Zoho:
+  - _Group_ delivers into every member's own inbox and keeps the `To:` intact for a filter;
+    `hola@` and `soporte@` are groups (both users, email access Everyone).
+  - _Alias on a user_ lands in that one user's inbox, and Zoho offers it as a From address
+    without setup. `privacidad@` is an alias on `eduardotorres@`, so ARCO requests reach the admin
+    only; move it to a group if a second person must see them.
+  - _New mailbox_ spends one of the five free licences and is one more login to watch. Not used.
+- **DNS: no change.** MX (`mx/mx2/mx3.zoho.com`), SPF (`include:zohomail.com`), DKIM (`zmail`) and
+  DMARC are per domain, and every group or alias on a verified domain uses them. Checked over DoH on 2026-11-11.
+- **Replying from the address (send-as).** ARCO answers must go out _from_ `privacidad@`, so a
+  reply is tied to the address the aviso publishes. As an alias it is already a From option in
+  Zoho Mail. For the `soporte@` group, each member adds it under Settings → Mail Accounts → Send
+  Mail As; Zoho verifies by mailing the group, which lands in that member's inbox.
+- **Transactional mail (Resend) does not use `privacidad@`.** ARCO correspondence stays human, in
+  Zoho. `EMAIL_FROM` stays `Xangarro <hola@xangarro.mx>`. `EMAIL_REPLY_TO` may become
+  `soporte@xangarro.mx` on the portal (optional; `hola@` and `soporte@` reach the same people today), and
+  `DIGEST_TO` already defaults to `soporte@`. When N-34 gets its own ARCO template, set its
+  reply-to per message to `privacidad@`.
+- **`PROVEEDOR.correo` → `soporte@`** (done 2026-11-18). LFPC 76 Bis I and III ask for a contact
+  for questions and complaints, which is what `soporte@` is, and the términos already name it. Checkout,
+  the footer of every email, the 2FA recovery screen and the landing's `EMPRESA` read it. `hola@`
+  stays the general address (landing «Acerca», FAQ, schema, error messages) and the From of app mail.
+- **Texts:** filled on 2026-11-17 (`57157e03`, aviso simplificado `1.0`).
+
+- [x] [alta] [bloq] Alias `privacidad@xangarro.mx` creado en Zoho; grupo `soporte@` confirmado; un
+      correo de prueba a cada uno llegó (2026-11-18). Pending, per member: «Send Mail As» for `soporte@`.
+- [x] [alta] [bloq] `[CORREO SOPORTE]` y `[CORREO PRIVACIDAD]` reemplazados en los textos y en el
+      aviso simplificado publicado (nueva `AVISO_VERSION`).
+
 ## 2. Captura de consentimiento (PRIV-REG-01) — implementado 2026-09-22
 
 - [x] Aviso simplificado rendered on `/signup` above the button (`signup/consent.tsx`).
