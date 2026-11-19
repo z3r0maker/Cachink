@@ -59,13 +59,38 @@ network). The `shared/mock-*.js` scripts call them from a flow.
 # Skip setup (assume the simulator is already in the right state):
 ./apps/mobile/maestro/scripts/run-flow.sh --skip-setup apps/mobile/maestro/flows/ventas-lista.yaml
 
-# Direct maestro test (no auto-setup — you manage state yourself):
-maestro test apps/mobile/maestro/flows/ventas-lista.yaml
+# Direct maestro test (no auto-setup — you manage state yourself), through
+# the lock (see «One Maestro at a time» below):
+./apps/mobile/maestro/scripts/maestro-locked.sh --device <udid> test apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Tag-filtered run:
-maestro test --includeTags smoke apps/mobile/maestro/flows/
-maestro test --excludeTags offline apps/mobile/maestro/flows/
+./apps/mobile/maestro/scripts/maestro-locked.sh test --include-tags smoke apps/mobile/maestro/flows/
+./apps/mobile/maestro/scripts/maestro-locked.sh test --exclude-tags offline apps/mobile/maestro/flows/
 ```
+
+### One Maestro at a time
+
+Maestro 2.5.1 drives every single-device iOS run through one driver port,
+`127.0.0.1:7001`, whatever `--device` says, and reuses any driver already
+there. Two runs on two simulators at once drive each other's: on 2026-11-19
+one run's `launchApp` closed the app on another session's simulator, and that
+session's setup failed on the home screen. A driver left running after a run
+does the same to the next one.
+
+So the scripts take a machine-wide lock (`scripts/lib/maestro-lock.sh`,
+`/tmp/xangarro-maestro.lock`) before their first Maestro command and keep it
+to the end. A second run waits, says who holds it (pid, simulator, script),
+and gives up after `MAESTRO_LOCK_WAIT` seconds (default an hour). A lock whose
+holder died is taken over. With the lock, a run clears leftover drivers before
+it starts and its own when it ends.
+
+- Run Maestro by hand only through `scripts/maestro-locked.sh <maestro args>`.
+  A bare `maestro test` doesn't take the lock; the scripts wait for it to end
+  but it can still be driven by, or drive, someone else's run.
+- Never `pkill -f maestro` or `xctest`: it ends other sessions' runs and the
+  Maestro MCP server. The lock's cleanup stops only the driver.
+- The Maestro MCP tools (`run`, `inspect_screen`) don't take the lock either.
+  Use them only while no script holds it (`cat /tmp/xangarro-maestro.lock/info`).
 
 ### Entry points
 
@@ -205,7 +230,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 
 | Task                         | Use                                              | Why                                            |
 | ---------------------------- | ------------------------------------------------ | ---------------------------------------------- |
-| Run a known flow             | `run-flow.sh` or `maestro test` via Bash         | Fast, no LLM round-trip overhead               |
+| Run a known flow             | `run-flow.sh` or `maestro-locked.sh` via Bash    | Fast, no LLM round-trip overhead               |
 | Explore the UI interactively | `maestro mcp` tools (tap, screenshot, hierarchy) | MCP gives Claude direct control                |
 | Debug a failing step         | MCP `inspect_view_hierarchy` + `take_screenshot` | Inspect state without re-running the full flow |
 

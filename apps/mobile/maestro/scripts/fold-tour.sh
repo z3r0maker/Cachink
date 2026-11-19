@@ -38,6 +38,10 @@ source "$SCRIPT_DIR/lib/device-resolve.sh"
 source "$SCRIPT_DIR/lib/with-timeout.sh"
 
 resolve_device "$DEVICE_CLASS"
+# One Maestro at a time on this machine (lib/maestro-lock.sh).
+# shellcheck source=lib/maestro-lock.sh
+source "$SCRIPT_DIR/lib/maestro-lock.sh"
+maestro_lock_acquire || exit 1
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/e2e-reports/fold-tours/$DEVICE_CLASS}"
 mkdir -p "$OUT_DIR"
 

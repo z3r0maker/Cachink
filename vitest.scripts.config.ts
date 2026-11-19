@@ -10,7 +10,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['scripts/**/*.test.ts'],
+    // The Maestro harness's shell libraries are tooling too (not part of the
+    // mobile workspace's own vitest, which only reads apps/mobile/tests).
+    include: ['scripts/**/*.test.ts', 'apps/mobile/maestro/scripts/tests/**/*.test.ts'],
     /**
      * These tests read the repository — every tracked file, the ESLint config,
      * the workflow, the `.env.example` files — so they are I/O bound and slow
