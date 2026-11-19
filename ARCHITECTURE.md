@@ -186,6 +186,7 @@ Links to discussion, docs, prior art.
 | [145](#adr-145) | 2026-11-17 | OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS | Accepted |
 | [146](#adr-146) | 2026-11-18 | An abono carries the turno whose drawer received it, as a gasto does | Accepted |
 | [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
+| [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10600,3 +10601,60 @@ confirmation and nothing was stored.
 - Open gap, not changed here: opening is checked per user while sales attach to the business's newest open
   turno (`findOpenByBusiness`, ADR-071 §3), so two operators on one phone can each hold an open turno.
 - The web caja still shows its Entrega dialog; aligning it is a canvas round of its own.
+
+## ADR-148
+
+**Title:** The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-13; boards CD-09 and CD-09b approved by the owner on 2026-11-19 (canvas round 15)
+
+**Context**
+
+E-13 puts Resultados' third tab, Impuestos, on the console: the month's ISR provisional (RESICO persona moral),
+IVA and withholdings estimated from the ledger, against what the contador declared, with the acuse, the línea
+de captura and the proof of payment. Three things in the existing code did not fit. The Agenda (E-04) carried
+two monthly obligations, «ISR provisional» and «IVA mensual», each with its own acuse and steps, while the SAT
+takes both, with the withholdings, in one declaration with one acuse and one línea de captura (the round-1
+Agenda board already showed it as one item). The withholdings had no obligation at all. And `pago_impuestos`
+(E-02) debited `isr_por_pagar` and `iva_por_pagar`, which nothing ever credits, so the first payment would have
+shown negative liabilities on Balance. No screen created that movement yet.
+
+**Decision**
+
+1. **One obligation a month, `impuestos_mensual` («ISR e IVA»),** replaces `isr_mensual` and `iva_mensual`.
+   Migration `0012_zz_corp_impuestos.sql` merges existing rows: where a month has both, the ISR row stays, takes
+   the IVA row's documents and the less advanced of the two statuses, and the IVA row is deleted; every other row
+   is renamed. Old links redirect (`plantillaRetirada`).
+2. **The contador's figures are a `Declaracion`** in `corp.tax_returns`, one row per month: ISR, IVA, ISR
+   retenido, IVA retenido, and the línea's amount and expiry. It can be corrected until the month is paid.
+3. **The estimate is the domain's** (`@xangarro/domain/corp` `impuestos/`): cash basis. The ISR is the year's
+   income collected less its deductible expenses paid, at 30 % through the portal's `calcularIsrPorRegimen`
+   (626, persona moral), less the year's earlier provisional payments: the contador's figure once declared, the
+   estimate before. The IVA is trasladado collected less acreditable paid less the earlier saldo a favor. A
+   difference over $1 is flagged «Revisa con el contador», never blocking.
+4. **The papers move the obligation.** The figures make it preparada and the acuse presentada.
+   «Marcar como pagado» needs the comprobante, or a declaration en ceros, which closes «sin pago». The Agenda
+   sends the monthly declaration to Impuestos and refuses to mark it pagada itself (`SePagaDesdeImpuestosError`),
+   so a paid month always has its movement.
+5. **The payment posts one `pago_impuestos` entry**, idempotent by `source_ref = 'impuestos:<period>'`: the ISR to
+   a new asset, «Pagos provisionales de ISR» (credited in the annual), the IVA against IVA trasladado (the
+   acreditable already reduced what is paid), the withholdings against their payable. `isr_por_pagar` and
+   `iva_por_pagar` stay in the chart, unused.
+
+**Alternatives considered**
+
+- *Keep two obligations and file the same acuse against both.* Rejected: two copies of every paper, two
+  statuses that can disagree, and the withholdings still nowhere.
+- *Post a monthly IVA determination (trasladado and acreditable netted into IVA por pagar) and pay against it.*
+  Rejected for now: the contador's figure often differs from the netting, and the difference needs an account
+  of its own. Balance's net IVA position is right either way; only its gross lines stay large.
+
+**Consequences**
+
+- The hosted database needs `0012` before the console's deploy; it renames Agenda rows the founders may have.
+- Balance lists «Pagos provisionales de ISR» among the assets, at zero until a month with ISR is paid.
+- The annual declaration (still its own obligation) will have to credit these provisional payments.
+- The withholdings are split into ISR and IVA by reading each movement's captured payload; the payable is one
+  account.

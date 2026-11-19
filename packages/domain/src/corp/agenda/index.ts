@@ -6,7 +6,7 @@ export {
   MIMES_EVIDENCIA,
   retenerHasta,
 } from './archivo.js';
-export { CATALOGO, plantilla } from './catalogo.js';
+export { CATALOGO, plantilla, plantillaRetirada } from './catalogo.js';
 export {
   anteriorDiaHabil,
   diasInhabiles,

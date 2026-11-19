@@ -32,6 +32,8 @@ export const ACCOUNTS = {
   iva_acreditable: a('IVA acreditable', 'activo', 'deudora'),
   /** IVA of an invoice on credit: creditable once it is paid (owner decision 9). */
   iva_por_acreditar: a('IVA pendiente de acreditar', 'activo', 'deudora'),
+  /** The year's ISR provisional payments, credited in the annual (E-13). */
+  isr_pagos_provisionales: a('Pagos provisionales de ISR', 'activo', 'deudora'),
   proveedores: a('Proveedores', 'pasivo', 'acreedora'),
   iva_trasladado: a('IVA trasladado', 'pasivo', 'acreedora'),
   isr_por_pagar: a('ISR por pagar', 'pasivo', 'acreedora'),

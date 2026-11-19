@@ -82,3 +82,27 @@ export class ServicioDesconocidoError extends Error {
     this.name = 'ServicioDesconocidoError';
   }
 }
+
+export class DeclaracionFaltanteError extends Error {
+  readonly code = 'DECLARACION_FALTANTE' as const;
+  constructor(readonly periodo: string) {
+    super('Primero captura lo que declaró el contador.');
+    this.name = 'DeclaracionFaltanteError';
+  }
+}
+
+export class DeclaracionPagadaError extends Error {
+  readonly code = 'DECLARACION_PAGADA' as const;
+  constructor(readonly periodo: string) {
+    super('Ese mes ya está pagado; su declaración ya no cambia.');
+    this.name = 'DeclaracionPagadaError';
+  }
+}
+
+export class SePagaDesdeImpuestosError extends Error {
+  readonly code = 'SE_PAGA_DESDE_IMPUESTOS' as const;
+  constructor() {
+    super('Esta declaración se marca pagada desde Impuestos, que registra el pago.');
+    this.name = 'SePagaDesdeImpuestosError';
+  }
+}

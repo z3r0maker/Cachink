@@ -35,7 +35,7 @@ const docs = [
   doc({ id: 'c2', reemplazaA: 'c1', subidoEn: '2026-10-03T15:00:00Z' }),
   doc({
     id: 'a1',
-    titulo: 'Acuse · ISR provisional',
+    titulo: 'Acuse · ISR e IVA',
     periodo: '2026-08',
     obligacionId: 'o1',
     subidoPor: 'f2',
@@ -49,8 +49,8 @@ const contexto: Contexto = {
     [
       'o1',
       {
-        texto: 'Agenda · ISR provisional de agosto de 2026',
-        href: '/empresa/agenda/isr_mensual/2026-08',
+        texto: 'Agenda · ISR e IVA de agosto de 2026',
+        href: '/empresa/agenda/impuestos_mensual/2026-08',
       },
     ],
   ]),
@@ -69,11 +69,11 @@ describe('filasDe', () => {
       [
         ['Constancia de situación fiscal', 'PDF · v2', 'Oct 2026', '3 oct · F1', null],
         [
-          'Acuse · ISR provisional',
+          'Acuse · ISR e IVA',
           'PDF · v1',
           'Ago 2026',
           '17 sep · F2',
-          'Agenda · ISR provisional de agosto de 2026',
+          'Agenda · ISR e IVA de agosto de 2026',
         ],
       ],
     );

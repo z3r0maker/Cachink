@@ -24,15 +24,15 @@ const p = (id: string): Plantilla => {
 
 describe('vencimiento', () => {
   it('moves a 17th that falls on a Saturday to Monday', () => {
-    assert.deepEqual(vencimiento(p('isr_mensual').regla, '2026-09'), {
+    assert.deepEqual(vencimiento(p('impuestos_mensual').regla, '2026-09'), {
       nominal: '2026-10-17',
       vence: '2026-10-19',
     });
   });
 
   it('keeps a 17th that is a business day, and crosses the year', () => {
-    assert.equal(vencimiento(p('iva_mensual').regla, '2026-10').vence, '2026-11-17');
-    assert.equal(vencimiento(p('iva_mensual').regla, '2026-12').vence, '2027-01-18');
+    assert.equal(vencimiento(p('impuestos_mensual').regla, '2026-10').vence, '2026-11-17');
+    assert.equal(vencimiento(p('impuestos_mensual').regla, '2026-12').vence, '2027-01-18');
   });
 
   it('dates the annual filings in March of the next year', () => {
@@ -58,7 +58,7 @@ describe('instanciasEsperadas', () => {
   const lista = instanciasEsperadas(CATALOGO, '2026-09-04', '2026-11-30');
 
   it('starts with the month of the SAT registration and stops at the horizon', () => {
-    const isr = lista.filter((i) => i.plantillaId === 'isr_mensual').map((i) => i.periodo);
+    const isr = lista.filter((i) => i.plantillaId === 'impuestos_mensual').map((i) => i.periodo);
     assert.deepEqual(isr, ['2026-09', '2026-10']);
   });
 
@@ -81,7 +81,7 @@ describe('instanciasEsperadas', () => {
 
 describe('the steps', () => {
   const con = (...kinds: TipoEvidencia[]) => new Set(kinds);
-  const isr = p('isr_mensual');
+  const isr = p('impuestos_mensual');
 
   it('lets a declaration be prepared, or filed straight away', () => {
     assert.deepEqual(siguientesPasos(isr, 'pendiente'), ['preparada', 'presentada']);

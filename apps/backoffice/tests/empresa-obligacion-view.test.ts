@@ -6,14 +6,14 @@ import { plantilla } from '@xangarro/domain/corp';
 import { accionesDe, tituloDe } from '../src/server/empresa/obligacion-view';
 
 /** E-04's obligation page: what it is called and which steps it allows. */
-const isr = plantilla('isr_mensual')!;
+const isr = plantilla('impuestos_mensual')!;
 const doc = (tipo: DocumentoMeta['tipo']) => ({ tipo }) as DocumentoMeta;
 
 describe('tituloDe', () => {
   it('names the month, the year, or the one-off itself', () => {
     assert.equal(
-      tituloDe({ titulo: 'ISR provisional', periodo: '2026-09' }),
-      'ISR provisional de septiembre de 2026',
+      tituloDe({ titulo: 'ISR e IVA', periodo: '2026-09' }),
+      'ISR e IVA de septiembre de 2026',
     );
     assert.equal(
       tituloDe({ titulo: 'Declaración anual', periodo: '2026' }),
@@ -41,7 +41,7 @@ describe('accionesDe', () => {
   it('offers «No hubo pago» while the payment proof is missing', () => {
     const presentada = vistaDe(isr, '2026-09', {
       id: 'o',
-      plantillaId: 'isr_mensual',
+      plantillaId: 'impuestos_mensual',
       periodo: '2026-09',
       titulo: null,
       estado: 'presentada',
