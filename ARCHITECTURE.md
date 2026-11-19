@@ -184,6 +184,7 @@ Links to discussion, docs, prior art.
 | [143](#adr-143) | 2026-11-12 | The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process | Accepted |
 | [144](#adr-144) | 2026-11-13 | The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them | Accepted |
 | [145](#adr-145) | 2026-11-17 | OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS | Accepted |
+| [146](#adr-146) | 2026-11-18 | An abono carries the turno whose drawer received it, as a gasto does | Accepted |
 | [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 
 <!-- END ADR-INDEX -->
@@ -10504,6 +10505,52 @@ long as they live.
   certificate. Development builds load from Metro and are unaffected.
 - Rotation is a store release: new pair, configured, shipped; the old key keeps publishing for the old
   builds until they are gone.
+
+---
+
+## ADR-146
+
+**Title:** An abono carries the turno whose drawer received it, as a gasto does
+
+**Date:** 2026-11-18
+
+**Status:** Accepted — owner decision 2026-11-18 («Stamp the turno»); fixes phone review finding M5
+
+**Context**
+
+ADR-074 gave every turno one expected-cash calculator, `fondo + ventas en efectivo + abonos en
+efectivo − gastos de caja`, and gave gastos a `cajaTurnoId`. Abonos got none: every reader took the
+cash abonos of the turno's days and assumed they were this drawer's. That held while a register had one
+turno a day. The owner has since approved several turnos a day without limit, so a second turno counted
+the first one's cash abonos, and another caja's, and showed a false faltante. Inicio, meanwhile, counted
+no abonos at all, so its «Efectivo esperado» disagreed with Mi turno as soon as one arrived.
+
+**Decision**
+
+1. **`client_payments` gains a nullable `caja_turno_id`** (SQLite migration 0015, Postgres 0058, indexed
+   by business and turno there). The domain's `ClientPayment.cajaTurnoId` defaults to null.
+2. **The writer stamps it:** the phone's «Recibir abono» with the operator's open turno, the web caja
+   with its session's turno. An abono received with no turno open keeps null.
+3. **An abono counts only in its turno.** `esperadoDelTurno` and the caja package's parts scope abonos
+   by `cajaTurnoId`, exactly as they scope gastos, and readers fetch them with
+   `ClientPaymentsRepository.findByCajaTurno`. A null abono is in no drawer's expected cash, as an
+   unstamped gasto is not.
+4. **The portal is unchanged.** It derives a corte's parts from the expected cash the close stored, so
+   it stays consistent once the close computes that figure correctly.
+
+**Alternatives considered**
+
+- *Infer the turno from the device and the time the abono was created.* Rejected: it stays a guess,
+  breaks when two operators share a device, and the portal would keep a different guess.
+- *Block abonos without an open turno.* Not now: it is a UI decision for its own board. Until then an
+  abono taken with no turno is recorded and owed, but counted in no drawer.
+
+**Consequences**
+
+- Abonos recorded before the migration have no turno. A turno still open when a phone upgrades loses
+  those abonos from its expected cash. Before the first store release no register in the field has one.
+- The client's balance is untouched: an abono still belongs to the client (ADR-074).
+- Sync needs no wire change. The push and pull carry the domain schema, which now has the column.
 
 ## ADR-147
 

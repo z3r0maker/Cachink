@@ -38,7 +38,7 @@ export function checkoutConsent(
     custom_text: {
       terms_of_service_acceptance: { message: consentText(lookupKey) },
       submit: {
-        message: `${PROVEEDOR_LINEA} · Dudas y quejas: ${PROVEEDOR.correo}, ${PROVEEDOR.telefono}`,
+        message: `${PROVEEDOR_LINEA} · Dudas y quejas: ${PROVEEDOR.correo}`,
       },
     },
   };

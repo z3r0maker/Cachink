@@ -284,6 +284,7 @@ run_curated_suite() {
     caja-abrir-cerrar
     ventas-lista
     venta-detalle-cancelar
+    comprobante-whatsapp
     fiado-abono-recordar
     gastos-registrar
     gastos-pagar-recurrente

@@ -4,6 +4,7 @@
 
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   ClientPayment,
   ClientPaymentId,
@@ -33,6 +34,7 @@ export class InMemoryClientPaymentsRepository implements ClientPaymentsRepositor
       montoCentavos: input.montoCentavos,
       metodo: input.metodo,
       nota: input.nota ?? null,
+      cajaTurnoId: input.cajaTurnoId ?? null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -54,6 +56,12 @@ export class InMemoryClientPaymentsRepository implements ClientPaymentsRepositor
     return [...this.rows.values()]
       .filter((r) => r.clienteId === clienteId && r.deletedAt === null)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly ClientPayment[]> {
+    return [...this.rows.values()]
+      .filter((r) => r.cajaTurnoId === cajaTurnoId && r.deletedAt === null)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async findByDateRange(

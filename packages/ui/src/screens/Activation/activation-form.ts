@@ -36,6 +36,18 @@ export function faltaParaConectar(email: string, code: string): Falta | null {
 }
 
 /**
+ * A refusal belongs to what was sent (R7): shown only while the operator is
+ * still looking at that same code. A new QR or edited fields clear it.
+ */
+export function errorDeLoEnviado(
+  enviado: string | null,
+  actual: string | null,
+  errorKey: string | null,
+): string | null {
+  return enviado !== null && enviado === actual ? errorKey : null;
+}
+
+/**
  * The portal's QR is a link with the token in its fragment
  * (`https://…/activar#c=<token>`, C-14). Anything else (a product's barcode,
  * another app's QR) is not ours: null.

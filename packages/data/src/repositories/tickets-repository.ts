@@ -37,7 +37,10 @@ export interface TicketsRepository {
   /** Pending/parcial Crédito tickets of one client, oldest first. */
   findPendingByClient(clientId: ClientId): Promise<readonly Ticket[]>;
 
-  /** Every Crédito ticket of one client — the account's fiado history (ADR-074). */
+  /**
+   * Every standing Crédito ticket of one client, the account's fiado history
+   * (ADR-074). A cancelled sale is left out: it is no longer owed (M3).
+   */
   findCreditoByClient(clientId: ClientId): Promise<readonly Ticket[]>;
 
   /** Update a ticket's estadoPago (e.g. after abonos). */

@@ -45,8 +45,8 @@ const FILAS: FilasCierre = {
     { ticketId: 'tk2', monto: 5_000n, deletedAt: null },
   ],
   abonos: [
-    { metodo: 'Efectivo', montoCentavos: 40_000n, deletedAt: null },
-    { metodo: 'Transferencia', montoCentavos: 10_000n, deletedAt: null },
+    { cajaTurnoId: 't1', metodo: 'Efectivo', montoCentavos: 40_000n, deletedAt: null },
+    { cajaTurnoId: 't1', metodo: 'Transferencia', montoCentavos: 10_000n, deletedAt: null },
   ],
   gastos: [{ cajaTurnoId: 't1', monto: 62_000n, deletedAt: null }],
 };

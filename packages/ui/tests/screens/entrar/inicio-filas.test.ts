@@ -5,7 +5,14 @@
 import { describe, expect, it } from 'vitest';
 import { heroFor, kpisFor } from '@xangarro/caja/inicio';
 import { cierreDeFilas } from '@xangarro/caja/cierre';
-import type { CajaTurno, Expense, RecurringExpense, Sale, Ticket } from '@xangarro/domain';
+import type {
+  CajaTurno,
+  ClientPayment,
+  Expense,
+  RecurringExpense,
+  Sale,
+  Ticket,
+} from '@xangarro/domain';
 import {
   cortesDe,
   diasEntre,
@@ -105,6 +112,19 @@ const gas: RecurringExpense = {
   ...AUDIT,
 } as unknown as RecurringExpense;
 
+const abono = (id: string, monto: bigint, cajaTurnoId: string | null): ClientPayment =>
+  ({
+    id,
+    clienteId: 'C1',
+    fecha: HOY,
+    montoCentavos: monto,
+    metodo: 'Efectivo',
+    nota: null,
+    cajaTurnoId,
+    createdAt: new Date(2026, 4, 14, 13, 0).toISOString(),
+    ...AUDIT,
+  }) as ClientPayment;
+
 function filas(p: Partial<FilasInicio> = {}): FilasInicio {
   return {
     turno: turno({}),
@@ -114,6 +134,7 @@ function filas(p: Partial<FilasInicio> = {}): FilasInicio {
       ticket('C', 'Tarjeta', { cancelledAt: new Date(2026, 4, 14, 12, 58).toISOString() }),
     ],
     lineas: [linea('A', 16_000n), linea('B', 9_000n), linea('C', 5_000n)],
+    abonos: [],
     gastos: [],
     turnos: [
       turno({
@@ -167,7 +188,12 @@ describe('inicioMovil', () => {
     expect(d.tareas.map((t) => t.tipo)).toEqual(['gasto', 'reponer']);
     expect(d.tareas[0]?.titulo).toBe('Registrar gas de la semana');
     expect(d.tareas[1]?.detalle).toBe('Quedan 6 · el umbral es 15');
-    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/gastos', '/productos']);
+    // The task's own item rides along, so the sheet opens on it (R8).
+    const [gasto, reponer] = d.tareas;
+    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual([
+      `/gastos?recurrente=${encodeURIComponent(gasto?.id ?? '')}`,
+      `/productos?reponer=${encodeURIComponent(reponer?.id.replace('stock:', '') ?? '')}`,
+    ]);
   });
 
   it('lists the closes newest first, as the chips say them', () => {
@@ -240,10 +266,18 @@ describe('Inicio and Mi turno read one esperado', () => {
         turno: T1,
         delTurno: f.tickets.filter((t) => t.cajaTurnoId === T1.id),
         lineas: f.lineas,
-        abonos: [],
+        abonos: f.abonos,
         gastos: f.gastos.filter((g) => g.cajaTurnoId === T1.id),
       }).esperadoCentavos,
     );
+
+  it('a cash abono of the turno raises both by the same amount (M5)', () => {
+    const f = filas({
+      abonos: [abono('A1', 5_000n, 'T1'), abono('A2', 9_000n, 'T0'), abono('A3', 7_000n, null)],
+    });
+    expect(inicioMovil(f, ENTORNO, HOY).turno?.esperado).toBe(101_000n);
+    expect(deMiTurno(f)).toBe(101_000n);
+  });
 
   it('a gasto of the turno lowers both by the same amount', () => {
     const f = filas({ gastos: [gasto('G1', 10_000n)] });
@@ -289,7 +323,9 @@ describe('helpers', () => {
     expect(haceDias('2026-03-01', 30)).toBe('2026-01-30');
   });
   it('maps the web hrefs to the phone routes, or none', () => {
-    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos');
+    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos?recurrente=R1');
+    expect(rutaMovil('/operador/inventario?reponer=P%201')).toBe('/productos?reponer=P%201');
+    expect(rutaMovil('/operador/caja#arriba')).toBe('/cobrar');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
     expect(rutaMovil('/operador/cierre')).toBe('/turno');
     expect(rutaMovil('/operador/cobranza/C1')).toBe('/fiado');

@@ -57,6 +57,7 @@ function repos(turnos: readonly CajaTurno[]) {
     tickets: { findByDateRange: async () => [] },
     sales: { findByDateRange: async () => [] },
     expenses: { findByDateRange: async () => [] },
+    clientPayments: { findByCajaTurno: async () => [] },
     recurringExpenses: { findDue: async () => [] },
     products: { listForBusiness: async () => [] },
     inventoryMovements: { sumStock: async () => 0n },

@@ -26,7 +26,13 @@ const linea = (ticketId: string, monto: bigint, deletedAt: string | null = null)
   monto,
   deletedAt,
 });
-const abono = (metodo: string, montoCentavos: bigint, deletedAt: string | null = null) => ({
+const abono = (
+  metodo: string,
+  montoCentavos: bigint,
+  deletedAt: string | null = null,
+  cajaTurnoId: string | null = 'T1',
+) => ({
+  cajaTurnoId,
   metodo,
   montoCentavos,
   deletedAt,
@@ -54,7 +60,14 @@ const FILAS = {
     linea('D', 90_00n),
     linea('E', 400_00n),
   ],
-  abonos: [abono('Efectivo', 400_00n), abono('Efectivo', 150_00n), abono('Transferencia', 99_00n)],
+  abonos: [
+    abono('Efectivo', 400_00n),
+    abono('Efectivo', 150_00n),
+    abono('Transferencia', 99_00n),
+    // Another turno's drawer and no turno at all (ADR-146): neither counts.
+    abono('Efectivo', 300_00n, null, 'T0'),
+    abono('Efectivo', 200_00n, null, null),
+  ],
   gastos: [gasto('T1', 450_00n), gasto('T1', 170_00n), gasto(null, 1_000_00n), gasto('T0', 5n)],
 } satisfies FilasPartes;
 
@@ -86,7 +99,17 @@ describe('partesDelTurno', () => {
   });
 
   it('counts only standing cash abonos', () => {
-    assert.equal(abonosEfectivo([abono('Efectivo', 5n, 'x'), abono('Tarjeta', 7n)]), 0n);
+    assert.equal(abonosEfectivo([abono('Efectivo', 5n, 'x'), abono('Tarjeta', 7n)], 'T1'), 0n);
+  });
+
+  it('counts only the abonos this turno received (M5)', () => {
+    const abonos = [
+      abono('Efectivo', 5n),
+      abono('Efectivo', 7n, null, 'T0'),
+      abono('Efectivo', 11n, null, null),
+    ];
+    assert.equal(abonosEfectivo(abonos, 'T1'), 5n);
+    assert.equal(abonosEfectivo(abonos, 'T0'), 7n);
   });
 });
 

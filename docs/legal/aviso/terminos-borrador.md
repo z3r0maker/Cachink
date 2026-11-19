@@ -11,14 +11,14 @@
 > de aplicaciones; límite de responsabilidad acorde a un servicio de nube de pago.
 > Los `[CORCHETES]` son datos que faltan.
 
-_Vigentes desde: 17 de noviembre de 2026. Versión: 1.0._
+_Vigentes desde: 18 de noviembre de 2026. Versión: 1.0._
 
 ---
 
 ## 1. Quién te presta el servicio
 
 Xangarro es un servicio de **MEXIA, S.A.S.**, con domicilio en **Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco** y RFC **MEX261015US8**
-("Xangarro", "nosotros"). Puedes escribirnos a **soporte@xangarro.mx** o llamarnos al **99 9999 9999**
+("Xangarro", "nosotros"). Puedes escribirnos a **soporte@xangarro.mx**
 (LFPC art. 76 Bis III: estos datos se muestran también antes de contratar, en xangarro.mx).
 
 ## 2. Aceptación
@@ -210,7 +210,7 @@ Si descargaste la app de App Store aplica además lo siguiente (términos mínim
   privacidad, y por cualquier reclamación de que la app infringe propiedad intelectual de terceros.
 - **Cumplimiento legal.** Declaras que no estás en un país sujeto a embargo del gobierno de EE. UU. ni
   en una lista de partes restringidas.
-- **Datos de contacto:** MEXIA, S.A.S., Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, soporte@xangarro.mx, 99 9999 9999.
+- **Datos de contacto:** MEXIA, S.A.S., Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco, soporte@xangarro.mx.
 - **Terceros.** Debes cumplir los términos de terceros aplicables al usar la app.
 - **Apple y sus filiales son terceros beneficiarios** de estos Términos y pueden hacerlos valer.
 

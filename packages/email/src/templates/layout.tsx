@@ -171,10 +171,7 @@ function Enlaces() {
 function PieLegal() {
   return (
     <>
-      <Small>
-        ¿Dudas o quejas? Responde a este correo, escribe a {PROVEEDOR.correo} o llama al{' '}
-        {PROVEEDOR.telefono}.
-      </Small>
+      <Small>¿Dudas o quejas? Responde a este correo o escribe a {PROVEEDOR.correo}.</Small>
       <Small>{PROVEEDOR_LINEA}</Small>
     </>
   );

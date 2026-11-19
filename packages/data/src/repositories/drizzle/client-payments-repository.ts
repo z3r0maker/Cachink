@@ -5,6 +5,7 @@
 import { and, asc, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   ClientPaymentId,
   DeviceId,
@@ -42,6 +43,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
       montoCentavos: input.montoCentavos,
       metodo: input.metodo,
       nota: input.nota ?? null,
+      cajaTurnoId: (input.cajaTurnoId ?? null) as string | null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -68,6 +70,16 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
       .from(clientPayments)
       .where(and(eq(clientPayments.clienteId, clienteId), isNull(clientPayments.deletedAt)))
       .orderBy(asc(clientPayments.fecha), asc(clientPayments.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly ClientPayment[]> {
+    const rows = await this.#db
+      .select()
+      .from(clientPayments)
+      .where(and(eq(clientPayments.cajaTurnoId, cajaTurnoId), isNull(clientPayments.deletedAt)))
+      .orderBy(desc(clientPayments.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
   }
@@ -110,6 +122,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
       montoCentavos: row.montoCentavos,
       metodo: row.metodo as PaymentMethod,
       nota: row.nota,
+      cajaTurnoId: (row.cajaTurnoId ?? null) as CajaTurnoId | null,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,

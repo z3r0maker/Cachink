@@ -149,6 +149,8 @@ export class DrizzleTicketsRepository implements TicketsRepository {
           eq(tickets.clienteId, clientId),
           eq(tickets.metodo, 'Crédito'),
           isNull(tickets.deletedAt),
+          // A cancelled sale is no longer owed (M3): the cancel promises it.
+          isNull(tickets.cancelledAt),
         ),
       )
       .orderBy(asc(tickets.createdAt))

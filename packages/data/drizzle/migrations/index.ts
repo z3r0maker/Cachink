@@ -23,6 +23,7 @@ import { migration0011Sql } from './0011_movimiento_origen.js';
 import { migration0012Sql } from './0012_business_branding.js';
 import { migration0013Sql } from './0013_opening_balances.js';
 import { migration0014Sql } from './0014_product_images.js';
+import { migration0015Sql } from './0015_client_payments_turno.js';
 
 export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze({
   '0000_initial': migration0000Sql,
@@ -40,6 +41,7 @@ export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze
   '0012_business_branding': migration0012Sql,
   '0013_opening_balances': migration0013Sql,
   '0014_product_images': migration0014Sql,
+  '0015_client_payments_turno': migration0015Sql,
 });
 
 export const migrationsBundle = Object.freeze({
@@ -60,6 +62,7 @@ export const migrationsBundle = Object.freeze({
     m0012: migration0012Sql,
     m0013: migration0013Sql,
     m0014: migration0014Sql,
+    m0015: migration0015Sql,
   }),
 });
 
@@ -80,5 +83,6 @@ export {
   migration0012Sql,
   migration0013Sql,
   migration0014Sql,
+  migration0015Sql,
 };
 export default migrationsBundle;

@@ -42,11 +42,8 @@ export async function filasDelTurno(
   if (turno === null) throw new Error('turno no encontrado');
   const delTurno = await tickets.findByCajaTurno(turnoId as never);
   const lineas = await sales.findByDateRange(turno.fecha, hoyLocal() as never, businessId as never);
-  const abonos = await payments.findByDateRange(
-    turno.fecha,
-    hoyLocal() as never,
-    businessId as never,
-  );
+  // The abonos this turno's drawer received (ADR-146), as the gastos are.
+  const abonos = await payments.findByCajaTurno(turnoId as never);
   const gastos = await expenses.findByCajaTurno(turnoId as never);
   return { turno, delTurno, lineas, abonos, gastos };
 }

@@ -75,6 +75,7 @@ export function FondoRapidos(props: { raw: string; onElegir: (c: bigint) => void
           <Chip
             label={etiquetaRapido(c)}
             selected={actual === c}
+            ajustado
             onPress={() => props.onElegir(c)}
             testID={`fondo-rapido-${c / 100n}`}
           />
