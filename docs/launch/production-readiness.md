@@ -23,7 +23,8 @@
       `docs/legal/aviso/respuestas-oq-borrador.md` §0.
 - [ ] [media] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
 - [ ] [media] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
-- [ ] [alta] [bloq] Llenar las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería) y los `[PLAZO]`s once OQ-L13 is confirmed.
+- [ ] [alta] [bloq] Llenar las dos celdas que quedan en la tabla de subencargados — `[REGIÓN]` (Sentry) y `[PAÍS]` (Mercado Pago / Clip) — y los `[PLAZO]`s once OQ-L13 is confirmed.
+      Corregido 2026-11-19: este renglón decía «las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería)». Son dos, no tres; se llaman distinto; y viven en `encargado-clausulas.md` §7, no en el §6.1 del aviso integral, que no tiene ningún hueco. La nota de progreso de abajo ya lo decía bien desde el 2026-11-11; el encabezado se quedó en septiembre.
       Progress 2026-11-11: correo and mensajería are EE. UU. (Resend in us-east-1, `docs/ops/email.md`;
       the urgent alerts go to a Slack or Discord webhook, both US). The DPA template's subencargados
       table (`encargado-clausulas.md` §7) now names Resend and carries the real regions (Supabase
@@ -201,8 +202,10 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
 - [ ] [media] Opción de hosting de Foundry decidida y configurada (recomendada: **Hosted on Azure, US DataZone**);
       written confirmation of the retention figure before the IA section publishes a number.
 - [ ] [media] `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda).
+  - **Remaining (2026-11-19, verificado contra el repo):** la salvaguarda no existe. `clienteModelo` acepta cualquier `ASESOR_LLM_BASE_URL` con cualquier llave, sin mirar el entorno ni el destino; el propio encabezado del módulo documenta el proxy local como el camino de localhost. La buena noticia es el momento: nadie llama al modelo todavía (`pedirProsa` no tiene consumidor, ver P-30), así que la salvaguarda se puede poner **antes** de la primera llamada, que es cuando sale gratis. Lo más barato que cumple el renglón es rechazar en producción un `baseURL` que no sea el host de Foundry (o que apunte a localhost o a una IP privada), en el mismo `clienteModelo` y con prueba.
 - [ ] [media] Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA section's negative list (no client names/phones/RFC, no free text, no credentials) is enforced
       at that boundary.
+  - **Remaining (2026-11-19, verificado contra el repo):** este renglón tiene dos mitades y están en estados distintos. La primera se cumple **de hecho**: `@anthropic-ai/sdk` lo importa exactamente un archivo, `apps/web/src/server/asesor/model.ts`, y la dependencia sólo la declara `apps/web`. Pero nada lo hace cumplir: no hay regla de ESLint que restrinja ese import, así que se sostiene por disciplina, y el repo ya tiene el molde para arreglarlo (`no-restricted-imports` con mensaje, en `packages/config/eslint.config.js`). La segunda mitad está **contradicha por el código**: el encabezado de `pedirProsa` dice que toda restricción de inyección es «the caller's» y que la frontera sólo rechaza una credencial ausente. O sea que la lista negativa no se aplica ahí, y hoy no se aplica en ningún lado porque no hay quien llame. Decide cuál gana — el renglón o el módulo — y escríbelo en los dos lugares; si gana el renglón, la lista negativa se aplica dentro de `pedirProsa` y se prueba ahí.
 
 ## 7. Higiene de producto con peso legal
 

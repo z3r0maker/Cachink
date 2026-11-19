@@ -1168,12 +1168,14 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-47 Anuncios a todos los inquilinos [baja]
 
 - [ ] Status · **Trigger:** la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo; el disparador no ha ocurrido y no puede ocurrir antes del lanzamiento. Su cimiento sí está: la tabla `notices` del ADR-060 existe en el esquema de Postgres y la campana del portal y la del teléfono ya la leen, así que esto es redacción y filtro, no plomería nueva.
 - **What:** compose an aviso to all tenants or a filter (plan, tipo de negocio, beta allowlist);
   delivered through the ADR-060 `notices` table to the portal's Avisos and the app.
 
 ### N-48 Ciclo de vida de cuentas inactivas (ADR-064) [baja]
 
 - [ ] Status · **Trigger:** lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes).
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y el disparador está a más de 90 días de distancia por definición. P-34, de quien reusa la exportación, ya está cerrada, así que la mitad de «escribir el export» existe; lo que no existe es nada del ciclo de vida (ni trabajo nocturno, ni correos d90/d150, ni el bucket cifrado, ni el camino de restaurar).
 - **What:** nightly job marks free tenants with no login and no device sync for 90 days as dormant;
   emails at d90 and d150 with a one-click "sigo aquí"; at d180 writes the full export (reuses P-34:
   Excel + JSON) to a private, encrypted bucket, verifies it (row counts), then deletes the tenant's
@@ -1189,6 +1191,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-49 Explorador de pruebas con GLM [deuda] [baja]
 
 - [ ] Status · **Trigger:** el staging de X-01 en vivo y N-29 en verde.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y el disparador sigue a dos tareas de distancia: X-01 y N-29 están las dos abiertas. Nada que replantear.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
   provider), with personas ("taquero con prisa", "contador revisando el mes") and goals. Findings →
   inbox `kind=explorador` with screenshots and reproduction steps. Never a CI gate.
@@ -1269,9 +1272,11 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
   (`[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[CORREO PRIVACIDAD]`, …), and have **no variante for a site
   visitor** — A is portal signup, B device linking, C operator PIN. A marketing-site visitor is
   not yet a customer, so none of them reaches one. See OQ Variante D in
-  `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
+  `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone.
+  Checkout hook in `probarGratis`; a portal-served 1×1
   pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
   because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
+  - **Remaining (2026-11-19, verificado contra el repo):** el bloqueo legal sigue en pie pero encogió, y su referencia se rompió. Lo que sigue cierto: los cuatro borradores del aviso siguen marcados «BORRADOR … No publicar», no hay variante para un visitante del sitio (siguen siendo A, B y C) y la revisión del abogado sigue abierta. Lo que cambió: de los nueve huecos ya sólo queda **uno** — `[PAÍS]`, una vez, en el renglón de Mercado Pago y Clip de `encargado-clausulas.md` — porque la razón social se constituyó el 2026-10-28 y los demás se llenaron. Y la «OQ Variante D» a la que esta nota manda **ya no existe**: el README del aviso lleva OQ-L1 … OQ-L10 y ninguna es ésa, así que la pregunta se quedó sin casa. Vale replantearla con lo que hoy dice el aviso simplificado: el pie del landing enlaza el aviso integral «sin texto simplificado», y la pregunta es si un visitante al que un pixel cuenta necesita el simplificado o le basta el integral. Eso lo contesta el abogado en la misma pasada, no una tarea de ingeniería. El gancho del checkout sigue sin ese bloqueo y puede salir solo, como dice arriba. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
 - [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
@@ -1366,6 +1371,7 @@ micro-POS than location does.
 ### N-69 Ciclo de vida de flags y despliegue porcentual [baja]
 
 - [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
+  - **Remaining (2026-11-19, verificado contra el repo):** todo lo que describe, sin empezar — pero **ya no está bloqueada**. Su barrera y su disparador son la misma cosa, N-09, y N-09 está cerrada: `platform-flag.ts` tiene las banderas, los interruptores y la resolución por negocio, y la consola tiene `/flags`. Lo que falta es lo de esta tarea: `kind`, `owner`, `expires_at`, la lista de vencidas y el `rollout_pct`. Esta tarea es una de seis que el tablero mostraba esperando a algo ya cerrado (ver la nota de N-84).
 - **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
   `/flags` and a line in the N-10 digest. Percentage rollout: `rollout_pct` evaluated server-side
   as `hash(business_id, flag_key) % 100 < pct`, so a business always lands on the same side;
@@ -1524,6 +1530,7 @@ update --channel production --private-key-path keys/private-key.pem`.
 ### N-84 Push: del registro de anomalías a los rechazos y las restricciones [baja]
 
 - [ ] Status · **Surfaced by:** N-26 (F-05 c/d, ADR-140 §5) · **Trigger:** 30 días de `push_anomaly` en producción con dispositivos reales
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y correctamente: el disparador pide 30 días de producción con teléfonos reales y no hay producción todavía. Lo que esta tarea necesita para poder leerse ya está en su lugar: `server/sync/anomaly-log.ts` escribe la línea `push_anomaly` con `kinds` contados y hasta 50 renglones nombrados (tabla, id, campo, nunca un valor), y los dos detectores existen en `packages/application/src/apply-push/push-anomalies.ts` (`DEVICE_MISMATCH` y `NEGATIVE_MONEY`). O sea que el día 1 de producción ya está midiendo.
 - **What:** read the `evt: 'push_anomaly'` log. If `NEGATIVE_MONEY` never fired: add, as `NOT VALID`
   then validated, `client_payments.monto_centavos > 0` and `tickets.cambio_centavos IS NULL OR
 cambio_centavos >= 0`. Widen the detector before any further column (`caja_movimientos.monto`,
@@ -1535,6 +1542,7 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
   to the token.
 - **Acceptance:** each constraint ships with a migration test and a conformance case; a phone that
   re-links with unsent rows loses none of them.
+  - **Un patrón del tablero, encontrado el 2026-11-19 al barrer las barreras contra los estados:** seis tareas abiertas dicen «Blocked by» algo que ya está cerrado — B-16 (B-03, B-11), N-69 (N-09), N-65 (N-08), N-66 y N-67 (N-05), N-64 (N-57) — más E-02 y E-44 (E-01) y E-26 (E-05) en el Command Center. Ninguna está esperando a nadie; se leen así porque el campo se escribió una vez y nadie lo volvió a tocar cuando la barrera cayó. Una prueba lo atraparía: una tarea abierta cuyas barreras nombradas estén **todas** cerradas y existan en `docs/plan` no debería decir «Blocked by». Los ids de tracks archivados (A-16, F-01) y los de los boards del canvas (KD-01…) no cuentan, porque el recolector del tablero no los ve. Falta decidir si esa prueba se escribe.
 
 ---
 

@@ -1881,13 +1881,13 @@ WhatsApp).
   58 mm printer» — cannot be met or verified. It stays written down rather than deleted: the
   caja already shares the comprobante by WhatsApp, and the designs hide the Imprimir button
   until this ships, so nothing regresses by waiting. Re-open when a printer exists.
+  - **Remaining (2026-11-19, verificado contra el repo):** el diferimiento sigue siendo correcto y su premisa se sostiene: no hay un solo «Imprimir» en la caja. Los tres que existen en el portal son otros (los códigos de recuperación de Seguridad y los estados financieros), así que nada regresa por esperar.
 - **Blocked by:** a physical 58/80 mm printer · **Blocks:** —
 - **Steps:** the caja sends the comprobante by WhatsApp today; add printing to a ticket printer
   (58/80 mm) from the «¡Listo!» dialog and from a sale's detail, using the «Ticket» template.
   Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
-  - **Remaining (2026-11-19, verificado contra el repo):** el diferimiento sigue siendo correcto y su premisa se sostiene: no hay un solo «Imprimir» en la caja. Los tres que existen en el portal son otros (los códigos de recuperación de Seguridad y los estados financieros), así que nada regresa por esperar.
 
 ### P-38 Don Cuentas explica una diferencia de caja [media]
 
@@ -1900,11 +1900,11 @@ WhatsApp).
       corte a diario, que era la llamada al modelo más frecuente del producto.
       **Ya no está bloqueado por P-30:** sólo necesitaba el runtime de generación porque iba a ser
       generado.
+  - **Remaining (2026-11-19, verificado contra el repo):** las tres consultas, sin empezar. Lo que ya existe es el otro lado del renglón: `cortes/motivo.ts` traduce el motivo que **declaró** el operador (`MOTIVOS_DIFERENCIA` de `@xangarro/caja/cierre`), que no es lo mismo que una causa deducida de los movimientos del turno. Ese vocabulario le da a esta tarea los nombres que debe usar cuando se construya, para que la causa propuesta y el motivo declarado no se contradigan en la misma pantalla.
 - **Steps:** on a corte with a faltante or sobrante, Don Cuentas proposes the likely causes from
   the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
-  - **Remaining (2026-11-19, verificado contra el repo):** las tres consultas, sin empezar. Lo que ya existe es el otro lado del renglón: `cortes/motivo.ts` traduce el motivo que **declaró** el operador (`MOTIVOS_DIFERENCIA` de `@xangarro/caja/cierre`), que no es lo mismo que una causa deducida de los movimientos del turno. Ese vocabulario le da a esta tarea los nombres que debe usar cuando se construya, para que la causa propuesta y el motivo declarado no se contradigan en la misma pantalla.
 
 ### P-39 Conclusiones de Don Cuentas en Estados financieros [baja]
 
@@ -1920,10 +1920,10 @@ WhatsApp).
       escribiría y nunca sonaría; «your report is ready» es un evento del sistema, no un insight.
       Necesita un lugar donde guardar una conclusión por periodo por estado, cosa que define la
       salida de P-28.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y sus dos barreras siguen en pie: P-28 no tiene dónde guardar una conclusión por periodo y P-30 no tiene quién llame al modelo (`pedirProsa` no tiene un solo consumidor). Nada que replantear aquí hasta entonces.
 - **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
-  - **Remaining (2026-11-19, verificado contra el repo):** todo, y sus dos barreras siguen en pie: P-28 no tiene dónde guardar una conclusión por periodo y P-30 no tiene quién llame al modelo (`pedirProsa` no tiene un solo consumidor). Nada que replantear aquí hasta entonces.
 
 ### P-40 Primer diagnóstico gratis a los 90 días [baja]
 
@@ -1935,6 +1935,7 @@ WhatsApp).
     la idea es probar cuánto vale una lectura escrita, y un reporte completo gratis socavaría
     ambos niveles de pago a la vez. El diseño ya dibuja el estado — `diagFreeOffer`, uno de los
     seis del Diagnóstico.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Depende de P-28 por la forma de la lectura corta, y el estado `diagFreeOffer` que la nota dice que el diseño ya dibuja no está en el código (los estados del Diagnóstico siguen siendo los del `ScreenState` compartido, que P-44 va a recortar). Cuando esto se construya, revisa que el estado nuevo no herede la compuerta retirada.
 - **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
@@ -1943,10 +1944,10 @@ WhatsApp).
 ### P-41 Funciones avanzadas de inventario [baja]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
+  - **Remaining (2026-11-19, verificado contra el repo):** mucho menos de lo que este renglón de una línea hace pensar. Ya existen las entidades del dominio (`conversion.ts`, `conversion-receta.ts`, `auditoria-inventario.ts`, `auditoria-cadencia.ts`), el caso de uso `EjecutarConversionUseCase`, las tres banderas con su cascada de dependencias (`stock` → `conversionMateriaPrima` → `conversionAutomatica`, y `auditoriaInventario` → `stock`) y la copia de las tres en la pantalla Funciones. Lo que falta es la liberación y el camino de la caja: `PLATFORM_AVAILABLE` tiene las tres en `false`, que es la pinza de la v1, y nada en la caja ni en el teléfono las lee. **Un pendiente que esta tarea hereda y nadie ha resuelto:** `PLATFORM_AVAILABLE.merma` también dice `false` — «dark for every business», según su propio comentario — y sin embargo el teléfono ya muestra Mermas sin condición (`Inventario/inventario-cifras.tsx`, `inventario-cabeza.tsx`). Los únicos que leen esa constante son el portal (Funciones, la copia de planes) y los entitlements de prueba; la superficie de captura nunca la consulta. O la bandera miente o la pantalla se adelantó: decídelo antes de prender las otras tres, porque es el mismo mecanismo.
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
   the v1 clamp (Q10), become switchable in Mi negocio › Funciones for Xangarrote.
 - **Acceptance:** each one, switched on, appears in the caja and syncs its records.
-  - **Remaining (2026-11-19, verificado contra el repo):** mucho menos de lo que este renglón de una línea hace pensar. Ya existen las entidades del dominio (`conversion.ts`, `conversion-receta.ts`, `auditoria-inventario.ts`, `auditoria-cadencia.ts`), el caso de uso `EjecutarConversionUseCase`, las tres banderas con su cascada de dependencias (`stock` → `conversionMateriaPrima` → `conversionAutomatica`, y `auditoriaInventario` → `stock`) y la copia de las tres en la pantalla Funciones. Lo que falta es la liberación y el camino de la caja: `PLATFORM_AVAILABLE` tiene las tres en `false`, que es la pinza de la v1, y nada en la caja ni en el teléfono las lee. **Un pendiente que esta tarea hereda y nadie ha resuelto:** `PLATFORM_AVAILABLE.merma` también dice `false` — «dark for every business», según su propio comentario — y sin embargo el teléfono ya muestra Mermas sin condición (`Inventario/inventario-cifras.tsx`, `inventario-cabeza.tsx`). Los únicos que leen esa constante son el portal (Funciones, la copia de planes) y los entitlements de prueba; la superficie de captura nunca la consulta. O la bandera miente o la pantalla se adelantó: decídelo antes de prender las otras tres, porque es el mismo mecanismo.
 
 ### P-42 La foto del producto en el catálogo y en la ficha (ADR-134) [media]
 
