@@ -291,7 +291,7 @@
 ### B-16 Back-office: consultas guardadas de Studio + funciones de soporte [media]
 
 - [~] Status · **Blocked by:** B-03, B-11
-  **Remaining (2026-09-23, verified against the code):** falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona.
+  **Remaining (2026-09-23, verified against the code):** falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. **Verificado el 2026-11-19 contra el repo**, sigue exacto: `supabase/studio/` tiene cuatro archivos (`codes-expiring-today`, `stale-devices`, `unlock-sign-in`, `unresolved-rejections`) y ninguno es el de suscripciones, y ni `billing.reissue_code` ni `billing.resend_magic_link` existen en ninguna migración. Lo único que cambió es el campo de arriba: **B-03 y B-11 ya están cerradas**, así que esta tarea no está bloqueada por nada. Lo que queda es una consulta guardada sobre `billing.subscriptions` (que ya existe), la función de reenvío, y una revisión del runbook que necesita una persona, no código.
   - 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today,
     and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()`
     (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every
