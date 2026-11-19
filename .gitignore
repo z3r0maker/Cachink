@@ -111,3 +111,7 @@ next-env.d.ts
 # `pnpm audit:gate` writes this before scripts/audit-gate.ts reads it.
 # (Arrived from N-26 attached to the design-compare block; given its own.)
 .audit.json
+
+# Synth (ADR-153): run results and journey memory are local, never tracked.
+tools/synth/reports/
+tools/synth/memory/

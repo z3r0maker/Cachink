@@ -101,6 +101,53 @@ describe('layer boundaries', () => {
   });
 });
 
+const SYNTH_IMPORT = `import * as synth from '@xangarro/synth-core';\nexport const s = synth;\n`;
+
+describe('Synth stays out of the product (ADR-153)', () => {
+  let fromWeb: ESLint;
+  let fromRoot: ESLint;
+
+  beforeAll(async () => {
+    fromWeb = eslintAsPackageLint('apps/web');
+    fromRoot = new ESLint({ cwd: REPO, overrideConfigFile: join(REPO, 'eslint.config.js') });
+    await Promise.all(
+      [fromWeb, fromRoot].map((e) => e.lintText('', { filePath: join(REPO, 'x.ts') })),
+    );
+  }, CONFIG_LOAD_TIMEOUT_MS);
+
+  it("rejects apps/web importing Synth, from the portal's own lint", async () => {
+    const ids = await ruleIds(fromWeb, 'apps/web/src/zz-synth.ts', SYNTH_IMPORT);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+
+  it('rejects a package the boundaries table does not classify', async () => {
+    const ids = await ruleIds(fromRoot, 'packages/data-pg/src/zz-synth.ts', SYNTH_IMPORT);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+
+  it('rejects a subpath import and a ui component, whose own rule replaces the shared one', async () => {
+    const sub = `import { x } from '@xangarro/synth-server/api';\nexport const y = x;\n`;
+    const ids = await ruleIds(fromRoot, 'packages/ui/src/components/Zz/zz.ts', sub);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+
+  it('runs studio → server → core, and never back', async () => {
+    const down = await ruleIds(
+      fromRoot,
+      'tools/synth/server/src/zz.ts',
+      `import * as core from '@xangarro/synth-core';\nexport const c = core;\n`,
+    );
+    assert.deepEqual(down, []);
+
+    const up = await ruleIds(
+      fromRoot,
+      'tools/synth/core/src/zz.ts',
+      `import * as studio from '@xangarro/synth-studio';\nexport const s = studio;\n`,
+    );
+    assert.ok(up.includes('boundaries/dependencies'), `got ${JSON.stringify(up)}`);
+  });
+});
+
 describe('path-scoped rules', () => {
   it(
     "fire from the package's own lint",
