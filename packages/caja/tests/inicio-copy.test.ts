@@ -2,7 +2,8 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import { colors } from '@xangarro/tokens';
 
-import { corteChip, sumarHoras } from '../src/inicio/copy';
+import { corteChip, heroFor, sumarHoras } from '../src/inicio/copy';
+import { INICIO_FIXTURE } from '../src/inicio/fixture';
 
 describe('Inicio: the last cortes and the closing hour', () => {
   it('chips a corte that balanced, one with a surplus and one short', () => {
@@ -26,5 +27,10 @@ describe('Inicio: the last cortes and the closing hour', () => {
     assert.equal(sumarHoras('08:15', 12), '20:15');
     assert.equal(sumarHoras('18:05', 8), '02:05');
     assert.equal(sumarHoras('', 3), '03:00');
+  });
+
+  it('offline, the hero says the turno can still close (ADR-123)', () => {
+    const h = heroFor({ ...INICIO_FIXTURE, offline: true, pendientes: 3 });
+    assert.equal(h.body, 'Se envían solos cuando vuelva la señal. Puedes cerrar el turno igual.');
   });
 });

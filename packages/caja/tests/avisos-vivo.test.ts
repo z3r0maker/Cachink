@@ -129,6 +129,15 @@ describe('avisos, vivos', () => {
     assert.equal(sinLeer(data.avisos), 2);
   });
 
+  it('the queue never says the turno cannot close (ADR-123), and says where it waits', () => {
+    const cola = { ...BASE, cola: { cuantos: 2, desde: null } };
+    assert.equal(
+      avisosVivos(cola, HOY, 'esta caja').avisos[0]?.cuerpo,
+      'Viven en esta caja hasta que suban. Puedes cerrar el turno; se envían cuando haya conexión.',
+    );
+    assert.match(avisosVivos(cola, HOY).avisos[0]?.cuerpo ?? '', /^Viven en este navegador/);
+  });
+
   it('an empty caja has nothing to say', () => {
     assert.deepEqual(avisosVivos(BASE, hoyLocal()).avisos, []);
   });

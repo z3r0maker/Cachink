@@ -53,7 +53,7 @@ export const AVISOS_FIXTURE: AvisosData = {
       tipo: 'Sincronización',
       titulo: '3 registros siguen sin enviarse',
       cuerpo:
-        'Se capturaron sin conexión y viven en este navegador. No podrás cerrar el turno hasta que suban.',
+        'Se capturaron sin conexión y viven en este navegador. Puedes cerrar el turno; se envían cuando haya conexión.',
       hora: 'Hoy 14:55',
       icono: NUBE,
       tono: 'atencion',

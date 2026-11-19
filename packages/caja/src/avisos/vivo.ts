@@ -96,7 +96,7 @@ function cola(c: AvisosPara['cola'], hoy: string, donde: string): Aviso[] {
         c.cuantos === 1
           ? '1 registro sigue sin enviarse'
           : `${c.cuantos} registros siguen sin enviarse`,
-      cuerpo: `Viven en ${donde} hasta que suban. No podrás cerrar el turno hasta que se envíen.`,
+      cuerpo: `Viven en ${donde} hasta que suban. Puedes cerrar el turno; se envían cuando haya conexión.`,
       hora: c.desde === null ? 'Ahora' : cuando(c.desde, hoy),
       icono: NUBE,
       tono: 'atencion',
