@@ -62,6 +62,8 @@ export interface Pago {
   readonly cerrado: boolean;
   /** A ledger entry paid it (a month en ceros has none). */
   readonly pagado: boolean;
+  /** Movimientos on the payment's own month, the day it was paid; null without one. */
+  readonly hrefPago: string | null;
   readonly texto: string;
 }
 
@@ -70,6 +72,8 @@ function pagoCerrado(d: DatosImpuestos): Pago {
     puede: false,
     cerrado: true,
     pagado: d.pago !== null,
+    hrefPago:
+      d.pago === null ? null : `/empresa/movimientos?mes=${d.pago.fecha.slice(0, 7)}&ver=impuestos`,
     texto:
       d.pago === null
         ? 'Declarada en ceros: no hubo nada que pagar.'
@@ -93,7 +97,13 @@ export function pagoDe(m: MesImpuestos, d: DatosImpuestos): Pago {
   const conComprobante = d.papeles.some((p) => p.tipo === 'comprobante_pago');
   const puede =
     dec !== null && m.obligacion?.estado === 'presentada' && (conComprobante || total === 0n);
-  return { puede, cerrado: false, pagado: false, texto: textoDelPago(m, puede, total) };
+  return {
+    puede,
+    cerrado: false,
+    pagado: false,
+    hrefPago: null,
+    texto: textoDelPago(m, puede, total),
+  };
 }
 
 export interface MesAnterior {

@@ -73,8 +73,8 @@ function Pagar({ mes, pago }: { readonly mes: string; readonly pago: Pago }) {
   return (
     <form onSubmit={submitWith(action)} className={m.row}>
       <input type="hidden" name="periodo" value={mes} />
-      {pago.pagado ? (
-        <a className={m.boton.quieto} href={`/empresa/movimientos?mes=${mes}&ver=impuestos`}>
+      {pago.hrefPago !== null ? (
+        <a className={m.boton.quieto} href={pago.hrefPago}>
           Ver el pago en Movimientos
         </a>
       ) : pago.cerrado ? null : (

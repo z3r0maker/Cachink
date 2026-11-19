@@ -79,6 +79,8 @@ describe('pagoDe', () => {
     const pagada = datos({ declaracion: OCTUBRE, estado: 'pagada', pagado: true });
     const p = pagoDe(mesDel(pagada), pagada);
     assert.deepEqual([p.cerrado, p.pagado, p.puede], [true, true, false]);
+    // Paid on 14 November: its movement is in November, not in the month it declared.
+    assert.equal(p.hrefPago, '/empresa/movimientos?mes=2026-11&ver=impuestos');
   });
 });
 
