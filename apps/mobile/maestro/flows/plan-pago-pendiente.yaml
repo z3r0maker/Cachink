@@ -30,8 +30,7 @@ tags:
       SCENARIO: grace
       RECORDS_PER_MONTH: ''
 # The entitlement rides on the pull: «Actualizar» refreshes it.
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     visible:
       id: 'plan-banner-grace'
@@ -49,8 +48,7 @@ tags:
     env:
       SCENARIO: xangarro
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     notVisible:
       id: 'plan-banner-grace'

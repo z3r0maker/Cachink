@@ -31,8 +31,7 @@ tags:
     env:
       SCENARIO: lapsed
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     visible:
       id: 'plan-banner-fellBack'
@@ -64,8 +63,7 @@ tags:
     env:
       SCENARIO: xangarro
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     notVisible:
       id: 'plan-banner-fellBack'

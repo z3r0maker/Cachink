@@ -115,6 +115,8 @@ function useFrame(props: AppShellFrameProps) {
     status: props.headerStatus ?? 'full',
     avisos: props.avisos,
     onOpenRejected: () => props.onNavigate('/no-enviados'),
+    // Registros por enviar is the queue's face, refused rows included (R4).
+    onOpenPendientes: () => props.onNavigate('/no-enviados'),
   };
   const menu: NavMenuProps = {
     activeKey: active,

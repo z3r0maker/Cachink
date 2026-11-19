@@ -33,7 +33,8 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     titulo: 'Venta',
     detalle: '$120.00 · Tacos',
     razon: 'El producto de este registro ya no existe en el portal.',
-    pista: 'El producto fue eliminado — regístrala con otro producto.',
+    pista:
+      'Pídele a Pedro que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
   {
@@ -43,7 +44,8 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     titulo: 'Pago de cliente',
     detalle: 'Chuy',
     razon: 'El cliente de este registro ya no existe en el portal.',
-    pista: 'El cliente fue eliminado — regístrala sin cliente o con otro.',
+    pista:
+      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
 ];

@@ -142,6 +142,13 @@ describe('pillView', () => {
     });
   });
 
+  it('offline with nothing waiting says «Sin internet», never «0 sin enviar» (R4)', () => {
+    expect(pillView(at({ phase: 'offline', counts: counts(0, 0, 0, 0) }))).toEqual({
+      labelKey: 'syncPill.sinInternet',
+      tone: 'warn',
+    });
+  });
+
   it('shows the last sync time when everything is up to date, and "never" before the first sync', () => {
     const view = pillView(at({ lastSyncAt: new Date(2026, 8, 16, 9, 5).toISOString() }));
     expect(view).toEqual({ labelKey: 'syncPill.synced', time: '09:05', tone: 'ok' });

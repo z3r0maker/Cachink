@@ -241,8 +241,11 @@ export const esMX = {
       otro: 'Registro',
     },
     hints: {
-      productMissing: 'El producto fue eliminado — regístrala con otro producto.',
-      clientMissing: 'El cliente fue eliminado — regístrala sin cliente o con otro.',
+      // Never «regístrala» again: the row is still here, it would count twice (R5).
+      productMissing:
+        'Pídele al dueño que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      clientMissing:
+        'Pídele al dueño que recupere el cliente en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
       userMissing: 'El operador fue eliminado en el portal.',
     },
   },
@@ -265,7 +268,9 @@ export const esMX = {
     pending: '{{count}} sin enviar',
     synced: 'Enviado',
     never: 'Sin enviar',
+    sinInternet: 'Sin internet',
     tapToUpdate: 'Toca para enviar ahora',
+    openPendientes: 'Toca para ver lo que falta enviar',
     openRejected: 'Toca para ver los no enviados',
     update: 'Actualizar',
   },

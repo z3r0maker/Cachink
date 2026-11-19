@@ -119,6 +119,7 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                     |
 | `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                            |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
+| `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
 | `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)          |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |

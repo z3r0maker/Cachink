@@ -63,10 +63,19 @@ describe('registros por enviar, móviles', () => {
     assert.equal(cuentaRechazados(1), '1 registro');
   });
 
-  it('the note says nothing is lost and why the close waits', () => {
+  it('the note says nothing is lost, and the turno closes with rows still to send (R3)', () => {
     assert.equal(NOTA_NADA_SE_PIERDE.titulo, 'Nada se pierde');
-    assert.match(NOTA_NADA_SE_PIERDE.cuerpo, /vive en esta caja/);
-    assert.match(NOTA_NADA_SE_PIERDE.cuerpo, /No podrás cerrar el turno/);
+    assert.equal(
+      NOTA_NADA_SE_PIERDE.cuerpo,
+      'Puedes cerrar el turno; se envían cuando vuelva la conexión.',
+    );
+    assert.doesNotMatch(NOTA_NADA_SE_PIERDE.cuerpo, /No podrás/);
+  });
+
+  it('sending never says the close waits for it (R3, ADR-123)', () => {
+    const h = heroeTelefono('enviando', COLA_FIXTURE, 0, null);
+    assert.equal(h.cuerpo, 'Puedes seguir cobrando y cerrar el turno mientras suben.');
+    assert.doesNotMatch(h.cuerpo, /se puede cerrar/);
   });
 
   it('the phase reads in the pill’s order: sending, refused, offline, waiting, done', () => {
@@ -95,14 +104,97 @@ describe('rechazados, la sentencia del servidor', () => {
     assert.equal(v.titulo, 'Venta');
     assert.equal(v.detalle, '$120.00 · Tacos · 2026-05-14');
     assert.equal(v.razon, 'El producto de este registro ya no existe en el portal.');
-    assert.equal(v.pista, 'El producto fue eliminado — regístrala con otro producto.');
+    assert.equal(
+      v.pista,
+      'Pídele al dueño que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+    );
     assert.equal(v.reintentando, false);
+  });
+
+  it('the hint names the owner and never says to capture it again (R5)', () => {
+    const cliente = describeRechazado(
+      {
+        tableName: 'expenses',
+        rowId: 'r-5',
+        code: 'FK_CLIENT_MISSING',
+        message: 'x',
+        retryable: false,
+      },
+      null,
+      'Pedro',
+    );
+    assert.equal(
+      cliente.pista,
+      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
+    );
+    assert.doesNotMatch(cliente.pista ?? '', /regístral/);
+  });
+
+  it('every code a push can be refused with is said in Spanish (R5)', () => {
+    const codigos = [
+      'VALIDATION',
+      'BUSINESS_MISMATCH',
+      'BUSINESS_SUSPENDED',
+      'TABLE_NOT_WRITABLE',
+      'HYBRID_UPDATE_FORBIDDEN',
+      'FK_PRODUCT_MISSING',
+      'FK_USER_MISSING',
+      'FK_CLIENT_MISSING',
+      'FK_MENSAJE_MISSING',
+      'DUPLICATE_CONFLICT',
+      'PROTOCOL_UNSUPPORTED',
+      'UNAUTHENTICATED',
+      'DEVICE_REVOKED',
+      'RATE_LIMITED',
+      'INTERNAL',
+    ];
+    for (const code of codigos) {
+      const v = describeRechazado(
+        {
+          tableName: 'sales',
+          rowId: 'r',
+          code,
+          message: 'sales/r already exists',
+          retryable: false,
+        },
+        null,
+      );
+      assert.notEqual(v.razon, 'sales/r already exists', code);
+    }
+  });
+
+  it('a duplicate says the server has it and not to capture it again', () => {
+    const v = describeRechazado(
+      {
+        tableName: 'sales',
+        rowId: 'r-6',
+        code: 'DUPLICATE_CONFLICT',
+        message: 'sales/r-6 already exists',
+        retryable: false,
+      },
+      null,
+      'Pedro',
+    );
+    assert.equal(
+      v.razon,
+      'El servidor ya tiene un registro distinto con este mismo identificador.',
+    );
+    assert.equal(
+      v.pista,
+      'Pídele a Pedro que lo revise en el portal. No la vuelvas a capturar: se contaría dos veces.',
+    );
   });
 
   it('money arrives as text or bigint, never a float', () => {
     assert.equal(
       describeRechazado(
-        { tableName: 'expenses', rowId: 'r-2', code: 'DUPLICATE', message: 'raw', retryable: true },
+        {
+          tableName: 'expenses',
+          rowId: 'r-2',
+          code: 'DUPLICATE_CONFLICT',
+          message: 'raw',
+          retryable: true,
+        },
         { id: 'e-1', monto: 620_00n, concepto: 'Gas' },
       ).detalle,
       '$620.00 · Gas',
@@ -122,7 +214,7 @@ describe('rechazados, la sentencia del servidor', () => {
     );
   });
 
-  it('an unknown code falls back to the server’s own message', () => {
+  it('an unknown code says it in Spanish, never the server’s own words (R5)', () => {
     const v = describeRechazado(
       {
         tableName: 'clients',
@@ -133,7 +225,8 @@ describe('rechazados, la sentencia del servidor', () => {
       },
       { id: 'c-1', nombre: 'Chuy' },
     );
-    assert.equal(v.razon, 'Rechazado por el portal');
+    assert.equal(v.razon, 'El servidor no aceptó este registro.');
+    assert.equal(v.pista, null);
     assert.equal(v.titulo, 'Cliente');
     assert.equal(v.detalle, 'Chuy');
   });
