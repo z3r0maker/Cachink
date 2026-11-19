@@ -189,6 +189,7 @@ Links to discussion, docs, prior art.
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
+| [151](#adr-151) | 2026-11-19 | A month closes in order once its seven steps are done, and reopens only when the other founder approves | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10795,3 +10796,56 @@ with the same name, so a duplicate code under another name goes through.
 - The phone's typed entry keeps letters, since Code 128 and Code 39 carry them.
 - ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
   unused `MobileScannerHost` go.
+
+## ADR-151
+
+**Title:** A month closes in order once its seven steps are done, and reopens only when the other founder approves
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-14; boards CD-10 and CD-10b approved by the owner on 2026-11-19 (canvas round 16)
+
+**Context**
+
+E-14 adds Cumplimiento › Cierre del mes. The ledger has locked months since E-02: `corp.closed_periods`, a
+trigger that refuses any entry dated in one, and `assertPeriodOpen` in the use cases. Nothing wrote that table
+yet. The plan asks for a checklist before the lock, a locked month that refuses entries, and an unlock that
+needs both founders and is audited. ADR-125 §2 grants DELETE to no role, which a plain unlock would need.
+
+**Decision**
+
+1. **Seven steps, read off what the console already holds** (`@xangarro/domain/corp` `cierre/`): the month's
+   global CFDI and payments still to issue (Emitidas), every payment imported as a cobro, every expense with its
+   CFDI or marked non-deductible and no XML left to review (Facturas), the bank balance, «ISR e IVA» presented
+   (Impuestos), the rest of the month's Agenda, and the contador's statements in the Expediente. Only the bank
+   balance and the statements wait on a founder. A step the month does not need (no sales to the public, no
+   expenses, a month before the SAT registration) is «no aplica» and counts as done.
+2. **The bank balance is confirmed only when it equals Bancos** at the month's last day (`corp.bank_balances`),
+   and stops counting as soon as the ledger moves past it.
+3. **Either founder closes; months close in order.** An earlier month with movements that is still open
+   blocks the close («Cierra primero septiembre»). Closing writes the lock and a `cerrado` event in one
+   transaction. The month's tax payment, dated the next month, is not part of it.
+4. **Reopening takes both founders and is kept forever.** `corp.period_events` is append-only: `cerrado`,
+   `reapertura_pedida` with its reason, `reapertura_rechazada` and `reabierto`. Only the other founder answers a
+   request, and months reopen from the newest back. The other founder gets an email (the generic notice layout of
+   the morning email).
+5. **No role gets DELETE.** The lock is lifted only by `corp.reabrir_periodo`, a security-definer function the
+   console may execute, which records `reabierto` and removes the lock together. Two triggers hold the rule in the
+   database too: `reabierto` and `reapertura_rechazada` need a pending request by the other founder, and a lock is
+   removed only right after a `reabierto`, the owner's own deletes included.
+6. **Registrar names the closed month**, the open one to use and the way to its Cierre.
+
+**Alternatives considered**
+
+- *Grant the console DELETE on `closed_periods`.* Rejected: ADR-125 §2, and a bug could then lift a lock alone.
+- *Derive the lock from the events.* Rejected: the entries' trigger and the use cases already read
+  `closed_periods`; one table for the state and one for its history changes nothing that works.
+- *Let a founder close with steps pending.* Rejected: the steps are the close. One that does not apply already
+  says so.
+
+**Consequences**
+
+- The hosted database needs corp `0013` before the console's deploy. A month locked before it has no events;
+  it reopens the new way (a migration test holds this).
+- A correction to a closed month is a reopening, never an edit: the ledger stays immutable.
+- E-43 (the export to the contador) can take a closed month as final.

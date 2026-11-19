@@ -736,8 +736,32 @@ with property tests:
 
 ### E-14 Cierre del mes `[media]`
 
-- [ ] Status · **Blocked by:** E-10, E-11, E-13
-  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/cierre`. Sus tres barreras siguen vivas (E-10, E-11, E-13).
+- [x] Status · **Blocked by:** E-10, E-11, E-13 · **Done:** 2026-11-19 (boards CD-10, CD-10b, round 16 approved)
+- **Progress (2026-11-19, ADR-151):**
+  - `@xangarro/domain/corp` `cierre/`: `pasosDelCierre` reads the seven steps off their sources
+    (hecho, pendiente, or «no aplica» when the month does not need one, which counts as done);
+    `assertPuedeCerrar` (the month ended, months in order, no step pending),
+    `assertPuedePedirReabrir` (closed, newest first, one request at a time, a reason),
+    `assertPuedeResponder` (only the other founder) and `assertSaldoCoincide`.
+  - `cerrarMes`, `pedirReabrir`, `responderReapertura` and `confirmarSaldo` (application).
+  - data-corp 0013: `corp.period_events` (append-only history) and `corp.bank_balances`; no DELETE
+    for anyone (ADR-125 §2): the lock is lifted only by `corp.reabrir_periodo`, and two triggers
+    refuse a reopening without the other founder. A migration test reopens a lock from before.
+  - `/empresa/cierre`, Cumplimiento's second tab: the steps with their source and the link to fix
+    each, the bank panel (confirmed only when equal to Bancos, the statement optional into
+    Comprobantes), the statements' upload into Estados financieros, «Cerrar», «Pedir reabrir»,
+    the other founder's approval or rejection, and «Meses de <año>» with each month's history.
+    Every write is founder-gated with its `staff_audit_log` row; a request emails the other
+    founder.
+  - Registrar refuses a date in a closed month naming it, the open month to use, and «Ir al
+    cierre de <mes>».
+  - Playwright: a month long before the others, its steps from real rows, the bank refused then
+    confirmed, the statements uploaded, closed, Registrar refused, a request, a rejection and
+    the other founder's request approved, with the history line.
+  - **Deviations from the boards:** the reopening email is the morning email's generic notice
+    (no board of its own; added to the canvas as CD-10c for review). The approval panel shows
+    who closed the month but not its movement count. The requester sees «Pediste reabrir», a
+    variant the boards did not draw.
 - **What:** the checklist:
   1. global CFDI stamped;
   2. income imported;

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { formatMoney } from '@xangarro/domain';
+import { formatMoney, formatMonth } from '@xangarro/domain';
 
 import { agregarCsd, fijarInscripcion, inscripcionPasada } from './empresa-agenda';
 import { capturarDeclaracion, esperadoDe, sembrarMesFiscal, subirPapel } from './empresa-impuestos';
@@ -71,6 +71,18 @@ import {
   trimestrePasado,
 } from './empresa-socios';
 import { signInAsStaff } from './helpers';
+import {
+  agregarOtroSocio,
+  confirmarSaldo,
+  esperarPaso,
+  MES_CIERRE,
+  OTRO_SOCIO,
+  otroSocioRechazaYPide,
+  quitarOtroSocio,
+  registrarEnMesCerrado,
+  sembrarMesCierre,
+  subirEstados,
+} from './empresa-cierre';
 
 /**
  * «Empresa» (ADR-125). E-01: the area exists only for founders. A staff
@@ -415,17 +427,19 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Facturas',
     'Servicios',
     'Agenda',
+    'Cierre del mes',
     'Expediente',
     'Corporativo',
   ]) {
     await expect(rail(page).getByRole('link', { name: pantalla, exact: true })).toHaveCount(0);
   }
 
-  // Cumplimiento: three tabs, each with the rows earlier tests left.
+  // Cumplimiento: four tabs, each with the rows earlier tests left.
   await abrirEntrada(page, 'Cumplimiento');
   await expect(page).toHaveURL(/\/empresa\/agenda$/);
   await expect(secciones(page, 'Cumplimiento').getByRole('link')).toHaveText([
     'Agenda',
+    'Cierre del mes',
     'Expediente',
     'Corporativo',
   ]);
@@ -908,5 +922,73 @@ test('a founder reads the issued invoices, each with its CFDI and its cobro (E-1
     await expect(page.getByText(`Cobro · ${PAPELERIA}`)).toBeVisible();
   } finally {
     await limpiarPagos();
+  }
+});
+
+test('a founder closes a month, Registrar refuses it, and it reopens with both founders (E-14)', async ({
+  page,
+}) => {
+  const mes = MES_CIERRE;
+  const nombre = formatMonth(mes).split(' ')[0] ?? mes;
+  const Nombre = `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`;
+  const saldo = await sembrarMesCierre(mes);
+  await agregarOtroSocio();
+  try {
+    await signInAsStaff(page, SOCIO);
+    await page.goto('/empresa/agenda');
+    await abrirPestana(page, 'Cierre del mes', /\/empresa\/cierre$/);
+    await page.goto(`/empresa/cierre?mes=${mes}`);
+
+    // Real data: the month's two movements reach the steps; before the SAT
+    // registration there is no sale to invoice, nothing to import or declare.
+    await expect(
+      page.getByRole('heading', { name: `Faltan 2 pasos para cerrar ${nombre}` }),
+    ).toBeVisible();
+    for (const id of ['emitidas', 'ingresos', 'impuestos', 'agenda'])
+      await esperarPaso(page, id, 'no_aplica');
+    await esperarPaso(page, 'recibidas', 'hecho');
+    await expect(page.locator('[data-paso="recibidas"]')).toContainText('1 marcado no deducible');
+    await expect(page.locator('[data-paso="banco"]')).toContainText(formatMoney(saldo));
+    await expect(page.getByRole('button', { name: `Cerrar ${nombre}` })).toBeDisabled();
+
+    await confirmarSaldo(page, saldo);
+    await subirEstados(page);
+    await expect(
+      page.getByRole('heading', { name: `${Nombre} está listo para cerrarse` }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: `Cerrar ${nombre}` }).click();
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
+    await expect(page.getByRole('heading', { name: `${Nombre} está cerrado` })).toBeVisible();
+
+    // The ledger takes nothing dated in it, and Registrar says where to go.
+    await registrarEnMesCerrado(page, mes, Nombre);
+
+    // Asking to reopen: it stays closed, and the asker cannot approve.
+    await page.getByRole('link', { name: `Pedir reabrir ${nombre}` }).click();
+    const pedir = page.getByRole('dialog', { name: `Pedir reabrir ${nombre}` });
+    await pedir.getByLabel('¿Qué hay que corregir?').fill('E2E falta la comisión');
+    await pedir.getByRole('button', { name: `Pedir a ${OTRO_SOCIO}` }).click();
+    await expect(page.getByTestId('cierre-pedido')).toContainText(`Pediste reabrir ${nombre}`);
+    await expect(page.getByRole('link', { name: 'Revisar y aprobar' })).toHaveCount(0);
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
+
+    // The other founder rejects it and asks themselves; this founder approves.
+    await otroSocioRechazaYPide(mes, 'E2E faltaba otra comisión');
+    await page.reload();
+    await expect(page.getByTestId('cierre-pedido')).toContainText(
+      `${OTRO_SOCIO} pidió reabrir ${nombre}`,
+    );
+    await page.getByRole('link', { name: 'Revisar y aprobar' }).click();
+    await page
+      .getByRole('dialog', { name: `Reabrir ${nombre}` })
+      .getByRole('button', { name: 'Aprobar y reabrir' })
+      .click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Listo');
+    const historia = page.getByTestId('cierre-historial').filter({ hasText: Nombre });
+    await expect(historia).toContainText('reapertura rechazada');
+    await expect(historia).toContainText(`pidió ${OTRO_SOCIO}, aprobó Socia E2E`);
+  } finally {
+    await quitarOtroSocio();
   }
 });

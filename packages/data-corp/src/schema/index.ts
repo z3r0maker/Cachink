@@ -9,3 +9,4 @@ export { receivedInvoices } from './facturas.js';
 export { annualCaps } from './limites.js';
 export { services } from './servicios.js';
 export { taxReturns } from './impuestos.js';
+export { bankBalances, periodEvents } from './cierre.js';
