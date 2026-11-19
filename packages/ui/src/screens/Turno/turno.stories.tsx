@@ -88,7 +88,7 @@ function Hecho(p: { readonly conteo: Parameters<typeof estadoDelConteo>[0] }): R
         data={CIERRE_FIXTURE}
         e={e(p.conteo)}
         motivo="Cambio mal dado"
-        porEnviar={0}
+        enviado
         onOtroTurno={() => undefined}
         onSalir={() => undefined}
       />

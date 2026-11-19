@@ -38,26 +38,29 @@ const CORTE: CorteParaMandar = {
 };
 
 describe('el cierre del teléfono · los patrones', () => {
-  it('a cuadre thanks the operator and says the owner already has it', () => {
+  it('once the close reached the cloud, a cuadre thanks the operator and says they have it', () => {
     assert.equal(
-      lineaHecho(CUADRA, null, 0, 'Ana Robledo'),
+      lineaHecho(CUADRA, null, true, 'Ana Robledo'),
       'El conteo cuadró con lo esperado. Los patrones ya lo tienen en su portal. Gracias por tu turno, Ana.',
     );
   });
 
-  it('with records still to send, the owner sees it once they go up', () => {
-    assert.match(lineaHecho(CUADRA, null, 3, 'Ana'), /lo verán en su portal cuando se envíen/);
-    assert.doesNotMatch(lineaHecho(CUADRA, null, 3, 'Ana'), /ya lo tienen/);
+  it('until a sync confirms it, the line never claims the owner has it (review M7)', () => {
+    assert.match(
+      lineaHecho(CUADRA, null, false, 'Ana'),
+      /lo verán en su portal en cuanto se envíe/,
+    );
+    assert.doesNotMatch(lineaHecho(CUADRA, null, false, 'Ana'), /ya lo tienen/);
   });
 
   it('a difference says its reason and never thanks; a blank name never prints a comma', () => {
     assert.equal(
-      lineaHecho(FALTA, 'Cambio mal dado', 0, 'Ana'),
+      lineaHecho(FALTA, 'Cambio mal dado', true, 'Ana'),
       'Quedó un faltante explicado como «Cambio mal dado». Los patrones ya lo tienen en su portal.',
     );
-    assert.match(lineaHecho(SOBRA, 'Salió un vale', 0, 'Ana'), /^Quedó un sobrante/);
+    assert.match(lineaHecho(SOBRA, 'Salió un vale', true, 'Ana'), /^Quedó un sobrante/);
     assert.equal(
-      lineaHecho(CUADRA, null, 0, '  '),
+      lineaHecho(CUADRA, null, true, '  '),
       'El conteo cuadró con lo esperado. Los patrones ya lo tienen en su portal. Gracias por tu turno.',
     );
   });
@@ -66,7 +69,7 @@ describe('el cierre del teléfono · los patrones', () => {
     const textos = [
       NOTA_TITULO,
       recordatorioEfectivo(2_710_00n),
-      lineaHecho(FALTA, 'Otra razón', 2, 'Ana'),
+      lineaHecho(FALTA, 'Otra razón', false, 'Ana'),
       pistaCerrar(false, false),
     ];
     for (const t of textos) assert.doesNotMatch(t, /dueño|Reviewer|Don\b|boss|manager/);

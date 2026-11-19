@@ -34,18 +34,18 @@ export function pistaCerrar(faltaMotivo: boolean, faltaNota: boolean): string {
 
 /**
  * The done screen's line: what the count did, and when the owner sees it.
- * A cuadre thanks the operator by first name.
+ * «Ya lo tienen» only once a sync run confirmed the close reached the cloud
+ * (review M7); until then, when it will. A cuadre thanks the operator.
  */
 export function lineaHecho(
   d: DiferenciaCorte,
   motivo: string | null,
-  porEnviar: number,
+  enviado: boolean,
   operador: string,
 ): string {
-  const portal =
-    porEnviar > 0
-      ? 'Los patrones lo verán en su portal cuando se envíen los registros.'
-      : 'Los patrones ya lo tienen en su portal.';
+  const portal = enviado
+    ? 'Los patrones ya lo tienen en su portal.'
+    : 'Los patrones lo verán en su portal en cuanto se envíe.';
   if (d.tipo !== 'cuadra') {
     const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
     return `Quedó un ${que} explicado como «${motivo ?? ''}». ${portal}`;

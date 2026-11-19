@@ -20,6 +20,8 @@ export interface CierreBandaProps {
   readonly sinRed: boolean;
   readonly enviando: boolean;
   readonly onReintentar: () => void;
+  /** ISO time of the last sync run that reached the server (M7: the hecho says «ya lo tienen» only after one). */
+  readonly ultimoEnvio?: string | null;
   /** Opens «Registros por enviar»; omitted while that screen is not wired. */
   readonly onVerCuales?: () => void;
 }

@@ -99,8 +99,7 @@ tags:
 - tapOn:
     id: 'cierre-cerrar-turno'
 # Hecho with a faltante: no celebration, «Turno cerrado» and the motivo in
-# the line; with rows still to send, lineaHecho says los patrones see it
-# once the rows go up (M-16).
+# the line; offline, lineaHecho never claims los patrones have it (M7).
 - extendedWaitUntil:
     visible:
       id: 'cierre-hecho'
@@ -108,7 +107,7 @@ tags:
 - assertVisible: '.*Faltante.*'
 - assertVisible: '.*Turno cerrado.*'
 - assertVisible: '.*Quedó un faltante explicado como «Cambio mal dado»\..*'
-- assertVisible: '.*Los patrones lo verán en su portal cuando se envíen los registros\..*'
+- assertVisible: '.*Los patrones lo verán en su portal en cuanto se envíe\..*'
 
 # The server returns; the cierre and the sale go up.
 - runScript:

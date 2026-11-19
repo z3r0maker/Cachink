@@ -137,8 +137,8 @@ export interface CierreHechoProps {
   readonly data: CierreData;
   readonly e: EstadoConteo;
   readonly motivo: MotivoDiferencia | null;
-  /** Records still to send: los patrones see the close once they go up. */
-  readonly porEnviar: number;
+  /** A sync run confirmed the close reached the cloud (review M7). */
+  readonly enviado: boolean;
   /** Opens the fondo sheet for another turno, over this screen. */
   readonly onOtroTurno: () => void;
   /** Leaves the caja; the route decides where. */
@@ -171,7 +171,7 @@ export function CierreHecho(p: CierreHechoProps): ReactElement {
       <CierreMarco testID="cierre-hecho" pie={pie}>
         <Cabeza e={p.e} />
         <MText size="body" weight="semibold" color={colors.ink} textAlign="left">
-          {lineaHecho(p.e.dif, p.motivo, p.porEnviar, p.data.operador)}
+          {lineaHecho(p.e.dif, p.motivo, p.enviado, p.data.operador)}
         </MText>
         <CierreCorte data={p.data} e={p.e} fecha={fecha} />
       </CierreMarco>

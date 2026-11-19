@@ -14,7 +14,7 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
-# The apertura row must be up: the hecho says «ya lo tienen» only then.
+# Start from a sent queue, so the only row the hecho waits for is the close.
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'
@@ -91,8 +91,11 @@ appId: mx.xangarro.mobile
 - assertVisible: '.*Cuadró.*'
 - assertVisible: '.*¡Turno cerrado!.*'
 - assertVisible: '.*Cuadró al centavo\..*'
-# lineaHecho appends «Gracias por tu turno, <nombre>.»; match the prefix.
-- assertVisible: '.*El conteo cuadró con lo esperado\. Los patrones ya lo tienen en su portal\..*'
+# The close goes up right away; «ya lo tienen» only once a sync run confirmed
+# it (review M7). lineaHecho appends «Gracias por tu turno, <nombre>.».
+- extendedWaitUntil:
+    visible: '.*El conteo cuadró con lo esperado\. Los patrones ya lo tienen en su portal\..*'
+    timeout: 30000
 - assertVisible:
     id: 'cierre-corte'
 - assertVisible: '.*Guarda \$500\.00 para los patrones\..*'

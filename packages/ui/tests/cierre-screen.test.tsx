@@ -35,7 +35,7 @@ function montar(over: Record<string, unknown> = {}) {
   const onSalir = vi.fn();
   const onAbrirTurno = vi.fn();
   const onOtroTurno = vi.fn();
-  renderWithProviders(
+  const pantalla = (mas: Record<string, unknown> = {}) => (
     <CierreScreen
       state="happy"
       data={CIERRE_FIXTURE}
@@ -46,9 +46,17 @@ function montar(over: Record<string, unknown> = {}) {
       onAbrirTurno={onAbrirTurno}
       onOtroTurno={onOtroTurno}
       {...over}
-    />,
+      {...mas}
+    />
   );
-  return { onCerrar, onSalir, onAbrirTurno, onOtroTurno };
+  const { rerender } = renderWithProviders(pantalla());
+  return {
+    onCerrar,
+    onSalir,
+    onAbrirTurno,
+    onOtroTurno,
+    rerender: (mas: Record<string, unknown>) => rerender(pantalla(mas)),
+  };
 }
 
 const tap = (id: string): void => {
@@ -152,24 +160,31 @@ describe('Cierre · paso 2, resultado', () => {
     });
   });
 
-  it('sobra says so; nothing counted reads as the whole esperado missing', () => {
+  it('sobra says so in its title and card', () => {
     montar();
     contarYVer(CONTEO_SOBRA);
     expect(screen.getByTestId('cierre-paso-resultado').textContent).toContain('Sobra efectivo');
     expect(screen.getByTestId('cierre-diferencia').textContent).toContain('$910.00');
-    tap('cierre-volver-a-contar');
-    tap('cierre-empezar-de-cero');
+  });
+
+  it('a drawer counted at $0.00 shows the motivos and can close (review M6)', async () => {
+    const { onCerrar } = montar();
     tap('cierre-ver-resultado');
     expect(screen.getByTestId('cierre-cerrar-turno').textContent).toContain(
       'faltante de $2,710.00',
     );
+    tap('cierre-motivo-Salió un vale');
+    tap('cierre-cerrar-turno');
+    await waitFor(() => expect(onCerrar).toHaveBeenCalledOnce());
+    expect(onCerrar.mock.calls[0]?.[0]).toMatchObject({ montoCierreCentavos: 0n });
   });
 });
 
 describe('Cierre · the close write', () => {
   it('happy: closes with the conteo and its denominaciones, then the hecho', async () => {
     const onPaso = vi.fn();
-    const { onCerrar } = montar({ onPaso });
+    const onReintentar = vi.fn();
+    const { onCerrar, rerender } = montar({ onPaso, cola: { ...COLA, onReintentar } });
     contarYVer(CONTEO_CUADRA);
     tap('cierre-cerrar-turno');
     await waitFor(() => expect(onCerrar).toHaveBeenCalledOnce());
@@ -181,11 +196,20 @@ describe('Cierre · the close write', () => {
     expect(onCerrar.mock.calls[0]?.[0]?.denominaciones).toEqual({ ...CONTEO_CUADRA });
     await waitFor(() => expect(screen.getByTestId('cierre-hecho')).toBeInTheDocument());
     expect(onPaso).toHaveBeenLastCalledWith('hecho');
+    // The close is sent right away, and nothing is claimed until a run confirms it (M7).
+    expect(onReintentar).toHaveBeenCalledTimes(1);
     const t = screen.getByTestId('cierre-hecho').textContent ?? '';
     expect(t).toContain('¡Turno cerrado!');
-    expect(t).toContain('Los patrones ya lo tienen en su portal. Gracias por tu turno, Ana.');
+    expect(t).toContain('Los patrones lo verán en su portal en cuanto se envíe.');
     // The owner («Pedro» in the fixture) is never named; only the business is.
     expect(t).not.toMatch(/Pedro (ya|lo)|dueño/);
+    // A run from before the close confirms nothing; one after it does.
+    rerender({ cola: { ...COLA, ultimoEnvio: '2020-01-01T00:00:00.000Z' } });
+    expect(screen.getByTestId('cierre-hecho').textContent).not.toContain('ya lo tienen');
+    rerender({ cola: { ...COLA, ultimoEnvio: new Date(Date.now() + 1000).toISOString() } });
+    expect(screen.getByTestId('cierre-hecho').textContent).toContain(
+      'Los patrones ya lo tienen en su portal. Gracias por tu turno, Ana.',
+    );
   });
 
   it('a failed write says so and stays on the result to retry', async () => {
@@ -209,7 +233,7 @@ describe('Cierre · the close write', () => {
     tap('cierre-cerrar-turno');
     await waitFor(() => expect(screen.getByTestId('cierre-hecho')).toBeInTheDocument());
     expect(screen.getByTestId('cierre-hecho').textContent).toContain(
-      'Los patrones lo verán en su portal cuando se envíen los registros',
+      'Los patrones lo verán en su portal en cuanto se envíe.',
     );
   });
 
@@ -231,7 +255,7 @@ describe('CierreHecho · the corte and the way on', () => {
         data={CIERRE_FIXTURE}
         e={estadoDelConteo(conteo, CIERRE_FIXTURE.partes, null, '')}
         motivo={motivo as never}
-        porEnviar={0}
+        enviado
         onOtroTurno={onOtroTurno}
         onSalir={onSalir}
       />,

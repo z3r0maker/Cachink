@@ -51,18 +51,51 @@ function usePaso(p: CierreScreenProps): readonly [PasoCierre, (x: PasoCierre) =>
   return [p.paso ?? propio, ir];
 }
 
+/**
+ * The close reached the cloud: a sync run that ended after the close, with
+ * nothing left to send and nothing on its way (review M7).
+ */
+export function corteEnviado(cola: ColaCierre, cerradoAt: number | null): boolean {
+  if (cerradoAt === null || cola.porEnviar > 0 || cola.enviando) return false;
+  const ultimo = Date.parse(cola.ultimoEnvio ?? '');
+  return ultimo >= cerradoAt;
+}
+
+/** The close write that, once it lands, sends it at once and moves on (review M7). */
+function cerrarYEnviar(
+  p: CierreScreenProps,
+  x: ReturnType<typeof useCierreEstado>,
+  alCerrar: () => void,
+): () => void {
+  return () =>
+    x.cerrar(async (c) => {
+      const fallo = await p.onCerrar(c);
+      if (fallo === null) {
+        alCerrar();
+        // Send the close now rather than on the next cycle.
+        p.cola.onReintentar();
+      }
+      return fallo;
+    });
+}
+
 /** The two steps over one count, and the hecho the close earns. */
 function Contando(p: CierreScreenProps & { readonly data: CierreData }): ReactElement {
   const x = useCierreEstado(p.data);
   const [paso, ir] = usePaso(p);
+  const [cerradoAt, setCerradoAt] = useState<number | null>(null);
   const id = p.testID ?? 'cierre';
+  const cerrar = cerrarYEnviar(p, x, () => {
+    setCerradoAt(Date.now());
+    ir('hecho');
+  });
   if (x.cerrado) {
     return (
       <CierreHecho
         data={p.data}
         e={x.e}
         motivo={x.motivo}
-        porEnviar={p.cola.porEnviar}
+        enviado={corteEnviado(p.cola, cerradoAt)}
         onOtroTurno={p.onOtroTurno}
         onSalir={p.onSalir}
       />
@@ -71,12 +104,6 @@ function Contando(p: CierreScreenProps & { readonly data: CierreData }): ReactEl
   if (paso === 'contar') {
     return <CierrePasoContar x={x} onSeguir={() => ir('resultado')} testID={id} />;
   }
-  const cerrar = (): void =>
-    x.cerrar(async (c) => {
-      const fallo = await p.onCerrar(c);
-      if (fallo === null) ir('hecho');
-      return fallo;
-    });
   return (
     <CierrePasoResultado
       x={x}
