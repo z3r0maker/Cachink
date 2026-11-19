@@ -1,14 +1,15 @@
 /**
- * Mi turno's four figures (Track M, M-09; the Turno board's KPI tiles):
- * Ventas, Cobrado, Fiado y Gastos, each with its hint, two by two on the
- * phone. The copy and colours come from `kpisMiTurno` in `@xangarro/caja`.
+ * Mi turno's two figures (MvTurno «Resumen del turno»): Ventas with its
+ * cancellations and Cobrado across every method, side by side on quiet
+ * tiles (read, not pressed). The copy and colours come from `kpisMiTurno`
+ * in `@xangarro/caja`.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { kpisMiTurno, type TurnoData } from '@xangarro/caja/turno';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow } from '../../components/Panel/index';
-import { borderWidths, colors, radii, shadows } from '../../theme';
+import { borderColors, borderWidths, colors, radii } from '../../theme';
 
 function Tile(p: {
   readonly k: string;
@@ -19,20 +20,23 @@ function Tile(p: {
   return (
     <View
       flex={1}
-      padding={12}
-      gap={4}
-      borderRadius={radii[4]}
-      borderWidth={borderWidths.thin}
-      borderColor={colors.black}
+      minWidth={0}
+      paddingHorizontal={14}
+      paddingVertical={12}
+      gap={2}
+      borderRadius={radii[5]}
+      borderWidth={borderWidths.quiet}
+      borderColor={borderColors.quiet}
       backgroundColor={colors.white}
-      style={{ boxShadow: shadows.card }}
     >
       <Eyebrow>{p.k}</Eyebrow>
       <MText
-        size="xl2"
+        size="xl3"
         weight="extraBold"
         numberOfLines={1}
+        adjustsFontSizeToFit
         fontVariant={['tabular-nums']}
+        letterSpacing={-0.7}
         color={p.color}
       >
         {p.v}
@@ -44,15 +48,17 @@ function Tile(p: {
   );
 }
 
-/** The board's four tiles, two rows of two on the phone. */
 export function MiTurnoCifras(p: { readonly data: TurnoData }): ReactElement {
-  const items = kpisMiTurno(p.data);
   return (
-    <View flexDirection="row" flexWrap="wrap" gap={10} testID="turno-cifras">
-      {items.map((t) => (
-        <View key={t.label} width="48%" flexGrow={1}>
-          <Tile k={t.label} v={t.value} hint={t.hint} color={t.color} />
-        </View>
+    <View
+      flexDirection="row"
+      gap={10}
+      testID="turno-cifras"
+      role="region"
+      aria-label="Resumen del turno"
+    >
+      {kpisMiTurno(p.data).map((t) => (
+        <Tile key={t.label} k={t.label} v={t.value} hint={t.hint} color={t.color} />
       ))}
     </View>
   );

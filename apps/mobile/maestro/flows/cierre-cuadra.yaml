@@ -1,5 +1,5 @@
 # Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's
-# «Cerrar mi turno», step 1 counts the drawer by denomination with the
+# «Cerrar turno», step 1 counts the drawer by denomination with the
 # esperado out of sight; «Ver resultado» shows «¡Cuadra!» $0.00 with no
 # motivo asked; the close lands on «¡Turno cerrado!» with the «Cuadró» chip,
 # the corte as a ticket and the cash reminder for los patrones.
@@ -20,7 +20,7 @@ appId: mx.xangarro.mobile
       id: 'cloud-sync-pill-synced'
     timeout: 30000
 
-# «Cerrar mi turno» opens the Cierre flow, a full page under the Turno tab.
+# «Cerrar turno» opens the Cierre flow, a full page under the Turno tab.
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:

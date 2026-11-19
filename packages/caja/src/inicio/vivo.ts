@@ -7,27 +7,12 @@
 
 import type { CuentaCliente } from '../cobranza/cliente/types';
 import type { CortePara, TurnoVivoPara } from '../lectura/turno-shapes';
-import { nombreDueno } from '../comun/dueno';
+import { mayuscula, nombreDueno } from '../comun/dueno';
+import { diaConFecha, MESES } from '../comun/frases';
 import { tareasParaHoy, type StockTarea } from './para-hoy';
 import type { CorteReciente, InicioData, Momento, ResultadoCorte, Situacion } from './types';
 
 export { comoTarea } from './para-hoy';
-
-const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-const MESES = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-];
 
 /** A shift this long asks to be closed (the design's «Llevas 12 horas»). */
 export const HORAS_PARA_CERRAR = 12;
@@ -37,7 +22,7 @@ export const primerNombre = (nombre: string): string => nombre.trim().split(/\s+
 
 /** «Sábado 26 de septiembre · Taquería, Caja 1». */
 export function fechaInicio(ahora: Date, negocio: string | null, caja: string): string {
-  const dia = `${DIAS[ahora.getDay()] ?? ''} ${ahora.getDate()} de ${MESES[ahora.getMonth()] ?? ''}`;
+  const dia = mayuscula(diaConFecha(ahora));
   return `${dia} · ${negocio === null ? caja : `${negocio}, ${caja}`}`;
 }
 

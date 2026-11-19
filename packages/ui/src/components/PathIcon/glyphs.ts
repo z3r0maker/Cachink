@@ -7,6 +7,11 @@
 export const GLYPHS = {
   chevronLeft: 'M15 6l-6 6 6 6',
   chevronRight: 'm9 18 6-6-6-6',
+  /** A fold that opens downward, and the same fold open (MvTurno «Ver de dónde sale»). */
+  chevronDown: 'm6 9 6 6 6-6',
+  chevronUp: 'm18 15-6-6-6 6',
+  /** Lucide `arrow-right`: a primary that moves on («Cerrar turno»). */
+  flecha: 'M5 12h14M13 6l6 6-6 6',
   close: 'M18 6 6 18M6 6l12 12',
   check: 'M20 6 9 17l-5-5',
   sinRed:

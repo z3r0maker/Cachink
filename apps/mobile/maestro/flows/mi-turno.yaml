@@ -1,10 +1,11 @@
 # Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno —
-# the hero with the cash that must be in the drawer, the four figures, the
-# movements of the turno, the due recurrente with its «Registrar» (which goes
-# to Gastos prefilled), and the big rows under the fold.
+# the head, the yellow hero with the cash that must be in the drawer (its
+# parts folded under «Ver de dónde sale»), Ventas and Cobrado, «Lo de tu
+# turno»'s rows with their live chips (the due recurrente on Gastos, which
+# opens Gastos with it), and the fixed foot with «Cerrar turno».
 #
 # Precondition: device activated against the mock; one cash venta captured so
-# the figures and the movements list carry data (Taco al pastor, $25.00).
+# the figures carry data (Taco al pastor, $25.00).
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
@@ -14,32 +15,53 @@ appId: mx.xangarro.mobile
 - runFlow: shared/ensure-caja-open.yaml
 - runFlow: shared/create-venta.yaml
 
-# The tab. The cabeza names the operator, the caja and the opening time
-# (packages/ui/src/screens/Turno/mi-turno-screen.tsx Cabeza).
+# The tab. The cabeza names the operator, the opening time and the day
+# (packages/ui/src/screens/Turno/mi-turno-cabeza.tsx).
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
 - extendedWaitUntil:
     visible:
       id: 'mobile-turno'
     timeout: 10000
-- assertVisible: '.*Toni, .*desde las.*.*'
+- assertVisible: '.*Toni, desde las.*'
 
-# Hero: the cash that must be in the drawer, its parts, «Debe haber».
+# Hero: the figure once, what it is for, and its parts folded.
 - assertVisible:
     id: 'turno-hero'
-- assertVisible: '.*Efectivo que debe haber en la caja.*'
+- assertVisible:
+    id: 'turno-debe-haber'
+- assertVisible: '.*Es lo que debes contar cuando cierres tu turno.*'
+- assertNotVisible:
+    id: 'turno-desglose'
+# «Ver de dónde sale» unfolds the parts and «Debe haber»; tapped again, folds.
+- tapOn:
+    id: 'turno-ver-desglose'
+- extendedWaitUntil:
+    visible:
+      id: 'turno-desglose'
+    timeout: 5000
 - assertVisible: '.*Fondo de caja.*'
 - assertVisible: '.*Ventas en efectivo.*'
 - assertVisible: '.*Debe haber.*'
+- assertVisible:
+    id: 'turno-desglose-total'
+- tapOn:
+    id: 'turno-ver-desglose'
+- assertNotVisible:
+    id: 'turno-desglose'
 
-# The four figures (mi-turno-cifras.tsx; copy from kpisMiTurno, caja/turno).
+# The two figures (mi-turno-cifras.tsx; copy from kpisMiTurno, caja/turno).
 - assertVisible:
     id: 'turno-cifras'
 - assertVisible: '.*Todos los métodos.*'
 - assertVisible: '.*Ninguna cancelada.*'
 
-# The big rows — stack routes off the tab bar, inside the one scroll at the
-# foot (shared/open-turno-row.yaml addresses them one by one).
+# The foot, fixed over the tab bar: the close and, on the phone, the lock.
+- assertVisible:
+    id: 'turno-cerrar-mi-turno'
+
+# «Lo de tu turno»: the rows to the stack routes, inside the scroll
+# (shared/open-turno-row.yaml addresses them one by one).
 - scrollUntilVisible:
     element:
       id: 'turno-rows'
@@ -47,58 +69,43 @@ appId: mx.xangarro.mobile
     timeout: 15000
     visibilityPercentage: 60
 - assertVisible:
-    id: 'turno-rows'
-- assertVisible:
     id: 'otros-gastos'
 - assertVisible:
+    id: 'otros-fiado'
+- assertVisible:
     id: 'otros-inventario'
-# The rows stack longer than the iPad's viewport; scroll the last one in
-# (the asserts above it sit within the fold on both layouts).
 - scrollUntilVisible:
     element:
       id: 'otros-no-enviados'
     direction: DOWN
     timeout: 8000
     visibilityPercentage: 60
+    centerElement: true
+- assertVisible:
+    id: 'otros-avisos'
+# The queue's chip: everything sent, or how many wait.
 - assertVisible:
     id: 'otros-no-enviados'
+    text: '.*(Todo enviado|por enviar).*'
 
 # A due recurrente (mock fixture REC-1 «Renta local», due on this month's
-# 1st, contracts/mock/fixtures.ts) with its due chip. In a
-# continuous run the turno carries every earlier flow's movements, so the
-# section sits further down: a longer budget, and 60% beats a full reveal.
+# 1st, contracts/mock/fixtures.ts) chips the Gastos row: by name when it is
+# the only one due, by count when there are more.
 - scrollUntilVisible:
     element:
-      id: 'turno-pendientes'
-    direction: DOWN
-    timeout: 15000
-    visibilityPercentage: 60
-- assertVisible: '.*Renta local.*'
-- assertVisible: '.*Cada mes · día 1.*'
-- assertVisible: '.*Atrasado.*|Vence hoy.*'
-
-# The movements: the venta create-venta.yaml just captured («Venta V-0001»).
-- scrollUntilVisible:
-    element:
-      id: 'turno-movimientos'
-    direction: DOWN
-    timeout: 5000
-- assertVisible: '.*Venta V-.*.*'
-- assertVisible: '.*Ver ventas.*'
-
-# «Registrar» → /gastos?recurrente=<id> with the pagar sheet prefilled
-# (turno/index.tsx onRegistrar → GastosScreen prefill → PagarRecurrenteSheet).
-- scrollUntilVisible:
-    element:
-      id: 'turno-registrar-01JREC00000000000000000001'
+      id: 'otros-gastos'
     direction: UP
-    timeout: 5000
+    timeout: 8000
+    centerElement: true
+- assertVisible:
+    id: 'otros-gastos'
+    text: '.*(Atrasado|vence hoy|por pagar).*'
+# The row opens Gastos, where the due recurrente waits with its «Registrar»
+# (gastos-pagar-recurrente.yaml pays it).
 - tapOn:
-    id: 'turno-registrar-01JREC00000000000000000001'
+    id: 'otros-gastos'
 - extendedWaitUntil:
     visible:
-      id: 'pagar-recurrente-sheet'
+      id: 'mobile-gastos'
     timeout: 10000
-- assertVisible: '.*Pagar renta local.*'
-- assertVisible:
-    id: 'pagar-recurrente-tarjeta'
+- assertVisible: '.*Renta local.*'

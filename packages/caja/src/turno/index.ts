@@ -4,3 +4,4 @@ export * from './kpis';
 export * from './types';
 export * from './vivo';
 export * from './titular';
+export * from './filas';

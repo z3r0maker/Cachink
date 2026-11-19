@@ -16,6 +16,7 @@ import { hoyLocal } from '@xangarro/caja';
 import { movimientoDominio } from '@xangarro/caja/lectura';
 import {
   comoInventario,
+  type Existencia,
   type InventarioData,
   type NuevoMovimientoVivo,
 } from '@xangarro/caja/inventario';
@@ -102,6 +103,22 @@ function consulta(
     queryFn: () => leerFilasInventario(repos, businessId as BusinessId, deviceId as DeviceId, hoy),
     enabled: businessId !== null && userId !== null && deviceId !== null,
   };
+}
+
+/**
+ * The stocked products alone, from Inventario's own query (one read, shared
+ * cache): what Mi turno's Inventario row names to restock. Undefined until
+ * the read lands.
+ */
+export function useExistencias(): readonly Existencia[] | undefined {
+  const repos = useRepositories();
+  const businessId = useCurrentBusinessId() as BusinessId | null;
+  const userId = useUserId();
+  const deviceId = useDeviceId();
+  const q = useQuery(consulta(repos, { businessId, userId, deviceId, hoy: hoyLocal() }));
+  return q.data === undefined
+    ? undefined
+    : comoInventario(q.data.inventario, { nombre: '' }).existencias;
 }
 
 export function useInventario(): InventarioVivo {

@@ -2,6 +2,7 @@
 export { MiTurnoScreen, type MiTurnoScreenProps } from './mi-turno-screen';
 export { MiTurnoEstados, type MiTurnoEstado, type MiTurnoEstadosProps } from './mi-turno-estados';
 export { useMiTurno, useColaCierre, miTurnoKey, type MiTurnoVivo } from './use-mi-turno';
+export { useLoDeTuTurno } from './use-lo-de-tu-turno';
 export {
   CierreScreen,
   type CierreScreenProps,

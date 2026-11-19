@@ -1,8 +1,10 @@
 # Reusable subflow: open one of Mi turno's rows (Track M, M-05).
 #
-# Gastos, Inventario, Movimientos de caja, No enviados and Ajustes left the
-# tab bar; they are stack routes opened from Mi turno's «Lo de tu turno»
-# rows, each with the `otros-<key>` testID (the rename is A-15).
+# Gastos, Fiado y abonos, Inventario, Avisos, Registros por enviar and
+# Ajustes are stack routes opened from Mi turno's «Lo de tu turno» rows
+# (MvTurno), each with the `otros-<key>` testID (the rename is A-15):
+# otros-gastos, otros-fiado, otros-inventario, otros-avisos,
+# otros-no-enviados, otros-configuracion.
 #
 # Usage:
 #   - runFlow:
@@ -28,8 +30,8 @@ appId: mx.xangarro.mobile
     commands:
       - tapOn:
           id: 'rail-turno|sidebar-turno'
-# Mi turno is one long scroll (M-09's foot moved the rows into it): give the
-# scroll room to cross the hero and the figures before the row appears.
+# The rows end Mi turno's scroll, over the fixed foot: give the scroll room
+# to cross the hero and the figures, and centre the row clear of the foot.
 - scrollUntilVisible:
     element:
       id: ${ROW}

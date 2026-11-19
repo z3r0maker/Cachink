@@ -26,7 +26,7 @@ export function hintComprobantes(n: number): string {
 }
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const MESES = [
+export const MESES = [
   'enero',
   'febrero',
   'marzo',
@@ -40,6 +40,17 @@ const MESES = [
   'noviembre',
   'diciembre',
 ];
+
+/** «jueves 14 de mayo»: a local day by its weekday and date (MvTurno's cabeza, Inicio's fecha). */
+export function diaConFecha(d: Date): string {
+  return `${DIAS[d.getDay()] ?? ''} ${d.getDate()} de ${MESES[d.getMonth()] ?? ''}`;
+}
+
+/** The apertura's local day from its UTC stamp, or '' when the stamp is broken. */
+export function diaDeApertura(isoUtc: string): string {
+  const d = new Date(isoUtc);
+  return isoUtc === '' || Number.isNaN(d.getTime()) ? '' : diaConFecha(d);
+}
 
 /** Days from `hoy` to `fecha`, both `YYYY-MM-DD`. */
 export function diasEntre(hoy: string, fecha: string): number {
