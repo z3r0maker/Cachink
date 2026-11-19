@@ -92,6 +92,20 @@ describe('InMemoryTicketsRepository · edges', () => {
     assert.equal(creditos.length, 3);
   });
 
+  it('a cancelled fiado sale leaves the client account (M3)', async () => {
+    const r = new InMemoryTicketsRepository(TEST_DEVICE_ID);
+    const fiado = (folio: number) =>
+      r.create(nuevo({ folio, clienteId: CLIENTE, estadoPago: 'pendiente', metodo: 'Crédito' }));
+    const viva = await fiado(1);
+    const cancelada = await fiado(2);
+    await r.cancel(cancelada.id as never, 'me equivoqué al cobrar', 'u-1');
+    const creditos = await r.findCreditoByClient(CLIENTE);
+    assert.deepEqual(
+      creditos.map((t) => t.id),
+      [viva.id],
+    );
+  });
+
   it('cancel stamps who, why and when — and only once', async () => {
     const r = new InMemoryTicketsRepository(TEST_DEVICE_ID);
     const t = await r.create(nuevo());

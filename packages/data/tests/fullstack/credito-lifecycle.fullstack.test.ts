@@ -120,6 +120,31 @@ describe('Crédito Lifecycle [fullstack]', () => {
     expect(await h.repos.tickets.findCreditoByClient(clientId)).toHaveLength(2);
   });
 
+  it('a cancelled fiado sale leaves the account (M3)', async () => {
+    const viva = await h.useCases.registrarVenta.execute(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: productId,
+        monto: 100_00n,
+        metodo: 'Crédito',
+        clienteId: clientId,
+      }),
+    );
+    const cancelada = await h.useCases.registrarVenta.execute(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: productId,
+        monto: 60_00n,
+        metodo: 'Crédito',
+        clienteId: clientId,
+      }),
+    );
+    await h.repos.tickets.cancel(cancelada.ticketId, 'Me equivoqué al cobrar', USER_ID);
+
+    const historial = await h.repos.tickets.findCreditoByClient(clientId);
+    expect(historial.map((t) => t.id)).toEqual([viva.ticketId]);
+  });
+
   it('records a client abono without touching the sale (ADR-074)', async () => {
     const sale = await h.useCases.registrarVenta.execute(
       makeNewSale({
