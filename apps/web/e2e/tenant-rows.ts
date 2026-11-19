@@ -1,178 +1,19 @@
-import { newUlid } from '@xangarro/domain';
-
-import { asTenant } from './sync-phone';
-import type { Tenant } from './tenant';
-
 /**
- * The rows a spec composes onto its own tenant (`tenant.ts`).
- *
- * Every one of these takes the tenant and returns the id it wrote, so a fixture
- * reads as the rows the test is about and nothing else. Amounts are centavos
- * (CLAUDE.md §2.8); dates are `YYYY-MM-DD` strings, because the suite pins the
- * business clock to the seed's day and a fixture dated "now" would fall outside
- * every period the screens show.
+ * The rows a spec composes onto its own tenant (`tenant.ts`). They live in
+ * `@xangarro/testing/tenant` since S-02 (ADR-153 §4); this file re-exports
+ * them so no spec's import changed.
  */
-export interface ProductRow {
-  readonly nombre?: string;
-  readonly sku?: string | null;
-  readonly categoria?: string;
-  /** Centavos. */
-  readonly costo?: number;
-  /** Centavos. */
-  readonly precio?: number;
-  readonly unidad?: string;
-  readonly seguirStock?: boolean;
-  readonly umbral?: number;
-}
-
-export async function addProduct(t: Tenant, row: ProductRow = {}): Promise<string> {
-  const id = newUlid();
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad,
-                            umbral_stock_bajo, tipo, seguir_stock, precio_venta_centavos,
-                            business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${row.nombre ?? 'Producto'}, ${row.sku ?? null},
-              ${row.categoria ?? 'Producto Terminado'}, ${row.costo ?? 100}, ${row.unidad ?? 'pza'},
-              ${row.umbral ?? 3}, 'producto', ${row.seguirStock ?? false}, ${row.precio ?? 500},
-              ${t.biz}, ${t.deviceId}, now(), now())`;
-  });
-  return id;
-}
-
-export interface SaleRow {
-  readonly fecha: string;
-  /** Centavos. */
-  readonly monto: number;
-  readonly concepto?: string;
-  readonly folio?: number;
-  readonly metodo?: 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR/CoDi' | 'Crédito';
-  readonly estadoPago?: 'pagado' | 'pendiente';
-  readonly productoId?: string | null;
-  readonly cantidad?: number;
-}
-
-/** A sale is a ticket line (C-17, ADR-073): the header comes with it. */
-export async function addSale(t: Tenant, row: SaleRow): Promise<string> {
-  const id = newUlid();
-  const concepto = row.concepto ?? 'Venta';
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
-                           business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${row.folio ?? 1}, ${row.fecha}, ${concepto}, ${row.metodo ?? 'Efectivo'},
-              ${row.estadoPago ?? 'pagado'}, ${t.biz}, ${t.deviceId}, now(), now())`;
-    await sql`
-      INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos, producto_id,
-                         cantidad, business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${id}, ${row.fecha}, ${concepto}, 'Producto', ${row.monto},
-              ${row.productoId ?? null}, ${row.cantidad ?? 1}, ${t.biz}, ${t.deviceId},
-              now(), now())`;
-  });
-  return id;
-}
-
-export interface OperatorRow {
-  readonly nombre?: string;
-  /** The NIP's hash. Specs that do not type it in pass nothing. */
-  readonly pinHash?: string;
-  readonly active?: boolean;
-  readonly permissions?: Record<string, boolean>;
-}
-
-export async function addOperator(t: Tenant, row: OperatorRow = {}): Promise<string> {
-  const id = newUlid();
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
-                         business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${row.nombre ?? 'Operador'}, ${row.pinHash ?? 'x'}, 'blue',
-              ${sql.json(row.permissions ?? {})}, ${row.active ?? true}, ${t.biz}, ${t.deviceId},
-              now(), now())`;
-  });
-  return id;
-}
-
-/** An 8 × 8 lossless WebP: small, but a real image the browser decodes. */
-const TINY_WEBP = 'UklGRh4AAABXRUJQVlA4TBEAAAAvB8ABAAdQ7sLXt/+BiOh/AAA=';
-
-/** A product's photo, as the phone's sync would leave it (P-42, ADR-134). */
-export async function addProductPhoto(t: Tenant, productoId: string): Promise<string> {
-  const id = newUlid();
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO product_images (id, producto_id, mime, bytes, width, height,
-                                  business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${productoId}, 'image/webp', decode(${TINY_WEBP}, 'base64'), 8, 8,
-              ${t.biz}, ${t.deviceId}, now(), now())`;
-  });
-  return id;
-}
-
-export interface ExpenseRow {
-  readonly fecha: string;
-  readonly concepto: string;
-  /** Centavos. */
-  readonly monto?: number;
-  /** Who wrote it down: a user and a turno of theirs on `fecha`. None leaves it a portal gasto's «—». */
-  readonly operador?: string;
-}
-
-/** A gasto as a phone's push leaves it, on its operador's turno when one is named. */
-export async function addExpense(t: Tenant, row: ExpenseRow): Promise<string> {
-  const [id, user, turno] = [newUlid(), newUlid(), newUlid()];
-  await asTenant(t.biz, async (sql) => {
-    if (row.operador !== undefined) {
-      await sql`
-        INSERT INTO users (id, nombre, pin_hash, active, business_id, device_id, created_at, updated_at)
-        VALUES (${user}, ${row.operador}, 'x', true, ${t.biz}, ${t.deviceId}, now(), now())`;
-      await sql`
-        INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, monto_apertura_centavos,
-                                 efectivo_adicional_centavos, business_id, device_id, created_at, updated_at)
-        VALUES (${turno}, ${user}, ${row.fecha}, now(), 0, 0, ${t.biz}, ${t.deviceId}, now(), now())`;
-    }
-    await sql`
-      INSERT INTO expenses (id, fecha, concepto, categoria, monto_centavos, caja_turno_id,
-                            business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${row.fecha}, ${row.concepto}, 'Servicios', ${row.monto ?? 18000},
-              ${row.operador === undefined ? null : turno}, ${t.biz}, ${t.deviceId}, now(), now())`;
-  });
-  return id;
-}
-
-/** A gasto's receipt photo, as the phone's push would leave it (ADR-149, M-18). */
-export async function addExpenseReceipt(t: Tenant, gastoId: string): Promise<string> {
-  const id = newUlid();
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO expense_receipts (id, gasto_id, mime, bytes, width, height,
-                                    business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${gastoId}, 'image/webp', decode(${TINY_WEBP}, 'base64'), 8, 8,
-              ${t.biz}, ${t.deviceId}, now(), now())`;
-  });
-  return id;
-}
-
-/**
- * A logo's bytes exactly as given, written past the upload gate. For the spec
- * that proves the serving route holds on its own (audit F-01): what is stored
- * here is whatever a wrong gate would have let through.
- */
-export async function addLogo(t: Tenant, svg: string): Promise<void> {
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO business_logos (business_id, mime, bytes, updated_at)
-      VALUES (${t.biz}, 'image/svg+xml', convert_to(${svg}, 'UTF8'), now())`;
-  });
-}
-
-/** A second device, for the specs about slots and pairing. */
-export async function addDevice(t: Tenant, nombre = 'Caja norte'): Promise<string> {
-  const id = newUlid();
-  await asTenant(t.biz, async (sql) => {
-    await sql`
-      INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
-      VALUES (${id}, ${nombre}, 'android', 'x', ${t.biz}, now(), now())`;
-  });
-  return id;
-}
+export {
+  addDevice,
+  addExpense,
+  addExpenseReceipt,
+  addLogo,
+  addOperator,
+  addProduct,
+  addProductPhoto,
+  addSale,
+  type ExpenseRow,
+  type OperatorRow,
+  type ProductRow,
+  type SaleRow,
+} from '@xangarro/testing/tenant';

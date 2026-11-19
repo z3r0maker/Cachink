@@ -967,15 +967,21 @@ importers:
 
   packages/testing:
     dependencies:
+      '@xangarro/auth-core':
+        specifier: workspace:*
+        version: link:../auth-core
       '@xangarro/data':
         specifier: workspace:*
         version: link:../data
       '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
       vitest:
         specifier: ^4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@25.9.9)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@25.9.9)(typescript@6.0.3))(vite@8.0.13(@types/node@25.9.9)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
     devDependencies:
       '@noble/ed25519':
         specifier: 3.2.0
@@ -983,6 +989,9 @@ importers:
       '@noble/hashes':
         specifier: 2.4.0
         version: 2.4.0
+      '@types/node':
+        specifier: ^22.19.17
+        version: 22.19.17
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14

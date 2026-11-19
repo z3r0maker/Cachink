@@ -25,14 +25,25 @@ import { describe, it } from 'vitest';
  */
 const E2E = path.resolve(import.meta.dirname, '../e2e');
 
-/** The factory itself, and the module that teaches the rule. */
-const OWNS_THE_ROWS = new Set(['tenant.ts', 'tenant-rows.ts']);
+/**
+ * The factory's home since S-02 (ADR-153 §4): `@xangarro/testing/tenant`,
+ * which the portal's e2e and Synth both mint through.
+ */
+const FACTORY = path.resolve(import.meta.dirname, '../../../packages/testing/src/tenant');
 
-function e2eFiles(): readonly { readonly name: string; readonly source: string }[] {
-  return readdirSync(E2E)
+/** The one module there that may insert a business: the factory itself. */
+const OWNS_THE_ROWS = new Set(['mint.ts']);
+
+type Source = { readonly name: string; readonly source: string };
+
+function tsFiles(dir: string): readonly Source[] {
+  return readdirSync(dir)
     .filter((f) => f.endsWith('.ts'))
-    .map((name) => ({ name, source: readFileSync(path.join(E2E, name), 'utf8') }));
+    .map((name) => ({ name, source: readFileSync(path.join(dir, name), 'utf8') }));
 }
+
+const e2eFiles = (): readonly Source[] => tsFiles(E2E);
+const factoryFiles = (): readonly Source[] => tsFiles(FACTORY);
 
 describe('E2E fixtures own their data (ADR-103)', () => {
   it('no spec builds an identity from the clock', () => {
@@ -52,10 +63,23 @@ describe('E2E fixtures own their data (ADR-103)', () => {
   });
 
   it('only the tenant factory inserts a business', () => {
-    const offenders = e2eFiles()
-      .filter(({ name }) => !OWNS_THE_ROWS.has(name))
-      .filter(({ source }) => /INSERT INTO businesses\b/.test(source))
-      .map(({ name }) => name);
+    const inserts = ({ source }: Source) => /INSERT INTO businesses\b/.test(source);
+    const offenders = [
+      ...e2eFiles()
+        .filter(inserts)
+        .map(({ name }) => `e2e/${name}`),
+      ...factoryFiles()
+        .filter(({ name }) => !OWNS_THE_ROWS.has(name))
+        .filter(inserts)
+        .map(({ name }) => `testing/tenant/${name}`),
+    ];
     assert.deepEqual(offenders, [], `mintTenant() from ./tenant in: ${offenders.join(', ')}`);
+  });
+
+  it('still finds the factory, so the rule above is not vacuous', () => {
+    const factory = factoryFiles().find(({ name }) => OWNS_THE_ROWS.has(name));
+    assert.ok(factory, `no ${[...OWNS_THE_ROWS].join(', ')} in ${FACTORY}`);
+    assert.match(factory.source, /INSERT INTO businesses\b/);
+    assert.match(factory.source, /export function stamp\(\)/);
   });
 });
