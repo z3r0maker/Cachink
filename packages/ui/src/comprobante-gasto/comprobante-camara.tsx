@@ -9,6 +9,7 @@ import { FotoCamaraSheet, type PistaCamara } from '../foto-producto/foto-camara-
 const PISTA: PistaCamara = {
   titulo: 'Que se lean el total y la fecha',
   cuerpo: 'Ponlo plano y con luz. Se guarda en blanco y negro.',
+  permiso: 'Para la foto del ticket, Xangarro necesita la cámara.',
 };
 
 export function ComprobanteCamara(p: {

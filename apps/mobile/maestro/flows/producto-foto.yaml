@@ -18,7 +18,10 @@ appId: mx.xangarro.mobile
 ---
 - addMedia:
     - '../fixtures/producto-foto.png'
-- launchApp
+# The camera is allowed up front: its buttons are pressed below.
+- launchApp:
+    permissions:
+      camera: allow
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - runFlow: shared/ensure-caja-open.yaml
@@ -38,25 +41,48 @@ appId: mx.xangarro.mobile
       id: 'producto-sin-foto-01JPRD00000000000000000007'
     direction: DOWN
     timeout: 5000
+# A tap opens the camera: every button pressed once. The shutter takes the
+# shot (the simulator's camera hands back a stand-in frame) and the result
+# sheet opens; «Otra foto» goes back to the camera, and its close keeps none.
+- tapOn:
+    id: 'producto-sin-foto-01JPRD00000000000000000007'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- assertVisible: '.*Ponlo sobre algo liso y con luz.*'
+- tapOn:
+    id: 'foto-linterna'
+- tapOn:
+    id: 'foto-linterna'
+- tapOn:
+    id: 'foto-disparar'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-listo-sheet'
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: 'foto-guardar'
+    timeout: 15000
+- tapOn:
+    id: 'foto-otra'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'foto-camara-cerrar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
 # Long press: the gallery (the boards' secondary path).
 - longPressOn:
     id: 'producto-sin-foto-01JPRD00000000000000000007'
-# The system picker: the newest photo is the fixture, and the grid lists it
-# first. Each cell reads «Photo, <date>, <time>» («Foto, …» in Spanish); the
-# pattern takes one cell only, never the «Photos» tab or the grid itself,
-# whose label strings every cell's together.
-- extendedWaitUntil:
-    visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
-    timeout: 10000
-- tapOn:
-    text: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
-    index: 0
-# iOS's picker may ask to confirm the pick («Agregar» / «Add»).
-- runFlow:
-    when:
-      visible: '^(Add|Agregar)$'
-    commands:
-      - tapOn: '^(Add|Agregar)$'
+# The system picker: the shared step taps the fixture on the iPhone by its
+# label and on the iPad by position (its picker has no cells in the tree).
+- runFlow: shared/elegir-foto-galeria.yaml
 # The lift and the encoder run; the sheet shows the result.
 - extendedWaitUntil:
     visible:
