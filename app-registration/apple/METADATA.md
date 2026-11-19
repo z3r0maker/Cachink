@@ -12,6 +12,9 @@ gets filled from.
 | Primary language | Spanish (Mexico)                                                |
 | Category         | Business                                                        |
 | Bundle ID        | `mx.xangarro.mobile` (explicit App ID under team `25T7H2DCB3`)  |
+| Apple ID         | `6836591900` (`ascAppId` in `apps/mobile/eas.json`)             |
+| Version          | `1.0.0`                                                         |
+| Availability     | Mexico only                                                     |
 | Price            | Free, no in-app purchases                                       |
 
 The paste-ready text for every listing field (name, subtitle, promotional
