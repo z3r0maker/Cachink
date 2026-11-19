@@ -15,3 +15,4 @@ export * from './balance/index.js';
 export * from './limites/index.js';
 export * from './servicios/index.js';
 export * from './impuestos/index.js';
+export * from './cierre/index.js';

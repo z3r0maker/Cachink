@@ -74,3 +74,11 @@ export {
   type ImpuestosDeps,
   type PagarDeclaracionInput,
 } from './impuestos.js';
+export {
+  cerrarMes,
+  confirmarSaldo,
+  pedirReabrir,
+  responderReapertura,
+  type CierreDeps,
+  type CierreRepository,
+} from './cierre.js';
