@@ -99,8 +99,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:54`
 - [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:55`
 - [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:56`
-- [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
-- [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
+- [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · Falta: todo. Sus boards (`CdMvCobro`, y `CdTbCobro`/`CdOpCobro` para tableta y caja) están dibujados y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:227`
+- [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · Falta: todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:302`
 
 ### Portal (17)
 
@@ -115,27 +115,27 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **P-44** El código de barras del producto: con lector y sin repetidos (ADR-150) — Bloqueada por: M-19 (`codigoCanonico`) · `04-portal.md:2003`
 - [ ] `Media` **P-45** Revisión de caja: el mismo código de barras (ADR-150) — Bloqueada por: P-44 (`codigo_canonico`) · `04-portal.md:2033`
 - [ ] `Media` **P-46** Quitar `ProximamenteState`, la deuda que el ADR-117 nombró — Bloqueada por: un board del canvas para el Diagnóstico con el modelo apagado · `04-portal.md:2054`
-- [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · `22-codi.md:211`
+- [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · Falta: todo, y la barrera de los boards vale la pena decirla en voz alta, porque la comparten K-13, K-15, K-23, K-24, K-30 y K-31: los **ocho** boards están dibujados desde el 2026-10-08 y siguen «waiting for the owner's approval» según el encabezado de `23-codi-design.md`. Seis semanas. No falta dibujar nada; falta una revisión del dueño, que es el desbloqueo más barato de todo el track. Después de eso, la mitad del track sólo espera a K-10 y K-11, que son código y no esperan a nadie más. · `22-codi.md:213`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-07, P-30 · Falta: todo, sin empezar, y su cláusula de aceptación ya no se puede cumplir tal como está escrita: «production renders «Próximamente»» es exactamente lo que el ADR-117 retiró. Cuando esto se construya, el estado de producción es la omisión, no un letrero. Arréglalo junto con P-46. · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · Falta: todo, y sus dos barreras siguen en pie: P-28 no tiene dónde guardar una conclusión por periodo y P-30 no tiene quién llame al modelo (`pedirProsa` no tiene un solo consumidor). Nada que replantear aquí hasta entonces. · `04-portal.md:1911`
 - [ ] `Baja` **P-40** Primer diagnóstico gratis a los 90 días — Bloqueada por: P-28 · Falta: todo. Depende de P-28 por la forma de la lectura corta, y el estado `diagFreeOffer` que la nota dice que el diseño ya dibuja no está en el código (los estados del Diagnóstico siguen siendo los del `ScreenState` compartido, que P-44 va a recortar). Cuando esto se construya, revisa que el estado nuevo no herede la compuerta retirada. · `04-portal.md:1930`
 - [ ] `Baja` **P-41** Funciones avanzadas de inventario — Bloqueada por: — · Falta: mucho menos de lo que este renglón de una línea hace pensar. Ya existen las entidades del dominio (`conversion.ts`, `conversion-receta.ts`, `auditoria-inventario.ts`, `auditoria-cadencia.ts`), el caso de uso `EjecutarConversionUseCase`, las tres banderas con su cascada de dependencias (`stock` → `conversionMateriaPrima` → `conversionAutomatica`, y `auditoriaInventario` → `stock`) y la copia de las tres en la pantalla Funciones. Lo que falta es la liberación y el camino de la caja: `PLATFORM_AVAILABLE` tiene las tres en `false`, que es la pinza de la v1, y nada en la caja ni en el teléfono las lee. · `04-portal.md:1946`
-- [ ] `Baja` **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · `22-codi.md:285`
+- [ ] `Baja` **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · Falta: todo, y está detrás de toda la fase 2. Su board (`CdActivo`, KD-02) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12), pero eso no es lo que la detiene: la detiene K-22. · `22-codi.md:294`
 
 ### Caja web (2)
 
-- [ ] `Media` **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · `22-codi.md:234`
+- [ ] `Media` **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · Falta: todo, y su camino ya está pavimentado por otra razón: `@xangarro/caja` (ADR-118) existe y el teléfono y la caja web ya comparten por ahí las derivaciones del cobro y del cierre, así que esto es la misma pantalla al tamaño de la caja, como dice, y no una segunda implementación. · `22-codi.md:238`
 - [!] `Baja` **P-37** Impresión de tickets desde la caja — Falta: el diferimiento sigue siendo correcto y su premisa se sostiene: no hay un solo «Imprimir» en la caja. Los tres que existen en el portal son otros (los códigos de recuperación de Seguridad y los estados financieros), así que nada regresa por esperar. · `04-portal.md:1879`
 
 ### Pagos y conciliación (18)
 
-- [ ] `Alta` **K-10** Dominio: CoDi vuelve como método — Bloqueada por: — · `22-codi.md:181`
-- [ ] `Alta` **K-11** Datos: la configuración CoDi del negocio — Bloqueada por: K-10 · `22-codi.md:197`
+- [ ] `Alta` **K-10** Dominio: CoDi vuelve como método — Bloqueada por: — · Falta: todo, sin empezar, y es la única del track que no espera a nadie. Contra el repo de hoy, con lo que ya existe y lo que no: `RETIRED_PAYMENT_METHODS` sigue siendo un `Set` con un solo miembro, `'QR/CoDi'`, y `OFFERED_PAYMENT_METHODS` lo filtra, así que el primer punto es quitar una línea. El enum del método sigue completo en los tres esquemas de Postgres (`ledger`, `caja`) y en SQLite, o sea que no hay migración de datos en juego, sólo de oferta. La «one label function» ya tiene medio nombre escrito en dos lugares que hoy se contradicen: el dominio declara `'QR · CoDi'` como forma de despliegue en `comprobante/datos.ts`, y nada la produce, porque `apps/web/src/server/comprobante/datos.ts:34` mapea `'QR/CoDi' → 'Transferencia'` (la decisión del ADR-117). Ese mapeo está en un solo lugar: es el que la función nueva reemplaza. `parseCodiQr` no existe, y `PlanCapabilities` no tiene `codi` ni `KILL_SWITCH_KEYS` lo lleva (hoy son tres: `asesorLlm`, `comprobanteShare`, `cobrosIntegrados`). Ojo con la aceptación: pide muestras reales de cuatro apps de banco, que el dueño junta «once the banks ship», así que la función se puede escribir ya y la aceptación no se puede cerrar todavía. · `22-codi.md:181`
+- [ ] `Alta` **K-11** Datos: la configuración CoDi del negocio — Bloqueada por: K-10 · Falta: todo. No existe `business_codi` en ninguno de los dos esquemas ni nada que se le parezca. Su barrera es real (K-10 define el método y la capacidad que esta tabla configura). · `22-codi.md:198`
 - [ ] `Media` **C-13** API de intenciones de pago — Disparador: que N-40 decida avanzar · `02-contracts.md:374`
 - [ ] `Media` **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? · `09-next-features.md:1045`
 - [ ] `Media` **N-41** Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago — Bloqueada por: N-75, ADR-109 · `09-next-features.md:1061`
 - [ ] `Media` **N-43** Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago — Bloqueada por: N-41 · `09-next-features.md:1069`
-- [ ] `Media` **K-15** Reportes: CoDi en su propia línea — Bloqueada por: K-10, board KD-06 · `22-codi.md:240`
+- [ ] `Media` **K-15** Reportes: CoDi en su propia línea — Bloqueada por: K-10, board KD-06 · Falta: todo. Un dato útil para cuando toque: `financials/flujo-efectivo.ts` ya cuenta `'QR/CoDi'` entre sus `CASH_METHODS`, así que el flujo de efectivo no cambia de aritmética, sólo de etiqueta y de línea. · `22-codi.md:245`
 - [ ] `Baja` **N-76** Conciliación de tarjeta — Bloqueada por: N-41, N-43 · `09-next-features.md:1082`
 - [ ] `Baja` **N-77** Paso del checklist e invitaciones — Bloqueada por: N-43 · `09-next-features.md:1095`
 - [ ] `Baja` **N-80** Puerto `PaymentProvider` — lado de escritura + Mercado Pago Point — Bloqueada por: N-41, N-40 (go de MP), C-13 · `09-next-features.md:1108`
@@ -144,9 +144,9 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **N-44** Cobrar en terminal (app y caja web) — Bloqueada por: N-42, N-79, N-45, N-24, N-53 · `09-next-features.md:1136`
 - [ ] `Baja` **N-78** Salud de la terminal en la caja — Bloqueada por: N-79 · `09-next-features.md:1147`
 - [ ] `Baja` **N-53** Adaptador de Clip — Bloqueada por: N-41, N-40 (go de Clip), N-75 (go de Clip) · `09-next-features.md:1229`
-- [ ] `Baja` **K-20** Spike: el sandbox de Banxico — Bloqueada por: K-01 (the technical documentation and sandbox) · `22-codi.md:250`
-- [ ] `Baja` **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · `22-codi.md:261`
-- [ ] `Baja` **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · `22-codi.md:271`
+- [ ] `Baja` **K-20** Spike: el sandbox de Banxico — Bloqueada por: K-01 (the technical documentation and sandbox) · Falta: todo, y correctamente: no hay `scripts/spikes/codi-banxico.ts` ni `docs/spikes/codi-banxico.md`, y no puede haberlos sin el sandbox, que llega con K-01 (el registro de MEXIA ante el SAT). · `22-codi.md:256`
+- [ ] `Baja` **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · Falta: todo. `payment_ref` no existe en ninguno de los dos esquemas ni en los contratos, así que la prueba de sync viejo → nuevo que pide su aceptación todavía no tiene nada que ejercitar. · `22-codi.md:268`
+- [ ] `Baja` **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · Falta: todo, y **le falta una barrera**: dice «the adapter behind ADR-066's `PaymentProvider` port», y ese puerto no existe en el repo — no hay un solo archivo que nombre `PaymentProvider`. Quien lo crea es N-41 («Puerto `PaymentProvider` — lado de lectura»), en `09-next-features.md`, que a su vez espera a N-75. Así que K-22 está bloqueada por K-21 **y** por N-41, y el campo sólo dice una. Agrégalo cuando se retome el track, o el primero que lo lea va a creer que el puerto ya está ahí. · `22-codi.md:279`
 
 ### Consola (backoffice) (29)
 
@@ -229,7 +229,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 - [ ] `Media` **L-05** Badges de tienda + páginas legales — Bloqueada por: X-05 (URLs reales de tienda) · Falta: `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. **Verificado el 2026-11-19 contra el repo**, las dos mitades siguen exactas. `docs/legal/terms.md` sigue ahí y sigue siendo el texto previo al pivote: cero menciones de «gracia» o «grace» en todo el archivo. Y el landing no tiene un solo badge ni enlace de tienda — lo único que lo toca es `/soporte`, la página a la que **apuntan** las fichas (X-05, ADR-136), no la que apunta a ellas. Una precisión del orden: el badge de Apple se puede poner en cuanto exista la URL de la ficha, y la de Google llega en diciembre según el orden de lanzamiento, así que esto aterriza en dos pasos, no en uno. · `06-landing.md:89`
 - [~] `Media` **N-58** Etapa 4 — compras + landing. — Falta: el bloqueo legal sigue en pie pero encogió, y su referencia se rompió. Lo que sigue cierto: los cuatro borradores del aviso siguen marcados «BORRADOR … No publicar», no hay variante para un visitante del sitio (siguen siendo A, B y C) y la revisión del abogado sigue abierta. Lo que cambió: de los nueve huecos ya sólo queda **uno** — `[PAÍS]`, una vez, en el renglón de Mercado Pago y Clip de `encargado-clausulas.md` — porque la razón social se constituyó el 2026-10-28 y los demás se llenaron. Y la «OQ Variante D» a la que esta nota manda **ya no existe**: el README del aviso lleva OQ-L1 … OQ-L10 y ninguna es ésa, así que la pregunta se quedó sin casa. Vale replantearla con lo que hoy dice el aviso simplificado: el pie del landing enlaza el aviso integral «sin texto simplificado», y la pregunta es si un visitante al que un pixel cuenta necesita el simplificado o le basta el integral. Eso lo contesta el abogado en la misma pasada, no una tarea de ingeniería. El gancho del checkout sigue sin ese bloqueo y puede salir solo, como dice arriba. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1 · `09-next-features.md:1267`
-- [ ] `Media` **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · `22-codi.md:319`
+- [ ] `Media` **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · Falta: todo. El landing no tiene ninguna sección de CoDi, y su board (`CdLanding`, KD-08) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12). De sus dos barreras, la que manda es K-02: las afirmaciones las fija la opinión legal, y esto es una página que promete algo. · `22-codi.md:330`
 
 ## Corporativo, legal y terceros (37)
 
@@ -270,7 +270,7 @@ Actúa el dueño fuera del repo: la razón social, abogado y contador, SAT/IMPI/
 
 - [~] `Alta` **K-01** Registro de MEXIA como tercero desarrollador CoDi — Bloqueada por: MEXIA incorporated and up to date with the SAT (acta, RFC, the company's e.firma, a positive 32-D) (ADR-125) · Falta: el dueño revisa el expediente. Investigación completa en `docs/plan/22-codi.md` K-01 (la carta y sus 8 anexos). Primero, confirmar que MEXIA está constituida y al corriente. Después, escribir a `codi@banxico.org.mx` (ADR-131) con cuatro preguntas: ¿se acepta en digital con e.firma?, ¿puede entregarlo un tercero?, ¿hay una guía más nueva que la de 2023?, ¿qué aceptan de una S.A.S. sin escritura ni poder notarial? No hay servicio de pago: la confirmación automática espera esta certificación. · `22-codi.md:84`
 - [ ] `Alta` **K-02** Opinión legal sobre CoDi — Bloqueada por: — · `22-codi.md:168`
-- [ ] `Baja` **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:301`
+- [ ] `Baja` **K-25** Pentest y certificación final — Bloqueada por: K-24 · `22-codi.md:312`
 
 ### `../launch/production-readiness.md` · 0. Lo único que todo lo demás espera (1)
 
@@ -377,7 +377,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 ### `22-codi.md` · 4. Tasks (1)
 
-- [ ] `Baja` **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:310`
+- [ ] `Baja` **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:321`
 
 ## Por archivo
 
