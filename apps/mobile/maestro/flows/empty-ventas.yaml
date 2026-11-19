@@ -20,4 +20,4 @@ appId: mx.xangarro.mobile
     visible:
       id: 'ventas-vacio'
     timeout: 8000
-- assertVisible: 'Sin ventas en este turno'
+- assertVisible: 'Todavía no hay ventas en este turno'

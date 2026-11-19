@@ -84,6 +84,7 @@ function Pantalla(props: { situacion: Situacion; telefono?: boolean }): ReactEle
             abierta={folio}
             onRetry={() => undefined}
             onIrACobrar={() => undefined}
+            onAbrirTurno={() => undefined}
             onCompartir={() => undefined}
             onCancelar={async () => null}
             testID="ventas-story"

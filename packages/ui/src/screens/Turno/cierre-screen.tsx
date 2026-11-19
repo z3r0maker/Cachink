@@ -32,6 +32,8 @@ export interface CierreScreenProps {
   readonly onRetry: () => void;
   /** From the hecho screen: back to Inicio (to open another turno). */
   readonly onSalir: () => void;
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
   /** The route's share for the WhatsApp corte. */
   readonly onCompartir: (texto: string) => void;
   readonly testID?: string;
@@ -132,7 +134,7 @@ export function CierreScreen(p: CierreScreenProps): ReactElement {
     // screen, not whichever branch the turno left it in.
     return (
       <View flex={1} testID={p.testID}>
-        <CierreEstados id={id} onRetry={p.onRetry} onIrAInicio={p.onSalir} />
+        <CierreEstados id={id} onRetry={p.onRetry} onAbrirTurno={p.onAbrirTurno} />
       </View>
     );
   }

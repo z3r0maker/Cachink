@@ -19,6 +19,7 @@ function montar(over: Partial<Parameters<typeof VentasMostradorScreen>[0]> = {})
     dueno: 'Pedro',
     onRetry: vi.fn(),
     onIrACobrar: vi.fn(),
+    onAbrirTurno: vi.fn(),
     onCompartir: vi.fn(),
     onCancelar: vi.fn(async () => null),
     ...over,
@@ -92,19 +93,24 @@ describe('los estados', () => {
     const onIrACobrar = vi.fn();
     montar({ state: 'empty', data: null, onIrACobrar });
     expect(screen.getByTestId('ventas-vacio')).toBeInTheDocument();
-    expect(screen.getByText('Sin ventas en este turno')).toBeInTheDocument();
-    expect(
-      screen.getByText(/aparece aquí con su folio, su método y la opción de cancelar/),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('ventas-ir-cobrar'));
+    expect(screen.getByText('Todavía no hay ventas en este turno')).toBeInTheDocument();
+    expect(screen.getByText('En cuanto cobres algo, aparece en esta lista.')).toBeInTheDocument();
+    expect(screen.getByTestId('ventas-vacio-cta')).toHaveTextContent('Cobrar la primera');
+    fireEvent.click(screen.getByTestId('ventas-vacio-cta'));
     expect(onIrACobrar).toHaveBeenCalled();
   });
 
-  it('sin-turno: says to open the turno first', () => {
-    montar({ state: 'sin-turno', data: null });
+  it('sin-turno: opens the turno right here, not by way of Cobrar', () => {
+    const onAbrirTurno = vi.fn();
+    const onIrACobrar = vi.fn();
+    montar({ state: 'sin-turno', data: null, onAbrirTurno, onIrACobrar });
     expect(screen.getByTestId('ventas-sin-turno')).toBeInTheDocument();
     expect(screen.getByText('Sin turno abierto')).toBeInTheDocument();
-    expect(screen.getByText(/Abre tu turno en Inicio/)).toBeInTheDocument();
+    expect(screen.getByText(/Abre tu turno y lo que cobres se va sumando/)).toBeInTheDocument();
+    expect(screen.getByTestId('ventas-sin-turno-cta')).toHaveTextContent('Abrir turno');
+    fireEvent.click(screen.getByTestId('ventas-sin-turno-cta'));
+    expect(onAbrirTurno).toHaveBeenCalledTimes(1);
+    expect(onIrACobrar).not.toHaveBeenCalled();
   });
 
   it('con-error: the board’s title and the retry', () => {

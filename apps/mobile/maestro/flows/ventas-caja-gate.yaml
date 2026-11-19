@@ -1,7 +1,7 @@
-# Verify the Caja gate blocks venta when caja is not open.
-# Precondition: at least one product must exist so the products gate
-# doesn't take priority. Product is created by inventario-producto.yaml
-# earlier in the regression chain.
+# The Caja gate: with no turno open, Cobrar says so and opens one right there
+# (MvTurnoCerrado); the catalogue then takes the gate's place, no other screen
+# in between.
+# Precondition: device activated against the mock, no turno open.
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
@@ -9,8 +9,6 @@ tags:
   - caja
   - gate
 ---
-# A fresh session has no turno: the Cobrar tab answers with the caja gate,
-# and its CTA goes where the turno opens (Mi turno).
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-operator.yaml
 - tapOn:
@@ -19,4 +17,16 @@ tags:
     visible:
       id: 'caja-gate-banner'
     timeout: 8000
-- assertVisible: 'Abre tu caja para empezar a vender'
+- assertVisible: 'Abre tu turno para cobrar'
+- assertNotVisible:
+    id: 'ventas-product-grid'
+- runFlow:
+    file: shared/abrir-turno-aqui.yaml
+    env:
+      CTA: 'caja-gate-banner-cta'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 10000
+- assertNotVisible:
+    id: 'caja-gate-banner'

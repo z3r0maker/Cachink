@@ -1,0 +1,41 @@
+# Turno cerrado (board MvTurnoCerrado): Cobrar, Ventas and Mi turno each open
+# the fondo sheet with one tap, over themselves, and «Ahorita no» leaves the
+# operator where they were. Opening from Mi turno stays on Mi turno, which now
+# says the cash that must be in the drawer.
+#
+# Precondition: device activated against the mock, no turno open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - caja
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+- tapOn: { id: 'tab-cobrar|rail-cobrar|sidebar-cobrar' }
+- extendedWaitUntil: { visible: { id: 'caja-gate-banner' }, timeout: 8000 }
+- tapOn: { id: 'caja-gate-banner-cta' }
+- extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+- tapOn: { id: 'abrir-ahorita-no' }
+- extendedWaitUntil: { visible: { id: 'caja-gate-banner' }, timeout: 5000 }
+
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
+- extendedWaitUntil: { visible: { id: 'ventas-sin-turno' }, timeout: 8000 }
+- tapOn: { id: 'ventas-sin-turno-cta' }
+- extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 5000 }
+- tapOn: { id: 'abrir-ahorita-no' }
+- extendedWaitUntil: { visible: { id: 'ventas-sin-turno' }, timeout: 5000 }
+
+# Mi turno keeps its rows under the card, and no screen sends anyone to Inicio.
+- tapOn: { id: 'tab-turno|rail-turno|sidebar-turno' }
+- extendedWaitUntil: { visible: { id: 'turno-sin-turno' }, timeout: 8000 }
+- assertVisible: '.*Sin turno abierto.*'
+- assertNotVisible: 'Ir a Inicio'
+- runFlow:
+    file: shared/abrir-turno-aqui.yaml
+    env:
+      CTA: 'turno-sin-turno-cta'
+- extendedWaitUntil: { visible: { id: 'turno-hero' }, timeout: 10000 }
+- assertVisible: '.*\$500\.00.*'

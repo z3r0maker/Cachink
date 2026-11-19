@@ -290,6 +290,8 @@ run_curated_suite() {
     mi-turno
     por-enviar
     cancelaciones-nav
+    turno-cerrado-abrir
+    cierre-sin-turno
     avisos-responder
     inventario-llego-merma
     esperado-tras-llegada

@@ -7,6 +7,7 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { Btn, ErrorState, Spinner } from '../../components/index';
 import { EmptyState } from '../../components/EmptyState/index';
+import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these. */
 export type MiTurnoEstado = 'happy' | 'loading' | 'empty' | 'error' | 'sin-turno';
@@ -14,24 +15,10 @@ export type MiTurnoEstado = 'happy' | 'loading' | 'empty' | 'error' | 'sin-turno
 export interface MiTurnoEstadosProps {
   readonly id: Exclude<MiTurnoEstado, 'happy'>;
   readonly onRetry: () => void;
-  /** The sin-turno and empty way forward. */
+  /** The empty state's way forward. */
   readonly onIrAInicio: () => void;
-}
-
-function SinTurno(p: { readonly onIrAInicio: () => void }): ReactElement {
-  return (
-    <EmptyState
-      icon="banknote"
-      title="Sin turno abierto"
-      description="Abre tu turno desde Inicio y aquí verás el efectivo que debe haber en la caja, tus ventas y tus gastos."
-      action={
-        <Btn variant="primary" onPress={p.onIrAInicio} testID="turno-ir-inicio">
-          Ir a Inicio
-        </Btn>
-      }
-      testID="turno-sin-turno"
-    />
-  );
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
 }
 
 function EnBlanco(p: { readonly onIrAInicio: () => void }): ReactElement {
@@ -70,7 +57,7 @@ export function MiTurnoEstados(p: MiTurnoEstadosProps): ReactElement {
     );
   }
   return p.id === 'sin-turno' ? (
-    <SinTurno onIrAInicio={p.onIrAInicio} />
+    <TurnoCerrado pantalla="turno" onAbrir={p.onAbrirTurno} testID="turno-sin-turno" />
   ) : (
     <EnBlanco onIrAInicio={p.onIrAInicio} />
   );

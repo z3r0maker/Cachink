@@ -5,8 +5,8 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { Btn, ErrorState, Spinner } from '../../components/index';
-import { EmptyState } from '../../components/EmptyState/index';
+import { ErrorState, Spinner } from '../../components/index';
+import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these. */
 export type CierreEstado = 'happy' | 'loading' | 'error' | 'sin-turno';
@@ -14,8 +14,8 @@ export type CierreEstado = 'happy' | 'loading' | 'error' | 'sin-turno';
 export interface CierreEstadosProps {
   readonly id: Exclude<CierreEstado, 'happy'>;
   readonly onRetry: () => void;
-  /** The sin-turno way forward. */
-  readonly onIrAInicio: () => void;
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
 }
 
 export function CierreEstados(p: CierreEstadosProps): ReactElement {
@@ -37,17 +37,5 @@ export function CierreEstados(p: CierreEstadosProps): ReactElement {
       />
     );
   }
-  return (
-    <EmptyState
-      icon="banknote"
-      title="No hay nada que cerrar"
-      description="Este turno no tiene movimientos. Abre tu turno desde Inicio para volver a capturar."
-      action={
-        <Btn variant="primary" onPress={p.onIrAInicio} testID="cierre-ir-inicio">
-          Ir a Inicio
-        </Btn>
-      }
-      testID="cierre-sin-turno"
-    />
-  );
+  return <TurnoCerrado pantalla="cierre" onAbrir={p.onAbrirTurno} testID="cierre-sin-turno" />;
 }

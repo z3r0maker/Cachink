@@ -36,6 +36,7 @@ const ACCIONES = {
   onCerrar: () => undefined,
   onRetry: () => undefined,
   onIrAInicio: () => undefined,
+  onAbrirTurno: () => undefined,
   onVerVentas: () => undefined,
   onRegistrar: () => undefined,
 };
@@ -71,6 +72,7 @@ function Cierre(p: {
         onCerrar={async () => null}
         onRetry={() => undefined}
         onSalir={() => undefined}
+        onAbrirTurno={() => undefined}
         onCompartir={() => undefined}
       />
     </Marco>

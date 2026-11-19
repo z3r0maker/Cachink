@@ -32,6 +32,7 @@ function montar(over: Record<string, unknown> = {}) {
   const onCerrar = vi.fn(async () => null);
   const onSalir = vi.fn();
   const onCompartir = vi.fn();
+  const onAbrirTurno = vi.fn();
   renderWithProviders(
     <CierreScreen
       state="happy"
@@ -40,11 +41,12 @@ function montar(over: Record<string, unknown> = {}) {
       onCerrar={onCerrar}
       onRetry={() => undefined}
       onSalir={onSalir}
+      onAbrirTurno={onAbrirTurno}
       onCompartir={onCompartir}
       {...over}
     />,
   );
-  return { onCerrar, onSalir, onCompartir };
+  return { onCerrar, onSalir, onCompartir, onAbrirTurno };
 }
 
 const tap = (id: string): void => {
@@ -203,11 +205,13 @@ describe('CierreScreen · the close write', () => {
     );
   });
 
-  it('sin-turno: nothing to close, Inicio is the way back', () => {
-    const { onSalir } = montar({ state: 'sin-turno', data: null });
+  it('sin-turno: nothing to close, and the turno opens from here', () => {
+    const { onSalir, onAbrirTurno } = montar({ state: 'sin-turno', data: null });
     expect(screen.getByTestId('cierre-sin-turno').textContent).toContain('No hay nada que cerrar');
-    tap('cierre-ir-inicio');
-    expect(onSalir).toHaveBeenCalled();
+    expect(screen.queryByText('Ir a Inicio')).toBeNull();
+    tap('cierre-sin-turno-cta');
+    expect(onAbrirTurno).toHaveBeenCalledTimes(1);
+    expect(onSalir).not.toHaveBeenCalled();
   });
 });
 

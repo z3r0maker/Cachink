@@ -21,6 +21,8 @@ import { textoUltimo, type UltimoCierre } from './ultimo-cierre';
 export interface AbrirTurnoFlowProps {
   readonly open: boolean;
   readonly onClose: () => void;
+  /** After the turno opened and the sheet closed; not on «Ahorita no». */
+  readonly onAbierto?: () => void;
 }
 
 /** The newest closed turno on this device, if any. */
@@ -54,7 +56,15 @@ function Abierta(props: AbrirTurnoFlowProps): ReactElement {
       error={abrir.error ? abrir.error.message || t('entrar.abrirTurno.error') : null}
       onAbrir={(fondo) => {
         if (userId === null) return;
-        abrir.mutate({ userId, montoAperturaCentavos: fondo }, { onSuccess: props.onClose });
+        abrir.mutate(
+          { userId, montoAperturaCentavos: fondo },
+          {
+            onSuccess: () => {
+              props.onClose();
+              props.onAbierto?.();
+            },
+          },
+        );
       }}
     />
   );

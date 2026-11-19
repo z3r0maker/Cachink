@@ -16,6 +16,8 @@ export function Tarjeta(p: {
   readonly role?: 'alert' | 'status';
   readonly label?: string;
   readonly busy?: boolean;
+  /** Takes the height it is given, its content centred. */
+  readonly llena?: boolean;
 }): ReactElement {
   return (
     <View
@@ -24,6 +26,8 @@ export function Tarjeta(p: {
       aria-label={p.label}
       aria-live={p.role ? 'polite' : undefined}
       aria-busy={p.busy}
+      flex={p.llena ? 1 : undefined}
+      justifyContent={p.llena ? 'center' : undefined}
       alignItems="center"
       gap={10}
       paddingHorizontal={20}

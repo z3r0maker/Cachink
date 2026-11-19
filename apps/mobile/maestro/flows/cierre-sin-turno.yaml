@@ -1,0 +1,28 @@
+# Cierre with no turno (board MvTurnoCerrado), reached by a stale link: there is
+# nothing to close, and «Abrir turno» opens the fondo sheet right there. A turno
+# that just opened has nothing to count, so the operator continues on Inicio.
+#
+# Precondition: device activated against the mock, no turno open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - caja
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+- openLink: 'xangarro://cierre'
+# iOS asks once before a custom scheme opens the app.
+- tapOn:
+    text: 'Open'
+    optional: true
+- extendedWaitUntil: { visible: { id: 'cierre-sin-turno' }, timeout: 10000 }
+- assertVisible: '.*No hay nada que cerrar.*'
+- assertNotVisible: 'Ir a Inicio'
+- runFlow:
+    file: shared/abrir-turno-aqui.yaml
+    env:
+      CTA: 'cierre-sin-turno-cta'
+- extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 10000 }
