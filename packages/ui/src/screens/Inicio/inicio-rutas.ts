@@ -19,10 +19,17 @@ const RUTAS: Readonly<Record<string, string>> = {
   fiado: '/fiado',
 };
 
+/**
+ * The phone route for a web href. Its query rides along (R8): the item a task
+ * points at («?recurrente=», «?reponer=») is what opens the sheet on arrival.
+ */
 export function rutaMovil(href: string): string | null {
   const sin = href.startsWith(OPERADOR_BASE) ? href.slice(OPERADOR_BASE.length) : href;
   const seccion = sin.replace(/^\/+/, '').split(/[/?#]/)[0] ?? '';
-  return RUTAS[seccion] ?? null;
+  const ruta = RUTAS[seccion];
+  if (ruta === undefined) return null;
+  const query = /\?[^#]*/.exec(sin)?.[0] ?? '';
+  return query.length > 1 ? `${ruta}${query}` : ruta;
 }
 
 /** The tiles under the KPIs (MvInicio «Atajos»); Fiado y abonos joined with M-08. */

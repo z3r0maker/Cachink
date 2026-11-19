@@ -167,7 +167,12 @@ describe('inicioMovil', () => {
     expect(d.tareas.map((t) => t.tipo)).toEqual(['gasto', 'reponer']);
     expect(d.tareas[0]?.titulo).toBe('Registrar gas de la semana');
     expect(d.tareas[1]?.detalle).toBe('Quedan 6 · el umbral es 15');
-    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual(['/gastos', '/productos']);
+    // The task's own item rides along, so the sheet opens on it (R8).
+    const [gasto, reponer] = d.tareas;
+    expect(d.tareas.map((t) => rutaMovil(t.href ?? ''))).toEqual([
+      `/gastos?recurrente=${encodeURIComponent(gasto?.id ?? '')}`,
+      `/productos?reponer=${encodeURIComponent(reponer?.id.replace('stock:', '') ?? '')}`,
+    ]);
   });
 
   it('lists the closes newest first, as the chips say them', () => {
@@ -289,7 +294,9 @@ describe('helpers', () => {
     expect(haceDias('2026-03-01', 30)).toBe('2026-01-30');
   });
   it('maps the web hrefs to the phone routes, or none', () => {
-    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos');
+    expect(rutaMovil('/operador/gastos?recurrente=R1')).toBe('/gastos?recurrente=R1');
+    expect(rutaMovil('/operador/inventario?reponer=P%201')).toBe('/productos?reponer=P%201');
+    expect(rutaMovil('/operador/caja#arriba')).toBe('/cobrar');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
     expect(rutaMovil('/operador/cierre')).toBe('/turno');
     expect(rutaMovil('/operador/cobranza/C1')).toBe('/fiado');

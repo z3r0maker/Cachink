@@ -8,10 +8,29 @@ import type { UserId } from '@xangarro/domain';
 import { siguienteBloqueo, useCajaLock } from '../../../src/app/caja-lock';
 import { useAppConfigStore } from '../../../src/app-config/use-app-config';
 import {
+  errorDeLoEnviado,
   faltaParaConectar,
   sanitizeCode,
   tokenDeQr,
 } from '../../../src/screens/Activation/activation-form';
+
+describe('errorDeLoEnviado (R7)', () => {
+  it('shows the refusal for what was sent', () => {
+    expect(errorDeLoEnviado('QR-A', 'QR-A', 'activation.expired')).toBe('activation.expired');
+  });
+  it('hides an old refusal once a different code is read', () => {
+    expect(errorDeLoEnviado('QR-A', 'QR-B', 'activation.expired')).toBeNull();
+  });
+  it('shows nothing before anything was sent', () => {
+    expect(errorDeLoEnviado(null, 'QR-A', 'activation.expired')).toBeNull();
+  });
+  it('shows nothing when there is no refusal', () => {
+    expect(errorDeLoEnviado('QR-A', 'QR-A', null)).toBeNull();
+  });
+  it('shows nothing once the camera is reading again', () => {
+    expect(errorDeLoEnviado('QR-A', null, 'activation.expired')).toBeNull();
+  });
+});
 import {
   centavosDe,
   etiquetaRapido,
