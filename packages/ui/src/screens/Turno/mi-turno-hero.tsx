@@ -71,7 +71,8 @@ function Parte(p: {
 function Cifra(p: { readonly data: TurnoData }): ReactElement {
   return (
     <View gap={6}>
-      <Eyebrow>Efectivo que debe haber en la caja</Eyebrow>
+      {/* On yellow the default muted label read 3.57:1; ink reads 12.35:1. */}
+      <Eyebrow color={colors.ink}>Efectivo que debe haber en la caja</Eyebrow>
       <MText size="total" weight="extraBold" fontVariant={['tabular-nums']} letterSpacing={-1.4}>
         {formatMoney(p.data.esperado)}
       </MText>
