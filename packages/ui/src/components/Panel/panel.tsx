@@ -23,10 +23,16 @@ export function Eyebrow(props: {
   /** `textMuted` on white; pass `gray600` on the gray200 page (§7). */
   readonly color?: string;
   readonly testID?: string;
+  /** When the eyebrow names its section («Total a cobrar»). */
+  readonly role?: 'heading';
+  /** What a screen reader says instead of the visible words. */
+  readonly ariaLabel?: string;
 }): ReactElement {
   return (
     <MText
       testID={props.testID}
+      role={props.role}
+      aria-label={props.ariaLabel}
       size="xs"
       weight="extraBold"
       letterSpacing={EYEBROW_TRACKING}

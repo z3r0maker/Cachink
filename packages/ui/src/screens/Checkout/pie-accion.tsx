@@ -18,7 +18,8 @@ export function PieAccion(p: {
 }): ReactElement {
   return (
     <View
-      padding={16}
+      paddingHorizontal={16}
+      paddingVertical={10}
       gap={8}
       borderTopWidth={borderWidths.quiet}
       borderTopColor={borderColors.quiet}

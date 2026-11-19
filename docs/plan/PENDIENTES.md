@@ -381,7 +381,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 51 abiertos (11 en curso, 0 bloqueados, 29 hechos)
 - `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 14 hechos)
-- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 13 hechos)
+- `19-movil-mostrador.md` — 2 abiertos (0 en curso, 0 bloqueados, 14 hechos)
 - `20-command-center.md` — 22 abiertos (5 en curso, 0 bloqueados, 10 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 24 hechos)
