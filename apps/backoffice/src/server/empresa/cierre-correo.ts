@@ -1,17 +1,9 @@
 import 'server-only';
 
-import { listFounders, type Founder } from '@xangarro/data-corp';
-import {
-  emailSenderFromEnv,
-  renderGenericNoticeEmail,
-  type GenericNoticeProps,
-} from '@xangarro/email';
+import type { Founder } from '@xangarro/data-corp';
+import type { GenericNoticeProps } from '@xangarro/email';
 
-import { DEFAULT_CONSOLE_URL } from '../alerts/webhook-notifier';
-import { db } from '../db/client';
-import { requireCorpDb } from '../db/corp';
-import { emailsDeStaff } from '../db/staff-emails';
-import { reportError } from '../observability/report';
+import { avisarAlOtroSocio } from './aviso-socio';
 import { hrefCierre } from './cierre-view';
 import { nombreMes } from './fechas';
 
@@ -45,33 +37,10 @@ export async function avisarReapertura(input: {
   readonly quien: Founder;
   readonly motivo: string;
 }): Promise<void> {
-  try {
-    const otros = (await listFounders(requireCorpDb())).filter((f) => f.id !== input.quien.id);
-    const emails = await emailsDeStaff(
-      db(),
-      otros.map((f) => f.staffMemberId),
-    );
-    const content = await renderGenericNoticeEmail(
-      correoReapertura(
-        input.periodo,
-        input.quien.nombre,
-        input.motivo,
-        process.env.ADMIN_BASE_URL ?? DEFAULT_CONSOLE_URL,
-      ),
-    );
-    const sender = emailSenderFromEnv(process.env);
-    for (const f of otros) {
-      const to = emails.get(f.staffMemberId);
-      if (to === undefined) continue;
-      const r = await sender.send({
-        to,
-        ...content,
-        tags: [{ name: 'kind', value: 'corp-reapertura' }],
-        idempotencyKey: `corp-reapertura:${input.periodo}:${f.id}:${Date.now()}`,
-      });
-      if (!r.ok) reportError(r.error, '[empresa] reapertura email failed');
-    }
-  } catch (error) {
-    reportError(error, '[empresa] reapertura email failed');
-  }
+  await avisarAlOtroSocio({
+    quien: input.quien,
+    correo: (url) => correoReapertura(input.periodo, input.quien.nombre, input.motivo, url),
+    kind: 'corp-reapertura',
+    clave: input.periodo,
+  });
 }

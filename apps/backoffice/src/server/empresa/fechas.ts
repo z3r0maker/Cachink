@@ -22,3 +22,8 @@ export const nombreMes = (mes: string) => formatMonth(mes).split(' ')[0] ?? mes;
 /** «30 de octubre»: a day named in a sentence. */
 export const fechaLarga = (iso: string) =>
   `${Number(iso.slice(8, 10))} de ${nombreMes(iso.slice(0, 7))}`;
+
+const DIA_MX = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City' });
+
+/** «12 nov»: the day an instant fell on in Mexico. */
+export const diaDe = (at: string) => fechaCorta(DIA_MX.format(new Date(at)));
