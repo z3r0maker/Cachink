@@ -50,6 +50,12 @@ export function useComprobanteCaptura(): ComprobanteCaptura {
       .finally(() => setProcesando(false));
   };
 
+  /** A file from the camera or the gallery: the camera closes, the draft encodes. */
+  const recibir = (archivo: string): void => {
+    setCamara(false);
+    procesar(archivo);
+  };
+
   return {
     disponible: puertos !== null,
     camara,
@@ -58,14 +64,11 @@ export function useComprobanteCaptura(): ComprobanteCaptura {
     foto,
     uri: foto === null ? null : `data:${EXPENSE_RECEIPT_MIME};base64,${foto.base64}`,
     abrir: () => setCamara(true),
-    galeria: () => {
-      setCamara(false);
-      void puertos?.elegirDeGaleria().then((archivo) => (archivo ? procesar(archivo) : undefined));
-    },
-    tomada: (archivo) => {
-      setCamara(false);
-      procesar(archivo);
-    },
+    // Over the camera when it is open (it closes after the pick: iOS will not
+    // present the picker while the camera's sheet is going away).
+    // Backing out of the picker leaves whatever was open.
+    galeria: () => void puertos?.elegirDeGaleria().then((a) => (a === null ? null : recibir(a))),
+    tomada: recibir,
     cerrar: () => setCamara(false),
     quitar: () => {
       setFoto(null);

@@ -179,6 +179,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 ### K-10 Dominio: CoDi vuelve como método [alta]
 
 - [ ] Status · **Blocked by:** —
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, sin empezar, y es la única del track que no espera a nadie. Contra el repo de hoy, con lo que ya existe y lo que no: `RETIRED_PAYMENT_METHODS` sigue siendo un `Set` con un solo miembro, `'QR/CoDi'`, y `OFFERED_PAYMENT_METHODS` lo filtra, así que el primer punto es quitar una línea. El enum del método sigue completo en los tres esquemas de Postgres (`ledger`, `caja`) y en SQLite, o sea que no hay migración de datos en juego, sólo de oferta. La «one label function» ya tiene medio nombre escrito en dos lugares que hoy se contradicen: el dominio declara `'QR · CoDi'` como forma de despliegue en `comprobante/datos.ts`, y nada la produce, porque `apps/web/src/server/comprobante/datos.ts:34` mapea `'QR/CoDi' → 'Transferencia'` (la decisión del ADR-117). Ese mapeo está en un solo lugar: es el que la función nueva reemplaza. `parseCodiQr` no existe, y `PlanCapabilities` no tiene `codi` ni `KILL_SWITCH_KEYS` lo lleva (hoy son tres: `asesorLlm`, `comprobanteShare`, `cobrosIntegrados`). Ojo con la aceptación: pide muestras reales de cuatro apps de banco, que el dueño junta «once the banks ship», así que la función se puede escribir ya y la aceptación no se puede cerrar todavía.
 - **What:**
   - drop `QR/CoDi` from `RETIRED_PAYMENT_METHODS`, and return it to `METODOS_CONFIGURABLES` only
     for a business with CoDi set up;
@@ -195,6 +196,7 @@ first (ADR-117). The brief to paste into Claude Design is `23-codi-design.md`.
 ### K-11 Datos: la configuración CoDi del negocio [alta]
 
 - [ ] Status · **Blocked by:** K-10
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. No existe `business_codi` en ninguno de los dos esquemas ni nada que se le parezca. Su barrera es real (K-10 define el método y la capacidad que esta tabla configura).
 - **What:**
   - `business_codi {business_id PK, modo puente|certificado, qr_payload, titular, clabe_last4,
 banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with its test;
@@ -209,6 +211,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 ### K-12 Portal: Negocio → Cobros → CoDi [media]
 
 - [ ] Status · **Blocked by:** K-11, boards KD-01 … KD-03
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y la barrera de los boards vale la pena decirla en voz alta, porque la comparten K-13, K-15, K-23, K-24, K-30 y K-31: los **ocho** boards están dibujados desde el 2026-10-08 y siguen «waiting for the owner's approval» según el encabezado de `23-codi-design.md`. Seis semanas. No falta dibujar nada; falta una revisión del dueño, que es el desbloqueo más barato de todo el track. Después de eso, la mitad del track sólo espera a K-10 y K-11, que son código y no esperan a nadie más.
 - **What:**
   - the setup (upload, scan or paste; decode; preview; titular and banco; activate; replace;
     deactivate);
@@ -222,6 +225,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 ### K-13 Teléfono: cobrar con CoDi (puente) [media]
 
 - [ ] Status · **Blocked by:** K-11, board KD-04
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Sus boards (`CdMvCobro`, y `CdTbCobro`/`CdOpCobro` para tableta y caja) están dibujados y sin aprobar desde el 2026-10-08 (ver K-12).
 - **What:**
   - CoDi as the fifth method in Cobrar, shown only once the shop has set it up;
   - the bridge screen (QR, the total in large digits, «Ya me llegó», «Cambiar método»);
@@ -232,12 +236,14 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 ### K-14 Caja web: cobrar con CoDi (puente) [media]
 
 - [ ] Status · **Blocked by:** K-13
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y su camino ya está pavimentado por otra razón: `@xangarro/caja` (ADR-118) existe y el teléfono y la caja web ya comparten por ahí las derivaciones del cobro y del cierre, así que esto es la misma pantalla al tamaño de la caja, como dice, y no una segunda implementación.
 - **What:** the same screen through `@xangarro/caja` (ADR-118), at the web caja's size.
 - **Acceptance:** a Playwright spec that charges with CoDi and sees the venta in Ventas y gastos.
 
 ### K-15 Reportes: CoDi en su propia línea [media]
 
 - [ ] Status · **Blocked by:** K-10, board KD-06
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Un dato útil para cuando toque: `financials/flujo-efectivo.ts` ya cuenta `'QR/CoDi'` entre sus `CASH_METHODS`, así que el flujo de efectivo no cambia de aritmética, sólo de etiqueta y de línea.
 - **What:** CoDi as its own line in cierre, Mi turno, flujo de efectivo, Ventas y gastos (a
   filter chip) and the sale detail, with how it was confirmed.
 - **Acceptance:** an integration test with ventas in each method, and a historical `QR/CoDi`
@@ -248,6 +254,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 ### K-20 Spike: el sandbox de Banxico [baja]
 
 - [ ] Status · **Blocked by:** K-01 (the technical documentation and sandbox)
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y correctamente: no hay `scripts/spikes/codi-banxico.ts` ni `docs/spikes/codi-banxico.md`, y no puede haberlos sin el sandbox, que llega con K-01 (el registro de MEXIA ante el SAT).
 - **What:**
   - a runnable `scripts/spikes/codi-banxico.ts` that does signing, QR cobro, the status query and
     the signed notification;
@@ -259,6 +266,7 @@ banco, activado_at, activado_por}` in `data-pg` with RLS, and a migration with i
 ### K-21 Contrato: la intención de cobro CoDi [baja]
 
 - [ ] Status · **Blocked by:** K-20
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. `payment_ref` no existe en ninguno de los dos esquemas ni en los contratos, así que la prueba de sync viejo → nuevo que pide su aceptación todavía no tiene nada que ejercitar.
 - **What:**
   - C-task: `POST /codi/cobros` (amount in centavos, concepto, idempotency key) → `{folio, qr,
 expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechazado`;
@@ -269,6 +277,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 ### K-22 Backend: adaptador CoDi [baja]
 
 - [ ] Status · **Blocked by:** K-21
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y **le falta una barrera**: dice «the adapter behind ADR-066's `PaymentProvider` port», y ese puerto no existe en el repo — no hay un solo archivo que nombre `PaymentProvider`. Quien lo crea es N-41 («Puerto `PaymentProvider` — lado de lectura»), en `09-next-features.md`, que a su vez espera a N-75. Así que K-22 está bloqueada por K-21 **y** por N-41, y el campo sólo dice una. Agrégalo cuando se retome el track, o el primero que lo lea va a creer que el puerto ya está ahí.
 - **What:**
   - the adapter behind ADR-066's `PaymentProvider` port (mode `codi-qr`);
   - MEXIA's certificates in the secrets store;
@@ -283,6 +292,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 ### K-23 Portal: pasar a confirmación automática [baja]
 
 - [ ] Status · **Blocked by:** K-22, board KD-02 (certified state)
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y está detrás de toda la fase 2. Su board (`CdActivo`, KD-02) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12), pero eso no es lo que la detiene: la detiene K-22.
 - **What:** the setup gains «Confirmación automática»: enrol the shop with Banxico through
   Xangarro, check the CLABE belongs to the business, and keep the bridge QR as the fallback.
 - **Acceptance:** a Playwright spec through the enrolment states against the mock.
@@ -290,6 +300,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 ### K-24 Teléfono y caja: QR en vivo [baja]
 
 - [ ] Status · **Blocked by:** K-22, board KD-05
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12).
 - **What:** the live flow (create cobro → QR with the amount → wait → «Pago recibido», then the
   venta with `payment_ref`), and its fallback states (sin internet, Banxico no responde, código
   vencido, rechazado), each dropping to the bridge.
@@ -317,6 +328,7 @@ expira_at}`, and `GET /codi/cobros/:folio` → `pendiente|pagado|expirado|rechaz
 ### K-31 Landing: «Cobra con CoDi» [media]
 
 - [ ] Status · **Blocked by:** K-02 (the claims), K-13
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. El landing no tiene ninguna sección de CoDi, y su board (`CdLanding`, KD-08) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12). De sus dos barreras, la que manda es K-02: las afirmaciones las fija la opinión legal, y esto es una página que promete algo.
 - **What:** a section on xangarro.mx (board KD-08): free CoDi cobros, no terminal, on every plan.
   It says «confirmación automática» only after K-24.
 - **Acceptance:** prerendered, and the claims match K-02's opinion.

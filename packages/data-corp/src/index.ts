@@ -25,7 +25,7 @@ export {
 } from './queries/movimientos.js';
 export { importesDeResultados } from './queries/resultados.js';
 export { lineasDeCuenta, sumasAl, type LineaDeCuenta } from './queries/balance.js';
-export { movimientosDeCaja, type MovimientoCajaDeEntrada } from './queries/caja.js';
+export { movimientosDeCaja, saldosDeCaja, type MovimientoCajaDeEntrada } from './queries/caja.js';
 export {
   createFundingCallRepository,
   listFundingCalls,
@@ -49,3 +49,20 @@ export {
   comisionesPorMes,
   type CargoDeServicio,
 } from './queries/servicios-costos.js';
+export {
+  createCierreRepository,
+  eventosDeCierre,
+  ultimoSaldoConfirmado,
+  type SaldoConfirmado,
+} from './queries/cierre.js';
+export {
+  recibidasDelMes,
+  saldoDeBancos,
+  type GastoSinFactura,
+  type RecibidasDelMes,
+} from './queries/cierre-fuentes.js';
+export {
+  createPresupuestoRepository,
+  listarPresupuestos,
+  listarSolicitudes,
+} from './queries/presupuesto.js';

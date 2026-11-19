@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { formatMoney } from '@xangarro/domain';
+import { formatMoney, formatMonth } from '@xangarro/domain';
 
 import { agregarCsd, fijarInscripcion, inscripcionPasada } from './empresa-agenda';
 import { capturarDeclaracion, esperadoDe, sembrarMesFiscal, subirPapel } from './empresa-impuestos';
@@ -71,6 +71,27 @@ import {
   trimestrePasado,
 } from './empresa-socios';
 import { signInAsStaff } from './helpers';
+import { E2E_HOSTING, esperadoDeCaja, hoyMx as hoyCaja, sembrarCargoProximo } from './empresa-caja';
+import {
+  E2E_CAMPANA,
+  esperadoDePresupuesto,
+  hoyMx as hoyPresupuesto,
+  otroSocioPide,
+  otroSocioRechazaYPrepara,
+  trimestreMx,
+} from './empresa-presupuesto';
+import {
+  agregarOtroSocio,
+  confirmarSaldo,
+  esperarPaso,
+  MES_CIERRE,
+  OTRO_SOCIO,
+  otroSocioRechazaYPide,
+  quitarOtroSocio,
+  registrarEnMesCerrado,
+  sembrarMesCierre,
+  subirEstados,
+} from './empresa-cierre';
 
 /**
  * «Empresa» (ADR-125). E-01: the area exists only for founders. A staff
@@ -414,18 +435,21 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Movimientos',
     'Facturas',
     'Servicios',
+    'Caja',
     'Agenda',
+    'Cierre del mes',
     'Expediente',
     'Corporativo',
   ]) {
     await expect(rail(page).getByRole('link', { name: pantalla, exact: true })).toHaveCount(0);
   }
 
-  // Cumplimiento: three tabs, each with the rows earlier tests left.
+  // Cumplimiento: four tabs, each with the rows earlier tests left.
   await abrirEntrada(page, 'Cumplimiento');
   await expect(page).toHaveURL(/\/empresa\/agenda$/);
   await expect(secciones(page, 'Cumplimiento').getByRole('link')).toHaveText([
     'Agenda',
+    'Cierre del mes',
     'Expediente',
     'Corporativo',
   ]);
@@ -452,6 +476,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Movimientos',
     'Facturas',
     'Servicios',
+    'Caja',
   ]);
   await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
 
@@ -462,6 +487,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Estado de resultados',
     'Balance',
     'Impuestos',
+    'Presupuesto',
   ]);
   await abrirPestana(page, 'Balance', /\/empresa\/balance$/, 'Resultados');
 
@@ -908,5 +934,203 @@ test('a founder reads the issued invoices, each with its CFDI and its cobro (E-1
     await expect(page.getByText(`Cobro · ${PAPELERIA}`)).toBeVisible();
   } finally {
     await limpiarPagos();
+  }
+});
+
+test('a founder closes a month, Registrar refuses it, and it reopens with both founders (E-14)', async ({
+  page,
+}) => {
+  const mes = MES_CIERRE;
+  const nombre = formatMonth(mes).split(' ')[0] ?? mes;
+  const Nombre = `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`;
+  const saldo = await sembrarMesCierre(mes);
+  await agregarOtroSocio();
+  try {
+    await signInAsStaff(page, SOCIO);
+    await page.goto('/empresa/agenda');
+    await abrirPestana(page, 'Cierre del mes', /\/empresa\/cierre$/);
+    await page.goto(`/empresa/cierre?mes=${mes}`);
+
+    // Real data: the month's two movements reach the steps; before the SAT
+    // registration there is no sale to invoice, nothing to import or declare.
+    await expect(
+      page.getByRole('heading', { name: `Faltan 2 pasos para cerrar ${nombre}` }),
+    ).toBeVisible();
+    for (const id of ['emitidas', 'ingresos', 'impuestos', 'agenda'])
+      await esperarPaso(page, id, 'no_aplica');
+    await esperarPaso(page, 'recibidas', 'hecho');
+    await expect(page.locator('[data-paso="recibidas"]')).toContainText('1 marcado no deducible');
+    await expect(page.locator('[data-paso="banco"]')).toContainText(formatMoney(saldo));
+    await expect(page.getByRole('button', { name: `Cerrar ${nombre}` })).toBeDisabled();
+
+    await confirmarSaldo(page, saldo);
+    await subirEstados(page);
+    await expect(
+      page.getByRole('heading', { name: `${Nombre} está listo para cerrarse` }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: `Cerrar ${nombre}` }).click();
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
+    await expect(page.getByRole('heading', { name: `${Nombre} está cerrado` })).toBeVisible();
+
+    // The ledger takes nothing dated in it, and Registrar says where to go.
+    await registrarEnMesCerrado(page, mes, Nombre);
+
+    // Asking to reopen: it stays closed, and the asker cannot approve.
+    await page.getByRole('link', { name: `Pedir reabrir ${nombre}` }).click();
+    const pedir = page.getByRole('dialog', { name: `Pedir reabrir ${nombre}` });
+    await pedir.getByLabel('¿Qué hay que corregir?').fill('E2E falta la comisión');
+    await pedir.getByRole('button', { name: `Pedir a ${OTRO_SOCIO}` }).click();
+    await expect(page.getByTestId('cierre-pedido')).toContainText(`Pediste reabrir ${nombre}`);
+    await expect(page.getByRole('link', { name: 'Revisar y aprobar' })).toHaveCount(0);
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
+
+    // The other founder rejects it and asks themselves; this founder approves.
+    await otroSocioRechazaYPide(mes, 'E2E faltaba otra comisión');
+    await page.reload();
+    await expect(page.getByTestId('cierre-pedido')).toContainText(
+      `${OTRO_SOCIO} pidió reabrir ${nombre}`,
+    );
+    await page.getByRole('link', { name: 'Revisar y aprobar' }).click();
+    await page
+      .getByRole('dialog', { name: `Reabrir ${nombre}` })
+      .getByRole('button', { name: 'Aprobar y reabrir' })
+      .click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Listo');
+    const historia = page.getByTestId('cierre-historial').filter({ hasText: Nombre });
+    await expect(historia).toContainText('reapertura rechazada');
+    await expect(historia).toContainText(`pidió ${OTRO_SOCIO}, aprobó Socia E2E`);
+  } finally {
+    await quitarOtroSocio();
+  }
+});
+
+test('a founder reads Caja: cash, spending, the scenarios and the next payments (E-23)', async ({
+  page,
+}) => {
+  const hoy = hoyCaja();
+  const dia = await sembrarCargoProximo(hoy);
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa/movimientos');
+  await abrirPestana(page, 'Caja', /\/empresa\/caja$/, 'Dinero');
+
+  // Real data: the ledger's cash and its three-month spending reach the tiles.
+  const a = await esperadoDeCaja(hoy);
+  await expect(page.getByTestId('caja-Caja')).toHaveText(formatMoney(a.caja));
+  await expect(page.getByTestId('caja-Gasto al mes')).toHaveText(formatMoney(a.sale));
+  await expect(page.getByRole('link', { name: /^Ver el cierre de / })).toBeVisible();
+
+  // The chart: real months, then six projected; a scenario redraws it.
+  await expect(page.locator('[data-testid="caja-barra"][data-real="no"]')).toHaveCount(6);
+  await expect(page.locator('[data-testid="caja-barra"][data-real="si"]').first()).toBeVisible();
+  await page.getByRole('link', { name: 'Si se detuvieran hoy' }).click();
+  await expect(page).toHaveURL(/\/empresa\/caja\?escenario=detener$/);
+  await expect(page.getByTestId('caja-titular')).toHaveText(/^Sin (ingresos|gastos)/);
+  await expect(page.getByRole('link', { name: 'Si se detuvieran hoy' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+
+  // The next 30 days carry the charge due in three days, at its usual amount.
+  const pago = page.getByTestId('caja-pago').filter({ hasText: E2E_HOSTING });
+  await expect(pago).toContainText('$1,234.50');
+  await expect(pago).toContainText(`${Number(dia.slice(8, 10))} `);
+  await expect(page.getByTestId('caja-flujo')).toContainText('Cambio en la operación');
+  await expect(page.getByTestId('caja-socios')).toContainText('Dinero de los socios');
+});
+
+test('a founder prepares a quarter’s budget, approves the other’s, and spends outside it (E-22)', async ({
+  page,
+}) => {
+  const hoy = hoyPresupuesto();
+  const t = trimestreMx();
+  const T = `${t.slice(6)}T ${t.slice(0, 4)}`;
+  await agregarOtroSocio();
+  try {
+    await signInAsStaff(page, SOCIO);
+    await page.goto('/empresa/resultados');
+    await abrirPestana(page, 'Presupuesto', /\/empresa\/presupuesto$/, 'Resultados');
+    await expect(
+      page.getByRole('heading', { name: `El ${T} aún no tiene presupuesto` }),
+    ).toBeVisible();
+
+    // This founder prepares it: it waits on the other one, who cannot be this one.
+    await page.getByRole('link', { name: `Preparar el presupuesto del ${T}` }).click();
+    const preparar = page.getByRole('dialog', { name: `Preparar el presupuesto del ${T}` });
+    for (const [campo, monto] of [
+      ['Costo del servicio al mes', '1000'],
+      ['Ventas y marketing al mes', '2000'],
+      ['Desarrollo al mes', '500'],
+      ['Administración al mes', '500'],
+    ] as const) {
+      await preparar.getByLabel(campo).fill(monto);
+    }
+    await expect(preparar.getByTestId('preparar-total')).toHaveText('Total al mes $4,000.00');
+    await preparar.getByRole('button', { name: `Enviar a ${OTRO_SOCIO}` }).click();
+    await expect(page.getByTestId('presupuesto-aviso')).toContainText(
+      `Enviaste el presupuesto del ${T} a ${OTRO_SOCIO}: $4,000.00 al mes`,
+    );
+    await expect(page.getByRole('link', { name: 'Revisar y aprobar' })).toHaveCount(0);
+
+    // The other founder rejects it and sends their own; this founder approves that one.
+    await otroSocioRechazaYPrepara(t);
+    await page.reload();
+    await expect(page.getByTestId('presupuesto-aviso')).toContainText(
+      `${OTRO_SOCIO} preparó el presupuesto del ${T}: $7,000.00 al mes`,
+    );
+    await page.getByRole('link', { name: 'Revisar y aprobar' }).click();
+    const aprobar = page.getByRole('dialog', { name: `Aprobar el presupuesto del ${T}` });
+    await expect(aprobar.getByTestId('aprobar-tabla')).toContainText('$7,000.00');
+    await aprobar.getByRole('button', { name: `Aprobar el presupuesto del ${T}` }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByTestId('presupuesto-aprobado')).toContainText(
+      `aprobado por ${OTRO_SOCIO} y Socia E2E`,
+    );
+
+    // Real data: the month's spending and the Límite as the ledger has them.
+    const e = await esperadoDePresupuesto(hoy);
+    const tiles = page.getByTestId('presupuesto-tile');
+    await expect(tiles.nth(0)).toContainText('$7,000.00');
+    await expect(tiles.nth(1)).toContainText(formatMoney(e.gastado));
+    await expect(page.getByTestId('presupuesto-linea')).toHaveCount(4);
+    await expect(page.getByTestId('presupuesto-limite')).toHaveText(
+      `${formatMoney(e.limite)} al mes por socio`,
+    );
+
+    // Inside the Límite it is approved on its own.
+    await page.getByRole('link', { name: 'Pedir un gasto fuera del presupuesto' }).click();
+    const pedir = page.getByRole('dialog', { name: 'Pedir un gasto fuera del presupuesto' });
+    await pedir.getByLabel('Para qué es').fill('E2E Canva');
+    await pedir.getByLabel('Monto, con IVA').fill('100');
+    await pedir.getByText('Ventas y marketing', { exact: true }).click();
+    await expect(pedir.getByTestId('pedir-aviso')).toContainText(
+      'Cabe en tu Límite: se aprueba solo',
+    );
+    await pedir.getByRole('button', { name: 'Registrar la solicitud' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    const canva = page.getByTestId('presupuesto-fuera').filter({ hasText: 'E2E Canva' });
+    await expect(canva).toContainText('Sin aprobación');
+
+    // The other founder's request above theirs: this founder approves part of it.
+    await otroSocioPide(hoy);
+    await page.reload();
+    const card = page.getByTestId('presupuesto-por-aprobar').filter({ hasText: E2E_CAMPANA });
+    await expect(card).toContainText('$6,000.00');
+    await card.getByRole('link', { name: 'Aprobar con otro monto' }).click();
+    const otro = page.getByRole('dialog', { name: 'Aprobar con otro monto' });
+    await otro.getByLabel('Monto que apruebas').fill('3000');
+    await otro.getByRole('button', { name: 'Aprobar $3,000.00' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    const campana = page.getByTestId('presupuesto-fuera').filter({ hasText: E2E_CAMPANA });
+    await expect(campana).toContainText('Aprobado');
+    await expect(campana).toContainText('pidió $6,000.00');
+    await expect(campana).toContainText('$3,000.00');
+
+    // The whole quarter.
+    await page.getByRole('link', { name: `${T} completo` }).click();
+    await expect(page).toHaveURL(/\/empresa\/presupuesto\?vista=trimestre$/);
+    await expect(tiles.nth(0)).toContainText('$21,000.00');
+  } finally {
+    await quitarOtroSocio();
   }
 });

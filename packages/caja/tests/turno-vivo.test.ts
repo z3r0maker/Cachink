@@ -115,6 +115,16 @@ describe('the open turno, live (runtime detail)', () => {
     assert.equal(tarjeta?.detalle, '1 Refresco · tarjeta');
     assert.equal(efectivo?.detalle, '2 Orden del día');
   });
+
+  it('a gasto with its receipt photo says so, and counts as a comprobante (ADR-149)', () => {
+    const sin = d.movimientos.find((m) => m.tipo === 'gasto');
+    assert.equal(sin?.detalle, 'Sin comprobante');
+    assert.equal(d.comprobantes, 0);
+    const con = detalleDelTurno({ ...FILAS, conFoto: new Set(['g1']) }, NOMBRES);
+    assert.equal(con.movimientos.find((m) => m.tipo === 'gasto')?.detalle, 'Con foto');
+    assert.equal(con.comprobantes, 1);
+    assert.equal(comoTurno({ ...VIVO, comprobantes: 1 }, 'Ana', 'Caja 1').comprobantes, 1);
+  });
 });
 
 const RENTA: RecurrentePara = {

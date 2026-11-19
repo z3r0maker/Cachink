@@ -24,6 +24,8 @@ export interface AppShellRouteWrapperProps {
   readonly backLabel?: string;
   readonly headerStatus?: HeaderStatus;
   readonly avisos?: AvisosSource;
+  /** A focused flow (Cierre): no tab bar on the phone. */
+  readonly sinBarra?: boolean;
   /** Platform-injected navigate callback (`router.push` on mobile). */
   readonly navigate: (path: string) => void;
   /**
@@ -46,6 +48,7 @@ export function AppShellRouteWrapper(props: AppShellRouteWrapperProps): ReactEle
       backLabel={props.backLabel}
       headerStatus={props.headerStatus}
       avisos={props.avisos}
+      sinBarra={props.sinBarra}
       onNavigate={props.replaceRoute ?? props.navigate}
       onLock={() => setUserId(null)}
     >

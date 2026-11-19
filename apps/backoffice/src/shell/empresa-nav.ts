@@ -11,11 +11,14 @@ export type EmpresaHref =
   | '/empresa/movimientos'
   | '/empresa/facturas'
   | '/empresa/servicios'
+  | '/empresa/caja'
   | '/empresa/resultados'
   | '/empresa/balance'
   | '/empresa/impuestos'
+  | '/empresa/presupuesto'
   | '/empresa/socios'
   | '/empresa/agenda'
+  | '/empresa/cierre'
   | '/empresa/expediente'
   | '/empresa/corporativo';
 
@@ -51,6 +54,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
       { label: 'Movimientos', href: '/empresa/movimientos', task: 'E-02' },
       { label: 'Facturas', href: '/empresa/facturas', task: 'E-11' },
       { label: 'Servicios', href: '/empresa/servicios', task: 'E-24' },
+      { label: 'Caja', href: '/empresa/caja', task: 'E-23' },
     ],
   },
   {
@@ -61,6 +65,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
       { label: 'Estado de resultados', href: '/empresa/resultados', task: 'E-12' },
       { label: 'Balance', href: '/empresa/balance', task: 'E-12' },
       { label: 'Impuestos', href: '/empresa/impuestos', task: 'E-13' },
+      { label: 'Presupuesto', href: '/empresa/presupuesto', task: 'E-22' },
     ],
   },
   {
@@ -75,6 +80,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
     summary: '¿Qué vence, cerramos el mes y dónde está cada papel?',
     tabs: [
       { label: 'Agenda', href: '/empresa/agenda', task: 'E-04' },
+      { label: 'Cierre del mes', href: '/empresa/cierre', task: 'E-14' },
       { label: 'Expediente', href: '/empresa/expediente', task: 'E-05' },
       { label: 'Corporativo', href: '/empresa/corporativo', task: 'E-06' },
     ],

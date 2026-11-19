@@ -189,6 +189,8 @@ Links to discussion, docs, prior art.
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
+| [151](#adr-151) | 2026-11-19 | A month closes in order once its seven steps are done, and reopens only when the other founder approves | Accepted |
+| [152](#adr-152) | 2026-11-19 | A quarter's budget counts once the other founder approves it, and spending outside it fits a Límite or waits on them | Accepted |
 | [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
 | [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 
@@ -10797,6 +10799,120 @@ with the same name, so a duplicate code under another name goes through.
 - The phone's typed entry keeps letters, since Code 128 and Code 39 carry them.
 - ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
   unused `MobileScannerHost` go.
+
+## ADR-151
+
+**Title:** A month closes in order once its seven steps are done, and reopens only when the other founder approves
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-14; boards CD-10 and CD-10b approved by the owner on 2026-11-19 (canvas round 16)
+
+**Context**
+
+E-14 adds Cumplimiento › Cierre del mes. The ledger has locked months since E-02: `corp.closed_periods`, a
+trigger that refuses any entry dated in one, and `assertPeriodOpen` in the use cases. Nothing wrote that table
+yet. The plan asks for a checklist before the lock, a locked month that refuses entries, and an unlock that
+needs both founders and is audited. ADR-125 §2 grants DELETE to no role, which a plain unlock would need.
+
+**Decision**
+
+1. **Seven steps, read off what the console already holds** (`@xangarro/domain/corp` `cierre/`): the month's
+   global CFDI and payments still to issue (Emitidas), every payment imported as a cobro, every expense with its
+   CFDI or marked non-deductible and no XML left to review (Facturas), the bank balance, «ISR e IVA» presented
+   (Impuestos), the rest of the month's Agenda, and the contador's statements in the Expediente. Only the bank
+   balance and the statements wait on a founder. A step the month does not need (no sales to the public, no
+   expenses, a month before the SAT registration) is «no aplica» and counts as done.
+2. **The bank balance is confirmed only when it equals Bancos** at the month's last day (`corp.bank_balances`),
+   and stops counting as soon as the ledger moves past it.
+3. **Either founder closes; months close in order.** An earlier month with movements that is still open
+   blocks the close («Cierra primero septiembre»). Closing writes the lock and a `cerrado` event in one
+   transaction. The month's tax payment, dated the next month, is not part of it.
+4. **Reopening takes both founders and is kept forever.** `corp.period_events` is append-only: `cerrado`,
+   `reapertura_pedida` with its reason, `reapertura_rechazada` and `reabierto`. Only the other founder answers a
+   request, and months reopen from the newest back. The other founder gets an email (the generic notice layout of
+   the morning email).
+5. **No role gets DELETE.** The lock is lifted only by `corp.reabrir_periodo`, a security-definer function the
+   console may execute, which records `reabierto` and removes the lock together. Two triggers hold the rule in the
+   database too: `reabierto` and `reapertura_rechazada` need a pending request by the other founder, and a lock is
+   removed only right after a `reabierto`, the owner's own deletes included.
+6. **Registrar names the closed month**, the open one to use and the way to its Cierre.
+
+**Alternatives considered**
+
+- *Grant the console DELETE on `closed_periods`.* Rejected: ADR-125 §2, and a bug could then lift a lock alone.
+- *Derive the lock from the events.* Rejected: the entries' trigger and the use cases already read
+  `closed_periods`; one table for the state and one for its history changes nothing that works.
+- *Let a founder close with steps pending.* Rejected: the steps are the close. One that does not apply already
+  says so.
+
+**Consequences**
+
+- The hosted database needs corp `0013` before the console's deploy. A month locked before it has no events;
+  it reopens the new way (a migration test holds this).
+- A correction to a closed month is a reopening, never an edit: the ledger stays immutable.
+- E-43 (the export to the contador) can take a closed month as final.
+
+## ADR-152
+
+**Title:** A quarter's budget counts once the other founder approves it, and spending outside it fits a Límite or waits on them
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-22; boards CD-15d and CD-15e approved by the owner on 2026-11-19 (canvas round 18, replacing round 4's CD-15)
+
+**Context**
+
+E-22 adds Resultados › Presupuesto. The plan asks for a quarterly budget by category, actual against it, each
+founder's Límite (the larger of a fixed amount and a share of the three-month average income) computed live,
+and spending over the Límite outside the budget approved by both founders. The ledger has four expense
+categories; bank fees post to `financiero`, which has none. There is one project, so a project filter would
+choose nothing (E-41 brings more).
+
+**Decision**
+
+1. **One budget per quarter, a monthly amount for each of the four categories** (`@xangarro/domain/corp`
+   `presupuesto/`, `corp.budgets` and `corp.budget_lines`). Bank fees stay out of it. No project filter until
+   E-41.
+2. **It counts once the other founder approves it.** One founder prepares it; the other approves or rejects
+   it (`corp.budget_answers`), and whoever prepared it cannot. Until then the quarter has no budget. A rejected
+   one is kept, and another may be prepared. A quarter holds one budget at a time: a trigger refuses a second
+   while one waits or once one was approved, under a lock per quarter.
+3. **«Gastado» is Resultados' own figure**: each category's lines on the day they were invoiced, reversals
+   netted. The month's projection adds the recurring peso charges still to come; the quarter's adds, for each
+   month not yet started, its recurring charges and the category's average of what was not recurring over the
+   three whole months before. A dollar charge is left out until it is paid, as in Caja.
+4. **The Límite is the larger of $1,000.00 and 10 % of the average income without IVA** of the three whole
+   months before this one, divided by three whatever those months held. Each founder has their own, monthly.
+5. **A request outside the budget that fits in what is left of its founder's Límite is approved on its own**
+   (`corp.spend_requests.automatica`). The repository decides it under an advisory lock per founder and month,
+   so two requests at once cannot both use the same room. Above it, the other founder approves it, approves a
+   smaller amount, or rejects it (`corp.spend_request_answers`); a trigger refuses the requester, an automatic
+   request and an amount above the one asked.
+6. **A request does not register the expense.** It is captured later in Registrar as usual; the two are not
+   linked in this first version, so an approved request does not count in «Gastado» until it is registered.
+7. **What waits on the other founder reaches them by email**: a budget to approve and a request above the
+   Límite, through the generic notice that Cierre's reopening already uses (`avisarAlOtroSocio`, now shared).
+8. **Append-only.** The console may insert and read these five tables, the agents may read them, and nobody may
+   delete.
+
+**Alternatives considered**
+
+- *A budget per month.* Rejected: the plan and the boards plan by quarter, and a monthly amount per category
+  is what the bars compare against in either view.
+- *Count an approved request as spent.* Rejected: it would be counted twice once the expense is registered,
+  and nothing links the two yet.
+- *Decide the automatic approval in a trigger.* Rejected: the Límite depends on the ledger's income, which the
+  domain already computes; the database only has to keep two requests from racing.
+- *Keep the bank fees under Administración.* Rejected: the ledger has no category for them, and moving them
+  would make Presupuesto disagree with Resultados.
+
+**Consequences**
+
+- The hosted database needs corp `0014` before the console's deploy. The migration only adds tables; a ledger
+  from before keeps every entry (a migration test holds this).
+- E-41 adds the project to the budget and the requests when a second project exists.
+- Linking a request to the expense that settles it, if the founders want it, is a later change.
 
 ## ADR-153
 

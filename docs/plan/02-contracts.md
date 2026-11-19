@@ -372,6 +372,7 @@ retryable) when the inbox could not be reached. A limit that cannot be checked r
 ### C-13 API de intenciones de pago [media]
 
 - [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** que N-40 decida avanzar · **Blocks:** N-80, N-42
+  - **Remaining (2026-11-19, verificado contra el repo):** todo: no hay esquemas, ni escenarios del mock, ni códigos en `ERROR_CATALOG` para nada de esto, y su disparador (que N-40 decida avanzar) no ha ocurrido. Su enmienda del 2026-09-25 sigue siendo correcta y conviene no perderla: Mercado Pago no tiene API de pago por QR en México, así que `mode` es `'terminal'` y nada más.
 - **Amended 2026-09-25:** Mercado Pago has no QR payment API in Mexico (`docs/spikes/payments-mercadopago.md`),
   so `mode` is `'terminal'` only; `'link'` returns only if ADR-109's D-2 keeps Clip payment links.
 - **Steps:** `POST /api/v1/payments/intents` `{ clientIntentId (ULID), amountCentavos, mode:
@@ -549,6 +550,7 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
       of view a killed feature and an unreleased one are the same thing. One field, one rule, no
       combining logic on two readers to get wrong. Additive at protocol 1: an older device ignores
       keys it does not know.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y la decisión del 2026-09-26 sigue sin aplicarse: `EntitlementSchema` dice `features: z.array(z.enum(FEATURE_FLAG_KEYS))`, no `PLATFORM_FLAG_KEYS`. El único lector de un interruptor en todo el repo es el portal (`server/comprobante/pausa.ts`, que lee `platform.comprobanteShare`); ni la caja ni el teléfono tienen por dónde. Dos cosas que conviene saber antes de ensanchar el campo. Una: hoy apagar `comprobanteShare` detiene la imagen que hace el servidor y **no** detiene al teléfono, porque desde M-07 el teléfono arma el comprobante en texto él mismo (`packages/ui/src/screens/Checkout/comprobante-acciones.ts`) y nunca pregunta. Eso es exactamente el hueco que esta tarea describe, ya con la superficie nombrada. Dos: `cobrosIntegrados` es a la vez interruptor (`KILL_SWITCH_KEYS`) y capacidad de plan (`capabilities.cobrosIntegrados` en el mismo entitlement). Ensanchar `features` lo pondría dos veces en la misma carga útil con dos significados, así que el dispositivo necesita saber cuál manda; decídelo en la tarea, no en el lector.
 - **What:** `entitlement.features` carries only `FEATURE_FLAG_KEYS`, so the platform's kill switches
   (`comprobanteShare`, `cobrosIntegrados`, and `asesorLlm` if the phone ever calls a model) never
   reach a device. The portal enforces them at its server boundaries (N-09), but the register's

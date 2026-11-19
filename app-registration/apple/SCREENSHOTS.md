@@ -1,8 +1,8 @@
 # Screenshots manifest — `screenshots/`
 
-Captured 2026-11-19 from the real app by one Maestro flow,
+Captured 2026-11-19 (retaken that afternoon with the receipt photo) from the real app by one Maestro flow,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
-against the contracts mock, on `main` plus the Avisos fix (PR #175). No
+against the contracts mock, on `main` with the gasto's receipt photo (PR #181). No
 compositing, no fixture screens: what the app shows for the demo taquería
 («Tacos La Esquina») is what the shots contain. Play's set comes from the same
 flow ([`../google-play/SCREENSHOTS.md`](../google-play/SCREENSHOTS.md)).
@@ -13,7 +13,9 @@ The caja is «Caja 1». The turno opens with a $2,000 fondo; all twenty
 products arrive, so nothing reads «Quedan 0» and the bell counts only the
 owner's two messages; then three sales: cash with change (2 Alambre, 2 Agua de
 horchata, 1 Café, $265.00 paid with $500), transfer ($150.00) and card
-($227.50); and one gasto, $180.00 of tortillas. Expected cash: $2,085.00.
+($227.50); and one gasto, $180.00 of tortillas, with its ticket's photo picked
+from the gallery (the simulator has no camera), so Gastos reads «Con foto» and
+Mi turno «1 comprobante». Expected cash: $2,085.00.
 
 The numbers are the store's order, not the capture's: Inicio first, because
 Don greets there; Vincular last, because a privacy notice should not open the
@@ -39,8 +41,9 @@ set.
 
 ## Known imperfections (for the next re-shoot)
 
-- **The gasto has no comprobante**: the phone's gasto form takes no photo
-  yet, so the row and the note say «Sin comprobante».
+- **Inicio greets «¡Buenas tardes, Toni!»** under a 9:41 status bar: the
+  greeting follows the simulator's real clock, and the set was taken after
+  noon.
 - **«Renta local» reads «Atrasado 49 días»**: the mock's recurrente is due on
   the 1st and nobody registers it in the story.
 - **The iPad** draws its window-resize arc in the bottom-right corner, and the

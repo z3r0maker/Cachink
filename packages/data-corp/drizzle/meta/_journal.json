@@ -92,6 +92,20 @@
       "when": 1795095583837,
       "tag": "0012_corp_impuestos",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795109360917,
+      "tag": "0013_corp_cierre",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795122711395,
+      "tag": "0014_corp_presupuesto",
+      "breakpoints": true
     }
   ]
 }

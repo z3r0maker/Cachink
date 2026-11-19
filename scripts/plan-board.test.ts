@@ -7,7 +7,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'vitest';
 import { type Item, parseTrack } from './plan-board-parse.js';
@@ -18,6 +18,11 @@ import { esBloqueante, ordenPrioridad, prioridadDe } from './plan-board-priorida
 import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
+
+/** Every track the board collects from, as repo-relative paths. */
+const PLAN_FILES = readdirSync(join(ROOT, 'docs/plan'))
+  .filter((f) => f.endsWith('.md') && f !== 'PENDIENTES.md' && f !== '00-README.md')
+  .map((f) => `docs/plan/${f}`);
 
 const FIXTURE = `# Track T
 
@@ -265,6 +270,28 @@ describe('the committed board', () => {
     const open = collect(ROOT).filter((i) => i.status !== 'done');
     assert.ok(open.length > 100);
     for (const i of open) assert.doesNotThrow(() => kindOf(i), `${i.id ?? i.title}`);
+  });
+
+  it('no deja un «Falta:» en un track — el tablero no lo lee y la nota se pierde', () => {
+    // El tablero imprime el campo `Remaining` con la etiqueta «Falta:», así
+    // que es natural escribir `**Falta:**` en el track; pero el parser sólo
+    // busca `Remaining`, y lo escrito así no llega a ninguna parte. Pasó tres
+    // veces en el track 20 (E-12, E-26, E-44) y nadie lo vio en siete semanas,
+    // porque el síntoma es una ausencia. El vocabulario de la fuente es
+    // `Remaining`; la traducción vive en el render.
+    const archivos = [...PLAN_FILES, 'docs/launch/production-readiness.md'];
+    const malos = archivos.flatMap((rel) =>
+      readFileSync(join(ROOT, rel), 'utf8')
+        .split('\n')
+        .flatMap((linea, i) =>
+          /\*\*Falta:?\*\*|\*\*Falta \(/u.test(linea) ? [`  ${rel}:${i + 1}`] : [],
+        ),
+    );
+    assert.deepEqual(
+      malos,
+      [],
+      `${malos.length} campo(s) «Falta» que el tablero no lee — usa **Remaining (fecha):**:\n${malos.join('\n')}`,
+    );
   });
 
   it('da un nivel a cada tarea abierta — sin él, el tablero no se lee por urgencia', () => {

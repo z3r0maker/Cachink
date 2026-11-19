@@ -9,7 +9,8 @@ import type { Movement } from '@xangarro/domain/corp';
 import { integrationSuite } from '@xangarro/testing/integration';
 
 import { createCorpDb } from '../src/client';
-import { movimientosDeCaja } from '../src/queries/caja';
+import { movimientosDeCaja, saldosDeCaja } from '../src/queries/caja';
+import { createCierreRepository, ultimoSaldoConfirmado } from '../src/queries/cierre';
 import { createCorpLedgerRepository } from '../src/queries/ledger';
 import { borrarLoDe } from './cleanup';
 
@@ -102,5 +103,26 @@ describe('corp cash read', () => {
       ],
       'the invoice on credit moved no cash, and the 25th is after the cut',
     );
+    // Caja (E-23) groups the month by kind; a reversal keeps its original's.
+    assert.deepEqual(
+      leidos.map((x) => x.kind),
+      ['cobro', 'payout', 'aportacion_capital', 'prestamo_socio', 'gasto', 'gasto'],
+    );
+    // The payout moved Stripe's money to the bank, less its fee.
+    // One snapshot for both reads: other suites post earlier-dated rows in parallel.
+    const [antes, luego] = await db.transaction(
+      async (tx) => [await saldosDeCaja(tx, `${m}-04`), await saldosDeCaja(tx, `${m}-20`)],
+      { isolationLevel: 'repeatable read' },
+    );
+    assert.equal(luego.stripe - antes.stripe, 0n);
+    assert.equal(luego.bancos - antes.bancos, 11_200_00n + 50_000_00n + 5_000_00n);
+  });
+
+  it('reads the latest balance confirmed in Cierre del mes', async () => {
+    const db = createCorpDb(url as string);
+    const cierre = createCierreRepository(db);
+    await cierre.confirmarSaldo('9998-11', 48_000_00n, AUTOR);
+    await cierre.confirmarSaldo('9998-12', 48_210_55n, AUTOR);
+    assert.deepEqual(await ultimoSaldoConfirmado(db), { periodo: '9998-12', saldo: 48_210_55n });
   });
 });

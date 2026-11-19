@@ -311,7 +311,7 @@ with property tests:
 ### E-02 Ledger core and Movimientos `[media]`
 
 - [~] Status · **Blocked by:** E-01
-  **Remaining (2026-10-14):** only the contador's código agrupador mapping, which waits on the
+  **Remaining (2026-11-19, verificado contra el repo):** sigue siendo sólo el mapeo de códigos agrupadores del contador, que espera al contador, y **E-01 ya está cerrada**, así que el «Blocked by» de arriba no detiene nada. Lo demás de esta tarea está en pie: `@xangarro/data-corp` existe con doce módulos de esquema y `/empresa/movimientos` es una ruta viva. **Nota del 2026-10-14:** only the contador's código agrupador mapping, which waits on the
   contador. The project filter moves to E-41: with one project the list has nothing to filter,
   and Registrar already asks Xangarro or Compartido.
   **Done 2026-10-14, recurring expenses and filters (boards CD-02, CD-03):**
@@ -644,7 +644,7 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Falta:** the sweat-cost memo,
+- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Remaining (2026-11-17):** the sweat-cost memo,
   which reads the Tablero's accepted value (E-20); the bridge's drivers («8 negocios nuevos…»),
   which need E-10's billing import.
   **Progress (2026-11-17, board CD-08, round 14 approved by the owner):**
@@ -736,7 +736,32 @@ with property tests:
 
 ### E-14 Cierre del mes `[media]`
 
-- [ ] Status · **Blocked by:** E-10, E-11, E-13
+- [x] Status · **Blocked by:** E-10, E-11, E-13 · **Done:** 2026-11-19 (boards CD-10, CD-10b, round 16 approved)
+- **Progress (2026-11-19, ADR-151):**
+  - `@xangarro/domain/corp` `cierre/`: `pasosDelCierre` reads the seven steps off their sources
+    (hecho, pendiente, or «no aplica» when the month does not need one, which counts as done);
+    `assertPuedeCerrar` (the month ended, months in order, no step pending),
+    `assertPuedePedirReabrir` (closed, newest first, one request at a time, a reason),
+    `assertPuedeResponder` (only the other founder) and `assertSaldoCoincide`.
+  - `cerrarMes`, `pedirReabrir`, `responderReapertura` and `confirmarSaldo` (application).
+  - data-corp 0013: `corp.period_events` (append-only history) and `corp.bank_balances`; no DELETE
+    for anyone (ADR-125 §2): the lock is lifted only by `corp.reabrir_periodo`, and two triggers
+    refuse a reopening without the other founder. A migration test reopens a lock from before.
+  - `/empresa/cierre`, Cumplimiento's second tab: the steps with their source and the link to fix
+    each, the bank panel (confirmed only when equal to Bancos, the statement optional into
+    Comprobantes), the statements' upload into Estados financieros, «Cerrar», «Pedir reabrir»,
+    the other founder's approval or rejection, and «Meses de <año>» with each month's history.
+    Every write is founder-gated with its `staff_audit_log` row; a request emails the other
+    founder.
+  - Registrar refuses a date in a closed month naming it, the open month to use, and «Ir al
+    cierre de <mes>».
+  - Playwright: a month long before the others, its steps from real rows, the bank refused then
+    confirmed, the statements uploaded, closed, Registrar refused, a request, a rejection and
+    the other founder's request approved, with the history line.
+  - **Deviations from the boards:** the reopening email is the morning email's generic notice
+    (no board of its own; added to the canvas as CD-10c for review). The approval panel shows
+    who closed the month but not its movement count. The requester sees «Pediste reabrir», a
+    variant the boards did not draw.
 - **What:** the checklist:
   1. global CFDI stamped;
   2. income imported;
@@ -829,6 +854,7 @@ with property tests:
 ### E-20 Tablero `[alta]`
 
 - [ ] Status · **Blocked by:** E-01, OD-4, E-26 (card attachments)
+  - **Remaining (2026-11-19, verificado contra el repo):** todo (no hay ruta `/empresa/tablero`), y de sus tres barreras **sólo dos siguen vivas**: E-01 ya está cerrada. Quedan OD-4 y E-26, y las dos son del dueño, no de código: OD-4 es la única pregunta de las cinco de §1 que sigue sin respuesta («settle the deliverable definition on the canvas», que cambia el board CD-13), y E-26 pide una cuenta de Azure. Dicho de frente: ésta es la única tarea `[alta]` abierta del track, y lo que la detiene es una definición y una cuenta. Nota de higiene: el encabezado de `21-command-center-design.md` todavía dice «Before sending: answer OD-1 … and OD-4», y OD-1 se respondió el 2026-10-30. Sólo falta OD-4.
 - **What:** §5's Tablero, quarter by quarter: both partners' value proposals, average and 2×
   flag, verifiable criterion, the 10-day objection clock, minimum-commitment check, incumplimiento
   detection with the notice to send, the «terminado» evidence attached (E-05), and the fast
@@ -840,6 +866,7 @@ with property tests:
 ### E-21 Acciones y cortes `[media]`
 
 - [ ] Status · **Blocked by:** E-20, E-03, E-06
+  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/acciones`. Detrás de E-20, que a su vez espera OD-4 y E-26.
 - **What:** the agreement module (vesting, forfeits, pool cuts with rounding and the zero-value
   rule, early freeze); `/empresa/acciones` with the live next-cut simulator; cut execution that
   creates the share transfer, its SE registration task and the beneficial-owner obligation.
@@ -848,7 +875,33 @@ with property tests:
 
 ### E-22 Presupuesto `[baja]`
 
-- [ ] Status · **Blocked by:** E-12
+- [x] Status · **Blocked by:** E-12 (its remaining memo and drivers feed neither) · **Done:** 2026-11-19 (boards CD-15d and CD-15e, round 18 approved; replace round 4's CD-15; ADR-152)
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `presupuesto/`: the quarter's budget in force and the one waiting
+    (`presupuestoVigente`, `presupuestoPendiente`, `trimestreAPreparar`), who may prepare and answer
+    one; the Límite (`limiteDeGasto`, `mesesDelLimite`: the larger of $1,000.00 and 10 % of the
+    average income without IVA of the three whole months before); the requests outside the budget
+    (approved on their own inside the Límite, otherwise answered by the other founder, for less if
+    they choose); and spent and projected by category (`gastadoPorCategoria`,
+    `recurrentesPendientes`, `promedioNoRecurrente`, `proyeccionPorCategoria`).
+  - application: `prepararPresupuesto`, `responderPresupuesto`, `pedirGasto`, `responderSolicitud`.
+  - data-corp `0014`: `budgets`, `budget_lines`, `budget_answers`, `spend_requests`,
+    `spend_request_answers`, append-only; triggers refuse a second budget for a quarter and a founder
+    answering their own; the automatic approval is decided under an advisory lock per founder and
+    month. Migration test old → new.
+  - `/empresa/presupuesto`, Resultados' fourth tab: the month or the whole quarter (`?vista=trimestre`),
+    the budget in force and who approved it, the four tiles, the bars by category (each opens its
+    expenses in Movimientos), each founder's Límite and what they used of it, and «Fuera del
+    presupuesto» with the requests waiting on this founder. The panels (`?panel=preparar`, `aprobar`,
+    `pedir`, `otro`) prepare the next quarter from the one in force, or this one from last quarter's
+    spending; approve or reject; ask for a spend with whether it fits said live; and approve another
+    amount. The other founder gets an email, through the notice Cierre's reopening uses.
+  - Playwright: preparing, the other founder's rejection and their own budget approved here; the tiles
+    and the Límite against the ledger; a request inside the Límite; the other founder's request
+    approved for less; the quarter view.
+  - **Deviations from the board:** the category cards use Registrar's descriptions (one place for
+    them). The founder who prepared a budget sees «Enviaste el presupuesto…» with no button, a state the
+    board did not draw.
 - **What:** a quarterly budget by category and project; actual vs budget; each partner's Límite
   (the larger of the fixed amount and a % of the 3-month average income), computed live; spending
   over the Límite outside the budget flagged for both partners' approval.
@@ -856,7 +909,27 @@ with property tests:
 
 ### E-23 Caja `[baja]`
 
-- [ ] Status · **Blocked by:** E-12
+- [x] Status · **Blocked by:** E-12 (its remaining memo and drivers feed neither) · **Done:** 2026-11-19 (board CD-15c, round 17 approved; replaces round 4's CD-15b)
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `caja/`: `cajaAlCierre` (cash at each month's last day, today for
+    the month running), `mesesDeHistoria`, `proyeccion` under the Resumen's three scenarios
+    (today's net, flat at break-even, spending alone; never below zero), `reservaMinima` (3 months
+    of the average spending), `devolverCabe`, and `flujoPorTipo` (a month's cash by kind, refunds
+    netted, partner money apart). The averages are `autonomia`'s, so Caja and the Resumen agree.
+  - data-corp: `movimientosDeCaja` carries each entry's kind (parsed); `saldosDeCaja` splits
+    Bancos and Stripe por depositar; `ultimoSaldoConfirmado` reads E-14's `bank_balances`.
+  - `/empresa/caja`, Dinero's fourth tab: five tiles (Caja, Bancos with the last balance
+    confirmed in Cierre del mes and its link, Stripe por depositar, Gasto al mes, Meses de caja or
+    «Sin consumo»), the warning below the reserve with the open funding call, cash at each
+    month's close with six projected months (`?escenario=`), last month's flow, the partners'
+    open call and loans, and the next 30 days (recurring charges not yet registered, the ISR e
+    IVA declared or estimated). The bars are SVG attributes: the console's CSP drops inline
+    styles.
+  - Playwright: the tiles against the ledger as the page reads it, the projected bars, a
+    scenario, and a recurring charge three days ahead in the next payments.
+  - **Deviations from the board:** a dollar charge stays in dollars in the next payments, and the
+    total reads «$… + USD …» (its peso amount is known only when paid). The bank balance is
+    confirmed only in Cierre del mes, so Caja has no «Confirmar saldo».
 - **What:** bank balances (manual in v1), 3-month burn, runway, equal funding calls (amount, due
   date, each partner's transfer) and partner loans outstanding.
 - **Acceptance:** runway shows «sin consumo» with non-positive burn; a funding call shows who has
@@ -867,6 +940,7 @@ with property tests:
 ### E-30 `corp-tools` and the Claude Desktop MCP server `[baja]`
 
 - [ ] Status · **Blocked by:** E-12, OD-3
+  - **Remaining (2026-11-19, verificado contra el repo):** todo (no existe `packages/corp-tools` ni nada que lo parezca), y **OD-3 ya está respondida** desde la tabla de §1: sí para los libros de MEXIA, nunca PII de inquilinos, y los ingresos salen sólo agregados por proyecto y periodo. Así que la barrera real es E-12 y nada más.
 - **What:** typed read tools (P&L by period and project, movements search, agenda, Tablero,
   partner accounts, limits) and a local stdio MCP server with the `xangarro_corp_agent` role.
   Read-only.
@@ -876,6 +950,7 @@ with property tests:
 ### E-31 Propuestas `[baja]`
 
 - [ ] Status · **Blocked by:** E-30
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-30, que ya sólo espera a E-12.
 - **What:** `corp.agent_proposals` (kind, payload, rationale, sources, status, decided_by);
   propose tools; `/empresa/propuestas` with approve or reject. Approval runs the same use case as
   a manual capture.
@@ -885,6 +960,7 @@ with property tests:
 ### E-32 The agents of §6 `[baja]`
 
 - [ ] Status · **Blocked by:** E-31
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-31.
 - **What:** prompts and tool sets for the clasificador, analista de cierre, asistente fiscal,
   secretario del Tablero (who also reads E-27's minutas) and «Pregúntale a MEXIA», as Claude Desktop project instructions first,
   with a small eval set per agent built from real months.
@@ -894,6 +970,7 @@ with property tests:
 ### E-33 Foundry runtime `[baja]`
 
 - [ ] Status · **Blocked by:** E-32
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-32: es el último eslabón de la rama de agentes.
 - **What:** console-side jobs (month-end narrative, deadline briefings) on the Anthropic
   TypeScript SDK Tool Runner with the Foundry client, `claude-opus-5-5`, results delivered as
   proposals or reports.
@@ -905,12 +982,14 @@ with property tests:
 ### E-40 KPIs SaaS `[baja]`
 
 - [ ] Status · **Blocked by:** N-63, E-12
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de N-63 (que espera datos reales) y de E-12.
 - **What:** MRR, ARR, churn, ARPA, CAC, LTV, LTV ÷ CAC, payback and infra ÷ MRR per project, on
   Resumen and as N-70 trigger rows.
 
 ### E-41 Second project and shared-cost allocation `[baja]`
 
 - [ ] Status · **Blocked by:** OD-2, a second project
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y **OD-2 ya está respondida** («by revenue share, with a manual override per cost»). La barrera real es la que la propia respuesta nombra: no hay un segundo proyecto. Aquí también aterriza el filtro por proyecto que E-02 le pasó.
 - **What:** project creation, the allocation rule for «compartido» costs, and the per-project and
   consolidated toggles everywhere, Movimientos' project filter included (moved from E-02;
   `listMovimientos` already takes a `projectId`).
@@ -918,18 +997,20 @@ with property tests:
 ### E-42 Banco y tipo de cambio `[baja]`
 
 - [ ] Status · **Blocked by:** E-23
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-23.
 - **What:** bank CSV import with matching (the conciliador agent proposes), and the Banxico FIX
   rate fetched daily.
 
 ### E-43 Exportación al contador `[media]`
 
 - [ ] Status · **Blocked by:** E-14
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-14. Nota: el mapeo de códigos agrupadores que necesita es el mismo que E-02 espera del contador, así que el contador desbloquea las dos.
 - **What:** a monthly export by código agrupador (balanza-style CSV), plus the month's XML and
   acuses in one archive.
 
 ### E-44 Salida a otro sistema `[baja]`
 
-- [~] Status · **Blocked by:** E-01 · **Falta:** the files' half, with E-26's Azure account: a
+- [~] Status · **Blocked by:** E-01 · **Remaining (2026-11-12):** the files' half, with E-26's Azure account: a
   runner of `moverDocumentos` between two accounts, rehearsed against a locked container.
 - **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
   container and check every file against `corp.documents.sha256` (E-26, ADR-135), swap the two
@@ -1033,6 +1114,7 @@ Changes to existing tasks:
 ### E-17 Resumen del trimestre `[baja]`
 
 - [ ] Status · **Blocked by:** E-12, E-20, E-04
+  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/trimestre`. Tres barreras vivas (E-12, E-20, E-04).
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the
@@ -1095,6 +1177,7 @@ Changes to existing tasks:
 ### E-25 Lectura de estados de cuenta con IA `[baja]`
 
 - [ ] Status · **Blocked by:** E-24, E-31, OD-3
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y **OD-3 ya está respondida** (ver E-30). Las barreras vivas son E-24 y E-31.
 - **What:** upload a card or bank statement (PDF or image). `claude-opus-5-5` reads it through
   `corp-tools` (vision) into lines: date, raw description, amount. The flow then:
   1. checks that the lines add up to the statement's total;
@@ -1169,7 +1252,7 @@ turns into proposed objectives and cards.
 
 ### E-26 Almacenamiento de documentos en Azure Blob `[media]`
 
-- [~] Status · **Blocked by:** E-05 · **Needed by:** E-20 · **Falta:** an Azure account. Run
+- [~] Status · **Blocked by:** E-05 · **Needed by:** E-20 · **Remaining (2026-10-30):** an Azure account. Run
   `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY`
   in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the
   script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted),
@@ -1202,6 +1285,7 @@ turns into proposed objectives and cards.
 ### E-27 Minutas `[baja]`
 
 - [ ] Status · **Blocked by:** E-05, E-31 · **Feeds:** E-20, E-32
+  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/minutas`. Detrás de E-31.
 - **What:**
   - an Expediente folder «Minutas» (a CHECK change in `corp.documents`, with its migration test);
   - a minuta is text or a transcript, with its date and attendees; audio is not kept;

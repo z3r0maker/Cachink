@@ -60,7 +60,13 @@ const TILE = {
 /** «Agregar foto» on a gasto without its receipt (M-18, board CgDespues). */
 function AgregarFoto(p: { readonly id: string; readonly onPress: () => void }): ReactElement {
   return (
-    <Btn variant="primary" size="sm" onPress={p.onPress} testID={`gasto-agregar-foto-${p.id}`}>
+    <Btn
+      variant="primary"
+      size="sm"
+      sentence
+      onPress={p.onPress}
+      testID={`gasto-agregar-foto-${p.id}`}
+    >
       Agregar foto
     </Btn>
   );
