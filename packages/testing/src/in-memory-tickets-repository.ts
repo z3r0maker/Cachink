@@ -102,7 +102,13 @@ export class InMemoryTicketsRepository implements TicketsRepository {
 
   async findCreditoByClient(clientId: ClientId): Promise<readonly Ticket[]> {
     return [...this.rows.values()]
-      .filter((r) => r.clienteId === clientId && r.metodo === 'Crédito' && r.deletedAt === null)
+      .filter(
+        (r) =>
+          r.clienteId === clientId &&
+          r.metodo === 'Crédito' &&
+          r.deletedAt === null &&
+          r.cancelledAt === null,
+      )
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
