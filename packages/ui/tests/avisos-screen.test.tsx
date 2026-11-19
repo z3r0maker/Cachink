@@ -96,6 +96,19 @@ describe('AvisosScreen · la respuesta', () => {
     );
   });
 
+  it('offline, the reply is saved and says it reaches Pedro with the signal (R6)', async () => {
+    const { vivo } = montar({ sinInternet: true });
+    tap('aviso-responder-corte');
+    escribir('responder-texto', 'Salió un vale de la caja y no lo registré.');
+    tap('responder-enviar');
+    await waitFor(() => expect(vivo.responder).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('avisos-toast')).toBeInTheDocument());
+    expect(screen.getByTestId('avisos-toast').textContent).toContain('Respuesta guardada');
+    expect(screen.getByTestId('avisos-toast').textContent).toContain(
+      'Tu respuesta se guardó. Le llega a Pedro cuando vuelva la señal.',
+    );
+  });
+
   it('a quick answer fills the box and sends in one more tap', async () => {
     const { vivo } = montar();
     tap('aviso-responder-corte');

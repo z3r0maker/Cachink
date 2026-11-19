@@ -7,11 +7,13 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { Aviso, AvisoGrupo, AvisosData, AvisosVivo } from '@xangarro/caja/avisos';
-import { toastRespuesta } from '@xangarro/caja/avisos';
+import { toastGuardada, toastRespuesta } from '@xangarro/caja/avisos';
 
 export interface AvisoToast {
   readonly texto: string;
   readonly ok: boolean;
+  /** Saved offline: it reaches the owner when the signal returns (R6). */
+  readonly guardada?: boolean;
 }
 
 export type AvisosTab = AvisoGrupo;
@@ -35,6 +37,18 @@ export interface AvisosVista {
 
 const FALLO = 'La respuesta no se guardó. Tu texto sigue aquí; inténtalo otra vez.';
 
+/** What the toast says: who has it, or, offline, that it waits for the signal. */
+function toastDe(
+  data: AvisosData | null,
+  aviso: Aviso | undefined,
+  sinInternet: boolean,
+): AvisoToast {
+  const dueno = data?.dueno ?? 'el dueño';
+  return sinInternet
+    ? { texto: toastGuardada(dueno), ok: true, guardada: true }
+    : { texto: toastRespuesta(dueno, aviso?.responder?.asunto ?? 'su mensaje'), ok: true };
+}
+
 /** The send: write through `vivo`, then show the reply and the toast. */
 async function enviar(
   vivo: AvisosVivo | undefined,
@@ -44,6 +58,7 @@ async function enviar(
   data: AvisosData | null,
   id: string,
   texto: string,
+  sinInternet: boolean,
 ): Promise<string | null> {
   const aviso = (data?.avisos ?? []).find((x) => x.id === id);
   try {
@@ -53,17 +68,31 @@ async function enviar(
   }
   set((all) => all.map((x) => (x.id === id ? { ...x, respuesta: texto, leido: true } : x)));
   cierra();
-  avisa({
-    texto: toastRespuesta(data?.dueno ?? 'el dueño', aviso?.responder?.asunto ?? 'su mensaje'),
-    ok: true,
-  });
+  avisa(toastDe(data, aviso, sinInternet));
   return null;
+}
+
+/** Marks read at once on the local copy, then hands the marks to `vivo`. */
+function useMarcar(
+  vivo: AvisosVivo | undefined,
+  setAvisos: (fn: (all: readonly Aviso[]) => readonly Aviso[]) => void,
+): (ids: readonly string[]) => void {
+  return useCallback(
+    (ids: readonly string[]): void => {
+      if (ids.length === 0) return;
+      const set = new Set(ids);
+      setAvisos((all) => all.map((x) => (set.has(x.id) ? { ...x, leido: true } : x)));
+      vivo?.marcar(ids);
+    },
+    [vivo, setAvisos],
+  );
 }
 
 export function useAvisosVista(
   data: AvisosData | null,
   tabInicial: AvisosTab,
   vivo: AvisosVivo | undefined,
+  sinInternet = false,
 ): AvisosVista {
   const [tab, setTab] = useState<AvisosTab>(tabInicial);
   const [avisos, setAvisos] = useState<readonly Aviso[]>(data?.avisos ?? []);
@@ -71,20 +100,11 @@ export function useAvisosVista(
   const [toast, setToast] = useState<AvisoToast | null>(null);
   useEffect(() => setAvisos(data?.avisos ?? []), [data]);
 
-  const marcar = useCallback(
-    (ids: readonly string[]): void => {
-      if (ids.length === 0) return;
-      const set = new Set(ids);
-      setAvisos((all) => all.map((x) => (set.has(x.id) ? { ...x, leido: true } : x)));
-      vivo?.marcar(ids);
-    },
-    [vivo],
-  );
-
+  const marcar = useMarcar(vivo, setAvisos);
   const responder = useCallback(
     (id: string, texto: string) =>
-      enviar(vivo, setAvisos, setToast, () => setRespondiendo(null), data, id, texto),
-    [vivo, data],
+      enviar(vivo, setAvisos, setToast, () => setRespondiendo(null), data, id, texto, sinInternet),
+    [vivo, data, sinInternet],
   );
 
   return {

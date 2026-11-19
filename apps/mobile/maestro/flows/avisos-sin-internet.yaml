@@ -1,0 +1,71 @@
+# Avisos without internet (RvAvisosSinInternet, R6): what the phone already
+# has keeps showing. The bell keeps its count, /avisos lists the owner's
+# messages under the shell's «Sin internet» strip, and a reply is saved for
+# the outbox: «Tu respuesta se guardó. Le llega al dueño cuando vuelva la
+# señal.» Before, the screen swapped every message for a sin-internet state.
+#
+# Precondition: device activated against the mock (its two mensajes for Toni,
+# contracts/mock/fixtures.ts mensajes()). Leaves the mock up again.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - avisos
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# The network goes; a sale's push finds no server, so the caja knows.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: down
+- runFlow: shared/create-venta.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'offline-banner'
+    timeout: 30000
+
+# The bell stays, with its count (useCampana reads the stored messages).
+- assertVisible:
+    id: 'avisos-bell'
+- tapOn:
+    id: 'avisos-bell'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-avisos'
+    timeout: 10000
+- assertVisible:
+    id: 'aviso-dueno-01JMSG00000000000000000001'
+- assertNotVisible:
+    id: 'avisos-sin-internet'
+
+# A reply offline: written to the outbox, said as saved, not sent.
+- tapOn:
+    id: 'aviso-responder-01JMSG00000000000000000001'
+- extendedWaitUntil:
+    visible:
+      id: 'responder-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'responder-rapida-Salió un vale'
+- tapOn:
+    id: 'responder-enviar'
+- extendedWaitUntil:
+    visible:
+      id: 'avisos-toast'
+    timeout: 8000
+- assertVisible: '.*Respuesta guardada.*'
+- assertVisible: '.*Le llega al dueño cuando vuelva la señal\..*'
+
+# The network returns.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: up

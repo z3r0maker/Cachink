@@ -4,7 +4,7 @@
  * makes a reply valid, and the toast that confirms it. Pure, tested here.
  */
 
-import { mayuscula } from '../comun/dueno';
+import { aDueno, mayuscula } from '../comun/dueno';
 
 /** A quick answer: the chip's short label and the sentence it writes. */
 export interface RespuestaRapida {
@@ -31,6 +31,14 @@ export function respuestaInvalida(texto: string): string | null {
   if (t.length < RESPUESTA_MIN) return 'Cuéntale un poco más para que le sirva.';
   if (t.length > RESPUESTA_MAX) return `Máximo ${RESPUESTA_MAX} caracteres.`;
   return null;
+}
+
+/**
+ * Offline the reply waits in the outbox (RvAvisosSinInternet, R6): «Tu
+ * respuesta se guardó. Le llega a Pedro cuando vuelva la señal.»
+ */
+export function toastGuardada(dueno: string): string {
+  return `Tu respuesta se guardó. Le llega ${aDueno(dueno)} cuando vuelva la señal.`;
 }
 
 /** «Pedro ya tiene tu respuesta sobre el corte del 13 de mayo.» */

@@ -6,6 +6,7 @@ import {
   RESPUESTAS_RAPIDAS,
   RESPUESTA_MAX,
   RESPUESTA_MIN,
+  toastGuardada,
   toastRespuesta,
 } from '../src/avisos/movil';
 
@@ -38,6 +39,19 @@ describe('la respuesta de un aviso, móvil', () => {
     assert.equal(
       toastRespuesta('el dueño', 'su mensaje'),
       'El dueño ya tiene tu respuesta sobre su mensaje.',
+    );
+  });
+});
+
+describe('la respuesta sin internet (R6)', () => {
+  it('says it is saved and reaches the owner when the signal returns', () => {
+    assert.equal(
+      toastGuardada('Pedro'),
+      'Tu respuesta se guardó. Le llega a Pedro cuando vuelva la señal.',
+    );
+    assert.equal(
+      toastGuardada('el dueño'),
+      'Tu respuesta se guardó. Le llega al dueño cuando vuelva la señal.',
     );
   });
 });

@@ -27,6 +27,8 @@ export interface AvisosScreenProps {
   readonly tab: AvisoGrupo;
   /** A linked caja: persists read marks and writes each reply. */
   readonly vivo?: AvisosVivo;
+  /** No network: what is stored still shows; a reply says it waits (R6). */
+  readonly sinInternet?: boolean;
   /** A cta's href (a web `/operador/...` path), mapped to a phone route. */
   readonly onAbrir: (href: string) => void;
   readonly onRetry: () => void;
@@ -122,7 +124,13 @@ function Capas(p: {
       ) : null}
       {p.v.toast ? (
         <Toast
-          title={p.v.toast.ok ? 'Respuesta enviada' : 'No se pudo enviar'}
+          title={
+            !p.v.toast.ok
+              ? 'No se pudo enviar'
+              : p.v.toast.guardada === true
+                ? 'Respuesta guardada'
+                : 'Respuesta enviada'
+          }
           body={p.v.toast.texto}
           tone={p.v.toast.ok ? 'ok' : 'warn'}
           floating
@@ -135,7 +143,7 @@ function Capas(p: {
 }
 
 function Feliz(p: AvisosScreenProps & { readonly data: AvisosData }): ReactElement {
-  const v = useAvisosVista(p.data, p.tab, p.vivo);
+  const v = useAvisosVista(p.data, p.tab, p.vivo, p.sinInternet === true);
   return (
     <View flex={1} testID={p.testID ?? 'avisos'}>
       <ScrollView
