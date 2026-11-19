@@ -32,7 +32,7 @@
 
 **The shape of the product (ADR-053).** The phone is **strictly the capture surface**: ventas, egresos, caja y turnos, stock and scanning — the work done on the shop floor, single-role, no Director build. **The web portal owns everything else**: identity, roles, business configuration, catalogue, dashboards, estados financieros and billing. The NIF and KPI calculations stay in `packages/domain` and both surfaces consume them — that shared domain is the single constraint that makes the split safe.
 
-Product scope per surface lives in `docs/plan/` (`04-portal.md`, `05-app.md`, `03-backend.md`, `10-operador-design-changes.md`, `17-consola-crecimiento.md`), not here.
+Product scope per surface lives in `docs/plan/` (`04-portal.md`, `19-movil-mostrador.md` y `docs/archive/05-app.md`, `03-backend.md`, `10-operador-design-changes.md`, `17-consola-crecimiento.md`), not here.
 
 ---
 

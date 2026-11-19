@@ -5,7 +5,7 @@
 # suite make an unattended nightly a bad first step). Failures are real
 # failures: no job-level continue-on-error, so a broken run goes red.
 # Known gap: the Expo dev-menu "Tools button" cannot be disabled from the
-# CLI on a fresh simulator (docs/plan/05-app.md A-16 harness fix).
+# CLI on a fresh simulator (docs/archive/05-app.md A-16 harness fix).
 
 name: maestro-e2e
 
