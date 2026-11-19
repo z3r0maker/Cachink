@@ -129,7 +129,16 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-02 `@xangarro/testing/tenant`: las fixtures de inquilino en un solo lugar [alta]
 
-- [ ] Status · **Blocks:** S-04
+- [x] Status · **Blocks:** S-04
+      Done: 2026-11-19 · `feat/synth-s02` · `packages/testing/src/tenant/`: `connection`, `mint`, `rows`, `codes`,
+      `wire`, `phone-rows`, `door` and `urls` (`db-url.ts` moved with them). The e2e files re-export by name, and
+      no spec's import changed. Kept in e2e, because they are typed on Playwright: `signIn`/`submitSignIn`, the
+      HTTP calls (`redeemCode`, `activatePhone`, `push`, `pull`, `activateOn`) and the door's browser walk. Synth
+      activates its phones through the app with a code from `mintCodeFor` (S-06), so it needs no HTTP push.
+      Fixed on the way: `mintTenant` and `addSale` are now transactional, so a refused value leaves no orphan owner
+      or ticket. `asTenant` without `DATABASE_URL` throws `FixtureDatabaseError`. Tests: 14 unit tests and 31
+      integration tests (`test:db`, in CI's `db` job). The fixture-identity rule now also scans
+      `packages/testing/src/tenant`, where only `mint.ts` may insert a business.
 - **What:**
   - Move the Playwright-free parts of `apps/web/e2e/tenant.ts`, `tenant-rows.ts`, `sync-phone.ts`,
     `tenant-phone.ts`, `phone-rows.ts` and `puerta-operador.ts` (mintTenant, stamp, addMember, row builders,

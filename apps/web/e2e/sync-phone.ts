@@ -1,54 +1,28 @@
 import type { APIRequestContext } from '@playwright/test';
 import { API_PATHS, deviceHeaders, encodeJson } from '@xangarro/contracts';
-import { newUlid } from '@xangarro/domain';
-import postgres from 'postgres';
-
-import { superDatabaseUrl } from './db-url';
+import { asTenant, BIZ, type Phone } from '@xangarro/testing/tenant';
 
 /**
  * A phone, for the sync spec: activated through the real `/activate`, then
  * pushing and pulling over HTTP exactly as the app will.
+ *
+ * The connections, the seed's ids and the wire rows live in
+ * `@xangarro/testing/tenant` since S-02 (ADR-153 §4) and are re-exported here,
+ * so no spec's import changed. What stays is typed on Playwright's request
+ * context: the HTTP calls.
  */
-export const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-export const TACO = '01HZ8XQN9GZJXV8AKQ5X0PTAC1';
-export const CNF = '01HZ8XQN9GZJXV8AKQ5X0CNF01';
-export const CNF_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0CNFP1';
-
-export async function asTenant<T>(biz: string, fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
-  const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
-  try {
-    await sql`SELECT set_config('xangarro.business_id', ${biz}, false)`;
-    return await fn(sql);
-  } finally {
-    await sql.end({ timeout: 5 });
-  }
-}
-
-/**
- * The owner connection, for fixture cleanup only: since data-pg 0036 the app
- * role cannot hard-delete (DB-RLS-01), and a spec that needs rows gone runs
- * that one statement here, never through `asTenant`.
- */
-export async function asOwner<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
-  // `superDatabaseUrl` rather than a fallback to `DATABASE_URL`: falling back
-  // to the app role turned a fixture cleanup into «permission denied for table
-  // sales» on a machine without the variable set, which is a confusing way to
-  // learn the role cannot DELETE.
-  const sql = postgres(superDatabaseUrl(), { max: 1, onnotice: () => undefined });
-  try {
-    return await fn(sql);
-  } finally {
-    await sql.end({ timeout: 5 });
-  }
-}
-
-export interface Phone {
-  readonly token: string;
-  readonly deviceId: string;
-  readonly cursor: number;
-  /** The business the code joined: Taquería's, or a minted tenant's (`tenant-phone.ts`). */
-  readonly businessId: string;
-}
+export {
+  asOwner,
+  asTenant,
+  BIZ,
+  client,
+  CNF,
+  CNF_PRODUCT,
+  sale,
+  TACO,
+  ticket,
+  type Phone,
+} from '@xangarro/testing/tenant';
 
 /** Frees Taquería's slots, then activates a phone with a code minted for it. */
 export async function activatePhone(request: APIRequestContext, code: string): Promise<Phone> {
@@ -100,64 +74,4 @@ export async function pull(request: APIRequestContext, phone: Phone, since: numb
   });
   if (r.status() !== 200) throw new Error(`pull ${r.status()}: ${await r.text()}`);
   return r.json();
-}
-
-const AT = '2026-09-17T18:30:00.000Z';
-const audit = (phone: Phone) => ({
-  businessId: phone.businessId,
-  deviceId: phone.deviceId,
-  createdByUserId: null,
-  createdAt: AT,
-  updatedAt: AT,
-  deletedAt: null,
-});
-
-/** Folios are unique per device (ADR-073); one counter per run keeps them apart. */
-let folio = 0;
-
-/** A ticket header (ADR-073): method, cash received and change live here now. */
-export function ticket(phone: Phone, over: Record<string, unknown> = {}) {
-  folio += 1;
-  const row = {
-    id: newUlid(),
-    folio,
-    fecha: '2026-09-17',
-    hora: '12:30',
-    concepto: 'Venta E2E',
-    metodo: 'Efectivo',
-    clienteId: null,
-    estadoPago: 'pagado',
-    efectivoRecibidoCentavos: 5000n,
-    cambioCentavos: 500n,
-    cajaTurnoId: null,
-    cancelMotivo: null,
-    cancelledByUserId: null,
-    cancelledAt: null,
-    ...audit(phone),
-    ...over,
-  };
-  return { table: 'tickets', rowId: row.id, op: 'insert', clientSeq: 1, row };
-}
-
-/** A sale line (ADR-073): it belongs to a ticket pushed in the same batch. */
-export function sale(phone: Phone, ticketId: string, over: Record<string, unknown> = {}) {
-  const id = newUlid();
-  const row = {
-    id,
-    ticketId,
-    fecha: '2026-09-17',
-    concepto: `Venta E2E ${id.slice(-4)}`,
-    categoria: 'Producto',
-    monto: 4500n,
-    productoId: TACO,
-    cantidad: 3,
-    ...audit(phone),
-    ...over,
-  };
-  return { table: 'sales', rowId: row.id, op: 'insert', clientSeq: 1, row };
-}
-
-export function client(phone: Phone, nombre: string) {
-  const row = { id: newUlid(), nombre, telefono: null, email: null, nota: null, ...audit(phone) };
-  return { table: 'clients', rowId: row.id, op: 'insert', clientSeq: 1, row };
 }
