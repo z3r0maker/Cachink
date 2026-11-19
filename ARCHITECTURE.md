@@ -187,6 +187,7 @@ Links to discussion, docs, prior art.
 | [146](#adr-146) | 2026-11-18 | An abono carries the turno whose drawer received it, as a gasto does | Accepted |
 | [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
+| [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10658,3 +10659,70 @@ shown negative liabilities on Balance. No screen created that movement yet.
 - The annual declaration (still its own obligation) will have to credit these provisional payments.
 - The withholdings are split into ISR and IVA by reading each movement's captured payload; the payable is one
   account.
+
+## ADR-149
+
+**Title:** The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — M-18; owner decisions of 2026-11-19 («Synced row», «Sheet + later», «Movimientos drawer»); boards CgHoja, CgDespues and CgPortal approved the same day (canvas page «Comprobante del gasto»), with a capture motion for every camera that takes a photo (board CgCaptura). Supersedes ADR-083 D3 (the per-business Storage bucket, never built); extends ADR-134.
+
+**Context**
+
+The phone's gasto form has never taken a photo: `foto` is always `null`, so every gasto reads «Sin comprobante»
+and the owner is told to ask for it. ADR-083 D3 planned a private Storage bucket and a second outbox; ADR-134 then
+ruled Storage out (N-19: its REST needs a JWT our auth never mints) and made the product photo a synced row,
+noting the same mechanism could carry receipts. The store screenshots (item 5 of the phone review) showed the gap,
+and the owner chose to build the photo before shipping that shot.
+
+A receipt is not a product tile. It must stay legible (the total, the date, the store), it is never shown to
+another phone, and nobody edits it. The owner reads it in the portal, where gastos already open in the Movimientos
+drawer.
+
+**Decision**
+
+1. **A new table, `expense_receipts`**: `id` (ULID), `businessId`, `gastoId` (the expense), `deviceId`, `mime`
+   (`image/webp` only), `bytes` (base64 text on the wire and in SQLite, `bytea` in Postgres), `width`, `height`,
+   audit columns. The domain entity is `ExpenseReceipt` in `packages/domain`; `expenses` gains no column.
+2. **Device → cloud only (`UP_TABLES`), insert only in practice.** The phone keeps its own rows; nothing is pulled
+   or put in a snapshot, because no other phone shows a receipt and the bytes would only weigh on every pull. The
+   newest row per gasto is the receipt (`createdAt`, then `id`); there is no tombstone and no replace once the
+   gasto is saved: before saving, «Cambiar» and «Quitar» act on the draft only, and after it a receipt can only be
+   added to a gasto that has none.
+3. **Legible and light: grayscale WebP, longest side 1024 px, at most 96 KB.** Skia draws the photo grayscale and
+   encodes quality 70 → 60 → 50 until it fits (`MAX_EXPENSE_RECEIPT_BYTES`); the row limit for the table is
+   160 KB (`maxPushRowBytes`). The push batch already fits its body to 2 MB (`fitBody`).
+4. **The phone takes it in two places**: the «Comprobante (opcional)» row of Registrar gasto, saved in the same
+   transaction as the gasto, and «Agregar foto» on a turno's gasto that has none. A gasto still saves without one.
+   The camera is `expo-camera` with a portrait guide; the gallery is the secondary path, as for products. No lift,
+   no crop UI.
+5. **The portal shows it in the gasto's drawer** (Ventas y gastos): a «Comprobante» section with the photo and
+   «Ver completa», or «Sin comprobante». The bytes come from `GET /api/gastos/[gastoId]/comprobante` inside
+   `withTenant`, with an ETag of the bytes' hash, as `GET /api/productos/[productId]/imagen` does.
+6. **A fifth motion, «Captura»** (El Mostrador §6): on the shutter, a white flash over the viewfinder (180 ms),
+   the shutter's press, a light haptic, and the photo shrinking into its place (280 ms): the receipt row, or the
+   product's square, where the product's «se levanta» follows. Reduce Motion drops the flash and the flight. It
+   applies to every camera that takes a photo; the barcode and QR scanners take none and do not change.
+7. **The web caja keeps its file-name-only control** until its own sync learns the table, as ADR-134 left product
+   photos; the browser's capture is out of scope here.
+
+**Alternatives considered**
+
+- *ADR-083 D3's bucket and a second outbox.* Rejected again for the reasons ADR-134 gives: a second auth path and a
+  store that does not exist. The bytes stay behind ADR-127's port; when tenant data moves to Azure Blob the
+  Postgres side becomes a reference and the wire does not change.
+- *A HYBRID table pulled by every phone, like `product_images`.* Rejected: a receipt is shown on no other device,
+  and pulling 96 KB rows would make every snapshot heavier for nothing.
+- *Colour, 512 px like products.* Rejected: a thermal ticket's total is unreadable at 512 px, and colour doubles
+  the weight without helping legibility.
+
+**Consequences**
+
+- Postgres gains `expense_receipts` with RLS by `business_id` and a migration; the hosted database needs it before
+  a phone build that sends receipts reaches TestFlight, or the push refuses the rows as an unknown table.
+- `MAX_PUSH_ROW_BYTES` gains its fourth per-table entry. A phone stays able to push while offline for days: each
+  receipt waits in the outbox like any row.
+- The portal's Movimientos drawer stops reading «Sin comprobante» from a phone's `foto` name; the Cortes drawer's
+  «gastos sin comprobante» counts gastos without a receipt row.
+- `docs/design/el-mostrador.md` §6 lists five motions.
