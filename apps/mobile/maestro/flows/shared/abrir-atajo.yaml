@@ -1,0 +1,40 @@
+# Reusable subflow: open one of Inicio's shortcut tiles (MvInicio «Atajos»):
+# gastos, fiado or inventario.
+#
+# On the phone the tiles sit under the KPIs. Once the turno has a sale the
+# hero grows, and they slide behind the tab bar: still on screen, so a plain
+# tapOn finds them, but their centre is under the bar and the tap opens the
+# «Cobrar» tab instead. So the tile is scrolled to the middle first.
+# The tablet has no tiles (inicio-screen drops them when wide), so it
+# deep-links the same screen (the navigate-to-settings pattern).
+#
+# Precondition: on Inicio with the hero settled. The caller asserts the screen.
+# Usage:
+#   - runFlow:
+#       file: shared/abrir-atajo.yaml
+#       env:
+#         ATAJO: fiado
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      visible:
+        id: 'tab-inicio'
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: 'inicio-atajo-${ATAJO}'
+          direction: DOWN
+          timeout: 10000
+          visibilityPercentage: 100
+          centerElement: true
+      - tapOn:
+          id: 'inicio-atajo-${ATAJO}'
+# The rail or the sidebar, never «tab bar gone»: that is also true for a beat
+# after the phone's tap navigates, and the deep link would then fight it.
+- runFlow:
+    when:
+      visible:
+        id: 'rail-inicio|sidebar-inicio'
+    commands:
+      - openLink: 'xangarro://${ATAJO}'

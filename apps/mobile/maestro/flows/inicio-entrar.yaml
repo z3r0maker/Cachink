@@ -40,8 +40,14 @@ appId: mx.xangarro.mobile
     id: 'inicio-turno-chip'
 
 # The shortcut tiles open Gastos.
-- tapOn:
-    id: 'inicio-atajo-gastos'
+- runFlow:
+    file: shared/abrir-atajo.yaml
+    env:
+      ATAJO: gastos
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
 - tapOn:
     id: 'tab-inicio|rail-inicio|sidebar-inicio'
 
