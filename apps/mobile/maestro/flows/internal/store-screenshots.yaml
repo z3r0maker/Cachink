@@ -19,6 +19,9 @@
 # card, and one gasto: $180.00 of tortillas.
 appId: mx.xangarro.mobile
 ---
+# The gasto's receipt comes from the gallery (store-gasto.yaml).
+- addMedia:
+    - '../../fixtures/producto-foto.png'
 - runScript:
     file: ../shared/mock-reset.js
     env:

@@ -30,6 +30,7 @@ export {
   useCancelacionLogsRepository,
   useMensajesOperadorRepository,
   useRespuestasOperadorRepository,
+  useExpenseReceiptsRepository,
   type Repositories,
   type RepositoryProviderProps,
 } from './repository-provider';

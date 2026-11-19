@@ -1,0 +1,53 @@
+# Reusable subflow: fill Registrar gasto's required fields — the concepto
+# typed in two pieces (the driver drops letters from a whole word) and
+# retyped until it reads ${CONCEPTO}, the monto ${MONTO}, and «Insumos».
+#
+# Usage:
+#   - runFlow:
+#       file: shared/llenar-gasto.yaml
+#       env: { CONCEPTO_A: 'Hie', CONCEPTO_B: 'lo', CONCEPTO: 'Hielo', MONTO: '80' }
+#
+# Precondition: the registrar-gasto-sheet is open.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'gasto-concepto'
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- inputText: ${CONCEPTO_A}
+- inputText: ${CONCEPTO_B}
+- waitForAnimationToEnd
+- repeat:
+    while:
+      notVisible:
+        id: 'gasto-concepto'
+        text: ${CONCEPTO}
+    times: 3
+    commands:
+      - tapOn:
+          id: 'gasto-concepto'
+      - eraseText: 20
+      - inputText: ${CONCEPTO_A}
+      - inputText: ${CONCEPTO_B}
+      - waitForAnimationToEnd
+- tapOn:
+    id: 'gasto-monto'
+- waitForAnimationToEnd
+- inputText: ${MONTO}
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-categoria-Insumos'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-categoria-Insumos'
+    timeout: 5000
+- tapOn:
+    id: 'gasto-categoria-Insumos'
+- waitForAnimationToEnd

@@ -26,6 +26,7 @@ const NOUN: Record<PushableTable, string> = {
   conversions: 'Conversión',
   auditorias_inventario: 'Auditoría de inventario',
   respuestas_operador: 'Respuesta a Pedro',
+  expense_receipts: 'Comprobante de gasto',
   products: 'Producto',
   clients: 'Cliente',
   product_images: 'Foto de producto',

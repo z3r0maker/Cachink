@@ -1,4 +1,4 @@
-import { bigint, jsonb, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { bigint, customType, jsonb, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * Shared column shapes for the cloud schema.
@@ -30,6 +30,24 @@ export const tenantStamps = {
 
 /** Money is integer centavos everywhere (CLAUDE.md §2.8) — never numeric/float. */
 export const centavos = (name: string) => bigint(name, { mode: 'bigint' });
+
+/**
+ * Base64 on the wire and in every row object, `bytea` on disk: a photo's row
+ * shape is identical to the device's (`tests/drift.test.ts` compares names;
+ * the codec needs no per-table case), while Postgres stores bytes. Product
+ * photos (ADR-134) and gasto receipts (ADR-149) both travel this way.
+ */
+export const base64Bytea = customType<{ data: string; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+  toDriver(value: string): Buffer {
+    return Buffer.from(value, 'base64');
+  },
+  fromDriver(value: Buffer): string {
+    return Buffer.from(value).toString('base64');
+  },
+});
 
 /** A calendar date the device wrote as `YYYY-MM-DD`; kept as text for parity. */
 export const isoDate = (name: string) => text(name);

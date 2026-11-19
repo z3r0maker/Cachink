@@ -1,0 +1,99 @@
+# El comprobante del gasto (M-18, ADR-149; boards CgHoja, CgDespues): the
+# receipt's photo goes with the gasto, or is added later. The simulator has
+# no camera, so both paths go the gallery way — the receipt row's long
+# press, and the receipt camera's gallery button — with the fixture photo
+# added to the library first. The encoder makes it gray at 1024 px; the
+# sheet shows «Foto lista», the row reads «Con foto», and «Agregar foto» on
+# a gasto without one ends in «Foto guardada».
+#
+# Precondition: device activated against the contracts mock; a turno is
+# opened here if none is.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - gastos
+  - regression
+---
+- addMedia:
+    - '../fixtures/producto-foto.png'
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+# 1 · With the gasto: Registrar gasto, the photo from the gallery, save.
+- runFlow: shared/abrir-registrar-gasto.yaml
+- runFlow:
+    file: shared/llenar-gasto.yaml
+    env:
+      CONCEPTO_A: 'Hie'
+      CONCEPTO_B: 'lo'
+      CONCEPTO: 'Hielo'
+      MONTO: '80'
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-comprobante-tomar'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- longPressOn:
+    id: 'gasto-comprobante-tomar'
+- runFlow: shared/elegir-foto-galeria.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-lista'
+    timeout: 15000
+- assertVisible: '.*Foto lista.*'
+- tapOn:
+    id: 'gasto-guardar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'registrar-gasto-sheet'
+    timeout: 8000
+- extendedWaitUntil:
+    visible: '.*Con foto.*'
+    timeout: 10000
+
+# 2 · Later: a gasto saved without one shows «Agregar foto».
+- tapOn:
+    id: 'gastos-abrir-registrar'
+- extendedWaitUntil:
+    visible:
+      id: 'registrar-gasto-sheet'
+    timeout: 5000
+- runFlow:
+    file: shared/llenar-gasto.yaml
+    env:
+      CONCEPTO_A: 'Ga'
+      CONCEPTO_B: 's'
+      CONCEPTO: 'Gas'
+      MONTO: '120'
+- tapOn:
+    id: 'gasto-guardar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'registrar-gasto-sheet'
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-agregar-foto-.*'
+    timeout: 10000
+- tapOn:
+    id: 'gasto-agregar-foto-.*'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-camara-sheet'
+    timeout: 5000
+- assertVisible: '.*Que se lean el total y la fecha.*'
+- tapOn:
+    id: 'foto-camara-galeria'
+- runFlow: shared/elegir-foto-galeria.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-foto-toast'
+    timeout: 15000
+- assertVisible: '.*Foto guardada.*'
+- assertNotVisible:
+    id: 'gasto-agregar-foto-.*'

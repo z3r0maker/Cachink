@@ -23,6 +23,7 @@ export * from './metas.js';
 export * from './logos.js';
 export * from './opening-balances.js';
 export * from './product-images.js';
+export * from './expense-receipts.js';
 export * from './estados-facts.js';
 export * from './device-last-seen.js';
 export * from './assisted-imports.js';

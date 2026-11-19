@@ -1,6 +1,8 @@
 # Store-screenshot helper: one gasto in the turno, so Gastos shows a real row
 # and its figures instead of zeros, and the expected cash on Inicio and Mi
-# turno already takes it out: «Tortillas», $180.00, Insumos.
+# turno already takes it out: «Tortillas», $180.00, Insumos, with the
+# ticket's photo (M-18) so the row reads «Con foto». The simulator has no
+# camera: the photo comes from the gallery (the fixture the main flow adds).
 #
 # Precondition: turno open, any tab. Leaves Gastos on screen.
 appId: mx.xangarro.mobile
@@ -58,6 +60,22 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-categoria-Insumos'
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-comprobante-tomar'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- longPressOn:
+    id: 'gasto-comprobante-tomar'
+- runFlow: ../shared/elegir-foto-galeria.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-lista'
+    timeout: 15000
 # A dropped digit would save the wrong amount: the footer says what it saves.
 - assertVisible:
     id: 'gasto-guardar'

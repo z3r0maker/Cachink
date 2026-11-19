@@ -63,7 +63,15 @@ export const RETENTION_RULES: readonly RetentionRule[] = [
       ['conversions', 'movimiento_entrada_id'],
     ],
   },
-  { table: 'expenses', guards: [['caja_turnos', 'egreso_auto_id']] },
+  // A receipt goes before its gasto, and a gasto stays while its receipt does (ADR-149).
+  { table: 'expense_receipts' },
+  {
+    table: 'expenses',
+    guards: [
+      ['caja_turnos', 'egreso_auto_id'],
+      ['expense_receipts', 'gasto_id'],
+    ],
+  },
   { table: 'day_closes' },
   { table: 'entregas_credito' },
   { table: 'auditorias_inventario' },

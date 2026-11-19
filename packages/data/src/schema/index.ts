@@ -25,6 +25,7 @@ export * from './sales';
 export * from './expenses';
 export * from './products';
 export * from './product-images';
+export * from './expense-receipts';
 export * from './inventory-movements';
 export * from './employees';
 export * from './clients';

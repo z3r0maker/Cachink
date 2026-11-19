@@ -122,6 +122,8 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
 | `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)          |
+| `shared/llenar-gasto.yaml`         | Fills Registrar gasto: the concepto in two pieces, retyped until it reads right, the monto, Insumos |
+| `shared/elegir-foto-galeria.yaml`  | Picks the newest photo in the iOS picker (the fixture `addMedia` added) (M-18)                      |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
 | `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                               |
 | `shared/mock-reset.js`             | `POST /__mock/reset`                                                                                |
