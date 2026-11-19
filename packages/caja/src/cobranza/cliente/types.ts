@@ -41,8 +41,8 @@ export interface CuentaCliente {
   readonly tint: string;
   /** «enero 2026». */
   readonly desde: string;
-  /** Set by the owner. */
-  readonly limite: Money;
+  /** Set by the owner; null while none is set (M4): nothing is then enforced or said. */
+  readonly limite: Money | null;
   readonly plazo: string;
   readonly atrasado: boolean;
   readonly ventas: readonly VentaCuenta[];

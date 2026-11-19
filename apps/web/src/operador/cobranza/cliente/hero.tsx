@@ -65,6 +65,26 @@ export function Indicadores(p: {
   return <KpiRow min={210} valueSize={26} items={indicadores(p.c, p.e, p.dueno)} />;
 }
 
+/** «Límite de fiado» and «Disponible», only when the owner set a limit (M4). */
+function limite(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiItem[] {
+  const libreHoy = libre(c, e);
+  if (c.limite === null || libreHoy === null) return [];
+  return [
+    {
+      label: 'Límite de fiado',
+      value: formatMoney(c.limite),
+      color: e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black,
+      hint: `Lo fijó ${dueno} · plazo ${c.plazo}`,
+    },
+    {
+      label: 'Disponible',
+      value: formatMoney(libreHoy),
+      color: colors.greenText,
+      hint: 'Lo que le puedes fiar hoy',
+    },
+  ];
+}
+
 function indicadores(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiItem[] {
   const vieja = abiertas(c, e)[0];
   const ultimo = ultimoAbono(c);
@@ -75,18 +95,7 @@ function indicadores(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly
       color: colors.black,
       hint: vieja ? `La más antigua es del ${vieja.venta.dia}` : 'Ninguna pendiente',
     },
-    {
-      label: 'Límite de fiado',
-      value: formatMoney(c.limite),
-      color: e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black,
-      hint: `Lo fijó ${dueno} · plazo ${c.plazo}`,
-    },
-    {
-      label: 'Disponible',
-      value: formatMoney(libre(c, e)),
-      color: colors.greenText,
-      hint: 'Lo que le puedes fiar hoy',
-    },
+    ...limite(c, e, dueno),
     {
       label: 'Último abono',
       value: ultimo ? formatMoney(ultimo.monto) : 'Ninguno',

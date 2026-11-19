@@ -5,10 +5,16 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { filtrar, type CuentaCliente, type FiltroCobranza } from '@xangarro/caja/cobranza';
+import {
+  conCuenta,
+  filtrar,
+  type CuentaCliente,
+  type FiltroCobranza,
+} from '@xangarro/caja/cobranza';
+import { CajaEstado } from '../../components/CajaEstado/index';
 import { GlyphSquare, MText } from '../../components/Mostrador/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
-import { borderColors, borderWidths, colors, radii } from '../../theme';
+import { colors } from '../../theme';
 import { CuentaTarjeta } from './cuenta-tarjeta';
 
 export function Cabeza({ onBack }: { readonly onBack: () => void }): ReactElement {
@@ -32,26 +38,15 @@ export function Cabeza({ onBack }: { readonly onBack: () => void }): ReactElemen
   );
 }
 
+/** Nobody owes anything: Don's empty state (MvEstados, RvFiado «Nadie debe»). */
 function NadieDebe(): ReactElement {
   return (
-    <View
-      testID="cobranza-vacio"
-      gap={6}
-      padding={20}
-      alignItems="center"
-      borderRadius={radii[6]}
-      borderWidth={borderWidths.quiet}
-      borderColor={borderColors.quiet}
-      backgroundColor={colors.white}
-    >
-      <MText size="body" weight="extraBold">
-        Nadie te debe nada
-      </MText>
-      <MText size="sm" weight="semibold" color={colors.gray600} textAlign="center">
-        Cuando cobres una venta fiada, el cliente aparece aquí con su saldo y podrás recibirle
-        abonos.
-      </MText>
-    </View>
+    <CajaEstado
+      mode="empty"
+      emptyTitle="Nadie te debe nada"
+      emptyBody="Cuando cobres una venta fiada, el cliente aparece aquí con su saldo."
+      testID="cobranza"
+    />
   );
 }
 
@@ -61,8 +56,9 @@ export function Cuerpo(p: {
   readonly q: string;
   readonly abrir: (id: string, conAbono: boolean) => void;
 }): ReactElement {
-  if (p.cuentas.length === 0) return <NadieDebe />;
-  const visibles = filtrar(p.cuentas, p.filtro, p.q);
+  const cuentas = conCuenta(p.cuentas);
+  if (cuentas.length === 0) return <NadieDebe />;
+  const visibles = filtrar(cuentas, p.filtro, p.q);
   return (
     <View gap={10}>
       {visibles.map((c) => (

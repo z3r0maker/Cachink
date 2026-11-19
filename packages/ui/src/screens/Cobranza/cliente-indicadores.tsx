@@ -57,6 +57,33 @@ function Indicador({
   );
 }
 
+/** «Límite de fiado» and «Disponible», only when the owner set a limit (M4). */
+function Limite(p: {
+  readonly c: CuentaCliente;
+  readonly e: Estado;
+  readonly dueno: string;
+}): ReactElement | null {
+  const { c, e } = p;
+  const libreHoy = libre(c, e);
+  if (c.limite === null || libreHoy === null) return null;
+  return (
+    <>
+      <Indicador
+        label="Límite de fiado"
+        valor={formatMoney(c.limite)}
+        hint={`Lo fijó ${p.dueno} · plazo ${c.plazo}`}
+        color={e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black}
+      />
+      <Indicador
+        label="Disponible"
+        valor={formatMoney(libreHoy)}
+        hint="Lo que le puedes fiar hoy"
+        color={colors.greenText}
+      />
+    </>
+  );
+}
+
 export function Indicadores({
   c,
   e,
@@ -76,18 +103,7 @@ export function Indicadores({
         hint={vieja ? `La más antigua es del ${vieja.venta.dia}` : 'Ninguna pendiente'}
         color={colors.black}
       />
-      <Indicador
-        label="Límite de fiado"
-        valor={formatMoney(c.limite)}
-        hint={`Lo fijó ${dueno} · plazo ${c.plazo}`}
-        color={e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black}
-      />
-      <Indicador
-        label="Disponible"
-        valor={formatMoney(libre(c, e))}
-        hint="Lo que le puedes fiar hoy"
-        color={colors.greenText}
-      />
+      <Limite c={c} e={e} dueno={dueno} />
       <Indicador
         label="Último abono"
         valor={ultimo ? formatMoney(ultimo.monto) : 'Ninguno'}

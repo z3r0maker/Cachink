@@ -14,6 +14,14 @@ export const saldo = (c: CuentaCliente): Money => estadoCuenta(c).saldo;
 
 export const estado = (c: CuentaCliente): EstadoCliente => estadoCliente(c, estadoCuenta(c));
 
+/**
+ * The clients Fiado y abonos lists (M4): those with a fiado sale or an abono.
+ * A client only created at the register has no account yet, and listing it
+ * hid «Nadie te debe nada».
+ */
+export const conCuenta = (cuentas: readonly CuentaCliente[]): readonly CuentaCliente[] =>
+  cuentas.filter((c) => c.ventas.length > 0 || c.abonos.length > 0);
+
 /** «del 8 may», «de hoy». */
 const delDia = (dia: string) => (dia.startsWith('hoy') ? 'de hoy' : `del ${dia}`);
 
@@ -22,7 +30,9 @@ export function resumenCliente(c: CuentaCliente): string {
   const vivas = abiertas(c, estadoCuenta(c));
   const vieja = vivas[0];
   if (!vieja) {
-    const dia = ultimoAbono(c)?.dia ?? '';
+    const dia = ultimoAbono(c)?.dia;
+    // No abono on file: nothing to date (M4).
+    if (dia === undefined) return 'No debe nada.';
     return `No debe nada. Liquidó su última venta ${dia.startsWith('hoy') ? 'hoy' : `el ${dia}`}.`;
   }
   const n = vivas.length === 1 ? '1 venta abierta' : `${vivas.length} ventas abiertas`;

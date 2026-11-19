@@ -153,12 +153,20 @@ export function ClienteCuentaSheet(p: ClienteCuentaProps): ReactElement {
         <Indicadores c={c} e={e} dueno={p.dueno} />
         <VentasAbiertas cuenta={c} e={e} hoy={p.hoy} />
         <Movimientos cuenta={c} />
-        <View padding={14} borderRadius={radii[4]} backgroundColor={colors.yellowSoft}>
-          <MText size="sm" weight="semibold" color={colors.ink}>
-            {limiteNota(c, e, p.dueno)}
-          </MText>
-        </View>
+        <LimiteNota nota={limiteNota(c, e, p.dueno)} />
       </View>
     </BottomSheet>
+  );
+}
+
+/** The owner's limit in words; nothing when none is set (M4). */
+function LimiteNota({ nota }: { readonly nota: string | null }): ReactElement | null {
+  if (nota === null) return null;
+  return (
+    <View padding={14} borderRadius={radii[4]} backgroundColor={colors.yellowSoft}>
+      <MText size="sm" weight="semibold" color={colors.ink}>
+        {nota}
+      </MText>
+    </View>
   );
 }

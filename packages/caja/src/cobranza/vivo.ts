@@ -76,7 +76,7 @@ export function comoCuenta(c: CuentaPara, hoy: string): CuentaCliente {
     desde: new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(
       new Date(c.creado),
     ),
-    limite: BigInt(c.limiteCentavos ?? '0'),
+    limite: c.limiteCentavos === null ? null : BigInt(c.limiteCentavos),
     plazo,
     atrasado: false,
     ventas: c.ventas.map((v) => comoVenta(v, hoy)),
