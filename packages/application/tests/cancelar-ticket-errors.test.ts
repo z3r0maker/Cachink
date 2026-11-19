@@ -80,6 +80,41 @@ describe('CancelarTicketUseCase: typed refusals', () => {
     return null;
   }
 
+  /** Checks the NIP and the permission alone, before anything is cancelled (M2). */
+  async function verificacion(userId: UserId, pin: string): Promise<unknown> {
+    try {
+      await useCase.verificar(userId, pin);
+    } catch (e: unknown) {
+      return e;
+    }
+    return null;
+  }
+
+  it('verificar accepts the right NIP with permission, and cancels nothing', async () => {
+    assert.equal(await verificacion(puede, '1234'), null);
+    // The sale still stands: it can be cancelled once, afterwards.
+    assert.equal(await refusal({}), null);
+  });
+
+  it('verificar refuses a wrong NIP as PIN_INCORRECTO', async () => {
+    const e = await verificacion(puede, '9999');
+    assert.ok(e instanceof CancelarTicketError);
+    assert.equal(e.code, 'PIN_INCORRECTO');
+    assert.equal(isWrongPin(e), true);
+  });
+
+  it('verificar refuses a missing permission as SIN_PERMISO', async () => {
+    const e = await verificacion(noPuede, '1234');
+    assert.ok(e instanceof CancelarTicketError);
+    assert.equal(e.code, 'SIN_PERMISO');
+  });
+
+  it('verificar refuses an unknown user', async () => {
+    const e = await verificacion(NADIE, '1234');
+    assert.ok(e instanceof CancelarTicketError);
+    assert.equal(e.code, 'USUARIO_NO_ENCONTRADO');
+  });
+
   it('goes through with the right NIP and permission', async () => {
     assert.equal(await refusal({}), null);
   });

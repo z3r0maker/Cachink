@@ -44,6 +44,11 @@ const fila: FilaCuenta = {
 };
 
 describe('cobranza · the phone reads an account (M-08)', () => {
+  it('keeps «no limit» as none, not as a $0.00 limit (M4)', () => {
+    assert.equal(comoCuenta(fila, HOY).limite, null);
+    assert.equal(comoCuenta({ ...fila, limite: 500_00n }, HOY).limite, 500_00n);
+  });
+
   it('says the ticket and the abono with folio, day and captor', () => {
     const c = comoCuenta(fila, HOY);
     assert.deepEqual(
@@ -63,7 +68,7 @@ describe('cobranza · the phone reads an account (M-08)', () => {
     assert.equal(saldo(c), 400_00n);
     assert.equal(c.desde, 'enero de 2026');
     assert.equal(c.telefono, '');
-    assert.equal(c.limite, 0n);
+    assert.equal(c.limite, null);
     assert.equal(c.plazo, '15 días');
   });
 

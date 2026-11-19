@@ -62,7 +62,9 @@ export function abiertas(c: CuentaCliente, e: EstadoCuenta): readonly Abierta[] 
 export const ultimoAbono = (c: CuentaCliente): AbonoCuenta | null =>
   [...c.abonos].sort((a, b) => b.fecha.localeCompare(a.fecha))[0] ?? null;
 
-export const libre = (c: CuentaCliente, e: EstadoCuenta): Money => disponible(c.limite, e.saldo);
+/** What the client can still take on credit; null with no limit set (M4). */
+export const libre = (c: CuentaCliente, e: EstadoCuenta): Money | null =>
+  c.limite === null ? null : disponible(c.limite, e.saldo);
 
 export interface Movimiento {
   readonly fecha: string;
@@ -118,7 +120,13 @@ export function historial(c: CuentaCliente): readonly Movimiento[] {
   return [...ventas, ...abonos].sort((a, b) => b.fecha.localeCompare(a.fecha));
 }
 
-export function limiteNota(c: CuentaCliente, e: EstadoCuenta, dueno: string): string {
+/**
+ * The limit in words, or null when the owner set none (M4): a client created
+ * at the register has no limit, and «Pasó su límite de $0.00» told the
+ * operator to refuse credit nobody had capped.
+ */
+export function limiteNota(c: CuentaCliente, e: EstadoCuenta, dueno: string): string | null {
+  if (c.limite === null) return null;
   const limite = formatMoney(c.limite);
   return e.saldo > c.limite
     ? `Pasó su límite de ${limite}. No le fíes más hasta que abone; si insiste, que hable con ${dueno}.`

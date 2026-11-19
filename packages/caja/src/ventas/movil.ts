@@ -8,6 +8,7 @@
 import { formatMoney, sum, type Money } from '@xangarro/domain';
 
 import type { Categoria } from '../caja/types';
+import { mayuscula } from '../comun/dueno';
 import type { LineaDetalle, VentaDetalle } from './detalle/types';
 import { comoMetodo } from './derive';
 import type { MetodoVenta, VentaTurno } from './types';
@@ -155,13 +156,13 @@ export function avisoCancelar(
   metodo: MetodoVenta,
   monto: Money,
   cliente?: string,
-  dueno = 'Pedro',
+  dueno = 'el dueño',
 ): string {
   if (metodo === 'Fiado' && cliente !== undefined) {
     return (
       `Esta venta es fiada. Al cancelarla, el saldo de ${cliente} baja ${formatMoney(monto)}. ` +
       `Si el cliente ya abonó contra esta venta, ese dinero no sale de la caja: queda como saldo ` +
-      `a favor suyo y se aplica solo a su siguiente compra. ${dueno} lo ve marcado en su portal.`
+      `a favor suyo y se aplica solo a su siguiente compra. ${mayuscula(dueno)} lo ve marcado en su portal.`
     );
   }
   if (metodo === 'Efectivo') {

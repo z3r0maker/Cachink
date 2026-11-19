@@ -61,10 +61,10 @@ function Dato(p: { label: string; valor: string; color?: string; testID: string 
 
 /** «Plazo 15 días · límite $1,500.00»; nothing when the owner set neither. */
 function condiciones(c: CuentaCliente): string | null {
-  if (c.plazo === '' && c.limite === 0n) return null;
+  if (c.plazo === '' && c.limite === null) return null;
   return [
     c.plazo ? `Plazo ${c.plazo}` : null,
-    c.limite > 0n ? `límite ${formatMoney(c.limite)}` : null,
+    c.limite === null ? null : `límite ${formatMoney(c.limite)}`,
   ]
     .filter(Boolean)
     .join(' · ');

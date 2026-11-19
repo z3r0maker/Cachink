@@ -18,7 +18,7 @@ export const EMPRESA = {
   pais: 'México',
   fundacion: '2026',
   /** For questions and complaints (LFPC art. 76 Bis III), as in `PROVEEDOR`. */
-  correo: 'hola@xangarro.mx',
+  correo: 'soporte@xangarro.mx',
 };
 
 /** «Paseo Puesta del Sol 4150, Colonia Lomas Altas, C.P. 45128, Zapopan, Jalisco». */

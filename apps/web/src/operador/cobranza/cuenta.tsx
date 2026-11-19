@@ -80,7 +80,7 @@ const subtitulo = (c: CuentaCliente) =>
 function Saldo({ c, saldo }: { readonly c: CuentaCliente; readonly saldo: Money }) {
   const meta = [
     c.plazo && `Plazo ${c.plazo}`,
-    c.limite > 0n && `límite ${formatMoney(c.limite)}`,
+    c.limite !== null && `límite ${formatMoney(c.limite)}`,
   ].filter(Boolean);
   return (
     <div className={k.saldoRow}>
