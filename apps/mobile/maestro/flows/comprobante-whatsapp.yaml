@@ -1,0 +1,53 @@
+# «Mandar comprobante» → WhatsApp (MvVentaHecha's share sheet): a phone without
+# the app. TestFlight 1.0.0 (2) answered «No se pudo abrir WhatsApp» here on
+# every iPhone, because canOpenURL rejects an undeclared scheme on iOS.
+#
+# A simulator has no WhatsApp, so `whatsapp://` does not open and the wa.me link
+# goes to the browser. Coming back, the sheet is still open and says what
+# happened. WhatsApp itself can only be proven on a real phone.
+#
+# Precondition: device activated against the contracts mock; the harness signs
+# in the operator and lands on Inicio.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
+
+# The newest sale heads the list; its sheet carries «Mandar comprobante».
+- tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
+- extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
+- tapOn:
+    id: 'venta-fila-.*'
+    index: 0
+- extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
+- tapOn: { id: 'venta-detalle-compartir' }
+- extendedWaitUntil: { visible: { id: 'comprobante-sheet' }, timeout: 5000 }
+- scrollUntilVisible:
+    element: { id: 'comprobante-whatsapp' }
+    direction: DOWN
+    timeout: 5000
+- tapOn: { id: 'comprobante-whatsapp' }
+
+# The browser took over; back in the app, the sheet explains and offers the rest.
+- extendedWaitUntil:
+    notVisible: { id: 'comprobante-whatsapp' }
+    timeout: 10000
+- launchApp:
+    appId: mx.xangarro.mobile
+    stopApp: false
+- extendedWaitUntil: { visible: { id: 'comprobante-sheet' }, timeout: 10000 }
+- scrollUntilVisible:
+    element: { id: 'comprobante-aviso' }
+    direction: DOWN
+    timeout: 5000
+- assertVisible: '.*Abrimos el enlace de WhatsApp\. Si no tienes la app, usa Mensajes o Copiar o compartir\..*'
+- assertNotVisible: '.*No se pudo abrir WhatsApp.*'
+- assertVisible: { id: 'comprobante-mensajes' }
+- assertVisible: { id: 'comprobante-menu' }

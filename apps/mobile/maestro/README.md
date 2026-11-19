@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 64 flows + 21 shared subflows and scripts; `full-regression.sh` runs the curated 39 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 65 flows + 21 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -207,7 +207,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — 39 per-screen flows — in dependency
+now runs the M-11 curated suite — 40 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
@@ -215,15 +215,15 @@ turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 | Order | Flows                                                                                                                                                                                        |
 | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1–3   | smoke-launch, login-lockout, bloqueo                                                                                                                                                         |
-| 4–7   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, fiado-abono-recordar                                                                                                                |
-| 8–9   | gastos-registrar, gastos-pagar-recurrente                                                                                                                                                    |
-| 10–17 | mi-turno, por-enviar, cancelaciones-nav, turno-cerrado-abrir, cierre-sin-turno, avisos-responder, inventario-llego-merma, esperado-tras-llegada                                              |
-| 18–21 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante                                                                                                                    |
-| 22–28 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
-| 29–30 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
-| 31–34 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
-| 35–36 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
-| 37–39 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
+| 4–8   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, comprobante-whatsapp, fiado-abono-recordar                                                                                          |
+| 9–10  | gastos-registrar, gastos-pagar-recurrente                                                                                                                                                    |
+| 11–18 | mi-turno, por-enviar, cancelaciones-nav, turno-cerrado-abrir, cierre-sin-turno, avisos-responder, inventario-llego-merma, esperado-tras-llegada                                              |
+| 19–22 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante                                                                                                                    |
+| 23–29 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
+| 30–31 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
+| 32–35 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
+| 36–37 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
+| 38–40 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).
@@ -251,16 +251,17 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-nine
 
 ### Cobrar y ventas
 
-| Flow                           | Entry     | Suite | What it proves                                                                                                                                                |
-| ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the three-figure KPI row,                                       |
-| `venta-cantidad-multiple.yaml` | activated |       | Sell multiple units by tapping the same product 3 times.                                                                                                      |
-| `venta-detalle-cancelar.yaml`  | activated | ✓     | A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas «detalle»/«cancelar-venta»): the lines and tiles, «Ma                                      |
-| `cancelaciones-nav.yaml`       | activated | ✓     | The Ventas tab (Track M-11): with no turno open it opens one right there (MvTurnoCerrado), stays on Ventas, and «Cobrar la primera» goes on to the catalogue. |
-| `ventas-caja-gate.yaml`        | activated |       | The Caja gate: with no turno open, Cobrar opens one right there and the catalogue takes its place (MvTurnoCerrado).                                           |
-| `cobrar-escaner.yaml`          | activated |       | The escáner (Track M, M-07; MvEscaner): typing an unknown code offers «Darlo de alta», which opens Producto nuevo with t                                      |
-| `empty-ventas.yaml`            | activated |       | Cobrar with no products (Track M, M-07): the catalogue says there is nothing yet and offers «Producto nuevo» right there                                      |
-| `fiado-abono-recordar.yaml`    | activated | ✓     | Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza\*): Inicio's atajo opens /fiado; a client's account opens its                                     |
+| Flow                           | Entry     | Suite | What it proves                                                                                                                                                      |
+| ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the three-figure KPI row,                                             |
+| `venta-cantidad-multiple.yaml` | activated |       | Sell multiple units by tapping the same product 3 times.                                                                                                            |
+| `venta-detalle-cancelar.yaml`  | activated | ✓     | A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas «detalle»/«cancelar-venta»): the lines and tiles, «Ma                                            |
+| `comprobante-whatsapp.yaml`    | activated | ✓     | «Mandar comprobante» → WhatsApp on a phone without the app: the wa.me link goes to the browser and, back in the app, the sheet says so and keeps the other options. |
+| `cancelaciones-nav.yaml`       | activated | ✓     | The Ventas tab (Track M-11): with no turno open it opens one right there (MvTurnoCerrado), stays on Ventas, and «Cobrar la primera» goes on to the catalogue.       |
+| `ventas-caja-gate.yaml`        | activated |       | The Caja gate: with no turno open, Cobrar opens one right there and the catalogue takes its place (MvTurnoCerrado).                                                 |
+| `cobrar-escaner.yaml`          | activated |       | The escáner (Track M, M-07; MvEscaner): typing an unknown code offers «Darlo de alta», which opens Producto nuevo with t                                            |
+| `empty-ventas.yaml`            | activated |       | Cobrar with no products (Track M, M-07): the catalogue says there is nothing yet and offers «Producto nuevo» right there                                            |
+| `fiado-abono-recordar.yaml`    | activated | ✓     | Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza\*): Inicio's atajo opens /fiado; a client's account opens its                                           |
 
 ### Gastos
 

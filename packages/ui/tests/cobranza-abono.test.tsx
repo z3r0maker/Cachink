@@ -100,15 +100,13 @@ describe('recordar saldo · the link and the sheet', () => {
   });
 
   it('opens WhatsApp and confirms in a line; a phone without it says so', async () => {
-    const puede = vi.spyOn(Linking, 'canOpenURL').mockResolvedValue(true);
     const abre = vi.spyOn(Linking, 'openURL').mockResolvedValue();
     await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toContain('Se abrió WhatsApp');
-    expect(abre).toHaveBeenCalledWith('https://wa.me/525512447903?text=Hola');
+    expect(abre).toHaveBeenCalledWith('whatsapp://send?phone=525512447903&text=Hola');
     abre.mockRejectedValue(new Error('sin app'));
     await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toContain(
       'No se pudo abrir WhatsApp',
     );
-    puede.mockRestore();
     abre.mockRestore();
   });
 

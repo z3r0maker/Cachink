@@ -2,7 +2,7 @@
  * «Recordarle su saldo a …» (MvCobranzaRecordar): the web's dialog on a
  * bottom sheet. The client's phone comes prefilled and the message carries
  * the live balance (`recordatorio`); both can be changed. «Abrir WhatsApp»
- * opens wa.me with the text ready — nothing is sent by the caja (ADR-083 D2),
+ * opens the chat with the text ready — nothing is sent by the caja (ADR-083 D2),
  * like the comprobante (N-21); the sheet confirms in a line.
  */
 import { useState, type ReactElement } from 'react';
