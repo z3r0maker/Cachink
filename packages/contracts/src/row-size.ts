@@ -24,6 +24,8 @@ const BY_TABLE: Readonly<Partial<Record<PushableTable, number>>> = {
   entregas_credito: 262_144,
   /** A 512 px WebP under 40 KB as base64 (ADR-134): ~55 KB, with room for the envelope. */
   product_images: 65_536,
+  /** A grayscale WebP under 96 KB as base64 (ADR-149): ~128 KB, with room for the envelope. */
+  expense_receipts: 163_840,
 };
 
 export function maxPushRowBytes(table: PushableTable): number {

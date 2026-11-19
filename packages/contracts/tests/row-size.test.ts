@@ -31,5 +31,6 @@ describe('push row size', () => {
     assert.ok(maxPushRowBytes('auditorias_inventario') >= 1_000_000, 'a count of every product');
     assert.ok(maxPushRowBytes('entregas_credito') > MAX_PUSH_ROW_BYTES, 'the sales it settles');
     assert.equal(maxPushRowBytes('product_images'), 65_536, 'a 40 KB WebP as base64 (ADR-134)');
+    assert.equal(maxPushRowBytes('expense_receipts'), 163_840, 'a 96 KB WebP as base64 (ADR-149)');
   });
 });
