@@ -90,6 +90,7 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       `playwright.config.ts`).
 - [ ] [media] **PRONTO — Trabajo nocturno de sellado:** llamar `xangarro.privacy_consents_day_root(day)` y obtener una
       NOM-151 constancia (PSC) or an RFC 3161 timestamp; archive it with the day. Decide the PSC.
+  - **Remaining (2026-11-19, verificado contra el repo):** la mitad de SQL existe y la otra mitad no. La función está en la migración `0034_privacy_consents.sql`, con `EXECUTE` revocado de `PUBLIC` y concedido a `xangarro_admin`, pero ningún cron la llama: `apps/web/vercel.json` declara siete trabajos (correos de prueba, de renovación, borrar cuentas, purgar fotos, asesor, uso y cierre de CFDI) y ninguno es éste. O sea que falta la ruta, su entrada en `vercel.json` y la decisión del PSC, no la consulta.
 - [x] [alta] [bloq] Archivar el texto completo de cada `AVISO_VERSION` (un hash sin su texto no prueba nada) —
       simplest: a `consent_versions` table or a versioned file kept forever. **Done 2026-11-06
       (ADR-137):** every published version stays in `apps/web/src/legal/aviso-simplificado.ts`
@@ -101,9 +102,11 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       nuevo» with a banner across the portal until accepted. Aviso 0.3 fixes the path.
 - [ ] [media] The Asesor switch the aviso (§ on the Asesor) and Términos §5 promise «en Configuración →
       Privacidad» does not exist yet: build it on «Privacidad y mis datos», or change the text.
+  - **Remaining (2026-11-19, verificado contra el repo):** sigue exacto, y la promesa está en **tres** lugares, no en dos: además del aviso integral §(Asesor) y de Términos §5, el procedimiento ARCO manda a «Configuración → Privacidad» dos veces, para oposición y para revocación de las finalidades secundarias. La pantalla existe y se llama «Privacidad y mis datos», pero su único `Switch` es el de novedades del ADR-137: no hay apagador del Asesor ni control de finalidades secundarias. Son dos controles, no uno, si se decide construir en vez de reescribir el texto.
 - [ ] [media] Bloqueo de re-consentimiento al iniciar sesión cuando una versión agregue una finalidad (art. 11); banner en caso contrario.
       Progress 2026-11-06 (ADR-137): the banner and «Acepto el aviso nuevo» exist; the sign-in block waits for the
       first version that adds a purpose.
+  - **Remaining (2026-11-19, verificado contra el repo):** sigue bien descrito por su propia nota de progreso: el banner y «Acepto el aviso nuevo» existen (`privacidad/novedades.tsx`), y el bloqueo al iniciar sesión espera la primera versión que agregue una finalidad. No hay nada que corregir.
 - [ ] [media] Decidir casilla vs. botón como consentimiento con el abogado (OQ-N7); hoy: casilla.
 
 ## 3. Derechos que el aviso promete (deben existir antes de publicar el aviso)
@@ -134,6 +137,7 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       `privacidad-arco.spec.ts` e2e.
 - [ ] [alta] Calendario de retención implementado por tabla (cifras de OQ-L13 una vez confirmadas); regla de 72 meses para
       payment-default data (art. 10).
+  - **Remaining (2026-11-19, verificado contra el repo):** nada implementado, y no puede empezar: las cifras salen de OQ-L13, que es del abogado. Lo que sí existe es el mecanismo que va a usar, probado: `geo_prune(400)` colgado de un cron (N-61) y las dos funciones de borrado de cuenta. Cuando lleguen las cifras, esto es una tabla de números sobre plomería que ya camina, no una construcción.
 - [ ] [alta] Protocolo de brechas con la lista de campos del Reglamento art. 65, una persona designada y la cláusula de 72 h para
       negocios; `security.txt` + vulnerability-disclosure page.
       Progress 2026-11-09 (ADR-139): `xangarro.mx/.well-known/security.txt` is published, and
@@ -163,6 +167,7 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       `https://xangarro.mx/terminos`) in test and live mode. Until it is set, Stripe refuses the
       Checkout consent and no paid Checkout opens (ADR-132).
 - [ ] [media] Aumentos de precio: aviso de 30 días + flujo de re-aceptación expresa.
+  - **Remaining (2026-11-19, verificado contra el repo):** nada construido: no hay ninguna pantalla, acción ni correo de aumento de precio ni de re-aceptación en el portal. Cuando toque, el molde ya existe y es el del ADR-137 (el banner de aviso nuevo con «Acepto»), que es el mismo problema con otro texto.
 - [x] [alta] [bloq] Domicilio, teléfono y canal de quejas visibles **antes** de contratar (landing + checkout). Done
       2026-11-11: checkout shows the domicilio, correo and teléfono under the pay button (`PROVEEDOR`,
       ADR-132), and both landing footers (home and /soporte) show the razón social, the domicilio and
@@ -191,9 +196,11 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
 - [x] **ANTES DE STORES — Notas para el revisor** que expliquen el modelo de dispositivo + NIP (sin cuenta en la app, sin
       Sign in with Apple/Google, deletion via the portal). **Done 2026-10-30:** `app-registration/apple/REVIEW-NOTES.md`
       and the App access text in `app-registration/google-play/README.md`.
-- [ ] [media] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,184 paquetes, sin
-      copyleft; resolve the 2 `Unknown`: `@tamagui/native`, `buffers`).
+- [ ] [media] Pantalla de avisos de licencias de código abierto generada desde `pnpm licenses list --prod` (1,203 paquetes al
+      2026-11-19; resolve the 2 `Unknown`: `@tamagui/native`, `buffers`).
+  - **Remaining (2026-11-19, verificado contra el repo):** la pantalla no existe en ninguna superficie, y **«sin copyleft» era inexacto**. Medido hoy: 1,203 paquetes (no 1,184) en 28 licencias distintas, los mismos dos `Unknown`, y seis paquetes con copyleft o doble licencia con copyleft en el árbol `--prod`: `node-forge` (BSD-3-Clause **OR** GPL-2.0) y `jszip` (MIT **OR** GPL-3.0-or-later), que se toman por su rama permisiva; `@img/sharp-libvips-darwin-arm64` (LGPL-3.0-or-later) y `lightningcss` con su binario (MPL-2.0), que son copyleft débil y no se distribuyen al dispositivo de nadie; y `eslint-plugin-sonarjs` (LGPL-3.0-only), que sale en `--prod` porque `packages/config` lo declara en `dependencies` — correcto para un paquete de configuración compartida, pero conviene saberlo. Ninguno parece un problema; lo que sí es un problema es que la pantalla los va a imprimir y este renglón decía que no existían. Vuelve a medir al generarla.
 - [ ] [baja] Nunca agregar Sign in with Apple/Google a la app móvil (activaría 5.1.1(v)).
+  - **Remaining (2026-11-19, verificado contra el repo):** la regla se cumple: ni `expo-apple-authentication` ni ningún paquete de Google Sign-In aparecen en el árbol de `apps/mobile`. Pero es una regla sin guardia, como la del módulo del Asesor: nada impide que alguien agregue la dependencia. Una prueba de una línea sobre el `package.json` de la app la haría real, y este renglón se podría cerrar.
 
 ## 6. Terceros y contratos
 
@@ -216,11 +223,13 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       `papel.tsx`/`ticket.tsx`), the register (`operador/caja/receipt.ts`, `share-recibo.tsx`) and the
       phone (`packages/ui/src/screens/Checkout/comprobante.ts`).
 - [ ] [media] Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo).
+  - **Remaining (2026-11-19, verificado contra el repo):** la regla no existe. `signup_attribution` sólo se borra cuando se borra la cuenta entera (las dos funciones de borrado, en `0051_account_deletion.sql` y `0057_email_confirm_second_factor.sql`); nada la poda por antigüedad. El molde a copiar sí está hecho y probado: `geo_prune(400)` colgado del cron del backoffice (N-61, cerrada).
 - [x] [media] Beacon del landing declarado en el aviso (hecho) y enlace en el pie de página de `xangarro.mx`
       (hecho: `apps/landing/home/CtaFooter.jsx`).
 - [ ] [media] Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS.
       Progress 2026-11-09 (ADR-139): the signup box starts unticked, so every account opts in
       expressly; the 5-day window no longer applies to signups.
+  - **Remaining (2026-11-19, verificado contra el repo):** su nota de progreso del 2026-11-09 (ADR-139) deja este renglón casi vacío: la casilla del registro empieza desmarcada, así que todo consentimiento es expreso y la ventana de 5 días ya no aplica a registros. Lo que queda vivo es sólo el REPEP, y sólo si algún día se usa teléfono o SMS, que hoy no se usa. Vale la pena reescribir el renglón para que diga eso, en lugar de leerse como trabajo pendiente.
 - [ ] [media] Afirmaciones publicitarias en el landing demostrables (LFPC art. 32).
 
 ## 8. Propiedad intelectual y gobernanza
