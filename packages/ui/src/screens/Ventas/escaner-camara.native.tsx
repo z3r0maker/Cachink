@@ -10,17 +10,15 @@ import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { usePermisoCamara } from '../../hooks/use-permiso-camara';
 import { colors, radii } from '../../theme';
-import { REPETIDO_MS, type EscanerCamaraProps } from './escaner-camara.shared';
+import { leerCodigo, type EscanerCamaraProps, type Lectura } from './escaner-camara.shared';
 import { EscanerVisor } from './escaner-visor';
 
 function useUnaLectura(onCodigo: (c: string) => void): (r: { data: string }) => void {
-  const ultimo = useRef<{ codigo: string; at: number } | null>(null);
+  const ultimo = useRef<Lectura | null>(null);
   return ({ data }) => {
-    const now = Date.now();
-    const u = ultimo.current;
-    if (u && u.codigo === data && now - u.at < REPETIDO_MS) return;
-    ultimo.current = { codigo: data, at: now };
-    onCodigo(data);
+    const r = leerCodigo(ultimo.current, data, Date.now());
+    ultimo.current = r.siguiente;
+    if (r.cuenta) onCodigo(data);
   };
 }
 
