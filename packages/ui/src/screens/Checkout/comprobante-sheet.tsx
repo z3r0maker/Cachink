@@ -1,8 +1,9 @@
 /**
  * «Mandar comprobante» (MvVentaHecha, the share sheet): how it reaches the
  * customer (the business's comprobante template), then WhatsApp, Mensajes
- * and the phone's share menu. Each tap confirms in a line; «Listo, nueva
- * venta» closes everything.
+ * and the phone's share menu. Each tap confirms in a line. After a cobro
+ * «Listo, nueva venta» closes everything; from a past sale (Ventas) it is
+ * «Listo» and only closes the sheet, as the web caja's dialog says it.
  */
 import type { ReactElement } from 'react';
 import { SvgXml } from 'react-native-svg';
@@ -24,7 +25,10 @@ export interface ComprobanteSheetProps {
   readonly venta: VentaHecha;
   readonly business: Business | null;
   readonly onClose: () => void;
-  readonly onNueva: () => void;
+  /** After a cobro: on to the next sale. Without it the foot only closes. */
+  readonly onNueva?: () => void;
+  /** Opened from a past sale (Ventas): the foot says «Listo», not «nueva venta». */
+  readonly desdeVentas?: boolean;
 }
 
 const OPCIONES: readonly OpcionEnvio[] = [
@@ -89,10 +93,10 @@ export function ComprobanteSheet(p: ComprobanteSheetProps): ReactElement {
       size="xl"
       sentence
       fullWidth
-      onPress={p.onNueva}
-      testID="comprobante-nueva"
+      onPress={p.onNueva ?? p.onClose}
+      testID={p.desdeVentas ? 'comprobante-listo' : 'comprobante-nueva'}
     >
-      Listo, nueva venta
+      {p.desdeVentas ? 'Listo' : 'Listo, nueva venta'}
     </Btn>
   );
   return (

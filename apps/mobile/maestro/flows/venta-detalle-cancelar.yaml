@@ -81,10 +81,12 @@ tags:
     direction: DOWN
     timeout: 5000
 - assertVisible: '.*Escoges el contacto y le das enviar.*'
-# Closed by its foot's «Listo»: on a fresh simulator the dev client's
-# floating «Tools» button sits right over the close square (a tap there opens
-# the developer menu), and the scrim above the sheet is under the status bar.
-- tapOn: { id: 'comprobante-nueva' }
+# Closed by its foot's «Listo» (from a past sale it only closes the sheet):
+# on a fresh simulator the dev client's floating «Tools» button sits right
+# over the close square (a tap there opens the developer menu), and the scrim
+# above the sheet is under the status bar.
+- assertVisible: 'Listo'
+- tapOn: { id: 'comprobante-listo' }
 - extendedWaitUntil: { notVisible: { id: 'comprobante-sheet' }, timeout: 5000 }
 - extendedWaitUntil: { visible: { id: 'venta-detalle' }, timeout: 5000 }
 - extendedWaitUntil: { visible: { text: 'Lo que llevó' }, timeout: 5000 }
