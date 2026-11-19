@@ -10,6 +10,7 @@ export type EmpresaHref =
   | '/empresa'
   | '/empresa/movimientos'
   | '/empresa/facturas'
+  | '/empresa/servicios'
   | '/empresa/resultados'
   | '/empresa/balance'
   | '/empresa/socios'
@@ -48,6 +49,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
     tabs: [
       { label: 'Movimientos', href: '/empresa/movimientos', task: 'E-02' },
       { label: 'Facturas', href: '/empresa/facturas', task: 'E-11' },
+      { label: 'Servicios', href: '/empresa/servicios', task: 'E-24' },
     ],
   },
   {

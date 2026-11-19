@@ -28,7 +28,8 @@ export function prefillDe(p: PlantillaRecurrente, mes: string): Prefill {
     concepto: p.nombre,
     contraparte: p.contraparte ?? '',
     moneda: p.moneda,
-    monto: toPesosString(p.montoEstimado),
+    // A usage service's charge has no usual amount: the founder types what the card shows.
+    monto: p.montoEstimado === 0n ? '' : toPesosString(p.montoEstimado),
     categoria: p.categoria,
     proyecto: p.projectId ?? '',
     deducible: p.deducible ? 'si' : 'no',

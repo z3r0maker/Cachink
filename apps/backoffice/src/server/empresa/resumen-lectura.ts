@@ -18,6 +18,8 @@ import {
 import { requireCorpDb } from '../db/corp';
 import { leerAgenda } from './agenda-lectura';
 import { leerLimites } from './limites-lectura';
+import { leerServicios } from './servicios-lectura';
+import { senalesDeServicios } from './servicios-senales';
 import type { LimitesVista } from './limites-view';
 import { grupos, itemsDeFondeo, type ItemAgenda } from './agenda-view';
 import { autonomiaDeHoy } from './resumen-hero';
@@ -37,18 +39,20 @@ export interface DatosResumen {
  * What the Resumen reads (E-16): the period's results and the one before
  * (devengado, as Resultados opens), cash up to today for the hero, the
  * Agenda with the partners' funding halves (as Agenda › Próximos lists it)
- * and the certificates. Autonomía is always today's, whatever the period.
+ * and the certificates, and the services' alerts (E-24). Autonomía is always
+ * today's, whatever the period.
  */
 export async function leerResumen(periodo: Periodo, hoy: string): Promise<DatosResumen> {
   const db = requireCorpDb();
   const previo = periodoAnterior(periodo);
-  const [importes, caja, agenda, calls, certificados, limites] = await Promise.all([
+  const [importes, caja, agenda, calls, certificados, limites, servicios] = await Promise.all([
     importesDeResultados(db, previo.desde, periodo.hasta),
     movimientosDeCaja(db, hoy),
     leerAgenda(hoy),
     listFundingCalls(db),
     createCorporativoRepository(db).certificados(),
     leerLimites(hoy),
+    leerServicios(hoy),
   ]);
   const actual = estadoDeResultados(importes, periodo, 'devengado');
   const autonomia = autonomiaDeHoy(caja, hoy);
@@ -66,6 +70,7 @@ export async function leerResumen(periodo: Periodo, hoy: string): Promise<DatosR
         vencidas: g.find((x) => x.label === 'Vencidas')?.items ?? [],
       }),
       ...limites.senales,
+      ...senalesDeServicios(servicios),
     ],
     proximos: proximos(g),
     limites,

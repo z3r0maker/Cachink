@@ -33,8 +33,12 @@ export interface FilaRecurrente {
   readonly href: string | null;
 }
 
-/** «USD 20.00» or «$3,500.00»: the template's own currency, never converted. */
+/**
+ * «USD 20.00» or «$3,500.00»: the template's own currency, never converted. A
+ * usage service's template has no fixed amount (E-24): «Sin monto fijo».
+ */
 export function montoEstimado(p: Pick<PlantillaRecurrente, 'moneda' | 'montoEstimado'>): string {
+  if (p.montoEstimado === 0n) return 'Sin monto fijo';
   const m = formatMoney(p.montoEstimado);
   return p.moneda === 'USD' ? `USD ${m.replace('$', '')}` : m;
 }
@@ -52,7 +56,8 @@ const ESTADO: Record<RecurrenteDelMes['estado'], EstadoRecurrenteVista> = {
 
 /** «Vercel Inc. · cada mes», or a supplier who invoices by its RFC: «RFC … · factura cada mes». */
 function detalleDe(p: PlantillaRecurrente): string {
-  const cada = p.rfc === null ? 'cada mes' : 'factura cada mes';
+  const periodo = p.periodicidad === 'anual' ? 'cada año' : 'cada mes';
+  const cada = p.rfc === null ? periodo : `factura ${periodo}`;
   return [p.rfc === null ? p.contraparte : `RFC ${p.rfc}`, p.activo ? cada : 'ya no se repite']
     .filter((x): x is string => x !== null && x !== '')
     .join(' · ');
@@ -100,7 +105,7 @@ export function filaSugerida(r: RecurrenteDelMes, mes: string): FilaMovimiento {
     detalle: [p.contraparte, 'recurrente'].filter((x) => x !== null && x !== '').join(' · '),
     categoria: ACCOUNTS[p.categoria].nombre,
     categoriaKey: p.categoria,
-    monto: `−${montoEstimado(p)}`,
+    monto: p.montoEstimado === 0n ? montoEstimado(p) : `−${montoEstimado(p)}`,
     entra: false,
     estado: 'Sugerido',
     filtro: 'gastos',

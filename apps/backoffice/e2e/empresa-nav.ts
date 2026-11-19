@@ -42,6 +42,7 @@ export const RUTAS: readonly (readonly [string, string])[] = [
   ['/empresa', 'Resumen'],
   ['/empresa/movimientos', 'Dinero'],
   ['/empresa/facturas', 'Dinero'],
+  ['/empresa/servicios', 'Dinero'],
   ['/empresa/resultados', 'Resultados'],
   ['/empresa/balance', 'Resultados'],
   ['/empresa/movimientos/registrar', 'Registrar'],
