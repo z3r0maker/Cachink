@@ -71,8 +71,10 @@ export function useAgregarFoto(): AgregarFoto {
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState<AvisoFoto | null>(null);
 
+  /** A file for `gasto`: the camera closes, the receipt saves (null: backed out). */
   const procesar = (gasto: AgregarFoto['abierta'], archivo: string | null): void => {
     if (gasto === null || archivo === null) return;
+    setAbierta(null);
     setGuardando(true);
     void guardar(gasto.id, archivo)
       .then(
@@ -91,16 +93,10 @@ export function useAgregarFoto(): AgregarFoto {
       setAviso(null);
       setAbierta({ id, titulo });
     },
-    tomada: (archivo) => {
-      setAbierta(null);
-      procesar(abierta, archivo);
-    },
-    // The camera closes first: the gallery opens over the list, not over it.
-    galeria: () => {
-      const gasto = abierta;
-      setAbierta(null);
-      void puertos?.elegirDeGaleria().then((archivo) => procesar(gasto, archivo));
-    },
+    tomada: (archivo) => procesar(abierta, archivo),
+    // The picker opens over the camera, which closes after the pick: iOS will
+    // not present it while the camera's sheet is going away.
+    galeria: () => void puertos?.elegirDeGaleria().then((a) => procesar(abierta, a)),
     cerrar: () => setAbierta(null),
     cerrarAviso: () => setAviso(null),
   };

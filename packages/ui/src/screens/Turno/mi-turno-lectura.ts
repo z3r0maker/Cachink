@@ -25,6 +25,7 @@ type R = Pick<
   | 'tickets'
   | 'sales'
   | 'expenses'
+  | 'expenseReceipts'
   | 'clientPayments'
   | 'clients'
   | 'inventoryMovements'
@@ -80,6 +81,8 @@ export async function leerTurnoVivo(
     ...abonos.map((a) => a.clienteId as string),
   ];
   const nombres = await nombresDe(r, ids);
+  // Which gastos carry their receipt photo (M-18, ADR-149).
+  const conFoto = await r.expenseReceipts.findGastosWithReceipt(gastos.map((g) => g.id));
   const filas: FilasCierre = { turno, delTurno, lineas, abonos, gastos };
   const cierre = cierreDeFilas(filas);
   const inventario = contar(delTurnoInventario(movimientos as never, deviceId, turno.aperturaAt));
@@ -89,7 +92,7 @@ export async function leerTurnoVivo(
     vivo: {
       cierre: { ...cierre, resumen: { ...cierre.resumen, ...inventario } },
       aperturaAt: turno.aperturaAt,
-      ...detalleDelTurno({ delTurno, lineas, abonos, gastos }, nombres),
+      ...detalleDelTurno({ delTurno, lineas, abonos, gastos, conFoto }, nombres),
       recurrentes: recurrentes.map((x) => comoRecurrente(x, hoy)),
       cortes: cortesDe(turnos),
     },

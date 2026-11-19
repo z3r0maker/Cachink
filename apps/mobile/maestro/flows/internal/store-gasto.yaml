@@ -60,15 +60,28 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-categoria-Insumos'
 - waitForAnimationToEnd
+# The row sits under the keyboard, and the driver counts it visible there.
+# Phone: a drag high in the sheet puts the keyboard away (keyboardDismissMode
+# on-drag) and scrolls the row up; the body's own centre is under the
+# keyboard, where a drag does nothing. Tablet: the sheet floats and any drag
+# closes it, even one anchored on its body; it is tall enough that the row
+# sits above the keyboard, so nothing is dragged there.
 - runFlow:
     when:
-      notVisible:
-        id: 'gasto-comprobante-tomar'
+      true: ${FORMA != 'tableta'}
     commands:
       - swipe:
-          element:
-            id: 'registrar-gasto-sheet-body'
-          direction: UP
+          start: '50%, 45%'
+          end: '50%, 20%'
+      - waitForAnimationToEnd
+      - swipe:
+          start: '50%, 45%'
+          end: '50%, 20%'
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-tomar'
+    timeout: 5000
 - longPressOn:
     id: 'gasto-comprobante-tomar'
 - runFlow: ../shared/elegir-foto-galeria.yaml
