@@ -82,7 +82,11 @@ async function cortesDe(
   return rows
     .filter((t) => t.cierreAt !== null)
     .slice(0, CORTES)
-    .map((t) => ({ fecha: t.fecha, diferenciaCentavos: (t.diferenciaCentavos ?? 0n).toString() }));
+    .map((t) => ({
+      id: t.id,
+      fecha: t.fecha,
+      diferenciaCentavos: (t.diferenciaCentavos ?? 0n).toString(),
+    }));
 }
 
 /** Everything Mi turno and Inicio show about the open turno. */

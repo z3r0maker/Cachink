@@ -74,6 +74,7 @@ export function etiquetaCorte(fecha: string, ahora: Date, caja: string): string 
 }
 
 export const comoCorte = (c: CortePara, ahora: Date, caja: string): CorteReciente => ({
+  id: c.id,
   etiqueta: etiquetaCorte(c.fecha, ahora, caja),
   resultado: resultadoDe(BigInt(c.diferenciaCentavos)),
 });

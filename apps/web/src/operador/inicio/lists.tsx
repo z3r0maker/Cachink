@@ -168,7 +168,7 @@ export function UltimosCortes({ cortes }: { readonly cortes: readonly CorteRecie
         {cortes.map((c) => {
           const chip = corteChip(c);
           return (
-            <div key={c.etiqueta} className={l.corte}>
+            <div key={c.id} className={l.corte}>
               <span className={l.corteFecha}>{c.etiqueta}</span>
               <Chip label={chip.label} color={chip.color} bg={chip.bg} />
             </div>

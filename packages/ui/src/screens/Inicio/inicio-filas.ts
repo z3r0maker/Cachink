@@ -74,7 +74,7 @@ export function cortesDe(turnos: readonly CajaTurno[]): readonly CortePara[] {
     .filter((t) => t.cierreAt !== null && t.diferenciaCentavos !== null)
     .sort((a, b) => (b.cierreAt ?? '').localeCompare(a.cierreAt ?? ''))
     .slice(0, 4)
-    .map((t) => ({ fecha: t.fecha, diferenciaCentavos: String(t.diferenciaCentavos) }));
+    .map((t) => ({ id: t.id, fecha: t.fecha, diferenciaCentavos: String(t.diferenciaCentavos) }));
 }
 
 const CERO: CierrePara['resumen'] = {

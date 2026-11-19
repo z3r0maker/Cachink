@@ -78,9 +78,9 @@ export const INICIO_FIXTURE: InicioData = {
     },
   ],
   cortes: [
-    { etiqueta: 'Ayer · Caja 1', resultado: { tipo: 'cuadro' } },
-    { etiqueta: '12 may · Caja 1', resultado: { tipo: 'cuadro' } },
-    { etiqueta: '11 may · Caja 1', resultado: { tipo: 'sobro', monto: 2_000n } },
-    { etiqueta: '10 may · Caja 1', resultado: { tipo: 'cuadro' } },
+    { id: 'corte-4', etiqueta: 'Ayer · Caja 1', resultado: { tipo: 'cuadro' } },
+    { id: 'corte-3', etiqueta: '12 may · Caja 1', resultado: { tipo: 'cuadro' } },
+    { id: 'corte-2', etiqueta: '11 may · Caja 1', resultado: { tipo: 'sobro', monto: 2_000n } },
+    { id: 'corte-1', etiqueta: '10 may · Caja 1', resultado: { tipo: 'cuadro' } },
   ],
 };

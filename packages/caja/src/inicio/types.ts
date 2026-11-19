@@ -32,6 +32,8 @@ export type ResultadoCorte =
   | { readonly tipo: 'falto'; readonly monto: Money; readonly motivo?: string };
 
 export interface CorteReciente {
+  /** The turno's id, the row's identity: «Hoy · Caja 1» can appear twice (ADR-147). */
+  readonly id: string;
   readonly etiqueta: string;
   readonly resultado: ResultadoCorte;
 }
