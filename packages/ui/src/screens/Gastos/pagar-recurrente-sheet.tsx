@@ -32,8 +32,11 @@ function Tarjeta({ x }: { readonly x: RecurrentePorPagar }): ReactElement {
       backgroundColor={colors.gray100}
     >
       <Eyebrow color={colors.gray600}>{detalleRecurrente(x.para)}</Eyebrow>
+      {/* The name never shrinks (flex={1} squeezed «Renta local» onto two
+          lines beside the red line): when both don't fit, the red line wraps
+          below it. maxWidth keeps a very long name inside the card. */}
       <View flexDirection="row" alignItems="baseline" gap={10} flexWrap="wrap">
-        <MText size="xl2" weight="extraBold" flex={1}>
+        <MText size="xl2" weight="extraBold" flexGrow={1} flexShrink={0} maxWidth="100%">
           {mayuscula(x.para.concepto)}
         </MText>
         {/* A due template is vence ≤ 0 (`comoRecurrente` clamps), so it always reads red here. */}
