@@ -31,6 +31,15 @@ export async function borrarLoDe(createdBy: string): Promise<void> {
       await tx`DELETE FROM corp.recurring_templates WHERE created_by = ${createdBy}`;
       await tx`DELETE FROM corp.bank_balances WHERE confirmed_by = ${createdBy}`;
       await tx`DELETE FROM corp.period_events WHERE founder_id = ${createdBy}`;
+      const budgets = tx`SELECT id FROM corp.budgets WHERE prepared_by = ${createdBy}`;
+      await tx`DELETE FROM corp.budget_answers
+                WHERE founder_id = ${createdBy} OR budget_id IN (${budgets})`;
+      await tx`DELETE FROM corp.budget_lines WHERE budget_id IN (${budgets})`;
+      await tx`DELETE FROM corp.budgets WHERE prepared_by = ${createdBy}`;
+      const requests = tx`SELECT id FROM corp.spend_requests WHERE founder_id = ${createdBy}`;
+      await tx`DELETE FROM corp.spend_request_answers
+                WHERE founder_id = ${createdBy} OR request_id IN (${requests})`;
+      await tx`DELETE FROM corp.spend_requests WHERE founder_id = ${createdBy}`;
       // A lock is lifted only after both founders' approval (0013_zz); a test's
       // own lock goes with the triggers off, for this transaction alone.
       await tx`SET LOCAL session_replication_role = replica`;

@@ -10,3 +10,10 @@ export { annualCaps } from './limites.js';
 export { services } from './servicios.js';
 export { taxReturns } from './impuestos.js';
 export { bankBalances, periodEvents } from './cierre.js';
+export {
+  budgetAnswers,
+  budgetLines,
+  budgets,
+  spendRequestAnswers,
+  spendRequests,
+} from './presupuesto.js';

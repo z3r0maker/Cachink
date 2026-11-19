@@ -15,6 +15,7 @@ export type EmpresaHref =
   | '/empresa/resultados'
   | '/empresa/balance'
   | '/empresa/impuestos'
+  | '/empresa/presupuesto'
   | '/empresa/socios'
   | '/empresa/agenda'
   | '/empresa/cierre'
@@ -64,6 +65,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
       { label: 'Estado de resultados', href: '/empresa/resultados', task: 'E-12' },
       { label: 'Balance', href: '/empresa/balance', task: 'E-12' },
       { label: 'Impuestos', href: '/empresa/impuestos', task: 'E-13' },
+      { label: 'Presupuesto', href: '/empresa/presupuesto', task: 'E-22' },
     ],
   },
   {

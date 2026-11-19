@@ -1,7 +1,7 @@
 import type { EventoCierre } from '@xangarro/domain/corp';
 
 import { hrefCierre, type DatosCierre } from './cierre-view';
-import { fechaCorta, nombreMes } from './fechas';
+import { diaDe, fechaCorta, nombreMes } from './fechas';
 
 /**
  * «Meses de <año>» under board CD-10: each month of the year that has
@@ -31,7 +31,7 @@ export function cuandoFue(at: string): string {
   return `${fechaCorta(DIA.format(d))} a las ${HORA.format(d)}`;
 }
 
-const dia = (at: string) => fechaCorta(DIA.format(new Date(at)));
+const dia = diaDe;
 
 function respuesta(pedido: EventoCierre, e: EventoCierre, socio: (id: string) => string) {
   const [accion, verbo] =

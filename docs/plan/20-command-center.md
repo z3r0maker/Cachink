@@ -875,8 +875,33 @@ with property tests:
 
 ### E-22 Presupuesto `[baja]`
 
-- [ ] Status · **Blocked by:** E-12
-  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/presupuesto`. Detrás de E-12, que sólo le falta el memo de sweat-cost y los drivers.
+- [x] Status · **Blocked by:** E-12 (its remaining memo and drivers feed neither) · **Done:** 2026-11-19 (boards CD-15d and CD-15e, round 18 approved; replace round 4's CD-15; ADR-152)
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `presupuesto/`: the quarter's budget in force and the one waiting
+    (`presupuestoVigente`, `presupuestoPendiente`, `trimestreAPreparar`), who may prepare and answer
+    one; the Límite (`limiteDeGasto`, `mesesDelLimite`: the larger of $1,000.00 and 10 % of the
+    average income without IVA of the three whole months before); the requests outside the budget
+    (approved on their own inside the Límite, otherwise answered by the other founder, for less if
+    they choose); and spent and projected by category (`gastadoPorCategoria`,
+    `recurrentesPendientes`, `promedioNoRecurrente`, `proyeccionPorCategoria`).
+  - application: `prepararPresupuesto`, `responderPresupuesto`, `pedirGasto`, `responderSolicitud`.
+  - data-corp `0014`: `budgets`, `budget_lines`, `budget_answers`, `spend_requests`,
+    `spend_request_answers`, append-only; triggers refuse a second budget for a quarter and a founder
+    answering their own; the automatic approval is decided under an advisory lock per founder and
+    month. Migration test old → new.
+  - `/empresa/presupuesto`, Resultados' fourth tab: the month or the whole quarter (`?vista=trimestre`),
+    the budget in force and who approved it, the four tiles, the bars by category (each opens its
+    expenses in Movimientos), each founder's Límite and what they used of it, and «Fuera del
+    presupuesto» with the requests waiting on this founder. The panels (`?panel=preparar`, `aprobar`,
+    `pedir`, `otro`) prepare the next quarter from the one in force, or this one from last quarter's
+    spending; approve or reject; ask for a spend with whether it fits said live; and approve another
+    amount. The other founder gets an email, through the notice Cierre's reopening uses.
+  - Playwright: preparing, the other founder's rejection and their own budget approved here; the tiles
+    and the Límite against the ledger; a request inside the Límite; the other founder's request
+    approved for less; the quarter view.
+  - **Deviations from the board:** the category cards use Registrar's descriptions (one place for
+    them). The founder who prepared a budget sees «Enviaste el presupuesto…» with no button, a state the
+    board did not draw.
 - **What:** a quarterly budget by category and project; actual vs budget; each partner's Límite
   (the larger of the fixed amount and a % of the 3-month average income), computed live; spending
   over the Límite outside the budget flagged for both partners' approval.
