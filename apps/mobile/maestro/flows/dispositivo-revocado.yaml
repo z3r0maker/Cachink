@@ -31,8 +31,7 @@ tags:
     env:
       SCENARIO: revoked
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 # forgetDevice drops the token: the gate swaps the shell for Vincular
 # (gated-navigation.tsx: not activated → ActivationScreen).
 - extendedWaitUntil:

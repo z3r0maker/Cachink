@@ -32,6 +32,7 @@ export interface PillView {
     | 'syncPill.syncing'
     | 'syncPill.rejected'
     | 'syncPill.offline'
+    | 'syncPill.sinInternet'
     | 'syncPill.pending'
     | 'syncPill.synced'
     | 'syncPill.never'
@@ -68,6 +69,9 @@ export function pillView(state: CloudSyncState, ahora: number = Date.now()): Pil
     return { labelKey: 'syncPill.rejected', count: state.counts.rejected, tone: 'danger' };
   }
   const waiting = state.counts.unsent;
+  // Offline with nothing waiting is no count at all (R4: «0 sin enviar»).
+  if (state.phase === 'offline' && waiting === 0)
+    return { labelKey: 'syncPill.sinInternet', tone: 'warn' };
   if (state.phase === 'offline')
     return { labelKey: 'syncPill.offline', count: waiting, tone: 'warn' };
   const retry = reintentando(state, ahora);

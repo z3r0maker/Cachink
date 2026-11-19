@@ -1,19 +1,21 @@
 /**
  * A row the server refused, said the way the phone's «Registros por enviar»
  * says it (M-09): what the record is, the server's sentence in words the
- * operator can act on, and what to do next. Pure, so the tests pin every
- * wording; the sentences match the catalog's (`sync.errors.*`, es-MX) so the
- * phone and the portal tell the same story.
+ * operator can act on, and what to do next — never to capture it again,
+ * which would count it twice (R5). Pure, so the tests pin every wording; the
+ * sentences match the catalog's (`sync.errors.*`, es-MX) so the phone and
+ * the portal tell the same story.
  */
 
 import { formatMoney, type Money } from '@xangarro/domain';
+import { aDueno } from '../comun/dueno';
 
 /** What the sync engine reports about a refused row (`RejectedEntry`). */
 export interface RechazoCrudo {
   readonly tableName: string;
   readonly rowId: string;
   readonly code: string;
-  /** The raw server message, shown only when the code has no sentence. */
+  /** The raw server message: logged, never shown (it can be English). */
   readonly message: string;
   /** True while automatic retries are still scheduled. */
   readonly retryable: boolean;
@@ -59,18 +61,40 @@ const RAZON: Readonly<Record<string, string>> = {
   VALIDATION: 'El registro tiene datos que el servidor no acepta.',
   BUSINESS_MISMATCH: 'El registro pertenece a otro negocio.',
   TABLE_NOT_WRITABLE: 'Este tipo de registro solo se cambia en el portal.',
-  HYBRID_UPDATE: 'Los cambios a este registro se hacen en el portal.',
+  // The catalogue's own codes (`ERROR_CATALOG`, contracts): `HYBRID_UPDATE`
+  // and `DUPLICATE` never arrived, so those fell to the server's English (R5).
+  HYBRID_UPDATE_FORBIDDEN: 'Los cambios a este registro se hacen en el portal.',
+  BUSINESS_SUSPENDED: 'El negocio está suspendido en el portal.',
   FK_PRODUCT_MISSING: 'El producto de este registro ya no existe en el portal.',
   FK_USER_MISSING: 'El operador de este registro ya no existe en el portal.',
   FK_CLIENT_MISSING: 'El cliente de este registro ya no existe en el portal.',
-  DUPLICATE: 'El servidor ya tiene un registro distinto con este mismo identificador.',
+  FK_MENSAJE_MISSING: 'El aviso que respondiste ya no existe en el portal.',
+  DUPLICATE_CONFLICT: 'El servidor ya tiene un registro distinto con este mismo identificador.',
 };
 
-const PISTA: Readonly<Record<string, string>> = {
-  FK_PRODUCT_MISSING: 'El producto fue eliminado — regístrala con otro producto.',
-  FK_CLIENT_MISSING: 'El cliente fue eliminado — regístrala sin cliente o con otro.',
-  FK_USER_MISSING: 'El operador fue eliminado en el portal.',
-};
+/** Said when the code is one this version doesn't know: never the server's words. */
+const RAZON_DESCONOCIDA = 'El servidor no aceptó este registro.';
+
+/** The records said in the feminine («la venta»); the rest are «lo». */
+const FEMENINO: ReadonlySet<string> = new Set(['sales', 'cancelacion_logs']);
+
+/** Capturing it again would count it twice: the row is still on the device. */
+const noOtraVez = (tabla: string): string =>
+  `No ${FEMENINO.has(tabla) ? 'la' : 'lo'} vuelvas a capturar: se contaría dos veces.`;
+
+/** What the owner can do in the portal, then the retry (RvEnvio). */
+function pista(code: string, tabla: string, dueno: string): string | null {
+  const pide = `Pídele ${aDueno(dueno)}`;
+  if (code === 'FK_PRODUCT_MISSING' || code === 'FK_CLIENT_MISSING') {
+    const que = code === 'FK_PRODUCT_MISSING' ? 'el producto' : 'el cliente';
+    return `${pide} que recupere ${que} en el portal y toca Reintentar. ${noOtraVez(tabla)}`;
+  }
+  if (code === 'FK_USER_MISSING') return `${pide} que revise en el portal al operador.`;
+  if (code === 'DUPLICATE_CONFLICT')
+    return `${pide} que lo revise en el portal. ${noOtraVez(tabla)}`;
+  if (code === 'BUSINESS_SUSPENDED') return `${pide} que lo revise en el portal.`;
+  return null;
+}
 
 function texto(row: Readonly<Record<string, unknown>> | null, campo: string): string | null {
   const v = row?.[campo];
@@ -91,10 +115,14 @@ export function detalleRechazo(row: Readonly<Record<string, unknown>> | null): s
     .join(' · ');
 }
 
-/** The refused row's face; the row itself may be gone (null), the refusal stays. */
+/**
+ * The refused row's face; the row itself may be gone (null), the refusal
+ * stays. `dueno` is the owner as the caja says them, «el dueño» until known.
+ */
 export function describeRechazado(
   r: RechazoCrudo,
   row: Readonly<Record<string, unknown>> | null,
+  dueno = 'el dueño',
 ): RechazoVisto {
   return {
     key: `${r.tableName}:${r.rowId}`,
@@ -102,8 +130,8 @@ export function describeRechazado(
     fila: r.rowId,
     titulo: CLASE[r.tableName] ?? 'Registro',
     detalle: detalleRechazo(row),
-    razon: RAZON[r.code] ?? r.message,
-    pista: PISTA[r.code] ?? null,
+    razon: RAZON[r.code] ?? RAZON_DESCONOCIDA,
+    pista: pista(r.code, r.tableName, dueno),
     reintentando: r.retryable,
   };
 }

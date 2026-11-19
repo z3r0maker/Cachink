@@ -1,0 +1,22 @@
+# Reusable subflow: send now (RvEnvio, R4). The pill opens «Registros por
+# enviar», and its hero's button runs the manual flush («Reintentar envío»,
+# «Enviar de nuevo» when everything already went). Off-centre on the pill on
+# purpose: offline, the header hides the bell and the pill slides right,
+# under the parked dev-menu gear (entry-setup.sh).
+#
+# Usage:
+#   - runFlow: shared/enviar-ahora.yaml
+#
+# Precondition: a screen whose header has the live pill (headerStatus full).
+# Leaves «Registros por enviar» open; the tabs stay under it.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'cloud-sync-pill'
+    point: '25%,50%'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-por-enviar'
+    timeout: 10000
+- tapOn:
+    id: 'por-enviar-reintentar'

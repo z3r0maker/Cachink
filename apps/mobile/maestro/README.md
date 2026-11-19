@@ -117,6 +117,7 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)                              |
 | `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                    |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
+| `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
 | `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                               |

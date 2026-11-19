@@ -20,6 +20,7 @@ import {
   type HeroeCola,
   type RechazoVisto,
 } from '@xangarro/caja/pendientes';
+import { Don } from '../../components/Don/index';
 import { MText } from '../../components/Mostrador/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
 import { PathIcon } from '../../components/PathIcon/index';
@@ -128,15 +129,28 @@ function Heroe(p: PorEnviarScreenProps & { readonly fase: FaseCola }): ReactElem
   );
 }
 
+/** Don beside his note (RvEnvio): nothing is lost, and the turno still closes. */
 function NadaSePierde(): ReactElement {
   return (
-    <View testID="por-enviar-nota" padding={16} gap={6} alignItems="center">
-      <MText size="sm" weight="extraBold">
-        {NOTA_NADA_SE_PIERDE.titulo}
-      </MText>
-      <MText size="xs" weight="semibold" color={colors.gray600} textAlign="center" lineHeight={17}>
-        {NOTA_NADA_SE_PIERDE.cuerpo}
-      </MText>
+    <View testID="por-enviar-nota" flexDirection="row" alignItems="center" gap={10}>
+      <Don pose="ayuda" size={76} />
+      <View
+        flex={1}
+        gap={3}
+        paddingVertical={10}
+        paddingHorizontal={12}
+        borderRadius={radii[4]}
+        borderWidth={borderWidths.thick}
+        borderColor={colors.black}
+        backgroundColor={colors.yellowSoft}
+      >
+        <MText size="md" weight="extraBold">
+          {NOTA_NADA_SE_PIERDE.titulo}
+        </MText>
+        <MText size="sm" weight="semibold" color={colors.ink} lineHeight={18}>
+          {NOTA_NADA_SE_PIERDE.cuerpo}
+        </MText>
+      </View>
     </View>
   );
 }

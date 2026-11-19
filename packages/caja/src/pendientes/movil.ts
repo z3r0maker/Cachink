@@ -46,7 +46,8 @@ export function heroeTelefono(
     return {
       eyebrow: 'Enviando',
       titulo: `Enviando ${cuenta(enviando, 'registro', 'registros')}…`,
-      cuerpo: 'En cuanto suban, el turno se puede cerrar.',
+      // The turno closes with rows still to send (ADR-123): never «wait».
+      cuerpo: 'Puedes seguir cobrando y cerrar el turno mientras suben.',
       boton: 'Enviando…',
     };
   }
@@ -73,11 +74,13 @@ export function heroeTelefono(
   return heroeEspera(fase === 'sin-internet', cola);
 }
 
-/** Don Cuentas' note under the queue: nothing is lost, and why the close waits. */
+/**
+ * Don Cuentas' note under the queue (RvEnvio): nothing is lost, and the turno
+ * closes with rows still to send, as Cierre says (R3, ADR-123).
+ */
 export const NOTA_NADA_SE_PIERDE = {
   titulo: 'Nada se pierde',
-  cuerpo:
-    'Lo que capturas vive en esta caja hasta que suba. No borres los datos de la app. No podrás cerrar el turno hasta que se envíe.',
+  cuerpo: 'Puedes cerrar el turno; se envían cuando vuelva la conexión.',
 } as const;
 
 /** The sync run's phase, as the bridge reports it (`CloudSyncPhase`). */
