@@ -6,20 +6,18 @@
  * Each returns the line the sheet confirms with.
  */
 import { Linking, Platform } from 'react-native';
+import { abrirChatWhatsApp, type AperturaWhatsApp } from '../../app/abrir-whatsapp';
 import { porMenu } from '../Checkout/comprobante-acciones';
 import { digitosTel } from './cobranza-logic';
 
+const AVISO_WHATSAPP: Readonly<Record<AperturaWhatsApp, string>> = {
+  app: 'Se abrió WhatsApp con el mensaje listo. Dale enviar.',
+  enlace: 'Abrimos el enlace de WhatsApp. Si no tienes la app, usa Mensajes o Compartir.',
+  fallo: 'No se pudo abrir WhatsApp en este teléfono. Usa Mensajes o Compartir.',
+};
+
 export async function recordarPorWhatsApp(tel: string, texto: string): Promise<string> {
-  const numero = `52${digitosTel(tel)}`;
-  const t = encodeURIComponent(texto);
-  const app = `whatsapp://send?phone=${numero}&text=${t}`;
-  try {
-    const hay = await Linking.canOpenURL(app);
-    await Linking.openURL(hay ? app : `https://wa.me/${numero}?text=${t}`);
-    return 'Se abrió WhatsApp con el mensaje listo. Dale enviar.';
-  } catch {
-    return 'No se pudo abrir WhatsApp en este teléfono.';
-  }
+  return AVISO_WHATSAPP[await abrirChatWhatsApp({ texto, numero: `52${digitosTel(tel)}` })];
 }
 
 export async function recordarPorMensaje(tel: string, texto: string): Promise<string> {

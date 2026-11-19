@@ -6,16 +6,16 @@
  * and «Imprimir» is left out. Each returns the line the sheet confirms with.
  */
 import { Linking, Platform, Share } from 'react-native';
+import { abrirChatWhatsApp, type AperturaWhatsApp } from '../../app/abrir-whatsapp';
+
+const AVISO_WHATSAPP: Readonly<Record<AperturaWhatsApp, string>> = {
+  app: 'Se abrió WhatsApp. Escoge el contacto y dale enviar.',
+  enlace: 'Abrimos el enlace de WhatsApp. Si no tienes la app, usa Mensajes o Copiar o compartir.',
+  fallo: 'No se pudo abrir WhatsApp en este teléfono. Usa Mensajes o Copiar o compartir.',
+};
 
 export async function porWhatsApp(texto: string): Promise<string> {
-  const t = encodeURIComponent(texto);
-  const app = `whatsapp://send?text=${t}`;
-  try {
-    await Linking.openURL((await Linking.canOpenURL(app)) ? app : `https://wa.me/?text=${t}`);
-    return 'Se abrió WhatsApp. Escoge el contacto y dale enviar.';
-  } catch {
-    return 'No se pudo abrir WhatsApp en este teléfono.';
-  }
+  return AVISO_WHATSAPP[await abrirChatWhatsApp({ texto })];
 }
 
 export async function porMensaje(texto: string): Promise<string> {

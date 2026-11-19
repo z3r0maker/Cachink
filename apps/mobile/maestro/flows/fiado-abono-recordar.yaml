@@ -1,7 +1,7 @@
 # Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza*): Inicio's
 # atajo opens /fiado; a client's account opens its sheet; «Recibir abono»
 # takes the quick «Todo» and a método, and the saldo drops; «Recordarle por
-# WhatsApp» composes the message in the sheet (nothing external is asserted).
+# WhatsApp» composes the message and hands it to the phone.
 #
 # The fixture clients carry no phone (fixtures.ts:129) and nobody owes
 # anything, so the flow first charges a fiado Gringa to a NEW client with a
@@ -114,8 +114,7 @@ tags:
 - assertVisible: '.*5512345678.*'
 
 # «Recordarle por WhatsApp»: the number came prefilled and the message
-# composed (editing it offers the original back). The sheet only opens
-# WhatsApp — nothing outside the app is asserted.
+# composed (editing it offers the original back).
 - tapOn: { id: 'cuenta-recordar' }
 - extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
 - assertVisible: '.*Recordarle su saldo a Don Beto.*'
@@ -123,8 +122,28 @@ tags:
 - assertVisible: '.*Se abre WhatsApp con el mensaje listo. Tú decides si lo mandas\..*'
 - tapOn: { id: 'recordar-mensaje' }
 - inputText: 'Nos vemos!'
+# On a fresh simulator iOS lays its one-time keyboard tip over the sheet.
+- tapOn: { text: 'Continue', optional: true }
 - assertVisible: { id: 'recordar-restaurar' }
 - tapOn: { id: 'recordar-restaurar' }
+- tapOn: { id: 'recordar-sheet-close' }
+- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+
+# «Abrir WhatsApp» on a fresh sheet. A simulator has no WhatsApp, so it falls
+# to the wa.me link in the browser; back in the app, the sheet says so. No
+# field is focused: with the keyboard up the sheet's close rides under the
+# status bar, where iOS now draws «◀ Safari» and takes the tap.
+- tapOn: { id: 'cuenta-recordar' }
+- extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
+- tapOn: { id: 'recordar-abrir' }
+- extendedWaitUntil:
+    notVisible: { id: 'recordar-abrir' }
+    timeout: 10000
+- launchApp:
+    appId: mx.xangarro.mobile
+    stopApp: false
+- extendedWaitUntil: { visible: { id: 'recordar-aviso' }, timeout: 10000 }
+- assertVisible: '.*Abrimos el enlace de WhatsApp\. Si no tienes la app, instálala para mandarlo\..*'
 - tapOn: { id: 'recordar-sheet-close' }
 - extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
 
