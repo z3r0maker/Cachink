@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
-import type { TurnoData } from '@xangarro/caja/turno';
+import { notaFondo, type TurnoData } from '@xangarro/caja/turno';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow, HeroPanel } from '../../components/Panel/index';
@@ -24,7 +24,7 @@ function partes(d: TurnoData): readonly {
   readonly rojo?: boolean;
 }[] {
   return [
-    { label: 'Fondo de caja', nota: 'con el que abriste', valor: formatMoney(d.fondo) },
+    { label: 'Fondo de caja', nota: notaFondo(d.titular), valor: formatMoney(d.fondo) },
     { label: 'Ventas en efectivo', valor: `+${formatMoney(d.ventasEfectivo)}` },
     { label: 'Abonos en efectivo', valor: `+${formatMoney(d.abonosEfectivo)}` },
     { label: 'Gastos de caja chica', valor: `−${formatMoney(d.gastosEfectivo)}`, rojo: true },

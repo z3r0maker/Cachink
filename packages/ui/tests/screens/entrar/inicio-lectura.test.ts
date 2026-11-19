@@ -1,8 +1,9 @@
 /**
- * leerFilasInicio (M-06): whose turno Inicio reads. The regression clause's
- * stuck-operator case lives here — a colleague's synced OPEN turno must not
- * dress the hero as «la caja está lista» (Cobrar gates on the operator's OWN
- * turno, and a ready hero hides the one «Abrir turno»).
+ * leerFilasInicio (M-06, M-18): which turno Inicio reads. One open turno per
+ * caja (ADR-071 §3): the caja's open turno is everyone's, whoever opened it,
+ * and Cobrar reads the same one, so the hero and the gate never disagree (the
+ * stuck-operator case M-06 fixed). Continuing it or closing it is the choice
+ * right after the NIP.
  */
 import { describe, expect, it } from 'vitest';
 import type { BusinessId, CajaTurno, UserId } from '@xangarro/domain';
@@ -48,8 +49,10 @@ function turno(p: Partial<CajaTurno>): CajaTurno {
 function repos(turnos: readonly CajaTurno[]) {
   return {
     cajaTurnos: {
-      findOpenByUser: async (userId: UserId) =>
-        turnos.find((t) => t.userId === userId && t.cierreAt === null) ?? null,
+      findOpenByBusiness: async () =>
+        [...turnos]
+          .filter((t) => t.cierreAt === null)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
       findLatest: async () =>
         [...turnos].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
       findByDateRange: async () => turnos,
@@ -65,38 +68,31 @@ function repos(turnos: readonly CajaTurno[]) {
 }
 
 describe('leerFilasInicio — whose turno', () => {
-  it("reads the operator's own open turno", async () => {
-    const filas = await leerFilasInicio(
-      repos([turno({ id: 'mio' }), turno({ id: 'ajena', userId: ANA })]),
-      BUSINESS,
-      TONI,
-      HOY,
-    );
+  it("reads the caja's open turno", async () => {
+    const filas = await leerFilasInicio(repos([turno({ id: 'mio' })]), BUSINESS, HOY);
     expect(filas.turno?.id).toBe('mio');
   });
 
-  it('a colleague’s open turno is not my Inicio: no turno, so the hero offers «Abrir turno»', async () => {
+  it('a colleague’s open turno is the caja’s: Inicio reads it (M-18)', async () => {
     const filas = await leerFilasInicio(
       repos([turno({ id: 'ajena-abierta', userId: ANA, createdAt: '2026-05-14T09:00:00.000Z' })]),
       BUSINESS,
-      TONI,
       HOY,
     );
-    expect(filas.turno).toBeNull();
+    expect(filas.turno?.id).toBe('ajena-abierta');
   });
 
   it('a closed turno still backs the day’s figures after the cierre', async () => {
     const filas = await leerFilasInicio(
       repos([turno({ id: 'cerrado', cierreAt: '2026-05-14T21:00:00.000Z' })]),
       BUSINESS,
-      TONI,
       HOY,
     );
     expect(filas.turno?.id).toBe('cerrado');
   });
 
   it('a first day on the device reads with no turno at all', async () => {
-    const filas = await leerFilasInicio(repos([]), BUSINESS, TONI, HOY);
+    const filas = await leerFilasInicio(repos([]), BUSINESS, HOY);
     expect(filas.turno).toBeNull();
   });
 });

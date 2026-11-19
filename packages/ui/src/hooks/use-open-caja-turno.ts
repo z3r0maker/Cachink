@@ -1,10 +1,11 @@
 /**
- * useOpenCajaTurno — query the currently open CajaTurno for the logged-in user.
+ * useOpenCajaTurno — the caja's open CajaTurno, whoever opened it (M-18,
+ * ADR-071 §3: one open turno per caja; sales attach to it).
  *
  * Returns `{ userId, openTurno, isLoading }`. `openTurno` is null when:
  *   - No user is logged in
- *   - The user hasn't opened a turno yet
- *   - The user's turno has been closed
+ *   - Nobody has opened a turno on this caja yet
+ *   - The caja's turno has been closed
  *
  * Shared by the shell and the Cobrar route's caja gate.
  */
@@ -24,8 +25,8 @@ export function useOpenCajaTurno(): {
   const turnosRepo = useCajaTurnosRepository();
   const openTurnoQ = useQuery({
     queryKey: [...cajaKeys.openByUser(businessId as BusinessId | null), userId],
-    queryFn: () => (userId ? turnosRepo.findOpenByUser(userId) : null),
-    enabled: userId !== null,
+    queryFn: () => (businessId ? turnosRepo.findOpenByBusiness(businessId as BusinessId) : null),
+    enabled: userId !== null && businessId !== null,
   });
   return {
     userId,

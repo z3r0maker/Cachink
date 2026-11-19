@@ -10,14 +10,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RegistrarPagoClienteUseCase } from '@xangarro/application';
 import { hoyLocal } from '@xangarro/caja';
 import type { MetodoAbono } from '@xangarro/caja/cobranza';
-import type { BusinessId, ClientId, ClientPayment, IsoDate, Money, UserId } from '@xangarro/domain';
+import type { BusinessId, ClientId, ClientPayment, IsoDate, Money } from '@xangarro/domain';
 import {
   useCajaTurnosRepository,
   useClientPaymentsRepository,
   useClientsRepository,
 } from '../../app/index';
 import { useCurrentBusinessId } from '../../app-config/index';
-import { useUserId } from '../../app-config/use-app-config';
 import { AUDIT_REGISTRAR_PAGO } from '../../observability/audit-configs';
 import { useAuditedUseCase } from '../../observability/use-audited-use-case';
 
@@ -34,7 +33,6 @@ export function useRegistrarAbono() {
   const payments = useClientPaymentsRepository();
   const clients = useClientsRepository();
   const turnos = useCajaTurnosRepository();
-  const userId = useUserId();
   const base = useMemo(
     () => new RegistrarPagoClienteUseCase(payments, clients),
     [payments, clients],
@@ -45,8 +43,8 @@ export function useRegistrarAbono() {
   return useMutation<ClientPayment, Error, AbonoInput>({
     async mutationFn(i) {
       if (!businessId) throw new Error('No hay negocio en esta caja');
-      // The drawer that receives it: the operator's open turno (ADR-146).
-      const turno = userId ? await turnos.findOpenByUser(userId as UserId) : null;
+      // The drawer that receives it: the caja's open turno (ADR-146, M-18).
+      const turno = await turnos.findOpenByBusiness(businessId as BusinessId);
       return useCase.execute({
         clienteId: i.clienteId as ClientId,
         fecha: hoyLocal() as IsoDate,

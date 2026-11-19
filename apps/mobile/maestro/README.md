@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 65 flows + 24 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 66 flows + 25 shared subflows and scripts; `full-regression.sh` runs the curated 41 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -102,33 +102,34 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 
 ### Shared subflows and scripts
 
-| File                               | Purpose                                                                                             |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `shared/dismiss-modals.yaml`       | Dismisses the dev-client sheets on cold boot                                                        |
-| `shared/prime-dev-client.yaml`     | Points the dev client at Metro and waits for the bundle                                             |
-| `shared/setup-activated.yaml`      | The `activated` entry: mock reset, activation, Toni, one sync cycle                                 |
-| `shared/login-operator.yaml`       | Picks Toni on Acceso and types 1234; no-op when already signed in                                   |
-| `shared/ensure-caja-open.yaml`     | Opens a turno with the $500 fondo when none is open                                                 |
-| `shared/abrir-turno-aqui.yaml`     | Opens the turno from the current screen with its `${CTA}` and the $500 fondo                        |
-| `shared/abrir-atajo.yaml`          | Opens an Inicio shortcut tile (`${ATAJO}`), scrolled clear of the tab bar; deep-links on the tablet |
-| `shared/lock-caja.yaml`            | «Bloquear la caja» from Mi turno                                                                    |
-| `shared/create-venta.yaml`         | One cash sale of the first catalogue tile                                                           |
-| `shared/cobrar-ticket.yaml`        | Charges the ticket on Cobrar with `${METODO}` (phone and tablet branches)                           |
-| `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)                              |
-| `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                    |
-| `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                     |
-| `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                            |
-| `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
-| `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                |
-| `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
-| `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)          |
-| `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
-| `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                               |
-| `shared/mock-reset.js`             | `POST /__mock/reset`                                                                                |
-| `shared/mock-row.js`               | `POST /__mock/forget` or `/restore` for one row                                                     |
-| `shared/mock-scenario.js`          | `POST /__mock/scenario` with an optional records-per-month override                                 |
-| `shared/mock-down.js`              | `POST /__mock/down` or `/up`                                                                        |
-| `shared/mock-snapshot-budget.js`   | `POST /__mock/snapshot-budget`                                                                      |
+| File                               | Purpose                                                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `shared/dismiss-modals.yaml`       | Dismisses the dev-client sheets on cold boot                                                          |
+| `shared/prime-dev-client.yaml`     | Points the dev client at Metro and waits for the bundle                                               |
+| `shared/setup-activated.yaml`      | The `activated` entry: mock reset, activation, Toni, one sync cycle                                   |
+| `shared/login-operator.yaml`       | Picks Toni on Acceso and types 1234; no-op when already signed in                                     |
+| `shared/ensure-caja-open.yaml`     | Opens a turno with the $500 fondo when none is open                                                   |
+| `shared/abrir-turno-aqui.yaml`     | Opens the turno from the current screen with its `${CTA}` and the $500 fondo                          |
+| `shared/seguir-turno-abierto.yaml` | Continues the caja's open turno when another operator's is open after a NIP (M-18); a no-op otherwise |
+| `shared/abrir-atajo.yaml`          | Opens an Inicio shortcut tile (`${ATAJO}`), scrolled clear of the tab bar; deep-links on the tablet   |
+| `shared/lock-caja.yaml`            | «Bloquear la caja» from Mi turno                                                                      |
+| `shared/create-venta.yaml`         | One cash sale of the first catalogue tile                                                             |
+| `shared/cobrar-ticket.yaml`        | Charges the ticket on Cobrar with `${METODO}` (phone and tablet branches)                             |
+| `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)                                |
+| `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                      |
+| `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                       |
+| `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                              |
+| `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                               |
+| `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                  |
+| `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                               |
+| `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)            |
+| `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                          |
+| `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                                 |
+| `shared/mock-reset.js`             | `POST /__mock/reset`                                                                                  |
+| `shared/mock-row.js`               | `POST /__mock/forget` or `/restore` for one row                                                       |
+| `shared/mock-scenario.js`          | `POST /__mock/scenario` with an optional records-per-month override                                   |
+| `shared/mock-down.js`              | `POST /__mock/down` or `/up`                                                                          |
+| `shared/mock-snapshot-budget.js`   | `POST /__mock/snapshot-budget`                                                                        |
 
 ### Test credentials (the contracts mock)
 
@@ -212,7 +213,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — 41 per-screen flows — in dependency
+now runs the M-11 curated suite — 42 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
@@ -223,12 +224,12 @@ turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 | 4–8   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, comprobante-whatsapp, fiado-abono-recordar                                                                                          |
 | 9–10  | gastos-registrar, gastos-pagar-recurrente                                                                                                                                                    |
 | 11–18 | mi-turno, por-enviar, cancelaciones-nav, turno-cerrado-abrir, cierre-sin-turno, avisos-responder, inventario-llego-merma, esperado-tras-llegada                                              |
-| 19–23 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante, cierre-otro-turno                                                                                                 |
-| 24–30 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
-| 31–32 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
-| 33–36 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
-| 37–38 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
-| 39–41 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
+| 19–24 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante, cierre-otro-turno, turno-de-otro                                                                                  |
+| 25–31 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
+| 32–33 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
+| 34–37 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
+| 38–39 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
+| 40–42 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).
@@ -237,7 +238,7 @@ the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ## Flow Inventory (grouped by feature area)
 
-Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
+Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
 
 ### Vincular y acceso
 
@@ -293,28 +294,29 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 
 ### Mi turno y cierre
 
-| Flow                               | Entry     | Suite | What it proves                                                                                                                                                                                                   |
-| ---------------------------------- | --------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mi-turno.yaml`                    | activated | ✓     | Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno — the hero with the cash that must be in the draw                                                                                         |
-| `caja-abrir-cerrar.yaml`           | activated | ✓     | Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old CajaContent flow — caja-status-card, blind-c                                                                                         |
-| `turno-cerrado-abrir.yaml`         | activated | ✓     | Turno cerrado (MvTurnoCerrado): Cobrar, Ventas and Mi turno each open the fondo sheet with one tap, «Ahorita no» stays put, and opening from Mi turno stays on Mi turno.                                         |
-| `cierre-sin-turno.yaml`            | activated | ✓     | Cierre with no turno (MvTurnoCerrado): nothing to close, «Abrir turno» opens the sheet there and the operator continues on Inicio.                                                                               |
-| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's «Cerrar mi turno», step 1 counts the d                                                                                                   |
-| `cierre-otro-turno.yaml`           | activated | ✓     | Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed turno never reopens; to keep selling, the                                                                                               |
-| `cierre-faltante.yaml`             | activated | ✓     | Cierre con faltante (Track M, M-09): count short of the expected, the diferencia turns red, asks its motivo and names th                                                                                         |
-| `cierre-sobrante.yaml`             | activated | ✓     | Cierre con sobrante (M-09, J4-25): count over the expected, its own hint, a motivo still required, «Sobrante» with the motivo in its line.                                                                       |
-| `cobrar-efectivo-falta.yaml`       | activated | ✓     | Short cash (J4-06): $20 typed against $25 turns the card red «Todavía falta» and keeps «Cobrar» disabled; $30 pays, «Venta hecha» says «Pagó con $30.00».                                                        |
-| `cobrar-ticket-largo.yaml`         | activated | ✓     | A long ticket (J4-10): twelve products, the bar counts twelve pieces, the sheet opens with total and «Cobrar $482.50» pinned; no phone «Deshacer» — a sale is undone from Ventas.                                |
-| `cobrar-ultima-pieza.yaml`         | activated | ✓     | Last unit and one more (J4-13, ADR-065): «Llegó mercancía» +1 Torta → «Quedan 1» → sale → «Quedan 0» → second sale goes through; every surface clamps at 0.                                                      |
-| `cobrar-desde-inventario.yaml`     | activated | ✓     | A sale started from a stack route (F21): Mi turno → Inventario → the Cobrar tab with Inventario open → «Venta hecha» on Cobrar, no way back to Inventario under it, nothing left over on Mi turno.               |
-| `esperado-tras-llegada.yaml`       | activated | ✓     | One expected cash after «Llegó mercancía» (F23, O-03): Inicio's «Efectivo esperado» and Mi turno's «Debe haber» read the same figure before and after the entrada; Gastos does not list its «Compra inventario». |
-| `venta-fiado-cancelar.yaml`        | activated | ✓     | Cancelling a fiado (J4-16): a Gringa on Don Pedro's account, the sheet's fiado note, PIN → motivo shows the saldo-a-favor consequence, no cash step, the row stays, cancelled.                                   |
-| `interrupcion-matar-ticket.yaml`   | activated | ✓     | The app killed mid-ticket (J4-32): the ticket comes back empty, never half-charged, and the open turno survives.                                                                                                 |
-| `interrupcion-rotar-ticket.yaml`   | activated | ✓     | Rotation mid-ticket (J4-31): landscape and back keeps both lines and the ticket still opens.                                                                                                                     |
-| `interrupcion-bloqueo-ticket.yaml` | activated |       | Backgrounded past the five-minute auto-lock with a ticket open (J4-33): Bloqueo, the NIP, the same ticket. Slow (about six minutes).                                                                             |
-| `caja-cierre-discrepancia.yaml`    | activated | ✓     | Cierre with a diferencia explained by its own note (M-09; the old flow's CountResultStep dropdown + explicación is gone)                                                                                         |
-| `avisos-responder.yaml`            | activated | ✓     | Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread count, /avisos lists the owner's messages, and                                                                                          |
-| `avisos-sin-internet.yaml`         | activated |       | Avisos without internet (RvAvisosSinInternet, R6): the stored messages and the bell stay, a reply is saved for the outbox.                                                                                       |
+| Flow                               | Entry     | Suite | What it proves                                                                                                                                                                                                                  |
+| ---------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mi-turno.yaml`                    | activated | ✓     | Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno — the hero with the cash that must be in the draw                                                                                                        |
+| `caja-abrir-cerrar.yaml`           | activated | ✓     | Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old CajaContent flow — caja-status-card, blind-c                                                                                                        |
+| `turno-cerrado-abrir.yaml`         | activated | ✓     | Turno cerrado (MvTurnoCerrado): Cobrar, Ventas and Mi turno each open the fondo sheet with one tap, «Ahorita no» stays put, and opening from Mi turno stays on Mi turno.                                                        |
+| `cierre-sin-turno.yaml`            | activated | ✓     | Cierre with no turno (MvTurnoCerrado): nothing to close, «Abrir turno» opens the sheet there and the operator continues on Inicio.                                                                                              |
+| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's «Cerrar mi turno», step 1 counts the d                                                                                                                  |
+| `cierre-otro-turno.yaml`           | activated | ✓     | Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed turno never reopens; to keep selling, the                                                                                                              |
+| `turno-de-otro.yaml`               | activated | ✓     | One open turno per caja (Track M, M-18; board MvTurnoDeOtro; ADR-071 §3): Ana signs in over Toni's open turno, continues it (Mi turno «Sigues el turno de Toni»), and after a restart counts and closes it, then opens her own. |
+| `cierre-faltante.yaml`             | activated | ✓     | Cierre con faltante (Track M, M-09): count short of the expected, the diferencia turns red, asks its motivo and names th                                                                                                        |
+| `cierre-sobrante.yaml`             | activated | ✓     | Cierre con sobrante (M-09, J4-25): count over the expected, its own hint, a motivo still required, «Sobrante» with the motivo in its line.                                                                                      |
+| `cobrar-efectivo-falta.yaml`       | activated | ✓     | Short cash (J4-06): $20 typed against $25 turns the card red «Todavía falta» and keeps «Cobrar» disabled; $30 pays, «Venta hecha» says «Pagó con $30.00».                                                                       |
+| `cobrar-ticket-largo.yaml`         | activated | ✓     | A long ticket (J4-10): twelve products, the bar counts twelve pieces, the sheet opens with total and «Cobrar $482.50» pinned; no phone «Deshacer» — a sale is undone from Ventas.                                               |
+| `cobrar-ultima-pieza.yaml`         | activated | ✓     | Last unit and one more (J4-13, ADR-065): «Llegó mercancía» +1 Torta → «Quedan 1» → sale → «Quedan 0» → second sale goes through; every surface clamps at 0.                                                                     |
+| `cobrar-desde-inventario.yaml`     | activated | ✓     | A sale started from a stack route (F21): Mi turno → Inventario → the Cobrar tab with Inventario open → «Venta hecha» on Cobrar, no way back to Inventario under it, nothing left over on Mi turno.                              |
+| `esperado-tras-llegada.yaml`       | activated | ✓     | One expected cash after «Llegó mercancía» (F23, O-03): Inicio's «Efectivo esperado» and Mi turno's «Debe haber» read the same figure before and after the entrada; Gastos does not list its «Compra inventario».                |
+| `venta-fiado-cancelar.yaml`        | activated | ✓     | Cancelling a fiado (J4-16): a Gringa on Don Pedro's account, the sheet's fiado note, PIN → motivo shows the saldo-a-favor consequence, no cash step, the row stays, cancelled.                                                  |
+| `interrupcion-matar-ticket.yaml`   | activated | ✓     | The app killed mid-ticket (J4-32): the ticket comes back empty, never half-charged, and the open turno survives.                                                                                                                |
+| `interrupcion-rotar-ticket.yaml`   | activated | ✓     | Rotation mid-ticket (J4-31): landscape and back keeps both lines and the ticket still opens.                                                                                                                                    |
+| `interrupcion-bloqueo-ticket.yaml` | activated |       | Backgrounded past the five-minute auto-lock with a ticket open (J4-33): Bloqueo, the NIP, the same ticket. Slow (about six minutes).                                                                                            |
+| `caja-cierre-discrepancia.yaml`    | activated | ✓     | Cierre with a diferencia explained by its own note (M-09; the old flow's CountResultStep dropdown + explicación is gone)                                                                                                        |
+| `avisos-responder.yaml`            | activated | ✓     | Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread count, /avisos lists the owner's messages, and                                                                                                         |
+| `avisos-sin-internet.yaml`         | activated |       | Avisos without internet (RvAvisosSinInternet, R6): the stored messages and the bell stay, a reply is saved for the outbox.                                                                                                      |
 
 ### Sincronización y sin internet
 

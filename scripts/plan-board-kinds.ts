@@ -73,12 +73,12 @@ const CONSOLES = new Set(
  * thresholds, or time after launch. Each carries its Trigger in the track. */
 const WAITS = new Set(
   ids(
-    'X-04 N-30 Z-01 Z-02 Z-04 Z-05 Z-07 Z-08 Z-11 N-51 N-52 N-54 N-63 N-64 N-71 N-72 N-73 N-74 K-30',
+    'X-04 N-30 Z-01 Z-02 Z-04 Z-05 Z-07 Z-08 Z-11 Z-13 N-51 N-52 N-54 N-63 N-64 N-71 N-72 N-73 N-74 K-30',
   ),
 );
 
 const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
-  Teléfono: ids('N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-17 K-13 K-24'),
+  Teléfono: ids('N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-17 M-18 K-13 K-24'),
   Portal: ids(
     'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 K-12 K-23 N-83',
   ),

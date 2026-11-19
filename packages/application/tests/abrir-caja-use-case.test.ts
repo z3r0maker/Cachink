@@ -5,6 +5,8 @@ import { AbrirCajaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER = '01HZ8XQN9GZJXV8AKQ5X0C7SR1' as UserId;
+const OTRO = '01HZ8XQN9GZJXV8AKQ5X0C7SR2' as UserId;
+const OTRO_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7XBZ' as BusinessId;
 
 describe('AbrirCajaUseCase', () => {
   let turnos: InMemoryCajaTurnosRepository;
@@ -64,5 +66,60 @@ describe('AbrirCajaUseCase', () => {
     });
     expect(turno.conteoCentavos).toBeNull();
     expect(turno.conteoAt).toBeNull();
+  });
+
+  // M-18, ADR-071 §3: one open turno per caja, whoever asks.
+  it('refuses a second operator while the caja has an open turno', async () => {
+    await useCase.execute({
+      userId: USER,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
+    });
+    await expect(
+      useCase.execute({
+        userId: OTRO,
+        fecha: '2026-05-09',
+        montoAperturaCentavos: 3000n,
+        businessId: BIZ,
+      }),
+    ).rejects.toThrow(/Ya hay un turno abierto en esta caja/);
+    expect(await turnos.findOpenByUser(OTRO)).toBeNull();
+  });
+
+  it('lets the second operator open once the caja turno is closed', async () => {
+    const primero = await useCase.execute({
+      userId: USER,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
+    });
+    await turnos.update(primero.id, {
+      cierreAt: '2026-05-09T20:00:00.000Z',
+      montoCierreCentavos: 5000n,
+    });
+    const segundo = await useCase.execute({
+      userId: OTRO,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
+    });
+    expect(segundo.userId).toBe(OTRO);
+  });
+
+  it('does not count another business as this caja', async () => {
+    await useCase.execute({
+      userId: USER,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: OTRO_BIZ,
+    });
+    const turno = await useCase.execute({
+      userId: OTRO,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
+    });
+    expect(turno.businessId).toBe(BIZ);
   });
 });

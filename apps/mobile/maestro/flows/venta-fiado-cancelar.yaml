@@ -37,6 +37,8 @@ tags:
 - tapOn: { id: 'numpad-8' }
 - tapOn: { id: 'nip-enviar' }
 - extendedWaitUntil: { visible: { id: 'mobile-inicio-tab' }, timeout: 15000 }
+# Toni's turno, if one is open, is the caja's (M-18): Ana continues it.
+- runFlow: shared/seguir-turno-abierto.yaml
 - runFlow:
     when:
       visible:

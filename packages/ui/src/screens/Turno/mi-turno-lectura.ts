@@ -1,6 +1,6 @@
 /**
  * Reads the rows Mi turno and Cierre say (Track M, M-09) from the phone's
- * repositories: the operator's open turno and its tickets, lines, abonos and
+ * repositories: the caja's open turno (whoever opened it, M-18) and its tickets, lines, abonos and
  * gastos, this turno's inventory movements, the recurring gastos already due
  * and the last closed turnos — shaped as the web's live read (`TurnoVivoPara`
  * plus the turno id, ADR-118), so `comoTurno` and `comoCierre` from
@@ -15,7 +15,7 @@ import {
   detalleDelTurno,
   type TurnoVivoPara,
 } from '@xangarro/caja/lectura';
-import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import type { Repositories } from '../../app/repository-provider';
 import { comoRecurrente, cortesDe } from '../Inicio/inicio-filas';
 
@@ -50,14 +50,20 @@ async function nombresDe(r: R, ids: readonly string[]): Promise<ReadonlyMap<stri
   return new Map(pares.flatMap(([id, n]) => (n === undefined ? [] : [[id, n] as const])));
 }
 
+export interface TurnoLeido {
+  readonly turnoId: string;
+  /** Who opened it: another operator when this one continues their turno (M-18). */
+  readonly titularId: string;
+  readonly vivo: TurnoVivoPara;
+}
+
 /** Everything the open turno says, or null when there is none. */
 export async function leerTurnoVivo(
   r: R,
   businessId: BusinessId,
-  userId: UserId,
   deviceId: string,
-): Promise<{ readonly turnoId: string; readonly vivo: TurnoVivoPara } | null> {
-  const turno = await r.cajaTurnos.findOpenByUser(userId);
+): Promise<TurnoLeido | null> {
+  const turno = await r.cajaTurnos.findOpenByBusiness(businessId);
   if (turno === null) return null;
   const hoy = hoyLocal();
   const [delTurno, lineas, abonos, gastos, movimientos, recurrentes, turnos] = await Promise.all([
@@ -79,6 +85,7 @@ export async function leerTurnoVivo(
   const inventario = contar(delTurnoInventario(movimientos as never, deviceId, turno.aperturaAt));
   return {
     turnoId: turno.id,
+    titularId: turno.userId,
     vivo: {
       cierre: { ...cierre, resumen: { ...cierre.resumen, ...inventario } },
       aperturaAt: turno.aperturaAt,

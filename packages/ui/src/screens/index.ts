@@ -34,6 +34,7 @@ export * from './Gastos/index';
 export * from './Cobranza/index';
 // Track M, M-09 — Mi turno y cierre: Inventario, Avisos, Registros por enviar
 export * from './Turno/index';
+export * from './TurnoDeOtro/index';
 export * from './Inventario/index';
 export * from './Avisos/index';
 export * from './Pendientes/index';

@@ -12,6 +12,9 @@
 # failed every login after the first synced turno. Toni's row id is
 # deterministic (fixtures.ts: users: [operator(1, 'Toni', …)], the ulidOf
 # ('PRS', 1) the row stamps as acceso-operador-<id>).
+#
+# M-18: a turno another flow left open on the device (one turno per caja)
+# asks Toni to continue or close it; `seguir-turno-abierto.yaml` continues.
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -38,3 +41,4 @@ appId: mx.xangarro.mobile
     visible:
       id: 'tab-turno|rail-turno|sidebar-turno'
     timeout: 15000
+- runFlow: seguir-turno-abierto.yaml

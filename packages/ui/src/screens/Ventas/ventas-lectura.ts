@@ -12,7 +12,7 @@ import {
   type VentaDetalle,
   type VentaTurno,
 } from '@xangarro/caja/ventas';
-import type { TicketId, UserId } from '@xangarro/domain';
+import type { BusinessId, TicketId } from '@xangarro/domain';
 import type { Repositories } from '../../app/repository-provider';
 
 type R = Pick<Repositories, 'cajaTurnos' | 'tickets' | 'sales' | 'clients'>;
@@ -25,8 +25,9 @@ export interface FilasVentas {
   readonly ventas: readonly VentaTurno[];
 }
 
-export async function leerVentasTurno(r: R, userId: UserId): Promise<FilasVentas> {
-  const turno = await r.cajaTurnos.findOpenByUser(userId);
+export async function leerVentasTurno(r: R, businessId: BusinessId): Promise<FilasVentas> {
+  // The caja's open turno, whoever opened it (M-18, ADR-071 §3).
+  const turno = await r.cajaTurnos.findOpenByBusiness(businessId);
   if (turno === null) return { turnoId: null, desde: null, ventas: [] };
   const tickets = await r.tickets.findByCajaTurno(turno.id);
   const ventas = await Promise.all(

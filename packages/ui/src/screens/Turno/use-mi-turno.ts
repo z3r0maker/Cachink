@@ -1,5 +1,5 @@
 /**
- * useMiTurno — the /turno tab's data (Track M, M-09): the open turno read
+ * useMiTurno — the /turno tab's data (Track M, M-09): the caja's open turno read
  * from the phone's own rows (`leerTurnoVivo`) and shaped by `comoTurno`
  * (`@xangarro/caja`), with the session's names around it and the sync
  * counts for the «por enviar» band. Keyed under the caja's queries, so
@@ -15,6 +15,7 @@ import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { cajaKeys } from '../../hooks/query-keys';
+import { useNombreDe } from '../../hooks/use-nombre-de';
 import { useShellData } from '../AppShell/use-shell-data';
 import { leerTurnoVivo } from './mi-turno-lectura';
 import type { ColaCierre } from './cierre-banda';
@@ -62,6 +63,12 @@ export function estadoMiTurno(
   return data !== null && data.movimientos.length === 0 ? 'empty' : 'happy';
 }
 
+/** Someone else opened the caja's turno: this operator continues it (M-18). */
+function useTitularAjeno(titularId: string | undefined, userId: string | null): string | null {
+  const ajeno = titularId !== undefined && titularId !== userId ? titularId : null;
+  return useNombreDe(ajeno);
+}
+
 export function useMiTurno(): MiTurnoVivo {
   const repos = useRepositories();
   const businessId = useCurrentBusinessId() as BusinessId | null;
@@ -71,12 +78,16 @@ export function useMiTurno(): MiTurnoVivo {
   const deviceId = useActivationState().record?.deviceId ?? '';
   const q = useQuery({
     queryKey: [...miTurnoKey(businessId, userId), hoyLocal()],
-    queryFn: () => leerTurnoVivo(repos, businessId as BusinessId, userId as UserId, deviceId),
+    queryFn: () => leerTurnoVivo(repos, businessId as BusinessId, deviceId),
     enabled: businessId !== null && userId !== null,
   });
+  const titular = useTitularAjeno(q.data?.titularId, userId);
   const data =
     q.data !== null && q.data !== undefined && shell.operador !== null
-      ? comoTurno(q.data.vivo, shell.operador.nombre, shell.caja ?? 'Caja')
+      ? {
+          ...comoTurno(q.data.vivo, shell.operador.nombre, shell.caja ?? 'Caja'),
+          ...(titular === null ? {} : { titular }),
+        }
       : null;
   const { refetch } = q;
   const recargar = useCallback(() => void refetch(), [refetch]);

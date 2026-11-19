@@ -1,9 +1,10 @@
 /**
  * AbrirCajaUseCase — opens a new cash drawer turn.
  *
- * Handoff flow: queries the last closed turn and auto-populates the
- * apertura amount from the previous cierre amount. Prevents opening
- * a new turn if the user already has an open one.
+ * One open turno per caja (ADR-071 §3, M-18): a caja is one device, and its
+ * repository holds that device's turnos, so an open turno of this business
+ * blocks a second one whoever asks. Someone else's open turno is continued
+ * or closed first, never doubled: sales attach to the caja's open turno.
  *
  * Phase 6 of the Feature Flags plan: Caja.
  */
@@ -29,10 +30,13 @@ export class AbrirCajaUseCase implements UseCase<NewCajaTurno, CajaTurno> {
   async execute(input: NewCajaTurno): Promise<CajaTurno> {
     const parsed = NewCajaTurnoSchema.parse(input);
 
-    // Prevent duplicate open turns for the same user
-    const open = await this.#turnos.findOpenByUser(parsed.userId);
+    const open = await this.#turnos.findOpenByBusiness(parsed.businessId as BusinessId);
     if (open) {
-      throw new TypeError('Ya tienes un turno abierto. Ciérralo antes de abrir uno nuevo.');
+      throw new TypeError(
+        open.userId === parsed.userId
+          ? 'Ya tienes un turno abierto. Ciérralo antes de abrir uno nuevo.'
+          : 'Ya hay un turno abierto en esta caja. Síguelo o ciérralo antes de abrir uno nuevo.',
+      );
     }
 
     return this.#turnos.create({
