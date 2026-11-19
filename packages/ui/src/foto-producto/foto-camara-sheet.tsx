@@ -1,12 +1,13 @@
 /**
- * «Foto del producto» — the camera (M-13, board MvFotoCamara): a dark sheet
- * over the whole screen with the product's name, the live view inside the
- * yellow square guide, the hint, and the three controls — the gallery, the
- * shutter, the torch. One shot hands its file on; closing takes no photo.
+ * The camera (M-13, board MvFotoCamara; M-18, board CgHoja): a dark sheet
+ * over the whole screen with what the photo is of, the live view inside the
+ * yellow guide, the hint, and the three controls — the gallery, the shutter,
+ * the torch. One shot hands its file on; closing takes no photo. The product
+ * frames square and lifts; the gasto's receipt frames upright, with its own
+ * eyebrow and hint.
  */
 import { useRef, useState, type ReactElement, type RefObject } from 'react';
 import { Modal, Pressable, type ViewStyle } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View } from '@tamagui/core';
 import { MText } from '../components/Mostrador/index';
@@ -15,16 +16,8 @@ import { PathIcon } from '../components/PathIcon/index';
 import { GLYPHS } from '../components/PathIcon/glyphs';
 import { borderWidths, colors, radii, shapeRadii } from '../theme';
 import { ControlesCamara } from './foto-camara-controles';
-import { FotoVisor } from './foto-visor';
+import { FotoGuia, type FormaGuia } from './foto-guia';
 import type { FotoVisorHandle } from './foto-visor-tipos';
-
-const GUIA = 300;
-const ESQUINAS = [
-  'M4 44V12a8 8 0 0 1 8-8h32',
-  'M256 4h32a8 8 0 0 1 8 8v32',
-  'M296 256v32a8 8 0 0 1-8 8h-32',
-  'M44 296H12a8 8 0 0 1-8-8v-32',
-];
 
 const CERRAR: ViewStyle = {
   width: 44,
@@ -37,18 +30,37 @@ const CERRAR: ViewStyle = {
   backgroundColor: colors.ink,
 };
 
+/** What the hint under the guide says. */
+export interface PistaCamara {
+  readonly titulo: string;
+  readonly cuerpo: string;
+}
+
+const PISTA_PRODUCTO: PistaCamara = {
+  titulo: 'Ponlo sobre algo liso y con luz',
+  cuerpo: 'Se recorta el fondo solo. Si no se puede, se guarda la foto completa.',
+};
+
 export interface FotoCamaraSheetProps {
   readonly nombre: string;
+  /** Over the name; «Foto del producto» unless told otherwise. */
+  readonly eyebrow?: string;
+  readonly forma?: FormaGuia;
+  readonly pista?: PistaCamara;
   readonly onTomada: (uri: string) => void;
   readonly onGaleria: () => void;
   readonly onCerrar: () => void;
 }
 
-function Cabeza(p: { readonly nombre: string; readonly onCerrar: () => void }): ReactElement {
+function Cabeza(p: {
+  readonly nombre: string;
+  readonly eyebrow: string;
+  readonly onCerrar: () => void;
+}): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={10} paddingHorizontal={16}>
       <View flex={1} minWidth={0} gap={2} paddingLeft={4}>
-        <Eyebrow color={colors.gray400}>Foto del producto</Eyebrow>
+        <Eyebrow color={colors.gray400}>{p.eyebrow}</Eyebrow>
         <MText size="xl3" weight="extraBold" color={colors.white} numberOfLines={1}>
           {p.nombre}
         </MText>
@@ -66,46 +78,11 @@ function Cabeza(p: { readonly nombre: string; readonly onCerrar: () => void }): 
   );
 }
 
-/** The live view inside the square, the yellow corners over it. */
-function Guia(p: {
-  readonly visor: RefObject<FotoVisorHandle | null>;
-  readonly linterna: boolean;
-}): ReactElement {
-  return (
-    <View width={GUIA} height={GUIA} alignItems="center" justifyContent="center">
-      <View
-        position="absolute"
-        top={10}
-        left={10}
-        right={10}
-        bottom={10}
-        borderRadius={radii[2]}
-        overflow="hidden"
-      >
-        <FotoVisor ref={p.visor} linterna={p.linterna} />
-      </View>
-      {/* The corners sit over the view, and over the permission button: never take its touch. */}
-      <View testID="foto-guia-esquinas" position="absolute" pointerEvents="none">
-        <Svg width={GUIA} height={GUIA} viewBox="0 0 300 300">
-          {ESQUINAS.map((d) => (
-            <Path
-              key={d}
-              d={d}
-              fill="none"
-              stroke={colors.yellow}
-              strokeWidth={5}
-              strokeLinecap="round"
-            />
-          ))}
-        </Svg>
-      </View>
-    </View>
-  );
-}
-
 function Visor(p: {
   readonly visor: RefObject<FotoVisorHandle | null>;
   readonly linterna: boolean;
+  readonly forma: FormaGuia;
+  readonly pista: PistaCamara;
 }): ReactElement {
   return (
     <View
@@ -119,14 +96,28 @@ function Visor(p: {
       borderRadius={radii[6]}
       backgroundColor={colors.ink}
     >
-      <Guia visor={p.visor} linterna={p.linterna} />
+      <FotoGuia visor={p.visor} linterna={p.linterna} forma={p.forma} />
       <MText size="lg" weight="extraBold" color={colors.white} textAlign="center">
-        Ponlo sobre algo liso y con luz
+        {p.pista.titulo}
       </MText>
       <MText size="md" weight="semibold" color={colors.gray400} textAlign="center">
-        Se recorta el fondo solo. Si no se puede, se guarda la foto completa.
+        {p.pista.cuerpo}
       </MText>
     </View>
+  );
+}
+
+/** The sheet's grab handle. */
+function Asa(): ReactElement {
+  return (
+    <View
+      alignSelf="center"
+      width={40}
+      height={5}
+      marginBottom={14}
+      borderRadius={shapeRadii.pill}
+      backgroundColor={colors.gray600}
+    />
   );
 }
 
@@ -156,16 +147,18 @@ export function FotoCamaraSheet(p: FotoCamaraSheetProps): ReactElement {
         paddingTop={insets.top + 10}
         paddingBottom={insets.bottom + 26}
       >
-        <View
-          alignSelf="center"
-          width={40}
-          height={5}
-          marginBottom={14}
-          borderRadius={shapeRadii.pill}
-          backgroundColor={colors.gray600}
+        <Asa />
+        <Cabeza
+          nombre={p.nombre}
+          eyebrow={p.eyebrow ?? 'Foto del producto'}
+          onCerrar={p.onCerrar}
         />
-        <Cabeza nombre={p.nombre} onCerrar={p.onCerrar} />
-        <Visor visor={visor} linterna={linterna} />
+        <Visor
+          visor={visor}
+          linterna={linterna}
+          forma={p.forma ?? 'cuadrada'}
+          pista={p.pista ?? PISTA_PRODUCTO}
+        />
         <ControlesCamara
           onGaleria={p.onGaleria}
           onDisparar={disparar}

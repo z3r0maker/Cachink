@@ -10693,8 +10693,10 @@ drawer.
 3. **Legible and light: grayscale WebP, longest side 1024 px, at most 96 KB.** Skia draws the photo grayscale and
    encodes quality 70 → 60 → 50 until it fits (`MAX_EXPENSE_RECEIPT_BYTES`); the row limit for the table is
    160 KB (`maxPushRowBytes`). The push batch already fits its body to 2 MB (`fitBody`).
-4. **The phone takes it in two places**: the «Comprobante (opcional)» row of Registrar gasto, saved in the same
-   transaction as the gasto, and «Agregar foto» on a turno's gasto that has none. A gasto still saves without one.
+4. **The phone takes it in two places**: the «Comprobante (opcional)» row of Registrar gasto, checked before
+   anything is written and saved right after the gasto with its id (the device repositories share no transaction,
+   so a refused photo never leaves a gasto behind, and a failed receipt insert is mended with «Agregar foto»), and
+   «Agregar foto» on a turno's gasto that has none. A gasto still saves without one.
    The camera is `expo-camera` with a portrait guide; the gallery is the secondary path, as for products. No lift,
    no crop UI.
 5. **The portal shows it in the gasto's drawer** (Ventas y gastos): a «Comprobante» section with the photo and
@@ -10723,6 +10725,9 @@ drawer.
   a phone build that sends receipts reaches TestFlight, or the push refuses the rows as an unknown table.
 - `MAX_PUSH_ROW_BYTES` gains its fourth per-table entry. A phone stays able to push while offline for days: each
   receipt waits in the outbox like any row.
-- The portal's Movimientos drawer stops reading «Sin comprobante» from a phone's `foto` name; the Cortes drawer's
-  «gastos sin comprobante» counts gastos without a receipt row.
+- The portal's Movimientos drawer reads the receipt row (`receiptsOfGastos`), not the expense's `foto` name. The
+  shared caja derivations still count «sin comprobante» from `foto` for the web caja (§7); the phone passes the ids
+  that have a receipt.
+- The push upserts UP rows, so `expense_receipts` is granted `UPDATE` as well as `INSERT` (unlike
+  `product_images`); nothing updates a receipt, and `DELETE` stays revoked.
 - `docs/design/el-mostrador.md` §6 lists five motions.

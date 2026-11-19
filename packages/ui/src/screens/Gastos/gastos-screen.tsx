@@ -8,13 +8,16 @@
  * template. Presentational: the route hands it `useGastos()`, the retry,
  * «Abrir turno» and, when Inicio's «Para hoy» sent one, the prefill.
  */
-import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
+import type { ComprobanteGasto } from '@xangarro/application';
+import { formatMoney } from '@xangarro/domain';
 import {
   filtrar,
   type CategoriaGasto,
   type GastosData,
+  type GastoTurno,
   type NuevoGasto,
   type PrefillGasto,
   type RecurrentePorPagar,
@@ -30,6 +33,9 @@ import { Cifras, Filtros } from './gastos-cifras';
 import { Lista, Pendientes, SinGastos } from './gastos-lista';
 import { PagarRecurrenteSheet } from './pagar-recurrente-sheet';
 import { RegistrarGastoSheet } from './registrar-gasto-sheet';
+import { useHoja } from './gastos-hoja';
+import { FotosGasto } from '../../comprobante-gasto/fotos-gasto';
+import type { AgregarFoto } from '../../comprobante-gasto/use-agregar-foto';
 
 export interface GastosScreenProps {
   readonly state: 'loading' | 'error' | 'happy';
@@ -43,28 +49,16 @@ export interface GastosScreenProps {
   /** A due recurring gasto Inicio's «Para hoy» sent: the pagar sheet opens on it. */
   readonly prefill?: PrefillGasto | null;
   /** The write behind both sheets (`useGastos().registrar`). */
-  readonly registrar: (n: NuevoGasto) => Promise<void>;
+  readonly registrar: (n: NuevoGasto, comprobante?: ComprobanteGasto | null) => Promise<void>;
   readonly onRetry: () => void;
+  /** «Agregar foto» on a saved gasto (`useAgregarFoto`); absent where there is no camera. */
+  readonly fotos?: AgregarFoto;
   readonly testID?: string;
 }
 
-type Hoja =
-  | { readonly kind: 'registrar' }
-  | { readonly kind: 'pagar'; readonly x: RecurrentePorPagar };
-
-/** The sheets: a due template to pay opens itself, as the web's cajón does. */
-function useHoja(
-  prefill: PrefillGasto | null,
-  porPagar: readonly RecurrentePorPagar[] | null,
-): { readonly hoja: Hoja | null; readonly abrir: (h: Hoja) => void; readonly cerrar: () => void } {
-  const [hoja, setHoja] = useState<Hoja | null>(null);
-  useEffect(() => {
-    if (prefill === null) return;
-    const x = (porPagar ?? []).find((p) => p.prefill.recurrenteId === prefill.recurrenteId);
-    if (x !== undefined) setHoja({ kind: 'pagar', x });
-  }, [prefill, porPagar]);
-  return { hoja, abrir: setHoja, cerrar: () => setHoja(null) };
-}
+/** A row's «Agregar foto»: the camera, titled «Tortillas · $180.00». */
+const agregar = (f: AgregarFoto) => (g: GastoTurno) =>
+  f.abrir(g.id, `${g.concepto} · ${formatMoney(g.monto)}`);
 
 function Cabeza(): ReactElement {
   return (
@@ -104,7 +98,11 @@ function Pie({ onRegistrar }: { readonly onRegistrar: () => void }): ReactElemen
 }
 
 /** The figures, the chips and the rows; Don alone when nothing left the drawer. */
-function Cuerpo(p: { readonly data: GastosData; readonly pendientes: ReactNode }): ReactElement {
+function Cuerpo(p: {
+  readonly data: GastosData;
+  readonly pendientes: ReactNode;
+  readonly fotos: AgregarFoto | undefined;
+}): ReactElement {
   const [filtro, setFiltro] = useState<'Todos' | CategoriaGasto>('Todos');
   if (p.data.gastos.length === 0) {
     return (
@@ -119,7 +117,10 @@ function Cuerpo(p: { readonly data: GastosData; readonly pendientes: ReactNode }
       <Cifras data={p.data} />
       <Filtros valor={filtro} onElegir={setFiltro} />
       {p.pendientes}
-      <Lista gastos={filtrar(p.data.gastos, filtro, '')} />
+      <Lista
+        gastos={filtrar(p.data.gastos, filtro, '')}
+        {...(p.fotos?.disponible === true ? { onAgregarFoto: agregar(p.fotos) } : {})}
+      />
     </>
   );
 }
@@ -138,6 +139,7 @@ function Contenido(p: GastosScreenProps & { readonly data: GastosData }): ReactE
         <Cabeza />
         <Cuerpo
           data={p.data}
+          fotos={p.fotos}
           pendientes={
             p.porPagar !== null && p.porPagar.length > 0 ? (
               <Pendientes items={p.porPagar} onPagar={(x) => abrir({ kind: 'pagar', x })} />
@@ -146,6 +148,7 @@ function Contenido(p: GastosScreenProps & { readonly data: GastosData }): ReactE
         />
       </ScrollView>
       <Pie onRegistrar={() => abrir({ kind: 'registrar' })} />
+      {p.fotos === undefined ? null : <FotosGasto f={p.fotos} />}
       {hoja === null ? null : hoja.kind === 'registrar' ? (
         <RegistrarGastoSheet open firma={firma} onClose={cerrar} onGuardar={p.registrar} />
       ) : (

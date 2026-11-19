@@ -57,11 +57,21 @@ const TILE = {
   borderColor: colors.black,
 } as const;
 
+/** «Agregar foto» on a gasto without its receipt (M-18, board CgDespues). */
+function AgregarFoto(p: { readonly id: string; readonly onPress: () => void }): ReactElement {
+  return (
+    <Btn variant="primary" size="sm" onPress={p.onPress} testID={`gasto-agregar-foto-${p.id}`}>
+      Agregar foto
+    </Btn>
+  );
+}
+
 /** The category chip beside the comprobante one, under the row's main line. */
-function Chips({ x }: { readonly x: GastoTurno }): ReactElement {
+function Chips(p: { readonly x: GastoTurno; readonly onAgregarFoto?: () => void }) {
+  const { x } = p;
   const comp = x.comprobante;
   return (
-    <View flexDirection="row" gap={8} flexWrap="wrap">
+    <View flexDirection="row" gap={8} flexWrap="wrap" alignItems="center">
       <Etiqueta label={x.categoria} bg={CAT_TINT[x.categoria]} color={CAT_TINTA[x.categoria]} />
       <Etiqueta
         label={comp ? 'Con foto' : 'Sin comprobante'}
@@ -69,11 +79,21 @@ function Chips({ x }: { readonly x: GastoTurno }): ReactElement {
         color={comp ? colors.greenText : colors.warningText}
         testID={`gasto-comp-${x.id}`}
       />
+      {comp || p.onAgregarFoto === undefined ? null : (
+        <AgregarFoto id={x.id} onPress={p.onAgregarFoto} />
+      )}
     </View>
   );
 }
 
-export function GastoFila({ x }: { readonly x: GastoTurno }): ReactElement {
+export function GastoFila({
+  x,
+  onAgregarFoto,
+}: {
+  readonly x: GastoTurno;
+  /** Opens the receipt camera; omitted where the app has no camera. */
+  readonly onAgregarFoto?: () => void;
+}): ReactElement {
   return (
     <View testID={`gasto-${x.id}`} gap={10} paddingHorizontal={16} paddingVertical={12}>
       <View flexDirection="row" alignItems="center" gap={12}>
@@ -103,7 +123,7 @@ export function GastoFila({ x }: { readonly x: GastoTurno }): ReactElement {
           </MText>
         </View>
       </View>
-      <Chips x={x} />
+      <Chips x={x} {...(onAgregarFoto ? { onAgregarFoto } : {})} />
     </View>
   );
 }

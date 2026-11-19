@@ -64,6 +64,14 @@ describe('gastosDelTurno (las filas del teléfono como la lista del board)', () 
     assert.equal(sinQuien?.hora, hhmmLocal(T('15:00')));
   });
 
+  it('una fila con foto del ticket lo dice; las demás siguen sin comprobante (ADR-149)', () => {
+    const [taxi, carbón] = gastosDelTurno(filas, 'tu-1', new Set(['e-1']));
+    assert.equal(carbón?.comprobante, true);
+    assert.equal(taxi?.comprobante, false);
+    const sinQuien = gastosDelTurno([gasto({ proveedor: null })], 'tu-1', new Set(['e-1']))[0];
+    assert.equal(sinQuien?.detalle, 'Con foto');
+  });
+
   it('sin turno, nada es «del turno»', () => {
     assert.deepEqual(gastosDelTurno(filas, null), []);
   });
