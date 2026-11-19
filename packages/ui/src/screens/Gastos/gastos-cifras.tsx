@@ -1,11 +1,11 @@
 /**
- * The strip above the Gastos list (M-08): the three quiet figures — how
- * many, how much left the drawer (red), how many lack a receipt (amber, with
- * the owner's note) — then the search box and the category chips, the words
- * the web's `Cifras` and filters say.
+ * The strip above the Gastos list (M-08, RvGastos): two quiet figures side by
+ * side — what left the drawer (red) and how many — the one line about
+ * receipts the owner will ask for, and the category chips. No search: the
+ * chips are the filter.
  */
 import type { ReactElement } from 'react';
-import { ScrollView, TextInput } from 'react-native';
+import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
 import { mayuscula } from '@xangarro/caja';
@@ -13,58 +13,69 @@ import { CATEGORIAS, resumen, type CategoriaGasto, type GastosData } from '@xang
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
-import {
-  borderColors,
-  borderWidths,
-  colors,
-  fontFace,
-  portalFontSizes,
-  radii,
-  typography,
-} from '../../theme';
+import { borderColors, borderWidths, colors, radii } from '../../theme';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 
 const TILE = {
+  flex: 1,
+  minWidth: 0,
   borderWidth: borderWidths.quiet,
   borderColor: borderColors.quiet,
-  borderRadius: radii[5],
+  borderRadius: radii[3],
   backgroundColor: colors.white,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-  gap: 3,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  gap: 2,
 } as const;
 
 function Cifra(p: {
   readonly label: string;
   readonly value: string;
   readonly color?: string;
-  readonly nota?: string;
+  readonly testID?: string;
 }): ReactElement {
   return (
     <View style={TILE}>
-      <MText
-        size="xs"
-        weight="extraBold"
-        letterSpacing={1.2}
-        color={colors.textMuted}
-        style={{ textTransform: 'uppercase' }}
-      >
+      <MText size="xs" weight="bold" color={colors.gray600}>
         {p.label}
       </MText>
       <MText
-        size="xl3"
+        size="lg"
         weight="extraBold"
-        letterSpacing={-0.7}
         color={p.color}
         fontVariant={['tabular-nums']}
+        testID={p.testID}
       >
         {p.value}
       </MText>
-      {p.nota === undefined ? null : (
-        <MText size="xs" weight="semibold" color={colors.gray600}>
-          {p.nota}
-        </MText>
-      )}
+    </View>
+  );
+}
+
+/** «1 sin comprobante. Pedro te lo va a preguntar.», only when one lacks it. */
+function NotaComprobante(p: { readonly n: number; readonly dueno: string }): ReactElement | null {
+  if (p.n === 0) return null;
+  return (
+    <View
+      flexDirection="row"
+      alignItems="center"
+      gap={10}
+      padding={12}
+      borderRadius={radii[3]}
+      borderWidth={borderWidths.quiet}
+      borderColor={borderColors.quiet}
+      backgroundColor={colors.yellowSoft}
+    >
+      <PathIcon d={COBRAR_GLYPHS.info} size={18} />
+      <MText
+        size="sm"
+        weight="semibold"
+        color={colors.ink}
+        flex={1}
+        testID="gastos-sin-comprobante"
+      >
+        {`${p.n} sin comprobante. ${mayuscula(p.dueno)} te lo va a preguntar.`}
+      </MText>
     </View>
   );
 }
@@ -73,50 +84,11 @@ export function Cifras({ data }: { readonly data: GastosData }): ReactElement {
   const r = resumen(data.gastos);
   return (
     <View testID="gastos-cifras" gap={10}>
-      <Cifra label="Gastos del turno" value={String(r.cuantos)} />
-      <Cifra label="Salió de caja" value={formatMoney(r.total)} color={colors.redText} />
-      <Cifra
-        label="Sin comprobante"
-        value={String(r.sinComprobante)}
-        color={colors.warningText}
-        nota={`${mayuscula(data.dueno ?? 'el dueño')} te lo va a preguntar`}
-      />
-    </View>
-  );
-}
-
-export function Buscador(p: {
-  readonly q: string;
-  readonly onQ: (q: string) => void;
-}): ReactElement {
-  return (
-    <View
-      flexDirection="row"
-      alignItems="center"
-      gap={10}
-      height={48}
-      paddingHorizontal={14}
-      borderRadius={radii[3]}
-      borderWidth={borderWidths.thin}
-      borderColor={colors.black}
-      backgroundColor={colors.white}
-    >
-      <PathIcon d={COBRAR_GLYPHS.buscar} size={18} strokeWidth={2.4} color={colors.gray600} />
-      <TextInput
-        testID="gastos-buscar"
-        aria-label="Buscar gasto"
-        placeholder="Buscar por concepto o proveedor"
-        placeholderTextColor={colors.textMuted}
-        value={p.q}
-        onChangeText={p.onQ}
-        style={{
-          flex: 1,
-          height: 44,
-          ...fontFace(typography.weights.semibold),
-          fontSize: portalFontSizes.body,
-          color: colors.black,
-        }}
-      />
+      <View flexDirection="row" gap={8}>
+        <Cifra label="Salió de caja chica" value={formatMoney(r.total)} color={colors.redText} />
+        <Cifra label="Gastos" value={String(r.cuantos)} testID="gastos-cuantos" />
+      </View>
+      <NotaComprobante n={r.sinComprobante} dueno={data.dueno ?? 'el dueño'} />
     </View>
   );
 }

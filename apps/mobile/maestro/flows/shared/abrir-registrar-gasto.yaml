@@ -7,8 +7,8 @@
 # Precondition: signed in, any tab.
 appId: mx.xangarro.mobile
 ---
-# The row opens the mostrador Gastos screen (`mobile-gastos`, with its
-# figures), the same one as Inicio's atajo: the older /egresos list is gone
+# The row opens the mostrador Gastos screen (`mobile-gastos`; its figures
+# show only once a gasto exists, RvGastos), the same one as Inicio's atajo: the older /egresos list is gone
 # (it only redirects there now). Phone row, tablet rail or sidebar alike.
 - runFlow: ensure-caja-open.yaml
 - runFlow:
@@ -19,8 +19,6 @@ appId: mx.xangarro.mobile
     visible:
       id: 'mobile-gastos'
     timeout: 8000
-- assertVisible:
-    id: 'gastos-cifras'
 - extendedWaitUntil:
     visible:
       id: 'gastos-abrir-registrar'

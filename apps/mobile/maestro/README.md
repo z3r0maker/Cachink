@@ -266,12 +266,13 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-nine
 
 ### Gastos
 
-| Flow                           | Entry     | Suite | What it proves                                                                                                           |
-| ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
-| `gastos-registrar.yaml`        | activated | ✓     | Gastos del turno (Track M-11, M-08; board MvGastos): Inicio's atajo opens /gastos, «Registrar gasto» records what left t |
-| `gastos-pagar-recurrente.yaml` | activated | ✓     | Pagar un gasto recurrente vencido (Track M-11, M-08; board MvGastos «pagar»): the seeded «Renta local» (mensual, vence e |
-| `nuevo-egreso-cancel.yaml`     | activated |       | Closing «Registrar gasto» without saving records nothing (Track M, M-08).                                                |
-| `empty-egresos.yaml`           | activated |       | Gastos with nothing recorded yet (Track M, M-08; MvGastos): Don and the empty state, and «Registrar gasto» still in the  |
+| Flow                           | Entry     | Suite | What it proves                                                                                                                     |
+| ------------------------------ | --------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `gastos-registrar.yaml`        | activated | ✓     | Gastos del turno (Track M-11, M-08; board MvGastos): Inicio's atajo opens /gastos, «Registrar gasto» records what left t           |
+| `gastos-pagar-recurrente.yaml` | activated | ✓     | Pagar un gasto recurrente vencido (Track M-11, M-08; board MvGastos «pagar»): the seeded «Renta local» (mensual, vence e           |
+| `nuevo-egreso-cancel.yaml`     | activated |       | Closing «Registrar gasto» without saving records nothing (Track M, M-08).                                                          |
+| `empty-egresos.yaml`           | activated |       | Gastos with nothing recorded yet (Track M, M-08; MvGastos): Don and the empty state, and «Registrar gasto» still in the            |
+| `gastos-sin-turno.yaml`        | activated |       | Gastos with no turno (RvGastos, M8): no form opens; «Abrir turno» opens the fondo sheet there, then the empty list and its button. |
 
 ### Inventario y productos
 

@@ -15,7 +15,7 @@ import { GastosScreen } from './gastos-screen';
 
 initI18n();
 
-type Estado = 'lista' | 'registrar' | 'pagar' | 'sinGastos' | 'cargando' | 'error';
+type Estado = 'lista' | 'registrar' | 'pagar' | 'sinGastos' | 'sinTurno' | 'cargando' | 'error';
 
 const DATA: GastosData = { ...GASTOS_FIXTURE, dueno: 'Pedro' };
 const FIRMA = `${GASTOS_FIXTURE.operador}, ${GASTOS_FIXTURE.caja}`;
@@ -32,6 +32,8 @@ function Pantalla(p: { readonly estado: Estado }): ReactElement {
               ? { ...DATA, gastos: [] }
               : DATA
         }
+        turnoAbierto={p.estado !== 'sinTurno'}
+        onAbrirTurno={() => undefined}
         porPagar={p.estado === 'sinGastos' ? [] : [RECURRENTE_PAGAR_FIXTURE]}
         registrar={() => Promise.resolve()}
         onRetry={() => undefined}
@@ -70,5 +72,6 @@ export const Lista: Story = { args: { estado: 'lista' } };
 export const RegistrarGasto: Story = { args: { estado: 'registrar' } };
 export const PagarRecurrente: Story = { args: { estado: 'pagar' } };
 export const SinGastos: Story = { args: { estado: 'sinGastos' } };
+export const SinTurno: Story = { args: { estado: 'sinTurno' } };
 export const Cargando: Story = { args: { estado: 'cargando' } };
 export const ConError: Story = { args: { estado: 'error' } };

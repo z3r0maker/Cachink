@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import { EstadoVacio } from '../../components/CajaEstado/index';
 import { useTranslation } from '../../i18n/index';
 
-export type PantallaSinTurno = 'cobrar' | 'ventas' | 'turno' | 'cierre';
+export type PantallaSinTurno = 'cobrar' | 'ventas' | 'turno' | 'cierre' | 'gastos';
 
 export interface TurnoCerradoProps {
   readonly pantalla: PantallaSinTurno;

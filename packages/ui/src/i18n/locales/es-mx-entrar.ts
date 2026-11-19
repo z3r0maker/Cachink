@@ -113,6 +113,12 @@ export const entrar = {
       titulo: 'No hay nada que cerrar',
       cuerpo: 'No tienes un turno abierto. Ábrelo para volver a capturar.',
     },
+    // RvGastos (M8): a gasto with no turno saved where no list showed it.
+    gastos: {
+      encabezado: 'Gastos',
+      titulo: 'Abre tu turno para registrar gastos',
+      cuerpo: 'Cada gasto sale del efectivo de un turno. Así cuadra tu corte al cerrar.',
+    },
   },
   inicio: {
     turnoAbierto: 'Turno abierto desde las {{hora}}',

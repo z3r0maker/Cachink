@@ -1,0 +1,30 @@
+# Gastos with no turno (RvGastos, M8): no form opens, because a gasto saved
+# there showed in no list. Don, one sentence and «Abrir turno», which opens the
+# fondo sheet right there; once the turno is open, Gastos says it is empty and
+# «Registrar gasto» is fixed at the foot.
+#
+# Precondition: device activated against the mock, no turno open.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - gastos
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+
+- openLink: 'xangarro://gastos'
+# iOS asks once before a custom scheme opens the app.
+- tapOn:
+    text: 'Open'
+    optional: true
+- extendedWaitUntil: { visible: { id: 'gastos-sin-turno' }, timeout: 10000 }
+- assertVisible: '.*Abre tu turno para registrar gastos.*'
+- assertNotVisible: { id: 'gastos-abrir-registrar' }
+- runFlow:
+    file: shared/abrir-turno-aqui.yaml
+    env:
+      CTA: 'gastos-sin-turno-cta'
+- extendedWaitUntil: { visible: { id: 'gastos-abrir-registrar' }, timeout: 10000 }
+- assertNotVisible: { id: 'gastos-sin-turno' }
