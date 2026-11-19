@@ -1,0 +1,26 @@
+# Reusable subflow: open the turno from the screen the operator is on
+# (MvTurnoCerrado). `${CTA}` is that screen's «Abrir turno»; the fondo sheet
+# opens over it, the $500 quick chip funds it, and the sheet closes once the
+# turno is open.
+#
+# Usage:
+#   - runFlow:
+#       file: shared/abrir-turno-aqui.yaml
+#       env:
+#         CTA: 'ventas-sin-turno-cta'
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: '${CTA}'
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 5000
+- tapOn:
+    id: 'fondo-rapido-500'
+- tapOn:
+    id: 'caja-abrir-submit'
+- extendedWaitUntil:
+    notVisible:
+      id: 'abrir-caja-modal'
+    timeout: 10000

@@ -89,6 +89,31 @@ export const entrar = {
     abrirCon: 'Abrir turno con {{monto}}',
     error: 'No se pudo abrir el turno. Intenta otra vez.',
   },
+  turnoCerrado: {
+    cobrar: {
+      encabezado: 'Cobrar',
+      titulo: 'Abre tu turno para cobrar',
+      cuerpo:
+        'Cuenta el efectivo con el que inicias. Contra ese fondo se cuadra tu corte al cerrar.',
+    },
+    ventas: {
+      encabezado: 'Ventas',
+      titulo: 'Sin turno abierto',
+      cuerpo:
+        'Las ventas de cada turno aparecen aquí. Abre tu turno y lo que cobres se va sumando.',
+    },
+    turno: {
+      encabezado: 'Mi turno',
+      titulo: 'Sin turno abierto',
+      cuerpo:
+        'Abre tu turno y aquí verás el efectivo que debe haber en la caja, tus ventas y tus gastos.',
+    },
+    cierre: {
+      encabezado: 'Cierre de turno',
+      titulo: 'No hay nada que cerrar',
+      cuerpo: 'No tienes un turno abierto. Ábrelo para volver a capturar.',
+    },
+  },
   inicio: {
     turnoAbierto: 'Turno abierto desde las {{hora}}',
     turnoCerrado: 'Turno cerrado',

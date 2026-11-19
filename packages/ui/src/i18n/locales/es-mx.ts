@@ -114,11 +114,6 @@ export const esMX = {
     manualLabel: 'Código',
   },
   ventas: {
-    // Caja Gate
-    cajaGateTitle: 'Abre tu caja para empezar a vender',
-    cajaGateDescription:
-      'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
-    cajaGateCta: 'Ir a Caja',
     // Products Gate
     productosGateTitle: 'Registra tus productos para empezar a vender',
     productosGateDescription:

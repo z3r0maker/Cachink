@@ -34,8 +34,10 @@ export interface VentasMostradorScreenProps {
   /** The owner's name (the amber note says it); «Pedro» until known. */
   readonly dueno?: string;
   readonly onRetry: () => void;
-  /** The empty and sin-turno way forward. */
+  /** The empty state's way forward. */
   readonly onIrACobrar: () => void;
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
   /** The phone's comprobante share for this ticket (the route owns it). */
   readonly onCompartir: (venta: VentaDetalle) => void;
   /** The fiado note's «Recibir un abono». */
@@ -190,7 +192,12 @@ export function VentasMostradorScreen(p: VentasMostradorScreenProps): ReactEleme
     // screen, not whichever branch the turno left it in.
     return (
       <View style={{ flex: 1 }} testID={p.testID}>
-        <VentasEstados id={id} onRetry={p.onRetry} onIrACobrar={p.onIrACobrar} />
+        <VentasEstados
+          id={id}
+          onRetry={p.onRetry}
+          onIrACobrar={p.onIrACobrar}
+          onAbrirTurno={p.onAbrirTurno}
+        />
       </View>
     );
   }

@@ -24,6 +24,7 @@ import { MText } from '../Mostrador/mtext';
 import { GLYPHS } from '../PathIcon/glyphs';
 import { PathIcon } from '../PathIcon/path-icon';
 import { Cuerpo, FilasPalidas, Tarjeta, Titulo } from './caja-estado-partes';
+import { EstadoVacio } from './estado-vacio';
 
 export const FRASES = [
   'Contando monedas',
@@ -33,7 +34,6 @@ export const FRASES = [
 ];
 
 const OTRA_VEZ = 'M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5';
-const FLECHA = 'M5 12h14M13 6l6 6-6 6';
 
 export interface CajaEstadoProps {
   readonly mode: EstadoMode;
@@ -97,32 +97,6 @@ export function EstadoCargando({ testID }: { readonly testID: string }): ReactEl
   );
 }
 
-function Vacio(p: CajaEstadoProps & { readonly id: string }): ReactElement {
-  const title = p.emptyTitle ?? 'Nada por aquí todavía';
-  return (
-    <Tarjeta testID={p.id} label={title}>
-      <Don pose="ayuda" size={170} />
-      <Titulo>{title}</Titulo>
-      <Cuerpo>{p.emptyBody ?? 'En cuanto captures algo, aparece en esta lista.'}</Cuerpo>
-      {p.cta ? (
-        <View alignSelf="stretch" marginTop={12}>
-          <Btn
-            variant="primary"
-            size="xl"
-            sentence
-            fullWidth
-            onPress={p.cta.onPress}
-            icon={<PathIcon d={FLECHA} size={20} strokeWidth={2.6} />}
-            testID={`${p.id}-cta`}
-          >
-            {p.cta.label}
-          </Btn>
-        </View>
-      ) : null}
-    </Tarjeta>
-  );
-}
-
 /** «Intentando…» for a moment after a retry, as the web does. */
 function useReintento(onRetry: (() => void) | undefined) {
   const [intentando, setIntentando] = useState(false);
@@ -175,5 +149,12 @@ export function CajaEstado(props: CajaEstadoProps): ReactElement {
   const base = props.testID ?? 'estado';
   if (props.mode === 'loading') return <EstadoCargando testID={`${base}-cargando`} />;
   if (props.mode === 'error') return <Falla {...props} id={`${base}-error`} />;
-  return <Vacio {...props} id={`${base}-vacio`} />;
+  return (
+    <EstadoVacio
+      id={`${base}-vacio`}
+      title={props.emptyTitle}
+      body={props.emptyBody}
+      cta={props.cta}
+    />
+  );
 }

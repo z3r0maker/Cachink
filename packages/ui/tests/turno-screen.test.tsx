@@ -24,6 +24,7 @@ const ACCIONES = {
   onCerrar: vi.fn(),
   onRetry: vi.fn(),
   onIrAInicio: vi.fn(),
+  onAbrirTurno: vi.fn(),
   onVerVentas: vi.fn(),
   onRegistrar: vi.fn(),
 };
@@ -111,11 +112,13 @@ describe('MiTurnoScreen · con-registros-por-enviar', () => {
 });
 
 describe('MiTurnoScreen · sin-turno y errores', () => {
-  it('sin-turno points to Inicio', () => {
+  it('sin-turno opens the turno right here, not by way of Inicio', () => {
     const a = montar({ state: 'sin-turno', data: null });
     expect(screen.getByTestId('turno-sin-turno').textContent).toContain('Sin turno abierto');
-    tap('turno-ir-inicio');
-    expect(a.onIrAInicio).toHaveBeenCalled();
+    expect(screen.queryByText('Ir a Inicio')).toBeNull();
+    tap('turno-sin-turno-cta');
+    expect(a.onAbrirTurno).toHaveBeenCalledTimes(1);
+    expect(a.onIrAInicio).not.toHaveBeenCalled();
   });
 
   it('a failed read offers the retry', () => {

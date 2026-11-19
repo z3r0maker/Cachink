@@ -1,12 +1,12 @@
 /**
- * The states Ventas shows besides its data (MvVentas; the board's Operador
- * Estado): cargando, sin ventas en este turno, sin turno abierto, and the
- * failed read. Each says what to do next.
+ * The states Ventas shows besides its data (MvVentas, MvEstados and
+ * MvTurnoCerrado): cargando, sin ventas en este turno, sin turno abierto, and
+ * the failed read. Each says what to do next.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { Btn, ErrorState, Spinner } from '../../components/index';
-import { EmptyState } from '../../components/EmptyState/index';
+import { ErrorState, EstadoVacio, Spinner } from '../../components/index';
+import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these (the web's EstadoMode plus sin-turno). */
 export type VentasEstado = 'happy' | 'loading' | 'empty' | 'error' | 'sin-turno';
@@ -14,8 +14,10 @@ export type VentasEstado = 'happy' | 'loading' | 'empty' | 'error' | 'sin-turno'
 export interface VentasEstadosProps {
   readonly id: Exclude<VentasEstado, 'happy'>;
   readonly onRetry: () => void;
-  /** The empty and sin-turno way forward. */
+  /** The empty state's way forward. */
   readonly onIrACobrar: () => void;
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
 }
 
 export function VentasEstados(p: VentasEstadosProps): ReactElement {
@@ -37,29 +39,16 @@ export function VentasEstados(p: VentasEstadosProps): ReactElement {
       />
     );
   }
-  return <SinDatos id={p.id} onIrACobrar={p.onIrACobrar} />;
-}
-
-function SinDatos(p: {
-  readonly id: 'empty' | 'sin-turno';
-  readonly onIrACobrar: () => void;
-}): ReactElement {
-  const sinTurno = p.id === 'sin-turno';
+  if (p.id === 'sin-turno') {
+    return <TurnoCerrado pantalla="ventas" onAbrir={p.onAbrirTurno} testID="ventas-sin-turno" />;
+  }
   return (
-    <EmptyState
-      icon={sinTurno ? 'banknote' : 'receipt'}
-      title={sinTurno ? 'Sin turno abierto' : 'Sin ventas en este turno'}
-      description={
-        sinTurno
-          ? 'Las ventas de cada turno aparecen aquí. Abre tu turno en Inicio y lo que cobres se va sumando.'
-          : 'Cuando cobres la primera, aparece aquí con su folio, su método y la opción de cancelar.'
-      }
-      action={
-        <Btn variant="primary" onPress={p.onIrACobrar} testID="ventas-ir-cobrar">
-          Ir a cobrar
-        </Btn>
-      }
-      testID={sinTurno ? 'ventas-sin-turno' : 'ventas-vacio'}
+    <EstadoVacio
+      id="ventas-vacio"
+      encabezado="Ventas"
+      title="Todavía no hay ventas en este turno"
+      body="En cuanto cobres algo, aparece en esta lista."
+      cta={{ label: 'Cobrar la primera', onPress: p.onIrACobrar }}
     />
   );
 }

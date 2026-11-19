@@ -1,10 +1,9 @@
 # Reusable subflow: ensure the current operator has a turno open (M-06/M-09).
 #
-# Inicio's hero carries the one «Abrir turno» (Mi turno's sin-turno state only
-# points back to Inicio, mi-turno-estados.tsx). When no turno is open the hero
-# reads «Abre tu turno para empezar» (tono cerrado) and its action opens the
-# fondo sheet (AbrirTurnoSheet); the $500 quick chip funds it. With a turno
-# already open the hero reads «La caja está lista» (tono listo) and every
+# It goes through Inicio, the screen every session lands on. When no turno is
+# open the hero reads «Abre tu turno para empezar» (tono cerrado) and its action
+# opens the fondo sheet (AbrirTurnoSheet); the $500 quick chip funds it. With a
+# turno already open the hero reads «La caja está lista» (tono listo) and every
 # step is skipped.
 #
 # Usage:

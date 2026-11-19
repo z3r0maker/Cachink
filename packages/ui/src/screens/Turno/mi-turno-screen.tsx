@@ -26,8 +26,10 @@ export interface MiTurnoScreenProps {
   /** «Cerrar mi turno»: opens the Cierre flow. */
   readonly onCerrar: () => void;
   readonly onRetry: () => void;
-  /** The sin-turno and empty way forward. */
+  /** The empty state's way forward. */
   readonly onIrAInicio: () => void;
+  /** Sin turno: opens the fondo sheet over this screen. */
+  readonly onAbrirTurno: () => void;
   /** «Ver ventas»: the Ventas tab. */
   readonly onVerVentas: () => void;
   /** A due gasto's «Registrar»: Gastos, with the sheet opened on it. */
@@ -116,7 +118,12 @@ export function MiTurnoScreen(p: MiTurnoScreenProps): ReactElement {
       <View flex={1} testID={p.testID}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1}>
-            <MiTurnoEstados id={id} onRetry={p.onRetry} onIrAInicio={p.onIrAInicio} />
+            <MiTurnoEstados
+              id={id}
+              onRetry={p.onRetry}
+              onIrAInicio={p.onIrAInicio}
+              onAbrirTurno={p.onAbrirTurno}
+            />
           </View>
           {p.foot ?? null}
         </ScrollView>
