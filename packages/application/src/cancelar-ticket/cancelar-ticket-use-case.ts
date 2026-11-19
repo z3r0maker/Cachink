@@ -67,6 +67,15 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
     this.#logs = logs;
   }
 
+  /**
+   * Checks who cancels before anything is said or handed back (M2): the NIP
+   * and the permission alone, cancelling nothing. Throws the same typed
+   * refusals `execute` does; `execute` checks again at the write.
+   */
+  async verificar(userId: UserId, pin: string): Promise<void> {
+    await this.#verifyUserAndPin(userId, pin);
+  }
+
   async execute(input: CancelarTicketInput): Promise<CancelarTicketResult> {
     await this.#verifyUserAndPin(input.userId, input.pin);
     const ticket = await this.#tickets.findById(input.ticketId);
