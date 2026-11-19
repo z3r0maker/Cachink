@@ -8,7 +8,9 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
 import { MOTIVOS_CANCELAR, avisoCancelar, type VentaTurno } from '@xangarro/caja/ventas';
+import { aDueno } from '@xangarro/caja';
 import { Btn } from '../../components/Btn/index';
+import { Don } from '../../components/Don/index';
 import { Input } from '../../components/Input/index';
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
@@ -147,6 +149,39 @@ export function MotivoStep(p: {
           Elige un motivo para cancelar.
         </MText>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * The operator may not cancel (RvCancelar «Sin permiso», M2): Don worried, why,
+ * and that nothing is handed back. Said before any «Devuelve $X».
+ */
+export function SinPermiso(p: {
+  readonly dueno: string;
+  readonly onEntendido: () => void;
+}): ReactElement {
+  return (
+    <View gap={12} alignItems="center" testID="cancelar-sin-permiso">
+      <Don pose="preocupado" size={112} />
+      <MText size="xl" weight="extraBold" textAlign="center">
+        No tienes permiso para cancelar
+      </MText>
+      <MText weight="semibold" color={colors.ink} textAlign="center">
+        {`Pídele ${aDueno(p.dueno)} que te dé permiso o que la cancele desde su portal. La venta sigue igual: no devuelvas dinero.`}
+      </MText>
+      <View alignSelf="stretch">
+        <Btn
+          variant="primary"
+          size="xl"
+          sentence
+          fullWidth
+          onPress={p.onEntendido}
+          testID="cancelar-sin-permiso-entendido"
+        >
+          Entendido
+        </Btn>
+      </View>
     </View>
   );
 }
