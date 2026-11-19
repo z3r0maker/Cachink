@@ -96,7 +96,7 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: 'cierre-corte'
 - assertVisible: '.*Guarda \$500\.00 para los patrones\..*'
-# No handover dialog any more (ADR-146).
+# No handover dialog any more (ADR-147).
 - assertNotVisible:
     id: 'cierre-entregar-efectivo'
 - assertVisible:

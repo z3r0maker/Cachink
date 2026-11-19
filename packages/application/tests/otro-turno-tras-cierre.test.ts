@@ -1,5 +1,5 @@
 /**
- * ADR-146: a closed turno is final, and keeping on selling is another turno.
+ * ADR-147: a closed turno is final, and keeping on selling is another turno.
  * The close → open cycle has no daily limit for the same operator, each
  * cycle leaves its own corte untouched, and nothing writes a closed turno
  * again. Happy path + 3 unhappy paths per CLAUDE.md §8.
@@ -21,7 +21,7 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER = '01HZ8XQN9GZJXV8AKQ5X0C7SR1' as UserId;
 const FECHA = '2026-11-18';
 
-describe('Otro turno tras el cierre (ADR-146)', () => {
+describe('Otro turno tras el cierre (ADR-147)', () => {
   let turnos: InMemoryCajaTurnosRepository;
   let abrir: AbrirCajaUseCase;
   let cerrar: CerrarCajaUseCase;

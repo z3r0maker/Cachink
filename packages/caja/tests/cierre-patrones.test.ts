@@ -1,5 +1,5 @@
 /**
- * The phone's close wording (M-16, ADR-146): «los patrones», never a name;
+ * The phone's close wording (M-16, ADR-147): «los patrones», never a name;
  * the done line by difference and queue; the cash reminder; the corte the
  * operator sends.
  */

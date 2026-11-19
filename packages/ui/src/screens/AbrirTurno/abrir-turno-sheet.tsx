@@ -28,7 +28,7 @@ export interface AbrirTurnoSheetProps {
   readonly onAbrir: (fondoCentavos: bigint) => void;
   readonly submitting: boolean;
   readonly error: string | null;
-  /** Right after a close (ADR-146): «¿Con cuánto sigues?» over the counted cash. */
+  /** Right after a close (ADR-147): «¿Con cuánto sigues?» over the counted cash. */
   readonly otro?: boolean;
 }
 

@@ -88,7 +88,7 @@ export const entrar = {
     abrir: 'Abrir turno',
     abrirCon: 'Abrir turno con {{monto}}',
     error: 'No se pudo abrir el turno. Intenta otra vez.',
-    /** Right after a close: the next turno starts from what was counted (ADR-146). */
+    /** Right after a close: the next turno starts from what was counted (ADR-147). */
     otro: {
       eyebrow: 'Otro turno',
       titulo: '¿Con cuánto sigues, {{nombre}}?',

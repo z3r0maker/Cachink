@@ -90,7 +90,7 @@ appId: mx.xangarro.mobile
 # textoCorte, cierre.tsx). The OS share sheet itself is not asserted: its
 # Cancel is not a stable element across simulator OS versions and locales
 # (M-11) — the compose is the OS's behavior, not the app's.
-# The corte as a ticket, with the cash reminder at its foot (ADR-146).
+# The corte as a ticket, with the cash reminder at its foot (ADR-147).
 - assertVisible:
     id: 'cierre-corte'
 - assertVisible: '.*Guarda \$200\.00 para los patrones\..*'

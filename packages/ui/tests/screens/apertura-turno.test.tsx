@@ -133,7 +133,7 @@ function DespuesDelCierre(): ReactElement {
   );
 }
 
-describe('useAperturaTurno · otro turno (ADR-146)', () => {
+describe('useAperturaTurno · otro turno (ADR-147)', () => {
   it('asks «¿Con cuánto sigues?» with the counted cash already in', async () => {
     h.ultimo = {
       fecha: new Date().toISOString().slice(0, 10),

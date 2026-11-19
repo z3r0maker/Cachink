@@ -3,7 +3,7 @@
  * shows it over the current screen and the route renders `hoja`, outside
  * anything the open turno replaces, so the sheet survives the refresh that
  * opening causes. `onAbierto` runs once the turno is open and the sheet shut.
- * `abrirOtro` is the same sheet right after a close (ADR-146): «¿Con cuánto
+ * `abrirOtro` is the same sheet right after a close (ADR-147): «¿Con cuánto
  * sigues?», the counted cash suggested.
  */
 import { useState, type ReactElement } from 'react';

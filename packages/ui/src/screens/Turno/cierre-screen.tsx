@@ -1,6 +1,6 @@
 /**
  * CierreScreen — «Cierre de turno» in two steps (M-16, MvCierreFlujo;
- * ADR-146): count the drawer by denomination without the expected cash,
+ * ADR-147): count the drawer by denomination without the expected cash,
  * then see the result, explain a difference and close; «Volver a contar»
  * goes back with the count kept. Records still to send warn but never block
  * the close (ADR-123). Closing ends on CierreHecho, which sends the corte or
@@ -33,7 +33,7 @@ export interface CierreScreenProps {
   readonly onSalir: () => void;
   /** Sin turno: opens the fondo sheet over this screen. */
   readonly onAbrirTurno: () => void;
-  /** From the hecho screen: the fondo sheet for another turno (ADR-146). */
+  /** From the hecho screen: the fondo sheet for another turno (ADR-147). */
   readonly onOtroTurno: () => void;
   /** The step, when the route owns it (its header's back follows it). */
   readonly paso?: PasoCierre;

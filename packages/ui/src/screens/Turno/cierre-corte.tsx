@@ -2,7 +2,7 @@
  * «Corte de caja» (M-16, MvCierreFlujo): the closed turno as a printed-style
  * ticket — the business, the caja, the operator and the hours; Contado,
  * Esperado and the difference tinted by its kind; the sales; and at its foot
- * the reminder that the counted cash is los patrones' (ADR-146: a reminder,
+ * the reminder that the counted cash is los patrones' (ADR-147: a reminder,
  * not a record).
  */
 import type { ReactElement } from 'react';

@@ -184,7 +184,7 @@ Links to discussion, docs, prior art.
 | [143](#adr-143) | 2026-11-12 | The Android app touches ML Kit only to lift a photo, and opens its SQLite file once per process | Accepted |
 | [144](#adr-144) | 2026-11-13 | The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them | Accepted |
 | [145](#adr-145) | 2026-11-17 | OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS | Accepted |
-| [146](#adr-146) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
+| [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10505,7 +10505,7 @@ long as they live.
 - Rotation is a store release: new pair, configured, shipped; the old key keeps publishing for the old
   builds until they are gone.
 
-## ADR-146
+## ADR-147
 
 **Title:** A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover
 

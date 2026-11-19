@@ -23,7 +23,7 @@ export interface AbrirTurnoFlowProps {
   readonly onClose: () => void;
   /** After the turno opened and the sheet closed; not on «Ahorita no». */
   readonly onAbierto?: () => void;
-  /** Right after a close: the sheet's «¿Con cuánto sigues?» (ADR-146). */
+  /** Right after a close: the sheet's «¿Con cuánto sigues?» (ADR-147). */
   readonly otro?: boolean;
 }
 
