@@ -18,7 +18,18 @@ appId: mx.xangarro.mobile
     timeout: 10000
 - assertVisible:
     id: 'inicio-hero-cerrado'
-- assertVisible: 'Tus pendientes salen al abrir el turno'
+# «Para hoy» sits under the KPIs, below the fold on a phone: scroll down to
+# it, then back up to the top (the turno chip, above the hero).
+- scrollUntilVisible:
+    element: 'Tus pendientes salen al abrir el turno'
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'inicio-turno-chip'
+    direction: UP
+    timeout: 10000
+    visibilityPercentage: 100
 
 # Abrir turno: a chip, then open.
 - tapOn:
