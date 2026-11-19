@@ -118,6 +118,7 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                    |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
+| `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)          |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
 | `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                               |
 | `shared/mock-reset.js`             | `POST /__mock/reset`                                                                                |
@@ -278,7 +279,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 
 | Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
 | -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; board MvInventario): /productos lists the existencias; a row's entrada square opens «Entrada                                                             |
+| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; RvInventario): one tap on a row opens the sheet on the kind its stock calls for; an entrada raises the count, then a merma lowers it                     |
 | `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                                                                              |
 | `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
 | `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |

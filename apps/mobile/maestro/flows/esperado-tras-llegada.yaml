@@ -34,8 +34,8 @@ tags:
     id: 'inicio-kpi-fuerte'
 - evalScript: ${output.esperado = maestro.copiedText.replace(/[^0-9]/g, '.')}
 
-# One Torta arrives through «Llegó mercancía» (inventario-llego-merma.yaml's
-# steps), which also writes the unstamped «Compra inventario» gasto.
+# One Torta (PRD-6) arrives through its row's «Llegó mercancía»
+# (shared/llego-mercancia.yaml), which also writes the unstamped «Compra inventario» gasto.
 - runFlow:
     file: shared/open-turno-row.yaml
     env:
@@ -44,44 +44,11 @@ tags:
     visible:
       id: 'mobile-inventario'
     timeout: 10000
-- scrollUntilVisible:
-    element:
-      id: 'inventario-abrir-entrada'
-    direction: UP
-    timeout: 5000
-- tapOn:
-    id: 'inventario-abrir-entrada'
-- extendedWaitUntil:
-    visible:
-      id: 'llego-mercancia-sheet'
-    timeout: 5000
-- waitForAnimationToEnd
-- scrollUntilVisible:
-    element:
-      id: 'mover-producto-Torta'
-    direction: DOWN
-    timeout: 10000
-    visibilityPercentage: 100
-    centerElement: true
-- waitForAnimationToEnd
-- tapOn:
-    id: 'mover-producto-Torta'
-- assertVisible:
-    id: 'mover-producto-Torta'
-    text: 'radio button, checked'
-- tapOn:
-    id: 'mover-cantidad'
-- inputText: '1'
-- swipe:
-    start: '50%, 45%'
-    end: '50%, 20%'
-- waitForAnimationToEnd
-- tapOn:
-    id: 'mover-guardar'
-- extendedWaitUntil:
-    visible:
-      id: 'mov-toast'
-    timeout: 8000
+- runFlow:
+    file: shared/llego-mercancia.yaml
+    env:
+      ID: '01JPRD00000000000000000006'
+      CANTIDAD: '1'
 - tapOn:
     id: 'mov-toast-entendido'
 - waitForAnimationToEnd

@@ -1,12 +1,13 @@
 /**
- * InventarioScreen — «Inventario» (Track M, M-09; the web operador's
- * `InventarioScreen` said on the phone): what there is and what moved in
- * this turno — the three figures, the two tabs, the search — and the two
- * entries the phone allows, «Entrada de mercancía» and «Registrar merma»,
- * as sheets over it; and each product's square takes its photo (M-13).
- * Presentational: the route hands it `useInventario()`, `useFotoFlujo()`,
- * the retry and, when Inicio's «Para hoy» sent one, the product whose
- * llegada sheet opens on arrival.
+ * InventarioScreen — «Inventario» (Track M, M-09; RvInventario): what there
+ * is and what moved in this turno — the three figures, the two tabs, the
+ * search — and one tap per row that opens «¿Qué pasó con la mercancía?» on
+ * that product, with «Llegó mercancía» or «Se echó a perder» chosen from its
+ * stock (item 6); each product's square takes its photo (M-13). No products
+ * yet is Don with «Producto nuevo». Presentational: the route hands it
+ * `useInventario()`, `useFotoFlujo()`, the retry, the way to a new product
+ * and, when Inicio's «Para hoy» sent one, the product whose llegada sheet
+ * opens on arrival.
  */
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
@@ -16,7 +17,6 @@ import {
   type InventarioData,
   type NuevoMovimientoVivo,
   type Pestana,
-  type TipoMovimiento,
 } from '@xangarro/caja/inventario';
 import { ErrorState, Spinner } from '../../components/index';
 import { Buscador, Cabeza, Kpis, Pestanas, Regla } from './inventario-cifras';
@@ -24,9 +24,8 @@ import { FotoHojas } from '../../foto-producto/foto-hojas';
 import { PistaFoto } from '../../foto-producto/foto-tile';
 import type { FotoFlujo } from '../../foto-producto/use-foto-flujo';
 import { ExistenciasLista, SinProductos, type OnFoto } from './existencias-lista';
-import { LlegoMercanciaSheet } from './llego-mercancia-sheet';
-import { MermaSheet } from './merma-sheet';
-import { BotonMov } from './mover-botones';
+import { tipoAlAbrir } from './mover-logica';
+import { MovimientoSheet } from './mover-sheet';
 import { MovimientosLista } from './movimientos-lista';
 import { MovToast, useMovToast } from './mov-toast';
 import { useHoja, type Hoja } from './use-hoja';
@@ -41,13 +40,15 @@ export interface InventarioScreenProps {
   /** A product to restock now: its «Llegó mercancía» opens (Inicio's «Para hoy»). */
   readonly reponer?: string | null;
   readonly registrar: (m: NuevoMovimientoVivo) => Promise<void>;
+  /** «Producto nuevo» on the empty state (the quick add); without it, Don alone. */
+  readonly onNuevoProducto?: () => void;
   /** The product photo's steps (M-13, `useFotoFlujo()`); without it the squares only show. */
   readonly foto?: FotoFlujo;
   readonly onRetry: () => void;
   readonly testID?: string;
 }
 
-/** The board's toolbar: the tabs, the search, and the two labelled entries. */
+/** The board's toolbar: the tabs, and on existencias the search and the photo hint. */
 function Barra(p: {
   readonly tab: Pestana;
   readonly items: number;
@@ -55,17 +56,12 @@ function Barra(p: {
   readonly query: string;
   readonly onQuery: (q: string) => void;
   readonly onTab: (t: Pestana) => void;
-  readonly onAbrir: (tipo: TipoMovimiento) => void;
 }): ReactElement {
   return (
     <>
       <Pestanas tab={p.tab} items={p.items} movs={p.movs} onElegir={p.onTab} />
       {p.tab === 'existencias' ? <Buscador q={p.query} onQ={p.onQuery} /> : null}
       {p.tab === 'existencias' ? <PistaFoto /> : null}
-      <View flexDirection="column" gap={10}>
-        <BotonMov tipo="Entrada" onPress={() => p.onAbrir('Entrada')} />
-        <BotonMov tipo="Merma" onPress={() => p.onAbrir('Merma')} />
-      </View>
     </>
   );
 }
@@ -76,10 +72,9 @@ function Cuerpo(p: {
   readonly data: InventarioData;
   readonly query: string;
   readonly dueno: string;
-  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onAbrir: (it: InventarioData['existencias'][number]) => void;
   readonly onFoto: OnFoto;
 }): ReactElement {
-  if (p.data.existencias.length === 0) return <SinProductos dueno={p.dueno} />;
   if (p.tab === 'movimientos') {
     return <MovimientosLista movs={p.data.movimientos} items={p.data.existencias} />;
   }
@@ -88,7 +83,7 @@ function Cuerpo(p: {
       <ExistenciasLista
         items={buscar(p.data.existencias, p.query)}
         query={p.query}
-        onMover={p.onMover}
+        onAbrir={p.onAbrir}
         onFoto={p.onFoto}
       />
       <Regla dueno={p.dueno} />
@@ -103,19 +98,18 @@ function Hojas(p: {
   readonly onGuardar: (m: NuevoMovimientoVivo) => Promise<void>;
   readonly onClose: () => void;
 }): ReactElement | null {
-  if (p.hoja === null) return null;
-  const shared = {
-    open: true,
-    items: p.data.existencias,
-    preselect: p.hoja.productoId,
-    firma: `${p.data.operador}, ${p.data.caja}`,
-    onClose: p.onClose,
-    onGuardar: p.onGuardar,
-  };
-  return p.hoja.tipo === 'Entrada' ? (
-    <LlegoMercanciaSheet {...shared} />
-  ) : (
-    <MermaSheet {...shared} />
+  const id = p.hoja?.productoId ?? null;
+  const item = p.data.existencias.find((e) => e.id === id);
+  if (p.hoja === null || item === undefined) return null;
+  return (
+    <MovimientoSheet
+      key={`${item.id}-${p.hoja.tipo}`}
+      item={item}
+      tipo={p.hoja.tipo}
+      firma={`${p.data.operador}, ${p.data.caja}`}
+      onClose={p.onClose}
+      onGuardar={p.onGuardar}
+    />
   );
 }
 
@@ -129,9 +123,39 @@ function porFoto(flujo: FotoFlujo | undefined): OnFoto {
   };
 }
 
-function Contenido(p: InventarioScreenProps & { readonly data: InventarioData }): ReactElement {
+/** The figures, the tabs and what the tab shows, once there are products. */
+function ConProductos(
+  p: InventarioScreenProps & {
+    readonly data: InventarioData;
+    readonly onAbrir: (it: InventarioData['existencias'][number]) => void;
+  },
+): ReactElement {
   const [tab, setTab] = useState<Pestana>(p.tabInicial ?? 'existencias');
   const [query, setQuery] = useState('');
+  return (
+    <>
+      <Kpis items={p.data.existencias} movs={p.data.movimientos} />
+      <Barra
+        tab={tab}
+        items={p.data.existencias.length}
+        movs={p.data.movimientos.length}
+        query={query}
+        onQuery={setQuery}
+        onTab={setTab}
+      />
+      <Cuerpo
+        tab={tab}
+        data={p.data}
+        query={query}
+        dueno={p.dueno}
+        onAbrir={p.onAbrir}
+        onFoto={porFoto(p.foto)}
+      />
+    </>
+  );
+}
+
+function Contenido(p: InventarioScreenProps & { readonly data: InventarioData }): ReactElement {
   const { hoja, abrir, cerrar } = useHoja(p.reponer ?? null, p.data.existencias);
   const { toast, guardar, cerrar: cerrarToast } = useMovToast(p.registrar);
   const onGuardar = (m: NuevoMovimientoVivo): Promise<void> => guardar(m, p.data.existencias);
@@ -143,24 +167,11 @@ function Contenido(p: InventarioScreenProps & { readonly data: InventarioData })
         keyboardShouldPersistTaps="handled"
       >
         <Cabeza />
-        <Kpis items={p.data.existencias} movs={p.data.movimientos} />
-        <Barra
-          tab={tab}
-          items={p.data.existencias.length}
-          movs={p.data.movimientos.length}
-          query={query}
-          onQuery={setQuery}
-          onTab={setTab}
-          onAbrir={(tipo) => abrir(tipo, null)}
-        />
-        <Cuerpo
-          tab={tab}
-          data={p.data}
-          query={query}
-          dueno={p.dueno}
-          onMover={abrir}
-          onFoto={porFoto(p.foto)}
-        />
+        {p.data.existencias.length === 0 ? (
+          <SinProductos {...(p.onNuevoProducto ? { onNuevo: p.onNuevoProducto } : {})} />
+        ) : (
+          <ConProductos {...p} data={p.data} onAbrir={(it) => abrir(tipoAlAbrir(it), it.id)} />
+        )}
       </ScrollView>
       <Hojas hoja={hoja} data={p.data} onGuardar={onGuardar} onClose={cerrar} />
       {toast === null ? null : <MovToast x={toast} onClose={cerrarToast} />}

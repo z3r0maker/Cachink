@@ -1,12 +1,9 @@
 export { InventarioScreen, type InventarioScreenProps } from './inventario-screen';
 export { useInventario, inventarioKey, type InventarioVivo } from './use-inventario';
 export { leerFilasInventario, seSigue, type FilasInventario } from './inventario-lectura';
-export { LlegoMercanciaSheet, type LlegoMercanciaSheetProps } from './llego-mercancia-sheet';
-export { MermaSheet, type MermaSheetProps } from './merma-sheet';
+export { MovimientoSheet, type MovimientoSheetProps } from './mover-sheet';
 export {
-  useMoverForm,
   useGuardarHoja as useGuardarMovimiento,
-  type MoverForm,
   type GuardarHoja as GuardarMovimiento,
 } from './use-mover-form';
 export { useHoja, type Hoja, type HojaVivo } from './use-hoja';
@@ -21,7 +18,7 @@ export {
   Pestanas as InventarioPestanas,
   Regla as InventarioRegla,
 } from './inventario-cifras';
-export { BotonMov, BotonFila, EtiquetaTipo, type TipoMover } from './mover-botones';
+export { EtiquetaTipo, type TipoMover } from './mover-botones';
 export {
   FLECHA_ENTRADA,
   FLECHA_MERMA,

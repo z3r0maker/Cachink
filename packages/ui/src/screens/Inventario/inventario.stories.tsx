@@ -10,8 +10,7 @@ import { INVENTARIO_FIXTURE } from '@xangarro/caja/inventario';
 import { initI18n } from '../../i18n/index';
 import { Marco } from '../Inicio/story-marco';
 import { InventarioScreen } from './inventario-screen';
-import { LlegoMercanciaSheet } from './llego-mercancia-sheet';
-import { MermaSheet } from './merma-sheet';
+import { MovimientoSheet } from './mover-sheet';
 
 initI18n();
 
@@ -25,6 +24,7 @@ type Estado =
   | 'error-al-leer';
 
 const FIRMA = `${INVENTARIO_FIXTURE.operador}, ${INVENTARIO_FIXTURE.caja}`;
+const item = (id: string) => INVENTARIO_FIXTURE.existencias.find((e) => e.id === id)!;
 
 function Pantalla(p: { readonly estado: Estado }): ReactElement {
   const hoja = p.estado === 'llego-mercancia' || p.estado === 'merma';
@@ -45,28 +45,17 @@ function Pantalla(p: { readonly estado: Estado }): ReactElement {
         }
         dueno="Pedro"
         registrar={() => Promise.resolve()}
+        onNuevoProducto={() => undefined}
         onRetry={() => undefined}
       />
       {hoja ? (
-        p.estado === 'merma' ? (
-          <MermaSheet
-            open
-            items={INVENTARIO_FIXTURE.existencias}
-            preselect="queso"
-            firma={FIRMA}
-            onClose={() => undefined}
-            onGuardar={() => Promise.resolve()}
-          />
-        ) : (
-          <LlegoMercanciaSheet
-            open
-            items={INVENTARIO_FIXTURE.existencias}
-            preselect="pastor"
-            firma={FIRMA}
-            onClose={() => undefined}
-            onGuardar={() => Promise.resolve()}
-          />
-        )
+        <MovimientoSheet
+          item={item(p.estado === 'merma' ? 'horchata' : 'pastor')}
+          tipo={p.estado === 'merma' ? 'Merma' : 'Entrada'}
+          firma={FIRMA}
+          onClose={() => undefined}
+          onGuardar={() => Promise.resolve()}
+        />
       ) : null}
     </Marco>
   );

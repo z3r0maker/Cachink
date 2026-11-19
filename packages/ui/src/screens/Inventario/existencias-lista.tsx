@@ -1,25 +1,19 @@
 /**
- * Existencias (M-09): one quiet panel of rows — the product's photo or glyph
- * on its tint (the square takes the photo, M-13), its name, «Umbral 15 ·
- * kg», the state pill («Reponer» red / «Suficiente» green), the count, and the two quick squares that open the
- * sheets with the product picked. The board's no-results answer when the
- * search filters everything out.
+ * Existencias (M-09, RvInventario): one quiet panel of rows — the product's
+ * photo square (it takes the photo, M-13) and the rest of the row, one tap
+ * that opens the movement sheet (`inventario-filas.tsx`). The no-results
+ * answer when the search filters everything out, and Don when there are no
+ * products yet.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { ICONS, mayuscula } from '@xangarro/caja';
-import {
-  conUnidad,
-  porReponer,
-  type Existencia,
-  type TipoMovimiento,
-} from '@xangarro/caja/inventario';
+import { conUnidad, porReponer, type Existencia } from '@xangarro/caja/inventario';
+import { EstadoVacio } from '../../components/CajaEstado/index';
 import { MText } from '../../components/Mostrador/index';
 import { QuietPanel } from '../../components/Panel/index';
-import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, colors, radii, shapeRadii } from '../../theme';
-import { BotonFila } from './mover-botones';
+import { borderWidths, colors, shapeRadii } from '../../theme';
 import { FotoTile } from '../../foto-producto/foto-tile';
+import { ExistenciaFila } from './inventario-filas';
 
 /** «Reponer» at or under the threshold, «Suficiente» above it. */
 export function EstadoPill(p: { readonly it: Existencia }): ReactElement {
@@ -60,40 +54,13 @@ function Cuadro(p: { readonly it: Existencia; readonly onFoto: OnFoto }): ReactE
 
 function Fila(p: {
   readonly it: Existencia;
-  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onAbrir: (it: Existencia) => void;
   readonly onFoto: OnFoto;
 }): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" gap={14} paddingVertical={12}>
+    <View flexDirection="row" alignItems="center" gap={12}>
       <Cuadro it={p.it} onFoto={p.onFoto} />
-      <View flex={1} gap={2}>
-        <MText size="md" weight="extraBold" letterSpacing={-0.2}>
-          {p.it.nombre}
-        </MText>
-        <MText
-          size="xs"
-          weight="semibold"
-          color={colors.gray600}
-        >{`Umbral ${p.it.umbral} · ${p.it.unidad}`}</MText>
-      </View>
-      <EstadoPill it={p.it} />
-      <MText
-        size="xl2"
-        weight="extraBold"
-        letterSpacing={-0.4}
-        fontVariant={['tabular-nums']}
-        testID={`inventario-cantidad-${p.it.id}`}
-      >
-        {String(p.it.existencias)}
-      </MText>
-      <View flexDirection="row" gap={8}>
-        <BotonFila
-          tipo="Entrada"
-          nombre={p.it.nombre}
-          onPress={() => p.onMover('Entrada', p.it.id)}
-        />
-        <BotonFila tipo="Merma" nombre={p.it.nombre} onPress={() => p.onMover('Merma', p.it.id)} />
-      </View>
+      <ExistenciaFila e={p.it} onPress={() => p.onAbrir(p.it)} />
     </View>
   );
 }
@@ -101,7 +68,7 @@ function Fila(p: {
 export function ExistenciasLista(p: {
   readonly items: readonly Existencia[];
   readonly query: string;
-  readonly onMover: (tipo: TipoMovimiento, id: string) => void;
+  readonly onAbrir: (it: Existencia) => void;
   readonly onFoto: OnFoto;
 }): ReactElement {
   return (
@@ -113,7 +80,7 @@ export function ExistenciasLista(p: {
           borderTopColor={colors.gray100}
           paddingHorizontal={14}
         >
-          <Fila it={it} onMover={p.onMover} onFoto={p.onFoto} />
+          <Fila it={it} onAbrir={p.onAbrir} onFoto={p.onFoto} />
         </View>
       ))}
       {p.items.length === 0 ? (
@@ -130,29 +97,14 @@ export function ExistenciasLista(p: {
 /** How much a product has, said with its unit, for the sheet's options. */
 export const cantidadConUnidad = (it: Existencia): string => conUnidad(it.existencias, it.unidad);
 
-/** The board's centered empty answer: a yellow tile, a title, a body. */
-export function SinProductos(p: { readonly dueno: string }): ReactElement {
+/** No products yet: Don, one sentence and, where the phone can, «Producto nuevo». */
+export function SinProductos(p: { readonly onNuevo?: () => void }): ReactElement {
   return (
-    <View testID="inventario-sin-productos" padding={32} gap={10} alignItems="center">
-      <View
-        width={56}
-        height={56}
-        alignItems="center"
-        justifyContent="center"
-        borderRadius={radii[4]}
-        borderWidth={borderWidths.thick}
-        borderColor={colors.black}
-        backgroundColor={colors.yellowSoft}
-        aria-hidden
-      >
-        <PathIcon d={ICONS.inventario} size={26} strokeWidth={2.3} />
-      </View>
-      <MText size="lg" weight="extraBold" letterSpacing={-0.4} textAlign="center">
-        Sin productos con existencias
-      </MText>
-      <MText size="md" weight="semibold" color={colors.gray600} textAlign="center">
-        {`Cuando ${mayuscula(p.dueno)} dé de alta el catálogo con sus existencias, aquí podrás registrar entradas y mermas.`}
-      </MText>
-    </View>
+    <EstadoVacio
+      id="inventario-sin-productos"
+      title="Todavía no hay productos"
+      body="Da de alta lo que vendes y aquí verás cuánto te queda."
+      {...(p.onNuevo ? { cta: { label: 'Producto nuevo', onPress: p.onNuevo } } : {})}
+    />
   );
 }

@@ -1,28 +1,22 @@
 /**
- * The fields of «¿Qué pasó con la mercancía?» (MvInventario's sheet; the
- * web's `mover-campos.tsx`): the product with its stock, what happened to a
- * merma, and the optional texts («(si quieres)»). The kinds of move are in
- * `mover-tipos.tsx`, the quantity in `mover-cantidad.tsx`.
+ * The fields of «¿Qué pasó con la mercancía?» (RvInventario's sheet): the
+ * product with its stock, and what happened to a merma. The kinds of move
+ * are in `mover-tipos.tsx`, the quantity in `mover-cantidad.tsx`.
  */
 import type { ReactElement } from 'react';
-import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { conUnidad, MOTIVOS_MERMA, type MotivoMerma } from '@xangarro/caja/inventario';
-import { Chip, MText } from '../../components/index';
 import {
-  borderColors,
-  borderWidths,
-  colors,
-  fontFace,
-  portalFontSizes,
-  radii,
-  typography,
-} from '../../theme';
-import { ProductoIcono } from '../Ventas/cobrar-tile';
+  conUnidad,
+  MOTIVOS_MERMA,
+  type Existencia,
+  type MotivoMerma,
+} from '@xangarro/caja/inventario';
+import { Chip, MText } from '../../components/index';
+import { colors, radii } from '../../theme';
+import { ProductoTile } from './mover-glifos';
 import { EstadoChip } from './inventario-filas';
-import type { ExistenciaMovil } from './inventario-registro';
 
-export function Articulo({ e }: { readonly e: ExistenciaMovil }): ReactElement {
+export function Articulo({ e }: { readonly e: Existencia }): ReactElement {
   return (
     <View
       flexDirection="row"
@@ -32,7 +26,7 @@ export function Articulo({ e }: { readonly e: ExistenciaMovil }): ReactElement {
       borderRadius={radii[4]}
       backgroundColor={colors.offwhite}
     >
-      <ProductoIcono icono={e.glifo} tint={e.tint} size={52} productoId={e.id} />
+      <ProductoTile icono={e.icono} tint={e.tint} size={52} productoId={e.id} />
       <View flex={1} minWidth={0}>
         <MText size="lgx" weight="extraBold">
           {e.nombre}
@@ -66,44 +60,6 @@ export function Motivos(p: {
           />
         ))}
       </View>
-    </View>
-  );
-}
-
-export function Opcional(p: {
-  readonly label: string;
-  readonly placeholder: string;
-  readonly value: string;
-  readonly onChange: (v: string) => void;
-  readonly testID: string;
-}): ReactElement {
-  return (
-    <View gap={8}>
-      <MText size="body" weight="extraBold">
-        {p.label}{' '}
-        <MText size="body" weight="semibold" color={colors.textMuted}>
-          (si quieres)
-        </MText>
-      </MText>
-      <TextInput
-        testID={p.testID}
-        aria-label={p.label}
-        placeholder={p.placeholder}
-        placeholderTextColor={colors.textMuted}
-        value={p.value}
-        onChangeText={p.onChange}
-        maxLength={200}
-        style={{
-          height: 48,
-          paddingHorizontal: 14,
-          borderRadius: radii[3],
-          borderWidth: borderWidths.quiet,
-          borderColor: borderColors.quiet,
-          ...fontFace(typography.weights.semibold),
-          fontSize: portalFontSizes.body,
-          color: colors.black,
-        }}
-      />
     </View>
   );
 }
