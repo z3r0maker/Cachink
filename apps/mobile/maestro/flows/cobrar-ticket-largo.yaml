@@ -86,13 +86,10 @@ tags:
     timeout: 8000
 
 # Exact cash, as any sale.
-- scrollUntilVisible:
-    element:
+- extendedWaitUntil:
+    visible:
       id: 'cobro-metodo-Efectivo'
-    direction: DOWN
     timeout: 10000
-    visibilityPercentage: 60
-    centerElement: true
 - tapOn: { id: 'cobro-metodo-Efectivo' }
 - waitForAnimationToEnd
 - tapOn: { id: 'cobro-rapido-0' }

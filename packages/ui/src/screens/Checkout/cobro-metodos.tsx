@@ -1,7 +1,8 @@
 /**
- * «¿Cómo paga?» (MvCobro): Efectivo, Tarjeta and Transferencia as a radio
- * group, and Fiado as its own row that goes on to choose the client. The
- * card and transfer panels say what to check before tapping Cobrar.
+ * How the customer pays (MvCobroTotal): one row with Efectivo, Tarjeta and
+ * Transferencia as a radio group, and Fiado beside them, which goes on to
+ * choose the client. The card and transfer panels say what to check before
+ * tapping Cobrar.
  */
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
@@ -22,17 +23,35 @@ const ICONO: Record<'Efectivo' | 'Tarjeta' | 'Transferencia', string> = {
 
 type Pago = Exclude<MetodoCobro, 'Fiado'>;
 
-const BOTON = {
-  flex: 1,
-  height: 64,
+/** Wide enough for its word: «Transferencia» takes more of the row than «Fiado». */
+const SEGMENTO = {
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: 'auto',
+  minWidth: 0,
   alignItems: 'center',
   justifyContent: 'center',
-  gap: 4,
-  borderRadius: radii[3],
-  borderWidth: borderWidths.thin,
+  gap: 2,
+  paddingHorizontal: 6,
+  borderRadius: radii[2],
 } as const;
 
-function MetodoBoton(p: { m: Pago; on: boolean; onPress: () => void }): ReactElement {
+function Palabra(p: { color: string; children: string }): ReactElement {
+  return (
+    <MText
+      size="xs"
+      weight="extraBold"
+      color={p.color}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      maxFontSizeMultiplier={1.2}
+    >
+      {p.children}
+    </MText>
+  );
+}
+
+function MetodoBoton(p: { m: Pago; on: boolean; alto: number; onPress: () => void }): ReactElement {
   const tinta = p.on ? colors.yellow : colors.black;
   return (
     <Pressable
@@ -42,45 +61,39 @@ function MetodoBoton(p: { m: Pago; on: boolean; onPress: () => void }): ReactEle
       aria-label={p.m}
       onPress={p.onPress}
       style={{
-        ...BOTON,
+        ...SEGMENTO,
+        height: p.alto,
+        borderWidth: p.on ? borderWidths.thin : borderWidths.quiet,
         borderColor: p.on ? colors.black : borderColors.quiet,
         backgroundColor: p.on ? colors.black : colors.white,
       }}
     >
-      <PathIcon d={ICONO[p.m]} size={20} color={tinta} />
-      <MText size="sm" weight="extraBold" color={tinta} numberOfLines={1}>
-        {p.m}
-      </MText>
+      <PathIcon d={ICONO[p.m]} size={16} color={tinta} />
+      <Palabra color={tinta}>{p.m}</Palabra>
     </Pressable>
   );
 }
 
-const FILA = {
-  height: 52,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 10,
-  paddingHorizontal: 14,
-  borderRadius: radii[3],
-  borderWidth: borderWidths.quiet,
-  borderColor: borderColors.quiet,
-  backgroundColor: colors.white,
-} as const;
-
-function FiadoFila({ onPress }: { onPress: () => void }): ReactElement {
+function FiadoBoton(p: { alto: number; onPress: () => void }): ReactElement {
   return (
     <Pressable
       testID="cobro-fiado"
       role="button"
       aria-label="Fiado, elegir a quién se lo anotas"
-      onPress={onPress}
-      style={FILA}
+      onPress={p.onPress}
+      style={{
+        ...SEGMENTO,
+        height: p.alto,
+        borderWidth: borderWidths.quiet,
+        borderColor: borderColors.quiet,
+        backgroundColor: colors.white,
+      }}
     >
-      <PathIcon d={COBRAR_GLYPHS.fiado} size={20} />
-      <MText flex={1} size="body" weight="extraBold" textAlign="left">
-        Fiado
-      </MText>
-      <PathIcon d={GLYPHS.chevronRight} size={18} color={colors.gray600} />
+      <PathIcon d={COBRAR_GLYPHS.fiado} size={16} />
+      <View flexDirection="row" alignItems="center" gap={1}>
+        <Palabra color={colors.black}>Fiado</Palabra>
+        <PathIcon d={GLYPHS.chevronRight} size={12} color={colors.gray600} />
+      </View>
     </Pressable>
   );
 }
@@ -88,33 +101,62 @@ function FiadoFila({ onPress }: { onPress: () => void }): ReactElement {
 export function Metodos(p: {
   readonly metodos: readonly MetodoCobro[];
   readonly metodo: MetodoCobro;
+  readonly alto: number;
   readonly onMetodo: (m: MetodoCobro) => void;
   readonly onFiado: () => void;
 }): ReactElement {
   const pagos = p.metodos.filter((m): m is Pago => m !== 'Fiado');
   return (
-    <View gap={8}>
-      <View role="radiogroup" aria-label="Forma de pago" flexDirection="row" gap={8}>
+    <View flexDirection="row" gap={6}>
+      <View
+        role="radiogroup"
+        aria-label="Forma de pago"
+        flexDirection="row"
+        flexGrow={3}
+        flexShrink={1}
+        minWidth={0}
+        gap={6}
+      >
         {pagos.map((m) => (
-          <MetodoBoton key={m} m={m} on={p.metodo === m} onPress={() => p.onMetodo(m)} />
+          <MetodoBoton
+            key={m}
+            m={m}
+            on={p.metodo === m}
+            alto={p.alto}
+            onPress={() => p.onMetodo(m)}
+          />
         ))}
       </View>
-      {p.metodos.includes('Fiado') ? <FiadoFila onPress={p.onFiado} /> : null}
+      {p.metodos.includes('Fiado') ? <FiadoBoton alto={p.alto} onPress={p.onFiado} /> : null}
     </View>
   );
 }
+
+const PANEL = {
+  Tarjeta: {
+    fondo: colors.blueSoft,
+    titulo: (monto: string) => `Cobra ${monto} en la terminal`,
+    nota: 'Cuando la terminal diga que pasó el pago, toca Cobrar.',
+  },
+  Transferencia: {
+    fondo: colors.greenSoft,
+    titulo: (monto: string) => `Pídele que te transfiera ${monto}`,
+    nota: 'Revisa que ya te llegó antes de tocar Cobrar.',
+  },
+} as const;
 
 /** Tarjeta or Transferencia: the one thing to check before «Cobrar». */
 export function PanelSinEfectivo(p: {
   readonly metodo: 'Tarjeta' | 'Transferencia';
   readonly total: Money;
 }): ReactElement {
-  const monto = formatMoney(p.total);
-  const tarjeta = p.metodo === 'Tarjeta';
+  const panel = PANEL[p.metodo];
   return (
     <View
       testID={`cobro-panel-${p.metodo}`}
+      flex={1}
       alignItems="center"
+      justifyContent="center"
       gap={10}
       padding={20}
       borderRadius={radii[5]}
@@ -130,17 +172,15 @@ export function PanelSinEfectivo(p: {
         borderRadius={shapeRadii.pill}
         borderWidth={borderWidths.thin}
         borderColor={colors.black}
-        backgroundColor={tarjeta ? colors.blueSoft : colors.greenSoft}
+        backgroundColor={panel.fondo}
       >
         <PathIcon d={ICONO[p.metodo]} size={28} />
       </View>
       <MText size="xl" weight="extraBold" textAlign="center">
-        {tarjeta ? `Cobra ${monto} en la terminal` : `Pídele que te transfiera ${monto}`}
+        {panel.titulo(formatMoney(p.total))}
       </MText>
       <MText weight="semibold" color={colors.gray600} textAlign="center">
-        {tarjeta
-          ? 'Cuando la terminal diga que pasó el pago, toca Cobrar.'
-          : 'Revisa que ya te llegó antes de tocar Cobrar.'}
+        {panel.nota}
       </MText>
     </View>
   );
