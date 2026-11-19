@@ -36,6 +36,7 @@ import type {
   MensajesOperadorRepository,
   RespuestasOperadorRepository,
   ProductImagesRepository,
+  ExpenseReceiptsRepository,
 } from '@xangarro/data';
 import {
   DrizzleAppConfigRepository,
@@ -63,6 +64,7 @@ import {
   DrizzleMensajesOperadorRepository,
   DrizzleRespuestasOperadorRepository,
   DrizzleProductImagesRepository,
+  DrizzleExpenseReceiptsRepository,
 } from '@xangarro/data';
 
 /**
@@ -100,6 +102,8 @@ export interface Repositories {
   readonly respuestasOperador: RespuestasOperadorRepository;
   /** The product photo (M-13): append-only rows, the newest per product wins. */
   readonly productImages: ProductImagesRepository;
+  /** The gasto's receipt photo (M-18): insert only, pushed and never pulled. */
+  readonly expenseReceipts: ExpenseReceiptsRepository;
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
@@ -141,6 +145,7 @@ export function buildDrizzleRepositories(
     mensajesOperador: new DrizzleMensajesOperadorRepository(db),
     respuestasOperador: new DrizzleRespuestasOperadorRepository(db, deviceId, uid),
     productImages: new DrizzleProductImagesRepository(db, deviceId, uid),
+    expenseReceipts: new DrizzleExpenseReceiptsRepository(db, deviceId, uid),
   };
 }
 
@@ -219,3 +224,5 @@ export const useMensajesOperadorRepository = (): MensajesOperadorRepository =>
   useRepositories().mensajesOperador;
 export const useRespuestasOperadorRepository = (): RespuestasOperadorRepository =>
   useRepositories().respuestasOperador;
+export const useExpenseReceiptsRepository = (): ExpenseReceiptsRepository =>
+  useRepositories().expenseReceipts;

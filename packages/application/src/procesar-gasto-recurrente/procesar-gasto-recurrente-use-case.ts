@@ -71,13 +71,9 @@ export class ProcesarGastoRecurrenteUseCase implements UseCase<
       return { processed: false, egreso: null, nextProximoDisparo: null };
     }
 
-    // Audit M-1 PR 4 — idempotency guard: if an egreso linked to this
-    // recurring template already exists for today, skip. Prevents double
-    // registration when the UI fires the confirm handler twice before
-    // the query cache refreshes.
-    const existing = await this.#expenses.findByGastoRecurrenteAndDate(template.id, today);
-    if (existing !== null) {
-      return { processed: true, egreso: existing, nextProximoDisparo: null };
+    const repeat = await this.#yaPagado(template, today);
+    if (repeat !== undefined) {
+      return { processed: true, egreso: repeat, nextProximoDisparo: null };
     }
 
     const proveedor = captura.proveedor === undefined ? template.proveedor : captura.proveedor;
@@ -100,6 +96,21 @@ export class ProcesarGastoRecurrenteUseCase implements UseCase<
     await this.#recurring.markFired(template.id, next);
 
     return { processed: true, egreso, nextProximoDisparo: next };
+  }
+
+  /**
+   * Audit M-1 PR 4 — idempotency guard: the UI may fire the confirm twice
+   * before its cache refreshes, both times with the same template. The
+   * period the caller pays starts at its `proximoDisparo`; once the stored
+   * schedule has moved past it, that period is paid, and the repeat gets the
+   * egreso it already wrote (null if it was written on another day).
+   * Keyed on the period, not the day: two months behind are two payments,
+   * and the second one may be made the same day as the first.
+   */
+  async #yaPagado(template: RecurringExpense, today: IsoDate): Promise<Expense | null | undefined> {
+    const stored = await this.#recurring.findById(template.id);
+    if (stored === null || stored.proximoDisparo === template.proximoDisparo) return undefined;
+    return this.#expenses.findByGastoRecurrenteAndDate(template.id, today);
   }
 }
 

@@ -41,6 +41,10 @@ the entrada sheet and the keyboard cover «Guardar».
 - **Gastos** shows no gasto: the story records none, so its cifras read zero.
 - The shots were taken from a debug build (the dev client), which draws
   exactly what a release build draws on these screens.
+- **The order and the story changed after this capture** (2026-11-19, the
+  App Store set): the flow now numbers the files in the store's order (Inicio
+  first, Vincular last), stocks all twenty products on every device and records
+  one gasto. These files keep the old names until the December re-shoot.
 
 ## Reproducing
 

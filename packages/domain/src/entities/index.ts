@@ -18,6 +18,7 @@ export * from './product.js';
 export * from './product-icon-defaults.js';
 export * from './product-icon-categories.js';
 export * from './product-image.js';
+export * from './expense-receipt.js';
 export * from './inventory-movement.js';
 export * from './employee.js';
 export * from './client.js';

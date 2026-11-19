@@ -19,6 +19,7 @@ import { useRepositoriesOrNull } from '../app/repository-provider';
 import { useCurrentBusinessId } from '../app-config/use-app-config';
 import { cajaKeys } from '../hooks/query-keys';
 import type { EncodedPhoto } from './encode';
+import type { EncodedReceipt } from '../comprobante-gasto/encode';
 
 /** What a tile needs to draw a photo and the «Cambiar o quitar» sheet to describe it. */
 export interface FotoVista {
@@ -34,6 +35,8 @@ export interface FotoPuertos {
   recortar(uri: string): Promise<{ readonly uri: string; readonly lifted: boolean }>;
   /** The PNG at `uri` encoded as the row carries it. */
   codificar(uri: string, lifted: boolean): Promise<EncodedPhoto>;
+  /** The photo at `uri` as a gasto's receipt: gray, at most 1024 px (ADR-149). */
+  codificarComprobante(uri: string): Promise<EncodedReceipt>;
   /** A photo picked from the gallery, or null when the operator backed out. */
   elegirDeGaleria(): Promise<string | null>;
 }

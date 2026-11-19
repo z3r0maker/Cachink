@@ -39,12 +39,14 @@ export const montoCrudo = (m: bigint): string => `${m / 100n}.${String(m % 100n)
  * expenses — the rows its corte subtracts (`esperadoDelTurno`), so the list,
  * Mi turno's Gastos and the esperado agree — newest first. An unstamped row
  * (an entrada's «Compra inventario», a gasto with no turno open) left no
- * drawer and stays out, as on the web caja. Receipt photos wait for the storage bucket (ADR-083 D3),
- * so a phone row never says it carries one; who was paid is its detail.
+ * drawer and stays out, as on the web caja. `conFoto` holds the ids whose
+ * receipt photo the phone has (ADR-149); who was paid is the detail, else
+ * whether the ticket's photo is there.
  */
 export function gastosDelTurno(
   gastos: readonly Expense[],
   turnoId: string | null,
+  conFoto: ReadonlySet<string> = new Set(),
 ): readonly GastoTurno[] {
   if (turnoId === null) return [];
   return gastos
@@ -53,11 +55,11 @@ export function gastosDelTurno(
     .map((g) => ({
       id: g.id,
       concepto: g.concepto,
-      detalle: g.proveedor ?? 'Sin comprobante',
+      detalle: g.proveedor ?? (conFoto.has(g.id) ? 'Con foto' : 'Sin comprobante'),
       monto: g.monto,
       categoria: categoriaOperador(g.categoria),
       hora: hhmmLocal(g.createdAt),
-      comprobante: false,
+      comprobante: conFoto.has(g.id),
     }));
 }
 

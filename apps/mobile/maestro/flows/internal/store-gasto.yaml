@@ -1,0 +1,92 @@
+# Store-screenshot helper: one gasto in the turno, so Gastos shows a real row
+# and its figures instead of zeros, and the expected cash on Inicio and Mi
+# turno already takes it out: «Tortillas», $180.00, Insumos, with the
+# ticket's photo (M-18) so the row reads «Con foto». The simulator has no
+# camera: the photo comes from the gallery (the fixture the main flow adds).
+#
+# Precondition: turno open, any tab. Leaves Gastos on screen.
+appId: mx.xangarro.mobile
+---
+- runFlow: ../shared/abrir-registrar-gasto.yaml
+- tapOn:
+    id: 'gasto-concepto'
+# The keyboard's rise races the typing: let the sheet settle first.
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+# The driver drops letters when the whole word goes at once («Tortllas» on
+# the iPad, every time); the shot shows the concepto, so it goes in pieces,
+# and again in pieces if it still reads wrong.
+- inputText: 'Tor'
+- inputText: 'ti'
+- inputText: 'llas'
+- waitForAnimationToEnd
+- repeat:
+    while:
+      notVisible:
+        id: 'gasto-concepto'
+        text: 'Tortillas'
+    times: 3
+    commands:
+      - tapOn:
+          id: 'gasto-concepto'
+      - eraseText: 20
+      - inputText: 'Tor'
+      - inputText: 'ti'
+      - inputText: 'llas'
+      - waitForAnimationToEnd
+- assertVisible:
+    id: 'gasto-concepto'
+    text: 'Tortillas'
+- tapOn:
+    id: 'gasto-monto'
+- waitForAnimationToEnd
+- inputText: '180'
+- waitForAnimationToEnd
+# The chips can sit below the fold: swipe the sheet's own body, never the
+# screen (on the iPad a centre swipe lands on the scrim and closes the sheet).
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-categoria-Insumos'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-categoria-Insumos'
+    timeout: 5000
+- tapOn:
+    id: 'gasto-categoria-Insumos'
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: 'gasto-comprobante-tomar'
+    commands:
+      - swipe:
+          element:
+            id: 'registrar-gasto-sheet-body'
+          direction: UP
+- longPressOn:
+    id: 'gasto-comprobante-tomar'
+- runFlow: ../shared/elegir-foto-galeria.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'gasto-comprobante-lista'
+    timeout: 15000
+# A dropped digit would save the wrong amount: the footer says what it saves.
+- assertVisible:
+    id: 'gasto-guardar'
+    text: ".*\\$180\\.00.*"
+- tapOn:
+    id: 'gasto-guardar'
+- extendedWaitUntil:
+    notVisible:
+      id: 'registrar-gasto-sheet'
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      text: ".*−\\$180\\.00.*"
+    timeout: 10000

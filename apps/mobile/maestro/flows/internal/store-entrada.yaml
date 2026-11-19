@@ -13,11 +13,22 @@ appId: mx.xangarro.mobile
     direction: UP
     timeout: 5000
     optional: true
+# Centred: a row found at the foot of the list sits under the tab bar, and
+# the tap would open that tab instead. The last row can't be centred (the
+# list ends), so the plain scroll after it finds that one.
 - scrollUntilVisible:
     element:
       id: 'inventario-fila-${ID}'
     direction: DOWN
     timeout: 5000
+    centerElement: true
+    optional: true
+- scrollUntilVisible:
+    element:
+      id: 'inventario-fila-${ID}'
+    direction: DOWN
+    timeout: 5000
+- waitForAnimationToEnd
 - tapOn:
     id: 'inventario-fila-${ID}'
 - extendedWaitUntil:

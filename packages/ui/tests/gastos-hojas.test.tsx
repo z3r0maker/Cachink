@@ -71,13 +71,16 @@ describe('RegistrarGastoSheet · validación', () => {
     expect(textoDe('gasto-guardar')).toContain('Registrar gasto de $150.00');
     fireEvent.click(screen.getByTestId('gasto-guardar'));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
-    expect(onGuardar).toHaveBeenCalledWith({
-      monto: 150_00n,
-      concepto: 'Cilindro de gas',
-      categoria: 'Insumos',
-      proveedor: 'Gas Express',
-      foto: null,
-    });
+    expect(onGuardar).toHaveBeenCalledWith(
+      {
+        monto: 150_00n,
+        concepto: 'Cilindro de gas',
+        categoria: 'Insumos',
+        proveedor: 'Gas Express',
+        foto: null,
+      },
+      null,
+    );
   });
 
   it('a failed write says so and stays open', async () => {

@@ -135,4 +135,31 @@ describe('ProcesarGastoRecurrenteUseCase', () => {
     });
     expect(result.nextProximoDisparo).toBe('2027-01-01');
   });
+
+  it('two months behind: the second is paid the same day and the schedule catches up', async () => {
+    await seedTemplate(recurring, { diaDelMes: 1, proximoDisparo: '2026-10-01' as IsoDate });
+    const [seeded] = await recurring.findDue('2026-11-19' as IsoDate, BIZ);
+    const today = '2026-11-19' as IsoDate;
+    const octubre = await useCase.execute({ template: seeded!, today });
+    expect(octubre.nextProximoDisparo).toBe('2026-11-01');
+    const fresh = await recurring.findById(seeded!.id);
+    const noviembre = await useCase.execute({ template: fresh!, today });
+    expect(noviembre.processed).toBe(true);
+    expect(noviembre.egreso?.id).not.toBe(octubre.egreso?.id);
+    expect(noviembre.nextProximoDisparo).toBe('2026-12-01');
+    expect(await recurring.findDue(today, BIZ)).toEqual([]);
+    expect(await expenses.findByDateRange(today, today, BIZ)).toHaveLength(2);
+  });
+
+  it('a repeat with the same stale template records once and advances once', async () => {
+    const template = await seedTemplate(recurring, { proximoDisparo: '2026-10-01' as IsoDate });
+    const today = '2026-11-19' as IsoDate;
+    const first = await useCase.execute({ template, today });
+    const again = await useCase.execute({ template, today });
+    expect(again.processed).toBe(true);
+    expect(again.egreso?.id).toBe(first.egreso?.id);
+    expect(again.nextProximoDisparo).toBe(null);
+    expect((await recurring.findById(template.id))?.proximoDisparo).toBe('2026-11-01');
+    expect(await expenses.findByDateRange(today, today, BIZ)).toHaveLength(1);
+  });
 });

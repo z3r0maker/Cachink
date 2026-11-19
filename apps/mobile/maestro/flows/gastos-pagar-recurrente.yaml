@@ -1,8 +1,9 @@
 # Pagar un gasto recurrente vencido (Track M-11, M-08; board MvGastos
-# «pagar»): the seeded «Renta local» (mensual, vence el 2026-10-01, así que
-# ya toca) waits in /gastos' «Pendientes de registrar»; its «Registrar» opens
-# the sheet prefilled from the template, and one write records the gasto and
-# clears the pendiente (Inicio's «Para hoy» and Mi turno's panel go with it).
+# «pagar»): the seeded «Renta local» (mensual, due on this month's 1st, so
+# exactly one payment is due) waits in /gastos' «Pendientes de registrar»;
+# its «Registrar» opens the sheet prefilled from the template, and one write
+# records the gasto and clears the pendiente (Inicio's «Para hoy» and Mi
+# turno's panel go with it).
 #
 # The pendiente's button id embeds the fixture's deterministic ULID
 # (01JREC…0001): packages/contracts/src/mock/fixtures.ts:174 seeds it via

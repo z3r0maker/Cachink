@@ -8,6 +8,7 @@
 export * from './_columns';
 export * from './tenant';
 export * from './catalog';
+export * from './expense-receipts.js';
 export * from './ledger';
 export * from './caja';
 export * from './mensajes';

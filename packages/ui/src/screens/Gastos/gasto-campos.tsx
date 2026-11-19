@@ -164,18 +164,22 @@ export function PieGasto(p: PieGastoProps): ReactElement {
         <Btn variant="secondary" size="xl" onPress={p.onCancelar} testID="gasto-cancelar">
           Cancelar
         </Btn>
-        <Btn
-          variant="primary"
-          size="xl"
-          sentence
-          fullWidth
-          disabled={!p.f.listo}
-          loading={p.guardando}
-          onPress={p.onGuardar}
-          testID="gasto-guardar"
-        >
-          {`Registrar gasto de ${monto}`}
-        </Btn>
+        {/* The rest of the row, not 100% of it: a full-width button beside
+            «Cancelar» ran past the sheet's right edge and cut its figure. */}
+        <View flex={1} minWidth={0}>
+          <Btn
+            variant="primary"
+            size="xl"
+            sentence
+            fullWidth
+            disabled={!p.f.listo}
+            loading={p.guardando}
+            onPress={p.onGuardar}
+            testID="gasto-guardar"
+          >
+            {`Registrar gasto de ${monto}`}
+          </Btn>
+        </View>
       </View>
     </View>
   );

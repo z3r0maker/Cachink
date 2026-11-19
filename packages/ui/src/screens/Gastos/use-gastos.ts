@@ -11,6 +11,7 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { categoriaDominio, hhmmLocal, hoyLocal } from '@xangarro/caja';
+import type { ComprobanteGasto } from '@xangarro/application';
 import type { GastosData, NuevoGasto, RecurrentePorPagar } from '@xangarro/caja/gastos';
 import type { BusinessId, CajaTurnoId, RecurringExpenseId, UserId } from '@xangarro/domain';
 import { useRepositories } from '../../app/repository-provider';
@@ -30,7 +31,8 @@ export interface GastosVivo {
   readonly turnoAbierto: boolean;
   /** The due recurrent gastos to pay; null until the read lands. */
   readonly porPagar: readonly RecurrentePorPagar[] | null;
-  readonly registrar: (n: NuevoGasto) => Promise<void>;
+  /** The gasto, and its receipt photo when Registrar gasto took one (M-18). */
+  readonly registrar: (n: NuevoGasto, comprobante?: ComprobanteGasto | null) => Promise<void>;
   readonly refetch: () => void;
 }
 
@@ -58,18 +60,18 @@ function nuevoEgreso(n: NuevoGasto, businessId: BusinessId, turnoId: CajaTurnoId
 function useRegistrarGasto(
   businessId: BusinessId | null,
   filas: FilasGastos | undefined,
-): (n: NuevoGasto) => Promise<void> {
+): GastosVivo['registrar'] {
   const repos = useRepositories();
   const egreso = useRegistrarEgreso();
   const procesar = useProcesarGastoRecurrente();
   const queryClient = useQueryClient();
   return useCallback(
-    async (n: NuevoGasto): Promise<void> => {
+    async (n, comprobante = null): Promise<void> => {
       if (businessId === null || filas === undefined)
         throw new Error('No hay negocio en esta caja');
       const turnoId = filas.abierto?.id ?? null;
       if (n.recurrenteId === undefined) {
-        await egreso.mutateAsync(nuevoEgreso(n, businessId, turnoId));
+        await egreso.mutateAsync({ ...nuevoEgreso(n, businessId, turnoId), comprobante });
       } else {
         const template = await repos.recurringExpenses.findById(
           n.recurrenteId as RecurringExpenseId,

@@ -1,6 +1,7 @@
 # The store screenshots (X-05): the real app against the contracts mock, eight
 # screens, saved to ${OUT}/0N-<name>.png. One flow for every device: the App
-# Store's iPhone 6.9" and iPad 13", Play's phone and tablet.
+# Store's iPhone 6.9" and iPad 13", Play's phone and tablet. The number is the
+# store's order, not the capture's: Inicio first (it shows Don), Vincular last.
 #
 # Run with -e OUT=<folder> -e FORMA=telefono|tableta (a floating sheet on a
 # tablet closes on the drag that hides a phone's keyboard), and -e MOCK=<url>
@@ -9,14 +10,18 @@
 # Before it (README «Reproducing» in app-registration/apple/SCREENSHOTS.md):
 # the mock on :3000, Metro with EXPO_PUBLIC_E2E=1, the database reset with
 # fresh-install.sh (never clearState: it forgets the dev client's settings),
-# the dev menu's «Tools button» off, the status bar at 9:41.
+# the dev menu's «Tools button» off, the status bar at 9:41, the simulator
+# renamed «Caja 1» (the header says the device's name).
 #
 # The story: a taquería's morning. The turno opens with a $2,000 fondo, ten
 # products arrive (their «Compra inventario» carries no turno, so the expected
 # cash never subtracts it), then three sales: cash with change, transfer,
-# card.
+# card, and one gasto: $180.00 of tortillas.
 appId: mx.xangarro.mobile
 ---
+# The gasto's receipt comes from the gallery (store-gasto.yaml).
+- addMedia:
+    - '../../fixtures/producto-foto.png'
 - runScript:
     file: ../shared/mock-reset.js
     env:
@@ -67,7 +72,7 @@ appId: mx.xangarro.mobile
           start: '5%, 30%'
           end: '5%, 80%'
 - runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/01-activacion
+- takeScreenshot: ${OUT}/08-activacion
 
 - tapOn:
     id: 'activation-submit'
@@ -95,35 +100,12 @@ appId: mx.xangarro.mobile
 
 - runFlow: store-surtir.yaml
 - runFlow: store-ventas.yaml
-
-- tapOn:
-    id: 'tab-inicio|rail-inicio|sidebar-inicio'
-- extendedWaitUntil:
-    visible:
-      id: 'inicio-hero-listo'
-    timeout: 10000
-- runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/02-inicio
-
-- tapOn:
-    id: 'tab-ventas|rail-ventas|sidebar-ventas'
-- runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/06-ventas
-
-# Gastos from Mi turno's row (the phone) or the rail and the sidebar (a tablet).
-- runFlow:
-    file: ../shared/open-turno-row.yaml
-    env:
-      ROW: 'otros-gastos'
-- extendedWaitUntil:
-    visible:
-      id: 'mobile-gastos'
-    timeout: 8000
+# The gasto lands before Inicio's shot, so every figure tells the same day.
+- runFlow: store-gasto.yaml
 - runFlow: store-pausa.yaml
 - takeScreenshot: ${OUT}/07-gastos
 
-# Gastos sits on Mi turno's stack: Android's tab bar does not pop to the
-# root when the tab is already selected, so «‹» goes back first.
+# Gastos sits on Mi turno's stack: back to the root before switching tabs.
 - runFlow:
     when:
       visible:
@@ -131,7 +113,29 @@ appId: mx.xangarro.mobile
     commands:
       - tapOn: { id: 'top-bar-back' }
 - tapOn:
+    id: 'tab-inicio|rail-inicio|sidebar-inicio'
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 10000
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/01-inicio
+
+- tapOn:
+    id: 'tab-ventas|rail-ventas|sidebar-ventas'
+- runFlow: store-pausa.yaml
+- takeScreenshot: ${OUT}/06-ventas
+
+# Android's tab bar does not pop Mi turno's stack to the root when the tab
+# is already selected; the Gastos screen was left above it.
+- tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
+- runFlow:
+    when:
+      visible:
+        id: 'top-bar-back'
+    commands:
+      - tapOn: { id: 'top-bar-back' }
 - extendedWaitUntil:
     visible:
       id: 'mobile-turno'
@@ -144,4 +148,4 @@ appId: mx.xangarro.mobile
           start: '50%, 35%'
           end: '50%, 85%'
 - runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/08-mi-turno
+- takeScreenshot: ${OUT}/05-mi-turno

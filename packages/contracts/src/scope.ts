@@ -17,6 +17,8 @@ export const UP_TABLES = [
   'conversions',
   'auditorias_inventario',
   'respuestas_operador',
+  // A gasto's receipt photo (ADR-149): pushed, never pulled; no other phone shows it.
+  'expense_receipts',
 ] as const;
 
 /**

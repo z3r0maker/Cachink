@@ -109,6 +109,50 @@ export async function addProductPhoto(t: Tenant, productoId: string): Promise<st
   return id;
 }
 
+export interface ExpenseRow {
+  readonly fecha: string;
+  readonly concepto: string;
+  /** Centavos. */
+  readonly monto?: number;
+  /** Who wrote it down: a user and a turno of theirs on `fecha`. None leaves it a portal gasto's «—». */
+  readonly operador?: string;
+}
+
+/** A gasto as a phone's push leaves it, on its operador's turno when one is named. */
+export async function addExpense(t: Tenant, row: ExpenseRow): Promise<string> {
+  const [id, user, turno] = [newUlid(), newUlid(), newUlid()];
+  await asTenant(t.biz, async (sql) => {
+    if (row.operador !== undefined) {
+      await sql`
+        INSERT INTO users (id, nombre, pin_hash, active, business_id, device_id, created_at, updated_at)
+        VALUES (${user}, ${row.operador}, 'x', true, ${t.biz}, ${t.deviceId}, now(), now())`;
+      await sql`
+        INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, monto_apertura_centavos,
+                                 efectivo_adicional_centavos, business_id, device_id, created_at, updated_at)
+        VALUES (${turno}, ${user}, ${row.fecha}, now(), 0, 0, ${t.biz}, ${t.deviceId}, now(), now())`;
+    }
+    await sql`
+      INSERT INTO expenses (id, fecha, concepto, categoria, monto_centavos, caja_turno_id,
+                            business_id, device_id, created_at, updated_at)
+      VALUES (${id}, ${row.fecha}, ${row.concepto}, 'Servicios', ${row.monto ?? 18000},
+              ${row.operador === undefined ? null : turno}, ${t.biz}, ${t.deviceId}, now(), now())`;
+  });
+  return id;
+}
+
+/** A gasto's receipt photo, as the phone's push would leave it (ADR-149, M-18). */
+export async function addExpenseReceipt(t: Tenant, gastoId: string): Promise<string> {
+  const id = newUlid();
+  await asTenant(t.biz, async (sql) => {
+    await sql`
+      INSERT INTO expense_receipts (id, gasto_id, mime, bytes, width, height,
+                                    business_id, device_id, created_at, updated_at)
+      VALUES (${id}, ${gastoId}, 'image/webp', decode(${TINY_WEBP}, 'base64'), 8, 8,
+              ${t.biz}, ${t.deviceId}, now(), now())`;
+  });
+  return id;
+}
+
 /**
  * A logo's bytes exactly as given, written past the upload gate. For the spec
  * that proves the serving route holds on its own (audit F-01): what is stored

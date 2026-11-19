@@ -28,7 +28,7 @@ function localTables(): string[] {
 }
 
 /** Whole tables whose device half is pending, as in data-pg's drift test.
- * Empty since 2026-09-22: C-20's two tables landed in SQLite 0013. */
+ * Empty since 2026-11-19: `expense_receipts` (ADR-149) landed in SQLite 0016. */
 const PENDING_DEVICE_TABLES = new Set<string>([]);
 
 describe('table scope', () => {
@@ -58,6 +58,11 @@ describe('table scope', () => {
     assert.equal(isPushable('product_images', 'insert'), true);
     assert.equal(isPushable('product_images', 'update'), false);
     assert.equal(isPullable('product_images'), true);
+  });
+
+  it('a gasto receipt goes up from the phone and is never pulled (ADR-149)', () => {
+    assert.equal(isPushable('expense_receipts', 'insert'), true);
+    assert.equal(isPullable('expense_receipts'), false);
   });
 
   it('down-only tables are never pushable and up-only tables are never pullable', () => {
