@@ -106,7 +106,7 @@ const sinConexion = (d: InicioData): Hero => ({
   icon: SIN_RED,
   chip: `${d.pendientes} sin enviar`,
   title: `Sin internet, sigue cobrando: ${d.pendientes} registros esperan`,
-  body: 'Se envían solos cuando vuelva la señal. No podrás cerrar el turno hasta que suban.',
+  body: 'Se envían solos cuando vuelva la señal. Puedes cerrar el turno igual.',
   cta: 'Ver pendientes',
   href: `${OPERADOR_BASE}/pendientes`,
   extra: { label: 'Seguir cobrando', href: `${OPERADOR_BASE}/caja` },

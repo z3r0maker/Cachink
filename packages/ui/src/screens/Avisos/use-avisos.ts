@@ -7,7 +7,8 @@
  * the outbox carries to the owner; every query sits under the caja's family
  * so a capture or a sync run refreshes it. What is stored shows offline and
  * after a failed run (R6): only a failed read is an error, and offline is a
- * flag, so a reply then says it waits for the signal.
+ * flag, so a reply then says it waits for the signal. The read follows each
+ * sync run, so the queue notice leaves once the rows are sent.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
@@ -134,7 +135,7 @@ async function leerAvisos(
     stockBajo: stock,
     dueno: dueno ?? null,
   };
-  return avisosVivos(para, hoyLocal());
+  return avisosVivos(para, hoyLocal(), 'esta caja');
 }
 
 async function marcarLeidos(l: Lectores, ids: readonly string[]): Promise<void> {
@@ -156,8 +157,12 @@ function useAvisosData(
 } {
   const db = useDatabase();
   const { state: sync, listRejected } = useCloudSync();
+  // Keyed on what a run changes too: a push that pulls nothing invalidates no
+  // caja query, and the queue notice outlived the send (as the queue did, R3).
+  const corrida = [sync.counts.unsent, sync.lastSyncAt] as const;
   const q = useQuery({
-    queryKey: [...cajaKeys.byBusiness(businessId), 'avisos', userId],
+    queryKey: [...cajaKeys.byBusiness(businessId), 'avisos', userId, ...corrida],
+    placeholderData: (previo) => previo,
     enabled: businessId !== null && userId !== null,
     queryFn: () => leerAvisos(l, businessId as BusinessId, userId as UserId, listRejected, db),
   });
