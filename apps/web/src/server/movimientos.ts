@@ -12,7 +12,10 @@ import {
   type MovimientoRow,
 } from '@xangarro/data-pg';
 
-import { withTenant } from './db';
+import { withTenant, type Tx } from './db';
+import { pgExpenseReceiptsReader, type ComprobanteGasto } from './repositories/expense-receipts';
+
+export type { ComprobanteGasto };
 
 /**
  * Ventas y gastos' read model (P-09, audit DB2-QRY-02): one page of the
@@ -26,8 +29,14 @@ import { withTenant } from './db';
  */
 export const POR_PAGINA = 10;
 
+/**
+ * A row of the page. A gasto carries its receipt photo, or null when it has
+ * none (ADR-149); a venta's is always null, its comprobante is the ticket.
+ */
+export type FilaMovimiento = MovimientoRow & { readonly comprobante: ComprobanteGasto | null };
+
 export interface MovimientosVista {
-  readonly filas: readonly MovimientoRow[];
+  readonly filas: readonly FilaMovimiento[];
   /** Per category for the period and search; the category filter is not applied. */
   readonly grupos: readonly GrupoMovimientos[];
   /** Rows per tab for the period and search, as the tab labels count them. */
@@ -57,6 +66,16 @@ export function paginaParaFecha(
   return withTenant(businessId, (tx) => paginaDeFecha(tx, kind, filtro, fecha, POR_PAGINA));
 }
 
+/** The page's rows with their receipts: one query for the ten gastos, none for ventas. */
+async function conComprobantes(
+  tx: Tx,
+  filas: readonly MovimientoRow[],
+): Promise<readonly FilaMovimiento[]> {
+  const gastos = filas.filter((f) => f.kind === 'gasto').map((f) => f.id);
+  const recibos = await pgExpenseReceiptsReader(tx).deGastos(gastos);
+  return filas.map((f) => ({ ...f, comprobante: recibos.get(f.id) ?? null }));
+}
+
 export function loadMovimientos(
   businessId: string,
   kind: 'venta' | 'gasto',
@@ -76,7 +95,7 @@ export function loadMovimientos(
     const tickets = filas.flatMap((f) => (f.ticketId === null ? [] : [f.ticketId]));
     const propios = filasDe(grupos, null);
     return {
-      filas,
+      filas: await conComprobantes(tx, filas),
       grupos,
       conteos:
         kind === 'venta' ? { ventas: propios, gastos: otro } : { ventas: otro, gastos: propios },
