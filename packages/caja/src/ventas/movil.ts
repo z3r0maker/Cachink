@@ -11,6 +11,7 @@ import type { Categoria } from '../caja/types';
 import { mayuscula } from '../comun/dueno';
 import type { LineaDetalle, VentaDetalle } from './detalle/types';
 import { comoMetodo } from './derive';
+import { lineasResumen } from './lista';
 import type { MetodoVenta, VentaTurno } from './types';
 
 /** The operator sees `V-0412`: `V-`, the counter padded to four (ADR-073). */
@@ -46,7 +47,10 @@ interface LineaLeida {
   readonly monto: Money;
 }
 
-/** The list's row: the lines summed, the method as the operator says it. */
+/**
+ * The list's row: every line named and summed (MvVentas: «2 Alambre · 1 Café»,
+ * not the header's first product), the method as the operator says it.
+ */
 export function ventaTurnoDe(
   t: TicketLeido,
   lineas: readonly LineaLeida[],
@@ -55,7 +59,7 @@ export function ventaTurnoDe(
   return {
     ...(t.id === undefined ? {} : { id: t.id }),
     folio: folioVisto(t.folio),
-    concepto: t.concepto,
+    concepto: lineas.length === 0 ? t.concepto : lineasResumen(lineas),
     monto: sum(lineas.map((l) => l.monto)),
     metodo: comoMetodo(t.metodo),
     hora: t.hora ?? '',

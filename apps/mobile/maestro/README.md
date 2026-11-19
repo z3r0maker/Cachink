@@ -286,7 +286,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `
 
 | Flow                           | Entry     | Suite | What it proves                                                                                                                                                      |
 | ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the three-figure KPI row,                                             |
+| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the compact three figures,                                            |
 | `venta-cantidad-multiple.yaml` | activated |       | Sell multiple units by tapping the same product 3 times.                                                                                                            |
 | `venta-detalle-cancelar.yaml`  | activated | ✓     | A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas «detalle»/«cancelar-venta»): the lines and tiles, «Ma                                            |
 | `comprobante-whatsapp.yaml`    | activated | ✓     | «Mandar comprobante» → WhatsApp on a phone without the app: the wa.me link goes to the browser and, back in the app, the sheet says so and keeps the other options. |

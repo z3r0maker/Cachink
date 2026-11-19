@@ -1,6 +1,6 @@
 /**
  * Ventas del turno — the list and its states (M-08). The figures the board
- * draws, the rows with their chips (a cancelled sale stays, struck through),
+ * draws, the rows with their chips (a cancelled sale stays, marked),
  * the method filter, the search, and the loading · sin-ventas · sin-turno ·
  * con-error block. Fed the caja fixture, exactly as the stories are.
  */
@@ -28,13 +28,14 @@ function montar(over: Partial<Parameters<typeof VentasMostradorScreen>[0]> = {})
 }
 
 describe('la lista', () => {
-  it('draws the turno’s three figures, agreeing with the fixture', () => {
+  it('draws the title line and the three compact figures, agreeing with the fixture', () => {
     montar();
-    expect(screen.getByRole('heading')).toHaveTextContent('Ventas del turno');
-    expect(screen.getByText('12')).toBeInTheDocument();
-    expect(screen.getByText('$3,120.00')).toBeInTheDocument();
-    expect(screen.getByText('$1,980.00')).toBeInTheDocument();
-    expect(screen.getByText(/Lo que cobraste desde las 08:15/)).toBeInTheDocument();
+    expect(screen.getByRole('heading')).toHaveTextContent('Ventas');
+    expect(screen.getByText('12 en tu turno, desde las 08:15')).toBeInTheDocument();
+    const cifras = screen.getByTestId('venta-resumen');
+    expect(cifras).toHaveTextContent('Cobrado$3,120.00');
+    expect(cifras).toHaveTextContent('En efectivo$1,980.00');
+    expect(cifras).toHaveTextContent('Canceladas1');
   });
 
   it('lists every sale with its folio, chip and amount', () => {
@@ -45,16 +46,21 @@ describe('la lista', () => {
     expect(screen.getAllByText('Efectivo').length).toBeGreaterThan(0);
   });
 
-  it('keeps the cancelled sale, struck through, next to its Cancelada chip', () => {
+  it('keeps the cancelled sale, next to its Cancelada chip, and says so to VoiceOver', () => {
     montar();
-    expect(screen.getByTestId('venta-fila-V-0405')).toBeInTheDocument();
-    expect(screen.getByText(/Cancelada · error de captura/)).toBeInTheDocument();
-    expect(screen.getAllByText('Cancelada').length).toBeGreaterThan(0);
+    const fila = screen.getByTestId('venta-fila-V-0405');
+    expect(fila).toHaveTextContent('Cancelada');
+    expect(fila).toHaveAttribute('aria-label', 'Ver venta V-0405, $60.00, Efectivo, cancelada');
   });
 
-  it('says the fiado row’s client', () => {
+  it('says the client only on a fiado row', () => {
     montar();
-    expect(screen.getByText(/Doña Mari de la tienda/)).toBeInTheDocument();
+    expect(screen.getByTestId('venta-fila-V-0409')).toHaveTextContent('Doña Mari de la tienda');
+    expect(screen.getByTestId('venta-fila-V-0412')).toHaveAttribute(
+      'aria-label',
+      'Ver venta V-0412, $160.00, Efectivo',
+    );
+    expect(screen.queryByText(/Ana Robledo · Caja 1/)).toBeNull();
   });
 
   it('narrows by method chip', () => {
@@ -65,20 +71,20 @@ describe('la lista', () => {
     expect(screen.getByTestId('venta-fila-V-0403')).toBeInTheDocument();
   });
 
-  it('searches folio, product and client, and says Sin resultados when nothing matches', () => {
+  it('searches folio, product and client, and says so when nothing matches', () => {
     montar();
     fireEvent.change(screen.getByTestId('venta-buscar'), { target: { value: 'dona mari' } });
     expect(screen.getByTestId('venta-fila-V-0409')).toBeInTheDocument();
     expect(screen.queryByTestId('venta-fila-V-0412')).toBeNull();
     fireEvent.change(screen.getByTestId('venta-buscar'), { target: { value: 'inexistente' } });
-    expect(screen.getByText('Sin resultados')).toBeInTheDocument();
-    expect(screen.getByText(/Ninguna venta de tu turno coincide/)).toBeInTheDocument();
+    expect(screen.getByText('No hay ventas con ese filtro')).toBeInTheDocument();
+    expect(screen.getByText(/Prueba con otra forma de pago/)).toBeInTheDocument();
   });
 
-  it('carries the amber note about cancelling, with the owner’s name', () => {
+  it('carries no standing note under the list (the cancel dialog says it)', () => {
     montar();
-    expect(screen.getByTestId('venta-nota')).toBeInTheDocument();
-    expect(screen.getByText(/Pedro la ve en su portal y en tu corte/)).toBeInTheDocument();
+    expect(screen.queryByTestId('venta-nota')).toBeNull();
+    expect(screen.queryByText(/Puedes cancelar ventas/)).toBeNull();
   });
 });
 

@@ -118,7 +118,7 @@ describe('useVentasTurno', () => {
     useAppConfigStore.getState().reset();
   });
 
-  it('reads the turno: the row with its lines summed, Crédito said as Fiado with its client', async () => {
+  it('reads the turno: the row with its lines named and summed, Crédito said as Fiado with its client', async () => {
     const leer = await montar(await conTurnoYVentas());
     const v = leer();
     expect(v.state).toBe('happy');
@@ -128,6 +128,7 @@ describe('useVentasTurno', () => {
     const fila = v.data?.ventas[0];
     expect(fila?.folio).toBe('V-0409');
     expect(fila?.monto).toBe(90_00n);
+    expect(fila?.concepto).toBe('1 Volcán · 1 Consomé');
     expect(fila?.metodo).toBe('Fiado');
     expect(fila?.cliente).toBe('Doña Mari de la tienda');
   });
