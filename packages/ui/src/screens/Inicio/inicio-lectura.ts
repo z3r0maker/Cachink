@@ -7,7 +7,7 @@
  * due and the tracked products' stock for «Para hoy».
  */
 import type { StockTarea } from '@xangarro/caja/inicio';
-import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import type { Repositories } from '../../app/repository-provider';
 import type { FilasInicio } from './inicio-filas';
 
@@ -50,10 +50,9 @@ export async function leerStock(r: R, businessId: BusinessId): Promise<readonly 
 export async function leerFilasInicio(
   r: R,
   businessId: BusinessId,
-  userId: UserId,
   hoy: string,
 ): Promise<FilasInicio> {
-  const abierto = await r.cajaTurnos.findOpenByUser(userId);
+  const abierto = await r.cajaTurnos.findOpenByBusiness(businessId);
   // The fallback shows the day's figures after a cierre — but a colleague's
   // synced OPEN turno must not take it: the hero would read «la caja está
   // lista» while Cobrar gates on the operator's OWN turno, hiding the one
