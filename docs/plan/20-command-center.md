@@ -884,8 +884,27 @@ with property tests:
 
 ### E-23 Caja `[baja]`
 
-- [ ] Status · **Blocked by:** E-12
-  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/caja`. Detrás de E-12.
+- [x] Status · **Blocked by:** E-12 (its remaining memo and drivers feed neither) · **Done:** 2026-11-19 (board CD-15c, round 17 approved; replaces round 4's CD-15b)
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `caja/`: `cajaAlCierre` (cash at each month's last day, today for
+    the month running), `mesesDeHistoria`, `proyeccion` under the Resumen's three scenarios
+    (today's net, flat at break-even, spending alone; never below zero), `reservaMinima` (3 months
+    of the average spending), `devolverCabe`, and `flujoPorTipo` (a month's cash by kind, refunds
+    netted, partner money apart). The averages are `autonomia`'s, so Caja and the Resumen agree.
+  - data-corp: `movimientosDeCaja` carries each entry's kind (parsed); `saldosDeCaja` splits
+    Bancos and Stripe por depositar; `ultimoSaldoConfirmado` reads E-14's `bank_balances`.
+  - `/empresa/caja`, Dinero's fourth tab: five tiles (Caja, Bancos with the last balance
+    confirmed in Cierre del mes and its link, Stripe por depositar, Gasto al mes, Meses de caja or
+    «Sin consumo»), the warning below the reserve with the open funding call, cash at each
+    month's close with six projected months (`?escenario=`), last month's flow, the partners'
+    open call and loans, and the next 30 days (recurring charges not yet registered, the ISR e
+    IVA declared or estimated). The bars are SVG attributes: the console's CSP drops inline
+    styles.
+  - Playwright: the tiles against the ledger as the page reads it, the projected bars, a
+    scenario, and a recurring charge three days ahead in the next payments.
+  - **Deviations from the board:** a dollar charge stays in dollars in the next payments, and the
+    total reads «$… + USD …» (its peso amount is known only when paid). The bank balance is
+    confirmed only in Cierre del mes, so Caja has no «Confirmar saldo».
 - **What:** bank balances (manual in v1), 3-month burn, runway, equal funding calls (amount, due
   date, each partner's transfer) and partner loans outstanding.
 - **Acceptance:** runway shows «sin consumo» with non-positive burn; a funding call shows who has

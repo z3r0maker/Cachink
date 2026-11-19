@@ -16,8 +16,8 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 `pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las
 listas de abajo.
 
-- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 13: E-10, E-12, E-22, E-23, E-30, E-40, … · `20-command-center.md:313`
 - **M-10** The owner corrects a sale. (Colas de tracks) — destraba 13: N-24, N-22, N-25, N-44, N-29, N-30, … · `19-movil-mostrador.md:33`
+- **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 11: E-10, E-12, E-22, E-30, E-40, E-17, … · `20-command-center.md:313`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1045`
 - **X-01** Entorno de staging (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **K-01** Registro de MEXIA como tercero desarrollador CoDi (Colas de tracks) — destraba 6: K-20, K-21, K-22, K-23, K-24, K-25 · `22-codi.md:84`
@@ -26,7 +26,7 @@ listas de abajo.
 - **C-13** API de intenciones de pago (Colas de tracks) — destraba 5: N-80, N-42, N-79, N-44, N-78 · `02-contracts.md:374`
 - **P-30** Runtime de generación del Asesor (Colas de tracks) — destraba 4: P-28, P-29, P-39, P-40 · `04-portal.md:1355`
 - **P-46** Quitar `ProximamenteState`, la deuda que el ADR-117 nombró (Colas de tracks) — destraba 4: P-28, P-29, P-39, P-40 · `04-portal.md:2054`
-- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1211`
+- **E-26** Almacenamiento de documentos en Azure Blob (Colas de tracks) — destraba 3: E-20, E-21, E-17 · `20-command-center.md:1230`
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1324`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1335`
 - **B-20** El journal de drizzle de Postgres, al día y con guarda (Colas de tracks) — destraba 2: N-27, N-30 · `03-backend.md:365`
@@ -82,7 +82,7 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (113)
+## Código y técnico (112)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
@@ -147,7 +147,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **K-21** Contrato: la intención de cobro CoDi — Bloqueada por: K-20 · Falta: todo. `payment_ref` no existe en ninguno de los dos esquemas ni en los contratos, así que la prueba de sync viejo → nuevo que pide su aceptación todavía no tiene nada que ejercitar. · `22-codi.md:268`
 - [ ] `Baja` **K-22** Backend: adaptador CoDi — Bloqueada por: K-21 · Falta: todo, y **le falta una barrera**: dice «the adapter behind ADR-066's `PaymentProvider` port», y ese puerto no existe en el repo — no hay un solo archivo que nombre `PaymentProvider`. Quien lo crea es N-41 («Puerto `PaymentProvider` — lado de lectura»), en `09-next-features.md`, que a su vez espera a N-75. Así que K-22 está bloqueada por K-21 **y** por N-41, y el campo sólo dice una. Agrégalo cuando se retome el track, o el primero que lo lea va a creer que el puerto ya está ahí. · `22-codi.md:279`
 
-### Consola (backoffice) (28)
+### Consola (backoffice) (27)
 
 - [ ] `Alta` **E-20** Tablero — Bloqueada por: E-01, OD-4, E-26 (card attachments) · Falta: todo (no hay ruta `/empresa/tablero`), y de sus tres barreras **sólo dos siguen vivas**: E-01 ya está cerrada. Quedan OD-4 y E-26, y las dos son del dueño, no de código: OD-4 es la única pregunta de las cinco de §1 que sigue sin respuesta («settle the deliverable definition on the canvas», que cambia el board CD-13), y E-26 pide una cuenta de Azure. Dicho de frente: ésta es la única tarea abierta del track, y lo que la detiene es una definición y una cuenta. Nota de higiene: el encabezado de `21-command-center-design.md` todavía dice «Before sending: answer OD-1 … and OD-4», y OD-1 se respondió el 2026-10-30. Sólo falta OD-4. · `20-command-center.md:856`
 - [~] `Media` **B-16** Back-office: consultas guardadas de Studio + funciones de soporte — Bloqueada por: B-03, B-11 · Falta: falta la consulta guardada de «suscripciones por plan/estado» (ya sin bloqueo porque `billing.subscriptions` existe); `billing.reissue_code` / `billing.resend_magic_link` no existen. La emisión desde Studio quedó sustituida por ADR-080 — elimina ese paso. La revisión del runbook requiere la aprobación de una persona. **Verificado el 2026-11-19 contra el repo**, sigue exacto: `supabase/studio/` tiene cuatro archivos (`codes-expiring-today`, `stale-devices`, `unlock-sign-in`, `unresolved-rejections`) y ninguno es el de suscripciones, y ni `billing.reissue_code` ni `billing.resend_magic_link` existen en ninguna migración. Lo único que cambió es el campo de arriba: **B-03 y B-11 ya están cerradas**, así que esta tarea no está bloqueada por nada. Lo que queda es una consulta guardada sobre `billing.subscriptions` (que ya existe), la función de reenvío, y una revisión del runbook que necesita una persona, no código. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:293`
@@ -159,24 +159,23 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [~] `Media` **E-10** Ingresos y facturas emitidas — Bloqueada por: E-02, B-10 · Falta: the «payout» movements: Stripe's deposits to the bank and its fee. Cobros wait in «Stripe por depositar» until then; the data needs N-63's `billing_events`. a partial refund (credit notes below the payment) posts nothing yet; a full one reverses. · `20-command-center.md:524`
 - [~] `Media` **E-12** Estado de resultados y Balance — Bloqueada por: E-02, OD-1 (answered 2026-10-30) · Falta: the sweat-cost memo, which reads the Tablero's accepted value (E-20); the bridge's drivers («8 negocios nuevos…»), which need E-10's billing import. · `20-command-center.md:647`
 - [ ] `Media` **E-21** Acciones y cortes — Bloqueada por: E-20, E-03, E-06 · Falta: todo; no hay ruta `/empresa/acciones`. Detrás de E-20, que a su vez espera OD-4 y E-26. · `20-command-center.md:868`
-- [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · Falta: todo. Detrás de E-14. Nota: el mapeo de códigos agrupadores que necesita es el mismo que E-02 espera del contador, así que el contador desbloquea las dos. · `20-command-center.md:962`
-- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · Falta: an Azure account. Run `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY` in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted), then `corp-blobs:move --vaciar`. The 20 MB upload and the lock are proven on Azurite and by that script, not yet against the real container. · `20-command-center.md:1211`
+- [ ] `Media` **E-43** Exportación al contador — Bloqueada por: E-14 · Falta: todo. Detrás de E-14. Nota: el mapeo de códigos agrupadores que necesita es el mismo que E-02 espera del contador, así que el contador desbloquea las dos. · `20-command-center.md:981`
+- [~] `Media` **E-26** Almacenamiento de documentos en Azure Blob — Bloqueada por: E-05 · Falta: an Azure account. Run `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY` in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted), then `corp-blobs:move --vaciar`. The 20 MB upload and the lock are proven on Azurite and by that script, not yet against the real container. · `20-command-center.md:1230`
 - [ ] `Baja` **N-62** Métricas de cohortes desde el domicilio fiscal, no desde la IP. — Falta: todo. Su premisa se sostiene: `businesses.codigo_postal` existe en el esquema de Postgres, así que esto no agrega recolección, como dice. Comparte la capa de consultas de cohortes con N-64, que tampoco existe, así que el que llegue primero la escribe. · `09-next-features.md:1303`
 - [ ] `Baja` **N-68** «Ver como» — suplantación de solo lectura con límite de tiempo — Bloqueada por: N-66, N-67 · Disparador: lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda resolver desde `/tenants/[id]` + N-65. · Falta: todo, y correctamente al final de la fila: sus dos barreras (N-66 y N-67) siguen abiertas, y su disparador pide un lanzamiento que no ha ocurrido más un caso concreto que no se pueda resolver sin esto. Nada que replantear. · `09-next-features.md:1377`
 - [ ] `Baja` **N-70** Decisiones — Bloqueada por: N-07, N-63 · Disparador: N-63 `[x]`. · Falta: todo, y de sus dos barreras sólo queda una: **N-07 está cerrada**, N-63 sigue abierta (y N-63 a su vez sólo espera datos reales). Así que el camino es N-63 y nada más. · `09-next-features.md:1402`
 - [ ] `Baja` **E-22** Presupuesto — Bloqueada por: E-12 · Falta: todo; no hay ruta `/empresa/presupuesto`. Detrás de E-12, que sólo le falta el memo de sweat-cost y los drivers. · `20-command-center.md:878`
-- [ ] `Baja` **E-23** Caja — Bloqueada por: E-12 · Falta: todo; no hay ruta `/empresa/caja`. Detrás de E-12. · `20-command-center.md:887`
-- [ ] `Baja` **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · Falta: todo (no existe `packages/corp-tools` ni nada que lo parezca), y **OD-3 ya está respondida** desde la tabla de §1: sí para los libros de MEXIA, nunca PII de inquilinos, y los ingresos salen sólo agregados por proyecto y periodo. Así que la barrera real es E-12 y nada más. · `20-command-center.md:898`
-- [ ] `Baja` **E-31** Propuestas — Bloqueada por: E-30 · Falta: todo. Detrás de E-30, que ya sólo espera a E-12. · `20-command-center.md:908`
-- [ ] `Baja` **E-32** The agents of §6 — Bloqueada por: E-31 · Falta: todo. Detrás de E-31. · `20-command-center.md:918`
-- [ ] `Baja` **E-33** Foundry runtime — Bloqueada por: E-32 · Falta: todo. Detrás de E-32: es el último eslabón de la rama de agentes. · `20-command-center.md:928`
-- [ ] `Baja` **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · Falta: todo. Detrás de N-63 (que espera datos reales) y de E-12. · `20-command-center.md:940`
-- [ ] `Baja` **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · Falta: todo, y **OD-2 ya está respondida** («by revenue share, with a manual override per cost»). La barrera real es la que la propia respuesta nombra: no hay un segundo proyecto. Aquí también aterriza el filtro por proyecto que E-02 le pasó. · `20-command-center.md:947`
-- [ ] `Baja` **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · Falta: todo. Detrás de E-23. · `20-command-center.md:955`
-- [~] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · Falta: the files' half, with E-26's Azure account: a runner of `moverDocumentos` between two accounts, rehearsed against a locked container. · `20-command-center.md:969`
-- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · Falta: todo; no hay ruta `/empresa/trimestre`. Tres barreras vivas (E-12, E-20, E-04). · `20-command-center.md:1072`
-- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · Falta: todo, y **OD-3 ya está respondida** (ver E-30). Las barreras vivas son E-24 y E-31. · `20-command-center.md:1135`
-- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · Falta: todo; no hay ruta `/empresa/minutas`. Detrás de E-31. · `20-command-center.md:1243`
+- [ ] `Baja` **E-30** `corp-tools` and the Claude Desktop MCP server — Bloqueada por: E-12, OD-3 · Falta: todo (no existe `packages/corp-tools` ni nada que lo parezca), y **OD-3 ya está respondida** desde la tabla de §1: sí para los libros de MEXIA, nunca PII de inquilinos, y los ingresos salen sólo agregados por proyecto y periodo. Así que la barrera real es E-12 y nada más. · `20-command-center.md:917`
+- [ ] `Baja` **E-31** Propuestas — Bloqueada por: E-30 · Falta: todo. Detrás de E-30, que ya sólo espera a E-12. · `20-command-center.md:927`
+- [ ] `Baja` **E-32** The agents of §6 — Bloqueada por: E-31 · Falta: todo. Detrás de E-31. · `20-command-center.md:937`
+- [ ] `Baja` **E-33** Foundry runtime — Bloqueada por: E-32 · Falta: todo. Detrás de E-32: es el último eslabón de la rama de agentes. · `20-command-center.md:947`
+- [ ] `Baja` **E-40** KPIs SaaS — Bloqueada por: N-63, E-12 · Falta: todo. Detrás de N-63 (que espera datos reales) y de E-12. · `20-command-center.md:959`
+- [ ] `Baja` **E-41** Second project and shared-cost allocation — Bloqueada por: OD-2, a second project · Falta: todo, y **OD-2 ya está respondida** («by revenue share, with a manual override per cost»). La barrera real es la que la propia respuesta nombra: no hay un segundo proyecto. Aquí también aterriza el filtro por proyecto que E-02 le pasó. · `20-command-center.md:966`
+- [ ] `Baja` **E-42** Banco y tipo de cambio — Bloqueada por: E-23 · Falta: todo. Detrás de E-23. · `20-command-center.md:974`
+- [~] `Baja` **E-44** Salida a otro sistema — Bloqueada por: E-01 · Falta: the files' half, with E-26's Azure account: a runner of `moverDocumentos` between two accounts, rehearsed against a locked container. · `20-command-center.md:988`
+- [ ] `Baja` **E-17** Resumen del trimestre — Bloqueada por: E-12, E-20, E-04 · Falta: todo; no hay ruta `/empresa/trimestre`. Tres barreras vivas (E-12, E-20, E-04). · `20-command-center.md:1091`
+- [ ] `Baja` **E-25** Lectura de estados de cuenta con IA — Bloqueada por: E-24, E-31, OD-3 · Falta: todo, y **OD-3 ya está respondida** (ver E-30). Las barreras vivas son E-24 y E-31. · `20-command-center.md:1154`
+- [ ] `Baja` **E-27** Minutas — Bloqueada por: E-05, E-31 · Falta: todo; no hay ruta `/empresa/minutas`. Detrás de E-31. · `20-command-center.md:1262`
 
 ### Backend, sync y datos (8)
 
@@ -388,6 +387,6 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `09-next-features.md` — 51 abiertos (11 en curso, 0 bloqueados, 29 hechos)
 - `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 14 hechos)
 - `19-movil-mostrador.md` — 5 abiertos (0 en curso, 0 bloqueados, 16 hechos)
-- `20-command-center.md` — 20 abiertos (5 en curso, 0 bloqueados, 12 hechos)
+- `20-command-center.md` — 19 abiertos (5 en curso, 0 bloqueados, 13 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 24 hechos)

@@ -71,6 +71,7 @@ import {
   trimestrePasado,
 } from './empresa-socios';
 import { signInAsStaff } from './helpers';
+import { E2E_HOSTING, esperadoDeCaja, hoyMx as hoyCaja, sembrarCargoProximo } from './empresa-caja';
 import {
   agregarOtroSocio,
   confirmarSaldo,
@@ -426,6 +427,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Movimientos',
     'Facturas',
     'Servicios',
+    'Caja',
     'Agenda',
     'Cierre del mes',
     'Expediente',
@@ -466,6 +468,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
     'Movimientos',
     'Facturas',
     'Servicios',
+    'Caja',
   ]);
   await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
 
@@ -991,4 +994,38 @@ test('a founder closes a month, Registrar refuses it, and it reopens with both f
   } finally {
     await quitarOtroSocio();
   }
+});
+
+test('a founder reads Caja: cash, spending, the scenarios and the next payments (E-23)', async ({
+  page,
+}) => {
+  const hoy = hoyCaja();
+  const dia = await sembrarCargoProximo(hoy);
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa/movimientos');
+  await abrirPestana(page, 'Caja', /\/empresa\/caja$/, 'Dinero');
+
+  // Real data: the ledger's cash and its three-month spending reach the tiles.
+  const a = await esperadoDeCaja(hoy);
+  await expect(page.getByTestId('caja-Caja')).toHaveText(formatMoney(a.caja));
+  await expect(page.getByTestId('caja-Gasto al mes')).toHaveText(formatMoney(a.sale));
+  await expect(page.getByRole('link', { name: /^Ver el cierre de / })).toBeVisible();
+
+  // The chart: real months, then six projected; a scenario redraws it.
+  await expect(page.locator('[data-testid="caja-barra"][data-real="no"]')).toHaveCount(6);
+  await expect(page.locator('[data-testid="caja-barra"][data-real="si"]').first()).toBeVisible();
+  await page.getByRole('link', { name: 'Si se detuvieran hoy' }).click();
+  await expect(page).toHaveURL(/\/empresa\/caja\?escenario=detener$/);
+  await expect(page.getByTestId('caja-titular')).toHaveText(/^Sin (ingresos|gastos)/);
+  await expect(page.getByRole('link', { name: 'Si se detuvieran hoy' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+
+  // The next 30 days carry the charge due in three days, at its usual amount.
+  const pago = page.getByTestId('caja-pago').filter({ hasText: E2E_HOSTING });
+  await expect(pago).toContainText('$1,234.50');
+  await expect(pago).toContainText(`${Number(dia.slice(8, 10))} `);
+  await expect(page.getByTestId('caja-flujo')).toContainText('Cambio en la operación');
+  await expect(page.getByTestId('caja-socios')).toContainText('Dinero de los socios');
 });
