@@ -47,6 +47,8 @@ export interface FilasDetalle {
   readonly lineas: readonly LineaFila[];
   readonly abonos: readonly AbonoFila[];
   readonly gastos: readonly GastoFila[];
+  /** Ids of the gastos whose receipt photo the device has (ADR-149); the web caja has none. */
+  readonly conFoto?: ReadonlySet<string>;
 }
 
 /** The screen's four methods; the retired QR/CoDi rides with Transferencia. */
@@ -65,7 +67,13 @@ const ultimo = (xs: readonly string[]): string | null =>
 
 type Detalle = Pick<
   TurnoVivoPara,
-  'porMetodo' | 'fiadoClientes' | 'ultimaCancelada' | 'ultimaVentaAt' | 'gastos' | 'movimientos'
+  | 'porMetodo'
+  | 'fiadoClientes'
+  | 'ultimaCancelada'
+  | 'ultimaVentaAt'
+  | 'gastos'
+  | 'comprobantes'
+  | 'movimientos'
 >;
 
 /** Everything Mi turno and Inicio show beyond the close figures. */
@@ -97,6 +105,7 @@ export function detalleDelTurno(f: FilasDetalle, nombres: ReadonlyMap<string, st
     ),
     ultimaVentaAt: ultimo(vivas.map((t) => t.createdAt)),
     gastos: f.gastos.length,
+    comprobantes: f.gastos.filter((g) => f.conFoto?.has(g.id) === true).length,
     movimientos: movimientosDe(f, nombres),
   };
 }
@@ -144,7 +153,7 @@ export function movimientosDe(
     id: g.id,
     tipo: 'gasto',
     titulo: `Gasto · ${g.concepto}`,
-    detalle: g.proveedor ?? 'Sin comprobante',
+    detalle: g.proveedor ?? (f.conFoto?.has(g.id) === true ? 'Con foto' : 'Sin comprobante'),
     hora: hhmmLocal(g.createdAt),
     montoCentavos: (-g.monto).toString(),
     at: g.createdAt,
