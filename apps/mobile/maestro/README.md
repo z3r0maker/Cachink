@@ -314,6 +314,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 | `interrupcion-bloqueo-ticket.yaml` | activated |       | Backgrounded past the five-minute auto-lock with a ticket open (J4-33): Bloqueo, the NIP, the same ticket. Slow (about six minutes).                                                                             |
 | `caja-cierre-discrepancia.yaml`    | activated | ✓     | Cierre with a diferencia explained by its own note (M-09; the old flow's CountResultStep dropdown + explicación is gone)                                                                                         |
 | `avisos-responder.yaml`            | activated | ✓     | Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread count, /avisos lists the owner's messages, and                                                                                          |
+| `avisos-sin-internet.yaml`         | activated |       | Avisos without internet (RvAvisosSinInternet, R6): the stored messages and the bell stay, a reply is saved for the outbox.                                                                                       |
 
 ### Sincronización y sin internet
 

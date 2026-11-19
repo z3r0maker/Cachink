@@ -3,7 +3,8 @@
  * messages and the caja's, replies from the phone. The caja's cta hrefs are
  * the web's `/operador/...` paths; `rutaMovil` maps them (or nothing). A
  * stack route opened from the header bell, so it wears the frame with the
- * way back.
+ * way back. Offline it still shows what is stored, and a reply waits in the
+ * outbox (RvAvisosSinInternet, R6).
  */
 
 import type { ReactElement } from 'react';
@@ -24,6 +25,7 @@ export default function AvisosRoute(): ReactElement {
         state={a.state}
         data={a.data}
         vivo={a.vivo}
+        sinInternet={a.sinInternet}
         onAbrir={(href) => {
           const ruta = rutaMovil(href);
           if (ruta !== null) router.navigate(ruta as never);

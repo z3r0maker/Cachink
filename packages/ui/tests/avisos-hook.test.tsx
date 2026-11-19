@@ -44,6 +44,23 @@ vi.mock('@xangarro/sync', async (importOriginal) => ({
 
 vi.mock('../src/database/index', () => ({ useDatabase: () => ({}) }));
 
+/** The last sync run's phase, as the test sets it (R6: offline, a failed run). */
+const sincronia = { fase: 'idle' as 'idle' | 'offline' | 'error' };
+vi.mock('../src/app/cloud-sync-bridge', async (importOriginal) => {
+  const real = await importOriginal<object>();
+  const { INITIAL_CLOUD_SYNC_STATE } = await import('../src/sync/cloud-sync-status');
+  return {
+    ...real,
+    useCloudSync: () => ({
+      state: { ...INITIAL_CLOUD_SYNC_STATE, phase: sincronia.fase },
+      syncNow: () => undefined,
+      listRejected: async () => [],
+      requeue: async () => undefined,
+      contar: async () => INITIAL_CLOUD_SYNC_STATE.counts,
+    }),
+  };
+});
+
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER = '01HZ8XQN9GZJXV8AKQ5X0C7ME0' as UserId;
 const MENSAJE = '01HZMSGOPERADORAAAAAAAAAAAA1';
@@ -111,6 +128,7 @@ beforeEach(() => {
   useAppConfigStore.setState({ currentBusinessId: BIZ, userId: USER });
   cola.mockReset();
   cola.mockResolvedValue([]);
+  sincronia.fase = 'idle';
 });
 
 describe('useAvisos · la lectura', () => {
@@ -139,6 +157,34 @@ describe('useAvisos · la lectura', () => {
     const v = await usar();
     expect(v.current.state).toBe('happy');
     expect(v.current.data?.avisos).toEqual([]);
+  });
+});
+
+describe('useAvisos · sin internet (R6)', () => {
+  it('offline, what is stored still shows, and the caja knows it is offline', async () => {
+    await sembrarMensaje();
+    sincronia.fase = 'offline';
+    const v = await usar();
+    expect(v.current.state).toBe('happy');
+    expect(v.current.sinInternet).toBe(true);
+    expect(v.current.data?.avisos.map((a) => a.titulo)).toContain('Aclara el corte del 13 de mayo');
+  });
+
+  it('a failed sync run is not a failed read: the messages stay', async () => {
+    await sembrarMensaje();
+    sincronia.fase = 'error';
+    const v = await usar();
+    expect(v.current.state).toBe('happy');
+    expect(v.current.sinInternet).toBe(false);
+  });
+
+  it('a reply offline still writes its row, for the outbox to carry later', async () => {
+    await sembrarMensaje();
+    sincronia.fase = 'offline';
+    const v = await usar();
+    await v.current.vivo.responder(MENSAJE, 'Salió un vale de la caja.');
+    const guardadas = await respuestas.findByMensaje(MENSAJE as never);
+    expect(guardadas.map((r) => r.texto)).toEqual(['Salió un vale de la caja.']);
   });
 });
 

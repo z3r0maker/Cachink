@@ -5,7 +5,9 @@
  * synced, ADR-075), and «De tu caja» from the caja's real state (the queue,
  * refused rows, low stock). The reply writes one `respuestas_operador` row
  * the outbox carries to the owner; every query sits under the caja's family
- * so a capture or a sync run refreshes it.
+ * so a capture or a sync run refreshes it. What is stored shows offline and
+ * after a failed run (R6): only a failed read is an error, and offline is a
+ * flag, so a reply then says it waits for the signal.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
@@ -43,6 +45,8 @@ const MAX_STOCK = 5;
 export interface AvisosVivoUi {
   readonly state: 'cargando' | 'error' | 'happy' | 'sin-internet';
   readonly data: AvisosData | null;
+  /** The last run had no network: the screen still shows what is stored. */
+  readonly sinInternet: boolean;
   readonly vivo: AvisosVivo;
   readonly refetch: () => void;
 }
@@ -147,6 +151,7 @@ function useAvisosData(
 ): {
   readonly state: AvisosVivoUi['state'];
   readonly data: AvisosData | null;
+  readonly sinInternet: boolean;
   readonly refetch: () => void;
 } {
   const db = useDatabase();
@@ -156,15 +161,15 @@ function useAvisosData(
     enabled: businessId !== null && userId !== null,
     queryFn: () => leerAvisos(l, businessId as BusinessId, userId as UserId, listRejected, db),
   });
-  const state: AvisosVivoUi['state'] =
-    q.isError || sync.phase === 'error'
-      ? 'error'
-      : sync.phase === 'offline'
-        ? 'sin-internet'
-        : q.data == null
-          ? 'cargando'
-          : 'happy';
-  return { state, data: q.data ?? null, refetch: () => void q.refetch() };
+  // The read is the device's own: a sync run that failed or found no network
+  // changes nothing stored, so it never hides the messages (R6).
+  const state: AvisosVivoUi['state'] = q.isError ? 'error' : q.data == null ? 'cargando' : 'happy';
+  return {
+    state,
+    data: q.data ?? null,
+    sinInternet: sync.phase === 'offline',
+    refetch: () => void q.refetch(),
+  };
 }
 
 /** The write path: marks device-local, the reply an outbox row. */
