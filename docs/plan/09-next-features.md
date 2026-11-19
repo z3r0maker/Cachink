@@ -1188,7 +1188,8 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### N-49 Explorador de pruebas con GLM [deuda] [baja]
 
-- [ ] Status · **Trigger:** el staging de X-01 en vivo y N-29 en verde.
+- [x] Status · ~~**Trigger:** el staging de X-01 en vivo y N-29 en verde.~~
+      Done: dropped — superseded by track S (`24-synth.md`, ADR-152, 2026-11-19): local, isolated stacks instead of staging, Claude instead of GLM, a separate judge and measured recall. The `kind=explorador` source is S-25.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
   provider), with personas ("taquero con prisa", "contador revisando el mes") and goals. Findings →
   inbox `kind=explorador` with screenshots and reproduction steps. Never a CI gate.

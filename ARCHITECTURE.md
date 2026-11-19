@@ -189,6 +189,7 @@ Links to discussion, docs, prior art.
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
+| [152](#adr-152) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10795,3 +10796,95 @@ with the same name, so a duplicate code under another name goes through.
 - The phone's typed entry keeps letters, since Code 128 and Code 39 carry them.
 - ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
   unused `MobileScannerHost` go.
+
+## ADR-152
+
+**Title:** Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — track 24 (`S-`); owner interview of 2026-11-19 on the Synth spec v2 (`docs/plan/25-synth-spec.md`). Supersedes N-49 («Explorador de pruebas con GLM»).
+
+**Context**
+
+The owner wrote a spec (v2) for exploratory QA and heuristic audit by LLM agents: an actor that uses the app as
+a persona would, a separate judge that classifies what it hit, deterministic scripts for seed, capture,
+interruptions and seeded bugs, and an internal app (Synth Studio) to launch, watch and review runs. N-49 already
+planned a smaller version of the idea, but on staging with a GLM model, and it waits for X-01, which is blocked.
+
+Phase 0 of the spec checked its assumptions against the repo (`tools/synth/ENV.md`). There is no staging. Member
+roles are `owner`, `admin` and `viewer`, and operators are PIN users on `/operador` behind a device link. The Asesor
+(Don Cuentas) is deterministic, with no reachable LLM call. `PORTAL_TODAY` fixes the app's clock per server
+process. `mintTenant()` and its row builders already exist under `apps/web/e2e/`.
+
+**Decision**
+
+1. **One track, `24-synth.md` (prefix `S-`), supersedes N-49.** The owner's spec is kept as the design brief,
+   `25-synth-spec.md`. Where the two differ, the track's §1 wins.
+2. **Location.** The harness lives in `tools/synth/{core,server,studio}`, workspace packages
+   `@xangarro/synth-core`, `-server` and `-studio`.
+   - `tools/*` joins `pnpm-workspace.yaml`, so CLAUDE.md applies in full: TDD for `core`, the 200/40-line budget,
+     strict TS, Vitest with `node:assert/strict`, and the latest stable packages.
+   - The direction is `studio → server → core`.
+   - An ESLint boundary refuses any import of `@xangarro/synth-*` from `apps/*` or `packages/*`.
+   - `scripts/release.sh` never names a `tools/*` package, and a test holds that.
+3. **Local only, isolated per corrida.**
+   - Each corrida gets its own stack: a Postgres container (`XG_PG_NAME=xangarro-pg-synth-<id>`, its own port,
+     removed with `-v` when it ends) and a `next start` production build on its own port.
+   - Each run inside it gets a fresh tenant from `mintTenant()`, a fresh Chromium profile and its own throttle IP.
+   - A journey adds one server per simulated day (`PORTAL_TODAY`), plus the browser's clock set by CDP.
+   - The runner refuses any `baseUrl` outside `127.0.0.1`/`localhost` (the `allowed_hosts` list in `config.yaml`).
+4. **Fixtures live once.** The Playwright-free half of `apps/web/e2e/tenant.ts`, `tenant-rows.ts`,
+   `sync-phone.ts`, `tenant-phone.ts`, `phone-rows.ts` and `puerta-operador.ts` moves to a new subpath,
+   `@xangarro/testing/tenant`. The e2e files keep `signIn()` and re-export the rest, so specs do not change, and
+   `tests/e2e-fixture-identity.test.ts` keeps holding ADR-128's rules.
+5. **Two runners from Phase 1, one harness.**
+   - **Web:** the runner owns Chromium and opens a CDP port. The actor's Playwright MCP attaches to it.
+   - **Phone:** the capture app runs on one Android emulator (`EXPO_PUBLIC_E2E=1`, API at `10.0.2.2`), and the
+     actor drives it through the Maestro MCP. The runner controls the network through the emulator console, reads
+     logcat, and clears state with `pm clear`.
+   - Personas, judge, findings and reports are shared. Only `run`, `capture` and the interruptions differ by runner.
+6. **The actor is a black box.**
+   - It runs as `claude -p` in an empty temporary directory, with a strict MCP config that holds only its runner's
+     MCP server and an allow-list of that server's tools.
+   - It runs on the developer's Claude Code login. Cost is estimated from the reported usage and capped by
+     `max_steps`, `max_turns` and a time limit.
+   - Models per role, in `config.yaml`: actor Claude Sonnet 5.5; judge and triage Claude Opus 5.5.
+7. **Studio** binds `127.0.0.1` only and has no login. It refuses any other interface unless an ADR adds auth.
+   The files are the source of truth (YAML in git, results in the gitignored `tools/synth/reports/`), and SQLite is
+   a rebuildable index.
+8. **Never a gate, never production data.** Findings are hypotheses. No CI job runs Synth. Triage writes a
+   failing regression test in the app's existing suite and never commits, pushes or fixes. Evidence files keep no
+   names or contact data.
+9. **Agents and skills.** CLAUDE.md §9 says none are deployed. They are added under `tools/synth/.claude/` and
+   scoped to that folder, not to the repo's own `.claude/`, so a normal coding session never loads them.
+10. **Licences.** No code is copied from MiroFish, OASIS, UXAgent or any other project. No AGPL or GPL dependency
+    is added without the owner's approval. Every new dependency is listed in `tools/synth/THIRD_PARTY.md`.
+
+**Alternatives considered**
+
+- *N-49 as written:* nightly, on staging, with a third-party GLM model. Rejected. It waits on X-01, sends data to a
+  provider we have not vetted, and has no judge, no seeded bugs and no measured recall.
+- *`packages/synth` and `apps/synth-studio`:* rejected, because `apps/*` reads as a shipped surface.
+- *Outside the workspace:* rejected, because it loses workspace imports and every CI check.
+- *The shared local `xangarro-pg`:* rejected, because any session's `db:reset` would wipe a corrida in flight.
+- *A Postgres per run:* rejected as too heavy for the 58 GB Docker VM shared with about 14 containers.
+- *Synth writes its own seed:* rejected. ADR-128 exists because 17 hand-rolled fixtures drifted apart.
+- *A dedicated API key with provider-side spend limits:* offered and declined by the owner, who prefers the Claude
+  Code login.
+- *iOS simulator for the phone runner:* rejected. It cannot cut one device's network for `offline-mid-sale`, and
+  its logs are harder to capture.
+
+**Consequences**
+
+- `pnpm-workspace.yaml` gains `tools/*`. Turbo lints, typechecks and tests the Synth packages in CI like any
+  other.
+- `@xangarro/testing` gains a `./tenant` export that depends on `postgres` and `@xangarro/auth-core`. 50 e2e
+  specs keep their imports.
+- A corrida's concurrency is bounded by the Claude Code login's rate limits and by one Android emulator. The
+  default web concurrency is 3, and the phone runs one at a time.
+- Personas start as `hypothesis`. The first evidence comes from public reviews of Mexican POS and finance apps,
+  with names stripped.
+- The narrative lab (Phase 12) is in scope as the track's last phase. Every one of its outputs is labelled as a
+  hypothesis to validate with real people.
+- N-49 is closed as superseded. The `kind=explorador` inbox source is a later `S-` task, if ever.

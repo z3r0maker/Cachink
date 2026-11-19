@@ -93,7 +93,9 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   ),
   'Backend, sync y datos': ids('C-21 C-24 B-19 B-20 N-47 N-48 N-69 N-81 N-84'),
   'Privacidad y LFPC': ids('N-34 N-60'),
-  'Auditorías y calidad': ids('N-26 N-27 N-28 N-29 N-49'),
+  'Auditorías y calidad': ids(
+    'N-26 N-27 N-28 N-29 S-01 S-02 S-03 S-04 S-05 S-06 S-07 S-08 S-09 S-10 S-11 S-12 S-13 S-14 S-15 S-16 S-17 S-18 S-19 S-20 S-21 S-22 S-23 S-24 S-25',
+  ),
   'Lanzamiento, stores e integración': ids('X-02 X-03 X-05 X-09 X-10 N-32 N-82'),
   Landing: ids('N-58 L-05 K-31'),
 };

@@ -31,6 +31,7 @@ by track so a task is identifiable anywhere (commit messages, PR titles, chat).
 | **El Mostrador** (phone redesign)      | `19-movil-mostrador.md`               | `M-`   | session "Móvil"          | now (ADR-117; the approved canvas boards are the spec)    |
 | **Empresa** (founders' command center) | `20-command-center.md`                | `E-`   | per phase                | now (ADR-125; design brief `21-command-center-design.md`) |
 | **CoDi** (bridge, then certified)      | `22-codi.md`                          | `K-`   | per phase                | now (ADR-130; design brief `23-codi-design.md`)           |
+| **Synth** (internal QA harness)        | `24-synth.md`                         | `S-`   | per phase                | now (ADR-152; design brief `25-synth-spec.md`)            |
 
 **Other files in this directory.** `PENDIENTES.md` — the **generated** board of everything still
 open, across every track (see §3). `11-pre-launch-and-deferred.md` — owner actions (`O-n` rows) and
