@@ -16,7 +16,7 @@ import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
 import { cajaKeys } from '../../hooks/query-keys';
 import { useShellData } from '../AppShell/use-shell-data';
-import { cancelarConNip } from './cancelar-con-nip';
+import { cancelarConNip, verificarConNip, type VerificacionCancelar } from './cancelar-con-nip';
 import { leerVentaDetalle, leerVentasTurno, type FilasVentas } from './ventas-lectura';
 import type { VentasEstado } from './ventas-mostrador-screen';
 
@@ -29,6 +29,8 @@ export interface VentasTurnoVivo {
   readonly cargarDetalle: (folio: string, fila: VentaTurno | undefined) => Promise<CargaTicket>;
   /** Resolves the error to show, or null once the ticket stands cancelled. */
   readonly cancelar: (venta: VentaTurno, motivo: string, pin: string) => Promise<string | null>;
+  /** Checks the NIP and the permission before the cancel says anything (M2). */
+  readonly verificar: (pin: string) => Promise<VerificacionCancelar>;
 }
 
 export function ventasTurnoKey(
@@ -134,6 +136,10 @@ export function useVentasTurno(): VentasTurnoVivo {
     q.data && q.data.turnoId !== null && shell.operador !== null ? comoData(q.data, shell) : null;
   const cargarDetalle = useCargarDetalle(repos, shell.operador, hoy);
   const cancelar = useCancelarTicket(repos, businessId, userId);
+  const verificar = useCallback(
+    (pin: string) => verificarConNip(repos, { userId: userId as UserId, pin }),
+    [repos, userId],
+  );
   const recargar = useCallback(() => void q.refetch(), [q]);
   return {
     state: estadoVentas(q, shell.operador),
@@ -142,5 +148,6 @@ export function useVentasTurno(): VentasTurnoVivo {
     refetch: recargar,
     cargarDetalle,
     cancelar,
+    verificar,
   };
 }

@@ -1,22 +1,28 @@
 /**
- * «Cancelar venta» (MvVentas, rule 6): a reason is required, nothing is
- * deleted — the ticket stays, marked. The phone's established steps (the
- * Cancelaciones flow, M-05): the operator's PIN first, then the board's
- * dialog (in `venta-cancelar-partes`), and for a cash sale the cash it hands
- * back before it goes through. The write itself is the caller's (the ticket
- * use case).
+ * «Cancelar venta» (MvVentas, rule 6; RvCancelar, M2): a reason is required,
+ * nothing is deleted — the ticket stays, marked. The operator's NIP first,
+ * checked with their permission as soon as the fourth digit lands, so a
+ * refusal stops there; then the board's dialog (in `venta-cancelar-partes`),
+ * and for a cash sale the cash it hands back, said only once the cancel is
+ * allowed. The write itself is the caller's (the ticket use case).
  */
 import { useState, type ReactElement } from 'react';
 import type { VentaTurno } from '@xangarro/caja/ventas';
 import { Modal } from '../../components/index';
 import { CashConfirmStep, PinStep } from '../Cancelaciones/cancellation-steps';
-import { Aviso, MotivoStep } from './venta-cancelar-partes';
+import type { VerificacionCancelar } from './cancelar-con-nip';
+import { Aviso, MotivoStep, SinPermiso } from './venta-cancelar-partes';
 
 export interface CancelarVentaDialogProps {
   readonly venta: VentaTurno;
-  /** The owner's name for the consequence line; «Pedro» until the phone knows it. */
+  /** The owner's name for the consequence line; «el dueño» until the phone knows it. */
   readonly dueno?: string;
   readonly onClose: () => void;
+  /**
+   * Checks the NIP and the permission before anything else (M2): null when
+   * the cancel may go on. Without it the check waits for the write.
+   */
+  readonly onVerificar?: (pin: string) => Promise<VerificacionCancelar>;
   /**
    * Cancels through `CancelarTicketUseCase`. Resolves the sentence that says
    * what went wrong (null when it went through); the dialog closes itself.
@@ -24,52 +30,63 @@ export interface CancelarVentaDialogProps {
   readonly onConfirm: (motivo: string, pin: string) => Promise<string | null>;
 }
 
-type Step = 'pin' | 'motivo' | 'efectivo';
+type Step = 'pin' | 'sin-permiso' | 'motivo' | 'efectivo';
 
-/** PIN → motivo (→ the cash a cash sale hands back) → through; a refusal starts over. */
+/** The NIP step: checked at once when the caller can; a refusal clears it. */
+function useNip(p: CancelarVentaDialogProps, irA: (s: Step) => void) {
+  const [pin, setPin] = useState('');
+  const [intento, setIntento] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [verificando, setVerificando] = useState(false);
+  const fallo = (texto: string): void => {
+    setError(texto);
+    setIntento((n) => n + 1);
+    irA('pin');
+  };
+  const alPaso = async (nip: string): Promise<void> => {
+    setError(null);
+    setVerificando(true);
+    const r = p.onVerificar ? await p.onVerificar(nip).catch(() => null) : null;
+    setVerificando(false);
+    if (r !== null && r.sinPermiso) return irA('sin-permiso');
+    if (r !== null) return fallo(r.texto);
+    setPin(nip);
+    irA('motivo');
+  };
+  return { pin, intento, error, verificando, alPaso, fallo };
+}
+
+/** NIP → motivo (→ the cash a cash sale hands back) → through; a refusal starts over. */
 function usePasos(p: CancelarVentaDialogProps) {
   const [step, setStep] = useState<Step>('pin');
-  const [pin, setPin] = useState('');
   const [motivo, setMotivo] = useState<string | null>(null);
   const [nota, setNota] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
-
-  const alPaso = (nip: string): void => {
-    setPin(nip);
-    setError(null);
-    setStep('motivo');
-  };
+  const nip = useNip(p, setStep);
   const confirmar = (): void => {
     if (motivo === null || enviando) return;
-    if (p.venta.metodo === 'Efectivo' && step === 'motivo') {
-      setStep('efectivo');
-      return;
-    }
+    if (p.venta.metodo === 'Efectivo' && step === 'motivo') return setStep('efectivo');
     const completo = nota.trim() === '' ? motivo : `${motivo}: ${nota.trim()}`;
     setEnviando(true);
     void p
-      .onConfirm(completo, pin)
+      .onConfirm(completo, nip.pin)
       .then((e) => {
         setEnviando(false);
-        if (e != null) {
-          // `!= null` also catches undefined (a missing return), and
-          // String() keeps whatever a caller resolves renderable.
-          setError(String(e));
-          setStep('pin');
-        }
+        // `!= null` also catches undefined (a missing return), and String()
+        // keeps whatever a caller resolves renderable.
+        if (e != null) nip.fallo(String(e));
       })
       .catch(() => {
         setEnviando(false);
-        setError('No se pudo cancelar. Inténtalo de nuevo.');
-        setStep('pin');
+        nip.fallo('No se pudo cancelar. Inténtalo de nuevo.');
       });
   };
-  return { step, motivo, nota, error, enviando, alPaso, setMotivo, setNota, confirmar };
+  return { step, motivo, nota, enviando, nip, setMotivo, setNota, confirmar };
 }
 
 export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
   const f = usePasos(p);
+  const dueno = p.dueno ?? 'el dueño';
   return (
     <Modal
       open
@@ -78,13 +95,15 @@ export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
       testID="venta-cancelar"
     >
       {f.step === 'pin' ? (
-        <PinStep onSubmit={f.alPaso} />
+        <PinStep key={f.nip.intento} onSubmit={(nip) => void f.nip.alPaso(nip)} />
+      ) : f.step === 'sin-permiso' ? (
+        <SinPermiso dueno={dueno} onEntendido={p.onClose} />
       ) : f.step === 'efectivo' ? (
         <CashConfirmStep amount={p.venta.monto} onConfirm={f.confirmar} submitting={f.enviando} />
       ) : (
         <MotivoStep
           venta={p.venta}
-          dueno={p.dueno ?? 'Pedro'}
+          dueno={dueno}
           motivo={f.motivo}
           nota={f.nota}
           enviando={f.enviando}
@@ -94,7 +113,7 @@ export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
           onVolver={p.onClose}
         />
       )}
-      {f.error ? <Aviso texto={f.error} error /> : null}
+      {f.nip.error ? <Aviso texto={f.nip.error} error /> : null}
     </Modal>
   );
 }

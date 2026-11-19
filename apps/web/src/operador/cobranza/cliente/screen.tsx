@@ -61,9 +61,7 @@ function Cuenta({
       <Indicadores c={c} e={x.e} dueno={data.dueno} />
       <Abiertas cuenta={c} e={x.e} hoy={data.hoy} />
       <Movimientos cuenta={c} />
-      <Note bg={colors.yellowSoft} padding="14px 16px" textColor={colors.ink}>
-        {limiteNota(c, x.e, data.dueno)}
-      </Note>
+      <LimiteNota nota={limiteNota(c, x.e, data.dueno)} />
       <Capas x={x} data={data} />
     </>
   );
@@ -107,5 +105,15 @@ function Capas({
         />
       ) : null}
     </>
+  );
+}
+
+/** The owner's limit in words; nothing when none is set (M4). */
+function LimiteNota({ nota }: { readonly nota: string | null }) {
+  if (nota === null) return null;
+  return (
+    <Note bg={colors.yellowSoft} padding="14px 16px" textColor={colors.ink}>
+      {nota}
+    </Note>
   );
 }

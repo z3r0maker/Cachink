@@ -37,6 +37,7 @@ export default function VentasTabRoute(): ReactElement {
         onCompartir={(venta) => setComprobante(venta)}
         onAbono={() => router.navigate('/fiado' as never)}
         onCancelar={v.cancelar}
+        onVerificar={v.verificar}
         cargarDetalle={v.cargarDetalle}
       />
       {apertura.hoja}

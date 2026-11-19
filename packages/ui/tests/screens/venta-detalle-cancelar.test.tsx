@@ -222,6 +222,55 @@ describe('cancelar con motivo', () => {
     expect(screen.queryByTestId('cancel-cash-confirm')).toBeNull();
   });
 
+  it('checks the NIP as soon as it is complete: a wrong one never reaches the cash (M2)', async () => {
+    const onVerificar = vi.fn(async () => ({
+      texto: 'Ese NIP no es. La venta sigue igual: no devuelvas dinero.',
+      sinPermiso: false,
+    }));
+    const l = montar({ onVerificar });
+    await abrir('V-0412');
+    fireEvent.click(screen.getByTestId('venta-detalle-cancelar'));
+    escribirPin('9999');
+    await waitFor(() => {
+      expect(screen.getByTestId('cancelar-error')).toBeInTheDocument();
+    });
+    expect(onVerificar).toHaveBeenCalledWith('9999');
+    expect(screen.getByText(/Ese NIP no es/)).toBeInTheDocument();
+    expect(screen.queryByTestId('cancelar-resumen')).toBeNull();
+    expect(screen.queryByTestId('cancel-cash-confirm')).toBeNull();
+    expect(l.onCancelar).not.toHaveBeenCalled();
+  });
+
+  it('without permission, Don says so and nothing is handed back (M2)', async () => {
+    const l = montar({
+      onVerificar: vi.fn(async () => ({ texto: 'Sin permiso', sinPermiso: true })),
+    });
+    await abrir('V-0412');
+    fireEvent.click(screen.getByTestId('venta-detalle-cancelar'));
+    escribirPin('1234');
+    await waitFor(() => {
+      expect(screen.getByTestId('cancelar-sin-permiso')).toBeInTheDocument();
+    });
+    expect(screen.getByText('No tienes permiso para cancelar')).toBeInTheDocument();
+    expect(screen.getByTestId('don-preocupado')).toBeInTheDocument();
+    expect(screen.queryByTestId('cancelar-resumen')).toBeNull();
+    fireEvent.click(screen.getByTestId('cancelar-sin-permiso-entendido'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('venta-cancelar')).toBeNull();
+    });
+    expect(l.onCancelar).not.toHaveBeenCalled();
+  });
+
+  it('a verified NIP goes on to the motivo (M2)', async () => {
+    montar({ onVerificar: vi.fn(async () => null) });
+    await abrir('V-0412');
+    fireEvent.click(screen.getByTestId('venta-detalle-cancelar'));
+    escribirPin('1234');
+    await waitFor(() => {
+      expect(screen.getByTestId('cancelar-resumen')).toBeInTheDocument();
+    });
+  });
+
   it('keeps the dialog open with the error when the cancel refuses', async () => {
     const l = montar({ onCancelar: vi.fn(async () => 'PIN incorrecto') });
     await abrir('V-0412');

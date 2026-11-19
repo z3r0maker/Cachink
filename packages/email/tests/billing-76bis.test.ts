@@ -35,7 +35,7 @@ describe('renewal reminder', () => {
     assert.match(e.text, /MEXIA, S\.A\.S\. · Paseo Puesta del Sol 4150/);
     assert.match(
       e.text,
-      /Responde a este correo o escribe a hola@xangarro\.mx/,
+      /Responde a este correo o escribe a soporte@xangarro\.mx/,
       'LFPC art. 76 Bis III',
     );
     assert.doesNotMatch(e.text, /99 9999 9999/);

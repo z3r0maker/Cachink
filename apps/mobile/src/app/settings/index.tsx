@@ -16,7 +16,6 @@ import {
   SettingsScreen,
   useAppConfigRepository,
   useBugReportSender,
-  useCheckForUpdates,
   useCrashReportingEnabled,
   useNotificationsEnabled,
   useSetCrashReportingEnabled,
@@ -28,7 +27,6 @@ import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
 import { restartApp } from '../../shell/restart-app';
 import { useMobileDeviceContext } from '../../shell/use-device-context';
-import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
 /** Persist a device toggle, then update the in-memory store. */
 function usePersistedToggle(
@@ -43,18 +41,6 @@ function usePersistedToggle(
   ];
 }
 
-function useUpdateCheck(): { check: () => void; status: string | undefined } {
-  const updates = useCheckForUpdates(useMobileUpdateAdapter());
-  const [status, setStatus] = useState<string | undefined>();
-  return {
-    check: () => {
-      setStatus('Buscando…');
-      void updates.check().then(() => setStatus(updates.status));
-    },
-    status,
-  };
-}
-
 function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
   const K = APP_CONFIG_KEYS;
   const [notif, onNotif] = usePersistedToggle(
@@ -67,15 +53,14 @@ function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
     useCrashReportingEnabled() === true,
     useSetCrashReportingEnabled(),
   );
-  const updates = useUpdateCheck();
+  // No «Buscar actualizaciones» (R1, approved 2026-11-19): the builds take no
+  // over-the-air update yet, and the button printed its raw status.
   return {
     notificationsEnabled: notif,
     onNotificationsChange: onNotif,
     crashReportingEnabled: crash,
     onCrashReportingChange: onCrash,
     onReportProblem,
-    onCheckForUpdates: updates.check,
-    checkForUpdatesStatus: updates.status,
   };
 }
 

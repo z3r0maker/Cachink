@@ -4,7 +4,9 @@
  * phone's «Bloquear la caja» bar in the thumb zone.
  *
  * Each row keeps the `otros-<key>` testID the Maestro flows already address
- * (the rename is A-15).
+ * (the rename is A-15). «Movimientos de caja» is gone (R2, approved
+ * 2026-11-19): nothing records a deposit or a withdrawal yet, so it only
+ * ever opened an empty list.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
@@ -19,7 +21,6 @@ import { useCajaLayout } from './use-caja-layout';
 export const TURNO_ROUTES = {
   gastos: NAV.gastos.path,
   inventario: NAV.inventario.path,
-  movimientos: '/caja-movimientos',
   pendientes: '/no-enviados',
   ajustes: '/settings',
 } as const;
@@ -43,7 +44,6 @@ function useRows(onNavigate: (path: string) => void): NavRowItem[] {
   return [
     row('gastos', 'gastos', ICONS.gastos, colors.redSoft),
     row('inventario', 'inventario', ICONS.inventario, colors.blueSoft),
-    row('movimientos', 'caja-movimientos', GLYPHS.movimientos, colors.yellowSoft),
     row('pendientes', 'no-enviados', GLYPHS.nube, colors.greenSoft),
     row('ajustes', 'configuracion', GLYPHS.ajustes, colors.gray100),
   ];

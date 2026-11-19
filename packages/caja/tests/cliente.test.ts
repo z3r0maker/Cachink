@@ -87,6 +87,22 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
 
   it('over the limit, the note says not to sell on credit', () => {
     const corta = { ...mari, limite: 300_00n };
-    assert.match(limiteNota(corta, estadoCuenta(corta), 'Pedro'), /^Pasó su límite de \$300\.00/);
+    assert.match(
+      limiteNota(corta, estadoCuenta(corta), 'Pedro') ?? '',
+      /^Pasó su límite de \$300\.00/,
+    );
+  });
+
+  it('with no limit set, there is no note and no free amount (M4)', () => {
+    const sinLimite = { ...mari, limite: null };
+    const e = estadoCuenta(sinLimite);
+    assert.ok(e.saldo > 0n);
+    assert.equal(limiteNota(sinLimite, e, 'Pedro'), null);
+    assert.equal(libre(sinLimite, e), null);
+  });
+
+  it('a limit of $0.00 set on purpose still says not to sell on credit', () => {
+    const cero = { ...mari, limite: 0n };
+    assert.match(limiteNota(cero, estadoCuenta(cero), 'Pedro') ?? '', /^Pasó su límite de \$0\.00/);
   });
 });

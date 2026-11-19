@@ -20,6 +20,7 @@ import {
   type VentaTurno,
 } from '@xangarro/caja/ventas';
 import { Buscador, Cabecera, Filtros, NotaAmbar, type FiltroVenta } from './venta-controles';
+import type { VerificacionCancelar } from './cancelar-con-nip';
 import { CancelarVentaDialog } from './venta-cancelar';
 import { VentaDetalleSheet } from './venta-detalle';
 import { VentasEstados, type VentasEstado } from './venta-estados';
@@ -31,7 +32,7 @@ export type { VentasEstado } from './venta-estados';
 export interface VentasMostradorScreenProps {
   readonly state: VentasEstado;
   readonly data: VentasData | null;
-  /** The owner's name (the amber note says it); «Pedro» until known. */
+  /** The owner's name (the amber note says it); «el dueño» until known. */
   readonly dueno?: string;
   readonly onRetry: () => void;
   /** The empty state's way forward. */
@@ -44,6 +45,8 @@ export interface VentasMostradorScreenProps {
   readonly onAbono?: () => void;
   /** Cancels through the ticket use case; resolves the error, or null. */
   readonly onCancelar: (venta: VentaTurno, motivo: string, pin: string) => Promise<string | null>;
+  /** Checks the NIP and the permission as soon as the NIP is complete (M2). */
+  readonly onVerificar?: (pin: string) => Promise<VerificacionCancelar>;
   /** Loads the ticket the sheet opens; the fixture resolution when absent. */
   readonly cargarDetalle?: (folio: string, fila: VentaTurno | undefined) => Promise<CargaTicket>;
   /** Opens with this folio's sheet over the list (the web's `/ventas/[folio]`). */
@@ -160,6 +163,7 @@ function Capas(p: {
           venta={v.fila}
           dueno={p.props.dueno}
           onClose={() => v.setCancelar(false)}
+          {...(p.props.onVerificar ? { onVerificar: p.props.onVerificar } : {})}
           onConfirm={v.confirmar}
         />
       ) : null}
@@ -178,7 +182,7 @@ function Contenido(p: VentasMostradorScreenProps & { readonly data: VentasData }
         <Buscador q={v.query} onQ={v.setQuery} />
         <Filtros filtro={v.filtro} onFiltro={v.setFiltro} />
         <ListaVentas ventas={filtrar(v.ventas, v.filtro, v.query)} ctx={ctx} onAbrir={v.abrir} />
-        <NotaAmbar dueno={p.dueno ?? 'Pedro'} />
+        <NotaAmbar dueno={p.dueno ?? 'el dueño'} />
       </ScrollView>
       <Capas props={p} data={p.data} v={v} />
     </>
