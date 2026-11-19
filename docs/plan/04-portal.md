@@ -192,7 +192,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
     disco (se revisaron el worktree y el checkout principal) ni en ningún commit. El mismo día: el
     patrón ahora es `/design-compare/` y el script `design:compare` que quedó colgando se eliminó,
     así que los Steps de abajo son una reescritura, no una recuperación. Restaura la entrada del
-    script cuando aterrice el sistema de captura.
+    script cuando aterrice el sistema de captura. **Verificado el 2026-11-19 contra el repo**, sigue exacta a los 57 días: no hay `scripts/design-compare/` ni `/design-compare/` en ningún disco, `design:compare` no existe en ningún `package.json`, y lo único que sobrevive de aquel commit es el comentario del `.gitignore` que cuenta cómo se perdió.
 - **Context:** ADR-058. Check 1 is a review, not an assertion — the design plan itself lists browser
   width, text reflow and real-vs-sample data as acceptable differences, and the `.dc.html` files
   render through a vendored runtime that fetches fonts over the network. This never runs in CI.
@@ -252,7 +252,7 @@ including the press stamp.
 ### P-23 Primitivas + inventario en Storybook + líneas base de regresión visual [deuda] [media]
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 y todas las tareas de pantalla
-  - **Remaining (2026-09-23, verified against the code):** la cláusula de aceptación de `design:compare` espera a P-21, reabierto ese mismo día (el sistema de captura nunca llegó a un commit y no existe en ningún disco; ver P-21). No hay página de Storybook en `apps/web`; Toast, gauge, nav item, switcher y user menu siguen sin cubrirse.
+  - **Remaining (2026-09-23, verified against the code):** la cláusula de aceptación de `design:compare` espera a P-21, reabierto ese mismo día (el sistema de captura nunca llegó a un commit y no existe en ningún disco; ver P-21). No hay página de Storybook en `apps/web`; Toast, gauge, nav item, switcher y user menu siguen sin cubrirse. **Verificado el 2026-11-19 contra el repo**, las tres afirmaciones siguen en pie: no existe `apps/web/.storybook`, `e2e/visual.spec.ts` fija cuatro secciones (botones, tags, cards, recientes) y ninguna de las cinco piezas sueltas. Un hallazgo nuevo, chico: de las doce líneas base comprometidas, ocho no se comparan nunca. El spec se salta todo proyecto que no sea `desktop` desde `0a5dd415` («baselines run on desktop only»), así que las variantes `-laptop-darwin` y `-tablet-darwin` quedaron de peso muerto y envejecen sin que nada las lea. Bórralas cuando toques esta tarea, o vuelve a correr los tres proyectos a propósito.
   - Auditoría doc 2026-09-22: entregado salvo la compuerta de `design:compare` en su Acceptance.
   - En curso: 2026-09-17 · **vocabulario núcleo construido y en pantalla**, la compuerta aún no cierra.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
@@ -1168,7 +1168,7 @@ never invented text.
 ### P-28 Diagnóstico + estrategia — **«Próximamente» en producción** [media]
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
-  - **Remaining (2026-09-23, verified against the code):** sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse.
+  - **Remaining (2026-09-23, verified against the code):** sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. **Verificado el 2026-11-19 contra el repo**, el alcance pendiente sigue intacto — el cuerpo del Diagnóstico es literalmente `<p>Reporte completo del mes.</p>`, no hay variante imprimible ni fixture de inyección — pero dos cosas de esta nota ya no existen. Una: el `LLM_ENABLED` que describe como «una bandera en una frontera» no aparece en ningún archivo del repo; la compuerta de hoy es la bandera de plataforma `asesorLlm` de N-09, apagada en producción hasta que el staff la prenda en la consola. Dos, y más grave: la compuerta «Próximamente» de la que cuelga su aceptación la retiró el ADR-117, que la nombra deuda por quitar y la reemplaza por omisión (una superficie cuya llamada al modelo está apagada no se muestra). El componente sigue en pie y nadie lo había anotado: eso es P-46.
   - Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios.
   - En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido.
   - Dos compuertas se componen en el orden correcto vía `resolveScreenState`: `capabilities.asesor ===
@@ -1342,6 +1342,7 @@ never invented text.
 > needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
 - [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** — `[baja]`
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, sin empezar, y su cláusula de aceptación ya no se puede cumplir tal como está escrita: «production renders «Próximamente»» es exactamente lo que el ADR-117 retiró. Cuando esto se construya, el estado de producción es la omisión, no un letrero. Arréglalo junto con P-46.
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
   (Nuevo / Actualizar / Error) → commit. Structured output (`strict: true` or
   `output_config.format`) validating against the domain `Producto` schema — extracted rows are never
@@ -1352,7 +1353,7 @@ never invented text.
 ### P-30 Runtime de generación del Asesor [media]
 
 - [~] Status · **Blocked by:** — · **Blocks:** P-28, P-29
-  - **Remaining (2026-10-05, verified against the code):** la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo.
+  - **Remaining (2026-10-05, verified against the code):** la llamada al modelo existe — `server/asesor/model.ts` carga el cliente real de Anthropic y `pedirProsa` (2026-09-21, abajo) — pero nada la llama: `runtime.ts` sigue siendo sólo determinista hasta que P-28 le dé a la prosa generada una pantalla donde aterrizar. **Verificado el 2026-11-19 contra el repo** y es más tajante que eso: `pedirProsa` no tiene un solo consumidor en todo el repo — el único archivo que importa `server/asesor/model.ts` es su prueba unitaria, y ni ésa la toca (lee `clienteModelo`, `modeloId` y `modelConfigurado`). Los imports de `runtime.ts` son cinco y ninguno es el modelo. Lo que falta es el cableado (prompt desde las cifras deterministas, resultados hacia el reporte), con la API de Batches y el prompt caching acompañándolo.
     - **Llamada al modelo.** ADR-056 la hace el último paso, con el prompt armado desde las cifras deterministas. Sostenida hasta **P-28**: el Diagnóstico es `<p>Reporte completo del mes.</p>` detrás de dos compuertas, así que la prosa generada caería en una tabla que ninguna pantalla lee. La frontera sigue siendo el módulo único que ADR-056 exige (`server/asesor/model.ts`) y `runtime.ts` nombra la costura. La API de Batches y el prompt caching van con ella — el batching necesita un registro donde juntar resultados, y eso es una tabla propia.
   - 2026-09-26 · **El fan-out diario aterrizó, y no necesitó migración.** La pregunta abierta era qué rol puede enumerar los tenants, entre una función privilegiada nueva, el rol de medición y el rol de servicio de la consola. **The metering role wins, and the answer was already in the schema:** 0010 grants `xangarro_metering` `SELECT (id, deleted_at) ON public.businesses` beside a `metering_read USING (true)` policy, because `usage_counts(NULL, …)` enumerates the very same set in order to count it. So `liveBusinessIds` reads two already-granted columns — **no migration, no new role, no new secret**, and the portal already holds `METERING_DATABASE_URL` for the nightly recompute. The service role was never eligible: CLAUDE.md §3 makes the backoffice the only project that may hold it, so reaching for it would have moved either the key or the cron. This also un-blocks P-30 from B-02/B-03, which it was only waiting on for that decision.
     - `server/asesor/fanout.ts` sweeps every live business **sequentially**, like the usage recompute — `generarParaNegocio` opens three transactions per business and a serverless pool is small. Per-tenant try/catch: one tenant failing is reported under its own id, tallied in `fallidos`, and the sweep continues to the next, because a scheduled job that 500s on the first bad tenant hides every tenant behind it.
@@ -1637,6 +1638,7 @@ critical avisos cannot be switched off.
 ### P-35 Cobertura del portal al 95% (pruebas unitarias + E2E combinadas, ADR-102) [deuda] [alta]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
+  - **Remaining (2026-11-19, verificado contra el repo):** mucho menos de lo que esta bitácora hace creer, y quieta desde hace siete semanas. La última entrada de abajo es del 2026-09-28 con el piso en 93.4, pero `apps/web/coverage-floor.json` dice 95.4 / 92.7 / 89.5 / 79.9: las líneas **ya cumplen** el ≥ 95 de la aceptación y la nota no lo dice en ninguna parte. Lo que falta son tres cifras, no cuatro — statements 92.7 → 95, functions 89.5 → 95, branches 79.9 → 85 — y el trinquete no se ha movido desde el 2026-09-30 (`8b77ec51`), la última de cuatro subidas posteriores a la última entrada escrita. Antes de volver a esta tarea, vuelve a medir: las cuatro listas de huecos de abajo tienen la edad del piso de septiembre.
   - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
     `pnpm test:e2e:coverage` (browser + `next start`) write raw V8 data;
     `pnpm coverage:check` merges them and holds `coverage-floor.json`, in the `portal-e2e`
@@ -1885,6 +1887,7 @@ WhatsApp).
   Until it ships, the designs show no Imprimir button (the owner's call, 2026-09-26).
 - **Acceptance:** a sale prints on a 58 mm printer from the web caja; the layout matches the
   WhatsApp image.
+  - **Remaining (2026-11-19, verificado contra el repo):** el diferimiento sigue siendo correcto y su premisa se sostiene: no hay un solo «Imprimir» en la caja. Los tres que existen en el portal son otros (los códigos de recuperación de Seguridad y los estados financieros), así que nada regresa por esperar.
 
 ### P-38 Don Cuentas explica una diferencia de caja [media]
 
@@ -1901,6 +1904,7 @@ WhatsApp).
   the turno's own records (cancelled sales, fiado, gastos without comprobante) in the Cortes drawer
   and in Revisión de caja.
 - **Acceptance:** a seeded $60.00 faltante gets an explanation that cites only that turno's rows.
+  - **Remaining (2026-11-19, verificado contra el repo):** las tres consultas, sin empezar. Lo que ya existe es el otro lado del renglón: `cortes/motivo.ts` traduce el motivo que **declaró** el operador (`MOTIVOS_DIFERENCIA` de `@xangarro/caja/cierre`), que no es lo mismo que una causa deducida de los movimientos del turno. Ese vocabulario le da a esta tarea los nombres que debe usar cuando se construya, para que la causa propuesta y el motivo declarado no se contradigan en la misma pantalla.
 
 ### P-39 Conclusiones de Don Cuentas en Estados financieros [baja]
 
@@ -1919,6 +1923,7 @@ WhatsApp).
 - **Steps:** one short conclusion per statement (resultados, balance, flujo) in plain Spanish,
   computed from the deterministic figures and phrased by the model.
 - **Acceptance:** every figure the text cites matches the statement on screen.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y sus dos barreras siguen en pie: P-28 no tiene dónde guardar una conclusión por periodo y P-30 no tiene quién llame al modelo (`pedirProsa` no tiene un solo consumidor). Nada que replantear aquí hasta entonces.
 
 ### P-40 Primer diagnóstico gratis a los 90 días [baja]
 
@@ -1933,6 +1938,7 @@ WhatsApp).
 - **Steps:** a **Xangarrito** business that reaches 90 días de registros gets one short-read
   Diagnóstico without upgrading, announced by an aviso.
 - **Acceptance:** the aviso fires once per business; the report opens once, in its short-read form.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Depende de P-28 por la forma de la lectura corta, y el estado `diagFreeOffer` que la nota dice que el diseño ya dibuja no está en el código (los estados del Diagnóstico siguen siendo los del `ScreenState` compartido, que P-46 va a recortar). Cuando esto se construya, revisa que el estado nuevo no herede la compuerta retirada.
 
 ### P-41 Funciones avanzadas de inventario [baja]
 
@@ -1940,6 +1946,7 @@ WhatsApp).
 - **Steps:** conversión de materia prima, conversión automática and auditoría de inventario, off in
   the v1 clamp (Q10), become switchable in Mi negocio › Funciones for Xangarrote.
 - **Acceptance:** each one, switched on, appears in the caja and syncs its records.
+  - **Remaining (2026-11-19, verificado contra el repo):** mucho menos de lo que este renglón de una línea hace pensar. Ya existen las entidades del dominio (`conversion.ts`, `conversion-receta.ts`, `auditoria-inventario.ts`, `auditoria-cadencia.ts`), el caso de uso `EjecutarConversionUseCase`, las tres banderas con su cascada de dependencias (`stock` → `conversionMateriaPrima` → `conversionAutomatica`, y `auditoriaInventario` → `stock`) y la copia de las tres en la pantalla Funciones. Lo que falta es la liberación y el camino de la caja: `PLATFORM_AVAILABLE` tiene las tres en `false`, que es la pinza de la v1, y nada en la caja ni en el teléfono las lee. **Un pendiente que esta tarea hereda y nadie ha resuelto:** `PLATFORM_AVAILABLE.merma` también dice `false` — «dark for every business», según su propio comentario — y sin embargo el teléfono ya muestra Mermas sin condición (`Inventario/inventario-cifras.tsx`, `inventario-cabeza.tsx`). Los únicos que leen esa constante son el portal (Funciones, la copia de planes) y los entitlements de prueba; la superficie de captura nunca la consulta. O la bandera miente o la pantalla se adelantó: decídelo antes de prender las otras tres, porque es el mismo mecanismo.
 
 ### P-42 La foto del producto en el catálogo y en la ficha (ADR-134) [media]
 
@@ -2040,3 +2047,31 @@ WhatsApp).
   code under another name and reads it as a duplicate; `revision-codigo.sync.spec.ts` composes that
   row with `phone-rows.ts` on a minted tenant, sees «Mismo código que …», clears the code with «Son
   distintos» and approves it.
+
+### P-46 Quitar `ProximamenteState`, la deuda que el ADR-117 nombró [deuda] [media]
+
+- [ ] Status · **Blocked by:** un board del canvas para el Diagnóstico con el modelo apagado · **Blocks:** P-28, P-29
+  - **Why now:** el ADR-117 no dejó esto a interpretación. En sus consecuencias dice que la
+    compuerta de producción del ADR-059 «se reemplaza por omisión: una superficie cuya llamada al
+    modelo está apagada no se muestra», y cierra nombrando el componente: «Code that still breaks
+    a rule (yellow-filled chips, hard-coded «Caja 1», the `ProximamenteState` component) is debt
+    to remove, not precedent». CLAUDE.md §7 lo repite como regla. Hasta el 2026-11-19 nadie había
+    escrito la tarea, igual que con B-20: el ADR era el único lugar del repo que la pedía.
+  - **What is wrong:** `components/gated-states.tsx` sigue exportando `ProximamenteState`, que
+    pinta un `Tag` con la palabra «Próximamente»; `resolveScreenState` sigue devolviendo
+    `'proximamente'` y lo pone por encima de `error` y `loading`; `components/screen.tsx` lo
+    monta; y la pestaña Diagnóstico del Asesor lo usa en producción con el título «El Diagnóstico
+    llega pronto» — las dos palabras que la regla prohíbe, en la misma pantalla, en vivo.
+  - **Decide first:** qué ve el dueño en la pestaña Diagnóstico cuando `asesorLlm` está apagada.
+    Omitir la superficie significa esconder la pestaña, y eso cambia una pantalla que el dueño ya
+    aprobó con tres pestañas, así que va al canvas antes que al código. Ojo con lo que cuelga de
+    ahí: `CompartirDiagnostico` está a propósito **fuera** de la compuerta, porque compartir las
+    cifras del mes es aritmética y no prosa del modelo, así que esconder la pestaña se lleva un
+    botón que sí funciona.
+  - **Steps:** el board; después borrar el componente, el miembro `'proximamente'` de
+    `ScreenState` y su rama en `resolveScreenState`; arreglar la aceptación de P-29 (que hoy pide
+    justo lo que el ADR prohíbe) y la de P-28; y la nota de P-28 que todavía nombra `LLM_ENABLED`,
+    una variable que no existe en el repo.
+  - **Acceptance:** `ScreenState` ya no tiene el miembro; ninguna cadena «Próximamente» ni
+    «llega pronto» queda en `apps/web/src`; las pruebas de `session/gating` pinan la precedencia
+    nueva sin ese estado; y `pnpm lint:design` sigue en cero.
