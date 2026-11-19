@@ -14,7 +14,7 @@ import { CerrarCajaUseCase } from '@xangarro/application';
 import { nombreDueno, hoyLocal, horaLocal } from '@xangarro/caja';
 import { comoCierre, type CierreData } from '@xangarro/caja/cierre';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
-import type { BusinessId, UserId } from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { useActivationState } from '../../activation/index';
 import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
@@ -92,7 +92,7 @@ export function useCierreTurno(): CierreTurnoVivo {
   const deviceId = useActivationState().record?.deviceId ?? '';
   const q = useQuery({
     queryKey: [...miTurnoKey(businessId, userId), hoyLocal(), 'cierre'],
-    queryFn: () => leerTurnoVivo(repos, businessId as BusinessId, userId as UserId, deviceId),
+    queryFn: () => leerTurnoVivo(repos, businessId as BusinessId, deviceId),
     enabled: businessId !== null && userId !== null,
   });
   const data =

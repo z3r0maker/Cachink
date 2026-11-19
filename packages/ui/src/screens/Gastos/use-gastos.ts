@@ -107,7 +107,7 @@ export function useGastos(): GastosVivo {
   const hoy = hoyLocal();
   const q = useQuery({
     queryKey: [...gastosKey(businessId, userId), hoy],
-    queryFn: () => leerFilasGastos(repos, businessId as BusinessId, userId as UserId, hoy),
+    queryFn: () => leerFilasGastos(repos, businessId as BusinessId, hoy),
     enabled: businessId !== null && userId !== null,
   });
   const registrar = useRegistrarGasto(businessId, q.data);

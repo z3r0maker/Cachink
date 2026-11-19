@@ -1,0 +1,91 @@
+# One open turno per caja (Track M, M-21; board MvTurnoDeOtro; ADR-071 §3):
+# Toni's turno is open when Ana signs in on the same phone. Right after her
+# NIP the phone says «El turno de Toni sigue abierto» with its start, fondo
+# and sales, and offers to continue it or count and close it. She continues:
+# Mi turno says «Sigues el turno de Toni» and the fondo is «con el que abrió
+# Toni». After a restart she signs in again and is asked again; she counts and closes
+# Toni's turno with the M-17 close, then opens her own with what she counted.
+#
+# Precondition: activated device with Toni's own turno open on the $500 fondo
+# and nothing captured (shared/ensure-caja-open.yaml; in the curated suite it
+# runs right after cierre-otro-turno, which leaves exactly that).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - caja
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# Ana comes to the counter: lock, «No soy Toni», her row and her NIP.
+- runFlow: shared/lock-caja.yaml
+- extendedWaitUntil: { visible: { id: 'bloqueo' }, timeout: 10000 }
+- tapOn: { id: 'bloqueo-cambiar' }
+- extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 15000 }
+- tapOn: { id: 'acceso-operador-01JPRS00000000000000000002' }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'nip-enviar' }
+
+# The caja keeps one turno: Toni's, with what it holds.
+- extendedWaitUntil: { visible: { id: 'turno-de-otro' }, timeout: 15000 }
+- assertVisible: '.*El turno de Toni sigue abierto.*'
+- assertVisible: '.*fondo \$500\.00.*'
+- assertVisible: '.*En esta caja va un turno a la vez, Ana\..*'
+# The cards switch the action; «Seguir» is the default.
+- assertVisible: 'Seguir con este turno'
+- tapOn: { id: 'turno-de-otro-cerrar' }
+- assertVisible: 'Contar y cerrar el turno de Toni'
+- tapOn: { id: 'turno-de-otro-seguir' }
+- tapOn: { id: 'turno-de-otro-cta' }
+- extendedWaitUntil: { notVisible: { id: 'turno-de-otro' }, timeout: 8000 }
+
+# Mi turno is Toni's turno, continued by Ana.
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil: { visible: { id: 'turno-sigue-de' }, timeout: 10000 }
+- assertVisible: '.*Sigues el turno de Toni\. Lo abrió a las.*'
+- assertVisible: '.*con el que abrió Toni.*'
+
+# A restart asks «¿Quién va a cobrar?» again and forgets the choice: Ana
+# signs in, the question comes back, and this time she counts and closes
+# Toni's turno.
+- stopApp
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- extendedWaitUntil: { visible: { id: 'quick-switch' }, timeout: 20000 }
+# The holder of the open turno comes preselected: Ana's row, always tapped.
+- tapOn: { id: 'acceso-operador-01JPRS00000000000000000002' }
+- extendedWaitUntil: { visible: { id: 'numpad-5' }, timeout: 8000 }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'nip-enviar' }
+- extendedWaitUntil: { visible: { id: 'turno-de-otro' }, timeout: 15000 }
+- tapOn: { id: 'turno-de-otro-cerrar' }
+- tapOn: { id: 'turno-de-otro-cta' }
+- extendedWaitUntil: { visible: { id: 'mobile-cierre' }, timeout: 10000 }
+- tapOn: { id: 'conteo-mas-billete-500' }
+- tapOn: { id: 'cierre-ver-resultado' }
+- extendedWaitUntil: { visible: { id: 'cierre-paso-resultado' }, timeout: 10000 }
+- tapOn: { id: 'cierre-cerrar-turno' }
+- extendedWaitUntil: { visible: { id: 'cierre-hecho' }, timeout: 10000 }
+
+# Then her own turno, with what she counted.
+- tapOn: { id: 'cierre-otro-turno' }
+- extendedWaitUntil: { visible: { id: 'abrir-caja-modal' }, timeout: 10000 }
+- extendedWaitUntil:
+    visible: '.*Abrir turno con \$500\.00.*'
+    timeout: 10000
+- tapOn: { id: 'caja-abrir-submit' }
+- extendedWaitUntil:
+    visible:
+      id: 'tab-inicio|rail-inicio|sidebar-inicio'
+    timeout: 10000
+- assertNotVisible: { id: 'turno-de-otro' }

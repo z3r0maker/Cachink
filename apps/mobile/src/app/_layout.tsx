@@ -62,6 +62,7 @@ import { AppProviders, fontFaces, SplashAnimado, StockLowScheduleHost } from '@x
 import { bootstrapI18n } from '../shell/i18n';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
+import { TurnoDeOtroHost } from '../shell/turno-de-otro-host';
 import { mobileActivationConfig } from '../shell/activation-config';
 import { fotoPuertos } from '../shell/foto-puertos';
 
@@ -121,6 +122,7 @@ function MobileApp(): ReactElement {
           <MobileScannerHost />
           <NotificationTapHost />
           <StockLowScheduleHost />
+          <TurnoDeOtroHost />
         </>
       }
     >

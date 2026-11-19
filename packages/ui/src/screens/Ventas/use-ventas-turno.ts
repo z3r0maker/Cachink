@@ -129,7 +129,7 @@ export function useVentasTurno(): VentasTurnoVivo {
   const hoy = hoyLocal();
   const q = useQuery({
     queryKey: [...ventasTurnoKey(businessId, userId), hoy],
-    queryFn: () => leerVentasTurno(repos, userId as UserId),
+    queryFn: () => leerVentasTurno(repos, businessId as BusinessId),
     enabled: businessId !== null && userId !== null,
   });
   const data =

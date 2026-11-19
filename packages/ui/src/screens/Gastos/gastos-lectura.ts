@@ -13,7 +13,7 @@ import {
   type GastoTurno,
   type RecurrentePorPagar,
 } from '@xangarro/caja/gastos';
-import type { BusinessId, CajaTurno, IsoDate, RecurringExpense, UserId } from '@xangarro/domain';
+import type { BusinessId, CajaTurno, IsoDate, RecurringExpense } from '@xangarro/domain';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
 import { comoRecurrente } from '../Inicio/inicio-filas';
@@ -44,10 +44,9 @@ export interface FilasGastos {
 export async function leerFilasGastos(
   r: R,
   businessId: BusinessId,
-  userId: UserId,
   hoy: string,
 ): Promise<FilasGastos> {
-  const abierto = await r.cajaTurnos.findOpenByUser(userId);
+  const abierto = await r.cajaTurnos.findOpenByBusiness(businessId);
   const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
   const fecha = turno?.fecha ?? hoy;
   const [expenses, recurrentes, dueno] = await Promise.all([
