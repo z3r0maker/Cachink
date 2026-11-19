@@ -25,6 +25,16 @@ describe('Chip', () => {
     expect(getComputedStyle(chip).backgroundColor).toBe('rgb(255, 255, 255)');
     expect(getComputedStyle(chip).minHeight).toBe('44px');
     expect(chip.getAttribute('role')).toBe('radio');
+    expect(getComputedStyle(chip).paddingLeft).toBe('16px');
+  });
+
+  it('gives its width to the label when it shares a row in equal parts', () => {
+    renderWithProviders(
+      <Chip label="$1,000" selected={false} ajustado onPress={vi.fn()} testID="c" />,
+    );
+    const chip = screen.getByTestId('c');
+    expect(getComputedStyle(chip).paddingLeft).toBe('4px');
+    expect(getComputedStyle(chip).paddingRight).toBe('4px');
   });
 
   it('fires onPress', () => {
