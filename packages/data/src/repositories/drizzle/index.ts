@@ -33,3 +33,4 @@ export * from './tickets-repository.js';
 export type { XangarroDatabase, XangarroSchema } from './_db.js';
 export * from './record-usage-repository.js';
 export * from './product-images-repository.js';
+export * from './expense-receipts-repository.js';

@@ -28,8 +28,8 @@ function localTables(): string[] {
 }
 
 /** Whole tables whose device half is pending, as in data-pg's drift test.
- * `expense_receipts` (ADR-149) until its SQLite migration lands in M-18. */
-const PENDING_DEVICE_TABLES = new Set<string>(['expense_receipts']);
+ * Empty since 2026-11-19: `expense_receipts` (ADR-149) landed in SQLite 0016. */
+const PENDING_DEVICE_TABLES = new Set<string>([]);
 
 describe('table scope', () => {
   it('classifies every local table exactly once', () => {

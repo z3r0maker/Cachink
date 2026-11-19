@@ -49,6 +49,7 @@ import { InMemoryCancelacionLogsRepository } from './in-memory-cancelacion-logs-
 import { InMemoryMensajesOperadorRepository } from './in-memory-mensajes-operador-repository.js';
 import { InMemoryRespuestasOperadorRepository } from './in-memory-respuestas-operador-repository.js';
 import { InMemoryProductImagesRepository } from './in-memory-product-images-repository.js';
+import { InMemoryExpenseReceiptsRepository } from './in-memory-expense-receipts-repository.js';
 
 export interface MockRepositoryProviderProps {
   readonly children: ReactNode;
@@ -89,6 +90,7 @@ function buildInMemoryRepositories(): Repositories {
     mensajesOperador: new InMemoryMensajesOperadorRepository(),
     respuestasOperador: new InMemoryRespuestasOperadorRepository(),
     productImages: new InMemoryProductImagesRepository(),
+    expenseReceipts: new InMemoryExpenseReceiptsRepository(),
   };
 }
 

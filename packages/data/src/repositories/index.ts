@@ -30,3 +30,4 @@ export * from './tickets-repository.js';
 export * from './drizzle/index.js';
 export * from './record-usage-repository.js';
 export * from './product-images-repository.js';
+export * from './expense-receipts-repository.js';

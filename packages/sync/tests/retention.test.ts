@@ -217,4 +217,26 @@ describe('purgeAcknowledged', () => {
     expect(await exists('caja_turnos', 'T-USED')).toBe(true);
     expect(await db.all(sql`PRAGMA foreign_key_check`)).toEqual([]);
   });
+
+  it('purges an old gasto with its receipt, and keeps a gasto whose receipt is not yet acknowledged', async () => {
+    const gasto = async (id: string) =>
+      db.run(sql`INSERT INTO expenses (id, fecha, concepto, categoria, monto_centavos, business_id, device_id, created_at, updated_at)
+        VALUES (${id}, '2026-06-01', 'Hielo', 'Otro', 4500, ${BIZ}, ${DEV}, ${OLD}, ${OLD})`);
+    const receipt = async (id: string, gastoId: string) =>
+      db.run(sql`INSERT INTO expense_receipts (id, gasto_id, bytes, width, height, business_id, device_id, created_at, updated_at)
+        VALUES (${id}, ${gastoId}, 'UklGRg==', 768, 1024, ${BIZ}, ${DEV}, ${OLD}, ${OLD})`);
+    await gasto('G-DONE');
+    await receipt('R-DONE', 'G-DONE');
+    await gasto('G-WAIT');
+    await receipt('R-WAIT', 'G-WAIT');
+    for (const id of ['G-DONE', 'G-WAIT']) await aged('expenses', id, OLD);
+    await aged('expense_receipts', 'R-DONE', OLD);
+    await aged('expense_receipts', 'R-WAIT', OLD, false);
+    await synced();
+    expect((await purge()).deleted).toEqual({ expense_receipts: 1, expenses: 1 });
+    expect(await exists('expense_receipts', 'R-DONE')).toBe(false);
+    expect(await exists('expenses', 'G-DONE')).toBe(false);
+    expect(await exists('expense_receipts', 'R-WAIT')).toBe(true);
+    expect(await exists('expenses', 'G-WAIT')).toBe(true);
+  });
 });
