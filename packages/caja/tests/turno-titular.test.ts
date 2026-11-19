@@ -1,5 +1,5 @@
 /**
- * One open turno per caja (M-18, ADR-071 §3; board MvTurnoDeOtro): what the
+ * One open turno per caja (M-21, ADR-071 §3; board MvTurnoDeOtro): what the
  * phone says when someone signs in over another person's open turno, and how
  * Mi turno names the person who opened the turno they continue.
  */

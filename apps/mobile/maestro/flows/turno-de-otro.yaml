@@ -1,4 +1,4 @@
-# One open turno per caja (Track M, M-18; board MvTurnoDeOtro; ADR-071 §3):
+# One open turno per caja (Track M, M-21; board MvTurnoDeOtro; ADR-071 §3):
 # Toni's turno is open when Ana signs in on the same phone. Right after her
 # NIP the phone says «El turno de Toni sigue abierto» with its start, fondo
 # and sales, and offers to continue it or count and close it. She continues:

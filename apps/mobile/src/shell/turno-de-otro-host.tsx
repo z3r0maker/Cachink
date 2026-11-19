@@ -1,5 +1,5 @@
 /**
- * TurnoDeOtroHost — «El turno de Ana sigue abierto» over the app (M-18,
+ * TurnoDeOtroHost — «El turno de Ana sigue abierto» over the app (M-21,
  * ADR-071 §3; MvTurnoDeOtro). Mounted with the overlays, so it sits above the
  * tabs right after the newcomer's NIP and the router is already up beneath
  * it: «Contar y cerrar» steps aside and opens /cierre on the caja's turno.

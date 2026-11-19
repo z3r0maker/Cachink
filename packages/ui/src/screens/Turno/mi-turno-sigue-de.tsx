@@ -1,5 +1,5 @@
 /**
- * «Sigues el turno de Ana. Lo abrió a las 08:15.» (M-18, MvTurnoDeOtro):
+ * «Sigues el turno de Ana. Lo abrió a las 08:15.» (M-21, MvTurnoDeOtro):
  * Mi turno's line while the operator continues the turno someone else opened
  * on this caja. The rest of Mi turno is the caja's turno as it always reads.
  */

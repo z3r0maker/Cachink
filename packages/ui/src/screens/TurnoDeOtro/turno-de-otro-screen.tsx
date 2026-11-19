@@ -1,5 +1,5 @@
 /**
- * «El turno de Ana sigue abierto» (M-18, ADR-071 §3; board MvTurnoDeOtro):
+ * «El turno de Ana sigue abierto» (M-21, ADR-071 §3; board MvTurnoDeOtro):
  * right after someone signs in while another person's turno is open on this
  * caja. One turno per caja: the newcomer continues it (their sales go into
  * it) or counts and closes it, then opens their own. «No soy …, volver» goes

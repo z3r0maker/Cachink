@@ -68,7 +68,7 @@ describe('AbrirCajaUseCase', () => {
     expect(turno.conteoAt).toBeNull();
   });
 
-  // M-18, ADR-071 §3: one open turno per caja, whoever asks.
+  // M-21, ADR-071 §3: one open turno per caja, whoever asks.
   it('refuses a second operator while the caja has an open turno', async () => {
     await useCase.execute({
       userId: USER,

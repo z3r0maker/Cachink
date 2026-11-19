@@ -1,7 +1,7 @@
 /**
  * AbrirCajaUseCase — opens a new cash drawer turn.
  *
- * One open turno per caja (ADR-071 §3, M-18): a caja is one device, and its
+ * One open turno per caja (ADR-071 §3, M-21): a caja is one device, and its
  * repository holds that device's turnos, so an open turno of this business
  * blocks a second one whoever asks. Someone else's open turno is continued
  * or closed first, never doubled: sales attach to the caja's open turno.

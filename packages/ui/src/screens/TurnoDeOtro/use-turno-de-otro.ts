@@ -1,6 +1,6 @@
 /**
  * useTurnoDeOtro — whether the signed-in operator must choose about the
- * caja's open turno (M-18, ADR-071 §3; MvTurnoDeOtro), and the words and
+ * caja's open turno (M-21, ADR-071 §3; MvTurnoDeOtro), and the words and
  * actions of that screen. Null when there is nothing to choose: no open
  * turno, the operator's own, or one they already chose to continue.
  *

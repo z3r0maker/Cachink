@@ -1,5 +1,5 @@
 /**
- * The turno an operator chose to continue (M-18, ADR-071 §3; MvTurnoDeOtro).
+ * The turno an operator chose to continue (M-21, ADR-071 §3; MvTurnoDeOtro).
  * One open turno per caja: when someone signs in while another person's
  * turno is open, the phone asks whether to continue it or count and close
  * it. Choosing to continue is remembered for that person and that turno, so

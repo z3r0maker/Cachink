@@ -38,7 +38,7 @@ export interface TurnoData {
   readonly desde: string;
   /**
    * Who opened the turno, when the operator continues someone else's
-   * (M-18, ADR-071 §3: one open turno per caja). Absent on their own turno.
+   * (M-21, ADR-071 §3: one open turno per caja). Absent on their own turno.
    */
   readonly titular?: string;
   /** The four parts of the expected cash, and its total from the domain calculator (O-03). */

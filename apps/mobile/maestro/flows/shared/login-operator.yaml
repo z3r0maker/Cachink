@@ -13,7 +13,7 @@
 # deterministic (fixtures.ts: users: [operator(1, 'Toni', …)], the ulidOf
 # ('PRS', 1) the row stamps as acceso-operador-<id>).
 #
-# M-18: a turno another flow left open on the device (one turno per caja)
+# M-21: a turno another flow left open on the device (one turno per caja)
 # asks Toni to continue or close it; `seguir-turno-abierto.yaml` continues.
 appId: mx.xangarro.mobile
 ---

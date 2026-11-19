@@ -2,7 +2,7 @@
  * useNombreDe — an operator's name by id, from the users the portal synced
  * down. Null while it loads, for no id, or for an operator the device does
  * not know. Mi turno and the «turno de otra persona» screen name whoever
- * opened the caja's turno with it (M-18).
+ * opened the caja's turno with it (M-21).
  */
 import { useQuery } from '@tanstack/react-query';
 import type { UserId } from '@xangarro/domain';

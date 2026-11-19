@@ -1,5 +1,5 @@
 /**
- * leerFilasInicio (M-06, M-18): which turno Inicio reads. One open turno per
+ * leerFilasInicio (M-06, M-21): which turno Inicio reads. One open turno per
  * caja (ADR-071 §3): the caja's open turno is everyone's, whoever opened it,
  * and Cobrar reads the same one, so the hero and the gate never disagree (the
  * stuck-operator case M-06 fixed). Continuing it or closing it is the choice
@@ -73,7 +73,7 @@ describe('leerFilasInicio — whose turno', () => {
     expect(filas.turno?.id).toBe('mio');
   });
 
-  it('a colleague’s open turno is the caja’s: Inicio reads it (M-18)', async () => {
+  it('a colleague’s open turno is the caja’s: Inicio reads it (M-21)', async () => {
     const filas = await leerFilasInicio(
       repos([turno({ id: 'ajena-abierta', userId: ANA, createdAt: '2026-05-14T09:00:00.000Z' })]),
       BUSINESS,

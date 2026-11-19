@@ -63,7 +63,7 @@ export function estadoMiTurno(
   return data !== null && data.movimientos.length === 0 ? 'empty' : 'happy';
 }
 
-/** Someone else opened the caja's turno: this operator continues it (M-18). */
+/** Someone else opened the caja's turno: this operator continues it (M-21). */
 function useTitularAjeno(titularId: string | undefined, userId: string | null): string | null {
   const ajeno = titularId !== undefined && titularId !== userId ? titularId : null;
   return useNombreDe(ajeno);

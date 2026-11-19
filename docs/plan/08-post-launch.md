@@ -72,7 +72,7 @@
 ### Z-13 Dos cajas, o dos personas cobrando a la vez en una caja (después del MVP) [media]
 
 - [ ] Status · **Trigger:** the first business that needs to sell from two places at once (two phones or browsers in one shop), or two people on one caja at the same time; or the first support case about either.
-- **Context:** the MVP rule (M-18, ADR-071 §3, decided with the owner 2026-11-19) is one open turno per caja, a caja being one device. A second operator who signs in continues the open turno or counts and closes it, then opens their own. That covers a relay between shifts, not two people working at once. Raised by the owner when approving board `MvTurnoDeOtro`.
+- **Context:** the MVP rule (M-21, ADR-071 §3, decided with the owner 2026-11-19) is one open turno per caja, a caja being one device. A second operator who signs in continues the open turno or counts and closes it, then opens their own. That covers a relay between shifts, not two people working at once. Raised by the owner when approving board `MvTurnoDeOtro`.
 - **Open questions:**
   1. **Two cajas in one shop.** Each device is already its own caja with its own turno and corte. If two devices share one physical drawer, two cortes count against the same cash and both esperados are wrong. Decide whether two cajas mean two drawers, how the portal shows two cortes of the same day, and how the owner names them (`devices.nombre`, «Caja 1», «Caja 2»).
   2. **Two people on one caja at once.** Today each sale carries whoever is signed in, and changing person means the lock or «¿Quién va a cobrar?» every time. Decide whether one corte should break down sales and cash per operator, who counts at the close, and whether a quicker per-sale switch is needed.

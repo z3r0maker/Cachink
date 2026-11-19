@@ -1,5 +1,5 @@
 /**
- * M-18 (ADR-071 §3, MvTurnoDeOtro): when the phone asks the newcomer whether
+ * M-21 (ADR-071 §3, MvTurnoDeOtro): when the phone asks the newcomer whether
  * to continue or close the caja's open turno. Their own turno never asks; a
  * turno they chose to continue stops asking; a newer turno asks again.
  */

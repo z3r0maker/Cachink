@@ -1,4 +1,4 @@
-# One open turno per caja (M-18, ADR-071 §3; board MvTurnoDeOtro): right
+# One open turno per caja (M-21, ADR-071 §3; board MvTurnoDeOtro): right
 # after a NIP, when someone else's turno is open on the device, the phone asks
 # whether to continue it or count and close it. This subflow continues it
 # («Seguir con este turno» is the default card), so a flow that only needed

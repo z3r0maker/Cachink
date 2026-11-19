@@ -1,5 +1,5 @@
 /**
- * The two ways out of «El turno de Ana sigue abierto» (M-18, MvTurnoDeOtro):
+ * The two ways out of «El turno de Ana sigue abierto» (M-21, MvTurnoDeOtro):
  * continue the caja's turno or count and close it. Option cards, not a
  * dropdown (two choices); the selected card is the action the foot takes.
  */

@@ -26,7 +26,7 @@ export interface FilasVentas {
 }
 
 export async function leerVentasTurno(r: R, businessId: BusinessId): Promise<FilasVentas> {
-  // The caja's open turno, whoever opened it (M-18, ADR-071 §3).
+  // The caja's open turno, whoever opened it (M-21, ADR-071 §3).
   const turno = await r.cajaTurnos.findOpenByBusiness(businessId);
   if (turno === null) return { turnoId: null, desde: null, ventas: [] };
   const tickets = await r.tickets.findByCajaTurno(turno.id);

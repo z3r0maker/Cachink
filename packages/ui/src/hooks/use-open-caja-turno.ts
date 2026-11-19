@@ -1,5 +1,5 @@
 /**
- * useOpenCajaTurno — the caja's open CajaTurno, whoever opened it (M-18,
+ * useOpenCajaTurno — the caja's open CajaTurno, whoever opened it (M-21,
  * ADR-071 §3: one open turno per caja; sales attach to it).
  *
  * Returns `{ userId, openTurno, isLoading }`. `openTurno` is null when:

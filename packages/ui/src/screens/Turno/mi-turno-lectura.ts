@@ -1,6 +1,6 @@
 /**
  * Reads the rows Mi turno and Cierre say (Track M, M-09) from the phone's
- * repositories: the caja's open turno (whoever opened it, M-18) and its tickets, lines, abonos and
+ * repositories: the caja's open turno (whoever opened it, M-21) and its tickets, lines, abonos and
  * gastos, this turno's inventory movements, the recurring gastos already due
  * and the last closed turnos — shaped as the web's live read (`TurnoVivoPara`
  * plus the turno id, ADR-118), so `comoTurno` and `comoCierre` from
@@ -52,7 +52,7 @@ async function nombresDe(r: R, ids: readonly string[]): Promise<ReadonlyMap<stri
 
 export interface TurnoLeido {
   readonly turnoId: string;
-  /** Who opened it: another operator when this one continues their turno (M-18). */
+  /** Who opened it: another operator when this one continues their turno (M-21). */
   readonly titularId: string;
   readonly vivo: TurnoVivoPara;
 }
