@@ -39,6 +39,7 @@ ephemerally**, **purpose = App functionality** only.
 | Financial info → Other financial info       | Required            | The business's sales, expenses, cash counts and stock movements                                             | Financial Info → Other Financial Info               |
 | Messages → Other in-app messages            | Optional            | Operators' replies to the owner's messages (`respuestas_operador`)                                          | User Content → Other User Content                   |
 | App activity → Other user-generated content | Required            | Free text typed into records (concepts, notes) and the description sent with «Reportar un problema»         | User Content → Other User Content, Customer Support |
+| Photos and videos → Photos                  | Optional            | Product photos taken or picked in Inventario, reduced to 512 px and synced to the business's account        |
 | App info and performance → Crash logs       | Optional            | Crash reports, **only if the user turns them on**; scrubbed of names, phones, amounts and text              | Diagnostics → Crash Data                            |
 | App info and performance → Diagnostics      | Required            | Platform, OS version and device name at linking; the scrubbed event log sent with a bug report              | Diagnostics → Other Diagnostic Data                 |
 | Device or other IDs → Device or other IDs   | Required            | The device id Xangarro generates at linking, and `expo-updates`' random install id (not the advertising id) | Identifiers → Device ID                             |
@@ -52,7 +53,7 @@ are declared under Personal info rather than left out.
 
 ## Not collected (leave unticked)
 
-Location, Contacts, Health and fitness, Photos and videos, Audio, Files and
+Location, Contacts, Health and fitness, Audio, Files and
 docs, Calendar, Web browsing, Installed apps, App interactions, In-app search
 history, Purchase history (the app sells nothing), Payment info (no card is
 ever typed: «Tarjeta» only records how the customer paid), Credit score, the
@@ -60,6 +61,7 @@ Advertising ID (no ads SDK; don't add the `AD_ID` permission).
 
 ## The camera
 
-The camera reads QR and barcodes on the device; no image or frame leaves it,
-so **Photos and videos** stays unticked. `app.json` turns the microphone off
+The camera reads QR and barcodes on the device, and those frames never leave
+it. It also takes product photos, which are synced to the business's account,
+so **Photos** is ticked above. `app.json` turns the microphone off
 (`recordAudioAndroid: false`), so no audio permission ships either.

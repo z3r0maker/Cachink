@@ -65,7 +65,8 @@ HOW TO SIGN IN (demo business "Tacos La Esquina")
 Each code links one device, once. To test on a second device, use the
 other code, DEMXK7M3 or DEMXPAD2, with the same email.
 
-The camera is used only to scan the owner's QR code and product barcodes.
+The camera scans the owner's QR code and product barcodes, and takes product
+photos. The photo library opens only when someone picks a product photo.
 The privacy policy and the terms open from Mi turno > Ajustes > "Privacidad
 y términos".
 Support: soporte@xangarro.mx · https://xangarro.mx/soporte/
