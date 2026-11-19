@@ -58,20 +58,25 @@ export function CierreConteo(p: {
   readonly onLimpiar: () => void;
 }): ReactElement {
   return (
-    <QuietPanel
-      label="Cuenta el efectivo de la caja"
-      testID="cierre-conteo"
-      padding={16}
-      action={
-        <Btn variant="quiet" size="sm" onPress={p.onLimpiar} testID="cierre-empezar-de-cero">
+    <View gap={12}>
+      <QuietPanel label="Cuenta el efectivo de la caja" testID="cierre-conteo" padding={16}>
+        <View gap={18}>
+          <Columna titulo="Billetes" lista={BILLETES} conteo={p.conteo} poner={p.poner} />
+          <Columna titulo="Monedas" lista={MONEDAS} conteo={p.conteo} poner={p.poner} />
+        </View>
+      </QuietPanel>
+      {/* Under the count, centred (MvCierreFlujo): in the panel's head it was cut off. */}
+      <View alignItems="center">
+        <Btn
+          variant="secondary"
+          size="md"
+          sentence
+          onPress={p.onLimpiar}
+          testID="cierre-empezar-de-cero"
+        >
           Empezar de cero
         </Btn>
-      }
-    >
-      <View gap={18}>
-        <Columna titulo="Billetes" lista={BILLETES} conteo={p.conteo} poner={p.poner} />
-        <Columna titulo="Monedas" lista={MONEDAS} conteo={p.conteo} poner={p.poner} />
       </View>
-    </QuietPanel>
+    </View>
   );
 }
