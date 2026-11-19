@@ -38,13 +38,17 @@ function certificate(): X509Certificate {
  * file does not undo a rule in its parent, so every level has to let the
  * certificate through.
  */
-function ignoredByAlone(gitignore: string, path: string): boolean {
+function ignoredByAlone(gitignore: string, paths: readonly string[]): readonly string[] {
   const repo = mkdtempSync(join(tmpdir(), 'ota-ignore-'));
   try {
     execFileSync('git', ['init', '-q'], { cwd: repo });
     copyFileSync(gitignore, join(repo, '.gitignore'));
-    const r = spawnSync('git', ['check-ignore', '-q', '--no-index', path], { cwd: repo });
-    return r.status === 0;
+    const r = spawnSync('git', ['check-ignore', '--no-index', '--stdin'], {
+      cwd: repo,
+      encoding: 'utf8',
+      input: paths.join('\n'),
+    });
+    return r.stdout.split('\n').filter(Boolean);
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -94,9 +98,9 @@ describe('OTA code signing', () => {
       { file: resolve(APP, '.gitignore'), prefix: '' },
     ];
     for (const { file, prefix } of levels) {
-      assert.equal(ignoredByAlone(file, `${prefix}certs/certificate.pem`), false, file);
-      assert.equal(ignoredByAlone(file, `${prefix}keys/private-key.pem`), true, file);
-      assert.equal(ignoredByAlone(file, `${prefix}certs/private-key.pem`), true, file);
+      const keys = [`${prefix}keys/private-key.pem`, `${prefix}certs/private-key.pem`];
+      const ignored = ignoredByAlone(file, [`${prefix}certs/certificate.pem`, ...keys]);
+      assert.deepEqual(ignored, keys, file);
     }
-  });
+  }, 30_000);
 });
