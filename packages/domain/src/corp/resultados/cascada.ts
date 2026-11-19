@@ -37,6 +37,8 @@ export interface ImporteResultados {
   readonly importe: Money;
   readonly fecha: string;
   readonly fechaFlujo: string | null;
+  /** The entry's deductibility as captured; Impuestos (E-13) counts all but `false`. */
+  readonly deducible?: boolean | null;
 }
 
 export type RenglonId =

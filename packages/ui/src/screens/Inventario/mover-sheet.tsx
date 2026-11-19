@@ -1,114 +1,101 @@
 /**
- * «¿Qué pasó con la mercancía?» (MvInventario's sheet, the web's side panel
- * `MoverExistencia`): «Llegó mercancía» (how much, who brought it if you
- * want, a note) or «Se echó a perder o se dañó (merma)» (how much, what
- * happened, always, and a note). The footer says what the move does and
- * records it. Whole units only: the domain counts in integers.
+ * «¿Qué pasó con la mercancía?» (RvInventario; M9, item 6): the one sheet a
+ * row opens, on that product, with the kind its stock calls for already
+ * chosen — «Llegó mercancía» or «Se echó a perder». The quantity is typed or
+ * stepped; a merma never takes more than there is and always says what
+ * happened. Saving goes through the route's write and the sheet closes; the
+ * screen's toast is the confirmation. Mounted fresh on every opening.
  */
-import { useEffect, useState, type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { conUnidad, type TipoMovimiento } from '@xangarro/caja/inventario';
-import { BottomSheet, Btn, MText } from '../../components/index';
-import { colors } from '../../theme';
-import type { ExistenciaMovil } from './inventario-registro';
-import { Articulo, Motivos, Opcional } from './mover-campos-registro';
+import {
+  conUnidad,
+  type Existencia,
+  type NuevoMovimientoVivo,
+  type TipoMovimiento,
+} from '@xangarro/caja/inventario';
+import { BottomSheet } from '../../components/BottomSheet/index';
 import { Cantidad } from './mover-cantidad';
+import { Articulo, Motivos } from './mover-campos-registro';
+import {
+  borradorInicial,
+  cta,
+  limpio,
+  listo,
+  paso,
+  payload,
+  quedan,
+  type Borrador,
+} from './mover-logica';
+import { NotaFirma, PieMover } from './mover-pie';
 import { Tipos } from './mover-tipos';
-import { borradorInicial, cta, listo, paso, quedan, type Borrador } from './mover-logica';
+import { useGuardarHoja } from './use-mover-form';
 
-export interface MoverSheetProps {
-  /** The product being moved; null keeps the sheet closed. */
-  readonly e: ExistenciaMovil | null;
+export interface MovimientoSheetProps {
+  /** The product the row was. */
+  readonly item: Existencia;
+  /** The kind the sheet opens on (`tipoAlAbrir`, or Entrada for «Reponer»). */
   readonly tipo: TipoMovimiento;
-  /** «Pedro», or «el dueño» until the caja knows the name. */
-  readonly dueno: string;
-  readonly registrando: boolean;
-  readonly error: string | null;
+  /** «Ana Robledo, Caja 1», from the session. */
+  readonly firma: string;
   readonly onClose: () => void;
-  readonly onRegistrar: (b: Borrador, e: ExistenciaMovil) => void;
+  readonly onGuardar: (m: NuevoMovimientoVivo) => Promise<void>;
 }
 
-function Campos(p: { b: Borrador; e: ExistenciaMovil; set: (b: Borrador) => void }): ReactElement {
+/** The unit as the field says it, «kg», «litros», «piezas». */
+const unidadDe = (e: Existencia, raw: string): string =>
+  conUnidad(Number(raw) || 2, e.unidad).replace(/^\S+ /, '');
+
+function Campos(p: {
+  readonly b: Borrador;
+  readonly e: Existencia;
+  readonly set: (b: Borrador) => void;
+}): ReactElement {
   const { b, e, set } = p;
   const merma = b.tipo === 'Merma';
   return (
-    <View gap={16} paddingTop={4}>
+    <View gap={16}>
       <Tipos value={b.tipo} onChange={(tipo) => set(borradorInicial(tipo))} />
       <Articulo e={e} />
       <Cantidad
         label={merma ? '¿Cuánto se echó a perder?' : '¿Cuánto llegó?'}
-        cantidad={b.cantidad}
-        unidad={conUnidad(b.cantidad, e.unidad).replace(/^\S+ /, '')}
+        raw={b.raw}
+        unidad={unidadDe(e, b.raw)}
         quedan={quedan(b, e)}
-        onPaso={(d) => set({ ...b, cantidad: paso(b, e, d) })}
+        onRaw={(v) => set({ ...b, raw: limpio(v) })}
+        onPaso={(d) => set({ ...b, raw: paso(b, e, d) })}
       />
-      {merma ? (
-        <Motivos value={b.motivo} onChange={(motivo) => set({ ...b, motivo })} />
-      ) : (
-        <Opcional
-          label="¿Quién la trajo?"
-          placeholder="Ej. Carnicería La Central"
-          value={b.proveedor}
-          onChange={(proveedor) => set({ ...b, proveedor })}
-          testID="mover-proveedor"
-        />
-      )}
-      <Opcional
-        label="Nota"
-        placeholder={merma ? 'Ej. se quedó fuera del refri' : 'Ej. venía en nota de remisión'}
-        value={b.nota}
-        onChange={(nota) => set({ ...b, nota })}
-        testID="mover-nota"
-      />
+      {merma ? <Motivos value={b.motivo} onChange={(motivo) => set({ ...b, motivo })} /> : null}
     </View>
   );
 }
 
-function Pie(p: MoverSheetProps & { b: Borrador; e: ExistenciaMovil }): ReactElement {
-  const merma = p.b.tipo === 'Merma';
-  return (
-    <View gap={10}>
-      {p.error ? (
-        <MText role="alert" size="md" weight="bold" color={colors.redText} testID="mover-error">
-          {p.error}
-        </MText>
-      ) : (
-        <MText size="sm" weight="semibold" color={colors.gray600}>
-          {`${merma ? 'Esto baja' : 'Esto sube'} el inventario y ${p.dueno} lo ve en sus números.`}
-        </MText>
-      )}
-      <Btn
-        variant="primary"
-        size="xl"
-        sentence
-        fullWidth
-        disabled={!listo(p.b, p.e) || p.registrando}
-        loading={p.registrando}
-        onPress={() => p.onRegistrar(p.b, p.e)}
-        testID="mover-registrar"
-      >
-        {cta(p.b, p.e)}
-      </Btn>
-    </View>
-  );
-}
-
-export function MoverSheet(p: MoverSheetProps): ReactElement | null {
+export function MovimientoSheet(p: MovimientoSheetProps): ReactElement {
   const [b, set] = useState<Borrador>(() => borradorInicial(p.tipo));
-  const id = p.e?.id ?? null;
-  useEffect(() => set(borradorInicial(p.tipo)), [id, p.tipo]);
-  if (p.e === null) return null;
+  const { guardando, error, guardar } = useGuardarHoja(p.onGuardar, p.onClose);
   return (
     <BottomSheet
       open
       onClose={p.onClose}
       eyebrow="Movimiento de inventario"
       title="¿Qué pasó con la mercancía?"
-      closeLabel="Cerrar movimiento"
-      footer={<Pie {...p} b={b} e={p.e} />}
+      closeLabel="Cerrar sin registrar"
       testID="mover-sheet"
+      footer={
+        <PieMover
+          cta={cta(b, p.item)}
+          listo={listo(b, p.item)}
+          guardando={guardando}
+          error={error}
+          onCancelar={p.onClose}
+          onGuardar={() => void guardar(payload(b, p.item))}
+        />
+      }
     >
-      <Campos b={b} e={p.e} set={set} />
+      <View gap={18}>
+        <Campos b={b} e={p.item} set={set} />
+        <NotaFirma firma={p.firma} />
+      </View>
     </BottomSheet>
   );
 }

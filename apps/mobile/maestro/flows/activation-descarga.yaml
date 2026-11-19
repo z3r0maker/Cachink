@@ -21,17 +21,11 @@ env:
     timeout: 60000
 - tapOn:
     id: 'vincular-escribir'
-- tapOn:
-    id: 'activation-email'
-    point: '95%,50%'
-- eraseText: 60
-- inputText: 'dueno@tacoslaesquina.mx'
-- tapOn:
-    id: 'activation-code'
-    point: '95%,50%'
-- eraseText: 20
-- inputText: 'valdk7m3'
-- hideKeyboard
+- runFlow: shared/vincular-correo.yaml
+- runFlow:
+    file: shared/vincular-codigo.yaml
+    env:
+      CODE: 'valdk7m3'
 - tapOn:
     id: 'activation-submit'
 # The pages land fast against a local mock: the progress is checked while it shows.

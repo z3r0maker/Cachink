@@ -1,0 +1,24 @@
+# Types the eight letters on Vincular's typed path and puts the keyboard
+# away, so «Conectar esta caja» is free to tap. Precondition: the typed path
+# is open and the keyboard is down (shared/vincular-correo.yaml).
+#
+# Env: CODE (8 characters; lowercase works, sanitizeCode uppercases).
+appId: mx.xangarro.mobile
+---
+# A short phone (iPhone SE) or a keyboard that shrank the screen (Android)
+# can leave the boxes below the fold.
+- scrollUntilVisible:
+    element:
+      id: 'activation-code'
+    direction: DOWN
+    timeout: 5000
+# A tap on a scroll still coasting only stops it (iOS): nothing gets focus.
+- waitForAnimationToEnd
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
+- tapOn:
+    id: 'activation-code'
+    point: '95%,50%'
+- eraseText: 20
+- inputText: ${CODE}
+# The same as the correo: Enter only closes the keyboard here.
+- pressKey: Enter

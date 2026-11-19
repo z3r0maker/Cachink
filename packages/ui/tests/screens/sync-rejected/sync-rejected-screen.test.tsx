@@ -49,7 +49,8 @@ describe('SyncRejectedScreen', () => {
     expect(screen.getByTestId('no-enviado-reason-sales:S1')).toHaveTextContent(
       'El producto de este registro ya no existe en el portal.',
     );
-    expect(screen.getByText(/regístrala con otro producto/)).toBeInTheDocument();
+    expect(screen.getByText(/que recupere el producto en el portal/)).toBeInTheDocument();
+    expect(screen.queryByText(/regístrala/)).not.toBeInTheDocument();
   });
 
   it('retries the tapped row and never offers delete', () => {

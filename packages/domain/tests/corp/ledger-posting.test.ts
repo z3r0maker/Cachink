@@ -67,6 +67,26 @@ describe('postMovement', () => {
     assert.equal(pick(lines, 'bancos')[0]?.haber, 3_336_67n);
   });
 
+  it('pays the ISR as a provisional payment and the IVA against what was collected (E-13)', () => {
+    const lines = postMovement(ALL[3]!);
+    assert.equal(pick(lines, 'isr_pagos_provisionales')[0]?.debe, 3_875_00n);
+    assert.equal(pick(lines, 'iva_trasladado')[0]?.debe, 2_944_00n);
+    assert.equal(pick(lines, 'retenciones_por_pagar')[0]?.debe, 723_33n);
+    assert.equal(pick(lines, 'bancos')[0]?.haber, 7_542_33n);
+  });
+
+  it('drops a tax at zero and refuses a payment of nothing', () => {
+    const lines = postMovement({ kind: 'pago_impuestos', isr: 0n, iva: 566_85n, retenciones: 0n });
+    assert.deepEqual(
+      lines.map((l) => l.cuenta),
+      ['iva_trasladado', 'bancos'],
+    );
+    assert.throws(
+      () => postMovement({ kind: 'pago_impuestos', isr: 0n, iva: 0n, retenciones: 0n }),
+      MontoInvalidoError,
+    );
+  });
+
   it('turns IVA that cannot be credited into cost, and an unpaid invoice into a payable', () => {
     const lines = postMovement({
       kind: 'gasto',

@@ -38,7 +38,7 @@ env:
       METODO: Transferencia
 
 # The pill refuses and opens «Registros por enviar»
-# (app-shell.tsx onOpenRejected → /no-enviados).
+# (app-shell.tsx onOpenPendientes → /no-enviados; it always does, R4).
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-rejected'
@@ -70,7 +70,7 @@ env:
     direction: DOWN
     timeout: 5000
 - assertVisible: '.*El producto de este registro ya no existe en el portal\..*'
-- assertVisible: '.*El producto fue eliminado — regístrala con otro producto\..*'
+- assertVisible: '.*que recupere el producto en el portal y toca Reintentar\..*'
 - runScript:
     file: shared/mock-row.js
     env:

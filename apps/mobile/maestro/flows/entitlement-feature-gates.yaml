@@ -38,8 +38,7 @@ env:
     env:
       SCENARIO: xangarrito
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'
@@ -60,8 +59,7 @@ env:
     env:
       SCENARIO: xangarro
       RECORDS_PER_MONTH: ''
-- tapOn:
-    id: 'cloud-sync-pill'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'

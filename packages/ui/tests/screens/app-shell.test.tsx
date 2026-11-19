@@ -132,6 +132,16 @@ describe('AppShell on a phone', () => {
     expect(screen.getByTestId('cloud-sync-pill')).toBeInTheDocument();
   });
 
+  it('the sync pill opens Registros por enviar, with or without refusals (R4)', () => {
+    const onNavigate = vi.fn();
+    mount({ onNavigate });
+    fireEvent.click(screen.getByTestId('cloud-sync-pill'));
+    expect(onNavigate).toHaveBeenCalledWith('/no-enviados');
+    expect(screen.getByTestId('cloud-sync-pill').getAttribute('aria-label')).toContain(
+      'Toca para ver lo que falta enviar',
+    );
+  });
+
   it('shows no bell without a count source, and the bell with one', () => {
     mount();
     expect(screen.queryByTestId('avisos-bell')).toBeNull();

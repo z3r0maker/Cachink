@@ -85,6 +85,13 @@
       "when": 1795063298706,
       "tag": "0011_corp_servicios",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795095583837,
+      "tag": "0012_corp_impuestos",
+      "breakpoints": true
     }
   ]
 }

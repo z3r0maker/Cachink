@@ -17,14 +17,11 @@ const vistas = agendaDe({
 
 describe('recordatoriosDe', () => {
   it('picks what falls due in exactly 7, 3 or 1 days', () => {
-    // ISR and IVA of September are due Monday 19 Oct: 7 days after the 12th.
+    // September's ISR e IVA is due Monday 19 Oct: 7 days after the 12th.
     const r = recordatoriosDe(vistas, '2026-10-12');
     assert.deepEqual(
       r.map((x) => [x.titulo, x.dias]),
-      [
-        ['ISR provisional de septiembre de 2026', 7],
-        ['IVA mensual de septiembre de 2026', 7],
-      ],
+      [['ISR e IVA de septiembre de 2026', 7]],
     );
   });
 
@@ -35,11 +32,12 @@ describe('recordatoriosDe', () => {
   });
 
   it('writes one subject for one item and a count for several', () => {
-    const r = recordatoriosDe(vistas, '2026-10-18');
+    // The 32-D opinion and the buzón review are both due 31 Oct.
+    const r = recordatoriosDe(vistas, '2026-10-28');
     assert.equal(correoDe(r, 'https://admin.x').subject, 'MEXIA: 2 obligaciones vencen pronto');
     assert.equal(
-      correoDe(r.slice(0, 1), 'https://admin.x').subject,
-      'MEXIA: ISR provisional de septiembre de 2026 vence mañana',
+      correoDe(recordatoriosDe(vistas, '2026-10-18'), 'https://admin.x').subject,
+      'MEXIA: ISR e IVA de septiembre de 2026 vence mañana',
     );
   });
 });

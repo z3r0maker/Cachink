@@ -79,9 +79,7 @@ tags:
 # slides right, under the parked dev-menu gear (entry-setup.sh); a centre
 # tap opens the dev menu instead of the sync. The queue also drains by
 # itself on the next scheduled run — the tap only hurries it.
-- tapOn:
-    id: 'cloud-sync-pill'
-    point: '25%,50%'
+- runFlow: shared/enviar-ahora.yaml
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'

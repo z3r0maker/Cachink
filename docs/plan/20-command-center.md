@@ -697,7 +697,35 @@ with property tests:
 
 ### E-13 Impuestos `[media]`
 
-- [ ] Status · **Blocked by:** E-12 (the portal's RESICO persona moral estimate it reuses landed with ADR-129: `packages/domain/src/financials/isr-regimen.ts`)
+- [x] Status · **Blocked by:** E-12 (the portal's RESICO persona moral estimate it reuses landed with ADR-129: `packages/domain/src/financials/isr-regimen.ts`) · **Done:** 2026-11-19 (boards CD-09, CD-09b, round 15 approved)
+- **Progress (2026-11-19, ADR-148):**
+  - `@xangarro/domain/corp` `impuestos/`: `mesesFiscales` sums the ledger into cash-basis months
+    (Resultados' P&L lines on the day their money moved, deductible ones only; the IVA and
+    withholding lines; the ISR withheld from each movement's payload). `estimadosDeImpuestos`
+    works the year: ISR at 30 % through the portal's `calcularIsrPorRegimen`, less the year's
+    earlier provisional payments (the contador's figure once declared); IVA less the earlier
+    saldo a favor; the withholdings. `compararConDeclaracion` flags a difference over $1.
+  - The Agenda's «ISR provisional» and «IVA mensual» are one obligation, `impuestos_mensual`
+    («ISR e IVA»), migrated with their documents (data-corp 0012); old links redirect. The
+    Agenda sends it to Impuestos and refuses to mark it pagada itself.
+  - `corp.tax_returns` (0012, with its grants) keeps the contador's figures. `guardarDeclaracion`,
+    `avanzarDeclaracion` and `pagarDeclaracion` (application): figures make the month preparada,
+    the acuse presentada, and «Marcar como pagado», which needs the comprobante (or a month
+    en ceros), posts one `pago_impuestos` entry idempotent by month. That movement now pays the
+    ISR into the new asset «Pagos provisionales de ISR» and the IVA against IVA trasladado.
+  - Resultados › Impuestos: the month's total and four steps, the three cards (Estimado, Del
+    contador, Diferencia), «Revisa con el contador», the papers and the year's earlier months;
+    the drawer «Lo que declaró el contador» compares each figure as it is typed.
+  - **Differences from the boards:**
+    - the acuse and the línea de captura are uploaded in the month's «Papeles», one row each,
+      through the Agenda's direct upload (E-26), not in the drawer: one upload path, up to 25 MB;
+    - the IVA card has no «IVA que nos retuvieron» line: the ledger records no withholding a
+      customer makes, and nothing would fill it;
+    - the withholdings card lists ISR and IVA retenido, not the fees they came from.
+  - Playwright: the late month of the SAT registration filed en ceros from the Agenda, its acuse
+    served back; last month with a seeded cobro and fee, its estimate on the page, the contador's
+    IVA $46.00 over and flagged, the acuse, the corrected figures, the comprobante, the payment in
+    Movimientos, and an old Agenda link landing on the paid «ISR e IVA».
 - **What:**
   - the ISR provisional (RESICO PM, cumulative cash basis) and IVA del mes from the ledger;
   - estimate vs the contador's figure (a difference over $1 is flagged);

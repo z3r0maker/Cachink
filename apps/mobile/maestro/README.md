@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 65 flows + 22 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 65 flows + 24 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -116,8 +116,12 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/cobrar-ticket.yaml`        | Charges the ticket on Cobrar with `${METODO}` (phone and tablet branches)                           |
 | `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)                              |
 | `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                    |
+| `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                     |
+| `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                            |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
+| `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
+| `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)          |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
 | `shared/navigate-to-settings.yaml` | Deep-links to Ajustes                                                                               |
 | `shared/mock-reset.js`             | `POST /__mock/reset`                                                                                |
@@ -278,7 +282,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 
 | Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
 | -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; board MvInventario): /productos lists the existencias; a row's entrada square opens «Entrada                                                             |
+| `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; RvInventario): one tap on a row opens the sheet on the kind its stock calls for; an entrada raises the count, then a merma lowers it                     |
 | `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                                                                              |
 | `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
 | `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
@@ -310,6 +314,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 | `interrupcion-bloqueo-ticket.yaml` | activated |       | Backgrounded past the five-minute auto-lock with a ticket open (J4-33): Bloqueo, the NIP, the same ticket. Slow (about six minutes).                                                                             |
 | `caja-cierre-discrepancia.yaml`    | activated | ✓     | Cierre with a diferencia explained by its own note (M-09; the old flow's CountResultStep dropdown + explicación is gone)                                                                                         |
 | `avisos-responder.yaml`            | activated | ✓     | Avisos (Track M, M-09; board MvAvisos): the header bell shows the unread count, /avisos lists the owner's messages, and                                                                                          |
+| `avisos-sin-internet.yaml`         | activated |       | Avisos without internet (RvAvisosSinInternet, R6): the stored messages and the bell stay, a reply is saved for the outbox.                                                                                       |
 
 ### Sincronización y sin internet
 

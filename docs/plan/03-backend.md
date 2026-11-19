@@ -359,3 +359,24 @@
   tombstone for one product and asserts what the route returns for each state.
 - **Acceptance:** `pnpm --filter @xangarro/data-pg test` green; `db:reset` seeds one product
   with a photo so the Playwright sentinel of P-42 has data to find.
+
+### B-20 El journal de drizzle de Postgres, al día y con guarda [media]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** N-27
+- **Why now:** la nota de N-27 lleva desde el 2026-09-26 delegando «la mitad del journal de drizzle»
+  a esta tarea, que nunca se escribió: hasta el 2026-11-19 esa nota era el único lugar del repo que
+  nombraba B-20. El hallazgo es DB2-MIG-01, la mitad que ADR-119 no cubrió.
+- **What is wrong:** `packages/data-pg/drizzle/meta/_journal.json` tiene 8 entradas (la última,
+  `0013_business_regimen_sat`) y 8 snapshots, contra 69 archivos `.sql`. Aplicar no se rompe por eso
+  — el local recorre `drizzle/*.sql` (`scripts/db-local.sh`) y el hospedado va por su ledger
+  (`scripts/hosted/plan.ts`) —, pero `pnpm --filter @xangarro/data-pg db:generate` diffea contra el
+  snapshot `0007`, así que la primera persona que lo corra obtiene una migración que recrea sesenta.
+  El lado de SQLite está sano y sirve de modelo: journal de 16 entradas y barril generado
+  (`packages/data/drizzle/migrations/index.ts`).
+- **Decide first:** o se reconstruye el journal con un snapshot por migración, o se declara que
+  Postgres no usa drizzle-kit y `db:generate` se retira del paquete. Las dos son defendibles; lo que
+  no se sostiene es un journal que miente. Como cambia una regla de §6 de CLAUDE.md («Both keep a
+  journal»), la decisión va en un ADR.
+- **Acceptance:** una prueba que falle si el journal y los `.sql` se separan otra vez — como la del
+  barril de SQLite —, de modo que esto no vuelva a descubrirse en una auditoría; y, si se retira
+  `db:generate`, que el script ya no exista en `packages/data-pg/package.json`.

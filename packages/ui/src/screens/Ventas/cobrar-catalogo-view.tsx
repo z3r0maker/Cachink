@@ -1,13 +1,15 @@
 /**
  * The catalogue half of Cobrar (MvCobrar; TbCobrar's left side): the title,
  * the search with the scanner button, the category chips and the tiles, two
- * across on a phone and more on a tablet. Empty and no-match states say what
- * to do next.
+ * across on a phone and more on a tablet. A caja with no products yet is
+ * Don pointing at «Producto nuevo», with nothing to search (RvPrimerUso); a
+ * search that matches nothing says so and offers the same quick add.
  */
 import type { ReactElement } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput } from 'react-native';
 import { View } from '@tamagui/core';
 import { Btn } from '../../components/Btn/index';
+import { EstadoVacio } from '../../components/CajaEstado/index';
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
@@ -122,18 +124,30 @@ function Categorias(p: CatalogoViewProps): ReactElement | null {
   );
 }
 
+/** No products at all: Don points the way, one yellow «Producto nuevo». */
+function SinProductos(p: CatalogoViewProps): ReactElement {
+  return (
+    <View paddingHorizontal={16} paddingTop={10}>
+      <EstadoVacio
+        id="cobrar-sin-productos"
+        pose="senalando"
+        title="Todavía no hay productos"
+        body="Da de alta lo que vendes y ya puedes cobrar."
+        cta={{ label: 'Producto nuevo', onPress: p.onProductoNuevo }}
+      />
+    </View>
+  );
+}
+
+/** A search that finds nothing: the plain answer, and the quick add. */
 function Vacio(p: CatalogoViewProps): ReactElement {
-  const titulo = p.hayCatalogo ? 'No hay productos con eso' : 'Todavía no hay productos';
-  const texto = p.hayCatalogo
-    ? 'Revisa cómo lo escribiste o dalo de alta aquí mismo.'
-    : 'Da de alta lo que vendes y ya puedes cobrar.';
   return (
     <View testID="cobrar-vacio" padding={24} gap={12} alignItems="center">
       <MText size="lg" weight="extraBold" textAlign="center">
-        {titulo}
+        No hay productos con eso
       </MText>
       <MText weight="semibold" color={colors.gray600} textAlign="center">
-        {texto}
+        Revisa cómo lo escribiste o dalo de alta aquí mismo.
       </MText>
       <Btn variant="secondary" size="lg" onPress={p.onProductoNuevo} testID="cobrar-vacio-nuevo">
         Producto nuevo
@@ -189,10 +203,18 @@ export function CatalogoView(p: CatalogoViewProps): ReactElement {
             Toca lo que pidió el cliente
           </MText>
         </View>
-        <Busqueda {...p} />
+        {p.hayCatalogo ? <Busqueda {...p} /> : null}
       </View>
-      <Categorias {...p} />
-      <Grid {...p} />
+      {p.hayCatalogo ? (
+        <>
+          <Categorias {...p} />
+          <Grid {...p} />
+        </>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+          <SinProductos {...p} />
+        </ScrollView>
+      )}
     </View>
   );
 }

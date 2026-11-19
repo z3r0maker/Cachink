@@ -1,76 +1,96 @@
 /**
- * «¿Qué pasó con la mercancía?» on the phone (MvInventario's sheet; the web's
- * `inventario/mover.tsx`): whole quantities only, since the domain counts
- * units in integers; a merma can't take more than there is and always says
- * what happened; the detalle joins the reason (or who brought it) and the
- * note with «·», as the web records it. Pure.
+ * «¿Qué pasó con la mercancía?» on the phone (RvInventario; M9, item 6): the
+ * row opens the kind its stock calls for, the quantity is typed or stepped in
+ * whole units (the domain counts in integers), a merma can't take more than
+ * there is and always says what happened. Pure: the sheet holds a `Borrador`
+ * and asks these what to say and what to write.
  */
 import {
+  cantidadValida,
   conUnidad,
   type Existencia,
   type MotivoMerma,
+  type NuevoMovimientoVivo,
   type TipoMovimiento,
 } from '@xangarro/caja/inventario';
 
 /** A write-off starts at one; a delivery at five, as the board has it. */
-export const INICIAL: Readonly<Record<TipoMovimiento, number>> = { Merma: 1, Entrada: 5 };
+export const INICIAL: Readonly<Record<TipoMovimiento, string>> = { Merma: '1', Entrada: '5' };
 
 export interface Borrador {
   readonly tipo: TipoMovimiento;
-  readonly cantidad: number;
+  /** What the field holds, digits only; `cantidadValida` says if it counts. */
+  readonly raw: string;
   readonly motivo: MotivoMerma | null;
-  readonly proveedor: string;
-  readonly nota: string;
 }
 
 export const borradorInicial = (tipo: TipoMovimiento): Borrador => ({
   tipo,
-  cantidad: INICIAL[tipo],
+  raw: INICIAL[tipo],
   motivo: null,
-  proveedor: '',
-  nota: '',
 });
 
-/** Low stock opens «Llegó mercancía»; the rest opens the merma (the board's `abrir`). */
+/** Low stock opens «Llegó mercancía»; the rest opens the merma. */
 export const tipoAlAbrir = (e: Existencia): TipoMovimiento =>
   e.existencias <= e.umbral ? 'Entrada' : 'Merma';
 
-export const alcanza = (b: Borrador, e: Existencia): boolean =>
-  b.tipo !== 'Merma' || b.cantidad <= e.existencias;
+/** Digits only: the field wants a whole number. */
+export const limpio = (raw: string): string => raw.replace(/[^0-9]/g, '');
+
+const cantidadDe = (b: Borrador): number | null => cantidadValida(b.raw);
+
+/** A merma within what there is; an entrada always fits. */
+const alcanza = (b: Borrador, e: Existencia): boolean => {
+  const n = cantidadDe(b);
+  return b.tipo !== 'Merma' || n === null || n <= e.existencias;
+};
 
 export const listo = (b: Borrador, e: Existencia): boolean =>
-  Number.isInteger(b.cantidad) &&
-  b.cantidad > 0 &&
-  alcanza(b, e) &&
-  (b.tipo !== 'Merma' || b.motivo !== null);
+  cantidadDe(b) !== null && alcanza(b, e) && (b.tipo !== 'Merma' || b.motivo !== null);
 
 /** The stepper: one at least, never past the stock on a merma. */
-export function paso(b: Borrador, e: Existencia, delta: number): number {
+export function paso(b: Borrador, e: Existencia, delta: number): string {
   const tope = b.tipo === 'Merma' ? Math.max(1, e.existencias) : Number.MAX_SAFE_INTEGER;
-  return Math.min(tope, Math.max(1, Math.round(b.cantidad + delta)));
+  const base = cantidadDe(b) ?? 0;
+  return String(Math.min(tope, Math.max(1, base + delta)));
 }
 
-/** «Te van a quedar 6 kg», «Vas a tener 13 kg, abajo del aviso», «Solo hay 2 kg.». */
-export function quedan(b: Borrador, e: Existencia): string {
-  if (!alcanza(b, e)) return `Solo hay ${conUnidad(e.existencias, e.unidad)}.`;
+export interface Quedan {
+  readonly texto: string;
+  /** Green above the aviso, red when a merma doesn't fit, quiet otherwise. */
+  readonly tono: 'bien' | 'rojo' | 'quieto';
+}
+
+/** «Vas a tener 30 kg», «Te van a quedar 2 kg, abajo del aviso», «Solo hay 6 kg.». */
+export function quedan(b: Borrador, e: Existencia): Quedan {
+  const n = cantidadDe(b);
+  if (n === null) return { texto: '', tono: 'quieto' };
+  if (!alcanza(b, e))
+    return { texto: `Solo hay ${conUnidad(e.existencias, e.unidad)}.`, tono: 'rojo' };
   const merma = b.tipo === 'Merma';
-  const despues = merma ? e.existencias - b.cantidad : e.existencias + b.cantidad;
-  const aviso = despues <= e.umbral ? ', abajo del aviso' : '';
-  return `${merma ? 'Te van a quedar' : 'Vas a tener'} ${conUnidad(despues, e.unidad)}${aviso}`;
+  const despues = merma ? e.existencias - n : e.existencias + n;
+  const bajo = despues <= e.umbral;
+  const texto = `${merma ? 'Te van a quedar' : 'Vas a tener'} ${conUnidad(despues, e.unidad)}`;
+  return bajo
+    ? { texto: `${texto}, abajo del aviso`, tono: 'quieto' }
+    : { texto, tono: merma ? 'quieto' : 'bien' };
 }
 
-export function detalle(b: Borrador): string {
-  const partes =
-    b.tipo === 'Merma' ? [b.motivo ?? '', b.nota.trim()] : [b.proveedor.trim(), b.nota.trim()];
-  return partes.filter(Boolean).join(' · ');
+/** «Registrar entrada de 24 kg»; the move alone until the quantity counts. */
+export function cta(b: Borrador, e: Existencia): string {
+  const n = cantidadDe(b);
+  const que = `Registrar ${b.tipo === 'Merma' ? 'merma' : 'entrada'}`;
+  return n === null ? que : `${que} de ${conUnidad(n, e.unidad)}`;
 }
 
-export const cta = (b: Borrador, e: Existencia): string =>
-  `Registrar ${b.tipo === 'Merma' ? 'merma' : 'entrada'} de ${conUnidad(b.cantidad, e.unidad)}`;
-
-/** «−3 de Carne de pastor · Se rompió. Queda en tu turno.» (the web's toast). */
-export function avisoHecho(b: Borrador, e: Existencia): string {
-  const signo = b.tipo === 'Merma' ? '−' : '+';
-  const motivo = b.tipo === 'Merma' && b.motivo ? ` · ${b.motivo}` : '';
-  return `${signo}${conUnidad(b.cantidad, e.unidad)} de ${e.nombre}${motivo}. Queda en tu turno.`;
+/** The write, or null while the sheet is not ready. */
+export function payload(b: Borrador, e: Existencia): NuevoMovimientoVivo | null {
+  const n = cantidadDe(b);
+  if (n === null || !listo(b, e)) return null;
+  return {
+    tipo: b.tipo,
+    existenciaId: e.id,
+    cantidad: n,
+    detalle: b.tipo === 'Merma' ? (b.motivo ?? '') : '',
+  };
 }

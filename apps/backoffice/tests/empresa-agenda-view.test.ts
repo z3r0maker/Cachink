@@ -23,8 +23,8 @@ describe('grupos', () => {
       ['Vencidas', 'Esta semana y la siguiente', 'Más adelante'],
     );
     const late = g[0]?.items.map((i) => i.key) ?? [];
-    assert.ok(late.includes('isr_mensual~2026-08'));
-    assert.ok(g[1]?.items.some((i) => i.key === 'isr_mensual~2026-09'));
+    assert.ok(late.includes('impuestos_mensual~2026-08'));
+    assert.ok(g[1]?.items.some((i) => i.key === 'impuestos_mensual~2026-09'));
   });
 
   it('leaves out what is done', () => {
@@ -32,7 +32,7 @@ describe('grupos', () => {
       vistas([
         {
           id: 'o',
-          plantillaId: 'isr_mensual',
+          plantillaId: 'impuestos_mensual',
           periodo: '2026-08',
           titulo: null,
           estado: 'pagada',
@@ -42,7 +42,7 @@ describe('grupos', () => {
       '2026-10-08',
     );
     assert.equal(
-      g.flatMap((x) => x.items).some((i) => i.key === 'isr_mensual~2026-08'),
+      g.flatMap((x) => x.items).some((i) => i.key === 'impuestos_mensual~2026-08'),
       false,
     );
   });
@@ -50,10 +50,10 @@ describe('grupos', () => {
   it('shows monthly periods only up to 60 days ahead', () => {
     const later = grupos(vistas(), '2026-10-08').flatMap((x) => x.items);
     assert.equal(
-      later.some((i) => i.key === 'isr_mensual~2026-11'),
+      later.some((i) => i.key === 'impuestos_mensual~2026-11'),
       false,
     ); // due 17 Dec, 70 days
-    assert.ok(later.some((i) => i.key === 'isr_mensual~2026-10')); // due 17 Nov, 40 days
+    assert.ok(later.some((i) => i.key === 'impuestos_mensual~2026-10')); // due 17 Nov, 40 days
   });
 
   it('has no groups when nothing is open', () => {
@@ -82,7 +82,7 @@ describe('the words', () => {
 
   it('names a review by what it is, and a declaration with nothing to pay', () => {
     const p = CATALOGO.find((t) => t.id === 'buzon');
-    const isr = CATALOGO.find((t) => t.id === 'isr_mensual');
+    const isr = CATALOGO.find((t) => t.id === 'impuestos_mensual');
     assert.equal(p && etiquetaEstado(p, 'presentada', false), 'Revisada');
     assert.equal(isr && etiquetaEstado(isr, 'pagada', true), 'Sin pago');
   });

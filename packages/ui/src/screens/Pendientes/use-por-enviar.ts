@@ -8,7 +8,7 @@
  * pushes.
  */
 import { useQuery } from '@tanstack/react-query';
-import { hhmmLocal, primerNombreDueno } from '@xangarro/caja';
+import { hhmmLocal, nombreDueno, primerNombreDueno } from '@xangarro/caja';
 import type { RegistroEnCola, RechazoVisto } from '@xangarro/caja/pendientes';
 import { describeRechazado, faseTelefono, type FaseCola } from '@xangarro/caja/pendientes';
 import { SYNC_CONFIG_KEYS, unsentRows } from '@xangarro/sync';
@@ -51,8 +51,12 @@ export function porEnviarKey(businessId: unknown): readonly unknown[] {
   return [...cajaKeys.byBusiness(businessId as never), 'por-enviar'];
 }
 
-/** The queue rows, one query under the caja's family. */
-function useCola() {
+/**
+ * The queue rows, one query under the caja's family. Keyed on what a run
+ * changes too (the unsent count, the last send): a push that pulls nothing
+ * invalidates no caja query, and the list kept rows already sent (R3).
+ */
+function useCola(unsent: number, ultima: string | null) {
   const businessId = useCurrentBusinessId();
   const db = useDatabase();
   const repos = {
@@ -68,7 +72,8 @@ function useCola() {
     respuestas: useRespuestasOperadorRepository(),
   };
   return useQuery({
-    queryKey: [...porEnviarKey(businessId), 'cola'],
+    queryKey: [...porEnviarKey(businessId), 'cola', unsent, ultima],
+    placeholderData: (previo) => previo,
     enabled: businessId !== null,
     queryFn: async () => leerCola(repos, await unsentRows(db)),
   });
@@ -77,10 +82,10 @@ function useCola() {
 export function usePorEnviar(): PorEnviarVivo {
   const appConfig = useAppConfigRepository();
   const { state: sync, syncNow, listRejected, requeue } = useCloudSync();
-  const cola = useCola();
+  const cola = useCola(sync.counts.unsent, sync.lastSyncAt);
   const rechazados = useQuery({
     queryKey: [...CLOUD_SYNC_QUERY_KEY, 'rechazados', 'por-enviar'],
-    queryFn: async () => (await listRejected()).map((r) => describeRechazado(r, r.row)),
+    queryFn: () => listRejected(),
   });
   const dueno = useQuery({
     queryKey: ['por-enviar', 'dueno'],
@@ -88,7 +93,10 @@ export function usePorEnviar(): PorEnviarVivo {
   });
 
   const filas = cola.data ?? [];
-  const negadas = rechazados.data ?? [];
+  // Said with the owner's name, so the hint reads «Pídele a Pedro…» (R5).
+  const negadas = (rechazados.data ?? []).map((r) =>
+    describeRechazado(r, r.row, nombreDueno(dueno.data ?? null)),
+  );
   return {
     state: cola.isError
       ? 'error'

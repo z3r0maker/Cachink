@@ -96,6 +96,19 @@ describe('AvisosScreen · la respuesta', () => {
     );
   });
 
+  it('offline, the reply is saved and says it reaches Pedro with the signal (R6)', async () => {
+    const { vivo } = montar({ sinInternet: true });
+    tap('aviso-responder-corte');
+    escribir('responder-texto', 'Salió un vale de la caja y no lo registré.');
+    tap('responder-enviar');
+    await waitFor(() => expect(vivo.responder).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('avisos-toast')).toBeInTheDocument());
+    expect(screen.getByTestId('avisos-toast').textContent).toContain('Respuesta guardada');
+    expect(screen.getByTestId('avisos-toast').textContent).toContain(
+      'Tu respuesta se guardó. Le llega a Pedro cuando vuelva la señal.',
+    );
+  });
+
   it('a quick answer fills the box and sends in one more tap', async () => {
     const { vivo } = montar();
     tap('aviso-responder-corte');
@@ -147,8 +160,9 @@ describe('AvisosScreen · la respuesta', () => {
 describe('AvisosScreen · estados', () => {
   const avisos = (xs: readonly Aviso[]): AvisosData => ({ dueno: 'Pedro', avisos: xs });
 
-  it('sin-avisos: nothing from Pedro nor from the caja', () => {
+  it('sin-avisos: Don, nothing from Pedro nor from the caja (RvPrimerUso)', () => {
     montar({ state: 'sin-avisos', data: avisos([]) });
+    expect(screen.getByTestId('don-ayuda')).toBeInTheDocument();
     expect(screen.getByTestId('avisos-vacio').textContent).toContain('Nada por leer');
     expect(screen.getByTestId('avisos-vacio').textContent).toContain(
       'Ni mensajes de Pedro ni avisos de tu caja.',
@@ -166,6 +180,14 @@ describe('AvisosScreen · estados', () => {
     expect(screen.getByTestId('avisos-error').textContent).toContain('No pudimos leer tus avisos');
     fireEvent.click(screen.getByTestId('error-state-retry'));
     expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('an empty owner tab: Don says Pedro has written nothing new', () => {
+    montar({ data: avisos(AVISOS_FIXTURE.avisos.filter((a) => a.grupo === 'caja')) });
+    expect(screen.getByTestId('don-ayuda')).toBeInTheDocument();
+    expect(screen.getByTestId('avisos-vacio').textContent).toContain(
+      'Pedro no te ha escrito nada nuevo.',
+    );
   });
 
   it('an empty tab says who has not written', () => {

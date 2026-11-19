@@ -1,0 +1,29 @@
+# Types the owner's correo on Vincular's typed path and puts the keyboard
+# away. Precondition: «Escribe el código» is open.
+#
+# Enter, not hideKeyboard: on the iPhone SE the keyboard covers the code
+# boxes, and the next tap on `activation-code` landed on a key and typed the
+# code into the correo. The field has no submit handler, so Enter only closes
+# the keyboard (blurOnSubmit).
+#
+# Env: EMAIL (optional, the mock's owner by default).
+appId: mx.xangarro.mobile
+---
+# A caller that scrolled down to the aviso (activation.yaml) has taken the
+# correo off the top of a short phone; a tap there types into nothing.
+- scrollUntilVisible:
+    element:
+      id: 'activation-email'
+    direction: UP
+    timeout: 5000
+# A tap on a scroll still coasting only stops it (iOS): nothing gets focus.
+- waitForAnimationToEnd
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
+- tapOn:
+    id: 'activation-email'
+    point: '95%,50%'
+- eraseText: 60
+- inputText: ${EMAIL || 'dueno@tacoslaesquina.mx'}
+- pressKey: Enter
+# A missed tap types into nothing; fail here, not at «Conectar esta caja».
+- assertNotVisible: '.*Falta el correo del dueño.*'

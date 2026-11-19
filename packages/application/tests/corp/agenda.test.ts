@@ -16,6 +16,7 @@ import {
   guardarInscripcion,
   InscripcionFuturaError,
   marcarObligacion,
+  SePagaDesdeImpuestosError,
   subirEvidencia,
 } from '../../src/corp/index.js';
 import { FakeAgenda, FakeDocumentos } from './fake-agenda.js';
@@ -26,10 +27,11 @@ const pdf = new Uint8Array([37, 80, 68, 70]);
 
 const deps = () => ({ agenda: new FakeAgenda(), documentos: new FakeDocumentos(), sha256 });
 
+// The annual declaration: the monthly one is paid from Impuestos (E-13).
 const subir = (d: ReturnType<typeof deps>, tipo: 'acuse' | 'comprobante_pago') =>
   subirEvidencia(d, {
-    plantillaId: 'isr_mensual',
-    periodo: '2026-09',
+    plantillaId: 'declaracion_anual',
+    periodo: '2026',
     tipo,
     nombre: `${tipo}.pdf`,
     mime: 'application/pdf',
@@ -40,8 +42,8 @@ const subir = (d: ReturnType<typeof deps>, tipo: 'acuse' | 'comprobante_pago') =
 
 const marcar = (d: ReturnType<typeof deps>, nuevo: 'presentada' | 'pagada', sinPago = false) =>
   marcarObligacion(d, {
-    plantillaId: 'isr_mensual',
-    periodo: '2026-09',
+    plantillaId: 'declaracion_anual',
+    periodo: '2026',
     nuevo,
     sinPago,
     founderId: 'f1',
@@ -62,7 +64,7 @@ describe('agendaDe', () => {
       guardadas: await d.agenda.obligaciones(),
       hasta: '2026-11-30',
     });
-    const isr = lista.find((o) => o.plantilla.id === 'isr_mensual');
+    const isr = lista.find((o) => o.plantilla.id === 'impuestos_mensual');
     assert.deepEqual(
       [isr?.periodo, isr?.vence, isr?.estado],
       ['2026-09', '2026-10-19', 'pendiente'],
@@ -92,6 +94,19 @@ describe('the evidence rule', () => {
     assert.equal(d.documentos.docs[0]?.retenerHasta, '2031-10-08');
   });
 
+  it('leaves paying the monthly declaration to Impuestos, which posts it (E-13)', async () => {
+    await assert.rejects(
+      marcarObligacion(deps(), {
+        plantillaId: 'impuestos_mensual',
+        periodo: '2026-09',
+        nuevo: 'pagada',
+        sinPago: true,
+        founderId: 'f1',
+      }),
+      SePagaDesdeImpuestosError,
+    );
+  });
+
   it('refuses presentada without the acuse', async () => {
     await assert.rejects(marcar(deps(), 'presentada'), EvidenciaFaltanteError);
   });
@@ -108,7 +123,7 @@ describe('the evidence rule', () => {
     const d = deps();
     await assert.rejects(
       marcarObligacion(d, {
-        plantillaId: 'isr_mensual',
+        plantillaId: 'impuestos_mensual',
         periodo: '2026-08',
         nuevo: 'presentada',
         sinPago: false,
@@ -132,7 +147,7 @@ describe('the evidence rule', () => {
     const d = deps();
     await assert.rejects(
       subirEvidencia(d, {
-        plantillaId: 'isr_mensual',
+        plantillaId: 'impuestos_mensual',
         periodo: '2026-09',
         tipo: 'acuse',
         nombre: 'x.exe',
@@ -166,7 +181,7 @@ describe('the registration and the one-offs', () => {
       FechaInvalidaError,
     );
     await assert.rejects(
-      agregarVencimiento(a, { ...base, plantillaId: 'isr_mensual', titulo: 'x' }),
+      agregarVencimiento(a, { ...base, plantillaId: 'impuestos_mensual', titulo: 'x' }),
       ObligacionDesconocidaError,
     );
   });

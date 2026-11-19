@@ -6,12 +6,13 @@ import {
   periodoValido,
   esRecurrente,
   ObligacionDesconocidaError,
+  PLANTILLA_IMPUESTOS,
   retenerHasta,
   type Paso,
   type TipoEvidencia,
 } from '@xangarro/domain/corp';
 
-import { ConceptoRequeridoError } from '../errors.js';
+import { ConceptoRequeridoError, SePagaDesdeImpuestosError } from '../errors.js';
 import { InscripcionFuturaError } from './errors.js';
 import { assertFecha, instanciaDe, plantillaVigente } from './obligacion.js';
 import type {
@@ -109,6 +110,9 @@ export async function marcarObligacion(
   input: MarcarInput,
 ): Promise<ObligacionGuardada> {
   const p = plantillaVigente(input.plantillaId);
+  // Its payment posts to the ledger: only Impuestos' «Marcar como pagado» does both (E-13).
+  if (p.id === PLANTILLA_IMPUESTOS && input.nuevo === 'pagada')
+    throw new SePagaDesdeImpuestosError();
   const instancia = await instanciaDe(deps.agenda, p, input.periodo, input.founderId);
   const docs = await deps.documentos.porObligacion(instancia.id);
   const sinPago = input.nuevo === 'pagada' && input.sinPago;

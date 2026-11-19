@@ -1,58 +1,35 @@
 # Store-screenshot helper: one «Llegó mercancía» for ${PRODUCTO} × ${CANTIDAD}
-# (${BUSCAR}: a short, accent-free piece of the name; the simulator keyboard
-# drops letters from a long one),
-# from the Inventario screen (so the shelves in the store shots don't read
-# «Quedan 0»: the mock seeds a catalogue with no inventory movements).
+# (${ID}: the mock's product id, the row's `inventario-fila-<id>`), from the
+# Inventario screen (so the shelves in the store shots don't read «Quedan 0»:
+# the mock seeds a catalogue with no inventory movements).
 #
 # Precondition: on Inventario (mobile-inventario), turno open.
 appId: mx.xangarro.mobile
 ---
-# Up first (the last entrada left the list scrolled), then down: «Entradas de
-# hoy» names every product stocked so far, and on a phone that card grows
-# until it pushes the button below the fold.
+# Up first: the last entrada left the list scrolled, and the row may be above.
 - scrollUntilVisible:
     element:
-      id: 'inventario-abrir-entrada'
+      id: 'inventario-fila-${ID}'
     direction: UP
     timeout: 5000
     optional: true
 - scrollUntilVisible:
     element:
-      id: 'inventario-abrir-entrada'
+      id: 'inventario-fila-${ID}'
     direction: DOWN
     timeout: 5000
 - tapOn:
-    id: 'inventario-abrir-entrada'
+    id: 'inventario-fila-${ID}'
 - extendedWaitUntil:
     visible:
-      id: 'llego-mercancia-sheet'
+      id: 'mover-sheet'
     timeout: 5000
-- tapOn:
-    id: 'mover-buscar'
-- inputText: ${BUSCAR}
-- waitForAnimationToEnd
-# Retype until the product itself shows: a dropped letter can match nothing
-# («pastorp») or another product («tra» finds Costra, not Torta). Each check
-# waits for the list to settle: an erased search lists every product for a
-# moment, the one sought among them.
-- repeat:
-    while:
-      notVisible:
-        id: 'mover-producto-${PRODUCTO}'
-    times: 5
-    commands:
-      - eraseText: 30
-      - inputText: ${BUSCAR}
-      - waitForAnimationToEnd
-# With the keyboard up, the first tap only closes it; the second selects (a
-# radio, so a repeated tap is harmless).
-- tapOn:
-    id: 'mover-producto-${PRODUCTO}'
 - waitForAnimationToEnd
 - tapOn:
-    id: 'mover-producto-${PRODUCTO}'
+    id: 'mover-tipo-Entrada'
 - tapOn:
     id: 'mover-cantidad'
+- eraseText: 6
 - inputText: ${CANTIDAD}
 # Phone: one drag in the sheet body dismisses the keyboard (keyboardDismissMode
 # on-drag), so the save footer is not under it. iPad: the sheet floats and

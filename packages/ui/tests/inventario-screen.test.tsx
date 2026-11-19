@@ -1,8 +1,9 @@
 /**
- * The Inventario screen (Track M, M-09) in its board states: the existencias
- * with their chips and regla, the turno's movements, the search, sin
- * productos, cargando y error — plus the entries that open the sheets and
- * the toast a recorded movement leaves. Fed the caja design fixture.
+ * The Inventario screen (Track M, M-09; RvInventario) in its board states:
+ * the existencias with their chips and regla, the turno's movements, the
+ * search, sin productos with Don, cargando y error — plus the one tap per
+ * row that opens the sheet on the kind its stock calls for, and the toast a
+ * recorded movement leaves. Fed the caja design fixture.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { within } from '@testing-library/react';
@@ -17,17 +18,19 @@ const DATA = INVENTARIO_FIXTURE;
 
 function montar(over: Partial<Parameters<typeof InventarioScreen>[0]> = {}) {
   const registrar = vi.fn(() => Promise.resolve());
+  const onNuevoProducto = vi.fn();
   renderWithProviders(
     <InventarioScreen
       state="happy"
       data={DATA}
       dueno="Pedro"
       registrar={registrar}
+      onNuevoProducto={onNuevoProducto}
       onRetry={() => undefined}
       {...over}
     />,
   );
-  return { registrar };
+  return { registrar, onNuevoProducto };
 }
 
 const textoDe = (testID: string): string => (screen.getByTestId(testID).textContent ?? '').trim();
@@ -43,11 +46,11 @@ describe('InventarioScreen · existencias', () => {
     expect(textoDe('inventario-kpis')).toContain('Horchata y queso oaxaca');
   });
 
-  it('rows say the threshold with its unit, the chip and the count', () => {
+  it('rows say the aviso with its unit, the chip and the count with its unit', () => {
     montar();
     expect(screen.getByText('Carne de pastor')).toBeInTheDocument();
-    expect(screen.getByText('Umbral 15 · kg')).toBeInTheDocument();
-    expect(textoDe('inventario-cantidad-pastor')).toBe('8');
+    expect(screen.getByText('Aviso en 15 kg')).toBeInTheDocument();
+    expect(textoDe('inventario-cantidad-pastor')).toBe('8 kg');
     expect(screen.getAllByText('Reponer').length).toBe(4);
     expect(screen.getAllByText('Suficiente').length).toBe(6);
   });
@@ -109,14 +112,15 @@ describe('InventarioScreen · movimientos', () => {
 });
 
 describe('InventarioScreen · estados del tablero', () => {
-  it('sin productos: the owner has not stocked the catalogue yet', () => {
-    montar({ data: { ...DATA, existencias: [], movimientos: [] } });
-    expect(screen.getByText('Sin productos con existencias')).toBeInTheDocument();
+  it('sin productos: Don, one sentence and «Producto nuevo»', () => {
+    const { onNuevoProducto } = montar({ data: { ...DATA, existencias: [], movimientos: [] } });
+    expect(screen.getByText('Todavía no hay productos')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Cuando Pedro dé de alta el catálogo con sus existencias, aquí podrás registrar entradas y mermas.',
-      ),
+      screen.getByText('Da de alta lo que vendes y aquí verás cuánto te queda.'),
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('inventario-tabs-movimientos')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('inventario-sin-productos-cta'));
+    expect(onNuevoProducto).toHaveBeenCalled();
   });
 
   it('cargando: the spinner while the read lands', () => {
@@ -134,40 +138,42 @@ describe('InventarioScreen · estados del tablero', () => {
 });
 
 describe('InventarioScreen · las hojas y el toast', () => {
-  it('the row quick square opens the merma sheet with the product picked', () => {
+  it('one tap on a low row opens the sheet on «Llegó mercancía»', () => {
     montar();
-    fireEvent.click(screen.getAllByTestId('inventario-fila-merma')[0]!);
-    expect(screen.getByTestId('merma-sheet')).toBeInTheDocument();
-    expect(screen.getByTestId('mover-producto-Carne de pastor').getAttribute('aria-checked')).toBe(
-      'true',
-    );
+    fireEvent.click(screen.getByTestId('inventario-fila-pastor'));
+    expect(screen.getByTestId('mover-sheet')).toBeInTheDocument();
+    expect(screen.getByTestId('mover-tipo-Entrada').getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByText('Hay 8 kg · aviso en 15 kg')).toBeInTheDocument();
   });
 
-  it('the labelled pair opens without a product picked', () => {
+  it('one tap on a row with enough opens it on the merma', () => {
     montar();
-    fireEvent.click(screen.getByTestId('inventario-abrir-entrada'));
-    expect(screen.getByTestId('llego-mercancia-sheet')).toBeInTheDocument();
-    expect(screen.getByTestId('mover-producto-Carne de pastor').getAttribute('aria-checked')).toBe(
-      'false',
-    );
+    fireEvent.click(screen.getByTestId('inventario-fila-horchata'));
+    expect(screen.getByTestId('mover-tipo-Merma').getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('has no entries without a product: every move starts on its row', () => {
+    montar();
+    expect(screen.queryByTestId('inventario-abrir-entrada')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inventario-abrir-merma')).not.toBeInTheDocument();
   });
 
   it('reponer (Inicio Para hoy) opens the llegada sheet on that product', () => {
-    montar({ reponer: 'pastor' });
-    expect(screen.getByTestId('llego-mercancia-sheet')).toBeInTheDocument();
-    expect(screen.getByTestId('mover-producto-Carne de pastor').getAttribute('aria-checked')).toBe(
-      'true',
-    );
+    montar({ reponer: 'horchata' });
+    expect(screen.getByTestId('mover-sheet')).toBeInTheDocument();
+    expect(screen.getByTestId('mover-tipo-Entrada').getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByText('Hay 9 litros · aviso en 6 litros')).toBeInTheDocument();
   });
 
   it('a recorded merma closes the sheet and leaves the toast with its motivo', async () => {
     const { registrar } = montar();
-    fireEvent.click(screen.getAllByTestId('inventario-fila-merma')[0]!);
+    fireEvent.click(screen.getByTestId('inventario-fila-pastor'));
+    fireEvent.click(screen.getByTestId('mover-tipo-Merma'));
     fireEvent.change(screen.getByTestId('mover-cantidad'), { target: { value: '3' } });
     fireEvent.click(screen.getByTestId('mover-motivo-Se rompió'));
     fireEvent.click(screen.getByTestId('mover-guardar'));
     await waitFor(() => expect(registrar).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByTestId('merma-sheet')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('mover-sheet')).not.toBeInTheDocument());
     expect(textoDe('mov-toast')).toContain('Merma registrada');
     expect(textoDe('mov-toast')).toContain('−3 de Carne de pastor · Se rompió. Queda en tu turno.');
     fireEvent.click(screen.getByTestId('mov-toast-entendido'));

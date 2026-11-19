@@ -35,6 +35,7 @@ const COLUMNAS = {
   pago: pagoPropio.fecha,
   creditoOriginal: original.metodoPago,
   pagoOriginal: pagoOriginal.fecha,
+  deducible: entries.deducible,
 } as const;
 
 interface Fila {
@@ -49,6 +50,7 @@ interface Fila {
   readonly pago: string | null;
   readonly creditoOriginal: string | null;
   readonly pagoOriginal: string | null;
+  readonly deducible: boolean | null;
 }
 
 function fechaFlujo(f: Fila): string | null {
@@ -72,6 +74,7 @@ function toImporte(f: Fila): ImporteResultados {
     importe: importeDeLinea(f.cuenta, f.debe, f.haber),
     fecha: f.fecha,
     fechaFlujo: fechaFlujo(f),
+    deducible: f.deducible,
   };
 }
 

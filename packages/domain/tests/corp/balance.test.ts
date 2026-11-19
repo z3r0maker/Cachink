@@ -113,6 +113,7 @@ describe('cuentasDelGrupo', () => {
       'stripe_por_depositar',
       'iva_acreditable',
       'iva_por_acreditar',
+      'isr_pagos_provisionales',
     ]);
     assert.equal(cuentasDelGrupo('pasivo').length, 6);
   });

@@ -1,11 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import {
-  agregarCsd,
-  fijarInscripcion,
-  inscripcionPasada,
-  presentarConAcuse,
-} from './empresa-agenda';
+import { formatMoney } from '@xangarro/domain';
+
+import { agregarCsd, fijarInscripcion, inscripcionPasada } from './empresa-agenda';
+import { capturarDeclaracion, esperadoDe, sembrarMesFiscal, subirPapel } from './empresa-impuestos';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
 import { stamp } from './consola-fixture';
@@ -14,7 +12,7 @@ import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { cuentaDelBalance, MES_BALANCE, sembrarBalance } from './empresa-balance';
 import { asegurarTopes, hoyEnMexico, quitarTopes, sembrarCobroDelAnio } from './empresa-limites';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
-import { nuevoServicioPorUso, registrarCargoDe } from './empresa-servicios';
+import { mesAnterior, nuevoServicioPorUso, registrarCargoDe } from './empresa-servicios';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
@@ -237,21 +235,35 @@ test('a founder files an obligation with its acuse and adds an expiry', async ({
     'RESICO persona moral está relevada',
   );
 
-  const tarde = page.getByTestId('obligacion').filter({ hasText: 'ISR provisional' }).first();
+  const tarde = page.getByTestId('obligacion').filter({ hasText: 'ISR e IVA' }).first();
   await expect(tarde).toContainText('vencida hace');
   await tarde.getByRole('link').click();
   await expect(
-    page.getByRole('heading', { name: `ISR provisional de ${inscripcion.mes}`, level: 1 }),
+    page.getByRole('heading', { name: `ISR e IVA de ${inscripcion.mes}`, level: 1 }),
   ).toBeVisible();
-  await presentarConAcuse(page);
+  // The monthly declaration is filed from Impuestos (E-13): this one en ceros, with its acuse.
+  await page.getByRole('link', { name: 'Declarar y pagar en Impuestos' }).click();
+  await expect(page).toHaveURL(/\/empresa\/impuestos\?mes=\d{4}-\d{2}$/);
+  await capturarDeclaracion(page, { isr: 0n, iva: 0n, retencionIsr: 0n, retencionIva: 0n }, false);
+  await subirPapel(page, 'Acuse de la declaración', 'acuse-e2e.pdf');
+  // «Ver» serves the very bytes that were kept.
+  const ver = page
+    .getByTestId('papel')
+    .filter({ hasText: 'Acuse' })
+    .getByRole('link', { name: 'Ver' });
+  const res = await page.request.get((await ver.getAttribute('href')) ?? '');
+  expect(res.status()).toBe(200);
+  expect((await res.body()).toString('utf8')).toContain('de prueba');
+  await page.getByRole('button', { name: 'Marcar como pagado' }).click();
+  await expect(page.getByTestId('impuestos-estado')).toHaveText('Presentada en ceros');
 
-  await page.getByRole('link', { name: 'Volver a la agenda' }).click();
+  await page.goto('/empresa/agenda');
   await agregarCsd(page);
   // The proof shows on Evidencias too.
   await page.getByRole('link', { name: 'Evidencias' }).click();
-  await expect(
-    page.getByTestId('fila-evidencia').filter({ hasText: 'ISR provisional' }),
-  ).toContainText('✓ Acuse');
+  await expect(page.getByTestId('fila-evidencia').filter({ hasText: 'ISR e IVA' })).toContainText(
+    '✓ Acuse',
+  );
 });
 
 test('a founder files papers, versions one and attaches a proof to a movement', async ({
@@ -262,8 +274,8 @@ test('a founder files papers, versions one and attaches a proof to a movement', 
   await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
   // The acuse filed on the Agenda is here, linked to its obligation.
   await expect(
-    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
-  ).toContainText('Agenda · ISR provisional');
+    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR e IVA' }),
+  ).toContainText('Agenda · ISR e IVA');
   await subirActa(page);
   await adjuntarComprobante(page);
 });
@@ -422,7 +434,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   ).toBeVisible();
   await abrirPestana(page, 'Expediente', /\/empresa\/expediente$/);
   await expect(
-    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR provisional' }),
+    page.getByTestId('documento-expediente').filter({ hasText: 'Acuse · ISR e IVA' }),
   ).toBeVisible();
   await abrirPestana(page, 'Corporativo', /\/empresa\/corporativo$/);
   await expect(page.getByTestId('tenencia-1')).toContainText('Fundador 1 · Socia E2E');
@@ -449,6 +461,7 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   await expect(secciones(page, 'Resultados').getByRole('link')).toHaveText([
     'Estado de resultados',
     'Balance',
+    'Impuestos',
   ]);
   await abrirPestana(page, 'Balance', /\/empresa\/balance$/, 'Resultados');
 
@@ -555,6 +568,59 @@ test('a founder reads a balance sheet that balances, opens an account and walks 
   await expect(
     page.getByRole('heading', { name: 'Aún no hay movimientos al 30 de abril' }),
   ).toBeVisible();
+});
+
+test('a founder checks a month’s taxes against the contador, then files and pays them (E-13)', async ({
+  page,
+}) => {
+  const mes = mesAnterior();
+  await sembrarMesFiscal(mes);
+  const e = await esperadoDe(mes);
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa/resultados');
+  await abrirPestana(page, 'Impuestos', /\/empresa\/impuestos$/, 'Resultados');
+
+  // Real data: the ledger's month reaches the total and the cards.
+  await expect(page.getByTestId('impuestos-total')).toHaveText(formatMoney(e.total));
+  await expect(page.getByTestId('tarjeta-iva')).toContainText(formatMoney(e.iva.trasladado));
+  await expect(page.getByTestId('tarjeta-retenciones')).toContainText(
+    formatMoney(e.retenciones.total),
+  );
+
+  // The contador declared $46.00 more IVA: flagged, never blocked.
+  const cifras = {
+    isr: e.isr.aPagar,
+    iva: e.iva.aPagar,
+    retencionIsr: e.retenciones.isr,
+    retencionIva: e.retenciones.iva,
+  };
+  await capturarDeclaracion(page, { ...cifras, iva: cifras.iva + 46_00n }, true);
+  await expect(page.getByTestId('impuestos-estado')).toHaveText('Revisa con el contador');
+  await expect(
+    page.getByText('Revisa con el contador: el IVA no coincide por $46.00'),
+  ).toBeVisible();
+  await expect(page.getByTestId('tarjeta-iva').getByTestId('diferencia')).toHaveText('+$46.00');
+
+  // «Marcar como pagado» waits for the acuse, then for the comprobante.
+  const pagar = page.getByRole('button', { name: 'Marcar como pagado' });
+  await expect(pagar).toBeDisabled();
+  await subirPapel(page, 'Acuse de la declaración', 'acuse-impuestos.pdf');
+  await capturarDeclaracion(page, cifras, false);
+  await expect(page.getByTestId('impuestos-estado')).toHaveText('Presentada · falta el pago');
+  await expect(pagar).toBeDisabled();
+  await expect(page.getByText('Sube el comprobante para marcarla pagada.')).toBeVisible();
+  await subirPapel(page, 'Comprobante de pago', 'spei-impuestos.pdf');
+  await pagar.click();
+  await expect(page.getByTestId('impuestos-estado')).toHaveText('Pagado');
+
+  // The payment is a movement, and an old link finds the Agenda's «ISR e IVA», paid.
+  await page.getByRole('link', { name: 'Ver el pago en Movimientos' }).click();
+  await expect(
+    page.getByTestId('movimiento').filter({ hasText: 'ISR e IVA de' }).first(),
+  ).toContainText(formatMoney(e.total));
+  await page.goto(`/empresa/agenda/isr_mensual/${mes}`);
+  await expect(page).toHaveURL(new RegExp(`/empresa/agenda/impuestos_mensual/${mes}$`));
+  await expect(page.getByTestId('estado')).toHaveText('Pagada');
 });
 
 test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-16)', async ({

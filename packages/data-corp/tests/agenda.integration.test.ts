@@ -50,7 +50,7 @@ describe('corp agenda storage', () => {
 
   const marcar = (nuevo: 'presentada' | 'pagada') =>
     marcarObligacion(deps(), {
-      plantillaId: 'iva_mensual',
+      plantillaId: 'impuestos_mensual',
       periodo: PERIODO,
       nuevo,
       sinPago: false,
@@ -61,7 +61,7 @@ describe('corp agenda storage', () => {
     await assert.rejects(marcar('presentada'), EvidenciaFaltanteError);
     const bytes = new TextEncoder().encode('%PDF-1.7 acuse');
     const doc = await subirEvidencia(deps(), {
-      plantillaId: 'iva_mensual',
+      plantillaId: 'impuestos_mensual',
       periodo: PERIODO,
       tipo: 'acuse',
       nombre: 'acuse-iva.pdf',

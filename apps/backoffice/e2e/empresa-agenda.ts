@@ -1,8 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 
 /**
- * E-04's steps for empresa.spec.ts: the SAT registration, filing an obligation
- * with its acuse, closing it «sin pago», and a dated one-off.
+ * E-04's steps for empresa.spec.ts: the SAT registration and a dated one-off.
+ * The monthly declaration is filed from Impuestos (`empresa-impuestos.ts`).
  */
 const hoy = (): string =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
@@ -27,34 +27,6 @@ export async function fijarInscripcion(page: Page, fecha: string): Promise<void>
   await page.getByLabel('Fecha de inscripción al RFC').fill(fecha);
   await page.getByRole('button', { name: 'Calcular la agenda' }).click();
   await expect(page.getByRole('heading', { name: 'Vencidas' })).toBeVisible();
-}
-
-const PDF = Buffer.from('%PDF-1.4\n% acuse de prueba\n%%EOF\n');
-
-export async function presentarConAcuse(page: Page): Promise<void> {
-  const presentar = page.getByRole('button', { name: 'Marcar presentada' });
-  await expect(presentar).toBeDisabled();
-  await expect(page.getByText('Para marcarla presentada, adjunta el acuse.')).toBeVisible();
-
-  await page.getByText('Acuse', { exact: true }).click();
-  await page
-    .getByLabel('Archivo')
-    .setInputFiles({ name: 'acuse-e2e.pdf', mimeType: 'application/pdf', buffer: PDF });
-  await page.getByRole('button', { name: 'Subir documento' }).click();
-  const doc = page.getByTestId('documento').filter({ hasText: 'acuse-e2e.pdf' });
-  await expect(doc).toContainText('Acuse');
-
-  // «Ver» serves the very bytes that were kept.
-  const href = await doc.getByRole('link', { name: 'Ver' }).getAttribute('href');
-  const res = await page.request.get(href ?? '');
-  expect(res.status()).toBe(200);
-  expect((await res.body()).toString('utf8')).toContain('acuse de prueba');
-
-  await presentar.click();
-  await expect(page.getByTestId('estado')).toHaveText('Presentada');
-  await expect(page.getByRole('button', { name: 'Marcar pagada' })).toBeDisabled();
-  await page.getByRole('button', { name: 'No hubo pago' }).click();
-  await expect(page.getByTestId('estado')).toHaveText('Sin pago');
 }
 
 export async function agregarCsd(page: Page): Promise<void> {
