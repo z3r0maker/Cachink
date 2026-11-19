@@ -32,6 +32,8 @@ export interface RecurrentePara {
 
 /** A closed turno of this caja (the current one too, once closed), newest first. */
 export interface CortePara {
+  /** The turno's id: two cortes can share a day once another turno opens (ADR-147). */
+  readonly id: string;
   readonly fecha: string;
   /** Counted minus expected; positive is a surplus. */
   readonly diferenciaCentavos: string;

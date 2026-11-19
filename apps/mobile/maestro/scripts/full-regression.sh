@@ -300,6 +300,7 @@ run_curated_suite() {
     caja-cierre-discrepancia
     cierre-faltante
     cierre-sobrante
+    cierre-otro-turno
     cobrar-efectivo-falta
     cobrar-ticket-largo
     cobrar-ultima-pieza

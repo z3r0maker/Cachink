@@ -45,6 +45,7 @@ export function useColaCierre(): ColaCierre {
     sinRed: state.phase === 'offline',
     enviando: state.phase === 'syncing',
     onReintentar: syncNow,
+    ultimoEnvio: state.lastSyncAt,
   };
 }
 

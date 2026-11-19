@@ -65,6 +65,13 @@ appId: mx.xangarro.mobile
     timeout: 10000
 - tapOn:
     id: 'conteo-mas-billete-500'
+# Step 1 ends at its fixed foot (M-17): «Ver resultado» shows the esperado.
+- tapOn:
+    id: 'cierre-ver-resultado'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-paso-resultado'
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: 'cierre-cerrar-turno'

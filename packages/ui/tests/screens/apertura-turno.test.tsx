@@ -18,13 +18,14 @@ const h = vi.hoisted(() => ({
   userId: 'usuario-1' as string | null,
   error: null as Error | null,
   mutate: vi.fn(),
+  ultimo: null as null | Record<string, unknown>,
 }));
 
 vi.mock('../../src/hooks/use-abrir-caja', () => ({
   useAbrirCaja: () => ({ isPending: false, error: h.error, mutate: h.mutate }),
 }));
 vi.mock('../../src/app/repository-provider', () => ({
-  useCajaTurnosRepository: () => ({ findLatest: async () => null }),
+  useCajaTurnosRepository: () => ({ findLatest: async () => h.ultimo }),
 }));
 vi.mock('../../src/app-config/use-app-config', () => ({
   useCurrentBusinessId: () => 'negocio-1',
@@ -66,6 +67,7 @@ beforeEach(() => {
   h.userId = 'usuario-1';
   h.error = null;
   h.mutate.mockReset();
+  h.ultimo = null;
 });
 
 describe('CajaGateBanner', () => {
@@ -117,5 +119,41 @@ describe('useAperturaTurno', () => {
     tap('caja-abrir-submit');
     expect(h.mutate).not.toHaveBeenCalled();
     expect(onAbierto).not.toHaveBeenCalled();
+  });
+});
+
+/** The route's hecho: «Abrir otro turno» opens the same sheet as «¿Con cuánto sigues?». */
+function DespuesDelCierre(): ReactElement {
+  const apertura = useAperturaTurno();
+  return (
+    <>
+      <button type="button" data-testid="otro" onClick={apertura.abrirOtro} />
+      {apertura.hoja}
+    </>
+  );
+}
+
+describe('useAperturaTurno · otro turno (ADR-147)', () => {
+  it('asks «¿Con cuánto sigues?» with the counted cash already in', async () => {
+    h.ultimo = {
+      fecha: new Date().toISOString().slice(0, 10),
+      cierreAt: new Date().toISOString(),
+      montoCierreCentavos: 271_000n,
+    };
+    renderWithProviders(
+      <QueryClientProvider client={new QueryClient()}>
+        <DespuesDelCierre />
+      </QueryClientProvider>,
+    );
+    tap('otro');
+    expect(screen.getByTestId('abrir-caja-modal')).toHaveTextContent('¿Con cuánto sigues, Ana?');
+    expect(screen.getByTestId('abrir-caja-modal')).toHaveTextContent(
+      'Si ya entregaste efectivo, cambia la cantidad.',
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('caja-abrir-submit')).toHaveTextContent(
+        'Abrir turno con $2,710.00',
+      ),
+    );
   });
 });

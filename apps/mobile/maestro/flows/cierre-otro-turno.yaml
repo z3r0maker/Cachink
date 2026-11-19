@@ -1,0 +1,73 @@
+# Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed
+# turno never reopens; to keep selling, the hecho's «Abrir otro turno» opens
+# the fondo sheet right there as «¿Con cuánto sigues?» with the counted cash
+# suggested, and the new turno lands on Inicio, open. The same operator can
+# do this as often as the day needs.
+#
+# Precondition: activated device, turno open with the $500 fondo
+# (shared/ensure-caja-open.yaml) and nothing else captured, so the expected
+# cash is exactly the fondo.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'turno-cerrar-mi-turno'
+    timeout: 10000
+- tapOn:
+    id: 'turno-cerrar-mi-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-cierre'
+    timeout: 10000
+
+# Count the $500 and close: it cuadra.
+- tapOn:
+    id: 'conteo-mas-billete-500'
+- tapOn:
+    id: 'cierre-ver-resultado'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-paso-resultado'
+    timeout: 10000
+- tapOn:
+    id: 'cierre-cerrar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-hecho'
+    timeout: 10000
+
+# «Abrir otro turno»: the fondo sheet over the hecho, the counted $500 in.
+- tapOn:
+    id: 'cierre-otro-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 10000
+- assertVisible: '.*Con cuánto sigues.*'
+- assertVisible: '.*Si ya entregaste efectivo, cambia la cantidad\..*'
+- extendedWaitUntil:
+    visible: '.*Abrir turno con \$500\.00.*'
+    timeout: 10000
+- tapOn:
+    id: 'caja-abrir-submit'
+
+# Open again, on Inicio; Mi turno expects the new fondo.
+- extendedWaitUntil:
+    visible:
+      id: 'inicio-hero-listo'
+    timeout: 15000
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- extendedWaitUntil:
+    visible:
+      id: 'turno-hero'
+    timeout: 10000
+- assertVisible: '.*\$500\.00.*'

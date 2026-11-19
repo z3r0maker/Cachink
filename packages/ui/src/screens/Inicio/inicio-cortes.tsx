@@ -55,7 +55,7 @@ export function UltimosCortes(p: {
   return (
     <QuietPanel label={t('entrar.inicio.cortes')} action={accion} testID="inicio-cortes">
       {p.cortes.map((c) => (
-        <Fila key={c.etiqueta} c={c} />
+        <Fila key={c.id} c={c} />
       ))}
     </QuietPanel>
   );

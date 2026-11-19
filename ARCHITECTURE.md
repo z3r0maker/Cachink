@@ -185,6 +185,7 @@ Links to discussion, docs, prior art.
 | [144](#adr-144) | 2026-11-13 | The portal's E2E suite runs as two phases on three runners, and `portal-e2e` is the job that merges them | Accepted |
 | [145](#adr-145) | 2026-11-17 | OTA updates are code-signed, and the signing key is the owner's, outside the repo and outside EAS | Accepted |
 | [146](#adr-146) | 2026-11-18 | An abono carries the turno whose drawer received it, as a gasto does | Accepted |
+| [147](#adr-147) | 2026-11-18 | A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10550,3 +10551,52 @@ no abonos at all, so its «Efectivo esperado» disagreed with Mi turno as soon a
   those abonos from its expected cash. Before the first store release no register in the field has one.
 - The client's balance is untouched: an abono still belongs to the client (ADR-074).
 - Sync needs no wire change. The push and pull carry the domain schema, which now has the column.
+
+## ADR-147
+
+**Title:** A closed turno is final: to keep selling, the operator opens another turno, and the phone's close stops promising a cash handover
+
+**Date:** 2026-11-18
+
+**Status:** Accepted — M-17; owner decisions of 2026-11-18 (canvas page «Cierre de turno», board `MvCierreFlujo`)
+
+**Context**
+
+The owner tested TestFlight build 1.0.0 (2) and asked whether a turno can be reopened after its close. Today it
+cannot: `CerrarCajaUseCase` refuses a turno whose `cierreAt` is set, and nothing clears it. `AbrirCajaUseCase`
+refuses only a second open turno **for the same user**, so the same operator can already close and open again
+with no daily limit, and neither SQLite nor Postgres has a uniqueness rule on open turnos. Meanwhile a closed
+corte travels: the operator may have sent it by WhatsApp, the owner reads it in Cortes de turno and may mark it
+«Aclarado» or ask for an aclaración (`mensajes_operador.caja_turno_id`), a «gasto no registrado» close has already
+created its egreso, and ADR-074 §4 writes the count once. The phone's done screen also asked the operator to
+confirm handing the cash over and said the owner would confirm it in the portal; the portal has no such
+confirmation and nothing was stored.
+
+**Decision**
+
+1. **A closed turno never reopens.** Its count, esperado, difference, reason and egreso stay as written. No use
+   case, repository or sync path clears `cierreAt`.
+2. **Continuing is a new turno.** The closed screen offers «Abrir otro turno», which opens the fondo sheet with
+   the counted cash as the suggested fondo, editable. Any operator, any number of times a day, under the existing
+   rule of one open turno per user. The portal lists each turno as its own corte. No schema or wire change.
+3. **The cash handover is a reminder, not a record.** The phone's corte says «Guarda $X para los patrones»; the
+   confirm dialog and its promise about the portal are gone from the phone. A real, synced handover the owner
+   confirms is future work with its own design.
+4. **The phone's close calls the owner «los patrones»**, never a name (plural, so it fits any owner and no test
+   or English name shows on the drawer).
+
+**Alternatives considered**
+
+- *The owner approves a reopen in the portal; the same turno continues with a revision of its corte.* Rejected
+  for now: it needs a revision table, sync of the reopen and the portal's approval, and a corte already sent
+  would still disagree with the one kept.
+- *The operator reopens for a short window.* Rejected: a corte already sent stops being true, with the same
+  sync work.
+
+**Consequences**
+
+- The rule is enforced by what exists: `CerrarCajaUseCase`'s refusal and the absence of any reopen path. A test
+  pins close → open again for the same operator.
+- Open gap, not changed here: opening is checked per user while sales attach to the business's newest open
+  turno (`findOpenByBusiness`, ADR-071 §3), so two operators on one phone can each hold an open turno.
+- The web caja still shows its Entrega dialog; aligning it is a canvas round of its own.

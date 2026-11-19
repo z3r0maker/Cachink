@@ -33,6 +33,14 @@ appId: mx.xangarro.mobile
     id: 'conteo-mas-billete-200'
 
 # Falta, with the amount in the close button (cerrarLabel).
+# Step 1 ends at its fixed foot (M-17): «Ver resultado» shows the esperado.
+- tapOn:
+    id: 'cierre-ver-resultado'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-paso-resultado'
+    timeout: 10000
+
 - scrollUntilVisible:
     element:
       id: 'cierre-diferencia'

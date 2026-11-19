@@ -339,3 +339,24 @@ describe('helpers', () => {
     expect(partirSaludo('¡Buen día, Ana!')).toEqual(['¡Buen día, Ana!', null]);
   });
 });
+
+describe('cortesDe · two cortes the same day (ADR-147)', () => {
+  it('each corte keeps its turno id, so «Hoy · Caja 1» twice still lists two rows', () => {
+    const cortes = cortesDe([
+      turno({
+        id: 'T1',
+        fecha: '2026-05-14',
+        cierreAt: '2026-05-14T15:00:00.000Z',
+        diferenciaCentavos: 0n,
+      }),
+      turno({
+        id: 'T2',
+        fecha: '2026-05-14',
+        cierreAt: '2026-05-14T22:00:00.000Z',
+        diferenciaCentavos: -7_000n,
+      }),
+    ]);
+    expect(cortes.map((c) => c.id)).toEqual(['T2', 'T1']);
+    expect(new Set(cortes.map((c) => c.id)).size).toBe(2);
+  });
+});

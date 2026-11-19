@@ -23,6 +23,8 @@ export interface AbrirTurnoFlowProps {
   readonly onClose: () => void;
   /** After the turno opened and the sheet closed; not on «Ahorita no». */
   readonly onAbierto?: () => void;
+  /** Right after a close: the sheet's «¿Con cuánto sigues?» (ADR-147). */
+  readonly otro?: boolean;
 }
 
 /** The newest closed turno on this device, if any. */
@@ -52,6 +54,7 @@ function Abierta(props: AbrirTurnoFlowProps): ReactElement {
       nombre={operador ? primerNombreDe(operador.nombre) : null}
       ultimo={textoUltimo(t, ultimo, new Date())}
       sugerido={ultimo?.monto ?? null}
+      otro={props.otro === true}
       submitting={abrir.isPending}
       error={abrir.error ? abrir.error.message || t('entrar.abrirTurno.error') : null}
       onAbrir={(fondo) => {

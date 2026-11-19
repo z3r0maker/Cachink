@@ -208,7 +208,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 ## Regression Script Phases
 
 The demo/wizard phase ladder retired with its flows (A-16). `full-regression.sh`
-now runs the M-11 curated suite — 40 per-screen flows — in dependency
+now runs the M-11 curated suite — 41 per-screen flows — in dependency
 order, each on a FRESH entry state (the conditions every flow's contract was
 verified under: exact stock counts, exact cierre math, sin-turno screens; a
 turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
@@ -219,12 +219,12 @@ turno that accumulated other flows' ventas cannot «cuadrar»). The suite:
 | 4–8   | caja-abrir-cerrar, ventas-lista, venta-detalle-cancelar, comprobante-whatsapp, fiado-abono-recordar                                                                                          |
 | 9–10  | gastos-registrar, gastos-pagar-recurrente                                                                                                                                                    |
 | 11–18 | mi-turno, por-enviar, cancelaciones-nav, turno-cerrado-abrir, cierre-sin-turno, avisos-responder, inventario-llego-merma, esperado-tras-llegada                                              |
-| 19–22 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante                                                                                                                    |
-| 23–29 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
-| 30–31 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
-| 32–35 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
-| 36–37 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
-| 38–40 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
+| 19–23 | cierre-cuadra, caja-cierre-discrepancia, cierre-faltante, cierre-sobrante, cierre-otro-turno                                                                                                 |
+| 24–30 | cobrar-efectivo-falta, cobrar-ticket-largo, cobrar-ultima-pieza, cobrar-desde-inventario, venta-fiado-cancelar, interrupcion-matar-ticket, interrupcion-rotar-ticket (the caja's edge cases) |
+| 31–32 | sin-internet-cobrar, sin-internet-cierre (the mock down and up)                                                                                                                              |
+| 33–36 | plan-pago-pendiente, plan-vencido, entitlement-feature-gates, dispositivo-revocado (mock scenarios)                                                                                          |
+| 37–38 | settings-borrar (wipes and links again), settings-desvincular (leaves it unlinked)                                                                                                           |
+| 39–41 | activation-errors, activation, login-operator-pin (fresh entry)                                                                                                                              |
 
 Use `--dry-run` to print the list, `--device-class se|iphone|ipad` to pick
 the simulator (lib/device-resolve.sh pins the 26.5 twins).
@@ -233,7 +233,7 @@ the simulator (lib/device-resolve.sh pins the 26.5 twins).
 
 ## Flow Inventory (grouped by feature area)
 
-Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-nine `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
+Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `full-regression.sh` runs. The catalogue in `docs/testing/e2e-test-catalog.md` names the scenario each flow proves.
 
 ### Vincular y acceso
 
@@ -294,7 +294,8 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-nine
 | `caja-abrir-cerrar.yaml`           | activated | ✓     | Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old CajaContent flow — caja-status-card, blind-c                                                                                         |
 | `turno-cerrado-abrir.yaml`         | activated | ✓     | Turno cerrado (MvTurnoCerrado): Cobrar, Ventas and Mi turno each open the fondo sheet with one tap, «Ahorita no» stays put, and opening from Mi turno stays on Mi turno.                                         |
 | `cierre-sin-turno.yaml`            | activated | ✓     | Cierre with no turno (MvTurnoCerrado): nothing to close, «Abrir turno» opens the sheet there and the operator continues on Inicio.                                                                               |
-| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-09; boards MvCierre/MvCierreHecho): from Mi turno's «Cerrar mi turno», count the drawer by                                                                                         |
+| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's «Cerrar mi turno», step 1 counts the d                                                                                                   |
+| `cierre-otro-turno.yaml`           | activated | ✓     | Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed turno never reopens; to keep selling, the                                                                                               |
 | `cierre-faltante.yaml`             | activated | ✓     | Cierre con faltante (Track M, M-09): count short of the expected, the diferencia turns red, asks its motivo and names th                                                                                         |
 | `cierre-sobrante.yaml`             | activated | ✓     | Cierre con sobrante (M-09, J4-25): count over the expected, its own hint, a motivo still required, «Sobrante» with the motivo in its line.                                                                       |
 | `cobrar-efectivo-falta.yaml`       | activated | ✓     | Short cash (J4-06): $20 typed against $25 turns the card red «Todavía falta» and keeps «Cobrar» disabled; $30 pays, «Venta hecha» says «Pagó con $30.00».                                                        |
