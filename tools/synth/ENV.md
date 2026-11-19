@@ -1,7 +1,7 @@
 # Synth — ENV (Phase 0 output, S-00)
 
 How to bring up, seed and authenticate the app for Synth. Checked against `origin/main` on 2026-11-19. The
-decisions are in ADR-152 and the plan is `docs/plan/24-synth.md`.
+decisions are in ADR-153 and the plan is `docs/plan/24-synth.md`.
 
 ## 1. Bring up the portal
 

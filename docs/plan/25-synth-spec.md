@@ -1,6 +1,6 @@
 # Xangarro Synth — Especificación técnica (v2)
 
-> **Brief, no plan.** Es la especificación v2 del dueño, tal cual, como brief de diseño del track 24 (`24-synth.md`, ADR-152). Donde difieran, mandan §1 y §2 de `24-synth.md`: los hallazgos de la Fase 0 y las decisiones del dueño del 2026-11-19 resuelven todos los `VERIFICAR` de abajo.
+> **Brief, no plan.** Es la especificación v2 del dueño, tal cual, como brief de diseño del track 24 (`24-synth.md`, ADR-153). Donde difieran, mandan §1 y §2 de `24-synth.md`: los hallazgos de la Fase 0 y las decisiones del dueño del 2026-11-19 resuelven todos los `VERIFICAR` de abajo.
 
 Arnés de QA exploratorio y auditoría heurística con agentes LLM para la web de Xangarro, con una app interna (**Synth Studio**) para lanzar, observar y revisar las simulaciones.
 

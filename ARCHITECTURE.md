@@ -189,8 +189,8 @@ Links to discussion, docs, prior art.
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
-| [152](#adr-152) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
-| [153](#adr-153) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
+| [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
+| [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10798,7 +10798,7 @@ with the same name, so a duplicate code under another name goes through.
 - ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
   unused `MobileScannerHost` go.
 
-## ADR-152
+## ADR-153
 
 **Title:** Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate
 
@@ -10890,7 +10890,7 @@ process. `mintTenant()` and its row builders already exist under `apps/web/e2e/`
   hypothesis to validate with real people.
 - N-49 is closed as superseded. The `kind=explorador` inbox source is a later `S-` task, if ever.
 
-## ADR-153
+## ADR-154
 
 **Title:** Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product
 
@@ -10907,7 +10907,7 @@ The owner asked for Synth Studio to feel like a control room: see each persona r
 progress, remaining time and cost at a glance, and have moments that land (a finding arriving, a report
 revealing its numbers). Five motions cannot carry that.
 
-Studio is not a product surface. ADR-152 puts it in `tools/synth/studio`, bound to `127.0.0.1`, for the owner
+Studio is not a product surface. ADR-153 puts it in `tools/synth/studio`, bound to `127.0.0.1`, for the owner
 only, never shipped. So a richer vocabulary there does not touch what an emprendedor sees, as long as it stays
 there.
 
