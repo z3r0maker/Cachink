@@ -1,4 +1,4 @@
-# Store-screenshot helper: three sales and shots 03–05. Cash with change
+# Store-screenshot helper: three sales and shots 02–04. Cash with change
 # (2 Alambre, 2 Agua de horchata, 1 Café: $265.00, pays with $500), transfer
 # (2 Cerveza, 1 Consomé), card (1 Arroz con leche, 2 Agua de jamaica, 1 Bolsa de hielo):
 # the first sale's tiles are in the three rows every screen size shows; the
@@ -18,12 +18,12 @@ appId: mx.xangarro.mobile
 - tapOn: { id: 'cobrar-tile-01JPRD00000000000000000007' }
 - tapOn: { id: 'cobrar-tile-01JPRD0000000000000000000H' }
 - runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/03-cobrar
+- takeScreenshot: ${OUT}/02-cobrar
 - runFlow: ../shared/abrir-cobro.yaml
 - tapOn:
     id: 'cobro-rapido-1'
 - runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/04-checkout
+- takeScreenshot: ${OUT}/03-checkout
 - tapOn:
     id: 'cobro-submit'
 - extendedWaitUntil:
@@ -31,7 +31,7 @@ appId: mx.xangarro.mobile
       id: 'venta-hecha'
     timeout: 8000
 - runFlow: store-pausa.yaml
-- takeScreenshot: ${OUT}/05-venta-hecha
+- takeScreenshot: ${OUT}/04-venta-hecha
 - tapOn:
     id: 'venta-hecha-nueva'
 - extendedWaitUntil:

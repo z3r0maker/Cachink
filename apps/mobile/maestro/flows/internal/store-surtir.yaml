@@ -1,7 +1,7 @@
-# Store-screenshot helper: stock the ten products Cobrar shows first, so the
-# shots don't read «Quedan 0» (the mock seeds no inventory movements). A
-# tablet's Cobrar shows every row and its Inicio lists what needs restocking,
-# so FORMA=tableta stocks the other ten as well.
+# Store-screenshot helper: stock all twenty products, so the shots don't read
+# «Quedan 0» (the mock seeds no inventory movements) and Avisos' bell counts
+# only the owner's two messages: every product left at 0 is a stock-bajo
+# aviso. After the three sales each stays above the threshold of 3.
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -73,66 +73,62 @@ appId: mx.xangarro.mobile
       ID: '01JPRD0000000000000000000J'
       CANTIDAD: '4'
 - runFlow:
-    when:
-      true: ${FORMA == 'tableta'}
-    commands:
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Frijoles charros'
-            ID: '01JPRD0000000000000000000C'
-            CANTIDAD: '6'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Gringa'
-            ID: '01JPRD00000000000000000005'
-            CANTIDAD: '8'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Orden de guacamole'
-            ID: '01JPRD0000000000000000000B'
-            CANTIDAD: '5'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Quesadilla'
-            ID: '01JPRD00000000000000000004'
-            CANTIDAD: '10'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Refresco 600ml'
-            ID: '01JPRD00000000000000000009'
-            CANTIDAD: '12'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Taco al pastor'
-            ID: '01JPRD00000000000000000001'
-            CANTIDAD: '15'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Taco de bistec'
-            ID: '01JPRD00000000000000000002'
-            CANTIDAD: '15'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Taco de suadero'
-            ID: '01JPRD00000000000000000003'
-            CANTIDAD: '15'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Torta'
-            ID: '01JPRD00000000000000000006'
-            CANTIDAD: '8'
-      - runFlow:
-          file: store-entrada.yaml
-          env:
-            PRODUCTO: 'Volcán'
-            ID: '01JPRD0000000000000000000E'
-            CANTIDAD: '10'
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Frijoles charros'
+      ID: '01JPRD0000000000000000000C'
+      CANTIDAD: '6'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Gringa'
+      ID: '01JPRD00000000000000000005'
+      CANTIDAD: '8'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Orden de guacamole'
+      ID: '01JPRD0000000000000000000B'
+      CANTIDAD: '5'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Quesadilla'
+      ID: '01JPRD00000000000000000004'
+      CANTIDAD: '10'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Refresco 600ml'
+      ID: '01JPRD00000000000000000009'
+      CANTIDAD: '12'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Taco al pastor'
+      ID: '01JPRD00000000000000000001'
+      CANTIDAD: '15'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Taco de bistec'
+      ID: '01JPRD00000000000000000002'
+      CANTIDAD: '15'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Taco de suadero'
+      ID: '01JPRD00000000000000000003'
+      CANTIDAD: '15'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Torta'
+      ID: '01JPRD00000000000000000006'
+      CANTIDAD: '8'
+- runFlow:
+    file: store-entrada.yaml
+    env:
+      PRODUCTO: 'Volcán'
+      ID: '01JPRD0000000000000000000E'
+      CANTIDAD: '10'
