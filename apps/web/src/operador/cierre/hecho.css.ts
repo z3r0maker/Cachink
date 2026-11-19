@@ -30,7 +30,7 @@ export const izquierda = style({ display: 'flex', flexDirection: 'column', gap: 
 export const donFila = style({ display: 'flex', alignItems: 'flex-end', gap: 14 });
 
 export const chip = style({
-  marginBottom: 34,
+  marginBottom: 30,
   height: 36,
   padding: '0 14px',
   display: 'inline-flex',
@@ -63,126 +63,86 @@ export const texto = style({
   textWrap: 'pretty',
 });
 
-export const pasos = style({
-  marginTop: 6,
+export const acciones = style({
+  marginTop: 4,
   maxWidth: 520,
   display: 'flex',
   flexDirection: 'column',
   gap: 12,
 });
 
-export const entregar = style([
+/** «Mandar el corte a los patrones»: the screen's one yellow action. */
+export const mandar = style([
   pressable,
   {
-    minHeight: 76,
-    padding: '12px 20px',
+    minHeight: 60,
     display: 'flex',
     alignItems: 'center',
-    gap: 14,
+    justifyContent: 'center',
+    gap: 10,
     border: borders.thick,
     borderRadius: radii[4],
     background: colors.yellow,
     boxShadow: shadows.card,
     fontFamily: 'inherit',
-    textAlign: 'left',
+    fontSize: portalFontSizes.lgx,
+    fontWeight: typography.weights.extraBold,
     color: colors.black,
   },
 ]);
 
-export const entregado = style({
-  boxSizing: 'border-box',
-  minHeight: 76,
-  padding: '12px 20px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 14,
-  border: `2px solid ${colors.greenText}`,
-  borderRadius: radii[4],
-  background: colors.greenSoft,
-  color: colors.greenText,
-});
-
-export const icono = style({
-  flex: 'none',
-  width: 44,
-  height: 44,
-  boxSizing: 'border-box',
-  display: 'grid',
-  placeItems: 'center',
-  border: borders.thin,
-  borderRadius: radii[2],
-  background: colors.white,
-});
-
-export const iconoVerde = style({ background: colors.green, color: colors.black });
-
-export const pasoTitulo = style({
-  display: 'block',
-  fontSize: portalFontSizes.lgx,
-  fontWeight: typography.weights.extraBold,
-});
-
-export const pasoTexto = style({
-  display: 'block',
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.semibold,
-  color: colors.ink,
-});
-
 export const botones = style({ display: 'flex', gap: 12, flexWrap: 'wrap' });
 
-export const whatsapp = style([
+export const otro = style([
   pressable,
   {
-    flex: '1 1 260px',
-    height: 56,
+    flex: '1 1 220px',
+    height: 54,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
     border: borders.thin,
     borderRadius: radii[4],
     background: colors.white,
-    boxShadow: shadows.small,
+    fontFamily: 'inherit',
     fontSize: portalFontSizes.lg,
     fontWeight: typography.weights.extraBold,
     color: colors.black,
-    textDecoration: 'none',
   },
 ]);
 
 export const salir = style({
   flex: 'none',
-  height: 56,
+  height: 54,
+  boxSizing: 'border-box',
   padding: '0 20px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: 8,
-  border: borders.quiet,
+  border: borders.thin,
   borderRadius: radii[4],
   background: colors.white,
   fontSize: portalFontSizes.body,
-  fontWeight: typography.weights.bold,
-  color: colors.gray600,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
   textDecoration: 'none',
 });
 
-/** «Pedro lo verá en su portal cuando se envíen los registros.» (DS-06, EsCajaCierre). */
+/** «Tienes 2 registros por enviar…» (OpCierreCorte): they go up by themselves. */
 export const porEnviar = style({
   margin: 0,
   maxWidth: 520,
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   gap: 10,
-  padding: '12px 16px',
-  border: `2px solid ${colors.warningText}`,
-  borderRadius: radii[4],
-  background: colors.warningSoft,
-  lineHeight: 1.45,
-  fontSize: portalFontSizes.body,
+  padding: '10px 14px',
+  border: borders.thin,
+  borderRadius: radii[3],
+  background: colors.yellowSoft,
+  lineHeight: 1.4,
+  fontSize: portalFontSizes.md,
   fontWeight: typography.weights.bold,
   color: colors.black,
 });
-
-export const porEnviarIcono = style({ display: 'inline-flex', color: colors.warningText });

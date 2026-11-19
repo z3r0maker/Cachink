@@ -1965,3 +1965,27 @@ WhatsApp).
   «Quitar foto» makes it 404.
 - **Acceptance:** `pnpm lint:design` stays at zero; the spec is green in the parallel phase (it
   writes its own tenant, no `@serial`).
+
+### P-43 La caja en la compu cierra el turno como el teléfono (ADR-147) [alta]
+
+- [x] Status · **Blocked by:** — · **Blocks:** —
+      Done: 2026-11-19 · the closed screen, the corte's reminder, «Mandar el corte» (WhatsApp, «Copiar el corte»), «Abrir otro turno» over the fondo dialog and «Nota para los patrones» on the count, as the board; the corte message is built once in `@xangarro/caja` (`corteDeCierre`) for the phone and the web, and the live corte now carries the business name. `operador-cierre.spec.ts` passes in a focused serial run (`XG_E2E_NO_VIEWPORTS=1`, 6/6).
+- **Context:** M-17 (track 19) rebuilt the phone's close; the web caja's «Turno cerrado» kept
+  the «Entregar el efectivo a {dueño}» button and dialog, which promised a portal confirmation
+  that does not exist, stored nothing and said «Él confirma».
+- **Decided with the owner 2026-11-19** (board `OpCierreCorte` on the canvas page «Cierre de
+  turno», approved the same day): the closed screen follows the phone's; the count stays on one
+  page, since the computer fits the esperado beside it. (1) No handover button or dialog. (2)
+  The corte ends with «Guarda $X para los patrones». (3) The screen says «los patrones», never a
+  name; the count's note for a difference too («Nota para los patrones»). (4) «Mandar el corte a
+  los patrones» opens a dialog with the message as it arrives, WhatsApp and «Copiar el corte»,
+  no Mensajes (a computer sends no SMS). (5) «Abrir otro turno» opens the fondo dialog as
+  «¿Con cuánto sigues?» with the counted cash written in; «Salir de la caja» stays. (6) With
+  records still to send, the line says «lo verán en su portal en cuanto se envíe» and a notice
+  says they go up by themselves.
+- **Files:** `apps/web/src/operador/cierre/` (`hecho.tsx`, `corte.tsx`, a new `mandar.tsx`;
+  `entrega.tsx` deleted), `acceso/fondo.tsx` (the «otro» wording and a starting amount),
+  `packages/caja/src/cierre/patrones.ts` (the shared copy and `mensajeCorte`).
+- **Acceptance:** `operador-cierre.spec.ts` closes a real turno, reads the corte's reminder,
+  copies the corte and opens another turno with the counted cash; `pnpm lint:design` stays at
+  zero.

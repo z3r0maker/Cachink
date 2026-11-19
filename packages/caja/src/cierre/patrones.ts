@@ -1,14 +1,15 @@
 /**
- * The phone's close in its own words (M-17, ADR-147; board MvCierreFlujo):
- * the owner is always «los patrones», never a name, so no test or English
- * name reaches the drawer and the sentence fits any owner. The two steps'
- * titles, the done line, the cash reminder and the corte the operator sends.
- * The web caja keeps `copy.ts`'s named wording until its own canvas round.
+ * The close in its own words (M-17 and P-43, ADR-147; boards MvCierreFlujo,
+ * OpCierreCorte): the owner is always «los patrones», never a name, so no
+ * test or English name reaches the drawer and the sentence fits any owner.
+ * The phone's two steps, the done line, the cash reminder and the corte the
+ * operator sends, on the phone and on the computer alike.
  */
 
 import { formatMoney, type DiferenciaCorte, type Money } from '@xangarro/domain';
 
 import { cerrarHint, DIF } from './copy';
+import type { CierreData } from './types';
 
 export const PATRONES = 'los patrones';
 
@@ -81,6 +82,43 @@ function lineaDiferencia(c: CorteParaMandar): string {
   const que = c.dif.tipo === 'falta' ? 'Faltante' : 'Sobrante';
   const por = c.motivo === null ? '' : ` (${c.motivo})`;
   return `${que}: ${formatMoney(c.dif.monto)}${por}`;
+}
+
+/** What the count came to: the figures the corte and its message read. */
+export interface CuentaCierre {
+  readonly contado: Money;
+  readonly esperado: Money;
+  readonly dif: DiferenciaCorte;
+}
+
+/** The closed turno as the corte to send; both cajas build it here. */
+export function corteDeCierre(
+  data: CierreData,
+  cuenta: CuentaCierre,
+  motivo: string | null,
+  fecha: string,
+): CorteParaMandar {
+  return {
+    ...(data.negocio === undefined ? {} : { negocio: data.negocio }),
+    caja: data.caja,
+    operador: data.operador,
+    fecha,
+    desde: data.desde,
+    hasta: data.hasta,
+    contado: cuenta.contado,
+    esperado: cuenta.esperado,
+    dif: cuenta.dif,
+    motivo,
+    ventas: data.resumen.ventas,
+    cobrado: data.resumen.cobrado,
+  };
+}
+
+/** The closed screen's notice while records wait; they go up by themselves. */
+export function avisoPorEnviar(n: number): string {
+  return n === 1
+    ? 'Tienes 1 registro por enviar. Se envía solo en cuanto haya conexión.'
+    : `Tienes ${n} registros por enviar. Se envían solos en cuanto haya conexión.`;
 }
 
 /** The corte as the message the owner receives, one fact per line. */

@@ -12,19 +12,26 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import { desencolar } from '../shell/cola';
+import type { MarcaDelNegocio } from '../runtime/negocio';
 import type { CierrePara } from '../runtime/protocol';
 import { type EstadoMode, horaLocal, nombreDueno } from '@xangarro/caja';
 import { CierreScreen } from './screen';
 import type { CerrarVivo, CierreData, CierreScreenProps } from '@xangarro/caja/cierre';
 
 /** The Worker's figures as the screen's data; the count starts at zero. */
-function comoCierre(c: CierrePara, sesion: { nombre: string }, dueno: string): CierreData {
+function comoCierre(
+  c: CierrePara,
+  sesion: { nombre: string },
+  negocio: MarcaDelNegocio | null,
+): CierreData {
+  const nombre = negocio?.nombre.trim() ?? '';
   return {
     operador: sesion.nombre,
     caja: 'Caja 1',
     desde: c.desde,
     hasta: horaLocal(),
-    dueno,
+    dueno: nombreDueno(negocio?.dueno),
+    ...(nombre === '' ? {} : { negocio: nombre }),
     partes: {
       fondo: BigInt(c.fondoCentavos),
       ventasEfectivo: BigInt(c.ventasEfectivoCentavos),
@@ -52,7 +59,7 @@ async function leerCierre(cred: Credenciales): Promise<CierreData> {
     rt.cierre(device.businessId, device.deviceId, sesion.turnoId),
     rt.negocio(device.businessId, device.deviceId).catch(() => null),
   ]);
-  return comoCierre(c, { nombre: sesion.nombre }, nombreDueno(negocio?.dueno));
+  return comoCierre(c, { nombre: sesion.nombre }, negocio);
 }
 
 /** Close through the use case, then let the queue carry it up. */

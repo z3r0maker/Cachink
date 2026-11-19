@@ -82,7 +82,7 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   Portal: ids(
     'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 K-12 K-23 N-83',
   ),
-  'Caja web': ids('P-37 K-14'),
+  'Caja web': ids('P-37 P-43 K-14'),
   'Pagos y conciliación': ids(
     'C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53 K-10 K-11 K-15 K-20 K-21 K-22',
   ),

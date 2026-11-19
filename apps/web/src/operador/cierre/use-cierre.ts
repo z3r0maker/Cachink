@@ -26,6 +26,8 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
   const [motivo, setMotivo] = useState<MotivoDiferencia | null>(null);
   const [nota, setNota] = useState('');
   const [cerrado, setCerrado] = useState(false);
+  // The close write landed on this register (and, online, was pushed).
+  const [guardado, setGuardado] = useState(false);
   const d = derivados(conteo, data, motivo, nota);
   const { contado, dif, puede } = d;
   const poner = ponerEn(setConteo);
@@ -45,6 +47,8 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
     // The queue as the pill counts it: pendientes, reintentando, connection, enviar.
     ...cola,
     cerrado,
+    // «Ya lo tienen» only once the close is written and nothing waits to go up.
+    enviado: guardado && cola.pendientes === 0,
     cerrar: () =>
       alCerrar({
         puede,
@@ -55,6 +59,7 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
         nota,
         conteo,
         ok: setCerrado,
+        guardado: () => setGuardado(true),
       }),
   };
 }
@@ -100,10 +105,14 @@ function alCerrar(p: {
   readonly nota: string;
   readonly conteo: ConteoDenominaciones;
   readonly ok: (v: boolean) => void;
+  readonly guardado: () => void;
 }): void {
   if (!p.puede) return;
   p.ok(true);
-  if (p.cerrarVivo === undefined) return;
+  if (p.cerrarVivo === undefined) {
+    p.guardado();
+    return;
+  }
   // D6: the screen's five reasons onto the enum's six, by direction.
   const motivo = p.tipo === 'cuadra' ? null : p.motivo;
   const reason =
@@ -116,5 +125,6 @@ function alCerrar(p: {
       explicacion: nota === '' ? null : nota,
       denominaciones: { ...p.conteo },
     })
+    .then(p.guardado)
     .catch(() => p.ok(false));
 }

@@ -60,7 +60,7 @@ test('a surplus needs a reason, and «Otra razón» a note, before closing', asy
   await expect(cerrar).toBeDisabled();
   await page.getByRole('button', { name: 'Otra razón' }).click();
   await expect(cerrar).toBeDisabled();
-  await page.getByLabel('Nota para Pedro').fill('Me dejaron propina');
+  await page.getByLabel('Nota para los patrones').fill('Me dejaron propina');
   await cerrar.click();
   await expect(page.getByText('Quedó un sobrante explicado como «Otra razón».')).toBeVisible();
   await expect(page.getByText('+$2,030.00')).toBeVisible();
@@ -93,12 +93,64 @@ test('a balanced count closes without a note', async ({ page }) => {
   await expect(page.getByText('Cuadra', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar turno' }).click();
   await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
+  // «Ya lo tienen» only once the close went up (P-43, as the phone's M7).
   await expect(
-    page.getByText('El conteo cuadró con lo esperado. Pedro ya lo tiene en su portal.'),
+    page.getByText('El conteo cuadró con lo esperado. Los patrones ya lo tienen en su portal.'),
   ).toBeVisible();
-  await page.getByRole('button', { name: /Entregar el efectivo a Pedro/ }).click();
-  await page.getByRole('button', { name: 'Sí, ya se lo di' }).click();
-  await expect(page.getByText('Le entregaste el efectivo a Pedro')).toBeVisible();
+  // ADR-147: a reminder on the corte, no handover button.
+  await expect(page.getByTestId('cierre-recordatorio')).toHaveText(
+    'Guarda $580.00 para los patrones.',
+  );
+  await expect(page.getByRole('button', { name: /Entregar el efectivo/ })).toHaveCount(0);
+});
+
+/**
+ * P-43 (board OpCierreCorte): the closed screen sends the corte as the message
+ * the owner gets, and opens another turno with the counted cash as its fondo.
+ */
+test('the closed turno sends its corte and opens another turno with the count', async ({
+  page,
+}) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await puertaOperador(page, PRODUCTOS);
+  await page.goto('/operador/caja');
+  await vender(page, /Orden del día/, '80');
+  await page.getByRole('link', { name: 'Cerrar mi turno' }).click();
+  await contar(page, { 'billetes de $500': '1', 'billetes de $50': '1', 'billetes de $20': '1' });
+  await page.getByRole('button', { name: 'Otra razón' }).click();
+  await page.getByLabel('Nota para los patrones').fill('Pagué el garrafón');
+  await page.getByRole('button', { name: 'Cerrar turno con faltante de $10.00' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: /^Turno cerrado/ })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Mandar el corte a los patrones' }).click();
+  const dialogo = page.getByRole('dialog', { name: 'Mandar el corte a los patrones' });
+  const mensaje = dialogo.getByTestId('corte-mensaje');
+  await expect(mensaje).toContainText('Contado: $570.00');
+  await expect(mensaje).toContainText('Esperado: $580.00');
+  await expect(mensaje).toContainText('Faltante: $10.00 (Otra razón)');
+  await expect(mensaje).toContainText('1 venta · Cobrado $80.00');
+  await expect(dialogo.getByRole('button', { name: /Mensajes/ })).toHaveCount(0);
+  await dialogo.getByRole('button', { name: /Copiar el corte/ }).click();
+  await expect(dialogo.getByRole('status')).toHaveText(
+    'Copiado. Pégalo en el chat o correo que quieras.',
+  );
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    'Faltante: $10.00 (Otra razón)',
+  );
+  await dialogo.getByRole('button', { name: 'Listo' }).click();
+
+  await page.getByRole('button', { name: 'Abrir otro turno' }).click();
+  const fondo = page.getByRole('dialog', { name: /^¿Con cuánto sigues/ });
+  await expect(fondo).toContainText('Terminaste con $570.00.');
+  await expect(fondo.getByTestId('fondo-input')).toHaveValue('570.00');
+  await fondo.getByTestId('fondo-abrir').click();
+  await expect(page).toHaveURL(/\/operador$/);
+
+  // The new turno stands on the counted cash; the closed one is not reopened.
+  await page.goto('/operador/turno');
+  const esperado = page.getByRole('region', { name: 'Efectivo que debe haber en la caja' });
+  await expect(esperado).toContainText('$570.00');
+  await expect(page.getByText('Venta V-0001')).toHaveCount(0);
 });
 
 test('the steppers change the count and its amount', async ({ page }) => {

@@ -2,7 +2,6 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import { esperadoDelTurno } from '@xangarro/domain';
 
-import { CHIP_HECHO, textoCorte, tituloHecho } from '../src/cierre/corte';
 import { abonosEfectivo, partesDelTurno, type FilasPartes } from '../src/lectura/partes-turno';
 import { desgloseFirmado, esperadoDe } from '../src/turno/desglose';
 
@@ -110,41 +109,5 @@ describe('partesDelTurno', () => {
     ];
     assert.equal(abonosEfectivo(abonos, 'T1'), 5n);
     assert.equal(abonosEfectivo(abonos, 'T0'), 7n);
-  });
-});
-
-describe('the closed turno in words', () => {
-  it('titles and chips each outcome', () => {
-    assert.deepEqual(tituloHecho({ tipo: 'cuadra', monto: 0n }), [
-      '¡Turno cerrado!',
-      'Cuadró al centavo.',
-    ]);
-    assert.deepEqual(tituloHecho({ tipo: 'falta', monto: 70_00n }), [
-      'Turno cerrado',
-      'Con un faltante de $70.00.',
-    ]);
-    assert.equal(CHIP_HECHO.sobra, 'Sobrante');
-  });
-
-  it('writes the corte as one line to send', () => {
-    const base = { caja: 'Caja 1', operador: 'Ana Robledo', fecha: '14 may' };
-    assert.equal(
-      textoCorte({
-        ...base,
-        contado: 2_710_00n,
-        esperado: 2_710_00n,
-        dif: { tipo: 'cuadra', monto: 0n },
-      }),
-      'Corte Caja 1, Ana Robledo, 14 may: contado $2,710.00, esperado $2,710.00, cuadró.',
-    );
-    assert.equal(
-      textoCorte({
-        ...base,
-        contado: 2_640_00n,
-        esperado: 2_710_00n,
-        dif: { tipo: 'falta', monto: 70_00n },
-      }),
-      'Corte Caja 1, Ana Robledo, 14 may: contado $2,640.00, esperado $2,710.00, diferencia −$70.00.',
-    );
   });
 });
