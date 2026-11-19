@@ -143,4 +143,13 @@ describe('recurrentesDelMes', () => {
     const r = recurrentesDelMes([contador], none, '2026-12', '2026-10-15');
     assert.equal(r[0]?.estado, 'proximo');
   });
+
+  it('suggests an annual template only in its own month, every year from its first (E-24)', () => {
+    const apple = { ...vercel, id: 'rec-apple', periodicidad: 'anual' as const, desde: '2027-09' };
+    assert.deepEqual(recurrentesDelMes([apple], none, '2027-08', '2027-10-01'), []);
+    assert.equal(recurrentesDelMes([apple], none, '2027-09', '2027-10-01')[0]?.estado, 'sugerido');
+    assert.deepEqual(recurrentesDelMes([apple], none, '2027-10', '2027-10-01'), []);
+    assert.equal(recurrentesDelMes([apple], none, '2028-09', '2027-10-01')[0]?.estado, 'proximo');
+    assert.deepEqual(recurrentesDelMes([apple], none, '2026-09', '2027-10-01'), []);
+  });
 });
