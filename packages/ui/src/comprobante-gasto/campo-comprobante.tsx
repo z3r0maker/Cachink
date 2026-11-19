@@ -3,15 +3,17 @@
  * photo, a dashed row that opens the camera («Tómale foto al ticket»; a long
  * press goes to the gallery); with one, its thumbnail, «Foto lista» and the
  * draft's two actions, «Cambiar» and the cross that removes it. The gasto
- * saves either way.
+ * saves either way. The thumbnail lands with «Captura» (CgCaptura): it
+ * shrinks into the row from where the camera was.
  */
 import type { ReactElement } from 'react';
-import { Image, Pressable, type ImageStyle, type ViewStyle } from 'react-native';
+import { Animated, Image, Pressable, type ImageStyle, type ViewStyle } from 'react-native';
 import { View } from '@tamagui/core';
 import { MText } from '../components/Mostrador/index';
 import { Eyebrow } from '../components/Panel/index';
 import { PathIcon } from '../components/PathIcon/index';
 import { GLYPHS } from '../components/PathIcon/glyphs';
+import { useLlegada } from '../components/motion/use-captura-motion';
 import { FOTO_GLIFOS } from '../foto-producto/foto-glifos';
 import { borderWidths, colors, radii } from '../theme';
 
@@ -134,6 +136,16 @@ function Acciones(p: { readonly onCambiar: () => void; readonly onQuitar: () => 
   );
 }
 
+/** The draft's photo, landing in the row (CgCaptura «Se va a su lugar»). */
+function Miniatura({ uri }: { readonly uri: string }): ReactElement {
+  const llegada = useLlegada();
+  return (
+    <Animated.View style={{ zIndex: 1, ...llegada }}>
+      <Image source={{ uri }} accessibilityIgnoresInvertColors style={MINIATURA} />
+    </Animated.View>
+  );
+}
+
 function Lista(p: CampoComprobanteProps & { readonly foto: string }): ReactElement {
   return (
     <View
@@ -147,7 +159,7 @@ function Lista(p: CampoComprobanteProps & { readonly foto: string }): ReactEleme
       borderColor={colors.greenText}
       backgroundColor={colors.greenSoft}
     >
-      <Image source={{ uri: p.foto }} accessibilityIgnoresInvertColors style={MINIATURA} />
+      <Miniatura uri={p.foto} />
       <Textos titulo="Foto lista" linea="Se manda al dueño con el gasto." tenue={false} />
       <Acciones onCambiar={p.onTomar} onQuitar={p.onQuitar} />
     </View>

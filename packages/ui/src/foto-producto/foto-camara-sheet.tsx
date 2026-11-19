@@ -4,16 +4,18 @@
  * yellow guide, the hint, and the three controls — the gallery, the shutter,
  * the torch. One shot hands its file on; closing takes no photo. The product
  * frames square and lifts; the gasto's receipt frames upright, with its own
- * eyebrow and hint.
+ * eyebrow and hint. The shutter fires «Captura» (CgCaptura): a white flash
+ * over the viewfinder and a light haptic.
  */
 import { useRef, useState, type ReactElement, type RefObject } from 'react';
-import { Modal, Pressable, type ViewStyle } from 'react-native';
+import { Animated, Modal, Pressable, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View } from '@tamagui/core';
 import { MText } from '../components/Mostrador/index';
 import { Eyebrow } from '../components/Panel/index';
 import { PathIcon } from '../components/PathIcon/index';
 import { GLYPHS } from '../components/PathIcon/glyphs';
+import { useDestello } from '../components/motion/use-captura-motion';
 import { borderWidths, colors, radii, shapeRadii } from '../theme';
 import { ControlesCamara } from './foto-camara-controles';
 import { FotoGuia, type FormaGuia } from './foto-guia';
@@ -78,14 +80,36 @@ function Cabeza(p: {
   );
 }
 
+/** The shutter's white flash, laid over the whole viewfinder (CgCaptura). */
+function Destello({ opacity }: { readonly opacity: Animated.Value }): ReactElement {
+  return (
+    <Animated.View
+      testID="foto-destello"
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: colors.white,
+        opacity,
+      }}
+    />
+  );
+}
+
 function Visor(p: {
   readonly visor: RefObject<FotoVisorHandle | null>;
   readonly linterna: boolean;
   readonly forma: FormaGuia;
   readonly pista: PistaCamara;
+  /** The shutter's flash, over the whole viewfinder. */
+  readonly destello: Animated.Value;
 }): ReactElement {
   return (
     <View
+      overflow="hidden"
       flex={1}
       marginHorizontal={12}
       marginTop={12}
@@ -103,6 +127,7 @@ function Visor(p: {
       <MText size="md" weight="semibold" color={colors.gray400} textAlign="center">
         {p.pista.cuerpo}
       </MText>
+      <Destello opacity={p.destello} />
     </View>
   );
 }
@@ -125,19 +150,21 @@ function Asa(): ReactElement {
 function useDisparo(onTomada: (uri: string) => void) {
   const visor = useRef<FotoVisorHandle | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const destello = useDestello();
   const disparar = (): void => {
+    destello.disparar();
     setOcupado(true);
     void (visor.current?.tomar() ?? Promise.resolve(null))
       .then((uri) => (uri ? onTomada(uri) : undefined))
       .finally(() => setOcupado(false));
   };
-  return { visor, ocupado, disparar };
+  return { visor, ocupado, disparar, destello: destello.opacity };
 }
 
 export function FotoCamaraSheet(p: FotoCamaraSheetProps): ReactElement {
   const insets = useSafeAreaInsets();
   const [linterna, setLinterna] = useState(false);
-  const { visor, ocupado, disparar } = useDisparo(p.onTomada);
+  const { visor, ocupado, disparar, destello } = useDisparo(p.onTomada);
   return (
     <Modal visible animationType="slide" onRequestClose={p.onCerrar} statusBarTranslucent>
       <View
@@ -158,6 +185,7 @@ export function FotoCamaraSheet(p: FotoCamaraSheetProps): ReactElement {
           linterna={linterna}
           forma={p.forma ?? 'cuadrada'}
           pista={p.pista ?? PISTA_PRODUCTO}
+          destello={destello}
         />
         <ControlesCamara
           onGaleria={p.onGaleria}
