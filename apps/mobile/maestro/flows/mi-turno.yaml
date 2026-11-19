@@ -63,8 +63,8 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: 'otros-no-enviados'
 
-# A due recurrente (mock fixture REC-1 «Renta local», proximoDisparo
-# 2026-10-01, contracts/mock/fixtures.ts:174) with its due chip. In a
+# A due recurrente (mock fixture REC-1 «Renta local», due on this month's
+# 1st, contracts/mock/fixtures.ts) with its due chip. In a
 # continuous run the turno carries every earlier flow's movements, so the
 # section sits further down: a longer budget, and 60% beats a full reveal.
 - scrollUntilVisible:

@@ -184,7 +184,8 @@ export function buildFixtures(): FixtureRows {
         frecuencia: 'mensual',
         diaDelMes: 1,
         diaDeLaSemana: null,
-        proximoDisparo: '2026-10-01',
+        // Due on this month's 1st (local, as the phone's hoyLocal): exactly one payment due.
+        proximoDisparo: `${new Date().toLocaleDateString('en-CA').slice(0, 7)}-01`,
         activo: true,
         ...audit(60),
       }),
