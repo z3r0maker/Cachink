@@ -54,6 +54,11 @@ export interface AppShellProps {
   readonly headerStatus?: HeaderStatus;
   /** The avisos bell appears only when there is a count to show. */
   readonly avisos?: AvisosSource;
+  /**
+   * A focused flow (Cierre, MvCierreFlujo): no tab bar on the phone, so its
+   * fixed foot owns the bottom; the home indicator is padded instead.
+   */
+  readonly sinBarra?: boolean;
   /** Forces a frame regardless of the window (Storybook, tests). */
   readonly layout?: CajaLayout;
   readonly testID?: string;
@@ -158,7 +163,14 @@ export function AppShellFrame(props: AppShellFrameProps): ReactElement {
         {phone ? <CajaHeader {...header} /> : <CajaTopbar {...header} />}
         {props.banners}
         <Body>{props.children}</Body>
-        {phone ? <BottomTabBar items={tabs} activeKey={tabKeyFor(active)} /> : null}
+        {phone && !props.sinBarra ? (
+          <BottomTabBar items={tabs} activeKey={tabKeyFor(active)} />
+        ) : null}
+        {phone && props.sinBarra ? (
+          <View backgroundColor={colors.white}>
+            <SafeAreaSpacer edge="bottom" />
+          </View>
+        ) : null}
       </View>
     </View>
   );
