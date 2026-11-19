@@ -57,7 +57,11 @@ export function SinGastos(): ReactElement {
   );
 }
 
-export function Lista(p: { readonly gastos: readonly GastoTurno[] }): ReactElement {
+export function Lista(p: {
+  readonly gastos: readonly GastoTurno[];
+  /** «Agregar foto» on a row without its receipt (M-18); absent, no button. */
+  readonly onAgregarFoto?: (g: GastoTurno) => void;
+}): ReactElement {
   if (p.gastos.length === 0) {
     return (
       <Vacio
@@ -75,7 +79,10 @@ export function Lista(p: { readonly gastos: readonly GastoTurno[] }): ReactEleme
           borderTopWidth={i === 0 ? 0 : borderWidths.quiet}
           borderTopColor={colors.gray100}
         >
-          <GastoFila x={g} />
+          <GastoFila
+            x={g}
+            {...(p.onAgregarFoto ? { onAgregarFoto: () => p.onAgregarFoto?.(g) } : {})}
+          />
         </View>
       ))}
     </QuietPanel>

@@ -19,6 +19,7 @@ import {
   sales,
   tickets,
 } from '../schema/ledger.js';
+import { expenseReceipts } from '../schema/expense-receipts.js';
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { mensajesOperador, respuestasOperador } from '../schema/mensajes.js';
 
@@ -51,6 +52,7 @@ export const SYNCED_TABLES = {
   conversion_recetas: conversionRecetas,
   mensajes_operador: mensajesOperador,
   respuestas_operador: respuestasOperador,
+  expense_receipts: expenseReceipts,
   opening_balances: openingBalances,
   opening_balance_clients: openingBalanceClients,
 } as const satisfies Record<SyncedTable, unknown>;

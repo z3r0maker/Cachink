@@ -6,6 +6,7 @@ import { colors } from '@xangarro/tokens';
 import { Drawer, DrawerStatus } from '@/components';
 import { button } from '@/components/button.css';
 
+import { Comprobante } from './comprobante';
 import * as s from './movimientos.css';
 import type { Row } from './parts';
 
@@ -134,6 +135,7 @@ export function DetalleMovimiento({ row, rows, onClose }: DetalleProps) {
       </div>
       <Fichas row={row} venta={venta} />
       <Renglones row={row} rows={rows} />
+      <Comprobante row={row} />
     </Drawer>
   );
 }

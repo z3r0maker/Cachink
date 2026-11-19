@@ -59,6 +59,7 @@ const STATIC = [
 const UPLOADS = [
   '/api/logos/01HZ8XQN9GZJXV8AKQ5X0PRD01',
   '/api/productos/01HZ8XQN9GZJXV8AKQ5X0PRD01/imagen',
+  '/api/gastos/01HZ8XQN9GZJXV8AKQ5X0GST01/comprobante',
 ];
 
 describe('portal security headers', () => {

@@ -3,12 +3,19 @@
  * gastos, registering one and paying a due recurrente. `?recurrente=<id>`
  * — Inicio's «Para hoy» — opens the pagar sheet prefilled. A stack route
  * opened from Inicio's atajo, so it wears the frame with the way back. With
- * no open turno, «Abrir turno» opens the fondo sheet here (RvGastos, M8).
+ * no open turno, «Abrir turno» opens the fondo sheet here (RvGastos, M8). A
+ * gasto without its receipt offers «Agregar foto» (M-18, CgDespues).
  */
 
 import type { ReactElement } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { GastosScreen, useAperturaTurno, useGastos, useTranslation } from '@xangarro/ui';
+import {
+  GastosScreen,
+  useAgregarFoto,
+  useAperturaTurno,
+  useGastos,
+  useTranslation,
+} from '@xangarro/ui';
 import { AppShellWrapper, useBackTo } from '../shell/app-shell-wrapper';
 
 export default function GastosRoute(): ReactElement {
@@ -16,6 +23,7 @@ export default function GastosRoute(): ReactElement {
   const back = useBackTo('/inicio');
   const g = useGastos();
   const apertura = useAperturaTurno();
+  const fotos = useAgregarFoto();
   const { recurrente } = useLocalSearchParams<{ recurrente?: string }>();
   const prefill = recurrente
     ? (g.porPagar?.find((p) => p.para.id === recurrente)?.prefill ?? null)
@@ -32,6 +40,7 @@ export default function GastosRoute(): ReactElement {
         prefill={prefill}
         registrar={g.registrar}
         onRetry={g.refetch}
+        fotos={fotos}
       />
       {apertura.hoja}
     </AppShellWrapper>

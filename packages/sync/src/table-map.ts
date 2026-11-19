@@ -15,6 +15,7 @@ import {
   conversions,
   dayCloses,
   entregasCredito,
+  expenseReceipts,
   expenses,
   inventoryMovements,
   productImages,
@@ -41,6 +42,8 @@ export const PUSH_TABLES: Readonly<Record<PushableTable, SQLiteTable>> = {
   products,
   clients,
   product_images: productImages,
+  // UP only (ADR-149): read here for the push, never applied from a pull.
+  expense_receipts: expenseReceipts,
 };
 
 /** Stable key for a (table, row) pair. */

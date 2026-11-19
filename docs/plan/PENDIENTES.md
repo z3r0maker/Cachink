@@ -29,7 +29,7 @@ listas de abajo.
 - **N-63** Negocio: MRR, churn, prueba → pago (Post-lanzamiento) — destraba 3: N-70, N-72, E-40 · `09-next-features.md:1305`
 - **N-64** Embudo de activación y cohortes semanales (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1316`
 - **B-20** El journal de drizzle de Postgres, al día y con guarda (Colas de tracks) — destraba 2: N-27, N-30 · `03-backend.md:365`
-- **M-19** Un código, un producto en el escáner (ADR-150). (Colas de tracks) — destraba 2: P-44, P-45 · `19-movil-mostrador.md:52`
+- **M-19** Un código, un producto en el escáner (ADR-150). (Colas de tracks) — destraba 2: P-44, P-45 · `19-movil-mostrador.md:53`
 - **N-66** Roles del staff (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1336`
 
 ## Bloquea producción (34)
@@ -82,11 +82,11 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (113)
+## Código y técnico (114)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (11)
+### Teléfono (12)
 
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + color de marca `[LAUNCH]` — Bloqueada por: C-15 · Falta: el teléfono no descarga ni guarda en caché el logo. `/api/logos` sigue teniendo un solo consumidor, el portal (`negocio/comprobantes/use-logo.ts` y sus pruebas); nada en `packages/ui`, `packages/sync` ni `apps/mobile` lo llama, y `businesses.logoUrl` en SQLite guarda la URL, no los bytes (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [~] `Alta` **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: N-20 (hecho) · web half landed 2026-09-20 · Falta: solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24. · `09-next-features.md:621`
@@ -95,8 +95,9 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: C-14, B-11, P-06, A-04, N-24 · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. · `09-next-features.md:717`
 - [ ] `Media` **M-10** The owner corrects a sale. · `19-movil-mostrador.md:33`
 - [ ] `Media` **M-14** Foto del producto en teléfonos reales. · `19-movil-mostrador.md:48`
-- [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:52`
-- [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:53`
+- [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:52`
+- [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:53`
+- [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:54`
 - [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · `22-codi.md:224`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · `22-codi.md:292`
 
@@ -385,7 +386,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 51 abiertos (11 en curso, 0 bloqueados, 29 hechos)
 - `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 14 hechos)
-- `19-movil-mostrador.md` — 4 abiertos (0 en curso, 0 bloqueados, 15 hechos)
+- `19-movil-mostrador.md` — 5 abiertos (0 en curso, 0 bloqueados, 15 hechos)
 - `20-command-center.md` — 21 abiertos (5 en curso, 0 bloqueados, 11 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 24 hechos)

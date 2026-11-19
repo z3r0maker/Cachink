@@ -50,7 +50,7 @@ const CSP = 'Content-Security-Policy';
  *
  * - Pages: the proxy's enforced policy, and nothing from here.
  * - What the proxy skips: no framing.
- * - Uploaded bytes (logos, product photos): the sandbox. A later rule
+ * - Uploaded bytes (logos, product photos, gasto receipts): the sandbox. A later rule
  *   overrides an earlier one, so these come last. Their route handlers send
  *   the same value, which is what reaches the wire if a rule here is lost.
  */
@@ -63,6 +63,10 @@ export const HEADER_RULES = [
   { source: '/api/logos/:businessId', headers: [{ key: CSP, value: UPLOADED_BYTES_CSP }] },
   {
     source: '/api/productos/:productId/imagen',
+    headers: [{ key: CSP, value: UPLOADED_BYTES_CSP }],
+  },
+  {
+    source: '/api/gastos/:gastoId/comprobante',
     headers: [{ key: CSP, value: UPLOADED_BYTES_CSP }],
   },
 ];

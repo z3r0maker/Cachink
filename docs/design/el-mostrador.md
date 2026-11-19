@@ -93,14 +93,15 @@ takes a rung, never an arbitrary number.
 
 ## 6. Motion
 
-Four motions, nothing else. All of them are wrapped in `@media (prefers-reduced-motion: reduce)`.
+Five motions, nothing else. All of them are wrapped in `@media (prefers-reduced-motion: reduce)`.
 
-| Motion      | What                                                                                       | Source                                                 |
-| ----------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| Press       | `translate(2px, 2px)`, shadow to `shadows.pressed`, 100 ms                                 | `pressTransform`, `pressable`                          |
-| Panel slide | side panel in from the right, 280 ms, scrim fades 160 ms; the console's menu from the left | `drawer.css.ts`, `lateral.css.ts`, `mobile-nav.css.ts` |
-| Dialog pop  | scale from 0.94–0.96, 160–220 ms                                                           | `dialog.css.ts`, `dialogo-mostrador.css.ts`            |
-| Don idle    | his pose's loop; the loader's coin toss                                                    | `don.css.ts`, `DonCargando`                            |
+| Motion      | What                                                                                                                                                                                                  | Source                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Press       | `translate(2px, 2px)`, shadow to `shadows.pressed`, 100 ms                                                                                                                                            | `pressTransform`, `pressable`                          |
+| Panel slide | side panel in from the right, 280 ms, scrim fades 160 ms; the console's menu from the left                                                                                                            | `drawer.css.ts`, `lateral.css.ts`, `mobile-nav.css.ts` |
+| Dialog pop  | scale from 0.94–0.96, 160–220 ms                                                                                                                                                                      | `dialog.css.ts`, `dialogo-mostrador.css.ts`            |
+| Don idle    | his pose's loop; the loader's coin toss                                                                                                                                                               | `don.css.ts`, `DonCargando`                            |
+| Captura     | the shutter: a white flash over the viewfinder (0.85, 180 ms) and a light haptic; the photo shrinks into its place from 2.4× (280 ms). Reduce Motion keeps only the haptic (ADR-149, board CgCaptura) | `use-captura-motion.ts`                                |
 
 Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner.
 
