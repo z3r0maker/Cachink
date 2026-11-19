@@ -23,6 +23,7 @@
       `docs/legal/aviso/respuestas-oq-borrador.md` §0.
 - [ ] [media] Plantilla de aviso para los clientes del propio negocio (OQ-L16).
 - [ ] [media] Retirar `docs/legal/privacy.md` y `docs/legal/terms.md` una vez aprobado lo anterior.
+  - **Remaining (2026-11-19, verificado contra el repo):** los dos archivos siguen ahí y siguen siendo los viejos: `terms.md` no menciona ni una vez «gracia» ni «grace», o sea que es el texto previo al pivote, sin el periodo de gracia de 7 días ni el downgrade (ver L-05). Esto es un `rm` detrás de una aprobación, no trabajo. Cuando se haga, revisa quién los enlaza: L-05 ya avisa que el landing sirve `/privacidad/` y `/terminos/` desde `docs/legal/aviso/`, no desde estos dos.
 - [ ] [alta] [bloq] Llenar las dos celdas que quedan en la tabla de subencargados — `[REGIÓN]` (Sentry) y `[PAÍS]` (Mercado Pago / Clip) — y los `[PLAZO]`s once OQ-L13 is confirmed.
       Corregido 2026-11-19: este renglón decía «las tres celdas `[PAÍS]` en el aviso §6.1 (monitoreo de errores, correo, mensajería)». Son dos, no tres; se llaman distinto; y viven en `encargado-clausulas.md` §7, no en el §6.1 del aviso integral, que no tiene ningún hueco. La nota de progreso de abajo ya lo decía bien desde el 2026-11-11; el encabezado se quedó en septiembre.
       Progress 2026-11-11: correo and mensajería are EE. UU. (Resend in us-east-1, `docs/ops/email.md`;
@@ -123,6 +124,7 @@ ARCO procedure). Zoho Mail Forever Free (US DC) holds the domain; its users are 
       38 over CFF art. 30's 5; the aviso §7 now says 10), and 30 calendar days for a self-service
       erase alongside the ARCO procedure's own deadlines. The backoffice support inbox (a separate
       database) is not erased by the job: an ARCO file follows its own retention.
+  - **Remaining (2026-11-19, verificado contra el repo):** nada que hacer aquí hasta que el abogado conteste; es el mismo paquete de la revisión de los cinco textos. Lo que este renglón afirma del código sí está construido y es verificable: `xangarro.account_deletions` y el bloqueo de 10 años existen desde la migración `0051`, y `/api/cron/borrar-cuentas` está en los siete crones de `vercel.json`. Así que lo único abierto son las cifras, no la plomería. Nota de clasificación: el tablero cuenta este renglón como «Código y técnico» porque va por §sección, y es trabajo del abogado; si se quiere arreglar, `plan-board-kinds.ts` tiene la lista `PR_TITLE` para mandarlo a corporativo por su prefijo, como ya se hace con cuatro otros.
 - [x] En la app **«Desvincular y borrar los datos de este dispositivo»** (el aviso §7 hoy reconoce que
       unlinking does not wipe). **Done 2026-11-03:** Ajustes → «Desvincular esta caja» offers
       «Desvincular y borrar» (board MvDesvincularBorrar). It refuses while anything is unsent or
