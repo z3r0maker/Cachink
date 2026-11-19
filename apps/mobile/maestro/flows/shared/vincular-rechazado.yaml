@@ -6,13 +6,10 @@
 # error. Precondition: the typed path is open and the email is filled.
 appId: mx.xangarro.mobile
 ---
-# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
-- tapOn:
-    id: 'activation-code'
-    point: '95%,50%'
-- eraseText: 12
-- inputText: ${CODE}
-- hideKeyboard
+- runFlow:
+    file: vincular-codigo.yaml
+    env:
+      CODE: ${CODE}
 - tapOn:
     id: 'activation-submit'
 - extendedWaitUntil:

@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 65 flows + 22 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 65 flows + 24 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -116,6 +116,8 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/cobrar-ticket.yaml`        | Charges the ticket on Cobrar with `${METODO}` (phone and tablet branches)                           |
 | `shared/abrir-cobro.yaml`          | From a ticket on Cobrar to «¿Cómo paga?» (phone sheet or tablet panel)                              |
 | `shared/ticket-dos-aguas.yaml`     | Two lines on the ticket (Agua de horchata, Agua de jamaica): «2 piezas · $82.50»                    |
+| `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                     |
+| `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                            |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                             |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                             |
 | `shared/open-turno-row.yaml`       | Opens one of Mi turno's rows (`otros-<key>`)                                                        |
