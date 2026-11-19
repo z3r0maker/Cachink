@@ -142,6 +142,9 @@ export function CodigoCajas(props: {
         right={0}
         bottom={0}
         opacity={0.02}
+        // Its own text showed faintly behind the boxes (the store shots'
+        // «VALDK7M3» ghost); the field stays tappable, its letters unseen.
+        style={{ color: 'transparent' }}
         caretHidden
         value={props.codigo}
         onChangeText={(v: string) => props.onCodigo(sanitizeCode(v))}
