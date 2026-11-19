@@ -34,7 +34,16 @@ export interface EscanerSheetProps {
   readonly onAlta: (codigo: string) => void;
   /** The bar's «Cobrar»: on to the ticket. */
   readonly onCobrar: () => void;
+  /** «Pedro», or «el dueño»: who sees a shared code in Revisión de caja. */
+  readonly dueno: string;
 }
+
+/**
+ * The characters a barcode can carry: digits for EAN and UPC, and Code 39's
+ * letters and signs (Code 128 is a superset). The keypad shows digits; a
+ * hardware keyboard or a reader paired to a tablet can type the rest.
+ */
+const NO_CODIGO = /[^0-9A-Za-z\-. $/+%]/g;
 
 function CodigoInput(p: {
   readonly codigo: string;
@@ -47,10 +56,11 @@ function CodigoInput(p: {
       testID="escaner-codigo"
       aria-label="Números del código de barras"
       inputMode="numeric"
+      autoCapitalize="characters"
       placeholder="7501234567897"
       placeholderTextColor={colors.textMuted}
       value={p.codigo}
-      onChangeText={(t) => p.setCodigo(t.replace(/[^0-9]/g, ''))}
+      onChangeText={(t) => p.setCodigo(t.replace(NO_CODIGO, ''))}
       onSubmitEditing={p.onSubmit}
       style={{
         flex: 1,
@@ -161,7 +171,7 @@ export function EscanerSheet(p: EscanerSheetProps): ReactElement {
       <View gap={12}>
         <EscanerCamara
           luz={luz}
-          activo={p.open && e.estado.tipo !== 'desconocido'}
+          activo={p.open && e.estado.tipo !== 'desconocido' && e.estado.tipo !== 'duplicado'}
           onCodigo={e.leer}
         />
         <MText weight="bold" textAlign="center">
@@ -174,7 +184,7 @@ export function EscanerSheet(p: EscanerSheetProps): ReactElement {
           manual={manual}
           onManual={() => setManual(!manual)}
         />
-        <EscanerResultado e={e} onAlta={(c) => salir(() => p.onAlta(c))()} />
+        <EscanerResultado e={e} dueno={p.dueno} onAlta={(c) => salir(() => p.onAlta(c))()} />
       </View>
     </BottomSheet>
   );

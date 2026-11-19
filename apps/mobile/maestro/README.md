@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 65 flows + 24 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 67 flows + 24 shared subflows and scripts; `full-regression.sh` runs the curated 40 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -167,7 +167,7 @@ three ways to exercise it depending on your environment:
 
 | Environment          | How to test                                                                                                                                                                                                                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **iOS Simulator**    | No camera available — use the **manual entry path**. The `inventario-barcode.yaml` Maestro flow covers this: taps "Escanear código", types a barcode in the manual input, and asserts the SKU populates.                                                                                                            |
+| **iOS Simulator**    | No camera available — use the **manual entry path**. The `escaner-*.yaml` and `cobrar-escaner.yaml` flows cover it: «Escribir el código» types a barcode into the escáner, the same read a scan goes through (the mock's barcodes are `MOCK_BARCODES` in `packages/contracts/src/mock/fixtures.ts`).                |
 | **Android Emulator** | Use the **VirtualScene camera**: AVD settings → Camera → Back = VirtualScene. Place a barcode PNG on the virtual poster wall (edit `~/.android/avd/<name>.avd/Toren1BD.posters` or drag an image into the scene), then "walk" to it with WASD keys. This exercises the real `onBarcodeScanned` pipeline end-to-end. |
 | **Real device**      | Run the Expo dev build and point the camera at any EAN-13 barcode on a product. A haptic confirms the read and the SKU auto-fills on the form.                                                                                                                                                                      |
 
@@ -267,6 +267,9 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 | `cancelaciones-nav.yaml`       | activated | ✓     | The Ventas tab (Track M-11): with no turno open it opens one right there (MvTurnoCerrado), stays on Ventas, and «Cobrar la primera» goes on to the catalogue.       |
 | `ventas-caja-gate.yaml`        | activated |       | The Caja gate: with no turno open, Cobrar opens one right there and the catalogue takes its place (MvTurnoCerrado).                                                 |
 | `cobrar-escaner.yaml`          | activated |       | The escáner (Track M, M-07; MvEscaner): typing an unknown code offers «Darlo de alta», which opens Producto nuevo with t                                            |
+| `escaner-conocido.yaml`        | activated |       | The escáner with a known code (M-19, ADR-150): Refresco's code puts it on the ticket, and «Deshacer» takes it off                                                   |
+| `escaner-duplicado.yaml`       | activated |       | A code two products share (M-19, EcDuplicado): the escáner asks which one and only the tapped product goes on the ticket                                            |
+| `escaner-alta-cobro.yaml`      | activated |       | Unknown code to sale (M-19): «Darlo de alta» saves it onto the ticket, the same code then finds it, and the ticket is charged                                       |
 | `empty-ventas.yaml`            | activated |       | Cobrar with no products (Track M, M-07): the catalogue says there is nothing yet and offers «Producto nuevo» right there                                            |
 | `fiado-abono-recordar.yaml`    | activated | ✓     | Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza\*): Inicio's atajo opens /fiado; a client's account opens its                                           |
 
@@ -285,7 +288,6 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-one `
 | Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
 | -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; RvInventario): one tap on a row opens the sheet on the kind its stock calls for; an entrada raises the count, then a merma lowers it                     |
-| `inventario-barcode.yaml`        | activated |       | Create a producto using the manual barcode entry path.                                                                                                                              |
 | `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
 | `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
 | `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                                                                                    |

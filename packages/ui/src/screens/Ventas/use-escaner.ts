@@ -1,21 +1,20 @@
 /**
- * What the escáner shows after each code (MvEscaner): the product it added
- * (with «Deshacer»), a code the catalogue does not have (with «Darlo de
- * alta»), the undo done, or the hint to keep scanning.
+ * The escáner's state across codes (MvEscaner, EcDuplicado): each read goes
+ * through `estadoDeCodigo`; a known code goes on the ticket with «Deshacer»,
+ * a shared one waits for `elegir`, an unknown one offers «Darlo de alta».
  */
 import { useState } from 'react';
 import { impactLight, notificationError, notificationSuccess } from '../../haptics/index';
-import { porCodigo, type ProductoCobrar } from './cobrar-catalogo';
+import type { ProductoCobrar } from './cobrar-catalogo';
+import { elegidoDeDuplicado, estadoDeCodigo, type EstadoEscaner } from './escaner-estado';
 
-export type EstadoEscaner =
-  | { readonly tipo: 'listo' }
-  | { readonly tipo: 'agregado'; readonly p: ProductoCobrar }
-  | { readonly tipo: 'desconocido'; readonly codigo: string }
-  | { readonly tipo: 'deshecho'; readonly p: ProductoCobrar };
+export type { EstadoEscaner } from './escaner-estado';
 
 export interface UseEscaner {
   readonly estado: EstadoEscaner;
   readonly leer: (codigo: string) => void;
+  /** A shared code: the product the operator tapped goes on the ticket. */
+  readonly elegir: (p: ProductoCobrar) => void;
   readonly deshacer: () => void;
   readonly otro: () => void;
   readonly reiniciar: () => void;
@@ -28,15 +27,20 @@ export function useEscaner(
 ): UseEscaner {
   const [estado, setEstado] = useState<EstadoEscaner>({ tipo: 'listo' });
   const leer = (codigo: string): void => {
-    const p = porCodigo(productos, codigo);
-    if (p === null) {
+    const e = estadoDeCodigo(productos, codigo);
+    if (e.tipo === 'agregado') {
+      notificationSuccess();
+      onAgregar(e.p);
+    } else {
       notificationError();
-      setEstado({ tipo: 'desconocido', codigo: codigo.trim() });
-      return;
     }
+    setEstado(e);
+  };
+  const elegir = (p: ProductoCobrar): void => {
+    if (estado.tipo !== 'duplicado') return;
     notificationSuccess();
     onAgregar(p);
-    setEstado({ tipo: 'agregado', p });
+    setEstado(elegidoDeDuplicado(estado, p));
   };
   const deshacer = (): void => {
     if (estado.tipo !== 'agregado') return;
@@ -45,5 +49,5 @@ export function useEscaner(
     setEstado({ tipo: 'deshecho', p: estado.p });
   };
   const otro = (): void => setEstado({ tipo: 'listo' });
-  return { estado, leer, deshacer, otro, reiniciar: otro };
+  return { estado, leer, elegir, deshacer, otro, reiniciar: otro };
 }

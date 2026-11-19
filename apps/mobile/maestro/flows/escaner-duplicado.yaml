@@ -1,0 +1,68 @@
+# A code two products share (M-19, ADR-150; board EcDuplicado): the escáner
+# says «Este código lo tienen 2 productos», puts nothing on the ticket, and
+# the product the operator taps is the one that goes on it. The code is
+# typed in its UPC-A form while Cerveza carries the EAN-13 one, so the flow
+# also proves both forms are one code.
+#
+# Precondition: the mock's fixtures (Agua de jamaica 012345000065 and Cerveza
+# 0012345000065, `MOCK_BARCODES` in packages/contracts/src/mock/fixtures.ts).
+# Both are in the catalogue already, so no «revisión» line shows.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - escaner
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- tapOn:
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'escaner-manual'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: '012345000065'
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-buscar'
+
+# The contract: the choice shows and nothing is on the ticket yet.
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-duplicado'
+    timeout: 8000
+- assertVisible: 'Este código lo tienen 2 productos'
+- assertVisible: 'Toca el que vas a vender.'
+- assertNotVisible:
+    id: 'escaner-agregado'
+
+# The option's label names it (an aria-label folds its texts on iOS).
+- tapOn:
+    text: 'Vender Cerveza, .*'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-agregado'
+    timeout: 5000
+- assertVisible:
+    text: '.*Agregaste Cerveza.*'
+- assertNotVisible:
+    id: 'escaner-duplicado'
+- assertNotVisible:
+    id: 'escaner-aviso-dueno'

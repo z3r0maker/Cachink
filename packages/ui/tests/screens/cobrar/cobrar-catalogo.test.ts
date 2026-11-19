@@ -8,7 +8,7 @@ import { makeProduct } from '../../../../testing/src/fixtures/product';
 import {
   categoriasDe,
   filtrarCatalogo,
-  porCodigo,
+  productosPorCodigo,
   productosDeCaja,
   TODOS,
 } from '../../../src/screens/Ventas/cobrar-catalogo';
@@ -66,15 +66,44 @@ describe('categoriasDe and filtrarCatalogo', () => {
   });
 });
 
-describe('porCodigo', () => {
-  const lista = productosDeCaja([pastor, agua], new Map());
+describe('productosPorCodigo (M-19, ADR-150)', () => {
+  const refresco = makeProduct({
+    id: '01HZ8XQN9GZJXV8AKQ5X0C7BJC' as ProductId,
+    nombre: 'Refresco de cola',
+    sku: '0012000001772',
+  });
+  const refrescoUpc = makeProduct({
+    id: '01HZ8XQN9GZJXV8AKQ5X0C7BJD' as ProductId,
+    nombre: 'Refresco 600 ml',
+    sku: '012000001772',
+  });
+  const etiqueta = makeProduct({
+    id: '01HZ8XQN9GZJXV8AKQ5X0C7BJE' as ProductId,
+    nombre: 'Salsa de la casa',
+    sku: 'tac-01',
+  });
+  const lista = productosDeCaja([pastor, agua, refresco, refrescoUpc, etiqueta], new Map());
+  const nombres = (codigo: string): readonly string[] =>
+    productosPorCodigo(lista, codigo).map((p) => p.nombre);
 
-  it('finds the product with that barcode, trimmed', () => {
-    expect(porCodigo(lista, ' 7501055300075 ')?.nombre).toBe('Taco de pastor');
+  it('finds the one product with that barcode, trimmed', () => {
+    expect(nombres(' 7501055300075 ')).toEqual(['Taco de pastor']);
   });
 
-  it('returns null for an unknown or empty code', () => {
-    expect(porCodigo(lista, '7501234567897')).toBeNull();
-    expect(porCodigo(lista, '  ')).toBeNull();
+  it('returns every product that shares a code, in catalogue order', () => {
+    expect(nombres('012000001772')).toEqual(['Refresco de cola', 'Refresco 600 ml']);
+  });
+
+  it('matches a UPC-A read as the 13-digit EAN', () => {
+    expect(nombres('0012000001772')).toEqual(['Refresco de cola', 'Refresco 600 ml']);
+  });
+
+  it('matches a code with letters whatever its case', () => {
+    expect(nombres('TAC-01')).toEqual(['Salsa de la casa']);
+  });
+
+  it('finds nothing for an unknown or empty code', () => {
+    expect(nombres('7501234567897')).toEqual([]);
+    expect(nombres('  ')).toEqual([]);
   });
 });

@@ -1,0 +1,123 @@
+# From an unknown code to a sale (M-19, ADR-150; MvEscaner, MvProductoNuevo):
+# «Darlo de alta» opens Producto nuevo with the code, the product saves onto
+# the ticket, the SAME code scanned again now finds it (the catalogue took
+# the new product), and the ticket is charged in Efectivo.
+#
+# The code is new on every run: an activated device keeps what earlier runs
+# registered, and a code from a previous run would no longer be unknown.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - escaner
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- evalScript: ${output.codigo = '75' + String(Date.now()).slice(-11)}
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- tapOn:
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'escaner-manual'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: ${output.codigo}
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-buscar'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-desconocido'
+    timeout: 8000
+- tapOn:
+    id: 'escaner-alta'
+
+# Producto nuevo arrives with the code.
+- extendedWaitUntil:
+    visible:
+      id: 'producto-nuevo-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'producto-nuevo-codigo'
+- assertVisible: ${output.codigo}
+- waitForAnimationToEnd
+- tapOn:
+    id: 'producto-nuevo-nombre'
+- waitForAnimationToEnd
+- inputText: 'Chicle'
+- runFlow:
+    when:
+      notVisible:
+        id: 'producto-nuevo-nombre'
+        text: '.*Chicle.*'
+    commands:
+      - tapOn: { id: 'producto-nuevo-nombre' }
+      - eraseText
+      - inputText: 'Chicle'
+- hideKeyboard
+- tapOn:
+    id: 'producto-nuevo-precio'
+- inputText: '5'
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'producto-nuevo-agregar'
+- extendedWaitUntil:
+    notVisible: { id: 'producto-nuevo-nombre' }
+    timeout: 15000
+- extendedWaitUntil:
+    visible: { text: '.*Chicle.*' }
+    timeout: 10000
+
+# The same code again: now it is a known product.
+- tapOn:
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+- tapOn:
+    id: 'escaner-manual'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: ${output.codigo}
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-buscar'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-agregado'
+    timeout: 8000
+- assertVisible:
+    text: '.*Agregaste Chicle.*'
+- tapOn:
+    id: 'escaner-sheet-close'
+- waitForAnimationToEnd
+
+# Two Chicles on the ticket, charged in Efectivo.
+- runFlow:
+    file: shared/cobrar-ticket.yaml
+    env:
+      METODO: Efectivo

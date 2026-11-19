@@ -81,7 +81,8 @@ const PRODUCT_NAMES = [
   'Flan',
   'Arroz con leche',
   'Bolsa de hielo',
-];
+] as const;
+type ProductName = (typeof PRODUCT_NAMES)[number];
 
 const pinHash = (pin: string): string => hashSync(pin, 4); // low cost: dev only
 
@@ -110,11 +111,24 @@ function operator(n: number, nombre: keyof typeof OPERATOR_PINS, avatarColor: st
   });
 }
 
-function product(nombre: string, i: number): Product {
+/**
+ * Barcodes the escáner flows read (M-19, ADR-150), made up under the GS1
+ * Mexico prefix. Refresco has its own; Cerveza and Agua de jamaica share one,
+ * written as EAN-13 and as UPC-A, so a typed code finds both and the escáner
+ * asks which one. Every other product keeps a plain code.
+ */
+export const MOCK_BARCODES = {
+  'Refresco 600ml': '7509876500017',
+  Cerveza: '0012345000065',
+  'Agua de jamaica': '012345000065',
+} as const satisfies Partial<Record<ProductName, string>>;
+
+function product(nombre: ProductName, i: number): Product {
+  const codigos: Partial<Record<ProductName, string>> = MOCK_BARCODES;
   return ProductSchema.parse({
     id: ulidOf('PRD', i + 1),
     nombre,
-    sku: `SKU-${String(i + 1).padStart(3, '0')}`,
+    sku: codigos[nombre] ?? `SKU-${String(i + 1).padStart(3, '0')}`,
     categoria: 'Producto Terminado',
     costoUnitCentavos: BigInt(1000 + i * 100),
     unidad: 'pza',
