@@ -28,6 +28,8 @@ export interface AbrirTurnoSheetProps {
   readonly onAbrir: (fondoCentavos: bigint) => void;
   readonly submitting: boolean;
   readonly error: string | null;
+  /** Right after a close (ADR-146): «¿Con cuánto sigues?» over the counted cash. */
+  readonly otro?: boolean;
 }
 
 function Nota({ texto }: { texto: string }): ReactElement {
@@ -97,7 +99,7 @@ function Cuerpo(
   return (
     <View gap={10}>
       <MText size="md" weight="semibold" color={colors.gray600}>
-        {t('entrar.abrirTurno.cuerpo')}
+        {t(p.otro === true ? 'entrar.abrirTurno.otro.cuerpo' : 'entrar.abrirTurno.cuerpo')}
       </MText>
       <FondoEtiqueta />
       <FondoCifra raw={p.raw} />
@@ -121,15 +123,23 @@ function Cuerpo(
 export function AbrirTurnoSheet(props: AbrirTurnoSheetProps): ReactElement {
   const { t } = useTranslation();
   const [estado, setEstado] = useState(() => fondoDe(props.sugerido));
+  // The last close is read as the sheet opens and may arrive after it: take
+  // the suggestion then, unless the operator has already typed a fondo.
+  const [sugeridoVisto, setSugeridoVisto] = useState(props.sugerido);
+  if (props.sugerido !== sugeridoVisto) {
+    setSugeridoVisto(props.sugerido);
+    if (estado.raw === '') setEstado(fondoDe(props.sugerido));
+  }
   const centavos = centavosDe(estado.raw);
+  const k = props.otro === true ? 'entrar.abrirTurno.otro' : 'entrar.abrirTurno';
   const titulo = props.nombre
-    ? t('entrar.abrirTurno.titulo', { nombre: props.nombre })
-    : t('entrar.abrirTurno.tituloSinNombre');
+    ? t(`${k}.titulo`, { nombre: props.nombre })
+    : t(`${k}.tituloSinNombre`);
   return (
     <BottomSheet
       open={props.open}
       onClose={props.onClose}
-      eyebrow={t('entrar.abrirTurno.eyebrow')}
+      eyebrow={t(`${k}.eyebrow`)}
       title={titulo}
       testID="abrir-caja-modal"
       footer={

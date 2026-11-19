@@ -1,7 +1,7 @@
 /**
  * «Cuenta el efectivo de la caja» (Track M, M-09): bills $1000 to $20 and
  * coins $20 to 10¢ in two columns, billetes and monedas each saying their
- * subtotal, and the foot saying the Contado. The rows themselves live in
+ * subtotal; the step's fixed foot says the Contado (M-16). The rows live in
  * `cierre-conteo-fila`; everything is centavos end to end.
  */
 import type { ReactElement } from 'react';
@@ -18,7 +18,6 @@ import { colors } from '@xangarro/tokens';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow, QuietPanel } from '../../components/Panel/index';
 import { Btn } from '../../components/Btn/index';
-import { borderWidths } from '../../theme';
 import { Fila } from './cierre-conteo-fila';
 
 const BILLETES = DENOMINACIONES_MXN.filter((d) => d.tipo === 'billete');
@@ -52,36 +51,9 @@ function Columna(p: {
   );
 }
 
-/** The foot: «Contaste», and the total the pieces add to. */
-function Contado(p: { readonly contado: bigint }): ReactElement {
-  return (
-    <View
-      flexDirection="row"
-      alignItems="baseline"
-      gap={12}
-      paddingTop={12}
-      borderTopWidth={borderWidths.thick}
-      borderTopColor={colors.black}
-    >
-      <Eyebrow>Contaste</Eyebrow>
-      <MText
-        size="total"
-        weight="extraBold"
-        fontVariant={['tabular-nums']}
-        letterSpacing={-1}
-        marginLeft="auto"
-        testID="cierre-contado"
-      >
-        {formatMoney(p.contado)}
-      </MText>
-    </View>
-  );
-}
-
 /** The counter itself; «Empezar de cero» clears every piece. */
 export function CierreConteo(p: {
   readonly conteo: ConteoDenominaciones;
-  readonly contado: bigint;
   readonly poner: (clave: ClaveDenominacion, n: number) => void;
   readonly onLimpiar: () => void;
 }): ReactElement {
@@ -99,7 +71,6 @@ export function CierreConteo(p: {
       <View gap={18}>
         <Columna titulo="Billetes" lista={BILLETES} conteo={p.conteo} poner={p.poner} />
         <Columna titulo="Monedas" lista={MONEDAS} conteo={p.conteo} poner={p.poner} />
-        <Contado contado={p.contado} />
       </View>
     </QuietPanel>
   );

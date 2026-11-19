@@ -60,27 +60,24 @@ tags:
       id: 'mobile-cierre'
     timeout: 15000
 
-# The band (cierre-banda.tsx, copy.ts bandaTitulo): the rows wait, the close
-# does not. Below the counter, with the resumen.
-- scrollUntilVisible:
-    element:
-      id: 'cierre-por-enviar'
-    direction: DOWN
-    timeout: 20000
-    visibilityPercentage: 60
-- assertVisible: 'Tienes .* por enviar.*'
-
 # Count one $500 bill against the $500 fondo + the sale's cash: a faltante,
 # explained with «Cambio mal dado» (the chip that needs no note). The flow is
 # about closing with rows pending, not about cuadrar.
-- scrollUntilVisible:
-    element:
-      id: 'conteo-mas-billete-500'
-    direction: UP
-    timeout: 15000
-    visibilityPercentage: 60
 - tapOn:
     id: 'conteo-mas-billete-500'
+# Step 1 ends at its fixed foot (M-16): «Ver resultado» shows the esperado.
+- tapOn:
+    id: 'cierre-ver-resultado'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-paso-resultado'
+    timeout: 10000
+
+# The band (cierre-banda.tsx, copy.ts bandaTitulo) on the result, over the
+# close: the rows wait, the close does not.
+- assertVisible:
+    id: 'cierre-por-enviar'
+- assertVisible: 'Tienes .* por enviar.*'
 - scrollUntilVisible:
     element:
       id: 'cierre-motivo-Cambio mal dado'
@@ -102,8 +99,8 @@ tags:
 - tapOn:
     id: 'cierre-cerrar-turno'
 # Hecho with a faltante: no celebration, «Turno cerrado» and the motivo in
-# the line; with rows still to send, lineaCerrado leaves out «ya lo tiene en
-# su portal» and lineaPorEnviar says when the owner sees it.
+# the line; with rows still to send, lineaHecho says los patrones see it
+# once the rows go up (M-16).
 - extendedWaitUntil:
     visible:
       id: 'cierre-hecho'
@@ -111,6 +108,7 @@ tags:
 - assertVisible: '.*Faltante.*'
 - assertVisible: '.*Turno cerrado.*'
 - assertVisible: '.*Quedó un faltante explicado como «Cambio mal dado»\..*'
+- assertVisible: '.*Los patrones lo verán en su portal cuando se envíen los registros\..*'
 
 # The server returns; the cierre and the sale go up.
 - runScript:

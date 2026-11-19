@@ -1,8 +1,8 @@
 # Cierre con faltante (Track M, M-09): count short of the expected, the
 # diferencia turns red, asks its motivo and names the faltante in the close
 # button, and the hecho screen says «Faltante» with the motivo in its line.
-# «Mandar el corte» composes the WhatsApp share — the OS sheet opens inside
-# the app and is dismissed here; nothing is sent to an external app.
+# «Mandar el corte a los patrones» opens the corte's own sheet with the
+# message as it arrives; «Listo» closes it, nothing is sent (M-16).
 #
 # Precondition: activated device, turno open with the $500 fondo, nothing
 # else captured (expected = fondo).
@@ -34,6 +34,14 @@ appId: mx.xangarro.mobile
 
 # Falta: Don worries, the motivo is required (DIF.falta.hint and cerrarHint,
 # caja/src/cierre/copy.ts). The diferencia panel is below the counter.
+# Step 1 ends at its fixed foot (M-16): «Ver resultado» shows the esperado.
+- tapOn:
+    id: 'cierre-ver-resultado'
+- extendedWaitUntil:
+    visible:
+      id: 'cierre-paso-resultado'
+    timeout: 10000
+
 - scrollUntilVisible:
     element:
       id: 'cierre-diferencia'
@@ -82,13 +90,25 @@ appId: mx.xangarro.mobile
 # textoCorte, cierre.tsx). The OS share sheet itself is not asserted: its
 # Cancel is not a stable element across simulator OS versions and locales
 # (M-11) — the compose is the OS's behavior, not the app's.
-- scrollUntilVisible:
-    element:
-      id: 'cierre-compartir'
-    direction: DOWN
-    timeout: 15000
-    visibilityPercentage: 60
+# The corte as a ticket, with the cash reminder at its foot (ADR-146).
 - assertVisible:
-    id: 'cierre-compartir'
+    id: 'cierre-corte'
+- assertVisible: '.*Guarda \$200\.00 para los patrones\..*'
+- tapOn:
+    id: 'cierre-mandar'
+- extendedWaitUntil:
+    visible:
+      id: 'corte-sheet'
+    timeout: 10000
+- assertVisible: '.*Mandar el corte a los patrones.*'
+- assertVisible: '.*Faltante: \$300\.00 \(Cambio mal dado\).*'
+- assertVisible:
+    id: 'corte-whatsapp'
+- tapOn:
+    id: 'corte-listo'
+- extendedWaitUntil:
+    notVisible:
+      id: 'corte-sheet'
+    timeout: 10000
 - assertVisible:
     id: 'cierre-hecho'

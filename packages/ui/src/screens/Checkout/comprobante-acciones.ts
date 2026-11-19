@@ -18,11 +18,12 @@ export async function porWhatsApp(texto: string): Promise<string> {
   }
 }
 
-export async function porMensaje(texto: string): Promise<string> {
+/** `que` names what was sent: «el comprobante» or, from the close, «el corte». */
+export async function porMensaje(texto: string, que = 'el comprobante'): Promise<string> {
   const sep = Platform.OS === 'ios' ? '&' : '?';
   try {
     await Linking.openURL(`sms:${sep}body=${encodeURIComponent(texto)}`);
-    return 'Se abrió Mensajes con el comprobante. Escribe su número y dale enviar.';
+    return `Se abrió Mensajes con ${que}. Escribe su número y dale enviar.`;
   } catch {
     return 'No se pudo abrir Mensajes en este teléfono.';
   }

@@ -14,7 +14,7 @@ import { TURNO_FIXTURE } from '@xangarro/caja/turno';
 import { initI18n } from '../../i18n/index';
 import { Marco } from '../Inicio/story-marco';
 import { CierreHecho } from './cierre-hecho';
-import { CierreScreen } from './cierre-screen';
+import { CierreScreen, type PasoCierre } from './cierre-screen';
 import { MiTurnoScreen } from './mi-turno-screen';
 
 initI18n();
@@ -62,6 +62,7 @@ function MiTurno(p: { readonly porEnviar?: boolean; readonly sinTurno?: boolean 
 function Cierre(p: {
   readonly conteo?: Parameters<typeof estadoDelConteo>[0];
   readonly porEnviar?: boolean;
+  readonly paso?: PasoCierre;
 }): ReactElement {
   return (
     <Marco layout="phone" shell>
@@ -73,7 +74,8 @@ function Cierre(p: {
         onRetry={() => undefined}
         onSalir={() => undefined}
         onAbrirTurno={() => undefined}
-        onCompartir={() => undefined}
+        onOtroTurno={() => undefined}
+        {...(p.paso === undefined ? {} : { paso: p.paso })}
       />
     </Marco>
   );
@@ -87,7 +89,7 @@ function Hecho(p: { readonly conteo: Parameters<typeof estadoDelConteo>[0] }): R
         e={e(p.conteo)}
         motivo="Cambio mal dado"
         porEnviar={0}
-        onCompartir={() => undefined}
+        onOtroTurno={() => undefined}
         onSalir={() => undefined}
       />
     </Marco>
@@ -105,10 +107,15 @@ type Story = StoryObj;
 export const Turno: Story = { render: () => <MiTurno /> };
 export const TurnoConRegistrosPorEnviar: Story = { render: () => <MiTurno porEnviar /> };
 export const TurnoSinTurno: Story = { render: () => <MiTurno sinTurno /> };
-export const CierreCuadra: Story = { render: () => <Cierre conteo={CONTEO_CUADRA} /> };
-export const CierreFalta: Story = { render: () => <Cierre conteo={CONTEO_FALTA} /> };
+export const CierreContar: Story = { render: () => <Cierre conteo={CONTEO_CUADRA} /> };
+export const CierreCuadra: Story = {
+  render: () => <Cierre conteo={CONTEO_CUADRA} paso="resultado" />,
+};
+export const CierreFalta: Story = {
+  render: () => <Cierre conteo={CONTEO_FALTA} paso="resultado" />,
+};
 export const CierreConRegistrosPorEnviar: Story = {
-  render: () => <Cierre conteo={CONTEO_FALTA} porEnviar />,
+  render: () => <Cierre conteo={CONTEO_FALTA} porEnviar paso="resultado" />,
 };
 export const HechoCuadro: Story = { render: () => <Hecho conteo={CONTEO_CUADRA} /> };
 export const HechoFaltante: Story = { render: () => <Hecho conteo={CONTEO_FALTA} /> };

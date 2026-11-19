@@ -1,23 +1,39 @@
 /**
- * The one close button on Cierre (Track M, M-09): the difference in its
- * words («Cerrar turno con faltante de $70.00»), blocked only while the
- * reason (or its note) is missing — records still to send never block it
- * (ADR-123) — with the hint under it saying which is missing.
+ * Step 2's fixed foot (M-16, MvCierreFlujo): the one close button, the
+ * difference in its words («Cerrar turno con faltante de $70.00»), blocked
+ * only while the reason (or its note) is missing — records still to send
+ * never block it (ADR-123) — «Volver a contar» under it, and the hint saying
+ * what is missing or what closing does.
  */
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
-import { cerrarHint, cerrarLabel, type EstadoConteo } from '@xangarro/caja/cierre';
+import { cerrarLabel, pistaCerrar, type EstadoConteo } from '@xangarro/caja/cierre';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { colors } from '../../theme';
+
+/** What is missing, or what closing does. */
+function Pista(p: { readonly e: EstadoConteo }): ReactElement {
+  return (
+    <MText
+      size="sm"
+      weight="semibold"
+      color={colors.gray600}
+      textAlign="center"
+      testID="cierre-cerrar"
+    >
+      {pistaCerrar(p.e.faltaMotivo, p.e.faltaNota)}
+    </MText>
+  );
+}
 
 export function CierreCerrar(p: {
   readonly e: EstadoConteo;
   readonly guardando: boolean;
   readonly onCerrar: () => void;
+  readonly onVolver: () => void;
 }): ReactElement {
   return (
-    <View gap={8} testID="cierre-cerrar">
+    <>
       <Btn
         variant="primary"
         size="xl"
@@ -30,9 +46,18 @@ export function CierreCerrar(p: {
       >
         {cerrarLabel(p.e.dif)}
       </Btn>
-      <MText size="xs" weight="semibold" color={colors.gray600} textAlign="center">
-        {cerrarHint(p.e.faltaMotivo, p.e.faltaNota)}
-      </MText>
-    </View>
+      <Btn
+        variant="secondary"
+        size="lg"
+        sentence
+        fullWidth
+        disabled={p.guardando}
+        onPress={p.onVolver}
+        testID="cierre-volver-a-contar"
+      >
+        Volver a contar
+      </Btn>
+      <Pista e={p.e} />
+    </>
   );
 }
