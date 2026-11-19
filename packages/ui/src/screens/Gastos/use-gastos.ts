@@ -26,6 +26,8 @@ import { leerFilasGastos } from './gastos-lectura';
 export interface GastosVivo {
   readonly state: 'loading' | 'error' | 'happy';
   readonly data: GastosData | null;
+  /** True while the operator has a turno open; a gasto needs one (M8). */
+  readonly turnoAbierto: boolean;
   /** The due recurrent gastos to pay; null until the read lands. */
   readonly porPagar: readonly RecurrentePorPagar[] | null;
   readonly registrar: (n: NuevoGasto) => Promise<void>;
@@ -123,6 +125,7 @@ export function useGastos(): GastosVivo {
   return {
     state,
     data,
+    turnoAbierto: q.data?.abierto != null,
     porPagar: q.isError ? null : (q.data?.recurrentes ?? null),
     registrar,
     refetch: recargar,

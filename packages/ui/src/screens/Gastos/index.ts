@@ -5,9 +5,5 @@ export { RegistrarGastoSheet, type RegistrarGastoSheetProps } from './registrar-
 export { PagarRecurrenteSheet, type PagarRecurrenteSheetProps } from './pagar-recurrente-sheet';
 export { GastoFila, PendienteFila, Etiqueta } from './gasto-fila';
 export { Lista as GastosLista, Pendientes as GastosPendientes } from './gastos-lista';
-export {
-  Cifras as GastosCifras,
-  Buscador as GastosBuscador,
-  Filtros as GastosFiltros,
-} from './gastos-cifras';
+export { Cifras as GastosCifras, Filtros as GastosFiltros } from './gastos-cifras';
 export { useGastoForm, useGuardarHoja, type GastoForm, type GuardarHoja } from './use-gasto-form';

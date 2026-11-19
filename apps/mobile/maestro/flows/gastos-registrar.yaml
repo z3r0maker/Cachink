@@ -42,7 +42,9 @@ tags:
     timeout: 8000
 - extendedWaitUntil: { visible: { id: 'mobile-gastos' }, timeout: 8000 }
 - assertVisible: '.*Lo que salió de la caja en tu turno.*'
-- assertVisible: { id: 'gastos-cifras' }
+# The figures appear only once a gasto exists (RvGastos); the one button
+# at the foot is there in every state with a turno.
+- assertVisible: { id: 'gastos-abrir-registrar' }
 
 # Unhappy: concepto alone is not enough — no monto, no categoría, and the
 # action stays blocked (the button still says «$___»; the sheet stays open).
@@ -121,6 +123,7 @@ tags:
     timeout: 5000
 - tapOn: { id: 'gasto-guardar' }
 - extendedWaitUntil: { notVisible: { id: 'registrar-gasto-sheet' }, timeout: 8000 }
+- assertVisible: { id: 'gastos-cifras' }
 
 # The new row heads the list, red and negative, with its categoría chip.
 # The row's concepto text is not asserted: the driver drops characters

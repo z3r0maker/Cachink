@@ -1,13 +1,14 @@
 /**
- * GastosScreen — «Gastos del turno» (Track M, M-08; the web operador's
- * `GastosScreen` said on the phone): what left the drawer in this turno,
- * its three figures, the search and the category chips, the recurring gastos
- * already due and the two sheets that record — «Registrar gasto» empty, or
- * «Pagar» one filled from a due template. Presentational: the route hands it
- * `useGastos()`, the retry and, when Inicio's «Para hoy» sent one, the
- * prefill to open the pagar sheet with.
+ * GastosScreen — «Gastos del turno» (Track M, M-08; RvGastos): what left the
+ * drawer in this turno, two figures, the receipt note and the category chips,
+ * the recurring gastos already due, and one «Registrar gasto» fixed at the
+ * foot. Nothing recorded yet is Don's empty state; no open turno is
+ * MvTurnoCerrado, because a gasto saved there showed in no list (M8). The two
+ * sheets record — «Registrar gasto» empty, or «Pagar» one filled from a due
+ * template. Presentational: the route hands it `useGastos()`, the retry,
+ * «Abrir turno» and, when Inicio's «Para hoy» sent one, the prefill.
  */
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import {
@@ -22,16 +23,21 @@ import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
 import { ErrorState, Spinner } from '../../components/index';
-import { colors } from '../../theme';
+import { borderColors, borderWidths, colors } from '../../theme';
+import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
-import { Buscador, Cifras, Filtros } from './gastos-cifras';
-import { Lista, Pendientes } from './gastos-lista';
+import { Cifras, Filtros } from './gastos-cifras';
+import { Lista, Pendientes, SinGastos } from './gastos-lista';
 import { PagarRecurrenteSheet } from './pagar-recurrente-sheet';
 import { RegistrarGastoSheet } from './registrar-gasto-sheet';
 
 export interface GastosScreenProps {
   readonly state: 'loading' | 'error' | 'happy';
   readonly data: GastosData | null;
+  /** False outside a turno: no form opens, only «Abrir turno» (M8). */
+  readonly turnoAbierto: boolean;
+  /** «Abrir turno»: the fondo sheet, right here (MvTurnoCerrado). */
+  readonly onAbrirTurno: () => void;
   /** The due recurring gastos to pay; null while the read lands. */
   readonly porPagar: readonly RecurrentePorPagar[] | null;
   /** A due recurring gasto Inicio's «Para hoy» sent: the pagar sheet opens on it. */
@@ -60,22 +66,34 @@ function useHoja(
   return { hoja, abrir: setHoja, cerrar: () => setHoja(null) };
 }
 
-function Cabeza({ onRegistrar }: { readonly onRegistrar: () => void }): ReactElement {
+function Cabeza(): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" gap={12}>
-      <View flex={1} gap={2}>
-        <MText size="xl4" weight="extraBold" letterSpacing={-0.9} role="heading">
-          Gastos
-        </MText>
-        <MText size="md" weight="semibold" color={colors.gray600}>
-          Lo que salió de la caja en tu turno
-        </MText>
-      </View>
+    <View gap={2}>
+      <MText size="xl4" weight="extraBold" letterSpacing={-0.9} role="heading">
+        Gastos
+      </MText>
+      <MText size="md" weight="semibold" color={colors.gray600}>
+        Lo que salió de la caja en tu turno
+      </MText>
+    </View>
+  );
+}
+
+/** The one way to record, fixed at the foot in every state with a turno. */
+function Pie({ onRegistrar }: { readonly onRegistrar: () => void }): ReactElement {
+  return (
+    <View
+      padding={16}
+      borderTopWidth={borderWidths.quiet}
+      borderTopColor={borderColors.quiet}
+      backgroundColor={colors.white}
+    >
       <Btn
         variant="primary"
-        size="lg"
+        size="xl"
         sentence
-        icon={<PathIcon d={COBRAR_GLYPHS.mas} size={18} strokeWidth={2.6} />}
+        fullWidth
+        icon={<PathIcon d={COBRAR_GLYPHS.mas} size={20} strokeWidth={2.6} />}
         onPress={onRegistrar}
         testID="gastos-abrir-registrar"
       >
@@ -85,28 +103,49 @@ function Cabeza({ onRegistrar }: { readonly onRegistrar: () => void }): ReactEle
   );
 }
 
-function Contenido(p: GastosScreenProps & { readonly data: GastosData }): ReactElement {
+/** The figures, the chips and the rows; Don alone when nothing left the drawer. */
+function Cuerpo(p: { readonly data: GastosData; readonly pendientes: ReactNode }): ReactElement {
   const [filtro, setFiltro] = useState<'Todos' | CategoriaGasto>('Todos');
-  const [query, setQuery] = useState('');
-  const { hoja, abrir, cerrar } = useHoja(p.prefill ?? null, p.porPagar);
-  const firma = `${p.data.operador}, ${p.data.caja}`;
-  const visibles = filtrar(p.data.gastos, filtro, query);
+  if (p.data.gastos.length === 0) {
+    return (
+      <>
+        {p.pendientes}
+        <SinGastos />
+      </>
+    );
+  }
   return (
     <>
+      <Cifras data={p.data} />
+      <Filtros valor={filtro} onElegir={setFiltro} />
+      {p.pendientes}
+      <Lista gastos={filtrar(p.data.gastos, filtro, '')} />
+    </>
+  );
+}
+
+function Contenido(p: GastosScreenProps & { readonly data: GastosData }): ReactElement {
+  const { hoja, abrir, cerrar } = useHoja(p.prefill ?? null, p.porPagar);
+  const firma = `${p.data.operador}, ${p.data.caja}`;
+  return (
+    <View flex={1}>
       <ScrollView
         testID={p.testID ?? 'gastos'}
+        style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Cabeza onRegistrar={() => abrir({ kind: 'registrar' })} />
-        <Cifras data={p.data} />
-        <Buscador q={query} onQ={setQuery} />
-        <Filtros valor={filtro} onElegir={setFiltro} />
-        {p.porPagar !== null && p.porPagar.length > 0 ? (
-          <Pendientes items={p.porPagar} onPagar={(x) => abrir({ kind: 'pagar', x })} />
-        ) : null}
-        <Lista gastos={visibles} buscando={query.trim() !== ''} />
+        <Cabeza />
+        <Cuerpo
+          data={p.data}
+          pendientes={
+            p.porPagar !== null && p.porPagar.length > 0 ? (
+              <Pendientes items={p.porPagar} onPagar={(x) => abrir({ kind: 'pagar', x })} />
+            ) : null
+          }
+        />
       </ScrollView>
+      <Pie onRegistrar={() => abrir({ kind: 'registrar' })} />
       {hoja === null ? null : hoja.kind === 'registrar' ? (
         <RegistrarGastoSheet open firma={firma} onClose={cerrar} onGuardar={p.registrar} />
       ) : (
@@ -118,7 +157,7 @@ function Contenido(p: GastosScreenProps & { readonly data: GastosData }): ReactE
           onGuardar={p.registrar}
         />
       )}
-    </>
+    </View>
   );
 }
 
@@ -144,6 +183,13 @@ export function GastosScreen(p: GastosScreenProps): ReactElement {
         <View flex={1} alignItems="center" justifyContent="center" testID="gastos-cargando">
           <Spinner />
         </View>
+      </View>
+    );
+  }
+  if (!p.turnoAbierto) {
+    return (
+      <View flex={1} testID={p.testID}>
+        <TurnoCerrado pantalla="gastos" onAbrir={p.onAbrirTurno} testID="gastos-sin-turno" />
       </View>
     );
   }

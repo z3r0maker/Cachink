@@ -1,12 +1,13 @@
 /**
- * The Gastos list itself (M-08): the turno's rows in a quiet panel, or the
- * board's two empty answers — «Sin resultados» while a search filters
- * everything out, «Sin gastos en este turno» when nothing has left the
- * drawer — plus «Pendientes de registrar», the due recurring gastos to pay.
+ * The Gastos list itself (M-08, RvGastos): the turno's rows in a quiet panel,
+ * or its two empty answers — «Nada en esta categoría» while a chip filters
+ * everything out, and Don's «No ha salido dinero de la caja» when nothing has
+ * left the drawer — plus «Pendientes de registrar», the due recurring gastos.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { GastoTurno, RecurrentePorPagar } from '@xangarro/caja/gastos';
+import { EstadoVacio } from '../../components/CajaEstado/index';
 import { MText } from '../../components/Mostrador/index';
 import { QuietPanel } from '../../components/Panel/index';
 import { PathIcon } from '../../components/PathIcon/index';
@@ -45,22 +46,24 @@ function Vacio(p: {
   );
 }
 
-export function Lista(p: {
-  readonly gastos: readonly GastoTurno[];
-  readonly buscando: boolean;
-}): ReactElement {
+/** Nothing has left the drawer yet: Don, one sentence; the button is the foot's. */
+export function SinGastos(): ReactElement {
+  return (
+    <EstadoVacio
+      id="gastos-sin-gastos"
+      title="No ha salido dinero de la caja"
+      body="Cuando pagues algo del negocio con efectivo, regístralo aquí."
+    />
+  );
+}
+
+export function Lista(p: { readonly gastos: readonly GastoTurno[] }): ReactElement {
   if (p.gastos.length === 0) {
-    return p.buscando ? (
+    return (
       <Vacio
-        titulo="Sin resultados"
-        cuerpo="Ningún gasto de tu turno coincide con lo que buscas."
+        titulo="Nada en esta categoría"
+        cuerpo="Toca «Todos» para ver cada gasto de tu turno."
         testID="gastos-sin-resultados"
-      />
-    ) : (
-      <Vacio
-        titulo="Sin gastos en este turno"
-        cuerpo="Cuando saques dinero de la caja para algo del negocio, regístralo aquí con su comprobante."
-        testID="gastos-sin-gastos"
       />
     );
   }

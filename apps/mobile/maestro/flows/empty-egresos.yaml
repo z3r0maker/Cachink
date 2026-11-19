@@ -28,9 +28,11 @@ appId: mx.xangarro.mobile
     visible:
       id: 'mobile-gastos'
     timeout: 8000
-# A just-opened turno has no gastos: the empty state owns the middle, and
-# «Registrar gasto» stays in the thumb zone.
+# A just-opened turno has no gastos: Don's empty state owns the middle, no
+# figures or chips, and «Registrar gasto» is fixed at the foot (RvGastos).
 - assertVisible:
     id: 'gastos-sin-gastos'
 - assertVisible:
     id: 'gastos-abrir-registrar'
+- assertNotVisible:
+    id: 'gastos-cifras'

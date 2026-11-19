@@ -1,7 +1,8 @@
 /**
- * GastosScreen (Track M, M-08) — the states the boards draw: the list with
- * its figures and pendientes, the search and the chips, sin gastos, cargando,
- * con error, and the two sheets' opening. Data comes from the caja package's
+ * GastosScreen (Track M, M-08; RvGastos) — the states the boards draw: the
+ * list with its two figures, the receipt note and the chips, one «Registrar
+ * gasto» at the foot, sin gastos with Don, sin turno, cargando, con error,
+ * and the two sheets' opening. Data comes from the caja package's
  * fixtures, as on the web screen.
  */
 import { describe, expect, it, vi } from 'vitest';
@@ -18,32 +19,45 @@ type Over = Partial<Parameters<typeof GastosScreen>[0]>;
 
 function montar(over: Over = {}) {
   const onRetry = vi.fn();
+  const onAbrirTurno = vi.fn();
   const registrar = vi.fn(() => Promise.resolve());
   renderWithProviders(
     <GastosScreen
       state="happy"
       data={DATA}
+      turnoAbierto
+      onAbrirTurno={onAbrirTurno}
       porPagar={[RECURRENTE_PAGAR_FIXTURE]}
       registrar={registrar}
       onRetry={onRetry}
       {...over}
     />,
   );
-  return { onRetry, registrar };
+  return { onRetry, onAbrirTurno, registrar };
 }
 
-const escribir = (testID: string, texto: string): void => {
-  fireEvent.change(screen.getByTestId(testID), { target: { value: texto } });
-};
-
 describe('GastosScreen · lista', () => {
-  it('says the head, the three figures and the owner note', () => {
+  it('says the head, the two figures and the receipt note in one line', () => {
     montar();
     expect(screen.getByRole('heading').textContent).toBe('Gastos');
     expect(screen.getByText('Lo que salió de la caja en tu turno')).toBeInTheDocument();
-    expect(screen.getByText('Gastos del turno')).toBeInTheDocument();
+    expect(screen.getByText('Salió de caja chica')).toBeInTheDocument();
     expect(screen.getByText('$620.00')).toBeInTheDocument();
-    expect(screen.getByText('Pedro te lo va a preguntar')).toBeInTheDocument();
+    expect(screen.getByTestId('gastos-cuantos').textContent).toBe('5');
+    expect(screen.getByTestId('gastos-sin-comprobante').textContent).toBe(
+      '1 sin comprobante. Pedro te lo va a preguntar.',
+    );
+    expect(screen.queryByText('Gastos del turno')).not.toBeInTheDocument();
+  });
+
+  it('has no search box: the chips are the only filter', () => {
+    montar();
+    expect(screen.queryByTestId('gastos-buscar')).not.toBeInTheDocument();
+  });
+
+  it('says nothing about receipts when every gasto has one', () => {
+    montar({ data: { ...DATA, gastos: DATA.gastos.filter((g) => g.comprobante) } });
+    expect(screen.queryByTestId('gastos-sin-comprobante')).not.toBeInTheDocument();
   });
 
   it('lists the turno rows with the category and receipt chips', () => {
@@ -66,7 +80,7 @@ describe('GastosScreen · lista', () => {
     expect(screen.getByText('Pagar gas del local')).toBeInTheDocument();
   });
 
-  it('opens the registrar sheet from the header button, and cancels back', () => {
+  it('opens the registrar sheet from the one button at the foot, and cancels back', () => {
     montar();
     fireEvent.click(screen.getByTestId('gastos-abrir-registrar'));
     expect(screen.getByTestId('registrar-gasto-sheet')).toBeInTheDocument();
@@ -76,31 +90,48 @@ describe('GastosScreen · lista', () => {
 });
 
 describe('GastosScreen · filtros', () => {
-  it('filters by category and searches without accents', () => {
+  it('filters by category', () => {
     montar();
     fireEvent.click(screen.getByTestId('gastos-filtro-Insumos'));
     expect(screen.getByText('Carbón')).toBeInTheDocument();
     expect(screen.queryByText('Taxi por insumos')).not.toBeInTheDocument();
-    escribir('gastos-buscar', 'carbonería');
-    expect(screen.getByText('Carbón')).toBeInTheDocument();
-    escribir('gastos-buscar', 'gas');
+  });
+
+  it('a category with nothing in it says so, and the chips stay', () => {
+    montar();
+    fireEvent.click(screen.getByTestId('gastos-filtro-Mantenimiento'));
     expect(screen.getByTestId('gastos-sin-resultados')).toBeInTheDocument();
-    expect(
-      screen.getByText('Ningún gasto de tu turno coincide con lo que buscas.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Nada en esta categoría')).toBeInTheDocument();
+    expect(screen.getByTestId('gastos-filtro-Todos')).toBeInTheDocument();
   });
 });
 
 describe('GastosScreen · estados', () => {
-  it('sin gastos: the board empty answer', () => {
+  it('sin gastos: Don, one sentence, and the button still at the foot', () => {
     montar({ data: { ...DATA, gastos: [] }, porPagar: [] });
     expect(screen.getByTestId('gastos-sin-gastos')).toBeInTheDocument();
-    expect(screen.getByText('Sin gastos en este turno')).toBeInTheDocument();
+    expect(screen.getByText('No ha salido dinero de la caja')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Cuando saques dinero de la caja para algo del negocio, regístralo aquí con su comprobante.',
-      ),
+      screen.getByText('Cuando pagues algo del negocio con efectivo, regístralo aquí.'),
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('gastos-cifras')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gastos-filtros')).not.toBeInTheDocument();
+    expect(screen.getByTestId('gastos-abrir-registrar')).toBeInTheDocument();
+  });
+
+  it('sin gastos keeps the due recurrent gastos to pay', () => {
+    montar({ data: { ...DATA, gastos: [] } });
+    expect(screen.getByTestId('gastos-pendientes')).toBeInTheDocument();
+  });
+
+  it('sin turno: no form to open, only «Abrir turno» (M8)', () => {
+    const { onAbrirTurno } = montar({ turnoAbierto: false });
+    expect(screen.getByText('Abre tu turno para registrar gastos')).toBeInTheDocument();
+    expect(screen.queryByTestId('gastos-abrir-registrar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gastos-pendientes')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gastos-lista')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('gastos-sin-turno-cta'));
+    expect(onAbrirTurno).toHaveBeenCalled();
   });
 
   it('cargando: a spinner, not a guess', () => {
@@ -121,5 +152,10 @@ describe('GastosScreen · prefill', () => {
   it('a due recurrent gasto Inicio sent opens the pagar sheet', async () => {
     montar({ prefill: RECURRENTE_PAGAR_FIXTURE.prefill });
     await waitFor(() => expect(screen.getByTestId('pagar-recurrente-sheet')).toBeInTheDocument());
+  });
+
+  it('without a turno the prefill opens nothing', () => {
+    montar({ turnoAbierto: false, prefill: RECURRENTE_PAGAR_FIXTURE.prefill });
+    expect(screen.queryByTestId('pagar-recurrente-sheet')).not.toBeInTheDocument();
   });
 });
