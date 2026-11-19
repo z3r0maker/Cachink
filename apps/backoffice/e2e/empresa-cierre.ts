@@ -72,7 +72,7 @@ const superSql = () =>
   postgres(process.env.DATABASE_SUPER_URL ?? '', { max: 1, onnotice: () => undefined });
 
 export const OTRO_SOCIO = 'Socio Dos E2E';
-const OTRO_ID = `f-e2e-dos-${randomBytes(4).toString('hex')}`;
+export const OTRO_ID = `f-e2e-dos-${randomBytes(4).toString('hex')}`;
 
 /** Fundador 2, with no console login: the test answers for them in the database. */
 export async function agregarOtroSocio(): Promise<void> {
