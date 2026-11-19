@@ -124,6 +124,15 @@ describe('ventaTurnoDe', () => {
     assert.equal(v.cliente, undefined);
   });
 
+  it('says every line the ticket carries, not the header concepto', () => {
+    const v = ventaTurnoDe({ ...TICKET, concepto: 'Taco de pastor' }, LINEAS);
+    assert.equal(v.concepto, '3 Taco de pastor · 1 Gringa');
+  });
+
+  it('a ticket whose lines are not read yet keeps its stored concepto', () => {
+    assert.equal(ventaTurnoDe(TICKET, []).concepto, '3 pastor · 1 gringa · 1 horchata');
+  });
+
   it('Crédito reads as Fiado with its client; the motivo survives', () => {
     const v = ventaTurnoDe(
       { ...TICKET, metodo: 'Crédito', cancelMotivo: 'Error de captura' },

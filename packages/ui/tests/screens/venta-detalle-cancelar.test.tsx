@@ -152,8 +152,10 @@ describe('cancelar con motivo', () => {
       expect(screen.queryByTestId('venta-cancelar')).toBeNull();
     });
     // The sale stays in the list, cancelled; the sheet says what happened.
-    expect(screen.getByTestId('venta-fila-V-0412')).toBeInTheDocument();
-    expect(screen.getByText(/Cancelada · Error de captura/)).toBeInTheDocument();
+    expect(screen.getByTestId('venta-fila-V-0412')).toHaveAttribute(
+      'aria-label',
+      'Ver venta V-0412, $160.00, Efectivo, cancelada',
+    );
     expect(screen.getByTestId('venta-detalle-aviso')).toBeInTheDocument();
   });
 
@@ -202,7 +204,10 @@ describe('cancelar con motivo', () => {
     vista.rerender(<VentasMostradorScreen {...props()} data={conNueva} />);
 
     // The cancellation still shows, and the new venta made it to the list.
-    expect(screen.getByText(/Cancelada · Error de captura/)).toBeInTheDocument();
+    expect(screen.getByTestId('venta-fila-V-0412')).toHaveAttribute(
+      'aria-label',
+      'Ver venta V-0412, $160.00, Efectivo, cancelada',
+    );
     expect(screen.getByTestId('venta-fila-V-0413')).toBeInTheDocument();
   });
 
