@@ -124,4 +124,23 @@ describe('CobrarScreen', () => {
     fireEvent.click(tile);
     expect(a.onAdd).toHaveBeenCalledWith(AGUA);
   });
+
+  it('a caja with no products yet: Don points to «Producto nuevo», nothing to search', () => {
+    const a = montar({ productos: [], lines: [] });
+    expect(screen.getByTestId('don-senalando')).toBeInTheDocument();
+    expect(screen.getByText('Todavía no hay productos')).toBeInTheDocument();
+    expect(screen.getByText('Da de alta lo que vendes y ya puedes cobrar.')).toBeInTheDocument();
+    expect(screen.queryByTestId('cobrar-search')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('cobrar-sin-productos-cta'));
+    expect(a.onProductoNuevo).toHaveBeenCalledTimes(1);
+  });
+
+  it('a search that matches nothing keeps the search and its plain answer', () => {
+    const a = montar();
+    fireEvent.change(screen.getByTestId('cobrar-search'), { target: { value: 'zzz' } });
+    expect(screen.getByText('No hay productos con eso')).toBeInTheDocument();
+    expect(screen.queryByTestId('don-senalando')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('cobrar-vacio-nuevo'));
+    expect(a.onProductoNuevo).toHaveBeenCalledTimes(1);
+  });
 });
