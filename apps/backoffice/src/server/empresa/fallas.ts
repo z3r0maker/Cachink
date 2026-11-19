@@ -58,6 +58,11 @@ const DOMAIN_CODES = new Set([
   'TOPE_INVALIDO',
   'SERVICIO_INVALIDO',
   'SERVICIO_DESCONOCIDO',
+  'DECLARACION_INVALIDA',
+  'DECLARACION_FALTANTE',
+  'DECLARACION_PAGADA',
+  'IMPUESTOS_INVALIDOS',
+  'SE_PAGA_DESDE_IMPUESTOS',
 ]);
 
 export function failed(error: unknown, what: string): FormState {
