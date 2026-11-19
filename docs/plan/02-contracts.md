@@ -372,6 +372,7 @@ retryable) when the inbox could not be reached. A limit that cannot be checked r
 ### C-13 API de intenciones de pago [media]
 
 - [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** que N-40 decida avanzar · **Blocks:** N-80, N-42
+  - **Remaining (2026-11-19, verificado contra el repo):** todo: no hay esquemas, ni escenarios del mock, ni códigos en `ERROR_CATALOG` para nada de esto, y su disparador (que N-40 decida avanzar) no ha ocurrido. Su enmienda del 2026-09-25 sigue siendo correcta y conviene no perderla: Mercado Pago no tiene API de pago por QR en México, así que `mode` es `'terminal'` y nada más.
 - **Amended 2026-09-25:** Mercado Pago has no QR payment API in Mexico (`docs/spikes/payments-mercadopago.md`),
   so `mode` is `'terminal'` only; `'link'` returns only if ADR-109's D-2 keeps Clip payment links.
 - **Steps:** `POST /api/v1/payments/intents` `{ clientIntentId (ULID), amountCentavos, mode:

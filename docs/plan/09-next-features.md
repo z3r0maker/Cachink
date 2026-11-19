@@ -1043,6 +1043,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
 ### N-75 Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media]
 
 - [ ] Status · **Blocks:** ADR-109, N-41, N-76
+  - **Remaining (2026-11-19, verificado contra el repo):** sin empezar, y vale la pena separar lo que falta de lo que ya se investigó, porque el track se lee como virgen y no lo es del todo. **No existen** `docs/spikes/payments-reconciliation.md` ni ningún `scripts/spikes/*-payments.ts`, y ningún archivo del repo nombra a Mercado Pago ni a Clip fuera de los spikes y de los planes. **Sí existen**, de N-40, los dos spikes de terminal (`docs/spikes/payments-clip.md`, `payments-mercadopago.md`) con sus guiones (`scripts/spikes/clip-pinpad.ts`, `mercadopago-point.ts`) y un `shared.ts` que ya resuelve dos cosas que esta tarea necesita: los centavos como decimal de dos cifras que ambos proveedores aceptan, y un `pollUntil` que lee un pago hasta que asienta (porque un webhook es sólo una señal, ADR-066). Ninguno de los dos spikes toca búsqueda de pagos, reportes ni conciliación, que es justo la pregunta de N-75, así que la pregunta sigue abierta — pero con andamio. Dos cosas de esos spikes que cambian cómo se planea esto. Una: Clip **no tiene sandbox**, cada prueba es un cargo real en una terminal real y Clip tiene que instalar su app PinPad en cada lector, así que N-53 no se puede probar sin hardware y sin O-28. Dos: `payments-mercadopago.md` dice «so N-41 can be built and tested before anyone buys a reader», y eso **ya no apunta a N-41**: el ADR-109 renumeró, y el adaptador de escritura del que habla el spike es hoy N-80. Corrige esa referencia en el spike cuando lo retomes, o el que lo lea va a creer que N-41 está desbloqueada.
 - **What:** read Mercado Pago's payment search, account-money / released-money reports and settlement
   reports, and Clip's transactions-by-date and settlements endpoints (`developer.clip.mx/reference/
 transactions`, `…/settlements`). Answer, per provider: does a payment taken on a **non-integrated
@@ -1059,6 +1060,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-41 Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago [media]
 
 - [ ] Status · **Blocked by:** N-75, ADR-109 · **Blocks:** N-43, N-53, N-76, N-80
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y conviene saberlo porque **otro track la nombra sin saberlo**: K-22 (el adaptador CoDi, en `22-codi.md`) dice construirse «behind ADR-066's `PaymentProvider` port», y ese puerto es esta tarea. No existe un solo archivo en el repo que nombre `PaymentProvider`. O sea que N-41 bloquea a K-22 además de a las cuatro que ya lista.
 - **What:** port in `packages/application`: `listPayments(range)`, `getPayment(id)`,
   `listSettlements(range)`, `verifyWebhook` (may return "unverified — fetch to confirm"). First
   adapter `mercadopago`, backend only. A shared adapter contract suite that N-53 must also pass.
@@ -1067,6 +1069,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-43 Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago [media]
 
 - [ ] Status · **Blocked by:** N-41
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. La pantalla donde vive ya existe (`negocio/cobros/metodos.tsx`, el interruptor de Tarjeta), así que esto es una tarjeta y un panel sobre algo construido. El spike de Mercado Pago ya trae una sección «Linking a merchant (N-43)» con el OAuth, así que el camino de MP está investigado; el de Clip es pegar llaves, y depende de O-28.
 - **What:** Negocio → Tipos de pago, under the Tarjeta switch: a card «¿Cobras con Mercado Pago o
   Clip? Conecta tu cuenta» → side panel with the two providers as option cards. **Mercado Pago:**
   "Conectar" (OAuth + PKCE), refresh before the 180-day expiry. **Clip:** guided paste of an API key +
@@ -1080,6 +1083,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-76 Conciliación de tarjeta `[baja]`
 
 - [ ] Status · **Blocked by:** N-41, N-43
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Depende de la llave que N-75 todavía no nombra, así que ni el emparejador del dominio se puede escribir: no se sabe contra qué campos empareja.
 - **What:** a job pulls the linked account's card payments (and N-53's, for Clip) and matches them to
   synced ventas with método Tarjeta, by the key N-75 names. Three states per day and caja:
   **emparejada**; **venta sin cobro** (Tarjeta recorded, no payment behind it); **cobro sin venta**
@@ -1093,6 +1097,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-77 Paso del checklist e invitaciones [baja]
 
 - [ ] Status · **Blocked by:** N-43
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Nota de orden: su condición de visibilidad es que `cobrosIntegrados` esté liberado, y hoy ese nombre es **interruptor de apagado** y **capacidad de plan** a la vez (ver C-21), así que cuando se construya hay que decir cuál de los dos consulta el paso.
 - **What:** «Primeros pasos», group «Cuando quieras»: «Conecta tu cuenta Mercado Pago o Clip» — shown
   only when Tarjeta is among the business's methods and `cobrosIntegrados` is released; done when an
   account is linked (detected from data, as every step). The one-time owner-only line under Tarjeta
@@ -1106,6 +1111,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-80 Puerto `PaymentProvider` — lado de escritura + Mercado Pago Point [baja]
 
 - [ ] Status · **Blocked by:** N-41, N-40 (go de MP), C-13 · **Blocks:** N-42, N-79
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la que el spike de Mercado Pago llama (mal) «N-41»: su veredicto «go for terminals» con sandbox y terminal virtual es para esta tarea. Lo que la detiene de verdad no es técnico: es el «go de MP» de N-40 y el C-13 que todavía no tiene contrato escrito.
 - **What:** the port gains `createIntent`, `getIntent`, `cancelIntent`, `refund`, `listTerminals`,
   `setTerminalMode`; the `mercadopago` adapter implements them on the Orders API for Point (stores,
   POS per caja, PDV mode, `X-Idempotency-Key`). The contract suite runs against the Point sandbox's
@@ -1114,6 +1120,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-42 Backend de intenciones de pago [baja]
 
 - [ ] Status · **Blocked by:** N-80, C-13
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. No hay tabla `payment_intents` en ninguno de los dos esquemas ni rutas bajo `/api/v1/payments/`.
 - **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, terminal id) →
   provider intent; `GET …/intents/:id` (polled every 2 s); provider webhooks →
   `payment_intents.status` — **a webhook is only a signal; status is always confirmed by fetching the
@@ -1124,6 +1131,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-79 Terminal por caja [baja]
 
 - [ ] Status · **Blocked by:** N-80, N-43, ADR-109 (D-1)
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Para la mitad de Clip, el spike ya dice lo que esto va a encontrar: Clip tiene que instalar su app PinPad en cada lector antes de que la API lo alcance, así que «Solicitar activación con Clip» no es un trámite de forma, es la condición para que el lector exista para nosotros.
 - **What:** in the Tipos de pago panel of a linked account: list the account's terminals, switch one
   to integrated mode (PDV), name it and assign it to a caja. **Clip:** register a reader by serial,
   show whether it is PinPad-ready, and a «Solicitar activación con Clip» step that files the
@@ -1134,6 +1142,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-44 Cobrar en terminal (app y caja web) [baja]
 
 - [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la de la cola más larga del track: cinco barreras, de las cuales N-45 (pentest externo) y N-53 (Clip) dependen de terceros y de dinero, no de código.
 - **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
   Cancelar). Approved → the device writes the venta (método Tarjeta, `payment_ref`) and syncs as
   usual. Declined → Reintentar / Cambiar método. Offline → «Sin conexión: cobra en tu terminal y
@@ -1145,6 +1154,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-78 Salud de la terminal en la caja [baja]
 
 - [ ] Status · **Blocked by:** N-79
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, detrás de N-79.
 - **What:** the caja reads its terminal's health (MP terminal list + mode; Clip `/devices/status`)
   and the account's token state. Broken → badge on Tarjeta; tapping it opens «Tu terminal Point
   ···3324 no responde» with **Cobrar sin terminal** (primary, records a manual Tarjeta sale),
@@ -1227,6 +1237,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-53 Adaptador de Clip [baja]
 
 - [ ] Status · **Blocked by:** N-41, N-40 (go de Clip), N-75 (go de Clip) · **Blocks:** la salida al público de N-44
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y su barrera más dura no está en la lista: **Clip no tiene sandbox**. Según `docs/spikes/payments-clip.md`, cada prueba es un cargo real en una terminal real, y Clip tiene que instalar su app PinPad en cada lector antes de que la API lo alcance. Así que esto necesita hardware y O-28 (el KYC de Clip), no sólo los dos «go» que ya nombra. Dicho de otro modo: la suite de contrato compartida que N-41 define se puede correr contra el sandbox de Mercado Pago y **no** contra Clip.
 - **What:** `clip` adapter for the N-41 port. **Read side first (Phase 1):** transactions by date and
   settlements, for N-76. **Write side (Phase 2):** PinPad API terminal push (`/f2f/pinpad/v1`:
   payment, status, cancel, `/devices/status`); payment links only if D-2 keeps them. Basic auth from
