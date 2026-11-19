@@ -4,10 +4,11 @@
  * allowed it asks, in the board's words for the photo.
  */
 import { useImperativeHandle, useRef, type ReactElement } from 'react';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import { View } from '@tamagui/core';
 import { Btn } from '../components/Btn/index';
 import { MText } from '../components/Mostrador/index';
+import { usePermisoCamara } from '../hooks/use-permiso-camara';
 import { colors } from '../theme';
 import type { FotoVisorProps } from './foto-visor-tipos';
 
@@ -25,7 +26,7 @@ function Permiso(p: { readonly onPedir: () => void }): ReactElement {
 }
 
 export function FotoVisor(p: FotoVisorProps): ReactElement {
-  const [permiso, pedir] = useCameraPermissions();
+  const { permiso, solicitar } = usePermisoCamara();
   const camara = useRef<CameraView>(null);
   useImperativeHandle(
     p.ref,
@@ -38,7 +39,7 @@ export function FotoVisor(p: FotoVisorProps): ReactElement {
     [],
   );
   if (permiso === null) return <View testID="foto-visor" flex={1} />;
-  if (!permiso.granted) return <Permiso onPedir={() => void pedir()} />;
+  if (!permiso.granted) return <Permiso onPedir={solicitar} />;
   return (
     <CameraView
       ref={camara}

@@ -18,7 +18,8 @@ import { Keyboard, Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - expo-camera is a peer dep resolved by Metro at runtime
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, type useCameraPermissions } from 'expo-camera';
+import { usePermisoCamara } from '../../hooks/use-permiso-camara';
 import { Btn } from '../Btn/index';
 import { Input } from '../Input/index';
 import { Modal } from '../Modal/index';
@@ -84,14 +85,14 @@ function ScannerBody({
   t,
 }: {
   permission: ReturnType<typeof useCameraPermissions>[0];
-  requestPermission: () => Promise<unknown>;
+  requestPermission: () => void;
   handleBarcode: (arg: { data: string }) => void;
   disabled: boolean;
   t: T;
 }): ReactElement {
   if (!permission) return <Text>...</Text>;
   if (!permission.granted) {
-    return <PermissionBanner onRequest={() => void requestPermission()} t={t} />;
+    return <PermissionBanner onRequest={requestPermission} t={t} />;
   }
   return <CameraBox onScan={handleBarcode} disabled={disabled} />;
 }
@@ -119,7 +120,7 @@ function useScanSession(props: ScannerProps, mode: 'single' | 'continuous') {
 export function Scanner(props: ScannerProps): ReactElement {
   const { t } = useTranslation();
   const mode = props.mode ?? 'single';
-  const [permission, requestPermission] = useCameraPermissions();
+  const { permiso: permission, solicitar: requestPermission } = usePermisoCamara();
   const { scanned, handleBarcode } = useScanSession(props, mode);
 
   return (

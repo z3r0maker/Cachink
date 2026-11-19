@@ -38,8 +38,11 @@ export interface BottomTabBarProps {
   readonly activeKey: string;
   /** Forwarded to the root container so E2E tests can anchor to it. */
   readonly testID?: string;
+  /** The home indicator's height: the tabs run through it, content above it. */
+  readonly bottomInset?: number;
 }
 
+const TAB_BAR_HEIGHT = 64;
 const MIN_ITEMS = 1;
 const MAX_ITEMS = 6;
 
@@ -64,12 +67,13 @@ function clampItems(items: readonly BottomTabBarItem[]): readonly BottomTabBarIt
  */
 export function BottomTabBarCore(props: BottomTabBarProps): ReactElement {
   const items = clampItems(props.items);
+  const bottomInset = props.bottomInset ?? 0;
   return (
     <View
       testID={props.testID ?? 'bottom-tab-bar'}
       flexDirection="row"
       role="tablist"
-      height={64}
+      height={TAB_BAR_HEIGHT + bottomInset}
       backgroundColor={colors.white}
       borderTopWidth={borderWidths.thin}
       borderTopColor={colors.black}
@@ -82,6 +86,7 @@ export function BottomTabBarCore(props: BottomTabBarProps): ReactElement {
           active={item.key === props.activeKey}
           onPress={item.onPress}
           badge={item.badge}
+          bottomInset={bottomInset}
           testID={item.testID ?? `tab-${item.key}`}
         />
       ))}

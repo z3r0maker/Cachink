@@ -30,6 +30,8 @@ export interface TabItemProps {
   readonly onPress: () => void;
   readonly badge?: number;
   readonly testID?: string;
+  /** Space kept clear below the content, for the home indicator. */
+  readonly bottomInset?: number;
 }
 
 function Badge({ count }: { count: number }): ReactElement {
@@ -113,7 +115,10 @@ export function TabItem(props: TabItemProps): ReactElement {
               props.onPress();
             }
       }
-      style={({ pressed }) => cellStyle(props.active, pressed)}
+      style={({ pressed }) => ({
+        ...cellStyle(props.active, pressed),
+        paddingBottom: props.bottomInset ?? 0,
+      })}
       role="tab"
       aria-label={props.label}
       aria-selected={props.active}

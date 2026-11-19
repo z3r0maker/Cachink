@@ -84,18 +84,21 @@ function Guia(p: {
       >
         <FotoVisor ref={p.visor} linterna={p.linterna} />
       </View>
-      <Svg width={GUIA} height={GUIA} viewBox="0 0 300 300" style={{ position: 'absolute' }}>
-        {ESQUINAS.map((d) => (
-          <Path
-            key={d}
-            d={d}
-            fill="none"
-            stroke={colors.yellow}
-            strokeWidth={5}
-            strokeLinecap="round"
-          />
-        ))}
-      </Svg>
+      {/* The corners sit over the view, and over the permission button: never take its touch. */}
+      <View testID="foto-guia-esquinas" position="absolute" pointerEvents="none">
+        <Svg width={GUIA} height={GUIA} viewBox="0 0 300 300">
+          {ESQUINAS.map((d) => (
+            <Path
+              key={d}
+              d={d}
+              fill="none"
+              stroke={colors.yellow}
+              strokeWidth={5}
+              strokeLinecap="round"
+            />
+          ))}
+        </Svg>
+      </View>
     </View>
   );
 }

@@ -1,0 +1,35 @@
+# Foto del producto, first use (M-13, board MvFotoCamara): the camera asks for
+# permission from inside the sheet. The guide's corners are drawn over that
+# button, so this holds that its tap reaches it and the system prompt appears.
+#
+# The product is «Agua de horchata» (PRD-7), as in producto-foto.yaml.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- launchApp:
+    permissions:
+      camera: unset
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- scrollUntilVisible:
+    element:
+      id: 'producto-sin-foto-01JPRD00000000000000000007'
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: 'producto-sin-foto-01JPRD00000000000000000007'
+- extendedWaitUntil:
+    visible:
+      id: 'foto-permiso'
+    timeout: 10000
+- tapOn:
+    id: 'foto-permiso'
+- extendedWaitUntil:
+    visible: '.*(would like to access the Camera|quiere acceder a la cámara).*'
+    timeout: 10000
+- tapOn: 'Don.t Allow|No permitir'

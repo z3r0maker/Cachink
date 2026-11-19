@@ -280,6 +280,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the thirty-five
 | `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
 | `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                                                                                    |
 | `producto-foto.yaml`             | activated |       | Foto del producto (M-13, ADR-134; MvFoto\* boards): the Inventario square takes a photo from the gallery, «Listo» or «Guardar así» saves it, then «Quitar foto» puts the icon back. |
+| `producto-foto-permiso.yaml`     | activated |       | Foto del producto, first use: «Permitir la cámara» reaches its tap and the system prompt appears.                                                                                   |
 | `notificaciones-stock-bajo.yaml` | activated |       | Verify the Director can toggle stock-low notifications in Settings (P1C-M11-T01..T03, S4-C13).                                                                                      |
 
 ### Mi turno y cierre
