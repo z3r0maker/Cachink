@@ -294,7 +294,7 @@ export const esMX = {
       pendientes: 'Registros no enviados',
       pendientesDetalle: 'Lo que el servidor no aceptó',
       ajustes: 'Ajustes de la caja',
-      ajustesDetalle: 'Sonido, avisos, actualizaciones',
+      ajustesDetalle: 'Esta caja, avisos y privacidad',
       bloquear: 'Bloquear la caja',
       cerrar: 'Cerrar',
       cerrarTurno: 'Cerrar mi turno',
