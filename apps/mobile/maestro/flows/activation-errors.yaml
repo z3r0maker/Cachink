@@ -16,12 +16,7 @@ appId: mx.xangarro.mobile
 # Vincular opens on the camera (MvVincular); the typed path is «Escribe el código».
 - tapOn:
     id: 'vincular-escribir'
-# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
-- tapOn:
-    id: 'activation-email'
-    point: '95%,50%'
-- inputText: 'dueno@tacoslaesquina.mx'
-- hideKeyboard
+- runFlow: shared/vincular-correo.yaml
 
 - runFlow:
     file: shared/vincular-rechazado.yaml
