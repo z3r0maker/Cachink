@@ -70,7 +70,7 @@ function integrationSuites(): readonly string[] {
 /** Workspace package name → its directory, for `--filter` resolution. */
 function packageDirs(): ReadonlyMap<string, string> {
   const map = new Map<string, string>();
-  for (const parent of ['apps', 'packages']) {
+  for (const parent of ['apps', 'packages', 'tools/synth']) {
     const dir = join(REPO, parent);
     if (!existsSync(dir)) continue;
     for (const entry of readdirSync(dir, { withFileTypes: true })) {

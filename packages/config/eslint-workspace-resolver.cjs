@@ -22,7 +22,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const REPO = path.resolve(__dirname, '..', '..');
-const WORKSPACE_PARENTS = ['apps', 'packages'];
+/** The folders `pnpm-workspace.yaml` globs one level under. */
+const WORKSPACE_PARENTS = ['apps', 'packages', 'tools/synth'];
 const EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
 
 /** @type {Map<string, { dir: string, exports: unknown }> | undefined} */

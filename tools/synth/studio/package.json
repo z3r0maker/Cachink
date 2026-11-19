@@ -1,0 +1,25 @@
+{
+  "name": "@xangarro/synth-studio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Synth Studio (ADR-153, ADR-154): the owner's local console to launch, watch and review corridas. Never shipped.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "lint": "eslint . --config ../../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "@xangarro/config": "workspace:*",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}

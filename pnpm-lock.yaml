@@ -1201,6 +1201,42 @@ importers:
         specifier: ^5.0.13
         version: 5.0.13(@types/react@19.2.14)(immer@11.1.18)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
 
+  tools/synth/core:
+    devDependencies:
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@25.9.9)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@25.9.9)(typescript@6.0.3))(vite@8.0.13(@types/node@25.9.9)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
+  tools/synth/server:
+    devDependencies:
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@25.9.9)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@25.9.9)(typescript@6.0.3))(vite@8.0.13(@types/node@25.9.9)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
+  tools/synth/studio:
+    devDependencies:
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@25.9.9)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@25.9.9)(typescript@6.0.3))(vite@8.0.13(@types/node@25.9.9)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
 packages:
 
   '@adobe/css-tools@4.4.4':
