@@ -18,7 +18,18 @@ appId: mx.xangarro.mobile
     timeout: 10000
 - assertVisible:
     id: 'inicio-hero-cerrado'
-- assertVisible: 'Tus pendientes salen al abrir el turno'
+# «Para hoy» sits under the KPIs, below the fold on a phone: scroll down to
+# it, then back up to the top (the turno chip, above the hero).
+- scrollUntilVisible:
+    element: 'Tus pendientes salen al abrir el turno'
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: 'inicio-turno-chip'
+    direction: UP
+    timeout: 10000
+    visibilityPercentage: 100
 
 # Abrir turno: a chip, then open.
 - tapOn:
@@ -40,8 +51,14 @@ appId: mx.xangarro.mobile
     id: 'inicio-turno-chip'
 
 # The shortcut tiles open Gastos.
-- tapOn:
-    id: 'inicio-atajo-gastos'
+- runFlow:
+    file: shared/abrir-atajo.yaml
+    env:
+      ATAJO: gastos
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-gastos'
+    timeout: 8000
 - tapOn:
     id: 'tab-inicio|rail-inicio|sidebar-inicio'
 

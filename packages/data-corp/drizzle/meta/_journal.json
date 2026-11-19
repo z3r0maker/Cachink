@@ -78,6 +78,13 @@
       "when": 1794932873564,
       "tag": "0010_corp_limites",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795063298706,
+      "tag": "0011_corp_servicios",
+      "breakpoints": true
     }
   ]
 }

@@ -93,6 +93,8 @@ export async function clearLedgerFixture(): Promise<void> {
                VALUES (2026, 767884994, 3500000000, 'e2e-fixture', now())
                ON CONFLICT (anio) DO NOTHING`;
       await tx`DELETE FROM corp.funding_calls WHERE concepto LIKE 'E2E %'`;
+      // E-24: the services the suite made, before the templates they own.
+      await tx`DELETE FROM corp.services WHERE nombre LIKE 'E2E %' OR updated_by IN (${suite})`;
       await tx`DELETE FROM corp.recurring_templates
                 WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;
     });

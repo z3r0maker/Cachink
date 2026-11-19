@@ -41,6 +41,7 @@ function toPlantilla(r: Row): PlantillaRecurrente {
     deducible: r.deducible,
     activo: r.activo,
     desde: r.desde,
+    periodicidad: r.periodicidad,
   };
 }
 
@@ -135,6 +136,9 @@ export function createRecurringTemplateRepository(db: CorpDb): RecurringTemplate
       ),
     setActivo: async (id, activo) => {
       await db.update(recurringTemplates).set({ activo }).where(eq(recurringTemplates.id, id));
+    },
+    actualizar: async (id, datos) => {
+      await db.update(recurringTemplates).set(datos).where(eq(recurringTemplates.id, id));
     },
     registradasEn: (mes) => registradasEn(db, mes),
     facturadasEn: (mes) => facturadasEn(db, mes),

@@ -1019,7 +1019,37 @@ Changes to existing tasks:
 
 ### E-24 Servicios `[baja]`
 
-- [ ] Status · **Blocked by:** E-02
+- [x] Status · **Blocked by:** E-02 · **Done:** 2026-11-18 (boards CD-18, CD-18c, CD-18d, round 14 approved)
+- **Progress (2026-11-18):**
+  - `@xangarro/domain/corp` `servicios/`:
+    - a service's five ways of charging, validated per way (`assertServicio`);
+    - `promedioMensual`: the mean of the last three months with a posted charge, an annual
+      one's last twelve months over 12;
+    - `proyeccionDelMes`: the month so far carried to its last day, from day 3 only;
+    - `usoDelPlan`, `proximoCargo`, and `plantillaDeServicio` (the template it owns).
+  - E-02's templates gain `periodicidad` (`anual` charges in its own month each year) and take
+    a zero amount, a usage service's «sin monto fijo». A template no service owns shows as a
+    fixed service under its own id; its first save makes the service and keeps the template.
+  - `corp.services` (data-corp 0011, with its grants; the agents read). `guardarServicio` and
+    `darDeBajaServicio` (application) keep the template in step, audited as
+    `empresa.servicio_guardado` and `empresa.servicio_dado_de_baja`. `cargosDeServicios` reads
+    each template's charges by the month they pay; `comisionesPorMes` reads Stripe's fee from
+    its payouts, a commission service's cost.
+  - Dinero › Servicios: the tiles, the usage cards, the list with its chips and «Tarjetas y
+    cuentas de pago»; a service's page; the drawer «Nuevo servicio» / «Editar»; «Dar de baja».
+  - The Resumen signals a usage service projected past its alert, a free plan from 60 % and an
+    annual renewal within 30 days.
+  - **Owner's round-14 defaults:**
+    - a founder types a usage service's month so far (Azure's cost API is a later task);
+    - «Subir estado de cuenta» and the statement lines wait for E-25.
+  - **Differences from the boards:**
+    - «Todavía no lo contratamos» is a box in the drawer, since the boards draw no way to mark
+      a service «Por contratar»;
+    - «Renuevan en 30 días» counts the fixed and annual charges due in 30 days, not usage ones;
+    - «Lo que va del mes» is a field of the usage drawer.
+  - Playwright: a usage service added through the drawer, last month's charge against its
+    template read as its average on its page and in the list, its template in Recurrentes
+    without a fixed amount, an edit of its alert, and its drop.
 - **What:** `/empresa/servicios`, a catalogue of third-party services. Each service records:
   - name and purpose, and an expense category;
   - billing model: fixed (with currency), usage-based, commission, free or annual;

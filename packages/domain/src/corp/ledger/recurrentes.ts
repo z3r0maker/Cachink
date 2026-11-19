@@ -30,7 +30,16 @@ export interface PlantillaRecurrente {
   readonly activo: boolean;
   /** `YYYY-MM`: the first month it charges. */
   readonly desde: string;
+  /**
+   * `anual` charges once a year, in `desde`'s month (E-24, an annual service);
+   * absent or `mensual`, every month.
+   */
+  readonly periodicidad?: 'mensual' | 'anual';
 }
+
+/** An annual template charges only in its own month of the year. */
+const tocaEn = (p: PlantillaRecurrente, mes: string): boolean =>
+  p.periodicidad !== 'anual' || p.desde.slice(5) === mes.slice(5);
 
 /** `falta_factura`: a supplier with an RFC whose day came without its invoice. */
 export type EstadoRecurrente = 'registrado' | 'sugerido' | 'falta_factura' | 'proximo';
@@ -134,7 +143,8 @@ export function recurrentesDelMes(
   facturadas: ReadonlyMap<string, FacturaDeRecurrente> = new Map(),
 ): readonly RecurrenteDelMes[] {
   return plantillas
-    .filter((p) => p.desde <= mes && (p.activo || registradas.has(p.id) || facturadas.has(p.id)))
+    .filter((p) => p.desde <= mes && tocaEn(p, mes))
+    .filter((p) => p.activo || registradas.has(p.id) || facturadas.has(p.id))
     .map((p) => delMes(p, mes, hoy, registradas.get(p.id) ?? null, facturadas.get(p.id) ?? null))
     .sort(
       (a, b) =>

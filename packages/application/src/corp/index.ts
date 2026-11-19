@@ -13,6 +13,7 @@ export {
   PlantillaDesconocidaError,
   ProyectoDesconocidoError,
   RecurrenteYaRegistradoError,
+  ServicioDesconocidoError,
   TrimestreEnCursoError,
   VencimientoInvalidoError,
   YaRevertidoError,
@@ -54,3 +55,11 @@ export * from './corporativo/index.js';
 export * from './facturas/index.js';
 export * from './ingresos/importar.js';
 export { guardarTopes, type TopesRepository } from './limites.js';
+export {
+  darDeBajaServicio,
+  guardarServicio,
+  servicioPorId,
+  type GuardarServicioInput,
+  type ServiceRepository,
+  type ServiciosDeps,
+} from './servicios.js';

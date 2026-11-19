@@ -56,6 +56,8 @@ const DOMAIN_CODES = new Set([
   'FECHA_PAGO_FUTURA',
   'FECHA_PAGO_INVALIDA',
   'TOPE_INVALIDO',
+  'SERVICIO_INVALIDO',
+  'SERVICIO_DESCONOCIDO',
 ]);
 
 export function failed(error: unknown, what: string): FormState {

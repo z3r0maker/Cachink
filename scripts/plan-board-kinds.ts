@@ -78,13 +78,11 @@ const WAITS = new Set(
 );
 
 const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
-  Teléfono: ids(
-    'N-19 N-21 N-22 N-24 N-25 A-16 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-16 DS-10 K-13 K-24',
-  ),
+  Teléfono: ids('N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-16 K-13 K-24'),
   Portal: ids(
-    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 DS-01 DS-02 DS-03 DS-04 DS-09 K-12 K-23 N-83',
+    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 K-12 K-23 N-83',
   ),
-  'Caja web': ids('P-37 DS-05 DS-06 DS-07 DS-08 K-14'),
+  'Caja web': ids('P-37 K-14'),
   'Pagos y conciliación': ids(
     'C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53 K-10 K-11 K-15 K-20 K-21 K-22',
   ),

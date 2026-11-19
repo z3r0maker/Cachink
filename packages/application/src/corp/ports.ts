@@ -1,4 +1,5 @@
 import type {
+  DatosDePlantilla,
   FacturaDeRecurrente,
   JournalLine,
   Movement,
@@ -86,6 +87,8 @@ export interface RecurringTemplateRepository {
   /** Every template, active or stopped. */
   list(): Promise<readonly PlantillaRecurrente[]>;
   setActivo(id: string, activo: boolean): Promise<void>;
+  /** A service's edit reaches its template (E-24); its contraparte, RFC and project stay. */
+  actualizar(id: string, datos: DatosDePlantilla & { readonly activo: boolean }): Promise<void>;
   /** Template id → the entry of its standing charge for `mes` (a reversed one does not count). */
   registradasEn(mes: string): Promise<ReadonlyMap<string, string>>;
   /**

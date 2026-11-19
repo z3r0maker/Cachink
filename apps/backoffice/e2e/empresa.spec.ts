@@ -8,11 +8,13 @@ import {
 } from './empresa-agenda';
 import { actualizarMarca, guardarCsd, suscribirAcciones } from './empresa-corporativo';
 import { CON_AZURE, prepararAzurite, subirVeinteMegas, verDesdeElAlmacen } from './empresa-blob';
+import { stamp } from './consola-fixture';
 import { abrirMenu, menu, sinScrollLateral, TELEFONO } from './consola-telefono';
 import { adjuntarComprobante, subirActa } from './empresa-expediente';
 import { cuentaDelBalance, MES_BALANCE, sembrarBalance } from './empresa-balance';
 import { asegurarTopes, hoyEnMexico, quitarTopes, sembrarCobroDelAnio } from './empresa-limites';
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
+import { nuevoServicioPorUso, registrarCargoDe } from './empresa-servicios';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
@@ -396,7 +398,14 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   for (const entrada of ['Resumen', 'Dinero', 'Resultados', 'Socios', 'Cumplimiento']) {
     await expect(rail(page).getByRole('link', { name: entrada, exact: true })).toBeVisible();
   }
-  for (const pantalla of ['Movimientos', 'Facturas', 'Agenda', 'Expediente', 'Corporativo']) {
+  for (const pantalla of [
+    'Movimientos',
+    'Facturas',
+    'Servicios',
+    'Agenda',
+    'Expediente',
+    'Corporativo',
+  ]) {
     await expect(rail(page).getByRole('link', { name: pantalla, exact: true })).toHaveCount(0);
   }
 
@@ -427,7 +436,11 @@ test('a founder moves through Empresa by its entries and tabs (E-07)', async ({ 
   // Dinero: Movimientos and Facturas.
   await abrirEntrada(page, 'Dinero');
   await expect(page).toHaveURL(/\/empresa\/movimientos/);
-  await expect(secciones(page, 'Dinero').getByRole('link')).toHaveText(['Movimientos', 'Facturas']);
+  await expect(secciones(page, 'Dinero').getByRole('link')).toHaveText([
+    'Movimientos',
+    'Facturas',
+    'Servicios',
+  ]);
   await abrirPestana(page, 'Facturas', /\/empresa\/facturas$/, 'Dinero');
 
   // Resultados: the statement and the balance sheet.
@@ -630,6 +643,48 @@ test('a founder reads the year’s limits from the Resumen, and captures caps a 
   await expect(page.getByRole('dialog').getByTestId('limite-sas')).toContainText(
     'de $7,678,849.94',
   );
+});
+
+test('a founder adds a usage service, reads what it cost, edits it and drops it (E-24)', async ({
+  page,
+}) => {
+  const nombre = `E2E Azure ${stamp()}`;
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa/movimientos');
+  await abrirPestana(page, 'Servicios', /\/empresa\/servicios$/, 'Dinero');
+  await nuevoServicioPorUso(page, nombre);
+  await expect(page.getByRole('heading', { level: 1, name: nombre })).toBeVisible();
+  await expect(page.getByTestId('servicio-recurrente')).toContainText('Cada día 3, sin monto fijo');
+
+  // Real data: last month's charge against its template is its average and its first expense.
+  await registrarCargoDe(nombre);
+  await page.reload();
+  await expect(page.getByTestId('servicio-kpi').first()).toContainText('$1,240.00');
+  await expect(page.getByTestId('servicio-gasto')).toContainText('$1,240.00');
+  await page.goto('/empresa/servicios?ver=uso');
+  const fila = page.getByTestId('servicio').filter({ hasText: nombre });
+  await expect(fila).toContainText('Por uso');
+  await expect(fila).toContainText('$1,240.00');
+  await expect(fila).toContainText('Activo');
+  await page.goto('/empresa/movimientos?ver=recurrentes');
+  await expect(page.getByTestId('recurrente').filter({ hasText: nombre })).toContainText(
+    'Sin monto fijo',
+  );
+
+  // «Editar» carries the alert; «Dar de baja» takes it off the list and keeps its expense.
+  await page.goto('/empresa/servicios');
+  await page.getByRole('link', { name: nombre, exact: true }).click();
+  await page.getByRole('link', { name: 'Editar', exact: true }).click();
+  const cajon = page.getByRole('dialog', { name: `Editar ${nombre}` });
+  await cajon.getByLabel('Avisar si el mes pasa de (opcional)').fill('3000');
+  await cajon.getByRole('button', { name: 'Guardar servicio' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByTestId('servicio-kpi').nth(2)).toContainText('$3,000.00');
+  await page.getByRole('button', { name: `Dar de baja ${nombre}` }).click();
+  await expect(page.getByText('De baja', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('servicio-gasto')).toContainText('$1,240.00');
+  await page.goto('/empresa/servicios');
+  await expect(page.getByTestId('servicio').filter({ hasText: nombre })).toHaveCount(0);
 });
 
 test('on a phone the rail folds into «Menú» and no Empresa page scrolls sideways', async ({

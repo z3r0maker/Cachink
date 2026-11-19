@@ -123,24 +123,33 @@ export const recurringTemplates = corp.table(
     moneda: text('moneda', { enum: ['MXN', 'USD'] })
       .notNull()
       .default('MXN'),
-    /** The usual monthly amount, IVA included, in the template's currency's centavos. */
+    /**
+     * The usual amount, IVA included, in the template's currency's centavos. 0
+     * for a service that charges by use (E-24): «sin monto fijo», typed when
+     * the charge is seen.
+     */
     montoEstimado: bigint('monto_estimado', { mode: 'bigint' }).notNull(),
     diaCargo: smallint('dia_cargo').notNull(),
     deducible: boolean('deducible').notNull().default(true),
     /** `YYYY-MM`: the first month it charges. */
     desde: text('desde').notNull(),
     activo: boolean('activo').notNull().default(true),
+    /** `anual` charges once a year, in `desde`'s month (E-24); every month otherwise. */
+    periodicidad: text('periodicidad', { enum: ['mensual', 'anual'] })
+      .notNull()
+      .default('mensual'),
     /** Null only on a template made before 0005. */
     createdBy: text('created_by'),
     createdAt: at('created_at').notNull(),
   },
   (t) => [
     check('recurring_templates_dia_check', sql`${t.diaCargo} BETWEEN 1 AND 31`),
-    check('recurring_templates_monto_check', sql`${t.montoEstimado} > 0`),
+    check('recurring_templates_monto_check', sql`${t.montoEstimado} >= 0`),
     check(
       'recurring_templates_categoria_check',
       sql`${t.categoria} IN ('costo_servicio', 'ventas_marketing', 'desarrollo', 'administracion')`,
     ),
+    check('recurring_templates_periodicidad_check', sql`${t.periodicidad} IN ('mensual', 'anual')`),
     check('recurring_templates_desde_check', sql`${t.desde} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
   ],
 );

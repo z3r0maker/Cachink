@@ -82,23 +82,9 @@ tags:
 - extendedWaitUntil: { visible: { id: 'inicio-hero-listo' }, timeout: 8000 }
 - waitForAnimationToEnd
 - runFlow:
-    when:
-      visible:
-        id: 'inicio-atajo-fiado'
-    commands:
-      - tapOn: { id: 'inicio-atajo-fiado' }
-- runFlow:
-    when:
-      # Still on Inicio = the atajo never existed (the tablet drops
-      # it); «atajo gone» would also be true a beat AFTER the phone
-      # taps it and navigates away, and the deep link would then
-      # fight the navigation with the iOS «Open in …?» dialog.
-      visible:
-        id: 'inicio-hero-listo'
-    commands:
-      # The atajos are phone-only (inicio-screen drops them when wide); the
-      # tablet deep-links the same screen (the navigate-to-settings pattern).
-      - openLink: 'xangarro://fiado'
+    file: shared/abrir-atajo.yaml
+    env:
+      ATAJO: fiado
 - extendedWaitUntil:
     visible:
       id: 'mobile-fiado'
@@ -126,6 +112,10 @@ tags:
 - tapOn: { text: 'Continue', optional: true }
 - assertVisible: { id: 'recordar-restaurar' }
 - tapOn: { id: 'recordar-restaurar' }
+# With the keyboard up the sheet rises to full height and its close sits
+# under the dev client's parked gear, which opens the dev menu instead. A tap
+# on the sheet's hint lowers the keyboard and the sheet with it.
+- tapOn: '.*Se abre WhatsApp con el mensaje listo.*'
 - tapOn: { id: 'recordar-sheet-close' }
 - extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
 

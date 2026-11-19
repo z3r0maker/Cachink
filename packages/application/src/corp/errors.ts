@@ -74,3 +74,11 @@ export class YaRevertidoError extends Error {
     this.name = 'YaRevertidoError';
   }
 }
+
+export class ServicioDesconocidoError extends Error {
+  readonly code = 'SERVICIO_DESCONOCIDO' as const;
+  constructor(readonly servicioId: string) {
+    super('Ese servicio no existe.');
+    this.name = 'ServicioDesconocidoError';
+  }
+}
