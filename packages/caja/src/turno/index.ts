@@ -3,3 +3,4 @@ export * from './fixture';
 export * from './kpis';
 export * from './types';
 export * from './vivo';
+export * from './titular';

@@ -14,7 +14,7 @@ import {
   type InventarioPara,
   type MovimientoInventarioPara,
 } from '@xangarro/caja/lectura';
-import type { BusinessId, DeviceId, Product, UserId } from '@xangarro/domain';
+import type { BusinessId, DeviceId, Product } from '@xangarro/domain';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
 
@@ -53,11 +53,10 @@ async function movimientosDelTurno(
 export async function leerFilasInventario(
   r: R,
   businessId: BusinessId,
-  userId: UserId,
   deviceId: DeviceId,
   hoy: string,
 ): Promise<FilasInventario> {
-  const abierto = await r.cajaTurnos.findOpenByUser(userId);
+  const abierto = await r.cajaTurnos.findOpenByBusiness(businessId);
   const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
   const [productos, movimientos, dueno] = await Promise.all([
     r.products.listForBusiness(businessId),

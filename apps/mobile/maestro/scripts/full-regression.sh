@@ -301,6 +301,7 @@ run_curated_suite() {
     cierre-faltante
     cierre-sobrante
     cierre-otro-turno
+    turno-de-otro
     cobrar-efectivo-falta
     cobrar-ticket-largo
     cobrar-ultima-pieza

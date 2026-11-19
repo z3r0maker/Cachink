@@ -99,14 +99,7 @@ function consulta(
   const { businessId, userId, deviceId, hoy } = ctx;
   return {
     queryKey: [...inventarioKey(businessId, userId, deviceId), hoy],
-    queryFn: () =>
-      leerFilasInventario(
-        repos,
-        businessId as BusinessId,
-        userId as UserId,
-        deviceId as DeviceId,
-        hoy,
-      ),
+    queryFn: () => leerFilasInventario(repos, businessId as BusinessId, deviceId as DeviceId, hoy),
     enabled: businessId !== null && userId !== null && deviceId !== null,
   };
 }

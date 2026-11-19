@@ -53,7 +53,7 @@ export function useInicio(): InicioVivo {
   const hoy = hoyLocal();
   const q = useQuery({
     queryKey: [...inicioKey(businessId, userId), hoy],
-    queryFn: () => leerFilasInicio(repos, businessId as BusinessId, userId as UserId, hoy),
+    queryFn: () => leerFilasInicio(repos, businessId as BusinessId, hoy),
     enabled: businessId !== null && userId !== null,
   });
   const data =

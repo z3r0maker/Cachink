@@ -179,7 +179,7 @@ const repos = () => ({
 
 describe('leerTurnoVivo', () => {
   it('says the rows as the web live read: figures, detail, recurrentes', async () => {
-    const leido = await leerTurnoVivo(repos(), BIZ, USER, TEST_DEVICE_ID);
+    const leido = await leerTurnoVivo(repos(), BIZ, TEST_DEVICE_ID);
     expect(leido).not.toBeNull();
     if (leido === null) return;
     const v = leido.vivo;
@@ -208,7 +208,7 @@ describe('leerTurnoVivo', () => {
       cierreAt: `${HOY}T20:00:00.000Z`,
     });
     expect(cerrado.cierreAt).not.toBeNull();
-    expect(await leerTurnoVivo(repos(), BIZ, USER, TEST_DEVICE_ID)).toBeNull();
+    expect(await leerTurnoVivo(repos(), BIZ, TEST_DEVICE_ID)).toBeNull();
   });
 });
 

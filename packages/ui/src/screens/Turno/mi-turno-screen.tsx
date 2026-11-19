@@ -16,6 +16,7 @@ import { MiTurnoEstados, type MiTurnoEstado } from './mi-turno-estados';
 import { MiTurnoHero } from './mi-turno-hero';
 import { MiTurnoMovimientos } from './mi-turno-movimientos';
 import { MiTurnoPendientes } from './mi-turno-pendientes';
+import { SigueDe } from './mi-turno-sigue-de';
 import { colors } from '../../theme';
 
 export interface MiTurnoScreenProps {
@@ -54,6 +55,9 @@ function Cabeza(p: { readonly data: TurnoData }): ReactElement {
         weight="semibold"
         color={colors.gray600}
       >{`${p.data.operador}, ${p.data.caja}, desde las ${p.data.desde}`}</MText>
+      {p.data.titular === undefined ? null : (
+        <SigueDe titular={p.data.titular} desde={p.data.desde} />
+      )}
     </View>
   );
 }
