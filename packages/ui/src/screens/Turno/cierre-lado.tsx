@@ -1,5 +1,5 @@
 /**
- * Cierre, step 2's figures (M-16, MvCierreFlujo): the result card — Contaste,
+ * Cierre, step 2's figures (M-17, MvCierreFlujo): the result card — Contaste,
  * Esperado and the difference, tinted Cuadra (green), Falta (red) or Sobra
  * (blue) — and «Cómo se calculó lo esperado», the four parts that formed it.
  */

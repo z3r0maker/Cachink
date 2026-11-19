@@ -10558,7 +10558,7 @@ no abonos at all, so its «Efectivo esperado» disagreed with Mi turno as soon a
 
 **Date:** 2026-11-18
 
-**Status:** Accepted — M-16; owner decisions of 2026-11-18 (canvas page «Cierre de turno», board `MvCierreFlujo`)
+**Status:** Accepted — M-17; owner decisions of 2026-11-18 (canvas page «Cierre de turno», board `MvCierreFlujo`)
 
 **Context**
 

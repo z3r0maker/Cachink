@@ -1,5 +1,5 @@
 /**
- * Expo Router entry for /cierre (Track M, M-16; boards MvCierreFlujo,
+ * Expo Router entry for /cierre (Track M, M-17; boards MvCierreFlujo,
  * MvTurnoCerrado; ADR-147): two steps, the count and then the result, the
  * queue band (ADR-123: the close stays enabled with rows still to send), and
  * the hecho screen with the corte to send and «Abrir otro turno». A stack

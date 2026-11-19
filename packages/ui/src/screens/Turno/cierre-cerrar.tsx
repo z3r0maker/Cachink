@@ -1,5 +1,5 @@
 /**
- * Step 2's fixed foot (M-16, MvCierreFlujo): the one close button, the
+ * Step 2's fixed foot (M-17, MvCierreFlujo): the one close button, the
  * difference in its words («Cerrar turno con faltante de $70.00»), blocked
  * only while the reason (or its note) is missing — records still to send
  * never block it (ADR-123) — «Volver a contar» under it, and the hint saying

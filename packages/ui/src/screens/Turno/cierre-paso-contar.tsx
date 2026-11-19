@@ -1,5 +1,5 @@
 /**
- * Cierre, step 1 «Cuenta la caja» (M-16, MvCierreFlujo): only the count. The
+ * Cierre, step 1 «Cuenta la caja» (M-17, MvCierreFlujo): only the count. The
  * expected cash stays out of sight until the operator has counted, so the
  * count says what is in the drawer, not what should be. The foot holds the
  * running «Contaste» and «Ver resultado».

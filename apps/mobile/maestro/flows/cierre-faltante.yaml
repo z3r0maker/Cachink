@@ -2,7 +2,7 @@
 # diferencia turns red, asks its motivo and names the faltante in the close
 # button, and the hecho screen says «Faltante» with the motivo in its line.
 # «Mandar el corte a los patrones» opens the corte's own sheet with the
-# message as it arrives; «Listo» closes it, nothing is sent (M-16).
+# message as it arrives; «Listo» closes it, nothing is sent (M-17).
 #
 # Precondition: activated device, turno open with the $500 fondo, nothing
 # else captured (expected = fondo).
@@ -34,7 +34,7 @@ appId: mx.xangarro.mobile
 
 # Falta: Don worries, the motivo is required (DIF.falta.hint and cerrarHint,
 # caja/src/cierre/copy.ts). The diferencia panel is below the counter.
-# Step 1 ends at its fixed foot (M-16): «Ver resultado» shows the esperado.
+# Step 1 ends at its fixed foot (M-17): «Ver resultado» shows the esperado.
 - tapOn:
     id: 'cierre-ver-resultado'
 - extendedWaitUntil:

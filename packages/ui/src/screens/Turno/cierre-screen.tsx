@@ -1,5 +1,5 @@
 /**
- * CierreScreen — «Cierre de turno» in two steps (M-16, MvCierreFlujo;
+ * CierreScreen — «Cierre de turno» in two steps (M-17, MvCierreFlujo;
  * ADR-147): count the drawer by denomination without the expected cash,
  * then see the result, explain a difference and close; «Volver a contar»
  * goes back with the count kept. Records still to send warn but never block

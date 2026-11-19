@@ -1,4 +1,4 @@
-# Cierre que cuadra (Track M, M-16; board MvCierreFlujo): from Mi turno's
+# Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's
 # «Cerrar mi turno», step 1 counts the drawer by denomination with the
 # esperado out of sight; «Ver resultado» shows «¡Cuadra!» $0.00 with no
 # motivo asked; the close lands on «¡Turno cerrado!» with the «Cuadró» chip,
@@ -48,7 +48,7 @@ appId: mx.xangarro.mobile
     id: 'cierre-contado'
 - assertVisible: '.*Contaste.*'
 
-# Step 1 ends at its fixed foot (M-16): «Ver resultado» shows the esperado.
+# Step 1 ends at its fixed foot (M-17): «Ver resultado» shows the esperado.
 - tapOn:
     id: 'cierre-ver-resultado'
 - extendedWaitUntil:

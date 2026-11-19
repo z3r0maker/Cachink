@@ -1,4 +1,4 @@
-# Abrir otro turno (Track M, M-16; board MvCierreFlujo; ADR-147): a closed
+# Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed
 # turno never reopens; to keep selling, the hecho's «Abrir otro turno» opens
 # the fondo sheet right there as «¿Con cuánto sigues?» with the counted cash
 # suggested, and the new turno lands on Inicio, open. The same operator can

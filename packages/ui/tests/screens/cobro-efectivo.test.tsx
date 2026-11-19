@@ -2,15 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { CobroEfectivo } from '../../src/screens/Checkout/cobro-efectivo';
 import { estadoEfectivo } from '../../src/screens/Checkout/cobro-logic';
+import { medidasCobro } from '../../src/screens/Checkout/cobro-medidas';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { renderWithProviders } from '../test-utils';
 
 /**
- * «¿Con cuánto paga?» (MvCobro): the keypad, the round bills with «Exacto»,
- * and the verdict card that is grey before anything is typed, green with the
- * change once it covers, red with what is still missing. The arithmetic is
- * cobro-logic's and fully covered; this pins what the cashier sees.
+ * Efectivo on the cobro (MvCobroTotal): the keypad, the round bills with
+ * «Exacto», «Paga con», and the verdict beside it that is grey before anything
+ * is typed, green with the change once it covers, red with what is still
+ * missing. The arithmetic is cobro-logic's and fully covered; this pins what
+ * the cashier sees.
  */
+
+const MEDIDAS = medidasCobro(844);
 
 function tap(el: Element): void {
   fireEvent.pointerDown(el);
@@ -26,6 +30,7 @@ function montar(total: bigint, tecleado: string) {
       total={total}
       tecleado={tecleado}
       estado={estadoEfectivo(tecleado, total)}
+      medidas={MEDIDAS}
       onTecla={onTecla}
       onMonto={onMonto}
     />,
@@ -39,6 +44,7 @@ describe('CobroEfectivo', () => {
     expect(screen.getByTestId('cobro-cambio').textContent).toContain('Su cambio');
     expect(screen.getByTestId('cobro-cambio').textContent).toContain('$0.00');
     expect(screen.getByTestId('cobro-recibido').textContent).toBe('$0.00');
+    expect(screen.getByText('Paga con')).toBeInTheDocument();
     expect(screen.getByLabelText(/Exacto/)).toBeInTheDocument();
   });
 
@@ -47,7 +53,6 @@ describe('CobroEfectivo', () => {
     const cambio = screen.getByTestId('cobro-cambio').textContent ?? '';
     expect(cambio).toContain('Su cambio');
     expect(cambio).toContain('150.00');
-    expect(cambio).toContain('Cuéntalo frente al cliente');
     expect(screen.getByTestId('cobro-recibido').textContent).toBe('$500');
   });
 
@@ -56,19 +61,18 @@ describe('CobroEfectivo', () => {
     expect(screen.getByTestId('cobro-recibido').textContent).toBe('$500.5');
   });
 
-  it('exact: green with «Pagó exacto.»', () => {
+  it('exact: green with «Pagó exacto»', () => {
     montar(350_00n, '350');
     const cambio = screen.getByTestId('cobro-cambio').textContent ?? '';
     expect(cambio).toContain('Pagó exacto');
     expect(cambio).toContain('$0.00');
   });
 
-  it('short: red, what is missing, and the ask for the rest', () => {
+  it('short: red, with what is missing', () => {
     montar(350_00n, '200');
     const cambio = screen.getByTestId('cobro-cambio').textContent ?? '';
     expect(cambio).toContain('Todavía falta');
     expect(cambio).toContain('150.00');
-    expect(cambio).toContain('Pídele el resto');
   });
 
   it('tapping a bill reports its typed form; the active bill inverts', () => {
@@ -88,6 +92,7 @@ describe('CobroEfectivo', () => {
           total={350_00n}
           tecleado="500"
           estado={estadoEfectivo('500', 350_00n)}
+          medidas={MEDIDAS}
           onTecla={onTecla2}
           onMonto={onMonto2}
         />,

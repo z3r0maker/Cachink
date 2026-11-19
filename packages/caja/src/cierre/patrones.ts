@@ -1,5 +1,5 @@
 /**
- * The phone's close in its own words (M-16, ADR-147; board MvCierreFlujo):
+ * The phone's close in its own words (M-17, ADR-147; board MvCierreFlujo):
  * the owner is always «los patrones», never a name, so no test or English
  * name reaches the drawer and the sentence fits any owner. The two steps'
  * titles, the done line, the cash reminder and the corte the operator sends.

@@ -1,7 +1,7 @@
 /**
  * «Cuenta el efectivo de la caja» (Track M, M-09): bills $1000 to $20 and
  * coins $20 to 10¢ in two columns, billetes and monedas each saying their
- * subtotal; the step's fixed foot says the Contado (M-16). The rows live in
+ * subtotal; the step's fixed foot says the Contado (M-17). The rows live in
  * `cierre-conteo-fila`; everything is centavos end to end.
  */
 import type { ReactElement } from 'react';

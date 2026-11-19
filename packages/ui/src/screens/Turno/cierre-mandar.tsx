@@ -1,5 +1,5 @@
 /**
- * «Mandar el corte a los patrones» (M-16, MvCierreFlujo): the message as it
+ * «Mandar el corte a los patrones» (M-17, MvCierreFlujo): the message as it
  * arrives, then WhatsApp, Mensajes and the phone's own menu — the same rows
  * and the same share actions as the sale's comprobante, so a fix to one
  * reaches both. The operator always presses send (ADR-083 D2).

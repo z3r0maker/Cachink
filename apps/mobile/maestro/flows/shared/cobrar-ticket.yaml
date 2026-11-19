@@ -15,15 +15,12 @@ appId: mx.xangarro.mobile
 # SHADOW it (a subflow's own env wins in Maestro) and every sale would
 # silently charge as the default method.
 - runFlow: abrir-cobro.yaml
-# The method tiles can sit low on the checkout; a blind tap lands on the
-# sheet behind them and the sale records as the default Efectivo.
-- scrollUntilVisible:
-    element:
+# Wait for the row: a blind tap during the transition lands on the sheet
+# behind it and the sale records as the default Efectivo.
+- extendedWaitUntil:
+    visible:
       id: 'cobro-metodo-${METODO}'
-    direction: DOWN
     timeout: 10000
-    visibilityPercentage: 60
-    centerElement: true
 - tapOn:
     id: 'cobro-metodo-${METODO}'
 - waitForAnimationToEnd

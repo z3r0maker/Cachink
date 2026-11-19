@@ -1,5 +1,5 @@
 /**
- * Cierre, step 2 «Resultado» (M-16, MvCierreFlujo): what the count did said
+ * Cierre, step 2 «Resultado» (M-17, MvCierreFlujo): what the count did said
  * in its title, the result card, the reason a difference asks for, how the
  * expected cash was formed and, while records wait, the band that warns but
  * never blocks (ADR-123). The foot closes, or goes back to count again.

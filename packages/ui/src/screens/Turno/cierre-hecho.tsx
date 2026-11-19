@@ -1,5 +1,5 @@
 /**
- * «¡Turno cerrado!» (M-16, MvCierreFlujo; ADR-147): Don celebrates only a
+ * «¡Turno cerrado!» (M-17, MvCierreFlujo; ADR-147): Don celebrates only a
  * count that cuadró and worries on a shortfall, the chip and the line say
  * what happened and when los patrones see it, the corte reads as a ticket,
  * and the fixed foot sends it, opens another turno or leaves. A closed turno

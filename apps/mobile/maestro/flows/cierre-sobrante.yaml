@@ -32,7 +32,7 @@ appId: mx.xangarro.mobile
     id: 'conteo-mas-billete-100'
 
 # Sobra (DIF.sobra): its own hint, and the close still waits on a motivo.
-# Step 1 ends at its fixed foot (M-16): «Ver resultado» shows the esperado.
+# Step 1 ends at its fixed foot (M-17): «Ver resultado» shows the esperado.
 - tapOn:
     id: 'cierre-ver-resultado'
 - extendedWaitUntil:

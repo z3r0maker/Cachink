@@ -1,23 +1,25 @@
 /**
- * «¿Con cuánto paga?» (MvCobro, Efectivo): what the customer hands over,
- * typed on the keypad or tapped as «Exacto» and the round bills, and the
- * change (green) or what is still missing (red), big.
+ * Efectivo on the cobro (board MvCobroTotal): what the customer hands over,
+ * typed on the keypad or tapped as «Exacto» and the round bills, beside the
+ * change (green) or what is still missing (red). Both stay smaller than the
+ * total above them; the keypad takes the height that is left.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { Pressable } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney, type Money } from '@xangarro/domain';
 import { Eyebrow } from '../../components/Panel/index';
 import { MText } from '../../components/Mostrador/index';
-import { PathIcon } from '../../components/PathIcon/index';
 import { borderColors, borderWidths, colors, radii } from '../../theme';
-import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
-import { billetes, comoTecleado, TECLAS, type EstadoEfectivo, type Tecla } from './cobro-logic';
+import { billetes, comoTecleado, type EstadoEfectivo, type Tecla } from './cobro-logic';
+import type { MedidasCobro } from './cobro-medidas';
+import { TecladoCobro } from './cobro-teclado';
 
 export interface CobroEfectivoProps {
   readonly total: Money;
   readonly tecleado: string;
   readonly estado: EstadoEfectivo;
+  readonly medidas: MedidasCobro;
   readonly onTecla: (k: Tecla) => void;
   readonly onMonto: (tecleado: string) => void;
 }
@@ -32,7 +34,7 @@ function mostrado(tecleado: string): string {
 
 function Rapidos(p: CobroEfectivoProps): ReactElement {
   return (
-    <View flexDirection="row" gap={8}>
+    <View flexDirection="row" gap={6}>
       {billetes(p.total).map((v, i) => {
         const on = p.tecleado === comoTecleado(v);
         const label = v === p.total ? 'Exacto' : formatMoney(v).replace('.00', '');
@@ -45,7 +47,7 @@ function Rapidos(p: CobroEfectivoProps): ReactElement {
             onPress={() => p.onMonto(comoTecleado(v))}
             style={{
               flex: 1,
-              height: 48,
+              height: p.medidas.rapido,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: radii[2],
@@ -54,7 +56,7 @@ function Rapidos(p: CobroEfectivoProps): ReactElement {
               backgroundColor: on ? colors.black : colors.white,
             }}
           >
-            <MText size="md" weight="extraBold" color={on ? colors.yellow : colors.black}>
+            <MText size="body" weight="extraBold" color={on ? colors.yellow : colors.black}>
               {label}
             </MText>
           </Pressable>
@@ -69,7 +71,6 @@ interface Tono {
   readonly fondo: string;
   readonly borde: string;
   readonly label: string;
-  readonly nota: string | null;
   readonly monto: string;
 }
 
@@ -77,93 +78,92 @@ interface Tono {
 function tonoDe(d: Money | null): Tono {
   if (d === null) {
     const base = { tinta: colors.gray600, fondo: colors.gray100, borde: borderColors.quiet };
-    return { ...base, label: 'Su cambio', nota: null, monto: '$0.00' };
+    return { ...base, label: 'Su cambio', monto: '$0.00' };
   }
   if (d < 0n) {
     const rojo = { tinta: colors.redText, fondo: colors.redSoft, borde: colors.redText };
-    return { ...rojo, label: 'Todavía falta', nota: 'Pídele el resto.', monto: formatMoney(-d) };
+    return { ...rojo, label: 'Todavía falta', monto: formatMoney(-d) };
   }
-  const nota = d === 0n ? 'Pagó exacto.' : 'Cuéntalo frente al cliente.';
   const verde = { tinta: colors.greenText, fondo: colors.greenSoft, borde: colors.greenText };
-  return { ...verde, label: 'Su cambio', nota, monto: formatMoney(d) };
+  return { ...verde, label: d === 0n ? 'Pagó exacto' : 'Su cambio', monto: formatMoney(d) };
 }
 
-function Cambio({ e }: { e: EstadoEfectivo }): ReactElement {
-  const t = tonoDe(e.diferencia);
+function Celda(p: {
+  readonly fondo: string;
+  readonly borde: string;
+  readonly ancho: number;
+  readonly testID?: string;
+  readonly vivo?: boolean;
+  readonly children: ReactNode;
+}): ReactElement {
   return (
     <View
-      testID="cobro-cambio"
-      aria-live="polite"
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="space-between"
-      padding={14}
-      borderRadius={radii[4]}
-      borderWidth={borderWidths.thin}
-      borderColor={t.borde}
-      backgroundColor={t.fondo}
+      testID={p.testID}
+      aria-live={p.vivo ? 'polite' : undefined}
+      flex={1}
+      minWidth={0}
+      justifyContent="center"
+      paddingHorizontal={10}
+      borderRadius={radii[2]}
+      borderWidth={p.ancho}
+      borderColor={p.borde}
+      backgroundColor={p.fondo}
     >
-      <View>
-        <Eyebrow color={t.tinta}>{t.label}</Eyebrow>
-        {t.nota ? (
-          <MText size="sm" weight="bold" color={t.tinta}>
-            {t.nota}
-          </MText>
-        ) : null}
-      </View>
-      <MText size="total" weight="extraBold" color={t.tinta}>
-        {t.monto}
-      </MText>
+      {p.children}
     </View>
   );
 }
 
-function Teclado({ onTecla }: { onTecla: (k: Tecla) => void }): ReactElement {
+function Cifra(p: {
+  readonly size: MedidasCobro['cifraCuenta'];
+  readonly color: string;
+  readonly testID?: string;
+  readonly children: string;
+}): ReactElement {
   return (
-    <View role="group" aria-label="Teclado de números" flexDirection="row" flexWrap="wrap" gap={8}>
-      {TECLAS.map((k) => (
-        <Pressable
-          key={k}
-          testID={`cobro-tecla-${k}`}
-          role="button"
-          aria-label={k === 'borrar' ? 'Borrar' : k === '.' ? 'Punto' : k}
-          onPress={() => onTecla(k)}
-          style={({ pressed }) => ({
-            width: '31.5%',
-            height: 56,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: radii[3],
-            borderWidth: borderWidths.quiet,
-            borderColor: borderColors.quiet,
-            backgroundColor: pressed ? colors.gray200 : colors.white,
-          })}
-        >
-          {k === 'borrar' ? (
-            <PathIcon d={COBRAR_GLYPHS.borrar} size={22} />
-          ) : (
-            <MText size="xl3" weight="extraBold">
-              {k}
-            </MText>
-          )}
-        </Pressable>
-      ))}
+    <MText
+      testID={p.testID}
+      size={p.size}
+      weight="extraBold"
+      color={p.color}
+      letterSpacing={-0.4}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      maxFontSizeMultiplier={1.2}
+      fontVariant={['tabular-nums']}
+    >
+      {p.children}
+    </MText>
+  );
+}
+
+function Cuenta(p: CobroEfectivoProps): ReactElement {
+  const t = tonoDe(p.estado.diferencia);
+  const { cuenta, cifraCuenta } = p.medidas;
+  return (
+    <View flexDirection="row" gap={8} height={cuenta}>
+      <Celda fondo={colors.white} borde={colors.black} ancho={borderWidths.thin} vivo>
+        <Eyebrow color={colors.gray600}>Paga con</Eyebrow>
+        <Cifra size={cifraCuenta} color={colors.black} testID="cobro-recibido">
+          {mostrado(p.tecleado)}
+        </Cifra>
+      </Celda>
+      <Celda fondo={t.fondo} borde={t.borde} ancho={borderWidths.quiet} testID="cobro-cambio" vivo>
+        <Eyebrow color={t.tinta}>{t.label}</Eyebrow>
+        <Cifra size={cifraCuenta} color={t.tinta}>
+          {t.monto}
+        </Cifra>
+      </Celda>
     </View>
   );
 }
 
 export function CobroEfectivo(p: CobroEfectivoProps): ReactElement {
   return (
-    <View gap={12} testID="cobro-efectivo">
-      <View flexDirection="row" alignItems="center" justifyContent="space-between">
-        <Eyebrow>¿Con cuánto paga?</Eyebrow>
-        <MText size="xl6" weight="extraBold" aria-live="polite" testID="cobro-recibido">
-          {mostrado(p.tecleado)}
-        </MText>
-      </View>
+    <View flex={1} gap={p.medidas.separacion} testID="cobro-efectivo">
+      <Cuenta {...p} />
       <Rapidos {...p} />
-      <Cambio e={p.estado} />
-      <Teclado onTecla={p.onTecla} />
+      <TecladoCobro separacion={p.medidas.separacionTeclas} onTecla={p.onTecla} />
     </View>
   );
 }

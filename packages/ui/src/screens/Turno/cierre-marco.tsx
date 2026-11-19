@@ -1,5 +1,5 @@
 /**
- * The frame every Cierre step shares (M-16, MvCierreFlujo): the content
+ * The frame every Cierre step shares (M-17, MvCierreFlujo): the content
  * scrolls, the step's action stays fixed at the bottom; and the step's head,
  * the two-part progress bar with «Paso N de 2», the title and one line.
  */

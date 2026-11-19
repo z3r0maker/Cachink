@@ -1,7 +1,7 @@
 /**
  * «Explica la diferencia» (Track M, M-09): the four reasons the board lists,
  * as chips, and the note «Otra razón» asks for: the words los patrones
- * read beside the corte (M-16).
+ * read beside the corte (M-17).
  */
 import type { ReactElement } from 'react';
 import { TextInput } from 'react-native';
