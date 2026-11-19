@@ -82,18 +82,21 @@ WHAT TO TRY
 - Ventas, Gastos and Mi turno show the day's sales, expenses and totals.
 - Mi turno > Inventario: tap a product's picture square to take its photo, or
   touch and hold it to choose one from the photo library.
+- Gastos > Registrar gasto: "Comprobante (opcional)" takes a photo of the
+  receipt. A saved gasto without one shows "Agregar foto".
 - The bell at the top opens Avisos: messages from the owner, which an employee
   can answer.
 
 PERMISSIONS
 The camera scans the owner's QR code and product barcodes, and takes product
-photos. The photo library opens only when someone picks a product photo.
-Product photos are uploaded to the business's account so its other devices and
-its website can show them.
+photos and gasto receipt photos. The photo library opens only when someone
+picks one of those photos. Product photos are uploaded to the business's
+account so its other devices and its website can show them; receipt photos are
+uploaded so the owner can see them on the website.
 
 PRIVATE TO EACH BUSINESS
-Product photos and messages are visible only inside the business that created
-them. Nothing is published to other users of the app.
+Photos and messages are visible only inside the business that created them.
+Nothing is published to other users of the app.
 
 ACCOUNTS AND DATA
 Employees do not create accounts in the app; the business owner adds them on

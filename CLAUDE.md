@@ -53,7 +53,9 @@ Product scope per surface lives in `docs/plan/` (`04-portal.md`, `19-movil-mostr
 
 ## 3. Monorepo Map
 
-pnpm workspaces + Turborepo. `apps/*` and `packages/*`; `archive/` is excluded from the workspace.
+pnpm workspaces + Turborepo. `apps/*`, `packages/*` and `tools/synth/*`; `archive/` is excluded from the workspace.
+
+`tools/synth/*` is Xangarro Synth, the internal QA harness (ADR-153): `@xangarro/synth-core`, `-server` and `-studio`. It is never shipped, and nothing in `apps/*` or `packages/*` may import it (ESLint enforces this).
 
 ### Apps
 

@@ -68,6 +68,12 @@ describe('release.sh', () => {
     assert.match(s, /Ready/);
   });
 
+  it('never names a tools/* package, so Synth cannot ship (ADR-153)', () => {
+    const s = source();
+    assert.doesNotMatch(s, /tools\//, 'release.sh names a path under tools/');
+    assert.doesNotMatch(s, /@xangarro\/synth-/, 'release.sh names a Synth package');
+  });
+
   it('names every app the repo deploys', () => {
     const s = source();
     for (const app of ['web', 'backoffice', 'landing']) {

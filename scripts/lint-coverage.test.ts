@@ -47,9 +47,9 @@ function trackedSources(): readonly string[] {
   return out.split('\0').filter((f) => f.length > 0);
 }
 
-/** `apps/*` and `packages/*`, per pnpm-workspace.yaml. */
+/** `apps/*`, `packages/*` and `tools/synth/*`, per pnpm-workspace.yaml. */
 function workspaceDirs(): readonly string[] {
-  return ['apps', 'packages'].flatMap((parent) => {
+  return ['apps', 'packages', 'tools/synth'].flatMap((parent) => {
     const dir = join(REPO, parent);
     if (!existsSync(dir)) return [];
     return readdirSync(dir, { withFileTypes: true })
@@ -144,7 +144,7 @@ describe('lint coverage', () => {
     // `.d.ts` are ambient declarations with nothing to lint, and are ignored
     // globally on purpose.
     const sources = tracked.filter(
-      (f) => /^(apps|packages)\/[^/]+\/src\//.test(f) && !f.endsWith('.d.ts'),
+      (f) => /^(apps|packages|tools\/synth)\/[^/]+\/src\//.test(f) && !f.endsWith('.d.ts'),
     );
 
     assert.ok(sources.length > 500, `expected the repo's source tree, found ${sources.length}`);

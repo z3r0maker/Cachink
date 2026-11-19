@@ -1,9 +1,10 @@
 /**
  * Ventas del turno (Track M, M-08; board MvVentas): what the operator cobró
- * since the turno opened — the three figures, the search, the method chips
- * and every sale, each opening its ticket in the sheet where it can be
- * shared or cancelled with a reason. Presentational: the route hands it
- * `useVentasTurno()` and the navigation; nothing here reads a database.
+ * since the turno opened. The title, the three compact figures, the search
+ * and the method chips stay put; only the list scrolls, every sale opening
+ * its ticket in the sheet where it can be shared or cancelled with a reason.
+ * Presentational: the route hands it `useVentasTurno()` and the navigation;
+ * nothing here reads a database.
  */
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -13,13 +14,14 @@ import {
   filtrar,
   marcarCancelada,
   avisoCancelada,
+  resumen,
   ventaPorFolio,
   type CargaTicket,
   type VentasData,
   type VentaDetalle,
   type VentaTurno,
 } from '@xangarro/caja/ventas';
-import { Buscador, Cabecera, Filtros, NotaAmbar, type FiltroVenta } from './venta-controles';
+import { Buscador, Cabecera, Filtros, type FiltroVenta } from './venta-controles';
 import type { VerificacionCancelar } from './cancelar-con-nip';
 import { CancelarVentaDialog } from './venta-cancelar';
 import { VentaDetalleSheet } from './venta-detalle';
@@ -32,7 +34,7 @@ export type { VentasEstado } from './venta-estados';
 export interface VentasMostradorScreenProps {
   readonly state: VentasEstado;
   readonly data: VentasData | null;
-  /** The owner's name (the amber note says it); «el dueño» until known. */
+  /** The owner's name (the cancel dialog says it); «el dueño» until known. */
   readonly dueno?: string;
   readonly onRetry: () => void;
   /** The empty state's way forward. */
@@ -171,21 +173,44 @@ function Capas(p: {
   );
 }
 
-function Contenido(p: VentasMostradorScreenProps & { readonly data: VentasData }): ReactElement {
-  const v = useVista(p, p.data);
-  const ctx = { operador: p.data.operador, caja: p.data.caja };
+/** The board's fixed top: title, figures and search, then the method chips. */
+function Arriba(p: {
+  readonly data: VentasData;
+  readonly v: ReturnType<typeof useVista>;
+}): ReactElement {
+  const { v } = p;
   return (
     <>
-      <ScrollView testID={p.testID ?? 'ventas'} contentContainerStyle={{ padding: 16, gap: 12 }}>
-        <Cabecera desde={p.data.desde} />
-        <VentaResumen ventas={v.ventas} desde={p.data.desde} />
+      <View style={{ gap: 10, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6 }}>
+        <Cabecera activas={resumen(v.ventas).activas} desde={p.data.desde} />
+        <VentaResumen ventas={v.ventas} />
         <Buscador q={v.query} onQ={v.setQuery} />
+      </View>
+      <View style={{ paddingTop: 4, paddingBottom: 10 }}>
         <Filtros filtro={v.filtro} onFiltro={v.setFiltro} />
-        <ListaVentas ventas={filtrar(v.ventas, v.filtro, v.query)} ctx={ctx} onAbrir={v.abrir} />
-        <NotaAmbar dueno={p.dueno ?? 'el dueño'} />
+      </View>
+    </>
+  );
+}
+
+function Contenido(p: VentasMostradorScreenProps & { readonly data: VentasData }): ReactElement {
+  const v = useVista(p, p.data);
+  return (
+    <View style={{ flex: 1 }} testID={p.testID ?? 'ventas'}>
+      <Arriba data={p.data} v={v} />
+      <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 14 }}
+      >
+        <ListaVentas
+          ventas={filtrar(v.ventas, v.filtro, v.query)}
+          abierta={v.sel}
+          onAbrir={v.abrir}
+        />
       </ScrollView>
       <Capas props={p} data={p.data} v={v} />
-    </>
+    </View>
   );
 }
 

@@ -110,7 +110,12 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-01 Paquetes `tools/synth/*` y su frontera [alta]
 
-- [ ] Status · **Blocks:** S-03…S-07
+- [x] Status · **Blocks:** S-03…S-07
+      Done: 2026-11-19 · `feat/synth-s01` · the workspace glob is `tools/synth/*`, so the three packages sit one
+      level down. The boundary is a shared `no-restricted-imports` pattern, also carried by the ui-components
+      block, which replaces the shared rule for its files. `scripts/lint-boundaries.test.ts` proves it fires from
+      `apps/web`, from an unclassified package and from a ui component. The packages' `test` runs with
+      `--passWithNoTests` until S-03 brings the first tests.
 - **What:**
   - Add `tools/*` to `pnpm-workspace.yaml`, with `@xangarro/synth-core`, `-server` and `-studio` (empty
     entrypoints, configs from `@xangarro/config`).
