@@ -51,6 +51,12 @@ to a business (its owner and the employees they add), and the people who use
 the app are those employees. The app is free to use: a business on our free
 plan links its first device at no cost. No employee buys anything.
 
+The app is also a free stand-alone companion to our paid web service
+(guideline 3.1.3(f)): nothing is sold in it, and it does not point anyone to
+a purchase. The plan a business holds on our website sets limits such as how
+many records and devices it can use. The demo business is on the full plan,
+so nothing is locked during review.
+
 HOW TO SIGN IN (demo business "Tacos La Esquina")
 1. On the first screen, tap "Escribe el código".
 2. "Correo del dueño": demo@xangarro.mx
@@ -71,9 +77,20 @@ WHAT TO TRY
 - Turn on airplane mode: sales still go through and are sent when the
   connection returns.
 - Ventas, Gastos and Mi turno show the day's sales, expenses and totals.
+- Mi turno > Inventario: tap a product's picture square to take its photo, or
+  touch and hold it to choose one from the photo library.
+- The bell at the top opens Avisos: messages from the owner, which an employee
+  can answer.
 
 PERMISSIONS
-The camera is used only to scan the owner's QR code and product barcodes.
+The camera scans the owner's QR code and product barcodes, and takes product
+photos. The photo library opens only when someone picks a product photo.
+Product photos are uploaded to the business's account so its other devices and
+its website can show them.
+
+PRIVATE TO EACH BUSINESS
+Product photos and messages are visible only inside the business that created
+them. Nothing is published to other users of the app.
 
 ACCOUNTS AND DATA
 Employees do not create accounts in the app; the business owner adds them on

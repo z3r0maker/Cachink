@@ -27,6 +27,7 @@ Every row: **purpose = App Functionality only**, **not used for tracking**.
 | Contact Info → Phone Number           | Yes                | Those customers' phone numbers (for WhatsApp reminders)                                                       | `domain/src/entities/client.ts`                                                   |
 | Financial Info → Other Financial Info | Yes                | The business's sales, expenses, cash counts and stock movements                                               | `contracts/src/sync-push.ts`                                                      |
 | User Content → Other User Content     | Yes                | Free text typed into those records (concepts, notes) and operators' replies to the owner's messages           | `contracts/src/sync-push.ts`                                                      |
+| User Content → Photos or Videos       | Yes                | Product photos taken or picked in Inventario, reduced to 512 px and synced to the business's account          |
 | User Content → Customer Support       | Yes                | The description sent with «Reportar un problema»                                                              | `ui/src/screens/Settings/use-bug-report-submit.ts`                                |
 | Identifiers → User ID                 | Yes                | The operator's id on each shift, cash movement and record they create                                         | `data/src/schema/caja-turnos.ts`, `_audit.ts`                                     |
 | Identifiers → Device ID               | Yes                | The device id Xangarro generates at linking (not the advertising id)                                          | `contracts/src/activate.ts`                                                       |
@@ -41,8 +42,9 @@ so they are declared under Contact Info rather than left out.
 
 Location (no GPS, no location permission), Contacts (the address book is
 never read), Health & Fitness, Sensitive Info, Browsing and Search History,
-Purchases (the app sells nothing), Usage Data (no analytics SDK), Photos or
-Videos and Audio (the camera only reads codes; no image leaves the device).
+Purchases (the app sells nothing), Usage Data (no analytics SDK) and Audio.
+QR and barcode frames are read on the device and never leave it; product photos
+are the only images sent.
 
 ## Third-party SDKs that send data
 
