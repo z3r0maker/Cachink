@@ -16,6 +16,7 @@ export type EmpresaHref =
   | '/empresa/impuestos'
   | '/empresa/socios'
   | '/empresa/agenda'
+  | '/empresa/cierre'
   | '/empresa/expediente'
   | '/empresa/corporativo';
 
@@ -75,6 +76,7 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
     summary: '¿Qué vence, cerramos el mes y dónde está cada papel?',
     tabs: [
       { label: 'Agenda', href: '/empresa/agenda', task: 'E-04' },
+      { label: 'Cierre del mes', href: '/empresa/cierre', task: 'E-14' },
       { label: 'Expediente', href: '/empresa/expediente', task: 'E-05' },
       { label: 'Corporativo', href: '/empresa/corporativo', task: 'E-06' },
     ],

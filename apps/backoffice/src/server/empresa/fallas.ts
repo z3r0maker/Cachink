@@ -3,6 +3,7 @@ import type { LedgerEntry, RecurrenteRegistrado } from '@xangarro/application/co
 import type { FormState } from '../actions/form-state';
 import { NotPermitted } from '../staff';
 import { reportError } from '../observability/report';
+import { mesCerrado } from './cierre-falla';
 
 /**
  * How «Empresa»'s actions answer a failure (ADR-125): the ledger's and the
@@ -63,11 +64,25 @@ const DOMAIN_CODES = new Set([
   'DECLARACION_PAGADA',
   'IMPUESTOS_INVALIDOS',
   'SE_PAGA_DESDE_IMPUESTOS',
+  'MES_INVALIDO',
+  'MES_EN_CURSO',
+  'MES_CERRADO',
+  'MES_ABIERTO',
+  'MES_ANTERIOR_ABIERTO',
+  'MES_POSTERIOR_CERRADO',
+  'PASOS_PENDIENTES',
+  'REAPERTURA_PENDIENTE',
+  'SIN_REAPERTURA',
+  'MISMO_SOCIO',
+  'MOTIVO_REAPERTURA',
+  'SALDO_NO_COINCIDE',
 ]);
 
 export function failed(error: unknown, what: string): FormState {
   if (error instanceof NotPermitted) return { ok: false, message: error.message };
   const code = error instanceof Error && 'code' in error ? String(error.code) : '';
+  const cerrado = mesCerrado(error);
+  if (cerrado !== null) return cerrado;
   const own = OWN_MESSAGES[code];
   if (own !== undefined) return { ok: false, message: own };
   if (DOMAIN_CODES.has(code) && error instanceof Error)
