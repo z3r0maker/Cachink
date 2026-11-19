@@ -11,6 +11,7 @@
 import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { colors } from '../../theme';
+import { errorDeLoEnviado } from './activation-form';
 import { VincularCodigo } from './vincular-codigo';
 import { VincularEscanear } from './vincular-escanear';
 import { VincularLeido } from './vincular-leido';
@@ -34,14 +35,23 @@ function useVincular(props: ActivationScreenProps) {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [codigo, setCodigo] = useState('');
-  // The refusal belongs to what was sent: editing either field clears it.
-  const [enviado, setEnviado] = useState('');
+  // The refusal belongs to what was sent: editing either field, or reading
+  // another QR, clears it (R7).
+  const [enviado, setEnviado] = useState<string | null>(null);
   const actual = `${email.trim()}|${codigo}`;
+  const qr = token === null ? null : `qr|${token}`;
+  const error = props.errorKey ?? null;
   return {
-    errorKey: enviado === actual ? (props.errorKey ?? null) : null,
+    errorKey: errorDeLoEnviado(enviado, actual, error),
+    errorQr: errorDeLoEnviado(enviado, qr, error),
     enviar: () => {
       setEnviado(actual);
       props.onSubmit({ email: email.trim(), code: codigo });
+    },
+    conectarQr: () => {
+      if (token === null || qr === null) return;
+      setEnviado(qr);
+      props.onScan(token);
     },
     vista,
     token,
@@ -83,10 +93,10 @@ export function ActivationScreen(props: ActivationScreenProps): ReactElement {
       )}
       <VincularLeido
         open={v.vista === 'escanear' && v.token !== null}
-        onConectar={() => (v.token === null ? undefined : props.onScan(v.token))}
+        onConectar={v.conectarQr}
         onVolver={v.irEscanear}
         submitting={props.submitting}
-        errorKey={props.errorKey ?? null}
+        errorKey={v.errorQr}
       />
     </View>
   );
