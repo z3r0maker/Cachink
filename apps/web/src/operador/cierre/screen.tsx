@@ -56,7 +56,7 @@ function Cuerpo({ x, data }: { readonly x: Cierre; readonly data: CierreData }) 
         <Conteo x={x} />
         <div className={s.columna}>
           <Esperado x={x} data={data} />
-          <Diferencia x={x} dueno={data.dueno} />
+          <Diferencia x={x} />
           <Cerrar x={x} />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { formatMoney } from '@xangarro/domain';
 import { Don } from '../../components/don/don';
 import { desglose } from '@xangarro/caja/turno';
 import * as s from './cierre.css';
-import { DIF, MOTIVOS_DIFERENCIA, type CierreData } from '@xangarro/caja/cierre';
+import { DIF, MOTIVOS_DIFERENCIA, NOTA_TITULO, type CierreData } from '@xangarro/caja/cierre';
 import * as d from './don.css';
 import type { Cierre } from './use-cierre';
 
@@ -30,7 +30,7 @@ export function Esperado({ x, data }: { readonly x: Cierre; readonly data: Cierr
 }
 
 /** Cuadra (green), Falta (red) or Sobra (blue); with a difference, the reason. */
-export function Diferencia({ x, dueno }: { readonly x: Cierre; readonly dueno: string }) {
+export function Diferencia({ x }: { readonly x: Cierre }) {
   if (x.contado === 0n) return <SinContar />;
   const t = DIF[x.dif.tipo];
   return (
@@ -42,7 +42,7 @@ export function Diferencia({ x, dueno }: { readonly x: Cierre; readonly dueno: s
         </span>
       </div>
       <Aviso x={x} />
-      {x.dif.tipo === 'cuadra' ? null : <Explica x={x} dueno={dueno} />}
+      {x.dif.tipo === 'cuadra' ? null : <Explica x={x} />}
     </section>
   );
 }
@@ -70,7 +70,7 @@ function Aviso({ x }: { readonly x: Cierre }) {
   );
 }
 
-function Explica({ x, dueno }: { readonly x: Cierre; readonly dueno: string }) {
+function Explica({ x }: { readonly x: Cierre }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span id="motivo-lbl" className={s.eyebrow}>
@@ -95,11 +95,11 @@ function Explica({ x, dueno }: { readonly x: Cierre; readonly dueno: string }) {
       </div>
       {x.motivo === 'Otra razón' ? (
         <label className={s.nota}>
-          <span className={s.notaLabel}>{`Nota para ${dueno}`}</span>
+          <span className={s.notaLabel}>{NOTA_TITULO}</span>
           <input
             type="text"
             className={s.notaInput}
-            placeholder="Cuéntale qué pasó"
+            placeholder="Cuéntales qué pasó"
             value={x.nota}
             onChange={(e) => x.setNota(e.target.value)}
           />

@@ -91,11 +91,17 @@ export const diferencia = style({
   fontWeight: typography.weights.extraBold,
 });
 
-export const pie = style({
-  padding: '12px 24px 16px',
-  borderTop: borders.quiet,
-  background: colors.offwhite,
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.semibold,
-  color: colors.textMuted,
+/** «Guarda $X para los patrones.» (OpCierreCorte): the counted cash is the owner's. */
+export const recordatorio = style({
+  margin: 0,
+  padding: '14px 24px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  borderTop: borders.thin,
+  background: colors.yellowSoft,
+  lineHeight: 1.3,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
 });

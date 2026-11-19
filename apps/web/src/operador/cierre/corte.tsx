@@ -1,14 +1,12 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
+import { Icon } from '../../shell/icon';
 import * as k from './corte.css';
-import { conSigno, DIF, type CierreData } from '@xangarro/caja/cierre';
+import { conSigno, DIF, recordatorioEfectivo, type CierreData } from '@xangarro/caja/cierre';
 import type { Cierre } from './use-cierre';
 
-/** «14 may», the day the turno closed. */
-export function fechaCorta(d: Date = new Date()): string {
-  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }).replace('.', '');
-}
+const BILLETE = 'M2 6h20v12H2V6Zm10 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4M6 12h.01M18 12h.01';
 
 function Fila(p: { readonly label: string; readonly value: string; readonly color?: string }) {
   return (
@@ -21,18 +19,33 @@ function Fila(p: { readonly label: string; readonly value: string; readonly colo
   );
 }
 
-/** «Corte de caja»: who, when, counted against expected, and the day's sales. */
-export function Corte({ x, data }: { readonly x: Cierre; readonly data: CierreData }) {
+function Cabeza(p: { readonly data: CierreData; readonly fecha: string }) {
+  return (
+    <div className={k.cabeza}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span className={k.eyebrow}>Corte de caja</span>
+        <span className={k.fecha}>{`${p.fecha} · ${p.data.hasta}`}</span>
+      </div>
+      {p.data.negocio ? <span className={k.negocio}>{p.data.negocio}</span> : null}
+    </div>
+  );
+}
+
+/**
+ * «Corte de caja» (OpCierreCorte, P-43): who, when, counted against expected,
+ * the day's sales, and at its foot the reminder that the counted cash is los
+ * patrones' (ADR-147: a reminder, not a record).
+ */
+export function Corte(p: {
+  readonly x: Cierre;
+  readonly data: CierreData;
+  readonly fecha: string;
+}) {
+  const { x, data } = p;
   const t = DIF[x.dif.tipo];
   return (
     <section aria-label="Corte de caja" className={k.corte}>
-      <div className={k.cabeza}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span className={k.eyebrow}>Corte de caja</span>
-          <span className={k.fecha}>{`${fechaCorta()} · ${data.hasta}`}</span>
-        </div>
-        {data.negocio ? <span className={k.negocio}>{data.negocio}</span> : null}
-      </div>
+      <Cabeza data={data} fecha={p.fecha} />
       <div className={k.bloque} style={{ paddingTop: 0 }}>
         <Fila label="Caja" value={data.caja} />
         <Fila label="Operadora" value={data.operador} />
@@ -55,9 +68,10 @@ export function Corte({ x, data }: { readonly x: Cierre; readonly data: CierreDa
         <Fila label="Ventas" value={String(data.resumen.ventas)} />
         <Fila label="Cobrado" value={formatMoney(data.resumen.cobrado)} color={colors.greenText} />
       </div>
-      <div className={k.pie}>
-        Guardado con tu nombre. Ya no puedes capturar en esta caja hasta abrir otro turno.
-      </div>
+      <p className={k.recordatorio} data-testid="cierre-recordatorio">
+        <Icon path={BILLETE} size={24} strokeWidth={2} />
+        {recordatorioEfectivo(x.contado)}
+      </p>
     </section>
   );
 }

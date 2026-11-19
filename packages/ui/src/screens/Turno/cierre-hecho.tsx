@@ -9,6 +9,7 @@ import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import {
   CHIP_CIERRE,
+  corteDeCierre,
   DIF,
   fechaCorta,
   lineaHecho,
@@ -149,20 +150,7 @@ export interface CierreHechoProps {
 export function CierreHecho(p: CierreHechoProps): ReactElement {
   const [mandar, setMandar] = useState(false);
   const [fecha] = useState(() => fechaCorta());
-  const texto = mensajeCorte({
-    ...(p.data.negocio === undefined ? {} : { negocio: p.data.negocio }),
-    caja: p.data.caja,
-    operador: p.data.operador,
-    fecha,
-    desde: p.data.desde,
-    hasta: p.data.hasta,
-    contado: p.e.contado,
-    esperado: p.e.esperado,
-    dif: p.e.dif,
-    motivo: p.motivo,
-    ventas: p.data.resumen.ventas,
-    cobrado: p.data.resumen.cobrado,
-  });
+  const texto = mensajeCorte(corteDeCierre(p.data, p.e, p.motivo, fecha));
   const pie = (
     <Pie onMandar={() => setMandar(true)} onOtroTurno={p.onOtroTurno} onSalir={p.onSalir} />
   );

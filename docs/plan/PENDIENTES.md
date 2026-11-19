@@ -375,7 +375,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 23 hechos)
 - `03-backend.md` — 2 abiertos (1 en curso, 0 bloqueados, 18 hechos)
-- `04-portal.md` — 11 abiertos (3 en curso, 1 bloqueados, 31 hechos)
+- `04-portal.md` — 11 abiertos (3 en curso, 1 bloqueados, 32 hechos)
 - `06-landing.md` — 4 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `07-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)

@@ -8,8 +8,6 @@ import {
   cerrarLabel,
   conSigno,
   DIF,
-  lineaCerrado,
-  lineaPorEnviar,
   BANDA_NO_SE_PUDO,
 } from '../src/cierre/copy';
 import { desglose, esperadoDe } from '../src/turno/desglose';
@@ -45,25 +43,11 @@ describe('cierre de turno', () => {
     assert.doesNotMatch(BANDA_CUERPO, /primero/i);
   });
 
-  it('words the difference and the closed line', () => {
+  it('words the difference', () => {
     assert.equal(DIF.sobra.label, 'Sobra');
     assert.equal(conSigno({ tipo: 'falta', monto: 70_00n }), '−$70.00');
     assert.equal(conSigno({ tipo: 'sobra', monto: 910_00n }), '+$910.00');
     assert.equal(conSigno({ tipo: 'cuadra', monto: 0n }), '$0.00');
-    assert.equal(
-      lineaCerrado({ tipo: 'falta', monto: 1n }, 'Salió un vale', 'Pedro'),
-      'Quedó un faltante explicado como «Salió un vale».',
-    );
-    assert.match(lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro'), /Pedro ya lo tiene/);
-    // With records to send, the portal line stands apart (DS-06, EsCajaCierre).
-    assert.equal(
-      lineaCerrado({ tipo: 'cuadra', monto: 0n }, null, 'Pedro', 2),
-      'El conteo cuadró con lo esperado.',
-    );
-    assert.equal(
-      lineaPorEnviar('pedro'),
-      'Pedro lo verá en su portal cuando se envíen los registros.',
-    );
     assert.equal(
       BANDA_NO_SE_PUDO,
       'Todavía no se pudo. Lo volvemos a intentar solos en un momento.',

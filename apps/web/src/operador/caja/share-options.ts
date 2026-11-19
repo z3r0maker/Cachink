@@ -9,10 +9,10 @@ import {
   type Comprobante,
 } from './receipt';
 
-const WA =
+export const WA =
   'M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719';
 const DOWNLOAD = 'M12 3v12M7 11l5 5 5-5M4 21h16';
-const COPY =
+export const COPY =
   'M10 8h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2';
 
 export interface Opcion {

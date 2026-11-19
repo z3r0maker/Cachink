@@ -27,14 +27,7 @@ export function Lado(p: {
       {opciones(p.c, p.tel, p.cliente).map((o) => (
         <OpcionBoton key={o.label} o={o} onDone={p.onHecho} />
       ))}
-      {p.hecho ? (
-        <div role="status" className={s.hecho}>
-          <span style={{ color: colors.greenText, display: 'grid' }}>
-            <Icon path={CHECK} size={20} strokeWidth={2.7} />
-          </span>
-          {p.hecho}
-        </div>
-      ) : null}
+      {p.hecho ? <Confirmacion texto={p.hecho} /> : null}
     </div>
   );
 }
@@ -71,7 +64,14 @@ function Telefono({ tel, setTel }: { readonly tel: string; readonly setTel: (t: 
   );
 }
 
-function OpcionBoton({ o, onDone }: { readonly o: Opcion; readonly onDone: (t: string) => void }) {
+/** One way out: its tile, its label and hint; `run` returns the line to confirm with. */
+export function OpcionBoton({
+  o,
+  onDone,
+}: {
+  readonly o: Opcion;
+  readonly onDone: (t: string) => void;
+}) {
   return (
     <button
       type="button"
@@ -88,5 +88,17 @@ function OpcionBoton({ o, onDone }: { readonly o: Opcion; readonly onDone: (t: s
         <span className={s.opcionHint}>{o.hint}</span>
       </span>
     </button>
+  );
+}
+
+/** What just happened, in green under the options (OpComprobante, OpCierreCorte). */
+export function Confirmacion({ texto }: { readonly texto: string }) {
+  return (
+    <div role="status" className={s.hecho}>
+      <span style={{ color: colors.greenText, display: 'grid' }}>
+        <Icon path={CHECK} size={20} strokeWidth={2.7} />
+      </span>
+      {texto}
+    </div>
   );
 }

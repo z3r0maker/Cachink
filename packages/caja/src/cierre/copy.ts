@@ -1,8 +1,6 @@
 import { formatMoney, type DiferenciaCorte } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '../comun/dueno';
-
 /** Every sentence of the close that changes with the difference or the queue. */
 export const DIF = {
   cuadra: {
@@ -53,28 +51,6 @@ export const BANDA_CUERPO = 'Puedes cerrar; se enviarán cuando vuelva la conexi
 /** Under the band after «Reintentar envío» left records waiting (EsCajaCierre, EsMvCierre). */
 export const BANDA_SIN_RED = 'Todavía no hay internet. Lo volvemos a intentar solos en un momento.';
 export const BANDA_NO_SE_PUDO = 'Todavía no se pudo. Lo volvemos a intentar solos en un momento.';
-
-/** The closed screen's own line while records wait (DS-06): the owner sees the close once they go up. */
-export const lineaPorEnviar = (dueno: string): string =>
-  `${mayuscula(dueno)} lo verá en su portal cuando se envíen los registros.`;
-
-/**
- * The closed line. With records still to send it says only what the count
- * did; `lineaPorEnviar` says when the owner sees it, on its own line.
- */
-export function lineaCerrado(
-  d: DiferenciaCorte,
-  motivo: string | null,
-  dueno: string,
-  porEnviar = 0,
-): string {
-  if (d.tipo === 'cuadra')
-    return porEnviar > 0
-      ? 'El conteo cuadró con lo esperado.'
-      : `El conteo cuadró con lo esperado. ${mayuscula(dueno)} ya lo tiene en su portal.`;
-  const que = d.tipo === 'falta' ? 'faltante' : 'sobrante';
-  return `Quedó un ${que} explicado como «${motivo ?? ''}».`;
-}
 
 /** «−$70.00», «+$910.00», «$0.00». */
 export function conSigno(d: DiferenciaCorte): string {
