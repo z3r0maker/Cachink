@@ -105,8 +105,7 @@ export async function confirmTotpEnrolment<Id extends string>(
 }
 
 export type FactorUsed =
-  | { readonly method: 'totp' }
-  | { readonly method: 'recovery'; readonly left: number };
+  { readonly method: 'totp' } | { readonly method: 'recovery'; readonly left: number };
 
 async function useTotp<Id extends string>(deps: SecondFactorDeps<Id>, id: Id, code: string) {
   const state = await deps.repo.totpState(id);

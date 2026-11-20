@@ -53,8 +53,7 @@ export function valoresDeclaracion(m: MesImpuestos): ValoresDeclaracion {
  * it. Pure: the domain validates what this cannot (`assertDeclaracion`).
  */
 export type CapturaDeclaracion =
-  | { readonly ok: true; readonly v: Declaracion }
-  | { readonly ok: false; readonly message: string };
+  { readonly ok: true; readonly v: Declaracion } | { readonly ok: false; readonly message: string };
 
 const texto = (f: FormData, k: string): string => {
   const v = f.get(k);

@@ -25,8 +25,7 @@ export function prepareEnrolment(
 }
 
 export type EnrolmentResult =
-  | { readonly kind: 'ok'; readonly recoveryCodes: readonly string[] }
-  | Refused;
+  { readonly kind: 'ok'; readonly recoveryCodes: readonly string[] } | Refused;
 
 /**
  * The first code proves the app holds the seed. Enrolment is recorded (with

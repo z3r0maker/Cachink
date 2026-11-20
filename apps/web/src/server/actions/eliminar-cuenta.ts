@@ -19,8 +19,7 @@ import { endSession } from '../session';
  * folio from a short-lived cookie.
  */
 export type EliminarCuentaResult =
-  | { ok: true }
-  | { ok: false; message: string; campo?: 'password' };
+  { ok: true } | { ok: false; message: string; campo?: 'password' };
 
 const NO_CAMBIO =
   'No pudimos eliminar tu cuenta y no se cambió nada. Revisa tu conexión e intenta otra vez; si sigue, escríbenos a hola@xangarro.mx.';

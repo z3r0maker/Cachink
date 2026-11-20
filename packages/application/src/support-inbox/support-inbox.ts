@@ -32,10 +32,7 @@ export interface SupportInbox {
 }
 
 export type SupportInboxErrorCode =
-  | 'INBOX_DISABLED'
-  | 'INBOX_UNAUTHORIZED'
-  | 'INBOX_REJECTED'
-  | 'INBOX_UNAVAILABLE';
+  'INBOX_DISABLED' | 'INBOX_UNAUTHORIZED' | 'INBOX_REJECTED' | 'INBOX_UNAVAILABLE';
 
 /** Filing failed. `retryable` — the same item may succeed later. */
 export class SupportInboxError extends Error {
