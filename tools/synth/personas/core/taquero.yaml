@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../../schemas/persona.schema.json
+#
+# Spec §7: a food stand, phone only, charging in a hurry. Stresses the speed of
+# the register and the number of taps. Every behavior is a hypothesis until
+# evidence anchors it (S-17).
+id: taquero
+kind: human
+tier: core
+status: hypothesis
+market_weight:
+  value: 0.25
+  source: estimate
+business:
+  type: puesto de tacos
+  team: solo
+  formality: informal
+device:
+  viewport: [390, 844]
+  network: 4g
+  input: touch
+comparators:
+  - libreta
+  - calculadora del celular
+goals:
+  - cobrar rápido y seguir despachando
+  - saber al final del día cuánto vendió
+knows:
+  - cobrar en efectivo y dar cambio
+  - usar WhatsApp y la cámara del celular
+does_not_know:
+  - SKU
+  - inventario
+  - ticket promedio
+  - sincronizar
+behaviors:
+  - trait: toca el botón más grande que diga cobrar, sin leer el resto
+    source: hypothesis
+  - trait: si una pantalla le pide un dato que no entiende, la salta o regresa
+    source: hypothesis
+  - trait: escribe montos sin punto ni centavos
+    source: hypothesis
+  - trait: no busca en menús; si no lo ve en la pantalla, cree que no existe
+    source: hypothesis
+patience:
+  max_steps: 25
+  abandon_triggers:
+    - tres toques seguidos sin que la pantalla cambie
+    - le pide registrarse o un dato fiscal para cobrar

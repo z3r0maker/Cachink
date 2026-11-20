@@ -141,12 +141,27 @@ the database alone; `--seed <seed> --auth-as <role>` also mints a run's tenant o
 
   An `operador` scenario also gets an activation code; `admin` and `viewer` get a member account of that role.
 
-## 10. Open items for the owner
+## 10. One web run (S-05)
+
+`pnpm --filter @xangarro/synth-core setup` once (it installs Playwright MCP in `vendor/`), then
+`pnpm --filter @xangarro/synth-core run-one --persona taquero --scenario primera-venta`. It brings up a corrida
+stack, runs, and tears down. The run's folder, `tools/synth/reports/<corrida>/runs/<run-id>/`, holds:
+
+| File                                          | What                                                                       |
+| --------------------------------------------- | -------------------------------------------------------------------------- |
+| `run.json`                                    | outcome, SQL checks, steps with fingerprints, exit interview, tokens, cost |
+| `actor.stream.jsonl`                          | everything the actor said and did, as `claude -p` streamed it              |
+| `steps.jsonl`, `screenshots/`                 | each step on the run's clock, with its screenshot                          |
+| `console.jsonl`, `network.jsonl`              | errors and warnings; failed, 4xx/5xx and slow (over 1.5 s) requests        |
+| `trace.zip`                                   | the Playwright trace (`npx playwright show-trace trace.zip`)               |
+| `access.json`, `mcp.json`, `actor.stderr.log` | the run's tenant id, the actor's MCP config, its stderr                    |
+
+## 11. Open items for the owner
 
 None blocks Phase 1. They are asked when their task starts:
 
-1. **S-05 and S-06:** verify the current `claude -p` flags, the Playwright MCP CDP option, and whether the Maestro
-   MCP can target a device non-interactively.
+1. **S-06:** whether the Maestro MCP can target a device non-interactively. (S-05 settled the `claude -p` flags
+   and Playwright MCP's `--cdp-endpoint`; see `core/src/runner/actor-args.ts`.)
 2. **S-19:** Stripe test keys for a corrida, if `subir-de-plan` should reach Checkout.
 3. **S-20:** whether Studio screens go on the El Mostrador canvas first (ADR-117), or are exempt as an internal
    tool.

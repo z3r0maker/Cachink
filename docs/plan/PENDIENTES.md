@@ -16,7 +16,7 @@ ordenadas por cuántas tareas abiertas destraban (transitivamente). Se recalcula
 `pnpm plan:board`; el paréntesis es la fase de lanzamiento, el tipo de trabajo está en las
 listas de abajo.
 
-- **S-05** Runner web: Chromium por CDP, captura y actor (Colas de tracks) — destraba 18: S-07, S-08, S-09, S-10, S-16, S-18, … · `24-synth.md:198`
+- **S-08** Juez (`synth-judge`) (Colas de tracks) — destraba 16: S-09, S-10, S-16, S-18, S-20, S-11, … · `24-synth.md:252`
 - **M-10** The owner corrects a sale. (Colas de tracks) — destraba 13: N-24, N-22, N-25, N-44, N-29, N-30, … · `19-movil-mostrador.md:33`
 - **E-02** Ledger core and Movimientos (Colas de tracks) — destraba 10: E-10, E-12, E-30, E-40, E-17, E-31, … · `20-command-center.md:313`
 - **N-75** Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? (Post-lanzamiento) — destraba 10: N-41, N-76, N-53, N-43, N-80, N-44, … · `09-next-features.md:1045`
@@ -82,7 +82,7 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (131)
+## Código y técnico (130)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
@@ -202,33 +202,32 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` Regla de retención de la atribución para `signup_attribution` (geo tiene 400 días; proponer lo mismo). — Falta: la regla no existe. `signup_attribution` sólo se borra cuando se borra la cuenta entera (las dos funciones de borrado, en `0051_account_deletion.sql` y `0057_email_confirm_second_factor.sql`); nada la poda por antigüedad. El molde a copiar sí está hecho y probado: `geo_prune(400)` colgado del cron del backoffice (N-61, cerrada). · `../launch/production-readiness.md:227`
 - [ ] `Media` Correo de marketing: opt-out respetado dentro de la ventana de 5 días; REPEP si algún día se usa teléfono/SMS. — Falta: su nota de progreso del 2026-11-09 (ADR-139) deja este renglón casi vacío: la casilla del registro empieza desmarcada, así que todo consentimiento es expreso y la ventana de 5 días ya no aplica a registros. Lo que queda vivo es sólo el REPEP, y sólo si algún día se usa teléfono o SMS, que hoy no se usa. Vale la pena reescribir el renglón para que diga eso, en lugar de leerse como trabajo pendiente. · `../launch/production-readiness.md:231`
 
-### Auditorías y calidad (25)
+### Auditorías y calidad (24)
 
 - [~] `⛔ bloquea prod` `Alta` **N-26** Auditoría de seguridad `[LAUNCH]` — Bloqueada por: N-05, B-17 · Falta: 5 de 6 hallazgos altos corregidos (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — el oráculo quedó cerrado y el token QR construido por C-14, 2026-09-23); SEC-DATA-01: su lado de código quedó hecho 2026-11-09 (ADR-138: `0054` quita a `anon` y `authenticated` todo en `public` y `xangarro`, también para tablas futuras; el token de dispositivo lleva emisor y audiencia propios; `check:data-api` lo comprueba en el proyecto hospedado) y el interruptor O-2 también: la Data API está apagada y 0054 está aplicada al proyecto hospedado (verificado 2026-11-09). SEC-DATA-01 queda cerrado; SEC-PRIV-01 es N-34. Hallazgos medios en el alcance, 2026-09-23: **SEC-WEB-01 hecho** — el portal envía X-Frame-Options, un `frame-ancestors 'none'` obligatorio, nosniff, HSTS, un referrer estricto y Permissions-Policy, `poweredByHeader` desactivado, todo desde una implementación compartida con la consola (`@xangarro/config/security`); su CSP completa con nonce (`src/proxy.ts`, con `'wasm-unsafe-eval'` y workers para la caja) se sirvió primero en modo report-only hacia `/api/csp-report`, y el barrido encontró cero violaciones en 18 páginas y en todos los flujos e2e de caja y sincronización tras dos correcciones (la sonda eval de Zod ponía `jitless` en el head; cada ruta se renderiza por petición, de modo que cada script recibe el nonce). **Obligatoria desde 2026-11-10** (F-04, ADR-140, PR #107): `src/proxy.ts` envía `Content-Security-Policy`, y las violaciones siguen llegando a `/api/csp-report`. **SEC-SUP-01 hecho** — `permissions: contents: read` en cada workflow, cada acción fijada a un SHA de commit, un job `supply-chain` que ejecuta `pnpm audit:gate` (falla ante cualquier advisory high/critical alcanzable en runtime; las rutas de solo build y una allowlist fechada en `security/audit-allowlist.json` son las únicas excepciones; los dos que salieron — `tmp`, `brace-expansion` bajo `exceljs` — quedan corregidos con `pnpm.overrides`) y un escaneo de gitleaks sobre los commits de cada ejecución, además de un workflow de CodeQL (el repo es público). El escaneo de gitleaks ya corre: en su primera corrida (PR #107, 2026-11-10) marcó dos llaves públicas de prueba (vectores 1 y 2 de RFC 8032), que `.gitleaks.toml` permite por valor, y con eso pasó. **Lo que queda** es la re-ejecución en el proyecto hospedado, que necesita X-01, y una prueba de penetración externa. Lo que la segunda pasada dejó abierto tiene su propia tarea: N-82, N-83, N-84 y X-10. · `09-next-features.md:735`
 - [~] `⛔ bloquea prod` `Alta` **N-27** Auditoría de base de datos `[LAUNCH]` — Bloqueada por: B-03, B-08, B-09 · Falta: la ronda 2 reverificó los 25 hallazgos de la primera ronda (9 corregidos, 9 parciales, 6 abiertos, 1 obsoleto; QRY-01 y MIG-01 quedaron solo parciales, SYNC-02 estaba hecho) y midió 24 hallazgos nuevos DB2-\* a escala. Corregidos en `perf/db-scale`: DB2-USE-01 (índices + reconteo con debounce), DB2-SYNC-01/-02 (push por lotes, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (migraciones sin transacción, ADR-119; no el journal desactualizado de drizzle), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Abiertos: DB-OPS-01/DB2-OPS-01 (PITR + simulacro = O-3), DB2-QRY-05 (rollup de `product_stock`; el bootstrap por snapshot ya está hecho, ADR-121), DB2-SYNC-03 (retención de recibos/logs, necesita un ADR), DB2-CHK-01 (las restricciones de integridad en la base: la tarea que la auditoría propuso como B-19 nunca se creó, y B-19 es hoy la foto de producto, ADR-134), la mitad del journal de drizzle de B-20, DB2-KEY-01, DB2-PART-01 (ADR de S2), contadores de uso incrementales; la UI en `docs/archive/18-db-scale-design-changes.md`. La ronda 3 (`docs/audits/db-2026-09-26-r3.html`) auditó la propia rama: 31 hallazgos (7 altos). Corregidos en `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Corregidos en `perf/db-launch`: DB3-BOOT-01 (el bootstrap rebasó el límite de 4.5 MB de Vercel tras alrededor de un mes con un negocio pesado; ahora es un snapshot paginado — línea base de stock + 90 días de movimientos, ≤ 2 MB por página — ADR-121, C-23; también la mitad bootstrap de DB2-QRY-05). DB3-EXP-01 (exportaciones en streaming), DB3-EST-01 (tope de 13 meses, sumas en SQL), DB3-SYNC-05 (503 + Retry-After en lugar de encolar), DB3-QRY-03 (resumen), ADR-122. DB3-SYNC-01 (b) (un lote rechazado en su totalidad se parte a la mitad hasta su fila; límite de tamaño de fila), DB3-L-02/03/07. También corregidos en `perf/db-launch`: DB3-CAJA-01/02/03 (una pestaña es la dueña de la caja, una «por enviar», el cierre con banner, pulls en reposo; ADR-123) y DB3-CAJA-04 en parte (escrituras OPFS encoladas; el VFS permanece abierto). La re-ejecución de `pg_stat_statements` todavía necesita el proyecto hospedado. **Verificado 2026-11-19 contra el repo**, los cuatro puntos que esta nota dejaba sin dueño o sin medir. (1) El journal de drizzle de Postgres sigue viejo y hasta ese día **no tenía tarea**: B-20 no existía en ningún track, y esta nota era el único lugar del repo que lo nombraba. Ya está escrita, con el nombre que esta nota le venía dando, en `03-backend.md`. `packages/data-pg/drizzle/meta/_journal.json` tiene 8 entradas (la última, `0013_business_regimen_sat`) y 8 snapshots, contra 69 archivos `.sql`, así que un `db:generate` diffearía contra el snapshot `0007` y emitiría una migración que recrea sesenta. Aplicar no se rompe por eso: el local recorre `drizzle/*.sql` (`scripts/db-local.sh`) y el hospedado va por su ledger (`scripts/hosted/plan.ts`); el riesgo es generar, no aplicar. El lado de SQLite está sano: journal de 16 entradas y barril generado, con el SQL en los `.ts` (`packages/data/drizzle/migrations/index.ts`). (2) DB2-CHK-01 está a medias y no como dice arriba: las tablas nuevas sí traen CHECK de enum (25 migraciones los tienen), pero las transaccionales del `0000` no tienen ninguno — `sales`, `expenses`, `inventory_movements`, `caja_movimientos`, `products`, `client_payments` —, que son justo las que la auditoría nombró. (3) DB2-SYNC-03 sigue sin ADR y sin purga: ningún ADR decide la retención, y nada borra `sync_receipts` ni `sync_log` (no hay cron ni migración que lo haga), así que las dos tablas crecen sin tope. (4) `pg_stat_statements` ya no espera a X-01: el proyecto hospedado existe en producción desde `447a6ef9` (2026-11-18). Falta correrlo, no tenerlo. · `09-next-features.md:765`
 - [ ] `⛔ bloquea prod` `Alta` **N-28** Auditoría de rendimiento `[LAUNCH]` — Bloqueada por: X-01 · Falta: sin empezar, y la nota no exageraba nada: no hay un solo archivo de k6 en el repo ni un `docs/audits/performance-*`, y `docs/archive/health-report-2026-04-30.md` sigue siendo lo único que existe. Espera a X-01. · `09-next-features.md:779`
 - [ ] `⛔ bloquea prod` `Alta` **N-29** Gate E2E determinista de toda la pila `[LAUNCH]` — Bloqueada por: P-17, A-16, N-22, N-25 · Falta: de las barreras sólo quedan dos abiertas: P-17 está cerrada y A-16 también, el 2026-10-20 (`docs/archive/05-app.md`), así que esperan N-22 y N-25. Nada del entregable de esta tarea existe todavía — no hay orquestador ni un escenario único —, pero sí existen, construidas para otras tareas, las dos mitades que va a usar. La cadena teléfono → portal **ya corre en CI contra el Postgres real**: `apps/web/e2e/telefono-cadenas.sync.spec.ts` activa un dispositivo y empuja y jala por HTTP (`sync-phone.ts`) para cuatro cadenas — una venta cancelada en el teléfono que llega a Movimientos con su stock de vuelta, un turno cerrado con faltante que llega a Cortes, un NIP reseteado en el portal que llega al siguiente pull, y el push de un dispositivo revocado que se rechaza y tras revincular aterriza una sola vez —, y los shards de `portal-e2e` la corren en cada push, de modo que un handler de push roto ya pone rojo el CI. La captura sin red es de Maestro (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`), pero contra el mock, no contra Supabase. Falta entonces: el escenario de punta a punta como una sola corrida (registro → asistente → operador → importación → código por QR → activar → vender en modo avión → reconectar → la venta en el portal → exportar), el script que secuencia Maestro y Playwright, y la mitad de Maestro en CI — `maestro-e2e.yml` sigue siendo `workflow_dispatch`, a la espera de un runner de macOS. · `09-next-features.md:788`
-- [ ] `Alta` **S-05** Runner web: Chromium por CDP, captura y actor — Bloqueada por: S-04 · `24-synth.md:198`
-- [ ] `Alta` **S-06** Runner de teléfono: emulador Android y Maestro MCP — Bloqueada por: S-04 · `24-synth.md:214`
-- [ ] `Alta` **S-07** Prueba de aislamiento del actor — Bloqueada por: S-05, S-06 · `24-synth.md:232`
-- [ ] `Alta` **S-08** Juez (`synth-judge`) — Bloqueada por: S-05 · `24-synth.md:242`
-- [ ] `Alta` **S-09** `aggregate.ts` y `report.md` — Bloqueada por: S-08 · `24-synth.md:255`
-- [ ] `Alta` **S-10** Personas y escenarios v1 — Bloqueada por: S-09 · `24-synth.md:267`
-- [ ] `Alta` **S-11** Matriz `smoke`, concurrencia y skill `synth-run` — Bloqueada por: S-10 · `24-synth.md:278`
-- [ ] `Alta` **S-12** Ocho bugs sembrados — Bloqueada por: S-11 · `24-synth.md:286`
-- [ ] `Alta` **S-13** `sensitivity.ts` y recall — Bloqueada por: S-12 · `24-synth.md:296`
-- [ ] `Media` **S-14** Estilo `walkthrough` — Bloqueada por: S-13 · `24-synth.md:307`
-- [ ] `Media` **S-15** Cinco interrupciones — Bloqueada por: S-13 · `24-synth.md:314`
-- [ ] `Media` **S-16** `synth-triage` — Bloqueada por: S-09 · `24-synth.md:327`
-- [ ] `Media` **S-17** `synth-persona` y evidencia pública — Bloqueada por: S-10 · `24-synth.md:341`
-- [ ] `Media` **S-18** `synth-research-prep` y línea base humana — Bloqueada por: S-09 · `24-synth.md:350`
-- [ ] `Media` **S-20** Studio de lectura — Bloqueada por: S-09 · `24-synth.md:369`
-- [ ] `Media` **S-21** Lanzar, En vivo, Comparar, Calibración — Bloqueada por: S-20, S-13 · `24-synth.md:389`
-- [ ] `Baja` **S-19** Resto de personas: núcleo, pool y anti-persona — Bloqueada por: S-17 · `24-synth.md:357`
-- [ ] `Baja` **S-22** Recorridos y memoria con olvido — Bloqueada por: S-11 · `24-synth.md:403`
-- [ ] `Baja` **S-23** Grafo de evidencia — Bloqueada por: S-17, S-20 · `24-synth.md:416`
-- [ ] `Baja` **S-24** Laboratorio de narrativa — Bloqueada por: S-23 · `24-synth.md:425`
-- [ ] `Baja` **S-25** Hallazgos al buzón `kind=explorador` — Disparador: the owner asks for Synth findings in the support inbox (N-05's source list). · `24-synth.md:436`
+- [ ] `Alta` **S-06** Runner de teléfono: emulador Android y Maestro MCP — Bloqueada por: S-04 · `24-synth.md:224`
+- [ ] `Alta` **S-07** Prueba de aislamiento del actor — Bloqueada por: S-05, S-06 · `24-synth.md:242`
+- [ ] `Alta` **S-08** Juez (`synth-judge`) — Bloqueada por: S-05 · `24-synth.md:252`
+- [ ] `Alta` **S-09** `aggregate.ts` y `report.md` — Bloqueada por: S-08 · `24-synth.md:265`
+- [ ] `Alta` **S-10** Personas y escenarios v1 — Bloqueada por: S-09 · `24-synth.md:277`
+- [ ] `Alta` **S-11** Matriz `smoke`, concurrencia y skill `synth-run` — Bloqueada por: S-10 · `24-synth.md:288`
+- [ ] `Alta` **S-12** Ocho bugs sembrados — Bloqueada por: S-11 · `24-synth.md:296`
+- [ ] `Alta` **S-13** `sensitivity.ts` y recall — Bloqueada por: S-12 · `24-synth.md:306`
+- [ ] `Media` **S-14** Estilo `walkthrough` — Bloqueada por: S-13 · `24-synth.md:317`
+- [ ] `Media` **S-15** Cinco interrupciones — Bloqueada por: S-13 · `24-synth.md:324`
+- [ ] `Media` **S-16** `synth-triage` — Bloqueada por: S-09 · `24-synth.md:337`
+- [ ] `Media` **S-17** `synth-persona` y evidencia pública — Bloqueada por: S-10 · `24-synth.md:351`
+- [ ] `Media` **S-18** `synth-research-prep` y línea base humana — Bloqueada por: S-09 · `24-synth.md:360`
+- [ ] `Media` **S-20** Studio de lectura — Bloqueada por: S-09 · `24-synth.md:379`
+- [ ] `Media` **S-21** Lanzar, En vivo, Comparar, Calibración — Bloqueada por: S-20, S-13 · `24-synth.md:399`
+- [ ] `Baja` **S-19** Resto de personas: núcleo, pool y anti-persona — Bloqueada por: S-17 · `24-synth.md:367`
+- [ ] `Baja` **S-22** Recorridos y memoria con olvido — Bloqueada por: S-11 · `24-synth.md:413`
+- [ ] `Baja` **S-23** Grafo de evidencia — Bloqueada por: S-17, S-20 · `24-synth.md:426`
+- [ ] `Baja` **S-24** Laboratorio de narrativa — Bloqueada por: S-23 · `24-synth.md:435`
+- [ ] `Baja` **S-25** Hallazgos al buzón `kind=explorador` — Disparador: the owner asks for Synth findings in the support inbox (N-05's source list). · `24-synth.md:446`
 
 ### Lanzamiento, stores e integración (8)
 
@@ -408,5 +407,5 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `19-movil-mostrador.md` — 5 abiertos (0 en curso, 0 bloqueados, 16 hechos)
 - `20-command-center.md` — 18 abiertos (5 en curso, 0 bloqueados, 14 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
-- `24-synth.md` — 21 abiertos (0 en curso, 0 bloqueados, 5 hechos)
+- `24-synth.md` — 20 abiertos (0 en curso, 0 bloqueados, 6 hechos)
 - `../launch/production-readiness.md` — 33 abiertos (7 en curso, 0 bloqueados, 24 hechos)

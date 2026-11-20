@@ -1,4 +1,4 @@
-import type { Tenant } from '@xangarro/testing/tenant';
+import { submitOwnerDoor, walkOwnerDoor, type Tenant } from '@xangarro/testing/tenant';
 
 import type { Page } from './test';
 
@@ -32,15 +32,10 @@ export async function submitSignIn(
   page: Page,
   t: Pick<Tenant, 'email' | 'password'>,
 ): Promise<void> {
-  await page.goto('/login');
-  await page.getByTestId('login-door-owner').click();
-  await page.getByTestId('login-email').fill(t.email);
-  await page.getByTestId('login-password').fill(t.password);
-  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
+  await submitOwnerDoor(page, t);
 }
 
-/** Through the real door, as its owner, and inside. */
+/** Through the real door, as its owner, and inside (`walkOwnerDoor`, shared with Synth). */
 export async function signIn(page: Page, t: Pick<Tenant, 'email' | 'password'>): Promise<void> {
-  await submitSignIn(page, t);
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+  await walkOwnerDoor(page, t);
 }

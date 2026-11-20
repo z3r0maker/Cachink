@@ -105,6 +105,23 @@ describe('validateTree', () => {
     ]);
   });
 
+  it('reports a success check the harness does not have, or parameters it does not accept', () => {
+    const scenario = {
+      ...PRIMERA_VENTA,
+      success: [
+        { check: 'venta-con-tarjeta' },
+        { check: 'venta-efectivo', params: { partidas: 0 } },
+      ],
+    };
+    const out = report(tree({ 'scenarios/primera-venta.yaml': scenario }));
+    assert.equal(out.length, 2);
+    assert.match(
+      out[0] ?? '',
+      /^scenarios\/primera-venta\.yaml: success\.0: no success check «venta-con-tarjeta»/,
+    );
+    assert.match(out[1] ?? '', /^scenarios\/primera-venta\.yaml: success\.1: venta-efectivo: /);
+  });
+
   it('reports two personas with one id in different folders', () => {
     const out = report(tree({ 'personas/pool/taquero.yaml': { ...TAQUERO, tier: 'pool' } }));
     assert.deepEqual(out, [
