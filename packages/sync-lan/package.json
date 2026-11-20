@@ -31,7 +31,7 @@
     "@xangarro/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@vitest/coverage-v8": "^4.1.12",
-    "better-sqlite3": "^12.10.0",
+    "better-sqlite3": "^12.11.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.12"
   }
