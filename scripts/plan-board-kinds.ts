@@ -82,7 +82,7 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
     'N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-17 M-18 M-19 M-20 M-21 M-22 K-13 K-24',
   ),
   Portal: ids(
-    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 P-44 P-45 P-46 K-12 K-23 N-83',
+    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 P-44 P-45 P-46 P-47 N-86 K-12 K-23 N-83',
   ),
   'Caja web': ids('P-37 P-43 K-14'),
   'Pagos y conciliación': ids(
@@ -92,7 +92,7 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
     'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44 N-85',
   ),
   'Backend, sync y datos': ids('C-21 C-24 B-19 B-20 N-47 N-48 N-69 N-81 N-84'),
-  'Privacidad y LFPC': ids('N-34 N-60'),
+  'Privacidad y LFPC': ids('N-34 N-60 N-87'),
   'Auditorías y calidad': ids(
     'N-26 N-27 N-28 N-29 S-01 S-02 S-03 S-04 S-05 S-06 S-07 S-08 S-09 S-10 S-11 S-12 S-13 S-14 S-15 S-16 S-17 S-18 S-19 S-20 S-21 S-22 S-23 S-24 S-25',
   ),
