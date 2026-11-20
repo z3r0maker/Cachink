@@ -77,8 +77,13 @@ globalStyle('[data-onyellow]:focus-visible', {
 /** All motion in this product is opt-out. */
 globalStyle('@media (prefers-reduced-motion: reduce)', {});
 
-/** Visually hidden but available to assistive technology. */
-export const srOnly = style({
+/**
+ * Visually hidden but available to assistive technology. The rules are also
+ * exported, for text that hides only at some widths: a label hidden with
+ * `display: none` stops naming its control, so a control that keeps no visible
+ * text there would be left nameless.
+ */
+export const VISUALLY_HIDDEN = {
   position: 'absolute',
   width: 1,
   height: 1,
@@ -88,7 +93,9 @@ export const srOnly = style({
   clip: 'rect(0, 0, 0, 0)',
   whiteSpace: 'nowrap',
   border: 0,
-});
+} as const;
+
+export const srOnly = style(VISUALLY_HIDDEN);
 
 /**
  * Print (P-34): a statement or a list prints as the document, not the app —

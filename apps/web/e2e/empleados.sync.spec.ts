@@ -54,7 +54,7 @@ test('an employee is created, edited and dado de baja, each change logged', asyn
 /** O-26/P-12: an employee's payments, found through the empleado_id link. */
 test('«Ver pagos» lists the payroll payments linked to the employee', async ({ page }) => {
   await page.goto('/empleados');
-  await page.getByRole('button', { name: 'Ver los pagos de Rosa Medina' }).click();
+  await page.getByRole('button', { name: 'Ver pagos de Rosa Medina' }).click();
   const drawer = page.getByRole('dialog');
   await expect(drawer.getByText('Pagos a Rosa Medina')).toBeVisible();
   // The seed's payroll gastos carry no empleado_id yet — the empty state is

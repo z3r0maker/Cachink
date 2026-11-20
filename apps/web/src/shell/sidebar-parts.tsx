@@ -3,6 +3,7 @@ import Link from 'next/link';
 import ayuda from '@/components/don/poses/ayuda.webp';
 import quieto from '@/components/don/poses/quieto.webp';
 import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
+import { srOnly } from '@/styles/global.css';
 
 import { Icon } from './icon';
 import type { NavItem } from './nav-items';
@@ -35,16 +36,19 @@ export function NavLink(p: {
     <Link
       href={item.href}
       title={item.label}
-      aria-label={n > 0 ? `${item.label}, ${n} pendientes` : undefined}
       className={s.navItem}
       aria-current={p.active ? 'page' : undefined}
     >
       {item.avatar ? <Face /> : <Icon path={item.icon} />}
       <span className={s.navLabel}>{item.label}</span>
       {n > 0 ? (
-        <span className={s.badge} aria-hidden="true">
-          {n}
-        </span>
+        <>
+          <span className={s.badge} aria-hidden="true">
+            {n}
+          </span>
+          {/* Named by its own text plus this, so the name holds what is seen (WCAG 2.5.3). */}
+          <span className={srOnly}>, {n} pendientes</span>
+        </>
       ) : null}
     </Link>
   );

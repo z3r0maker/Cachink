@@ -57,7 +57,7 @@ export function Palette() {
   const p = usePalette();
   return (
     <Dialog.Root open={p.open} onOpenChange={p.setOpen}>
-      <Dialog.Trigger className={s.trigger} aria-label="Buscar o ir a">
+      <Dialog.Trigger className={s.trigger}>
         <Icon path={SEARCH} size={18} />
         <span className={s.triggerText}>Buscar o ir a…</span>
         <span className={s.kbd} aria-hidden="true">
