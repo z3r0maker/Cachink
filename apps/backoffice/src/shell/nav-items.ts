@@ -3,14 +3,7 @@
  * until the task named in `task` fills it.
  */
 export type NavHref =
-  | '/'
-  | '/tenants'
-  | '/uso'
-  | '/inbox'
-  | '/flags'
-  | '/mapa'
-  | '/campanas'
-  | '/capacidad';
+  '/' | '/tenants' | '/uso' | '/inbox' | '/flags' | '/mapa' | '/campanas' | '/capacidad';
 
 export interface NavItem {
   readonly label: string;

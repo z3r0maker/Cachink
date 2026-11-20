@@ -3,11 +3,7 @@
  * `code` the page and the server action map to a Spanish message.
  */
 export type FlagErrorCode =
-  | 'VALIDATION'
-  | 'NO_CHANGE'
-  | 'NEEDS_CONFIRMATION'
-  | 'UNKNOWN_TENANT'
-  | 'STORE_FAILED';
+  'VALIDATION' | 'NO_CHANGE' | 'NEEDS_CONFIRMATION' | 'UNKNOWN_TENANT' | 'STORE_FAILED';
 
 export class FlagError extends Error {
   constructor(

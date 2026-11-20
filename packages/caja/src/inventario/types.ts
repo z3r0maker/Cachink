@@ -3,14 +3,7 @@ import type { ProductIcon } from '../comun/product-icons';
 
 /** The screen's unit words; a linked caja maps the domain's units onto them. */
 export type Unidad =
-  | 'kg'
-  | 'piezas'
-  | 'litros'
-  | 'metros'
-  | 'cajas'
-  | 'bolsas'
-  | 'rollos'
-  | 'pares';
+  'kg' | 'piezas' | 'litros' | 'metros' | 'cajas' | 'bolsas' | 'rollos' | 'pares';
 
 /** A stocked item: what the sales draw down, and what the operator restocks or writes off. */
 export interface Existencia {

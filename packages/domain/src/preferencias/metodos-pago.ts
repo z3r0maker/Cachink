@@ -14,8 +14,7 @@ const isConfigurable = (m: string): m is MetodoConfigurable =>
   (METODOS_CONFIGURABLES as readonly string[]).includes(m);
 
 export type MetodosPagoResult =
-  | { readonly ok: true; readonly value: string }
-  | { readonly ok: false; readonly error: string };
+  { readonly ok: true; readonly value: string } | { readonly ok: false; readonly error: string };
 
 /** At least one, all known, in catalogue order — as the JSON to store. */
 export function validateMetodosPago(chosen: readonly string[]): MetodosPagoResult {

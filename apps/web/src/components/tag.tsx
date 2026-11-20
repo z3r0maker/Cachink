@@ -3,15 +3,7 @@ import type { ReactNode } from 'react';
 import { dot, tag } from './tag.css';
 
 export type Tone =
-  | 'neutral'
-  | 'success'
-  | 'danger'
-  | 'warning'
-  | 'info'
-  | 'brand'
-  | 'soft'
-  | 'purple'
-  | 'peach';
+  'neutral' | 'success' | 'danger' | 'warning' | 'info' | 'brand' | 'soft' | 'purple' | 'peach';
 
 export interface TagProps {
   readonly tone?: Tone;

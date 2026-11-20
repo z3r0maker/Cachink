@@ -4,12 +4,7 @@ import type { ReactNode } from 'react';
 import * as h from './hub.css';
 
 export type SeccionNegocio =
-  | 'general'
-  | 'comprobantes'
-  | 'cobros'
-  | 'funciones'
-  | 'plan'
-  | 'sincronizacion';
+  'general' | 'comprobantes' | 'cobros' | 'funciones' | 'plan' | 'sincronizacion';
 
 const SECCIONES: readonly {
   readonly id: SeccionNegocio;

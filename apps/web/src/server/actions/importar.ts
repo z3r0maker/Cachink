@@ -18,8 +18,7 @@ import { templateOf, type ImportTemplate, type PreviewRow } from '../import/temp
  * interactive forms; error rows are skipped because the preview listed them.
  */
 export type PreviewResult =
-  | { ok: true; rows: readonly PreviewRow[] }
-  | { ok: false; message: string };
+  { ok: true; rows: readonly PreviewRow[] } | { ok: false; message: string };
 export type ImportResult =
   | { ok: true; nuevos: number; actualizados: number; sinCambios: number; omitidos: number }
   | { ok: false; message: string };

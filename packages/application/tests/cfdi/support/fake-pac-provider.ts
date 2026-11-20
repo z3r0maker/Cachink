@@ -15,11 +15,7 @@ import type {
 } from '../../../src/cfdi/index.js';
 
 type Method =
-  | 'stampInvoice'
-  | 'stampGlobalInvoice'
-  | 'stampPaymentComplement'
-  | 'stampCreditNote'
-  | 'cancel';
+  'stampInvoice' | 'stampGlobalInvoice' | 'stampPaymentComplement' | 'stampCreditNote' | 'cancel';
 
 export class FakePacProvider implements PacProvider {
   readonly invoices: StampInvoiceRequest[] = [];

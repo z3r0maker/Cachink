@@ -35,8 +35,7 @@ export async function enlaceDeConfirmacion(
 }
 
 export type Confirmado =
-  | Entrada
-  | { readonly kind: 'enlace'; readonly estado: 'vencido' | 'usado' | 'desconocido' };
+  Entrada | { readonly kind: 'enlace'; readonly estado: 'vencido' | 'usado' | 'desconocido' };
 
 /** The button on that page: spend the link, send the welcome, open what opens. */
 export async function confirmar(deps: AccessDeps, token: string): Promise<Confirmado> {
