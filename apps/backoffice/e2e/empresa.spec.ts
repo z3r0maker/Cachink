@@ -1384,3 +1384,34 @@ test('a founder registers a USD invoice at what the bank charged (E-42)', async 
   await expect(row).toContainText('−$1,861.40');
   await expect(row).toContainText('USD 100.00 · el banco cobró a 18.6140');
 });
+
+test('a founder reads a quarter in figures: this one in progress, a closed one (E-17)', async ({
+  page,
+}) => {
+  // Reads what the E-20 test left: this quarter's accepted card and objective, and its
+  // seeded closed quarter, where Fundador 2 fell short.
+  await signInAsStaff(page, SOCIO);
+  await page.goto('/empresa/socios');
+  await abrirPestana(page, 'Trimestre', /\/empresa\/trimestre$/, 'Socios');
+  const cifras = page.getByTestId('trimestre-cifras');
+  await expect(cifras).toContainText('En curso');
+  const tablero = page
+    .getByTestId('trimestre-tile')
+    .filter({ hasText: 'Valor aceptado en el Tablero' });
+  await expect(tablero).toContainText('$20,000');
+  await expect(
+    page.getByTestId('trimestre-acumulado').filter({ hasText: 'Valor aceptado en el Tablero' }),
+  ).toContainText('$20,000');
+  await expect(page.getByTestId('trimestre-barra')).toHaveCount(4);
+  await expect(page.getByTestId('trimestre-objetivo')).toContainText('48 de 60 negocios');
+  await expect(page.getByTestId('trimestre-socio-1')).toContainText('Aceptado $20,000');
+  await expect(page.getByRole('button', { name: 'Exportar PDF' })).toBeVisible();
+
+  await page.goto(`/empresa/trimestre?t=${TABLERO_CERRADO}`);
+  await expect(cifras).toContainText('Cerrado');
+  await expect(page.getByTestId('trimestre-socio-1')).toContainText('Cumplió · 100 %');
+  await expect(page.getByTestId('trimestre-socio-2')).toContainText('No cumplió · 0 %');
+  await expect(page.getByTestId('trimestre-cumplimiento')).toContainText(
+    'obligaciones a tiempo, con evidencia',
+  );
+});
