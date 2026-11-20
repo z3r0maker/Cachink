@@ -8,6 +8,7 @@ import type { BusinessId, ProductId } from '@xangarro/domain';
 import { failure, type FailurePolicy } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { pgCodigos } from '../repositories/codigos';
 import { pgProductsRepository } from '../repositories/products';
 
 /**
@@ -45,7 +46,7 @@ const CAMPO: Readonly<Record<string, string>> = {
  * what is left is an incident, reported behind the retry message.
  */
 const REFUSALS: FailurePolicy = {
-  shown: ['PRODUCT_NOT_FOUND'],
+  shown: ['PRODUCT_NOT_FOUND', 'CODIGO_DUPLICADO'],
   invalid: (campo) => CAMPO[campo] ?? 'Revisa los datos del producto.',
   retry: 'No pudimos guardar el producto. Intenta de nuevo.',
 };
@@ -60,7 +61,10 @@ export async function editarProducto(id: string, patch: ProductPatch): Promise<E
     const businessId = session.business_id as BusinessId;
 
     await withTenant(businessId, async (tx) => {
-      const useCase = new EditarProductoUseCase(pgProductsRepository(tx, businessId));
+      const useCase = new EditarProductoUseCase(
+        pgProductsRepository(tx, businessId),
+        pgCodigos(tx),
+      );
       await useCase.execute({ id: id as ProductId, patch });
     });
   } catch (error) {
