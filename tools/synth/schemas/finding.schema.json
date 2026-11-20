@@ -1,0 +1,120 @@
+{
+  "title": "Synth finding",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^F-\\d{4}-\\d{2}-\\d{2}-\\d{3}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+__[a-z0-9-]+__(?:task|walkthrough)__r[1-9]\\d*$"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "friction",
+        "comprehension",
+        "agent_failure",
+        "out_of_scope_expectation"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "major",
+        "minor"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 140
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "screenshots": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "console": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "network": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "steps",
+        "screenshots",
+        "console",
+        "network"
+      ],
+      "additionalProperties": false
+    },
+    "persona_status": {
+      "type": "string",
+      "enum": [
+        "hypothesis",
+        "grounded"
+      ]
+    },
+    "repro": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "dedupe_key": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+(?:\\/[a-z0-9-]+)+$"
+    }
+  },
+  "required": [
+    "id",
+    "run_id",
+    "category",
+    "severity",
+    "title",
+    "description",
+    "evidence",
+    "persona_status",
+    "repro",
+    "confidence",
+    "dedupe_key"
+  ],
+  "additionalProperties": false
+}

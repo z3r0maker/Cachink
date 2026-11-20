@@ -1,0 +1,125 @@
+{
+  "title": "Synth scenario",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mission": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runner": {
+      "type": "string",
+      "enum": [
+        "web",
+        "phone"
+      ]
+    },
+    "start": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "string",
+          "enum": [
+            "vacio",
+            "negocio-con-catalogo-minimo",
+            "negocio-con-historial-30-dias",
+            "plan-al-limite"
+          ]
+        },
+        "auth_as": {
+          "type": "string",
+          "enum": [
+            "owner",
+            "admin",
+            "viewer",
+            "operador"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^\\/(?!\\/)"
+        }
+      },
+      "required": [
+        "seed",
+        "auth_as",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "success": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "check": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          }
+        },
+        "required": [
+          "check"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "optimal_steps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "interruptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      }
+    },
+    "applies_to": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "human",
+          "chaos",
+          "device"
+        ]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "mission",
+    "runner",
+    "start",
+    "success",
+    "optimal_steps",
+    "interruptions",
+    "applies_to"
+  ],
+  "additionalProperties": false
+}

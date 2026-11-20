@@ -1,0 +1,55 @@
+{
+  "title": "Synth matrix",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "smoke",
+        "full"
+      ]
+    },
+    "repetitions": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "runs": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "persona": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "scenario": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "task",
+              "walkthrough"
+            ]
+          }
+        },
+        "required": [
+          "persona",
+          "scenario",
+          "style"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "mode",
+    "repetitions",
+    "runs"
+  ],
+  "additionalProperties": false
+}

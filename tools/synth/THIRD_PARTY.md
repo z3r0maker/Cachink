@@ -10,8 +10,15 @@ ADR-153 §10 sets three rules for everything under `tools/synth/`:
 
 ## Dependencies
 
-None yet. The three packages only use the workspace's shared dev tooling (`@xangarro/config`, TypeScript,
-Vitest). The first one added starts a table here: package, licence, which Synth package uses it, and what for.
+| Package     | Version  | Licence | Used by      | What for                                                       |
+| ----------- | -------- | ------- | ------------ | -------------------------------------------------------------- |
+| `zod`       | ^4.6.7   | MIT     | `synth-core` | the schemas of every file, and their JSON Schema (S-03)        |
+| `yaml`      | 2.9.1    | ISC     | `synth-core` | parsing the harness's YAML with line numbers for errors (S-03) |
+| `tsx` (dev) | ^4.23.13 | MIT     | `synth-core` | running the `validate` and `schemas` scripts                   |
+
+All three were already workspace dependencies, at the same versions, which were the latest stable on npm on
+2026-11-19. Beyond them the packages use the workspace's shared dev tooling (`@xangarro/config`, TypeScript,
+Vitest, `@types/node`).
 
 ## External tools the harness drives
 
