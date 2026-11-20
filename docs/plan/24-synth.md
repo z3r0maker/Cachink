@@ -295,7 +295,18 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-09 `aggregate.ts` y `report.md` [alta]
 
-- [ ] Status · **Blocked by:** S-08
+- [x] Status · **Blocked by:** S-08
+      Done: 2026-11-20 · `feat/synth-s09` · `pnpm --filter @xangarro/synth-core aggregate <corrida folder>`
+      writes `metrics.json` and `report.md` beside the runs. - Findings without evidence are dropped and counted. The rest merge by `dedupe_key` and category, so
+      an `agent_failure` never joins a real finding. Priority is severity (critical 3, major 2, minor 1) ×
+      distinct personas × their summed `market_weight`. With repetitions, each finding says how many of
+      its cells' runs it appeared in. - Per run: the outcome, steps against `optimal_steps`, the abandon step, console errors (one per error,
+      as the judge's candidates count them) and agent failures. - Deltas compare against the latest earlier corrida that ran a same persona × scenario × style. The
+      success rate appears only there, in points, beside mean steps and the keys that appeared or went. - The report keeps §11's order, and `agent_failure` findings appear only in its appendix. - `run-one` now writes `corrida.json` (the app's commit and whether the tree was dirty, the mode, the
+      repetitions) for the report's header. Older corridas show the commit as unknown.
+
+      Aggregated for real: 235e against 3b08 (both judged), and the phone 1a14 against a7b8.
+
 - **What:** do spec §9's aggregation and write §11's report in its fixed order. That covers dedup, priority,
   per-persona metrics, deltas against a comparable corrida, and counts across repetitions.
 - **Acceptance:**

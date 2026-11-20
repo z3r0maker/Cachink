@@ -1,10 +1,11 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { parse } from 'yaml';
 
+import { writeCorridaFile } from '../aggregate/load';
 import { ConfigSchema } from '../schemas/config';
 import type { Run } from '../schemas/run';
 import { PersonaSchema } from '../schemas/persona';
@@ -126,6 +127,9 @@ async function main(): Promise<void> {
     allowedHosts: config.allowed_hosts,
   });
   tearDownOnSignals(stack);
+  const corridaDir = join(reportsDir(REPO), id);
+  mkdirSync(corridaDir, { recursive: true });
+  writeCorridaFile(corridaDir, { id, mode: 'single', repetitions: 1 }, REPO);
   process.env.DATABASE_URL = stack.urls.database;
   process.env.DATABASE_SUPER_URL = stack.urls.superUser;
   process.env.BILLING_DATABASE_URL = stack.urls.billing;
@@ -138,10 +142,7 @@ async function main(): Promise<void> {
       scenario,
       repetition: args.repetition,
     };
-    printVerdict(
-      await runOn(stack, deps, { ...common, corridaDir: join(reportsDir(REPO), id) }),
-      id,
-    );
+    printVerdict(await runOn(stack, deps, { ...common, corridaDir }), id);
   } finally {
     await stack.stop();
   }

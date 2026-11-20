@@ -23,7 +23,8 @@
     "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
     "run-one": "tsx src/cli/run-one.ts",
     "isolation": "tsx src/cli/isolation.ts",
-    "judge": "tsx src/cli/judge.ts"
+    "judge": "tsx src/cli/judge.ts",
+    "aggregate": "tsx src/cli/aggregate.ts"
   },
   "dependencies": {
     "@xangarro/domain": "workspace:*",
