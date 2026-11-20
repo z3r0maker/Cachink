@@ -67,6 +67,15 @@ CD-13d replace CD-13 below (ADR-156).
 >
 > When a choice has 5 options or fewer, show them as icon + description cards, not a dropdown.
 
+> **Consola · Empresa — motion (ADR-161, canvas CD-21).** Every Empresa board moves, once, when
+> the screen opens, and is still within 1.5 s. The background is a faint grid. The hero card
+> lands on its hard shadow and one yellow band sweeps across it; its figures, and the KPI
+> tiles', roll like an odometer to their real value. Cards and rows enter one after another,
+> bars grow from the axis, progress fills from the left, lines and checkmarks draw, an «en
+> curso» dot pulses three times, and a status chip lands like a stamp right after the action.
+> Tables, chart labels and inputs never move. With reduced motion everything is simply in
+> place.
+
 ## 2. Phase 0 boards
 
 ### CD-01 Movimientos
