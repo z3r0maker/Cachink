@@ -10,6 +10,7 @@ export {
 } from './accounts.js';
 export {
   AsientoDesbalanceadoError,
+  CargoMxnFaltanteError,
   MontoInvalidoError,
   MotivoRequeridoError,
   PeriodoCerradoError,
@@ -53,3 +54,10 @@ export {
   type PlantillaRecurrente,
   type RecurrenteDelMes,
 } from './recurrentes.js';
+export {
+  aCargo,
+  enProporcion,
+  tipoCambioDelCargo,
+  tipoCambioRaro,
+  type MontosDeFactura,
+} from './cargo.js';

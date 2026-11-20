@@ -1,8 +1,8 @@
 import type { Money } from '../../money/index.js';
 import type { AccountKey, CategoriaGasto } from './accounts.js';
-import { MontoInvalidoError, TipoCambioInvalidoError } from './errors.js';
+import { tipoCambioDelCargo, enProporcion } from './cargo.js';
+import { CargoMxnFaltanteError, MontoInvalidoError } from './errors.js';
 import type { Gasto, JournalLine } from './movements.js';
-import { convertirAMxn } from './rules.js';
 
 /**
  * The capture screen's arithmetic (E-02): what a founder reads off a receipt
@@ -16,8 +16,8 @@ export interface CapturaGasto {
   readonly total: Money;
   /** The IVA inside `total`, same currency; 0 when the receipt shows none. */
   readonly iva: Money;
-  /** Pesos per dollar on the payment date; required for USD. */
-  readonly tipoCambio: string | null;
+  /** What the bank charged in pesos, its fee included; required for USD (E-42). */
+  readonly cargoMxn: Money | null;
   readonly deducible: boolean;
 }
 
@@ -27,12 +27,15 @@ export interface GastoCapturado {
 }
 
 function enPesos(c: CapturaGasto, monto: Money): Money {
-  if (c.moneda === 'MXN' || monto === 0n) return monto;
-  if (c.tipoCambio === null) throw new TipoCambioInvalidoError('');
-  return convertirAMxn(monto, c.tipoCambio);
+  if (c.moneda === 'MXN') return monto;
+  if (c.cargoMxn === null || c.cargoMxn <= 0n) throw new CargoMxnFaltanteError();
+  return enProporcion(monto, c.total, c.cargoMxn);
 }
 
-/** A paid expense, IVA split out; a USD charge converted at its rate (ADR-125 §4). */
+/**
+ * A paid expense, IVA split out. A USD charge is booked at what the bank
+ * charged in pesos, and keeps its dollars and the rate that resulted (E-42).
+ */
 export function gastoDesdeCaptura(c: CapturaGasto): GastoCapturado {
   if (c.total <= 0n) throw new MontoInvalidoError('el monto debe ser mayor a cero');
   if (c.iva < 0n || c.iva >= c.total)
@@ -51,8 +54,8 @@ export function gastoDesdeCaptura(c: CapturaGasto): GastoCapturado {
       pagado: true,
     },
     usd:
-      c.moneda === 'USD' && c.tipoCambio !== null
-        ? { montoOriginal: c.total, tipoCambio: c.tipoCambio }
+      c.moneda === 'USD'
+        ? { montoOriginal: c.total, tipoCambio: tipoCambioDelCargo(c.total, total) }
         : null,
   };
 }
