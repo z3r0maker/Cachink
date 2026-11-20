@@ -14,12 +14,15 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
-// A Maestro lane's Metro (ADR-157) runs from a worktree nested in the main
-// checkout, and Watchman answers for the enclosing watch: on this Mac that
-// watch re-crawls without end, so `watch-project` never returns and Metro
-// never starts. Lanes set XANGARRO_METRO_WATCHMAN=0 to use Metro's own
-// file crawler and watcher instead.
-if (process.env.XANGARRO_METRO_WATCHMAN === '0') {
+// A checkout nested in another one (an agent worktree in .claude/worktrees,
+// or .e2e) uses Metro's own crawler and watcher, not Watchman. Watchman
+// answers a nested path with the enclosing watch, and the main checkout's
+// .watchmanconfig ignores those folders (their installs flooded FSEvents
+// until the watch re-crawled without end), so Watchman would hand Metro an
+// empty tree (ADR-158). XANGARRO_METRO_WATCHMAN=0|1 overrides either way.
+const nestedCheckout = /\/\.claude\/worktrees\/|\/\.e2e\//.test(`${workspaceRoot}/`);
+const watchmanSwitch = process.env.XANGARRO_METRO_WATCHMAN;
+if (watchmanSwitch === '0' || (watchmanSwitch !== '1' && nestedCheckout)) {
   config.resolver.useWatchman = false;
 }
 
