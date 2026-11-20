@@ -14,8 +14,8 @@ shared navigation. Each board is approved on the canvas before its task starts. 
 Each quoted block can be pasted into Claude Design as it stands. §1 goes first: it sets the
 shell every other board uses. Send the phases in order. Phase 0 and 1 boards are needed first.
 
-**Before sending:** answer OD-1 (devengado vs flujo default, which changes CD-07) and OD-4 (the
-Tablero wording, which changes CD-13). Their recommendations are in `20-command-center.md` §1.
+**Before sending:** OD-1 was answered on 2026-10-30 and OD-4 on 2026-11-19; round 20's boards CD-13b to
+CD-13d replace CD-13 below (ADR-156).
 
 ## 1. Shell and shared rules
 
@@ -336,7 +336,7 @@ Tablero wording, which changes CD-13). Their recommendations are in `20-command-
 
 ## 4. Phase 2 boards
 
-### CD-13 Tablero _(answer OD-4 first)_
+### CD-13 Tablero _(superseded by round 20's CD-13b to CD-13d, 2026-11-19)_
 
 > **Empresa · Tablero.** One quarter at a time (selector «4T 2026»).
 >
