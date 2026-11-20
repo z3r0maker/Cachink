@@ -10,13 +10,7 @@ import type { Socio } from '../ledger/movements.js';
 export type TipoTarjeta = 'entregable' | 'tarea';
 
 export type TipoEvento =
-  | 'iniciada'
-  | 'terminada'
-  | 'aceptada'
-  | 'objetada'
-  | 'al_mediador'
-  | 'resuelta'
-  | 'hecha';
+  'iniciada' | 'terminada' | 'aceptada' | 'objetada' | 'al_mediador' | 'resuelta' | 'hecha';
 
 export interface EventoTarjeta {
   readonly tipo: TipoEvento;

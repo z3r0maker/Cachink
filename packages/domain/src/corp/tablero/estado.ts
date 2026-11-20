@@ -14,13 +14,7 @@ import type { EventoTarjeta, Tarjeta } from './tipos.js';
 export const PLAZO_OBJECION_DIAS = 10;
 
 export type Fase =
-  | 'por_hacer'
-  | 'en_curso'
-  | 'en_revision'
-  | 'objetada'
-  | 'al_mediador'
-  | 'aceptada'
-  | 'hecha';
+  'por_hacer' | 'en_curso' | 'en_revision' | 'objetada' | 'al_mediador' | 'aceptada' | 'hecha';
 
 export interface EstadoTarjeta {
   readonly fase: Fase;

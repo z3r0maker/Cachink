@@ -13,13 +13,7 @@ import { valorDeTarjeta } from './valor.js';
  * window; either takes an objection to the mediator and records the ruling.
  */
 export type Accion =
-  | 'iniciar'
-  | 'terminar'
-  | 'aceptar'
-  | 'objetar'
-  | 'mediador'
-  | 'resolver'
-  | 'hacer';
+  'iniciar' | 'terminar' | 'aceptar' | 'objetar' | 'mediador' | 'resolver' | 'hacer';
 
 export interface Movimiento {
   readonly accion: Accion;
