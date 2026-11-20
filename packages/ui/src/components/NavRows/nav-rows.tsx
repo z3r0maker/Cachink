@@ -90,8 +90,9 @@ function RowBody({ item }: { item: NavRowItem }): ReactElement {
         <MText size="lg" weight="extraBold">
           {item.title}
         </MText>
+        {/* Two lines: beside a chip, one line cut «… salieron de la c…». */}
         {item.detail ? (
-          <MText size="sm" weight="semibold" color={colors.gray600} numberOfLines={1}>
+          <MText size="sm" weight="semibold" color={colors.gray600} numberOfLines={2}>
             {item.detail}
           </MText>
         ) : null}
