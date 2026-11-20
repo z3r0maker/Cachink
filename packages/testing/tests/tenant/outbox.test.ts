@@ -54,6 +54,11 @@ describe('the outbox', () => {
     assert.equal(await linkIn(dir, 'lupita@ejemplo.mx', '/signup/confirmar'), null);
   });
 
+  it('reads the path literally: a «.» in it is not any character', async () => {
+    writeFileSync(join(dir, '1.eml'), eml('lupita@ejemplo.mx', `/signupXconfirmar?t=${TOKEN}`));
+    assert.equal(await linkIn(dir, 'lupita@ejemplo.mx', '/signup.confirmar'), null);
+  });
+
   it('answers null when the message carries no such link', async () => {
     writeFileSync(join(dir, '1.eml'), eml('lupita@ejemplo.mx', `/login/entrar?t=${TOKEN}`));
     assert.equal(await linkIn(dir, 'lupita@ejemplo.mx', '/signup/confirmar'), null);
