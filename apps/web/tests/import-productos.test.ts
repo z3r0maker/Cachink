@@ -242,3 +242,57 @@ describe('parseProductSheet · the refusals', () => {
     assert.ok(r.rows[0]?.errors.some((e) => e.includes('icono')));
   });
 });
+
+/**
+ * A barcode names one product in the import too (ADR-150): UPC-A and EAN-13
+ * are one code, so the EAN-13 form of a catalogue product's UPC-A updates that
+ * product instead of creating a second one with its code.
+ */
+describe('the import and the barcode (ADR-150)', () => {
+  const refresco = {
+    id: 'P2',
+    nombre: 'Refresco 600 ml',
+    categoria: 'Producto Terminado',
+    unidad: 'pza',
+    costoUnitCentavos: 980n,
+    precioVentaCentavos: 2500n,
+    seguirStock: true,
+    umbralStockBajo: 5,
+    icono: null,
+  } as const;
+  const UPC_A = '012000001772';
+
+  it('matches the EAN-13 form of a catalogue product’s UPC-A, never a new product', () => {
+    const parsed = parseProductSheet([
+      HEAD,
+      row({ sku: `0${UPC_A}`, nombre: 'Refresco 600 ml', precio_venta: '26' }),
+    ]);
+    assert.ok(parsed.ok);
+    const [p] = planImport(parsed.rows, new Map([[`00${UPC_A}`, refresco]]));
+    assert.equal(p?.kind, 'actualizar');
+    assert.equal(p?.id, 'P2');
+  });
+
+  it('refuses a code two catalogue products already share, on that row', () => {
+    const parsed = parseProductSheet([HEAD, row({ sku: UPC_A })]);
+    assert.ok(parsed.ok);
+    const [p] = planImport(
+      parsed.rows,
+      new Map([[`00${UPC_A}`, refresco]]),
+      new Set([`00${UPC_A}`]),
+    );
+    assert.equal(p?.kind, 'error');
+    assert.match(p?.errors.join() ?? '', /lo tienen 2 o más productos/);
+  });
+
+  it('refuses the same code twice in the file, UPC-A and EAN-13', () => {
+    const r = parseProductSheet([
+      HEAD,
+      row({ sku: UPC_A, nombre: 'Uno' }),
+      row({ sku: `0${UPC_A}`, nombre: 'Dos' }),
+    ]);
+    assert.ok(r.ok);
+    assert.equal(r.rows.filter((x) => x.values === null).length, 2);
+    assert.match(at(r.rows, 1).errors.join(), /SKU repetido en el archivo \(filas 2, 3\)/);
+  });
+});

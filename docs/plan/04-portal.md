@@ -2001,7 +2001,7 @@ WhatsApp).
 ### P-44 El código de barras del producto: con lector y sin repetidos (ADR-150) [media]
 
 - [x] Status · **Blocked by:** M-19 (`codigoCanonico`) · **Blocks:** P-45
-      Done: 2026-11-19 · 0060's generated `codigo_canonico` and partial index (no Drizzle column, so it never reaches the wire), `CodigosDeProducto` in both use cases, `codigoEnUso` before «Siguiente», one `CodigoBarras` field for the wizard and the drawer, the page-wide reader burst (`lector.ts`), and `/productos?editar=<id>` for «Ver ese producto»; `producto-codigo.spec.ts` mints its own tenant. The assisted import still creates without the check.
+      Done: 2026-11-19 · 0060's generated `codigo_canonico` and partial index (no Drizzle column, so it never reaches the wire), `CodigosDeProducto` in both use cases, `codigoEnUso` before «Siguiente», one `CodigoBarras` field for the wizard and the drawer, the page-wide reader burst (`lector.ts`), and `/productos?editar=<id>` for «Ver ese producto»; `producto-codigo.spec.ts` mints its own tenant. 2026-11-20: the Excel import matches the catalogue by barcode too (`planImport`), refuses a code two catalogue products share and the same code twice in the file, and its apply goes through the same port.
 - **Context:** the product form calls the code «Código (SKU)» under «Más opciones», accepts any value,
   and a USB or Bluetooth reader's trailing Enter may submit the form before the owner finishes. Two
   products can carry the same code, and the phone then rings up whichever it finds first.

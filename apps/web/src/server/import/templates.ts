@@ -13,6 +13,7 @@ import type { PlannedClientRow } from '@/lib/import-plan-clientes';
 
 import type { Tx } from '../db';
 import { pgClientsRepository } from '../repositories/clients';
+import { pgCodigos } from '../repositories/codigos';
 import { pgProductsRepository } from '../repositories/products';
 import { planFromFile as planProductsFromFile } from './plan-productos';
 import { planClientsFromFile } from './plan-clientes';
@@ -68,13 +69,18 @@ const productos: ImportTemplate = {
     })),
   apply: async (tx, businessId, plan) => {
     const repo = pgProductsRepository(tx, businessId);
+    // The plan already matched by barcode; the use cases refuse a code that
+    // arrived since, as the forms do (ADR-150).
+    const codigos = pgCodigos(tx);
     for (const row of plan as readonly PlannedProductRow[]) {
       if (row.values === null) continue;
       const { seguirStock: _s, costoUnitCentavos: _c, ...patch } = row.values;
       if (row.kind === 'actualizar' && row.id !== undefined) {
-        await new EditarProductoUseCase(repo).execute({ id: row.id as ProductId, patch });
+        await new EditarProductoUseCase(repo, codigos).execute({ id: row.id as ProductId, patch });
       } else if (row.kind === 'nuevo') {
-        await new CrearProductoUseCase(repo).execute({ product: { ...row.values, businessId } });
+        await new CrearProductoUseCase(repo, undefined, 'manual', codigos).execute({
+          product: { ...row.values, businessId },
+        });
       }
     }
   },
