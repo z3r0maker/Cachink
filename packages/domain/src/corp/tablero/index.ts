@@ -68,3 +68,4 @@ export {
   type NoAceptada,
   type TextoAviso,
 } from './aviso.js';
+export { costoDeSudor, type CostoDeSudor } from './sudor.js';
