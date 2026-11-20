@@ -1,4 +1,5 @@
 import type { LedgerEntry, RecurrenteRegistrado } from '@xangarro/application/corp';
+import { TableroError } from '@xangarro/domain/corp';
 
 import type { FormState } from '../actions/form-state';
 import { NotPermitted } from '../staff';
@@ -108,6 +109,8 @@ export function failed(error: unknown, what: string): FormState {
   if (cerrado !== null) return cerrado;
   const own = OWN_MESSAGES[code];
   if (own !== undefined) return { ok: false, message: own };
+  // The Tablero's errors (E-20) all speak the founders' words.
+  if (error instanceof TableroError) return { ok: false, message: error.message };
   if (DOMAIN_CODES.has(code) && error instanceof Error)
     return { ok: false, message: error.message };
   reportError(error, `[empresa] ${what} failed`);
