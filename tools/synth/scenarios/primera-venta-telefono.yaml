@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# primera-venta on the capture app (S-06): the same sale, on the phone. The
+# runner links the phone and signs the operator in; the actor charges.
+id: primera-venta-telefono
+title: Registrar la primera venta del día, en el teléfono
+mission: >
+  Acabas de abrir tu puesto y llega el primer cliente del día. Se lleva un
+  refresco y unas galletas, y te paga en efectivo con un billete de 100.
+  Cóbrale en tu celular.
+runner: phone
+start:
+  seed: negocio-con-catalogo-minimo
+  auth_as: operador
+  url: /
+success:
+  - check: venta-efectivo
+    params:
+      partidas: 2
+optimal_steps: 6
+interruptions: []
+applies_to: [human, chaos]
