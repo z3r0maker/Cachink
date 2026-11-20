@@ -56,6 +56,39 @@ describe('ScenarioSchema', () => {
     assert.deepEqual(failingPaths(ScenarioSchema, bad), ['start.url']);
   });
 
+  it('accepts «sin-cuenta» for a web signup: the actor becomes the owner at /signup', () => {
+    const signup = withPatch(PRIMERA_VENTA, {
+      start: { seed: 'sin-cuenta', auth_as: 'owner', url: '/signup' },
+    });
+    assert.deepEqual(issues(ScenarioSchema, signup), []);
+  });
+
+  it('refuses «sin-cuenta» starting anywhere but /signup, since there is no door to walk', () => {
+    for (const url of ['/', '/login', '/bienvenida']) {
+      const bad = withPatch(PRIMERA_VENTA, {
+        start: { seed: 'sin-cuenta', auth_as: 'owner', url },
+      });
+      assert.deepEqual(failingPaths(ScenarioSchema, bad), ['start.url'], url);
+    }
+  });
+
+  it('refuses «sin-cuenta» for any role but the owner a signup makes', () => {
+    for (const auth_as of ['admin', 'viewer', 'operador']) {
+      const bad = withPatch(PRIMERA_VENTA, {
+        start: { seed: 'sin-cuenta', auth_as, url: '/signup' },
+      });
+      assert.deepEqual(failingPaths(ScenarioSchema, bad), ['start.auth_as'], auth_as);
+    }
+  });
+
+  it('refuses «sin-cuenta» on the phone: the capture app has no signup', () => {
+    const bad = withPatch(PRIMERA_VENTA, {
+      runner: 'phone',
+      start: { seed: 'sin-cuenta', auth_as: 'operador', url: '/signup' },
+    });
+    assert.ok(failingPaths(ScenarioSchema, bad).includes('runner'));
+  });
+
   it('refuses an empty mission, zero optimal steps and an empty applies_to', () => {
     const bad = withPatch(PRIMERA_VENTA, { mission: ' ', optimal_steps: 0, applies_to: [] });
     assert.deepEqual(failingPaths(ScenarioSchema, bad).sort(), [

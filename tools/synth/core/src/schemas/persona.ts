@@ -55,6 +55,15 @@ export const PersonaSchema = z
     }),
   })
   .superRefine((p, ctx) => {
+    // A chaos or device persona is not a segment: it counts at the humans'
+    // summed weight when findings are ranked (`aggregate/weights.ts`).
+    if (p.kind !== 'human' && p.market_weight.value !== 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['market_weight', 'value'],
+        message: `a ${p.kind} persona declares 0: it inherits the human personas’ weight`,
+      });
+    }
     if (p.status === 'grounded' && evidenceShare(p.behaviors) < GROUNDED_SHARE) {
       ctx.addIssue({
         code: 'custom',

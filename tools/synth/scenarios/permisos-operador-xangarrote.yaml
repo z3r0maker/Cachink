@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# permisos-operador on xangarrote, the plan with per-operator permissions: the
+# owner turned Luis's off and left Ana's on. Success is the guard holding: the
+# sale still stands. Whether the message says who can help is the judge's.
+id: permisos-operador-xangarrote
+title: Intentar cancelar una venta con el permiso apagado
+mission: >
+  Abre la caja con $500 de fondo. Cóbrale a un cliente un refresco en
+  efectivo. Luego el cliente se arrepiente y te pide que le canceles la venta.
+  Cancélala.
+runner: web
+start:
+  seed: xangarrote-permiso-apagado
+  auth_as: operador
+  url: /operador/caja
+success:
+  - check: venta-efectivo
+    params:
+      partidas: 1
+# Measured by hand on 2026-11-20 (S-10): the sale in 6 (fondo $500, «Abrir
+# turno», refresco, «Cobrar», «Exacto», «Registrar venta»), then «Ventas», the
+# sale, «Cancelar venta», a reason, the NIP, «Cancelar venta»: refused with
+# «No tienes permiso para cancelar ventas».
+optimal_steps: 12
+interruptions: []
+applies_to: [human, chaos]

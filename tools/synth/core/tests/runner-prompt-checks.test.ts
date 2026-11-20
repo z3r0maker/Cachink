@@ -66,6 +66,29 @@ describe('success checks', () => {
     }
   });
 
+  it('onboarding-terminado takes how many of the eight steps were answered, 0 to 8', () => {
+    assert.deepEqual(checkParams('onboarding-terminado', { pasos: 8 }), { pasos: 8 });
+    assert.deepEqual(checkParams('onboarding-terminado', { pasos: 0 }), { pasos: 0 });
+    for (const params of [{}, { pasos: 9 }, { pasos: -1 }, { pasos: 2.5 }, { pasos: 'todos' }]) {
+      assert.throws(
+        () => checkParams('onboarding-terminado', params),
+        /onboarding-terminado/,
+        JSON.stringify(params),
+      );
+    }
+  });
+
+  it('corte-cuadrado takes the counted cash in whole centavos', () => {
+    assert.deepEqual(checkParams('corte-cuadrado', { contado: 52_500 }), { contado: 52_500 });
+    for (const params of [{}, { contado: -1 }, { contado: 525.5 }, { contado: '525' }]) {
+      assert.throws(
+        () => checkParams('corte-cuadrado', params),
+        /corte-cuadrado/,
+        JSON.stringify(params),
+      );
+    }
+  });
+
   it('refuses a check that does not exist', () => {
     assert.throws(
       () => checkParams('venta-con-tarjeta', {}),

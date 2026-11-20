@@ -108,6 +108,7 @@ async function runOn(
     baseUrl: stack.baseUrl ?? '',
     cdpPort: await deps.freePort(),
     mcpCli: MCP_CLI,
+    outboxDir: stack.names.outboxDir,
   });
 }
 

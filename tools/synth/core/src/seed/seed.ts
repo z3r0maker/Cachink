@@ -7,10 +7,12 @@ import {
   billingDatabaseUrl,
   mintCodeFor,
   mintTenant,
+  stamp,
   superDatabaseUrl,
-  type Account,
   type Tenant,
 } from '@xangarro/testing/tenant';
+import { randomBytes } from 'node:crypto';
+
 import bcrypt from 'bcryptjs';
 import type { z } from 'zod';
 
@@ -32,10 +34,20 @@ export interface SeededOperator {
   readonly nip: string;
 }
 
+/** What signs in: an email and a test password. */
+export interface RunAccount {
+  readonly email: string;
+  readonly password: string;
+}
+
 export interface RunAccess {
-  readonly tenant: Tenant;
-  /** Who signs in at `/login`: the owner, or a member with the scenario's role. */
-  readonly account: Account;
+  /** Null for `sin-cuenta`: the actor's signup makes the business, found by `account.email`. */
+  readonly tenant: Tenant | null;
+  /**
+   * Who signs in at `/login`: the owner, or a member with the scenario's role.
+   * For `sin-cuenta`, the address and password the actor signs up with.
+   */
+  readonly account: RunAccount;
   readonly operators: readonly SeededOperator[];
   /** For an `operador` scenario: the code that links the browser or phone as a device. */
   readonly activationCode: string | null;
@@ -97,15 +109,42 @@ function assertHosts(allowed: readonly string[]): void {
     assertLocalUrl(url, allowed);
 }
 
-async function accountFor(t: Tenant, authAs: SeedOptions['authAs']): Promise<Account> {
+async function accountFor(t: Tenant, authAs: SeedOptions['authAs']): Promise<RunAccount> {
   if (authAs === 'admin' || authAs === 'viewer')
     return addMember(t, { role: authAs, label: authAs });
   return t;
 }
 
+/** The run's seeded tenant; throws for `sin-cuenta`, whose runner has none to give a door. */
+export function seededTenant(access: RunAccess): Tenant {
+  if (access.tenant === null) {
+    throw new StackError('SEED_UNKNOWN', 'this run starts with no account: the actor signs up');
+  }
+  return access.tenant;
+}
+
+/** A signup's own address and password: test values, unique per run so throttles stay apart. */
+function signupAccess(label: string): RunAccess {
+  const slug = label.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'synth';
+  return {
+    tenant: null,
+    account: {
+      email: `${slug}-${stamp()}@ejemplo.mx`,
+      password: `synth-${randomBytes(4).toString('hex')}`,
+    },
+    operators: [],
+    activationCode: null,
+  };
+}
+
 export async function seedRun(o: SeedOptions): Promise<RunAccess> {
   const plan = FIXTURES[o.seed];
   if (plan === undefined) throw new StackError('SEED_UNKNOWN', `no seed «${o.seed}»`);
+  if (plan.signup === true) {
+    // Nothing is written, but success is read from this database afterwards.
+    assertHosts(o.allowedHosts);
+    return signupAccess(o.label ?? 'synth');
+  }
   if (o.authAs === 'operador' && plan.operators.length === 0) {
     throw new StackError(
       'SEED_UNKNOWN',

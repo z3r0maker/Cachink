@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# Owner decision 7: camino A answers all eight steps of «Platícanos de ti» and
+# chooses the free plan at «Tu plan ideal». It starts with no account: the actor
+# signs up with the address the runner gives it, and the runner opens the
+# confirmation email's link in its tab when the email lands (S-10).
+id: onboarding-camino-a
+title: Crear la cuenta y contestar todo el asistente
+mission: >
+  Te recomendaron Xangarro para llevar las cuentas de tu tiendita. Crea tu
+  cuenta, contesta todas las preguntas que te hagan sobre tu negocio y empieza
+  con el plan gratis.
+runner: web
+start:
+  seed: sin-cuenta
+  auth_as: owner
+  url: /signup
+success:
+  - check: onboarding-terminado
+    params:
+      pasos: 8
+# Measured by hand on 2026-11-20 (S-10), one step per click or field typed:
+# signup 5 (name, email, password, consent, «Crear mi cuenta»), confirm 2,
+# «¡Va, empecemos!» 1, eight questions × (answer, «Siguiente») 16, «Empezar
+# gratis» 1. The runner's opening of the emailed link is not a step.
+optimal_steps: 25
+interruptions: []
+applies_to: [human, chaos]

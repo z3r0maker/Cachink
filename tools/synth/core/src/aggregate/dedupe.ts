@@ -8,6 +8,7 @@ import type { Run } from '../schemas/run';
  * and counted across repetitions.
  */
 export interface PersonaFacts {
+  /** The weight its findings count at: a non-human's is the humans' sum (`weights.ts`). */
   readonly market_weight: number;
   readonly status: Finding['persona_status'];
 }

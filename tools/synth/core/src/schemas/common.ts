@@ -27,12 +27,15 @@ export const Runner = z.enum(['web', 'phone']);
 /** `task` completes the mission; `walkthrough` is the cognitive walkthrough (spec §8.2). */
 export const Style = z.enum(['task', 'walkthrough']);
 
-/** The seeds `seed.ts` knows (S-04). */
+/** The seeds `seed.ts` knows (S-04, S-10). `sin-cuenta` mints nothing: the actor signs up. */
 export const Seed = z.enum([
   'vacio',
   'negocio-con-catalogo-minimo',
   'negocio-con-historial-30-dias',
   'plan-al-limite',
+  'operador-sin-permiso',
+  'xangarrote-permiso-apagado',
+  'sin-cuenta',
 ]);
 
 export const PersonaStatus = z.enum(['hypothesis', 'grounded']);

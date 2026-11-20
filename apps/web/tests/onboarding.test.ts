@@ -78,6 +78,11 @@ describe('the wizard steps (N-12)', () => {
     for (let i = 0; i < 8; i += 1) assert.ok(skipKeys(i).length > 0);
   });
 
+  it('takes its keys from the domain, and has a title and a hint for each', () => {
+    for (const s of STEPS) assert.ok(s.title !== '' && s.hint !== '', JSON.stringify(s.keys));
+    assert.deepEqual(skipKeys(5), ['whatsapp', 'hasLogo']);
+  });
+
   it('"no vendo a crédito" takes Crédito out of the payment methods', () => {
     const r = reconcile({ metodosCobro: ['Efectivo', 'Crédito'] }, { vendeACredito: false });
     assert.deepEqual(r.patch, { vendeACredito: false, metodosCobro: ['Efectivo'] });

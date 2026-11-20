@@ -31,7 +31,10 @@
             "vacio",
             "negocio-con-catalogo-minimo",
             "negocio-con-historial-30-dias",
-            "plan-al-limite"
+            "plan-al-limite",
+            "operador-sin-permiso",
+            "xangarrote-permiso-apagado",
+            "sin-cuenta"
           ]
         },
         "auth_as": {

@@ -30,14 +30,33 @@ export const ScenarioSchema = z
     applies_to: z.array(PersonaKind).min(1),
   })
   .superRefine((s, ctx) => {
+    const issue = (path: string[], message: string) =>
+      ctx.addIssue({ code: 'custom', path, message });
     // The capture app is single-role: a phone signs in as an operator (ADR-053).
     if (s.runner === 'phone' && s.start.auth_as !== 'operador') {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['start', 'auth_as'],
-        message: 'the phone runner signs in as «operador»: the capture app has no member sign-in',
-      });
+      issue(
+        ['start', 'auth_as'],
+        'the phone runner signs in as «operador»: the capture app has no member sign-in',
+      );
     }
+    if (s.start.seed === 'sin-cuenta') signupIssues(s, issue);
   });
+
+/**
+ * `sin-cuenta` (S-10): no tenant and no door. The actor signs up on the web
+ * at /signup, and the account it makes is an owner's.
+ */
+function signupIssues(
+  s: { runner: string; start: { auth_as: string; url: string } },
+  issue: (path: string[], message: string) => void,
+): void {
+  if (s.runner !== 'web') issue(['runner'], '«sin-cuenta» is a web signup: the phone has none');
+  if (s.start.auth_as !== 'owner') {
+    issue(['start', 'auth_as'], '«sin-cuenta» signs up an owner');
+  }
+  if (!/^\/signup(?:[?#]|$)/.test(s.start.url)) {
+    issue(['start', 'url'], '«sin-cuenta» starts at /signup: there is no door to walk');
+  }
+}
 
 export type Scenario = z.infer<typeof ScenarioSchema>;
