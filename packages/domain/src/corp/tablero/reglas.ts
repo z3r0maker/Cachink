@@ -47,7 +47,11 @@ const REGLAS: Record<Accion, Regla> = {
   hacer: { tipo: 'hecha', fases: ['por_hacer', 'en_curso'], quien: 'responsable', de: 'tarea' },
 };
 
-const URL = /^https?:\/\/[^\s]+\.[^\s]+$/;
+/** A link with a host that has a dot, no spaces, at most 2,048 characters; each check is linear. */
+const esEnlace = (s: string): boolean => {
+  const resto = s.replace(/^https?:\/\//, '');
+  return s.length <= 2048 && resto !== s && !/\s/.test(s) && resto.includes('.');
+};
 
 const limpio = (s: string | null): string | null => {
   const t = s?.trim() ?? '';
@@ -86,7 +90,7 @@ function evidencia(m: Movimiento, t: Tarjeta): Detalle {
   const enlace = limpio(m.enlace);
   const documentoId = limpio(m.documentoId);
   if (documentoId !== null) return { ...NADA, documentoId };
-  if (enlace === null || !URL.test(enlace)) throw new TableroError('EVIDENCIA');
+  if (enlace === null || !esEnlace(enlace)) throw new TableroError('EVIDENCIA');
   return { ...NADA, enlace };
 }
 
