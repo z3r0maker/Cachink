@@ -43,7 +43,8 @@ export interface Balance {
   readonly vacio: boolean;
 }
 
-const RESULTADOS: readonly AccountGroup[] = ['ingreso', 'costo', 'gasto', 'otro'];
+/** The groups of the P&L: they start every year at zero, with no closing entry. */
+export const RESULTADOS: readonly AccountGroup[] = ['ingreso', 'costo', 'gasto', 'otro'];
 
 /** The chart's accounts of one group, in the chart's own order. */
 export function cuentasDelGrupo(grupo: AccountGroup): AccountKey[] {
