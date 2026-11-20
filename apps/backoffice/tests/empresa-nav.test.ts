@@ -28,6 +28,10 @@ describe('EMPRESA_NAV', () => {
       ['Estado de resultados', 'Balance', 'Impuestos', 'Presupuesto'],
     );
     assert.deepEqual(
+      entry('socios').tabs.map((t) => t.label),
+      ['Cuentas', 'Tablero'],
+    );
+    assert.deepEqual(
       entry('cumplimiento').tabs.map((t) => t.label),
       ['Agenda', 'Cierre del mes', 'Expediente', 'Corporativo'],
     );

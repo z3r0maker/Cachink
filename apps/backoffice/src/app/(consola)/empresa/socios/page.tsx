@@ -1,7 +1,12 @@
-import { dineroDelTrimestre } from '@xangarro/application/corp';
+import {
+  aceptadoDelTrimestre,
+  dineroDelTrimestre,
+  type DatosDelTablero,
+} from '@xangarro/application/corp';
 import {
   listFounders,
   listFundingCalls,
+  leerTablero,
   listPartnerEntries,
   type Movimiento,
 } from '@xangarro/data-corp';
@@ -20,14 +25,21 @@ import { requireFounderPage } from '@/server/founder';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
 
+import { EncabezadoSeccion } from '../encabezado-seccion';
 import { Cierre, type CierreSocio } from './cierre';
 import { Cuenta, Historial } from './cuentas';
 import { Fondeo } from './fondeo';
 
 export const dynamic = 'force-dynamic';
 
-/** The last quarter that ended is the one whose money can be closed. */
-function cierres(entries: readonly Movimiento[], trimestre: string, nombres: Nombres) {
+/** The last quarter that ended is the one whose money can be closed; its cap is the Tablero's. */
+function cierres(
+  entries: readonly Movimiento[],
+  trimestre: string,
+  nombres: Nombres,
+  tablero: { readonly datos: DatosDelTablero; readonly hoy: string },
+) {
+  const t = aceptadoDelTrimestre(tablero.datos, trimestre, tablero.hoy);
   return ([1, 2] as const).map((socio): CierreSocio => {
     const { adicional, previo } = dineroDelTrimestre(entries, trimestre, socio);
     return {
@@ -36,27 +48,23 @@ function cierres(entries: readonly Movimiento[], trimestre: string, nombres: Nom
       adicional,
       cerrado:
         previo === null ? null : { bolsa: adicional - previo.prestamo, prestamo: previo.prestamo },
+      tablero: !t.cubierto ? null : t.decidido ? t.aceptado[socio] : 'espera',
     };
   });
 }
 
 function Encabezado({ hoy }: { readonly hoy: string }) {
   return (
-    <header className={m.head}>
-      <div className={m.headText}>
-        <span className={m.eyebrow}>MEXIA · Empresa</span>
-        <h1 className={m.title}>Cuentas de socios</h1>
-        <p className={m.sub}>Al {formatDateLong(parseIsoDate(hoy))}</p>
-      </div>
+    <EncabezadoSeccion actual="/empresa/socios" sub={`Al ${formatDateLong(parseIsoDate(hoy))}`}>
       <Link className={m.boton.primario} href="/empresa/movimientos/registrar?tipo=socios">
         + Movimiento de socios
       </Link>
-    </header>
+    </EncabezadoSeccion>
   );
 }
 
 /**
- * Cuentas de socios (E-03, board CD-04): the open funding call, each
+ * Socios › Cuentas (E-03, board CD-04): the open funding call, each
  * partner's capital, halves, additional money and loans, the last quarter's
  * money close, and the history. All of it read from the ledger.
  */
@@ -64,10 +72,11 @@ export default async function SociosPage() {
   await requireFounderPage();
   const db = requireCorpDb();
   const hoy = hoyEnMexico();
-  const [founders, entries, calls] = await Promise.all([
+  const [founders, entries, calls, datos] = await Promise.all([
     listFounders(db),
     listPartnerEntries(db),
     listFundingCalls(db),
+    leerTablero(db),
   ]);
   const nombres = nombresDe(founders);
   const cuentas = cuentasDeSocios(entries);
@@ -85,7 +94,7 @@ export default async function SociosPage() {
         <Cierre
           trimestre={anterior}
           nombre={nombreTrimestre(anterior)}
-          socios={cierres(entries, anterior, nombres)}
+          socios={cierres(entries, anterior, nombres, { datos, hoy })}
         />
         <Historial
           filas={[...entries]

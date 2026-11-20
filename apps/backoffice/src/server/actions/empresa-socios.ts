@@ -1,14 +1,20 @@
 'use server';
 
 import {
+  aceptadoDelTrimestre,
   CerrarDineroDelTrimestreUseCase,
   PagarMitadUseCase,
   PedirFondeoUseCase,
   type CierreDeDinero,
   type FundingCall,
 } from '@xangarro/application/corp';
-import { createCorpLedgerRepository, createFundingCallRepository } from '@xangarro/data-corp';
+import {
+  createCorpLedgerRepository,
+  createFundingCallRepository,
+  leerTablero,
+} from '@xangarro/data-corp';
 import { formatMoney, pesosToCentavos } from '@xangarro/domain';
+import { nombreTrimestre } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 
 import { auditedMutation } from '../audited';
@@ -76,14 +82,31 @@ export async function pagarMitad(_prev: FormState, form: FormData): Promise<Form
   }
 }
 
+/**
+ * The cap of a quarter's money close: what the Tablero accepted (E-20), once
+ * its reviews are over; for a quarter from before the Tablero, the value the
+ * founders type. A string is the reason it cannot close yet.
+ */
+async function entregablesDe(form: FormData, trimestre: string): Promise<bigint | string> {
+  const t = aceptadoDelTrimestre(await leerTablero(requireCorpDb()), trimestre, hoyEnMexico());
+  if (t.cubierto) {
+    if (!t.decidido) {
+      return `El Tablero del ${nombreTrimestre(trimestre)} aún no cierra: espera a que acaben sus revisiones.`;
+    }
+    return t.aceptado[socioDe(form)];
+  }
+  return (
+    pesosToCentavos(field(form, 'entregables')) ??
+    'Escribe el valor de los entregables con números.'
+  );
+}
+
 export async function cerrarDinero(_prev: FormState, form: FormData): Promise<FormState> {
   try {
     const { founder } = await requireFounder();
-    const entregables = pesosToCentavos(field(form, 'entregables'));
-    if (entregables === null) {
-      return { ok: false, message: 'Escribe el valor de los entregables con números.' };
-    }
     const trimestre = field(form, 'trimestre');
+    const entregables = await entregablesDe(form, trimestre);
+    if (typeof entregables === 'string') return { ok: false, message: entregables };
     const { result } = await auditedMutation(
       (r: CierreDeDinero) => ({
         action: 'empresa.dinero_cerrado',

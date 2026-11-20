@@ -14,7 +14,8 @@
     "./cuenta": "./src/cuenta/index.ts",
     "./support-inbox": "./src/support-inbox/index.ts",
     "./usage": "./src/usage/index.ts",
-    "./corp": "./src/corp/index.ts"
+    "./corp": "./src/corp/index.ts",
+    "./corp-pdf": "./src/corp/tablero/aviso-pdf.tsx"
   },
   "scripts": {
     "build": "tsc --build",

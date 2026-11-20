@@ -82,6 +82,18 @@ import {
 } from './empresa-presupuesto';
 import { bajarPaquete, capturarCodigos, codigoDe, MES_CONTADOR } from './empresa-contador';
 import {
+  hoy as hoyTablero,
+  nombre as nombreT,
+  otroApruebaPlan,
+  otroObjeta,
+  otroPoneValor,
+  primerDia,
+  sembrarCierre,
+  TABLERO_ACTUAL,
+  TABLERO_CERRADO,
+  TABLERO_SIGUIENTE,
+} from './empresa-tablero';
+import {
   agregarOtroSocio,
   confirmarSaldo,
   esperarPaso,
@@ -216,7 +228,7 @@ test('a founder repeats an expense, registers its next charge and stops it', asy
 test('a founder funds by halves, puts in more and closes the quarter', async ({ page }) => {
   await signInAsStaff(page, SOCIO);
   await page.getByRole('link', { name: 'Socios', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Cuentas de socios', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Socios', level: 1 })).toBeVisible();
   await pedirYPagarFondeo(page);
 
   const pasado = trimestrePasado();
@@ -1204,4 +1216,134 @@ test('a founder downloads the contador’s package, and types in and validates t
   await page.getByLabel('Código agrupador de Bancos').fill('102.02');
   await page.getByRole('button', { name: 'Guardar los códigos' }).click();
   await expect(page.getByTestId('codigos-chip')).toHaveText('Sin validar · 22 de 22');
+});
+
+test('a founder plans the next quarter, takes a card through the mediator, and sends a notice (E-20)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await agregarOtroSocio();
+  await sembrarCierre();
+  try {
+    await signInAsStaff(page, SOCIO);
+    await page.goto('/empresa/socios');
+    await abrirPestana(page, 'Tablero', /\/empresa\/tablero$/, 'Socios');
+    const banner = page.getByTestId('tablero-banner').first();
+
+    // The next quarter's plan: a card with this founder's value, the other's, sent and approved.
+    const SIG = nombreT(TABLERO_SIGUIENTE);
+    await page.getByRole('link', { name: 'Trimestre siguiente' }).click();
+    await expect(banner).toContainText(`El plan del ${SIG} se arma aquí`);
+    await page.getByRole('link', { name: '+ Nueva tarjeta' }).click();
+    const nueva = page.getByRole('dialog', { name: 'Nueva tarjeta' });
+    await nueva.getByLabel('Título', { exact: true }).fill('E2E Integración con el SAT');
+    await nueva.getByLabel('Criterio de terminado').fill('Las facturas recibidas llegan solas.');
+    await nueva.getByLabel('Tu propuesta de valor').fill('40000');
+    await nueva.getByLabel('Fecha', { exact: true }).fill(primerDia(TABLERO_SIGUIENTE));
+    await nueva.getByRole('button', { name: 'Agregar la tarjeta' }).click();
+    const fila = page.getByTestId('plan-fila').filter({ hasText: 'E2E Integración con el SAT' });
+    await expect(fila).toContainText('$40,000');
+    await expect(fila).toContainText('Falta su valor');
+    await otroPoneValor('E2E Integración con el SAT', 30000);
+    await page.reload();
+    await expect(fila).toContainText('$35,000');
+    await page.getByRole('button', { name: 'Enviar el plan' }).click();
+    await expect(banner).toContainText(`Enviaste el plan del ${SIG}`);
+    await otroApruebaPlan(TABLERO_SIGUIENTE);
+    await page.reload();
+    await expect(banner).toContainText(`El plan del ${SIG} lo aprobó Fundador 2`);
+    await expect(page.getByTestId('tablero-comprometido-1')).toHaveText('$35,000');
+
+    // This quarter: a card started, finished with a link, objected, and accepted by the mediator.
+    await page.goto(`/empresa/tablero?t=${TABLERO_ACTUAL}`);
+    await page.getByRole('link', { name: '+ Nueva tarjeta' }).click();
+    await nueva.getByLabel('Título', { exact: true }).fill('E2E Guía de inicio');
+    await nueva.getByLabel('Criterio de terminado').fill('Cinco videos en la ayuda.');
+    await nueva.getByLabel('Tu propuesta de valor').fill('20000');
+    await nueva.getByLabel('Fecha', { exact: true }).fill(hoyTablero());
+    await nueva.getByRole('button', { name: 'Agregar la tarjeta' }).click();
+    const guia = (columna: string) =>
+      page
+        .getByTestId(`columna-${columna}`)
+        .getByTestId('tablero-tarjeta')
+        .filter({ hasText: 'E2E Guía de inicio' });
+    // The card is saved and the drawer closed before the other founder values it.
+    await expect(nueva).toHaveCount(0);
+    await expect(guia('por_hacer')).toContainText('Falta un valor');
+    await otroPoneValor('E2E Guía de inicio', 20000);
+    await page.reload();
+    await expect(guia('por_hacer')).toContainText('Valor: $20,000, los dos igual');
+    await guia('por_hacer').click();
+    const cajon = page.getByRole('dialog', { name: 'E2E Guía de inicio' });
+    await expect(cajon.getByTestId('tarjeta-valores')).toContainText('se usa el promedio: $20,000');
+    await cajon.getByRole('button', { name: 'Empezar' }).click();
+    await expect(guia('en_curso')).toBeVisible();
+    await cajon.getByLabel('O un enlace').fill('https://xangarro.mx/ayuda');
+    await cajon.getByRole('button', { name: 'Marcar terminado' }).click();
+    await expect(guia('en_revision')).toContainText('puede objetar hasta el');
+    await otroObjeta('E2E Guía de inicio', 'Falta el video de inventario.');
+    await page.reload();
+    await expect(guia('en_revision')).toContainText('Objetada: Falta el video de inventario.');
+    await cajon
+      .getByLabel('¿Por qué la llevas al mediador?')
+      .fill('Está en la sección de egresos.');
+    await cajon.getByRole('button', { name: 'Llevar al mediador' }).click();
+    await expect(guia('en_revision')).toContainText('Con el mediador');
+    await cajon.getByLabel('El documento del mediador').setInputFiles({
+      name: 'resolucion.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4 resolución'),
+    });
+    await cajon.getByRole('button', { name: 'Registrar la resolución' }).click();
+    await expect(guia('terminado')).toContainText('Aceptado por el mediador');
+    await expect(cajon.getByTestId('tarjeta-historia')).toContainText(
+      'Objetó: «Falta el video de inventario.»',
+    );
+    await expect(page.getByTestId('tablero-aceptado-1')).toHaveText('$20,000');
+
+    // An objective, typed in and updated by hand.
+    await page.goto(`/empresa/tablero?t=${TABLERO_ACTUAL}&panel=nuevo-objetivo`);
+    const objetivo = page.getByRole('dialog', { name: 'Nuevo objetivo' });
+    await objetivo.getByLabel('Objetivo', { exact: true }).fill('E2E 60 negocios pagando');
+    await objetivo.getByLabel('Meta').fill('60');
+    await objetivo.getByLabel('Unidad').fill('negocios');
+    await objetivo.getByRole('button', { name: 'Agregar el objetivo' }).click();
+    const fila60 = page
+      .getByTestId('tablero-objetivo')
+      .filter({ hasText: 'E2E 60 negocios pagando' });
+    await fila60.getByRole('link', { name: 'Actualizar avance' }).click();
+    await page
+      .getByRole('dialog', { name: 'E2E 60 negocios pagando' })
+      .getByLabel('Avance')
+      .fill('48');
+    await page.getByRole('button', { name: 'Guardar el avance' }).click();
+    await expect(fila60).toContainText('48 de 60 negocios');
+
+    // A closed quarter with Fundador 2 under the minimum: the clause, the draft, its PDF, sent.
+    const CER = nombreT(TABLERO_CERRADO);
+    await page.goto(`/empresa/tablero?t=${TABLERO_CERRADO}`);
+    await expect(banner).toContainText(
+      `Cierre del ${CER}: Fundador 2 · ${OTRO_SOCIO} no llegó al mínimo`,
+    );
+    await expect(page.getByTestId('tablero-socio-1')).toContainText('Cumplió · 100 %');
+    await expect(page.getByTestId('tablero-socio-2')).toContainText('No cumplió · 0 %');
+    await page.getByRole('link', { name: 'Preparar el aviso' }).click();
+    const aviso = page.getByRole('dialog', { name: 'Aviso de incumplimiento' });
+    await aviso.getByLabel('Número de la cláusula').fill('Décima segunda');
+    await aviso
+      .getByLabel('Su texto')
+      .fill('E2E El socio que no cumpla pierde su parte del corte.');
+    await aviso.getByRole('button', { name: 'Guardar la cláusula' }).click();
+    const borrador = aviso.getByTestId('aviso-borrador');
+    await expect(borrador).toContainText('te comprometiste a entregables por $30,000.00');
+    await expect(borrador).toContainText('E2E Alianza cerrada, $30,000.00: no se empezó.');
+    await expect(borrador).toContainText('«E2E El socio que no cumpla pierde su parte del corte.»');
+    const pdf = await page.request.get(`/empresa/tablero/aviso?t=${TABLERO_CERRADO}`);
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()['content-type']).toBe('application/pdf');
+    await aviso.getByRole('button', { name: 'Marcar como enviado' }).click();
+    await expect(aviso.getByTestId('aviso-enviado')).toContainText('Enviado el');
+  } finally {
+    await quitarOtroSocio();
+  }
 });

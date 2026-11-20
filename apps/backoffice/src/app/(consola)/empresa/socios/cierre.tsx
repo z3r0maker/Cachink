@@ -1,6 +1,6 @@
 'use client';
 
-import { formatMoney, pesosToCentavos } from '@xangarro/domain';
+import { formatMoney, pesosToCentavos, toPesosString } from '@xangarro/domain';
 import { repartoDelDinero } from '@xangarro/domain/corp';
 import { useActionState, useState } from 'react';
 
@@ -23,6 +23,11 @@ export interface CierreSocio {
   /** Centavos of additional money in the quarter. */
   readonly adicional: bigint;
   readonly cerrado: { readonly bolsa: bigint; readonly prestamo: bigint } | null;
+  /**
+   * The Tablero's accepted value (E-20), «espera» while its reviews go on, or
+   * null for a quarter from before the Tablero, whose value is typed.
+   */
+  readonly tablero: bigint | 'espera' | null;
 }
 
 function Vista({
@@ -69,16 +74,25 @@ function FormaCierre({ c, trimestre, nombre }: SocioProps) {
       <p className={m.sub}>
         {c.nombre}: {formatMoney(c.adicional)} de aportaciones adicionales en el {nombre}.
       </p>
-      <Campo
-        label="Valor de sus entregables terminados"
-        name="entregables"
-        inputMode="decimal"
-        required
-        value={entregables}
-        onChange={(e) => setEntregables(e.target.value)}
-        hint="El que acordaron en el Tablero del trimestre."
+      {c.tablero === null ? (
+        <Campo
+          label="Valor de sus entregables terminados"
+          name="entregables"
+          inputMode="decimal"
+          required
+          value={entregables}
+          onChange={(e) => setEntregables(e.target.value)}
+          hint="Este trimestre no está en el Tablero: escribe el valor que acordaron."
+        />
+      ) : (
+        <p className={m.sub} data-testid={`tablero-aceptado-${c.socio}`}>
+          Entregables aceptados en el Tablero: {formatMoney(c.tablero as bigint)}.
+        </p>
+      )}
+      <Vista
+        adicional={c.adicional}
+        entregables={c.tablero === null ? entregables : toPesosString(c.tablero as bigint)}
       />
-      <Vista adicional={c.adicional} entregables={entregables} />
       <Aviso state={state} />
       <div className={m.row}>
         <button className={m.boton.primario} type="submit" disabled={pending}>
@@ -100,6 +114,14 @@ function Socio(props: SocioProps) {
     );
   }
   if (c.adicional === 0n) return <p className={m.sub}>{c.nombre}: sin aportaciones adicionales.</p>;
+  if (c.tablero === 'espera') {
+    return (
+      <p className={m.sub} data-testid={`cierre-espera-${c.socio}`}>
+        {c.nombre}: el Tablero del {props.nombre} aún no cierra. Su dinero se cierra cuando acaben
+        sus revisiones.
+      </p>
+    );
+  }
   return <FormaCierre {...props} />;
 }
 

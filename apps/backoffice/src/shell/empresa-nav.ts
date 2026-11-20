@@ -17,6 +17,7 @@ export type EmpresaHref =
   | '/empresa/impuestos'
   | '/empresa/presupuesto'
   | '/empresa/socios'
+  | '/empresa/tablero'
   | '/empresa/agenda'
   | '/empresa/cierre'
   | '/empresa/expediente'
@@ -72,7 +73,10 @@ export const EMPRESA_NAV: readonly EmpresaEntry[] = [
     id: 'socios',
     label: 'Socios',
     summary: '¿Qué puso, prometió y entregó cada socio?',
-    tabs: [{ label: 'Cuentas', href: '/empresa/socios', task: 'E-03' }],
+    tabs: [
+      { label: 'Cuentas', href: '/empresa/socios', task: 'E-03' },
+      { label: 'Tablero', href: '/empresa/tablero', task: 'E-20' },
+    ],
   },
   {
     id: 'cumplimiento',
