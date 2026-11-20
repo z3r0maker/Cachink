@@ -1,11 +1,15 @@
-# Reusable subflow: pick the newest photo in the iOS system picker (the
-# fixture a flow added with `addMedia`). On the iPhone each cell reads
-# «Photo, <date>, <time>» («Foto, …» in Spanish); the pattern takes one cell
-# only, never the «Photos» tab or the grid, whose label strings every cell's
-# together. The iPad's picker is a popover in its own process, with no cell
-# in the tree: there the first cell is tapped where the popover draws it
-# (the fixture is the library's first photo). The picker may ask to confirm
-# («Add» / «Agregar»).
+# Reusable subflow: pick the newest photo in the system picker (the fixture a
+# flow added with `addMedia`).
+#
+# iOS: on the iPhone each cell reads «Photo, <date>, <time>» («Foto, …» in
+# Spanish); the pattern takes one cell only, never the «Photos» tab or the
+# grid, whose label strings every cell's together. The iPad's picker is a
+# popover in its own process, with no cell in the tree: there the first cell
+# is tapped where the popover draws it (the fixture is the library's first
+# photo). The picker may ask to confirm («Add» / «Agregar»).
+#
+# Android: the system photo picker labels each cell «Photo taken on <date>»
+# («Foto tomada el …» in Spanish); the newest is the first.
 #
 # Usage:
 #   - runFlow: shared/elegir-foto-galeria.yaml
@@ -13,26 +17,40 @@
 # Precondition: the picker is opening (a long press or a gallery button).
 appId: mx.xangarro.mobile
 ---
-- extendedWaitUntil:
-    visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
-    timeout: 10000
-    optional: true
 - runFlow:
     when:
-      visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+      platform: Android
     commands:
+      - extendedWaitUntil:
+          visible: '(Photo taken on|Foto tomada el) .*'
+          timeout: 10000
       - tapOn:
-          text: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+          text: '(Photo taken on|Foto tomada el) .*'
           index: 0
 - runFlow:
     when:
-      notVisible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+      platform: iOS
     commands:
-      - waitForAnimationToEnd
-      - tapOn:
-          point: '45%, 35%'
-- runFlow:
-    when:
-      visible: '^(Add|Agregar)$'
-    commands:
-      - tapOn: '^(Add|Agregar)$'
+      - extendedWaitUntil:
+          visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            visible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+          commands:
+            - tapOn:
+                text: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+                index: 0
+      - runFlow:
+          when:
+            notVisible: '(Photo|Foto), [^,]+(, [^,]+){1,2}'
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                point: '45%, 35%'
+      - runFlow:
+          when:
+            visible: '^(Add|Agregar)$'
+          commands:
+            - tapOn: '^(Add|Agregar)$'

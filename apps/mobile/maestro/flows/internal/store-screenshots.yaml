@@ -27,6 +27,18 @@ appId: mx.xangarro.mobile
     env:
       MOCK_API: ${MOCK || 'http://127.0.0.1:3000'}
 - launchApp
+# The Android dev client can come back on its launcher, its «Recently opened»
+# entry pointing at a port Metro never served: open Metro's server by hand.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: 'http://10\.0\.2\.2:8081'
+          commands:
+            - tapOn: 'http://10\.0\.2\.2:8081'
 - runFlow: ../shared/dismiss-modals.yaml
 - extendedWaitUntil:
     visible:
