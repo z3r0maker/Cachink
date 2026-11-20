@@ -1624,6 +1624,9 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
       **Surfaced by:** X-09, al colapsar `ROADMAP.md` el 2026-11-20: es lo que quedó de
       `M-1-STEP0-T02`, que pedía posponer el modal para que no se auto-montara antes del asistente.
       Ya no se auto-monta, porque ya no se monta en ninguna parte, y eso es la pregunta nueva.
+- **Decided 2026-11-20 (ADR-162):** the consent moment is the linking aviso's line plus the Ajustes
+  switch, with reports on by default. `ConsentModal` is retired, with its barrel and tests, in M-24;
+  this task closes with it.
 - **What:** `packages/ui/src/screens/ConsentModal/` existe, tiene sus pruebas
   (`packages/ui/tests/screens/consent-modal.test.tsx`, cuatro casos) y la exporta el barril de
   `screens`, pero **ningún archivo de `apps/mobile`, `apps/web` ni `packages/ui` la usa**; tampoco
@@ -1636,6 +1639,28 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
 - **Acceptance:** o la pantalla se monta donde la decisión diga, con un flujo que lo pruebe, o se
   retira con su barril y sus pruebas y el ADR-027 recibe su consecuencia escrita. Lo que no puede
   quedarse es una pantalla construida que nadie abre.
+
+### N-88 La consola captura sus errores, y su bandeja muestra cada reporte junto a su error (ADR-162) [media]
+
+- [ ] Status · **Blocked by:** B-21, O-34 · **Blocks:** —
+      **Surfaced by:** the owner, 2026-11-20 («auto report bugs found by execution with the trace …
+      so we can fix them without user input»).
+- **What:** (1) The console reports its own server errors: `initSentry`, `scrubEvent` and
+  `reportError` move from `apps/web/src/server/observability/` to `@xangarro/observability`, so the
+  portal and the console share one copy (§2.3), and `apps/backoffice` mounts them (`onRequestError`
+  and its actions' failures). (2) In the inbox a `bug` item shows what the person tapped (its
+  category), the caja and the business, and, when the report names an `eventId`, «Ver el error»,
+  which opens that event in Sentry. An item from the portal's Ayuda (P-48) shows the screen and the
+  browser.
+- **Design first** (CLAUDE.md §6, ADR-117), on the console's canvas
+  (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): the inbox row and the item with and without an
+  error. **Not drawn yet.**
+- **Tests:** the moved module keeps its tests and gains the console's (an unexpected error is
+  reported with no staff email in it; an expected one is not reported). Playwright on Desktop Chrome:
+  an item built with a category and an event id shows both, and one without an event id shows no
+  link.
+- **Acceptance:** staff open a report and reach its trace in one tap; an error in the console itself
+  shows in Sentry.
 
 ---
 

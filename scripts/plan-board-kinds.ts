@@ -59,14 +59,14 @@ const ids = (text: string): readonly string[] => text.trim().split(/\s+/);
  * Mercado Pago, y las decisiones de negocio (folded here by the owner). */
 const CORPORATE = new Set(
   ids(
-    'X-07 X-08 O-14 O-15 O-16 O-17 O-18 O-19 O-27 O-28 O-29 O-32 N-40 N-45 N-50 Z-12 L-09 L-10 K-01 K-02 K-25',
+    'X-07 X-08 O-14 O-15 O-16 O-17 O-18 O-19 O-27 O-28 O-29 O-32 O-35 N-40 N-45 N-50 Z-12 L-09 L-10 K-01 K-02 K-25',
   ),
 );
 
 /** Configuration in third-party consoles: Vercel, Supabase, Stripe, Resend,
  * DNS, GitHub. The repo already carries everything these need. */
 const CONSOLES = new Set(
-  ids('X-01 L-04 O-2 O-3 O-4 O-5 O-6 O-7 O-8 O-9 O-10 O-11 O-12 O-13 O-22 O-30 O-31 O-33'),
+  ids('X-01 L-04 O-2 O-3 O-4 O-5 O-6 O-7 O-8 O-9 O-10 O-11 O-12 O-13 O-22 O-30 O-31 O-33 O-34'),
 );
 
 /** Cannot start until the world delivers: real customers, telemetry, scale
@@ -79,19 +79,19 @@ const WAITS = new Set(
 
 const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
   Teléfono: ids(
-    'N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-17 M-18 M-19 M-20 M-21 M-22 K-13 K-24',
+    'N-19 N-21 N-22 N-24 N-25 M-08 M-09 M-10 M-11 M-12 M-13 M-14 M-17 M-18 M-19 M-20 M-21 M-22 M-23 M-24 K-13 K-24',
   ),
   Portal: ids(
-    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 P-44 P-45 P-46 P-47 N-86 K-12 K-23 N-83',
+    'N-03 N-12 P-21 P-23 P-28 P-29 P-30 P-35 P-36 P-38 P-39 P-40 P-41 P-42 P-44 P-45 P-46 P-47 P-48 P-49 N-86 K-12 K-23 N-83',
   ),
   'Caja web': ids('P-37 P-43 K-14'),
   'Pagos y conciliación': ids(
     'C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53 K-10 K-11 K-15 K-20 K-21 K-22',
   ),
   'Consola (backoffice)': ids(
-    'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44 N-85',
+    'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44 N-85 N-88',
   ),
-  'Backend, sync y datos': ids('C-21 C-24 B-19 B-20 N-47 N-48 N-69 N-81 N-84'),
+  'Backend, sync y datos': ids('C-21 C-24 C-26 B-19 B-20 B-21 N-47 N-48 N-69 N-81 N-84'),
   'Privacidad y LFPC': ids('N-34 N-60 N-87'),
   'Auditorías y calidad': ids(
     'N-26 N-27 N-28 N-29 S-01 S-02 S-03 S-04 S-05 S-06 S-07 S-08 S-09 S-10 S-11 S-12 S-13 S-14 S-15 S-16 S-17 S-18 S-19 S-20 S-21 S-22 S-23 S-24 S-25',
