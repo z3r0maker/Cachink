@@ -7,6 +7,8 @@ e2e/.auth/
 public/__design
 public/__cmp.txt
 .next-e2e/
+# Synth's per-corrida builds (S-04); a corrida removes its own when it ends.
+.next-synth/
 
 # O-02 spike build output (esbuild)
 e2e/spikes/sqlite-wasm-opfs/.out/

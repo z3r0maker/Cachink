@@ -17,9 +17,14 @@
     "schemas": "tsx src/cli/schemas.ts",
     "lint": "eslint . --config ../../../eslint.config.js",
     "lint:fix": "eslint . --config ../../../eslint.config.js --fix",
-    "clean": "rm -rf dist .turbo"
+    "clean": "rm -rf dist .turbo",
+    "stack": "tsx src/cli/stack.ts",
+    "test:stack": "SYNTH_STACK=1 vitest run .integration.test"
   },
   "dependencies": {
+    "@xangarro/domain": "workspace:*",
+    "@xangarro/testing": "workspace:*",
+    "bcryptjs": "3.0.3",
     "yaml": "2.9.1",
     "zod": "^4.6.7"
   },

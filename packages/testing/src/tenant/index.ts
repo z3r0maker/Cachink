@@ -33,6 +33,12 @@ export {
   type TurnoRow,
 } from './phone-rows.js';
 export {
+  portalServerEnv,
+  TEST_ENTITLEMENT_KEY,
+  TEST_TOTP_KEY,
+  type PortalEnvInput,
+} from './portal-env.js';
+export {
   addDevice,
   addExpense,
   addExpenseReceipt,

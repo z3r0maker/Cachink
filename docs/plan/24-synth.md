@@ -174,7 +174,13 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-04 La pila de una corrida [alta]
 
-- [ ] Status · **Blocked by:** S-02, S-03
+- [x] Status · **Blocked by:** S-02, S-03
+      Done: 2026-11-19 · `feat/synth-s04` · `core/src/stack/` and `core/src/seed/`, with the `stack up|reap` CLI.
+      The portal's server env is one recipe, `portalServerEnv()` in `@xangarro/testing/tenant`, which
+      `playwright.config.ts` now uses too. Mail goes to the corrida's own folder through a new local-only
+      `EMAIL_OUTBOX_DIR` in `@xangarro/email`. A SIGKILL cannot be caught, so a lock file per stack lets the next
+      start, or `stack reap`, remove what a dead corrida left. Tests: 33 unit tests against fakes, and
+      `test:stack` against real Docker (two corridas side by side, SIGTERM, SIGKILL and reap).
 - **What:**
   - `stack.ts` brings up `xangarro-pg-synth-<id>` on a free port through `db-local.sh` (`XG_PG_NAME`/`XG_PG_PORT`)
     and applies migrations and seed.

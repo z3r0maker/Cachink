@@ -7,4 +7,6 @@
  * the Next server, and `segundo-factor.ts` seals a fixture's seed with it, so
  * the server can open what the fixture wrote.
  */
-export const E2E_TOTP_KEY = process.env.PORTAL_TOTP_KEY ?? Buffer.alloc(32).toString('base64');
+import { TEST_TOTP_KEY } from '@xangarro/testing/tenant';
+
+export const E2E_TOTP_KEY = process.env.PORTAL_TOTP_KEY ?? TEST_TOTP_KEY;
