@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 import { ExitInterview } from '../schemas/run';
-import { actionToolName, isLookTool } from './actor-args';
-import { asText, describeAction, describeObserved } from './describe';
+import { asText, describeObserved } from './describe';
+import { WEB_TOOLS, type ToolSet } from './tools';
 
 /**
  * Reads the actor's `claude -p --output-format stream-json` events as they
@@ -55,6 +55,8 @@ const Result = z.looseObject({
 type Block = z.infer<typeof Block>;
 
 export class StepTracker {
+  constructor(private readonly tools: ToolSet = WEB_TOOLS) {}
+
   readonly steps: TrackedStep[] = [];
   looks = 0;
   turns = 0;
@@ -98,12 +100,12 @@ export class StepTracker {
   }
 
   private use(id: string, name: string, input: Record<string, unknown>): void {
-    const action = actionToolName(name);
-    if (action !== undefined) {
+    const kind = this.tools.kind(name, input);
+    if (kind === 'action') {
       const n = this.steps.length + this.pending.size + 1;
-      this.pending.set(id, { n, thought: this.thought, tool: action, input });
+      this.pending.set(id, { n, thought: this.thought, tool: name, input });
       this.thought = '';
-    } else if (isLookTool(name)) {
+    } else if (kind === 'look') {
       this.looking.add(id);
     }
   }
@@ -119,7 +121,7 @@ export class StepTracker {
     const step = {
       n: p.n,
       thought: p.thought,
-      action: describeAction(p.tool, p.input, asText(content)),
+      action: this.tools.describe(p.tool, p.input, asText(content)),
       observed: describeObserved(content),
       isError,
     };
@@ -149,6 +151,18 @@ export const ActorReport = z.strictObject({
 export type ActorReport = z.infer<typeof ActorReport>;
 
 /** The actor's final JSON, from a fenced block or bare braces; `null` when it is not the contract. */
+/**
+ * The exit interview asks for the two moments that got in the way most
+ * (spec §8.1). An actor that lists three has still answered; the first two
+ * are kept rather than throwing the whole report away (seen in S-06's run).
+ */
+function keepTwoMoments(raw: unknown): unknown {
+  const r = raw as { exit_interview?: { hardest_moments?: unknown } } | null;
+  const moments = r?.exit_interview?.hardest_moments;
+  if (r === null || !Array.isArray(moments) || moments.length <= 2) return raw;
+  return { ...r, exit_interview: { ...r.exit_interview, hardest_moments: moments.slice(0, 2) } };
+}
+
 export function parseActorReport(text: string): ActorReport | null {
   const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text)?.[1];
   const start = text.indexOf('{');
@@ -156,7 +170,7 @@ export function parseActorReport(text: string): ActorReport | null {
   for (const candidate of [fenced, bare]) {
     if (candidate === undefined) continue;
     try {
-      const parsed = ActorReport.safeParse(JSON.parse(candidate));
+      const parsed = ActorReport.safeParse(keepTwoMoments(JSON.parse(candidate)));
       if (parsed.success) return parsed.data;
     } catch {
       // Not JSON; try the next shape.

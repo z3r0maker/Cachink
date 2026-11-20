@@ -39,6 +39,7 @@ export const CATALOGO_EJEMPLO: readonly ProductoCobrar[] = FILAS.map(
     tint,
     codigo: id === 'refresco' ? '7501055300075' : null,
     quedan,
+    pendiente: false,
   }),
 );
 

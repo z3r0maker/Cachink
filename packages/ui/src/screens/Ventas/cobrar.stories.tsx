@@ -114,6 +114,7 @@ function Demo(props: {
         onQuitarUno={(p) => onBump(p.id, -1)}
         onAlta={() => setHoja('nuevoCodigo')}
         onCobrar={() => setHoja('ticket')}
+        dueno="Pedro"
       />
       <ProductoNuevoSheet
         open={hoja === 'nuevo' || hoja === 'nuevoCodigo'}

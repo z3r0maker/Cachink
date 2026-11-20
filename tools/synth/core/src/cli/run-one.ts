@@ -9,11 +9,14 @@ import { ConfigSchema } from '../schemas/config';
 import type { Run } from '../schemas/run';
 import { PersonaSchema } from '../schemas/persona';
 import { ScenarioSchema } from '../schemas/scenario';
+import { holdsMaestroLock, rerunUnderMaestroLock } from '../phone/lock';
+import { runPhone } from '../phone/run-phone';
+import type { Common } from '../runner/act';
 import { runOne } from '../runner/run';
 import { nodeStackDeps } from '../stack/adapters';
 import { reportsDir } from '../stack/names';
 import { tearDownOnSignals } from '../stack/signals';
-import { startStack } from '../stack/stack';
+import { startStack, type Stack, type StackDeps } from '../stack/stack';
 import { formatIssue, validateTree } from '../validate/tree';
 import { existsUnder, readTree } from './read-tree';
 
@@ -85,12 +88,34 @@ function printVerdict(run: Run, corrida: string): void {
   process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
 }
 
+/** The run itself, on a stack that is already up, by the scenario's runner. */
+async function runOn(
+  stack: Stack,
+  deps: StackDeps,
+  c: Common & { corridaDir: string },
+): Promise<Run> {
+  if (c.scenario.runner === 'phone') {
+    return runPhone({
+      ...c,
+      serverPort: stack.serverPort ?? 0,
+      serverLog: stack.names.serverLog,
+      metroPort: await deps.freePort(),
+    });
+  }
+  return runOne({
+    ...c,
+    baseUrl: stack.baseUrl ?? '',
+    cdpPort: await deps.freePort(),
+    mcpCli: MCP_CLI,
+  });
+}
+
 async function main(): Promise<void> {
   const args = cliArgs();
   const { config, persona, scenario } = load(args.persona, args.scenario);
-  if (scenario.runner !== 'web') {
-    throw new Error(`«${scenario.id}» runs on the ${scenario.runner}; this is the web runner`);
-  }
+  // A phone run starts over inside a shell holding the machine-wide Maestro lock.
+  if (scenario.runner === 'phone' && !holdsMaestroLock())
+    process.exit(await rerunUnderMaestroLock(REPO));
   const deps = nodeStackDeps(REPO);
   const today = new Date().toISOString().slice(0, 10);
   const id = `${today.replace(/-/g, '')}-${randomBytes(2).toString('hex')}`;
@@ -105,19 +130,18 @@ async function main(): Promise<void> {
   process.env.DATABASE_SUPER_URL = stack.urls.superUser;
   process.env.BILLING_DATABASE_URL = stack.urls.billing;
   try {
-    const run = await runOne({
+    const common = {
       repoRoot: REPO,
-      baseUrl: stack.baseUrl ?? '',
       today,
       config,
       persona,
       scenario,
       repetition: args.repetition,
-      corridaDir: join(reportsDir(REPO), id),
-      cdpPort: await deps.freePort(),
-      mcpCli: MCP_CLI,
-    });
-    printVerdict(run, id);
+    };
+    printVerdict(
+      await runOn(stack, deps, { ...common, corridaDir: join(reportsDir(REPO), id) }),
+      id,
+    );
   } finally {
     await stack.stop();
   }

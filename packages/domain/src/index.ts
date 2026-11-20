@@ -13,6 +13,7 @@ export * from './errors/operador-errors.js';
 export * from './errors/entitlement-errors.js';
 export * from './errors/feature-flag-errors.js';
 export * from './errors/product-errors.js';
+export * from './errors/codigo-barras-errors.js';
 export * from './errors/product-image-errors.js';
 export * from './errors/expense-errors.js';
 export * from './errors/expense-receipt-errors.js';
