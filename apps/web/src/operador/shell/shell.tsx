@@ -2,11 +2,13 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { usePathname } from 'next/navigation';
 
 import { ColaProvider, useCola } from './cola';
 import { useAvisosSinLeer } from '../avisos/sin-leer';
 import { useRegisterRuntime } from '../runtime/hooks';
 import { OperadorHeader, HEADER_ACTION_ID } from './header';
+import { useQuien } from './quien';
 import { OperadorSidebar } from './sidebar';
 import { BloqueoCaja } from '../caja/bloqueo';
 import { bloquear } from '../caja/ticket-store';
@@ -60,8 +62,10 @@ function Frame({
   const cola = useCola();
   // The bell counts the live unread avisos on a linked caja (O-16).
   const avisosSinLeer = useAvisosSinLeer(data.avisosSinLeer, `${cola.pendientes}:${cola.enviando}`);
+  const quien = useQuien(data, usePathname());
   const shown = {
     ...data,
+    ...quien,
     connection: cola.connection,
     pendientes: cola.pendientes,
     avisosSinLeer,
