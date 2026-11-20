@@ -4,8 +4,7 @@
  * do next.
  */
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
-import { ErrorState, Spinner } from '../../components/index';
+import { CajaEstado, EstadoCargando } from '../../components/index';
 import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these. */
@@ -19,21 +18,14 @@ export interface CierreEstadosProps {
 }
 
 export function CierreEstados(p: CierreEstadosProps): ReactElement {
-  if (p.id === 'loading') {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="cierre-cargando">
-        <Spinner />
-      </View>
-    );
-  }
+  if (p.id === 'loading') return <EstadoCargando testID="cierre-cargando" />;
   if (p.id === 'error') {
     return (
-      <ErrorState
-        title="No pudimos calcular tu corte"
-        body="Tus datos están a salvo en este dispositivo. Vuelve a intentar en un momento."
-        retryLabel="Intentar de nuevo"
+      <CajaEstado
+        mode="error"
+        errorTitle="No pudimos calcular tu corte"
         onRetry={p.onRetry}
-        testID="cierre-error"
+        testID="cierre"
       />
     );
   }

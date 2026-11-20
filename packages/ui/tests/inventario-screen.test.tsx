@@ -132,7 +132,7 @@ describe('InventarioScreen · estados del tablero', () => {
     const onRetry = vi.fn();
     montar({ state: 'error', data: null, onRetry });
     expect(screen.getByText('No pudimos cargar el inventario')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Intentar otra vez'));
+    fireEvent.click(screen.getByText('Intentar de nuevo'));
     expect(onRetry).toHaveBeenCalled();
   });
 });

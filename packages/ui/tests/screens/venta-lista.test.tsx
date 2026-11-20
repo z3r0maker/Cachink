@@ -124,7 +124,7 @@ describe('los estados', () => {
     montar({ state: 'error', data: null, onRetry });
     expect(screen.getByTestId('ventas-error')).toBeInTheDocument();
     expect(screen.getByText('No pudimos cargar tus ventas')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('ventas-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 });

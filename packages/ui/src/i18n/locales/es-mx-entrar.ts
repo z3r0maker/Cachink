@@ -143,8 +143,6 @@ export const entrar = {
     cortes: 'Tus últimos cortes',
     cerrarTurno: 'Cerrar turno',
     errorTitulo: 'No pudimos cargar tu turno',
-    errorCuerpo: 'Lo que capturaste sigue guardado en esta caja. Intenta otra vez.',
-    reintentar: 'Intentar otra vez',
     accion: {
       gasto: 'Registrar',
       reponer: 'Ver stock',

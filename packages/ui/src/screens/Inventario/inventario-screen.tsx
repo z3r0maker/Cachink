@@ -18,7 +18,7 @@ import {
   type NuevoMovimientoVivo,
   type Pestana,
 } from '@xangarro/caja/inventario';
-import { ErrorState, Spinner } from '../../components/index';
+import { CajaEstado, EstadoCargando } from '../../components/index';
 import { Buscador, Kpis, Pestanas, Regla } from './inventario-cifras';
 import { InventarioEscaner, type InventarioEscanerProps } from './inventario-escaner';
 import { InventarioTitulo } from './inventario-titulo';
@@ -203,12 +203,11 @@ export function InventarioScreen(p: InventarioScreenProps): ReactElement {
   if (p.state === 'error' || (p.state === 'happy' && p.data === null)) {
     return (
       <View flex={1} testID={p.testID}>
-        <ErrorState
-          title="No pudimos cargar el inventario"
-          body="Lo que hay y lo que se movió sigue en tu negocio. Intenta otra vez."
-          retryLabel="Intentar otra vez"
+        <CajaEstado
+          mode="error"
+          errorTitle="No pudimos cargar el inventario"
           onRetry={p.onRetry}
-          testID="inventario-error"
+          testID="inventario"
         />
       </View>
     );
@@ -216,9 +215,7 @@ export function InventarioScreen(p: InventarioScreenProps): ReactElement {
   if (p.data === null) {
     return (
       <View flex={1} testID={p.testID}>
-        <View flex={1} alignItems="center" justifyContent="center" testID="inventario-cargando">
-          <Spinner />
-        </View>
+        <EstadoCargando testID="inventario-cargando" />
       </View>
     );
   }
