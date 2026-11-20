@@ -1,0 +1,8 @@
+{
+  "name": "synth-vendor-playwright-mcp",
+  "private": true,
+  "description": "Playwright MCP for the Synth actor, installed apart from the workspace: its alpha playwright-core would otherwise be hoisted over the repo's (S-05). Install with `pnpm --filter @xangarro/synth-core setup`.",
+  "dependencies": {
+    "@playwright/mcp": "0.0.85"
+  }
+}

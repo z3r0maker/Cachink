@@ -19,12 +19,15 @@
     "lint:fix": "eslint . --config ../../../eslint.config.js --fix",
     "clean": "rm -rf dist .turbo",
     "stack": "tsx src/cli/stack.ts",
-    "test:stack": "SYNTH_STACK=1 vitest run .integration.test"
+    "test:stack": "SYNTH_STACK=1 vitest run .integration.test",
+    "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
+    "run-one": "tsx src/cli/run-one.ts"
   },
   "dependencies": {
     "@xangarro/domain": "workspace:*",
     "@xangarro/testing": "workspace:*",
     "bcryptjs": "3.0.3",
+    "playwright-core": "1.63.0",
     "yaml": "2.9.1",
     "zod": "^4.6.7"
   },

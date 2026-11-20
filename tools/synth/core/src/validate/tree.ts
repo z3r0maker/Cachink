@@ -6,6 +6,7 @@ import { ConfigSchema } from '../schemas/config';
 import { MatrixSchema, type Matrix } from '../schemas/matrix';
 import { PersonaSchema, type Persona } from '../schemas/persona';
 import { ScenarioSchema, type Scenario } from '../schemas/scenario';
+import { checkParams } from '../success/checks';
 import { matrixIssues } from './cross';
 
 /**
@@ -97,6 +98,18 @@ function evidenceIssues(file: string, p: Persona, exists: (path: string) => bool
   });
 }
 
+/** Each success check must be one the harness has, with parameters it accepts. */
+function checkIssues(file: string, s: Scenario): TreeIssue[] {
+  return s.success.flatMap((c, i) => {
+    try {
+      checkParams(c.check, c.params ?? {});
+      return [];
+    } catch (e) {
+      return [{ file, at: `success.${i}`, reason: e instanceof Error ? e.message : String(e) }];
+    }
+  });
+}
+
 /** Files it knows, in order, filed by kind once they pass their schema. */
 function register(
   file: SourceFile,
@@ -116,7 +129,10 @@ function register(
   }
   if (kind === 'scenario') {
     const s = value as Scenario;
-    const out = idIssues(file.path, s.id, into.scenarios.get(s.id)?.file);
+    const out = [
+      ...idIssues(file.path, s.id, into.scenarios.get(s.id)?.file),
+      ...checkIssues(file.path, s),
+    ];
     if (!into.scenarios.has(s.id)) into.scenarios.set(s.id, { file: file.path, value: s });
     return out;
   }

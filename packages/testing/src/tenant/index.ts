@@ -39,6 +39,15 @@ export {
   type PortalEnvInput,
 } from './portal-env.js';
 export {
+  DoorError,
+  submitOwnerDoor,
+  walkOperatorDoor,
+  walkOwnerDoor,
+  type DoorLocator,
+  type DoorPage,
+  type OperatorDoor,
+} from './doors.js';
+export {
   addDevice,
   addExpense,
   addExpenseReceipt,

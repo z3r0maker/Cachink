@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# Spec §6.2: the day's first sale at the register. The runner walks the Acceso
+# up to the NIP; the actor opens the till and charges.
+id: primera-venta
+title: Registrar la primera venta del día
+mission: >
+  Acabas de abrir tu puesto y llega el primer cliente del día. Se lleva un
+  refresco y unas galletas, y te paga en efectivo con un billete de 100. Abre
+  la caja y cóbrale.
+runner: web
+start:
+  seed: negocio-con-catalogo-minimo
+  auth_as: operador
+  url: /operador/caja
+success:
+  - check: venta-efectivo
+    params:
+      partidas: 2
+optimal_steps: 6
+interruptions: []
+applies_to: [human, chaos]

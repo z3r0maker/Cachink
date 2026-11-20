@@ -122,7 +122,10 @@ export async function seedRun(o: SeedOptions): Promise<RunAccess> {
         sku: p.sku,
         precio: p.precio,
         costo: p.costo,
-        seguirStock: true,
+        // Not tracked: a tracked product with no stock shows «Quedan 0» in red,
+        // which the first run read as a problem with the app. A seed that is
+        // about inventory adds stock and turns tracking on.
+        seguirStock: false,
       }),
     );
   }

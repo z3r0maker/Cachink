@@ -152,11 +152,12 @@ test('the close goes ahead with records still to send, and they go up later', as
   await expect(cerrar).toBeEnabled();
   await cerrar.click();
   await expect(page.getByText('¡Turno cerrado!')).toBeVisible();
-  // The closed screen (OpCierreCorte, ADR-147): the line says when los
-  // patrones see it, and a notice says the waiting records go up by themselves.
+  // The done line says when los patrones see it (`lineaHecho`, not yet sent).
   await expect(
     page.getByText('Los patrones lo verán en su portal en cuanto se envíe.'),
   ).toBeVisible();
+  // Its own line on the closed screen (`hecho.tsx`, `avisoPorEnviar` since
+  // P-43): how many records still wait, and that they go up by themselves.
   await expect(
     page.getByRole('status').filter({
       hasText: /^Tienes \d+ registros? por enviar\. Se envían? solos? en cuanto haya conexión\.$/,
