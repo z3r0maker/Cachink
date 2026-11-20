@@ -195,7 +195,17 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-05 Runner web: Chromium por CDP, captura y actor [alta]
 
-- [ ] Status · **Blocked by:** S-04
+- [x] Status · **Blocked by:** S-04
+      Done: 2026-11-20 · `feat/synth-s05` · `core/src/runner/`, `core/src/success/`, and the `run-one` command.
+      Taquero on primera-venta: completed, with success true from SQL, in 9 steps and 31 s, for about $0.08.
+      Verified on Claude Code 2.1.283: the actor runs with `--restricted --strict-mcp-config --tools ""`, every
+      built-in and 13 Playwright tools on `--disallowedTools`, the 12 persona tools on `--allowedTools`, and
+      `--permission-mode dontAsk`. A probe showed it sees exactly those 12 tools, no CLAUDE.md and no memory.
+      `--safe-mode` drops `--mcp-config`. `--bare` never reads the Claude Code login. There is no
+      `--max-turns`, so the runner enforces steps, turns and time itself. Playwright MCP 0.0.85 attaches with
+      `--cdp-endpoint`. It lives in `tools/synth/vendor/` because its alpha `playwright-core` hoisted over
+      the repo's. The runner walks the door up to the NIP; the fondo and the sale are the actor's. The door walk
+      is shared with the e2e (`walkOwnerDoor`, `walkOperatorDoor` in `@xangarro/testing/tenant`).
 - **What:**
   - `run.ts` launches Chromium with a temporary profile, the persona's viewport and network profile, and a CDP
     port.

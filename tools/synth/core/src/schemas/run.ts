@@ -17,6 +17,19 @@ const Step = z.strictObject({
   fingerprint: Text,
 });
 
+/** The actor's forced-choice exit interview (spec §8.1). */
+export const ExitInterview = z.strictObject({
+  hardest_moments: z
+    .array(z.strictObject({ step: z.number().int().min(0), what: z.string() }))
+    .max(2),
+  not_understood: z.string(),
+  expected_missing: z.string(),
+});
+export type ExitInterview = z.infer<typeof ExitInterview>;
+
+/** One of the scenario's success checks, as the SQL answered it. */
+const CheckResult = z.strictObject({ check: KebabId, passed: z.boolean() });
+
 /** What ran, as one id: `<persona>__<scenario>__<style>__r<repetition>`. */
 export function runId(r: {
   readonly persona: string;
@@ -43,8 +56,14 @@ export const RunSchema = z
     runner: Runner,
     outcome: z.enum(['completed', 'abandoned', 'blocked', 'error']),
     success: z.boolean().nullable(),
+    /** Each success check's answer; `success` is all of them. Empty when the harness failed. */
+    checks: z.array(CheckResult),
     error: Text.optional(),
     steps: z.array(Step),
+    /** Snapshots, screenshots and waits: looking, which is not a step. */
+    looks: Count,
+    /** Absent when the actor ended without the contract's report. */
+    exit_interview: ExitInterview.optional(),
     tokens: z.strictObject({ input: Count, output: Count, cache_read: Count, cache_write: Count }),
     /** An estimate from the reported usage, in whole US cents: never a float. */
     estimated_cost_usd_cents: Count,
