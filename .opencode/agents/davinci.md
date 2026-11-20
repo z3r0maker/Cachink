@@ -6,7 +6,7 @@ model: ollama/qwen3.6:35b-a3b-coding-nvfp4
 steps: 30
 max_turns: 30
 temperature: 0.7
-color: "#4A9EFF"
+color: '#4A9EFF'
 permission:
   Write: ask
   Edit: ask

@@ -103,5 +103,4 @@ export async function avisosDelBell(): Promise<BellResult> {
 }
 
 export type BellResult =
-  | { ok: true; avisos: Awaited<ReturnType<typeof listNotices>> }
-  | { ok: false; message: string };
+  { ok: true; avisos: Awaited<ReturnType<typeof listNotices>> } | { ok: false; message: string };

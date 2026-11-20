@@ -28,8 +28,7 @@ import { portalOrigin as origin } from './origin';
  * caller.
  */
 export type BillingActionResult =
-  | { ok: true; url: string }
-  | { ok: false; message: string; reconfirmar?: true };
+  { ok: true; url: string } | { ok: false; message: string; reconfirmar?: true };
 
 const SUSCRIPCION = '/suscripcion';
 
@@ -110,8 +109,7 @@ export async function administrarSuscripcion(): Promise<BillingActionResult> {
 
 /** What cancelling or resuming answers the screen: the end date, or a sentence. */
 export type CancelActionResult =
-  | { ok: true; endsAt: string | null }
-  | { ok: false; message: string; reconfirmar?: true };
+  { ok: true; endsAt: string | null } | { ok: false; message: string; reconfirmar?: true };
 
 const NO_CAMBIO =
   'No pudimos cancelar tu suscripción y no se cambió nada. Revisa tu conexión e intenta otra vez; si sigue, escríbenos a hola@xangarro.mx.';

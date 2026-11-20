@@ -58,10 +58,6 @@ export const assistedImportFiles = pgTable(
 );
 
 export type AssistedImportStatus =
-  | 'revision'
-  | 'esperando_aprobacion'
-  | 'aplicada'
-  | 'rechazada'
-  | 'expirada';
+  'revision' | 'esperando_aprobacion' | 'aplicada' | 'rechazada' | 'expirada';
 
 export type AssistedImportFileRole = 'solicitud' | 'mapeado';

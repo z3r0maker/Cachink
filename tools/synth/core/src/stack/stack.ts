@@ -105,6 +105,21 @@ async function upDatabase(c: Ctx, pgPort: number): Promise<DbUrls> {
   return urls;
 }
 
+/** `next/font` fetching the portal's Google Fonts at build time: a network blip, worth one more try. */
+const FONT_FETCH = /Failed to fetch `[^`]+` from Google Fonts/;
+
+/** One production build of the portal, retried once when only the font fetch failed. */
+async function buildPortal(c: Ctx, env: Record<string, string>): Promise<void> {
+  const build = ['--filter', '@xangarro/web', 'exec', 'next', 'build', '--webpack'];
+  const opts = { env: { ...env, NODE_ENV: 'production' }, cwd: c.o.repoRoot };
+  try {
+    await c.deps.exec('pnpm', build, opts);
+  } catch (e) {
+    if (!FONT_FETCH.test(e instanceof Error ? e.message : String(e))) throw e;
+    await c.deps.exec('pnpm', build, opts);
+  }
+}
+
 async function upServer(
   c: Ctx,
   urls: DbUrls,
@@ -113,8 +128,7 @@ async function upServer(
   const web = join(c.o.repoRoot, 'apps/web');
   c.teardown.add('build', () => c.deps.removeDir(join(web, c.names.distDir)));
   const env = stackServerEnv(urls, c.o.today, c.names);
-  const build = ['--filter', '@xangarro/web', 'exec', 'next', 'build', '--webpack'];
-  await c.deps.exec('pnpm', build, { env: { ...env, NODE_ENV: 'production' }, cwd: c.o.repoRoot });
+  await buildPortal(c, env);
   const port = await c.deps.freePort();
   const server = await c.deps.spawnServer({ cwd: web, env, port, logFile: c.names.serverLog });
   c.teardown.add('server', () => server.stop());

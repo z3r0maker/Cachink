@@ -9,9 +9,7 @@ import { fechaEnDias } from './rango-fechas.js';
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 type FechaCol =
-  | typeof clientPayments.fecha
-  | typeof dayCloses.fecha
-  | typeof inventoryMovements.fecha;
+  typeof clientPayments.fecha | typeof dayCloses.fecha | typeof inventoryMovements.fecha;
 
 /** Sargable day range (DB2-QRY-04): timestamped fechas still count on their day. */
 const enRango = (col: FechaCol, from: string, to: string) => fechaEnDias(col, from, to);

@@ -21,8 +21,7 @@ import { pgEmployeesRepository } from '../repositories/employees';
  * for the phones (`employees` is DOWN).
  */
 export type EmpleadoResult =
-  | { ok: true }
-  | { ok: false; message: string; campos: Readonly<Record<string, string>> };
+  { ok: true } | { ok: false; message: string; campos: Readonly<Record<string, string>> };
 
 /** An invalid form names its fields; the rest is the shared mapping, with no fields. */
 function fallo(error: unknown, endpoint: string): EmpleadoResult {

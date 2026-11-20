@@ -7,8 +7,7 @@ import { useEffect, useState } from 'react';
 import type { PrefillGasto, RecurrentePorPagar } from '@xangarro/caja/gastos';
 
 export type Hoja =
-  | { readonly kind: 'registrar' }
-  | { readonly kind: 'pagar'; readonly x: RecurrentePorPagar };
+  { readonly kind: 'registrar' } | { readonly kind: 'pagar'; readonly x: RecurrentePorPagar };
 
 export function useHoja(
   prefill: PrefillGasto | null,

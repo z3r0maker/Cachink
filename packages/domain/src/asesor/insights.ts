@@ -66,11 +66,7 @@ export interface EntradaInsight {
 }
 
 export type InsightKind =
-  | 'costo-subio'
-  | 'quincena'
-  | 'gasto-fuera'
-  | 'inventario-quieto'
-  | 'gasto-duplicado';
+  'costo-subio' | 'quincena' | 'gasto-fuera' | 'inventario-quieto' | 'gasto-duplicado';
 
 export interface Insight {
   readonly kind: InsightKind;

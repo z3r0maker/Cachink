@@ -49,12 +49,7 @@ export function leerFallo(r: {
 }
 
 export type EstadoPill =
-  | 'en-linea'
-  | 'por-enviar'
-  | 'enviando'
-  | 'reintentando'
-  | 'sin-conexion'
-  | 'con-rechazos';
+  'en-linea' | 'por-enviar' | 'enviando' | 'reintentando' | 'sin-conexion' | 'con-rechazos';
 
 export interface EntradaPill {
   readonly enLinea: boolean;

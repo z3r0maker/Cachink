@@ -20,12 +20,7 @@ import * as s from './hazlo.css';
  */
 export interface AsistidaView {
   readonly status:
-    | 'revision'
-    | 'esperando_aprobacion'
-    | 'aplicada'
-    | 'rechazada'
-    | 'expirada'
-    | null;
+    'revision' | 'esperando_aprobacion' | 'aplicada' | 'rechazada' | 'expirada' | null;
   readonly paid: boolean;
   readonly mayWrite: boolean;
   readonly fileCount: number;

@@ -47,14 +47,12 @@ export function ventaHechaDeDetalle(d: VentaDetalle): VentaHecha {
     ticketId: d.id ?? d.folio,
     folio: d.folio,
     hora: d.cuando.split(' ').pop() ?? d.cuando,
-    lines: d.lineas.map(
-      (l: LineaDetalle): LineaTicket => ({
-        productoId: l.productoId,
-        nombre: l.nombre,
-        precio: l.precio ?? 0n,
-        cantidad: l.cantidad,
-      }),
-    ),
+    lines: d.lineas.map((l: LineaDetalle): LineaTicket => ({
+      productoId: l.productoId,
+      nombre: l.nombre,
+      precio: l.precio ?? 0n,
+      cantidad: l.cantidad,
+    })),
     total,
     metodo: d.metodo as MetodoCobro,
     recibido: d.recibido ?? null,
