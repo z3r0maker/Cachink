@@ -197,6 +197,7 @@ Links to discussion, docs, prior art.
 | [156](#adr-156) | 2026-11-19 | The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted | Accepted |
 | [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
 | [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
+| [159](#adr-160) | 2026-11-20 | The console signs in with passkeys only; its password and TOTP are retired | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11396,3 +11397,79 @@ make it a root of its own.
   watch.
 - A worktree branched before this ADR still asks Watchman, and once the main checkout ignores worktrees it gets an
   empty tree. It should merge main before starting Metro.
+
+---
+
+## ADR-160
+
+**Title:** The console signs in with passkeys only; its password and TOTP are retired
+
+**Date:** 2026-11-20
+
+**Status:** Accepted — decided by the owner, 2026-11-20; amends ADR-063 («TOTP 2FA (AAL2) is mandatory») and
+ADR-080 §1 **for the console only** (the portal keeps its password and its optional TOTP, ADR-142); task N-85
+
+**Context**
+
+The console's two staff members sign in with an email, a password and a TOTP code (ADR-080, N-05). Each is one
+more secret to keep for a console that reads every tenant. The owner asked to sign in with the Gmail and Hotmail
+addresses already on `staff_members` plus a second factor, instead of another password.
+
+Two ways were weighed. **«Sign in with Google / Microsoft»** removes the password but not the TOTP step, adds an
+OAuth app in Google Cloud and in Microsoft Entra, and ties the console's safety to two consumer mailboxes.
+Microsoft's `email` claim is not a verified field, so matching staff by it is the known «nOAuth» takeover; accounts
+would have to be bound by the provider's subject id after a first authenticated sign-in. **Passkeys** (WebAuthn)
+need no third party: one tap with Face ID, Touch ID or the device PIN proves possession and the person at once, and
+the credential only answers to the console's own domain, so it cannot be phished.
+
+**Decision**
+
+1. **Passkeys are the only way in.** WebAuthn with discoverable credentials, `userVerification: 'required'`,
+   `attestation: 'none'`, relying party `admin.xangarro.mx` (localhost in development), origin checked exactly.
+   `/login` has one button and no email field: the credential id finds the staff member, never an address. One
+   verified assertion opens an AAL2 session directly (12 h, 30 min idle, unchanged); the AAL1 step is gone.
+   Challenges are 32 random bytes, kept server-side, single use, 5 minutes. The signature counter is stored; a
+   synced passkey reports 0 and is accepted, a counter that goes backwards is refused and audited. The sign-in
+   throttle per IP (`LOGIN_PER_IP`) still applies.
+2. **Password and TOTP are retired, in two steps** (§2.9). Release 1 adds `staff_passkeys` and
+   `staff_enrolment_links`, and stops reading `password_hash`, `totp_*` and `recovery_codes`. Once every live staff
+   member has a passkey, release 2's migration drops those columns and `ADMIN_TOTP_KEY` leaves the environment. A
+   rollback between the two still finds the old columns.
+3. **The first passkey comes from a link the CLI prints.** `staff create --email --nombre` (no password on stdin
+   any more) and `staff passkey-link --email` print a one-time URL: 256 random bits, only the SHA-256 stored,
+   single use, 15 minutes, and minting a new one voids the last. It is never emailed, so no inbox becomes a key to
+   the console. Only the owner role mints links; the console's `xangarro_admin` role can only consume one, through
+   a SECURITY DEFINER function. `staff passkey-link --reset` also removes every passkey and ends every session: the
+   path when all of a member's devices are lost. The two current members move over this way.
+4. **«Mi acceso»** is a console page per staff member: each passkey with its name, created, last used and whether
+   it syncs; «Agregar llave» and «Quitar». Both ask for a fresh passkey tap first (within 5 minutes), so a session
+   left open cannot plant or delete a key; the last passkey cannot be removed. A session records the passkey
+   that opened it, and removing a passkey ends its sessions. Each member is expected to hold two
+   (phone and computer).
+5. **Every step is audited** in `staff_audit_log`: `auth.entrar_llave`, `auth.registrar_llave` (with whether it came
+   from a link or from «Mi acceso»), `auth.quitar_llave`, `auth.llave_contador_invalido`.
+6. **One place for the ceremony.** The registration and assertion checks wrap `@simplewebauthn/server` inside
+   `@xangarro/auth-core`, behind a storage port like its TOTP, so the portal can adopt passkeys later without a
+   copy. The browser half is `@simplewebauthn/browser`.
+
+**Alternatives considered**
+
+- *Google and Microsoft sign-in, TOTP kept.* Still two steps, two vendor apps to register and keep, an unverified
+  Microsoft email claim to work around, and the console only as safe as two personal mailboxes.
+- *Passkeys, with password + TOTP kept as a fallback.* The console is only as safe as its weakest way in, and a
+  password still has to be kept somewhere.
+- *A TOTP or recovery code alone registers a new passkey.* One factor reopens an account that two factors guard.
+- *The CLI emails the link.* Whoever reads the inbox in those 15 minutes takes the account.
+- *Existing members add a passkey from the console after one last password sign-in.* Two enrolment paths where one
+  does.
+
+**Consequences**
+
+- Nothing to remember. Signing in is one tap, and phishing pages get nothing usable.
+- Losing every device needs someone with the owner role at a trusted machine. With two staff, each can do it for
+  the other.
+- The console's Playwright suite needs Chromium's virtual authenticator (CDP `WebAuthn.addVirtualAuthenticator`);
+  the TOTP specs are rewritten, not deleted. The suite already runs on Desktop Chrome only.
+- The console's Permissions-Policy leaves `publickey-credentials-get` and `-create` at their default (self); it must
+  not deny them. The CSP needs no change.
+- The portal is unchanged. N-83's console action to switch an owner's TOTP off is unaffected.

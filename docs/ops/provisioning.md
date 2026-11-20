@@ -62,7 +62,6 @@ destination (§3 for the role passwords, §7 for the rest).
 | `ENTITLEMENT_PRIVATE_KEY` + public key                                     | `pnpm --filter @xangarro/web entitlement:keygen` | portal / mobile EAS env       |
 | `CRON_SECRET` (one per project)                                            | `openssl rand -base64 32`                        | portal, admin                 |
 | `ADMIN_INGEST_SECRET` (same value in both)                                 | `openssl rand -base64 32`                        | portal, admin                 |
-| `ADMIN_TOTP_KEY`                                                           | `openssl rand -base64 32`                        | admin                         |
 | `PORTAL_TOTP_KEY` (not the admin's)                                        | `openssl rand -base64 32`                        | portal                        |
 
 `entitlement:keygen` prints two lines: `ENTITLEMENT_PRIVATE_KEY` (64 hex, the
@@ -239,12 +238,15 @@ Vercel; raise it only for a long-lived server.
   Session-pooler URL (it must bypass RLS on the staff tables):
 
   ```bash
-  read -rs PASSWORD && printf %s "$PASSWORD" | \
-    DATABASE_URL='<SUPERUSER_URL from §3>' pnpm --filter @xangarro/backoffice staff create \
-      --email you@xangarro.mx --nombre "Tu nombre"
+  DATABASE_URL='<SUPERUSER_URL from §3>' pnpm --filter @xangarro/backoffice staff create \
+    --email you@gmail.com --nombre "Tu nombre"
   ```
 
-  They enrol the authenticator at first sign-in on `admin.xangarro.mx`.
+  It prints a one-time link (15 minutes) that registers the member's first
+  passkey (ADR-160): open it on their phone or computer, never forward it by
+  email. Each member then adds a second passkey from «Mi acceso». A member who
+  loses every device gets a new link with
+  `staff passkey-link --email … --reset`, which retires their passkeys first.
 
 - **Stripe — test mode only (B-10).** `STRIPE_SECRET_KEY=sk_test_… pnpm
 --filter @xangarro/web stripe:seed` creates the products, the four prices
@@ -313,9 +315,8 @@ and its meaning is in `apps/web/.env.example` and `apps/backoffice/.env.example`
 | `ADMIN_INGEST_URL`                                                     |   ✓    |       | `https://admin.xangarro.mx/api/internal/support-items`                                                                                                  |
 | `ADMIN_INGEST_SECRET`                                                  |   ✓    |   ✓   | same value in both                                                                                                                                      |
 | `SENTRY_DSN`                                                           |  opt.  |       |                                                                                                                                                         |
-| `ADMIN_TOTP_KEY`                                                       |        |   ✓   | §2; rotating it forces every staff member to re-enrol                                                                                                   |
 | `PORTAL_TOTP_KEY`                                                      |   ✓    |       | §2; seals owners' second-factor seeds (N-83). Unset: nobody can turn it on. Rotated: see below                                                          |
-| `ADMIN_BASE_URL`                                                       |        | opt.  | default `https://admin.xangarro.mx`                                                                                                                     |
+| `ADMIN_BASE_URL`                                                       |        | opt.  | default `https://admin.xangarro.mx`; the passkeys' host (ADR-160)                                                                                       |
 | `DIGEST_TO`, `ALERT_WEBHOOK_URL`                                       |        | opt.  |                                                                                                                                                         |
 
 Redeploy both projects after setting variables (they are read at runtime,
@@ -362,7 +363,9 @@ At the DNS host of `xangarro.mx`:
   year later, or sooner to cut the old tokens off: those phones then link
   again. Changing it without the previous value still unlinks every phone.
 - `ENTITLEMENT_PRIVATE_KEY`: needs a phone release with the new public key
-  first. `ADMIN_TOTP_KEY`: every staff member re-enrols.
+  first.
+- `ADMIN_BASE_URL` (ADR-160): passkeys are bound to its host. Changing the
+  console's domain means a new link (`staff passkey-link`) for every member.
 - `PORTAL_TOTP_KEY` (ADR-142): do not rotate it casually. Every owner and admin
   with the second factor on is sealed under it, and a new key cannot open their
   seeds: the app code stops working at step two of their sign-in. Recovery codes
