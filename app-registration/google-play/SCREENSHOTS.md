@@ -100,9 +100,11 @@ the entrada sheet and the keyboard cover «Guardar».
    forgets the dev client's settings), open the dev client at
    `exp+xangarro://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081`
    (Metro's port), then from `apps/mobile/maestro/flows/internal/`:
-   `apps/mobile/maestro/scripts/maestro-locked.sh --device <serial> test --no-reinstall-driver -e OUT=<folder> -e FORMA=telefono -e MOCK=http://127.0.0.1:3007 store-screenshots.yaml`
+   `apps/mobile/maestro/scripts/maestro-locked.sh --device <serial> test --no-reinstall-driver --test-output-dir=<folder> -e OUT=shots -e FORMA=telefono -e MOCK=http://127.0.0.1:3007 store-screenshots.yaml`
    (`FORMA=tableta` on the tablet). A full run takes about 25 minutes on the
-   phone and 45 on the tablet.
+   phone and 45 on the tablet. Since Maestro 2.12 the shots land in
+   `<folder>/<run>/…/shots/` (a screenshot outside the run's output folder is
+   refused); copy them out from there.
 6. When other Maestro sessions are registered, Maestro skips starting its
    Android driver and every command fails with `UNAVAILABLE (tcp:7001)`.
    Install `maestro-app.apk` and `maestro-server.apk` (inside

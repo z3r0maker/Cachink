@@ -31,6 +31,24 @@ appId: mx.xangarro.mobile
 - waitForAnimationToEnd
 - tapOn:
     id: 'inventario-fila-${ID}'
+# A row the scroll left half under the header takes no tap: bring it down a
+# little and tap again.
+- extendedWaitUntil:
+    visible:
+      id: 'mover-sheet'
+    timeout: 3000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: 'mover-sheet'
+    commands:
+      - swipe:
+          start: '50%, 40%'
+          end: '50%, 55%'
+      - waitForAnimationToEnd
+      - tapOn:
+          id: 'inventario-fila-${ID}'
 - extendedWaitUntil:
     visible:
       id: 'mover-sheet'
@@ -69,9 +87,22 @@ appId: mx.xangarro.mobile
 - waitForAnimationToEnd
 - tapOn:
     id: 'mover-guardar'
+# The sheet closes on the save. The toast can come and go before the driver
+# looks (Maestro 2.12 on the iPhone): the sheet gone is the save, and a toast
+# still up is put away.
+- extendedWaitUntil:
+    notVisible:
+      id: 'mover-sheet'
+    timeout: 8000
 - extendedWaitUntil:
     visible:
       id: 'mov-toast'
-    timeout: 8000
-- tapOn:
-    id: 'mov-toast-entendido'
+    timeout: 3000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: 'mov-toast-entendido'
+    commands:
+      - tapOn:
+          id: 'mov-toast-entendido'
