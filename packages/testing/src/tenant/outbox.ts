@@ -28,9 +28,12 @@ export async function latestMailTo(dir: string, to: string): Promise<string | nu
     .join('\n');
 }
 
+/** `text` matched literally inside a RegExp: every metacharacter escaped, the backslash too. */
+const literal = (text: string): string => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+
 /** The emailed link's path and token, e.g. `/login/entrar?t=…`, or null. */
 export async function linkIn(dir: string, to: string, path: string): Promise<string | null> {
   const body = await latestMailTo(dir, to);
-  const m = body?.match(new RegExp(`${path.replace(/\//g, '\\/')}\\?t=[A-Za-z0-9_-]{43}`));
+  const m = body?.match(new RegExp(`${literal(path)}\\?t=[A-Za-z0-9_-]{43}`));
   return m?.[0] ?? null;
 }
