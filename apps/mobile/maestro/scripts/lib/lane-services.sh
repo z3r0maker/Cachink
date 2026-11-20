@@ -67,7 +67,7 @@ _lane_wait() {
 }
 
 _lane_mock_answers() { curl -s -o /dev/null --max-time 2 "http://127.0.0.1:$1/"; }
-_lane_metro_answers() { curl -s --max-time 2 "http://127.0.0.1:$1/status" | grep -q running; }
+_lane_metro_answers() { curl -s --max-time 2 "http://localhost:$1/status" | grep -q running; }
 
 _lane_mock_stale() {
   local dir="$1" port="$2"
@@ -95,22 +95,33 @@ _lane_start_mock() {
 _lane_warm_bundle() {
   local port="$1" url
   url=$(curl -s --max-time 30 -H 'expo-platform: ios' -H 'accept: application/expo+json' \
-    "http://127.0.0.1:$port/" | python3 -c \
+    "http://localhost:$port/" | python3 -c \
     'import sys, json; print(json.load(sys.stdin)["launchAsset"]["url"])' 2>/dev/null || true)
   [[ -n "$url" ]] || return 0
   echo "🔥  Warming the lane bundle (first build takes a minute or two)"
   curl -s -o /dev/null --max-time 400 "$url" || true
 }
 
+# The repo installs hoisted (.npmrc node-linker=hoisted): bins sit at the root.
+_lane_expo_bin() {
+  local b
+  for b in "$LANE_REPO_ROOT/apps/mobile/node_modules/.bin/expo" "$LANE_REPO_ROOT/node_modules/.bin/expo"; do
+    [[ -x "$b" ]] && { echo "$b"; return 0; }
+  done
+  return 1
+}
+
 _lane_start_metro() {
-  local dir="$1" port="$2" mock="$3"
+  local dir="$1" port="$2" mock="$3" expo
+  expo="$(_lane_expo_bin)" || { echo "❌  No expo binary in $LANE_REPO_ROOT: run pnpm install." >&2; return 1; }
   _lane_stop "$dir/metro.pid"
   _lane_port_free "$port" || return 1
   echo "📦  Lane Metro on :$port → mock :$mock"
   mkdir -p "$dir/tmp"
   _lane_spawn "$dir/metro.pid" "$dir/metro.log" "$LANE_REPO_ROOT/apps/mobile" \
     env EXPO_PUBLIC_E2E=1 EXPO_PUBLIC_API_BASE="http://127.0.0.1:$mock" TMPDIR="$dir/tmp" \
-    EXPO_NO_TELEMETRY=1 ./node_modules/.bin/expo start --dev-client --localhost --port "$port"
+    EXPO_NO_TELEMETRY=1 XANGARRO_METRO_WATCHMAN="${LANE_METRO_WATCHMAN:-0}" REACT_NATIVE_PACKAGER_HOSTNAME=127.0.0.1 \
+    "$expo" start --dev-client --port "$port"
   if ! _lane_wait 180 _lane_metro_answers "$port"; then
     echo "❌  The lane Metro did not come up on :$port — $dir/metro.log" >&2
     return 1
@@ -125,7 +136,7 @@ lane_services_up() {
   metro="$(lane_metro_port "$n")"
   other=0
   [[ "$(cat "$dir/root" 2>/dev/null || true)" == "$LANE_REPO_ROOT" ]] || other=1
-  if [[ ! -d "$LANE_REPO_ROOT/apps/mobile/node_modules" ]]; then
+  if [[ ! -d "$LANE_REPO_ROOT/node_modules" ]]; then
     echo "❌  $LANE_REPO_ROOT has no node_modules: run pnpm install first." >&2
     return 1
   fi

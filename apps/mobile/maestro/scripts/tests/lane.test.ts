@@ -241,7 +241,7 @@ describe('maestro_kill_drivers and the run scan', () => {
 describe('lane_services_up', () => {
   /** Services stubbed alive or dead; starting one only says so. */
   function up(alive: boolean, env: Record<string, string> = {}) {
-    mkdirSync(join(repo, 'apps/mobile/node_modules'), { recursive: true });
+    mkdirSync(join(repo, 'node_modules'), { recursive: true });
     mkdirSync(join(repo, 'packages/contracts/src'), { recursive: true });
     return spawnSync(
       'bash',

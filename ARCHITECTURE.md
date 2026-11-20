@@ -11223,7 +11223,10 @@ killed every driver on the machine. The phone flows never reach Postgres, so no 
    device class, «Xangarro L<N> iphone|se|ipad» on iOS 26.5, created on first use with the dev client copied from a
    simulator that has it. It has its own contracts mock on 3100+N, which is its own company, and its own Metro on
    8100+N, pointed at that mock and with its own cache. Its lock is `/tmp/xangarro-lanes/L<N>/run.lock`, a
-   maestro-lock.sh lock, so a dead holder is taken over as before.
+   maestro-lock.sh lock, so a dead holder is taken over as before. A lane's Metro uses Metro's own file watcher
+   (`XANGARRO_METRO_WATCHMAN=0` in `metro.config.js`), not Watchman. A worktree sits inside the main checkout, and
+   Watchman answers for the enclosing watch, which on this Mac has re-crawled without end since 2026-11-09, so
+   `watch-project` never returned. Its bundle URLs say `127.0.0.1`, since `--localhost` listens on `::1` only.
 2. **Lane 0 is what there was**: any simulator, the mock on :3000, Metro on :8081, one run at a time on
    `/tmp/xangarro-maestro.lock`. Scripts that don't take a lane (run-ipad, fold-*, `maestro-locked.sh` without
    `--lane`, a pinned `MAESTRO_DEVICE_UDID`, `MAESTRO_LANES=0`) and any Maestro older than 2.6.0 use it.

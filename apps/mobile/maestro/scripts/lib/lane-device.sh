@@ -34,19 +34,21 @@ _lane_has_app() {
   xcrun simctl get_app_container "$1" "${APP_ID:-mx.xangarro.mobile}" app >/dev/null 2>&1
 }
 
-# A dev client to copy: XANGARRO_DEV_CLIENT_APP, else the one installed on
-# any booted simulator.
+# A dev client to copy: XANGARRO_DEV_CLIENT_APP, else the newest one
+# installed on a booted simulator (other simulators may hold older builds,
+# without the latest native modules).
 _lane_dev_client_source() {
   if [[ -n "${XANGARRO_DEV_CLIENT_APP:-}" ]]; then
     echo "$XANGARRO_DEV_CLIENT_APP"
     return 0
   fi
-  local u app
+  local u app at best="" best_at=0
   for u in $(xcrun simctl list devices booted | grep -Eo '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}'); do
-    app=$(xcrun simctl get_app_container "$u" "${APP_ID:-mx.xangarro.mobile}" app 2>/dev/null) \
-      && [[ -d "$app" ]] && { echo "$app"; return 0; }
+    app=$(xcrun simctl get_app_container "$u" "${APP_ID:-mx.xangarro.mobile}" app 2>/dev/null) || continue
+    at=$(stat -f %m "$app/Info.plist" 2>/dev/null || echo 0)
+    ((at > best_at)) && best="$app" best_at="$at"
   done
-  return 1
+  [[ -n "$best" ]] && echo "$best"
 }
 
 _lane_install_dev_client() {
