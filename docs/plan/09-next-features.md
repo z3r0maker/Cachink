@@ -139,7 +139,7 @@ computed_at)` table (ADR-060 portal-only entity checklist).
 
 ### N-03 Avisos por exceder los límites y alertas al proveedor `[LAUNCH]` [alta] [bloq]
 
-- [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
+- [~] Status · **Blocked by:** — · **Blocks:** N-30
   **Remaining (2026-11-18, re-verificado contra el código):** los correos de umbral **ya están**: `NotifyUsageThresholdUseCase` + `renderUsageThresholdEmail` + `recompute-usage.ts` cubren 80/100 % al dueño y 100/150 % al buzón del proveedor, con pruebas de los dos umbrales. Lo que falta son las dos superficies. Sin banner de uso por métrica en el portal (existe el primitivo `UsageBar`, pero sólo se usa para contar operadores y dispositivos en Equipo); sin banner en la app guiado por el `usage` que llega en el pull (`usageMessageCode` nunca se invoca; `PlanLimitSheet` cuenta en local); falta el test de contrato de que un negocio de pago al 150 % sigue sincronizando todas las filas (el escenario `over-limit` del mock no se usa).
 
 - **What:** thresholds 80 % / 100 % per metric → owner email (once per threshold per month), portal
@@ -396,7 +396,7 @@ body, attachments)`.
 
 ### N-12 Asistente «Platícanos de ti» `[LAUNCH]` [alta] [bloq]
 
-- [~] Status · **Blocked by:** N-11, N-19 · **Blocks:** N-13, N-15
+- [~] Status · **Blocked by:** N-19 · **Blocks:** —
   **Remaining (2026-11-18, re-verificado contra el código):** criterio de aceptación cumplido (`suggested-plan-table.test.ts`, 535ceaa1). Las respuestas de tipo de negocio y de WhatsApp nunca se guardan aunque existen `businesses.tipo_negocio` / `whatsapp`: `#writeBusiness` arma su patch con `enabledPaymentMethods` y `nombre`, nada más, y el formulario sí recoge `tipoNegocio` (`onboarding/ui/steps-datos.tsx`), así que la respuesta se captura y se tira (`AplicarConfiguracionUseCase` escribe solo nombre + métodos de pago); el paso 6 registra `hasLogo` sin subida de archivo (N-19); las respuestas viven en `business_onboarding`, no en `businesses.onboarding` — documentado, pero sin ratificar mediante un ADR.
 
 - **What:** replaces P-04's steps. "Paso N de 8", one question per step, icon + description cards
@@ -558,7 +558,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-19 Logo + color de marca `[LAUNCH]` [alta] [bloq]
 
-- [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+- [~] Status · **Blocked by:** — · **Blocks:** N-12
   **Remaining (2026-11-18, re-verificado contra el código):** el teléfono no descarga ni guarda en caché el logo. `/api/logos` sigue teniendo un solo consumidor, el portal (`negocio/comprobantes/use-logo.ts` y sus pruebas); nada en `packages/ui`, `packages/sync` ni `apps/mobile` lo llama, y `businesses.logoUrl` en SQLite guarda la URL, no los bytes (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do».
 
 - Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
@@ -618,7 +618,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-21 Compartir por WhatsApp `[LAUNCH]` [alta]
 
-- [~] Status · **Blocked by:** N-20 (hecho) · web half landed 2026-09-20
+- [~] Status · **Blocked by:** —
   **Remaining (2026-11-19, verificado contra el repo):** queda **una** cosa, no cuatro, y no es ninguna de las que decía la nota del 2026-09-23 (conservada abajo). La mitad del teléfono aterrizó con otro diseño: el comprobante se manda como **texto**, con el SVG sólo de vista previa en pantalla, y la persona escoge el contacto y le da enviar. Punto por punto, contra el repo de hoy. (1) «no hay envío a un número predefinido (`share-image.ts`)»: ese archivo ya no existe en ningún lado, ni la función `shareComprobanteAsImage` que el «What» de abajo manda cablear — sobreviven sólo en ROADMAP.md y en `docs/archive/`. El camino del número **sí** existe, en `packages/ui/src/app/abrir-whatsapp.ts` (`whatsapp://send?phone=` y `wa.me/<numero>`), y Cobranza ya lo usa en sus dos recordatorios de saldo. (2) «no hay «Enviar como texto»»: todo el camino del teléfono es texto, y además hay Mensajes por SMS y el menú del sistema (`comprobante-acciones.ts`). (3) «no hay flujo de Maestro»: `maestro/flows/comprobante-whatsapp.yaml` llega hasta la entrega y vuelve a leer el aviso de la hoja; su encabezado guarda el hallazgo de TestFlight 1.0.0 (2) que lo arregló — `canOpenURL` rechaza un esquema no declarado en iOS, así que `abrirChatWhatsApp` nunca pregunta y sólo intenta abrir. (4) «ni test unitario del fallback»: 16 pruebas en `packages/ui/tests/app/abrir-whatsapp.test.ts`. **Lo que falta de verdad:** la hoja llama `abrirChatWhatsApp({ texto })` sin `numero`, así que el teléfono del cliente que el «What» promete recordar nunca prellena el chat. El ayudante ya acepta el número y Cobranza ya se lo pasa; a esta pantalla sólo le falta hacer lo mismo. Mientras eso no pase, el hint «Escoges el contacto y le das enviar» es correcto y no debe cambiarse. **Nota vieja (2026-09-23), conservada porque su marco cambió, no sólo sus hechos:** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido, no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24.
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
@@ -651,7 +651,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-22 Banners de sincronización en la app `[LAUNCH]` [alta] [bloq]
 
-- [ ] Status · **Blocked by:** A-06, A-07 · **Blocks:** N-29
+- [ ] Status · **Blocked by:** — · **Blocks:** N-29
       **Remaining (2026-09-28, re-verificado el 2026-11-20 contra el repo):** la mitad ya existe y llegó con M-05. La píldora de sync está montada en el shell (`packages/ui/src/screens/AppShell/cloud-sync-pill.tsx`, usada por `app-shell.tsx` y `caja-header.tsx`), el puente a la nube es `cloud-sync-bridge.tsx`, y `OfflineBanner` existe en `packages/ui/src/components/OfflineBanner/`. Lo que **no** existe son dos de los tres banners que esta tarea pide: `offline-banner.tsx` sólo recibe `pendientes` y sólo se dibuja cuando la fase es `offline` (el ámbar), así que faltan el rojo de rechazados y el gris de «sin sincronizar desde hace más de 72 h». Tres cosas que el 2026-11-20 cambian el tamaño de esta tarea. Una: los datos ya están. `CloudSyncState` lleva `counts.rejected` y `lastSyncAt` (`packages/ui/src/sync/cloud-sync-status.ts`), así que los dos banners que faltan son presentación, no plomería. Dos: el rojo ya lo cubre casi entero la píldora, que con `rejected > 0` pinta el tono `danger` con la cuenta y es tocable hacia «No enviados» (`SyncRejected` está, y `por-enviar.yaml` la recorre). Tres: el gris es el hueco de verdad, y es peor de lo que decía esta nota. `pillView` calcula `time: hhmm(state.lastSyncAt)` y se lo pasa a `t()`, pero la cadena `syncPill.synced` es «Enviado», sin `{{time}}`: el valor se tira. Hoy **nada en el teléfono dice de cuándo es el último envío**, ni la píldora ni un banner, se haya logrado hace dos minutos o hace tres semanas. De los flujos de Maestro, el ámbar ya tiene tres (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`, `avisos-sin-internet.yaml`) y los rechazados dos (`por-enviar.yaml`, `pendientes-reintento.yaml`); falta el del reloj adelantado, que espera al banner que no está. Y nada la bloquea: A-06 y A-07 están archivadas y N-24 dejó de bloquearla porque el teléfono ya se rehízo en El Mostrador, mientras ella sí bloquea N-29. Esta nota existía desde el 2026-09-28 bajo la etiqueta «Re-verificado», que el parser no lee, así que el tablero imprimió esta tarea sin nada que decir durante siete semanas.
 - **What:** on top of the A-07 pill, conditional full-width banners:
   - amber — offline **and** pending > 0: "Trabajando sin conexión · 12 registros se enviarán al
@@ -690,10 +690,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) `[alta]` `[bloq]`
-      móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las
-      barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente
-      terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · **Blocks:** N-20, N-22, N-25
+- [ ] Status · **Blocked by:** M-10, la única fase que falta del track del Mostrador (el dueño corrige `[alta]` `[bloq]`
+      una venta, en `19-movil-mostrador.md`) · **Blocks:** N-25
       **Remaining (2026-11-20, verificado contra el repo):** su contenido ya salió y su especificación ya no es especificación. Las once pantallas que lista existen en `packages/ui/src/screens/`: Activation, Login (el NIP), Ventas, Checkout (el ticket), AbrirTurno/Turno/TurnoDeOtro, Gastos, Productos con su quick-add, el cierre en `/turno/cierre`, la píldora de sync en AppShell, el comprobante en `Checkout/comprobante-acciones.ts` y Settings; las entregaron M-05…M-09 y las fases que siguieron. Su «How» nombra `design-reference/operador/` como «the spec at its 375 px width», y el ADR-117 retiró justo eso: «el proyecto de Claude Design y `design-reference/` dejan de ser la especificación». De sus barreras sólo M-10 sigue viva (M-11 y M-12 cerradas, A-16 archivada), y M-10 no es trabajo de pantalla: choca con el §2 del ADR-058 y pide una enmienda que nadie ha escrito. Sus «Blocks» tampoco se sostienen: N-20 está cerrada, y la nota de N-22 dijo el 2026-09-28 que esta tarea deja de bloquearla. Peor: lo único genuino que queda dentro de su propia lista de pantallas, «sync pill + banners», **es** N-22, a la que dice bloquear. Lo que cabe decidir es si esto se cierra apuntando a M-10 y a N-22, que es donde vive el trabajo que falta.
 - **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
   caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
@@ -709,7 +707,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-25 Vinculación de dispositivos por QR `[LAUNCH]` [alta]
 
-- [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
+- [ ] Status · **Blocked by:** N-24
       **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. **Verificado el 2026-11-19 contra el repo**, los cuatro huecos siguen abiertos tal cual, y los cinco cimientos siguen en pie: `activation-form.ts`, `qr-visor.native.tsx` y `vincular-escanear.tsx` están en `packages/ui/src/screens/Activation/`, y el fragmento `#c=` lo escriben `lib/pairing-token.ts` y `server/actions/pairing-qr.ts` del portal, con prueba unitaria y `e2e/devices.spec.ts` leyéndolo. Dos detalles que ahorran una búsqueda cuando esto arranque. Uno: `apps/mobile/app.json` tiene exactamente una línea de esquema y **ninguna** de `intentFilters` ni `associatedDomains`, que son las dos que Expo necesita para que el enlace https abra la app. Dos: `assetlinks.json` y el AASA no están en ningún disco, y su casa es `apps/landing/public/.well-known/`, que ya existe con `security.txt` dentro — o sea que se sirven por copia estática del build de Vite, no por una ruta, y el dominio que firman es `app.xangarro.mx`, que hoy no es el landing. Eso último es una decisión de DNS antes que de código.
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
@@ -727,7 +725,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-26 Auditoría de seguridad `[LAUNCH]` [deuda] [alta] [bloq]
 
-- [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
+- [~] Status · **Blocked by:** — · **Blocks:** N-30
   **Remaining (2026-11-18, re-verificado; el contenido ya venía al día al 2026-11-10):** 5 de 6 hallazgos altos corregidos (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — el oráculo quedó cerrado y el token QR construido por C-14, 2026-09-23); SEC-DATA-01: su lado de código quedó hecho 2026-11-09 (ADR-138: `0054` quita a `anon` y `authenticated` todo en `public` y `xangarro`, también para tablas futuras; el token de dispositivo lleva emisor y audiencia propios; `check:data-api` lo comprueba en el proyecto hospedado) y el interruptor O-2 también: la Data API está apagada y 0054 está aplicada al proyecto hospedado (verificado 2026-11-09). SEC-DATA-01 queda cerrado; SEC-PRIV-01 es N-34. Hallazgos medios en el alcance, 2026-09-23: **SEC-WEB-01 hecho** — el portal envía X-Frame-Options, un `frame-ancestors 'none'` obligatorio, nosniff, HSTS, un referrer estricto y Permissions-Policy, `poweredByHeader` desactivado, todo desde una implementación compartida con la consola (`@xangarro/config/security`); su CSP completa con nonce (`src/proxy.ts`, con `'wasm-unsafe-eval'` y workers para la caja) se sirvió primero en modo report-only hacia `/api/csp-report`, y el barrido encontró cero violaciones en 18 páginas y en todos los flujos e2e de caja y sincronización tras dos correcciones (la sonda eval de Zod ponía `jitless` en el head; cada ruta se renderiza por petición, de modo que cada script recibe el nonce). **Obligatoria desde 2026-11-10** (F-04, ADR-140, PR #107): `src/proxy.ts` envía `Content-Security-Policy`, y las violaciones siguen llegando a `/api/csp-report`. **SEC-SUP-01 hecho** — `permissions: contents: read` en cada workflow, cada acción fijada a un SHA de commit, un job `supply-chain` que ejecuta `pnpm audit:gate` (falla ante cualquier advisory high/critical alcanzable en runtime; las rutas de solo build y una allowlist fechada en `security/audit-allowlist.json` son las únicas excepciones; los dos que salieron — `tmp`, `brace-expansion` bajo `exceljs` — quedan corregidos con `pnpm.overrides`) y un escaneo de gitleaks sobre los commits de cada ejecución, además de un workflow de CodeQL (el repo es público). El escaneo de gitleaks ya corre: en su primera corrida (PR #107, 2026-11-10) marcó dos llaves públicas de prueba (vectores 1 y 2 de RFC 8032), que `.gitleaks.toml` permite por valor, y con eso pasó. **Lo que queda** es la re-ejecución en el proyecto hospedado, que necesita X-01, y una prueba de penetración externa. Lo que la segunda pasada dejó abierto tiene su propia tarea: N-82, N-83, N-84 y X-10.
 
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
@@ -757,7 +755,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-27 Auditoría de base de datos `[LAUNCH]` [deuda] [alta] [bloq]
 
-- [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
+- [~] Status · **Blocked by:** — · **Blocks:** N-30
   **Remaining (2026-09-26, round 2 — `docs/audits/db-2026-09-26.html`, branch `perf/db-scale`):** la ronda 2 reverificó los 25 hallazgos de la primera ronda (9 corregidos, 9 parciales, 6 abiertos, 1 obsoleto; QRY-01 y MIG-01 quedaron solo parciales, SYNC-02 estaba hecho) y midió 24 hallazgos nuevos DB2-\* a escala. Corregidos en `perf/db-scale`: DB2-USE-01 (índices + reconteo con debounce), DB2-SYNC-01/-02 (push por lotes, ADR-120), DB2-QRY-01..04, DB2-EXP-01, DB2-DEV-01/-02, DB2-HOT-01, DB2-CONN-01, DB2-MIG-01 (migraciones sin transacción, ADR-119; no el journal desactualizado de drizzle), DB2-IDX-01, DB2-RLS-01, DB2-CRON-01, DB2-PAGE-01. Abiertos: DB-OPS-01/DB2-OPS-01 (PITR + simulacro = O-3), DB2-QRY-05 (rollup de `product_stock`; el bootstrap por snapshot ya está hecho, ADR-121), DB2-SYNC-03 (retención de recibos/logs, necesita un ADR), DB2-CHK-01 (las restricciones de integridad en la base: la tarea que la auditoría propuso como B-19 nunca se creó, y B-19 es hoy la foto de producto, ADR-134), la mitad del journal de drizzle de B-20, DB2-KEY-01, DB2-PART-01 (ADR de S2), contadores de uso incrementales; la UI en `docs/archive/18-db-scale-design-changes.md`. La ronda 3 (`docs/audits/db-2026-09-26-r3.html`) auditó la propia rama: 31 hallazgos (7 altos). Corregidos en `perf/db-scale`: DB3-MIG-01, DB3-IDX-01, DB3-OPS-01, DB3-SYNC-01 (a)(c)/-02/-03/-04. Corregidos en `perf/db-launch`: DB3-BOOT-01 (el bootstrap rebasó el límite de 4.5 MB de Vercel tras alrededor de un mes con un negocio pesado; ahora es un snapshot paginado — línea base de stock + 90 días de movimientos, ≤ 2 MB por página — ADR-121, C-23; también la mitad bootstrap de DB2-QRY-05). DB3-EXP-01 (exportaciones en streaming), DB3-EST-01 (tope de 13 meses, sumas en SQL), DB3-SYNC-05 (503 + Retry-After en lugar de encolar), DB3-QRY-03 (resumen), ADR-122. DB3-SYNC-01 (b) (un lote rechazado en su totalidad se parte a la mitad hasta su fila; límite de tamaño de fila), DB3-L-02/03/07. También corregidos en `perf/db-launch`: DB3-CAJA-01/02/03 (una pestaña es la dueña de la caja, una «por enviar», el cierre con banner, pulls en reposo; ADR-123) y DB3-CAJA-04 en parte (escrituras OPFS encoladas; el VFS permanece abierto). La re-ejecución de `pg_stat_statements` todavía necesita el proyecto hospedado. **Verificado 2026-11-19 contra el repo**, los cuatro puntos que esta nota dejaba sin dueño o sin medir. (1) El journal de drizzle de Postgres sigue viejo y hasta ese día **no tenía tarea**: B-20 no existía en ningún track, y esta nota era el único lugar del repo que lo nombraba. Ya está escrita, con el nombre que esta nota le venía dando, en `03-backend.md`. `packages/data-pg/drizzle/meta/_journal.json` tiene 8 entradas (la última, `0013_business_regimen_sat`) y 8 snapshots, contra 69 archivos `.sql`, así que un `db:generate` diffearía contra el snapshot `0007` y emitiría una migración que recrea sesenta. Aplicar no se rompe por eso: el local recorre `drizzle/*.sql` (`scripts/db-local.sh`) y el hospedado va por su ledger (`scripts/hosted/plan.ts`); el riesgo es generar, no aplicar. El lado de SQLite está sano: journal de 16 entradas y barril generado, con el SQL en los `.ts` (`packages/data/drizzle/migrations/index.ts`). (2) DB2-CHK-01 está a medias y no como dice arriba: las tablas nuevas sí traen CHECK de enum (25 migraciones los tienen), pero las transaccionales del `0000` no tienen ninguno — `sales`, `expenses`, `inventory_movements`, `caja_movimientos`, `products`, `client_payments` —, que son justo las que la auditoría nombró. (3) DB2-SYNC-03 sigue sin ADR y sin purga: ningún ADR decide la retención, y nada borra `sync_receipts` ni `sync_log` (no hay cron ni migración que lo haga), así que las dos tablas crecen sin tope. (4) `pg_stat_statements` ya no espera a X-01: el proyecto hospedado existe en producción desde `447a6ef9` (2026-11-18). Falta correrlo, no tenerlo.
 
 - **Scope:** Postgres (the 2026-05 reports cover the archived SQLite desktop DB): `pg_stat_statements`
@@ -780,7 +778,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-29 Gate E2E determinista de toda la pila `[LAUNCH]` [deuda] [alta] [bloq]
 
-- [ ] Status · **Blocked by:** P-17, A-16, N-22, N-25 · **Blocks:** N-30, X-02
+- [ ] Status · **Blocked by:** N-22, N-25 · **Blocks:** N-30, X-02
       **Remaining (2026-11-19, verificado contra el repo):** de las barreras sólo quedan dos abiertas: P-17 está cerrada y A-16 también, el 2026-10-20 (`docs/archive/05-app.md`), así que esperan N-22 y N-25. Nada del entregable de esta tarea existe todavía — no hay orquestador ni un escenario único —, pero sí existen, construidas para otras tareas, las dos mitades que va a usar. La cadena teléfono → portal **ya corre en CI contra el Postgres real**: `apps/web/e2e/telefono-cadenas.sync.spec.ts` activa un dispositivo y empuja y jala por HTTP (`sync-phone.ts`) para cuatro cadenas — una venta cancelada en el teléfono que llega a Movimientos con su stock de vuelta, un turno cerrado con faltante que llega a Cortes, un NIP reseteado en el portal que llega al siguiente pull, y el push de un dispositivo revocado que se rechaza y tras revincular aterriza una sola vez —, y los shards de `portal-e2e` la corren en cada push, de modo que un handler de push roto ya pone rojo el CI. La captura sin red es de Maestro (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`), pero contra el mock, no contra Supabase. Falta entonces: el escenario de punta a punta como una sola corrida (registro → asistente → operador → importación → código por QR → activar → vender en modo avión → reconectar → la venta en el portal → exportar), el script que secuencia Maestro y Playwright, y la mitad de Maestro en CI — `maestro-e2e.yml` sigue siendo `workflow_dispatch`, a la espera de un runner de macOS.
 - **What:** one scenario against a real local Supabase: signup → wizard → operator → import →
   device code (QR deep link) → activate → **sell in airplane mode** → reconnect → sale visible in the
@@ -791,7 +789,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-30 Beta cerrada `[LAUNCH]` [critica] [bloq]
 
-- [ ] Status · **Blocked by:** X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29
+- [ ] Status · **Blocked by:** X-01, N-03, N-26, N-27, N-28, N-29
 - **Who:** 10–20 businesses — prebeta partners, 2–3 each of taquería / tiendita / servicios, and
   Xangarro itself (tenant #1).
 - **How:** production, "Beta" badge, comp xangarrote via N-06 (then 50 % off for 3 months), "Enviar
@@ -857,7 +855,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ### N-34 Aviso de privacidad + solicitudes ARCO `[LAUNCH]` [legal] [alta] [bloq]
 
-- [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
+- [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** — · **Blocks:** N-30
   **Remaining (2026-11-18, re-verificado contra el código):** dos de los cinco pendientes del 2026-09-23 ya están hechos y quedaron anotados sólo en `docs/launch/production-readiness.md`, no aquí: Configuración → Privacidad (`app/(portal)/privacidad/`, §2 en `[x]`) y la eliminación por autoservicio (`server/cuenta/`, §3 en `[x]`). Siguen abiertos: el aviso del NIP de operador (variante C — `legal/aviso-simplificado.ts` sólo publica la variante A); enrutar las solicitudes de los clientes de un comercio hacia el comercio; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01. Los textos son borradores con huecos `[BRACKET]` hasta que el abogado dé el visto bueno (O-17). La aplicación al proyecto hospedado quedó hecha 2026-09-25: `db:migrate:hosted` aplicó data-pg `0034`–`0042` y consola `0017`–`0019` (12 archivos; el primer signup en producción había fallado con 42883 en `privacy_consent_record`); el dry run reporta 0 pendientes.
   Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. **ARCO requests:** the public form `app.xangarro.mx/privacidad/solicitud` (xangarro.mx/privacidad/solicitud redirects there; Ayuda links to it), throttled per IP, files `kind = 'arco'` through `SolicitarArcoUseCase` with a folio and `dueAt`, the end of the 20th día hábil in CDMX (`plazosArco`, LFT art. 74 calendar); the titular sees the folio and the date. The console shows «Responder antes del …» in the list and the detail, and lists open ARCO requests by nearest deadline in every daily digest (console `0019_support_arco.sql`: the kind, `due_at`, a CHECK tying them). **Device linking:** the phone's activation screen and the browser register's «Vincula esta caja» show variante B (no checkbox, per the draft) and send its version; `/activate` stores it with the text's SHA-256 on the device row (C-22, data-pg `0041_device_aviso.sql`). Tests: `arco.test.ts`, `support-item.test.ts`, `solicitar-arco.test.ts`, console `inbox-create`, `digest`, `support-items-sql`, `legal-aviso.test.ts`, `privacidad-arco.spec.ts`, `acceso.sync.spec.ts` (the notice and the stored hash), Maestro `activation.yaml`.
 
@@ -1317,7 +1315,7 @@ micro-POS than location does.
 ### N-63 Negocio: MRR, churn, prueba → pago [media]
 
 - [ ] Status · **Trigger:** los webhooks de B-10 escriban `billing.subscriptions` para el primer inquilino
-      que paga (se retira el stub de N-06). **Blocked by:** N-06 · **Blocks:** N-70, N-72
+      que paga (se retira el stub de N-06). **Blocked by:** — · **Blocks:** N-70, N-72
 - **What:** `/negocio`. MRR (plus IVA excluded, centavos), MRR by plan, new / expansion /
   contraction / churned MRR per month, logo churn, trial → paid per weekly signup cohort, annual vs
   monthly mix. Read from a webhook-fed `billing_events` table — the console never calls Stripe.
@@ -1327,7 +1325,7 @@ micro-POS than location does.
 
 ### N-64 Embudo de activación y cohortes semanales [media]
 
-- [ ] Status · **Trigger:** lanzamiento de X-10 (registros reales). **Blocked by:** N-57 · **Blocks:** N-70, N-74
+- [ ] Status · **Trigger:** lanzamiento de X-10 (registros reales). **Blocked by:** — · **Blocks:** N-70, N-74
 - **What:** define **activated** as one product moment — first venta synced from a device or the
   operator view — and record `activated_at` on the business (server-side, from the first push).
   Funnel per weekly cohort: signup → wizard done → first venta (≤ 7 d) → active in week 2 → paid.
@@ -1338,7 +1336,7 @@ micro-POS than location does.
 
 ### N-65 Línea de tiempo del inquilino [media]
 
-- [ ] Status · **Trigger:** ya (todas las tablas fuente existen). **Blocked by:** N-08
+- [ ] Status · **Trigger:** ya (todas las tablas fuente existen). **Blocked by:** —
   - **Remaining (2026-11-19, verificado contra el repo):** todo lo de la pantalla, pero el campo de arriba se contradice solo y hay que creerle al disparador: dice «ya», y **N-08 está cerrada**, así que esto no espera a nadie. Sus dos piezas de apoyo están: `/tenants/[id]` existe como ruta y `apps/backoffice/src/server/keyset.ts` es el paginador que su aceptación manda reusar. Lo que falta es la unión de tablas y el renglón por evento; ninguna tabla nueva, como dice su aceptación.
 - **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
   and revoked, plan and override changes, flag allowlist changes, inbox items, B-18 rejections,
@@ -1349,7 +1347,7 @@ micro-POS than location does.
 ### N-66 Roles del staff [media]
 
 - [ ] Status · **Trigger:** que se agregue al segundo miembro del staff, o antes de que arranquen
-      N-68 / N-71 — lo que ocurra primero. **Blocked by:** N-05 · **Blocks:** N-68, N-71
+      N-68 / N-71 — lo que ocurra primero. **Blocked by:** — · **Blocks:** N-68, N-71
   - **Remaining (2026-11-19, verificado contra el repo):** todo, y **N-05 ya está cerrada**, así que lo único que la detiene es su disparador: hoy hay un solo miembro del staff. Medido: `staff_members` (en el esquema propio del backoffice, `server/db/schema.ts`) tiene id, `user_id`, correo, nombre, fechas, el hash de contraseña y el TOTP — **ninguna columna de rol**; `ActiveStaff` lleva id, correo y nombre; y `requireStaff()` no toma un rol mínimo, sólo comprueba que la sesión entre a la consola. O sea que la forma del cambio es una columna, un campo en el contexto y un parámetro en la guardia, con las dos CLI que ya existen (`scripts/staff.ts`, `scripts/staff-cli.ts`) para fijarlo.
 - **What:** `staff_members.role ∈ { lector, operador, admin }`. Lector reads everything, writes
   nothing. Operador does inbox, migrations, overrides, trial extensions, "ver como". Admin also
@@ -1359,7 +1357,7 @@ micro-POS than location does.
 
 ### N-67 `/auditoria` `[media]`
 
-- [ ] Status · **Trigger:** ya. **Blocked by:** N-05
+- [ ] Status · **Trigger:** ya. **Blocked by:** —
   - **Remaining (2026-11-19, verificado contra el repo):** falta la pantalla y nada más, y **N-05 ya está cerrada**, así que su disparador «ya» es literal. Los datos se están escribiendo desde hace tiempo: `staff_audit_log` existe en el esquema del backoffice con su llave al miembro del staff, y `recordStaffAction` los inserta por mutación, con un `auditSink` atado a la transacción de cada escritura. No hay ruta `auditoria` entre las nueve de la consola. Es un lector sobre una tabla que ya se llena: de las ocho de esta oleada, es la más barata.
 - **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
   origin. Filters by actor, action kind, tenant, date range; keyset paging; CSV export for an
@@ -1383,7 +1381,7 @@ micro-POS than location does.
 
 ### N-69 Ciclo de vida de flags y despliegue porcentual [baja]
 
-- [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
+- [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** —
   - **Remaining (2026-11-19, verificado contra el repo):** todo lo que describe, sin empezar — pero **ya no está bloqueada**. Su barrera y su disparador son la misma cosa, N-09, y N-09 está cerrada: `platform-flag.ts` tiene las banderas, los interruptores y la resolución por negocio, y la consola tiene `/flags`. Lo que falta es lo de esta tarea: `kind`, `owner`, `expires_at`, la lista de vencidas y el `rollout_pct`. Esta tarea es una de seis que el tablero mostraba esperando a algo ya cerrado (ver la nota de N-84).
 - **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
   `/flags` and a line in the N-10 digest. Percentage rollout: `rollout_pct` evaluated server-side
@@ -1394,7 +1392,7 @@ micro-POS than location does.
 
 ### N-70 Decisiones `[baja]`
 
-- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-07, N-63
+- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-63
   - **Remaining (2026-11-19, verificado contra el repo):** todo, y de sus dos barreras sólo queda una: **N-07 está cerrada**, N-63 sigue abierta (y N-63 a su vez sólo espera datos reales). Así que el camino es N-63 y nada más.
 - **What:** `/decisiones` renders the table in `17-consola-crecimiento.md` §4: signal, source,
   threshold, current value, 8-week trend, projected crossing date, and the decision it forces.
@@ -1405,7 +1403,7 @@ micro-POS than location does.
 
 ### N-71 Cobros: cobranza de vencidos, pruebas por vencer, extender / acreditar [media]
 
-- [ ] Status · **Trigger:** el primer inquilino que paga. **Blocked by:** N-06, N-66
+- [ ] Status · **Trigger:** el primer inquilino que paga. **Blocked by:** N-66
 - **What:** `/cobros`: `past_due` and `grace` tenants with days remaining and last dunning email;
   trials ending in ≤ 7 days with activation state (N-64); pagos sin CFDI (N-33, moves here).
   Actions (operador): extend trial by N days, apply a one-time credit — both through the existing
@@ -1433,7 +1431,7 @@ micro-POS than location does.
 
 ### N-74 Códigos promocionales y de referidos con atribución [baja]
 
-- [ ] Status · **Trigger:** lanzamiento de X-10. **Blocked by:** N-64, N-01
+- [ ] Status · **Trigger:** lanzamiento de X-10. **Blocked by:** N-64
 - **What:** codes are Stripe promotion codes created from the console (admin), each tagged with a
   campaign; redemption lands in `/campanas` as its own origin and flows into N-64's funnel. A
   dueño's "recomienda Xangarro" link is a code with the referrer's business id, one month free for

@@ -103,6 +103,18 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
   order — derived from **Blocked by** / **Blocks** (ready tasks first, ranked by what they
   unblock), so keep those two fields accurate: they are what orders the board.
 
+- **Cuando una barrera cierra, se saca del campo el mismo día.** `Blocked by` y `Blocks` son la
+  entrada del orden de trabajo, no un archivo histórico: una tarea que nombra barreras cerradas se
+  lee como detenida y arrastra al tablero entero. El 2026-11-20 pasó en 48 campos de seis tracks, y
+  en 25 de ellos **nada** la detenía ya. Los dos campos llevan sólo barreras vivas, o `—` cuando no
+  queda ninguna; lo que salió se cuenta en el commit, no en el campo, porque `pnpm plan:board` lee
+  **todos** los ids del campo para armar «Siguiente» y un id cerrado escrito «de recuerdo» vuelve a
+  crear la arista que se acababa de quitar. `pnpm test:scripts` lo comprueba. Dos cosas no son
+  tareas del plan y se quedan donde están: los ids de los boards del canvas y de las decisiones del
+  dueño (`OD-`, `CD-`, `KD-`), que la prueba no puede ver, y las barreras escritas en prosa, como
+  «las cláusulas de reparto del contrato». Una tarea de un track archivado (`A-`, `F-`) se saca
+  igual que una cerrada.
+
 ---
 
 ## 4. Decision summary (what the interview settled)

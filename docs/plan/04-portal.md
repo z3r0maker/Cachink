@@ -184,7 +184,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
 
 ### P-21 Capturas lado a lado para `pnpm design:compare` [deuda] [media]
 
-- [ ] Status · **Blocked by:** P-18 · **Blocks:** la verificación 1 de cada tarea de pantalla
+- [ ] Status · **Blocked by:** — · **Blocks:** la verificación 1 de cada tarea de pantalla
   - **Remaining (2026-09-23, verified against the code):** todo el sistema de captura. El que se
     verificó en `83ec5840` (2026-09-21) nunca llegó a un commit: el patrón `design-compare/` de
     `.gitignore`, sin anclar, también coincidía con `scripts/design-compare/`, así que el commit
@@ -251,7 +251,7 @@ including the press stamp.
 
 ### P-23 Primitivas + inventario en Storybook + líneas base de regresión visual [deuda] [media]
 
-- [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 y todas las tareas de pantalla
+- [~] Status · **Blocked by:** — · **Blocks:** las tareas de pantalla que sigan abiertas
   - **Remaining (2026-09-23, verified against the code):** la cláusula de aceptación de `design:compare` espera a P-21, reabierto ese mismo día (el sistema de captura nunca llegó a un commit y no existe en ningún disco; ver P-21). No hay página de Storybook en `apps/web`; Toast, gauge, nav item, switcher y user menu siguen sin cubrirse. **Verificado el 2026-11-19 contra el repo**, las tres afirmaciones siguen en pie: no existe `apps/web/.storybook`, `e2e/visual.spec.ts` fija cuatro secciones (botones, tags, cards, recientes) y ninguna de las cinco piezas sueltas. Un hallazgo nuevo, chico: de las doce líneas base comprometidas, ocho no se comparan nunca. El spec se salta todo proyecto que no sea `desktop` desde `0a5dd415` («baselines run on desktop only»), así que las variantes `-laptop-darwin` y `-tablet-darwin` quedaron de peso muerto y envejecen sin que nada las lea. Bórralas cuando toques esta tarea, o vuelve a correr los tres proyectos a propósito.
   - Auditoría doc 2026-09-22: entregado salvo la compuerta de `design:compare` en su Acceptance.
   - En curso: 2026-09-17 · **vocabulario núcleo construido y en pantalla**, la compuerta aún no cierra.
@@ -1167,7 +1167,7 @@ never invented text.
 
 ### P-28 Diagnóstico + estrategia — **«Próximamente» en producción** [media]
 
-- [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
+- [~] Status · **Blocked by:** P-30 · **Blocks:** —
   - **Remaining (2026-09-23, verified against the code):** sólo existen la pestaña y ambas compuertas (`asesor/screen.tsx`); las diez secciones, los mosaicos de mes, la tabla de precios, la lista de estrategia, los seis estados, la variante imprimible y el fixture de inyección de prompt siguen sin construirse. **Verificado el 2026-11-19 contra el repo**, el alcance pendiente sigue intacto — el cuerpo del Diagnóstico es literalmente `<p>Reporte completo del mes.</p>`, no hay variante imprimible ni fixture de inyección — pero dos cosas de esta nota ya no existen. Una: el `LLM_ENABLED` que describe como «una bandera en una frontera» no aparece en ningún archivo del repo; la compuerta de hoy es la bandera de plataforma `asesorLlm` de N-09, apagada en producción hasta que el staff la prenda en la consola. Dos, y más grave: la compuerta «Próximamente» de la que cuelga su aceptación la retiró el ADR-117, que la nombra deuda por quitar y la reemplaza por omisión (una superficie cuya llamada al modelo está apagada no se muestra). El componente sigue en pie y nadie lo había anotado: eso es P-46.
   - Auditoría doc 2026-09-22: entregado salvo las diez secciones del reporte y la tabla de precios.
   - En curso: 2026-09-17 · la pestaña y **ambas compuertas** están cableadas; el reporte en sí no está construido.
@@ -1341,7 +1341,7 @@ never invented text.
 > experience this can give. Still to decide: where the per-business count lives (`usage_counters`
 > needs a new counted metric; `assisted_imports` is the staff flow, not this one).
 
-- [ ] Status · **Blocked by:** P-07, P-30 · **Blocks:** — `[baja]`
+- [ ] Status · **Blocked by:** P-30 · **Blocks:** — `[baja]`
   - **Remaining (2026-11-19, verificado contra el repo):** todo, sin empezar, y su cláusula de aceptación ya no se puede cumplir tal como está escrita: «production renders «Próximamente»» es exactamente lo que el ADR-117 retiró. Cuando esto se construya, el estado de producción es la omisión, no un letrero. Arréglalo junto con P-46.
 - **Steps:** Upload → vision extraction → the **same dry-run preview table as P-07's Excel import**
   (Nuevo / Actualizar / Error) → commit. Structured output (`strict: true` or
