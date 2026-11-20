@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------
-# lane-device.sh — one simulator per lane and device class (ADR-156).
+# lane-device.sh — one simulator per lane and device class (ADR-157).
 #
 # «Xangarro L<N> iphone|se|ipad», on MAESTRO_IOS_RUNTIME (26.5: the dev
 # client crashes at launch on 27.0). Created the first time a lane needs it,

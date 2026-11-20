@@ -6,7 +6,7 @@
 # shared mock on :3000 and Metro on :8081, so its runs still go one at a
 # time. lane.sh points MAESTRO_LOCK_DIR at a lane's own lock instead, and
 # with Maestro 2.6+ (MAESTRO_PARALLEL_SAFE=1) the driver cleanup and the
-# run scan below only touch this run's simulator (ADR-156).
+# run scan below only touch this run's simulator (ADR-157).
 #
 # Why it began: Maestro 2.5.1 drives every single-device iOS run through ONE driver
 # port, 7001 (hard-coded in TestCommand.selectPort; only sharded runs get

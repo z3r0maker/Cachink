@@ -98,7 +98,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:54`
 - [ ] `Media` **M-19** Un código, un producto en el escáner (ADR-150). · `19-movil-mostrador.md:55`
 - [ ] `Media` **M-20** Escanear en Inventario (ADR-150). · `19-movil-mostrador.md:56`
-- [ ] `Media` **M-22** Maestro en carriles: varias sesiones a la vez (ADR-156). · `19-movil-mostrador.md:58`
+- [ ] `Media` **M-22** Maestro en carriles: varias sesiones a la vez (ADR-157). · `19-movil-mostrador.md:58`
 - [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · Falta: todo. Sus boards (`CdMvCobro`, y `CdTbCobro`/`CdOpCobro` para tableta y caja) están dibujados y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:227`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · Falta: todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:302`
 

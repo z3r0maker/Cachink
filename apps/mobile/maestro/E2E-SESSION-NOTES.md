@@ -53,7 +53,7 @@ gotchas that otherwise cost ~30 min of debugging.
   scripts or `scripts/maestro-locked.sh`: taking the lock clears the old driver.
   **Never `pkill -9 -f maestro`** — it ends other sessions' runs and the
   Maestro MCP server (README «Lanes»).
-- **Runs go in lanes (ADR-156).** With Maestro 2.6+, `run-flow.sh`,
+- **Runs go in lanes (ADR-157).** With Maestro 2.6+, `run-flow.sh`,
   `full-regression.sh` and `maestro-locked.sh --lane` each take a lane (own
   simulator, mock on 3100+N, Metro on 8100+N), so sessions run at once;
   `scripts/lane.sh status` shows who holds what. Lane 0 (any simulator, :3000,

@@ -194,7 +194,7 @@ Links to discussion, docs, prior art.
 | [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
 | [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 | [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
-| [156](#adr-156) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
+| [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11193,7 +11193,7 @@ fiscal, which `ingresos_del_periodo` returns.
 - Once Xangarro stamps through the PAC (`CFDI_MODE=live`), the package can carry the issued XMLs too, with the
   PAC key in the backoffice.
 
-## ADR-156
+## ADR-157
 
 **Title:** Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later
 

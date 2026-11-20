@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------
-# lane.sh — see and stop the Maestro lanes (ADR-156, lib/lane.sh).
+# lane.sh — see and stop the Maestro lanes (ADR-157, lib/lane.sh).
 #
 #   apps/mobile/maestro/scripts/lane.sh status       # who holds each lane, its
 #                                                    # worktree, ports, services

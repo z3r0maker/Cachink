@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------
-# lane.sh — parallel Maestro runs, one lane each (ADR-156).
+# lane.sh — parallel Maestro runs, one lane each (ADR-157).
 #
 # A lane is everything one run must not share: its own simulator per device
 # class («Xangarro L<N> iphone|se|ipad»), its own contracts mock (an
@@ -45,7 +45,7 @@ _lane_count() { echo "${MAESTRO_LANES:-4}"; }
 lanes_enabled() {
   [[ "$(_lane_count)" != 0 ]] || return 1
   if ! maestro_parallel_safe; then
-    echo "ℹ️   Maestro ${MAESTRO_CLI_VERSION:-?} is older than 2.6.0: lane 0, one run at a time (ADR-156)." >&2
+    echo "ℹ️   Maestro ${MAESTRO_CLI_VERSION:-?} is older than 2.6.0: lane 0, one run at a time (ADR-157)." >&2
     return 1
   fi
 }

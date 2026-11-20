@@ -1,5 +1,5 @@
 /**
- * Maestro lanes (lib/lane.sh, ADR-156): each run takes a lane of its own —
+ * Maestro lanes (lib/lane.sh, ADR-157): each run takes a lane of its own —
  * simulator, contracts mock and Metro — so sessions can run at once with
  * Maestro 2.6+. Lane 0 (the machine-wide lock) stays for older Maestro.
  *

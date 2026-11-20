@@ -70,7 +70,7 @@ network). The `shared/mock-*.js` scripts call them from a flow.
 ./apps/mobile/maestro/scripts/maestro-locked.sh test --exclude-tags offline apps/mobile/maestro/flows/
 ```
 
-### Lanes: several runs at once (ADR-156)
+### Lanes: several runs at once (ADR-157)
 
 With Maestro 2.6 or later (`maestro --version`; this Mac and CI use 2.12.1),
 `run-flow.sh` and `full-regression.sh` take a **lane**: their own simulator,
@@ -113,7 +113,7 @@ mock and Metro from your worktree (`pnpm install` first).
 - The Maestro MCP tools (`run`, `inspect_screen`) take no lock and no lane, so
   their flows hit lane 0's ports. Use them to look at a screen, and the scripts
   to run flows.
-- A worktree branched before ADR-156 still clears every driver on the machine
+- A worktree branched before ADR-157 still clears every driver on the machine
   when it takes lane 0: merge main into it before its next Maestro run.
 
 ### Entry points

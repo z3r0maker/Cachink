@@ -18,7 +18,7 @@ on:
         required: true
 
 env:
-  MAESTRO_VERSION: '2.12.1' # 2.6+: per-run driver port (ADR-156)
+  MAESTRO_VERSION: '2.12.1' # 2.6+: per-run driver port (ADR-157)
   # One run on its own runner, with the mock and Metro started below: lane 0.
   MAESTRO_LANES: '0'
   EXPO_PUBLIC_E2E: '1'

@@ -114,7 +114,7 @@ fi
 
 echo "    UDID: $IPAD_UDID"
 
-# ──────────── One run at a time on lane 0 (ADR-156) ──────────────
+# ──────────── One run at a time on lane 0 (ADR-157) ──────────────
 # Every iOS run shares driver port 7001; two at once drive each other's
 # simulators (lib/maestro-lock.sh). Only a run that will start Maestro waits.
 # shellcheck source=lib/maestro-lock.sh

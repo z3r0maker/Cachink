@@ -153,6 +153,16 @@ tags:
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 # The Fiado filter leaves the fiado row alone on the list — and exercises
 # the filter for real (the panel is one row tall per venta; no scrolling).
+# The chips scroll sideways (MvVentas): on a 402 pt iPhone 17 Pro «Fiado»,
+# the fifth, starts off-screen, so swipe the row itself, not the screen.
+- runFlow:
+    when:
+      notVisible: { id: 'venta-filtro-Fiado' }
+    commands:
+      - swipe:
+          from: { id: 'venta-filtros' }
+          direction: LEFT
+      - waitForAnimationToEnd
 - tapOn: { id: 'venta-filtro-Fiado' }
 - extendedWaitUntil: { visible: { id: 'venta-fila-V-0002' }, timeout: 8000 }
 - assertVisible: '.*Don Pedro.*'

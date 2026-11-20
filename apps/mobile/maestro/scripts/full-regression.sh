@@ -85,7 +85,7 @@ source "$SCRIPT_DIR/lib/with-timeout.sh"
 # shellcheck source=lib/lane.sh
 source "$SCRIPT_DIR/lib/lane.sh"
 
-# A lane of its own (ADR-156): with Maestro 2.6+ and no simulator pinned the
+# A lane of its own (ADR-157): with Maestro 2.6+ and no simulator pinned the
 # suite takes a free lane, so other sessions can run at the same time.
 if [[ "$DRY_RUN" == false && -z "${MAESTRO_DEVICE_UDID:-}" ]] && lanes_enabled; then
   lane_acquire "${DEVICE_CLASS:-iphone}" || exit 1

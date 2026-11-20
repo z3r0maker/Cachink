@@ -38,7 +38,7 @@ source "$SCRIPT_DIR/lib/device-resolve.sh"
 source "$SCRIPT_DIR/lib/with-timeout.sh"
 
 resolve_device "$DEVICE_CLASS"
-# One run at a time on lane 0 (ADR-156) (lib/maestro-lock.sh).
+# One run at a time on lane 0 (ADR-157) (lib/maestro-lock.sh).
 # shellcheck source=lib/maestro-lock.sh
 source "$SCRIPT_DIR/lib/maestro-lock.sh"
 maestro_lock_acquire || exit 1

@@ -88,7 +88,7 @@ source "$SCRIPT_DIR/lib/device-resolve.sh"
 # shellcheck source=lib/lane.sh
 source "$SCRIPT_DIR/lib/lane.sh"
 
-# ──────────── A lane of its own (ADR-156) ────────────────────────
+# ──────────── A lane of its own (ADR-157) ────────────────────────
 # With Maestro 2.6+ and no simulator pinned, the run takes a free lane: its
 # own simulator, mock and Metro, so other sessions can run at the same time.
 # MAESTRO_LANES=0 or a pinned MAESTRO_DEVICE_UDID keeps lane 0.
