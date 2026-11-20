@@ -8,7 +8,14 @@
  * is booted, started or killed.
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import assert from 'node:assert/strict';
@@ -282,6 +289,10 @@ describe('lane_services_up', () => {
   it('restarts the mock when the contracts changed since it started', () => {
     warmedBy(2, repo);
     writeFileSync(join(lanes, 'L2', 'mock.started'), '');
+    // A minute back: `find -newer` is strict, and Linux stamps two writes this
+    // close with the same coarse mtime, so the change would look as old as the start.
+    const unMinuto = new Date(Date.now() - 60_000);
+    utimesSync(join(lanes, 'L2', 'mock.started'), unMinuto, unMinuto);
     mkdirSync(join(repo, 'packages/contracts/src'), { recursive: true });
     writeFileSync(join(repo, 'packages/contracts/src/wire.ts'), '// changed\n');
     const out = up(true);
