@@ -19,3 +19,4 @@ export * from './cierre/index.js';
 export * from './presupuesto/index.js';
 export * from './contador/index.js';
 export * from './tablero/index.js';
+export * from './trimestre/index.js';

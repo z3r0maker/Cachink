@@ -526,8 +526,10 @@ with property tests:
 
 - [~] Status · **Blocked by:** —
   **Remaining (2026-11-09):**
-  - the «payout» movements: Stripe's deposits to the bank and its fee. Cobros wait in «Stripe por
-    depositar» until then; the data needs N-63's `billing_events`.
+  - the «payout» movements: Stripe's deposits to the bank and its fee. **Owner decision (2026-11-20):**
+    they come from the bank CSV (E-42's second half): a «STRIPE» deposit is matched against «Stripe
+    por depositar» and the difference is the fee, with no change to the portal. Until then cobros
+    wait in «Stripe por depositar».
   - a partial refund (credit notes below the payment) posts nothing yet; a full one reverses.
     **Done 2026-11-09, board CD-06i (round 13, approved the same day):**
   - `xangarro.ingresos_del_periodo()` (data-pg 0055, `xangarro_admin` only): a month of
@@ -1203,8 +1205,24 @@ Changes to existing tasks:
 
 ### E-17 Resumen del trimestre `[baja]`
 
-- [ ] Status · **Blocked by:** E-12
-  - **Remaining (2026-11-20):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; de E-12 sólo quedan los drivers del puente, que esperan la importación de E-10.
+- [x] Status · **Blocked by:** — · **Done:** 2026-11-20 (board CD-17b, round 22, approved the same day; replaces
+      round 2's CD-17)
+- **Owner decisions (2026-11-20):** figures only: no written headline nor «Lo que salió bien / Lo que
+  hay que corregir / Decisiones» until the analista de cierre (E-32); «Exportar PDF» prints the page
+  (the browser's «Guardar como PDF»); paying businesses (N-63) and the next pool cut (E-21) stay out
+  until they exist. The board's motion waits for the console's motion ADR (round 23).
+- **Progress (2026-11-20):**
+  - `@xangarro/domain/corp` `trimestre/`: `crecimiento` (whole percent, null «sin base» without a
+    positive base), `trimestresHasta`, `rangoDelResumen` (a quarter in progress runs to today),
+    `dineroDelRango` (partners' money in and taxes paid, from the cash movements).
+  - `/empresa/trimestre`, Socios' third tab: the main card (income against the previous quarter,
+    EBITDA and margin, cash, the Tablero's accepted value of the committed), four quarters of
+    income and EBITDA with a loss below the axis, the year's and lifetime totals, the objectives,
+    each partner's Tablero and the partners' money, and compliance (obligations with every
+    evidence filed by their due day, the 32-D opinion, each month's close). Devengado, as
+    Resultados opens. A quarter with Tablero activity but no entries still has its summary.
+  - Playwright: this quarter in progress with the Tablero test's accepted card and objective, and
+    its seeded closed quarter with Fundador 2 under the minimum.
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the
