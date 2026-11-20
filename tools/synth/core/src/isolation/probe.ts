@@ -142,8 +142,7 @@ export function isolationVerdict(
   if (canary.serverHits > 0)
     problems.push(`the canary server was reached ${canary.serverHits} time(s)`);
   const final = events.find((e) => (e as { type?: string }).type === 'result') as
-    | { result?: string }
-    | undefined;
+    { result?: string } | undefined;
   if (final === undefined) problems.push('the probe did not finish, and silence proves nothing');
   return {
     ok: problems.length === 0,

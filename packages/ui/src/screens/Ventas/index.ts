@@ -3,7 +3,12 @@ export { CobrarScreen, type CobrarScreenProps } from './cobrar-screen';
 export { productosDeCaja, type ProductoCobrar } from './cobrar-catalogo';
 export { TicketSheet, type TicketSheetProps } from './ticket-sheet';
 export { TicketPanel, type TicketPanelProps } from './ticket-panel';
-export { EscanerSheet, type EscanerSheetProps } from './escaner-sheet';
+export {
+  EscanerSheet,
+  type EscanerSheetProps,
+  type EscanerTicket,
+  type EscanerProducto,
+} from './escaner-sheet';
 export { ProductoNuevoSheet, type ProductoNuevoSheetProps } from './producto-nuevo-sheet';
 export { useTicketEnCurso, resumenTicket, type ProductoParaTicket } from './ticket-en-curso';
 // Caja Gate

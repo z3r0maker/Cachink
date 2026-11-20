@@ -56,7 +56,6 @@
 
 | Primitive            | One-liner                                                                           | Storybook                               |
 | -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------- |
-| **`<Scanner>`**      | Barcode scanner — RN expo-camera, web BarcodeDetector.                              | `Phase 1C / Primitives / Scanner`       |
 | **`<PeriodPicker>`** | Estados Financieros period selector — mensual / anual / rango. `role="radiogroup"`. | `Phase 1C / Primitives / Period Picker` |
 
 ## Conventions

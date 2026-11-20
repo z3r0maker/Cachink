@@ -10,9 +10,8 @@
  *      component).
  *   4. Pass the activation config (API base, secure token store) into
  *      `<AppProviders>`; cloud sync mounts there (A-04, A-07).
- *   5. Mount `<MobileScannerHost />` inside the provider tree so
- *      `openScannerForResult()` has a `<Scanner>` to show, and hand the
- *      product photo's native half (`fotoPuertos`, M-13) to the providers.
+ *   5. Hand the product photo's native half (`fotoPuertos`, M-13) to the
+ *      providers.
  *   6. Mount `` for Cloud overlay sub-screens
  *      (Advanced Backend, Password Reset).
  *   7. Wrap the tree in `<GestureHandlerRootView>` (Phase C1) so
@@ -60,7 +59,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as plusJakartaSans from '@expo-google-fonts/plus-jakarta-sans';
 import { AppProviders, fontFaces, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
-import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { TurnoDeOtroHost } from '../shell/turno-de-otro-host';
 import { mobileActivationConfig } from '../shell/activation-config';
@@ -119,7 +117,6 @@ function MobileApp(): ReactElement {
       fotoPuertos={fotoPuertos}
       overlays={
         <>
-          <MobileScannerHost />
           <NotificationTapHost />
           <StockLowScheduleHost />
           <TurnoDeOtroHost />
