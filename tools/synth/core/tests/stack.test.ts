@@ -132,6 +132,28 @@ describe('startStack', () => {
     assert.equal(f.locks.size, 0);
   });
 
+  it('retries the build once when Google Fonts could not be fetched, and only then', async () => {
+    let builds = 0;
+    const f = fake();
+    const exec = f.deps.exec;
+    f.deps.exec = async (cmd, args, opts) => {
+      if (args.includes('build') && (builds += 1) === 1) {
+        throw new Error('`next/font` error:\nFailed to fetch `Anton` from Google Fonts.');
+      }
+      return exec(cmd, args, opts);
+    };
+    await startStack(f.deps, OPTS);
+    assert.equal(builds, 2);
+
+    const g = fake({ failOn: /next build/ });
+    await assert.rejects(startStack(g.deps, OPTS), /failed: pnpm/);
+    assert.equal(
+      lines(g.calls).filter((l) => l.includes('next build')).length,
+      1,
+      'other failures are not retried',
+    );
+  });
+
   it('a Postgres that fails halfway up is still removed, since its removal is registered first', async () => {
     const f = fake({ failOn: /db-local\.sh up/ });
     await assert.rejects(startStack(f.deps, OPTS));

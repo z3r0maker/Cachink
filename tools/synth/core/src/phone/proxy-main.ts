@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { parseArgs } from 'node:util';
 
@@ -27,15 +27,8 @@ if (!values.device || !values.capture) {
   process.exit(2);
 }
 
-const child = spawn(values.maestro, values['maestro-arg'] ?? ['mcp'], {
-  stdio: ['pipe', 'pipe', 'inherit'],
-});
 const write = (stream: NodeJS.WritableStream) => (msg: unknown) =>
   stream.write(`${JSON.stringify(msg)}\n`);
-const proxy = new PhoneProxy(
-  { device: values.device, captureDir: values.capture, appId: values.app },
-  { toClient: write(process.stdout), toChild: write(child.stdin) },
-);
 
 const lines = (input: NodeJS.ReadableStream, on: (msg: never) => void) =>
   createInterface({ input }).on('line', (line) => {
@@ -46,6 +39,34 @@ const lines = (input: NodeJS.ReadableStream, on: (msg: never) => void) =>
     }
   });
 
-lines(process.stdin, (m) => proxy.fromClient(m)).on('close', () => child.kill());
-lines(child.stdout, (m) => proxy.fromChild(m));
-child.on('exit', (code) => process.exit(code ?? 0));
+let child: ChildProcess;
+let closing = false;
+
+const proxy = new PhoneProxy(
+  { device: values.device, captureDir: values.capture, appId: values.app },
+  { toClient: write(process.stdout), toChild: (msg) => write(child.stdin!)(msg) },
+);
+
+/**
+ * `maestro mcp`, started again whenever it dies while the actor is still
+ * talking: another session's `pkill -9 -f maestro` reaches every Maestro on
+ * the machine, ours included.
+ */
+function startMaestro(): void {
+  child = spawn(values.maestro!, values['maestro-arg'] ?? ['mcp'], {
+    stdio: ['pipe', 'pipe', 'inherit'],
+  });
+  lines(child.stdout!, (m) => proxy.fromChild(m));
+  child.on('exit', () => {
+    if (closing) return;
+    startMaestro();
+    proxy.restarted();
+  });
+}
+
+startMaestro();
+lines(process.stdin, (m) => proxy.fromClient(m)).on('close', () => {
+  closing = true;
+  child.kill();
+  process.exit(0);
+});

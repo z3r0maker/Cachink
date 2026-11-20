@@ -84,9 +84,11 @@ export const PHONE_TOOLS: ToolSet = {
   kind: (name, input) => {
     if (name === ph('inspect_screen') || name === ph('take_screenshot')) return 'look';
     if (name !== ph('run')) return undefined;
-    // A refused command is still something the persona tried: it is a step.
+    // A command the proxy refuses never reaches the phone: it is the actor
+    // fumbling the tool, not the persona doing something, so it spends no
+    // patience. max_turns still bounds an actor that keeps fumbling.
     const check = checkPhoneCommand(String(input.yaml ?? ''));
-    return check.ok ? check.kind : 'action';
+    return check.ok ? check.kind : 'look';
   },
   describe: (_name, input) => describePhoneCommand(String(input.yaml ?? '')),
 };

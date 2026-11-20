@@ -221,13 +221,18 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-06 Runner de teléfono: emulador Android y Maestro MCP [alta]
 
-- [ ] Status · **Blocked by:** S-04
-  - **Remaining (2026-11-20):** the end-to-end run, taquero on `primera-venta-telefono`. The runner is built on
-    `feat/synth-s06` (`core/src/phone/`, 143 tests). The emulator and the machine-wide Maestro lock were held by
-    another session's capture run all day. Maestro MCP takes a `device_id` on every call, so targeting is not
-    the problem. But its `run` accepts any Maestro YAML, so the actor gets a Synth proxy in front of it, which
-    allows one person-level command per call on the pinned device. `login-operator.yaml` gains `OPERATOR_ID` and
-    `NIP`, defaulting to Toni and 1234; no harness run has exercised that change yet.
+- [x] Status · **Blocked by:** S-04
+      Done: 2026-11-20 · `feat/synth-s06` · `core/src/phone/`, `tools/synth/flows/phone-door.yaml`. Taquero on
+      `primera-venta-telefono`: completed, with success true from SQL after the outbox pushed, in 16 steps and
+      195 s, for about $0.25. Maestro MCP does take a `device_id` on every call. But its `run` accepts any Maestro
+      YAML, so the actor's only MCP server is a Synth proxy in front of it, which allows one person-level command
+      per call on the pinned device and restarts `maestro mcp` when another session's `pkill -9 -f maestro` kills
+      it. The run holds the harness's machine-wide Maestro lock. `login-operator.yaml` gains `OPERATOR_ID` and
+      `NIP`, defaulting to Toni and 1234; the phone door exercised the parameters, and no harness run has used
+      the defaults since. It took five runs to pass, each failure on the harness's side: the dev-client sheet
+      after `pm clear`, a Google Fonts blip in the build (retried once now), a report with three hard moments
+      (the first two are kept), YAML and pixel-tap slips (refused with a hint, not counted as steps), and
+      Maestro killed mid-run.
 - **What:**
   - Use one Android emulator, with an AVD named in `config.yaml`.
   - The capture app runs a dev-client build with `EXPO_PUBLIC_E2E=1` and `EXPO_PUBLIC_API_BASE=http://10.0.2.2:<port>`

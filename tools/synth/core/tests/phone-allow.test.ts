@@ -75,6 +75,16 @@ describe('checkPhoneCommand', () => {
     ok('- tapOn: Cobrar\n- waitForAnimationToEnd');
   });
 
+  it('refuses an item that holds two commands, and says where the option goes (seen in a run)', () => {
+    refused('- tapOn: "Cobrar"\n  index: 0', /one command per item.*under tapOn/);
+  });
+
+  it('refuses a tap aimed at bare pixel numbers, and says how to aim at a point (seen in a run)', () => {
+    refused('- tapOn: 897,1578', /point: 50%,80%/);
+    refused('- tapOn: 25%,60%', /point: 50%,80%/);
+    ok('- tapOn: "2,500"'.replace('2,500', 'Cobrar $1,500'));
+  });
+
   it('refuses YAML it cannot read, and an empty call', () => {
     refused('- tapOn: [', /YAML/);
     refused('', /nothing/);

@@ -28,7 +28,12 @@ export type PhoneCheck =
   | { readonly ok: true; readonly kind: 'action' | 'look'; readonly commands: readonly Command[] }
   | { readonly ok: false; readonly reason: string };
 
-type Command = { readonly name: string; readonly arg: unknown };
+type Command = {
+  readonly name: string;
+  readonly arg: unknown;
+  /** Keys beside the command in one list item: a mis-indented option. */
+  readonly extra: readonly string[];
+};
 
 /** The commands of a call: a bare list, one command, or a flow after its `appId` header. */
 function commandsOf(yaml: string): Command[] | string {
@@ -38,13 +43,29 @@ function commandsOf(yaml: string): Command[] | string {
   const last = docs.at(-1)?.toJS() as unknown;
   const list = Array.isArray(last) ? last : last === null || last === undefined ? [] : [last];
   return list.map((c: unknown) => {
-    if (typeof c === 'string') return { name: c, arg: undefined };
-    const [name, arg] = Object.entries(c as Record<string, unknown>)[0] ?? ['', undefined];
-    return { name, arg };
+    if (typeof c === 'string') return { name: c, arg: undefined, extra: [] };
+    const [first, ...rest] = Object.entries(c as Record<string, unknown>);
+    const [name, arg] = first ?? ['', undefined];
+    return { name, arg, extra: rest.map(([k]) => k) };
   });
 }
 
+/** A tap at bare numbers, like `897,1578`: Maestro would look for that text. */
+const PIXELS = /^\s*\d+%?\s*,\s*\d+%?\s*$/;
+
+function shapeIssue(c: Command): string | undefined {
+  if (c.extra.length > 0) {
+    return `one command per item: put ${c.extra.join(', ')} under ${c.name}, indented, not beside it`;
+  }
+  if (TAPS.has(c.name) && typeof c.arg === 'string' && PIXELS.test(c.arg)) {
+    return 'to tap a place rather than a text, write it as a point: tapOn: { point: 50%,80% }';
+  }
+  return undefined;
+}
+
 function commandIssue(c: Command): string | undefined {
+  const shape = shapeIssue(c);
+  if (shape !== undefined) return shape;
   if (WAITS.has(c.name)) return undefined;
   if (!ACTIONS.has(c.name)) return `«${c.name}» is not something a person does with the phone`;
   if (c.name === 'pressKey' && !KEYS.has(String(c.arg)))

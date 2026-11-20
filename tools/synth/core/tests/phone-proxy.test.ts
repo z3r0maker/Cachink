@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -63,7 +63,11 @@ beforeEach(async () => {
     ],
     {
       cwd: CORE,
-      env: { ...process.env, FAKE_MAESTRO_LOG: join(dir, 'maestro.log') },
+      env: {
+        ...process.env,
+        FAKE_MAESTRO_LOG: join(dir, 'maestro.log'),
+        FAKE_MAESTRO_CRASH_FILE: join(dir, 'crash'),
+      },
       stdio: ['pipe', 'pipe', 'inherit'],
     },
   );
@@ -130,6 +134,17 @@ describe('the phone proxy', () => {
     });
     assert.match(text(look), /screen after emulator-5554/);
     assert.ok(!maestroLog().some((m) => m.params?.name === 'run_on_cloud'));
+  });
+
+  it('survives Maestro dying mid-call: that call says try again, and the next one works', async () => {
+    writeFileSync(join(dir, 'crash.armed'), '');
+    const lost = await call('tools/call', { name: 'run', arguments: { yaml: '- tapOn: Cobrar' } });
+    assert.equal((lost.result as { isError?: boolean }).isError, true);
+    assert.match(text(lost), /stopped answering/);
+    const again = await call('tools/call', { name: 'run', arguments: { yaml: '- tapOn: Cobrar' } });
+    assert.match(text(again), /ran run/);
+    const inits = maestroLog().filter((m) => m.method === 'initialize');
+    assert.equal(inits.length, 2, 'the new Maestro was initialized as the first one was');
   });
 
   it('a lone wait is a look: Maestro runs it, but no step is saved', async () => {

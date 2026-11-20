@@ -165,14 +165,15 @@ describe('StepTracker on the phone', () => {
     assert.equal(t.looks, 2);
   });
 
-  it('a command the proxy refused still counts as a step the persona tried', () => {
+  it('a command the proxy refused is the actor fumbling the tool: it spends no patience', () => {
     const t = new StepTracker(PHONE_TOOLS);
     t.feed(phoneUse('x', 'run', { yaml: '- openLink: exp+xangarro://x' }));
     const done = t.feed(
       result('x', '«openLink» is not something a person does with the phone', true),
     );
-    assert.equal(done?.isError, true);
-    assert.equal(t.steps.length, 1);
+    assert.equal(done, undefined);
+    assert.equal(t.steps.length, 0);
+    assert.equal(t.looks, 1);
   });
 
   it('a web tool name means nothing to the phone tracker, and the reverse', () => {
@@ -204,6 +205,17 @@ describe('parseActorReport', () => {
       REPORT,
     );
     assert.deepEqual(parseActorReport(`Me rindo. ${JSON.stringify(REPORT)}`), REPORT);
+  });
+
+  it('keeps the first two hard moments of a report that lists three (seen in a phone run)', () => {
+    const three = {
+      ...REPORT,
+      exit_interview: {
+        ...REPORT.exit_interview,
+        hardest_moments: [...REPORT.exit_interview.hardest_moments, { step: 8, what: 'otra vez' }],
+      },
+    };
+    assert.deepEqual(parseActorReport(JSON.stringify(three)), REPORT);
   });
 
   it('returns null for no JSON, broken JSON, or a report outside the contract', () => {

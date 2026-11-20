@@ -54,6 +54,8 @@ export const PHONE_TOOLS_SHOWN = [
   },
 ] as const;
 
+const STOPPED = 'The phone stopped answering for a moment. Try that again.';
+
 const refusal = (id: Msg['id'], text: string) => ({
   jsonrpc: '2.0',
   id,
@@ -63,6 +65,8 @@ const refusal = (id: Msg['id'], text: string) => ({
 export class PhoneProxy {
   private next = 0;
   private steps = 0;
+  /** What the client initialized Maestro with, for a Maestro that had to be started again. */
+  private initialize: Msg['params'];
   private readonly pending = new Map<string, (msg: Msg) => void>();
 
   constructor(
@@ -79,7 +83,27 @@ export class PhoneProxy {
       this.call(msg);
       return;
     }
+    if (msg.method === 'initialize') this.initialize = msg.params;
     this.io.toChild(msg);
+  }
+
+  /**
+   * Maestro died (another session's `pkill -9 -f maestro` reaches ours too).
+   * Every call waiting on it is told to try again, and the new Maestro the
+   * caller started is initialized the way the client initialized the first.
+   */
+  restarted(): void {
+    for (const [id, handler] of this.pending) {
+      handler({ id, result: { content: [{ type: 'text', text: STOPPED }], isError: true } });
+    }
+    this.pending.clear();
+    if (this.initialize === undefined) return;
+    this.next += 1;
+    const id = `synth-init-${this.next}`;
+    this.pending.set(id, () =>
+      this.io.toChild({ jsonrpc: '2.0', method: 'notifications/initialized' }),
+    );
+    this.io.toChild({ jsonrpc: '2.0', id, method: 'initialize', params: this.initialize });
   }
 
   fromChild(msg: Msg): void {

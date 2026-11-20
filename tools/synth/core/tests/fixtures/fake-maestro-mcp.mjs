@@ -1,6 +1,6 @@
 // A stand-in for `maestro mcp`: answers initialize, tools/list and tools/call
 // over stdio JSON-RPC, and logs every call it gets to FAKE_MAESTRO_LOG.
-import { appendFileSync } from 'node:fs';
+import { appendFileSync, existsSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 
 const log = process.env.FAKE_MAESTRO_LOG;
@@ -30,6 +30,13 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     });
   if (m.method === 'tools/list') reply(m.id, { tools: TOOLS });
   if (m.method === 'tools/call') {
+    // FAKE_MAESTRO_CRASH_FILE (armed by <file>.armed): the first instance to see a `run` dies without
+    // answering, as when another session's `pkill -9 -f maestro` lands.
+    const crash = process.env.FAKE_MAESTRO_CRASH_FILE;
+    if (crash && existsSync(`${crash}.armed`) && m.params.name === 'run' && !existsSync(crash)) {
+      writeFileSync(crash, 'crashed');
+      process.exit(137);
+    }
     const name = m.params.name;
     const text =
       name === 'inspect_screen'

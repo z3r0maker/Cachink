@@ -176,7 +176,13 @@ notes: `npx expo prebuild -p android`, then `./gradlew :app:assembleDebug`).
   - it pins the device;
   - it allows one person-level command per `run` (tap by text or point, type, erase, swipe, scroll, back,
     hide the keyboard, Enter or Backspace);
-  - it saves the hierarchy after each action for the step's fingerprint.
+  - it saves the hierarchy after each action for the step's fingerprint;
+  - it starts `maestro mcp` again when it dies. The harness's `with-timeout.sh` runs `pkill -9 -f maestro`
+    machine-wide, which reaches ours too; the call in flight is told to try again.
+
+  A command the proxy refuses (wrong YAML shape, a tap at bare numbers, anything outside the list) comes back
+  with a hint and never reaches the phone. It is the actor fumbling the tool, so it spends no patience.
+
 - **Evidence:** `console.jsonl` from logcat (errors, and React Native's warnings), `network.jsonl` from the portal's
   own per-call API log for this tenant (failures, refused rows, calls over 1.5 s), and a screenshot and a
   hierarchy per step.

@@ -151,6 +151,18 @@ export const ActorReport = z.strictObject({
 export type ActorReport = z.infer<typeof ActorReport>;
 
 /** The actor's final JSON, from a fenced block or bare braces; `null` when it is not the contract. */
+/**
+ * The exit interview asks for the two moments that got in the way most
+ * (spec §8.1). An actor that lists three has still answered; the first two
+ * are kept rather than throwing the whole report away (seen in S-06's run).
+ */
+function keepTwoMoments(raw: unknown): unknown {
+  const r = raw as { exit_interview?: { hardest_moments?: unknown } } | null;
+  const moments = r?.exit_interview?.hardest_moments;
+  if (r === null || !Array.isArray(moments) || moments.length <= 2) return raw;
+  return { ...r, exit_interview: { ...r.exit_interview, hardest_moments: moments.slice(0, 2) } };
+}
+
 export function parseActorReport(text: string): ActorReport | null {
   const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text)?.[1];
   const start = text.indexOf('{');
@@ -158,7 +170,7 @@ export function parseActorReport(text: string): ActorReport | null {
   for (const candidate of [fenced, bare]) {
     if (candidate === undefined) continue;
     try {
-      const parsed = ActorReport.safeParse(JSON.parse(candidate));
+      const parsed = ActorReport.safeParse(keepTwoMoments(JSON.parse(candidate)));
       if (parsed.success) return parsed.data;
     } catch {
       // Not JSON; try the next shape.
