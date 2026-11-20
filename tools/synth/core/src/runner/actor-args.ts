@@ -17,8 +17,23 @@ import { SERVER, WEB_TOOLS, type ToolSet } from './tools';
 
 export { ACTION_TOOLS, LOOK_TOOLS, SERVER } from './tools';
 
-const BUILT_IN = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'NotebookEdit', 'Bash', 'PowerShell'];
-const BUILT_IN_MORE = ['WebFetch', 'WebSearch', 'Task', 'Agent', 'TodoWrite', 'Skill'];
+/** Claude Code's built-in tools: the actor gets none of them; the judge gets the three that read. */
+export const BUILT_INS = [
+  'Read',
+  'Edit',
+  'Write',
+  'Glob',
+  'Grep',
+  'NotebookEdit',
+  'Bash',
+  'PowerShell',
+  'WebFetch',
+  'WebSearch',
+  'Task',
+  'Agent',
+  'TodoWrite',
+  'Skill',
+] as const;
 
 export interface ActorArgsInput {
   readonly model: string;
@@ -52,7 +67,7 @@ export function actorArgs(i: ActorArgsInput): string[] {
     '--allowedTools',
     (i.tools ?? WEB_TOOLS).allowed.join(','),
     '--disallowedTools',
-    [...BUILT_IN, ...BUILT_IN_MORE, ...(i.tools ?? WEB_TOOLS).never].join(','),
+    [...BUILT_INS, ...(i.tools ?? WEB_TOOLS).never].join(','),
     '--permission-mode',
     'dontAsk',
     '--system-prompt',
