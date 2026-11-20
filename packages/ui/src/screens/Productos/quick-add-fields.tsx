@@ -1,14 +1,15 @@
 /**
- * QuickAddFields — the five quick-add product inputs (A-09) plus the barcode
- * scanner that fills the código.
+ * QuickAddFields — the five quick-add product inputs (A-09) plus the escáner's
+ * camera that fills the código (M-20).
  */
 
 import { useRef, useState, type ReactElement } from 'react';
 import type { TextInput } from 'react-native';
 import type { InventoryCategory } from '@xangarro/domain';
-import { Btn, Icon, Input, OptionCardGroup, Scanner } from '../../components/index';
+import { Btn, Icon, Input, OptionCardGroup } from '../../components/index';
 import { focusRef, MoneyField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
+import { LeerCodigoSheet } from './leer-codigo-sheet';
 import {
   INV_CATEGORIAS,
   stockTrackingCards,
@@ -19,7 +20,7 @@ import {
 type Props = { readonly form: ProductoFormApi };
 type SaleProps = Props & { readonly stockEnabled: boolean };
 
-/** "Escanear código" button + scanner sheet. */
+/** "Escanear código" button + the escáner camera's sheet. */
 function ScanCode(props: { onCode: (code: string) => void }): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -34,7 +35,7 @@ function ScanCode(props: { onCode: (code: string) => void }): ReactElement {
       >
         {t('scanner.title')}
       </Btn>
-      <Scanner open={open} onClose={() => setOpen(false)} onScan={props.onCode} mode="single" />
+      <LeerCodigoSheet open={open} onClose={() => setOpen(false)} onCodigo={props.onCode} />
     </>
   );
 }

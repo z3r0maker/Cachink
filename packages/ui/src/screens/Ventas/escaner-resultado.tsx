@@ -1,8 +1,9 @@
 /**
- * The card under the camera after a code (MvEscaner, EcDuplicado): added with
- * «Deshacer», unknown with «Escanear otro» and «Darlo de alta», shared by two
- * or more products with the choice, undone, or the hint. Announced politely
- * as it changes.
+ * The card under the camera after a code (MvEscaner, EcDuplicado,
+ * EcInventario): added with «Deshacer», unknown with «Escanear otro» and
+ * «Darlo de alta», shared by two or more products with the choice, a product
+ * Inventario does not list, undone, or the hint. Announced politely as it
+ * changes.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
@@ -16,6 +17,7 @@ import { borderColors, borderWidths, colors, radii } from '../../theme';
 import { ProductoIcono } from './cobrar-tile';
 import { COBRAR_GLYPHS } from './cobrar-glyphs';
 import { EscanerDuplicado } from './escaner-duplicado';
+import { EscanerSinExistencias } from './escaner-sin-existencias';
 import type { UseEscaner } from './use-escaner';
 
 const CARD = {
@@ -49,7 +51,11 @@ function Agregado({ e }: { e: UseEscaner }): ReactElement | null {
   );
 }
 
-function Desconocido(p: { e: UseEscaner; onAlta: (codigo: string) => void }): ReactElement | null {
+function Desconocido(p: {
+  e: UseEscaner;
+  inventario: boolean;
+  onAlta: (codigo: string) => void;
+}): ReactElement | null {
   if (p.e.estado.tipo !== 'desconocido') return null;
   const { codigo } = p.e.estado;
   return (
@@ -60,6 +66,11 @@ function Desconocido(p: { e: UseEscaner; onAlta: (codigo: string) => void }): Re
       <MText size="md" weight="bold" color={colors.gray600}>
         {codigo}
       </MText>
+      {p.inventario ? (
+        <MText size="md" weight="semibold" color={colors.gray600}>
+          Dalo de alta con su nombre y precio, y luego anota lo que llegó.
+        </MText>
+      ) : null}
       <View flexDirection="row" gap={10}>
         <Btn variant="secondary" size="lg" onPress={p.e.otro} testID="escaner-otro">
           Escanear otro
@@ -101,11 +112,20 @@ function Linea(p: { d?: string; texto: string; testID: string }): ReactElement {
   );
 }
 
+/** The hint before a code: each one on the ticket, or one product's movement. */
+const LISTO = {
+  ticket: 'Escanea uno tras otro. Cada código se agrega al ticket.',
+  inventario:
+    'Escanea un producto y se abre su movimiento: lo que llegó o lo que se echó a perder.',
+} as const;
+
 export function EscanerResultado(p: {
   e: UseEscaner;
   onAlta: (codigo: string) => void;
   /** «Pedro», or «el dueño». */
   dueno: string;
+  /** Inventario's escáner (EcInventario) rather than the ticket's. */
+  inventario: boolean;
 }): ReactElement {
   const s = p.e.estado;
   return (
@@ -121,7 +141,10 @@ export function EscanerResultado(p: {
       {s.tipo === 'duplicado' ? (
         <EscanerDuplicado e={s} onElegir={p.e.elegir} onOtro={p.e.otro} />
       ) : null}
-      <Desconocido e={p.e} onAlta={p.onAlta} />
+      <Desconocido e={p.e} inventario={p.inventario} onAlta={p.onAlta} />
+      {s.tipo === 'sinExistencias' ? (
+        <EscanerSinExistencias producto={s.p} codigo={s.codigo} dueno={p.dueno} onOtro={p.e.otro} />
+      ) : null}
       {s.tipo === 'deshecho' ? (
         <Linea
           d={GLYPHS.check}
@@ -130,10 +153,7 @@ export function EscanerResultado(p: {
         />
       ) : null}
       {s.tipo === 'listo' ? (
-        <Linea
-          texto="Escanea uno tras otro. Cada código se agrega al ticket."
-          testID="escaner-listo"
-        />
+        <Linea texto={p.inventario ? LISTO.inventario : LISTO.ticket} testID="escaner-listo" />
       ) : null}
     </View>
   );

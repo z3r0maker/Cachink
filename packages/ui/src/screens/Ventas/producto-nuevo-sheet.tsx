@@ -29,8 +29,10 @@ export interface ProductoNuevoSheetProps {
   /** «Pedro», or «el dueño». */
   readonly dueno: string;
   readonly onGuardar: (input: CrearProductoInput) => Promise<Product>;
-  /** Saved: the route puts it in the ticket and says so. */
+  /** Saved: the route puts it in the ticket and says so, or Inventario opens its entrada. */
   readonly onListo: (p: Product) => void;
+  /** The button once both answers are in; the ticket's by default. */
+  readonly alGuardar?: string;
 }
 
 function Nota({ dueno }: { dueno: string }): ReactElement {
@@ -46,6 +48,7 @@ function Nota({ dueno }: { dueno: string }): ReactElement {
 
 function Pie(p: {
   f: ProductoNuevoForm;
+  alGuardar: string;
   guardando: boolean;
   error: boolean;
   onAgregar: () => void;
@@ -68,7 +71,7 @@ function Pie(p: {
         onPress={p.onAgregar}
         testID="producto-nuevo-agregar"
       >
-        {p.f.ok ? 'Agregar y ponerlo en el ticket' : 'Escribe el nombre y el precio'}
+        {p.f.ok ? p.alGuardar : 'Escribe el nombre y el precio'}
       </Btn>
     </View>
   );
@@ -120,7 +123,15 @@ function Abierto(p: ProductoNuevoSheetProps): ReactElement {
       title="Producto nuevo en caja"
       closeLabel="Cerrar sin agregar"
       testID="producto-nuevo-sheet"
-      footer={<Pie f={f} guardando={guardando} error={error} onAgregar={() => void agregar()} />}
+      footer={
+        <Pie
+          f={f}
+          alGuardar={p.alGuardar ?? 'Agregar y ponerlo en el ticket'}
+          guardando={guardando}
+          error={error}
+          onAgregar={() => void agregar()}
+        />
+      }
     >
       <Formulario {...p} f={f} />
     </BottomSheet>

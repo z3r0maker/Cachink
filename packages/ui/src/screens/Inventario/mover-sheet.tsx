@@ -38,6 +38,8 @@ export interface MovimientoSheetProps {
   readonly tipo: TipoMovimiento;
   /** «Ana Robledo, Caja 1», from the session. */
   readonly firma: string;
+  /** Opened by the escáner (M-20): the product says «Del escáner». */
+  readonly delEscaner?: boolean;
   readonly onClose: () => void;
   readonly onGuardar: (m: NuevoMovimientoVivo) => Promise<void>;
 }
@@ -49,6 +51,7 @@ const unidadDe = (e: Existencia, raw: string): string =>
 function Campos(p: {
   readonly b: Borrador;
   readonly e: Existencia;
+  readonly delEscaner: boolean;
   readonly set: (b: Borrador) => void;
 }): ReactElement {
   const { b, e, set } = p;
@@ -56,7 +59,7 @@ function Campos(p: {
   return (
     <View gap={16}>
       <Tipos value={b.tipo} onChange={(tipo) => set(borradorInicial(tipo))} />
-      <Articulo e={e} />
+      <Articulo e={e} delEscaner={p.delEscaner} />
       <Cantidad
         label={merma ? '¿Cuánto se echó a perder?' : '¿Cuánto llegó?'}
         raw={b.raw}
@@ -93,7 +96,7 @@ export function MovimientoSheet(p: MovimientoSheetProps): ReactElement {
       }
     >
       <View gap={18}>
-        <Campos b={b} e={p.item} set={set} />
+        <Campos b={b} e={p.item} delEscaner={p.delEscaner ?? false} set={set} />
         <NotaFirma firma={p.firma} />
       </View>
     </BottomSheet>
