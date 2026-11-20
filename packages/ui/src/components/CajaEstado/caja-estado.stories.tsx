@@ -49,7 +49,7 @@ function Demo({ vista }: { vista: Vista }): ReactElement {
 }
 
 const meta: Meta<typeof Demo> = {
-  title: 'Track M / Pantallas / Estados',
+  title: 'Track M / Pantallas / Estados en Ventas',
   component: Demo,
   parameters: { layout: 'centered' },
 };
