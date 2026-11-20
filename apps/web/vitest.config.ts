@@ -11,8 +11,9 @@ export default mergeConfig(
     // The app tsconfig says `jsx: preserve` (Next), which vite's transform
     // honors and leaves JSX untransformed — invalid JS to the test runner.
     // Component tests (jsdom) need it compiled; `automatic` matches the app.
-    // (Vite 8: the option moved from `esbuild` to `oxc`.)
-    oxc: { jsx: 'automatic' },
+    // (Vite 8: the option moved from `esbuild` to `oxc`, and takes an object;
+    // vite 8.3's rolldown rejects the bare string `'automatic'`.)
+    oxc: { jsx: { runtime: 'automatic' } },
     resolve: {
       alias: {
         // See tests/support/server-only.ts: the guard stays in the source.
