@@ -22,6 +22,7 @@ import {
 } from '@xangarro/domain';
 import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { asegurarCodigoLibre, type CodigosDeProducto } from '../crear-producto/codigo-libre.js';
 
 export interface EditarProductoInput {
   readonly id: ProductId;
@@ -30,9 +31,12 @@ export interface EditarProductoInput {
 
 export class EditarProductoUseCase implements UseCase<EditarProductoInput, Product> {
   readonly #products: ProductsRepository;
+  readonly #codigos: CodigosDeProducto | undefined;
 
-  constructor(products: ProductsRepository) {
+  /** `codigos`: the portal's; a code another product has is refused (P-44). */
+  constructor(products: ProductsRepository, codigos?: CodigosDeProducto) {
     this.#products = products;
+    this.#codigos = codigos;
   }
 
   async execute(input: EditarProductoInput): Promise<Product> {
@@ -42,6 +46,9 @@ export class EditarProductoUseCase implements UseCase<EditarProductoInput, Produ
     }
     const merged = { ...existing, ...input.patch };
     ProductSchema.parse(merged);
+    if (input.patch.sku !== undefined) {
+      await asegurarCodigoLibre(this.#codigos, input.patch.sku, input.id);
+    }
     const updated = await this.#products.update(input.id, input.patch);
     if (!updated) {
       // Deleted between the read and the write: the same fact, the same error.

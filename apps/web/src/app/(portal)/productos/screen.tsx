@@ -101,8 +101,10 @@ function Body({
 }
 
 /** One open dialog per row action; the screen only routes the click. */
-function useRowDialogs() {
-  const [open, setOpen] = useState<{ action: RowAction; producto: Producto } | null>(null);
+function useRowDialogs(inicial: Producto | null) {
+  const [open, setOpen] = useState<{ action: RowAction; producto: Producto } | null>(
+    inicial === null ? null : { action: 'editar', producto: inicial },
+  );
   const close = () => setOpen(null);
   const target = (a: RowAction) => (open?.action === a ? open.producto : null);
   const dialogs = (
@@ -137,15 +139,19 @@ type Catalogo = ReturnType<typeof useCatalogo>;
 export function ProductosScreen({
   data,
   filtroInicial = 'todos',
+  editarInicial = null,
 }: {
   readonly data: ProductosData | null;
   /** `?filtro=bajo` — the Inicio banner and the sidebar chip land here. */
   readonly filtroInicial?: 'todos' | 'bajo';
+  /** `?editar=<id>` — «Ver ese producto» opens its drawer (P-44). */
+  readonly editarInicial?: string | null;
 }) {
   const session = useSession();
   const c = useCatalogo(data, filtroInicial);
   const mayWrite = canWrite(session.role);
-  const rowDialogs = useRowDialogs();
+  const inicial = mayWrite ? (data?.catalogo.find((p) => p.id === editarInicial) ?? null) : null;
+  const rowDialogs = useRowDialogs(inicial);
   const movimientos = data?.movimientos ?? [];
 
   return (

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { pgCodigos } from '../repositories/codigos';
 import { pgProductsRepository } from '../repositories/products';
 
 /**
@@ -25,16 +26,20 @@ export async function crearProducto(form: NuevoProductoForm): Promise<CrearProdu
   try {
     const session = await requireMember('admin');
     const businessId = session.business_id as BusinessId;
+    // A code another product has is refused, the product named (P-44, ADR-150).
     const product = await withTenant(businessId, (tx) =>
-      new CrearProductoUseCase(pgProductsRepository(tx, businessId)).execute({
-        product: { ...form, businessId },
-      }),
+      new CrearProductoUseCase(
+        pgProductsRepository(tx, businessId),
+        undefined,
+        'manual',
+        pgCodigos(tx),
+      ).execute({ product: { ...form, businessId } }),
     );
     revalidatePath('/productos');
     return { ok: true, id: product.id };
   } catch (error) {
     return failure(error, 'crearProducto', {
-      shown: ['PRODUCT_INVALID', 'INITIAL_STOCK_NOT_ALLOWED'],
+      shown: ['PRODUCT_INVALID', 'INITIAL_STOCK_NOT_ALLOWED', 'CODIGO_DUPLICADO'],
       retry: 'No pudimos crear el producto. Intenta de nuevo.',
     });
   }

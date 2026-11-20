@@ -38,4 +38,5 @@ export * from './rango-fechas.js';
 export * from './exportaciones.js';
 export * from './estados-periodo.js';
 export * from './owner-nombre.js';
+export * from './productos-codigo.js';
 export * from './datos-negocio.js';
