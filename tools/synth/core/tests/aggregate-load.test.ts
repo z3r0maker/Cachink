@@ -77,7 +77,9 @@ describe('writeCorridaFile', () => {
     const c = CorridaSchema.parse(JSON.parse(readFileSync(join(dir, 'corrida.json'), 'utf8')));
     assert.match(c.app_commit, /^[0-9a-f]{40}$/);
     assert.equal(typeof c.app_dirty, 'boolean');
-  });
+    // `git status` over this repo and its worktrees takes seconds while every package's tests run
+    // at once in the pre-push hook; 5 s timed out there.
+  }, 30_000);
 });
 
 describe('findingKeys', () => {
