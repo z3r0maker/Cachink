@@ -2078,3 +2078,21 @@ WhatsApp).
   - **Acceptance:** `ScreenState` ya no tiene el miembro; ninguna cadena «Próximamente» ni
     «llega pronto» queda en `apps/web/src`; las pruebas de `session/gating` pinan la precedencia
     nueva sin ese estado; y `pnpm lint:design` sigue en cero.
+
+### P-47 Editar las plantillas de gastos recurrentes [baja]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** — · **Trigger:** que alguien pida cambiar o detener una plantilla antes de que se dispare
+      **Surfaced by:** X-09, al colapsar `ROADMAP.md` el 2026-11-20: era `S9-E2-T01`, aparcada el
+      2026-04-24 con esta misma condición, y sigue siendo cierta.
+- **What:** una plantilla de gasto recurrente se puede crear y borrar en la capa de datos
+  (`RecurringExpensesRepository` tiene `create`, `findById`, `findDue`, `markFired` y `delete`) pero
+  **no tiene `update`**, no hay caso de uso de alta ni de edición en `packages/application` — sólo
+  `ProcesarGastoRecurrenteUseCase` y `DescartarGastoRecurrenteUseCase`, que son por ocurrencia — y
+  el portal no tiene pantalla de plantillas: lo único que menciona la palabra es el interruptor de
+  aviso «Gasto recurrente confirmado». Verificado el 2026-11-20.
+- **Why the portal:** configurar el negocio es del portal (ADR-053 §3). El teléfono paga la
+  ocurrencia (`gastos-pagar-recurrente`, M-08) y la plantilla avanza su calendario; cambiar el monto
+  o la frecuencia es configuración, no captura.
+- **Acceptance:** el dueño cambia el monto y la frecuencia de una plantilla y detiene otra; la
+  siguiente ocurrencia respeta el cambio; un Playwright lo prueba contra datos reales, y la bitácora
+  de auditoría guarda quién la cambió.

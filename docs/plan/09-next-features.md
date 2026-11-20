@@ -695,7 +695,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
       Done: 2026-11-20 · cerrada por decisión del dueño, sin commit propio: la entregaron M-05…M-09 ·
       las once pantallas que esta tarea pedía existen en `packages/ui/src/screens/` — Activation,
       Login (el NIP), Ventas, Checkout (el ticket), AbrirTurno/Turno/TurnoDeOtro, Gastos, Productos
-      con su quick-add, el cierre en `/turno/cierre`, la píldora de sync en AppShell, el comprobante
+      con su quick-add, el cierre en `/cierre`, la píldora de sync en AppShell, el comprobante
       en `Checkout/comprobante-acciones.ts` y Settings — y el ADR-117 retiró
       `design-reference/operador/` como especificación, que era a la vez su «How» y su Acceptance
       («each phone screen matches its Track O counterpart at 375 px»), así que la medida que esta
@@ -1602,6 +1602,40 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
 - **Acceptance:** with release 1 deployed, a staff member with a passkey reaches the console in one tap, and
   `/login` offers no password field; a used or expired link registers nothing; a member whose passkeys were
   reset with `--reset` cannot sign in until a new link is used.
+
+### N-86 Virtualizar `<List>` en web cuando una lista crezca [baja]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** — · **Trigger:** que alguna lista del portal o de la caja web pase de ~200 filas en un negocio real
+      **Surfaced by:** X-09, al colapsar `ROADMAP.md` el 2026-11-20: era `M-1-PR4.5-T10`, escrita en
+      la auditoría M-1 de abril con esta misma condición, y es la única de esa auditoría que el
+      ADR-053 y el ADR-117 no dejaron sin objeto.
+- **What:** cambiar el cuerpo de `packages/ui/src/components/List/list.tsx` por
+  `@tanstack/react-virtual`. La API pública de `<List>` ya está formada para esto y los dos archivos
+  lo dicen en su encabezado (`list.tsx`, `list.shared.tsx`): es un cambio de un archivo, sin tocar
+  a quien la usa. El objetivo nativo se queda como está.
+- **Why not now:** ningún inquilino tiene listas de ese tamaño, y virtualizar antes cuesta una
+  dependencia y rompe el scroll de las pruebas de Playwright sin ganar nada medible.
+- **Acceptance:** la lista más larga del seed renderiza con el mismo HTML visible y las pruebas de
+  Playwright que la recorren siguen verdes; una lista de 1,000 filas no monta 1,000 nodos.
+
+### N-87 `ConsentModal` no tiene quien la monte [deuda] [media]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+      **Surfaced by:** X-09, al colapsar `ROADMAP.md` el 2026-11-20: es lo que quedó de
+      `M-1-STEP0-T02`, que pedía posponer el modal para que no se auto-montara antes del asistente.
+      Ya no se auto-monta, porque ya no se monta en ninguna parte, y eso es la pregunta nueva.
+- **What:** `packages/ui/src/screens/ConsentModal/` existe, tiene sus pruebas
+  (`packages/ui/tests/screens/consent-modal.test.tsx`, cuatro casos) y la exporta el barril de
+  `screens`, pero **ningún archivo de `apps/mobile`, `apps/web` ni `packages/ui` la usa**; tampoco
+  existe ya el `TelemetryBridge` que la montaba. Verificado el 2026-11-20.
+- **Decide first:** si el consentimiento de telemetría que pedía el ADR-027 lo cumple hoy el
+  interruptor de reportes de fallas en Ajustes (hay flujo de Maestro,
+  `settings-crash-reporting-toggle.yaml`), o si falta un momento de consentimiento explícito. Es
+  decisión de privacidad antes que de código, y se cruza con el renglón «Decidir casilla vs. botón»
+  de `docs/launch/production-readiness.md`.
+- **Acceptance:** o la pantalla se monta donde la decisión diga, con un flujo que lo pruebe, o se
+  retira con su barril y sus pruebas y el ADR-027 recibe su consecuencia escrita. Lo que no puede
+  quedarse es una pantalla construida que nadie abre.
 
 ---
 

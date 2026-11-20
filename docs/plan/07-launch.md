@@ -111,16 +111,36 @@
 - **Steps:** GitHub rename `z3r0maker/Cachink` → `Xangarro` (GitHub redirects the old URL); local `mv ~/Downloads/Cachink! ~/Downloads/Cachink` **without `!`** (the directory is already `Cachink`; a stray `~/Downloads/Cachink!` sits beside it); update `~/.claude/projects/*` memory pointers if any; same for `CachinkLanding` → `XangarroLanding`. Do it when no track branch is mid-flight.
 - **Acceptance:** `git remote -v` shows the new name; CI still runs.
 
-### X-09 Reset de ROADMAP.md [media] [bloq]
+### X-09 Reset de ROADMAP.md [alta] [bloq]
 
-- [ ] Status · **Blocked by:** X-02
-      **Remaining (2026-11-20, verificado contra el repo):** todo, y más urgente y más barato de lo que su `[media]` sugiere. ROADMAP.md tiene **1,536 líneas** contra una aceptación de «< 200», y `ROADMAP-archive.md` ya existe con 434: el destino está puesto. Su «Current phase» dice «Audit M-1 — Mobile-First UI/UX Audit» con fechas del 2026-04-28, siete meses atrás, y el §0 de CLAUDE.md manda a cada sesión a leer este archivo para el teléfono. Su propia sección «Archive» dice «(No phases archived yet.)» mientras el archivo ya guarda las fases 0 a 1F. Su lista de candidatos de fase 2 sigue ordenando «do not plan» sobre CoDi y sobre Clip/Mercado Pago, que hoy son el track 22 y O-19/O-27/O-28. Y el patrón que esta tarea cita para colapsar, «CLAUDE.md §12», **no existe**: CLAUDE.md va del §0 al §11 desde el ADR-100, y lo citan tres archivos (esta tarea, `ROADMAP.md:3` y `ROADMAP-archive.md:4`). De las once citas a CLAUDE.md que ROADMAP.md lleva, nueve apuntan a secciones que ya no dicen lo citado: §12 y §14 no existen, §8.4 y §7.1/§7.4 (dos veces) perdieron su subsección, §9 cambió de tema, y §1 se cita tres veces por el contrato de pestañas que §1 ya no define; sobreviven §3 y §2.3. Nada de esto necesita X-02 — colapsar un roadmap no espera una corrida de integración — así que la barrera es peso muerto y el nivel está mal puesto.
-- **Steps:** collapse everything before this pivot into `ROADMAP-archive.md` (pattern in CLAUDE.md §12); ROADMAP.md becomes: current phase = Xangarro launch, pointer to `docs/plan/`, "last updated" truthful.
+- [x] Status · **Blocked by:** — · **Blocks:** X-10
+      Done: 2026-11-20 · decisión del dueño: nivel `[alta]`, y la barrera X-02 fuera, porque
+      colapsar un roadmap no espera una corrida de integración. `ROADMAP.md` pasó de **1,536 líneas
+      a 140**: la fase actual (el lanzamiento, con el ADR-053 como forma del producto y el estado
+      real al 2026-11-20), una tabla de dónde está cada cosa, la sección del teléfono que el §0 de
+      CLAUDE.md manda a leer, la tabla de fases cerradas, el patrón de colapso escrito ahí mismo y
+      el registro de lo que se archivó. Trece secciones se movieron a `ROADMAP-archive.md` (434 →
+      1,850 líneas), sin copiar los resúmenes de las fases 0 a 1F porque su detalle ya estaba ahí.
+      Ninguna de las 38 casillas abiertas era trabajo vivo: el ADR-053 y el ADR-117 dejaron sin
+      objeto la alineación con los mocks (UXD, 17), las conversiones de modal a ruta (5) y las
+      pantallas de Director; las cinco de «Resilience Foundation» ya decían cerradas en el propio
+      Current Status; las tres de «Beta feedback» eran elogios sin acción; y de las cinco de «Step
+      0», tres estaban hechas — el `<Pressable>` del `Btn` (su docstring cita la tarea), el
+      `useSafeAreaInsets()` de `modal.native.tsx`, y el `ConsentModal` que ya no se auto-monta — y
+      una no tenía caso, porque los tres «self-imports» sospechosos de `.native.tsx` son
+      `import type`, que se borra al compilar. Tres sí seguían vivas y se escribieron como tareas:
+      **P-47** (editar plantillas de gastos recurrentes, era `S9-E2-T01`), **N-86** (virtualizar
+      `<List>` en web, era `M-1-PR4.5-T10`) y **N-87** (`ConsentModal` sin consumidor, lo que quedó
+      de `M-1-STEP0-T02`). El patrón que esta tarea citaba, «CLAUDE.md §12», no existe desde el
+      ADR-100: ahora está escrito en `ROADMAP.md` y `ROADMAP-archive.md` ya no lo cita. De las once
+      citas a CLAUDE.md que `ROADMAP.md` llevaba, nueve apuntaban a secciones renumeradas y se
+      fueron con sus fases; las dos que sobrevivían (§3 y §2.3) no están en el archivo nuevo.
+- **Steps:** collapse everything before this pivot into `ROADMAP-archive.md`; ROADMAP.md becomes: current phase = Xangarro launch, pointer to `docs/plan/`, "last updated" truthful.
 - **Acceptance:** ROADMAP.md < 200 lines and accurate.
 
 ### X-10 Compuerta del checklist de lanzamiento [critica] [bloq]
 
-- [ ] Status · **Blocked by:** X-01, X-02, X-03, X-04, X-05, X-09
+- [ ] Status · **Blocked by:** X-01, X-02, X-03, X-04, X-05
       **Remaining (2026-11-20, verificado contra el repo):** de sus siete renglones, seis son acciones del dueño en consolas ajenas (IMPI, DMARC, Sentry, PITR, llaves vivas de Stripe, la guardia de la primera semana) y el único entregable del repo es `docs/launch-checklist.md`, que está peor que viejo. Es el único documento vivo fuera de `archive/` y `docs/archive/` que todavía dice `cachink.mx` (en minúsculas, por eso un `grep Cachink` no lo ve): su paso 2 manda a **comprar `cachink.mx`** y a desplegar `docs/landing/index.html`, un prototipo de 141 líneas que sigue en el disco, cuando el dominio ya está vivo y el landing es `apps/landing/` desde el ADR-084. Su paso 8 apunta a `docs/beta/invitees.csv`, que no existe, y describe «5–10 emprendedoras» por TestFlight donde N-30 pide 10–20 negocios con criterios de salida. Su paso 11 etiqueta `v0.1.0` «MVP iOS public beta» cuando la app va en 1.0.0 (2), compilada y subida el 2026-11-18. Su paso 5 llama a Sentry «optional» mientras los pasos de **esta misma tarea** lo exigen en app y portal. Y toda la mitad «Deferred» apunta a pilas retiradas: el escritorio en Tauri (archivado, F-02) y PowerSync, cuyo `PRODUCTION_POWERSYNC_URL` no aparece en ningún otro archivo del repo. `docs/beta/testflight-setup.md` arrastra el mismo dominio viejo. El comentario de `scripts/plan-board.ts` que llama a este archivo «pre-rebrand and stale» tiene razón, y lo que escribí el 2026-11-19 dudándolo estaba mal.
 - **Steps:** IMPI trademark result recorded; domain live; DMARC passing; Sentry receiving from app + portal; backups: Supabase PITR enabled on prod; Stripe live keys; `docs/launch-checklist.md` rewritten for Xangarro; on-call: who watches Sync health + Stripe failures the first week.
 - **Acceptance:** every line checked by a human.
