@@ -20,6 +20,7 @@
     "clean": "rm -rf dist .turbo",
     "stack": "tsx src/cli/stack.ts",
     "test:stack": "SYNTH_STACK=1 vitest run .integration.test",
+    "test:db": "SYNTH_DB=1 vitest run success.integration",
     "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
     "run-one": "tsx src/cli/run-one.ts",
     "isolation": "tsx src/cli/isolation.ts",

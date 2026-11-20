@@ -11,6 +11,7 @@
 export { asOwner, asTenant } from './connection.js';
 export { codeOf, freeSlots, mintCodeFor } from './codes.js';
 export { resetThrottle, seedDoorProducts, type ProductoPuerta } from './door.js';
+export { latestMailTo, linkIn } from './outbox.js';
 export {
   addMember,
   clientIp,

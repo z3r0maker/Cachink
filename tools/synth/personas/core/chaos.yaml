@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=../../schemas/persona.schema.json
+#
+# Spec §7, non-human: does what a hurried or careless person does by accident,
+# on purpose. Aimed at what the deterministic chaos-1…4 and operador-chaos specs
+# do not cover (track S §2). Not a segment of the market: it declares weight 0
+# and its findings count at the human personas' summed weight (S-10).
+id: chaos
+kind: chaos
+tier: core
+status: hypothesis
+market_weight:
+  value: 0
+  source: estimate
+business:
+  type: cualquiera
+  team: solo
+  formality: informal
+device:
+  viewport: [1280, 800]
+  network: wifi
+  input: mouse
+comparators: []
+goals:
+  - terminar la misión aunque sea por el camino más raro
+knows:
+  - usar un navegador
+does_not_know: []
+behaviors:
+  - trait: da doble clic en cada botón que guarda o cobra
+    source: hypothesis
+  - trait: regresa con el botón atrás a media operación y luego sigue
+    source: hypothesis
+  - trait: escribe precio 0 o cantidades con decimales cuando la pantalla lo permite
+    source: hypothesis
+  - trait: escribe nombres con ñ y acentos, y textos mucho más largos de lo normal
+    source: hypothesis
+  - trait: recarga la página a media venta con F5
+    source: hypothesis
+patience:
+  max_steps: 40
+  abandon_triggers:
+    - la misma pantalla de error tres veces seguidas

@@ -42,6 +42,36 @@ describe('FIXTURES', () => {
     assert.deepEqual(h.products, FIXTURES['negocio-con-catalogo-minimo'].products);
   });
 
+  it('sin-cuenta mints nothing: the actor signs up, so there is no tenant to seed', () => {
+    const f = FIXTURES['sin-cuenta'];
+    assert.equal(f.signup, true);
+    assert.deepEqual([f.products.length, f.operators.length, f.history.days], [0, 0, 0]);
+    for (const [seed, other] of Object.entries(FIXTURES)) {
+      if (seed !== 'sin-cuenta') assert.notEqual(other.signup, true, seed);
+    }
+  });
+
+  it('operador-sin-permiso is xangarro, with one operator who cannot cancel and something to sell', () => {
+    const f = FIXTURES['operador-sin-permiso'];
+    assert.equal(f.plan, 'xangarro');
+    assert.deepEqual(
+      f.operators.map((o) => o.canCancelSales),
+      [false],
+    );
+    assert.ok(f.products.length >= 1);
+  });
+
+  it('xangarrote-permiso-apagado signs in an operator with the permission off, beside one with it on', () => {
+    const f = FIXTURES['xangarrote-permiso-apagado'];
+    assert.equal(f.plan, 'xangarrote');
+    // The runner signs in as the first: the one the owner turned off.
+    assert.deepEqual(
+      f.operators.map((o) => o.canCancelSales),
+      [false, true],
+    );
+    assert.ok(f.operators.length <= PLAN_LIMITS.xangarrote.operators);
+  });
+
   it('every NIP is four digits (ADR-072), and every price is whole centavos', () => {
     for (const f of Object.values(FIXTURES)) {
       for (const op of f.operators) assert.match(op.nip, /^\d{4}$/);

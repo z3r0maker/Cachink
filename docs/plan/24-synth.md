@@ -45,6 +45,11 @@ It is never shipped, never a CI gate, and never pointed at production. The desig
     - Reactions come from runner signals only.
     - Personas are geometric faces with a pictogram of the business type.
     - The boards are on the Synth Studio canvas, https://claude.ai/artifact/HrVjKALmE6H7zTFaCDAFvp.
+14. **Signup confirmation (2026-11-20, S-10):** the actor has only a browser, so when the confirmation email
+    lands in the corrida's outbox the runner opens its link in the actor's tab, as tapping it on the phone
+    would. The run folder gets `confirmation.json`, so the judge knows the runner moved the tab.
+15. **Non-human weight (2026-11-20, S-10):** `chaos` and `device` declare `market_weight` 0. When findings are
+    ranked they count at the human personas' summed weight: what they break, they break for every segment.
 
 ## 2. What Phase 0 found (corrections to the spec)
 
@@ -318,7 +323,20 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-10 Personas y escenarios v1 [alta]
 
-- [ ] Status · **Blocked by:** S-09
+- [x] Status · **Blocked by:** S-09
+      Done: 2026-11-20 · `feat/synth-s10` · Personas `lupita-abarrotes`, `operador` and `chaos` join `taquero`.
+      Scenarios `onboarding-camino-a`, `corte-de-caja`, `permisos-operador` (xangarro, Luis never allowed) and
+      `permisos-operador-xangarrote` (Luis's permission off, Ana's on) join both `primera-venta`s. New seeds:
+      `operador-sin-permiso`, `xangarrote-permiso-apagado` and `sin-cuenta`, for which the runner mints
+      nothing. The actor signs up with an address it is given, and success finds the business by that
+      address (decision 14). New checks: `onboarding-terminado` counts answered steps through the domain's
+      `WIZARD_STEP_KEYS`, which the wizard now reads too, and `corte-cuadrado`. Permission success is the sale
+      still standing. The outbox reader moved to `@xangarro/testing/tenant`. `optimal_steps` were walked by
+      hand on a corrida stack: 25, 11, 12, 12 and 7. The phone's 6 was not re-measured. `test:db` runs every
+      scenario's checks against a seeded run (20 tests). The walks found two app bugs. The wizard's yes/no
+      cards keep the previous question's selection, and a card shown selected that way saves nothing. The
+      register's sidebar showed «Ana Robledo» and «Taquería Don Pedro» while Luis was signed in on another
+      business.
 - **What:**
   - Personas: `lupita-abarrotes`, `taquero`, `operador`, `chaos`, all `hypothesis`, with the weights in §1.
   - Scenarios: `onboarding-camino-a`, `primera-venta` (web and phone), `corte-de-caja`, `permisos-operador`.

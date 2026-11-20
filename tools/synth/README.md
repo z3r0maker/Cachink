@@ -19,6 +19,7 @@ All from `@xangarro/synth-core`: `pnpm --filter @xangarro/synth-core <command>`.
 | `isolation`                              | Proves the actor cannot leave its tools, and writes `isolation.md`.            |
 | `judge <run folder>…`                    | Opus judges each run, read-only; findings go to the corrida's `findings.json`. |
 | `aggregate <corrida folder>`             | Dedups and prioritises the findings; writes `metrics.json` and `report.md`.    |
+| `test:db`                                | Each scenario's success checks against a seeded run, on the database in env.   |
 
 ## The actor is a black box
 

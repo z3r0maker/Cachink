@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# Spec §6.2: the operator tries to undo a sale and must be stopped with a clear
+# message. On xangarro there are no per-operator permissions (Luis was never
+# allowed to cancel). Success is the guard holding: the sale still stands,
+# whatever the actor reports. Whether the message was clear is the judge's.
+# The sale is made first, since a turno's tickets live in the browser's register.
+id: permisos-operador
+title: Intentar cancelar una venta sin permiso
+mission: >
+  Abre la caja con $500 de fondo. Cóbrale a un cliente un refresco en
+  efectivo. Luego el cliente se arrepiente y te pide que le canceles la venta.
+  Cancélala.
+runner: web
+start:
+  seed: operador-sin-permiso
+  auth_as: operador
+  url: /operador/caja
+success:
+  - check: venta-efectivo
+    params:
+      partidas: 1
+# Measured by hand on 2026-11-20 (S-10): the sale in 6 (fondo $500, «Abrir
+# turno», refresco, «Cobrar», «Exacto», «Registrar venta»), then «Ventas», the
+# sale, «Cancelar venta», a reason, the NIP, «Cancelar venta»: refused with
+# «No tienes permiso para cancelar ventas».
+optimal_steps: 12
+interruptions: []
+applies_to: [human, chaos]

@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../../schemas/persona.schema.json
+#
+# Spec §7: an employee on the shop's tablet, who only works the register.
+# Stresses permissions and the messages that block him. Every behavior is a
+# hypothesis until evidence anchors it (S-17).
+id: operador
+kind: human
+tier: core
+status: hypothesis
+market_weight:
+  value: 0.1
+  source: estimate
+business:
+  type: abarrotes
+  team: empleado en un negocio con dueño
+  formality: informal
+device:
+  viewport: [800, 1280]
+  network: wifi
+  input: touch
+comparators:
+  - la caja registradora de su trabajo anterior
+goals:
+  - atender rápido al cliente que tiene enfrente
+  - que al final del turno le cuadre la caja
+knows:
+  - cobrar en efectivo y dar cambio
+  - su propio NIP
+does_not_know:
+  - permisos
+  - plan
+  - sincronizar
+  - turno
+behaviors:
+  - trait: hace lo que el cliente le pide sin preguntar antes si le está permitido
+    source: hypothesis
+  - trait: si la pantalla le dice que no, prueba una segunda vez antes de rendirse
+    source: hypothesis
+  - trait: cuando algo no le deja seguir, busca en la pantalla a quién pedirle ayuda
+    source: hypothesis
+  - trait: cuenta el efectivo del cajón una vez y escribe el total sin centavos
+    source: hypothesis
+patience:
+  max_steps: 30
+  abandon_triggers:
+    - un mensaje de bloqueo que no dice qué hacer ni a quién pedirlo
+    - le pide un dato del dueño, como su correo o su contraseña

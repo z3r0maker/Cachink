@@ -17,6 +17,9 @@ success:
   - check: venta-efectivo
     params:
       partidas: 2
-optimal_steps: 6
+# From the one-product sale walked by hand on 2026-11-20 (S-10), plus the
+# second product: fondo $500, «Abrir turno», refresco, galletas, «Cobrar»,
+# «$100.00», «Registrar venta».
+optimal_steps: 7
 interruptions: []
 applies_to: [human, chaos]

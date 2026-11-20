@@ -37,13 +37,23 @@ export async function seedRunTenant(c: Common, dir: string): Promise<RunAccess> 
     allowedHosts: c.config.allowed_hosts,
     label: c.persona.id,
   });
-  const note = { biz: access.tenant.biz, operators: access.operators.map((o) => o.nombre) };
+  const note = {
+    biz: access.tenant?.biz ?? null,
+    ...(access.tenant === null ? { signup: access.account.email } : {}),
+    operators: access.operators.map((o) => o.nombre),
+  };
   writeFileSync(join(dir, 'access.json'), `${JSON.stringify(note, null, 2)}\n`);
   return access;
 }
 
 /** What the persona has at hand once the runner walked the door, in its own words. */
 export function accessLines(scenario: Scenario, access: RunAccess): string[] {
+  if (access.tenant === null) {
+    return [
+      `Para crear tu cuenta usa tu correo, ${access.account.email}, y la contraseña ${access.account.password}.`,
+      'Cuando te llegue el correo para confirmar, se abre solo en tu navegador.',
+    ];
+  }
   const op = access.operators[0];
   if (scenario.start.auth_as === 'operador' && op !== undefined) {
     return [
@@ -61,7 +71,8 @@ export interface ActInput extends Common {
   /** An empty folder: the actor's working directory. */
   readonly empty: string;
   readonly startedAt: Date;
-  readonly biz: string;
+  /** The run's business, once the actor is done: a signup's is only known then. */
+  readonly biz: () => Promise<string | null>;
   /** What the persona has at hand, in its own words. */
   readonly access: readonly string[];
   readonly mcpConfig: unknown;
@@ -99,7 +110,9 @@ export async function actAndRecord(a: ActInput): Promise<Run> {
   writeFileSync(join(a.dir, 'actor.stderr.log'), actor.stderr);
   const decided = decideOutcome(actor);
   const failed = decided.outcome === 'error';
-  const checks = failed ? [] : await evaluateSuccess(a.biz, a.scenario.success, a.successWaitMs);
+  const checks = failed
+    ? []
+    : await evaluateSuccess(await a.biz(), a.scenario.success, a.successWaitMs);
   const run = buildRun(a, { actor, decided, checks, fingerprints });
   writeFileSync(join(a.dir, 'run.json'), `${JSON.stringify(run, null, 2)}\n`);
   return run;

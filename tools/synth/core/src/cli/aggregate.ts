@@ -13,6 +13,7 @@ import {
   runMetrics,
 } from '../aggregate/metrics';
 import { renderReport } from '../aggregate/report';
+import { marketWeights } from '../aggregate/weights';
 import { PersonaSchema } from '../schemas/persona';
 import { ScenarioSchema } from '../schemas/scenario';
 import { reportsDir } from '../stack/names';
@@ -28,17 +29,19 @@ const SYNTH = join(REPO, 'tools/synth');
 
 function catalogue() {
   const tree = readTree(SYNTH);
-  const personas = new Map<string, PersonaFacts>();
+  const found = tree
+    .filter((f) => f.path.startsWith('personas/'))
+    .map((f) => PersonaSchema.parse(parse(f.text)));
+  const weights = marketWeights(
+    found.map((p) => ({ id: p.id, kind: p.kind, weight: p.market_weight.value })),
+  );
+  const personas = new Map<string, PersonaFacts>(
+    found.map((p) => [p.id, { market_weight: weights.get(p.id) ?? 0, status: p.status }]),
+  );
   const optimal = new Map<string, number>();
-  for (const f of tree) {
-    if (f.path.startsWith('personas/')) {
-      const p = PersonaSchema.parse(parse(f.text));
-      personas.set(p.id, { market_weight: p.market_weight.value, status: p.status });
-    }
-    if (f.path.startsWith('scenarios/')) {
-      const s = ScenarioSchema.parse(parse(f.text));
-      optimal.set(s.id, s.optimal_steps);
-    }
+  for (const f of tree.filter((t) => t.path.startsWith('scenarios/'))) {
+    const s = ScenarioSchema.parse(parse(f.text));
+    optimal.set(s.id, s.optimal_steps);
   }
   return { personas, optimal };
 }

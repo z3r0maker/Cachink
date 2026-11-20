@@ -69,3 +69,24 @@ export function wantsCredit(answers: WizardAnswers): boolean | undefined {
   if (answers.vendeACredito !== undefined) return answers.vendeACredito;
   return answers.metodosCobro?.includes('Crédito') ? true : undefined;
 }
+
+/**
+ * Which answers each of the eight steps holds, in order (N-12). Skipping a
+ * step clears its keys; the wizard's screens and Synth's onboarding checks
+ * (S-10) both read the steps from here.
+ */
+export const WIZARD_STEP_KEYS: readonly (readonly WizardAnswerKey[])[] = [
+  ['nombre', 'tipoNegocio'],
+  ['metodosCobro'],
+  ['manejaInventario'],
+  ['manejaCajaEfectivo'],
+  ['vendeACredito'],
+  ['whatsapp', 'hasLogo'],
+  ['tieneDatosFiscales'],
+  ['personasQueCobran'],
+];
+
+/** How many steps hold at least one answer; `false` is an answer, a skipped step is not. */
+export function answeredSteps(answers: WizardAnswers): number {
+  return WIZARD_STEP_KEYS.filter((keys) => keys.some((k) => answers[k] !== undefined)).length;
+}

@@ -8,57 +8,47 @@
  * check never has to refuse a click.
  */
 
-import type { WizardAnswerKey, WizardAnswers } from '@xangarro/domain';
+import { WIZARD_STEP_KEYS, type WizardAnswerKey, type WizardAnswers } from '@xangarro/domain';
 
 export interface StepDef {
   readonly title: string;
   readonly hint: string;
-  /** Cleared when the step is skipped. */
+  /** Cleared when the step is skipped: the domain's `WIZARD_STEP_KEYS`. */
   readonly keys: readonly WizardAnswerKey[];
 }
 
-export const STEPS: readonly StepDef[] = [
-  {
-    title: '¿Cómo se llama tu negocio y qué vendes?',
-    hint: 'Así personalizamos tu catálogo.',
-    keys: ['nombre', 'tipoNegocio'],
-  },
-  {
-    title: '¿Cómo te pagan tus clientes?',
-    hint: 'Elige todas las que uses.',
-    keys: ['metodosCobro'],
-  },
+/** Each step's words, in the domain's order of steps. */
+const COPY: readonly Omit<StepDef, 'keys'>[] = [
+  { title: '¿Cómo se llama tu negocio y qué vendes?', hint: 'Así personalizamos tu catálogo.' },
+  { title: '¿Cómo te pagan tus clientes?', hint: 'Elige todas las que uses.' },
   {
     title: '¿Llevas inventario de tus productos?',
     hint: 'Cuántas piezas tienes y cuándo se acaban.',
-    keys: ['manejaInventario'],
   },
   {
     title: '¿Manejas una caja de efectivo?',
     hint: 'Abrir y cerrar turno contando el efectivo.',
-    keys: ['manejaCajaEfectivo'],
   },
-  {
-    title: '¿Vendes a crédito?',
-    hint: 'Entregas hoy y tu cliente te paga después.',
-    keys: ['vendeACredito'],
-  },
+  { title: '¿Vendes a crédito?', hint: 'Entregas hoy y tu cliente te paga después.' },
   {
     title: '¿Cómo te contactan tus clientes?',
     hint: 'Tu WhatsApp aparece en tus comprobantes.',
-    keys: ['whatsapp', 'hasLogo'],
   },
   {
     title: '¿Ya tienes tus datos fiscales a la mano?',
     hint: 'RFC y régimen. Los capturas después en Negocio.',
-    keys: ['tieneDatosFiscales'],
   },
   {
     title: '¿Cuántas personas cobran en tu negocio?',
     hint: 'Cada una con su propia caja y su NIP.',
-    keys: ['personasQueCobran'],
   },
 ];
+
+export const STEPS: readonly StepDef[] = WIZARD_STEP_KEYS.map((keys, i) => ({
+  title: COPY[i]?.title ?? '',
+  hint: COPY[i]?.hint ?? '',
+  keys,
+}));
 
 export const TOTAL_STEPS = STEPS.length;
 
