@@ -1,5 +1,6 @@
 'use server';
 
+import { pesosToCentavos } from '@xangarro/domain';
 import {
   descartarRevision,
   registrarFacturas,
@@ -56,7 +57,9 @@ function seleccionesDe(form: FormData): Seleccion[] {
     const categoria = CATEGORIAS_GASTO.find((c) => c === field(form, `categoria-${uuid}`));
     if (uuid === '' || categoria === undefined) return [];
     const proyecto = field(form, `proyecto-${uuid}`);
-    return [{ uuid, categoria, projectId: proyecto === '' ? null : proyecto }];
+    const cargo = pesosToCentavos(field(form, `cargo-${uuid}`));
+    const usd = cargo === null ? {} : { cargoMxn: cargo };
+    return [{ uuid, categoria, projectId: proyecto === '' ? null : proyecto, ...usd }];
   });
 }
 

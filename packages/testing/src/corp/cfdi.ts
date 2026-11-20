@@ -18,6 +18,8 @@ export interface CfdiDePrueba {
   readonly iva?: string;
   readonly isr?: string;
   readonly ivaRetenido?: string;
+  /** A USD invoice at this rate (E-42); MXN without it. */
+  readonly tipoCambio?: string;
 }
 
 export const RFC_MEXIA_PRUEBA = 'MEX261001AB1';
@@ -63,6 +65,9 @@ const DEFECTO = {
   ivaRetenido: '373.33',
 } as const;
 
+const moneda = (tc: string | undefined): string =>
+  tc === undefined ? 'Moneda="MXN"' : `Moneda="USD" TipoCambio="${tc}"`;
+
 export function cfdiXml(cambios: CfdiDePrueba = {}): string {
   const o = { ...DEFECTO, uuid: uuidDePrueba(), ...cambios };
   const { subtotal, iva, isr, ivaRetenido, emisor } = o;
@@ -72,7 +77,7 @@ export function cfdiXml(cambios: CfdiDePrueba = {}): string {
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" ' +
     'xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="H" Folio="118" ' +
-    `Fecha="${o.fecha}T10:15:00" SubTotal="${subtotal}" Moneda="MXN" ` +
+    `Fecha="${o.fecha}T10:15:00" SubTotal="${subtotal}" ${moneda(o.tipoCambio)} ` +
     `Total="${pesos(total)}" TipoDeComprobante="I" Exportacion="01" MetodoPago="${metodo}" ` +
     `FormaPago="${metodo === 'PPD' ? '99' : '03'}" LugarExpedicion="06600" Sello="c2VsbG8=12AB34CD">` +
     `<cfdi:Emisor Rfc="${emisor.rfc}" Nombre="${esc(emisor.nombre)}" RegimenFiscal="612"/>` +

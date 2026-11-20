@@ -6,7 +6,7 @@ import {
   MontoInvalidoError,
   postMovement,
   resumenDelMes,
-  TipoCambioInvalidoError,
+  CargoMxnFaltanteError,
   type JournalLine,
 } from '../../src/corp/ledger/index.js';
 
@@ -17,7 +17,7 @@ describe('gastoDesdeCaptura', () => {
     moneda: 'MXN',
     total: 1_160_00n,
     iva: 160_00n,
-    tipoCambio: null,
+    cargoMxn: null,
     deducible: true,
   } as const;
 
@@ -30,16 +30,28 @@ describe('gastoDesdeCaptura', () => {
     assert.equal(usd, null);
   });
 
-  it('converts a USD charge at the rate of the day and keeps the original', () => {
+  it('books a USD charge at what the bank charged in pesos, and keeps the dollars and the rate', () => {
     const { movement, usd } = gastoDesdeCaptura({
       ...base,
       moneda: 'USD',
       total: 20_00n,
       iva: 0n,
-      tipoCambio: '18.42',
+      cargoMxn: 372_10n,
     });
-    assert.equal(movement.subtotal, 368_40n);
-    assert.deepEqual(usd, { montoOriginal: 20_00n, tipoCambio: '18.42' });
+    assert.equal(movement.subtotal, 372_10n);
+    assert.deepEqual(usd, { montoOriginal: 20_00n, tipoCambio: '18.6050' });
+  });
+
+  it('splits the IVA of a USD receipt in the same proportion, the total still the charge', () => {
+    const { movement } = gastoDesdeCaptura({
+      ...base,
+      moneda: 'USD',
+      total: 116_00n,
+      iva: 16_00n,
+      cargoMxn: 2_158_33n,
+    });
+    assert.equal(movement.iva, 297_70n);
+    assert.equal(movement.subtotal + movement.iva, 2_158_33n);
   });
 
   it('puts the IVA of a non-deductible expense into the expense', () => {
@@ -53,10 +65,14 @@ describe('gastoDesdeCaptura', () => {
     assert.throws(() => gastoDesdeCaptura({ ...base, iva: 1_160_00n }), MontoInvalidoError);
   });
 
-  it('refuses a USD charge without a rate', () => {
+  it('refuses a USD charge without what the bank charged', () => {
     assert.throws(
-      () => gastoDesdeCaptura({ ...base, moneda: 'USD', tipoCambio: null }),
-      TipoCambioInvalidoError,
+      () => gastoDesdeCaptura({ ...base, moneda: 'USD', cargoMxn: null }),
+      CargoMxnFaltanteError,
+    );
+    assert.throws(
+      () => gastoDesdeCaptura({ ...base, moneda: 'USD', cargoMxn: 0n }),
+      CargoMxnFaltanteError,
     );
   });
 

@@ -15,6 +15,7 @@ import * as mx from '@/styles/mostrador-registrar-xml.css';
 import * as m from '@/styles/mostrador.css';
 
 import { CATEGORIAS, HacerRecurrente } from './del-gasto';
+import { CargoDeFactura } from './cargo-usd';
 import { Campo, Opciones, submitWith, type Opcion } from './opciones';
 
 /** «contador.xml leído · vigente en el SAT», with «Quitar» to start over without it. */
@@ -135,6 +136,9 @@ export function ConXml({
       <Adjunto panel={panel} />
       <Campos panel={panel} fecha={fecha} onFecha={setFecha} />
       <DelXml panel={panel} fecha={fecha} />
+      {panel.usd === null ? null : (
+        <CargoDeFactura usd={panel.usd.monto} tipoXml={panel.usd.tipoXml} />
+      )}
       <Opciones
         legend="Categoría"
         name="categoria"

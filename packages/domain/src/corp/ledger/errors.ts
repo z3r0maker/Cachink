@@ -46,6 +46,15 @@ export class TipoCambioInvalidoError extends Error {
   }
 }
 
+/** A USD expense paid in pesos needs what the bank charged (E-42). */
+export class CargoMxnFaltanteError extends Error {
+  readonly code = 'CARGO_MXN_FALTANTE' as const;
+  constructor() {
+    super('Escribe lo que cobró el banco, en pesos, como aparece el cargo.');
+    this.name = 'CargoMxnFaltanteError';
+  }
+}
+
 export class PlantillaInvalidaError extends Error {
   readonly code = 'PLANTILLA_INVALIDA' as const;
   constructor(detalle: string) {

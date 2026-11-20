@@ -1,18 +1,17 @@
 'use client';
 
-import { formatMoney, pesosToCentavos } from '@xangarro/domain';
-import { convertirAMxn } from '@xangarro/domain/corp';
 import { useState } from 'react';
 
 import type { Prefill } from '@/server/empresa/prefill';
 import * as d from '@/styles/mostrador-data.css';
 import * as mv from '@/styles/mostrador-movimientos.css';
 
+import { CargoUsd } from './cargo-usd';
 import { Campo, Opciones, type Opcion } from './opciones';
 
 /**
  * Registrar's expense fields (E-02, board CD-03): supplier, currency, amount
- * with the live peso equivalent, IVA, category, project, deductibility and
+ * (in USD, the invoice's dollars and the bank's peso charge, E-42), IVA, category, project, deductibility and
  * «Hacer recurrente cada mes». A suggested charge arrives prefilled.
  */
 export type { Prefill };
@@ -34,46 +33,23 @@ const DEDUCIBLE: readonly Opcion[] = [
   { value: 'no', title: 'No', text: 'Sin factura, o no es de la empresa.' },
 ];
 
-/** «Equivale a $368.40 MXN» while the founder types; nothing until both parse. */
-function equivalencia(monto: string, tipoCambio: string): string | undefined {
-  const usd = pesosToCentavos(monto);
-  if (usd === null || usd === 0n) return undefined;
-  try {
-    return `Equivale a ${formatMoney(convertirAMxn(usd, tipoCambio))} MXN.`;
-  } catch {
-    return undefined;
-  }
-}
-
 export function Montos(props: {
   readonly moneda: string;
   readonly label?: string;
   readonly inicial?: string;
 }) {
   const [monto, setMonto] = useState(props.inicial ?? '');
-  const [tc, setTc] = useState('');
-  const usd = props.moneda === 'USD';
+  if (props.moneda === 'USD') return <CargoUsd inicial={props.inicial} />;
   return (
     <div className={d.fields}>
       <Campo
-        label={usd ? 'Monto pagado (USD)' : (props.label ?? 'Monto pagado')}
+        label={props.label ?? 'Monto pagado'}
         name="monto"
         inputMode="decimal"
         required
         value={monto}
         onChange={(e) => setMonto(e.target.value)}
       />
-      {usd ? (
-        <Campo
-          label="Tipo de cambio del día"
-          name="tipoCambio"
-          inputMode="decimal"
-          required
-          value={tc}
-          onChange={(e) => setTc(e.target.value)}
-          hint={equivalencia(monto, tc) ?? 'Pesos por dólar en la fecha de pago.'}
-        />
-      ) : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import type { FacturaRecibida, Rechazo } from '@xangarro/application/corp';
 import { formatMoney, formatMonth } from '@xangarro/domain';
 import type { CategoriaGasto } from '@xangarro/domain/corp';
 
-import { fueraDe, type Recordada } from './revision-view';
+import { fueraDe, usdPagadaDe, type Recordada, type UsdPagada } from './revision-view';
 
 /**
  * Board CD-06d, Registrar gasto with one XML attached (E-11): what was read,
@@ -31,6 +31,8 @@ export interface PanelXml {
   readonly subtotal: string;
   readonly montos: readonly MontoXml[];
   readonly conRetenciones: boolean;
+  /** A paid USD invoice (E-42): its dollars and its own rate; the bank's charge is typed. */
+  readonly usd: UsdPagada | null;
   readonly categoria: CategoriaGasto | null;
   /** A project id, or '' for «Compartido». */
   readonly proyecto: string;
@@ -48,7 +50,12 @@ function montosDe(f: FacturaRecibida): readonly MontoXml[] {
     ...retenido('ISR retenido', c.retencionIsr),
     ...retenido('IVA retenido', c.retencionIva),
     {
-      label: c.metodoPago === 'PUE' ? 'Salió del banco' : 'Por pagar',
+      label:
+        c.metodoPago === 'PPD'
+          ? 'Por pagar'
+          : c.usd !== null
+            ? 'Al tipo de cambio de la factura'
+            : 'Salió del banco',
       value: formatMoney(c.total),
       tono: 'total',
     },
@@ -70,6 +77,7 @@ export function panelXml(f: FacturaRecibida, recordada: Recordada | null): Panel
     subtotal: formatMoney(c.subtotal),
     montos: montosDe(f),
     conRetenciones: c.retencionIsr + c.retencionIva > 0n,
+    usd: usdPagadaDe(c),
     categoria: recordada?.categoria ?? null,
     proyecto: recordada?.projectId ?? '',
     nota:

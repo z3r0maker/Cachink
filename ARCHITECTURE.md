@@ -197,6 +197,7 @@ Links to discussion, docs, prior art.
 | [156](#adr-156) | 2026-11-19 | The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted | Accepted |
 | [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
 | [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
+| [159](#adr-159) | 2026-11-20 | A USD expense paid from a peso account is booked at what the bank charged, not at a published rate | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11396,3 +11397,51 @@ make it a root of its own.
   watch.
 - A worktree branched before this ADR still asks Watchman, and once the main checkout ignores worktrees it gets an
   empty tree. It should merge main before starting Metro.
+
+## ADR-159
+
+**Title:** A USD expense paid from a peso account is booked at what the bank charged, not at a published rate
+
+**Date:** 2026-11-20
+
+**Status:** Accepted — E-42's first half; boards CD-01g and CD-01h approved by the owner on 2026-11-20 (canvas
+round 21)
+
+**Context**
+
+E-42 planned a daily Banxico FIX fetch to fill the rate of USD expenses, which founders typed by hand (ADR-125 §4
+said «the DOF FIX rate; entered manually in v1, fetched from Banxico in E-42»). Reviewing the boards, the owner
+pointed out that MEXIA's accounts are in pesos: a USD charge leaves the bank as a peso amount, at the rate the bank
+or card applied, its fee included. A published rate would book a figure that never left the bank, and Caja would
+stop agreeing with the bank in the month's close. MEXIA has no bank account yet (2026-11-18), so the statement CSV,
+E-42's other half, waits for one.
+
+**Decision**
+
+1. **The books carry the peso charge.** A USD expense takes two amounts, the invoice's dollars and what the bank
+   charged in pesos, and posts exactly the charge. The rate is worked out (pesos ÷ dollars, four decimals, half up)
+   and stored with the entry (`tipo_cambio`), with the dollars (`monto_original`); nothing in the schema changes.
+2. **No published rate.** No Banxico fetch, DOF rate or token in this task. How the contador deducts a USD service
+   paid in pesos is the owner's to confirm with them.
+3. **A rate outside 15–25 pesos per dollar asks «¿Seguro?»**, most likely a mistyped charge, and is still allowed.
+4. **A paid USD invoice (PUE)** keeps its XML's `TipoCambio` as the invoice's own data; its expense is booked at
+   the bank charge, IVA and retentions in proportion and the subtotal taking the rounding, so the total paid is the
+   charge (`aCargo`). Registering it without the charge is refused (`CARGO_MXN_FALTANTE`).
+5. **An invoice on credit (PPD)** still posts at its own rate when issued; its payment is left as it was.
+6. **A USD recurring charge** recalls its dollars; each month Registrar asks for the charge. USD entries posted
+   before keep the rate that was typed.
+
+**Alternatives considered**
+
+- *The DOF FIX of the day before payment (CFF art. 20), fetched daily.* Drawn in round 21's first version and
+  dropped by the owner: it books pesos that never left the bank.
+- *The DOF rate as a fallback while the charge is unknown.* Rejected: an entry is never edited, so correcting it
+  means a reversal and a new entry for every USD expense.
+
+**Consequences**
+
+- No migration. The capture form's `tipoCambio` field becomes `cargo`, and the domain's `CapturaGasto` takes
+  `cargoMxn` instead of a rate.
+- A PPD invoice in USD paid at a different rate leaves the difference unbooked, as before; it needs an exchange
+  gain-or-loss account and is left for when one is paid.
+- The bank CSV (E-42's second half) will bring the charge in by itself once MEXIA has its account.

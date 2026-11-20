@@ -65,6 +65,10 @@ function detalleDe(p: PlantillaRecurrente): string {
 
 function notaDe(r: RecurrenteDelMes): string {
   if (r.facturaDel !== null) return `Con su factura del ${fechaCorta(r.facturaDel)}`;
+  // E-42: a USD charge recalls its dollars; the pesos change each month.
+  if (r.estado === 'sugerido' && r.plantilla.moneda === 'USD') {
+    return 'Al registrarlo se pide lo que cobró el banco, en pesos.';
+  }
   if (r.estado !== 'falta_factura') return '';
   return `Pídela a ${r.plantilla.contraparte ?? r.plantilla.nombre}`;
 }

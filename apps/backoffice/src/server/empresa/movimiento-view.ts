@@ -91,7 +91,9 @@ function detalle(m: Movimiento): string {
   if (m.reversesEntryId !== null) return 'Revierte un movimiento anterior';
   const parts: string[] = [];
   if (m.moneda === 'USD' && m.montoOriginal !== null) {
-    parts.push(`USD ${formatMoney(m.montoOriginal).replace('$', '')} · TC ${m.tipoCambio ?? ''}`);
+    parts.push(
+      `USD ${formatMoney(m.montoOriginal).replace('$', '')} · el banco cobró a ${m.tipoCambio ?? ''}`,
+    );
   }
   if (m.contraparte !== null && m.contraparte !== '') parts.push(m.contraparte);
   if (m.deducible === false) parts.push('no deducible');

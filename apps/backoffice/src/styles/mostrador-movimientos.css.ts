@@ -78,3 +78,42 @@ export const rotulo = style({
 
 /** «Dejar de repetir» sits in the row; a form per row so it posts without script. */
 export const enLinea = style({ display: 'inline', margin: 0 });
+
+/** E-42 (board CD-01g): the rate the bank charged, worked out from the two amounts. */
+const tcBase = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 6,
+  padding: '14px 16px',
+  border: borders.thin,
+  borderRadius: radii[4],
+});
+
+export const tc = style([tcBase, { background: colors.offwhite }]);
+
+export const tcRaro = style([
+  tcBase,
+  { background: colors.warningSoft, borderColor: colors.warningText },
+]);
+
+export const tcTitulo = style({
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+});
+
+export const tcValor = style({
+  fontSize: portalFontSizes.xl,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
+
+export const tcPendiente = style({
+  margin: 0,
+  padding: '14px 16px',
+  border: borders.quiet,
+  borderRadius: radii[4],
+  background: colors.offwhite,
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  color: colors.gray600,
+});

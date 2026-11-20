@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { PeriodoCerradoError } from '@xangarro/domain/corp';
+import { CargoMxnFaltanteError, PeriodoCerradoError } from '@xangarro/domain/corp';
 
 import {
   cancelarFactura,
@@ -123,5 +123,45 @@ describe('an invoice on credit (E-11, owner decision 9)', () => {
       cancelarFactura(pue, { uuid: A, fecha: '2026-10-30', motivo: 'x', founderId: 'f1' }),
       FacturaNoPorPagarError,
     );
+  });
+});
+
+/** E-42: a USD invoice paid from a peso account is booked at what the bank charged. */
+describe('registrarFacturas · USD (E-42)', () => {
+  const usd = {
+    subtotal: '100.00',
+    iva: '0.00',
+    isr: '0.00',
+    ivaRetenido: '0.00',
+    tipoCambio: '18.1000',
+  };
+
+  it('books a paid USD invoice at the bank charge, with the rate that resulted', async () => {
+    const d = await conSubida(usd);
+    const [entry] = await registrarFacturas(d, {
+      selecciones: [{ ...seleccion, cargoMxn: 1_861_40n }],
+      ...ctx,
+    });
+    assert.equal(cuenta(entry?.lines ?? [], 'bancos')?.haber, 1_861_40n);
+    assert.deepEqual(
+      [entry?.moneda, entry?.montoOriginal, entry?.tipoCambio],
+      ['USD', 100_00n, '18.6140'],
+    );
+  });
+
+  it('refuses a paid USD invoice without the bank charge', async () => {
+    const d = await conSubida(usd);
+    await assert.rejects(
+      registrarFacturas(d, { selecciones: [seleccion], ...ctx }),
+      CargoMxnFaltanteError,
+    );
+    assert.equal(d.ledger.entries.length, 0);
+  });
+
+  it('an invoice on credit keeps its own rate until it is paid', async () => {
+    const d = await conSubida({ ...usd, metodoPago: 'PPD' });
+    const [entry] = await registrarFacturas(d, { selecciones: [seleccion], ...ctx });
+    assert.equal(cuenta(entry?.lines ?? [], 'proveedores')?.haber, 1_810_00n);
+    assert.equal(entry?.tipoCambio, '18.1000');
   });
 });

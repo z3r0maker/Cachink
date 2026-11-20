@@ -7,6 +7,7 @@ import {
   subirFacturas,
   type Seleccion,
 } from '@xangarro/application/corp';
+import { pesosToCentavos } from '@xangarro/domain';
 import { CATEGORIAS_GASTO, periodOf } from '@xangarro/domain/corp';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -58,6 +59,12 @@ export async function adjuntarXmlAction(_p: FormState, form: FormData): Promise<
  * Registers the invoice and, with «Hacer recurrente cada mes» ticked, makes
  * its supplier's template, known by the RFC (board CD-06h).
  */
+/** A paid USD invoice's bank charge (E-42); none for the rest. */
+function cargoDe(form: FormData): { cargoMxn?: bigint } {
+  const cargo = pesosToCentavos(field(form, 'cargo'));
+  return cargo === null ? {} : { cargoMxn: cargo };
+}
+
 async function registrarYRepetir(seleccion: Seleccion, founderId: string, recurrente: boolean) {
   const deps = facturasDeps();
   const entries = await registrarFacturas(deps, {
@@ -84,6 +91,7 @@ export async function registrarConXmlAction(_p: FormState, form: FormData): Prom
       projectId: proyecto === '' ? null : proyecto,
       concepto: field(form, 'concepto'),
       fecha: field(form, 'fecha'),
+      ...cargoDe(form),
     };
     const { result } = await auditedMutation(
       (r) => ({

@@ -1,9 +1,14 @@
+import type { Money } from '@xangarro/domain';
 import {
+  aCargo,
+  CargoMxnFaltanteError,
   gastoDeCfdi,
   periodOf,
   refFactura,
   retenerHasta,
+  tipoCambioDelCargo,
   type CategoriaGasto,
+  type Gasto,
 } from '@xangarro/domain/corp';
 
 import type { DocumentRepository } from '../agenda/ports.js';
@@ -38,6 +43,11 @@ export interface Seleccion {
   readonly concepto?: string;
   /** The day a paid (PUE) invoice left the bank; one on credit keeps its own date. */
   readonly fecha?: string;
+  /**
+   * What the bank charged in pesos for a paid USD invoice (E-42), centavos.
+   * The expense is booked at it; the XML's own rate stays the invoice's.
+   */
+  readonly cargoMxn?: Money;
 }
 
 export async function factura(deps: FacturasDeps, uuid: string): Promise<FacturaRecibida> {
@@ -81,6 +91,27 @@ function conceptoYFecha(f: FacturaRecibida, s: Seleccion) {
   return { concepto, fecha };
 }
 
+/**
+ * The expense and its dollars: a paid USD invoice at what the bank charged,
+ * with the rate that resulted; one on credit at its own rate until it is paid.
+ */
+function gastoDe(
+  f: FacturaRecibida,
+  s: Seleccion,
+): { movement: Gasto; usd: FacturaRecibida['cfdi']['usd'] } {
+  const g = gastoDeCfdi(f.cfdi, s.categoria);
+  const usd = f.cfdi.usd;
+  if (usd === null || f.cfdi.metodoPago === 'PPD') return { movement: g, usd };
+  if (s.cargoMxn === undefined || s.cargoMxn <= 0n) throw new CargoMxnFaltanteError();
+  return {
+    movement: { ...g, ...aCargo(g, s.cargoMxn) },
+    usd: {
+      montoOriginal: usd.montoOriginal,
+      tipoCambio: tipoCambioDelCargo(usd.montoOriginal, s.cargoMxn),
+    },
+  };
+}
+
 async function registrarUna(
   deps: RegistrarFacturasDeps,
   s: Seleccion,
@@ -92,6 +123,7 @@ async function registrarUna(
     if (ya !== null) return ya;
   }
   if (f.estado !== 'por_revisar') throw new FacturaNoPendienteError(s.uuid);
+  const { movement, usd } = gastoDe(f, s);
   const entry = await new RegistrarMovimientoUseCase(deps.ledger).execute({
     ...conceptoYFecha(f, s),
     projectId: s.projectId,
@@ -99,9 +131,9 @@ async function registrarUna(
     founderId: ctx.founderId,
     source: 'cfdi',
     sourceRef: refFactura(f.cfdi.uuid),
-    usd: f.cfdi.usd,
+    usd,
     deducible: true,
-    movement: gastoDeCfdi(f.cfdi, s.categoria),
+    movement,
   });
   await deps.facturas.marcarRegistrada(f.cfdi.uuid, {
     categoria: s.categoria,

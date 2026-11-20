@@ -1,5 +1,12 @@
 import type { FacturaRecibida, MotivoRechazo, Rechazo } from '@xangarro/application/corp';
-import { formatDate, formatMoney, formatMonth, parseIsoDate, tipoPersona } from '@xangarro/domain';
+import {
+  formatDate,
+  formatMoney,
+  formatMonth,
+  parseIsoDate,
+  tipoPersona,
+  toPesosString,
+} from '@xangarro/domain';
 import {
   mensajeCfdiInvalido,
   type CategoriaGasto,
@@ -29,7 +36,19 @@ export interface TarjetaRevision {
   readonly nota: string;
   /** A project id, or '' for «Compartido». */
   readonly proyecto: string;
+  readonly usd: UsdPagada | null;
 }
+
+/** A paid USD invoice (E-42): its dollars and its own rate; the bank's charge is typed. */
+export interface UsdPagada {
+  readonly monto: string;
+  readonly tipoXml: string;
+}
+
+export const usdPagadaDe = (c: FacturaRecibida['cfdi']): UsdPagada | null =>
+  c.usd !== null && c.metodoPago === 'PUE'
+    ? { monto: toPesosString(c.usd.montoOriginal), tipoXml: c.usd.tipoCambio }
+    : null;
 
 export type Recordada = { readonly categoria: CategoriaGasto; readonly projectId: string | null };
 
@@ -68,6 +87,7 @@ export function tarjetaDe(f: FacturaRecibida, recordada: Recordada | null): Tarj
         ? 'Elige una; la recordamos para este RFC.'
         : 'Como sus facturas anteriores.',
     proyecto: recordada?.projectId ?? '',
+    usd: usdPagadaDe(c),
   };
 }
 
