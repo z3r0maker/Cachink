@@ -38,28 +38,34 @@ appId: mx.xangarro.mobile
 - waitForAnimationToEnd
 - tapOn:
     id: 'mover-tipo-Entrada'
+- waitForAnimationToEnd
+# At the field's end: a tap mid-field leaves the cursor before the digits,
+# and the erase then removes nothing.
 - tapOn:
     id: 'mover-cantidad'
+    point: '95%,50%'
 - eraseText: 6
 - inputText: ${CANTIDAD}
-# Phone: one drag in the sheet body dismisses the keyboard (keyboardDismissMode
-# on-drag), so the save footer is not under it. iPad: the sheet floats and
-# that drag (or hideKeyboard) dismisses the sheet itself; the footer is clear.
-# An Android tablet draws the phone's bottom sheet with the keyboard over the
-# footer: Back (hideKeyboard) closes only the keyboard there.
-- runFlow:
-    when:
-      true: ${FORMA == 'telefono'}
+- runFlow: store-entrada-teclado.yaml
+# The Android phone can lose the typing (the field still read 0 and the save
+# stayed off): type it again until the field holds the quantity. The check
+# runs with the keyboard away, which covers the field on a phone.
+- repeat:
+    while:
+      notVisible:
+        id: 'mover-cantidad'
+        text: '${CANTIDAD}'
+    times: 3
     commands:
-      - swipe:
-          start: '50%, 45%'
-          end: '50%, 20%'
-- runFlow:
-    when:
-      platform: Android
-      true: ${FORMA != 'telefono'}
-    commands:
-      - hideKeyboard
+      - tapOn:
+          id: 'mover-cantidad'
+          point: '95%,50%'
+      - eraseText: 6
+      - inputText: ${CANTIDAD}
+      - runFlow: store-entrada-teclado.yaml
+- assertVisible:
+    id: 'mover-cantidad'
+    text: '${CANTIDAD}'
 - waitForAnimationToEnd
 - tapOn:
     id: 'mover-guardar'

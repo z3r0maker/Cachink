@@ -43,8 +43,10 @@ function TotalCobro(p: CobroScreenProps & { readonly m: MedidasCobro }): ReactEl
   const nombre = ['Total a cobrar', p.folio, piezasTexto(p.piezas)].filter(Boolean).join(', ');
   return (
     <View paddingHorizontal={16} paddingTop={p.m.margen}>
+      {/* At least the board's height; taller when the font needs it (Android's line heights). */}
       <View
-        height={p.m.total}
+        minHeight={p.m.total}
+        paddingVertical={4}
         marginRight={4}
         justifyContent="center"
         gap={2}
