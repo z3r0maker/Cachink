@@ -1,11 +1,11 @@
 /**
- * A client's account (MvCobranzaCliente), the web's Detalle de cliente on a
- * bottom sheet: who they are and their state, the balance, the four
- * indicators, the open tickets and the movements — all derived from the
- * account's two facts (ADR-074) — the owner's limit note, and the two
- * actions: «Recibir abono» while they owe, «Recordarle por WhatsApp» always.
+ * A client's account (MvCobranzaCliente, RvFiado's client page): who they
+ * are and their state, the balance, the four indicators, the open tickets
+ * and the movements — all derived from the account's two facts (ADR-074) —
+ * the owner's limit note, and the two actions: «Recibir abono» while they
+ * owe, «Recordarle su saldo» always. The page around it is `ClienteScreen`.
  */
-import { useMemo, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney, type Money } from '@xangarro/domain';
 import {
@@ -14,14 +14,13 @@ import {
   limiteNota,
   type CuentaCliente,
 } from '@xangarro/caja/cobranza';
-import { BottomSheet } from '../../components/BottomSheet/index';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow } from '../../components/Panel/index';
 import { borderColors, borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { Indicadores } from './cliente-indicadores';
 import { Movimientos, VentasAbiertas } from './cliente-movimientos';
-import { EstadoChip } from './cuenta-tarjeta';
+import { EstadoChip } from './estado-chip';
 
 type Estado = ReturnType<typeof estadoCuenta>;
 
@@ -89,7 +88,7 @@ function Heroe({ c, e }: { readonly c: CuentaCliente; readonly e: Estado }): Rea
   );
 }
 
-function Pie({
+export function CuentaPie({
   debe,
   onAbonar,
   onRecordar,
@@ -119,43 +118,28 @@ function Pie({
         onPress={onRecordar}
         testID="cuenta-recordar"
       >
-        Recordarle por WhatsApp
+        Recordarle su saldo
       </Btn>
     </View>
   );
 }
 
-export interface ClienteCuentaProps {
-  readonly open: boolean;
+/** The account's body, as the page scrolls it. */
+export function CuentaCuerpo(p: {
   readonly cuenta: CuentaCliente;
   readonly hoy: string;
   readonly dueno: string;
-  readonly onClose: () => void;
-  readonly onAbonar: () => void;
-  readonly onRecordar: () => void;
-}
-
-/** The account sheet; the balance and its derivations come from the facts. */
-export function ClienteCuentaSheet(p: ClienteCuentaProps): ReactElement {
+}): ReactElement {
   const c = p.cuenta;
-  const e = useMemo(() => estadoCuenta(p.cuenta), [p.cuenta]);
+  const e = estadoCuenta(c);
   return (
-    <BottomSheet
-      open={p.open}
-      onClose={p.onClose}
-      eyebrow="Cuenta de fiado"
-      title={c.nombre}
-      testID="cuenta-sheet"
-      footer={<Pie debe={e.saldo > 0n} onAbonar={p.onAbonar} onRecordar={p.onRecordar} />}
-    >
-      <View gap={14}>
-        <Heroe c={c} e={e} />
-        <Indicadores c={c} e={e} dueno={p.dueno} />
-        <VentasAbiertas cuenta={c} e={e} hoy={p.hoy} />
-        <Movimientos cuenta={c} />
-        <LimiteNota nota={limiteNota(c, e, p.dueno)} />
-      </View>
-    </BottomSheet>
+    <View gap={14}>
+      <Heroe c={c} e={e} />
+      <Indicadores c={c} e={e} dueno={p.dueno} />
+      <VentasAbiertas cuenta={c} e={e} hoy={p.hoy} />
+      <Movimientos cuenta={c} />
+      <LimiteNota nota={limiteNota(c, e, p.dueno)} />
+    </View>
   );
 }
 

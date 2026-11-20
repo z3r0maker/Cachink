@@ -4,7 +4,7 @@
 # FK_PRODUCT_MISSING, the pill turns red and opens /no-enviados, the hero
 # says the phase (con-rechazados) with the server's sentence under it, and
 # once the portal restores the product «Reintentar» requeues the row and
-# everything lands: «Todo enviado».
+# everything lands: Don's «Todo está enviado» (RvEnvio).
 #
 # Precondition: activated device against the mock on MOCK_API, turno open.
 # Replaces sync-rejected.yaml (A-08's old «No enviados» screen is gone).
@@ -82,20 +82,14 @@ env:
 # them — one card's button would leave the other refused.
 - tapOn: { id: 'rechazados-retry-todos' }
 
-# The queue drains: «Todo enviado», «Nada pendiente» (the panel sits above
-# where the refusals were — scroll up to it), the pill green again.
-# The retry flushes the whole queue through the mock: give the sweep room
-# before the hero flips to «Todo enviado».
+# The queue drains: Don's «Todo está enviado» takes the screen, with the
+# way to the cierre, and the pill turns green again. The retry flushes the
+# whole queue through the mock: give the sweep room.
 - extendedWaitUntil:
-    visible: { text: '.*Todo enviado.*' }
+    visible: { id: 'por-enviar-todo-enviado' }
     timeout: 30000
-- scrollUntilVisible:
-    element:
-      id: 'cola-vacia'
-    direction: UP
-    timeout: 30000
-- assertVisible: '.*Todo enviado.*'
-- assertVisible: '.*Nada pendiente.*'
+- assertVisible: '.*Todo está enviado.*'
+- assertVisible: { id: 'por-enviar-todo-enviado-cta' }
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'

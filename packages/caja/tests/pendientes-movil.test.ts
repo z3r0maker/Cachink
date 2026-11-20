@@ -2,7 +2,12 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { COLA_FIXTURE } from '../src/pendientes/fixture';
-import { faseTelefono, heroeTelefono, NOTA_NADA_SE_PIERDE } from '../src/pendientes/movil';
+import {
+  faseTelefono,
+  heroeTelefono,
+  NOTA_NADA_SE_PIERDE,
+  todoEnviado,
+} from '../src/pendientes/movil';
 import { cuentaRechazados, describeRechazado } from '../src/pendientes/rechazado';
 
 const VENTA = {
@@ -229,5 +234,32 @@ describe('rechazados, la sentencia del servidor', () => {
     assert.equal(v.pista, null);
     assert.equal(v.titulo, 'Cliente');
     assert.equal(v.detalle, 'Chuy');
+  });
+});
+
+describe('todo enviado (RvEnvio): Don and the owner who already has it', () => {
+  it('names the owner and the last send', () => {
+    assert.deepEqual(todoEnviado('Pedro', '09:41'), {
+      titulo: 'Todo está enviado',
+      cuerpo: 'Pedro ya tiene lo que capturaste. Última vez a las 09:41.',
+    });
+  });
+
+  it('a send moments ago says so', () => {
+    assert.equal(
+      todoEnviado('Pedro', null).cuerpo,
+      'Pedro ya tiene lo que capturaste. Última vez hace unos segundos.',
+    );
+  });
+
+  it('without the owner’s name it says «tu negocio»', () => {
+    assert.equal(
+      todoEnviado(null, '09:41').cuerpo,
+      'Tu negocio ya tiene lo que capturaste. Última vez a las 09:41.',
+    );
+  });
+
+  it('a blank name is no name', () => {
+    assert.match(todoEnviado('  ', null).cuerpo, /^Tu negocio ya tiene/);
   });
 });

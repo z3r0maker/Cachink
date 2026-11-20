@@ -57,5 +57,6 @@ export const Use = createMockComponent('Use');
 export const Symbol = createMockComponent('Symbol');
 export const Mask = createMockComponent('Mask');
 export const TSpan = createMockComponent('TSpan');
+export const SvgXml = createMockComponent('SvgXml');
 
 export default Svg;

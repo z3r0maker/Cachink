@@ -38,12 +38,11 @@ const textoDe = (testID: string): string => (screen.getByTestId(testID).textCont
 describe('InventarioScreen · existencias', () => {
   it('says the three figures with their hints', () => {
     montar();
-    expect(textoDe('inventario-kpis')).toContain('Por reponer');
-    expect(textoDe('inventario-kpis')).toContain('4');
-    expect(textoDe('inventario-kpis')).toContain('Entradas de hoy');
-    expect(textoDe('inventario-kpis')).toContain('Pastor, tortilla y agua');
-    expect(textoDe('inventario-kpis')).toContain('Mermas de hoy');
-    expect(textoDe('inventario-kpis')).toContain('Horchata y queso oaxaca');
+    // The board's compact figures (RvInventario): a label and a count each.
+    expect(textoDe('inventario-kpis')).toContain('Reponer4');
+    expect(textoDe('inventario-kpis')).toContain('Llegó hoy');
+    expect(textoDe('inventario-kpis')).toContain('Mermas');
+    expect(textoDe('inventario-kpis')).not.toContain('Pastor, tortilla y agua');
   });
 
   it('rows say the aviso with its unit, the chip and the count with its unit', () => {
@@ -51,7 +50,8 @@ describe('InventarioScreen · existencias', () => {
     expect(screen.getByText('Carne de pastor')).toBeInTheDocument();
     expect(screen.getByText('Aviso en 15 kg')).toBeInTheDocument();
     expect(textoDe('inventario-cantidad-pastor')).toBe('8 kg');
-    expect(screen.getAllByText('Reponer').length).toBe(4);
+    // Four rows' chips, and the compact figure's own «Reponer» label.
+    expect(screen.getAllByText('Reponer').length).toBe(5);
     expect(screen.getAllByText('Suficiente').length).toBe(6);
   });
 

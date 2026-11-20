@@ -88,4 +88,41 @@ describe('FiadoScreen', () => {
     montar({ cargando: true });
     expect(screen.getByTestId('fiado-cargando')).toBeInTheDocument();
   });
+
+  describe('«Cliente nuevo» starts with the searched name', () => {
+    const nombre = (): string =>
+      (screen.getByTestId('fiado-nuevo-nombre') as HTMLInputElement).value;
+
+    it('carries the search into the name, so it is not typed twice', () => {
+      montar({ clientes: [] });
+      escribir('  Don Beto  ');
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      expect(nombre()).toBe('Don Beto');
+      expect(textoDe('fiado-anotar')).toContain('Don Beto');
+    });
+
+    it('opens empty when nothing was searched', () => {
+      montar();
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      expect(nombre()).toBe('');
+      expect(textoDe('fiado-anotar')).toContain('Escribe su nombre');
+    });
+
+    it('a blank search opens empty too', () => {
+      montar();
+      escribir('   ');
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      expect(nombre()).toBe('');
+    });
+
+    it('closing and reopening takes the search as it is then', () => {
+      montar({ clientes: [] });
+      escribir('Lupita');
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      escribir('Lupe');
+      fireEvent.click(screen.getByTestId('fiado-nuevo'));
+      expect(nombre()).toBe('Lupe');
+    });
+  });
 });

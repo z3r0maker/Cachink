@@ -14,18 +14,17 @@ import type { Fase, RegistroEnCola } from '@xangarro/caja/pendientes';
 import {
   heroeTelefono,
   intro,
-  NOTA_NADA_SE_PIERDE,
   portalDe,
   type FaseCola,
   type HeroeCola,
   type RechazoVisto,
 } from '@xangarro/caja/pendientes';
-import { Don } from '../../components/Don/index';
 import { MText } from '../../components/Mostrador/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
 import { PathIcon } from '../../components/PathIcon/index';
 import { borderWidths, colors, radii, shapeRadii } from '../../theme';
 import { ColaPanel } from './cola-panel';
+import { NadaSePierde, TodoEnviado } from './por-enviar-don';
 import { EstadosCaja } from './estados';
 import { RechazadosPanel } from './rechazados-panel';
 
@@ -129,32 +128,6 @@ function Heroe(p: PorEnviarScreenProps & { readonly fase: FaseCola }): ReactElem
   );
 }
 
-/** Don beside his note (RvEnvio): nothing is lost, and the turno still closes. */
-function NadaSePierde(): ReactElement {
-  return (
-    <View testID="por-enviar-nota" flexDirection="row" alignItems="center" gap={10}>
-      <Don pose="ayuda" size={76} />
-      <View
-        flex={1}
-        gap={3}
-        paddingVertical={10}
-        paddingHorizontal={12}
-        borderRadius={radii[4]}
-        borderWidth={borderWidths.thick}
-        borderColor={colors.black}
-        backgroundColor={colors.yellowSoft}
-      >
-        <MText size="md" weight="extraBold">
-          {NOTA_NADA_SE_PIERDE.titulo}
-        </MText>
-        <MText size="sm" weight="semibold" color={colors.ink} lineHeight={18}>
-          {NOTA_NADA_SE_PIERDE.cuerpo}
-        </MText>
-      </View>
-    </View>
-  );
-}
-
 function Cabeza(p: { readonly vacia: boolean; readonly dueno: string | null }): ReactElement {
   return (
     <View gap={2}>
@@ -195,10 +168,13 @@ function ConDatos(p: PorEnviarScreenProps): ReactElement {
 export function PorEnviarScreen(p: PorEnviarScreenProps): ReactElement {
   const vacia = p.cola.length === 0 && p.rechazados.length === 0;
   const base = p.testID ?? 'por-enviar';
+  const alDia = vacia && p.state === 'happy' && p.fase === 'enviado';
   return (
-    <ScrollView testID={base} contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView testID={base} contentContainerStyle={{ padding: 16, gap: 14, flexGrow: 1 }}>
       <Cabeza vacia={vacia} dueno={p.dueno ?? null} />
-      {p.state === 'happy' || p.state === SIN_INTERNET ? (
+      {alDia ? (
+        <TodoEnviado {...p} />
+      ) : p.state === 'happy' || p.state === SIN_INTERNET ? (
         <ConDatos {...p} />
       ) : p.state === 'cargando' ? (
         <EstadosCaja id="cargando" titulo="Leyendo la cola de esta caja…" testID={base} />

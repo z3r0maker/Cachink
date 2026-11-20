@@ -1,93 +1,64 @@
 /**
- * The strip above Inventario's lists (M-09): the three figures — how many
- * to restock (red), how many entradas and mermas this turno — then the two
- * joined tabs and the search. The words are the board's; the hints come
- * from the caja's derivations (`paraReponer`, `enLista`).
+ * The strip above Inventario's lists (M-09, RvInventario): the three compact
+ * figures — how many to restock (red), how many came in and spoiled this
+ * turno — then the two joined tabs and the search. The words are the board's.
  */
 import type { ReactElement } from 'react';
 import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { enLista, resumen } from '@xangarro/caja/inventario';
+import { resumen } from '@xangarro/caja/inventario';
 import type { Existencia, Movimiento, Pestana } from '@xangarro/caja/inventario';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
 import { SegmentedTabs } from '../../components/SegmentedTabs/index';
-import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
+import {
+  borderColors,
+  borderWidths,
+  colors,
+  fontFace,
+  portalFontSizes,
+  radii,
+  typography,
+} from '../../theme';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 
-const TILE = {
+const CELDA = {
   borderWidth: borderWidths.quiet,
-  borderRadius: radii[5],
+  borderColor: borderColors.quiet,
+  borderRadius: radii[3],
   backgroundColor: colors.white,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-  gap: 3,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  gap: 2,
   flex: 1,
+  minWidth: 0,
 } as const;
 
-function Cifra(p: {
-  readonly label: string;
-  readonly value: string;
-  readonly color: string;
-  readonly hint: string;
-}): ReactElement {
+/** One compact figure (RvInventario): its label, then the count. */
+function Cifra(p: { readonly label: string; readonly value: number; readonly color: string }) {
   return (
-    <View style={TILE}>
-      <MText
-        size="xs"
-        weight="extraBold"
-        letterSpacing={1.2}
-        color={colors.textMuted}
-        style={{ textTransform: 'uppercase' }}
-      >
+    <View style={CELDA} aria-label={`${p.label}: ${p.value}`}>
+      <MText size="xs" weight="bold" color={colors.gray600} numberOfLines={1}>
         {p.label}
       </MText>
-      <MText
-        size="xl3"
-        weight="extraBold"
-        letterSpacing={-0.7}
-        color={p.color}
-        fontVariant={['tabular-nums']}
-      >
-        {p.value}
-      </MText>
-      <MText size="xs" weight="semibold" color={colors.gray600}>
-        {p.hint}
+      <MText size="sectionTitle" weight="extraBold" color={p.color} fontVariant={['tabular-nums']}>
+        {String(p.value)}
       </MText>
     </View>
   );
 }
 
-const NADA = 'Nada todavía';
-
-/** The three KPI cards; the entrada/merma hints name what moved, or nothing. */
+/** The three compact figures (RvInventario): what to restock, what came in, what spoiled. */
 export function Kpis(p: {
   readonly items: readonly Existencia[];
   readonly movs: readonly Movimiento[];
 }): ReactElement {
   const r = resumen(p.items, p.movs);
-  const entradas = enLista(p.movs, p.items, 'Entrada');
-  const mermas = enLista(p.movs, p.items, 'Merma');
   return (
-    <View testID="inventario-kpis" flexDirection="row" gap={10}>
-      <Cifra
-        label="Por reponer"
-        value={String(r.porReponer)}
-        color={colors.redText}
-        hint="Están en o abajo de su umbral"
-      />
-      <Cifra
-        label="Entradas de hoy"
-        value={String(r.entradas)}
-        color={colors.greenText}
-        hint={entradas === '' ? NADA : entradas}
-      />
-      <Cifra
-        label="Mermas de hoy"
-        value={String(r.mermas)}
-        color={colors.black}
-        hint={mermas === '' ? NADA : mermas}
-      />
+    <View testID="inventario-kpis" flexDirection="row" gap={8}>
+      <Cifra label="Reponer" value={r.porReponer} color={colors.redText} />
+      <Cifra label="Llegó hoy" value={r.entradas} color={colors.black} />
+      <Cifra label="Mermas" value={r.mermas} color={colors.black} />
     </View>
   );
 }

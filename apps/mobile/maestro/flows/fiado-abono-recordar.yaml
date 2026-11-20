@@ -1,15 +1,14 @@
 # Fiado y abonos (Track M-11, M-08; boards MvFiado/MvCobranza*): Inicio's
-# atajo opens /fiado; a client's account opens its sheet; «Recibir abono»
-# takes the quick «Todo» and a método, and the saldo drops; «Recordarle por
-# WhatsApp» composes the message and hands it to the phone.
+# atajo opens /fiado; a client's row opens their page (RvFiado); «Recibir
+# abono» takes the quick «Todo» and a método, and the saldo drops;
+# «Recordarle su saldo» composes the message and hands it to the phone.
 #
 # The fixture clients carry no phone (fixtures.ts:129) and nobody owes
 # anything, so the flow first charges a fiado Gringa to a NEW client with a
 # number — the account and the reminder both come from that.
 #
-# The reminder is driven BEFORE the abono: a client who owes nothing keeps the
-# account sheet's «Recordarle por WhatsApp», but the card's «Ver cuenta» stops
-# being a labelled button once the saldo is zero.
+# The reminder is driven BEFORE the abono, while Don Beto still owes, so the
+# message carries a balance.
 #
 # Precondition: device activated against the contracts mock; the harness signs
 # in the operator and lands on Inicio.
@@ -93,49 +92,52 @@ tags:
 - assertVisible: '.*Fiado y abonos.*'
 - assertVisible: { id: 'cobranza-kpis' }
 - assertVisible: '.*Don Beto.*'
-- tapOn:
-    text: 'Ver cuenta'
-- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
-- assertVisible: '.*Cuenta de fiado.*'
+- tapOn: '.*Don Beto.*'
+- extendedWaitUntil: { visible: { id: 'mobile-cliente' }, timeout: 5000 }
 - assertVisible: '.*5512345678.*'
 
-# «Recordarle por WhatsApp»: the number came prefilled and the message
-# composed (editing it offers the original back).
+# «Recordarle su saldo»: the number came prefilled and the message composed
+# (editing it offers the original back).
 - tapOn: { id: 'cuenta-recordar' }
 - extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
-- assertVisible: '.*Recordarle su saldo a Don Beto.*'
+- assertVisible: '.*Recordarle su saldo.*'
 - assertVisible: { id: 'recordar-telefono' }
-- assertVisible: '.*Se abre WhatsApp con el mensaje listo. Tú decides si lo mandas\..*'
+- assertVisible: '.*Se abre la app con el mensaje listo. Tú decides si lo mandas\..*'
 - tapOn: { id: 'recordar-mensaje' }
 - inputText: 'Nos vemos!'
 # On a fresh simulator iOS lays its one-time keyboard tip over the sheet.
 - tapOn: { text: 'Continue', optional: true }
-- assertVisible: { id: 'recordar-restaurar' }
-- tapOn: { id: 'recordar-restaurar' }
-# With the keyboard up the sheet rises to full height and its close sits
-# under the dev client's parked gear, which opens the dev menu instead. A tap
-# on the sheet's hint lowers the keyboard and the sheet with it.
-- tapOn: '.*Se abre WhatsApp con el mensaje listo.*'
+# Lower the keyboard first. With it up the sheet's body shows only the first
+# lines of the message; the link below is clipped, but iOS still reports its
+# frame, which falls on the footer, so a tap «on» it opens «Mensajes». A tap on
+# the line above the bubble (plain text, on screen) lowers the keyboard.
+- tapOn: 'Así le llega. Puedes cambiarlo.'
+- waitForAnimationToEnd
+- tapOn: { id: 'recordar-original' }
+# The original is back: the link only shows while the message is edited.
+- extendedWaitUntil:
+    notVisible: { id: 'recordar-original' }
+    timeout: 5000
 - tapOn: { id: 'recordar-sheet-close' }
-- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+- extendedWaitUntil: { visible: { id: 'mobile-cliente' }, timeout: 5000 }
 
-# «Abrir WhatsApp» on a fresh sheet. A simulator has no WhatsApp, so it falls
-# to the wa.me link in the browser; back in the app, the sheet says so. No
-# field is focused: with the keyboard up the sheet's close rides under the
-# status bar, where iOS now draws «◀ Safari» and takes the tap.
+# «WhatsApp» on a fresh sheet. A simulator has no WhatsApp, so it falls to
+# the wa.me link in the browser; back in the app, the sheet says so. No field
+# is focused: with the keyboard up the sheet's close rides under the status
+# bar, where iOS now draws «◀ Safari» and takes the tap.
 - tapOn: { id: 'cuenta-recordar' }
 - extendedWaitUntil: { visible: { id: 'recordar-sheet' }, timeout: 5000 }
-- tapOn: { id: 'recordar-abrir' }
+- tapOn: { id: 'recordar-whatsapp' }
 - extendedWaitUntil:
-    notVisible: { id: 'recordar-abrir' }
+    notVisible: { id: 'recordar-whatsapp' }
     timeout: 10000
 - launchApp:
     appId: mx.xangarro.mobile
     stopApp: false
 - extendedWaitUntil: { visible: { id: 'recordar-aviso' }, timeout: 10000 }
-- assertVisible: '.*Abrimos el enlace de WhatsApp\. Si no tienes la app, instálala para mandarlo\..*'
+- assertVisible: '.*Abrimos el enlace de WhatsApp\. Si no tienes la app, usa Mensajes o Compartir\..*'
 - tapOn: { id: 'recordar-sheet-close' }
-- extendedWaitUntil: { visible: { id: 'cuenta-sheet' }, timeout: 5000 }
+- extendedWaitUntil: { visible: { id: 'mobile-cliente' }, timeout: 5000 }
 
 # «Recibir abono»: the quick «Todo», how they pay, and the saldo drops.
 - tapOn: { id: 'cuenta-abonar' }
@@ -146,14 +148,15 @@ tags:
 - tapOn: { id: 'abono-rapido-3500' }
 - tapOn: { id: 'abono-metodo-Transferencia' }
 - tapOn: { id: 'abono-registrar' }
-- extendedWaitUntil: { visible: { id: 'cobranza-toast' }, timeout: 8000 }
+- extendedWaitUntil: { visible: { id: 'cliente-toast' }, timeout: 8000 }
 - assertVisible: '.*Abono registrado.*'
 - assertVisible: ".*queda \\$0\\.00.*"
-# The day's abonos land in the panel below the client cards (the toast floats
-# over them, so close it first). The cards reshuffle once the saldo drops, so
-# let that settle before scrolling for the panel.
-- tapOn: { id: 'cobranza-toast-close' }
+- tapOn: { id: 'cliente-toast-close' }
 - waitForAnimationToEnd
+
+# Back on the list, the day's abonos land in the panel below the rows.
+- tapOn: { id: 'top-bar-back' }
+- extendedWaitUntil: { visible: { id: 'mobile-fiado' }, timeout: 5000 }
 - scrollUntilVisible:
     element: { id: 'cobranza-abonos-hoy' }
     direction: DOWN

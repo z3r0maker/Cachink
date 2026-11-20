@@ -2,14 +2,12 @@
  * useCobranza — Fiado y abonos' data for the signed-in operator (M-08): the
  * business's credit accounts from the phone's own rows (`leerCuentas`), the
  * turno's date for «abonos de hoy», the business's name for the reminder and
- * the owner's for the limit note. The abono write goes through
- * `RegistrarPagoClienteUseCase`, the same use case the web's register uses
- * (O-33); the query key sits under the caja's family, so a venta fiada or an
- * abono refreshes everything.
+ * the owner's for the limit note. The abono write is `useRegistrarAbono`'s:
+ * the web register's use case (O-33), stamped with the open turno; the query
+ * key sits under the caja's family, so a venta fiada or an abono refreshes
+ * everything.
  */
-import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RegistrarPagoClienteUseCase } from '@xangarro/application';
+import { useQuery } from '@tanstack/react-query';
 import { hoyLocal, nombreDueno } from '@xangarro/caja';
 import type { CuentaCliente, MetodoAbono } from '@xangarro/caja/cobranza';
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
@@ -24,10 +22,9 @@ import {
 } from '../../app/index';
 import { useCurrentBusinessId } from '../../app-config/index';
 import { cajaKeys } from '../../hooks/query-keys';
-import { useAuditedUseCase } from '../../observability/index';
-import { AUDIT_REGISTRAR_PAGO } from '../../observability/audit-configs';
 import { useShellData } from '../AppShell/use-shell-data';
 import { leerCuentas } from './cobranza-lectura';
+import { useRegistrarAbono } from './use-registrar-abono';
 
 /** One abono the operator is recording, whole (an excess is saldo a favor, D5). */
 export interface AbonoHecho {
@@ -88,32 +85,16 @@ function useDueno(): string {
   return nombreDueno(q.data ?? null);
 }
 
-/** The write: the same use case the web's register records an abono with. */
-function useRegistrarAbono() {
-  const payments = useClientPaymentsRepository();
-  const clients = useClientsRepository();
-  const businessId = useCurrentBusinessId();
-  const queryClient = useQueryClient();
-  const useCase = useAuditedUseCase(
-    useMemo(() => new RegistrarPagoClienteUseCase(payments, clients), [payments, clients]),
-    AUDIT_REGISTRAR_PAGO,
-  );
-  const m = useMutation({
-    mutationFn: async (a: AbonoHecho) => {
-      if (!businessId) throw new Error('No hay negocio en esta caja');
-      await useCase.execute({
-        clienteId: a.clienteId as never,
-        fecha: hoyLocal() as never,
-        montoCentavos: a.monto,
-        metodo: a.metodo,
-        businessId: businessId as BusinessId,
-      });
-    },
-  });
-  return async (a: AbonoHecho): Promise<string | null> => {
+/**
+ * The write: the abono recorded through `RegistrarPagoClienteUseCase` and
+ * stamped with the caja's open turno (ADR-146), so the turno's expected cash
+ * counts it. The message when it failed, or null when it landed.
+ */
+function useRegistrar(): (a: AbonoHecho) => Promise<string | null> {
+  const m = useRegistrarAbono();
+  return async (a) => {
     try {
       await m.mutateAsync(a);
-      await queryClient.invalidateQueries({ queryKey: cajaKeys.byBusiness(businessId) });
       return null;
     } catch (e) {
       return `No se pudo registrar el abono: ${e instanceof Error ? e.message : String(e)}`;
@@ -126,7 +107,7 @@ export function useCobranza(): CobranzaVivo {
   const shell = useShellData();
   const negocio = shell.negocio ?? '';
   const { cuentas, isError, refetch } = useCuentas(hoy, shell.caja ?? 'la caja');
-  const registrar = useRegistrarAbono();
+  const registrar = useRegistrar();
   const dueno = useDueno();
   return {
     state: isError ? 'error' : cuentas === null ? 'cargando' : 'happy',

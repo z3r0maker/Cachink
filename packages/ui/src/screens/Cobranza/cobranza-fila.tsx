@@ -1,68 +1,29 @@
 /**
- * One client on Fiado y abonos (MvCobranza): initials, name and balance, the
- * state chip and how old the debt is («Abonó hoy · debe desde hace 16
- * días»). The whole row opens the account.
+ * One client on Fiado y abonos (board RvFiado): the name and a line under it
+ * («2 ventas abiertas», «Sin abonar hace 16 días»), the balance and its mark
+ * («Abonó hoy», «Atrasado»). No buttons: the whole row opens the client.
  */
 import type { ReactElement } from 'react';
-import { Pressable, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
 import { View } from '@tamagui/core';
-import { lineaCuenta, saldo, type CuentaCliente } from '@xangarro/caja/cobranza';
+import { renglonCuenta, saldo, type CuentaCliente } from '@xangarro/caja/cobranza';
 import { formatMoney } from '@xangarro/domain';
 import { MText } from '../../components/Mostrador/index';
-import { GLYPHS, PathIcon } from '../../components/PathIcon/index';
-import { colors } from '../../theme';
-import { colorSaldo } from './cobranza-logic';
-import { Avatar, Cifra, EstadoChip } from './cobranza-partes';
+import { borderColors, borderWidths, colors, radii } from '../../theme';
 
 const estilo =
   (ultima: boolean) =>
   ({ pressed }: { pressed: boolean }): ViewStyle => ({
-    minHeight: 68,
+    minHeight: 60,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
+    gap: 10,
+    paddingVertical: 8,
     paddingHorizontal: 14,
-    borderBottomWidth: ultima ? 0 : 1,
+    borderBottomWidth: ultima ? 0 : StyleSheet.hairlineWidth,
     borderBottomColor: colors.gray100,
-    backgroundColor: pressed ? colors.offwhite : colors.white,
+    backgroundColor: pressed ? colors.yellowSoft : colors.white,
   });
-
-function Texto(p: { c: CuentaCliente; hoy: string }): ReactElement {
-  const s = saldo(p.c);
-  return (
-    <View flex={1} minWidth={0} gap={4}>
-      <View flexDirection="row" alignItems="baseline" gap={8}>
-        <MText
-          textAlign="left"
-          size="body"
-          weight="extraBold"
-          numberOfLines={1}
-          flex={1}
-          minWidth={0}
-        >
-          {p.c.nombre}
-        </MText>
-        <Cifra size="lgx" color={colorSaldo(s)}>
-          {formatMoney(s)}
-        </Cifra>
-      </View>
-      <View flexDirection="row" alignItems="center" gap={6} minWidth={0}>
-        <EstadoChip c={p.c} />
-        <MText
-          textAlign="left"
-          size="sm"
-          weight="semibold"
-          color={colors.gray600}
-          numberOfLines={1}
-          flex={1}
-        >
-          {lineaCuenta(p.c, p.hoy)}
-        </MText>
-      </View>
-    </View>
-  );
-}
 
 export function CobranzaFila(p: {
   readonly c: CuentaCliente;
@@ -70,17 +31,62 @@ export function CobranzaFila(p: {
   readonly ultima: boolean;
   readonly onPress: () => void;
 }): ReactElement {
+  const f = renglonCuenta(p.c, p.hoy);
+  const monto = formatMoney(saldo(p.c));
   return (
     <Pressable
       testID={`cobranza-cliente-${p.c.id}`}
       role="button"
-      aria-label={`Ver cuenta de ${p.c.nombre}, debe ${formatMoney(saldo(p.c))}`}
+      aria-label={[p.c.nombre, f.linea, monto, f.marca].filter(Boolean).join(', ')}
       onPress={p.onPress}
       style={estilo(p.ultima)}
     >
-      <Avatar c={p.c} size={44} />
-      <Texto c={p.c} hoy={p.hoy} />
-      <PathIcon d={GLYPHS.chevronRight} size={18} color={colors.gray600} />
+      <View flex={1} minWidth={0} gap={2} alignItems="flex-start">
+        <MText size="body" weight="extraBold" numberOfLines={1}>
+          {p.c.nombre}
+        </MText>
+        <MText size="sm" weight="semibold" color={colors.gray600} numberOfLines={1}>
+          {f.linea}
+        </MText>
+      </View>
+      <View alignItems="flex-end" gap={2}>
+        <MText size="body" weight="extraBold" fontVariant={['tabular-nums']}>
+          {monto}
+        </MText>
+        {f.marca ? (
+          <MText size="xs" weight="bold" color={colors.gray600}>
+            {f.marca}
+          </MText>
+        ) : null}
+      </View>
     </Pressable>
+  );
+}
+
+/** The rows on one quiet panel, as the board draws them. */
+export function CobranzaFilas(p: {
+  readonly cuentas: readonly CuentaCliente[];
+  readonly hoy: string;
+  readonly onAbrir: (id: string) => void;
+}): ReactElement {
+  return (
+    <View
+      testID="cobranza-filas"
+      backgroundColor={colors.white}
+      borderWidth={borderWidths.quiet}
+      borderColor={borderColors.quiet}
+      borderRadius={radii[6]}
+      overflow="hidden"
+    >
+      {p.cuentas.map((c, i) => (
+        <CobranzaFila
+          key={c.id}
+          c={c}
+          hoy={p.hoy}
+          ultima={i === p.cuentas.length - 1}
+          onPress={() => p.onAbrir(c.id)}
+        />
+      ))}
+    </View>
   );
 }

@@ -2,21 +2,13 @@
  * «Recibir abono» and «Recordarle su saldo» (M-08): the abono sheet follows
  * the web's rules exactly — nothing registers until the amount parses, zero
  * is not an amount, and an abono above the balance is allowed and becomes
- * saldo a favor (D5). The reminder composes the wa.me link from the phone as
- * typed and the live message, and waits for all ten digits.
+ * saldo a favor (D5). The reminder is `RecordarSheet`'s (MvRecordarSaldo),
+ * tested with the client's page.
  */
 import { describe, expect, it, vi } from 'vitest';
-import { Linking } from 'react-native';
 import { cuentaPorId } from '@xangarro/caja/cobranza';
 import { initI18n } from '../src/i18n/index';
 import { RecibirAbonoSheet } from '../src/screens/Cobranza/recibir-abono-sheet';
-import { RecordarSaldoSheet } from '../src/screens/Cobranza/recordar-saldo-sheet';
-import {
-  abrirWhatsApp,
-  digitos,
-  enlaceWhatsApp,
-  telefonoCompleto,
-} from '../src/screens/Cobranza/recordar-saldo';
 import { fireEvent, renderWithProviders, screen } from './test-utils';
 
 initI18n();
@@ -86,66 +78,5 @@ describe('RecibirAbonoSheet · validation, the web’s rules', () => {
     tap('abono-metodo-Transferencia');
     tap('abono-registrar');
     expect(onGuardar).toHaveBeenCalledWith('Transferencia', 100_00n);
-  });
-});
-
-describe('recordar saldo · the link and the sheet', () => {
-  it('composes the wa.me link from the phone as typed and the message', () => {
-    expect(digitos('5512 447 903')).toBe('5512447903');
-    expect(enlaceWhatsApp('5512 447 903', 'Te debemos nada')).toBe(
-      'https://wa.me/525512447903?text=Te%20debemos%20nada',
-    );
-    expect(telefonoCompleto('5512 447 903')).toBe(true);
-    expect(telefonoCompleto('5512')).toBe(false);
-  });
-
-  it('opens WhatsApp and confirms in a line; a phone without it says so', async () => {
-    const abre = vi.spyOn(Linking, 'openURL').mockResolvedValue();
-    await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toContain('Se abrió WhatsApp');
-    expect(abre).toHaveBeenCalledWith('whatsapp://send?phone=525512447903&text=Hola');
-    abre.mockRejectedValue(new Error('sin app'));
-    await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toContain(
-      'No se pudo abrir WhatsApp',
-    );
-    abre.mockRestore();
-  });
-
-  it('the sheet prefills phone and message and waits for ten digits', () => {
-    renderWithProviders(
-      <RecordarSaldoSheet
-        open
-        nombre="Taller de Chuy"
-        telefono="5533 981 204"
-        mensaje="Hola, Taller de Chuy. Tu saldo es de $860.00."
-        onClose={vi.fn()}
-      />,
-    );
-    expect(screen.getByText('Recordarle su saldo a Taller de Chuy')).toBeInTheDocument();
-    expect((screen.getByTestId('recordar-telefono') as HTMLInputElement).value).toBe(
-      '5533 981 204',
-    );
-    expect(screen.getByTestId('recordar-mensaje').textContent).toContain('$860.00');
-    expect(screen.queryByText('Faltan números: son 10 dígitos.')).toBeNull();
-    fireEvent.change(screen.getByTestId('recordar-telefono'), { target: { value: '5533' } });
-    expect(screen.getByText('Faltan números: son 10 dígitos.')).toBeInTheDocument();
-    expect(screen.getByTestId('recordar-abrir').getAttribute('aria-disabled')).toBe('true');
-  });
-
-  it('the message can be changed and put back', () => {
-    renderWithProviders(
-      <RecordarSaldoSheet
-        open
-        nombre="Chuy"
-        telefono="5533 981 204"
-        mensaje="original"
-        onClose={vi.fn()}
-      />,
-    );
-    expect(screen.queryByTestId('recordar-restaurar')).toBeNull();
-    fireEvent.change(screen.getByTestId('recordar-mensaje'), { target: { value: 'cambiado' } });
-    expect(screen.getByTestId('recordar-restaurar')).toBeInTheDocument();
-    tap('recordar-restaurar');
-    expect(screen.queryByTestId('recordar-restaurar')).toBeNull();
-    expect(screen.getByTestId('recordar-mensaje').textContent).toContain('original');
   });
 });

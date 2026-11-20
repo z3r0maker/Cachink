@@ -25,7 +25,9 @@ const RUTAS: Readonly<Record<string, string>> = {
  */
 export function rutaMovil(href: string): string | null {
   const sin = href.startsWith(OPERADOR_BASE) ? href.slice(OPERADOR_BASE.length) : href;
-  const seccion = sin.replace(/^\/+/, '').split(/[/?#]/)[0] ?? '';
+  const [seccion = '', sub = ''] = sin.replace(/^\/+/, '').split(/[?#]/)[0]?.split('/') ?? [];
+  // «Cobrar a …» names the client: their page, with «Recibir abono» up (RvFiado).
+  if (seccion === 'cobranza' && sub !== '') return `/cobranza/${sub}?abono=1`;
   const ruta = RUTAS[seccion];
   if (ruta === undefined) return null;
   const query = /\?[^#]*/.exec(sin)?.[0] ?? '';

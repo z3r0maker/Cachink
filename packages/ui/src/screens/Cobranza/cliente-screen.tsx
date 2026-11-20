@@ -1,9 +1,11 @@
 /**
- * A client's account on the phone (MvCobranza's client view, the web's
- * Detalle de cliente): who they are, the saldo hero, the open sales and the
- * latest abonos; «Recibir abono» (only while they owe) and «Recordarle su
- * saldo» in the thumb zone, each opening its sheet. After an abono the toast
- * says where it landed (`toastAbono`, as the web's).
+ * A client's page on Fiado y abonos (RvFiado «Cliente», MvCobranzaCliente):
+ * the account scrolls, «Recibir abono» and «Recordarle su saldo» stay in the
+ * thumb zone, and each opens its sheet — the abono, and the reminder with
+ * WhatsApp, Mensajes or the phone's share menu (MvRecordarSaldo), so a
+ * client with no number still gets the message. After an abono the toast
+ * says where it landed; a failed write replaces it. Presentational: the
+ * route hands it the account and `useCobranza().registrar`.
  */
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
@@ -17,157 +19,108 @@ import {
   type MetodoAbono,
 } from '@xangarro/caja/cobranza';
 import type { Money } from '@xangarro/domain';
-import { Btn, CajaEstado, EstadoCargando, PathIcon, Toast } from '../../components/index';
+import { CajaEstado, EstadoCargando, Toast } from '../../components/index';
 import { borderColors, borderWidths, colors } from '../../theme';
-import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
-import { AbonoSheet } from './abono-sheet';
-import { Abonos } from './cliente-abonos';
-import { Abiertas, ClienteCabeza, SaldoHero } from './cliente-partes';
+import { CuentaCuerpo, CuentaPie } from './cliente-cuenta';
+import { RecibirAbonoSheet } from './recibir-abono-sheet';
 import { RecordarSheet } from './recordar-sheet';
+import type { AbonoHecho, DatosCobranza } from './use-cobranza';
 
 export interface ClienteScreenProps {
-  readonly state: 'loading' | 'error' | 'happy';
+  readonly state: 'cargando' | 'error' | 'happy';
   /** Null once loaded: no such client on this caja. */
   readonly cuenta: CuentaCliente | null;
-  readonly hoy: string;
-  readonly negocio: string;
+  readonly data: DatosCobranza | null;
   /** Opens with «Recibir abono» up (Inicio's «Cobrar a …»). */
   readonly abrirAbono?: boolean;
-  /** Opens with «Recordarle su saldo» up (review stories). */
-  readonly abrirRecordar?: boolean;
-  /** Records the abono; rejects with the reason when it can't. */
-  readonly onRecibir: (metodo: MetodoAbono, monto: Money) => Promise<void>;
+  /** Records the abono; returns the error message, or null when it landed. */
+  readonly onRegistrar: (a: AbonoHecho) => Promise<string | null>;
   readonly onRetry: () => void;
+  readonly testID?: string;
 }
 
 type Hoja = 'abono' | 'recordar' | null;
+type Aviso = { readonly texto: string; readonly ok: boolean } | null;
 
 function useHojas(p: ClienteScreenProps, cuenta: CuentaCliente) {
-  const [hoja, setHoja] = useState<Hoja>(
-    p.abrirAbono && saldo(cuenta) > 0n ? 'abono' : p.abrirRecordar ? 'recordar' : null,
-  );
+  const [hoja, setHoja] = useState<Hoja>(p.abrirAbono && saldo(cuenta) > 0n ? 'abono' : null);
+  const [aviso, setAviso] = useState<Aviso>(null);
+  // Each opening is a fresh sheet: a reminder left half-edited doesn't come back.
   const [vez, setVez] = useState(0);
-  const [registrando, setRegistrando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const abrir = (h: Hoja) => {
-    setError(null);
+  const abrir = (x: Hoja): void => {
     setVez((n) => n + 1);
-    setHoja(h);
+    setHoja(x);
   };
-  const recibir = async (metodo: MetodoAbono, monto: Money) => {
-    const aviso = toastAbono(vistaAbono(cuenta, estadoCuenta(cuenta), monto, false), monto, metodo);
-    setRegistrando(true);
-    try {
-      await p.onRecibir(metodo, monto);
-      setHoja(null);
-      setToast(aviso);
-    } catch (e) {
-      setError(`No se pudo registrar el abono: ${e instanceof Error ? e.message : String(e)}`);
-    } finally {
-      setRegistrando(false);
-    }
+  const guardar = async (metodo: MetodoAbono, monto: Money): Promise<string | null> => {
+    const v = vistaAbono(cuenta, estadoCuenta(cuenta), monto, false);
+    setHoja(null);
+    setAviso({ texto: toastAbono(v, monto, metodo, cuenta.nombre), ok: true });
+    const error = await p.onRegistrar({ clienteId: cuenta.id, metodo, monto });
+    if (error !== null) setAviso({ texto: error, ok: false });
+    return error;
   };
-  return { hoja, vez, abrir, registrando, error, toast, setToast, recibir };
+  return { hoja, setHoja, abrir, vez, aviso, setAviso, guardar };
 }
 
-function Pie(p: { debe: boolean; onAbono: () => void; onRecordar: () => void }): ReactElement {
+/** Where the abono landed, or what went wrong with it. */
+function AvisoAbono(p: { readonly aviso: Aviso; readonly onClose: () => void }) {
+  if (p.aviso === null) return null;
   return (
-    <View
-      gap={8}
-      paddingHorizontal={16}
-      paddingTop={10}
-      paddingBottom={12}
-      borderTopWidth={borderWidths.quiet}
-      borderTopColor={borderColors.quiet}
-      backgroundColor={colors.offwhite}
-    >
-      {p.debe ? (
-        <Btn
-          variant="primary"
-          size="xl"
-          sentence
-          fullWidth
-          onPress={p.onAbono}
-          testID="cliente-abonar"
-        >
-          Recibir abono
-        </Btn>
-      ) : null}
-      <Btn
-        variant="secondary"
-        size="lg"
-        fullWidth
-        icon={<PathIcon d={COBRAR_GLYPHS.whatsapp} size={18} />}
-        onPress={p.onRecordar}
-        testID="cliente-recordar"
-      >
-        Recordarle su saldo
-      </Btn>
-    </View>
+    <Toast
+      title={p.aviso.ok ? 'Abono registrado' : 'No se pudo registrar el abono'}
+      body={p.aviso.texto}
+      tone={p.aviso.ok ? 'ok' : 'warn'}
+      floating
+      onClose={p.onClose}
+      testID="cliente-toast"
+    />
   );
 }
 
-function Hojas(
-  p: ClienteScreenProps & { cuenta: CuentaCliente; h: ReturnType<typeof useHojas> },
-): ReactElement {
-  const { h } = p;
+function Pagina(p: ClienteScreenProps & { cuenta: CuentaCliente; data: DatosCobranza }) {
+  const h = useHojas(p, p.cuenta);
   return (
-    <>
-      <AbonoSheet
+    <View flex={1} testID={p.testID ?? 'cliente'}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+        <CuentaCuerpo cuenta={p.cuenta} hoy={p.data.hoy} dueno={p.data.dueno} />
+      </ScrollView>
+      <View
+        padding={16}
+        paddingTop={12}
+        borderTopWidth={borderWidths.quiet}
+        borderTopColor={borderColors.quiet}
+        backgroundColor={colors.offwhite}
+      >
+        <CuentaPie
+          debe={saldo(p.cuenta) > 0n}
+          onAbonar={() => h.abrir('abono')}
+          onRecordar={() => h.abrir('recordar')}
+        />
+      </View>
+      <RecibirAbonoSheet
         key={`abono-${h.vez}`}
         open={h.hoja === 'abono'}
         cuenta={p.cuenta}
-        registrando={h.registrando}
-        error={h.error}
-        onClose={() => h.abrir(null)}
-        onRecibir={(m, monto) => void h.recibir(m, monto)}
+        onClose={() => h.setHoja(null)}
+        onGuardar={h.guardar}
       />
       <RecordarSheet
         key={`recordar-${h.vez}`}
         open={h.hoja === 'recordar'}
         cuenta={p.cuenta}
-        negocio={p.negocio}
-        onClose={() => h.abrir(null)}
+        negocio={p.data.negocio}
+        onClose={() => h.setHoja(null)}
       />
-    </>
-  );
-}
-
-function Cuenta(p: ClienteScreenProps & { cuenta: CuentaCliente }): ReactElement {
-  const h = useHojas(p, p.cuenta);
-  return (
-    <View flex={1} testID="cliente">
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 14, gap: 14 }}>
-        <ClienteCabeza c={p.cuenta} />
-        <SaldoHero c={p.cuenta} hoy={p.hoy} />
-        <Abiertas c={p.cuenta} />
-        <Abonos c={p.cuenta} />
-      </ScrollView>
-      <Pie
-        debe={saldo(p.cuenta) > 0n}
-        onAbono={() => h.abrir('abono')}
-        onRecordar={() => h.abrir('recordar')}
-      />
-      {h.toast ? (
-        <Toast
-          floating
-          title="Abono recibido"
-          body={h.toast}
-          onClose={() => h.setToast(null)}
-          testID="cliente-toast"
-        />
-      ) : null}
-      <Hojas {...p} h={h} />
+      <AvisoAbono aviso={h.aviso} onClose={() => h.setAviso(null)} />
     </View>
   );
 }
 
 export function ClienteScreen(p: ClienteScreenProps): ReactElement {
-  if (p.state === 'loading') {
+  if (p.state === 'cargando' || (p.state === 'happy' && p.data === null)) {
     return <EstadoCargando testID="cliente-cargando" />;
   }
-  if (p.state === 'error' || p.cuenta === null) {
+  if (p.state === 'error' || p.cuenta === null || p.data === null) {
     return (
       <CajaEstado
         mode="error"
@@ -179,5 +132,5 @@ export function ClienteScreen(p: ClienteScreenProps): ReactElement {
       />
     );
   }
-  return <Cuenta {...p} cuenta={p.cuenta} />;
+  return <Pagina {...p} cuenta={p.cuenta} data={p.data} />;
 }

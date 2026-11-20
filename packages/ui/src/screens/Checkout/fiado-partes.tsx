@@ -164,6 +164,8 @@ export function ClienteNuevo(p: {
   valor: NuevoCliente | null;
   onCambio: (v: NuevoCliente | null) => void;
   dueno: string;
+  /** What the search holds: the new client's name starts as it, not typed twice. */
+  sugerido?: string;
 }): ReactElement {
   const abierto = p.valor !== null;
   return (
@@ -172,7 +174,7 @@ export function ClienteNuevo(p: {
         testID="fiado-nuevo"
         role="button"
         aria-expanded={abierto}
-        onPress={() => p.onCambio(abierto ? null : VACIO)}
+        onPress={() => p.onCambio(abierto ? null : { ...VACIO, nombre: (p.sugerido ?? '').trim() })}
         style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10 }}
       >
         <PathIcon d={COBRAR_GLYPHS.mas} size={18} strokeWidth={2.6} />

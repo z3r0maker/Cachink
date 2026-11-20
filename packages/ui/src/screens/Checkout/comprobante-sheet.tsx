@@ -3,7 +3,8 @@
  * customer (the business's comprobante template), then WhatsApp, Mensajes
  * and the phone's share menu. Each tap confirms in a line. After a cobro
  * «Listo, nueva venta» closes everything; from a past sale (Ventas) it is
- * «Listo» and only closes the sheet, as the web caja's dialog says it.
+ * «Listo» and only closes the sheet, as the web caja's dialog says it, and
+ * the sheet is just the ways to send it (MvVentas): the sale was already seen.
  */
 import type { ReactElement } from 'react';
 import { SvgXml } from 'react-native-svg';
@@ -79,8 +80,11 @@ function Vista({ svg, texto }: { svg: string; texto: string }): ReactElement {
   );
 }
 
-const eyebrowDe = (v: VentaHecha): string =>
-  [v.folio, formatMoney(v.total), v.cambio !== null ? `Cambio ${formatMoney(v.cambio)}` : null]
+const eyebrowDe = (v: VentaHecha, desdeVentas: boolean): string =>
+  (desdeVentas
+    ? ['Venta', v.folio, formatMoney(v.total)]
+    : [v.folio, formatMoney(v.total), v.cambio !== null ? `Cambio ${formatMoney(v.cambio)}` : null]
+  )
     .filter(Boolean)
     .join(' · ');
 
@@ -103,17 +107,19 @@ export function ComprobanteSheet(p: ComprobanteSheetProps): ReactElement {
     <BottomSheet
       open={p.open}
       onClose={p.onClose}
-      eyebrow={eyebrowDe(v)}
+      eyebrow={eyebrowDe(v, p.desdeVentas === true)}
       title="Mandar comprobante"
       closeLabel="Cerrar y volver a la venta"
       testID="comprobante-sheet"
       footer={pie}
     >
       <View gap={10}>
-        <Vista
-          svg={comprobanteSvgDe(v, p.business)}
-          texto={`Comprobante de la venta ${v.folio}: total ${formatMoney(v.total)}`}
-        />
+        {p.desdeVentas ? null : (
+          <Vista
+            svg={comprobanteSvgDe(v, p.business)}
+            texto={`Comprobante de la venta ${v.folio}: total ${formatMoney(v.total)}`}
+          />
+        )}
         <EnviarOpciones opciones={OPCIONES} texto={texto} avisoTestID="comprobante-aviso" />
       </View>
     </BottomSheet>

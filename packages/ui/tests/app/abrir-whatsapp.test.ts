@@ -9,7 +9,6 @@ import { Linking } from 'react-native';
 import { abrirChatWhatsApp, enlacesDeChat } from '../../src/app/abrir-whatsapp';
 import { porWhatsApp } from '../../src/screens/Checkout/comprobante-acciones';
 import { recordarPorWhatsApp } from '../../src/screens/Cobranza/recordar-acciones';
-import { abrirWhatsApp } from '../../src/screens/Cobranza/recordar-saldo';
 
 const APP_SIN_NUMERO = 'whatsapp://send?text=Hola%20t%C3%BA';
 const WEB_SIN_NUMERO = 'https://wa.me/?text=Hola%20t%C3%BA';
@@ -123,34 +122,6 @@ describe('the reminder from a client account', () => {
     abrenSolo();
     await expect(recordarPorWhatsApp('55 1244 7903', 'Hola')).resolves.toBe(
       'No se pudo abrir WhatsApp en este teléfono. Usa Mensajes o Compartir.',
-    );
-  });
-});
-
-describe('the reminder from Fiado y abonos', () => {
-  it('opens the chat on the client number', async () => {
-    abrenSolo(APP_AL_NUMERO);
-    await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toBe(
-      'Se abrió WhatsApp con el recordatorio. Tú decides si lo mandas.',
-    );
-  });
-
-  it('leaves the contact to WhatsApp while the number is incomplete', async () => {
-    abrenSolo('whatsapp://send?text=Hola');
-    await expect(abrirWhatsApp('5512', 'Hola')).resolves.toContain('Se abrió WhatsApp');
-  });
-
-  it('says what to do when only the link opened', async () => {
-    abrenSolo(WEB_AL_NUMERO);
-    await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toBe(
-      'Abrimos el enlace de WhatsApp. Si no tienes la app, instálala para mandarlo.',
-    );
-  });
-
-  it('says so when nothing opened', async () => {
-    abrenSolo();
-    await expect(abrirWhatsApp('5512 447 903', 'Hola')).resolves.toBe(
-      'No se pudo abrir WhatsApp en este teléfono.',
     );
   });
 });

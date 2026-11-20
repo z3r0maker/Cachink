@@ -45,8 +45,9 @@ appId: mx.xangarro.mobile
 # 0 + 15; the pill turned (15 > umbral 3).
 - assertVisible:
     id: 'inventario-cantidad-01JPRD00000000000000000007'
-- assertVisible: '.*15.*'
-- assertVisible: '.*Suficiente.*'
+# The row folds its chip into one label, which names «reponer» only while
+# it is low: the exact label says 15 and no longer asks for it.
+- assertVisible: 'Agua de horchata, hay 15 piezas\. Registrar un movimiento'
 # Merma: 15 is above the aviso (3), so the same row now opens the merma
 # (tipoAlAbrir); the amount, and the reason a write-off always needs.
 - scrollUntilVisible:

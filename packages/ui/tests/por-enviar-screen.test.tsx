@@ -108,14 +108,19 @@ describe('PorEnviarScreen · fases', () => {
     expect(onReintentar).not.toHaveBeenCalled();
   });
 
-  it('todo-enviado: nothing pending and the way to the cierre', () => {
+  it('todo-enviado: Don, who already has it, and the way to the cierre (RvEnvio)', () => {
     const { onIrACierre } = montar({ fase: 'enviado', cola: [] });
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('Todo enviado');
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('a las 14:55');
-    expect(screen.getByTestId('cola-vacia').textContent).toContain('Nada pendiente');
-    expect(screen.getByTestId('cola-vacia').textContent).toContain('el portal de Pedro');
-    tap('cola-ir-cierre');
+    const card = screen.getByTestId('por-enviar-todo-enviado').textContent ?? '';
+    expect(card).toContain('Todo está enviado');
+    expect(card).toContain('ya tiene lo que capturaste. Última vez a las 14:55.');
+    expect(screen.queryByTestId('por-enviar-heroe')).toBeNull();
+    tap('por-enviar-todo-enviado-cta');
     expect(onIrACierre).toHaveBeenCalled();
+  });
+
+  it('todo-enviado offline keeps the queue view, not Don’s card', () => {
+    montar({ state: 'sin-internet', fase: 'enviado', cola: [] });
+    expect(screen.queryByTestId('por-enviar-todo-enviado')).toBeNull();
   });
 });
 

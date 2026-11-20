@@ -328,7 +328,9 @@ describe('helpers', () => {
     expect(rutaMovil('/operador/caja#arriba')).toBe('/cobrar');
     expect(rutaMovil('/operador/caja')).toBe('/cobrar');
     expect(rutaMovil('/operador/cierre')).toBe('/turno');
-    expect(rutaMovil('/operador/cobranza/C1')).toBe('/fiado');
+    expect(rutaMovil('/operador/cobranza/C1')).toBe('/cobranza/C1?abono=1');
+    expect(rutaMovil('/operador/cobranza/C%201')).toBe('/cobranza/C%201?abono=1');
+    expect(rutaMovil('/operador/cobranza')).toBe('/fiado');
     expect(rutaMovil('/operador/avisos')).toBeNull();
   });
   it('splits the greeting from «La caja está lista.»', () => {
