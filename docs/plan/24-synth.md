@@ -396,7 +396,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-16 `synth-triage` [media]
 
-- [ ] Status · **Blocked by:** S-09
+- [ ] Status · **Blocked by:** —
 - **What:**
   - The only agent with repo access.
   - For each `critical` or `major` bug: reproduce it with a deterministic Playwright spec using `mintTenant()`, or
@@ -419,7 +419,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-18 `synth-research-prep` y línea base humana [media]
 
-- [ ] Status · **Blocked by:** S-09
+- [ ] Status · **Blocked by:** —
 - **What:** a script for 3 to 5 real sessions on the same 3 scenarios, a `human-baseline.yaml` format, and
   `aggregate.ts` matches against it.
 - **Acceptance:** spec Phase 7's acceptance.
@@ -438,7 +438,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-20 Studio de lectura [media]
 
-- [ ] Status · **Blocked by:** S-09
+- [ ] Status · **Blocked by:** —
 - **What:**
   - **Server:** a SQLite indexer over `reports/` (`reindex`) and the read half of spec §16.4's API, bound to
     `127.0.0.1` only.
