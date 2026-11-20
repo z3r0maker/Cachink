@@ -53,6 +53,7 @@ function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): Reac
         onQuitarUno={(p) => r.ticket.bump(p.id, -1)}
         onAlta={r.abrirNuevo}
         onCobrar={() => r.setHoja('ticket')}
+        dueno={dueno}
       />
       <ProductoNuevoSheet
         open={r.hoja === 'nuevo'}

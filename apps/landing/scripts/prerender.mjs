@@ -45,7 +45,7 @@ await build({
   build: {
     ssr: 'src/entry-server.jsx',
     outDir: 'dist/server',
-    rollupOptions: {
+    rolldownOptions: {
       output: { format: 'esm' },
     },
   },

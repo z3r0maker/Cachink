@@ -1,0 +1,65 @@
+# The escáner with a code the catalogue knows (M-19, ADR-150; MvEscaner): the
+# typed code puts Refresco on the ticket with «Deshacer», and «Deshacer»
+# takes it off again. The camera can't be driven from Maestro; the typed
+# code goes through the same read as a scan.
+#
+# Precondition: the mock's fixtures (Refresco 600ml carries 7509876500017,
+# `MOCK_BARCODES` in packages/contracts/src/mock/fixtures.ts).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - ventas
+  - escaner
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+- tapOn:
+    id: 'cobrar-scan'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+- assertVisible:
+    id: 'escaner-listo'
+- tapOn:
+    id: 'escaner-manual'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: '7509876500017'
+# One drag dismisses the OS keyboard; hideKeyboard leaves it over «Buscar».
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-buscar'
+
+# The contract: one product with that code goes on the ticket.
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-agregado'
+    timeout: 8000
+- assertVisible:
+    text: '.*Agregaste Refresco 600ml.*'
+- assertVisible: 'Ya va en el ticket'
+- assertNotVisible:
+    id: 'escaner-duplicado'
+
+# «Deshacer» takes the one piece back off.
+- tapOn:
+    id: 'escaner-deshacer'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-deshecho'
+    timeout: 5000
+- assertVisible: 'Quitaste Refresco 600ml del ticket.'

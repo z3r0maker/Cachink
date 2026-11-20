@@ -1,10 +1,12 @@
 /**
- * The card under the camera after a code (MvEscaner): added with «Deshacer»,
- * unknown with «Escanear otro» and «Darlo de alta», undone, or the hint.
- * Announced politely as it changes.
+ * The card under the camera after a code (MvEscaner, EcDuplicado): added with
+ * «Deshacer», unknown with «Escanear otro» and «Darlo de alta», shared by two
+ * or more products with the choice, undone, or the hint. Announced politely
+ * as it changes.
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
+import { mayuscula } from '@xangarro/caja';
 import { formatMoney } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
@@ -12,6 +14,8 @@ import { PathIcon } from '../../components/PathIcon/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
 import { borderColors, borderWidths, colors, radii } from '../../theme';
 import { ProductoIcono } from './cobrar-tile';
+import { COBRAR_GLYPHS } from './cobrar-glyphs';
+import { EscanerDuplicado } from './escaner-duplicado';
 import type { UseEscaner } from './use-escaner';
 
 const CARD = {
@@ -100,11 +104,23 @@ function Linea(p: { d?: string; texto: string; testID: string }): ReactElement {
 export function EscanerResultado(p: {
   e: UseEscaner;
   onAlta: (codigo: string) => void;
+  /** «Pedro», or «el dueño». */
+  dueno: string;
 }): ReactElement {
   const s = p.e.estado;
   return (
-    <View aria-live="polite">
+    <View aria-live="polite" gap={8}>
       <Agregado e={p.e} />
+      {s.tipo === 'agregado' && s.avisaDueno ? (
+        <Linea
+          d={COBRAR_GLYPHS.info}
+          texto={`${mayuscula(p.dueno)} va a ver el código repetido en su revisión.`}
+          testID="escaner-aviso-dueno"
+        />
+      ) : null}
+      {s.tipo === 'duplicado' ? (
+        <EscanerDuplicado e={s} onElegir={p.e.elegir} onOtro={p.e.otro} />
+      ) : null}
       <Desconocido e={p.e} onAlta={p.onAlta} />
       {s.tipo === 'deshecho' ? (
         <Linea

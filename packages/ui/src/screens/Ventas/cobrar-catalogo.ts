@@ -5,7 +5,7 @@
  * carry; the web caja's four fixed chips (`categoriaDe`, apps/web) come from
  * the design fixture and would put a real catalogue under «Extras».
  */
-import { formatMoney, resolveProductIcon } from '@xangarro/domain';
+import { formatMoney, mismoCodigo, resolveProductIcon } from '@xangarro/domain';
 import type { Money, Product, ProductIcon } from '@xangarro/domain';
 import { matches } from '@xangarro/caja';
 import { stockDeCaja } from '@xangarro/caja/lectura';
@@ -25,6 +25,8 @@ export interface ProductoCobrar {
   readonly codigo: string | null;
   /** «Quedan N» shows only for a tracked product at or under its threshold. */
   readonly quedan: number | null;
+  /** Given at the counter and still waiting in the owner's Revisión de caja. */
+  readonly pendiente: boolean;
 }
 
 export function productosDeCaja(
@@ -43,6 +45,7 @@ export function productosDeCaja(
       tint: PRODUCT_BG_COLORS[p.colorFondo],
       codigo: p.sku,
       quedan: tracked !== undefined && s.existencias <= s.umbral ? s.existencias : null,
+      pendiente: p.estadoRevision === 'pendiente',
     };
   });
 }
@@ -64,12 +67,14 @@ export function filtrarCatalogo(
     .filter((p) => matches(query, p.nombre, p.codigo ?? '', formatMoney(p.precio)));
 }
 
-/** The product a scanned or typed code names; null when the catalogue has none. */
-export function porCodigo(
+/**
+ * Every product a scanned or typed code names, in catalogue order (ADR-150):
+ * compared by `codigoCanonico`, so a UPC-A and its EAN-13 form meet. Two or
+ * more means the catalogue has a duplicate and the escáner asks which one.
+ */
+export function productosPorCodigo(
   productos: readonly ProductoCobrar[],
   codigo: string,
-): ProductoCobrar | null {
-  const c = codigo.trim();
-  if (c === '') return null;
-  return productos.find((p) => p.codigo === c) ?? null;
+): readonly ProductoCobrar[] {
+  return productos.filter((p) => mismoCodigo(p.codigo, codigo));
 }
