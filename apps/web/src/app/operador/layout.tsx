@@ -12,8 +12,9 @@ export const metadata: Metadata = { title: 'Caja · Xangarro!' };
  * The operator's register (Track O). One tab owns it (DB3-CAJA-01): a second
  * tab stops at «La caja ya está abierta en otra pestaña» before anything opens
  * the database. Then the gate (O-12): an unlinked browser sees only Acceso. The shell lives in the layout so it
- * never re-mounts between screens (O-11 gate). Data is the design fixture
- * until the register screens read the linked device's own (O-14+).
+ * never re-mounts between screens (O-11 gate). The fixture is only the
+ * design's: a linked caja overlays its own operator, business and turno
+ * (`shell/quien.ts`), its queue and its avisos.
  */
 export default function OperadorLayout({ children }: { readonly children: ReactNode }) {
   return (

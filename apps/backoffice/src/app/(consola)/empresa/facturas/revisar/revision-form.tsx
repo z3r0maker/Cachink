@@ -12,6 +12,8 @@ import * as mf from '@/styles/mostrador-facturas.css';
 import * as d from '@/styles/mostrador-data.css';
 import * as m from '@/styles/mostrador.css';
 
+import { CargoDeFactura } from '../../movimientos/registrar/cargo-usd';
+
 import { CATEGORIAS } from '../../movimientos/registrar/del-gasto';
 import { Opciones, submitWith, type Opcion } from '../../movimientos/registrar/opciones';
 
@@ -52,6 +54,9 @@ function Tarjeta({
           </div>
         ))}
       </dl>
+      {t.usd === null ? null : (
+        <CargoDeFactura usd={t.usd.monto} tipoXml={t.usd.tipoXml} name={`cargo-${t.uuid}`} />
+      )}
       <Opciones
         legend="Categoría"
         name={`categoria-${t.uuid}`}

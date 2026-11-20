@@ -95,7 +95,7 @@ function montosDe(campo: Campo): Montos | string {
     moneda: usd ? 'USD' : 'MXN',
     total,
     iva,
-    tipoCambio: usd ? campo('tipoCambio') : null,
+    cargoMxn: usd ? centavos(campo('cargo'), null) : null,
     deducible: campo('deducible') !== 'no',
   });
 }

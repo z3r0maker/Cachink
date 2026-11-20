@@ -27,7 +27,11 @@ export function OptionCards({ options, value, onValueChange, ariaLabel }: Option
   return (
     <RadioGroup.Root
       className={group}
-      value={value ?? undefined}
+      // Always controlled: `undefined` would hand Radix the selection, and a
+      // group React reuses (one wizard question after another) would keep the
+      // last one's choice on screen while the answer it shows was never set.
+      // `''` matches no option, so «no answer» shows nothing selected.
+      value={value ?? ''}
       onValueChange={onValueChange}
       aria-label={ariaLabel}
     >

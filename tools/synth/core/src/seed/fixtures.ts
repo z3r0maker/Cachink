@@ -31,6 +31,8 @@ export interface FixturePlan {
   readonly operators: readonly FixtureOperator[];
   /** Sales on the `days` before today, `perDay` each, across the products. */
   readonly history: { readonly days: number; readonly perDay: number };
+  /** No tenant at all: the actor signs up, and becomes the owner of what it creates. */
+  readonly signup?: true;
 }
 
 const CATALOGO: readonly FixtureProduct[] = [
@@ -62,6 +64,29 @@ export const FIXTURES: Readonly<Record<z.infer<typeof Seed>, FixturePlan>> = {
     products: CATALOGO,
     operators: [ANA, LUIS],
     history: { days: 0, perDay: 0 },
+  },
+  // Xangarro has no per-operator permissions: an operator who was never
+  // allowed to cancel cannot be allowed from /equipo either.
+  'operador-sin-permiso': {
+    plan: 'xangarro',
+    products: CATALOGO,
+    operators: [LUIS],
+    history: { days: 0, perDay: 0 },
+  },
+  // Xangarrote sets them per operator: Luis's was turned off, Ana's is on.
+  // The runner signs in as the first.
+  'xangarrote-permiso-apagado': {
+    plan: 'xangarrote',
+    products: CATALOGO,
+    operators: [LUIS, ANA],
+    history: { days: 0, perDay: 0 },
+  },
+  'sin-cuenta': {
+    plan: 'xangarrito',
+    products: [],
+    operators: [],
+    history: { days: 0, perDay: 0 },
+    signup: true,
   },
 };
 

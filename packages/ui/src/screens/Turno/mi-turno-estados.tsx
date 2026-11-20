@@ -4,9 +4,7 @@
  * turno en blanco and the failed read. Each says what to do next.
  */
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
-import { Btn, ErrorState, Spinner } from '../../components/index';
-import { EmptyState } from '../../components/EmptyState/index';
+import { CajaEstado, EstadoCargando, EstadoVacio } from '../../components/index';
 import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these. */
@@ -23,36 +21,24 @@ export interface MiTurnoEstadosProps {
 
 function EnBlanco(p: { readonly onIrAInicio: () => void }): ReactElement {
   return (
-    <EmptyState
-      icon="receipt"
+    <EstadoVacio
+      id="turno-vacio"
       title="Tu turno va en blanco"
-      description="Todavía no has capturado nada. En cuanto cobres la primera venta, aparece aquí."
-      action={
-        <Btn variant="primary" onPress={p.onIrAInicio} testID="turno-ir-cobrar">
-          Ir a cobrar
-        </Btn>
-      }
-      testID="turno-vacio"
+      body="Todavía no has capturado nada. En cuanto cobres la primera venta, aparece aquí."
+      cta={{ label: 'Ir a cobrar', onPress: p.onIrAInicio }}
     />
   );
 }
 
 export function MiTurnoEstados(p: MiTurnoEstadosProps): ReactElement {
-  if (p.id === 'loading') {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="turno-cargando">
-        <Spinner />
-      </View>
-    );
-  }
+  if (p.id === 'loading') return <EstadoCargando testID="turno-cargando" />;
   if (p.id === 'error') {
     return (
-      <ErrorState
-        title="No pudimos cargar tu turno"
-        body="Tus datos están a salvo en este dispositivo. Vuelve a intentar en un momento."
-        retryLabel="Intentar de nuevo"
+      <CajaEstado
+        mode="error"
+        errorTitle="No pudimos cargar tu turno"
         onRetry={p.onRetry}
-        testID="turno-error"
+        testID="turno"
       />
     );
   }

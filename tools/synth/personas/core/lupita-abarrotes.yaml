@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../schemas/persona.schema.json
+#
+# Spec §7: a corner-shop owner who keeps her accounts in a notebook, on a
+# low-end Android phone. Stresses onboarding, vocabulary and the free plan.
+# Every behavior is a hypothesis until evidence anchors it (S-17).
+id: lupita-abarrotes
+kind: human
+tier: core
+status: hypothesis
+market_weight:
+  value: 0.3
+  source: estimate
+business:
+  type: abarrotes
+  team: solo
+  formality: informal
+device:
+  viewport: [360, 740]
+  network: slow-3g
+  input: touch
+comparators:
+  - libreta
+goals:
+  - saber cuánto vendió hoy sin hacer cuentas a mano
+  - empezar sin pagar
+knows:
+  - cobrar, dar cambio y fiar
+  - usar WhatsApp y Facebook en el celular
+does_not_know:
+  - SKU
+  - inventario
+  - conciliación
+  - régimen fiscal
+  - sincronizar
+behaviors:
+  - trait: lee solo los botones grandes y salta el texto de ayuda
+    source: hypothesis
+  - trait: si aparece un error en inglés, cierra la app
+    source: hypothesis
+  - trait: cuando le preguntan por su negocio contesta con lo que tiene a la mano y deja lo demás en blanco
+    source: hypothesis
+  - trait: busca la palabra gratis antes de seguir y desconfía de cualquier pantalla que hable de pagar
+    source: hypothesis
+  - trait: escribe su contraseña despacio y la revisa letra por letra
+    source: hypothesis
+patience:
+  max_steps: 40
+  abandon_triggers:
+    - le piden un dato que no tiene a la mano (RFC)
+    - tres intentos fallidos en la misma pantalla
+    - le piden una tarjeta para empezar

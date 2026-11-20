@@ -18,7 +18,7 @@ import {
   type MetodoAbono,
 } from '@xangarro/caja/cobranza';
 import type { Money } from '@xangarro/domain';
-import { ErrorState, Spinner, Toast } from '../../components/index';
+import { CajaEstado, EstadoCargando, Toast } from '../../components/index';
 import { Buscador, Filtros } from './cobranza-barra';
 import { Cabeza, Cuerpo } from './cobranza-lista';
 import { AbonosHoyPanel, ResumenFiado } from './cobranza-resumen';
@@ -161,12 +161,11 @@ export function CobranzaScreen(p: CobranzaScreenProps): ReactElement {
   if (p.state === 'error') {
     return (
       <View flex={1} justifyContent="center" padding={16} testID={p.testID ?? 'cobranza'}>
-        <ErrorState
-          title="No pudimos cargar el fiado"
-          body="Lo que has cobrado sigue guardado en esta caja. Intenta otra vez."
-          retryLabel="Intentar otra vez"
+        <CajaEstado
+          mode="error"
+          errorTitle="No pudimos cargar el fiado"
           onRetry={p.onRetry}
-          testID="cobranza-error"
+          testID="cobranza"
         />
       </View>
     );
@@ -174,9 +173,7 @@ export function CobranzaScreen(p: CobranzaScreenProps): ReactElement {
   if (p.state === 'cargando' || p.data === null) {
     return (
       <View flex={1} testID={p.testID}>
-        <View flex={1} alignItems="center" justifyContent="center" testID="cobranza-cargando">
-          <Spinner />
-        </View>
+        <EstadoCargando testID="cobranza-cargando" />
       </View>
     );
   }

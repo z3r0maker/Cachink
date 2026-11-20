@@ -8,7 +8,7 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 import { View } from '@tamagui/core';
-import { Btn, ErrorState, Spinner } from '../../components/index';
+import { Btn, CajaEstado, EstadoCargando } from '../../components/index';
 import { EmptyState } from '../../components/EmptyState/index';
 import { MText } from '../../components/Mostrador/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
@@ -48,21 +48,9 @@ const DEFECTO: Record<EstadoCaja, { readonly titulo: string; readonly cuerpo: st
   },
 };
 
+/** Don counting, with his coin and the pale rows (MvEstados). */
 function Cargando(p: EstadosCajaProps): ReactElement {
-  return (
-    <View
-      flex={1}
-      alignItems="center"
-      justifyContent="center"
-      padding={24}
-      testID={`${p.testID ?? 'estados'}-cargando`}
-      role="status"
-      aria-busy
-      accessibilityLabel={p.titulo ?? DEFECTO.cargando.titulo}
-    >
-      <Spinner />
-    </View>
-  );
+  return <EstadoCargando testID={`${p.testID ?? 'estados'}-cargando`} />;
 }
 
 function SinNada(p: EstadosCajaProps): ReactElement {
@@ -79,15 +67,15 @@ function SinNada(p: EstadosCajaProps): ReactElement {
   );
 }
 
+/** Don worried: the data is safe, and «Intentar de nuevo» (MvEstados). */
 function Falla(p: EstadosCajaProps): ReactElement {
   return (
     <View flex={1} justifyContent="center" padding={16} testID={`${p.testID ?? 'estados'}-falla`}>
-      <ErrorState
-        title={p.titulo ?? DEFECTO.falla.titulo}
-        body={p.cuerpo ?? DEFECTO.falla.cuerpo}
-        retryLabel={p.reintentarLabel ?? 'Intentar otra vez'}
-        onRetry={p.onRetry}
-        testID={`${p.testID ?? 'estados'}-error`}
+      <CajaEstado
+        mode="error"
+        errorTitle={p.titulo ?? DEFECTO.falla.titulo}
+        {...(p.onRetry ? { onRetry: p.onRetry } : {})}
+        testID={p.testID ?? 'estados'}
       />
     </View>
   );

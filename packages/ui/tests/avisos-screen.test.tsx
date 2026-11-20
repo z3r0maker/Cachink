@@ -178,7 +178,7 @@ describe('AvisosScreen · estados', () => {
   it('error-al-leer: the title and the retry', () => {
     const { onRetry } = montar({ state: 'error', data: null });
     expect(screen.getByTestId('avisos-error').textContent).toContain('No pudimos leer tus avisos');
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('avisos-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 

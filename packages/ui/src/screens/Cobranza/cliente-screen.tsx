@@ -17,7 +17,7 @@ import {
   type MetodoAbono,
 } from '@xangarro/caja/cobranza';
 import type { Money } from '@xangarro/domain';
-import { Btn, ErrorState, PathIcon, Spinner, Toast } from '../../components/index';
+import { Btn, CajaEstado, EstadoCargando, PathIcon, Toast } from '../../components/index';
 import { borderColors, borderWidths, colors } from '../../theme';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 import { AbonoSheet } from './abono-sheet';
@@ -165,20 +165,17 @@ function Cuenta(p: ClienteScreenProps & { cuenta: CuentaCliente }): ReactElement
 
 export function ClienteScreen(p: ClienteScreenProps): ReactElement {
   if (p.state === 'loading') {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="cliente-cargando">
-        <Spinner />
-      </View>
-    );
+    return <EstadoCargando testID="cliente-cargando" />;
   }
   if (p.state === 'error' || p.cuenta === null) {
     return (
-      <ErrorState
-        title={p.state === 'error' ? 'No pudimos leer la cuenta' : 'No encontramos a este cliente'}
-        body="Sus ventas fiadas y sus abonos siguen guardados en esta caja. Vuelve a intentarlo."
-        retryLabel="Reintentar"
+      <CajaEstado
+        mode="error"
+        errorTitle={
+          p.state === 'error' ? 'No pudimos leer la cuenta' : 'No encontramos a este cliente'
+        }
         onRetry={p.onRetry}
-        testID="cliente-error"
+        testID="cliente"
       />
     );
   }

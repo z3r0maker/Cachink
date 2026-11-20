@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { TipoCambioInvalidoError } from '@xangarro/domain/corp';
+import { CargoMxnFaltanteError } from '@xangarro/domain/corp';
 
 import { leerCaptura } from '../src/server/empresa/captura';
 
@@ -17,7 +17,7 @@ const gasto = {
   contraparte: 'Vercel Inc.',
   moneda: 'USD',
   monto: '20',
-  tipoCambio: '18.42',
+  cargo: '372.10',
   categoria: 'costo_servicio',
   deducible: 'si',
   proyecto: 'xangarro',
@@ -25,14 +25,14 @@ const gasto = {
 };
 
 describe('leerCaptura', () => {
-  it('turns a USD expense into a converted gasto with its original amount', () => {
+  it('books a USD expense at what the bank charged, with its dollars and the rate (E-42)', () => {
     const r = leerCaptura(form(gasto), 'f-1');
     assert.ok(r.ok);
     assert.equal(r.input.movement.kind, 'gasto');
-    assert.deepEqual(r.input.usd, { montoOriginal: 20_00n, tipoCambio: '18.42' });
+    assert.deepEqual(r.input.usd, { montoOriginal: 20_00n, tipoCambio: '18.6050' });
     assert.equal(r.input.sourceRef, 'n-1');
     assert.equal(r.input.projectId, 'xangarro');
-    if (r.input.movement.kind === 'gasto') assert.equal(r.input.movement.subtotal, 368_40n);
+    if (r.input.movement.kind === 'gasto') assert.equal(r.input.movement.subtotal, 372_10n);
   });
 
   it('records a bank fee with just the amount', () => {
@@ -88,10 +88,7 @@ describe('leerCaptura', () => {
     assert.deepEqual(r, { ok: false, message: 'Elige la fecha de pago.' });
   });
 
-  it('leaves a USD charge without a rate to the domain to refuse', () => {
-    assert.throws(
-      () => leerCaptura(form({ ...gasto, tipoCambio: '' }), 'f-1'),
-      TipoCambioInvalidoError,
-    );
+  it('leaves a USD charge without the bank charge to the domain to refuse', () => {
+    assert.throws(() => leerCaptura(form({ ...gasto, cargo: '' }), 'f-1'), CargoMxnFaltanteError);
   });
 });

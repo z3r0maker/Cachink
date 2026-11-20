@@ -1,3 +1,4 @@
+import { answeredSteps, WIZARD_STEP_KEYS, WizardAnswersSchema } from '@xangarro/domain';
 import { asTenant } from '@xangarro/testing/tenant';
 import { z } from 'zod';
 
@@ -36,7 +37,48 @@ const CHECKS = {
         );
       }),
   }),
+  /**
+   * The wizard finished: «Tu plan ideal» chose a plan (`completed_at`), with
+   * exactly `pasos` of the eight steps answered. Camino A answers all eight;
+   * camino B skips every one.
+   */
+  'onboarding-terminado': define({
+    params: z.strictObject({ pasos: z.number().int().min(0).max(WIZARD_STEP_KEYS.length) }),
+    run: (biz, { pasos }) =>
+      asTenant(biz, async (sql) => {
+        const [row] = await sql`SELECT answers, completed_at FROM business_onboarding`;
+        const answers = WizardAnswersSchema.safeParse(row?.answers);
+        return (
+          row?.completed_at != null && answers.success && answeredSteps(answers.data) === pasos
+        );
+      }),
+  }),
+  /**
+   * The day's one turno closed with `contado` centavos counted and nothing
+   * left over or missing. A difference is a finding for the judge, not a corte.
+   */
+  'corte-cuadrado': define({
+    params: z.strictObject({ contado: z.number().int().min(0) }),
+    run: (biz, { contado }) =>
+      asTenant(biz, async (sql) => {
+        const rows = await sql`
+          SELECT cierre_at, monto_cierre_centavos::text AS contado, diferencia_centavos::text AS diferencia
+          FROM caja_turnos WHERE deleted_at IS NULL`;
+        const [only] = rows;
+        return (
+          rows.length === 1 &&
+          only?.cierre_at != null &&
+          centavos(only.contado) === BigInt(contado) &&
+          centavos(only.diferencia) === 0n
+        );
+      }),
+  }),
 } as const;
+
+/** A centavos column read as text, parsed (CLAUDE.md §2.8): null for a missing value. */
+function centavos(text: unknown): bigint | null {
+  return typeof text === 'string' && /^-?\d+$/.test(text) ? BigInt(text) : null;
+}
 
 export type CheckName = keyof typeof CHECKS;
 export const CHECK_NAMES = Object.keys(CHECKS) as CheckName[];

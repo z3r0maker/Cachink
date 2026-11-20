@@ -24,6 +24,60 @@ const PLAN_FILES = readdirSync(join(ROOT, 'docs/plan'))
   .filter((f) => f.endsWith('.md') && f !== 'PENDIENTES.md' && f !== '00-README.md')
   .map((f) => `docs/plan/${f}`);
 
+/** Los ids que un campo **Blocked by** / **Blocks** nombra como barrera, que es
+ * lo mismo que `idsIn` lee para armar «Siguiente»: los rangos `A-04…A-10`
+ * abiertos y las referencias a un ADR fuera, porque `ADR-109 (D-1)` no nombra
+ * ninguna tarea, ni cuando trae su decisión entre paréntesis («ADR-109 (D-1)»).
+ * El campo no guarda recuerdos (`docs/plan/00-README.md` §3). */
+function barrerasDe(campo: string): string[] {
+  const out: string[] = [];
+  let t = campo.replace(/ADR-\d+\s*\([^)]*\)/gu, ' ').replace(/ADR-\d+/gu, ' ');
+  for (const m of [...t.matchAll(/([A-Z]{1,2})-(\d+)\s*(?:…|\.\.\.)\s*(?:[A-Z]{1,2}-)?(\d+)/gu)]) {
+    const [todo, pre, a, b] = m;
+    for (let n = Number(a); n <= Number(b); n += 1)
+      out.push(`${pre}-${String(n).padStart((a ?? '').length, '0')}`);
+    t = t.replace(todo, ' ');
+  }
+  for (const m of t.matchAll(/\b([A-Z]{1,2})-(\d+)\b/gu)) out.push(`${m[1]}-${m[2]}`);
+  return [...new Set(out)];
+}
+
+/** Las aristas que el «Dependency sketch» del §5 de `09-next-features.md`
+ * dibuja: `A, B ──► C, D` son cuatro pares. Las líneas con texto (los
+ * encabezados de grupo) no coinciden y se ignoran. */
+function aristasDelCroquis(): readonly (readonly [string, string])[] {
+  const md = readFileSync(join(ROOT, 'docs/plan/09-next-features.md'), 'utf8');
+  const seccion = md.slice(md.indexOf('## 5. Dependency sketch'));
+  const bloque = seccion.slice(
+    seccion.indexOf('```') + 3,
+    seccion.indexOf('```', seccion.indexOf('```') + 3),
+  );
+  const FLECHA =
+    /^((?:[A-Z]{1,2}-\d+)(?:, [A-Z]{1,2}-\d+)*) ──► ((?:[A-Z]{1,2}-\d+)(?:, [A-Z]{1,2}-\d+)*)$/u;
+  return bloque.split('\n').flatMap((linea) => {
+    const m = FLECHA.exec(linea.trim());
+    if (m === null) return [];
+    return (m[1] ?? '')
+      .split(', ')
+      .flatMap((a) => (m[2] ?? '').split(', ').map((b) => [a, b] as const));
+  });
+}
+
+/** `OD-`/`CD-`/`KD-` son boards del canvas y decisiones del dueño, no tareas:
+ * esta prueba no puede saber si siguen abiertos, así que no los juzga. */
+const NO_ES_TAREA = /^(OD|CD|KD)-/u;
+
+/** El estado de cada id: el de su track, o «cerrado» si sólo vive en el
+ * archivo — un track archivado ya no detiene nada. */
+function estadoDeTodos(): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const i of collect(ROOT)) if (i.id) m.set(i.id, i.status);
+  for (const f of readdirSync(join(ROOT, 'docs/archive')).filter((n) => n.endsWith('.md')))
+    for (const i of parseTrack(f, readFileSync(join(ROOT, 'docs/archive', f), 'utf8')))
+      if (i.id && !m.has(i.id)) m.set(i.id, 'done');
+  return m;
+}
+
 const FIXTURE = `# Track T
 
 ## 2. Launch blockers
@@ -291,6 +345,70 @@ describe('the committed board', () => {
       malos,
       [],
       `${malos.length} campo(s) «Falta» que el tablero no lee — usa **Remaining (fecha):**:\n${malos.join('\n')}`,
+    );
+  });
+
+  it('el croquis del §5 no dibuja una arista que ya no existe', () => {
+    // La versión anterior de esa sección seguía mostrando «N-24 ──► N-20,
+    // N-22, N-25» con N-20 cerrada desde septiembre: un dibujo escrito una
+    // vez y nunca vuelto a mirar, que es la misma avería que la de los
+    // campos, con otra cara. La prueba exige **solidez**, no completitud: cada
+    // flecha tiene que estar en los campos y tener las dos puntas abiertas,
+    // pero el croquis puede dejar fuera lo que no le toca contar — el grafo
+    // entero vive en «Siguiente», que se genera.
+    const items = collect(ROOT);
+    const abiertos = new Set(
+      items.filter((i) => i.status !== 'done' && i.id !== null).map((i) => i.id),
+    );
+    const real = new Set<string>();
+    for (const i of items) {
+      if (!abiertos.has(i.id)) continue;
+      for (const b of idsIn(i.blockedBy)) real.add(`${b}→${i.id}`);
+      for (const b of idsIn(i.blocks)) real.add(`${i.id}→${b}`);
+    }
+    const malas = aristasDelCroquis().flatMap(([a, b]) => {
+      if (!abiertos.has(a)) return [`  ${a} ──► ${b}: ${a} ya no está abierta`];
+      if (!abiertos.has(b)) return [`  ${a} ──► ${b}: ${b} ya no está abierta`];
+      return real.has(`${a}→${b}`) ? [] : [`  ${a} ──► ${b}: ningún campo lo dice`];
+    });
+    assert.deepEqual(
+      malas,
+      [],
+      `${malas.length} flecha(s) del croquis del §5 que los tracks no sostienen:\n${malas.join('\n')}`,
+    );
+  });
+
+  it('no nombra como barrera una tarea ya cerrada — es lo que ordena el tablero', () => {
+    // «Siguiente» sale de Blocked by / Blocks, así que una barrera cerrada que
+    // nadie sacó no es cosmética: mueve el orden de trabajo. El 2026-11-20
+    // había 48 campos así en seis tracks y en 25 **nada** detenía ya a la
+    // tarea; el primer renglón del tablero lo era por una cadena muerta. La
+    // forma que esta prueba exige está en `docs/plan/00-README.md` §3: en el
+    // campo sólo barreras vivas, o `—`; lo que salió se cuenta en el commit,
+    // porque el generador lee todos los ids del campo y un id cerrado escrito
+    // «de recuerdo» vuelve a crear la arista que se acababa de quitar.
+    const estado = estadoDeTodos();
+    const malos: string[] = [];
+    for (const i of collect(ROOT)) {
+      if (i.status === 'done') continue;
+      for (const [campo, texto] of [
+        ['Blocked by', i.blockedBy],
+        ['Blocks', i.blocks],
+      ] as const) {
+        for (const ref of texto ? barrerasDe(texto) : []) {
+          if (NO_ES_TAREA.test(ref)) continue;
+          const e = estado.get(ref);
+          if (e !== undefined && e !== 'done') continue;
+          malos.push(
+            `  ${i.id ?? i.title.slice(0, 30)} · ${campo}: ${ref} (${e ?? 'no existe'}) · ${i.source}:${i.line}`,
+          );
+        }
+      }
+    }
+    assert.deepEqual(
+      malos,
+      [],
+      `${malos.length} barrera(s) cerrada(s) que el tablero sigue leyendo — sácalas del campo y cuéntalo en el commit:\n${malos.join('\n')}`,
     );
   });
 

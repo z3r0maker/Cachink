@@ -147,7 +147,7 @@ describe('MiTurnoScreen · sin-turno y errores', () => {
   it('a failed read offers the retry', () => {
     const a = montar({ state: 'error', data: null });
     expect(screen.getByTestId('turno-error')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('turno-error-reintentar'));
     expect(a.onRetry).toHaveBeenCalled();
   });
 });

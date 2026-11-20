@@ -1,6 +1,8 @@
 import { expect, test, type Page } from './test';
 
 import { confirmarYSeguir, crearCuenta } from './confirmacion';
+import { asOwner } from '@xangarro/testing/tenant';
+
 import { stamp } from './tenant';
 
 /**
@@ -123,6 +125,43 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   for (let i = 0; i < 7; i += 1) await next(page);
   await next(page, 'Terminar');
   await expect(page.getByRole('heading', { name: 'No hay cambios' })).toBeVisible();
+});
+
+/** The wizard's answers as stored for the business `email` owns. */
+async function storedAnswers(email: string): Promise<Record<string, unknown>> {
+  const rows = await asOwner(
+    (sql) => sql`
+      SELECT o.answers FROM business_onboarding o
+      JOIN business_members m ON m.business_id = o.business_id AND m.role = 'owner'
+      JOIN auth.users u ON u.id::text = m.user_id
+      WHERE u.email = ${email}`,
+  );
+  return (rows[0]?.answers ?? {}) as Record<string, unknown>;
+}
+
+test('two yes/no questions in a row: the second opens unanswered, and both answers are saved', async ({
+  page,
+}, info) => {
+  const email = `sino+${stamp()}-${info.project.name}@ejemplo.mx`;
+  await crearCuenta(page, { negocio: 'Abarrotes Lupita', email, password: 'tortas-2026' });
+  await confirmarYSeguir(page, email);
+  await next(page, '¡Va, empecemos!');
+  await next(page, 'Omitir');
+  await next(page, 'Omitir');
+  await expect(page.getByText('Paso 3 de 8')).toBeVisible();
+  await page.getByRole('radio', { name: /^No/ }).click();
+  await next(page);
+
+  // A card that looks chosen must be the stored answer: question 4 has none yet.
+  await expect(page.getByText('Paso 4 de 8')).toBeVisible();
+  await expect(page.getByRole('radio', { checked: true })).toHaveCount(0);
+  await page.getByRole('radio', { name: /^No/ }).click();
+  await next(page);
+  await expect(page.getByText('Paso 5 de 8')).toBeVisible();
+
+  await expect
+    .poll(() => storedAnswers(email))
+    .toMatchObject({ manejaInventario: false, manejaCajaEfectivo: false });
 });
 
 test('signup refuses a short password without creating anything', async ({ page }) => {

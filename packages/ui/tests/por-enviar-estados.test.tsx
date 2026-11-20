@@ -34,8 +34,10 @@ describe('EstadosCaja · las cuatro', () => {
       <EstadosCaja id="falla" titulo="No se pudo leer" onRetry={onRetry} testID="p" />,
     );
     expect(screen.getByTestId('p-error').textContent).toContain('No se pudo leer');
-    expect(screen.getByTestId('p-error').textContent).toContain('sigue guardado en esta caja');
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    expect(screen.getByTestId('p-error').textContent).toContain(
+      'Tus datos están a salvo en esta caja',
+    );
+    fireEvent.click(screen.getByTestId('p-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 

@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../schemas/scenario.schema.json
+#
+# Spec §6.2: closing the day and squaring the till. The turno lives in the
+# browser's register until it pushes, so the actor opens it and makes the
+# day's one sale before the corte: a $25 refresco, paid exact, on a $500 fondo.
+id: corte-de-caja
+title: Hacer el corte de caja al final del día
+mission: >
+  Abre la caja con $500 de fondo. Llega un cliente, se lleva un refresco y te
+  paga justo con $25 en efectivo. Ya es hora de cerrar: haz el corte de caja.
+  Contaste el cajón y hay $525.
+runner: web
+start:
+  seed: negocio-con-catalogo-minimo
+  auth_as: operador
+  url: /operador/caja
+success:
+  - check: venta-efectivo
+    params:
+      partidas: 1
+  - check: corte-cuadrado
+    params:
+      contado: 52500
+# Measured by hand on 2026-11-20 (S-10): fondo $500, «Abrir turno», refresco,
+# «Cobrar», «Exacto», «Registrar venta», «Cerrar mi turno», one $500 bill, one
+# $20 bill, one $5 coin, «Cerrar turno».
+optimal_steps: 11
+interruptions: []
+applies_to: [human, chaos]

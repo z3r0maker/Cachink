@@ -148,8 +148,8 @@ domain function posts its balanced lines. Nobody types debits and credits.
   - **Depreciación y amortización.**
 - **Each expense carries:** a project (or «compartido»), whether it is deductible, its IVA
   treatment (acreditable, not acreditable, exempt) and its currency.
-- **USD.** Kept in USD plus the FX rate of the payment date (the DOF FIX rate; entered manually in
-  v1, fetched from Banxico in E-42).
+- **USD.** Booked at what the bank charged in pesos, its fee included; the dollars and the rate
+  that results (pesos ÷ dollars) travel with the entry (E-42, ADR-159). No published rate is used.
 - **Sources:**
   - revenue imported from billing through `RevenueSource`;
   - CFDI XML upload for received invoices;
@@ -524,7 +524,7 @@ with property tests:
 
 ### E-10 Ingresos y facturas emitidas `[media]`
 
-- [~] Status · **Blocked by:** E-02, B-10
+- [~] Status · **Blocked by:** —
   **Remaining (2026-11-09):**
   - the «payout» movements: Stripe's deposits to the bank and its fee. Cobros wait in «Stripe por
     depositar» until then; the data needs N-63's `billing_events`.
@@ -647,9 +647,15 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [~] Status · **Blocked by:** E-02, OD-1 (answered 2026-10-30) · **Remaining (2026-11-17):** the sweat-cost memo,
-  which reads the Tablero's accepted value (E-20); the bridge's drivers («8 negocios nuevos…»),
-  which need E-10's billing import.
+- [~] Status · **Blocked by:** — · **Remaining (2026-11-20):** the bridge's drivers («8 negocios
+  nuevos…»), which need E-10's billing import.
+  **Progress (2026-11-20, board CD-07):** the «Costo de sudor» memo under the statement. Owner
+  decision: a deliverable's accepted value counts in the month its card was finished, once accepted,
+  the Tablero's rule for quarters (ADR-156), so a quarter's memo equals its Tablero. `costoDeSudor`
+  (`@xangarro/domain/corp` `tablero/sudor.ts`) leaves out work in review, objected work and tasks;
+  the band reads «Costo de sudor: $X · EBITDA económico: $Y», the same under Devengado and Flujo,
+  says so when nothing was accepted, and links to that quarter's Tablero. Playwright: the Tablero
+  test's card, accepted by the mediator, reaches the month's memo.
   **Progress (2026-11-17, board CD-08, round 14 approved by the owner):**
   - `@xangarro/domain/corp` `balance/`: `balanceGeneral` groups the ledger's sums per account
     into Activo, Pasivo and Capital from the chart itself (`cuentasDelGrupo`). There are no
@@ -902,7 +908,7 @@ with property tests:
 
 ### E-21 Acciones y cortes `[media]`
 
-- [ ] Status · **Blocked by:** the agreement's share clauses (owner, post-MVP) · E-20, E-03 and E-06 are done
+- [ ] Status · **Blocked by:** the agreement's share clauses (owner, post-MVP)
   - **Owner decision (2026-11-20): post-MVP.** There are no share clauses yet: the split stays 50/50
     (6,000 shares each, as issued) and the Tablero is the only part of the agreement in use. Vesting,
     forfeits, the pool and its cuts are defined later, and nothing here is built until they are. Round
@@ -1039,10 +1045,28 @@ with property tests:
 
 ### E-42 Banco y tipo de cambio `[baja]`
 
-- [ ] Status · **Blocked by:** E-23
-  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-23.
-- **What:** bank CSV import with matching (the conciliador agent proposes), and the Banxico FIX
-  rate fetched daily.
+- [~] Status · **Blocked by:** — · **Remaining (2026-11-20):** the bank CSV import with matching, which waits
+  for MEXIA's bank account and an anonymized sample statement (owner).
+- **What:** bank CSV import with matching (the conciliador agent proposes), and USD expenses at the
+  bank's charge. **Owner decision (2026-11-20, ADR-159):** the Banxico FIX fetch is dropped: the
+  accounts are in pesos, so a USD expense is booked at what the bank charged, and the rate is worked
+  out from it.
+- **Progress (2026-11-20, boards CD-01g and CD-01h, round 21):**
+  - `@xangarro/domain/corp` `ledger/cargo.ts`: `tipoCambioDelCargo` (pesos ÷ dollars, four decimals,
+    half up), `tipoCambioRaro` (outside 15–25 pesos per dollar, «¿Seguro?»), `aCargo` (a USD
+    invoice's IVA and retentions in proportion to the charge, the subtotal taking the rounding).
+    `gastoDesdeCaptura` takes `cargoMxn` instead of a rate; `CARGO_MXN_FALTANTE` when it is missing.
+  - application: `registrarFacturas` books a paid (PUE) USD invoice at its `cargoMxn`, refusing it
+    without one; an invoice on credit (PPD) still posts at its XML's rate.
+  - Console: Registrar's USD fields are «Monto de la factura (USD)» and «Lo que cobró el banco
+    (MXN)», with the worked-out rate and the «¿Seguro?» warning; Registrar con XML and the Facturas
+    review ask the charge of a paid USD invoice, next to the rate the invoice states. Movimientos
+    reads «USD 20.00 · el banco cobró a 18.6050»; a USD recurring charge says the charge is asked
+    when it is registered.
+  - Playwright: the USD expense of `empresa.spec.ts` is typed with its charge (a mistyped one
+    flagged first), and a paid USD invoice is registered from Registrar at the bank's charge.
+  - **Deviation from the board:** a recurring charge's row does not show last month's charge; it
+    says the charge is asked when it is registered.
 
 ### E-43 Exportación al contador `[media]`
 
@@ -1076,7 +1100,7 @@ with property tests:
 
 ### E-44 Salida a otro sistema `[baja]`
 
-- [~] Status · **Blocked by:** E-01 · **Remaining (2026-11-12):** the files' half, with E-26's Azure account: a
+- [~] Status · **Blocked by:** — · **Remaining (2026-11-12):** the files' half, with E-26's Azure account: a
   runner of `moverDocumentos` between two accounts, rehearsed against a locked container.
 - **What:** a written and rehearsed runbook: dump `corp`, restore, copy the `corp-docs`
   container and check every file against `corp.documents.sha256` (E-26, ADR-135), swap the two
@@ -1179,8 +1203,8 @@ Changes to existing tasks:
 
 ### E-17 Resumen del trimestre `[baja]`
 
-- [ ] Status · **Blocked by:** E-12, E-20, E-04
-  - **Remaining (2026-11-19):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; queda E-12, que está a medias (su memo del costo de sudor).
+- [ ] Status · **Blocked by:** E-12
+  - **Remaining (2026-11-20):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; de E-12 sólo quedan los drivers del puente, que esperan la importación de E-10.
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the
@@ -1242,7 +1266,7 @@ Changes to existing tasks:
 
 ### E-25 Lectura de estados de cuenta con IA `[baja]`
 
-- [ ] Status · **Blocked by:** E-24, E-31, OD-3
+- [ ] Status · **Blocked by:** E-31, OD-3
   - **Remaining (2026-11-19, verificado contra el repo):** todo, y **OD-3 ya está respondida** (ver E-30). Las barreras vivas son E-24 y E-31.
 - **What:** upload a card or bank statement (PDF or image). `claude-opus-5-5` reads it through
   `corp-tools` (vision) into lines: date, raw description, amount. The flow then:
@@ -1318,7 +1342,7 @@ turns into proposed objectives and cards.
 
 ### E-26 Almacenamiento de documentos en Azure Blob `[media]`
 
-- [~] Status · **Blocked by:** E-05 · **Needed by:** E-20 · **Remaining (2026-10-30):** an Azure account. Run
+- [~] Status · **Blocked by:** — · **Needed by:** E-20 · **Remaining (2026-10-30):** an Azure account. Run
   `apps/backoffice/scripts/corp-blob-provision.sh`, set `CORP_BLOB_ACCOUNT` and `CORP_BLOB_KEY`
   in Vercel, run `pnpm --filter @xangarro/backoffice corp-blobs:move --aplicar`, then the
   script again with `--bloquear` (it proves a blob can be neither overwritten nor deleted),
@@ -1350,7 +1374,7 @@ turns into proposed objectives and cards.
 
 ### E-27 Minutas `[baja]`
 
-- [ ] Status · **Blocked by:** E-05, E-31 · **Feeds:** E-20, E-32
+- [ ] Status · **Blocked by:** E-31 · **Feeds:** E-20, E-32
   - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/minutas`. Detrás de E-31.
 - **What:**
   - an Expediente folder «Minutas» (a CHECK change in `corp.documents`, with its migration test);

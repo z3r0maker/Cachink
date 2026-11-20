@@ -11,10 +11,7 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { View } from '@tamagui/core';
 import type { LineaTicket } from '@xangarro/caja/caja';
-import { Btn } from '../../components/Btn/index';
-import { MText } from '../../components/Mostrador/index';
-import { Spinner } from '../../components/Spinner/index';
-import { colors } from '../../theme';
+import { CajaEstado, EstadoCargando } from '../../components/CajaEstado/index';
 import { useCajaLayout } from '../AppShell/use-caja-layout';
 import type { MetodoCobro } from '../Checkout/cobro-logic';
 import { CatalogoView } from './cobrar-catalogo-view';
@@ -75,35 +72,16 @@ function useFiltro(productos: readonly ProductoCobrar[]) {
   return { categoria, setCategoria, query, buscar, categorias, visibles };
 }
 
+/** Don counting while the catalogue loads; Don worried when it can't be read (MvEstados). */
 function Estado(p: CobrarScreenProps): ReactElement {
-  if (p.estado === 'cargando') {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="cobrar-cargando">
-        <Spinner />
-      </View>
-    );
-  }
+  if (p.estado === 'cargando') return <EstadoCargando testID="cobrar-cargando" />;
   return (
-    <View
-      flex={1}
-      alignItems="center"
-      justifyContent="center"
-      padding={24}
-      gap={12}
-      testID="cobrar-error"
-    >
-      <MText size="lg" weight="extraBold" textAlign="center">
-        No pudimos leer tus productos
-      </MText>
-      <MText weight="semibold" color={colors.gray600} textAlign="center">
-        Tu venta no se pierde. Vuelve a intentarlo.
-      </MText>
-      {p.onReintentar ? (
-        <Btn variant="secondary" size="lg" onPress={p.onReintentar}>
-          Reintentar
-        </Btn>
-      ) : null}
-    </View>
+    <CajaEstado
+      mode="error"
+      errorTitle="No pudimos leer tus productos"
+      {...(p.onReintentar ? { onRetry: p.onReintentar } : {})}
+      testID="cobrar"
+    />
   );
 }
 

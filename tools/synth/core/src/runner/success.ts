@@ -8,12 +8,15 @@ import { runCheck } from '../success/checks';
  * its own database first and pushes through the outbox, so a sale can reach
  * Postgres a few seconds after the actor is done: the checks are asked again
  * until all pass or `waitMs` runs out, and the last answer is the verdict.
+ * `biz` is null when a signup run ended with no business made.
  */
 export async function evaluateSuccess(
-  biz: string,
+  biz: string | null,
   success: Scenario['success'],
   waitMs = 60_000,
 ): Promise<{ check: string; passed: boolean }[]> {
+  // A signup run whose actor never made a business: there is nothing to check.
+  if (biz === null) return success.map((c) => ({ check: c.check, passed: false }));
   const until = Date.now() + waitMs;
   for (;;) {
     const results = await Promise.all(

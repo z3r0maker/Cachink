@@ -43,7 +43,7 @@ describe('filaDe', () => {
     assert.equal(f.categoria, 'Costo del servicio');
     assert.equal(f.monto, '−$368.40');
     assert.equal(f.entra, false);
-    assert.equal(f.detalle, 'USD 20.00 · TC 18.42 · Vercel Inc.');
+    assert.equal(f.detalle, 'USD 20.00 · el banco cobró a 18.42 · Vercel Inc.');
     assert.equal(f.estado, 'Registrado');
     assert.equal(f.filtro, 'gastos');
   });

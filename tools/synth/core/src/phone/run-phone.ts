@@ -8,7 +8,7 @@ import { promisify } from 'node:util';
 import { accessLines, actAndRecord, seedRunTenant, type Common } from '../runner/act';
 import { PHONE_TOOLS, PHONE_SERVER } from '../runner/tools';
 import { runId, type Run } from '../schemas/run';
-import type { RunAccess } from '../seed/seed';
+import { seededTenant, type RunAccess } from '../seed/seed';
 import { assertLocalUrl } from '../stack/hosts';
 import { PhoneCapture } from './capture';
 import { Device } from './device';
@@ -93,6 +93,8 @@ interface Ready {
   readonly startedAt: Date;
   readonly device: Device;
   readonly access: RunAccess;
+  /** The run's business: a phone scenario always starts on a seeded tenant. */
+  readonly biz: string;
   readonly door: Record<string, string>;
   readonly metro: Metro;
 }
@@ -116,6 +118,7 @@ async function prepare(i: PhoneRunInput): Promise<Ready> {
   if (!(await device.hasApp()))
     throw new Error(`the capture app's dev client is not installed on ${device.serial}`);
   const access = await seedRunTenant(i, dir);
+  const tenant = seededTenant(access);
   const [op] = access.operators;
   if (op === undefined || access.activationCode === null)
     throw new Error('a phone scenario needs an operator and a code');
@@ -130,17 +133,17 @@ async function prepare(i: PhoneRunInput): Promise<Ready> {
     logFile: join(dir, 'metro.log'),
   });
   const door = {
-    EMAIL: access.tenant.email,
+    EMAIL: tenant.email,
     CODE: access.activationCode,
     OPERATOR_ID: op.id,
     NIP: op.nip,
   };
-  return { id, dir, startedAt, device, access, door, metro };
+  return { id, dir, startedAt, device, access, biz: tenant.biz, door, metro };
 }
 
 export async function runPhone(i: PhoneRunInput): Promise<Run> {
   const r = await prepare(i);
-  const capture = new PhoneCapture(r.dir, r.device, i.serverLog, r.access.tenant.biz);
+  const capture = new PhoneCapture(r.dir, r.device, i.serverLog, r.biz);
   const empty = mkdtempSync(join(tmpdir(), 'synth-actor-'));
   try {
     await r.device.openDevClient(r.metro.url);
@@ -153,7 +156,7 @@ export async function runPhone(i: PhoneRunInput): Promise<Run> {
       dir: r.dir,
       empty,
       startedAt: r.startedAt,
-      biz: r.access.tenant.biz,
+      biz: async () => r.biz,
       access: accessLines(i.scenario, r.access),
       mcpConfig: phoneMcpConfig({ serial: r.device.serial, captureDir: r.dir }),
       tools: PHONE_TOOLS,

@@ -138,8 +138,17 @@ the database alone; `--seed <seed> --auth-as <role>` also mints a run's tenant o
   | `negocio-con-catalogo-minimo`   | plus 3 products and operator Ana (NIP 2580)                   |
   | `negocio-con-historial-30-dias` | plus 3 sales a day for the 30 days before today               |
   | `plan-al-limite`                | xangarrito, with its 2 operators (Ana, Luis) and its 1 device |
+  | `operador-sin-permiso`          | xangarro, 3 products and Luis (NIP 1357), who cannot cancel   |
+  | `xangarrote-permiso-apagado`    | xangarrote, 3 products, Luis (cancel off) and Ana (cancel on) |
+  | `sin-cuenta`                    | nothing: the actor signs up with an address the runner gives  |
 
   An `operador` scenario also gets an activation code; `admin` and `viewer` get a member account of that role.
+  An operator scenario signs in as the seed's first operator.
+
+- **Signup runs** (`sin-cuenta`, S-10): there is no door. The actor starts at `/signup` with a fresh
+  `@ejemplo.mx` address and a test password. When the confirmation email lands in the corrida's outbox, the
+  runner opens its link in the actor's tab and leaves `confirmation.json` in the run folder for the judge.
+  Success looks the business up by that address afterwards.
 
 ## 10. One web run (S-05)
 

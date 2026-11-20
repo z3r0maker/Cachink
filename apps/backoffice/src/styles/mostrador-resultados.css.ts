@@ -85,3 +85,29 @@ export const aviso = style({
   fontSize: portalFontSizes.sm,
   fontWeight: typography.weights.bold,
 });
+
+/** «Costo de sudor» (E-12, board CD-07): the memo under the statement. */
+export const sudor = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 12,
+  padding: '14px 16px',
+  borderRadius: radii[4],
+  background: colors.yellowSoft,
+});
+
+export const sudorTitulo = style({
+  display: 'block',
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+});
+
+export const sudorNota = style({
+  display: 'block',
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.semibold,
+  color: colors.ink,
+});

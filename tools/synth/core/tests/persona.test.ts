@@ -68,6 +68,24 @@ describe('PersonaSchema', () => {
     ]);
   });
 
+  it('takes a non-human persona at weight 0: it is not a segment of the market', () => {
+    const chaos = withPatch(LUPITA, {
+      kind: 'chaos',
+      market_weight: { value: 0, source: 'estimate' },
+    });
+    assert.deepEqual(issues(PersonaSchema, chaos), []);
+  });
+
+  it('refuses a weight on a chaos or device persona, which inherits the humans’ instead', () => {
+    for (const kind of ['chaos', 'device']) {
+      const weighted = withPatch(LUPITA, {
+        kind,
+        market_weight: { value: 0.1, source: 'estimate' },
+      });
+      assert.deepEqual(failingPaths(PersonaSchema, weighted), ['market_weight.value'], kind);
+    }
+  });
+
   it('refuses keys the model does not know, so a typo is not silently ignored', () => {
     assert.deepEqual(failingPaths(PersonaSchema, withPatch(LUPITA, { biografia: 'nació en…' })), [
       '',
