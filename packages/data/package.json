@@ -36,8 +36,8 @@
     "@xangarro/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@vitest/coverage-v8": "^4.1.12",
-    "better-sqlite3": "^12.10.0",
-    "drizzle-kit": "^0.31.10",
+    "better-sqlite3": "^12.11.1",
+    "drizzle-kit": "^0.31.11",
     "typescript": "^6.0.3",
     "vitest": "^4.1.12"
   }
