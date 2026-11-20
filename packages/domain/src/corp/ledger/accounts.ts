@@ -3,9 +3,8 @@
  * the contador keeps the legal books; this chart only has to produce the P&L
  * cascade, the balance sheet, the partner accounts and the IVA position.
  *
- * `sat` is the código agrupador (Anexo 24 RMF) the contador validates once
- * (E-02's acceptance) and E-43 exports by. Null until validated: an unverified
- * code is worse than none.
+ * Each account's código agrupador (Anexo 24 RMF) is not here: the founders
+ * type in what the contador sends, and the console keeps it (E-43, ADR-155).
  */
 export type AccountGroup = 'activo' | 'pasivo' | 'capital' | 'ingreso' | 'costo' | 'gasto' | 'otro';
 
@@ -16,14 +15,12 @@ export interface Account {
   readonly nombre: string;
   readonly grupo: AccountGroup;
   readonly naturaleza: Naturaleza;
-  readonly sat: string | null;
 }
 
 const a = (nombre: string, grupo: AccountGroup, naturaleza: Naturaleza): Account => ({
   nombre,
   grupo,
   naturaleza,
-  sat: null,
 });
 
 export const ACCOUNTS = {

@@ -40,6 +40,8 @@ export function Cajon(props: {
   readonly titulo: string;
   readonly sub?: string;
   readonly cerrar: string;
+  /** «amplio» for a table read across, as board CD-10d's. */
+  readonly ancho?: 'normal' | 'amplio';
   readonly children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -51,7 +53,7 @@ export function Cajon(props: {
   return (
     <dialog
       ref={ref}
-      className={c.cajon}
+      className={props.ancho === 'amplio' ? c.cajonAmplio : c.cajon}
       aria-labelledby="cajon-titulo"
       onClose={() => router.replace(props.cerrar as Route, { scroll: false })}
     >

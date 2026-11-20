@@ -37,6 +37,9 @@ export const cajon = style({
   selectors: { '&::backdrop': { background: colors.scrim } },
 });
 
+/** A drawer with a table to read across (board CD-10d). */
+export const cajonAmplio = style([cajon, { width: 'min(760px, 100vw)' }]);
+
 export const cuerpo = style({ display: 'flex', flexDirection: 'column', gap: 20 });
 
 export const cabeza = style({

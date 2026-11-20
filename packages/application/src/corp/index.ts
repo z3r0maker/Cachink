@@ -91,3 +91,15 @@ export {
   type PresupuestoDeps,
   type PresupuestoRepository,
 } from './presupuesto.js';
+export {
+  armarPaquete,
+  guardarCodigos,
+  leerEstadoDeCodigos,
+  validarCodigos,
+  type ArchivoDelPaquete,
+  type CodigosDeps,
+  type CodigosRepository,
+  type ComprobanteDelPaquete,
+  type FuentesDelPaquete,
+  type Paquete,
+} from './contador.js';

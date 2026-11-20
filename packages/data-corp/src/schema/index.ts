@@ -17,3 +17,4 @@ export {
   spendRequestAnswers,
   spendRequests,
 } from './presupuesto.js';
+export { accountCodeLists, accountCodes, accountCodeValidations } from './contador.js';

@@ -17,3 +17,4 @@ export * from './servicios/index.js';
 export * from './impuestos/index.js';
 export * from './cierre/index.js';
 export * from './presupuesto/index.js';
+export * from './contador/index.js';

@@ -137,7 +137,8 @@ domain function posts its balanced lines. Nobody types debits and credits.
 
 - **Immutable.** A wrong entry is reversed and recaptured. A month closed in E-14 is locked.
 - **Chart of accounts.** About 40 accounts, each mapped to the SAT código agrupador (Anexo 24).
-  The contador validates the mapping once (E-02), and E-43 exports by it.
+  The founders type in the contador's mapping and mark it validated (E-02, E-43, ADR-155),
+  and E-43 exports by it.
 - **Expense categories** drive the P&L lines:
   - **Costo del servicio:** infrastructure, payment gateway, CFDI stamping, transactional email,
     direct support.
@@ -310,11 +311,13 @@ with property tests:
 
 ### E-02 Ledger core and Movimientos `[media]`
 
-- [~] Status · **Blocked by:** E-01
-  **Remaining (2026-11-19, verificado contra el repo):** sigue siendo sólo el mapeo de códigos agrupadores del contador, que espera al contador, y **E-01 ya está cerrada**, así que el «Blocked by» de arriba no detiene nada. Lo demás de esta tarea está en pie: `@xangarro/data-corp` existe con doce módulos de esquema y `/empresa/movimientos` es una ruta viva. **Nota del 2026-10-14:** only the contador's código agrupador mapping, which waits on the
-  contador. The project filter moves to E-41: with one project the list has nothing to filter,
-  and Registrar already asks Xangarro or Compartido.
-  **Done 2026-10-14, recurring expenses and filters (boards CD-02, CD-03):**
+- [x] Status · **Blocked by:** E-01 · **Done:** 2026-11-19 (the código agrupador mapping, by E-43; ADR-155)
+      **Done 2026-11-19, the códigos agrupadores:** the mapping is data the founders type in at
+      `/empresa/cierre/codigos` and mark as validated with the day the contador did (E-43, ADR-155), so
+      no code change waits on the contador; the chart's unused `sat` field is gone. **Nota del
+      2026-10-14:** the project filter moves to E-41: with one project the list has nothing to filter,
+      and Registrar already asks Xangarro or Compartido.
+      **Done 2026-10-14, recurring expenses and filters (boards CD-02, CD-03):**
   - «Hacer recurrente cada mes» on Registrar makes a template from the charge being captured,
     with «Te recordamos registrarlo cada N» read off the payment date.
   - Each month the template's charge shows in Movimientos as «Sugerido». It posts nothing and
@@ -1003,10 +1006,33 @@ with property tests:
 
 ### E-43 Exportación al contador `[media]`
 
-- [ ] Status · **Blocked by:** E-14
-  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-14. Nota: el mapeo de códigos agrupadores que necesita es el mismo que E-02 espera del contador, así que el contador desbloquea las dos.
+- [x] Status · **Blocked by:** E-14 · **Done:** 2026-11-19 (boards CD-10d and CD-10e, round 19 approved; ADR-155)
 - **What:** a monthly export by código agrupador (balanza-style CSV), plus the month's XML and
   acuses in one archive.
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `contador/`: the códigos agrupadores (`leerCodigos`, `estadoDeCodigos`,
+    `assertPuedeValidar`: only the newest, complete list, on a day up to today), the month's balanza
+    (`balanzaDelMes`: the 22 accounts, moved or not, each on its own side; a result account opens the
+    year at zero and earlier years open in Resultados acumulados), the CSVs (`balanzaCsv`,
+    `listaDeCuentasCsv`, `emitidasCsv`; UTF-8 with a BOM, a text cell that reads as a formula guarded)
+    and what goes in the package (`comprobantesDelMes`, `rutasDelPaquete`, `nombreDelPaquete`).
+  - application: `guardarCodigos` (writes nothing when nothing changed), `validarCodigos`,
+    `armarPaquete` («final» once the month is closed, «preliminar» before; a missing Expediente file
+    stops it).
+  - data-corp `0015`: `account_code_lists`, `account_codes`, `account_code_validations`, append-only; a
+    trigger lets only the newest list be validated, under one lock. `sumasPorTramo` reads the ledger in
+    the balanza's three stretches. Migration test old → new.
+  - Cierre del mes: «Paquete para el contador» on any month that has ended opens `?panel=contador` (the
+    chip, the codes' warning, what goes in it, the balanza as its CSV writes it) and
+    `/empresa/cierre/paquete?mes=` serves the .zip (`balanza-YYYY-MM.csv`, `emitidas.csv`,
+    `recibidas/`, `acuses/`), with a `staff_audit_log` row per download.
+    `/empresa/cierre/codigos` lists the accounts under the board's six headings with their code, the
+    list for the contador as CSV, «Guardar los códigos» and «Marcar como validada».
+  - The issued invoices go by folio fiscal in `emitidas.csv`: with `CFDI_MODE=off` the console holds
+    no issued XML (ADR-155 §4). Board CD-10d's row says so.
+  - Playwright: `e2e/empresa.spec.ts` opens the package of a seeded month without codes, types the
+    codes in with one missing and then all, validates them, downloads the .zip and reads Bancos'
+    line with its code and balance, and sees a changed code leave the list unvalidated.
 
 ### E-44 Salida a otro sistema `[baja]`
 
