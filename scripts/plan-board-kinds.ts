@@ -109,6 +109,7 @@ const PR_TITLE: readonly (readonly [string, Classified])[] = [
   ['Decidir casilla vs. botón', CORP],
   ['Protocolo de brechas', CORP],
   ['En la app «Desvincular', PHONE],
+  ['Operador — set the Términos URL', INFRA],
   ['ANTES DE STORES — Apple', INFRA],
   ['DPAs firmados', CORP],
   ['Opción de hosting de Foundry', CORP],
