@@ -123,7 +123,7 @@ fi
 # The dev-client caches the Metro URL. If Metro isn't running, the
 # app will launch but show a red error screen instead of our UI.
 # Quick probe — allow 3 s connect timeout, don't block long.
-METRO_URL="http://localhost:8081/status"
+METRO_URL="http://localhost:${MAESTRO_LANE_METRO_PORT:-8081}/status"
 if ! curl -sf --connect-timeout 3 "$METRO_URL" >/dev/null 2>&1; then
   echo "⚠️   Metro bundler not responding at $METRO_URL."
   echo "    Start Metro first:  cd apps/mobile && npx expo start"
@@ -138,8 +138,8 @@ fi
 # dev-client deep link with the explicit localhost URL, waiting
 # for the bundle to load, then terminating the app so Maestro's
 # `launchApp` gets a clean cold start.
-DEV_CLIENT_URL="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
-echo "🔗  Reconnecting dev-client to localhost:8081..."
+DEV_CLIENT_URL="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A${MAESTRO_LANE_METRO_PORT:-8081}"
+echo "🔗  Reconnecting dev-client to localhost:${MAESTRO_LANE_METRO_PORT:-8081}..."
 xcrun simctl terminate "$SIM_TARGET" "$APP_ID" 2>/dev/null || true
 xcrun simctl openurl "$SIM_TARGET" "$DEV_CLIENT_URL" 2>/dev/null || true
 sleep 5
@@ -164,7 +164,7 @@ if [[ -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
 fi
 
 if [[ $# -gt 0 ]]; then
-  # One Maestro at a time on this machine (lib/maestro-lock.sh). Started by
+  # One run at a time on lane 0 (ADR-157) (lib/maestro-lock.sh). Started by
   # a runner that holds it, this rides that lock.
   # shellcheck source=lib/maestro-lock.sh
   source "$(cd "$(dirname "$0")" && pwd)/lib/maestro-lock.sh"

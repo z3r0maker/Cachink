@@ -9,6 +9,7 @@ import {
   typography,
 } from '@xangarro/tokens';
 
+import { VISUALLY_HIDDEN } from '../styles/global.css';
 import { pressable } from '../styles/press.css';
 
 /** The header's «Buscar o ir a…» trigger. */
@@ -34,8 +35,9 @@ export const trigger = style([
   },
 ]);
 
+/** Hidden from sight on narrow screens, but still the trigger's name there. */
 export const triggerText = style({
-  '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  '@media': { 'screen and (max-width: 1023px)': VISUALLY_HIDDEN },
 });
 
 export const kbd = style({

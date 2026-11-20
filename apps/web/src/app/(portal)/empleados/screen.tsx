@@ -39,7 +39,7 @@ function acciones(
         <Button
           variant="ghost"
           onClick={() => onPagos?.(e)}
-          aria-label={`Ver los pagos de ${e.nombre}`}
+          aria-label={`Ver pagos de ${e.nombre}`}
           data-testid={`ver-pagos-${e.id}`}
         >
           Ver pagos

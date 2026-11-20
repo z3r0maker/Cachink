@@ -23,7 +23,7 @@ test('Nómina is a tab of the same page, and /empleados lands on it', async ({ p
     'aria-pressed',
     'true',
   );
-  await expect(page.getByRole('button', { name: 'Ver los pagos de Rosa Medina' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ver pagos de Rosa Medina' })).toBeVisible();
   await expect(page.locator('main').getByText('Nómina de la semana')).toBeVisible();
 });
 

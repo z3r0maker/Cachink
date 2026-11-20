@@ -1,0 +1,12 @@
+{
+  "ignore_dirs": [
+    ".claude/worktrees",
+    ".e2e",
+    "e2e-reports",
+    "archive",
+    ".turbo",
+    ".build-logs",
+    "audit-screenshots",
+    "brag-output"
+  ]
+}

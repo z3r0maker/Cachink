@@ -8,7 +8,7 @@
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
 env:
-  MOCK_API: http://127.0.0.1:3000
+  MOCK_API: ${MAESTRO_LANE_MOCK_API || 'http://127.0.0.1:3000'}
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml

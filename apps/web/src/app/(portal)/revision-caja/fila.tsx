@@ -10,6 +10,23 @@ const PRODUCTO = 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8';
 const CLIENTE = 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8';
 const CERRAR = 'M6 6l12 12M18 6 6 18';
 
+const CODIGO =
+  'M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M9 8v8M12 8v8M15 8v8';
+
+/** The record it looks like: by barcode (P-45, EcRevision) or by name. */
+function Parecido({ x }: { readonly x: ProductoCaja | ClienteCaja }) {
+  if (!x.pareceA) return null;
+  if ('porCodigo' in x && x.porCodigo) {
+    return (
+      <span className={s.mismoCodigo} data-testid="revision-mismo-codigo">
+        <Icon path={CODIGO} size={14} strokeWidth={2.4} />
+        {`Mismo código que ${x.pareceA}`}
+      </span>
+    );
+  }
+  return <span className={s.parece}>{`Se parece a ${x.pareceA}`}</span>;
+}
+
 /** One record: who created it and where, how often it sold, what it looks like, and the exits. */
 export function Fila(p: {
   readonly x: ProductoCaja | ClienteCaja;
@@ -25,7 +42,7 @@ export function Fila(p: {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
           <span className={s.nombre}>{p.x.nombre}</span>
-          {p.x.pareceA ? <span className={s.parece}>{`Se parece a ${p.x.pareceA}`}</span> : null}
+          <Parecido x={p.x} />
         </div>
         <div className={s.detalle}>{p.x.detalle}</div>
       </div>

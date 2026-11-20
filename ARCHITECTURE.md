@@ -195,6 +195,8 @@ Links to discussion, docs, prior art.
 | [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 | [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
 | [156](#adr-156) | 2026-11-19 | The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted | Accepted |
+| [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
+| [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11266,3 +11268,131 @@ shipped. E-26's `BlobStore` keeps evidence in `corp` until Azure is provisioned.
   a code list from before stay as they were (a migration test holds this).
 - E-21's pool cut and E-17's quarter summary read the Tablero's accepted value through `aceptadoDelTrimestre`.
 - Moving the evidence to Azure is E-26's; the Tablero reads documents through the Expediente either way.
+
+## ADR-157
+
+**Title:** Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — owner request of 2026-11-19 (several sessions need the phone's E2E at once). Plan item M-22.
+Amends the one-run-per-machine lock of PR #184; lane 0 keeps it.
+
+**Context**
+
+Since PR #184 every harness script took one machine-wide lock, because Maestro 2.5.1 sends every single-device run
+through driver port 7001 (iOS simulators share the Mac's localhost) and keeps one session per platform: a second
+run found the first run's driver and drove the wrong simulator, and an Android run skipped its driver when another
+session was registered. So every session's phone E2E waited in one queue.
+
+Maestro 2.6.0 (mobile-dev-inc/maestro#3138, May 2026) fixed both: a run takes a free port from the OS (or
+`--driver-host-port`) and sessions are tracked per device. The latest release, 2.12.1, keeps that. The port was not
+the only thing a run shared, though. The contracts mock (`pnpm mock:api` on :3000) keeps one company in memory, and
+`__mock/reset`, `/scenario`, `/down` and the single-use activation codes act on everyone. Metro (:8081) bakes
+`EXPO_PUBLIC_API_BASE` into the bundle and serves one worktree's code. The entry-state cache
+(`/tmp/maestro-entry-state`) and the simulator a device class resolves to were single too, and the driver cleanup
+killed every driver on the machine. The phone flows never reach Postgres, so no database or portal tenant is shared.
+
+**Decision**
+
+1. **A lane is what one run must not share.** Lane N (1 to `MAESTRO_LANES`, default 4) has its own simulator per
+   device class, «Xangarro L<N> iphone|se|ipad» on iOS 26.5, created on first use with the dev client copied from a
+   simulator that has it. It has its own contracts mock on 3100+N, which is its own company, and its own Metro on
+   8100+N, pointed at that mock and with its own cache. Its lock is `/tmp/xangarro-lanes/L<N>/run.lock`, a
+   maestro-lock.sh lock, so a dead holder is taken over as before. A lane's Metro uses Metro's own file watcher
+   (`XANGARRO_METRO_WATCHMAN=0` in `metro.config.js`), not Watchman. A worktree sits inside the main checkout, and
+   Watchman answers for the enclosing watch, which on this Mac has re-crawled without end since 2026-11-09, so
+   `watch-project` never returned. Its bundle URLs say `127.0.0.1`, since `--localhost` listens on `::1` only.
+2. **Lane 0 is what there was**: any simulator, the mock on :3000, Metro on :8081, one run at a time on
+   `/tmp/xangarro-maestro.lock`. Scripts that don't take a lane (run-ipad, fold-*, `maestro-locked.sh` without
+   `--lane`, a pinned `MAESTRO_DEVICE_UDID`, `MAESTRO_LANES=0`) and any Maestro older than 2.6.0 use it.
+3. **`run-flow.sh` and `full-regression.sh` take a lane by default** on Maestro 2.6+, and hand runs take one with
+   `maestro-locked.sh --lane [class]`. A run prefers a lane its own worktree warmed, then an unused one, then
+   another worktree's idle lane, whose services it restarts from its own worktree. The mock is also restarted when
+   `packages/contracts/src` changed since it started, and a restarted mock drops the lane's cached entry states.
+   Services stay up after a run; `lane.sh status` shows the lanes and `lane.sh down <N|all>` stops a free one.
+4. **Flows read the lane from the shell.** Maestro hands a flow every `MAESTRO_*` variable, so flows say
+   `${MAESTRO_LANE_MOCK_API || 'http://127.0.0.1:3000'}` and `${MAESTRO_LANE_METRO_PORT || "8081"}`: a flow's own
+   `env:` wins over `-e`, so the harness can't override a hard-coded address. The bundle cache-buster becomes
+   `MAESTRO_BUNDLE_BUSTER` for the same reason. As plain `BUNDLE_BUSTER` it never reached a flow (`ts=undefined`).
+5. **Cleanup touches only the run's own simulator** on Maestro 2.6+: its `xcodebuild … id=<udid>` and the runner app
+   under `Devices/<udid>/`. The wait for runs started outside the harness looks only at runs on that simulator.
+   Older Maestro keeps the machine-wide cleanup and the wait on port 7001.
+6. **Maestro 2.12.1 everywhere**: this Mac's `~/.maestro` and the CI pin in `maestro-e2e.yml` (it said 2.4.0).
+
+**Alternatives considered**
+
+- **Maestro's own sharding (`--shard-split`)**: one process drives N simulators, but the harness's per-flow setup
+  (keychain and SQLite reset, mock reset, activation) runs between flows from the shell. It would have to move into
+  the flows, and it still leaves one mock and one Metro.
+- **One multi-tenant mock, keyed by device**: the app reaches the mock before it has a device token, so the mock
+  can't tell two phones apart without a per-device API base. That needs a per-device bundle anyway, and that is
+  Metro per lane.
+- **More portal tenants or databases**: not needed. The phone flows run against the in-memory mock, and the portal's
+  Playwright specs already mint their own tenant (ADR-128) and can run against a private Postgres
+  (`XG_PG_NAME`/`XG_PG_PORT`). A tenant per lane is needed only if Maestro ever runs against a real backend: then
+  `mintTenant()` plus an activation code per lane, not another database.
+- **Keep the single lock**: safe, but every session waits behind the slowest suite.
+
+**Consequences**
+
+- Up to four sessions run Maestro at once. Each lane costs a simulator, a Metro and a mock (about 4 to 6 GB of RAM
+  with the simulator booted), and a lane's first run pays a cold Metro bundle.
+- A worktree branched before this ADR still runs the old cleanup, which kills every iOS driver on the machine when
+  it takes or frees lane 0. Such a worktree should merge main before its next Maestro run.
+- The Maestro MCP server's `run` tool takes no lock and gets no lane variables, so its flows go to lane 0's ports.
+  Use it to look at a screen, and the harness to run flows.
+- Android emulators are not lanes yet: the scripts drive simulators with `simctl`. With 2.12.1 an Android run on
+  lane 0 no longer collides with iOS lanes, but two Android runs still share lane 0.
+
+## ADR-158
+
+**Title:** Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — found while building ADR-157 (Maestro lanes); the owner asked for the fix the same day.
+Amends ADR-157 §1: the watcher choice is no longer the lanes' alone.
+
+**Context**
+
+The main checkout's Watchman watch (`~/Downloads/Cachink`) held about 5.5 million files, and 5.3 million of them were
+the agents' worktrees: 22 in `.claude/worktrees` (4.8 million) and `.e2e` (0.47 million), each with a full hoisted
+`node_modules`. An install in any of them overflowed FSEvents (`MustScanSubDirs UserDropped`), and Watchman then
+re-crawled the whole tree. Each re-crawl took six to seven minutes and came every 15 to 25 minutes (78 by
+2026-11-19, since 2026-11-09), so `watch-project` and `clock` timed out. A Metro started in the main checkout, or in
+any worktree inside it, stopped at «Waiting for Watchman `watch-project`» and never served the app.
+
+Watchman answers a path inside a watched root with that root and a `relative_path`. It does so even when the path is
+in one of the root's `ignore_dirs`, and then reports no files for it. A worktree's own `.watchmanconfig` does not
+make it a root of its own.
+
+**Decision**
+
+1. **A committed `.watchmanconfig`** ignores `.claude/worktrees`, `.e2e`, `e2e-reports`, `archive`, `.turbo`,
+   `.build-logs`, `audit-screenshots` and `brag-output`. That is eight, the most macOS takes as FSEvents exclusion
+   paths, so those folders' events never reach Watchman.
+2. **A nested checkout's Metro uses Metro's own crawler and watcher.** `apps/mobile/metro.config.js` sets
+   `resolver.useWatchman = false` when the workspace root sits under `/.claude/worktrees/` or `/.e2e/`. Watchman
+   would otherwise hand it the enclosing watch, which now ignores it. `XANGARRO_METRO_WATCHMAN=0|1` overrides that
+   either way, and the lanes keep passing 0.
+
+**Alternatives considered**
+
+- **Move the worktrees out of the checkout**: Claude Code creates them in `.claude/worktrees`, and other tools
+  create `.e2e`. They are not ours to move.
+- **Give each worktree its own Watchman root**: that only works while the outer root is not watched, and anything
+  run from the main checkout watches it again.
+- **Ignore nothing, and delete the watch when it sickens**: it comes back with the next Metro, and so do the
+  re-crawls.
+
+**Consequences**
+
+- With the config, a full checkout with `node_modules` crawls in 6.6 s and answers `clock` in 0.15 s.
+- A worktree's Metro crawls with Node at start and picks up edits through FSEvents without Watchman. Lane 1's
+  Metro came up in about 10 s, and its first iOS bundle took 62 s.
+- The main checkout gets `.watchmanconfig` only when it is updated to main. The sick watch was deleted on 2026-11-19
+  (it had no subscribers). Until the main checkout has the file, the next Metro started there re-creates the old
+  watch.
+- A worktree branched before this ADR still asks Watchman, and once the main checkout ignores worktrees it gets an
+  empty tree. It should merge main before starting Metro.

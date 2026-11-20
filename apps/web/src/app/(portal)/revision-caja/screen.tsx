@@ -131,6 +131,7 @@ function Capas({ r }: { readonly r: Revision }) {
           x={producto}
           onClose={cerrar}
           onFusionar={() => r.fusionar(producto)}
+          onSonDistintos={() => r.sonDistintos(producto)}
           onAprobar={(f) => r.aprobarProducto(producto, f, `${producto.nombre} entra al catálogo.`)}
         />
       ) : null}

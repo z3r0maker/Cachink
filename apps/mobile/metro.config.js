@@ -14,6 +14,18 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
+// A checkout nested in another one (an agent worktree in .claude/worktrees,
+// or .e2e) uses Metro's own crawler and watcher, not Watchman. Watchman
+// answers a nested path with the enclosing watch, and the main checkout's
+// .watchmanconfig ignores those folders (their installs flooded FSEvents
+// until the watch re-crawled without end), so Watchman would hand Metro an
+// empty tree (ADR-158). XANGARRO_METRO_WATCHMAN=0|1 overrides either way.
+const nestedCheckout = /\/\.claude\/worktrees\/|\/\.e2e\//.test(`${workspaceRoot}/`);
+const watchmanSwitch = process.env.XANGARRO_METRO_WATCHMAN;
+if (watchmanSwitch === '0' || (watchmanSwitch !== '1' && nestedCheckout)) {
+  config.resolver.useWatchman = false;
+}
+
 // Exclude the pnpm virtual store from Metro resolution. With
 // node-linker=hoisted all packages are real directories in
 // node_modules/ — the .pnpm store should never be traversed.

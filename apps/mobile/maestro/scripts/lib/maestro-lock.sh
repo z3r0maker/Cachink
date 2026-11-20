@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------
-# maestro-lock.sh — one Maestro run at a time on this machine.
+# maestro-lock.sh — one Maestro run at a time per lane.
 #
-# Why: Maestro 2.5.1 drives every single-device iOS run through ONE driver
+# Lane 0 (this file's default lock, /tmp/xangarro-maestro.lock) is the
+# shared mock on :3000 and Metro on :8081, so its runs still go one at a
+# time. lane.sh points MAESTRO_LOCK_DIR at a lane's own lock instead, and
+# with Maestro 2.6+ (MAESTRO_PARALLEL_SAFE=1) the driver cleanup and the
+# run scan below only touch this run's simulator (ADR-157).
+#
+# Why it began: Maestro 2.5.1 drives every single-device iOS run through ONE driver
 # port, 7001 (hard-coded in TestCommand.selectPort; only sharded runs get
 # another), and its start-up check reuses whatever driver already listens
 # there — whichever simulator that driver belongs to. Two sessions testing
@@ -33,11 +39,49 @@
 
 MAESTRO_LOCK_DIR="${MAESTRO_LOCK_DIR:-/tmp/xangarro-maestro.lock}"
 
-# Stops every Maestro iOS driver: the xcodebuild that hosts it and the
-# runner app listening on 7001. Only call it while holding the lock — then
-# any driver left is a leftover, never another run's.
+# a.b.c >= x.y.z
+_version_at_least() {
+  local IFS=. i
+  local -a a b
+  read -r -a a <<<"$1"
+  read -r -a b <<<"$2"
+  for i in 0 1 2; do
+    ((10#${a[i]:-0} > 10#${b[i]:-0})) && return 0
+    ((10#${a[i]:-0} < 10#${b[i]:-0})) && return 1
+  done
+  return 0
+}
+
+# Maestro 2.6.0 gave each run its own driver port and each device its own
+# session (mobile-dev-inc/maestro#3138). Probed once per process tree, and
+# never fails: callers run under `set -e`.
+maestro_parallel_safe() {
+  if [[ -z "${MAESTRO_PARALLEL_SAFE:-}" ]]; then
+    local v
+    v=$(maestro --version 2>/dev/null | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
+    MAESTRO_PARALLEL_SAFE=0
+    if [[ -n "$v" ]] && _version_at_least "$v" 2.6.0; then MAESTRO_PARALLEL_SAFE=1; fi
+    export MAESTRO_PARALLEL_SAFE MAESTRO_CLI_VERSION="${v:-unknown}"
+  fi
+  [[ "$MAESTRO_PARALLEL_SAFE" == 1 ]]
+}
+
+# Stops this run's Maestro iOS driver: the xcodebuild that hosts it and the
+# runner app inside its simulator. Only call it while holding the lock.
+#
+# Maestro 2.6+ (MAESTRO_PARALLEL_SAFE=1): each run has its own driver port,
+# so only MAESTRO_DEVICE_UDID's driver is ours; other lanes' are left alone,
+# and with no simulator pinned there is nothing to clear. Older Maestro
+# shares 7001: every driver on the machine goes, and the port must free up.
 maestro_kill_drivers() {
   [[ "${MAESTRO_LOCK_NO_DRIVER_CLEANUP:-}" == 1 ]] && return 0
+  if [[ "${MAESTRO_PARALLEL_SAFE:-}" == 1 ]]; then
+    local udid="${MAESTRO_DEVICE_UDID:-}"
+    [[ "$udid" =~ ^[0-9A-Fa-f-]{36}$ ]] || return 0
+    pkill -f "xcodebuild test-without-building.*id=$udid" 2>/dev/null || true
+    pkill -f "Devices/$udid/.*maestro-driver-iosUITests-Runner" 2>/dev/null || true
+    return 0
+  fi
   pkill -f 'xcodebuild test-without-building.*maestro-driver-ios' 2>/dev/null || true
   pkill -f 'maestro-driver-iosUITests-Runner' 2>/dev/null || true
   local i
@@ -53,9 +97,15 @@ maestro_kill_drivers() {
 # it holds no driver until asked.
 _maestro_other_runs() {
   [[ "${MAESTRO_LOCK_NO_RUN_SCAN:-}" == 1 ]] && return 0
-  ps -axo pid=,command= 2>/dev/null \
+  local runs
+  runs=$(ps -axo pid=,command= 2>/dev/null \
     | grep -E '[m]aestro\.cli\.AppKt.* (test|hierarchy|record)( |$)' \
-    | cut -c1-200 || true
+    | cut -c1-200 || true)
+  # Maestro 2.6+: only a run on this run's simulator is in the way.
+  if [[ "${MAESTRO_PARALLEL_SAFE:-}" == 1 && -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
+    runs=$(grep -F -- "$MAESTRO_DEVICE_UDID" <<<"$runs" || true)
+  fi
+  [[ -z "$runs" ]] || echo "$runs"
 }
 
 # Never fails: callers run under `set -euo pipefail`, and the EXIT trap is
@@ -131,12 +181,23 @@ maestro_lock_acquire() {
     return 0
   fi
   _maestro_lock_wait _maestro_lock_busy_note _maestro_lock_try || return 1
+  _maestro_lock_hold
+  _maestro_lock_settle
+}
 
-  export MAESTRO_LOCK_OWNER=$$
-  echo "pid $$ · ${MAESTRO_DEVICE_UDID:-booted} · $(basename "$0") · since $(date '+%H:%M:%S')" \
-    >"$MAESTRO_LOCK_DIR/info"
+# Right after taking the lock: what the holder starts runs under it, and it
+# is freed on exit. lane.sh calls the two halves around its device setup.
+_maestro_lock_hold() {
+  maestro_parallel_safe || true
+  export MAESTRO_LOCK_OWNER=$$ MAESTRO_LOCK_DIR
   trap 'maestro_lock_release' EXIT
+}
 
+# Once the simulator is known: say who holds the lock, wait out runs started
+# outside the harness, clear leftover drivers.
+_maestro_lock_settle() {
+  echo "pid $$ · ${MAESTRO_LANE:+lane $MAESTRO_LANE · }${MAESTRO_DEVICE_UDID:-booted} · $(basename "$0") · ${PWD##*/} · since $(date '+%H:%M:%S')" \
+    >"$MAESTRO_LOCK_DIR/info"
   # Runs outside the harness don't take the lock; wait until they end. If
   # one never does, free the lock untouched — its driver is in use.
   if ! _maestro_lock_wait _maestro_lock_others_note _maestro_lock_no_others; then

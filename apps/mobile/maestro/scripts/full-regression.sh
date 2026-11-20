@@ -82,8 +82,14 @@ source "$SCRIPT_DIR/lib/device-resolve.sh"
 # XCUITest driver cannot wedge the whole suite (see lib/with-timeout.sh).
 # shellcheck source=lib/with-timeout.sh
 source "$SCRIPT_DIR/lib/with-timeout.sh"
+# shellcheck source=lib/lane.sh
+source "$SCRIPT_DIR/lib/lane.sh"
 
-if [[ -n "$DEVICE_CLASS" ]]; then
+# A lane of its own (ADR-157): with Maestro 2.6+ and no simulator pinned the
+# suite takes a free lane, so other sessions can run at the same time.
+if [[ "$DRY_RUN" == false && -z "${MAESTRO_DEVICE_UDID:-}" ]] && lanes_enabled; then
+  lane_acquire "${DEVICE_CLASS:-iphone}" || exit 1
+elif [[ -n "$DEVICE_CLASS" ]]; then
   # --dry-run only prints the flow list, so resolve the UDID but skip the boot.
   if [[ "$DRY_RUN" == true ]]; then
     ensure_device "$DEVICE_CLASS"
@@ -92,11 +98,8 @@ if [[ -n "$DEVICE_CLASS" ]]; then
   fi
 fi
 
-# ──────────── One Maestro at a time on this machine ──────────────
-# Every iOS run shares driver port 7001; two at once drive each other's
-# simulators. Held to the end of the suite (lib/maestro-lock.sh).
-# shellcheck source=lib/maestro-lock.sh
-source "$SCRIPT_DIR/lib/maestro-lock.sh"
+# ──────────── One run at a time on lane 0 ─────────────────────────
+# A no-op when a lane was taken above. Held to the end (lib/maestro-lock.sh).
 if [[ "$DRY_RUN" == false ]]; then
   maestro_lock_acquire || exit 1
 fi
@@ -106,7 +109,7 @@ PHASE_LABEL="all"
 if [[ -n "$RUN_NAME" ]]; then
   RUN_ID="$RUN_NAME"
 else
-  RUN_ID="$(date +%Y-%m-%d_%H%M)_full-regression_${PHASE_LABEL}"
+  RUN_ID="$(date +%Y-%m-%d_%H%M)_full-regression_${PHASE_LABEL}${MAESTRO_LANE:+_L$MAESTRO_LANE}"
 fi
 RUN_DIR="$REPORT_ROOT/runs/$RUN_ID"
 if [[ "$DRY_RUN" == false ]]; then

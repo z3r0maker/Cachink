@@ -24,6 +24,7 @@ function run(args: string[]): { status: number | null; out: string } {
       MAESTRO_LOCK_DIR: lock,
       MAESTRO_LOCK_NO_DRIVER_CLEANUP: '1',
       MAESTRO_LOCK_NO_RUN_SCAN: '1',
+      MAESTRO_PARALLEL_SAFE: '0',
     },
     timeout: 30_000,
   });
@@ -80,6 +81,7 @@ describe('maestro-locked.sh', () => {
         MAESTRO_LOCK_POLL: '0.2',
         MAESTRO_LOCK_NO_DRIVER_CLEANUP: '1',
         MAESTRO_LOCK_NO_RUN_SCAN: '1',
+        MAESTRO_PARALLEL_SAFE: '0',
       },
       timeout: 30_000,
     });
