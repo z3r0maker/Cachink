@@ -636,3 +636,20 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
   protocol 1.
 - **Files:** `packages/contracts/src/{support,transport,index}.ts`, `src/mock/{handler,state}.ts`,
   `tests/support.test.ts`, `tests/conformance/bug-report.test.ts`.
+
+### C-26 `POST /support/bug-report`: categoría, descripción opcional y el error que nombra (ADR-162) [alta]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** B-21, M-23
+- **Context:** §9, ADR-162 §5. The phone's sheet stops asking for text: the person taps one of four
+  options and may add a sentence, and a report opened from an error names that error. Additive at
+  protocol 1: a build made before this keeps sending `description` alone and stays valid.
+- **Change:** `BUG_REPORT_CATEGORIES` (`could_not_charge`, `froze_or_closed`, `wrong_number`, `other`,
+  `as const`) and an optional `category`; `description` may be empty **when a category is given**,
+  and a report with neither is still refused; an optional `eventId`, the 32 hex characters of the
+  Sentry event the report is about. Still no field for who is calling. `MAX_BUG_REPORT_BYTES` and the
+  snapshot's limits do not change, and the snapshot still carries no stack trace.
+- **Files:** `packages/contracts/src/support.ts`, `src/mock/{handler,state}.ts`,
+  `tests/support.test.ts`, `tests/conformance/bug-report.test.ts`; §9 of this file, in the same change.
+- **Acceptance:** schema tests for a category alone, a description alone (what an old build sends),
+  neither (refused), an unknown category (refused) and an `eventId` that is not 32 hex (refused); the
+  conformance test green against the mock and against the real portal (`test:conformance`).

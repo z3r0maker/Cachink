@@ -380,3 +380,20 @@
 - **Acceptance:** una prueba que falle si el journal y los `.sql` se separan otra vez — como la del
   barril de SQLite —, de modo que esto no vuelva a descubrirse en una auditoría; y, si se retira
   `db:generate`, que el script ya no exista en `packages/data-pg/package.json`.
+
+### B-21 El reporte de la caja guarda su categoría y el error que nombra (ADR-162) [alta]
+
+- [ ] Status · **Blocked by:** C-26 · **Blocks:** M-23, N-88
+- **What:** `fileBugReport` (`apps/web/src/server/support/bug-report.ts`) files the report's `category`
+  and `eventId` with the inbox item, so the console can show a report beside its error (N-88). With
+  no description, the item's title comes from the category. ADR-141's limits (20 a day per device, 60
+  per business), its idempotency by `(bug-report, deviceId:submittedAt)` and its rule that no stack
+  trace is filed do not change.
+- **Decide first:** where the two values live: columns on `support_items` (a migration on the
+  console's schema, with its migration test, §2.9) or fields inside the item's body. N-88's board
+  decides it: an inbox that filters by category needs the column.
+- **Tests:** integration against Postgres, building the rows the seed does not: a report with a
+  category and no text, one with an event id, one in the old shape, and a resend that files nothing
+  new.
+- **Acceptance:** a report sent through `/api/v1/support/bug-report` with a category and an event id
+  reaches the console's inbox with both.

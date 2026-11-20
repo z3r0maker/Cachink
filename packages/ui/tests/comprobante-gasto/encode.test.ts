@@ -80,7 +80,9 @@ describe('encodeReceiptPhoto', () => {
     assert.equal(out.height, 512);
   });
 
-  it('refuses a photo that stays over 96 KB at q50', () => {
+  // 40,000 rectangles and three WebP passes in software Skia: 0.6 s on a laptop,
+  // 5.07 s on a shared CI runner, which is past Vitest's 5 s default.
+  it('refuses a photo that stays over 96 KB at q50', { timeout: 30_000 }, () => {
     assert.throws(
       () => encodeReceiptPhoto(skia, photo(1024, 1024, true)),
       (e: unknown) =>

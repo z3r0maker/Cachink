@@ -2096,3 +2096,50 @@ WhatsApp).
 - **Acceptance:** el dueño cambia el monto y la frecuencia de una plantilla y detiene otra; la
   siguiente ocurrencia respeta el cambio; un Playwright lo prueba contra datos reales, y la bitácora
   de auditoría guarda quién la cambió.
+
+### P-48 Ayuda: «¿Qué necesitas?», una duda o algo que no funciona (ADR-162) [media]
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+- **What:** «Escríbele al equipo» asks first, with two cards. «Tengo una duda» keeps today's form
+  (Asunto, Mensaje, «Es urgente: mi negocio no puede operar»). «Algo no funciona» shows «¿En qué
+  pantalla?» already filled with the screen the person came from, with «Fue en otra», takes an
+  optional sentence, and files a `bug` item that carries by itself the screen, the browser and the
+  last error of the session («Va con la pantalla, tu navegador y el último error que vimos en tu
+  sesión.»). No screenshot.
+- **Design first:** board `RpAyuda` on the canvas page «Reportar un problema», three states
+  (Tengo una duda, Algo no funciona, Enviado), drawn 2026-11-20. **Approval pending: no code before
+  it.**
+- **How:** `apps/web/src/app/(portal)/ayuda/formulario.tsx` and `server/actions/ayuda.ts`. The last
+  error is what `failure()` (`server/action-errors.ts`) and `onRequestError` already report; its id
+  is kept with the session on the server, never in the URL.
+- **Tests:** the action test-first (happy path + 3 unhappy: no session, «Algo no funciona» with
+  neither a screen nor a sentence, the console's ingest down, which is said to the person and loses
+  nothing silently). Playwright on a tenant from `mintTenant()`: the bug path files an item, and the
+  spec reads it back from the console's inbox with the screen's name, so real data reached the page.
+- **Acceptance:** from any portal screen, two taps and no typing file a report that names that
+  screen; the question path works as it does today.
+
+### P-49 Los errores del navegador llegan a Sentry y una pantalla que falla conserva el menú (ADR-162) [media]
+
+- [ ] Status · **Blocked by:** O-34 · **Blocks:** —
+- **What:** (1) The portal's browser reports its errors; today only the server does, so a screen that
+  breaks in the browser is seen by nobody. (2) A screen that fails keeps the sidebar and the topbar:
+  «Esta pantalla falló», that the records are safe, «Reintentar», «Contar qué pasó» (opens P-48's
+  bug path) and «Ir a Hoy». (3) A portal that cannot open at all shows «El portal no pudo abrir» with
+  «Reintentar» and «Escribir a soporte», in place of today's bare HTML. Both say «Ya nos llegó el
+  aviso con los detalles» **only when the report went out**.
+- **Design first:** board `RpError`, two states (Falla una pantalla, Falla todo el portal), drawn
+  2026-11-20. **Approval pending: no code before it.**
+- **How:** `@sentry/node` moves to the major `@sentry/nextjs` needs, then `@sentry/nextjs`, both at
+  the latest stable (§2.7). Data collection is set explicitly: no IP address, cookies, headers or
+  request bodies, which the new major sends unless told not to. `scrubEvent` runs on both sides. A
+  same-origin tunnel route carries the reports, so ad blockers do not drop them and the CSP's
+  `connect-src` does not change. `error.tsx` for the `(portal)` segment and a rewritten
+  `global-error.tsx`. The web caja (`apps/web/src/operador`) is covered by the same SDK, and its
+  linking aviso gains its line here (ADR-162, last consequence).
+- **Tests:** unit tests for the browser side of the scrubber (a name, a phone, an amount, a typed
+  note: none leaves). Playwright: a route that throws on purpose in test builds shows the first state
+  with the sidebar still there, «Reintentar» recovers, and the tunnel received a report (the spec
+  intercepts the tunnel route; it does not call Sentry).
+- **Acceptance:** an error thrown in the browser on production shows in Sentry with a readable trace
+  and no personal data, and the person never sees a blank page.

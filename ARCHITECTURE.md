@@ -199,6 +199,7 @@ Links to discussion, docs, prior art.
 | [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
 | [159](#adr-159) | 2026-11-20 | A USD expense paid from a peso account is booked at what the bank charged, not at a published rate | Accepted |
 | [160](#adr-160) | 2026-11-20 | The console signs in with passkeys only; its password and TOTP are retired | Accepted |
+| [162](#adr-162) | 2026-11-20 | Error reports are on by default and a report sent by hand always sends; the phone's door to report is a help button in the header, and no report carries a screenshot | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11522,3 +11523,116 @@ the credential only answers to the console's own domain, so it cannot be phished
 - The console's Permissions-Policy leaves `publickey-credentials-get` and `-create` at their default (self); it must
   not deny them. The CSP needs no change.
 - The portal is unchanged. N-83's console action to switch an owner's TOTP off is unaffected.
+
+---
+
+## ADR-162
+
+**Title:** Error reports are on by default and a report sent by hand always sends; the phone's door to report is a
+help button in the header, and no report carries a screenshot
+
+**Date:** 2026-11-20
+
+**Status:** Accepted — four decisions by the owner, 2026-11-20 (canvas page «Reportar un problema», boards `Rp*`
+drawn the same day and **not yet approved**); supersedes ADR-027's «default opt-out» and ADR-124's «reporting is
+off by default»; amends ADR-141 §2 (the consent gate on the hand-sent report and the shared file); answers N-87's
+open question; tasks C-26, B-21, M-23, M-24, P-48, P-49, N-88, O-34, O-35
+
+**Context**
+
+The owner asked two things on 2026-11-20: whether reporting a problem is easy and visible enough for people who
+are not technical, and whether errors reach us by themselves, with their trace, without the user doing anything.
+The answer to both was no, checked against `origin/main` and the hosted settings that day:
+
+- **No error reaches anyone automatically.** Production holds no Sentry key on either surface: the portal's Vercel
+  production environment has no `SENTRY_DSN`, EAS production has no `EXPO_PUBLIC_SENTRY_DSN`, and `eas.json` passes
+  one only to `preview`. The app has no Sentry Expo plugin and uploads no source maps. The portal has the server
+  SDK and no browser SDK, so an error in the browser is seen by nobody. The console captures nothing.
+- **The phone reports nothing until a switch is turned on that nothing leads to.** ADR-027 made reports opt-in and
+  ADR-124 moved the question to a line in the linking aviso and a switch in Ajustes. `crashReportingEnabled` starts
+  `null`, which reads as off.
+- **A report sent by hand is hard to find and, by default, is not sent.** «Reportar un problema» is a grey button
+  at the end of Ajustes › Dispositivo, and Ajustes opens only from Mi turno. With reports off, which is the
+  default, the sheet shares a JSON file through the system share sheet (ADR-141 §2). A description is required.
+- **A filed report never carries a stack trace** (ADR-141 §1, stripped on the phone and again on the server). So a
+  hand-sent report cannot be debugged alone; only Sentry carries the trace.
+
+Research the same day, with its sources in the audit delivered to the owner: registers and messaging apps of the
+same kind (Square, Shopify POS, WhatsApp) put help in a menu row; Material reserves the floating button for a
+screen's primary action; Sentry deprecated its own floating feedback button in the React Native SDK 8.7.0. Apple's
+guideline 5.1.1 asks for consent and a way to withdraw it and does not fix the form; the LFPDPPP (DOF 2025-03-20)
+takes tacit consent through the aviso as the general rule and asks for express consent for financial and
+patrimonial data, which these reports do not carry. **That reading is ours, not counsel's** (O-35).
+
+**Decision**
+
+1. **The phone's door is a help button in the header, on every tab** (owner decision 1), plus a row «¿Algo no
+   funciona?» in Mi turno. Ajustes keeps «Reportar un problema» as a row with its icon. There is no floating button
+   and no shake gesture.
+2. **Automatic error reports are on by default on the phone** (owner decision 2). The switch «Avisar de errores a
+   Xangarro» in Ajustes turns them off, and the linking aviso says so in one line. `crashReportingEnabled` `null`
+   now reads as on; `false` is off, and then Sentry does not start at all. ADR-027's two other commitments stand:
+   PII scrubbing is always on and Sentry never starts partially.
+3. **A phone linked before the build that shows the new aviso line does not start reporting silently.** It keeps
+   reading `null` as off until it has shown that line. This guard was not one of the owner's four decisions; it is
+   the conservative reading of them, and M-24 draws the state before building it.
+4. **What an automatic report carries:** the exception and its stack trace, the app version and build, the system
+   and device model, the name of the screen, and the `business_id` and `device_id` tags the portal's server already
+   sends. Nothing a person typed, no names, no amounts (`scrubPii`, unchanged), no IP address, no session replay.
+5. **A report the person sends by hand always sends** (owner decision 3). The sheet no longer reads the switch; it
+   needs only the device's link. Without a connection the report is kept in a queue on the device and leaves when
+   the connection returns. The shared JSON file and «Copiar detalles» are removed. The sheet asks «¿Qué pasó?» with
+   four options to tap and an optional sentence, so the contract gains a `category`, lets `description` be empty
+   when a category is given, and gains an optional `eventId` naming the Sentry error the report is about (C-26).
+   ADR-141's limits and its rule that a filed report carries no stack trace stand.
+6. **No report carries a screenshot** (owner decision 4). It would show names and amounts, which the aviso de
+   privacidad promises never leave the phone.
+7. **The moment something fails is the main door.** The error toast and the crash screen say Xangarro already
+   knows, and offer «Contar qué pasó», which opens the sheet tied to that error. They say it **only when it is
+   true**: reports on and Sentry started. With reports off they offer «Avisar de esta falla», a hand-sent report.
+8. **The portal** asks first, in Ayuda, whether it is a question or something that does not work; the second files
+   a `bug` item with the screen, the browser and the last error of the session. A screen that fails keeps the menu,
+   and a portal that cannot open shows a page of its own instead of bare HTML. Browser errors reach Sentry through
+   the browser SDK and a same-origin tunnel, with IP address, cookies, headers and request bodies switched off
+   explicitly. The portal has no switch: the aviso integral already lists its error monitoring without one.
+9. **The console** captures its server errors with the portal's module, moved to `@xangarro/observability` so it
+   lives in one place, and its inbox shows a report beside the error it names. Its board is drawn first (N-88).
+10. **Nothing above reports anything until the keys exist** (O-34): a Sentry project per surface, their keys in
+    Vercel and EAS, the source-map token, and an alert by email.
+
+**Alternatives considered**
+
+- _A floating button that can be dismissed and returns at the next sign-in_ (the owner's own idea, drawn as
+  option B and compared on the canvas). It covers a product on Cobrar beside the Cobrar bar, its close mark is
+  28 px against the 44 px a finger needs, dismissing it every shift is a chore, and no comparable app does it.
+- _Shake to report._ It needs a visible alternative and an off switch anyway (WCAG 2.5.4), and a phone on a counter
+  stand shakes by accident.
+- _Keep reports opt-in and ask in a first-launch modal_ (ADR-027 as written; `ConsentModal`). It asks before the
+  person has seen the aviso (ADR-124), and in practice nobody turns reports on, so nothing arrives.
+- _Keep the hand-sent report behind the switch._ Someone who turned automatic reports off would have no working way
+  to say that something broke.
+- _Attach a screenshot, with a preview to accept._ The aviso would have to change and the sheet would gain a step,
+  for people the sheet is meant to ask nothing of. Support can ask for one in its reply when a report needs it.
+- _Sentry's own feedback call as the hand-report path._ Reports would live outside the console's inbox, where
+  support works (ADR-063), and would stop when the switch is off.
+- _A folio or error code on the screen for the person to read out._ The event id travels with the report by
+  itself; a code on screen is one more thing to understand.
+
+**Consequences**
+
+- **Five privacy documents change in the same release as decision 2, not before and not after:** the aviso
+  integral (the rows «Reportes de fallas» and «Monitoreo de errores», and the bullet on turning them off), the
+  aviso simplificado (its line on a consent screen, already stale since ADR-124), `docs/legal/privacy.md` §3
+  («opt-in explícito»), Apple's privacy label and Google Play's data safety form (both say «only if the user turns
+  them on»). The aviso integral is versioned and its hash is stored with each consent, so this is a new version,
+  and counsel reviews it first (O-35, with O-17).
+- Stack traces leave the phone by default, through Sentry only. The inbox still never stores one.
+- `ConsentModal`, its stories and its tests are deleted (N-87). The Maestro flows `bug-report-sheet`,
+  `bug-report-enviar` and `settings-crash-reporting-toggle` are rewritten, and the new states get their own.
+- A phone that is not linked has no door to report: it has no token to send with. The person linking it is the
+  owner, who has the portal's Ayuda.
+- `@sentry/nextjs` needs the server SDK on the same major, so the portal's `@sentry/node` moves up first; versions
+  are checked on npm when the work starts (§2.7).
+- Sentry's free plan holds 5,000 errors a month. One noisy bug can use it up, which is what the alert is for.
+- The web caja shares the linking aviso's copy with the phone. Its new line is true there only once the browser
+  SDK is live (P-49), so the line ships per surface.
