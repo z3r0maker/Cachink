@@ -73,3 +73,5 @@ export {
   xmlsDelPaquete,
   type RecibidaDelPaquete,
 } from './queries/contador.js';
+export { createTableroRepository } from './queries/tablero.js';
+export { leerTablero } from './queries/tablero-lectura.js';

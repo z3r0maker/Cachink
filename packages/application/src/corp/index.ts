@@ -103,3 +103,4 @@ export {
   type FuentesDelPaquete,
   type Paquete,
 } from './contador.js';
+export * from './tablero/index.js';
