@@ -196,6 +196,7 @@ Links to discussion, docs, prior art.
 | [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
 | [156](#adr-156) | 2026-11-19 | The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted | Accepted |
 | [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
+| [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11343,3 +11344,55 @@ killed every driver on the machine. The phone flows never reach Postgres, so no 
   Use it to look at a screen, and the harness to run flows.
 - Android emulators are not lanes yet: the scripts drive simulators with `simctl`. With 2.12.1 an Android run on
   lane 0 no longer collides with iOS lanes, but two Android runs still share lane 0.
+
+## ADR-158
+
+**Title:** Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — found while building ADR-157 (Maestro lanes); the owner asked for the fix the same day.
+Amends ADR-157 §1: the watcher choice is no longer the lanes' alone.
+
+**Context**
+
+The main checkout's Watchman watch (`~/Downloads/Cachink`) held about 5.5 million files, and 5.3 million of them were
+the agents' worktrees: 22 in `.claude/worktrees` (4.8 million) and `.e2e` (0.47 million), each with a full hoisted
+`node_modules`. An install in any of them overflowed FSEvents (`MustScanSubDirs UserDropped`), and Watchman then
+re-crawled the whole tree. Each re-crawl took six to seven minutes and came every 15 to 25 minutes (78 by
+2026-11-19, since 2026-11-09), so `watch-project` and `clock` timed out. A Metro started in the main checkout, or in
+any worktree inside it, stopped at «Waiting for Watchman `watch-project`» and never served the app.
+
+Watchman answers a path inside a watched root with that root and a `relative_path`. It does so even when the path is
+in one of the root's `ignore_dirs`, and then reports no files for it. A worktree's own `.watchmanconfig` does not
+make it a root of its own.
+
+**Decision**
+
+1. **A committed `.watchmanconfig`** ignores `.claude/worktrees`, `.e2e`, `e2e-reports`, `archive`, `.turbo`,
+   `.build-logs`, `audit-screenshots` and `brag-output`. That is eight, the most macOS takes as FSEvents exclusion
+   paths, so those folders' events never reach Watchman.
+2. **A nested checkout's Metro uses Metro's own crawler and watcher.** `apps/mobile/metro.config.js` sets
+   `resolver.useWatchman = false` when the workspace root sits under `/.claude/worktrees/` or `/.e2e/`. Watchman
+   would otherwise hand it the enclosing watch, which now ignores it. `XANGARRO_METRO_WATCHMAN=0|1` overrides that
+   either way, and the lanes keep passing 0.
+
+**Alternatives considered**
+
+- **Move the worktrees out of the checkout**: Claude Code creates them in `.claude/worktrees`, and other tools
+  create `.e2e`. They are not ours to move.
+- **Give each worktree its own Watchman root**: that only works while the outer root is not watched, and anything
+  run from the main checkout watches it again.
+- **Ignore nothing, and delete the watch when it sickens**: it comes back with the next Metro, and so do the
+  re-crawls.
+
+**Consequences**
+
+- With the config, a full checkout with `node_modules` crawls in 6.6 s and answers `clock` in 0.15 s.
+- A worktree's Metro crawls with Node at start and picks up edits through FSEvents without Watchman. Lane 1's
+  Metro came up in about 10 s, and its first iOS bundle took 62 s.
+- The main checkout gets `.watchmanconfig` only when it is updated to main. The sick watch was deleted on 2026-11-19
+  (it had no subscribers). Until the main checkout has the file, the next Metro started there re-creates the old
+  watch.
+- A worktree branched before this ADR still asks Watchman, and once the main checkout ignores worktrees it gets an
+  empty tree. It should merge main before starting Metro.
