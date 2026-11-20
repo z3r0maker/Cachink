@@ -73,8 +73,7 @@ export interface SignupStore {
 }
 
 export type TrialCheckoutResult =
-  | { readonly status: 'redirect'; readonly url: string }
-  | { readonly status: 'unavailable' };
+  { readonly status: 'redirect'; readonly url: string } | { readonly status: 'unavailable' };
 
 /**
  * The seam B-10 fills: a Stripe Checkout session with a 14-day trial and no

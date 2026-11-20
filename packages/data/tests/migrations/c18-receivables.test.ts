@@ -124,8 +124,7 @@ describe('migration 0004 — receivables and review status', () => {
     assert.equal(client['fusionado_con_id'], null);
 
     const product = db.prepare('SELECT estado_revision FROM products LIMIT 1').get() as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     if (product) assert.equal(product['estado_revision'], 'aprobado');
 
     const expense = db

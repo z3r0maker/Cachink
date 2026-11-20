@@ -32,7 +32,7 @@
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "postgres": "^3.4.9",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.12"
   },
   "peerDependencies": {
     "@xangarro/ui": "workspace:*",
@@ -41,9 +41,9 @@
   "devDependencies": {
     "@noble/ed25519": "3.2.0",
     "@noble/hashes": "2.4.0",
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.2.14",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.12",
     "@xangarro/config": "workspace:*",
     "@xangarro/sync": "workspace:*",
     "@xangarro/ui": "workspace:*",

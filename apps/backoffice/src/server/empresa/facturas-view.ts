@@ -14,11 +14,7 @@ import { satFila, type SatFila } from './sat-fila-view';
  * and the four tiles above the list.
  */
 export type EstadoFila =
-  | 'Vigente'
-  | 'Sin verificar'
-  | 'Cancelada'
-  | 'Cancelada en el SAT'
-  | 'Sin CFDI';
+  'Vigente' | 'Sin verificar' | 'Cancelada' | 'Cancelada en el SAT' | 'Sin CFDI';
 
 export type Destino =
   | { readonly tipo: 'enlace'; readonly href: string; readonly texto: string }

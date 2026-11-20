@@ -24,8 +24,7 @@ import type { AuthDeps, StaffSession } from './ports';
  * 15 min, auth-core's `TOTP_PER_ACCOUNT`).
  */
 export type Refused =
-  | { readonly kind: 'failed' }
-  | { readonly kind: 'locked'; readonly wait: number };
+  { readonly kind: 'failed' } | { readonly kind: 'locked'; readonly wait: number };
 export type FactorResult = { readonly kind: 'ok'; readonly token: string } | Refused;
 
 export const factorSubjects = (staffId: StaffMemberId): ThrottleSubject[] => [

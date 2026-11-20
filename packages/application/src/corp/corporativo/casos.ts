@@ -92,7 +92,7 @@ async function prueba(
   if (r.documentoId !== null) {
     // It may have been versioned from the Expediente since: follow to the current one.
     let actual = r.documentoId;
-    for (let next = await deps.documentos.reemplazadoPor(actual); next !== null; ) {
+    for (let next = await deps.documentos.reemplazadoPor(actual); next !== null;) {
       actual = next;
       next = await deps.documentos.reemplazadoPor(actual);
     }

@@ -15,13 +15,7 @@
 import { useCallback, useState } from 'react';
 
 export type UpdateStatus =
-  | 'idle'
-  | 'checking'
-  | 'up-to-date'
-  | 'downloading'
-  | 'downloaded'
-  | 'error'
-  | 'unsupported';
+  'idle' | 'checking' | 'up-to-date' | 'downloading' | 'downloaded' | 'error' | 'unsupported';
 
 export interface UpdateAdapter {
   check(): Promise<'up-to-date' | { ready: boolean }>;

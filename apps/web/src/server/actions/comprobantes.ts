@@ -21,8 +21,7 @@ import { pgBusinessesRepository } from '../repositories/businesses';
  */
 
 export type SubirLogoResult =
-  | { ok: true; brandColor: string | null }
-  | { ok: false; message: string };
+  { ok: true; brandColor: string | null } | { ok: false; message: string };
 
 export async function subirLogo(form: FormData): Promise<SubirLogoResult> {
   try {

@@ -32,8 +32,7 @@ export type CodigoRechazado = {
 };
 /** `restantes`: recovery codes left, when one was used to get in. */
 export type SegundoPasoResult =
-  | { readonly ok: true; readonly restantes: number | null }
-  | CodigoRechazado;
+  { readonly ok: true; readonly restantes: number | null } | CodigoRechazado;
 export type IdentidadResult = { readonly ok: true } | CodigoRechazado;
 
 const CADUCO = 'Tu inicio de sesión caducó. Entra otra vez con tu contraseña.';

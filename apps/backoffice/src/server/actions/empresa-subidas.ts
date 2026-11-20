@@ -12,9 +12,7 @@ import { requireFounder } from '../founder';
  * founder gate and after the name, type and size pass the domain's check.
  */
 export type Firma =
-  | { readonly key: string; readonly url: string }
-  | { readonly error: string }
-  | null;
+  { readonly key: string; readonly url: string } | { readonly error: string } | null;
 
 export async function firmarSubidaAction(archivo: {
   readonly nombre: string;

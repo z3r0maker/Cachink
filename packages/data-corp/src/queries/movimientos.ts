@@ -44,13 +44,11 @@ export async function withDetail(db: CorpDb, rows: readonly (typeof entries.$inf
   const byEntry = new Map<string, LineRow[]>();
   for (const l of lines) byEntry.set(l.entryId, [...(byEntry.get(l.entryId) ?? []), l]);
   const reversedBy = new Map(reversals.map((r) => [r.of, r.id]));
-  return rows.map(
-    (r): Movimiento => ({
-      ...toEntry(r, byEntry.get(r.id) ?? []),
-      createdAt: r.createdAt,
-      reversedBy: reversedBy.get(r.id) ?? null,
-    }),
-  );
+  return rows.map((r): Movimiento => ({
+    ...toEntry(r, byEntry.get(r.id) ?? []),
+    createdAt: r.createdAt,
+    reversedBy: reversedBy.get(r.id) ?? null,
+  }));
 }
 
 /** Every entry dated in `period` (`YYYY-MM`), newest first. */
