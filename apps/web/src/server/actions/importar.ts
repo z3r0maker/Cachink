@@ -25,7 +25,7 @@ export type ImportResult =
 
 /** A file the owner must fix says why; anything else is an incident. */
 const REFUSALS: FailurePolicy = {
-  shown: ['SHEET_INVALID'],
+  shown: ['SHEET_INVALID', 'CODIGO_DUPLICADO'],
   retry: 'No pudimos procesar el archivo. Intenta de nuevo.',
 };
 

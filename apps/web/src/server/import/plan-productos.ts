@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { products } from '@xangarro/data-pg';
+import { codigoCanonico } from '@xangarro/domain';
 import { and, isNotNull, isNull } from 'drizzle-orm';
 
 import { planImport, type Existing, type PlannedRow } from '@/lib/import-plan';
@@ -15,7 +16,9 @@ import { readSheet, SheetError } from './read-sheet';
  * written is always re-derived on the server from the file — never taken from
  * a preview the browser sent back.
  */
-async function existingBySku(tx: Tx): Promise<Map<string, Existing>> {
+async function existingByCodigo(
+  tx: Tx,
+): Promise<{ porCodigo: Map<string, Existing>; repetidos: Set<string> }> {
   const rows = await tx
     .select({
       id: products.id,
@@ -31,11 +34,22 @@ async function existingBySku(tx: Tx): Promise<Map<string, Existing>> {
     })
     .from(products)
     .where(and(isNull(products.deletedAt), isNotNull(products.sku)));
-  return new Map(rows.map(({ sku, ...r }) => [sku as string, r as Existing]));
+  // By barcode (ADR-150): UPC-A and EAN-13 meet; a key two products share is
+  // remembered, so the plan refuses it instead of updating either.
+  const porCodigo = new Map<string, Existing>();
+  const repetidos = new Set<string>();
+  for (const { sku, ...r } of rows) {
+    const clave = codigoCanonico(sku);
+    if (clave === null) continue;
+    if (porCodigo.has(clave)) repetidos.add(clave);
+    porCodigo.set(clave, r as Existing);
+  }
+  return { porCodigo, repetidos };
 }
 
 export async function planFromFile(tx: Tx, file: File): Promise<PlannedRow[]> {
   const parsed = parseProductSheet(await readSheet(file));
   if (!parsed.ok) throw new SheetError(parsed.message);
-  return planImport(parsed.rows, await existingBySku(tx));
+  const { porCodigo, repetidos } = await existingByCodigo(tx);
+  return planImport(parsed.rows, porCodigo, repetidos);
 }

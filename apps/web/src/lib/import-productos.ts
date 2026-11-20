@@ -1,4 +1,5 @@
 import {
+  codigoCanonico,
   InventoryCategoryEnum,
   InventoryUnitEnum,
   ProductIconEnum,
@@ -136,14 +137,15 @@ function parseRow(cells: Cells, line: number): ParsedRow {
   };
 }
 
+/** The same code twice in the file, UPC-A and EAN-13 being one code (ADR-150). */
 function markDuplicateSkus(rows: ParsedRow[], skus: readonly string[]): ParsedRow[] {
   const lines = new Map<string, number[]>();
-  skus.forEach(
-    (s, i) =>
-      s && lines.set(s.toUpperCase(), [...(lines.get(s.toUpperCase()) ?? []), rows[i]?.line ?? 0]),
-  );
+  skus.forEach((s, i) => {
+    const clave = codigoCanonico(s);
+    if (clave !== null) lines.set(clave, [...(lines.get(clave) ?? []), rows[i]?.line ?? 0]);
+  });
   return rows.map((r, i) => {
-    const same = lines.get((skus[i] ?? '').toUpperCase()) ?? [];
+    const same = lines.get(codigoCanonico(skus[i]) ?? '') ?? [];
     if (same.length < 2) return r;
     const error = `SKU repetido en el archivo (filas ${same.join(', ')})`;
     return { line: r.line, values: null, errors: [...r.errors, error] };
