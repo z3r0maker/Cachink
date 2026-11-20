@@ -690,9 +690,19 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** M-10, la única fase que falta del track del Mostrador (el dueño corrige `[alta]` `[bloq]`
+- [x] Status · **Blocked by:** M-10, la última fase del track del Mostrador (el dueño corrige `[alta]` `[bloq]`
       una venta, en `19-movil-mostrador.md`) · **Blocks:** N-25
-      **Remaining (2026-11-20, verificado contra el repo):** su contenido ya salió y su especificación ya no es especificación. Las once pantallas que lista existen en `packages/ui/src/screens/`: Activation, Login (el NIP), Ventas, Checkout (el ticket), AbrirTurno/Turno/TurnoDeOtro, Gastos, Productos con su quick-add, el cierre en `/turno/cierre`, la píldora de sync en AppShell, el comprobante en `Checkout/comprobante-acciones.ts` y Settings; las entregaron M-05…M-09 y las fases que siguieron. Su «How» nombra `design-reference/operador/` como «the spec at its 375 px width», y el ADR-117 retiró justo eso: «el proyecto de Claude Design y `design-reference/` dejan de ser la especificación». De sus barreras sólo M-10 sigue viva (M-11 y M-12 cerradas, A-16 archivada), y M-10 no es trabajo de pantalla: choca con el §2 del ADR-058 y pide una enmienda que nadie ha escrito. Sus «Blocks» tampoco se sostienen: N-20 está cerrada, y la nota de N-22 dijo el 2026-09-28 que esta tarea deja de bloquearla. Peor: lo único genuino que queda dentro de su propia lista de pantallas, «sync pill + banners», **es** N-22, a la que dice bloquear. Lo que cabe decidir es si esto se cierra apuntando a M-10 y a N-22, que es donde vive el trabajo que falta.
+      Done: 2026-11-20 · cerrada por decisión del dueño, sin commit propio: la entregaron M-05…M-09 ·
+      las once pantallas que esta tarea pedía existen en `packages/ui/src/screens/` — Activation,
+      Login (el NIP), Ventas, Checkout (el ticket), AbrirTurno/Turno/TurnoDeOtro, Gastos, Productos
+      con su quick-add, el cierre en `/turno/cierre`, la píldora de sync en AppShell, el comprobante
+      en `Checkout/comprobante-acciones.ts` y Settings — y el ADR-117 retiró
+      `design-reference/operador/` como especificación, que era a la vez su «How» y su Acceptance
+      («each phone screen matches its Track O counterpart at 375 px»), así que la medida que esta
+      tarea pedía ya no existe. Lo que seguía abierto dentro de su propia lista no era trabajo de
+      esta tarea: los banners de sync son N-22, a la que esta misma tarea decía bloquear, y corregir
+      una venta desde el portal es M-10, que choca con el §2 del ADR-058 y pide una enmienda al ADR
+      antes que una pantalla. Sacada el mismo día de las barreras de N-25 y N-44.
 - **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
   caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
   device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
@@ -707,8 +717,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-25 Vinculación de dispositivos por QR `[LAUNCH]` [alta]
 
-- [ ] Status · **Blocked by:** N-24
-      **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. **Verificado el 2026-11-19 contra el repo**, los cuatro huecos siguen abiertos tal cual, y los cinco cimientos siguen en pie: `activation-form.ts`, `qr-visor.native.tsx` y `vincular-escanear.tsx` están en `packages/ui/src/screens/Activation/`, y el fragmento `#c=` lo escriben `lib/pairing-token.ts` y `server/actions/pairing-qr.ts` del portal, con prueba unitaria y `e2e/devices.spec.ts` leyéndolo. Dos detalles que ahorran una búsqueda cuando esto arranque. Uno: `apps/mobile/app.json` tiene exactamente una línea de esquema y **ninguna** de `intentFilters` ni `associatedDomains`, que son las dos que Expo necesita para que el enlace https abra la app. Dos: `assetlinks.json` y el AASA no están en ningún disco, y su casa es `apps/landing/public/.well-known/`, que ya existe con `security.txt` dentro — o sea que se sirven por copia estática del build de Vite, no por una ruta, y el dominio que firman es `app.xangarro.mx`, que hoy no es el landing. Eso último es una decisión de DNS antes que de código.
+- [ ] Status · **Blocked by:** —
+      **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. N-24 se cerró el 2026-11-20 (su contenido lo entregó el track del Mostrador), así que nada la bloquea. **Verificado el 2026-11-19 contra el repo**, los cuatro huecos siguen abiertos tal cual, y los cinco cimientos siguen en pie: `activation-form.ts`, `qr-visor.native.tsx` y `vincular-escanear.tsx` están en `packages/ui/src/screens/Activation/`, y el fragmento `#c=` lo escriben `lib/pairing-token.ts` y `server/actions/pairing-qr.ts` del portal, con prueba unitaria y `e2e/devices.spec.ts` leyéndolo. Dos detalles que ahorran una búsqueda cuando esto arranque. Uno: `apps/mobile/app.json` tiene exactamente una línea de esquema y **ninguna** de `intentFilters` ni `associatedDomains`, que son las dos que Expo necesita para que el enlace https abra la app. Dos: `assetlinks.json` y el AASA no están en ningún disco, y su casa es `apps/landing/public/.well-known/`, que ya existe con `security.txt` dentro — o sea que se sirven por copia estática del build de Vite, no por una ruta, y el dominio que firman es `app.xangarro.mx`, que hoy no es el landing. Eso último es una decisión de DNS antes que de código.
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
   `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
@@ -1134,8 +1144,8 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### N-44 Cobrar en terminal (app y caja web) [baja]
 
-- [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
-  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la de la cola más larga del track: cinco barreras, de las cuales N-45 (pentest externo) y N-53 (Clip) dependen de terceros y de dinero, no de código.
+- [ ] Status · **Blocked by:** N-42, N-79, N-45, N-53
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la de la cola más larga del track: cuatro barreras (eran cinco hasta que N-24 se cerró el 2026-11-20), de las cuales N-45 (pentest externo) y N-53 (Clip) dependen de terceros y de dinero, no de código.
 - **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
   Cancelar). Approved → the device writes the venta (método Tarjeta, `payment_ref`) and syncs as
   usual. Declined → Reintentar / Cambiar método. Offline → «Sin conexión: cobra en tu terminal y
