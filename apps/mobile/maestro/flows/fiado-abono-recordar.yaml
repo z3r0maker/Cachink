@@ -107,11 +107,17 @@ tags:
 - inputText: 'Nos vemos!'
 # On a fresh simulator iOS lays its one-time keyboard tip over the sheet.
 - tapOn: { text: 'Continue', optional: true }
-- assertVisible: { id: 'recordar-original' }
+# Lower the keyboard first. With it up the sheet's body shows only the first
+# lines of the message; the link below is clipped, but iOS still reports its
+# frame, which falls on the footer, so a tap «on» it opens «Mensajes». A tap on
+# the line above the bubble (plain text, on screen) lowers the keyboard.
+- tapOn: 'Así le llega. Puedes cambiarlo.'
+- waitForAnimationToEnd
 - tapOn: { id: 'recordar-original' }
-# With the keyboard up the sheet rises to full height and its close can sit
-# under the status bar. A tap on the sheet's hint lowers the keyboard.
-- tapOn: '.*Se abre la app con el mensaje listo.*'
+# The original is back: the link only shows while the message is edited.
+- extendedWaitUntil:
+    notVisible: { id: 'recordar-original' }
+    timeout: 5000
 - tapOn: { id: 'recordar-sheet-close' }
 - extendedWaitUntil: { visible: { id: 'mobile-cliente' }, timeout: 5000 }
 
