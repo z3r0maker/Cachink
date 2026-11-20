@@ -20,6 +20,7 @@ const QUESO: ProductoCobrar = {
   tint: '#fff',
   codigo: null,
   quedan: null,
+  pendiente: false,
 } as never;
 
 const AGUA: ProductoCobrar = {
@@ -31,6 +32,7 @@ const AGUA: ProductoCobrar = {
   tint: '#fff',
   codigo: null,
   quedan: null,
+  pendiente: false,
 } as never;
 
 function montar(over: Record<string, unknown> = {}) {

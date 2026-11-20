@@ -6,7 +6,7 @@
 export interface EscanerCamaraProps {
   /** The torch; only a phone has one. */
   readonly luz: boolean;
-  /** False while the unknown-code card waits; a held code is read once either way (`leerCodigo`). */
+  /** False while the unknown or shared code card waits; a held code is read once either way (`leerCodigo`). */
   readonly activo: boolean;
   readonly onCodigo: (codigo: string) => void;
 }

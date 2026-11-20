@@ -15,6 +15,7 @@ export * from './app-config.js';
 export * from './sale.js';
 export * from './expense.js';
 export * from './product.js';
+export * from './codigo-barras.js';
 export * from './product-icon-defaults.js';
 export * from './product-icon-categories.js';
 export * from './product-image.js';
