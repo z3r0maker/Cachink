@@ -95,17 +95,49 @@ async function borrarCodigos(tx: postgres.TransactionSql): Promise<void> {
   await tx`DELETE FROM corp.account_code_lists WHERE id IN (${listas})`;
 }
 
+/**
+ * E-20: every Tablero row the suite's founders, the other founder the tests
+ * add, or a founder an earlier run left behind wrote. The suite owns
+ * corp.founders here (`clearFounders`), so a row of no current founder is a
+ * past run's. Before the documents, which the notices and events name.
+ */
+async function borrarTablero(tx: postgres.TransactionSql): Promise<void> {
+  const otros = tx`SELECT f.id FROM corp.founders f
+                     JOIN staff_members s ON s.id = f.staff_member_id
+                    WHERE lower(s.email) <> ${SOCIO.email} AND f.id NOT LIKE 'f-e2e-%'`;
+  const tarjetas = tx`SELECT id FROM corp.board_cards
+                       WHERE created_by NOT IN (${otros}) OR title LIKE 'E2E %'`;
+  await tx`DELETE FROM corp.board_notices WHERE founder_id NOT IN (${otros})`;
+  await tx`DELETE FROM corp.board_card_events
+            WHERE card_id IN (${tarjetas}) OR founder_id NOT IN (${otros})`;
+  await tx`DELETE FROM corp.board_cards WHERE id IN (${tarjetas})`;
+  const objetivos = tx`SELECT id FROM corp.board_objectives WHERE created_by NOT IN (${otros})`;
+  await tx`DELETE FROM corp.board_objective_progress WHERE objective_id IN (${objetivos})`;
+  await tx`DELETE FROM corp.board_objectives WHERE id IN (${objetivos})`;
+  await tx`DELETE FROM corp.board_plan_events WHERE founder_id NOT IN (${otros})`;
+  await tx`DELETE FROM corp.board_clauses WHERE founder_id NOT IN (${otros})`;
+}
+
+/** The suite's documents, once nothing names them: the Tablero's rows, then the registries'. */
+async function borrarDocumentos(
+  tx: postgres.TransactionSql,
+  suite: postgres.PendingQuery<postgres.Row[]>,
+): Promise<void> {
+  await borrarTablero(tx);
+  await tx`UPDATE corp.registries SET document_id = NULL
+            WHERE document_id IN (SELECT id FROM corp.documents WHERE uploaded_by IN (${suite}))`;
+  await tx`DELETE FROM corp.blobs WHERE key IN (SELECT blob_key FROM corp.documents
+             WHERE uploaded_by IN (${suite}) AND storage = 'pg')`;
+  await tx`DELETE FROM corp.documents WHERE uploaded_by IN (${suite})`;
+}
+
 export async function clearLedgerFixture(): Promise<void> {
   await withSuper(async (sql) => {
     await sql.begin(async (tx) => {
       const suite = tx`SELECT f.id FROM corp.founders f
                          JOIN staff_members s ON s.id = f.staff_member_id
                         WHERE lower(s.email) = ${SOCIO.email}`;
-      await tx`UPDATE corp.registries SET document_id = NULL
-                WHERE document_id IN (SELECT id FROM corp.documents WHERE uploaded_by IN (${suite}))`;
-      await tx`DELETE FROM corp.blobs WHERE key IN (SELECT blob_key FROM corp.documents
-                 WHERE uploaded_by IN (${suite}) AND storage = 'pg')`;
-      await tx`DELETE FROM corp.documents WHERE uploaded_by IN (${suite})`;
+      await borrarDocumentos(tx, suite);
       await tx`DELETE FROM corp.received_invoices WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.share_events WHERE created_by IN (${suite})`;
       await tx`DELETE FROM corp.certificates WHERE created_by IN (${suite})`;

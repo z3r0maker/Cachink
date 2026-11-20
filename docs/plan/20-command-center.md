@@ -46,7 +46,7 @@
 | OD-1 | Default basis of the P&L view                    | **Answered 2026-10-30: devengado** (invoiced in the month) with a «Flujo» toggle; taxes always use flujo (RESICO is cash basis) | E-12      |
 | OD-2 | How shared costs split between projects          | By revenue share, with a manual override per cost. Irrelevant until project 2                                                   | E-41      |
 | OD-3 | May MEXIA's financial data go to Claude/Foundry? | Yes for MEXIA's own books; **never** tenant PII. Revenue leaves only aggregated by project and period                           | E-30      |
-| OD-4 | Tablero wording the owner still finds ambiguous  | Settle the deliverable definition on the canvas (E-20's design) before coding it                                                | E-20      |
+| OD-4 | Tablero wording the owner still finds ambiguous  | **Answered 2026-11-19:** a deliverable is a work product; values average, over 2× a quote; silence accepts in 10 days (ADR-156) | E-20      |
 | OD-5 | Which Claude Design project holds these screens  | A new **«Consola»** project (none exists; `design-reference/` holds portal, operador, comprobantes)                             | E-01      |
 
 ## 2. Map of the area
@@ -385,8 +385,8 @@ with property tests:
       «Dinero de socios» on Registrar. Playwright: `e2e/empresa.spec.ts` asks for funding, pays a
       half, records additional money in the last quarter, sees a repayment refused, and closes the
       quarter into $20,000 of pool value and a $10,000 loan.
-      **Until E-20 ships,** the close asks for the deliverables' value the Tablero agreed; E-20 feeds
-      it instead. The corp integration suites now delete what they wrote (`tests/cleanup.ts`, one
+      **Since E-20 (2026-11-19),** a quarter the Tablero covers closes with each partner's accepted
+      value once its reviews are over; a quarter from before the Tablero keeps the typed value. The corp integration suites now delete what they wrote (`tests/cleanup.ts`, one
       author id per file), so a shared local database stays clean for the e2e.
 - **What:**
   - the capital, equal funding call, additional contribution (AFAC), partner loan and repayment
@@ -856,8 +856,9 @@ with property tests:
 
 ### E-20 Tablero `[alta]`
 
-- [ ] Status · **Blocked by:** E-01, OD-4, E-26 (card attachments)
-  - **Remaining (2026-11-19, verificado contra el repo):** todo (no hay ruta `/empresa/tablero`), y de sus tres barreras **sólo dos siguen vivas**: E-01 ya está cerrada. Quedan OD-4 y E-26, y las dos son del dueño, no de código: OD-4 es la única pregunta de las cinco de §1 que sigue sin respuesta («settle the deliverable definition on the canvas», que cambia el board CD-13), y E-26 pide una cuenta de Azure. Dicho de frente: ésta es la única tarea `[alta]` abierta del track, y lo que la detiene es una definición y una cuenta. Nota de higiene: el encabezado de `21-command-center-design.md` todavía dice «Before sending: answer OD-1 … and OD-4», y OD-1 se respondió el 2026-10-30. Sólo falta OD-4.
+- [x] Status · **Blocked by:** E-01, OD-4, E-26 (card attachments) · **Done:** 2026-11-19 (OD-4 answered; boards
+      CD-13b, CD-13c and CD-13d, round 20 approved; ADR-156). E-26's code was done; the evidence stays in `corp.blobs`
+      until its Azure account exists, as the Expediente's does.
 - **What:** §5's Tablero, quarter by quarter: both partners' value proposals, average and 2×
   flag, verifiable criterion, the 10-day objection clock, minimum-commitment check, incumplimiento
   detection with the notice to send, the «terminado» evidence attached (E-05), and the fast
@@ -865,11 +866,44 @@ with property tests:
 - **Acceptance:** a value is frozen once work starts; when both partners fall short in the same
   quarter, no consequence is raised; a quarter with no agreed board copies the previous quarter's
   total commitment.
+- **OD-4's answers (2026-11-19):** a deliverable with value is a work product a third party can verify, and a
+  result («60 negocios pagando») is an objective, measured and never valued; each partner proposes a value and the
+  average is used, and over 2× the card waits for a third party's quote, whose amount is the value; «terminado» asks
+  for evidence and gives the other partner ten calendar days, silence accepts, an objection names the unmet part of
+  the criterion and the owner marks it again (ten new days) or either takes it to the mediator, whose ruling is
+  recorded; a partner cumple with 50 % of the commitment accepted, and work finished in the quarter counts once
+  accepted, so the close waits for those reviews; one partner sends the plan and the other approves it, which
+  freezes its values, and without an approved plan by day 10 the commitment is the previous quarter's; unaccepted
+  cards roll over with their value; the notice is a PDF the partner who cumplió sends, quoting the agreement's
+  clause word for word, filed in the Expediente when marked sent, and none goes when both fall short; objectives
+  are updated by hand and deliverables linked to them. Defaults: tasks carry no value, obligations are mirrored
+  from the Agenda and marked there, and the Tablero's agent suggestions wait for E-32.
+- **Progress (2026-11-19):**
+  - `@xangarro/domain/corp` `tablero/`: the value (`valorDeTarjeta`: average half up, a quote over 2×), the card's
+    state folded from its events (`estadoDeTarjeta`, the window and the silence), what a partner may do
+    (`eventoDeMovimiento`), the plan (`estadoDelPlan`, `limiteDelPlan`, sending, answering, values that freeze,
+    leaving a plan), the quarter (`resumenDelTrimestre`: commitment, accepted, in review, the close, the rollover,
+    the mismatch warning, who gets a notice), objectives, and the notice (`avisoDelCierre`, `textoDelAviso`).
+  - application `corp/tablero/`: the card writes, each re-decided on the card under its lock and filing a document
+    only once valid; the plan and objectives; the clause and the notice; `aceptadoDelTrimestre` for the money
+    close; `buildAvisoPdf` on its own entry, `@xangarro/application/corp-pdf`.
+  - `@xangarro/data-corp`: corp `0016` (`board_plan_events`, `board_cards`, `board_card_events`,
+    `board_objectives`, `board_objective_progress`, `board_clauses`, `board_notices`) and `0016_zz` (grants; the
+    plan's order under a lock per quarter; owner and reviewer per event; values frozen once work starts or a quote
+    sets them, under the card's lock). Integration tests on a throwaway database, and old → new.
+  - Console: `/empresa/tablero`, Socios' second tab (CD-13b): banners, each partner's tile with the 50 % line, the
+    objectives, the rollover, the plan's table while it is built, the kanban with its filters and the Agenda's
+    obligations; the card's drawer (CD-13c); the plan's approval, an objective's progress and the notice (CD-13d),
+    whose PDF is `/empresa/tablero/aviso`. A plan sent and a card finished email the other partner. Socios ›
+    Cuentas takes the shared header and closes a covered quarter's money with the Tablero's value.
+  - Playwright: `e2e/empresa.spec.ts` plans the next quarter (a card valued by both, sent and approved), takes a
+    card of this quarter through start, finish, objection and the mediator, types an objective and its progress,
+    and on a seeded closed quarter types the clause, reads the draft, downloads its PDF and marks it sent.
 
 ### E-21 Acciones y cortes `[media]`
 
 - [ ] Status · **Blocked by:** E-20, E-03, E-06
-  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/acciones`. Detrás de E-20, que a su vez espera OD-4 y E-26.
+  - **Remaining (2026-11-19):** todo; no hay ruta `/empresa/acciones`. E-20, E-03 y E-06 ya están: nada la bloquea. Lee el valor aceptado de cada socio con `aceptadoDelTrimestre` (ADR-156).
 - **What:** the agreement module (vesting, forfeits, pool cuts with rounding and the zero-value
   rule, early freeze); `/empresa/acciones` with the live next-cut simulator; cut execution that
   creates the share transfer, its SE registration task and the beneficial-owner obligation.
@@ -1140,7 +1174,7 @@ Changes to existing tasks:
 ### E-17 Resumen del trimestre `[baja]`
 
 - [ ] Status · **Blocked by:** E-12, E-20, E-04
-  - **Remaining (2026-11-19, verificado contra el repo):** todo; no hay ruta `/empresa/trimestre`. Tres barreras vivas (E-12, E-20, E-04).
+  - **Remaining (2026-11-19):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; queda E-12, que está a medias (su memo del costo de sudor).
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the
