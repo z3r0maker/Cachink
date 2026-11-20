@@ -84,12 +84,17 @@ export function parseMesCierre(raw: string | undefined, hoy: string): string {
   return sumarDias(`${hoy.slice(0, 7)}-01`, -1).slice(0, 7);
 }
 
-export type PanelCierre = 'banco' | 'reabrir' | 'aprobar';
+export type PanelCierre = 'banco' | 'reabrir' | 'aprobar' | 'contador';
+
+/** Cierre › Códigos agrupadores (E-43, board CD-10e). */
+export const HREF_CODIGOS = '/empresa/cierre/codigos';
 
 export function hrefCierre(mes: string, panel?: PanelCierre): string {
   return `/empresa/cierre?mes=${mes}${panel === undefined ? '' : `&panel=${panel}`}`;
 }
 
 export function parsePanel(raw: string | undefined): PanelCierre | null {
-  return raw === 'banco' || raw === 'reabrir' || raw === 'aprobar' ? raw : null;
+  return raw === 'banco' || raw === 'reabrir' || raw === 'aprobar' || raw === 'contador'
+    ? raw
+    : null;
 }

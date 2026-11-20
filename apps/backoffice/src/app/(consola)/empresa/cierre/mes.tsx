@@ -91,6 +91,11 @@ function Pie({ mes, enc }: { readonly mes: string; readonly enc: EncabezadoCierr
       ) : (
         <CerrarForm mes={mes} puede={enc.puedeCerrar} />
       )}
+      {enc.paqueteHref === null ? null : (
+        <Link className={m.boton.secundario} href={enc.paqueteHref as Route}>
+          Paquete para el contador
+        </Link>
+      )}
       <span className={k.nota}>{enc.cierreTexto}</span>
     </div>
   );
