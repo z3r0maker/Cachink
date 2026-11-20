@@ -2,14 +2,21 @@ import { expect, type Page } from '@playwright/test';
 
 import { E2E_CONCEPTO } from './founder-fixture';
 
-/** E-02's capture steps for empresa.spec.ts: a USD expense, refused once, then recorded. */
+/**
+ * E-02's capture steps for empresa.spec.ts: a USD expense, refused once, then
+ * recorded at what the bank charged (E-42), after a mistyped charge is flagged.
+ */
 export async function registrarGastoEnDolares(page: Page) {
   await page.getByRole('link', { name: '+ Registrar' }).click();
   await page.getByRole('textbox', { name: 'Concepto', exact: true }).fill(E2E_CONCEPTO);
   await page.getByRole('textbox', { name: 'Proveedor', exact: true }).fill('Vercel Inc.');
   await page.getByText('Dólares (USD)').click();
-  await page.getByRole('textbox', { name: 'Monto pagado (USD)', exact: true }).fill('veinte');
-  await page.getByRole('textbox', { name: 'Tipo de cambio del día', exact: true }).fill('18.42');
+  await page
+    .getByRole('textbox', { name: 'Monto de la factura (USD)', exact: true })
+    .fill('veinte');
+  await page
+    .getByRole('textbox', { name: 'Lo que cobró el banco (MXN)', exact: true })
+    .fill('3721');
   await page.getByText('Costo del servicio').click();
   await page.getByRole('button', { name: 'Registrar gasto' }).click();
   await expect(page.getByText('Escribe el monto con números, por ejemplo 368.40.')).toBeVisible();
@@ -18,8 +25,15 @@ export async function registrarGastoEnDolares(page: Page) {
     E2E_CONCEPTO,
   );
 
-  await page.getByRole('textbox', { name: 'Monto pagado (USD)', exact: true }).fill('20');
-  await expect(page.getByText('Equivale a $368.40 MXN.')).toBeVisible();
+  await page.getByRole('textbox', { name: 'Monto de la factura (USD)', exact: true }).fill('20');
+  const tc = page.getByTestId('tc-del-banco');
+  await expect(tc).toContainText('¿Seguro? Eso es cobrar a');
+  await expect(tc).toContainText('186.0500 pesos por dólar');
+  await page
+    .getByRole('textbox', { name: 'Lo que cobró el banco (MXN)', exact: true })
+    .fill('372.10');
+  await expect(tc).toContainText('El banco te cobró a');
+  await expect(tc).toContainText('18.6050 pesos por dólar');
   await page.getByRole('button', { name: 'Registrar gasto' }).click();
 }
 

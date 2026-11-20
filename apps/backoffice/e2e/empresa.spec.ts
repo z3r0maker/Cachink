@@ -173,15 +173,15 @@ test('a founder records a USD expense and reverses it', async ({ page }) => {
   await registrarGastoEnDolares(page);
   await expect(page).toHaveURL(/\/empresa\/movimientos\?mes=\d{4}-\d{2}$/);
   const row = page.getByTestId('movimiento').filter({ hasText: E2E_CONCEPTO }).first();
-  await expect(row).toContainText('−$368.40');
-  await expect(row).toContainText('USD 20.00 · TC 18.42 · Vercel Inc.');
+  await expect(row).toContainText('−$372.10');
+  await expect(row).toContainText('USD 20.00 · el banco cobró a 18.6050 · Vercel Inc.');
   await expect(row).toContainText('Registrado');
-  await expect(page.getByTestId('total-salidas')).toContainText('$368.40');
+  await expect(page.getByTestId('total-salidas')).toContainText('$372.10');
 
   await row.getByRole('link', { name: E2E_CONCEPTO }).click();
   const linea = (cuenta: string) => page.getByTestId('linea').filter({ hasText: cuenta });
-  await expect(linea('Costo del servicio')).toContainText('$368.40');
-  await expect(linea('Bancos')).toContainText('$368.40');
+  await expect(linea('Costo del servicio')).toContainText('$372.10');
+  await expect(linea('Bancos')).toContainText('$372.10');
 
   await page
     .getByRole('textbox', { name: '¿Por qué lo reviertes?', exact: true })
@@ -1346,4 +1346,37 @@ test('a founder plans the next quarter, takes a card through the mediator, and s
   } finally {
     await quitarOtroSocio();
   }
+});
+
+test('a founder registers a USD invoice at what the bank charged (E-42)', async ({ page }) => {
+  await fijarRfcMexia();
+  await signInAsStaff(page, SOCIO);
+  await abrirEntrada(page, 'Dinero');
+  await page.getByRole('link', { name: '+ Registrar' }).click();
+  await expect(page.getByRole('heading', { name: 'Registrar', level: 1 })).toBeVisible();
+
+  // A paid invoice in USD: its own rate is the supplier's; the books take the bank's charge.
+  await adjuntar(page, 'nube-usd.xml', {
+    emisor: { rfc: 'NUB100101AB3', nombre: 'Nube E2E' },
+    concepto: 'Servidores E2E en USD',
+    subtotal: '100.00',
+    iva: '0.00',
+    isr: '0.00',
+    ivaRetenido: '0.00',
+    tipoCambio: '18.1000',
+  });
+  const delXml = page.getByRole('region', { name: 'Del XML' });
+  await expect(delXml).toContainText('Al tipo de cambio de la factura$1,810.00');
+  const cargo = page.getByLabel('Lo que cobró el banco (MXN)');
+  await expect(page.getByText('La factura es de USD 100.00 y dice 18.1000')).toBeVisible();
+  await cargo.fill('1861.40');
+  await expect(page.getByTestId('tc-del-banco')).toContainText('18.6140 pesos por dólar');
+  await page.getByLabel('Fecha de pago').fill(hoyMx());
+  await page.getByText('Costo del servicio', { exact: true }).click();
+  await page.getByRole('button', { name: 'Registrar gasto' }).click();
+
+  await expect(page).toHaveURL(/\/empresa\/movimientos\?mes=\d{4}-\d{2}$/);
+  const row = page.getByTestId('movimiento').filter({ hasText: 'Servidores E2E en USD' });
+  await expect(row).toContainText('−$1,861.40');
+  await expect(row).toContainText('USD 100.00 · el banco cobró a 18.6140');
 });
