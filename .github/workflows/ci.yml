@@ -254,8 +254,9 @@ jobs:
       - name: Integration tests (corp roles, founders)
         run: pnpm --filter @xangarro/data-corp test:db
 
-  # The staff console's own browser suite (N-05's follow-up): sign-in, forced
-  # TOTP enrolment, session end, lockout and an audit row per mutation,
+  # The staff console's own browser suite (N-05's follow-up, ADR-160): passkey
+  # sign-in through Chromium's virtual authenticator, the enrolment link, «Mi
+  # acceso», session end, lockout and an audit row per mutation,
   # against a real Postgres with the admin migrations applied.
   backoffice-e2e:
     name: backoffice-e2e
@@ -279,10 +280,6 @@ jobs:
       # `postgres` URL in DATABASE_SUPER_URL.
       DATABASE_URL: postgres://xangarro_admin:xangarro_admin@localhost:55432/xangarro
       DATABASE_SUPER_URL: postgres://postgres:xangarro@localhost:55432/xangarro
-      # Sign-in seals TOTP seeds with this key; the suite's throwaway value
-      # (32 bytes base64), set at the job level so it cannot be lost between
-      # the webServer env and the server process.
-      ADMIN_TOTP_KEY: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -319,11 +316,16 @@ jobs:
       - name: Apply the corp set (ADR-125)
         run: pnpm --filter @xangarro/data-corp db:apply
 
+      # The passkey adapters and the session prune, as the console's own role
+      # (ADR-160). REQUIRE_DB=1: no database is a failure, never a skip.
+      - name: Integration (console ↔ Postgres)
+        run: pnpm --filter @xangarro/backoffice test:db
+
       # See portal-e2e-shard for why this is not `turbo run build`.
       - name: Build the console (production, webpack)
         run: pnpm --filter @xangarro/backoffice run build
 
-      - name: E2E (auth, MFA, lockout, audit)
+      - name: E2E (passkeys, enrolment link, lockout, audit)
         run: pnpm --filter @xangarro/backoffice run test:e2e
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

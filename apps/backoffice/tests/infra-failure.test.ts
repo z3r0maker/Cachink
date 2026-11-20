@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { AuthCoreError } from '@xangarro/auth-core';
 import { describe, it } from 'vitest';
 
 import { classifyInfraFailure, infraFailureMessage } from '@/server/auth/infra-failure';
@@ -16,9 +15,14 @@ const queryError = (code: string): Error =>
   });
 
 describe('classifyInfraFailure', () => {
-  it('names a missing or malformed ADMIN_TOTP_KEY', () => {
-    const error = new AuthCoreError('INVALID_KEY', 'The key must be 32 bytes, base64-encoded.');
-    assert.deepEqual(classifyInfraFailure(error), { cause: 'totp-key', detail: 'INVALID_KEY' });
+  it('names an ADMIN_BASE_URL that is not a URL', () => {
+    let error: unknown;
+    try {
+      new URL('admin.xangarro.mx');
+    } catch (e) {
+      error = e;
+    }
+    assert.deepEqual(classifyInfraFailure(error), { cause: 'base-url', detail: 'ERR_INVALID_URL' });
   });
 
   it('reads the SQLSTATE through the driver wrapper, not just the top error', () => {
@@ -68,7 +72,7 @@ describe('classifyInfraFailure', () => {
 describe('infraFailureMessage', () => {
   const causes: readonly InfraFailure[] = [
     { cause: 'migration-missing', detail: '42883' },
-    { cause: 'totp-key', detail: 'INVALID_KEY' },
+    { cause: 'base-url', detail: 'ERR_INVALID_URL' },
     { cause: 'db-credentials', detail: '28P01' },
     { cause: 'db-unreachable', detail: 'ENOTFOUND' },
     { cause: 'db-missing', detail: '3D000' },
@@ -84,14 +88,14 @@ describe('infraFailureMessage', () => {
   it('never leaks an environment variable or a hostname while diagnostics are off', () => {
     for (const failure of causes) {
       const message = infraFailureMessage(failure, off);
-      assert.ok(!message.includes('ADMIN_TOTP_KEY'));
+      assert.ok(!message.includes('ADMIN_BASE_URL'));
       assert.ok(!message.includes('DATABASE_URL'));
       assert.ok(!message.includes(DB));
     }
   });
 
   it('names the variable to fix when diagnostics are on', () => {
-    assert.match(infraFailureMessage(causes[1]!, on), /ADMIN_TOTP_KEY/);
+    assert.match(infraFailureMessage(causes[1]!, on), /ADMIN_BASE_URL/);
     assert.match(infraFailureMessage(causes[2]!, on), /DATABASE_URL/);
   });
 

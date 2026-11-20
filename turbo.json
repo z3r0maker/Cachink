@@ -39,7 +39,6 @@
       "outputs": [".next/**", "!.next/cache/**"],
       "env": [
         "DATABASE_URL",
-        "ADMIN_TOTP_KEY",
         "ADMIN_BASE_URL",
         "ADMIN_DIAGNOSTICS",
         "ADMIN_INGEST_SECRET",

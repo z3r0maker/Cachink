@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { logout } from '@/server/actions/auth';
 import { founderForLayout } from '@/server/founder';
 import { requireStaffPage } from '@/server/staff';
@@ -33,6 +35,9 @@ export default async function ConsolaLayout({ children }: { children: React.Reac
         <div className={footer}>
           <span className={muted}>Turno</span>
           <span className={who}>{staff.email}</span>
+          <Link className={buttonQuiet} href="/mi-acceso">
+            Mi acceso
+          </Link>
           <form action={logout}>
             <button className={buttonQuiet} type="submit">
               Cerrar sesión

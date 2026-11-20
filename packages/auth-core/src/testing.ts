@@ -1,3 +1,4 @@
+import type { ChallengeStore, PasskeyRepo } from './passkey.js';
 import type { SecondFactorRepo } from './second-factor.js';
 import type { FailurePolicy, ThrottleStore } from './throttle.js';
 
@@ -36,6 +37,61 @@ export function memoryThrottleStore(clock: FakeClock = { t: 0 }): ThrottleStore 
       return 0;
     },
     clear: async (key) => void rows.delete(key),
+  };
+}
+
+export {
+  ICLOUD_AAGUID,
+  softAuthenticator,
+  softPasskey,
+  type CeremonyOverrides,
+  type SoftPasskey,
+} from './testing-authenticator.js';
+
+/** A `ChallengeStore` that keeps hashes with their purpose and expiry, and gives each up once. */
+export function memoryChallengeStore(clock: FakeClock = { t: 0 }): ChallengeStore {
+  const rows = new Map<string, { purpose: string; until: number }>();
+  return {
+    save: async (hash, purpose, ttl) => void rows.set(hash, { purpose, until: clock.t + ttl }),
+    take: async (hash, purpose) => {
+      const r = rows.get(hash);
+      if (!r || r.purpose !== purpose || r.until <= clock.t) return false;
+      rows.delete(hash);
+      return true;
+    },
+  };
+}
+
+/** One stored passkey, keyed by credential id in the map. */
+export interface MemoryPasskeyRow {
+  ownerId: string;
+  publicKey: Uint8Array;
+  counter: number;
+  transports: string[];
+  revoked: boolean;
+}
+
+/** A `PasskeyRepo` over a map: removed passkeys are invisible. */
+export function memoryPasskeyRepo(rows: Map<string, MemoryPasskeyRow>): PasskeyRepo {
+  return {
+    find: async (id) => {
+      const r = rows.get(id);
+      return r && !r.revoked
+        ? {
+            id,
+            ownerId: r.ownerId,
+            publicKey: r.publicKey,
+            counter: r.counter,
+            transports: r.transports,
+          }
+        : null;
+    },
+    recordUse: async (id, counter) => {
+      const r = rows.get(id);
+      if (!r || r.revoked) return false;
+      r.counter = counter;
+      return true;
+    },
   };
 }
 

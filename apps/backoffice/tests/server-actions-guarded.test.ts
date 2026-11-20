@@ -19,15 +19,21 @@ const SRC = path.resolve(import.meta.dirname, '../src');
 /**
  * `src/server/staff.ts` and `src/server/founder.ts`, and `auditedMutation`,
  * which is gate → mutation → audit row in one call (`src/server/audited.ts`).
- * `requireStaffPage` is the MFA steps' gate: it admits an allowlisted member
- * still at AAL1, on the one step the gate assigns them.
  */
 const GUARDS = ['requireStaff', 'requireStaffPage', 'requireFounder', 'auditedMutation'];
 
 /** Callable with no session, on purpose. */
 const PUBLIC: Readonly<Record<string, string>> = {
-  'server/actions/auth.ts#login':
-    'the door. Throttled per address and per IP (`auth/sign-in.ts`), every refusal logged',
+  'server/actions/auth.ts#opcionesEntrada':
+    'the door: a fresh single-use challenge, refused while the IP is locked (`auth/sign-in-passkey.ts`)',
+  'server/actions/auth.ts#entrarConLlave':
+    'the door: a passkey answer, parsed, verified and throttled per IP; every refusal logged',
+  'server/actions/acceso.ts#estadoEnlace':
+    'a printed link: 256-bit token from the URL fragment; says only the first name of a live link',
+  'server/actions/acceso.ts#opcionesRegistro':
+    'a printed link: options only for a live link, its challenge bound to that link',
+  'server/actions/acceso.ts#registrarConEnlace':
+    'a printed link: spends it on one verified passkey for its own member (`auth/enrol-link.ts`)',
   'server/actions/auth.ts#logout': 'ends the caller’s own session; takes nothing',
 };
 

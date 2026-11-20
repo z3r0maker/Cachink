@@ -11,6 +11,7 @@ import { drizzleRejectionSource } from '@/server/db/rejections';
 import { prunePortalSecurity } from '@/server/db/security-prune';
 import { drizzleStoredUsageSource } from '@/server/db/usage';
 import { expireStaleAssistedImports, purgeResolvedAssistedImportFiles } from '@xangarro/data-pg';
+import { pruneChallenges } from '@/server/db/staff-challenges';
 import { pruneStaffSessions } from '@/server/db/staff-sessions-prune';
 import { drizzleSupportItems } from '@/server/db/support-items';
 import { usageDeps } from '@/server/usage/wiring';
@@ -26,7 +27,8 @@ export async function GET(request: Request): Promise<Response> {
     rejections: drizzleRejectionSource(db()),
     // The counters the 03:00 usage job stored, not a recount (DB2-CRON-01).
     overLimit: usageOverLimitSource({ ...usageDeps(db()), usage: drizzleStoredUsageSource(db()) }),
-    pruneSessions: () => pruneStaffSessions(db()),
+    // Sign-in residue: old sessions and passkey challenges nobody answered.
+    pruneSessions: async () => (await pruneStaffSessions(db())) + (await pruneChallenges(db())),
     pruneGeo: () => pruneGeoCounters(db()),
     pruneLatency: () => pruneApiLatency(db()),
     prunePortalSecurity: () => prunePortalSecurity(db()),

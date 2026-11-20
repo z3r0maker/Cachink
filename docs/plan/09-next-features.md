@@ -1566,6 +1566,43 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
   re-links with unsent rows loses none of them.
   - **Un patrón del tablero, encontrado el 2026-11-19 al barrer las barreras contra los estados:** seis tareas abiertas dicen «Blocked by» algo que ya está cerrado — B-16 (B-03, B-11), N-69 (N-09), N-65 (N-08), N-66 y N-67 (N-05), N-64 (N-57) — más E-02 y E-44 (E-01) y E-26 (E-05) en el Command Center. Ninguna está esperando a nadie; se leen así porque el campo se escribió una vez y nadie lo volvió a tocar cuando la barrera cayó. Una prueba lo atraparía: una tarea abierta cuyas barreras nombradas estén **todas** cerradas y existan en `docs/plan` no debería decir «Blocked by». Los ids de tracks archivados (A-16, F-01) y los de los boards del canvas (KD-01…) no cuentan, porque el recolector del tablero no los ve. Falta decidir si esa prueba se escribe.
 
+### N-85 La consola entra con llaves de acceso (passkeys); se retiran su contraseña y su TOTP [media]
+
+- [~] Status · **Surfaced by:** the owner, 2026-11-20 («to not have to remember another email and password») · **Trigger:** ya
+  Progress: 2026-11-20 · branch `feat/n85-passkeys` · **release 1 built**: `@xangarro/auth-core`'s `passkey.ts` (with a software authenticator for tests), migration `0023`, the use cases in `server/auth/` (`sign-in-passkey`, `enrol-link`, `manage-passkeys`), `/login`, `/acceso/registrar` and `/mi-acceso`, `staff create` / `staff passkey-link [--reset]`, `/mfa/*` removed. Tests: unit (use cases, parser, labels), `staff-passkeys.integration.test.ts` as the console role (new CI step), and the Playwright suite on Chromium's virtual authenticator (44 pass locally). Two findings on the way: Postgres caps a regex repetition at 255, so the credential-id CHECK uses `length()`; the virtual authenticator signs with ML-DSA, whose kilobyte signatures the answer parser now allows. **Remaining:** deploy, then both members run `staff passkey-link`; release 2 (migration `0024` drops `password_hash`, `totp_*`, `recovery_codes`; `ADMIN_TOTP_KEY` deleted from Vercel) once both have a passkey. The four states drawn while building (CD-20b «No sirve», «No se guardó»; CD-20c's avisos) wait for the owner's look.
+- **What:** the console (`apps/backoffice`) signs in with a passkey only (ADR-160): one tap, no email, no
+  password, no code. The two current members and every new one get their first passkey from a one-time link
+  the owner-role CLI prints; «Mi acceso» lets a signed-in member add a second passkey or remove a lost one.
+  The password and TOTP path stops being read in release 1 and its columns are dropped in release 2.
+- **Decided with the owner, 2026-11-20:** (1) passkeys over Google/Microsoft sign-in; (2) password and TOTP
+  are retired, not kept as a fallback; (3) the first passkey comes from a link the CLI **prints**, never one it
+  emails; (4) a «Mi acceso» page in the console manages them.
+- **Decided by convention (ADR-160 §1):** discoverable credentials, so `/login` has no email field; user
+  verification required, so one tap is AAL2; sessions keep 12 h and 30 min idle; adding or removing a passkey
+  asks for a fresh tap; the last passkey cannot be removed.
+- **Design first** (CLAUDE.md §6, ADR-117), on the console's canvas
+  (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq). **Round 22 drawn and approved by the owner on 2026-11-20:** `CD-20` `/login` (ready, waiting for the key, no key used, key not recognised, too many attempts),
+  `CD-20b` the link page (register, waiting, not created, done, expired, already used) and `CD-20c` «Mi acceso»
+  (two keys, one key, confirm it is you, waiting for the new key, remove a key). Two notes beside the row
+  record the four decisions and eight defaults to review (no email field, one tap is both factors, the link
+  survives a cancel, the key is named after its provider, the 5-minute re-ask, the last key stays, «Mi acceso»
+  opens from your name in the menu, removing a key ends its sessions).
+- **How:** `@xangarro/auth-core` gains `passkey.ts` over `@simplewebauthn/server` 14.x with a storage port, the
+  way `second-factor.ts` is shared; the console's `server/auth/` gains the use cases (`sign-in-passkey`,
+  `enrol-link`, `manage-passkeys`) and drops `sign-in.ts`, `second-factor.ts` and `enrolment.ts`; admin
+  migration `0023` adds `staff_passkeys`, `staff_enrolment_links` and their SECURITY DEFINER functions;
+  `scripts/staff.ts` gains `passkey-link [--reset]` and `create` stops reading a password; the gate's AAL1
+  state and `/mfa/*` go. Release 2: migration `0024` drops `password_hash`, `totp_*` and `recovery_codes`, and
+  `ADMIN_TOTP_KEY` leaves `docs/ops/provisioning.md`.
+- **Tests:** auth-core and the use cases test-first (happy path + 3 unhappy each: wrong origin, replayed or
+  expired challenge, counter going backwards, unknown or revoked credential, used or expired link, removing the
+  last key); the migration test covers a staff row with a password and TOTP turning into one with a passkey;
+  Playwright with Chromium's virtual authenticator rewrites `auth.spec.ts` (link → register → sign in → «Mi
+  acceso» add and remove → revoked member loses the console → sign-out).
+- **Acceptance:** with release 1 deployed, a staff member with a passkey reaches the console in one tap, and
+  `/login` offers no password field; a used or expired link registers nothing; a member whose passkeys were
+  reset with `--reset` cannot sign in until a new link is used.
+
 ---
 
 ## 4. Open questions (not decided in the interview)

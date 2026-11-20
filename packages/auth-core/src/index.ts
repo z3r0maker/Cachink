@@ -9,3 +9,4 @@ export * from './totp.js';
 export * from './recovery-codes.js';
 export * from './secret-box.js';
 export * from './second-factor.js';
+export * from './passkey.js';

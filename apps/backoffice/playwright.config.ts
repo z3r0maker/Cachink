@@ -6,11 +6,10 @@ import { defineConfig, devices } from '@playwright/test';
  * data and sessions, and a suite that skips them would read as green while
  * proving nothing.
  *
- * Local: `pnpm test:e2e` (wraps db-local's URLs). The staff fixture is
- * created by `e2e/staff-fixture.ts` (superuser INSERT, the CLI's own shape)
- * in the auth suite's `beforeAll`, and TOTP enrolment happens through the
- * page — the suite reads the seed the enrolment screen shows for humans
- * without a camera.
+ * Local: `pnpm test:e2e` (wraps db-local's URLs). Each suite's fixture
+ * creates its staff member (superuser INSERT, the CLI's own shape) with a
+ * seeded passkey that Chromium's virtual authenticator holds (`e2e/passkeys.ts`);
+ * the auth suite also registers one through a printed link's page.
  */
 
 const E2E_PORT = Number(process.env.E2E_PORT ?? 3200);
@@ -31,8 +30,7 @@ function databaseUrl(): string {
 
 export default defineConfig({
   testDir: './e2e',
-  // TOTP's replay guard means a second verify inside one 30-second step
-  // waits out the window; the auth suite needs the headroom.
+  // The lockout test taps twenty times; the headroom is for that.
   timeout: 120_000,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
@@ -58,9 +56,8 @@ export default defineConfig({
       // in this directory cannot swap it out mid-run. CI builds `.next` in
       // its own step and is alone on the runner — next start must find it.
       ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
-      // Sign-in seals TOTP seeds with this key; a fixed test value is fine
-      // because the whole run is local/CI throwaway data.
-      ADMIN_TOTP_KEY: process.env.ADMIN_TOTP_KEY ?? 'MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=',
+      // The passkeys' relying party (ADR-160): rp id `localhost`, this exact origin.
+      ADMIN_BASE_URL: BASE_URL,
       ADMIN_INGEST_SECRET: process.env.ADMIN_INGEST_SECRET ?? 'e2e-ingest-secret',
       CRON_SECRET: process.env.CRON_SECRET ?? 'e2e-cron-secret',
       // E-26: «Empresa»'s blob store. Unset (the default run), files stay in

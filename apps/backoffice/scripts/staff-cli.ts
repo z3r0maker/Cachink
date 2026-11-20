@@ -1,22 +1,24 @@
 /**
- * The pure half of `scripts/staff.ts`: argument parsing and the password rule.
+ * The pure half of `scripts/staff.ts`: argument parsing and the link's URL.
  * Kept apart so it is tested without a database (like service-role-guard.ts).
  */
-import { MAX_PASSWORD_BYTES } from '@xangarro/auth-core';
-
-export const MIN_PASSWORD_LENGTH = 12;
+import { DEFAULT_CONSOLE_URL } from '../src/server/alerts/webhook-notifier';
+import { ENROL_PATH } from '../src/server/gate';
 
 export type StaffCommand =
   | { readonly command: 'create'; readonly email: string; readonly nombre: string }
-  | { readonly command: 'set-password'; readonly email: string; readonly resetTotp: boolean };
+  | { readonly command: 'passkey-link'; readonly email: string; readonly reset: boolean };
 
 export class UsageError extends Error {
   readonly code = 'USAGE';
 }
 
-export const USAGE = `usage (the password is read from stdin, never from arguments):
-  printf %s "$PASSWORD" | pnpm --filter @xangarro/backoffice staff create --email <email> --nombre <nombre>
-  printf %s "$PASSWORD" | pnpm --filter @xangarro/backoffice staff set-password --email <email> [--reset-totp]`;
+export const USAGE = `usage (DATABASE_URL is the owner role; each prints a one-time link, valid 15 minutes):
+  pnpm --filter @xangarro/backoffice staff create --email <email> --nombre <nombre>
+  pnpm --filter @xangarro/backoffice staff passkey-link --email <email> [--reset]
+
+  --reset also removes every passkey of that member and ends their sessions:
+  the path when all of their devices are lost.`;
 
 export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,20 +48,15 @@ export function parseStaffArgs(argv: readonly string[]): StaffCommand {
   const email = text(f, 'email').toLowerCase();
   if (!EMAIL.test(email)) throw new UsageError(`not an email address: ${email}`);
   if (command === 'create') return { command, email, nombre: text(f, 'nombre') };
-  if (command === 'set-password') {
-    return { command, email, resetTotp: f.get('reset-totp') === true };
-  }
+  if (command === 'passkey-link') return { command, email, reset: f.get('reset') === true };
   throw new UsageError(`unknown command: ${command ?? '(none)'}`);
 }
 
-/** The password as piped in: one trailing newline (from `echo`) is not part of it. */
-export function readPassword(raw: string): string {
-  const password = raw.replace(/\r?\n$/, '');
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    throw new UsageError(`the password must be at least ${MIN_PASSWORD_LENGTH} characters`);
-  }
-  if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_BYTES) {
-    throw new UsageError(`the password must be at most ${MAX_PASSWORD_BYTES} bytes`);
-  }
-  return password;
+/**
+ * Where the printed link goes: the console's link page, the token in the
+ * fragment, which the browser never sends, so no server log ever holds it.
+ */
+export function enrolmentUrl(token: string, baseUrl: string | undefined): string {
+  const base = new URL(baseUrl === undefined || baseUrl === '' ? DEFAULT_CONSOLE_URL : baseUrl);
+  return `${base.origin}${ENROL_PATH}#${token}`;
 }

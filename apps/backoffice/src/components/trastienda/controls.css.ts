@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import {
   borders,
   colors,
@@ -9,55 +9,61 @@ import {
   typography,
 } from '@xangarro/tokens';
 
-/** The fields and the main button inside the vale. */
+/** The passkey button and its notices inside the vale (ADR-160). */
 
 /* ─── Controls inside the ticket ─── */
 
-export const inputWrap = style({ position: 'relative' });
-
-export const inputIcon = style({
-  position: 'absolute',
-  left: 16,
-  top: 16,
-  width: 20,
-  height: 20,
-  color: colors.gray600,
-  pointerEvents: 'none',
-});
-
-export const input = style({
-  width: '100%',
-  height: 52,
-  padding: '0 16px 0 48px',
-  border: borders.thin,
-  borderRadius: radii[2],
-  fontFamily: 'inherit',
-  fontSize: fontSizes.lg,
+/** A line under the button: what the browser's own prompt will ask for. */
+export const hint = style({
+  margin: 0,
+  padding: '12px 14px',
+  borderRadius: radii[3],
+  background: colors.offwhite,
+  fontSize: fontSizes.sm,
   fontWeight: typography.weights.semibold,
-  color: colors.black,
-  background: colors.white,
-  selectors: {
-    '&:focus': { outline: 'none', background: colors.yellowSoft, boxShadow: shadows.card },
-    '&:focus-visible': { outline: 'none', boxShadow: shadows.card },
-  },
+  lineHeight: 1.5,
+  color: colors.ink,
 });
 
-export const inputWithToggle = style([input, { paddingRight: 56 }]);
+const noticeBase = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 4,
+  margin: 0,
+  padding: '12px 14px',
+  borderRadius: radii[3],
+  fontSize: fontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  lineHeight: 1.45,
+  color: colors.ink,
+  border: borders.thin,
+});
 
-export const reveal = style({
-  position: 'absolute',
-  right: 4,
-  top: 4,
-  width: 44,
-  height: 44,
-  border: 0,
-  borderRadius: radii[1],
-  background: 'transparent',
-  color: colors.black,
+export const notice = styleVariants({
+  aviso: [noticeBase, { background: colors.warningSoft, borderColor: colors.warningText }],
+  error: [noticeBase, { background: colors.redSoft, borderColor: colors.redText }],
+  ok: [noticeBase, { background: colors.greenSoft, borderColor: colors.greenText }],
+});
+
+export const noticeTitle = style({
+  fontSize: fontSizes.md,
+  fontWeight: typography.weights.extraBold,
+});
+
+/** A secondary way out of the vale («Ir a la entrada»). */
+export const secondary = style({
+  height: 52,
+  border: borders.thick,
+  borderRadius: radii[3],
+  background: colors.white,
+  boxShadow: shadows.small,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  cursor: 'pointer',
+  fontSize: fontSizes.md,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+  textDecoration: 'none',
 });
 
 export const cta = style({
@@ -75,6 +81,7 @@ export const cta = style({
   alignItems: 'center',
   justifyContent: 'center',
   gap: 10,
+  textDecoration: 'none',
   cursor: 'pointer',
   selectors: {
     '&:active:not(:disabled)': { transform: pressTransform.to, boxShadow: shadows.pressed },
