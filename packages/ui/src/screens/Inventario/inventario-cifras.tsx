@@ -154,19 +154,6 @@ export function Buscador(p: {
 }
 
 /** What the screen says it is (the board's h1 row, said the phone's way). */
-export function Cabeza(): ReactElement {
-  return (
-    <View gap={2}>
-      <MText size="xl4" weight="extraBold" letterSpacing={-0.9} role="heading">
-        Inventario
-      </MText>
-      <MText size="md" weight="semibold" color={colors.gray600}>
-        Lo que hay y lo que se movió en tu turno
-      </MText>
-    </View>
-  );
-}
-
 /** The list's regla: the yellow-soft note with the info circle. */
 export function Regla(p: { readonly dueno: string }): ReactElement {
   return (

@@ -22,6 +22,7 @@ import type { InventoryMovement } from '@xangarro/domain';
 import type { z } from 'zod';
 
 import type { UseCase } from '../_use-case.js';
+import { asegurarCodigoLibre, type CodigosDeProducto } from './codigo-libre.js';
 
 export interface CrearProductoInput {
   /** The domain's new-product shape; defaults (tipo, seguirStock, color…) may be omitted. */
@@ -43,6 +44,8 @@ export class CrearProductoUseCase implements UseCase<CrearProductoInput, Product
     private readonly movements?: Pick<InventoryMovementsRepository, 'create'>,
     /** Whose opening stock this is: the portal's (owner) or a phone's (C-12). */
     private readonly origen: InventoryMovement['origen'] = 'manual',
+    /** The portal's: a code another product has is refused (P-44). The phone passes none. */
+    private readonly codigos?: CodigosDeProducto,
   ) {}
 
   async execute(input: CrearProductoInput): Promise<Product> {
@@ -55,6 +58,7 @@ export class CrearProductoUseCase implements UseCase<CrearProductoInput, Product
     if (!parsed.success) {
       throw new ProductInvalidError(parsed.error.issues.map((i) => i.path.join('.')));
     }
+    await asegurarCodigoLibre(this.codigos, parsed.data.sku);
     const product = await this.products.create(parsed.data);
     if (stock > 0 && this.movements !== undefined) {
       await this.movements.create({

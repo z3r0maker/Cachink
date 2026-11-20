@@ -3,7 +3,7 @@
  * three questions (name, price, type) and a look at the tile it makes. It
  * needs a name and a price; it saves through the phone's quick-add path
  * (`buildProductoPayload`, `useCrearProducto`) without stock tracking, so it
- * sells at once.
+ * sells at once; from Inventario's escáner it keeps stock (M-20).
  */
 import { useState } from 'react';
 import { resolveProductIcon, type InventoryCategory, type ProductIcon } from '@xangarro/domain';
@@ -27,7 +27,15 @@ export const ICONOS_NUEVO: readonly (readonly [ProductIcon, string])[] = [
   ['package', 'Otro'],
 ];
 
-export function useProductoNuevo(codigo: string | null, tipos: readonly InventoryCategory[]) {
+/**
+ * `conExistencias`: given de alta from Inventario's escáner (M-20), the
+ * product keeps stock, or Inventario would never list it to note what arrived.
+ */
+export function useProductoNuevo(
+  codigo: string | null,
+  tipos: readonly InventoryCategory[],
+  conExistencias = false,
+) {
   const [nombre, setNombreRaw] = useState('');
   const [precio, setPrecio] = useState('');
   const [tipo, setTipo] = useState<InventoryCategory>(tipos[0] ?? 'Producto Terminado');
@@ -42,7 +50,7 @@ export function useProductoNuevo(codigo: string | null, tipos: readonly Inventor
       sku: codigo ?? '',
       categoria: tipo,
       precioVentaPesos: precio,
-      stock: 'sin-stock',
+      stock: conExistencias ? 'con-stock' : 'sin-stock',
     }),
     icono,
   });

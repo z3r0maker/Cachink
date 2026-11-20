@@ -13,6 +13,7 @@ import {
   VentaHechaDialog,
   useCurrentBusiness,
   useVentaHecha,
+  type EscanerTicket,
   type ProductoCobrar,
 } from '@xangarro/ui';
 import type { InventoryCategory } from '@xangarro/domain';
@@ -26,6 +27,18 @@ export interface CobrarOverlaysProps {
   readonly tipos: readonly InventoryCategory[];
   readonly folio: string | null;
   readonly dueno: string;
+}
+
+/** The escáner on the ticket: what a code adds, «Deshacer», and the bar's «Cobrar». */
+function modoTicket(r: Ruta, folio: string | null): EscanerTicket {
+  return {
+    tipo: 'ticket',
+    folio,
+    lines: r.ticket.lines,
+    onAgregar: r.agregar,
+    onQuitarUno: (p) => r.ticket.bump(p.id, -1),
+    onCobrar: () => r.setHoja('ticket'),
+  };
 }
 
 function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): ReactElement {
@@ -46,13 +59,9 @@ function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): Reac
       <EscanerSheet
         open={r.hoja === 'escaner'}
         onClose={() => r.setHoja(null)}
-        folio={folio}
+        modo={modoTicket(r, folio)}
         productos={productos}
-        lines={r.ticket.lines}
-        onAgregar={r.agregar}
-        onQuitarUno={(p) => r.ticket.bump(p.id, -1)}
         onAlta={r.abrirNuevo}
-        onCobrar={() => r.setHoja('ticket')}
         dueno={dueno}
       />
       <ProductoNuevoSheet

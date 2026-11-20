@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components';
 
 import { useProductoForm } from '../sheet/use-producto-form';
+import { useCodigo, useLectorEnPagina } from '../use-codigo';
 import * as s from './nuevo.css';
 import { errorDelPaso, PASOS, type Paso } from './pasos';
 import { PasoDos, PasoTres, PasoUno } from './preguntas';
@@ -34,23 +35,38 @@ function Camino({ paso, ir }: { readonly paso: Paso; readonly ir: (p: Paso) => v
   );
 }
 
+/**
+ * The steps, and the barcode's (P-44): a reader typing anywhere on the page
+ * puts its code in step one, and «Siguiente» there waits while another
+ * product has the code. The save refuses it again on the server.
+ */
 function useAsistente() {
   const router = useRouter();
   const f = useProductoForm(null, () => router.push('/productos'));
   const [paso, setPaso] = useState<Paso>(1);
   const [aviso, setAviso] = useState<string | null>(null);
-  const siguiente = () => {
-    const error = errorDelPaso(f.draft, paso);
-    setAviso(error);
-    if (error !== null) return;
-    if (paso === 3) f.save();
-    else setPaso((paso + 1) as Paso);
-  };
+  const codigo = useCodigo(f.draft.sku, (sku) => f.set({ sku }));
   const ir = (p: Paso) => {
     setAviso(null);
     setPaso(p);
   };
-  return { f, paso, siguiente, ir, error: aviso ?? f.error };
+  useLectorEnPagina((leido) => {
+    codigo.leer(leido);
+    ir(1);
+  });
+  const siguiente = async () => {
+    const error = errorDelPaso(f.draft, paso);
+    setAviso(error);
+    if (error !== null) return;
+    if (paso === 1) {
+      const libre = await codigo.revisar();
+      if (typeof libre === 'string') setAviso(libre);
+      if (libre !== true) return;
+    }
+    if (paso === 3) f.save();
+    else setPaso((paso + 1) as Paso);
+  };
+  return { f, paso, siguiente, ir, codigo, error: aviso ?? f.error };
 }
 
 function Migas() {
@@ -75,7 +91,11 @@ function Acciones({ a }: { readonly a: ReturnType<typeof useAsistente> }) {
         </Button>
       ) : null}
       <span className={s.empuja} />
-      <Button onClick={a.siguiente} disabled={a.f.pending} size="lg">
+      <Button
+        onClick={() => void a.siguiente()}
+        disabled={a.f.pending || a.codigo.ocupado !== null}
+        size="lg"
+      >
         {a.paso < 3 ? 'Siguiente' : a.f.pending ? 'Guardando…' : 'Crear producto'}
       </Button>
     </div>
@@ -99,7 +119,7 @@ export function NuevoProducto() {
       </div>
       <div className={s.cuerpo}>
         <section className={s.tarjeta} aria-label={PASOS[a.paso - 1]?.label}>
-          {a.paso === 1 ? <PasoUno {...props} /> : null}
+          {a.paso === 1 ? <PasoUno {...props} codigo={a.codigo} /> : null}
           {a.paso === 2 ? <PasoDos {...props} /> : null}
           {a.paso === 3 ? <PasoTres {...props} /> : null}
           {a.error === null ? null : (

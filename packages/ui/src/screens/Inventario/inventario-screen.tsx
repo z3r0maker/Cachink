@@ -19,7 +19,9 @@ import {
   type Pestana,
 } from '@xangarro/caja/inventario';
 import { ErrorState, Spinner } from '../../components/index';
-import { Buscador, Cabeza, Kpis, Pestanas, Regla } from './inventario-cifras';
+import { Buscador, Kpis, Pestanas, Regla } from './inventario-cifras';
+import { InventarioEscaner, type InventarioEscanerProps } from './inventario-escaner';
+import { InventarioTitulo } from './inventario-titulo';
 import { FotoHojas } from '../../foto-producto/foto-hojas';
 import { PistaFoto } from '../../foto-producto/foto-tile';
 import type { FotoFlujo } from '../../foto-producto/use-foto-flujo';
@@ -44,6 +46,8 @@ export interface InventarioScreenProps {
   readonly onNuevoProducto?: () => void;
   /** The product photo's steps (M-13, `useFotoFlujo()`); without it the squares only show. */
   readonly foto?: FotoFlujo;
+  /** «Escanear» beside the title (M-20); without it, no escáner. */
+  readonly escaner?: InventarioEscanerProps;
   readonly onRetry: () => void;
   readonly testID?: string;
 }
@@ -106,6 +110,7 @@ function Hojas(p: {
       key={`${item.id}-${p.hoja.tipo}`}
       item={item}
       tipo={p.hoja.tipo}
+      delEscaner={p.hoja.delEscaner ?? false}
       firma={`${p.data.operador}, ${p.data.caja}`}
       onClose={p.onClose}
       onGuardar={p.onGuardar}
@@ -156,7 +161,9 @@ function ConProductos(
 }
 
 function Contenido(p: InventarioScreenProps & { readonly data: InventarioData }): ReactElement {
-  const { hoja, abrir, cerrar } = useHoja(p.reponer ?? null, p.data.existencias);
+  const vivo = useHoja(p.reponer ?? null, p.data.existencias);
+  const { hoja, abrir, cerrar } = vivo;
+  const [escaneando, setEscaneando] = useState(false);
   const { toast, guardar, cerrar: cerrarToast } = useMovToast(p.registrar);
   const onGuardar = (m: NuevoMovimientoVivo): Promise<void> => guardar(m, p.data.existencias);
   return (
@@ -166,7 +173,7 @@ function Contenido(p: InventarioScreenProps & { readonly data: InventarioData })
         contentContainerStyle={{ padding: 16, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Cabeza />
+        <InventarioTitulo {...(p.escaner ? { onEscanear: () => setEscaneando(true) } : {})} />
         {p.data.existencias.length === 0 ? (
           <SinProductos {...(p.onNuevoProducto ? { onNuevo: p.onNuevoProducto } : {})} />
         ) : (
@@ -174,6 +181,16 @@ function Contenido(p: InventarioScreenProps & { readonly data: InventarioData })
         )}
       </ScrollView>
       <Hojas hoja={hoja} data={p.data} onGuardar={onGuardar} onClose={cerrar} />
+      {p.escaner ? (
+        <InventarioEscaner
+          config={p.escaner}
+          abierto={escaneando}
+          onCerrar={() => setEscaneando(false)}
+          existencias={p.data.existencias}
+          dueno={p.dueno}
+          hoja={vivo}
+        />
+      ) : null}
       {toast === null ? null : <MovToast x={toast} onClose={cerrarToast} />}
       {p.foto ? <FotoHojas flujo={p.foto} dueno={p.dueno} caja={p.data.caja} /> : null}
     </>

@@ -11,12 +11,41 @@ import {
   type Existencia,
   type MotivoMerma,
 } from '@xangarro/caja/inventario';
-import { Chip, MText } from '../../components/index';
-import { colors, radii } from '../../theme';
+import { Chip, MText, PathIcon } from '../../components/index';
+import { borderColors, borderWidths, colors, radii, shapeRadii } from '../../theme';
+import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 import { ProductoTile } from './mover-glifos';
 import { EstadoChip } from './inventario-filas';
 
-export function Articulo({ e }: { readonly e: Existencia }): ReactElement {
+/** «Del escáner» (EcInventario): the escáner chose the product, so only the quantity is left. */
+function DelEscaner(): ReactElement {
+  return (
+    <View
+      testID="mover-del-escaner"
+      flexDirection="row"
+      alignItems="center"
+      gap={6}
+      paddingHorizontal={10}
+      paddingVertical={3}
+      borderRadius={shapeRadii.pill}
+      borderWidth={borderWidths.quiet}
+      borderColor={borderColors.quiet}
+      backgroundColor={colors.gray100}
+    >
+      <PathIcon d={COBRAR_GLYPHS.escanear} size={14} strokeWidth={2.4} color={colors.ink} />
+      <MText size="xs" weight="extraBold" color={colors.ink}>
+        Del escáner
+      </MText>
+    </View>
+  );
+}
+
+export function Articulo(p: {
+  readonly e: Existencia;
+  /** The escáner opened the sheet on this product. */
+  readonly delEscaner?: boolean;
+}): ReactElement {
+  const { e } = p;
   return (
     <View
       flexDirection="row"
@@ -35,7 +64,7 @@ export function Articulo({ e }: { readonly e: Existencia }): ReactElement {
           {`Hay ${conUnidad(e.existencias, e.unidad)} · aviso en ${conUnidad(e.umbral, e.unidad)}`}
         </MText>
       </View>
-      <EstadoChip e={e} />
+      {p.delEscaner ? <DelEscaner /> : <EstadoChip e={e} />}
     </View>
   );
 }

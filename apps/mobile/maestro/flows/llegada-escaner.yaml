@@ -1,0 +1,111 @@
+# Inventario's escáner with a known code (M-20, ADR-150; EcInventario):
+# «Escanear» beside the title opens the escáner one product at a time; the
+# typed code (the same read a scan goes through) closes it and opens «Llegó
+# mercancía» on that product, marked «Del escáner», where only the quantity
+# is left. «Registrar entrada» raises the row's count by what arrived.
+#
+# Refresco 600ml is PRD-9 with its own code in the mock (`MOCK_BARCODES`).
+# The count before is read off the row, so the flow holds on a device that
+# already recorded entradas.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+tags:
+  - inventario
+  - escaner
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow:
+    file: shared/open-turno-row.yaml
+    env:
+      ROW: 'otros-inventario'
+- extendedWaitUntil:
+    visible:
+      id: 'mobile-inventario'
+    timeout: 10000
+
+# The row's count before.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000009'
+    direction: DOWN
+    timeout: 10000
+- copyTextFrom:
+    id: 'inventario-cantidad-01JPRD00000000000000000009'
+- evalScript: ${output.antes = parseInt(maestro.copiedText, 10) || 0}
+
+# «Escanear» beside the title.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-escanear'
+    direction: UP
+    timeout: 10000
+- tapOn:
+    id: 'inventario-escanear'
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-sheet'
+    timeout: 5000
+# The sheet is still sliding up when it first shows; a tap then lands short.
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-listo'
+    timeout: 5000
+- waitForAnimationToEnd
+- assertVisible: '.*Escáner · Inventario.*'
+- assertVisible: '.*se abre su movimiento.*'
+- tapOn:
+    id: 'escaner-manual'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-codigo'
+- inputText: '7509876500017'
+# One drag dismisses the OS keyboard; hideKeyboard leaves it over «Buscar».
+- swipe:
+    start: '50%,45%'
+    end: '50%,25%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'escaner-buscar'
+
+# The escáner closed onto the product's «Llegó mercancía».
+- extendedWaitUntil:
+    visible:
+      id: 'mover-sheet'
+    timeout: 8000
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: 'escaner-sheet'
+- assertVisible:
+    id: 'mover-del-escaner'
+- assertVisible: '.*Refresco 600ml.*'
+- assertVisible: '.*¿Cuánto llegó\?.*'
+- tapOn:
+    id: 'mover-cantidad'
+- eraseText: 6
+- inputText: '24'
+- swipe:
+    start: '50%, 45%'
+    end: '50%, 20%'
+- waitForAnimationToEnd
+- tapOn:
+    id: 'mover-guardar'
+- extendedWaitUntil:
+    visible:
+      id: 'mov-toast'
+    timeout: 8000
+- assertVisible: '.*\+24 de Refresco 600ml\..*'
+- tapOn:
+    id: 'mov-toast-entendido'
+
+# The row's count went up by 24.
+- scrollUntilVisible:
+    element:
+      id: 'inventario-cantidad-01JPRD00000000000000000009'
+    direction: DOWN
+    timeout: 10000
+- assertVisible:
+    id: 'inventario-cantidad-01JPRD00000000000000000009'
+    text: '${String(output.antes + 24)}\b.*'
