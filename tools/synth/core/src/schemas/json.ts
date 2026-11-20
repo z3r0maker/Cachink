@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ConfigSchema } from './config';
+import { CorridaSchema } from './corrida';
 import { FindingSchema } from './finding';
 import { MatrixSchema } from './matrix';
 import { PersonaSchema } from './persona';
@@ -18,6 +19,7 @@ import { ScenarioSchema } from './scenario';
  */
 export const SCHEMAS = {
   config: ConfigSchema,
+  corrida: CorridaSchema,
   finding: FindingSchema,
   matrix: MatrixSchema,
   persona: PersonaSchema,

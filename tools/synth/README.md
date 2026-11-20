@@ -18,6 +18,7 @@ All from `@xangarro/synth-core`: `pnpm --filter @xangarro/synth-core <command>`.
 | `run-one --persona <id> --scenario <id>` | One run, end to end, on a fresh stack: web or phone, by the scenario's runner. |
 | `isolation`                              | Proves the actor cannot leave its tools, and writes `isolation.md`.            |
 | `judge <run folder>…`                    | Opus judges each run, read-only; findings go to the corrida's `findings.json`. |
+| `aggregate <corrida folder>`             | Dedups and prioritises the findings; writes `metrics.json` and `report.md`.    |
 
 ## The actor is a black box
 
