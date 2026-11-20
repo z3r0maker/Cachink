@@ -42,6 +42,27 @@ function barrerasDe(campo: string): string[] {
   return [...new Set(out)];
 }
 
+/** Las aristas que el «Dependency sketch» del §5 de `09-next-features.md`
+ * dibuja: `A, B ──► C, D` son cuatro pares. Las líneas con texto (los
+ * encabezados de grupo) no coinciden y se ignoran. */
+function aristasDelCroquis(): readonly (readonly [string, string])[] {
+  const md = readFileSync(join(ROOT, 'docs/plan/09-next-features.md'), 'utf8');
+  const seccion = md.slice(md.indexOf('## 5. Dependency sketch'));
+  const bloque = seccion.slice(
+    seccion.indexOf('```') + 3,
+    seccion.indexOf('```', seccion.indexOf('```') + 3),
+  );
+  const FLECHA =
+    /^((?:[A-Z]{1,2}-\d+)(?:, [A-Z]{1,2}-\d+)*) ──► ((?:[A-Z]{1,2}-\d+)(?:, [A-Z]{1,2}-\d+)*)$/u;
+  return bloque.split('\n').flatMap((linea) => {
+    const m = FLECHA.exec(linea.trim());
+    if (m === null) return [];
+    return (m[1] ?? '')
+      .split(', ')
+      .flatMap((a) => (m[2] ?? '').split(', ').map((b) => [a, b] as const));
+  });
+}
+
 /** `OD-`/`CD-`/`KD-` son boards del canvas y decisiones del dueño, no tareas:
  * esta prueba no puede saber si siguen abiertos, así que no los juzga. */
 const NO_ES_TAREA = /^(OD|CD|KD)-/u;
@@ -324,6 +345,36 @@ describe('the committed board', () => {
       malos,
       [],
       `${malos.length} campo(s) «Falta» que el tablero no lee — usa **Remaining (fecha):**:\n${malos.join('\n')}`,
+    );
+  });
+
+  it('el croquis del §5 no dibuja una arista que ya no existe', () => {
+    // La versión anterior de esa sección seguía mostrando «N-24 ──► N-20,
+    // N-22, N-25» con N-20 cerrada desde septiembre: un dibujo escrito una
+    // vez y nunca vuelto a mirar, que es la misma avería que la de los
+    // campos, con otra cara. La prueba exige **solidez**, no completitud: cada
+    // flecha tiene que estar en los campos y tener las dos puntas abiertas,
+    // pero el croquis puede dejar fuera lo que no le toca contar — el grafo
+    // entero vive en «Siguiente», que se genera.
+    const items = collect(ROOT);
+    const abiertos = new Set(
+      items.filter((i) => i.status !== 'done' && i.id !== null).map((i) => i.id),
+    );
+    const real = new Set<string>();
+    for (const i of items) {
+      if (!abiertos.has(i.id)) continue;
+      for (const b of idsIn(i.blockedBy)) real.add(`${b}→${i.id}`);
+      for (const b of idsIn(i.blocks)) real.add(`${i.id}→${b}`);
+    }
+    const malas = aristasDelCroquis().flatMap(([a, b]) => {
+      if (!abiertos.has(a)) return [`  ${a} ──► ${b}: ${a} ya no está abierta`];
+      if (!abiertos.has(b)) return [`  ${a} ──► ${b}: ${b} ya no está abierta`];
+      return real.has(`${a}→${b}`) ? [] : [`  ${a} ──► ${b}: ningún campo lo dice`];
+    });
+    assert.deepEqual(
+      malas,
+      [],
+      `${malas.length} flecha(s) del croquis del §5 que los tracks no sostienen:\n${malas.join('\n')}`,
     );
   });
 
