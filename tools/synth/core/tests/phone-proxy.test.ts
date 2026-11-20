@@ -7,6 +7,8 @@ import { createInterface } from 'node:readline';
 
 import { afterEach, beforeEach, describe, it } from 'vitest';
 
+import { phoneMcpConfig } from '../src/phone/run-phone';
+
 /**
  * The Synth phone proxy as the actor's `claude -p` meets it: a stdio MCP
  * server in front of `maestro mcp` (here a fake that logs what it is asked).
@@ -145,6 +147,27 @@ describe('the phone proxy', () => {
     assert.match(text(again), /ran run/);
     const inits = maestroLog().filter((m) => m.method === 'initialize');
     assert.equal(inits.length, 2, 'the new Maestro was initialized as the first one was');
+  });
+
+  it('starts a Maestro whose own arguments begin with «--», given as --maestro-arg=<value> (seen in S-07)', async () => {
+    const config = phoneMcpConfig({
+      serial: 'emulator-5554',
+      captureDir: dir,
+      maestro: { command: process.execPath, args: ['--no-warnings', FAKE] },
+    }) as { mcpServers: { phone: { args: string[] } } };
+    const second = spawn(process.execPath, config.mcpServers.phone.args, {
+      cwd: CORE,
+      env: { ...process.env, FAKE_MAESTRO_LOG: join(dir, 'second.log') },
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    const answered = new Promise<string>((resolve) =>
+      createInterface({ input: second.stdout! }).once('line', resolve),
+    );
+    second.stdin?.write(
+      `${JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} })}\n`,
+    );
+    assert.match(await answered, /"serverInfo"/);
+    second.kill();
   });
 
   it('a lone wait is a look: Maestro runs it, but no step is saved', async () => {
