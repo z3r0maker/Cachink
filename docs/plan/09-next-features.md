@@ -652,14 +652,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-22 Banners de sincronización en la app `[LAUNCH]` [alta] [bloq]
 
 - [ ] Status · **Blocked by:** A-06, A-07 · **Blocks:** N-29
-      **Re-verificado 2026-09-28:** la mitad ya existe y llegó con M-05. La píldora de sync está montada
-      en el shell (`packages/ui/src/screens/AppShell/cloud-sync-pill.tsx`, usada por `app-shell.tsx` y
-      `caja-header.tsx`), el puente a la nube es `cloud-sync-bridge.tsx`, y `OfflineBanner` existe. Lo
-      que **no** existe son dos de los tres banners que esta tarea pide: `offline-banner.tsx` sólo lee
-      `pendientes` (el ámbar), así que faltan el rojo de rechazados y el gris de «sin sincronizar desde
-      hace más de 72 h». La pantalla `SyncRejected` sí está, pero no hay banner que lleve a ella. Faltan
-      también los flujos de Maestro de cada estado. N-24 deja de bloquearla: el teléfono ya se rehízo en
-      El Mostrador.
+      **Remaining (2026-09-28, re-verificado el 2026-11-20 contra el repo):** la mitad ya existe y llegó con M-05. La píldora de sync está montada en el shell (`packages/ui/src/screens/AppShell/cloud-sync-pill.tsx`, usada por `app-shell.tsx` y `caja-header.tsx`), el puente a la nube es `cloud-sync-bridge.tsx`, y `OfflineBanner` existe en `packages/ui/src/components/OfflineBanner/`. Lo que **no** existe son dos de los tres banners que esta tarea pide: `offline-banner.tsx` sólo recibe `pendientes` y sólo se dibuja cuando la fase es `offline` (el ámbar), así que faltan el rojo de rechazados y el gris de «sin sincronizar desde hace más de 72 h». Tres cosas que el 2026-11-20 cambian el tamaño de esta tarea. Una: los datos ya están. `CloudSyncState` lleva `counts.rejected` y `lastSyncAt` (`packages/ui/src/sync/cloud-sync-status.ts`), así que los dos banners que faltan son presentación, no plomería. Dos: el rojo ya lo cubre casi entero la píldora, que con `rejected > 0` pinta el tono `danger` con la cuenta y es tocable hacia «No enviados» (`SyncRejected` está, y `por-enviar.yaml` la recorre). Tres: el gris es el hueco de verdad, y es peor de lo que decía esta nota. `pillView` calcula `time: hhmm(state.lastSyncAt)` y se lo pasa a `t()`, pero la cadena `syncPill.synced` es «Enviado», sin `{{time}}`: el valor se tira. Hoy **nada en el teléfono dice de cuándo es el último envío**, ni la píldora ni un banner, se haya logrado hace dos minutos o hace tres semanas. De los flujos de Maestro, el ámbar ya tiene tres (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`, `avisos-sin-internet.yaml`) y los rechazados dos (`por-enviar.yaml`, `pendientes-reintento.yaml`); falta el del reloj adelantado, que espera al banner que no está. Y nada la bloquea: A-06 y A-07 están archivadas y N-24 dejó de bloquearla porque el teléfono ya se rehízo en El Mostrador, mientras ella sí bloquea N-29. Esta nota existía desde el 2026-09-28 bajo la etiqueta «Re-verificado», que el parser no lee, así que el tablero imprimió esta tarea sin nada que decir durante siete semanas.
 - **What:** on top of the A-07 pill, conditional full-width banners:
   - amber — offline **and** pending > 0: "Trabajando sin conexión · 12 registros se enviarán al
     reconectar";
@@ -700,10 +693,12 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - [ ] Status · **Blocked by:** lo que falta del lado del teléfono — las fases restantes del track del Mostrador (M-10, M-11 y M-12, en `19-movil-mostrador.md`) `[alta]` `[bloq]`
       móvil-mostrador (el dueño corrige una venta, reescritura de Maestro) y el rework de A-16. Las
       barreras previas ya están cerradas (verificado 2026-10-05): el Track O está completamente
-      terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · **Blocks:** N-20, N-22, N-25- **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
-      caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
-      device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
-      operator sees the same register on the phone and in the browser.
+      terminado (`docs/archive/10-operador.md`) y M-01…M-09 ya salieron · **Blocks:** N-20, N-22, N-25
+      **Remaining (2026-11-20, verificado contra el repo):** su contenido ya salió y su especificación ya no es especificación. Las once pantallas que lista existen en `packages/ui/src/screens/`: Activation, Login (el NIP), Ventas, Checkout (el ticket), AbrirTurno/Turno/TurnoDeOtro, Gastos, Productos con su quick-add, el cierre en `/turno/cierre`, la píldora de sync en AppShell, el comprobante en `Checkout/comprobante-acciones.ts` y Settings; las entregaron M-05…M-09 y las fases que siguieron. Su «How» nombra `design-reference/operador/` como «the spec at its 375 px width», y el ADR-117 retiró justo eso: «el proyecto de Claude Design y `design-reference/` dejan de ser la especificación». De sus barreras sólo M-10 sigue viva (M-11 y M-12 cerradas, A-16 archivada), y M-10 no es trabajo de pantalla: choca con el §2 del ADR-058 y pide una enmienda que nadie ha escrito. Sus «Blocks» tampoco se sostienen: N-20 está cerrada, y la nota de N-22 dijo el 2026-09-28 que esta tarea deja de bloquearla. Peor: lo único genuino que queda dentro de su propia lista de pantallas, «sync pill + banners», **es** N-22, a la que dice bloquear. Lo que cabe decidir es si esto se cierra apuntando a M-10 y a N-22, que es donde vive el trabajo que falta.
+- **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
+  caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
+  device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
+  operator sees the same register on the phone and in the browser.
 - **How:** `design-reference/operador/` is the spec at its 375 px width. Native-only surfaces not in
   the handoff — barcode scanner, WhatsApp image share (N-21), stock-low notification (A-13), camera
   activation (N-25) — are added upstream in the Claude Design project first as small amendments
