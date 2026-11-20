@@ -104,6 +104,7 @@ function Celda(p: {
       minWidth={0}
       justifyContent="center"
       paddingHorizontal={10}
+      paddingVertical={4}
       borderRadius={radii[2]}
       borderWidth={p.ancho}
       borderColor={p.borde}
@@ -141,7 +142,7 @@ function Cuenta(p: CobroEfectivoProps): ReactElement {
   const t = tonoDe(p.estado.diferencia);
   const { cuenta, cifraCuenta } = p.medidas;
   return (
-    <View flexDirection="row" gap={8} height={cuenta}>
+    <View flexDirection="row" gap={8} minHeight={cuenta}>
       <Celda fondo={colors.white} borde={colors.black} ancho={borderWidths.thin} vivo>
         <Eyebrow color={colors.gray600}>Paga con</Eyebrow>
         <Cifra size={cifraCuenta} color={colors.black} testID="cobro-recibido">

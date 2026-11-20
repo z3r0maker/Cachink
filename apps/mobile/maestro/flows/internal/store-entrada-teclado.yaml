@@ -1,0 +1,23 @@
+# Store-screenshot helper for store-entrada.yaml: put the keyboard away from
+# the inventory sheet, so the quantity and the save footer are not under it.
+# Phone: one drag in the sheet body dismisses the keyboard (keyboardDismissMode
+# on-drag). iPad: the sheet floats and that drag (or hideKeyboard) dismisses
+# the sheet itself; the footer is clear, so nothing is done. An Android tablet
+# draws the phone's bottom sheet with the keyboard over the footer: Back
+# (hideKeyboard) closes only the keyboard there.
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      true: ${FORMA == 'telefono'}
+    commands:
+      - swipe:
+          start: '50%, 45%'
+          end: '50%, 20%'
+- runFlow:
+    when:
+      platform: Android
+      true: ${FORMA != 'telefono'}
+    commands:
+      - hideKeyboard
+- waitForAnimationToEnd

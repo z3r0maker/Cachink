@@ -78,6 +78,26 @@ appId: mx.xangarro.mobile
           start: '50%, 45%'
           end: '50%, 20%'
       - waitForAnimationToEnd
+# An Android tablet draws the phone's bottom sheet, with the keyboard over
+# the photo row: Back (hideKeyboard) closes only the keyboard, then the
+# sheet's own body scrolls the row up.
+- runFlow:
+    when:
+      platform: Android
+      true: ${FORMA == 'tableta'}
+    commands:
+      - hideKeyboard
+      - waitForAnimationToEnd
+      - runFlow:
+          when:
+            notVisible:
+              id: 'gasto-comprobante-tomar'
+          commands:
+            - swipe:
+                element:
+                  id: 'registrar-gasto-sheet-body'
+                direction: UP
+            - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       id: 'gasto-comprobante-tomar'
@@ -99,7 +119,10 @@ appId: mx.xangarro.mobile
     notVisible:
       id: 'registrar-gasto-sheet'
     timeout: 8000
-- extendedWaitUntil:
-    visible:
+# A 1920 px Android phone has the row below «Pendientes de registrar»: scroll
+# to it, so the shot shows the gasto (taller screens find it in place).
+- scrollUntilVisible:
+    element:
       text: ".*−\\$180\\.00.*"
+    direction: DOWN
     timeout: 10000
