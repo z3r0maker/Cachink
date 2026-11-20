@@ -85,6 +85,20 @@ export const parece = style({
   color: colors.warningText,
 });
 
+/** «Mismo código que …» (P-45, EcRevision): black with yellow, the barcode glyph first. */
+export const mismoCodigo = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  padding: '3px 10px',
+  borderRadius: shapeRadii.pill,
+  background: colors.black,
+  fontSize: portalFontSizes.tag,
+  fontWeight: typography.weights.extraBold,
+  whiteSpace: 'nowrap',
+  color: colors.yellow,
+});
+
 export const detalle = style({
   marginTop: 3,
   fontSize: portalFontSizes.sm,

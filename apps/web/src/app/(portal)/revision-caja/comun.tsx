@@ -7,6 +7,7 @@ import * as f from '@/operador/ui/field.css';
 import { OpModal } from '@/operador/ui/modal';
 import { eyebrow } from '@/styles/text.css';
 
+import { CodigoDuplicado, type CodigoRepetido } from './codigo-duplicado';
 import * as s from './form.css';
 
 /** The review modal: yellow head, «Lo que capturó la caja», the fields, the merge offer, the exits. */
@@ -14,6 +15,8 @@ export function Revisar(p: {
   readonly titulo: string;
   readonly capturado: string;
   readonly pareceA: string | undefined;
+  /** The match is by barcode (P-45): its own box, and «Aprobar» waits. */
+  readonly codigo?: CodigoRepetido | undefined;
   readonly cta: string;
   readonly listo: boolean;
   readonly onClose: () => void;
@@ -36,17 +39,27 @@ export function Revisar(p: {
         <div className={s.capturadoTexto}>{p.capturado}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>{p.children}</div>
-      {p.pareceA ? <Duplicado con={p.pareceA} onFusionar={p.onFusionar} /> : null}
+      <Coincidencia pareceA={p.pareceA} codigo={p.codigo} onFusionar={p.onFusionar} />
       <ModalBotones
         volver="Cancelar"
         confirmar={p.cta}
-        listo={p.listo}
+        listo={p.listo && p.codigo === undefined}
         tint={colors.yellow}
         onBack={p.onClose}
         onConfirm={p.onAprobar}
       />
     </OpModal>
   );
+}
+
+/** The record it matches: by barcode (P-45) with its own box, or by name. */
+function Coincidencia(p: {
+  readonly pareceA: string | undefined;
+  readonly codigo: CodigoRepetido | undefined;
+  readonly onFusionar: () => void;
+}) {
+  if (p.codigo) return <CodigoDuplicado {...p.codigo} onFusionar={p.onFusionar} />;
+  return p.pareceA ? <Duplicado con={p.pareceA} onFusionar={p.onFusionar} /> : null;
 }
 
 function Duplicado({ con, onFusionar }: { readonly con: string; readonly onFusionar: () => void }) {

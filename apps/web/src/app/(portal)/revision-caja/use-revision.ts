@@ -10,6 +10,7 @@ import {
   fusionar as fusionarEnServidor,
   rechazar as rechazarEnServidor,
 } from '@/server/actions/revision';
+import { sonDistintos as sonDistintosEnServidor } from '@/server/actions/revision-codigo';
 import { avisoFusion, avisoRechazo } from './derive';
 import type { ClienteCaja, Pestana, ProductoCaja, RevisionData } from './types';
 
@@ -41,12 +42,13 @@ export function useRevision(data: RevisionData, tabInicial: Pestana) {
     setSel(null);
   };
   const cerrarAviso = useCallback(() => setAviso(null), []);
-  const acciones = crearAcciones({
-    esProducto: () => tab === 'productos',
-    resolver,
+  const escrito = {
     fallo: (m: string) => setAviso({ tint: colors.redSoft, title: 'No se pudo guardar', body: m }),
     refrescar: () => router.refresh(),
-  });
+  };
+  const acciones = crearAcciones({ esProducto: () => tab === 'productos', resolver, ...escrito });
+  // P-45: the review stays open; the refresh drops the code match and frees «Aprobar».
+  const sonDistintos = (x: ProductoCaja) => lanzar(sonDistintosEnServidor(x.id), escrito);
   return {
     tab,
     cambiarTab,
@@ -58,6 +60,7 @@ export function useRevision(data: RevisionData, tabInicial: Pestana) {
     cerrarAviso,
     rechazar: acciones.rechazar,
     fusionar: acciones.fusionar,
+    sonDistintos,
     aprobarProducto: acciones.aprobarProducto,
     aprobarCliente: acciones.aprobarCliente,
   };

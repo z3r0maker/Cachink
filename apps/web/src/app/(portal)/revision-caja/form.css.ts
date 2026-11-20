@@ -80,6 +80,16 @@ export const duplicado = style({
   background: colors.warningSoft,
 });
 
+/** The barcode match's two exits (P-45), side by side. */
+export const duplicadoBotones = style({ display: 'flex', gap: 8, flexWrap: 'wrap' });
+
+export const duplicadoNota = style({
+  flexBasis: '100%',
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.semibold,
+  color: colors.ink,
+});
+
 export const duplicadoTexto = style({
   flex: 1,
   minWidth: 180,

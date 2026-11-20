@@ -2,8 +2,8 @@
  * Revisión de caja's read (O-37): the products and clients an operator
  * created at the counter (`estado_revision = 'pendiente'`, ADR-074 §2) with
  * their facts — sales of each unreviewed product, fiado of each client — and
- * the likely duplicate offered for a merge (an approved record with the same
- * name).
+ * the likely duplicate offered for a merge: an approved record with the same
+ * name or, for a product, the same barcode (P-45), which wins when both differ.
  */
 
 import { and, count, eq, inArray, isNull, ne, sum } from 'drizzle-orm';
@@ -16,6 +16,7 @@ import {
   tickets,
 } from '@xangarro/data-pg';
 
+import { mismoCodigoPorProducto } from './revision-codigo';
 import { mapearClientes, mapearProductos } from './revision-mapear';
 import { withTenant, type Tx } from './db';
 
@@ -28,6 +29,12 @@ export interface ProductoPendiente {
   readonly tint: string;
   readonly pareceA: string | null;
   readonly pareceAId: string | null;
+  /** The match is by barcode (P-45): approving waits for a merge or «Son distintos». */
+  readonly porCodigo: boolean;
+  /** The code the caja saved, when it has one. */
+  readonly codigo: string | null;
+  /** How many sales the caja captured with it. */
+  readonly vendidas: number;
 }
 
 export interface ClientePendiente {
@@ -55,6 +62,7 @@ export async function listarPendientes(businessId: string): Promise<Pendientes> 
         id: products.id,
         nombre: products.nombre,
         precio: products.precioVentaCentavos,
+        sku: products.sku,
         creado: products.createdAt,
       })
       .from(products)
@@ -70,7 +78,7 @@ export async function listarPendientes(businessId: string): Promise<Pendientes> 
       .where(pendienteDeRevision(clients, businessId));
 
     const ctx = await leerContexto(tx, businessId, productos, clientesRows);
-    const filasProductos = mapearProductos(productos, ctx.ventas, ctx.dupsProductos);
+    const filasProductos = mapearProductos(productos, ctx.ventas, ctx.dupsProductos, ctx.codigos);
     const filasClientes = mapearClientes(clientesRows, ctx.fiado, ctx.dupsClientes);
     return {
       productos: filasProductos,
@@ -90,7 +98,7 @@ async function leerContexto(
   productos: readonly { id: string }[],
   clientes: readonly { id: string }[],
 ) {
-  const [ventas, dupsProductos, fiado, dupsClientes] = await Promise.all([
+  const [ventas, dupsProductos, fiado, dupsClientes, codigos] = await Promise.all([
     ventasPorProducto(
       tx,
       businessId,
@@ -103,8 +111,9 @@ async function leerContexto(
       clientes.map((c) => c.id),
     ),
     duplicados(tx, clients, businessId),
+    mismoCodigoPorProducto(tx, businessId),
   ]);
-  return { ventas, dupsProductos, fiado, dupsClientes };
+  return { ventas, dupsProductos, fiado, dupsClientes, codigos };
 }
 
 /**

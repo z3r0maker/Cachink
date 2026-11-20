@@ -2031,7 +2031,8 @@ WhatsApp).
 
 ### P-45 Revisión de caja: el mismo código de barras (ADR-150) [media]
 
-- [ ] Status · **Blocked by:** P-44 (`codigo_canonico`) · **Blocks:** —
+- [x] Status · **Blocked by:** — (P-44 done) · **Blocks:** —
+      Done: 2026-11-20 · `mismoCodigoPorProducto` over 0060's `codigo_canonico` (approved, live products only), the code match taking `pareceA` with `porCodigo`, «Mismo código que …» in the list, the modal's code box with «Fusionar con …» and «Son distintos» (`sonDistintos` clears the code through the products repository, so `sync_log` carries it), and «Aprobar» held until one is done. The spec mints its own tenant and needs no phone, so it is `revision-codigo.spec.ts`, not a `.sync` one.
 - **Context:** Revisión de caja offers a merge only for a pending product with the same name as an
   approved one (`duplicados` in `apps/web/src/server/revision.ts`). A product the caja gave the
   same code under another name goes through to the catalogue.

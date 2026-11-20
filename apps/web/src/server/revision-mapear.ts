@@ -4,6 +4,7 @@
  */
 
 import type { ClientePendiente, ProductoPendiente } from './revision';
+import type { MismoCodigo } from './revision-codigo';
 import { colors } from '@xangarro/tokens';
 
 const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;
@@ -17,14 +18,18 @@ export function mapearProductos(
     id: string;
     nombre: string;
     precio: bigint;
+    sku: string | null;
     creado: string;
   }[],
   ventas: Map<string, { n: number; monto: bigint }>,
   dups: Map<string, { id: string; nombre: string }>,
+  codigos: Map<string, MismoCodigo>,
 ): readonly ProductoPendiente[] {
   return productos.map((p, i) => {
     const v = ventas.get(p.id) ?? { n: 0, monto: 0n };
-    const dup = dups.get(p.nombre.toLowerCase());
+    // The same barcode wins over a name that looks alike (P-45, ADR-150 §4).
+    const porCodigo = codigos.get(p.id);
+    const dup = porCodigo ?? dups.get(p.nombre.toLowerCase());
     return {
       id: p.id,
       nombre: p.nombre,
@@ -33,6 +38,9 @@ export function mapearProductos(
       tint: TINTES[i % TINTES.length] ?? colors.yellow,
       pareceA: dup?.nombre ?? null,
       pareceAId: dup?.id ?? null,
+      porCodigo: porCodigo !== undefined,
+      codigo: p.sku?.trim() || null,
+      vendidas: v.n,
     } satisfies ProductoPendiente;
   });
 }

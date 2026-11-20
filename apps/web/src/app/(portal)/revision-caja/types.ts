@@ -15,6 +15,12 @@ interface CreadoEnCaja {
 
 export interface ProductoCaja extends CreadoEnCaja {
   readonly precio: Money;
+  /** `pareceA` has the same barcode (P-45): approving waits for a merge or «Son distintos». */
+  readonly porCodigo: boolean;
+  /** The code the caja saved, when it has one. */
+  readonly codigo: string | null;
+  /** Sales the caja captured with it. */
+  readonly vendidas: number;
 }
 
 export interface ClienteCaja extends CreadoEnCaja {
