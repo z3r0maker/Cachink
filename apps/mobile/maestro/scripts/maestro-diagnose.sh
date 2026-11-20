@@ -40,7 +40,7 @@ fi
 
 mkdir -p "$REPORT_DIR"
 
-# One Maestro at a time on this machine (lib/maestro-lock.sh). Called by
+# One run at a time on lane 0 (ADR-157) (lib/maestro-lock.sh). Called by
 # run-flow.sh or full-regression.sh after a failure, this rides their lock.
 # shellcheck source=lib/maestro-lock.sh
 source "$SCRIPT_DIR/lib/maestro-lock.sh"

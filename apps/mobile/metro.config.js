@@ -14,6 +14,15 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
+// A Maestro lane's Metro (ADR-157) runs from a worktree nested in the main
+// checkout, and Watchman answers for the enclosing watch: on this Mac that
+// watch re-crawls without end, so `watch-project` never returns and Metro
+// never starts. Lanes set XANGARRO_METRO_WATCHMAN=0 to use Metro's own
+// file crawler and watcher instead.
+if (process.env.XANGARRO_METRO_WATCHMAN === '0') {
+  config.resolver.useWatchman = false;
+}
+
 // Exclude the pnpm virtual store from Metro resolution. With
 // node-linker=hoisted all packages are real directories in
 // node_modules/ — the .pnpm store should never be traversed.

@@ -53,7 +53,7 @@ fi
 DEV=()
 [[ -n "${MAESTRO_DEVICE_UDID:-}" ]] && DEV=(--device "$MAESTRO_DEVICE_UDID")
 
-# One Maestro at a time on this machine (lib/maestro-lock.sh). Run from
+# One run at a time on lane 0 (ADR-157) (lib/maestro-lock.sh). Run from
 # run-flow.sh or fold-tour.sh, this rides their lock.
 # shellcheck source=lib/maestro-lock.sh
 source "$SCRIPT_DIR/lib/maestro-lock.sh"
