@@ -193,6 +193,7 @@ Links to discussion, docs, prior art.
 | [152](#adr-152) | 2026-11-19 | A quarter's budget counts once the other founder approves it, and spending outside it fits a Límite or waits on them | Accepted |
 | [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
 | [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
+| [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11122,3 +11123,71 @@ The canvas was drawn on those decisions: fifteen boards, every screen of spec §
   states.
 - The runners have to record a screen fingerprint per step for the mapping to work: URL plus DOM hash on the web
   (S-05), the hash of `hierarchy.json` on the phone (S-06). `config.yaml` gains `reactions:` (S-03).
+
+## ADR-155
+
+**Title:** The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-43, and E-02's last piece; boards CD-10d and CD-10e approved by the owner on 2026-11-19
+(canvas round 19)
+
+**Context**
+
+E-43 asks for a monthly export by código agrupador (a balanza-style CSV) with the month's XML and acuses in one
+archive. ADR-125 §4 left `ACCOUNTS[k].sat` null in code until the contador validated a mapping, and E-02 has waited
+on that mapping since 2026-10-14. Writing the codes into the chart would need a release each time the contador
+changes one, and nobody but the contador knows them.
+
+The ledger has no closing entries (E-12): the result accounts are never zeroed into Resultados acumulados. The
+console holds the received invoices' XML (E-11) and the Expediente's files (E-05, E-26), but not the issued
+invoices' XML: while `CFDI_MODE=off` (ADR-070) staff stamp them in the SAT's portal and record only the folio
+fiscal, which `ingresos_del_periodo` returns.
+
+**Decision**
+
+1. **The codes are data, not code** (`corp.account_code_lists`, `corp.account_codes`). Each «Guardar los
+   códigos» writes a whole new list unless the codes are the ones there are; the newest list counts. A list may be
+   partial. A code is written as Anexo 24 writes it, `102` or `102.01` (a check holds the format; the domain's
+   chart says which accounts exist). The console never proposes a code. The chart's unused `ACCOUNTS[k].sat` goes.
+2. **A validation names the list it validated** (`corp.account_code_validations`, one per list), with the day the
+   contador validated it. Only the newest, complete list can be marked, and a trigger refuses an older one under
+   one lock, so a new list and a validation at once cannot cross. Changing a code makes a new list, so the
+   codes stand unvalidated until they are marked again.
+3. **The package comes out of any month that has ended**: «preliminar» while the month is open, built from what
+   there is that day; «final» once it is closed. It is built on each download, never stored, so a month reopened
+   and corrected exports the correction.
+4. **What goes in it**: `balanza-YYYY-MM.csv`, the 22 accounts (moved or not) with their code, opening balance,
+   the month's debits and credits and closing balance, each on its own side; `emitidas.csv`, the month's issued
+   CFDIs by folio fiscal (invoices, payment complements, the global once stamped; cancelled ones left out);
+   `recibidas/`, the month's registered received invoices as uploaded; and `acuses/`, the current version of
+   each obligation's evidence filed for the month and of each statement filed without a movement. An Expediente
+   file whose bytes are missing stops the download rather than leaving it out.
+5. **A result account opens each year at zero**, and what earlier years left in them opens in Resultados
+   acumulados, as Balance reads them. So the debit balances equal the credit ones, and the balanza «cuadra». A
+   line in an account the chart does not know is listed apart and the balanza says it does not cuadra.
+6. **A missing code leaves its cell empty**, and the drawer names the accounts without one; complete codes not yet
+   validated are warned of too.
+7. **It is not the SAT's contabilidad electrónica**, and nothing is sent: the founder downloads the zip and sends
+   it as they do today. Each download is a `staff_audit_log` row (`empresa.paquete_descargado`): it carries the
+   month's fiscal record.
+
+**Alternatives considered**
+
+- *Codes in `ACCOUNTS` once validated.* Rejected: every change by the contador would be a release, and the console
+  could not show where the list stands.
+- *Edit a code in place.* Rejected: corp is append-only (ADR-125 §2), and a validation has to name exactly the
+  codes the contador saw.
+- *Issued XMLs from the PAC.* Rejected for now: with `CFDI_MODE=off` the PAC holds none, and the backoffice has no
+  PAC key. The contador downloads them from the SAT by the folio fiscal the CSV lists.
+- *Store each final package.* Rejected: it would be a second copy of the ledger to keep in step with a reopening.
+
+**Consequences**
+
+- The hosted database needs corp `0015` before the console's deploy. The migration only adds tables; a ledger from
+  before keeps every entry (a migration test holds this).
+- E-02's código agrupador piece is closed by the founders entering the contador's codes; no code change waits on
+  the contador.
+- Once Xangarro stamps through the PAC (`CFDI_MODE=live`), the package can carry the issued XMLs too, with the
+  PAC key in the backoffice.

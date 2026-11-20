@@ -84,6 +84,17 @@ async function borrarPresupuestos(tx: postgres.TransactionSql): Promise<void> {
   await tx`DELETE FROM corp.spend_requests WHERE id IN (${pedidas})`;
 }
 
+/** E-43: the códigos agrupadores the suite saved, with their validations. */
+async function borrarCodigos(tx: postgres.TransactionSql): Promise<void> {
+  const listas = tx`SELECT l.id FROM corp.account_code_lists l
+                     JOIN corp.founders f ON f.id = l.captured_by
+                     JOIN staff_members s ON s.id = f.staff_member_id
+                    WHERE lower(s.email) = ${SOCIO.email}`;
+  await tx`DELETE FROM corp.account_code_validations WHERE list_id IN (${listas})`;
+  await tx`DELETE FROM corp.account_codes WHERE list_id IN (${listas})`;
+  await tx`DELETE FROM corp.account_code_lists WHERE id IN (${listas})`;
+}
+
 export async function clearLedgerFixture(): Promise<void> {
   await withSuper(async (sql) => {
     await sql.begin(async (tx) => {
@@ -118,6 +129,7 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.recurring_templates
                 WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;
       await borrarPresupuestos(tx);
+      await borrarCodigos(tx);
       // E-14: the Cierre test closes a month before 2010, which nothing else uses;
       // a lock is lifted only with both founders, so its own goes with the
       // triggers off, for this transaction alone.
