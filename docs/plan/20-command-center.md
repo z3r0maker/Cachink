@@ -212,7 +212,7 @@ with property tests:
   The board also checks each partner's minimum commitment and flags incumplimiento (under 50 %
   of the committed value) with the notice it requires.
 
-- **Acciones (E-21).** For each partner it shows:
+- **Acciones (E-21), post-MVP (owner, 2026-11-20): 50/50 until the share clauses are written.** For each partner it shows:
   - base shares consolidated and pending, by the schedule;
   - pool shares assigned;
   - forfeited shares;
@@ -902,8 +902,14 @@ with property tests:
 
 ### E-21 Acciones y cortes `[media]`
 
-- [ ] Status · **Blocked by:** E-20, E-03, E-06
-  - **Remaining (2026-11-19):** todo; no hay ruta `/empresa/acciones`. E-20, E-03 y E-06 ya están: nada la bloquea. Lee el valor aceptado de cada socio con `aceptadoDelTrimestre` (ADR-156).
+- [ ] Status · **Blocked by:** the agreement's share clauses (owner, post-MVP) · E-20, E-03 and E-06 are done
+  - **Owner decision (2026-11-20): post-MVP.** There are no share clauses yet: the split stays 50/50
+    (6,000 shares each, as issued) and the Tablero is the only part of the agreement in use. Vesting,
+    forfeits, the pool and its cuts are defined later, and nothing here is built until they are. Round
+    1's CD-14 board used sample figures; it is not the spec. When the clauses exist, quote them here
+    (the base shares' schedule, what an incumplimiento forfeits, whether a cut counts the value since
+    the previous cut or since signing, Anexo A's figures, the 40–60 % bound and the freeze), then
+    redraw CD-14. The Tablero's accepted value is ready for it (`aceptadoDelTrimestre`, ADR-156).
 - **What:** the agreement module (vesting, forfeits, pool cuts with rounding and the zero-value
   rule, early freeze); `/empresa/acciones` with the live next-cut simulator; cut execution that
   creates the share transfer, its SE registration task and the beneficial-owner obligation.
