@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { parseActorReport, StepTracker } from '../src/runner/stream';
+import { PHONE_TOOLS } from '../src/runner/tools';
 
 /** `claude -p --output-format stream-json` events, as the actor emits them. */
 const text = (t: string) => ({
@@ -142,6 +143,45 @@ describe('StepTracker', () => {
     });
     assert.equal(t.final?.costCents, 42);
     assert.deepEqual(t.final?.tokens, { input: 10, output: 20, cache_read: 30, cache_write: 40 });
+  });
+});
+
+describe('StepTracker on the phone', () => {
+  const phoneUse = (id: string, name: string, input: Record<string, unknown>) => ({
+    type: 'assistant',
+    message: { content: [{ type: 'tool_use', id, name: `mcp__phone__${name}`, input }] },
+  });
+
+  it('a Maestro tap is a step in words; looking at the screen is not', () => {
+    const t = new StepTracker(PHONE_TOOLS);
+    t.feed(text('Toco cobrar.'));
+    t.feed(phoneUse('a', 'run', { yaml: '- tapOn: Cobrar' }));
+    assert.equal(t.feed(result('a', 'ran'))?.action, 'tap «Cobrar»');
+    t.feed(phoneUse('b', 'inspect_screen', {}));
+    t.feed(result('b', '{}'));
+    t.feed(phoneUse('c', 'run', { yaml: '- waitForAnimationToEnd' }));
+    t.feed(result('c', 'ran'));
+    assert.equal(t.steps.length, 1);
+    assert.equal(t.looks, 2);
+  });
+
+  it('a command the proxy refused still counts as a step the persona tried', () => {
+    const t = new StepTracker(PHONE_TOOLS);
+    t.feed(phoneUse('x', 'run', { yaml: '- openLink: exp+xangarro://x' }));
+    const done = t.feed(
+      result('x', '«openLink» is not something a person does with the phone', true),
+    );
+    assert.equal(done?.isError, true);
+    assert.equal(t.steps.length, 1);
+  });
+
+  it('a web tool name means nothing to the phone tracker, and the reverse', () => {
+    const phone = new StepTracker(PHONE_TOOLS);
+    phone.feed(use('w', 'click', { element: 'x' }));
+    assert.equal(phone.feed(result('w', PAGE)), undefined);
+    const web = new StepTracker();
+    web.feed(phoneUse('p', 'run', { yaml: '- tapOn: x' }));
+    assert.equal(web.feed(result('p', 'ran')), undefined);
   });
 });
 

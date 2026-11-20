@@ -1,0 +1,33 @@
+# Synth's phone door (S-06): from a wiped dev client already pointed at the
+# corrida's Metro to a signed-in operator, the way a person links a new phone:
+# the typed path on Vincular (the owner's correo and the code minted for this
+# run), then the operator and the NIP. Built from the harness's own subflows;
+# the runner passes EMAIL, CODE, OPERATOR_ID and NIP.
+appId: mx.xangarro.mobile
+---
+- runFlow: ../../../apps/mobile/maestro/flows/shared/dismiss-modals.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 180000
+- tapOn:
+    id: 'vincular-escribir'
+- runFlow:
+    file: ../../../apps/mobile/maestro/flows/shared/vincular-correo.yaml
+    env:
+      EMAIL: ${EMAIL}
+- runFlow:
+    file: ../../../apps/mobile/maestro/flows/shared/vincular-codigo.yaml
+    env:
+      CODE: ${CODE}
+- tapOn:
+    id: 'activation-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 60000
+- runFlow:
+    file: ../../../apps/mobile/maestro/flows/shared/login-operator.yaml
+    env:
+      OPERATOR_ID: ${OPERATOR_ID}
+      NIP: ${NIP}

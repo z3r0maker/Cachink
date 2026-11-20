@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 import { ExitInterview } from '../schemas/run';
-import { actionToolName, isLookTool } from './actor-args';
-import { asText, describeAction, describeObserved } from './describe';
+import { asText, describeObserved } from './describe';
+import { WEB_TOOLS, type ToolSet } from './tools';
 
 /**
  * Reads the actor's `claude -p --output-format stream-json` events as they
@@ -55,6 +55,8 @@ const Result = z.looseObject({
 type Block = z.infer<typeof Block>;
 
 export class StepTracker {
+  constructor(private readonly tools: ToolSet = WEB_TOOLS) {}
+
   readonly steps: TrackedStep[] = [];
   looks = 0;
   turns = 0;
@@ -98,12 +100,12 @@ export class StepTracker {
   }
 
   private use(id: string, name: string, input: Record<string, unknown>): void {
-    const action = actionToolName(name);
-    if (action !== undefined) {
+    const kind = this.tools.kind(name, input);
+    if (kind === 'action') {
       const n = this.steps.length + this.pending.size + 1;
-      this.pending.set(id, { n, thought: this.thought, tool: action, input });
+      this.pending.set(id, { n, thought: this.thought, tool: name, input });
       this.thought = '';
-    } else if (isLookTool(name)) {
+    } else if (kind === 'look') {
       this.looking.add(id);
     }
   }
@@ -119,7 +121,7 @@ export class StepTracker {
     const step = {
       n: p.n,
       thought: p.thought,
-      action: describeAction(p.tool, p.input, asText(content)),
+      action: this.tools.describe(p.tool, p.input, asText(content)),
       observed: describeObserved(content),
       isError,
     };

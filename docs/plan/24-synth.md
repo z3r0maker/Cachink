@@ -222,6 +222,12 @@ The full findings are in `tools/synth/ENV.md`.
 ### S-06 Runner de teléfono: emulador Android y Maestro MCP [alta]
 
 - [ ] Status · **Blocked by:** S-04
+  - **Remaining (2026-11-20):** the end-to-end run, taquero on `primera-venta-telefono`. The runner is built on
+    `feat/synth-s06` (`core/src/phone/`, 143 tests). The emulator and the machine-wide Maestro lock were held by
+    another session's capture run all day. Maestro MCP takes a `device_id` on every call, so targeting is not
+    the problem. But its `run` accepts any Maestro YAML, so the actor gets a Synth proxy in front of it, which
+    allows one person-level command per call on the pinned device. `login-operator.yaml` gains `OPERATOR_ID` and
+    `NIP`, defaulting to Toni and 1234; no harness run has exercised that change yet.
 - **What:**
   - Use one Android emulator, with an AVD named in `config.yaml`.
   - The capture app runs a dev-client build with `EXPO_PUBLIC_E2E=1` and `EXPO_PUBLIC_API_BASE=http://10.0.2.2:<port>`

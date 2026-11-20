@@ -156,12 +156,36 @@ stack, runs, and tears down. The run's folder, `tools/synth/reports/<corrida>/ru
 | `trace.zip`                                   | the Playwright trace (`npx playwright show-trace trace.zip`)               |
 | `access.json`, `mcp.json`, `actor.stderr.log` | the run's tenant id, the actor's MCP config, its stderr                    |
 
-## 11. Open items for the owner
+## 11. One phone run (S-06)
+
+`pnpm --filter @xangarro/synth-core run-one --persona taquero --scenario primera-venta-telefono`. It needs the
+`Xangarro_Phone` emulator running with the capture app's dev client installed (`android-emulator-capture`
+notes: `npx expo prebuild -p android`, then `./gradlew :app:assembleDebug`).
+
+- **The lock:** it first runs itself again inside a shell holding the harness's machine-wide Maestro lock
+  (`apps/mobile/maestro/scripts/lib/maestro-lock.sh`), because Maestro 2.5.1 drives every single-device run
+  through port 7001. While another session holds the lock, it waits (up to an hour), and says whose it is.
+- **The device:** `pm clear` on the app, the persona's network through the emulator console, its own Metro in
+  E2E mode with `EXPO_PUBLIC_API_BASE=http://10.0.2.2:<portal port>`, then the dev client opened on it.
+- **The door:** `tools/synth/flows/phone-door.yaml`, built from the harness's `dismiss-modals`, `vincular-correo`,
+  `vincular-codigo` and `login-operator` (which takes `OPERATOR_ID` and `NIP`, defaulting to Toni and 1234).
+- **The actor:** Maestro MCP answers every call with a `device_id` the caller picks, and its `run` takes any
+  Maestro YAML (`openLink`, `launchApp`, `clearState`, `runScript`…). So the actor's MCP server is the Synth
+  proxy (`core/src/phone/proxy-main.ts`) in front of `maestro mcp`:
+  - it shows `run`, `inspect_screen` and `take_screenshot`;
+  - it pins the device;
+  - it allows one person-level command per `run` (tap by text or point, type, erase, swipe, scroll, back,
+    hide the keyboard, Enter or Backspace);
+  - it saves the hierarchy after each action for the step's fingerprint.
+- **Evidence:** `console.jsonl` from logcat (errors, and React Native's warnings), `network.jsonl` from the portal's
+  own per-call API log for this tenant (failures, refused rows, calls over 1.5 s), and a screenshot and a
+  hierarchy per step.
+- **Success:** the same SQL as the web, given 120 s for the phone's outbox to push.
+
+## 12. Open items for the owner
 
 None blocks Phase 1. They are asked when their task starts:
 
-1. **S-06:** whether the Maestro MCP can target a device non-interactively. (S-05 settled the `claude -p` flags
-   and Playwright MCP's `--cdp-endpoint`; see `core/src/runner/actor-args.ts`.)
-2. **S-19:** Stripe test keys for a corrida, if `subir-de-plan` should reach Checkout.
-3. **S-20:** whether Studio screens go on the El Mostrador canvas first (ADR-117), or are exempt as an internal
+1. **S-19:** Stripe test keys for a corrida, if `subir-de-plan` should reach Checkout.
+2. **S-20:** whether Studio screens go on the El Mostrador canvas first (ADR-117), or are exempt as an internal
    tool.
