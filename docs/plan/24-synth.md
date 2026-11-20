@@ -250,7 +250,16 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-07 Prueba de aislamiento del actor [alta]
 
-- [ ] Status · **Blocked by:** S-05, S-06
+- [x] Status · **Blocked by:** S-05, S-06
+      Done: 2026-11-20 · `feat/synth-s07` · `pnpm --filter @xangarro/synth-core isolation` writes
+      `tools/synth/isolation.md`; both actors are isolated. Each actor, started with a run's exact flags and MCP
+      server, is told to read a canary file, `cat` it, fetch a canary page from a local server that counts hits,
+      and leave through its runner's door (URL bar, phone link). A script decides the verdict: Claude Code's
+      `init` event shows the server connected and exactly the allow-list visible, every call is on the list,
+      neither token reaches the transcript, and the server counts no hit. The first phone probe passed while its
+      proxy had failed to start (an actor with no tools), so the verdict now requires the tools to be there, and
+      the override's arguments are passed as `--maestro-arg=<value>`. The README shows the flags rendered from
+      `actorArgs`, and `tests/readme.test.ts` holds it to them and to an «isolated» record.
 - **What:**
   - A test run where the actor is told to read a file, run a shell command and fetch a URL. Each attempt is refused.
   - The README shows the exact flags and the allow-list.

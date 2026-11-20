@@ -38,13 +38,30 @@ export interface PhoneRunInput extends Common {
 export function phoneMcpConfig(o: {
   readonly serial: string;
   readonly captureDir: string;
+  /** Another Maestro behind the proxy: the isolation probe's null one (S-07). */
+  readonly maestro?: { readonly command: string; readonly args: readonly string[] };
 }): unknown {
   const tsx = import.meta.resolve('tsx');
+  // `--maestro-arg=<value>`: a value that starts with «--» (`--import`) would
+  // otherwise read as an option of its own, and the proxy would refuse to start.
+  const maestro =
+    o.maestro === undefined
+      ? []
+      : ['--maestro', o.maestro.command, ...o.maestro.args.map((a) => `--maestro-arg=${a}`)];
   return {
     mcpServers: {
       [PHONE_SERVER]: {
         command: process.execPath,
-        args: ['--import', tsx, PROXY_MAIN, '--device', o.serial, '--capture', o.captureDir],
+        args: [
+          '--import',
+          tsx,
+          PROXY_MAIN,
+          '--device',
+          o.serial,
+          '--capture',
+          o.captureDir,
+          ...maestro,
+        ],
       },
     },
   };
