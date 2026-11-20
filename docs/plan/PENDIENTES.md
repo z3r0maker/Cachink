@@ -82,7 +82,7 @@ trabajo, que es quien tiene que moverla.
 
 - [ ] `⛔ bloquea prod` `Media` **X-09** Reset de ROADMAP.md — Bloqueada por: X-02 · `07-launch.md:114`
 
-## Código y técnico (121)
+## Código y técnico (120)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
