@@ -1301,6 +1301,10 @@ test('a founder plans the next quarter, takes a card through the mediator, and s
     );
     await expect(page.getByTestId('tablero-aceptado-1')).toHaveText('$20,000');
 
+    // E-12's memo reads it: the card was finished this month, and Resultados opens on this month.
+    await page.goto('/empresa/resultados');
+    await expect(page.getByTestId('costo-sudor')).toContainText('Costo de sudor: $20,000');
+
     // An objective, typed in and updated by hand.
     await page.goto(`/empresa/tablero?t=${TABLERO_ACTUAL}&panel=nuevo-objetivo`);
     const objetivo = page.getByRole('dialog', { name: 'Nuevo objetivo' });

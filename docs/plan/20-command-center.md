@@ -647,9 +647,15 @@ with property tests:
 
 ### E-12 Estado de resultados y Balance `[media]`
 
-- [~] Status · **Blocked by:** — · **Remaining (2026-11-17):** the sweat-cost memo,
-  which reads the Tablero's accepted value (E-20); the bridge's drivers («8 negocios nuevos…»),
-  which need E-10's billing import.
+- [~] Status · **Blocked by:** — · **Remaining (2026-11-20):** the bridge's drivers («8 negocios
+  nuevos…»), which need E-10's billing import.
+  **Progress (2026-11-20, board CD-07):** the «Costo de sudor» memo under the statement. Owner
+  decision: a deliverable's accepted value counts in the month its card was finished, once accepted,
+  the Tablero's rule for quarters (ADR-156), so a quarter's memo equals its Tablero. `costoDeSudor`
+  (`@xangarro/domain/corp` `tablero/sudor.ts`) leaves out work in review, objected work and tasks;
+  the band reads «Costo de sudor: $X · EBITDA económico: $Y», the same under Devengado and Flujo,
+  says so when nothing was accepted, and links to that quarter's Tablero. Playwright: the Tablero
+  test's card, accepted by the mediator, reaches the month's memo.
   **Progress (2026-11-17, board CD-08, round 14 approved by the owner):**
   - `@xangarro/domain/corp` `balance/`: `balanceGeneral` groups the ledger's sums per account
     into Activo, Pasivo and Capital from the chart itself (`cuentasDelGrupo`). There are no
@@ -1198,7 +1204,7 @@ Changes to existing tasks:
 ### E-17 Resumen del trimestre `[baja]`
 
 - [ ] Status · **Blocked by:** E-12
-  - **Remaining (2026-11-19):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; queda E-12, que está a medias (su memo del costo de sudor).
+  - **Remaining (2026-11-20):** todo; no hay ruta `/empresa/trimestre`. E-20 y E-04 ya están; de E-12 sólo quedan los drivers del puente, que esperan la importación de E-10.
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the

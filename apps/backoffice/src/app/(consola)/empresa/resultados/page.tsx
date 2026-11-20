@@ -23,6 +23,7 @@ import * as m from '@/styles/mostrador.css';
 import { EncabezadoResultados } from './encabezado';
 import { Estado } from './estado';
 import { Cascada, Puente, Tendencia } from './graficas';
+import { Sudor } from './sudor';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,7 @@ function Contenido({ v, datos }: { readonly v: VistaResultados; readonly datos: 
         hrefDe={(cuenta) => hrefResultados(v, { abrir: cuenta })}
         faltanGastos={actual.faltanGastos}
       />
+      <Sudor v={v} sudor={datos.sudor} ebitda={actual.renglones.ebitda} />
     </>
   );
 }
@@ -101,8 +103,9 @@ export default async function ResultadosPage(props: {
   searchParams: Promise<{ periodo?: string; base?: string; abrir?: string }>;
 }) {
   await requireFounderPage();
-  const v = parseVista(await props.searchParams, hoyEnMexico());
-  const datos = await leerResultados(v);
+  const hoy = hoyEnMexico();
+  const v = parseVista(await props.searchParams, hoy);
+  const datos = await leerResultados(v, hoy);
   const vacio = datos.actual.movimientos.size === 0 && datos.anterior.movimientos.size === 0;
   return (
     <div className={m.page}>

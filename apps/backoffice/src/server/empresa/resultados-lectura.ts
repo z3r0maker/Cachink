@@ -1,12 +1,14 @@
 import 'server-only';
 
-import { importesDeResultados } from '@xangarro/data-corp';
+import { importesDeResultados, leerTablero } from '@xangarro/data-corp';
 import {
+  costoDeSudor,
   estadoDeResultados,
   mesesHasta,
   periodoAnterior,
   puenteEbitda,
   tendencia,
+  type CostoDeSudor,
   type EstadoResultados,
   type MesDeTendencia,
   type PuenteEbitda,
@@ -23,6 +25,8 @@ export interface DatosResultados {
   readonly anterior: EstadoResultados;
   readonly puente: PuenteEbitda;
   readonly tendencia: readonly MesDeTendencia[];
+  /** The Tablero's accepted value finished in the period (the «Costo de sudor» memo). */
+  readonly sudor: CostoDeSudor;
 }
 
 /**
@@ -30,12 +34,16 @@ export interface DatosResultados {
  * any of its parts needs (the previous period, the six months of the trend)
  * to the period's last, then the domain does the rest.
  */
-export async function leerResultados(v: VistaResultados): Promise<DatosResultados> {
+export async function leerResultados(v: VistaResultados, hoy: string): Promise<DatosResultados> {
   const previo = periodoAnterior(v.periodo);
   const ultimoMes = v.periodo.hasta.slice(0, 7);
   const primerMes = mesesHasta(ultimoMes, MESES_TENDENCIA)[0] ?? ultimoMes;
   const desde = [`${primerMes}-01`, previo.desde].sort()[0] ?? previo.desde;
-  const importes = await importesDeResultados(requireCorpDb(), desde, v.periodo.hasta);
+  const db = requireCorpDb();
+  const [importes, tablero] = await Promise.all([
+    importesDeResultados(db, desde, v.periodo.hasta),
+    leerTablero(db),
+  ]);
   const actual = estadoDeResultados(importes, v.periodo, v.base);
   const anterior = estadoDeResultados(importes, previo, v.base);
   return {
@@ -43,5 +51,6 @@ export async function leerResultados(v: VistaResultados): Promise<DatosResultado
     anterior,
     puente: puenteEbitda(actual, anterior),
     tendencia: tendencia(importes, ultimoMes, MESES_TENDENCIA, v.base),
+    sudor: costoDeSudor(tablero.tarjetas, v.periodo, hoy),
   };
 }
