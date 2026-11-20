@@ -29,6 +29,12 @@ tags:
     visible:
       id: 'escaner-sheet'
     timeout: 5000
+# The sheet is still sliding up when it first shows; a tap then lands short.
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-listo'
+    timeout: 5000
+- waitForAnimationToEnd
 - tapOn:
     id: 'escaner-manual'
 - waitForAnimationToEnd
@@ -60,16 +66,23 @@ tags:
 - tapOn:
     id: 'producto-nuevo-nombre'
 - waitForAnimationToEnd
-- inputText: 'Chicle'
-- runFlow:
-    when:
+- inputText: 'Goma'
+# Synthetic keystrokes drop letters in this controlled field ('Chicle' saved
+# as 'Chice' twice in a row): retype until the field reads back the whole
+# name, then hold it there before it can reach the catalogue.
+- repeat:
+    while:
       notVisible:
         id: 'producto-nuevo-nombre'
-        text: '.*Chicle.*'
+        text: 'Goma'
+    times: 4
     commands:
       - tapOn: { id: 'producto-nuevo-nombre' }
       - eraseText
-      - inputText: 'Chicle'
+      - inputText: 'Goma'
+- assertVisible:
+    id: 'producto-nuevo-nombre'
+    text: 'Goma'
 - hideKeyboard
 - tapOn:
     id: 'producto-nuevo-precio'
@@ -84,16 +97,25 @@ tags:
     notVisible: { id: 'producto-nuevo-nombre' }
     timeout: 15000
 - extendedWaitUntil:
-    visible: { text: '.*Chicle.*' }
+    visible: { text: '.*Goma.*' }
     timeout: 10000
 
-# The same code again: now it is a known product.
+# The same code again: now it is a known product. The escáner opens on the
+# camera again, not on the typed field from the first read.
 - tapOn:
     id: 'cobrar-scan'
 - extendedWaitUntil:
     visible:
       id: 'escaner-sheet'
     timeout: 5000
+# The sheet is still sliding up when it first shows; a tap then lands short.
+- extendedWaitUntil:
+    visible:
+      id: 'escaner-listo'
+    timeout: 5000
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: 'escaner-codigo'
 - tapOn:
     id: 'escaner-manual'
 - waitForAnimationToEnd
@@ -111,12 +133,12 @@ tags:
       id: 'escaner-agregado'
     timeout: 8000
 - assertVisible:
-    text: '.*Agregaste Chicle.*'
+    text: '.*Agregaste Goma.*'
 - tapOn:
     id: 'escaner-sheet-close'
 - waitForAnimationToEnd
 
-# Two Chicles on the ticket, charged in Efectivo.
+# Two Gomas on the ticket, charged in Efectivo.
 - runFlow:
     file: shared/cobrar-ticket.yaml
     env:

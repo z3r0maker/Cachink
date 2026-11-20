@@ -145,10 +145,12 @@ function useEscanerSheet(p: EscanerSheetProps) {
   const e = useEscaner(p.productos, p.onAgregar, p.onQuitarUno);
   const [luz, setLuz] = useState(false);
   const [manual, setManual] = useState(false);
-  // Every way out leaves the next opening fresh: no old card, torch off.
+  // Every way out leaves the next opening fresh: no old card, torch off, and
+  // the camera rather than a typed field still holding the last code.
   const salir = (then: () => void) => (): void => {
     e.reiniciar();
     setLuz(false);
+    setManual(false);
     then();
   };
   return { e, luz, setLuz, manual, setManual, salir };
