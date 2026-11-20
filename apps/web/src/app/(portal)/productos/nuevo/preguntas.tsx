@@ -4,10 +4,12 @@ import type { ProductoTipo, UsoProducto } from '@xangarro/domain';
 
 import { FilterChip, Input, OptionCards, Switch } from '@/components';
 
+import { CodigoBarras } from '../codigo-barras';
 import { Swatches } from '../sheet/apariencia';
 import { IconoPicker } from '../sheet/icono-picker';
 import type { Draft } from '../sheet/use-producto-form';
 import * as s from './preguntas.css';
+import type { CodigoVivo } from '../use-codigo';
 import { ganancia, UNIDADES } from './pasos';
 
 export interface PreguntaProps {
@@ -26,18 +28,25 @@ const TIPOS = [
   { value: 'servicio', title: 'Es un servicio', description: 'Se cobra, pero no se acaba.' },
 ];
 
-/** SKU and servicio: what most owners never need, folded away. */
-function MasOpciones({ draft, set }: PreguntaProps) {
+/**
+ * The barcode and servicio: what most owners never need, folded away. A code
+ * arriving from a reader opens it by itself (P-44, EcPortalCodigo).
+ */
+function MasOpciones({ draft, set, codigo }: PreguntaProps & { readonly codigo: CodigoVivo }) {
   return (
-    <details className={s.mas}>
-      <summary className={s.masResumen}>Más opciones: código (SKU) o si es un servicio</summary>
+    <details
+      className={s.mas}
+      open={codigo.abierto}
+      onToggle={(e) => codigo.setAbierto(e.currentTarget.open)}
+    >
+      <summary className={s.masResumen}>Más opciones: código de barras o si es un servicio</summary>
       <div className={s.grupo}>
-        <Input
-          labelText="Código (SKU)"
-          hintText="Opcional; el código con el que lo buscas"
+        <CodigoBarras
           value={draft.sku}
-          onChange={(e) => set({ sku: e.target.value })}
-          data-testid="producto-sku"
+          onChange={codigo.cambiar}
+          leido={codigo.leido}
+          onLeido={codigo.onLeido}
+          ocupado={codigo.ocupado}
         />
         <OptionCards
           ariaLabel="Tipo"
@@ -50,7 +59,7 @@ function MasOpciones({ draft, set }: PreguntaProps) {
   );
 }
 
-export function PasoUno({ draft, set }: PreguntaProps) {
+export function PasoUno({ draft, set, codigo }: PreguntaProps & { readonly codigo: CodigoVivo }) {
   return (
     <div className={s.grupo}>
       <Input
@@ -79,7 +88,7 @@ export function PasoUno({ draft, set }: PreguntaProps) {
           onValueChange={(v) => set({ usoProducto: v as UsoProducto })}
         />
       </div>
-      <MasOpciones draft={draft} set={set} />
+      <MasOpciones draft={draft} set={set} codigo={codigo} />
     </div>
   );
 }

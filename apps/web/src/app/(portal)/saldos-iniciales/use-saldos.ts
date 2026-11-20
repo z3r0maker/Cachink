@@ -28,8 +28,7 @@ export interface SaldosView {
 
 /** The last save or lock: a pill beside the heading when it went well, an alert when not. */
 export type Resultado =
-  | { readonly ok: true; readonly texto: string }
-  | { readonly ok: false; readonly texto: string };
+  { readonly ok: true; readonly texto: string } | { readonly ok: false; readonly texto: string };
 
 let nuevas = 0;
 

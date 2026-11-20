@@ -225,7 +225,7 @@ export function unguarded(
 ): ServerAction[] {
   const closed = new Set(guards);
   const open = new Set(actions);
-  for (let moved = true; moved; ) {
+  for (let moved = true; moved;) {
     moved = false;
     for (const action of open) {
       if (!action.calls.some((name) => closed.has(name))) continue;

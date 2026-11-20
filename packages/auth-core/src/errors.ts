@@ -7,10 +7,7 @@
  * a key of the wrong length, a sealed secret that fails authentication.
  */
 export type AuthCoreErrorCode =
-  | 'INVALID_ARGUMENT'
-  | 'INVALID_BASE32'
-  | 'INVALID_KEY'
-  | 'INVALID_SEALED_SECRET';
+  'INVALID_ARGUMENT' | 'INVALID_BASE32' | 'INVALID_KEY' | 'INVALID_SEALED_SECRET';
 
 export class AuthCoreError extends Error {
   constructor(

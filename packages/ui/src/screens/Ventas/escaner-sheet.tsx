@@ -1,179 +1,111 @@
 /**
- * «Escanea el producto» (MvEscaner): the camera in a bottom sheet, the torch,
- * typing the code by hand, and what each code did. A known code goes into the
- * ticket with «Deshacer»; an unknown one offers «Darlo de alta», which opens
- * Producto nuevo with the code filled in.
+ * «Escanea el producto» (MvEscaner, EcInventario): the camera in a bottom
+ * sheet, the torch, typing the code by hand, and what each code did. On the
+ * ticket a known code goes on it with «Deshacer»; in Inventario it closes the
+ * escáner and opens that product's movement. An unknown code offers «Darlo de
+ * alta», which opens Producto nuevo with the code filled in.
  */
 import { useState, type ReactElement } from 'react';
-import { Pressable, TextInput } from 'react-native';
 import { View } from '@tamagui/core';
 import type { LineaTicket } from '@xangarro/caja/caja';
 import { BottomSheet } from '../../components/BottomSheet/index';
-import { Btn } from '../../components/Btn/index';
-import { Eyebrow } from '../../components/Panel/index';
 import { MText } from '../../components/Mostrador/index';
-import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 import { CobrarBar } from './cobrar-bar';
 import type { ProductoCobrar } from './cobrar-catalogo';
-import { COBRAR_GLYPHS } from './cobrar-glyphs';
 import { EscanerCamara } from './escaner-camara';
+import { Controles, Manual } from './escaner-controles';
 import { EscanerResultado } from './escaner-resultado';
 import { resumenTicket } from './ticket-en-curso';
-import { useEscaner } from './use-escaner';
+import { useEscaner, type ModoEscaner } from './use-escaner';
+
+/** Cobrar's escáner: the ticket's lines and its «Cobrar» bar. */
+export interface EscanerTicket {
+  readonly tipo: 'ticket';
+  readonly folio: string | null;
+  readonly lines: readonly LineaTicket[];
+  readonly onAgregar: (p: ProductoCobrar) => void;
+  readonly onQuitarUno: (p: ProductoCobrar) => void;
+  /** The bar's «Cobrar»: on to the ticket. */
+  readonly onCobrar: () => void;
+}
+
+/** Inventario's escáner: one product at a time, onto its movement. */
+export interface EscanerProducto {
+  readonly tipo: 'producto';
+  readonly llevaExistencias: (p: ProductoCobrar) => boolean;
+  readonly onProducto: (p: ProductoCobrar) => void;
+}
 
 export interface EscanerSheetProps {
   readonly open: boolean;
   readonly onClose: () => void;
-  readonly folio: string | null;
+  readonly modo: EscanerTicket | EscanerProducto;
   readonly productos: readonly ProductoCobrar[];
-  readonly lines: readonly LineaTicket[];
-  readonly onAgregar: (p: ProductoCobrar) => void;
-  readonly onQuitarUno: (p: ProductoCobrar) => void;
   /** «Darlo de alta»: Producto nuevo with this code. */
   readonly onAlta: (codigo: string) => void;
-  /** The bar's «Cobrar»: on to the ticket. */
-  readonly onCobrar: () => void;
-  /** «Pedro», or «el dueño»: who sees a shared code in Revisión de caja. */
+  /** «Pedro», or «el dueño»: who sees a shared code, who decides what keeps stock. */
   readonly dueno: string;
 }
 
-/**
- * The characters a barcode can carry: digits for EAN and UPC, and Code 39's
- * letters and signs (Code 128 is a superset). The keypad shows digits; a
- * hardware keyboard or a reader paired to a tablet can type the rest.
- */
-const NO_CODIGO = /[^0-9A-Za-z\-. $/+%]/g;
-
-function CodigoInput(p: {
-  readonly codigo: string;
-  readonly setCodigo: (t: string) => void;
-  readonly onSubmit: () => void;
-}): ReactElement {
-  return (
-    <TextInput
-      autoCorrect={false}
-      testID="escaner-codigo"
-      aria-label="Números del código de barras"
-      inputMode="numeric"
-      autoCapitalize="characters"
-      placeholder="7501234567897"
-      placeholderTextColor={colors.textMuted}
-      value={p.codigo}
-      onChangeText={(t) => p.setCodigo(t.replace(NO_CODIGO, ''))}
-      onSubmitEditing={p.onSubmit}
-      style={{
-        flex: 1,
-        height: 48,
-        paddingHorizontal: 14,
-        borderRadius: radii[3],
-        borderWidth: borderWidths.thin,
-        borderColor: colors.black,
-        ...fontFace(typography.weights.bold),
-        fontSize: portalFontSizes.lg,
-        color: colors.black,
-      }}
-    />
-  );
-}
-
-function Manual({ onBuscar }: { onBuscar: (c: string) => void }): ReactElement {
-  const [codigo, setCodigo] = useState('');
-  const buscar = (): void => {
-    if (codigo.trim() === '') return;
-    onBuscar(codigo);
-    setCodigo('');
+/** `apagar` runs before Inventario's product closes the escáner, as any way out does. */
+function modoDelHook(m: EscanerTicket | EscanerProducto, apagar: () => void): ModoEscaner {
+  if (m.tipo === 'ticket') {
+    return { tipo: 'ticket', onAgregar: m.onAgregar, onQuitarUno: m.onQuitarUno };
+  }
+  const onProducto = (p: ProductoCobrar): void => {
+    apagar();
+    m.onProducto(p);
   };
-  return (
-    <View gap={6}>
-      <Eyebrow>Escribe los números del código</Eyebrow>
-      <View flexDirection="row" gap={8}>
-        <CodigoInput codigo={codigo} setCodigo={setCodigo} onSubmit={buscar} />
-        <Btn variant="primary" size="lg" sentence onPress={buscar} testID="escaner-buscar">
-          Buscar
-        </Btn>
-      </View>
-    </View>
-  );
-}
-
-const LUZ = {
-  width: 52,
-  height: 52,
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: radii[3],
-  borderWidth: borderWidths.thin,
-  borderColor: colors.black,
-} as const;
-
-function Controles(p: {
-  luz: boolean;
-  onLuz: () => void;
-  manual: boolean;
-  onManual: () => void;
-}): ReactElement {
-  return (
-    <View flexDirection="row" gap={10}>
-      <Pressable
-        testID="escaner-luz"
-        role="button"
-        aria-label="Linterna"
-        aria-pressed={p.luz}
-        onPress={p.onLuz}
-        style={{ ...LUZ, backgroundColor: p.luz ? colors.yellow : colors.white }}
-      >
-        <PathIcon d={COBRAR_GLYPHS.linterna} size={20} />
-      </Pressable>
-      <View flex={1}>
-        <Btn
-          variant="secondary"
-          size="lg"
-          fullWidth
-          icon={<PathIcon d={COBRAR_GLYPHS.teclado} size={18} />}
-          onPress={p.onManual}
-          testID="escaner-manual"
-        >
-          {p.manual ? 'Mejor con la cámara' : 'Escribir el código'}
-        </Btn>
-      </View>
-    </View>
-  );
+  return { tipo: 'producto', llevaExistencias: m.llevaExistencias, onProducto };
 }
 
 function useEscanerSheet(p: EscanerSheetProps) {
-  const e = useEscaner(p.productos, p.onAgregar, p.onQuitarUno);
   const [luz, setLuz] = useState(false);
   const [manual, setManual] = useState(false);
   // Every way out leaves the next opening fresh: no old card, torch off, and
   // the camera rather than a typed field still holding the last code.
-  const salir = (then: () => void) => (): void => {
-    e.reiniciar();
+  const apagar = (): void => {
     setLuz(false);
     setManual(false);
+  };
+  const e = useEscaner(p.productos, modoDelHook(p.modo, apagar));
+  const salir = (then: () => void) => (): void => {
+    e.reiniciar();
+    apagar();
     then();
   };
   return { e, luz, setLuz, manual, setManual, salir };
 }
 
+function Pie(p: { modo: EscanerTicket; onCobrar: () => void }): ReactElement {
+  const { piezas, total } = resumenTicket(p.modo.lines);
+  return <CobrarBar piezas={piezas} total={total} onCobrar={p.onCobrar} enHoja />;
+}
+
+const eyebrowDe = (m: EscanerTicket | EscanerProducto): string =>
+  m.tipo === 'ticket' ? ['Escáner', m.folio].filter(Boolean).join(' · ') : 'Escáner · Inventario';
+
+/** The camera waits while a card asks something of the operator. */
+const PAUSAN: readonly string[] = ['desconocido', 'duplicado', 'sinExistencias'];
+
 export function EscanerSheet(p: EscanerSheetProps): ReactElement {
   const { e, luz, setLuz, manual, setManual, salir } = useEscanerSheet(p);
-  const { piezas, total } = resumenTicket(p.lines);
-  const pie = <CobrarBar piezas={piezas} total={total} onCobrar={salir(p.onCobrar)} enHoja />;
+  const pie =
+    p.modo.tipo === 'ticket' ? <Pie modo={p.modo} onCobrar={salir(p.modo.onCobrar)} /> : null;
   return (
     <BottomSheet
       open={p.open}
       onClose={salir(p.onClose)}
-      eyebrow={['Escáner', p.folio].filter(Boolean).join(' · ')}
+      eyebrow={eyebrowDe(p.modo)}
       title="Escanea el producto"
       closeLabel="Cerrar el escáner"
       testID="escaner-sheet"
-      footer={pie}
+      {...(pie ? { footer: pie } : {})}
     >
       <View gap={12}>
         <EscanerCamara
           luz={luz}
-          activo={p.open && e.estado.tipo !== 'desconocido' && e.estado.tipo !== 'duplicado'}
+          activo={p.open && !PAUSAN.includes(e.estado.tipo)}
           onCodigo={e.leer}
         />
         <MText weight="bold" textAlign="center">
@@ -186,7 +118,12 @@ export function EscanerSheet(p: EscanerSheetProps): ReactElement {
           manual={manual}
           onManual={() => setManual(!manual)}
         />
-        <EscanerResultado e={e} dueno={p.dueno} onAlta={(c) => salir(() => p.onAlta(c))()} />
+        <EscanerResultado
+          e={e}
+          dueno={p.dueno}
+          inventario={p.modo.tipo === 'producto'}
+          onAlta={(c) => salir(() => p.onAlta(c))()}
+        />
       </View>
     </BottomSheet>
   );

@@ -24,8 +24,7 @@ import { qrSvgDataUri } from '../qr';
 type Refused = Failure & { readonly campo?: 'password' | 'codigo'; readonly bloqueado?: true };
 
 export type PrepararResult =
-  | { readonly ok: true; readonly qr: string; readonly clave: string }
-  | Refused;
+  { readonly ok: true; readonly qr: string; readonly clave: string } | Refused;
 export type CodigosResult = { readonly ok: true; readonly codigos: readonly string[] } | Refused;
 export type SeguridadResult = { readonly ok: true } | Refused;
 

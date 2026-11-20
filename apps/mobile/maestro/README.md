@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 68 flows + 25 shared subflows and scripts; `full-regression.sh` runs the curated 41 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 70 flows + 25 shared subflows and scripts; `full-regression.sh` runs the curated 41 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -339,6 +339,8 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `
 | Flow                             | Entry     | Suite | What it proves                                                                                                                                                                      |
 | -------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inventario-llego-merma.yaml`    | activated | ✓     | Inventario (Track M, M-09; RvInventario): one tap on a row opens the sheet on the kind its stock calls for; an entrada raises the count, then a merma lowers it                     |
+| `llegada-escaner.yaml`           | activated |       | Inventario's escáner (M-20, EcInventario): a known code opens «Llegó mercancía» on that product, marked «Del escáner», and the entrada raises the row's count                       |
+| `llegada-escaner-alta.yaml`      | activated |       | Inventario's escáner with an unknown code (M-20): «Darlo de alta» saves the product, then its «Llegó mercancía» opens marked «Del escáner» and registers                            |
 | `stock-buscar.yaml`              | activated |       | Inventario's search (Track M, M-09; MvInventario): typing filters the Existencias list, and a name with no product says                                                             |
 | `producto-quick-add.yaml`        | activated |       | Products are create-only on the device (A-09): quick-add asks nombre, código, categoría, precio and stock tracking; the                                                             |
 | `validation-producto.yaml`       | activated |       | Test form validation on the NuevoProducto modal.                                                                                                                                    |

@@ -15,6 +15,9 @@
 #
 # M-21: a turno another flow left open on the device (one turno per caja)
 # asks Toni to continue or close it; `seguir-turno-abierto.yaml` continues.
+#
+# Synth (S-06) signs in its own minted operator: `OPERATOR_ID` and `NIP`
+# override Toni and 1234, and every flow that passes neither gets Toni.
 appId: mx.xangarro.mobile
 ---
 - runFlow:
@@ -24,18 +27,18 @@ appId: mx.xangarro.mobile
     commands:
       - extendedWaitUntil:
           visible:
-            id: 'acceso-operador-01JPRS00000000000000000001'
+            id: 'acceso-operador-${OPERATOR_ID || "01JPRS00000000000000000001"}'
           timeout: 20000
       - tapOn:
-          id: 'acceso-operador-01JPRS00000000000000000001'
+          id: 'acceso-operador-${OPERATOR_ID || "01JPRS00000000000000000001"}'
       - extendedWaitUntil:
           visible:
             id: 'numpad-1'
           timeout: 8000
-      - tapOn: { id: 'numpad-1' }
-      - tapOn: { id: 'numpad-2' }
-      - tapOn: { id: 'numpad-3' }
-      - tapOn: { id: 'numpad-4' }
+      - tapOn: { id: 'numpad-${(NIP || "1234").charAt(0)}' }
+      - tapOn: { id: 'numpad-${(NIP || "1234").charAt(1)}' }
+      - tapOn: { id: 'numpad-${(NIP || "1234").charAt(2)}' }
+      - tapOn: { id: 'numpad-${(NIP || "1234").charAt(3)}' }
       - tapOn: { id: 'nip-enviar' }
 - extendedWaitUntil:
     visible:

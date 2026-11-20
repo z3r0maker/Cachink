@@ -107,13 +107,16 @@ function Demo(props: {
       <EscanerSheet
         open={hoja === 'escaner'}
         onClose={() => setHoja(null)}
-        folio="V-0413"
+        modo={{
+          tipo: 'ticket',
+          folio: 'V-0413',
+          lines,
+          onAgregar: (p) => setLines((l) => agregar(l, p)),
+          onQuitarUno: (p) => onBump(p.id, -1),
+          onCobrar: () => setHoja('ticket'),
+        }}
         productos={productos}
-        lines={lines}
-        onAgregar={(p) => setLines((l) => agregar(l, p))}
-        onQuitarUno={(p) => onBump(p.id, -1)}
         onAlta={() => setHoja('nuevoCodigo')}
-        onCobrar={() => setHoja('ticket')}
         dueno="Pedro"
       />
       <ProductoNuevoSheet

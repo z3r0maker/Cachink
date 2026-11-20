@@ -154,8 +154,7 @@ export interface InventarioInicialRow {
 }
 
 export type CapturaResult =
-  | { ok: true; total: string; movimientos: number }
-  | { ok: false; message: string };
+  { ok: true; total: string; movimientos: number } | { ok: false; message: string };
 
 export async function capturarInventarioInicial(
   fecha: string,

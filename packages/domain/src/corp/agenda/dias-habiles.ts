@@ -77,7 +77,7 @@ export function anteriorDiaHabil(fecha: string): string {
 /** `n` business days after `fecha`, not counting `fecha` itself. */
 export function sumarDiasHabiles(fecha: string, n: number): string {
   let d = fecha;
-  for (let left = n; left > 0; ) {
+  for (let left = n; left > 0;) {
     d = step(d, 1);
     if (esDiaHabil(d)) left -= 1;
   }

@@ -42,11 +42,7 @@ export interface Factura extends FacturaRegistrada {
 }
 
 export type FacturaErrorCode =
-  | 'NO_ENCONTRADA'
-  | 'NO_DISPONIBLE'
-  | 'NO_APLICA'
-  | 'DATOS_FISCALES_INCOMPLETOS'
-  | 'DATO_INVALIDO';
+  'NO_ENCONTRADA' | 'NO_DISPONIBLE' | 'NO_APLICA' | 'DATOS_FISCALES_INCOMPLETOS' | 'DATO_INVALIDO';
 
 /** A typed refusal the screen shows as is; `message` is for the customer. */
 export class FacturaError extends Error {

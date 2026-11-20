@@ -143,8 +143,7 @@ export async function pruneSupersededImages(db: XangarroDatabase): Promise<void>
 
 async function changeLogHighWater(db: XangarroDatabase): Promise<number> {
   const row = (await db.get(sql`SELECT COALESCE(MAX(id), 0) AS hw FROM __xangarro_change_log`)) as
-    | { hw: number }
-    | undefined;
+    { hw: number } | undefined;
   return row?.hw ?? 0;
 }
 

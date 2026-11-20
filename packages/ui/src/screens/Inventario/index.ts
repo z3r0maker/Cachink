@@ -7,13 +7,14 @@ export {
   type GuardarHoja as GuardarMovimiento,
 } from './use-mover-form';
 export { useHoja, type Hoja, type HojaVivo } from './use-hoja';
+export { useEscanerInventario } from './use-escaner-inventario';
+export { type InventarioEscanerProps } from './inventario-escaner';
 export { ExistenciasLista, SinProductos, EstadoPill, cantidadConUnidad } from './existencias-lista';
 export { MovimientosLista } from './movimientos-lista';
 export { MovToast } from './mov-toast';
 export { NotaFirma, PieMover, type PieMoverProps } from './mover-pie';
 export {
   Buscador as InventarioBuscador,
-  Cabeza as InventarioCabeza,
   Kpis as InventarioKpis,
   Pestanas as InventarioPestanas,
   Regla as InventarioRegla,

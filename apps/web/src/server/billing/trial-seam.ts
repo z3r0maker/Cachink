@@ -11,8 +11,7 @@ import type { BillingBusiness, StartTrialCheckoutUseCase } from '@xangarro/appli
  */
 export type WizardInterval = 'mensual' | 'anual';
 export type TrialSeamResult =
-  | { readonly status: 'redirect'; readonly url: string }
-  | { readonly status: 'unavailable' };
+  { readonly status: 'redirect'; readonly url: string } | { readonly status: 'unavailable' };
 
 const INTERVAL: Readonly<Record<WizardInterval, 'month' | 'year'>> = {
   mensual: 'month',

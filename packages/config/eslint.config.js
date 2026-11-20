@@ -99,11 +99,12 @@ const configs = tseslint.config(
           type: 'ui',
           pattern: [
             'packages/ui/src/**',
-            // Storybook config + story files live next to the UI package but
-            // are not implementations of the boundary rules themselves.
-            // Counting them as UI-scope keeps lint clean without a new layer.
+            // Storybook config lives next to the UI package but is not an
+            // implementation of the boundary rules itself. Counting it as
+            // UI-scope keeps lint clean without a new layer. Story files sit
+            // under src/**, and boundaries 7 matches element patterns to
+            // folders, not files, so they need no pattern of their own.
             'packages/ui/.storybook/**',
-            'packages/ui/**/*.stories.{ts,tsx,mdx}',
           ],
         },
         { type: 'sync', pattern: ['packages/sync/src/**', 'packages/sync-*/src/**'] },
@@ -122,51 +123,63 @@ const configs = tseslint.config(
         'error',
         {
           default: 'disallow',
-          rules: [
-            { from: { type: 'domain' }, disallow: { to: { type: '*' } } },
+          policies: [
+            { from: { element: { type: 'domain' } }, disallow: { to: { element: { type: '*' } } } },
             {
               // Use cases take repository *interfaces* (CLAUDE.md §3–4); the
               // Drizzle implementations stay out of reach.
-              from: { type: 'application' },
+              from: { element: { type: 'application' } },
               allow: [
-                { to: { type: 'domain' } },
-                { to: { type: 'data' }, dependency: { kind: 'type' } },
+                { to: { element: { type: 'domain' } } },
+                { to: { element: { type: 'data' } }, dependency: { kind: 'type' } },
               ],
             },
-            { from: { type: 'data' }, allow: { to: { type: 'domain' } } },
-            { from: { type: 'caja' }, allow: { to: { type: 'domain' } } },
-            { from: { type: 'sync' }, allow: { to: { type: ['domain', 'data'] } } },
+            { from: { element: { type: 'data' } }, allow: { to: { element: { type: 'domain' } } } },
+            { from: { element: { type: 'caja' } }, allow: { to: { element: { type: 'domain' } } } },
+            {
+              from: { element: { type: 'sync' } },
+              allow: { to: { element: { types: ['domain', 'data'] } } },
+            },
             {
               // ui is the phone's body: it wires the cloud sync bridge,
               // activation and entitlement from @xangarro/sync (ADR-104).
-              from: { type: 'ui' },
-              allow: { to: { type: ['domain', 'application', 'data', 'sync', 'caja'] } },
+              from: { element: { type: 'ui' } },
+              allow: {
+                to: { element: { types: ['domain', 'application', 'data', 'sync', 'caja'] } },
+              },
             },
             {
               // `MockRepositoryProvider` wraps ui's `RepositoryProvider`, and
               // lives in testing so it stays off the runtime graph (ADR-033).
-              from: { type: 'testing' },
+              from: { element: { type: 'testing' } },
               allow: [
-                { to: { type: ['domain', 'application', 'data', 'ui'] } },
+                { to: { element: { types: ['domain', 'application', 'data', 'ui'] } } },
                 // In-memory fakes implement sync's repository interfaces.
-                { to: { type: 'sync' }, dependency: { kind: 'type' } },
+                { to: { element: { type: 'sync' } }, dependency: { kind: 'type' } },
               ],
             },
             {
-              from: { type: 'app' },
+              from: { element: { type: 'app' } },
               allow: {
-                to: { type: ['domain', 'application', 'data', 'ui', 'sync', 'testing', 'caja'] },
+                to: {
+                  element: {
+                    types: ['domain', 'application', 'data', 'ui', 'sync', 'testing', 'caja'],
+                  },
+                },
               },
             },
             // core mints tenants through @xangarro/testing/tenant (S-02, S-04).
-            { from: { type: 'synth-core' }, allow: { to: { type: ['domain', 'testing'] } } },
             {
-              from: { type: 'synth-server' },
-              allow: { to: { type: ['synth-core', 'domain', 'testing'] } },
+              from: { element: { type: 'synth-core' } },
+              allow: { to: { element: { types: ['domain', 'testing'] } } },
             },
             {
-              from: { type: 'synth-studio' },
-              allow: { to: { type: ['synth-server', 'synth-core', 'domain'] } },
+              from: { element: { type: 'synth-server' } },
+              allow: { to: { element: { types: ['synth-core', 'domain', 'testing'] } } },
+            },
+            {
+              from: { element: { type: 'synth-studio' } },
+              allow: { to: { element: { types: ['synth-server', 'synth-core', 'domain'] } } },
             },
           ],
         },

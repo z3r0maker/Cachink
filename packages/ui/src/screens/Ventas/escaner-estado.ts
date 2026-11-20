@@ -20,7 +20,9 @@ export type EstadoEscaner =
       readonly codigo: string;
       readonly opciones: readonly ProductoCobrar[];
     }
-  | { readonly tipo: 'deshecho'; readonly p: ProductoCobrar };
+  | { readonly tipo: 'deshecho'; readonly p: ProductoCobrar }
+  /** Inventario's escáner: the product is in the catalogue but Inventario does not list it. */
+  | { readonly tipo: 'sinExistencias'; readonly p: ProductoCobrar; readonly codigo: string };
 
 export type EstadoDuplicado = Extract<EstadoEscaner, { tipo: 'duplicado' }>;
 export type EstadoAgregado = Extract<EstadoEscaner, { tipo: 'agregado' }>;
@@ -45,4 +47,25 @@ export function estadoDeCodigo(
  */
 export function elegidoDeDuplicado(e: EstadoDuplicado, p: ProductoCobrar): EstadoAgregado {
   return { tipo: 'agregado', p, avisaDueno: e.opciones.some((o) => o.pendiente) };
+}
+
+/** Inventario's answer to a found product: open its movement. */
+export interface AbrirMovimiento {
+  readonly tipo: 'abrir';
+  readonly p: ProductoCobrar;
+}
+
+/**
+ * The same read in Inventario (M-20, EcInventario): the product found opens
+ * its movement when Inventario lists it (`lleva`), and says it keeps no stock
+ * when it does not, since an alta would repeat its code (ADR-150). Unknown and
+ * shared codes stay as they are.
+ */
+export function paraInventario(
+  e: EstadoEscaner,
+  lleva: (p: ProductoCobrar) => boolean,
+): EstadoEscaner | AbrirMovimiento {
+  if (e.tipo !== 'agregado') return e;
+  if (lleva(e.p)) return { tipo: 'abrir', p: e.p };
+  return { tipo: 'sinExistencias', p: e.p, codigo: e.p.codigo ?? '' };
 }

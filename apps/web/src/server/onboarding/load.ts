@@ -131,10 +131,9 @@ function aSenales(r: Senales): ChecklistSignals {
  * `cache()`: the layout's «Primeros pasos» and Inicio's card read the same
  * signals in one request; they cost one round trip, not two.
  */
-export const loadChecklistSignals = cache(
-  (businessId: string): Promise<ChecklistSignals> =>
-    withTenant(businessId, async (tx) => {
-      const [r = SIN_SENALES] = await tx.execute<Senales>(sql`
+export const loadChecklistSignals = cache((businessId: string): Promise<ChecklistSignals> =>
+  withTenant(businessId, async (tx) => {
+    const [r = SIN_SENALES] = await tx.execute<Senales>(sql`
       SELECT ${hay(sql`${users}`)} AS operadores,
              ${hay(sql`${products}`, sql`deleted_at IS NULL`)} AS productos,
              ${hay(sql`${openingBalances}`, sql`deleted_at IS NULL`)} AS saldos,
@@ -144,6 +143,6 @@ export const loadChecklistSignals = cache(
              b.logo_url AS logo, b.rfc, b.enabled_payment_methods AS pagos
         FROM (SELECT 1) uno
         LEFT JOIN ${businesses} b ON true`);
-      return aSenales(r);
-    }),
+    return aSenales(r);
+  }),
 );

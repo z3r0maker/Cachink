@@ -12,11 +12,7 @@ export type PlantillaComprobante = 'clasico' | 'moderno' | 'ticket' | 'minimal';
 
 /** The handoff's labels; 'QR · CoDi' is the display form of the enum's 'QR/CoDi'. */
 export type MetodoPagoComprobante =
-  | 'Efectivo'
-  | 'Transferencia'
-  | 'Tarjeta'
-  | 'QR · CoDi'
-  | 'Crédito';
+  'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR · CoDi' | 'Crédito';
 
 export interface ConceptoComprobante {
   readonly concepto: string;

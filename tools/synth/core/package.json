@@ -21,21 +21,23 @@
     "stack": "tsx src/cli/stack.ts",
     "test:stack": "SYNTH_STACK=1 vitest run .integration.test",
     "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
-    "run-one": "tsx src/cli/run-one.ts"
+    "run-one": "tsx src/cli/run-one.ts",
+    "isolation": "tsx src/cli/isolation.ts",
+    "judge": "tsx src/cli/judge.ts"
   },
   "dependencies": {
     "@xangarro/domain": "workspace:*",
     "@xangarro/testing": "workspace:*",
     "bcryptjs": "3.0.3",
-    "playwright-core": "1.63.0",
+    "playwright-core": "1.65.0",
     "yaml": "2.9.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.20.5",
     "@xangarro/config": "workspace:*",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.12"
   }
 }

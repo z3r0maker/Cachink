@@ -11,6 +11,8 @@ import { FilterChip, Input, OptionCards, Switch, Tag } from '@/components';
 import { marginPercent } from '@/lib/money';
 import { eyebrow } from '@/styles/text.css';
 
+import { CodigoBarras } from '../codigo-barras';
+import { useCodigo } from '../use-codigo';
 import { chipRow, section, toggleRow, twoCol } from './sheet.css';
 import type { Draft } from './use-producto-form';
 
@@ -40,6 +42,9 @@ const USOS = [
 ];
 
 export function Basico({ draft, set, editing }: SectionProps) {
+  // P-44: the reader's Enter never saves; a repeated code comes back from the
+  // save as the sentence that names the other product.
+  const codigo = useCodigo(draft.sku, (sku) => set({ sku }));
   return (
     <div className={section}>
       <span className={eyebrow}>Básico</span>
@@ -49,12 +54,12 @@ export function Basico({ draft, set, editing }: SectionProps) {
         onChange={(e) => set({ nombre: e.target.value })}
         data-testid="producto-nombre"
       />
-      <Input
-        labelText="SKU"
-        hintText="Opcional; el código que usas para buscarlo"
+      <CodigoBarras
         value={draft.sku}
-        onChange={(e) => set({ sku: e.target.value })}
-        data-testid="producto-sku"
+        onChange={codigo.cambiar}
+        leido={codigo.leido}
+        onLeido={codigo.onLeido}
+        ocupado={null}
       />
       {editing ? (
         <Tag tone="neutral">{draft.tipo === 'servicio' ? 'Servicio' : 'Producto'}</Tag>
