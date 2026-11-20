@@ -194,6 +194,7 @@ Links to discussion, docs, prior art.
 | [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
 | [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
 | [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
+| [156](#adr-156) | 2026-11-19 | The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted | Accepted |
 | [157](#adr-157) | 2026-11-19 | Maestro runs in lanes: each run takes its own simulator, contracts mock and Metro, on Maestro 2.6 or later | Accepted |
 
 <!-- END ADR-INDEX -->
@@ -11192,6 +11193,80 @@ fiscal, which `ingresos_del_periodo` returns.
   the contador.
 - Once Xangarro stamps through the PAC (`CFDI_MODE=live`), the package can carry the issued XMLs too, with the
   PAC key in the backoffice.
+
+## ADR-156
+
+**Title:** The Tablero reads each card's state from its events, and a card lives from its plan until it is accepted
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-20; OD-4 answered by the owner on 2026-11-19, boards CD-13b to CD-13d approved the same day
+(canvas round 20)
+
+**Context**
+
+E-20 is the founders' agreement made operational: each quarter both partners commit to deliverables, each with a
+verifiable criterion and a value, and a partner who has less than half of the commitment accepted at the close gets
+a written notice. OD-4 settled the wording: a deliverable is a work product only (a result is an objective, measured
+and never valued); each partner proposes a value and the average is used, and a gap over 2× waits for a third
+party's quote; «terminado» opens ten calendar days to object, silence accepts, an objection names the unmet part
+and goes back to the owner or to the mediator, whose ruling is recorded; work finished inside the quarter counts
+once accepted, so the close waits; both partners approve the plan, which freezes its values, and without a plan by
+day 10 the previous quarter's commitment stands; the console drafts the notice, quoting the agreement's clause word
+for word, and the partner who cumplió sends it.
+
+The quarter's money close (E-03, ADR-125 §5) has asked the founders to type «the value the Tablero agreed» since it
+shipped. E-26's `BlobStore` keeps evidence in `corp` until Azure is provisioned.
+
+**Decision**
+
+1. **A card's state is never stored.** `corp.board_card_events` is append-only (iniciada, terminada, aceptada,
+   objetada, al_mediador, resuelta, hecha) and the domain folds it into the card's phase, the last «terminado», the
+   window's last day and the quarter it counts in. Silence accepts when the day after the window arrives, dated on
+   the window's last day; an event later than that changes nothing.
+2. **A card lives from the quarter it was planned in until it is accepted or taken off a plan.** So an unaccepted
+   card rolls over with its value and counts as committed again, and a quarter's «no cumplida» list is what was
+   alive in it and not accepted in it. A card finished in the quarter and accepted after it counts in the quarter
+   it was finished in. A card of the next plan moves only once its quarter starts.
+3. **A partner's commitment** is the value of their valued deliverables alive in the quarter, once its plan is
+   approved; while the plan is built, the same sum, shown as a draft; with no plan approved by day 10, the previous
+   quarter's commitment, back to the first quarter the Tablero has. A card added after the approval counts once both
+   values are in.
+4. **The close is decided** when the quarter has ended and no card finished in it is in its window or with the
+   mediator. An objection of a decided quarter no longer reaches the mediator: the owner fixes it and marks it
+   again, and it counts in the quarter it is then accepted in. A partner cumple with half or more accepted (nothing
+   committed cumple); only one partner short calls for a notice.
+5. **Values freeze** once the card's plan is approved and it has a value, once work starts, or once a quote sets
+   it. The use cases refuse a change; a trigger refuses it too, under the card's lock, which events take as well.
+   Plan events go in order (sent from a draft, answered by the other partner) under a lock per quarter.
+6. **Evidence, quotes, the mediator's rulings and the notices are Expediente documents** in «Acuerdo de socios»,
+   filed only once the write is known to be valid. Evidence may instead be a link.
+7. **The notice is drafted from the decided quarter** and quotes the newest clause the founders typed in
+   (`corp.board_clauses`, append-only). Its PDF comes from the domain's own words (`textoDelAviso`), the same the
+   screen shows. Marking it sent files the PDF with the clause as it read that day; the console never sends it.
+8. **The money close reads the Tablero.** A quarter the Tablero covers (a plan or a card) closes with each
+   partner's accepted value, once decided; a quarter from before the Tablero keeps the typed value, so it does not
+   read as nothing delivered.
+9. **Obligations are mirrored from the Agenda** onto the kanban and marked there; tasks carry no value; objectives
+   are typed in with a whole goal and a unit, updated by hand, and judged against the last progress inside the
+   quarter. No agent suggestions until E-32.
+
+**Alternatives considered**
+
+- *A stored status column on each card.* Rejected: two partners acting at once could leave it disagreeing with
+  what happened, and the ten-day silence would need a job to flip it.
+- *Copying unaccepted cards into the next quarter at the close.* Rejected: the next plan is built before the close
+  decides, and a card accepted late would leave a stale copy behind.
+- *A fresh commitment of zero without a plan.* Rejected: the agreement keeps the previous quarter's.
+- *Sending the notice by email from the console.* Rejected by the owner (OD-4 §6): the agreement asks a partner to
+  send it.
+
+**Consequences**
+
+- The hosted database needs corp `0016` before the console's deploy. The migration only adds tables; a ledger and
+  a code list from before stay as they were (a migration test holds this).
+- E-21's pool cut and E-17's quarter summary read the Tablero's accepted value through `aceptadoDelTrimestre`.
+- Moving the evidence to Azure is E-26's; the Tablero reads documents through the Expediente either way.
 
 ## ADR-157
 

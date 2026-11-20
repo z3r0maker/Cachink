@@ -18,3 +18,12 @@ export {
   spendRequests,
 } from './presupuesto.js';
 export { accountCodeLists, accountCodes, accountCodeValidations } from './contador.js';
+export {
+  boardCardEvents,
+  boardCards,
+  boardClauses,
+  boardNotices,
+  boardObjectiveProgress,
+  boardObjectives,
+  boardPlanEvents,
+} from './tablero.js';
