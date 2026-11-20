@@ -165,7 +165,7 @@ describe('PorEnviarScreen · estados', () => {
     expect(screen.getByTestId('por-enviar-error').textContent).toContain(
       'No pudimos leer la cola de esta caja',
     );
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('por-enviar-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 });

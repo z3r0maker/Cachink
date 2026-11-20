@@ -12,7 +12,7 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import { heroFor, kpisFor, type InicioData } from '@xangarro/caja/inicio';
-import { ErrorState, Spinner } from '../../components/index';
+import { CajaEstado, EstadoCargando } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useCajaLayout, type CajaLayout } from '../AppShell/use-caja-layout';
 import { InicioAtajos } from './inicio-atajos';
@@ -88,21 +88,16 @@ export function InicioScreen(props: InicioScreenProps): ReactElement {
   const pad = ancho ? 24 : 16;
   if (props.state === 'error' || (props.state === 'happy' && props.data === null)) {
     return (
-      <ErrorState
-        title={t('entrar.inicio.errorTitulo')}
-        body={t('entrar.inicio.errorCuerpo')}
-        retryLabel={t('entrar.inicio.reintentar')}
+      <CajaEstado
+        mode="error"
+        errorTitle={t('entrar.inicio.errorTitulo')}
         onRetry={props.onRetry}
-        testID="inicio-error"
+        testID="inicio"
       />
     );
   }
   if (props.data === null) {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="inicio-cargando">
-        <Spinner />
-      </View>
-    );
+    return <EstadoCargando testID="inicio-cargando" />;
   }
   return (
     <ScrollView

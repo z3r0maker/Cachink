@@ -143,7 +143,7 @@ describe('GastosScreen · estados', () => {
     const { onRetry } = montar({ state: 'error', data: null, porPagar: null });
     expect(screen.getByTestId('gastos-error')).toBeInTheDocument();
     expect(screen.getByText('No pudimos cargar tus gastos')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('gastos-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 });

@@ -105,7 +105,7 @@ describe('CobranzaScreen · states', () => {
     expect(screen.getByTestId('cobranza-error').textContent).toContain(
       'No pudimos cargar el fiado',
     );
-    fireEvent.click(screen.getByTestId('error-state-retry'));
+    fireEvent.click(screen.getByTestId('cobranza-error-reintentar'));
     expect(onRetry).toHaveBeenCalled();
   });
 });

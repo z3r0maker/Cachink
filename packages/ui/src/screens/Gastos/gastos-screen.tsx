@@ -25,7 +25,7 @@ import {
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
-import { ErrorState, Spinner } from '../../components/index';
+import { CajaEstado, EstadoCargando } from '../../components/index';
 import { borderColors, borderWidths, colors } from '../../theme';
 import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
@@ -170,12 +170,11 @@ export function GastosScreen(p: GastosScreenProps): ReactElement {
   if (p.state === 'error' || (p.state === 'happy' && p.data === null)) {
     return (
       <View flex={1} testID={p.testID}>
-        <ErrorState
-          title="No pudimos cargar tus gastos"
-          body="Lo que salió de tu caja sigue guardado. Intenta otra vez."
-          retryLabel="Intentar otra vez"
+        <CajaEstado
+          mode="error"
+          errorTitle="No pudimos cargar tus gastos"
           onRetry={p.onRetry}
-          testID="gastos-error"
+          testID="gastos"
         />
       </View>
     );
@@ -183,9 +182,7 @@ export function GastosScreen(p: GastosScreenProps): ReactElement {
   if (p.data === null) {
     return (
       <View flex={1} testID={p.testID}>
-        <View flex={1} alignItems="center" justifyContent="center" testID="gastos-cargando">
-          <Spinner />
-        </View>
+        <EstadoCargando testID="gastos-cargando" />
       </View>
     );
   }

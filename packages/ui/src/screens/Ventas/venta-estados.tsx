@@ -4,8 +4,7 @@
  * the failed read. Each says what to do next.
  */
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
-import { ErrorState, EstadoVacio, Spinner } from '../../components/index';
+import { CajaEstado, EstadoCargando, EstadoVacio } from '../../components/index';
 import { TurnoCerrado } from '../AbrirTurno/turno-cerrado';
 
 /** The screen's states: its data, or one of these (the web's EstadoMode plus sin-turno). */
@@ -21,21 +20,14 @@ export interface VentasEstadosProps {
 }
 
 export function VentasEstados(p: VentasEstadosProps): ReactElement {
-  if (p.id === 'loading') {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center" testID="ventas-cargando">
-        <Spinner />
-      </View>
-    );
-  }
+  if (p.id === 'loading') return <EstadoCargando testID="ventas-cargando" />;
   if (p.id === 'error') {
     return (
-      <ErrorState
-        title="No pudimos cargar tus ventas"
-        body="Tus datos están a salvo en este dispositivo. Vuelve a intentar en un momento."
-        retryLabel="Intentar de nuevo"
+      <CajaEstado
+        mode="error"
+        errorTitle="No pudimos cargar tus ventas"
         onRetry={p.onRetry}
-        testID="ventas-error"
+        testID="ventas"
       />
     );
   }

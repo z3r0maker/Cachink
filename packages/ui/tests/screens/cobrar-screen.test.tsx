@@ -74,8 +74,8 @@ describe('CobrarScreen', () => {
     const onReintentar = vi.fn();
     montar({ estado: 'error', onReintentar });
     expect(screen.getByText('No pudimos leer tus productos')).toBeInTheDocument();
-    expect(screen.getByText(/Tu venta no se pierde/)).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Reintentar'));
+    expect(screen.getByText(/Lo que capturaste no se pierde/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Intentar de nuevo'));
     expect(onReintentar).toHaveBeenCalledTimes(1);
   });
 
