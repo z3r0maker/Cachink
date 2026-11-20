@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 
 import { defineConfig, devices } from '@playwright/test';
 
-import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { type: 'json' };
+import { portalServerEnv } from '@xangarro/testing/tenant';
 
 import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
@@ -13,9 +13,6 @@ import { SERIAL_TAG } from './e2e/shared-tenant';
 import { E2E_TOTP_KEY } from './e2e/totp-key';
 import type { OpcionesWebkit } from './e2e/webkit-profile';
 import { INSPECT_PORT, SERVER_V8_DIR, coverageEnabled } from './scripts/coverage-gate/options';
-
-/** The contract's published test key — never a production fallback. */
-const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
 
 /**
  * Portal accessibility and state/role sweep (P-16).
@@ -127,28 +124,19 @@ function serverEnv(today: string): Record<string, string> {
     // builds in this directory cannot swap it out mid-run. CI builds `.next`
     // in its own step and is alone on the runner.
     ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
-    DATABASE_URL: databaseUrl(),
-    DATABASE_SUPER_URL: superDatabaseUrl(),
-    // The business's today (server/clock.ts).
-    PORTAL_TODAY: today,
-    // The local build keeps the dev galleries (/inventario) for visual.spec;
-    // any other production build answers 404 there.
-    DEV_PAGES: '1',
-    // /activate signs a device token and an entitlement. The entitlement key
-    // is the contract's published TEST key, passed explicitly: the portal has
-    // no default for it on purpose (server/device/credentials.ts).
-    DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
-    ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
-    // Seals the TOTP seeds the second-factor specs enrol (N-83, e2e/totp-key.ts).
-    PORTAL_TOTP_KEY: E2E_TOTP_KEY,
-    BILLING_DATABASE_URL: billingDatabaseUrl(),
-    // One long-lived server for every worker, not a serverless instance:
-    // it keeps the pool it had before `createDb` defaulted to 2 (DB2-CONN-01).
-    DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX ?? '5',
-    // Every viewport project exports the seeded tenant several times inside
-    // ten minutes; production's five-per-ten-minutes would 429 the suite
-    // (DB3-EXP-01). The limit itself is unit-tested (export-route.test.ts).
-    EXPORTS_PER_TENANT: process.env.EXPORTS_PER_TENANT ?? '1000',
+    // The recipe Synth's stack uses too (`@xangarro/testing/tenant`, S-04).
+    ...portalServerEnv({
+      databaseUrl: databaseUrl(),
+      superDatabaseUrl: superDatabaseUrl(),
+      billingDatabaseUrl: billingDatabaseUrl(),
+      today,
+      deviceTokenSecret: process.env.DEVICE_TOKEN_SECRET,
+      entitlementPrivateKey: process.env.ENTITLEMENT_PRIVATE_KEY,
+      // Seals the TOTP seeds the second-factor specs enrol (N-83, e2e/totp-key.ts).
+      totpKey: E2E_TOTP_KEY,
+      poolMax: process.env.DATABASE_POOL_MAX,
+      exportsPerTenant: process.env.EXPORTS_PER_TENANT,
+    }),
   };
 }
 

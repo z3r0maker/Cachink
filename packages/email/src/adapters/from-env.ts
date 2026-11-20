@@ -30,6 +30,12 @@ export interface EmailEnv {
   readonly RESEND_API_KEY?: string;
   readonly EMAIL_FROM?: string;
   readonly EMAIL_REPLY_TO?: string;
+  /**
+   * Local only: where the outbox writes, instead of `<cwd>/.email-outbox/`.
+   * Synth gives each corrida its own (ADR-153 §3), since every `next start`
+   * runs in `apps/web`. Ignored when mail goes through Resend or is refused.
+   */
+  readonly EMAIL_OUTBOX_DIR?: string;
   readonly VERCEL_ENV?: string;
 }
 
@@ -46,6 +52,12 @@ const set = (v: string | undefined): v is string => v !== undefined && v.trim() 
 export function emailTransport(env: EmailEnv): EmailTransport {
   if (set(env.RESEND_API_KEY)) return 'resend';
   return set(env.VERCEL_ENV) ? 'unconfigured' : 'outbox';
+}
+
+/** The outbox folder: an explicit one, then `EMAIL_OUTBOX_DIR`, then `<cwd>/.email-outbox`. */
+function outboxDir(env: EmailEnv, options: FromEnvOptions): string {
+  if (options.outboxDir !== undefined) return options.outboxDir;
+  return set(env.EMAIL_OUTBOX_DIR) ? env.EMAIL_OUTBOX_DIR : join(process.cwd(), '.email-outbox');
 }
 
 const unconfigured: EmailSender = {
@@ -74,6 +86,6 @@ export function emailSenderFromEnv(env: EmailEnv, options: FromEnvOptions = {}):
     case 'unconfigured':
       return unconfigured;
     case 'outbox':
-      return outboxSender({ dir: options.outboxDir ?? join(process.cwd(), '.email-outbox'), from });
+      return outboxSender({ dir: outboxDir(env, options), from });
   }
 }

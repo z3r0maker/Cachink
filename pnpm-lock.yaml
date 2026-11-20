@@ -969,6 +969,9 @@ importers:
       '@xangarro/auth-core':
         specifier: workspace:*
         version: link:../auth-core
+      '@xangarro/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@xangarro/data':
         specifier: workspace:*
         version: link:../data
@@ -1000,9 +1003,6 @@ importers:
       '@xangarro/config':
         specifier: workspace:*
         version: link:../config
-      '@xangarro/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@xangarro/sync':
         specifier: workspace:*
         version: link:../sync
@@ -1211,6 +1211,15 @@ importers:
 
   tools/synth/core:
     dependencies:
+      '@xangarro/domain':
+        specifier: workspace:*
+        version: link:../../../packages/domain
+      '@xangarro/testing':
+        specifier: workspace:*
+        version: link:../../../packages/testing
+      bcryptjs:
+        specifier: 3.0.3
+        version: 3.0.3
       yaml:
         specifier: 2.9.1
         version: 2.9.1

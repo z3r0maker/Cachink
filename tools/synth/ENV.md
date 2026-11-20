@@ -116,7 +116,32 @@ There is no trial (ADR-105).
 - **Phone:** Maestro flows in `apps/mobile/maestro/flows/` with `flows/shared/` subflows, and reports in
   `e2e-reports/`.
 
-## 9. Open items for the owner
+## 9. A corrida's own stack (S-04)
+
+`pnpm --filter @xangarro/synth-core stack up` brings one up and prints a JSON `ready` line. `--no-server` gives
+the database alone; `--seed <seed> --auth-as <role>` also mints a run's tenant on it.
+
+- **Database:** container `xangarro-pg-synth-<id>` on a free port, migrated and seeded by `db-local.sh`. It is
+  removed with its volume when the corrida ends.
+- **Portal:** one production build in `apps/web/.next-synth/<id>`, and `next start` on another free port.
+  - It starts with `portalServerEnv()` from `@xangarro/testing/tenant`, the e2e suite's own recipe.
+  - It adds `EMAIL_OUTBOX_DIR=tools/synth/reports/<id>/outbox`, so each corrida's mail stays apart.
+  - `CFDI_MODE=off`, and no Stripe, Resend or LLM key is set.
+- **Refusals:** under 10 GB free on the Docker VM, or a database URL outside `allowed_hosts`.
+- **Ending:** SIGINT, SIGTERM and SIGHUP tear down. A SIGKILL leaves `tools/synth/reports/.stacks/<id>.json`, which
+  the next `stack up`, or `stack reap`, uses to remove the server, container and build it names.
+- **Seeds** (`core/src/seed/fixtures.ts`):
+
+  | Seed                            | What is on the run's tenant                                   |
+  | ------------------------------- | ------------------------------------------------------------- |
+  | `vacio`                         | the owner, the business and one device                        |
+  | `negocio-con-catalogo-minimo`   | plus 3 products and operator Ana (NIP 2580)                   |
+  | `negocio-con-historial-30-dias` | plus 3 sales a day for the 30 days before today               |
+  | `plan-al-limite`                | xangarrito, with its 2 operators (Ana, Luis) and its 1 device |
+
+  An `operador` scenario also gets an activation code; `admin` and `viewer` get a member account of that role.
+
+## 10. Open items for the owner
 
 None blocks Phase 1. They are asked when their task starts:
 

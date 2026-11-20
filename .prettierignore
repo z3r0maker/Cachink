@@ -17,6 +17,7 @@ apps/*/android/
 # Next.js build output, esbuild bundles and generated types are not ours to format.
 .next/
 .next-e2e/
+.next-synth/
 **/.out/
 next-env.d.ts
 test-results/
