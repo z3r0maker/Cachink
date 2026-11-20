@@ -31,8 +31,7 @@ export const factorDeps = (deps: AccessDeps): SecondFactorDeps => ({
 });
 
 export type Rechazado =
-  | { readonly kind: 'failed' }
-  | { readonly kind: 'locked'; readonly wait: number };
+  { readonly kind: 'failed' } | { readonly kind: 'locked'; readonly wait: number };
 export type Comprobado = { readonly kind: 'ok'; readonly usado: FactorUsed } | Rechazado;
 
 async function comprobar(deps: AccessDeps, userId: string, input: string): Promise<Comprobado> {
@@ -53,9 +52,7 @@ export async function retoPendiente(
 }
 
 export type Verificado =
-  | Comprobado
-  | { readonly kind: 'sin-reto' }
-  | { readonly kind: 'sin-negocio' };
+  Comprobado | { readonly kind: 'sin-reto' } | { readonly kind: 'sin-negocio' };
 
 /**
  * Step two of a sign-in: an app code or a recovery code. Only now does a

@@ -52,8 +52,7 @@ export interface BillingFilter {
 
 /** Which tenants a billing filter keeps: all of them, or exactly these. */
 export type BillingMatch =
-  | { readonly kind: 'all' }
-  | { readonly kind: 'only'; readonly businessIds: readonly BusinessId[] };
+  { readonly kind: 'all' } | { readonly kind: 'only'; readonly businessIds: readonly BusinessId[] };
 
 export interface BillingStatusSource {
   /** False while no adapter has real billing data (the B-10 stub); the list says so. */

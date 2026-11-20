@@ -23,8 +23,7 @@ export interface LogQueryOptions {
 
 /** Combined timeline entry — discriminated by `type` field. */
 export type TimelineEntry =
-  | (AuditEvent & { readonly type: 'audit' })
-  | (ErrorLogEntry & { readonly type: 'error' });
+  (AuditEvent & { readonly type: 'audit' }) | (ErrorLogEntry & { readonly type: 'error' });
 
 /** Snapshot for bug report export. */
 export interface LogSnapshot {

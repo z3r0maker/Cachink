@@ -31,8 +31,7 @@ import { sendActivationCode } from '../email/activation-code';
  * doing nothing wrong.
  */
 export type CodeResult =
-  | { ok: true; code: string; expiresAt: string }
-  | { ok: false; message: string };
+  { ok: true; code: string; expiresAt: string } | { ok: false; message: string };
 
 const ATTEMPTS = 3;
 

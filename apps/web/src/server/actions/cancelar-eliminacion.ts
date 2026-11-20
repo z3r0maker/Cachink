@@ -10,8 +10,7 @@ import { reportError } from '../observability/report';
  * session: the single-use link is the proof, and opening it changed nothing.
  */
 export type CancelarEliminacionResult =
-  | { ok: true; view: CancelarEliminacionView }
-  | { ok: false; message: string };
+  { ok: true; view: CancelarEliminacionView } | { ok: false; message: string };
 
 export async function cancelarEliminacion(token: string): Promise<CancelarEliminacionResult> {
   try {

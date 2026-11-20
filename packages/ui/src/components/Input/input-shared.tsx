@@ -45,14 +45,7 @@ import { colors, fontSizes, radii, typography } from '../../theme';
  *   3. Add a regression test under `tests/input.test.tsx`.
  */
 export type InputType =
-  | 'text'
-  | 'number'
-  | 'date'
-  | 'select'
-  | 'email'
-  | 'phone'
-  | 'password'
-  | 'decimal';
+  'text' | 'number' | 'date' | 'select' | 'email' | 'phone' | 'password' | 'decimal';
 
 export const FIELD_RADIUS = radii[2]; // 12 — per CLAUDE.md §8.3 scale.
 export const ROW_MARGIN_BOTTOM = 14; // form-row rhythm from the mock.
@@ -92,12 +85,7 @@ export const FIELD_STYLE: CSSProperties = {
 export interface KeyboardHints {
   /** RN `keyboardType` — soft keyboard variant. */
   readonly keyboardType?:
-    | 'default'
-    | 'numeric'
-    | 'decimal-pad'
-    | 'number-pad'
-    | 'email-address'
-    | 'phone-pad';
+    'default' | 'numeric' | 'decimal-pad' | 'number-pad' | 'email-address' | 'phone-pad';
   /** Web `inputMode` — equivalent of `keyboardType` on HTMLInputElement. */
   readonly inputMode?: 'text' | 'numeric' | 'decimal' | 'email' | 'tel' | 'none';
   /** Whether the field should mask its value (passwords). */

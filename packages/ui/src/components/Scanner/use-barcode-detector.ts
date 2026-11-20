@@ -82,8 +82,7 @@ async function initStream(
   videoElRef: React.MutableRefObject<HTMLVideoElement | null>,
 ): Promise<boolean> {
   const nav = (typeof navigator !== 'undefined' ? navigator : null) as
-    | (NavigatorMediaLike & Navigator)
-    | null;
+    (NavigatorMediaLike & Navigator) | null;
   if (!nav?.mediaDevices?.getUserMedia) return false;
   const stream = await nav.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
   if (cancelledRef.current) {

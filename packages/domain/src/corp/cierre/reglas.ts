@@ -10,10 +10,7 @@ import { pasosPendientes, type PasoDelCierre } from './pasos.js';
  * newest back, so a reopened month never sits under a closed one. Pure.
  */
 export type KindEventoCierre =
-  | 'cerrado'
-  | 'reapertura_pedida'
-  | 'reapertura_rechazada'
-  | 'reabierto';
+  'cerrado' | 'reapertura_pedida' | 'reapertura_rechazada' | 'reabierto';
 
 export interface EventoCierre {
   readonly kind: KindEventoCierre;
