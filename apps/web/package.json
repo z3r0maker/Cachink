@@ -81,7 +81,7 @@
     "monocart-coverage-reports": "^2.13.0",
     "sql.js": "^1.14.2",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6",
+    "vitest": "^4.1.12",
     "vitest-monocart-coverage": "^4.0.2"
   }
 }
