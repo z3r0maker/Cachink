@@ -148,8 +148,8 @@ domain function posts its balanced lines. Nobody types debits and credits.
   - **Depreciación y amortización.**
 - **Each expense carries:** a project (or «compartido»), whether it is deductible, its IVA
   treatment (acreditable, not acreditable, exempt) and its currency.
-- **USD.** Kept in USD plus the FX rate of the payment date (the DOF FIX rate; entered manually in
-  v1, fetched from Banxico in E-42).
+- **USD.** Booked at what the bank charged in pesos, its fee included; the dollars and the rate
+  that results (pesos ÷ dollars) travel with the entry (E-42, ADR-159). No published rate is used.
 - **Sources:**
   - revenue imported from billing through `RevenueSource`;
   - CFDI XML upload for received invoices;
@@ -1039,10 +1039,28 @@ with property tests:
 
 ### E-42 Banco y tipo de cambio `[baja]`
 
-- [ ] Status · **Blocked by:** —
-  - **Remaining (2026-11-19, verificado contra el repo):** todo. Detrás de E-23.
-- **What:** bank CSV import with matching (the conciliador agent proposes), and the Banxico FIX
-  rate fetched daily.
+- [~] Status · **Blocked by:** — · **Remaining (2026-11-20):** the bank CSV import with matching, which waits
+  for MEXIA's bank account and an anonymized sample statement (owner).
+- **What:** bank CSV import with matching (the conciliador agent proposes), and USD expenses at the
+  bank's charge. **Owner decision (2026-11-20, ADR-159):** the Banxico FIX fetch is dropped: the
+  accounts are in pesos, so a USD expense is booked at what the bank charged, and the rate is worked
+  out from it.
+- **Progress (2026-11-20, boards CD-01g and CD-01h, round 21):**
+  - `@xangarro/domain/corp` `ledger/cargo.ts`: `tipoCambioDelCargo` (pesos ÷ dollars, four decimals,
+    half up), `tipoCambioRaro` (outside 15–25 pesos per dollar, «¿Seguro?»), `aCargo` (a USD
+    invoice's IVA and retentions in proportion to the charge, the subtotal taking the rounding).
+    `gastoDesdeCaptura` takes `cargoMxn` instead of a rate; `CARGO_MXN_FALTANTE` when it is missing.
+  - application: `registrarFacturas` books a paid (PUE) USD invoice at its `cargoMxn`, refusing it
+    without one; an invoice on credit (PPD) still posts at its XML's rate.
+  - Console: Registrar's USD fields are «Monto de la factura (USD)» and «Lo que cobró el banco
+    (MXN)», with the worked-out rate and the «¿Seguro?» warning; Registrar con XML and the Facturas
+    review ask the charge of a paid USD invoice, next to the rate the invoice states. Movimientos
+    reads «USD 20.00 · el banco cobró a 18.6050»; a USD recurring charge says the charge is asked
+    when it is registered.
+  - Playwright: the USD expense of `empresa.spec.ts` is typed with its charge (a mistyped one
+    flagged first), and a paid USD invoice is registered from Registrar at the bank's charge.
+  - **Deviation from the board:** a recurring charge's row does not show last month's charge; it
+    says the charge is asked when it is registered.
 
 ### E-43 Exportación al contador `[media]`
 
