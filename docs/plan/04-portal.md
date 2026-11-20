@@ -1892,7 +1892,7 @@ WhatsApp).
 ### P-38 Don Cuentas explica una diferencia de caja [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** —
-      **2026-09-26 (owner, ADR-110): totalmente determinista — sin modelo.** Las causas que esto
+      **Decidido 2026-09-26 (owner, ADR-110):** totalmente determinista, sin modelo. Las causas que esto
       propone están nombradas en sus propios Steps: ventas canceladas, fiado, gastos sin
       comprobante. Son tres consultas sobre un turno, ordenadas por monto. Su aceptación — «cites
       only that turno's rows» — sale gratis en lugar de algo que haya que confiarle a un prompt;
@@ -1909,7 +1909,7 @@ WhatsApp).
 ### P-39 Conclusiones de Don Cuentas en Estados financieros [baja]
 
 - [ ] Status · **Blocked by:** P-30, P-28 · **Blocks:** —
-      **2026-09-26 (owner, ADR-110): se escribe una vez al mes, se muestra en Estados y se anuncia.**
+      **Decidido 2026-09-26 (owner, ADR-110):** se escribe una vez al mes, se muestra en Estados y se anuncia.
       No por cada vista del estado — esa era una factura por vista que nadie había cotizado — y
       tampoco se pliega en el Diagnóstico, porque el valor es una línea _donde están los números_.
       Se genera con la corrida mensual, se guarda para ese periodo y se renderiza en Estados
@@ -1928,7 +1928,7 @@ WhatsApp).
 ### P-40 Primer diagnóstico gratis a los 90 días [baja]
 
 - [ ] Status · **Blocked by:** P-28 · **Blocks:** —
-  - **Acotado por ADR-109 (2026-09-26).** Esto decía «Xangarrito **or Xangarro**», escrito cuando el
+  - **Acotado por ADR-109 (2026-09-26):** Esto decía «Xangarrito **or Xangarro**», escrito cuando el
     Diagnóstico era sólo de Xangarrote. Xangarro ya recibe uno cada mes como parte del plan, así
     que un reporte gratis único no es una oferta para ellos — **P-40 es sólo de Xangarrito.** Lo
     que muestra es la _lectura corta_ (la forma de Xangarro, según P-28), no el reporte completo:

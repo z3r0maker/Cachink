@@ -1592,24 +1592,45 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
 
 ## 5. Dependency sketch
 
-```
-C-12 limits/usage/capabilities ──► N-01, N-02, N-31
-C-13 payment intents ──► N-41, N-42
-C-14 QR activation ──► N-25
-C-15 business branding columns ──► N-11, N-19
+> **Derivado de los campos `Blocked by` / `Blocks`, no escrito a mano.** Sólo aristas vivas: las dos
+> puntas abiertas el 2026-11-20. `pnpm test:scripts` falla si una de estas flechas no existe en los
+> campos, o si una de sus puntas cerró — que es exactamente lo que le pasó a la versión anterior de
+> esta sección, que seguía dibujando `N-24 ──► N-20, N-22, N-25` con N-20 cerrada desde septiembre y
+> N-24 desde el 2026-11-20. El grafo completo, con las demás tracks y el orden de trabajo, está en
+> «Siguiente» de `PENDIENTES.md`, que se regenera con `pnpm plan:board`.
 
-B-10 ──► N-01 ──► N-13 ──► N-30
-N-02 ──► N-03, N-04, N-07
-N-05 admin ──► N-06 … N-10, N-18, N-46 … N-48
-N-11 parity ──► A-01, N-12 ──► N-13, N-14, N-15
-P-07 ──► N-16 ──► N-17, N-18
-N-19 ──► N-20 ──► N-21
-app-branch merge + Track O screens ──► N-24 ──► N-20, N-22, N-25
-N-26, N-27, N-28, N-29 ──► N-30 beta ──► X-10
-N-24, A-15 ──► N-32 ──► X-05 · B-10 ──► N-33 ──► N-30
-N-30 ──► N-40 ──► N-41 ──► N-42, N-43, N-53 ──► N-45 ──► N-44
-N-06 + B-10 ──► N-63 ──► N-70, N-72 · N-57 ──► N-64 ──► N-73, N-74
-N-05 ──► N-66 ──► N-68, N-71 · N-09 ──► N-69 · N-67 ──► N-68  (17-consola-crecimiento.md)
+```
+Entran de otras tracks:
+B-20 ──► N-27
+C-13 ──► N-42, N-80
+X-01 ──► N-28, N-30
+
+Teléfono y portal:
+N-19 ──► N-12
+N-22 ──► N-29
+N-25 ──► N-29
+
+Beta cerrada y lanzamiento:
+N-03, N-26, N-27, N-28, N-29, N-34 ──► N-30
+N-29 ──► X-02
+N-82 ──► X-10
+
+Pagos y conciliación:
+N-75 ──► N-41, N-53, N-76
+N-40 ──► N-53, N-80
+N-41 ──► N-43, N-53, N-76, N-80
+N-43 ──► N-76, N-77, N-79
+N-80 ──► N-42, N-79
+N-79 ──► N-44, N-78
+N-42, N-45, N-53 ──► N-44
+
+Consola de crecimiento (17-consola-crecimiento.md):
+N-47 ──► N-73
+N-63 ──► E-40, N-70, N-72
+N-64 ──► N-70, N-73, N-74
+N-66 ──► N-68, N-71
+N-67 ──► N-68
+N-72 ──► N-70
 ```
 
 ---
