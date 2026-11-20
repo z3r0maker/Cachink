@@ -347,7 +347,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-11 Matriz `smoke`, concurrencia y skill `synth-run` [alta]
 
-- [ ] Status · **Blocked by:** S-10
+- [ ] Status · **Blocked by:** —
 - **What:** `matrix/smoke.yaml`, a concurrency pool (web 3, phone 1), and `tools/synth/.claude/skills/synth-run`.
 - **Acceptance:** smoke runs in parallel with no cross-run interference and finishes in under 15 minutes.
 
@@ -410,7 +410,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-17 `synth-persona` y evidencia pública [media]
 
-- [ ] Status · **Blocked by:** S-10
+- [ ] Status · **Blocked by:** —
 - **What:**
   - Collect public store reviews of Mexican POS and finance apps into `personas/evidence/`, with reviewer names
     stripped, short quotes only, and the source URL and date kept.
