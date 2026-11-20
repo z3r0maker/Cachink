@@ -108,6 +108,10 @@ Cards may still lift on hover on desktop (`liftOnHover`). No shimmer, no spinner
 Synth Studio (`tools/synth/studio`, internal, never shipped) has a list of its own (ADR-154). None of it applies
 to `apps/*`.
 
+The founders' «Empresa» area of the console (`/empresa` in `apps/backoffice`) has eleven patterns of its own
+(ADR-161, canvas CD-21), with their values in `consoleMotion`. They apply there and nowhere else; the shimmer rule
+above has one exception there, a single sweep across the hero card when a screen opens.
+
 ## 7. Contrast
 
 - **4.5:1 minimum** for all text.

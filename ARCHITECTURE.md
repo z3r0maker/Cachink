@@ -199,6 +199,7 @@ Links to discussion, docs, prior art.
 | [158](#adr-158) | 2026-11-19 | Watchman watches the checkout, not the agents' worktrees inside it, and a nested checkout's Metro uses its own watcher | Accepted |
 | [159](#adr-159) | 2026-11-20 | A USD expense paid from a peso account is booked at what the bank charged, not at a published rate | Accepted |
 | [160](#adr-160) | 2026-11-20 | The console signs in with passkeys only; its password and TOTP are retired | Accepted |
+| [161](#adr-161) | 2026-11-20 | The founders' «Empresa» console has a motion vocabulary of its own: eleven patterns that run once when a screen opens, never loop, keep every figure readable, and take their values from `consoleMotion` tokens | Accepted |
 | [162](#adr-162) | 2026-11-20 | Error reports are on by default and a report sent by hand always sends; the phone's door to report is a help button in the header, and no report carries a screenshot | Accepted |
 
 <!-- END ADR-INDEX -->
@@ -11523,6 +11524,134 @@ the credential only answers to the console's own domain, so it cannot be phished
 - The console's Permissions-Policy leaves `publickey-credentials-get` and `-create` at their default (self); it must
   not deny them. The CSP needs no change.
 - The portal is unchanged. N-83's console action to switch an owner's TOTP off is unaffected.
+
+---
+
+## ADR-161
+
+**Title:** The founders' «Empresa» console has a motion vocabulary of its own: eleven patterns that run once when a
+screen opens, never loop, keep every figure readable, and take their values from `consoleMotion` tokens
+
+**Date:** 2026-11-20
+
+**Status:** Accepted — owner design interview of 2026-11-20 (track E, tasks E-45 and E-46). The spec is canvas round
+23 of «Xangarro Consola · Empresa» (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq), boards CD-21 (the eleven
+patterns) and CD-21b to CD-21d (Resumen, Resultados and Cierre with motion), all approved the same day. Amends
+ADR-117's El Mostrador §6 («Five motions, nothing else») **for the `/empresa` area of `apps/backoffice` only**.
+
+**Context**
+
+The owner asked for MEXIA's founders' console (ADR-125) to look techy and «super fancy», with animations. El
+Mostrador §6 allows five motions: press, panel slide, dialog pop, Don's idle loop and the phone's capture shutter.
+That is right for an emprendedor capturing a sale. «Empresa» is different: its only users are the two founders
+(ADR-125 §1), it is never shown to a tenant, and they read it to decide, weekly and on the 17th.
+
+Four constraints shaped the answer:
+
+- **The console's CSP has no `'unsafe-inline'`.** No style attribute may carry a value, so a bar's height, a
+  stagger delay or a counter's target cannot be written inline. Charts are SVG rects whose geometry is attributes
+  and whose colour is a class over tokens.
+- **Reduced motion is honoured everywhere** (§6 already wraps every motion in it).
+- **A founder must never wait for a figure, or read a wrong one,** because of an animation (CLAUDE.md §2.1).
+- **WCAG 2.2.2:** anything that moves for more than five seconds needs a way to pause it.
+
+Round 22's CD-17b (E-17, Resumen del trimestre) had already drawn motion ad hoc, with slower timings (900 ms bars,
+a 1 s fill after a 400 ms wait), a yellow sweep and a dot that pulsed forever.
+
+The review proposed ten calm patterns («only the mark moves»). The owner chose **more energy** and decided in the
+same interview:
+
+1. figures **roll like an odometer** to their real value, on hero figures and KPI tiles; chart labels and tables
+   stay still;
+2. a **yellow sweep crosses the hero card once** when a screen opens, and nowhere else;
+3. the rest as drawn: reduced motion turns it all off, nothing loops, no inline styles.
+
+**Decision**
+
+1. **Scope.** These patterns apply to the `/empresa` routes of `apps/backoffice` and their drawers. The rest of the
+   console (Plataforma, the trastienda sign-in) keeps El Mostrador's five. Nothing here moves to `apps/web`,
+   `apps/landing`, `apps/mobile` or `packages/ui` without an ADR of its own. Press, panel slide and dialog pop stay
+   as §6 defines them.
+2. **The list.** Eleven patterns, nothing else.
+
+   | Pattern | What it does | Timing | Where | Reduced motion |
+   | --- | --- | --- | --- | --- |
+   | Rejilla | A 1 px grid every 32 px at 5 % ink behind the cards. It never moves | — | every Empresa page background | the same |
+   | Entra | A card or row rises 12 px and fades in, one after another | 320 ms, 40 ms apart, at most 6 steps | KPI tiles, Señales, vencimientos, Cierre steps, Tablero cards, Socios rows | in place |
+   | Aterriza | The hero card arrives lifted 6 px and settles on its hard shadow. It is never hidden | 320 ms | the black-bordered card of each screen | settled |
+   | Odómetro | Each digit spins one full turn and stops on its value | 560 ms (rightmost) to 800 ms (leftmost) | hero figures and KPI tiles | the figure |
+   | Barrido | One yellow band crosses the hero card | 1.2 s, starting at 200 ms, once per screen | the hero card only | none |
+   | Crece | Bars grow from the axis; in the Resultados waterfall each cost hangs down from the level before it | 480 ms, 40 ms apart (60 ms per waterfall step) | Resultados, Caja by month, Servicios | full bars |
+   | Llena | A bar fills from the left | 520 ms, no wait | Cierre progress, Tablero commitment and objectives, Presupuesto consumption, Socios funding | at its value |
+   | Traza | A line or checkmark draws from start to end | 600 ms | Caja's reserve line, Cierre and accepted-card checkmarks | drawn |
+   | Vivo | A green ring opens around the «en curso» dot, three times, then the dot stays still | 1.6 s × 3 | Tablero «En curso», the open month in Cierre | a still dot |
+   | Sello | A status chip lands from 1.35× and −8°, bounces once and sits straight | 240 ms | right after closing a month, approving a plan or budget, accepting a card | in place |
+   | Panel | §6's panel slide (280 ms, scrim 160 ms); its content then enters as «Entra» | 200 ms after the panel | every Empresa drawer | open |
+
+3. **Rules.**
+   - **Once, when the screen opens.** A period switch is a new page and plays again. No pattern repeats on its own:
+     «Vivo» stops after three pulses, inside WCAG 2.2.2's five seconds, so no pause control is needed.
+   - **Settled within 1.5 s.** The sweep ends last, at 1.4 s; the waterfall at 1.1 s; everything else before 0.8 s.
+   - **The figure is always the real one.** The odometer is server-rendered at its final digit, so it needs no
+     script and never flashes `$0`. Its digits are `aria-hidden`, and a visually hidden copy of the figure is what
+     screen readers, copying and the Playwright specs read. Tables, chart value labels and inputs never move.
+   - **One sweep per screen**, on the hero card. It is not a loading state: loading keeps §1's skeleton rows.
+   - **«Sello» only follows the action.** The action's redirect carries a one-time flag; a reload or a later visit
+     shows the chip still.
+   - **Reduced motion is the OS setting.** `prefers-reduced-motion: reduce` gives every pattern the fallback in its
+     row. There is no in-console switch: the canvas's «Ver con movimiento reducido» button is for review only.
+4. **Built with vanilla-extract, CSS only.** Keyframes and classes in one stylesheet of the console. Everything a
+   CSP-safe build needs comes from structure, never from an inline value:
+   - the stagger from `:nth-child()` rules generated up to the cap;
+   - the odometer from one class per digit (`0`…`9`) over a two-turn strip drawn with generated content;
+   - strokes from SVG's `pathLength="1"` attribute;
+   - the waterfall's direction from a class per bar kind (total grows up, cost hangs down).
+
+   Only `transform`, `opacity`, `stroke-dashoffset` and, for «Aterriza», the shadow animate; never layout. No
+   animation library and no client script.
+5. **The values are tokens.** `@xangarro/tokens` gains `consoleMotion` (`src/console-motion.ts`, beside
+   `consoleTheme`), and no stylesheet writes a duration or a curve of its own:
+   - durations: stamp 240, enter 320, land 320, grow 480, fill 520, draw 600, roll 560 to 800, sweep 1200, pulse
+     1600 ms;
+   - delays and steps: sweep 200 ms, stagger 40 ms with a cap of 6, waterfall step 60 ms, panel content 200 ms;
+   - counts and distances: pulse 3, enter 12 px, land 6 px, odometer line 1.1 em;
+   - curves: `out` `cubic-bezier(0.2, 0.8, 0.2, 1)` (the portal's Estados charts already use it), `stamp`
+     `cubic-bezier(0.34, 1.56, 0.64, 1)`, and `ease-out` for the sweep and the pulse;
+   - the sweep's band (yellow at 32 %) and the pulse's ring (green at 60 %) as colour tokens, so design-lint stays
+     at zero.
+
+   Its name says whose it is. A lint rule refuses `consoleMotion` outside `apps/backoffice`, the same way §6's list
+   stays the product's.
+6. **CD-17b adopts these values** when E-17 is built: its bars and fill take «Crece» and «Llena», its sweep becomes
+   «Barrido» and its pulse stops after three.
+7. **Adding a pattern** means a board on the Empresa canvas first, then an ADR that amends this list.
+
+**Alternatives considered**
+
+- *El Mostrador's five only:* rejected by the owner; the console would not feel like the tech product they asked for.
+- *The calm proposal* (ten patterns, no odometer, no sweep, figures revealed whole): recommended by the review;
+  the owner chose more energy.
+- *Counting up from `$0` in a client script:* the server sends the real figure, the script resets it to `$0` and
+  climbs, so the page flashes; hiding it until hydration delays the figure. The odometer rolls without either.
+- *Counting with CSS `@property` and `counter()`:* the target would have to be an inline custom property, which the
+  CSP forbids.
+- *A sweep on every card, or a slow loop on the hero:* about eight sweeps in Resumen's first second read as noise;
+  a loop needs a pause control (WCAG 2.2.2).
+- *Values local to `apps/backoffice`, as ADR-154 keeps Synth's in Studio:* Synth's must never look allowed in the
+  product. Here a namespaced token and a lint rule do the same job, and E-17 and every later Empresa task read one
+  set (CLAUDE.md §2.3).
+
+**Consequences**
+
+- El Mostrador §6 gains a line pointing here, as it does for Synth Studio.
+- E-45 adds `consoleMotion` to `@xangarro/tokens`, test-first, with the lint rule, and regenerates
+  `DESIGN_CONTRACT.md` if the contract lists it. E-46 builds the stylesheet and an `Odometro` component in
+  `apps/backoffice`, then applies the patterns screen by screen: CD-21b to CD-21d as drawn, the others as round
+  23's review sticky lists them.
+- Each animated screen's Playwright spec reads the figure from the odometer's hidden copy, so it still asserts that
+  real data reached the page. One spec per screen runs under `reducedMotion: 'reduce'` and checks that nothing
+  animates (`document.getAnimations()` is empty).
+- Every new Empresa board on the canvas is drawn with these patterns.
 
 ---
 

@@ -89,7 +89,7 @@ const BY_SURFACE: Readonly<Record<Surface, readonly string[]>> = {
     'C-13 N-75 N-41 N-43 N-76 N-77 N-80 N-42 N-79 N-44 N-78 N-53 K-10 K-11 K-15 K-20 K-21 K-22',
   ),
   'Consola (backoffice)': ids(
-    'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44 N-85 N-88',
+    'N-46 N-62 N-65 N-66 N-67 N-68 N-70 B-16 E-01 E-02 E-03 E-04 E-05 E-06 E-07 E-10 E-11 E-12 E-13 E-14 E-15 E-16 E-17 E-20 E-21 E-22 E-23 E-24 E-25 E-26 E-27 E-30 E-31 E-32 E-33 E-40 E-41 E-42 E-43 E-44 E-45 E-46 N-85 N-88',
   ),
   'Backend, sync y datos': ids('C-21 C-24 C-26 B-19 B-20 B-21 N-47 N-48 N-69 N-81 N-84'),
   'Privacidad y LFPC': ids('N-34 N-60 N-87'),

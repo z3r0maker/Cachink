@@ -4,7 +4,7 @@
 > founders at 50/50, a founders' agreement with a performance pool) will operate Xangarro, and the
 > owner wants "a command center of the company, visible to the partners, to make decisions".
 > **ADR-125** records the architecture. This file holds the scope, the definitions, the phases and
-> the tasks **E-01 … E-44**. The screens go to Claude Design through
+> the tasks **E-01 … E-46**. The screens go to Claude Design through
 > `21-command-center-design.md`.
 >
 > Read ADR-063 (the console), ADR-070 (CFDI for our own payments), ADR-125 and
@@ -1232,6 +1232,8 @@ Changes to existing tasks:
   - **Quarter review:** objectives met or missed, each partner's Tablero compliance, compliance
     with evidence, what went well and what to fix, and decisions taken.
   - **Exportar PDF.**
+  - **Motion:** CD-17b's, with ADR-161's values (E-45): its bars and fill take «Crece» and «Llena»,
+    its sweep becomes «Barrido» and its «en curso» dot pulses three times.
 - **Acceptance:** a quarter that is not closed shows «en curso» and no headline; QoQ growth with a
   zero base shows «sin base», not ∞.
 
@@ -1402,3 +1404,61 @@ turns into proposed objectives and cards.
   - an approved card keeps a link to its minuta, and the minuta lists the cards it produced.
 - **Acceptance:** a rejected proposal leaves no card; an approved one shows «De la minuta del
   …» and opens it; a minuta never creates a card without a founder's approval.
+
+## 13. Motion (owner decision, 2026-11-20, ADR-161)
+
+The owner asked for «Empresa» to look techy and «super fancy», with animations. Canvas round 23 holds the
+vocabulary (CD-21) and three screens with it (CD-21b Resumen, CD-21c Resultados, CD-21d Cierre); the owner
+approved them on 2026-11-20 and decided:
+
+1. **More energy** than the calm proposal: «Empresa» gets eleven patterns of its own beyond El Mostrador's five.
+2. **Figures roll like an odometer** to their real value, on hero figures and KPI tiles. Chart labels and tables
+   stay still.
+3. **One yellow sweep** crosses the hero card when a screen opens, nowhere else.
+4. Unchanged from the proposal: reduced motion turns it all off, nothing loops (the «en curso» dot pulses three
+   times), everything settles within 1.5 s, no inline styles.
+
+ADR-161 holds the list, the rules and the token values. Every Empresa task that draws a screen from here on uses it,
+and its board shows the motion.
+
+### E-45 Tokens de movimiento de la consola `[media]`
+
+- [ ] Status · **Blocked by:** — · **Feeds:** E-46, E-17
+- **What:**
+  - `consoleMotion` in `@xangarro/tokens` (`src/console-motion.ts`, exported beside `consoleTheme`), with ADR-161
+    §5's durations, delays, stagger step and cap, pulse count, distances, odometer line, the `out` and `stamp`
+    curves, and the sweep and pulse colours;
+  - a test first, in `packages/tokens/tests/`, that holds every pattern to the 1.5 s budget (delay + duration,
+    with the stagger cap) and the pulse to WCAG 2.2.2's five seconds;
+  - an ESLint rule (`no-restricted-imports` in the shared config) that refuses `consoleMotion` outside
+    `apps/backoffice`;
+  - `pnpm design:contract` regenerated if the contract lists console tokens;
+  - El Mostrador §6 already points to ADR-161.
+- **Acceptance:** the values match ADR-161; importing `consoleMotion` from `apps/web` fails `pnpm lint`; the
+  budget test fails when a duration is raised past 1.5 s.
+
+### E-46 Movimiento en las pantallas de Empresa `[media]`
+
+- [ ] Status · **Blocked by:** E-45
+- **What:**
+  - one stylesheet, `apps/backoffice/src/styles/mostrador-movimiento.css.ts`, with the eleven patterns as
+    vanilla-extract keyframes and classes over `consoleMotion`: the stagger as generated `:nth-child()` rules,
+    the odometer as one class per digit, strokes through `pathLength="1"`, every class wrapped in
+    `prefers-reduced-motion: reduce`;
+  - an `Odometro` server component: the digits `aria-hidden`, a visually hidden copy of the figure beside them;
+  - the screens, as round 23 draws them:
+    - **Resumen** (CD-21b): Autonomía lands with the sweep and rolls its figures; the tiles roll and enter in
+      turn; Señales and vencimientos enter; «De dónde sale la utilidad» fills;
+    - **Resultados** (CD-21c): the waterfall builds step by step with the sweep; the trend and «¿Por qué cambió
+      el EBITDA?» grow; the statement stays still;
+    - **Cierre** (CD-21d): the month card sweeps, the steps enter with their checkmarks drawing, the bar fills,
+      «Abierto» pulses and «Cerrado» lands as a stamp right after closing;
+    - **Caja, Tablero, Socios and Presupuesto**, as round 23's review sticky lists them; Presupuesto's
+      over-limit category fills to the limit and then fills its excess in red;
+  - «Sello» from a one-time flag on the action's redirect, never on a reload;
+  - the rejilla background on every Empresa page.
+- **Tests:** each screen's Playwright spec reads its figures from the odometer's hidden copy, so it still proves
+  real data reached the page; one spec per screen under `reducedMotion: 'reduce'` asserts
+  `document.getAnimations()` is empty and every figure reads in full.
+- **Acceptance:** the CSP stays without `'unsafe-inline'`; nothing on a screen moves after 1.5 s; with reduced
+  motion every screen looks like its static board; `pnpm lint:design` stays at zero.
