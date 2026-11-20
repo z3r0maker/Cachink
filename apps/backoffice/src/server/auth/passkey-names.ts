@@ -34,6 +34,7 @@ const PROVIDERS: ReadonlyMap<string, string> = new Map(
 
 export function passkeyName(aaguid: string, backedUp: boolean): string {
   return (
-    PROVIDERS[aaguid.toLowerCase()] ?? (backedUp ? 'Llave sincronizada' : 'Llave de este equipo')
+    PROVIDERS.get(aaguid.toLowerCase()) ??
+    (backedUp ? 'Llave sincronizada' : 'Llave de este equipo')
   );
 }
