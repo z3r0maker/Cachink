@@ -18,12 +18,12 @@ const dinero = (v: string) => v.replace(/[^0-9.]/g, '');
 const entero = (v: string) => v.replace(/\D/g, '');
 
 /** Price, **cost** with the live margin, category, stock and threshold; cost + category + stock approve. */
-type RevisarProductoProps = Parameters<typeof RevisarProducto>[0];
-
-export function RevisarProducto(p: {
+interface RevisarProductoProps {
   readonly x: ProductoCaja;
   readonly onClose: () => void;
   readonly onFusionar: () => void;
+  /** «Son distintos» (P-45): the code comes off this product. */
+  readonly onSonDistintos: () => void;
   readonly onAprobar: (f: {
     readonly precioCentavos: bigint;
     readonly costoCentavos: bigint;
@@ -31,14 +31,17 @@ export function RevisarProducto(p: {
     readonly existencias: number;
     readonly umbral: number;
   }) => void;
-}) {
+}
+
+export function RevisarProducto(p: RevisarProductoProps) {
   const f = useProducto(p.x);
   const aprobar = () => f.listo && p.onAprobar(camposDe(f, p.x.precio));
   return (
     <Revisar
       titulo={`Revisar ${p.x.nombre}`}
-      capturado={`Nombre «${p.x.nombre}» y precio ${formatMoney(p.x.precio)}. ${p.x.detalle}`}
+      capturado={capturado(p.x)}
       pareceA={p.x.pareceA}
+      codigo={codigoRepetido(p.x, p.onSonDistintos)}
       cta="Aprobar y agregar al catálogo"
       listo={f.listo}
       onClose={p.onClose}
@@ -60,6 +63,20 @@ export function RevisarProducto(p: {
     </Revisar>
   );
 }
+
+/** «Lo que capturó la caja»: name, price, the barcode when it has one, and the facts. */
+const capturado = (x: ProductoCaja): string =>
+  [
+    `Nombre «${x.nombre}» y precio ${formatMoney(x.precio)}.`,
+    x.codigo ? `Código de barras ${x.codigo}.` : null,
+    x.detalle,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+/** The barcode match's box, when the match is by code (P-45). */
+const codigoRepetido = (x: ProductoCaja, onSonDistintos: () => void) =>
+  x.porCodigo && x.pareceA ? { con: x.pareceA, vendidas: x.vendidas, onSonDistintos } : undefined;
 
 type Set = (v: string) => void;
 
