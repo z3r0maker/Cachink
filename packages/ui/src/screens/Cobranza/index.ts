@@ -8,7 +8,5 @@ export {
   type AbonoHecho,
 } from './use-cobranza';
 export { leerCuentas } from './cobranza-lectura';
-export { enlaceWhatsApp, abrirWhatsApp, digitos, telefonoCompleto } from './recordar-saldo';
 export { RecibirAbonoSheet, type RecibirAbonoSheetProps } from './recibir-abono-sheet';
-export { RecordarSaldoSheet, type RecordarSaldoSheetProps } from './recordar-saldo-sheet';
-export { ClienteCuentaSheet, type ClienteCuentaProps } from './cliente-cuenta';
+export { RecordarSheet, type RecordarSheetProps } from './recordar-sheet';

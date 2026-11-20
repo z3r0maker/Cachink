@@ -42,5 +42,4 @@ export * from './Pendientes/index';
 // directories; main's mobile routes (cobranza, pendientes, inventario) and
 // the portal pages import them from this barrel by name.
 export { ClienteScreen } from './Cobranza/cliente-screen';
-export { useClienteCobranza } from './Cobranza/use-cliente-cobranza';
 export { useCuentas } from './Cobranza/use-cuentas';

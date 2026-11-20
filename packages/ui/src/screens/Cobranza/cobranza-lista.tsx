@@ -1,6 +1,6 @@
 /**
- * The list itself (MvCobranzaLista): the screen's head, and the clients the
- * search and filter leave — each card opening its account or its abono. With
+ * The list itself (RvFiado): the screen's head, and the clients the search
+ * and filter leave as compact rows — each opening the client's page. With
  * no accounts at all, the empty state explains when someone appears here.
  */
 import type { ReactElement } from 'react';
@@ -15,7 +15,7 @@ import { CajaEstado } from '../../components/CajaEstado/index';
 import { GlyphSquare, MText } from '../../components/Mostrador/index';
 import { GLYPHS } from '../../components/PathIcon/glyphs';
 import { colors } from '../../theme';
-import { CuentaTarjeta } from './cuenta-tarjeta';
+import { CobranzaFilas } from './cobranza-fila';
 
 export function Cabeza({ onBack }: { readonly onBack: () => void }): ReactElement {
   return (
@@ -52,28 +52,20 @@ function NadieDebe(): ReactElement {
 
 export function Cuerpo(p: {
   readonly cuentas: readonly CuentaCliente[];
+  readonly hoy: string;
   readonly filtro: FiltroCobranza;
   readonly q: string;
-  readonly abrir: (id: string, conAbono: boolean) => void;
+  readonly abrir: (id: string) => void;
 }): ReactElement {
   const cuentas = conCuenta(p.cuentas);
   if (cuentas.length === 0) return <NadieDebe />;
   const visibles = filtrar(cuentas, p.filtro, p.q);
-  return (
-    <View gap={10}>
-      {visibles.map((c) => (
-        <CuentaTarjeta
-          key={c.id}
-          x={c}
-          onAbonar={() => p.abrir(c.id, true)}
-          onVer={() => p.abrir(c.id, false)}
-        />
-      ))}
-      {visibles.length === 0 ? (
-        <MText size="sm" weight="semibold" color={colors.gray600} testID="cobranza-sin-resultados">
-          Ningún cliente coincide con lo que buscas.
-        </MText>
-      ) : null}
-    </View>
-  );
+  if (visibles.length === 0) {
+    return (
+      <MText size="sm" weight="semibold" color={colors.gray600} testID="cobranza-sin-resultados">
+        Ningún cliente coincide con lo que buscas.
+      </MText>
+    );
+  }
+  return <CobranzaFilas cuentas={visibles} hoy={p.hoy} onAbrir={p.abrir} />;
 }

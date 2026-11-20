@@ -1,25 +1,21 @@
 /**
- * Fiado y abonos (Track M, M-08) in its board states — lista, cliente,
- * recibir-abono, sin-saldo, recordar-saldo, cargando, error-al-leer — for
- * review against the boards. Fed the caja package's design fixture; the live
- * screen reads `useCobranza()`.
+ * Fiado y abonos (Track M, M-08; RvFiado) in its board states — the list,
+ * a client's page, its abono and its reminder, sin-saldo, cargando and
+ * error-al-leer — for review against the boards. Fed the caja package's
+ * design fixture; the live routes read `useCobranza()`.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { HOY } from '@xangarro/caja';
-import { CUENTAS, cuentaPorId, estadoCuenta, recordatorio } from '@xangarro/caja/cobranza';
+import { CUENTAS, cuentaPorId } from '@xangarro/caja/cobranza';
 import { initI18n } from '../../i18n/index';
 import { Marco } from '../Inicio/story-marco';
-import { ClienteCuentaSheet } from './cliente-cuenta';
+import { ClienteScreen } from './cliente-screen';
 import { CobranzaScreen } from './cobranza-screen';
-import { RecibirAbonoSheet } from './recibir-abono-sheet';
-import { RecordarSaldoSheet } from './recordar-saldo-sheet';
 import type { DatosCobranza } from './use-cobranza';
 
 initI18n();
-
-type Capa = 'ninguna' | 'cliente' | 'abono' | 'recordar';
 
 const DATOS: DatosCobranza = {
   cuentas: CUENTAS,
@@ -33,60 +29,37 @@ const SIN_SALDO: DatosCobranza = {
   cuentas: CUENTAS.filter((c) => c.id === 'delgado'),
 };
 
-function pantalla(state: 'happy' | 'cargando' | 'error', data: DatosCobranza | null): ReactElement {
-  return (
-    <CobranzaScreen
-      state={state}
-      data={state === 'happy' ? data : null}
-      onRegistrar={async () => null}
-      onRetry={() => undefined}
-      onBack={() => undefined}
-    />
-  );
-}
-
 function Demo(p: {
-  readonly capa?: Capa;
+  readonly cliente?: string;
+  readonly abono?: boolean;
   readonly datos?: DatosCobranza;
   readonly estado?: 'happy' | 'cargando' | 'error';
 }): ReactElement {
-  const [capa, setCapa] = useState<Capa>(p.capa ?? 'ninguna');
   const datos = p.datos ?? DATOS;
   const estado = p.estado ?? 'happy';
-  const chuy = cuentaPorId('chuy');
-  const mari = cuentaPorId('mari');
+  const cuenta = p.cliente === undefined ? null : cuentaPorId(p.cliente);
   return (
     <Marco layout="phone" shell={estado === 'happy'}>
-      <View flex={1}>{pantalla(estado, datos)}</View>
-      {chuy === null || mari === null ? null : (
-        <>
-          <ClienteCuentaSheet
-            open={capa === 'cliente'}
-            cuenta={chuy}
-            hoy={datos.hoy}
-            dueno={datos.dueno}
-            onClose={() => setCapa('ninguna')}
-            onAbonar={() => setCapa('abono')}
-            onRecordar={() => setCapa('recordar')}
+      <View flex={1}>
+        {p.cliente === undefined ? (
+          <CobranzaScreen
+            state={estado}
+            data={estado === 'happy' ? datos : null}
+            onRetry={() => undefined}
+            onBack={() => undefined}
+            onAbrirCliente={() => undefined}
           />
-          <RecibirAbonoSheet
-            open={capa === 'abono'}
-            cuenta={mari}
-            onClose={() => setCapa('ninguna')}
-            onGuardar={async () => {
-              setCapa('ninguna');
-              return null;
-            }}
+        ) : (
+          <ClienteScreen
+            state={estado}
+            cuenta={cuenta}
+            data={datos}
+            {...(p.abono ? { abrirAbono: true } : {})}
+            onRegistrar={async () => null}
+            onRetry={() => undefined}
           />
-          <RecordarSaldoSheet
-            open={capa === 'recordar'}
-            nombre={chuy.nombre}
-            telefono={chuy.telefono}
-            mensaje={recordatorio(chuy, estadoCuenta(chuy), datos.negocio)}
-            onClose={() => setCapa('ninguna')}
-          />
-        </>
-      )}
+        )}
+      </View>
     </Marco>
   );
 }
@@ -101,9 +74,9 @@ export default meta;
 type Story = StoryObj<typeof Demo>;
 
 export const Lista: Story = { args: {} };
-export const Cliente: Story = { args: { capa: 'cliente' } };
-export const RecibirAbono: Story = { args: { capa: 'abono' } };
-export const RecordarSaldo: Story = { args: { capa: 'recordar' } };
+export const Cliente: Story = { args: { cliente: 'mari' } };
+export const ClienteConLimitePasado: Story = { args: { cliente: 'chuy' } };
+export const RecibirAbono: Story = { args: { cliente: 'mari', abono: true } };
 export const SinSaldo: Story = { args: { datos: SIN_SALDO } };
 export const Cargando: Story = { args: { estado: 'cargando' } };
 export const ErrorAlLeer: Story = { args: { estado: 'error' } };
