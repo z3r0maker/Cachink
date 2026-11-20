@@ -10,15 +10,16 @@ import {
 } from '@xangarro/tokens';
 
 /**
- * «La trastienda» — the console's sign-in pages (login and both MFA steps).
+ * «La trastienda» — the console's sign-in pages (the entrance and the enrolment link).
  *
- * Don Cuentas guards the door on the left; the form is a «vale de entrada» on
- * the right. His mood is a `data-mood` attribute on the page root, and every
+ * Don Cuentas guards the door on the left; the passkey button sits on a «vale
+ * de entrada» on the right (boards CD-20 and CD-20b, ADR-160). His mood is a `data-mood` attribute on the page root, and every
  * reaction below is a selector on it: the CSP has no `'unsafe-inline'`, so no
  * state may travel through a `style=""` attribute.
  */
 
-const COVERING = ['password', 'peek'] as const;
+/** The moods where Don Cuentas leans back: something did not add up. */
+const TILTED = ['rechazada', 'vencido', 'usado'] as const;
 const mood = (m: string) => `[data-mood="${m}"] &`;
 const WIDE = 'screen and (min-width: 960px)';
 const MOTION_OK = '(prefers-reduced-motion: no-preference)';
@@ -154,25 +155,7 @@ const figure = style({
 export const doorman = style([
   figure,
   {
-    selectors: {
-      ...Object.fromEntries(
-        COVERING.map((m) => [mood(m), { opacity: 0, transform: 'scale(.85)' }]),
-      ),
-      [mood('email')]: { transform: 'rotate(4deg) translateX(2%)' },
-      [mood('error')]: { transform: 'rotate(-6deg)' },
-    },
-  },
-]);
-
-export const noPeeking = style([
-  figure,
-  {
-    opacity: 0,
-    transform: 'scale(.85)',
-    selectors: {
-      [mood('password')]: { opacity: 1, transform: 'none' },
-      [mood('peek')]: { opacity: 1, transform: 'rotate(-8deg) translateY(-2%)' },
-    },
+    selectors: Object.fromEntries(TILTED.map((m) => [mood(m), { transform: 'rotate(-6deg)' }])),
   },
 ]);
 

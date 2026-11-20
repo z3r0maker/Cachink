@@ -25,11 +25,11 @@ export class NotPermitted extends Error {
 export interface StaffContext {
   readonly staff: ActiveStaff;
   readonly session: StaffSession;
-  /** The raw cookie token — the MFA step replaces it with an AAL2 one. */
+  /** The raw cookie token — a re-ask records its tap against it. */
   readonly token: string;
 }
 
-/** Any console path that is neither public nor an MFA step: the full gate applies. */
+/** Any console path that is not public: the full gate applies. */
 const CONSOLE_PATH = '/';
 
 async function evaluate(
@@ -51,11 +51,7 @@ export async function requireStaff(): Promise<StaffContext> {
   return ctx;
 }
 
-/**
- * For layouts, pages and the MFA actions: follows the gate's redirect. With
- * an MFA path it admits an allowlisted member still at AAL1 — on the one MFA
- * step the gate assigns them.
- */
+/** For layouts and pages: follows the gate's redirect. */
 export async function requireStaffPage(path: string = CONSOLE_PATH): Promise<StaffContext> {
   const { decision, ctx } = await evaluate(path);
   if (ctx !== null) return ctx;

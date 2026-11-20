@@ -1,18 +1,15 @@
 import { randomBytes } from 'node:crypto';
-import { hashPassword } from '@xangarro/auth-core';
 import postgres from 'postgres';
 
 import type { StaffLogin } from './helpers';
+import { insertStaff } from './staff-fixture';
 
 /**
  * The «Empresa» suite's own staff member (E-01): allowlisted like any staff,
  * a founder only once the suite registers them in corp. Separate from the
  * auth suite's member, so the two specs never share a TOTP seed or a lockout.
  */
-export const SOCIO: StaffLogin = {
-  email: 'e2e-socio@xangarro.mx',
-  password: 'e2e-socio-password-123',
-};
+export const SOCIO: StaffLogin = { email: 'e2e-socio@xangarro.mx' };
 
 const superUrl = (): string => {
   const url = process.env.DATABASE_SUPER_URL ?? '';
@@ -31,19 +28,9 @@ async function withSuper<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
 
 /** A fresh, not-yet-founder staff member, and no founders at all in corp. */
 export async function resetSocioFixture(): Promise<void> {
-  const hash = await hashPassword(SOCIO.password);
   await withSuper(async (sql) => {
     await sql`DELETE FROM corp.founders`;
-    await sql`DELETE FROM staff_sessions USING staff_members s
-               WHERE staff_sessions.staff_id = s.id AND lower(s.email) = ${SOCIO.email}`;
-    await sql`DELETE FROM staff_audit_log USING staff_members s
-               WHERE staff_audit_log.staff_id = s.id AND lower(s.email) = ${SOCIO.email}`;
-    await sql`DELETE FROM staff_members WHERE lower(email) = ${SOCIO.email}`;
-    // A ULID-shaped id (Crockford: no I, L, O or U), or the audit log refuses it.
-    const id = `01E2PARTNER${randomBytes(9).toString('hex').toUpperCase()}`.slice(0, 26);
-    await sql`
-      INSERT INTO staff_members (id, email, nombre, password_hash, created_at)
-      VALUES (${id}, ${SOCIO.email}, 'Socia E2E', ${hash}, now())`;
+    await insertStaff(sql, SOCIO.email, 'Socia E2E', '01E2PARTNER', true);
   });
 }
 

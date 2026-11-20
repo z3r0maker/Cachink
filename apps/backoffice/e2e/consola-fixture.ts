@@ -1,9 +1,9 @@
-import { randomBytes, randomUUID } from 'node:crypto';
-import { hashPassword } from '@xangarro/auth-core';
+import { randomUUID } from 'node:crypto';
 import { newUlid } from '@xangarro/domain';
 import postgres from 'postgres';
 
 import type { StaffLogin } from './helpers';
+import { dropStaff, insertStaff } from './staff-fixture';
 
 /**
  * The console sweep's own fixtures (gap 11): a staff member of its own, so it
@@ -11,10 +11,7 @@ import type { StaffLogin } from './helpers';
  * one business it mints with exactly the rows its pages are asserted against.
  * The seed is reference data: read, never rewritten.
  */
-export const CONSOLA: StaffLogin = {
-  email: 'e2e-consola@xangarro.mx',
-  password: 'e2e-consola-password-123',
-};
+export const CONSOLA: StaffLogin = { email: 'e2e-consola@xangarro.mx' };
 
 /** A name nothing else in the run can take: the pid plus a UUID, never the clock. */
 export function stamp(): string {
@@ -41,21 +38,14 @@ async function dropConsolaStaff(sql: postgres.Sql): Promise<void> {
   const member = sql`SELECT id FROM staff_members WHERE lower(email) = ${CONSOLA.email}`;
   await sql`DELETE FROM platform_flag_events WHERE updated_by IN (${member})`;
   await sql`DELETE FROM plan_overrides WHERE created_by IN (${member})`;
-  await sql`DELETE FROM staff_sessions WHERE staff_id IN (${member})`;
-  await sql`DELETE FROM staff_audit_log WHERE staff_id IN (${member})`;
-  await sql`DELETE FROM staff_members WHERE lower(email) = ${CONSOLA.email}`;
+  await dropStaff(sql, CONSOLA.email);
 }
 
-/** A fresh allowlisted member (TOTP enrols through the page, as a first sign-in does). */
+/** A fresh allowlisted member with a seeded passkey (ADR-160). */
 export async function resetConsolaStaff(): Promise<void> {
-  const hash = await hashPassword(CONSOLA.password);
   await withSuper(async (sql) => {
     await dropConsolaStaff(sql);
-    // A ULID-shaped id (Crockford: no I, L, O or U), or the audit log refuses it.
-    const id = `01E2C0NS0E2E${randomBytes(9).toString('hex').toUpperCase()}`.slice(0, 26);
-    await sql`
-      INSERT INTO staff_members (id, email, nombre, password_hash, created_at)
-      VALUES (${id}, ${CONSOLA.email}, 'Consola E2E', ${hash}, now())`;
+    await insertStaff(sql, CONSOLA.email, 'Consola E2E', '01E2C0NS0E2E', true);
   });
 }
 

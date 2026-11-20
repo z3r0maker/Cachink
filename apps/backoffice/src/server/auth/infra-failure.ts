@@ -1,20 +1,24 @@
-import type { Diagnostics } from './login-message';
+/** What the diagnostics flag allows a banner to say beyond the generic sentence. */
+export interface Diagnostics {
+  readonly on: boolean;
+  readonly db: string;
+}
 
 /**
  * Why a sign-in died before it could reach a verdict.
  *
- * `loginRefusalMessage` answers "we refused you"; this answers "we never got
- * to ask". A missing `ADMIN_TOTP_KEY` or a `DATABASE_URL` the database
+ * A refused passkey answers "we refused you"; this answers "we never got to
+ * ask". An `ADMIN_BASE_URL` that is not a URL or a `DATABASE_URL` the database
  * rejects is nobody's typo, and the form has no way to recover from it — so
  * it is worth its own banner instead of an unhandled throw and Next's
  * generic error page (which redacts the cause in production anyway).
  */
 export type InfraCause =
-  'migration-missing' | 'totp-key' | 'db-credentials' | 'db-unreachable' | 'db-missing' | 'unknown';
+  'migration-missing' | 'base-url' | 'db-credentials' | 'db-unreachable' | 'db-missing' | 'unknown';
 
 export interface InfraFailure {
   readonly cause: InfraCause;
-  /** The code that identified it (`28P01`, `INVALID_KEY`), or the error's name. */
+  /** The code that identified it (`28P01`, `ERR_INVALID_URL`), or the error's name. */
   readonly detail: string;
 }
 
@@ -28,7 +32,8 @@ const CODES_BY_CAUSE = {
   // before `db:migrate:hosted` ran. Worth its own cause because the symptom is
   // an empty screen, which reads as "no data" rather than "not installed".
   'migration-missing': ['42883', '42P01'],
-  'totp-key': ['INVALID_KEY'],
+  // The relying party is read from it: a passkey cannot be checked without it.
+  'base-url': ['ERR_INVALID_URL'],
   'db-credentials': ['28P01', '28000'],
   'db-missing': ['3D000'],
   'db-unreachable': ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'],
@@ -82,8 +87,8 @@ export function infraFailureMessage(failure: InfraFailure, diag: Diagnostics): s
   switch (failure.cause) {
     case 'migration-missing':
       return `Configuración: faltan migraciones en ${diag.db} — corre \`pnpm --filter @xangarro/data-pg db:migrate:hosted\` (${failure.detail}).`;
-    case 'totp-key':
-      return 'Configuración: ADMIN_TOTP_KEY falta o no es una llave de 32 bytes en base64.';
+    case 'base-url':
+      return 'Configuración: ADMIN_BASE_URL no es una URL válida.';
     case 'db-credentials':
       return `Configuración: ${diag.db} rechazó las credenciales — revisa DATABASE_URL.`;
     case 'db-unreachable':

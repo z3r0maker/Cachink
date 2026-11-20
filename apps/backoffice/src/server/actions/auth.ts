@@ -1,75 +1,81 @@
 'use server';
 
-import { clientIp } from '@xangarro/auth-core';
+import { clientIp, minutes, type PublicKeyCredentialRequestOptionsJSON } from '@xangarro/auth-core';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { clearSessionCookie, readSessionToken, setSessionCookie } from '../auth/cookie';
 import { classifyInfraFailure, infraFailureMessage } from '../auth/infra-failure';
-import type { InfraFailure } from '../auth/infra-failure';
-import type { Diagnostics } from '../auth/login-message';
-import { loginRefusalMessage } from '../auth/login-message';
-import type { SignInInput, SignInResult } from '../auth/sign-in';
-import { signIn, signOut } from '../auth/sign-in';
+import { finishSignIn, signOut, startSignIn } from '../auth/sign-in-passkey';
+import { answerIssues, parseAuthentication } from '../auth/webauthn-json';
 import { authDeps } from '../auth/wiring';
 import { dbFingerprint } from '../db/fingerprint';
 import { LOGIN_PATH } from '../gate';
-import { resolveGate } from '../resolve-gate';
-import { field, type FormState } from './form-state';
 import { reportError } from '../observability/report';
-
-/** What the banner may say beyond the generic refusal; dev phase only. */
-function diagnostics(): Diagnostics {
-  return { on: process.env.ADMIN_DIAGNOSTICS === '1', db: dbFingerprint() };
-}
-
-type Attempt = SignInResult | { readonly kind: 'infra'; readonly failure: InfraFailure };
+import { resolveGate } from '../resolve-gate';
 
 /**
- * A throw from here is a misconfigured deployment, not a bad credential: a
- * `DATABASE_URL` the database rejects, a missing `ADMIN_TOTP_KEY`. Turning it
- * into a result keeps the form on screen and the cause in the logs, instead
- * of Next's generic error page — which redacts the cause in production.
- */
-async function attemptSignIn(input: SignInInput): Promise<Attempt> {
-  try {
-    return await signIn(authDeps(), input);
-  } catch (error) {
-    const failure = classifyInfraFailure(error);
-    reportError(error, `[login] infra ${failure.cause}/${failure.detail} db=${dbFingerprint()}`);
-    return { kind: 'infra', failure };
-  }
-}
-
-/**
- * Email + password → an AAL1 session. The redirect to `/` goes back through
- * the proxy, which sends the staff member to /mfa/enroll or /mfa/verify.
+ * Sign-in with a passkey (N-85, ADR-160), as the two calls the login page
+ * makes around the browser's own prompt: the options, then the answer.
  *
- * Every refusal logs its reason and the database consulted server-side, so
- * Vercel's runtime logs answer "what actually happened" even when the banner
- * (deliberately) does not.
+ * What the page may say is deliberately thin: a refused passkey is one
+ * sentence whatever the reason, so the page never confirms whether a key
+ * belongs to the team. Every refusal logs its reason server-side.
  */
-export async function login(_prev: FormState, form: FormData): Promise<FormState> {
-  const email = field(form, 'email');
-  const password = form.get('password');
+export type EntradaState =
+  | { readonly kind: 'opciones'; readonly options: PublicKeyCredentialRequestOptionsJSON }
+  | { readonly kind: 'rechazada' }
+  | { readonly kind: 'bloqueada'; readonly minutos: number }
+  | { readonly kind: 'error'; readonly message: string };
+
+const diagnostics = () => ({ on: process.env.ADMIN_DIAGNOSTICS === '1', db: dbFingerprint() });
+
+/**
+ * A throw from here is a misconfigured deployment, not a bad passkey: a
+ * `DATABASE_URL` the database rejects, an `ADMIN_BASE_URL` that is not a URL.
+ * Turning it into a state keeps the page on screen and the cause in the logs.
+ */
+function infra(error: unknown, step: string): Extract<EntradaState, { kind: 'error' }> {
+  const failure = classifyInfraFailure(error);
+  reportError(
+    error,
+    `[login:${step}] infra ${failure.cause}/${failure.detail} db=${dbFingerprint()}`,
+  );
+  return { kind: 'error', message: infraFailureMessage(failure, diagnostics()) };
+}
+
+export async function opcionesEntrada(): Promise<EntradaState> {
+  try {
+    const started = await startSignIn(authDeps(), clientIp(await headers()));
+    if (started.kind === 'locked') return { kind: 'bloqueada', minutos: minutes(started.wait) };
+    return { kind: 'opciones', options: started.options };
+  } catch (error) {
+    return infra(error, 'opciones');
+  }
+}
+
+/** The browser's answer. On success the cookie is set and the page goes to `/`. */
+export async function entrarConLlave(
+  answer: unknown,
+): Promise<Exclude<EntradaState, { kind: 'opciones' }>> {
   const ip = clientIp(await headers());
-  const result = await attemptSignIn({
-    email,
-    password: typeof password === 'string' ? password : '',
-    ip,
-  });
-
-  if (result.kind === 'infra') {
-    return { ok: false, message: infraFailureMessage(result.failure, diagnostics()) };
+  const response = parseAuthentication(answer);
+  if (response === null) {
+    console.error(`[login] malformed answer (${answerIssues(answer, 'authentication')}) ip=${ip}`);
+    return { kind: 'rechazada' };
   }
-
-  if (result.kind !== 'ok') {
-    const detail = 'reason' in result ? ` (${result.reason})` : '';
-    console.error(`[login] ${result.kind}${detail} email=${email} ip=${ip} db=${dbFingerprint()}`);
-    return { ok: false, message: loginRefusalMessage(result, diagnostics()) };
+  let result;
+  try {
+    result = await finishSignIn(authDeps(), response, ip);
+  } catch (error) {
+    return infra(error, 'entrar');
   }
-
-  await setSessionCookie(result.token, 'aal1');
+  if (result.kind === 'locked') return { kind: 'bloqueada', minutos: minutes(result.wait) };
+  if (result.kind === 'failed') {
+    console.error(`[login] failed (${result.reason}) ip=${ip} db=${dbFingerprint()}`);
+    return { kind: 'rechazada' };
+  }
+  await setSessionCookie(result.token);
   redirect('/');
 }
 

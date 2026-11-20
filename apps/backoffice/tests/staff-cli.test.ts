@@ -1,37 +1,32 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { parseStaffArgs, readPassword, UsageError } from '../scripts/staff-cli';
+import { enrolmentUrl, parseStaffArgs, UsageError } from '../scripts/staff-cli';
 
+/** The operator CLI with passkeys (ADR-160): no password anywhere, a printed link instead. */
 describe('parseStaffArgs', () => {
   it('parses create, lower-casing the email', () => {
     assert.deepEqual(
       parseStaffArgs(['create', '--email', 'Ana@Xangarro.MX', '--nombre', 'Ana López']),
-      {
-        command: 'create',
-        email: 'ana@xangarro.mx',
-        nombre: 'Ana López',
-      },
+      { command: 'create', email: 'ana@xangarro.mx', nombre: 'Ana López' },
     );
   });
 
-  it('parses set-password with and without --reset-totp', () => {
-    assert.deepEqual(parseStaffArgs(['set-password', '--email', 'a@x.mx']), {
-      command: 'set-password',
+  it('parses passkey-link with and without --reset', () => {
+    assert.deepEqual(parseStaffArgs(['passkey-link', '--email', 'a@x.mx']), {
+      command: 'passkey-link',
       email: 'a@x.mx',
-      resetTotp: false,
+      reset: false,
     });
-    assert.equal(
-      (
-        parseStaffArgs(['set-password', '--email', 'a@x.mx', '--reset-totp']) as {
-          resetTotp: boolean;
-        }
-      ).resetTotp,
-      true,
-    );
+    assert.deepEqual(parseStaffArgs(['passkey-link', '--email', 'a@x.mx', '--reset']), {
+      command: 'passkey-link',
+      email: 'a@x.mx',
+      reset: true,
+    });
   });
 
-  it('refuses an unknown or missing command', () => {
+  it('no longer knows set-password, and refuses an unknown or missing command', () => {
+    assert.throws(() => parseStaffArgs(['set-password', '--email', 'a@x.mx']), UsageError);
     assert.throws(() => parseStaffArgs(['delete', '--email', 'a@x.mx']), UsageError);
     assert.throws(() => parseStaffArgs([]), UsageError);
   });
@@ -45,26 +40,20 @@ describe('parseStaffArgs', () => {
     assert.throws(() => parseStaffArgs(['create', '--email', 'a@x.mx']), UsageError);
   });
 
-  it('refuses a password passed as an argument (positional junk)', () => {
+  it('refuses positional junk', () => {
     assert.throws(() => parseStaffArgs(['create', 'hunter2', '--email', 'a@x.mx']), UsageError);
   });
 });
 
-describe('readPassword', () => {
-  it('drops one trailing newline from echo', () => {
-    assert.equal(readPassword('una-contraseña-larga\n'), 'una-contraseña-larga');
-  });
-
-  it('keeps inner and leading spaces', () => {
-    assert.equal(readPassword('  frase con espacios '), '  frase con espacios ');
-  });
-
-  it('refuses fewer than 12 characters', () => {
-    assert.throws(() => readPassword('corta\n'), UsageError);
-    assert.throws(() => readPassword(''), UsageError);
-  });
-
-  it('refuses more than bcrypt’s 72 bytes', () => {
-    assert.throws(() => readPassword('ñ'.repeat(40)), UsageError);
+describe('enrolmentUrl', () => {
+  it('puts the token in the fragment of the console’s link page', () => {
+    assert.equal(
+      enrolmentUrl('tok_en', undefined),
+      'https://admin.xangarro.mx/acceso/registrar#tok_en',
+    );
+    assert.equal(
+      enrolmentUrl('tok_en', 'http://localhost:3200/'),
+      'http://localhost:3200/acceso/registrar#tok_en',
+    );
   });
 });

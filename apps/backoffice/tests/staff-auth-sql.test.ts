@@ -2,8 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
-import { ADMIN_COOKIE, sessionCookieOptions, ttlFor } from '@/server/auth/config';
-import { groupKey, qrDataUri } from '@/server/auth/qr';
+import { ADMIN_COOKIE, relyingParty, sessionCookieOptions } from '@/server/auth/config';
 
 /**
  * 0008 checked as text (no Postgres in this unit run; it was also applied to
@@ -51,38 +50,78 @@ describe('0008_staff_inhouse_auth.sql', () => {
   });
 });
 
-describe('session cookie', () => {
-  it('is __Host-, HttpOnly, Secure, SameSite=Strict, Path=/', () => {
-    assert.equal(ADMIN_COOKIE, '__Host-xg_admin');
-    const o = sessionCookieOptions('aal2');
-    assert.deepEqual(
-      { ...o, maxAge: undefined },
-      {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: undefined,
-      },
+const passkeys = readFileSync(
+  new URL('../src/server/db/migrations/0023_staff_passkeys.sql', import.meta.url),
+  'utf8',
+).replace(/--.*$/gm, '');
+
+describe('0023_staff_passkeys.sql', () => {
+  it('never lets the console mint, void or delete an enrolment link', () => {
+    assert.match(passkeys, /GRANT SELECT ON public\.staff_enrolment_links TO xangarro_admin/);
+    assert.match(
+      passkeys,
+      /GRANT UPDATE \(used_at\) ON public\.staff_enrolment_links TO xangarro_admin/,
     );
+    assert.doesNotMatch(passkeys, /GRANT[^;]*(INSERT|DELETE|ALL)[^;]*staff_enrolment_links/);
   });
 
-  it('lives 15 min before the second factor and 12 h after', () => {
-    assert.equal(ttlFor('aal1'), 15 * 60);
-    assert.equal(ttlFor('aal2'), 12 * 60 * 60);
-    assert.equal(sessionCookieOptions('aal1').maxAge, 15 * 60);
+  it('lets the console add and retire passkeys but never rewrite or delete one', () => {
+    assert.match(passkeys, /GRANT SELECT, INSERT ON public\.staff_passkeys TO xangarro_admin/);
+    assert.match(
+      passkeys,
+      /GRANT UPDATE \(counter, last_used_at, revoked_at\) ON public\.staff_passkeys TO xangarro_admin/,
+    );
+    assert.doesNotMatch(passkeys, /GRANT[^;]*DELETE[^;]*staff_passkeys/);
+  });
+
+  it('hides all three tables from the portal role, under forced RLS', () => {
+    for (const t of ['staff_passkeys', 'staff_enrolment_links', 'staff_webauthn_challenges']) {
+      assert.match(passkeys, new RegExp(`REVOKE ALL ON public\\.${t} FROM xangarro_app`));
+      assert.match(passkeys, new RegExp(`ALTER TABLE public\\.${t} FORCE ROW LEVEL SECURITY`));
+    }
+  });
+
+  it('stores only hashes of link tokens and challenges, and leaves the old columns in place', () => {
+    assert.match(
+      passkeys,
+      /token_hash\s+text PRIMARY KEY CHECK \(token_hash ~ '\^\[0-9a-f\]\{64\}\$'\)/,
+    );
+    assert.match(
+      passkeys,
+      /challenge_hash\s+text PRIMARY KEY CHECK \(challenge_hash ~ '\^\[0-9a-f\]\{64\}\$'\)/,
+    );
+    assert.doesNotMatch(passkeys, /DROP COLUMN/);
   });
 });
 
-describe('qr', () => {
-  it('renders the URI as an SVG data URI on the server', () => {
-    const uri = qrDataUri('otpauth://totp/X:a?secret=JBSWY3DP');
-    assert.ok(uri.startsWith('data:image/svg+xml;utf8,'));
-    assert.match(decodeURIComponent(uri), /^data:image\/svg\+xml;utf8,<svg /);
+describe('session cookie', () => {
+  it('is __Host-, HttpOnly, Secure, SameSite=Strict, Path=/, 12 h', () => {
+    assert.equal(ADMIN_COOKIE, '__Host-xg_admin');
+    assert.deepEqual(sessionCookieOptions(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 12 * 60 * 60,
+    });
+  });
+});
+
+describe('relyingParty', () => {
+  it('binds passkeys to the console host and checks its exact origin', () => {
+    assert.deepEqual(relyingParty(undefined), {
+      id: 'admin.xangarro.mx',
+      origin: 'https://admin.xangarro.mx',
+      name: 'Xangarro Consola',
+    });
+    assert.deepEqual(relyingParty('http://localhost:3200/'), {
+      id: 'localhost',
+      origin: 'http://localhost:3200',
+      name: 'Xangarro Consola',
+    });
   });
 
-  it('groups a key in fours for typing', () => {
-    assert.equal(groupKey('ABCDEFGHIJ'), 'ABCD EFGH IJ');
-    assert.equal(groupKey(''), '');
+  it('throws on a base URL that is not a URL', () => {
+    assert.throws(() => relyingParty('admin.xangarro.mx'), { code: 'ERR_INVALID_URL' });
   });
 });

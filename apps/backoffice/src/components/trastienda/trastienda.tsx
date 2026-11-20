@@ -3,34 +3,48 @@
 import { createContext, useContext, useState } from 'react';
 
 import doormanImg from './don-cuentas-portero.webp';
-import noPeekingImg from './don-cuentas-no-veo.webp';
 import * as d from './door.css';
 import * as v from './vale.css';
 
 /**
- * «La trastienda» — the frame of every sign-in page (login, MFA enrolment,
- * MFA verification). Don Cuentas stands at the door and reacts to the form:
- * he leans in while you type your email and covers his eyes on the password.
+ * «La trastienda» — the frame of every sign-in page (the entrance and the
+ * enrolment link, ADR-160). Don Cuentas stands at the door and reacts to the
+ * ceremony: he waits for the key, frowns at one that does not fit.
  *
  * The bubble is flavour, not information — errors are always announced by the
- * form's own `FormStatus`, and the bubble never repeats or refines them (it
- * must not hint whether the email or the password was wrong).
+ * page's own notice, and the bubble never repeats or refines them (it must not
+ * hint whether a passkey belongs to the team). Lines from boards CD-20/20b.
  */
-export type Mood = 'idle' | 'email' | 'password' | 'peek' | 'error' | 'otp' | 'enroll';
+export type Mood =
+  | 'idle'
+  | 'esperando'
+  | 'cancelada'
+  | 'rechazada'
+  | 'bloqueada'
+  | 'nuevo'
+  | 'registrando'
+  | 'noCreada'
+  | 'lista'
+  | 'vencido'
+  | 'usado';
 
 const LINES: Readonly<Record<Mood, string>> = {
   idle: '¿Quién anda ahí? Ah, eres del equipo. Pásale.',
-  email: 'A ver, a ver… ¿cómo te llamas en el sistema?',
-  password: 'No veo, no veo. Yo nomás cuento.',
-  peek: 'Oye, ¿para qué la destapas? Yo no me asomo… mucho.',
-  error: 'Mmm. Esas cuentas no me cuadran.',
-  otp: 'Ya casi. Pásame el código, que aquí no entra cualquiera.',
-  enroll: 'Primera vez por aquí. Vamos a ponerle candado a tu cuenta.',
+  esperando: 'Ándale, enséñame la llave.',
+  cancelada: '¿Te arrepentiste? La puerta sigue abierta.',
+  rechazada: 'Mmm. Esas cuentas no me cuadran.',
+  bloqueada: 'Tranquilo. Aquí la puerta se toma su tiempo.',
+  nuevo: 'Primera vez por aquí. Vamos a darte tu llave.',
+  registrando: 'Ándale, que ya casi.',
+  noCreada: '¿Te arrepentiste? El enlace todavía sirve.',
+  lista: 'Ahora sí, ya eres de la casa.',
+  vencido: 'Llegaste tarde, pero no pasa nada.',
+  usado: 'Mmm. Ese vale ya pasó por aquí.',
 };
 
 const MoodContext = createContext<(mood: Mood) => void>(() => undefined);
 
-/** Lets a form inside the frame change Don Cuentas's mood. */
+/** Lets the page inside the frame change Don Cuentas's mood. */
 export function useDonCuentas(): (mood: Mood) => void {
   return useContext(MoodContext);
 }
@@ -55,7 +69,6 @@ function Door({ mood }: { readonly mood: Mood }) {
             height={640}
             alt="Don Cuentas, con su tabla, cuidando la puerta"
           />
-          <img className={d.noPeeking} src={noPeekingImg.src} width={640} height={640} alt="" />
         </div>
       </div>
       <div className={d.tagline}>
@@ -82,7 +95,9 @@ export function Trastienda({
         <Door mood={mood} />
         <section className={v.counter}>
           {children}
-          <p className={v.footnote}>Don Cuentas no ve tu contraseña. Ni quiere.</p>
+          <p className={v.footnote}>
+            Aquí no hay contraseñas. Tu huella y tu cara nunca salen de tu equipo.
+          </p>
         </section>
       </main>
     </MoodContext.Provider>
