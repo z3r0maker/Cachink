@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { formatMoney, formatMonth } from '@xangarro/domain';
+import { formatMoney, formatMonth, toPesosString } from '@xangarro/domain';
 
 import { agregarCsd, fijarInscripcion, inscripcionPasada } from './empresa-agenda';
 import { capturarDeclaracion, esperadoDe, sembrarMesFiscal, subirPapel } from './empresa-impuestos';
@@ -80,6 +80,7 @@ import {
   otroSocioRechazaYPrepara,
   trimestreMx,
 } from './empresa-presupuesto';
+import { bajarPaquete, capturarCodigos, codigoDe, MES_CONTADOR } from './empresa-contador';
 import {
   agregarOtroSocio,
   confirmarSaldo,
@@ -1133,4 +1134,74 @@ test('a founder prepares a quarter’s budget, approves the other’s, and spend
   } finally {
     await quitarOtroSocio();
   }
+});
+
+test('a founder downloads the contador’s package, and types in and validates the codes (E-43)', async ({
+  page,
+}) => {
+  const mes = MES_CONTADOR;
+  const nombre = formatMonth(mes).split(' ')[0] ?? mes;
+  const saldo = await sembrarMesCierre(mes);
+  await signInAsStaff(page, SOCIO);
+  await page.goto(`/empresa/cierre?mes=${mes}`);
+  await page.getByRole('link', { name: 'Paquete para el contador' }).click();
+  const panel = page.getByRole('dialog', { name: 'Paquete para el contador' });
+
+  // Real data: the month's ledger reaches the balanza, which has no code yet.
+  await expect(panel.getByTestId('paquete-chip')).toHaveText('Preliminar');
+  await expect(panel.getByTestId('paquete-aviso')).toContainText(
+    '22 cuentas no tienen código agrupador',
+  );
+  const bancos = panel.locator('[data-cuenta="bancos"]');
+  await expect(bancos).toContainText('Sin código');
+  await expect(bancos).toContainText(formatMoney(saldo));
+  await expect(panel.getByTestId('paquete-cuadra')).toHaveText('22 cuentas · cuadra');
+  await expect(panel.getByTestId('paquete-parte').nth(2)).toContainText(
+    'el gasto sin factura, marcado no deducible, va solo en la balanza',
+  );
+  await expect(panel.getByTestId('paquete-descargar')).toHaveText(
+    `Descargar el preliminar de ${nombre}`,
+  );
+
+  // The codes: the list for the contador, typed in with one missing, then all.
+  await panel.getByRole('link', { name: 'Ver los códigos' }).click();
+  await expect(page).toHaveURL(/\/empresa\/cierre\/codigos$/);
+  await expect(page.getByRole('heading', { name: 'Aún no hay códigos agrupadores' })).toBeVisible();
+  const lista = await page.request.get('/empresa/cierre/codigos/lista');
+  expect(await lista.text()).toContain('Bancos,Activo,Deudora,');
+  await capturarCodigos(page, 'afac');
+  await expect(page.getByRole('heading', { name: '21 de 22 cuentas con su código' })).toBeVisible();
+  await expect(page.locator('[data-cuenta="afac"]')).toContainText('Falta');
+  await expect(page.getByRole('button', { name: 'Marcar como validada' })).toBeDisabled();
+  await capturarCodigos(page, null);
+  await expect(
+    page.getByRole('heading', { name: 'Las 22 cuentas tienen su código' }),
+  ).toBeVisible();
+  await page
+    .getByTestId('codigos-validar')
+    .getByRole('button', { name: 'Marcar como validada' })
+    .click();
+  await expect(page.getByTestId('codigos-chip')).toHaveText('Validados');
+  await expect(page.getByRole('heading', { name: /^Validados por el contador el / })).toBeVisible();
+
+  // The package now goes without a warning, and the .zip carries the codes.
+  await page.goto(`/empresa/cierre?mes=${mes}&panel=contador`);
+  await expect(panel.getByTestId('paquete-aviso')).toHaveCount(0);
+  await expect(bancos).toContainText(codigoDe('bancos'));
+  const href = (await panel.getByTestId('paquete-descargar').getAttribute('href')) ?? '';
+  const zip = await bajarPaquete(page.request, href);
+  expect(zip.tipo).toBe('application/zip');
+  expect(Object.keys(zip.archivos)).toEqual(
+    expect.arrayContaining([`balanza-${mes}.csv`, 'emitidas.csv']),
+  );
+  const linea = (zip.archivos[`balanza-${mes}.csv`] ?? '')
+    .split('\r\n')
+    .find((l) => l.startsWith(`${codigoDe('bancos')},Bancos,Deudora,`));
+  expect(linea?.endsWith(`,${toPesosString(saldo)}`)).toBe(true);
+
+  // Changing one code leaves the list unvalidated again.
+  await page.goto('/empresa/cierre/codigos');
+  await page.getByLabel('Código agrupador de Bancos').fill('102.02');
+  await page.getByRole('button', { name: 'Guardar los códigos' }).click();
+  await expect(page.getByTestId('codigos-chip')).toHaveText('Sin validar · 22 de 22');
 });

@@ -106,6 +106,13 @@
       "when": 1795122711395,
       "tag": "0014_corp_presupuesto",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795135257559,
+      "tag": "0015_corp_contador",
+      "breakpoints": true
     }
   ]
 }

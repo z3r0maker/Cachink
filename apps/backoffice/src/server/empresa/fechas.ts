@@ -25,5 +25,8 @@ export const fechaLarga = (iso: string) =>
 
 const DIA_MX = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City' });
 
+/** `YYYY-MM-DD`: the day an instant fell on in Mexico. */
+export const fechaEnMexico = (at: string) => DIA_MX.format(new Date(at));
+
 /** «12 nov»: the day an instant fell on in Mexico. */
-export const diaDe = (at: string) => fechaCorta(DIA_MX.format(new Date(at)));
+export const diaDe = (at: string) => fechaCorta(fechaEnMexico(at));

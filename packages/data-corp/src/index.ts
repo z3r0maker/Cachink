@@ -66,3 +66,10 @@ export {
   listarPresupuestos,
   listarSolicitudes,
 } from './queries/presupuesto.js';
+export {
+  createCodigosRepository,
+  recibidasDelPaquete,
+  sumasPorTramo,
+  xmlsDelPaquete,
+  type RecibidaDelPaquete,
+} from './queries/contador.js';

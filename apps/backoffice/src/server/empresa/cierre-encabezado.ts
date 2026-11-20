@@ -36,6 +36,8 @@ export interface EncabezadoCierre {
   readonly cierreTexto: string;
   /** «Pedir reabrir» opens its panel; null when the month may not be asked. */
   readonly reabrirHref: string | null;
+  /** «Paquete para el contador» (E-43): any month that has ended. */
+  readonly paqueteHref: string | null;
   readonly pedido: Pedido | null;
 }
 
@@ -143,6 +145,7 @@ export function encabezadoDe(
     puedeCerrar: !cerrado && noCerrar === null,
     cierreTexto: cerrado ? (noReabrir ?? REABRIR) : (noCerrar ?? CERRAR),
     reabrirHref: cerrado && noReabrir === null ? hrefCierre(d.mes, 'reabrir') : null,
+    paqueteHref: d.mes < d.hoy.slice(0, 7) ? hrefCierre(d.mes, 'contador') : null,
     pedido: pedidoDe(estado, d, founderId),
   };
 }

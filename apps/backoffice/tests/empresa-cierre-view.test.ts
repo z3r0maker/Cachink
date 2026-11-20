@@ -141,6 +141,12 @@ describe('the month’s header', () => {
     assert.equal(e.titulo, 'Noviembre todavía no termina');
     assert.equal(e.puedeCerrar, false);
   });
+
+  it('«Paquete para el contador» opens for a month that ended, open or closed (E-43)', () => {
+    assert.equal(enc(datos(enCurso)).paqueteHref, '/empresa/cierre?mes=2026-10&panel=contador');
+    assert.equal(enc(cerrado(false)).paqueteHref, '/empresa/cierre?mes=2026-10&panel=contador');
+    assert.equal(enc(datos(listo, { mes: '2026-11' })).paqueteHref, null);
+  });
 });
 
 describe('the month on screen', () => {
