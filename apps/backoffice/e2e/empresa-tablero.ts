@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 
 import { nombreTrimestre, trimestreSiguiente, ultimoDiaDelTrimestre } from '@xangarro/domain/corp';
 import postgres from 'postgres';
@@ -16,7 +16,7 @@ import { hoyMx, trimestreMx } from './empresa-presupuesto';
 export const TABLERO_ACTUAL = trimestreMx();
 export const TABLERO_SIGUIENTE = trimestreSiguiente(TABLERO_ACTUAL);
 export const TABLERO_CERRADO = (() => {
-  const n = randomBytes(1).readUInt8(0) % 20;
+  const n = randomInt(20);
   return `${2020 + Math.floor(n / 4)}-T${(n % 4) + 1}`;
 })();
 export const nombre = nombreTrimestre;

@@ -141,6 +141,21 @@ describe('eventoDeMovimiento (OD-4 §3)', () => {
     );
   });
 
+  it('a long or hostile link is refused at once, not after a slow match', () => {
+    const largo = `https://${'a.'.repeat(30_000)}`;
+    const inicio = performance.now();
+    assert.throws(
+      () => eventoDeMovimiento(tarjeta(), mov({ accion: 'terminar', enlace: largo })),
+      codigo('EVIDENCIA'),
+    );
+    assert.ok(performance.now() - inicio < 50);
+    const sinPunto = `https://${'a'.repeat(2_000)}`;
+    assert.throws(
+      () => eventoDeMovimiento(tarjeta(), mov({ accion: 'terminar', enlace: sinPunto })),
+      codigo('EVIDENCIA'),
+    );
+  });
+
   it('a card of the next plan does not move before its quarter starts', () => {
     const siguiente = tarjeta({ trimestre: '2027-T1', vence: '2027-02-01' });
     assert.throws(
