@@ -3,6 +3,7 @@ import { appendFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 
 import { StepTracker, type TrackedStep } from './stream';
+import type { ToolSet } from './tools';
 
 /**
  * The actor as a process: `claude -p` in an empty folder, its stream read line
@@ -32,6 +33,8 @@ export interface ActorProcessInput {
   readonly onStep: (step: TrackedStep) => Promise<void>;
   /** Where every event is kept as it arrives: the actor's own record, for the judge. */
   readonly streamFile?: string;
+  /** Which calls are steps and how they read; the web's by default. */
+  readonly tools?: ToolSet;
 }
 
 /** Nothing about the stack or the repo reaches the actor's environment. */
@@ -53,7 +56,7 @@ function readEvent(line: string, streamFile: string | undefined): unknown {
 }
 
 export function runActor(i: ActorProcessInput): Promise<ActorRun> {
-  const tracker = new StepTracker();
+  const tracker = new StepTracker(i.tools);
   const child = spawn(i.command, [...i.args, i.prompt], {
     cwd: i.cwd,
     env: actorEnv(),

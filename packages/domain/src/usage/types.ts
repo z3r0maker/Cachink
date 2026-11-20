@@ -41,24 +41,14 @@ export interface UsageSnapshot extends PeriodUsage {
  * another use case wrote on the user's behalf.
  */
 export type MovementOrigin =
-  | 'manual'
-  | 'portal'
-  | 'apertura'
-  | 'venta'
-  | 'cancelacion'
-  | 'conversion';
+  'manual' | 'portal' | 'apertura' | 'venta' | 'cancelacion' | 'conversion';
 
 /** Review status of a product created at the register (ADR-074). */
 export type ProductReviewStatus = 'pendiente' | 'aprobado' | 'fusionado' | 'rechazado';
 
 /** Record kinds that are never transactions (OQ-5). */
 export type NonCountedKind =
-  | 'cancelacion'
-  | 'corteDeDia'
-  | 'cajaMovimiento'
-  | 'cajaTurno'
-  | 'abono'
-  | 'mensajeOperador';
+  'cancelacion' | 'corteDeDia' | 'cajaMovimiento' | 'cajaTurno' | 'abono' | 'mensajeOperador';
 
 /**
  * A synced row as usage metering sees it. `at` is an ISO-8601 instant that

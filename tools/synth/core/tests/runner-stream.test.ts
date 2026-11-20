@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { parseActorReport, StepTracker } from '../src/runner/stream';
+import { PHONE_TOOLS } from '../src/runner/tools';
 
 /** `claude -p --output-format stream-json` events, as the actor emits them. */
 const text = (t: string) => ({
@@ -145,6 +146,46 @@ describe('StepTracker', () => {
   });
 });
 
+describe('StepTracker on the phone', () => {
+  const phoneUse = (id: string, name: string, input: Record<string, unknown>) => ({
+    type: 'assistant',
+    message: { content: [{ type: 'tool_use', id, name: `mcp__phone__${name}`, input }] },
+  });
+
+  it('a Maestro tap is a step in words; looking at the screen is not', () => {
+    const t = new StepTracker(PHONE_TOOLS);
+    t.feed(text('Toco cobrar.'));
+    t.feed(phoneUse('a', 'run', { yaml: '- tapOn: Cobrar' }));
+    assert.equal(t.feed(result('a', 'ran'))?.action, 'tap «Cobrar»');
+    t.feed(phoneUse('b', 'inspect_screen', {}));
+    t.feed(result('b', '{}'));
+    t.feed(phoneUse('c', 'run', { yaml: '- waitForAnimationToEnd' }));
+    t.feed(result('c', 'ran'));
+    assert.equal(t.steps.length, 1);
+    assert.equal(t.looks, 2);
+  });
+
+  it('a command the proxy refused is the actor fumbling the tool: it spends no patience', () => {
+    const t = new StepTracker(PHONE_TOOLS);
+    t.feed(phoneUse('x', 'run', { yaml: '- openLink: exp+xangarro://x' }));
+    const done = t.feed(
+      result('x', '«openLink» is not something a person does with the phone', true),
+    );
+    assert.equal(done, undefined);
+    assert.equal(t.steps.length, 0);
+    assert.equal(t.looks, 1);
+  });
+
+  it('a web tool name means nothing to the phone tracker, and the reverse', () => {
+    const phone = new StepTracker(PHONE_TOOLS);
+    phone.feed(use('w', 'click', { element: 'x' }));
+    assert.equal(phone.feed(result('w', PAGE)), undefined);
+    const web = new StepTracker();
+    web.feed(phoneUse('p', 'run', { yaml: '- tapOn: x' }));
+    assert.equal(web.feed(result('p', 'ran')), undefined);
+  });
+});
+
 describe('parseActorReport', () => {
   const REPORT = {
     outcome: 'abandoned',
@@ -164,6 +205,17 @@ describe('parseActorReport', () => {
       REPORT,
     );
     assert.deepEqual(parseActorReport(`Me rindo. ${JSON.stringify(REPORT)}`), REPORT);
+  });
+
+  it('keeps the first two hard moments of a report that lists three (seen in a phone run)', () => {
+    const three = {
+      ...REPORT,
+      exit_interview: {
+        ...REPORT.exit_interview,
+        hardest_moments: [...REPORT.exit_interview.hardest_moments, { step: 8, what: 'otra vez' }],
+      },
+    };
+    assert.deepEqual(parseActorReport(JSON.stringify(three)), REPORT);
   });
 
   it('returns null for no JSON, broken JSON, or a report outside the contract', () => {

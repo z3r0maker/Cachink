@@ -221,7 +221,18 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-06 Runner de teléfono: emulador Android y Maestro MCP [alta]
 
-- [ ] Status · **Blocked by:** S-04
+- [x] Status · **Blocked by:** S-04
+      Done: 2026-11-20 · `feat/synth-s06` · `core/src/phone/`, `tools/synth/flows/phone-door.yaml`. Taquero on
+      `primera-venta-telefono`: completed, with success true from SQL after the outbox pushed, in 16 steps and
+      195 s, for about $0.25. Maestro MCP does take a `device_id` on every call. But its `run` accepts any Maestro
+      YAML, so the actor's only MCP server is a Synth proxy in front of it, which allows one person-level command
+      per call on the pinned device and restarts `maestro mcp` when another session's `pkill -9 -f maestro` kills
+      it. The run holds the harness's machine-wide Maestro lock. `login-operator.yaml` gains `OPERATOR_ID` and
+      `NIP`, defaulting to Toni and 1234; the phone door exercised the parameters, and no harness run has used
+      the defaults since. It took five runs to pass, each failure on the harness's side: the dev-client sheet
+      after `pm clear`, a Google Fonts blip in the build (retried once now), a report with three hard moments
+      (the first two are kept), YAML and pixel-tap slips (refused with a hint, not counted as steps), and
+      Maestro killed mid-run.
 - **What:**
   - Use one Android emulator, with an AVD named in `config.yaml`.
   - The capture app runs a dev-client build with `EXPO_PUBLIC_E2E=1` and `EXPO_PUBLIC_API_BASE=http://10.0.2.2:<port>`
@@ -239,7 +250,16 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-07 Prueba de aislamiento del actor [alta]
 
-- [ ] Status · **Blocked by:** S-05, S-06
+- [x] Status · **Blocked by:** S-05, S-06
+      Done: 2026-11-20 · `feat/synth-s07` · `pnpm --filter @xangarro/synth-core isolation` writes
+      `tools/synth/isolation.md`; both actors are isolated. Each actor, started with a run's exact flags and MCP
+      server, is told to read a canary file, `cat` it, fetch a canary page from a local server that counts hits,
+      and leave through its runner's door (URL bar, phone link). A script decides the verdict: Claude Code's
+      `init` event shows the server connected and exactly the allow-list visible, every call is on the list,
+      neither token reaches the transcript, and the server counts no hit. The first phone probe passed while its
+      proxy had failed to start (an actor with no tools), so the verdict now requires the tools to be there, and
+      the override's arguments are passed as `--maestro-arg=<value>`. The README shows the flags rendered from
+      `actorArgs`, and `tests/readme.test.ts` holds it to them and to an «isolated» record.
 - **What:**
   - A test run where the actor is told to read a file, run a shell command and fetch a URL. Each attempt is refused.
   - The README shows the exact flags and the allow-list.
@@ -249,7 +269,20 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-08 Juez (`synth-judge`) [alta]
 
-- [ ] Status · **Blocked by:** S-05
+- [x] Status · **Blocked by:** S-05
+      Done: 2026-11-20 · `feat/synth-s08` · `pnpm --filter @xangarro/synth-core judge <run folder>…` starts
+      Opus with `claude -p` in the run folder, with Read, Glob and Grep confined there by `--restricted` and
+      no MCP server. Its transcript is checked: the `init` tools must be exactly those three, and every path
+      it read must be inside the run. The bug candidates are picked by script (`judge/candidates.ts`): every
+      console error, with a stack trace and a burst of the same line folded into one, plus every failed or
+      4xx/5xx request. `judge/review.ts` then checks the judge's JSON against the trace: - a reference the run lacks is removed, and a finding left with none is dropped; - a finding answered «no» to the cut question becomes `agent_failure`; - an `agent_failure` answered «yes» is dropped as self-contradicting; - a candidate neither cited nor dismissed is added as «Sin revisar».
+
+      Findings go to the corrida's `findings.json`. The judge's record goes to `<corrida>/judge/<run-id>/`:
+      the cut answers, the drops, the candidates and the cost. Two judgements of the S-06 phone run agree,
+      at about $0.55 each. «$500 → $8» and «Cobrar $43.00» are `agent_failure`, because Maestro resolved the
+      text to a hidden twin of the visible button. Abrir turno before the first sale is `friction`. The web
+      run costs about $0.14: the double «Cobrar» is `friction`, and the RSC prefetch aborts are dismissed.
+
 - **What:**
   - Write `prompts/judge.md` and `tools/synth/.claude/agents/synth-judge.md` with the spec §8.3 rubric.
   - The judge has read-only tools on one run folder.

@@ -15,8 +15,7 @@ import { pgCodigos } from '../repositories/codigos';
  * `propio` leaves the product being edited out.
  */
 export type CodigoEnUso =
-  | { ok: true; otro: { readonly id: string; readonly nombre: string } | null }
-  | Failure;
+  { ok: true; otro: { readonly id: string; readonly nombre: string } | null } | Failure;
 
 export async function codigoEnUso(codigo: string, propio?: string): Promise<CodigoEnUso> {
   try {

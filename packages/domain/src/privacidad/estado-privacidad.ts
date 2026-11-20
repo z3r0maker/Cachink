@@ -29,9 +29,10 @@ function ultima(
 ): ConsentimientoGuardado | undefined {
   return rows
     .filter((r) => r.purpose === purpose)
-    .reduce<
-      ConsentimientoGuardado | undefined
-    >((a, r) => (a === undefined || r.createdAt > a.createdAt ? r : a), undefined);
+    .reduce<ConsentimientoGuardado | undefined>(
+      (a, r) => (a === undefined || r.createdAt > a.createdAt ? r : a),
+      undefined,
+    );
 }
 
 export function estadoDePrivacidad(

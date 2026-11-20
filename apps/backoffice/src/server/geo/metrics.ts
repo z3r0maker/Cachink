@@ -23,15 +23,7 @@ export type MetricKind = 'conteo' | 'tasa';
 
 /** The shading class for one region; `mapa.css.ts` keys its variants by these. */
 export type Bucket =
-  | 'cero'
-  | 'b1'
-  | 'b2'
-  | 'b3'
-  | 'b4'
-  | 'insuficiente'
-  | 'abajo'
-  | 'igual'
-  | 'arriba';
+  'cero' | 'b1' | 'b2' | 'b3' | 'b4' | 'insuficiente' | 'abajo' | 'igual' | 'arriba';
 
 export interface Scale {
   /** Largest value across regions in the period. */

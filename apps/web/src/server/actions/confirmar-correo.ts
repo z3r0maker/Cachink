@@ -28,8 +28,7 @@ export type ConfirmacionResult =
 /** `limite`: too many emails for now, a wait and not a fault. */
 export type ReenvioResult = { ok: true } | { ok: false; message: string; limite?: true };
 export type CorregirResult =
-  | { ok: true; email: string }
-  | { ok: false; message: string; limite?: true };
+  { ok: true; email: string } | { ok: false; message: string; limite?: true };
 
 const LIMITE = 'Pediste varios enlaces seguidos. Vuelve a intentar en 15 min.';
 const NO_ENVIADO = 'No pudimos mandar el correo. Tu cuenta ya está creada. Intenta otra vez.';

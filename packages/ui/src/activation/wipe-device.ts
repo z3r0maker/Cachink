@@ -30,8 +30,7 @@ export function sinEnviar(counts: SyncCounts): number {
 const REINICIO_MS = 800;
 
 export type WipeResult =
-  | { readonly kind: 'borrado' }
-  | { readonly kind: 'pendiente'; readonly sinEnviar: number };
+  { readonly kind: 'borrado' } | { readonly kind: 'pendiente'; readonly sinEnviar: number };
 
 export interface WipeDeviceDeps {
   readonly db: XangarroDatabase;

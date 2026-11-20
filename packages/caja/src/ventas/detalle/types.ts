@@ -68,5 +68,4 @@ export interface Abierta {
 
 /** The drawer's ticket as loaded. */
 export type CargaTicket =
-  | { readonly state: 'happy'; readonly venta: VentaDetalle }
-  | { readonly state: EstadoMode };
+  { readonly state: 'happy'; readonly venta: VentaDetalle } | { readonly state: EstadoMode };

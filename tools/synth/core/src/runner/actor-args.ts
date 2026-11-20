@@ -13,52 +13,27 @@
  * - This CLI has no `--max-turns`; the runner counts turns and steps itself
  *   and stops the actor, with `--max-budget-usd` as the last guard.
  */
-export const SERVER = 'pw';
+import { SERVER, WEB_TOOLS, type ToolSet } from './tools';
 
-/** What a person can do to a screen: each call is a step, and spends patience. */
-export const ACTION_TOOLS = [
-  'click',
-  'type',
-  'fill_form',
-  'press_key',
-  'select_option',
-  'hover',
-  'drag',
-  'handle_dialog',
-  'navigate_back',
+export { ACTION_TOOLS, LOOK_TOOLS, SERVER } from './tools';
+
+/** Claude Code's built-in tools: the actor gets none of them; the judge gets the three that read. */
+export const BUILT_INS = [
+  'Read',
+  'Edit',
+  'Write',
+  'Glob',
+  'Grep',
+  'NotebookEdit',
+  'Bash',
+  'PowerShell',
+  'WebFetch',
+  'WebSearch',
+  'Task',
+  'Agent',
+  'TodoWrite',
+  'Skill',
 ] as const;
-
-/** Looking, which is recorded but is not a step. */
-export const LOOK_TOOLS = ['snapshot', 'take_screenshot', 'wait_for'] as const;
-
-/**
- * Playwright tools a person does not have (spec §8.1 rule 5): the URL bar,
- * running code, DevTools, other tabs, and the window itself.
- */
-const PERSONA_NEVER = [
-  'navigate',
-  'evaluate',
-  'run_code_unsafe',
-  'console_messages',
-  'network_requests',
-  'network_request',
-  'find',
-  'tabs',
-  'resize',
-  'emulate_media',
-  'file_upload',
-  'drop',
-  'close',
-] as const;
-
-const BUILT_IN = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'NotebookEdit', 'Bash', 'PowerShell'];
-const BUILT_IN_MORE = ['WebFetch', 'WebSearch', 'Task', 'Agent', 'TodoWrite', 'Skill'];
-
-const tool = (t: string): string => `mcp__${SERVER}__browser_${t}`;
-
-export const actionToolName = (name: string): string | undefined =>
-  ACTION_TOOLS.find((t) => tool(t) === name);
-export const isLookTool = (name: string): boolean => LOOK_TOOLS.some((t) => tool(t) === name);
 
 export interface ActorArgsInput {
   readonly model: string;
@@ -66,6 +41,8 @@ export interface ActorArgsInput {
   /** The last guard on spend, in US dollars; the corrida's caps are checked before. */
   readonly budgetUsd: number;
   readonly systemPrompt: string;
+  /** The runner's tools; the web's by default. */
+  readonly tools?: ToolSet;
 }
 
 export function actorArgs(i: ActorArgsInput): string[] {
@@ -88,9 +65,9 @@ export function actorArgs(i: ActorArgsInput): string[] {
     '--tools',
     '',
     '--allowedTools',
-    [...ACTION_TOOLS, ...LOOK_TOOLS].map(tool).join(','),
+    (i.tools ?? WEB_TOOLS).allowed.join(','),
     '--disallowedTools',
-    [...BUILT_IN, ...BUILT_IN_MORE, ...PERSONA_NEVER.map(tool)].join(','),
+    [...BUILT_INS, ...(i.tools ?? WEB_TOOLS).never].join(','),
     '--permission-mode',
     'dontAsk',
     '--system-prompt',

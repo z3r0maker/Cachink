@@ -11,8 +11,7 @@ import { liveCancelLink } from './live';
  * cancelled nothing. A failure changes nothing and says so.
  */
 export type ConfirmarEnlaceResult =
-  | { ok: true; view: CancelLinkView }
-  | { ok: false; message: string };
+  { ok: true; view: CancelLinkView } | { ok: false; message: string };
 
 export async function confirmarCancelacionPorEnlace(token: string): Promise<ConfirmarEnlaceResult> {
   try {

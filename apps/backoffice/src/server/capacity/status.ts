@@ -69,11 +69,7 @@ export interface CapacitySnapshot {
 }
 
 export type CapacityMetricKey =
-  | 'dbSizeS2'
-  | 'largestTableRows'
-  | 'syncP95'
-  | 'dbSizeS3'
-  | 'activeTenants';
+  'dbSizeS2' | 'largestTableRows' | 'syncP95' | 'dbSizeS3' | 'activeTenants';
 
 export interface CapacityMetric {
   readonly key: CapacityMetricKey;
