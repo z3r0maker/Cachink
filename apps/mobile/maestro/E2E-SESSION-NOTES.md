@@ -52,10 +52,12 @@ gotchas that otherwise cost ~30 min of debugging.
   CPU load. If you see `ConnectException: 127.0.0.1:7001`, re-run through the
   scripts or `scripts/maestro-locked.sh`: taking the lock clears the old driver.
   **Never `pkill -9 -f maestro`** — it ends other sessions' runs and the
-  Maestro MCP server (README «One Maestro at a time»).
-- **One Maestro at a time on the machine.** Every iOS run shares port 7001, so
-  two runs on two simulators drive each other's. The scripts hold
-  `/tmp/xangarro-maestro.lock`; `cat /tmp/xangarro-maestro.lock/info` shows who.
+  Maestro MCP server (README «Lanes»).
+- **Runs go in lanes (ADR-156).** With Maestro 2.6+, `run-flow.sh`,
+  `full-regression.sh` and `maestro-locked.sh --lane` each take a lane (own
+  simulator, mock on 3100+N, Metro on 8100+N), so sessions run at once;
+  `scripts/lane.sh status` shows who holds what. Lane 0 (any simulator, :3000,
+  :8081) is still one run at a time on `/tmp/xangarro-maestro.lock`.
 
 ## 3. Triage discipline (bug vs test issue)
 

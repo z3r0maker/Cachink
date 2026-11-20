@@ -85,8 +85,16 @@ fi
 # ONE implementation. It also creates the iPhone SE target on first use.
 # shellcheck source=lib/device-resolve.sh
 source "$SCRIPT_DIR/lib/device-resolve.sh"
+# shellcheck source=lib/lane.sh
+source "$SCRIPT_DIR/lib/lane.sh"
 
-if [[ -n "$DEVICE_CLASS" ]]; then
+# ──────────── A lane of its own (ADR-156) ────────────────────────
+# With Maestro 2.6+ and no simulator pinned, the run takes a free lane: its
+# own simulator, mock and Metro, so other sessions can run at the same time.
+# MAESTRO_LANES=0 or a pinned MAESTRO_DEVICE_UDID keeps lane 0.
+if [[ "$DRY_RUN" == false && -z "${MAESTRO_DEVICE_UDID:-}" ]] && lanes_enabled; then
+  lane_acquire "${DEVICE_CLASS:-iphone}" || exit 1
+elif [[ -n "$DEVICE_CLASS" ]]; then
   # --dry-run only prints the flow list, so resolve the UDID but do not pay
   # the ~60s boot (and do not wake a simulator the user did not ask for).
   if [[ "$DRY_RUN" == true ]]; then
@@ -96,11 +104,9 @@ if [[ -n "$DEVICE_CLASS" ]]; then
   fi
 fi
 
-# ──────────── One Maestro at a time on this machine ──────────────
-# Every iOS run shares driver port 7001; two at once drive each other's
-# simulators. Held to the end of the script (lib/maestro-lock.sh).
-# shellcheck source=lib/maestro-lock.sh
-source "$SCRIPT_DIR/lib/maestro-lock.sh"
+# ──────────── One run at a time on lane 0 ─────────────────────────
+# Lane 0 shares the mock on :3000 and Metro on :8081. A no-op when a lane
+# was taken above (its lock is already this script's). lib/maestro-lock.sh.
 if [[ "$DRY_RUN" == false ]]; then
   maestro_lock_acquire || exit 1
 fi
@@ -118,7 +124,7 @@ FAILED=0
 TOTAL=$#
 
 # Create run directory for E2E report
-RUN_ID="$(date +%Y-%m-%d_%H%M)_single-flow"
+RUN_ID="$(date +%Y-%m-%d_%H%M)_single-flow${MAESTRO_LANE:+_L$MAESTRO_LANE}"
 RUN_DIR="$REPORT_ROOT/runs/$RUN_ID"
 if [[ "$DRY_RUN" == false ]]; then
   mkdir -p "$RUN_DIR/tests"

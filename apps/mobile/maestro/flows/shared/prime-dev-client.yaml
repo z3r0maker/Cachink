@@ -7,7 +7,7 @@ appId: mx.xangarro.mobile
 - tapOn:
     text: 'Open'
     optional: true
-- openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+- openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A${MAESTRO_LANE_METRO_PORT || "8081"}%3Fts%3D${MAESTRO_BUNDLE_BUSTER}'
 # The «Open in …?» dialog sometimes shows without a text the driver can see;
 # its button sits mid-screen — one coordinate tap accepts it either way.
 - tapOn:
@@ -35,7 +35,7 @@ appId: mx.xangarro.mobile
       visible:
         text: '.*Runtime version.*'
     commands:
-      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A${MAESTRO_LANE_METRO_PORT || "8081"}%3Fts%3D${MAESTRO_BUNDLE_BUSTER}'
 # The manual-entry dialog with the URL prefilled: Connect submits it.
 - runFlow:
     when:
@@ -49,7 +49,7 @@ appId: mx.xangarro.mobile
       visible:
         text: '.*Runtime version.*'
     commands:
-      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081%3Fts%3D${BUNDLE_BUSTER}'
+      - openLink: 'exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A${MAESTRO_LANE_METRO_PORT || "8081"}%3Fts%3D${MAESTRO_BUNDLE_BUSTER}'
 # The floating «Tools» button covers the header's bell on phones. Switch it off
 # once per simulator in the dev menu (gear › Tools button); the dev-client
 # remembers it across resets.

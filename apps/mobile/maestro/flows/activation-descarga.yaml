@@ -9,7 +9,7 @@
 # x-entrypoint: fresh
 appId: mx.xangarro.mobile
 env:
-  MOCK_API: http://127.0.0.1:3100
+  MOCK_API: ${MAESTRO_LANE_MOCK_API || 'http://127.0.0.1:3000'}
 ---
 - runScript:
     file: shared/mock-snapshot-budget.js

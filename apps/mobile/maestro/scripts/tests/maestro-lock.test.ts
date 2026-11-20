@@ -4,7 +4,8 @@
  * Maestro 2.5.1 drives every single-device iOS run through one driver port,
  * 7001, whatever `--device` says, so two runs on two simulators at once drive
  * each other's (2026-11-19: one run's `launchApp` closed the other's app).
- * The lock makes the harness run one Maestro at a time on the machine.
+ * The lock makes the harness run one Maestro at a time on lane 0 (ADR-156:
+ * lanes 1+ reuse it, see lane.test.ts).
  *
  * Each case runs real bash against a private lock directory; the driver
  * cleanup and the process scan are stubbed so nothing on the machine is
@@ -46,6 +47,7 @@ function bash(
       PATH: process.env.PATH ?? '',
       MAESTRO_LOCK_DIR: lock,
       MAESTRO_LOCK_POLL: '0.2',
+      MAESTRO_PARALLEL_SAFE: '0',
       ...env,
     },
     timeout: 30_000,

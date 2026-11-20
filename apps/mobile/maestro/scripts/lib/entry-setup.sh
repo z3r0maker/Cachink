@@ -66,7 +66,8 @@ current_state() {
 # Clean slate: no device token (keychain), no SQLite, the contracts mock
 # back to its fixtures, then the dev-client is pointed at Metro and waits
 # for the first screen (Vincular on fresh, the tab bar when activated).
-MOCK_API="${MOCK_API:-http://127.0.0.1:3000}"
+# A lane's own mock (lib/lane.sh exports it), else lane 0's.
+MOCK_API="${MOCK_API:-${MAESTRO_LANE_MOCK_API:-http://127.0.0.1:3000}}"
 PRIME_FLOW="${PRIME_FLOW:-$FLOWS_DIR/shared/prime-dev-client.yaml}"
 
 # Maestro sometimes hangs after an XCTest hiccup while the app is switching
@@ -97,7 +98,9 @@ reset_app() {
   # Cache-buster for the dev client's bundle URL: a cold start otherwise
   # serves the stale bundle cached on disk, and app-side fixes never reach
   # the phone (M-11). A fresh URL forces the reconnect to re-fetch.
-  export BUNDLE_BUSTER="$(date +%s)"
+  # MAESTRO_-prefixed: Maestro hands a flow only the MAESTRO_* shell
+  # variables, so as plain BUNDLE_BUSTER it never arrived (ts=undefined).
+  export MAESTRO_BUNDLE_BUSTER="$(date +%s)"
   # Park the dev client's floating gear in the status bar's right corner
   # (M-11): left to drift it eats taps with no trace in the accessibility
   # tree — the handoff's «Tools button» gotcha. The strip is dead on every

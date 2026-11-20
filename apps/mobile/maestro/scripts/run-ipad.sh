@@ -114,7 +114,7 @@ fi
 
 echo "    UDID: $IPAD_UDID"
 
-# ──────────── One Maestro at a time on this machine ──────────────
+# ──────────── One run at a time on lane 0 (ADR-156) ──────────────
 # Every iOS run shares driver port 7001; two at once drive each other's
 # simulators (lib/maestro-lock.sh). Only a run that will start Maestro waits.
 # shellcheck source=lib/maestro-lock.sh
@@ -208,7 +208,7 @@ if [[ "$INSTALL_ONLY" == true ]]; then
 fi
 
 # ──────────────── Verify Metro bundler is reachable ─────────────
-METRO_URL="http://localhost:8081/status"
+METRO_URL="http://localhost:${MAESTRO_LANE_METRO_PORT:-8081}/status"
 if ! curl -sf --connect-timeout 3 "$METRO_URL" >/dev/null 2>&1; then
   echo "⚠️   Metro bundler not responding at $METRO_URL."
   echo "    Start Metro first:  cd apps/mobile && npx expo start"

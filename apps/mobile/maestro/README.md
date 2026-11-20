@@ -17,7 +17,9 @@ before any change that touches the wizard, tabs, or onboarding flows.
   pnpm --filter @xangarro/mobile ios   # or `android`
   ```
 
-### What must be running
+### What must be running (lane 0)
+
+A lane (see «Lanes» below) starts its own mock and Metro; these are for lane 0.
 
 | Thing                                              | How                                                                                                          | Check                                                      |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
@@ -60,7 +62,7 @@ network). The `shared/mock-*.js` scripts call them from a flow.
 ./apps/mobile/maestro/scripts/run-flow.sh --skip-setup apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Direct maestro test (no auto-setup — you manage state yourself), through
-# the lock (see «One Maestro at a time» below):
+# the lock (see «Lanes» below; --lane gives it a lane of its own):
 ./apps/mobile/maestro/scripts/maestro-locked.sh --device <udid> test apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Tag-filtered run:
@@ -68,37 +70,60 @@ network). The `shared/mock-*.js` scripts call them from a flow.
 ./apps/mobile/maestro/scripts/maestro-locked.sh test --exclude-tags offline apps/mobile/maestro/flows/
 ```
 
-### One Maestro at a time
+### Lanes: several runs at once (ADR-156)
 
-Maestro 2.5.1 drives every single-device iOS run through one driver port,
-`127.0.0.1:7001`, whatever `--device` says, and reuses any driver already
-there. Two runs on two simulators at once drive each other's: on 2026-11-19
-one run's `launchApp` closed the app on another session's simulator, and that
-session's setup failed on the home screen. A driver left running after a run
-does the same to the next one.
+With Maestro 2.6 or later (`maestro --version`; this Mac and CI use 2.12.1),
+`run-flow.sh` and `full-regression.sh` take a **lane**: their own simulator,
+contracts mock and Metro, so other sessions run at the same time. There is
+nothing to start by hand. The lane creates and boots its simulator («Xangarro
+L<N> iphone|se|ipad», iOS 26.5), copies the dev client in from a booted
+simulator that has it (or `XANGARRO_DEV_CLIENT_APP=<.app>`), and starts the
+mock and Metro from your worktree (`pnpm install` first).
 
-So the scripts take a machine-wide lock (`scripts/lib/maestro-lock.sh`,
-`/tmp/xangarro-maestro.lock`) before their first Maestro command and keep it
-to the end. A second run waits, says who holds it (pid, simulator, script),
-and gives up after `MAESTRO_LOCK_WAIT` seconds (default an hour). A lock whose
-holder died is taken over. With the lock, a run clears leftover drivers before
-it starts and its own when it ends.
+| Lane  | Simulator               | Mock (its own company) | Metro     | Lock                                |
+| ----- | ----------------------- | ---------------------- | --------- | ----------------------------------- |
+| 0     | any, yours              | `:3000`                | `:8081`   | `/tmp/xangarro-maestro.lock`        |
+| 1 – 4 | `Xangarro L<N> <class>` | `:3100+N`              | `:8100+N` | `/tmp/xangarro-lanes/L<N>/run.lock` |
 
-- Run Maestro by hand only through `scripts/maestro-locked.sh <maestro args>`.
-  A bare `maestro test` doesn't take the lock; the scripts wait for it to end
-  but it can still be driven by, or drive, someone else's run.
-- Never `pkill -f maestro` or `xctest`: it ends other sessions' runs and the
-  Maestro MCP server. The lock's cleanup stops only the driver.
-- The Maestro MCP tools (`run`, `inspect_screen`) don't take the lock either.
-  Use them only while no script holds it (`cat /tmp/xangarro-maestro.lock/info`).
+```sh
+# A hand run in a lane (--device is filled in):
+./apps/mobile/maestro/scripts/maestro-locked.sh --lane iphone test apps/mobile/maestro/flows/ventas-lista.yaml
+# Who holds what, which worktree each lane serves, whether its services are up:
+./apps/mobile/maestro/scripts/lane.sh status
+# Stop a free lane's mock and Metro, and shut its simulators down:
+./apps/mobile/maestro/scripts/lane.sh down 2 --shutdown
+```
+
+- A run goes back to the lane its worktree warmed, else an unused one, else
+  another worktree's idle lane (whose mock and Metro restart from yours). When
+  all are busy it waits `MAESTRO_LOCK_WAIT` seconds (default an hour) and names
+  the holders.
+- Flows read `MAESTRO_LANE_MOCK_API` and `MAESTRO_LANE_METRO_PORT` (Maestro
+  hands a flow every `MAESTRO_*` shell variable) and fall back to lane 0's
+  ports. A new flow that calls the mock writes
+  `MOCK_API: ${MAESTRO_LANE_MOCK_API || 'http://127.0.0.1:3000'}`, never a bare
+  address: a flow's own `env:` wins over `-e`.
+- **Lane 0** is the old way, one run at a time. It serves a pinned
+  `MAESTRO_DEVICE_UDID`, `MAESTRO_LANES=0`, `run-ipad.sh`, the fold scripts,
+  `maestro-locked.sh` without `--lane`, and any Maestro older than 2.6.0.
+  Maestro 2.5.1 hard-codes driver port 7001 and shares one session per
+  platform, so two of its runs drive each other's simulators (2026-11-19).
+- Cleanup stops only the run's own simulator's driver. Never `pkill -f maestro`
+  or `xctest`: it ends other sessions' runs and the Maestro MCP server.
+- The Maestro MCP tools (`run`, `inspect_screen`) take no lock and no lane, so
+  their flows hit lane 0's ports. Use them to look at a screen, and the scripts
+  to run flows.
+- A worktree branched before ADR-156 still clears every driver on the machine
+  when it takes lane 0: merge main into it before its next Maestro run.
 
 ### Entry points
 
 Each flow declares `# x-entrypoint:` in its header; `run-flow.sh` and
 `full-regression.sh` read it and put the app in that state first
-(`scripts/lib/entry-setup.sh`), caching the current state in
-`/tmp/maestro-entry-state` so consecutive same-entry flows skip the setup.
-**Delete that file after restarting the mock**: the cache says «activated» while
+(`scripts/lib/entry-setup.sh`), caching the current state (lane 0: `/tmp/maestro-entry-state`; a lane:
+`/tmp/xangarro-lanes/L<N>/state-<udid>`) so consecutive same-entry flows skip
+the setup. A lane drops its states when it restarts its mock. **On lane 0,
+delete the file after restarting the mock**: the cache says «activated» while
 the fresh mock no longer knows the device's token, so the app is back on Vincular.
 
 | Entry point | Setup action                                                           | State after                                   |
