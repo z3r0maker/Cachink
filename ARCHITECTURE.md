@@ -11298,10 +11298,8 @@ killed every driver on the machine. The phone flows never reach Postgres, so no 
    device class, «Xangarro L<N> iphone|se|ipad» on iOS 26.5, created on first use with the dev client copied from a
    simulator that has it. It has its own contracts mock on 3100+N, which is its own company, and its own Metro on
    8100+N, pointed at that mock and with its own cache. Its lock is `/tmp/xangarro-lanes/L<N>/run.lock`, a
-   maestro-lock.sh lock, so a dead holder is taken over as before. A lane's Metro uses Metro's own file watcher
-   (`XANGARRO_METRO_WATCHMAN=0` in `metro.config.js`), not Watchman. A worktree sits inside the main checkout, and
-   Watchman answers for the enclosing watch, which on this Mac has re-crawled without end since 2026-11-09, so
-   `watch-project` never returned. Its bundle URLs say `127.0.0.1`, since `--localhost` listens on `::1` only.
+   maestro-lock.sh lock, so a dead holder is taken over as before. Its bundle URLs say `127.0.0.1`, since
+   `--localhost` listens on `::1` only.
 2. **Lane 0 is what there was**: any simulator, the mock on :3000, Metro on :8081, one run at a time on
    `/tmp/xangarro-maestro.lock`. Scripts that don't take a lane (run-ipad, fold-*, `maestro-locked.sh` without
    `--lane`, a pinned `MAESTRO_DEVICE_UDID`, `MAESTRO_LANES=0`) and any Maestro older than 2.6.0 use it.
@@ -11318,6 +11316,14 @@ killed every driver on the machine. The phone flows never reach Postgres, so no 
    under `Devices/<udid>/`. The wait for runs started outside the harness looks only at runs on that simulator.
    Older Maestro keeps the machine-wide cleanup and the wait on port 7001.
 6. **Maestro 2.12.1 everywhere**: this Mac's `~/.maestro` and the CI pin in `maestro-e2e.yml` (it said 2.4.0).
+7. **Watchman watches the checkout, not the worktrees in it.** The main checkout's watch held about 5.5 million
+   files, 5.3 million of them in the agents' worktrees (`.claude/worktrees`, `.e2e`). An install in any of them
+   overflowed FSEvents (`MustScanSubDirs UserDropped`), and each full re-crawl took six to seven minutes, every 15
+   to 25, so `watch-project` and `clock` timed out (78 re-crawls by 2026-11-19). A committed `.watchmanconfig`
+   ignores those folders and six other generated ones: eight, the most macOS takes as FSEvents exclusion paths.
+   Watchman still answers a nested path with the enclosing watch, which now ignores it, so `metro.config.js` uses
+   Metro's own crawler and watcher in any nested checkout. `XANGARRO_METRO_WATCHMAN=0|1` overrides that, and lanes
+   pass 0.
 
 **Alternatives considered**
 
