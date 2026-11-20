@@ -33,6 +33,8 @@ export interface ProductoNuevoSheetProps {
   readonly onListo: (p: Product) => void;
   /** The button once both answers are in; the ticket's by default. */
   readonly alGuardar?: string;
+  /** From Inventario (M-20): the product keeps stock, so Inventario lists it. */
+  readonly conExistencias?: boolean;
 }
 
 function Nota({ dueno }: { dueno: string }): ReactElement {
@@ -100,7 +102,7 @@ function Formulario(p: ProductoNuevoSheetProps & { f: ProductoNuevoForm }): Reac
 
 /** Mounted fresh on every opening, so a new product never starts from the last one. */
 function Abierto(p: ProductoNuevoSheetProps): ReactElement {
-  const f = useProductoNuevo(p.codigo, p.tipos);
+  const f = useProductoNuevo(p.codigo, p.tipos, p.conExistencias);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(false);
   const agregar = async (): Promise<void> => {

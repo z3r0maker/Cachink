@@ -79,6 +79,7 @@ export function InventarioEscaner(p: InventarioEscanerVivo): ReactElement {
         dueno={p.dueno}
         onGuardar={p.config.onGuardar}
         alGuardar="Darlo de alta y anotar lo que llegó"
+        conExistencias
         onListo={f.alListo}
       />
     </>
