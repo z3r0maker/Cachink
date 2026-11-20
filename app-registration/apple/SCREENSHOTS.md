@@ -1,9 +1,9 @@
 # Screenshots manifest — `screenshots/`
 
-Captured 2026-11-19 from the real app by one Maestro flow,
+Captured the morning of 2026-11-20 from the real app by one Maestro flow,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
 against the contracts mock, on `main` with the gasto's receipt photo (PR #181)
-and the redesigned Ventas and Mi turno (PRs #195, #196). No
+and the redesigned Ventas and Mi turno (PRs #195, #196, #220, #224). No
 compositing, no fixture screens: what the app shows for the demo taquería
 («Tacos La Esquina») is what the shots contain. Play's set comes from the same
 flow ([`../google-play/SCREENSHOTS.md`](../google-play/SCREENSHOTS.md)).
@@ -42,17 +42,12 @@ set.
 
 ## Known imperfections (for the next re-shoot)
 
-- **Inicio greets «¡Buenas tardes, Toni!»** under a 9:41 status bar: the
-  greeting follows the simulator's real clock, and the set was taken after
-  noon.
-- **«Renta local» reads «Atrasado 18 días»**: the mock's recurrente is due on
+- **The times read just before eight** (the turno «desde las 07:33») under a
+  9:41 status bar: the greeting and the times follow the simulator's clock,
+  which is the Mac's. Take the set in the morning, so Inicio says «Buenos
+  días»; a run that crosses midnight reads two days.
+- **«Renta local» reads «Atrasado 19 días»**: the mock's recurrente is due on
   the 1st and nobody registers it in the story.
-- **On the iPhone, Mi turno's Gastos row is cut** («$180.00 salieron de la
-  c…»): the «Atrasado 18 días» chip takes the row's width. The iPad has room
-  and reads «· 1 comprobante». Fixed in the app (the line wraps to two since
-  2026-11-20); `05-mi-turno` on the iPhone needs a daytime re-shoot, since
-  the simulators follow the Mac's clock and a shot after midnight reads
-  another day than the rest of the set.
 - **The iPad** draws its window-resize arc in the bottom-right corner, and the
   status bar's «9:41 a.m.» sits over the rail's «Caja 1» chip; both are iPadOS.
 
