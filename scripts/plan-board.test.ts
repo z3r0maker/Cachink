@@ -294,6 +294,34 @@ describe('the committed board', () => {
     );
   });
 
+  it('no esconde una verificación bajo otra etiqueta en una tarea abierta', () => {
+    // Hermana de la de arriba, misma causa y el mismo síntoma: una ausencia.
+    // El parser sólo entiende `Remaining`, así que una nota escrita como
+    // «Re-verificado», «Still to do» o «Left for later» se escribe y nunca se
+    // lee. N-22 llevó así desde el 2026-09-28: una tarea `[alta]` `[bloq]`
+    // que el tablero imprimía sin nada que decir mientras el track tenía la
+    // verificación completa, siete semanas. Sólo muerde en una tarea abierta
+    // sin `Remaining` legible — bajo un renglón cerrado estas etiquetas son
+    // historia y se quedan donde están.
+    const OTRAS = /\*\*(Re-verificado|Still to do|Left for later|Remaining and)/u;
+    const malos: string[] = [];
+    for (const rel of [...PLAN_FILES, 'docs/launch/production-readiness.md']) {
+      const lineas = readFileSync(join(ROOT, rel), 'utf8').split('\n');
+      for (const item of parseTrack(rel, lineas.join('\n'))) {
+        if (item.status === 'done' || item.remaining !== null) continue;
+        for (let i = item.line; i < lineas.length && /^\s{2,}\S/u.test(lineas[i] ?? ''); i += 1) {
+          if (OTRAS.test(lineas[i] ?? ''))
+            malos.push(`  ${item.id ?? item.title} · ${rel}:${i + 1}`);
+        }
+      }
+    }
+    assert.deepEqual(
+      malos,
+      [],
+      `${malos.length} nota(s) que el tablero no lee — renómbralas **Remaining (fecha):**:\n${malos.join('\n')}`,
+    );
+  });
+
   it('da un nivel a cada tarea abierta — sin él, el tablero no se lee por urgencia', () => {
     // El eje de prioridad llegó el 2026-09-28 y lo escribió sobre las 162
     // tareas de entonces. Las 61 que nacieron después se quedaron sin nivel y
