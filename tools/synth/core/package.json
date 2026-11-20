@@ -22,7 +22,8 @@
     "test:stack": "SYNTH_STACK=1 vitest run .integration.test",
     "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
     "run-one": "tsx src/cli/run-one.ts",
-    "isolation": "tsx src/cli/isolation.ts"
+    "isolation": "tsx src/cli/isolation.ts",
+    "judge": "tsx src/cli/judge.ts"
   },
   "dependencies": {
     "@xangarro/domain": "workspace:*",

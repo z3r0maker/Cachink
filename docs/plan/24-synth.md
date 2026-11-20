@@ -269,7 +269,20 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-08 Juez (`synth-judge`) [alta]
 
-- [ ] Status · **Blocked by:** S-05
+- [x] Status · **Blocked by:** S-05
+      Done: 2026-11-20 · `feat/synth-s08` · `pnpm --filter @xangarro/synth-core judge <run folder>…` starts
+      Opus with `claude -p` in the run folder, with Read, Glob and Grep confined there by `--restricted` and
+      no MCP server. Its transcript is checked: the `init` tools must be exactly those three, and every path
+      it read must be inside the run. The bug candidates are picked by script (`judge/candidates.ts`): every
+      console error, with a stack trace and a burst of the same line folded into one, plus every failed or
+      4xx/5xx request. `judge/review.ts` then checks the judge's JSON against the trace: - a reference the run lacks is removed, and a finding left with none is dropped; - a finding answered «no» to the cut question becomes `agent_failure`; - an `agent_failure` answered «yes» is dropped as self-contradicting; - a candidate neither cited nor dismissed is added as «Sin revisar».
+
+      Findings go to the corrida's `findings.json`. The judge's record goes to `<corrida>/judge/<run-id>/`:
+      the cut answers, the drops, the candidates and the cost. Two judgements of the S-06 phone run agree,
+      at about $0.55 each. «$500 → $8» and «Cobrar $43.00» are `agent_failure`, because Maestro resolved the
+      text to a hidden twin of the visible button. Abrir turno before the first sale is `friction`. The web
+      run costs about $0.14: the double «Cobrar» is `friction`, and the RSC prefetch aborts are dismissed.
+
 - **What:**
   - Write `prompts/judge.md` and `tools/synth/.claude/agents/synth-judge.md` with the spec §8.3 rubric.
   - The judge has read-only tools on one run folder.
