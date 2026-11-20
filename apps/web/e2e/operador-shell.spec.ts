@@ -1,3 +1,12 @@
+import {
+  addOperator,
+  mintCodeFor,
+  mintTenant,
+  resetThrottle,
+  walkOperatorDoor,
+} from '@xangarro/testing/tenant';
+import { hash } from 'bcryptjs';
+
 import { expect, test } from './test';
 
 import { puertaOperador } from './puerta-operador';
@@ -42,6 +51,31 @@ test('the header links the sync pill and the bell to their screens', async ({ pa
   await page.goto('/operador/turno');
   await page.getByRole('link', { name: /^Avisos · \d+ sin leer$/ }).click();
   await expect(page).toHaveURL(/\/operador\/avisos$/);
+});
+
+test('the sidebar names the operator signed in, their business and their turno, never the design’s', async ({
+  page,
+}) => {
+  // A business of its own, with an operator who is not the fixture's Ana.
+  const t = await mintTenant({ label: 'Fonda' });
+  await addOperator(t, { nombre: 'Rosa Medina', pinHash: await hash('4826', 10) });
+  await resetThrottle();
+  const code = await mintCodeFor(t);
+  await page.goto('/operador/caja');
+  await walkOperatorDoor(page, {
+    email: t.email,
+    code,
+    operador: 'Rosa Medina',
+    nip: '4826',
+    fondo: '500',
+  });
+
+  const aside = page.locator('aside').filter({ hasText: 'XANGARRO!' });
+  await expect(aside).toContainText('Rosa Medina');
+  await expect(aside).toContainText(t.nombre);
+  await expect(aside).toContainText(/Cobrando desde las \d{2}:\d{2}/);
+  await expect(aside).not.toContainText('Ana Robledo');
+  await expect(aside).not.toContainText('Taquería Don Pedro');
 });
 
 test('an unknown operator path is a 404, not an empty screen', async ({ page }) => {
