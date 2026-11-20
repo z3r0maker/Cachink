@@ -59,13 +59,38 @@ network). The `shared/mock-*.js` scripts call them from a flow.
 # Skip setup (assume the simulator is already in the right state):
 ./apps/mobile/maestro/scripts/run-flow.sh --skip-setup apps/mobile/maestro/flows/ventas-lista.yaml
 
-# Direct maestro test (no auto-setup — you manage state yourself):
-maestro test apps/mobile/maestro/flows/ventas-lista.yaml
+# Direct maestro test (no auto-setup — you manage state yourself), through
+# the lock (see «One Maestro at a time» below):
+./apps/mobile/maestro/scripts/maestro-locked.sh --device <udid> test apps/mobile/maestro/flows/ventas-lista.yaml
 
 # Tag-filtered run:
-maestro test --includeTags smoke apps/mobile/maestro/flows/
-maestro test --excludeTags offline apps/mobile/maestro/flows/
+./apps/mobile/maestro/scripts/maestro-locked.sh test --include-tags smoke apps/mobile/maestro/flows/
+./apps/mobile/maestro/scripts/maestro-locked.sh test --exclude-tags offline apps/mobile/maestro/flows/
 ```
+
+### One Maestro at a time
+
+Maestro 2.5.1 drives every single-device iOS run through one driver port,
+`127.0.0.1:7001`, whatever `--device` says, and reuses any driver already
+there. Two runs on two simulators at once drive each other's: on 2026-11-19
+one run's `launchApp` closed the app on another session's simulator, and that
+session's setup failed on the home screen. A driver left running after a run
+does the same to the next one.
+
+So the scripts take a machine-wide lock (`scripts/lib/maestro-lock.sh`,
+`/tmp/xangarro-maestro.lock`) before their first Maestro command and keep it
+to the end. A second run waits, says who holds it (pid, simulator, script),
+and gives up after `MAESTRO_LOCK_WAIT` seconds (default an hour). A lock whose
+holder died is taken over. With the lock, a run clears leftover drivers before
+it starts and its own when it ends.
+
+- Run Maestro by hand only through `scripts/maestro-locked.sh <maestro args>`.
+  A bare `maestro test` doesn't take the lock; the scripts wait for it to end
+  but it can still be driven by, or drive, someone else's run.
+- Never `pkill -f maestro` or `xctest`: it ends other sessions' runs and the
+  Maestro MCP server. The lock's cleanup stops only the driver.
+- The Maestro MCP tools (`run`, `inspect_screen`) don't take the lock either.
+  Use them only while no script holds it (`cat /tmp/xangarro-maestro.lock/info`).
 
 ### Entry points
 
@@ -206,7 +231,7 @@ EXPO_PUBLIC_E2E=1 npx expo start
 
 | Task                         | Use                                              | Why                                            |
 | ---------------------------- | ------------------------------------------------ | ---------------------------------------------- |
-| Run a known flow             | `run-flow.sh` or `maestro test` via Bash         | Fast, no LLM round-trip overhead               |
+| Run a known flow             | `run-flow.sh` or `maestro-locked.sh` via Bash    | Fast, no LLM round-trip overhead               |
 | Explore the UI interactively | `maestro mcp` tools (tap, screenshot, hierarchy) | MCP gives Claude direct control                |
 | Debug a failing step         | MCP `inspect_view_hierarchy` + `take_screenshot` | Inspect state without re-running the full flow |
 
@@ -261,7 +286,7 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `
 
 | Flow                           | Entry     | Suite | What it proves                                                                                                                                                      |
 | ------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the three-figure KPI row,                                             |
+| `ventas-lista.yaml`            | activated | ✓     | Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists the turno's sales — the compact three figures,                                            |
 | `venta-cantidad-multiple.yaml` | activated |       | Sell multiple units by tapping the same product 3 times.                                                                                                            |
 | `venta-detalle-cancelar.yaml`  | activated | ✓     | A sale's sheet on the Ventas tab (Track M-11, M-08; board MvVentas «detalle»/«cancelar-venta»): the lines and tiles, «Ma                                            |
 | `comprobante-whatsapp.yaml`    | activated | ✓     | «Mandar comprobante» → WhatsApp on a phone without the app: the wa.me link goes to the browser and, back in the app, the sheet says so and keeps the other options. |
@@ -300,11 +325,11 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `
 
 | Flow                               | Entry     | Suite | What it proves                                                                                                                                                                                                                                  |
 | ---------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mi-turno.yaml`                    | activated | ✓     | Mi turno (Track M, M-09; board MvTurno): the /turno tab says the turno — the hero with the cash that must be in the draw                                                                                                                        |
+| `mi-turno.yaml`                    | activated | ✓     | Mi turno (Track M, M-09; board MvTurno): the head, the hero with its parts folded under «Ver de dónde sale», Ventas and Cobrado, the                                                                                                            |
 | `caja-abrir-cerrar.yaml`           | activated | ✓     | Open→close lifecycle on the new Mi turno/Cierre screens (M-06/M-09; the old CajaContent flow — caja-status-card, blind-c                                                                                                                        |
 | `turno-cerrado-abrir.yaml`         | activated | ✓     | Turno cerrado (MvTurnoCerrado): Cobrar, Ventas and Mi turno each open the fondo sheet with one tap, «Ahorita no» stays put, and opening from Mi turno stays on Mi turno.                                                                        |
 | `cierre-sin-turno.yaml`            | activated | ✓     | Cierre with no turno (MvTurnoCerrado): nothing to close, «Abrir turno» opens the sheet there and the operator continues on Inicio.                                                                                                              |
-| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's «Cerrar mi turno», step 1 counts the d                                                                                                                                  |
+| `cierre-cuadra.yaml`               | activated | ✓     | Cierre que cuadra (Track M, M-17; board MvCierreFlujo): from Mi turno's «Cerrar turno», step 1 counts the d                                                                                                                                     |
 | `cierre-otro-turno.yaml`           | activated | ✓     | Abrir otro turno (Track M, M-17; board MvCierreFlujo; ADR-147): a closed turno never reopens; to keep selling, the                                                                                                                              |
 | `turno-de-otro.yaml`               | activated | ✓     | One open turno per caja (Track M, M-21; board MvTurnoDeOtro; ADR-071 §3): Ana signs in over Toni's open turno, continues it (Mi turno «Sigues el turno de Toni»), and after a restart signs in again, counts and closes it, then opens her own. |
 | `cierre-faltante.yaml`             | activated | ✓     | Cierre con faltante (Track M, M-09): count short of the expected, the diferencia turns red, asks its motivo and names th                                                                                                                        |

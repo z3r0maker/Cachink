@@ -114,6 +114,15 @@ fi
 
 echo "    UDID: $IPAD_UDID"
 
+# ──────────── One Maestro at a time on this machine ──────────────
+# Every iOS run shares driver port 7001; two at once drive each other's
+# simulators (lib/maestro-lock.sh). Only a run that will start Maestro waits.
+# shellcheck source=lib/maestro-lock.sh
+source "$SCRIPT_DIR/lib/maestro-lock.sh"
+if [[ $# -gt 0 ]]; then
+  MAESTRO_DEVICE_UDID="$IPAD_UDID" maestro_lock_acquire || exit 1
+fi
+
 # ──────────── Optionally shut down iPhone simulators ────────────
 if [[ "$EXCLUSIVE" == "1" ]]; then
   echo "🔇  MAESTRO_EXCLUSIVE=1 — shutting down other simulators..."

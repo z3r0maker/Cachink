@@ -39,20 +39,14 @@ tags:
       id: 'cloud-sync-pill-offline'
     timeout: 30000
 
-# Cerrar mi turno, from the Mi turno tab.
+# Cerrar turno, from the Mi turno tab: the fixed foot over the tab bar, so
+# the band above the hero never pushes it below the fold.
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
-# With rows waiting, Mi turno puts the band above the hero and «Cerrar mi
-# turno» drops below the fold: centre it first, or the tap lands short.
-- scrollUntilVisible:
-    element:
+- extendedWaitUntil:
+    visible:
       id: 'turno-cerrar-mi-turno'
-    direction: DOWN
     timeout: 15000
-    visibilityPercentage: 100
-    centerElement: true
-# Let the centring scroll settle: a tap mid-momentum lands beside the button.
-- waitForAnimationToEnd
 - tapOn:
     id: 'turno-cerrar-mi-turno'
 - extendedWaitUntil:

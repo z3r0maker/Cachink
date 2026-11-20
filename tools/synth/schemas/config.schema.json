@@ -1,0 +1,155 @@
+{
+  "title": "Synth config",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "allowed_hosts": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "127.0.0.1",
+          "localhost",
+          "10.0.2.2"
+        ]
+      }
+    },
+    "models": {
+      "type": "object",
+      "properties": {
+        "actor": {
+          "type": "string",
+          "pattern": "^claude-[a-z0-9-]+$"
+        },
+        "judge": {
+          "type": "string",
+          "pattern": "^claude-[a-z0-9-]+$"
+        },
+        "triage": {
+          "type": "string",
+          "pattern": "^claude-[a-z0-9-]+$"
+        }
+      },
+      "required": [
+        "actor",
+        "judge",
+        "triage"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "max_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 400
+        },
+        "run_timeout_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      },
+      "required": [
+        "max_steps",
+        "max_turns",
+        "run_timeout_s"
+      ],
+      "additionalProperties": false
+    },
+    "concurrency": {
+      "type": "object",
+      "properties": {
+        "web": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "phone": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "web",
+        "phone"
+      ],
+      "additionalProperties": false
+    },
+    "estimated_cost_caps": {
+      "type": "object",
+      "properties": {
+        "per_corrida_usd_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "per_day_usd_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "per_corrida_usd_cents",
+        "per_day_usd_cents"
+      ],
+      "additionalProperties": false
+    },
+    "reactions": {
+      "type": "object",
+      "properties": {
+        "doubt_after": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "stuck_after": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "patience_stuck_at": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        }
+      },
+      "required": [
+        "doubt_after",
+        "stuck_after",
+        "patience_stuck_at"
+      ],
+      "additionalProperties": false
+    },
+    "android": {
+      "type": "object",
+      "properties": {
+        "avd": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "avd"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "allowed_hosts",
+    "models",
+    "limits",
+    "concurrency",
+    "estimated_cost_caps",
+    "reactions"
+  ],
+  "additionalProperties": false
+}

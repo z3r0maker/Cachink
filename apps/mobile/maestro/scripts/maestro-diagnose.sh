@@ -40,6 +40,12 @@ fi
 
 mkdir -p "$REPORT_DIR"
 
+# One Maestro at a time on this machine (lib/maestro-lock.sh). Called by
+# run-flow.sh or full-regression.sh after a failure, this rides their lock.
+# shellcheck source=lib/maestro-lock.sh
+source "$SCRIPT_DIR/lib/maestro-lock.sh"
+maestro_lock_acquire || exit 1
+
 # ──────────── 1. Capture the live view hierarchy ───────────────
 # The screen is still frozen on the failure state, so this shows
 # exactly what testIDs and text are visible right now.

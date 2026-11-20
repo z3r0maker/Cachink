@@ -1,5 +1,5 @@
 # Reusable subflow: lock the caja (Track M, M-05). The header's avatar
-# chip is gone; on the phone «Bloquear la caja» sits at the foot of Mi turno,
+# chip is gone; on the phone «Bloquear la caja» sits in Mi turno's fixed foot,
 # on a tablet in the rail's or the sidebar's turno card.
 # Locking clears the signed-in operator, so the operator list comes back.
 #
@@ -8,7 +8,7 @@ appId: mx.xangarro.mobile
 ---
 # Decide the layout once: after tapping «Bloquear» the phone's tab bar is gone,
 # so a second «when» would wrongly take the tablet branch (M-11).
-# Phone: Mi turno, «Bloquear la caja» at its foot.
+# Phone: Mi turno, «Bloquear la caja» in its fixed foot.
 - runFlow:
     when:
       visible:
@@ -16,14 +16,11 @@ appId: mx.xangarro.mobile
     commands:
       - tapOn:
           id: 'tab-turno'
-      - scrollUntilVisible:
-          element:
+      # The fixed foot over the tab bar (MvTurno): no scroll to reach it.
+      - extendedWaitUntil:
+          visible:
             id: 'turno-bloquear'
-          direction: DOWN
-          visibilityPercentage: 60
-          # Center it: at the scroll's end the bar sits under the tab bar
-          # and the home indicator, where taps never land.
-          centerElement: true
+          timeout: 10000
       - tapOn:
           id: 'turno-bloquear'
 # Tablet: the rail's or the sidebar's item.

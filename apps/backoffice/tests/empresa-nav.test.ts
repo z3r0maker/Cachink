@@ -21,15 +21,15 @@ describe('EMPRESA_NAV', () => {
     );
     assert.deepEqual(
       entry('dinero').tabs.map((t) => t.label),
-      ['Movimientos', 'Facturas', 'Servicios'],
+      ['Movimientos', 'Facturas', 'Servicios', 'Caja'],
     );
     assert.deepEqual(
       entry('resultados').tabs.map((t) => t.label),
-      ['Estado de resultados', 'Balance', 'Impuestos'],
+      ['Estado de resultados', 'Balance', 'Impuestos', 'Presupuesto'],
     );
     assert.deepEqual(
       entry('cumplimiento').tabs.map((t) => t.label),
-      ['Agenda', 'Expediente', 'Corporativo'],
+      ['Agenda', 'Cierre del mes', 'Expediente', 'Corporativo'],
     );
   });
 

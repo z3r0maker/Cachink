@@ -65,6 +65,36 @@ export const E2E_CONCEPTO = 'E2E Vercel';
  * entries: the ones it names «E2E …», their reversals, and whatever its
  * founders posted (a quarter close names itself), plus its funding calls.
  */
+/**
+ * E-22: the budgets and requests of the suite's founder and of the other
+ * founder the tests add (`f-e2e-dos-…`), with their answers.
+ */
+async function borrarPresupuestos(tx: postgres.TransactionSql): Promise<void> {
+  const suite = tx`SELECT f.id FROM corp.founders f
+                     JOIN staff_members s ON s.id = f.staff_member_id
+                    WHERE lower(s.email) = ${SOCIO.email}`;
+  const presupuestos = tx`SELECT id FROM corp.budgets
+                           WHERE prepared_by LIKE 'f-e2e-%' OR prepared_by IN (${suite})`;
+  await tx`DELETE FROM corp.budget_answers WHERE budget_id IN (${presupuestos})`;
+  await tx`DELETE FROM corp.budget_lines WHERE budget_id IN (${presupuestos})`;
+  await tx`DELETE FROM corp.budgets WHERE id IN (${presupuestos})`;
+  const pedidas = tx`SELECT id FROM corp.spend_requests
+                      WHERE founder_id LIKE 'f-e2e-%' OR founder_id IN (${suite})`;
+  await tx`DELETE FROM corp.spend_request_answers WHERE request_id IN (${pedidas})`;
+  await tx`DELETE FROM corp.spend_requests WHERE id IN (${pedidas})`;
+}
+
+/** E-43: the códigos agrupadores the suite saved, with their validations. */
+async function borrarCodigos(tx: postgres.TransactionSql): Promise<void> {
+  const listas = tx`SELECT l.id FROM corp.account_code_lists l
+                     JOIN corp.founders f ON f.id = l.captured_by
+                     JOIN staff_members s ON s.id = f.staff_member_id
+                    WHERE lower(s.email) = ${SOCIO.email}`;
+  await tx`DELETE FROM corp.account_code_validations WHERE list_id IN (${listas})`;
+  await tx`DELETE FROM corp.account_codes WHERE list_id IN (${listas})`;
+  await tx`DELETE FROM corp.account_code_lists WHERE id IN (${listas})`;
+}
+
 export async function clearLedgerFixture(): Promise<void> {
   await withSuper(async (sql) => {
     await sql.begin(async (tx) => {
@@ -98,6 +128,15 @@ export async function clearLedgerFixture(): Promise<void> {
       await tx`DELETE FROM corp.services WHERE nombre LIKE 'E2E %' OR updated_by IN (${suite})`;
       await tx`DELETE FROM corp.recurring_templates
                 WHERE nombre LIKE 'E2E %' OR created_by IN (${suite})`;
+      await borrarPresupuestos(tx);
+      await borrarCodigos(tx);
+      // E-14: the Cierre test closes a month before 2010, which nothing else uses;
+      // a lock is lifted only with both founders, so its own goes with the
+      // triggers off, for this transaction alone.
+      await tx`DELETE FROM corp.bank_balances WHERE period < '2010-01'`;
+      await tx`DELETE FROM corp.period_events WHERE period < '2010-01'`;
+      await tx`SET LOCAL session_replication_role = replica`;
+      await tx`DELETE FROM corp.closed_periods WHERE period < '2010-01'`;
     });
   });
 }

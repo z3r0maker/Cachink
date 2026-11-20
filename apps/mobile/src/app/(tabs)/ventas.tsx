@@ -47,7 +47,7 @@ export default function VentasTabRoute(): ReactElement {
           venta={ventaHechaDeDetalle(comprobante)}
           business={business}
           onClose={cerrar}
-          onNueva={cerrar}
+          desdeVentas
         />
       ) : null}
     </>

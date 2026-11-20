@@ -8,6 +8,6 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "tests"],
+  "exclude": ["node_modules", "dist", "tests", "src/tenant"],
   "references": [{ "path": "../domain" }, { "path": "../data" }, { "path": "../ui" }]
 }

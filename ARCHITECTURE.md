@@ -189,6 +189,11 @@ Links to discussion, docs, prior art.
 | [148](#adr-148) | 2026-11-19 | The monthly ISR and IVA are one declaration: one Agenda obligation, the contador's figures beside the estimate, and a payment that posts | Accepted |
 | [149](#adr-149) | 2026-11-19 | The gasto's receipt photo is a row like the product photo: grayscale, 1024 px, pushed from the phone only, shown in the portal's gasto drawer | Accepted |
 | [150](#adr-150) | 2026-11-19 | A barcode names one product: compared as a GTIN, refused in the portal, asked about on the phone and merged in Revisión | Accepted |
+| [151](#adr-151) | 2026-11-19 | A month closes in order once its seven steps are done, and reopens only when the other founder approves | Accepted |
+| [152](#adr-152) | 2026-11-19 | A quarter's budget counts once the other founder approves it, and spending outside it fits a Límite or waits on them | Accepted |
+| [153](#adr-153) | 2026-11-19 | Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate | Accepted |
+| [154](#adr-154) | 2026-11-19 | Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product | Accepted |
+| [155](#adr-155) | 2026-11-19 | The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -10795,3 +10800,394 @@ with the same name, so a duplicate code under another name goes through.
 - The phone's typed entry keeps letters, since Code 128 and Code 39 carry them.
 - ADR-022's two scanner implementations collapse into the escáner camera (M-20). `components/Scanner` and the
   unused `MobileScannerHost` go.
+
+## ADR-151
+
+**Title:** A month closes in order once its seven steps are done, and reopens only when the other founder approves
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-14; boards CD-10 and CD-10b approved by the owner on 2026-11-19 (canvas round 16)
+
+**Context**
+
+E-14 adds Cumplimiento › Cierre del mes. The ledger has locked months since E-02: `corp.closed_periods`, a
+trigger that refuses any entry dated in one, and `assertPeriodOpen` in the use cases. Nothing wrote that table
+yet. The plan asks for a checklist before the lock, a locked month that refuses entries, and an unlock that
+needs both founders and is audited. ADR-125 §2 grants DELETE to no role, which a plain unlock would need.
+
+**Decision**
+
+1. **Seven steps, read off what the console already holds** (`@xangarro/domain/corp` `cierre/`): the month's
+   global CFDI and payments still to issue (Emitidas), every payment imported as a cobro, every expense with its
+   CFDI or marked non-deductible and no XML left to review (Facturas), the bank balance, «ISR e IVA» presented
+   (Impuestos), the rest of the month's Agenda, and the contador's statements in the Expediente. Only the bank
+   balance and the statements wait on a founder. A step the month does not need (no sales to the public, no
+   expenses, a month before the SAT registration) is «no aplica» and counts as done.
+2. **The bank balance is confirmed only when it equals Bancos** at the month's last day (`corp.bank_balances`),
+   and stops counting as soon as the ledger moves past it.
+3. **Either founder closes; months close in order.** An earlier month with movements that is still open
+   blocks the close («Cierra primero septiembre»). Closing writes the lock and a `cerrado` event in one
+   transaction. The month's tax payment, dated the next month, is not part of it.
+4. **Reopening takes both founders and is kept forever.** `corp.period_events` is append-only: `cerrado`,
+   `reapertura_pedida` with its reason, `reapertura_rechazada` and `reabierto`. Only the other founder answers a
+   request, and months reopen from the newest back. The other founder gets an email (the generic notice layout of
+   the morning email).
+5. **No role gets DELETE.** The lock is lifted only by `corp.reabrir_periodo`, a security-definer function the
+   console may execute, which records `reabierto` and removes the lock together. Two triggers hold the rule in the
+   database too: `reabierto` and `reapertura_rechazada` need a pending request by the other founder, and a lock is
+   removed only right after a `reabierto`, the owner's own deletes included.
+6. **Registrar names the closed month**, the open one to use and the way to its Cierre.
+
+**Alternatives considered**
+
+- *Grant the console DELETE on `closed_periods`.* Rejected: ADR-125 §2, and a bug could then lift a lock alone.
+- *Derive the lock from the events.* Rejected: the entries' trigger and the use cases already read
+  `closed_periods`; one table for the state and one for its history changes nothing that works.
+- *Let a founder close with steps pending.* Rejected: the steps are the close. One that does not apply already
+  says so.
+
+**Consequences**
+
+- The hosted database needs corp `0013` before the console's deploy. A month locked before it has no events;
+  it reopens the new way (a migration test holds this).
+- A correction to a closed month is a reopening, never an edit: the ledger stays immutable.
+- E-43 (the export to the contador) can take a closed month as final.
+
+## ADR-152
+
+**Title:** A quarter's budget counts once the other founder approves it, and spending outside it fits a Límite or waits on them
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-22; boards CD-15d and CD-15e approved by the owner on 2026-11-19 (canvas round 18, replacing round 4's CD-15)
+
+**Context**
+
+E-22 adds Resultados › Presupuesto. The plan asks for a quarterly budget by category, actual against it, each
+founder's Límite (the larger of a fixed amount and a share of the three-month average income) computed live,
+and spending over the Límite outside the budget approved by both founders. The ledger has four expense
+categories; bank fees post to `financiero`, which has none. There is one project, so a project filter would
+choose nothing (E-41 brings more).
+
+**Decision**
+
+1. **One budget per quarter, a monthly amount for each of the four categories** (`@xangarro/domain/corp`
+   `presupuesto/`, `corp.budgets` and `corp.budget_lines`). Bank fees stay out of it. No project filter until
+   E-41.
+2. **It counts once the other founder approves it.** One founder prepares it; the other approves or rejects
+   it (`corp.budget_answers`), and whoever prepared it cannot. Until then the quarter has no budget. A rejected
+   one is kept, and another may be prepared. A quarter holds one budget at a time: a trigger refuses a second
+   while one waits or once one was approved, under a lock per quarter.
+3. **«Gastado» is Resultados' own figure**: each category's lines on the day they were invoiced, reversals
+   netted. The month's projection adds the recurring peso charges still to come; the quarter's adds, for each
+   month not yet started, its recurring charges and the category's average of what was not recurring over the
+   three whole months before. A dollar charge is left out until it is paid, as in Caja.
+4. **The Límite is the larger of $1,000.00 and 10 % of the average income without IVA** of the three whole
+   months before this one, divided by three whatever those months held. Each founder has their own, monthly.
+5. **A request outside the budget that fits in what is left of its founder's Límite is approved on its own**
+   (`corp.spend_requests.automatica`). The repository decides it under an advisory lock per founder and month,
+   so two requests at once cannot both use the same room. Above it, the other founder approves it, approves a
+   smaller amount, or rejects it (`corp.spend_request_answers`); a trigger refuses the requester, an automatic
+   request and an amount above the one asked.
+6. **A request does not register the expense.** It is captured later in Registrar as usual; the two are not
+   linked in this first version, so an approved request does not count in «Gastado» until it is registered.
+7. **What waits on the other founder reaches them by email**: a budget to approve and a request above the
+   Límite, through the generic notice that Cierre's reopening already uses (`avisarAlOtroSocio`, now shared).
+8. **Append-only.** The console may insert and read these five tables, the agents may read them, and nobody may
+   delete.
+
+**Alternatives considered**
+
+- *A budget per month.* Rejected: the plan and the boards plan by quarter, and a monthly amount per category
+  is what the bars compare against in either view.
+- *Count an approved request as spent.* Rejected: it would be counted twice once the expense is registered,
+  and nothing links the two yet.
+- *Decide the automatic approval in a trigger.* Rejected: the Límite depends on the ledger's income, which the
+  domain already computes; the database only has to keep two requests from racing.
+- *Keep the bank fees under Administración.* Rejected: the ledger has no category for them, and moving them
+  would make Presupuesto disagree with Resultados.
+
+**Consequences**
+
+- The hosted database needs corp `0014` before the console's deploy. The migration only adds tables; a ledger
+  from before keeps every entry (a migration test holds this).
+- E-41 adds the project to the budget and the requests when a second project exists.
+- Linking a request to the expense that settles it, if the founders want it, is a later change.
+
+## ADR-153
+
+**Title:** Xangarro Synth: an internal QA harness of LLM personas over the real portal and phone, in `tools/synth`, never shipped and never a gate
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — track 24 (`S-`); owner interview of 2026-11-19 on the Synth spec v2 (`docs/plan/25-synth-spec.md`). Supersedes N-49 («Explorador de pruebas con GLM»).
+
+**Context**
+
+The owner wrote a spec (v2) for exploratory QA and heuristic audit by LLM agents: an actor that uses the app as
+a persona would, a separate judge that classifies what it hit, deterministic scripts for seed, capture,
+interruptions and seeded bugs, and an internal app (Synth Studio) to launch, watch and review runs. N-49 already
+planned a smaller version of the idea, but on staging with a GLM model, and it waits for X-01, which is blocked.
+
+Phase 0 of the spec checked its assumptions against the repo (`tools/synth/ENV.md`). There is no staging. Member
+roles are `owner`, `admin` and `viewer`, and operators are PIN users on `/operador` behind a device link. The Asesor
+(Don Cuentas) is deterministic, with no reachable LLM call. `PORTAL_TODAY` fixes the app's clock per server
+process. `mintTenant()` and its row builders already exist under `apps/web/e2e/`.
+
+**Decision**
+
+1. **One track, `24-synth.md` (prefix `S-`), supersedes N-49.** The owner's spec is kept as the design brief,
+   `25-synth-spec.md`. Where the two differ, the track's §1 wins.
+2. **Location.** The harness lives in `tools/synth/{core,server,studio}`, workspace packages
+   `@xangarro/synth-core`, `-server` and `-studio`.
+   - `tools/*` joins `pnpm-workspace.yaml`, so CLAUDE.md applies in full: TDD for `core`, the 200/40-line budget,
+     strict TS, Vitest with `node:assert/strict`, and the latest stable packages.
+   - The direction is `studio → server → core`.
+   - An ESLint boundary refuses any import of `@xangarro/synth-*` from `apps/*` or `packages/*`.
+   - `scripts/release.sh` never names a `tools/*` package, and a test holds that.
+3. **Local only, isolated per corrida.**
+   - Each corrida gets its own stack: a Postgres container (`XG_PG_NAME=xangarro-pg-synth-<id>`, its own port,
+     removed with `-v` when it ends) and a `next start` production build on its own port.
+   - Each run inside it gets a fresh tenant from `mintTenant()`, a fresh Chromium profile and its own throttle IP.
+   - A journey adds one server per simulated day (`PORTAL_TODAY`), plus the browser's clock set by CDP.
+   - The runner refuses any `baseUrl` outside `127.0.0.1`/`localhost` (the `allowed_hosts` list in `config.yaml`).
+4. **Fixtures live once.** The Playwright-free half of `apps/web/e2e/tenant.ts`, `tenant-rows.ts`,
+   `sync-phone.ts`, `tenant-phone.ts`, `phone-rows.ts` and `puerta-operador.ts` moves to a new subpath,
+   `@xangarro/testing/tenant`. The e2e files keep `signIn()` and re-export the rest, so specs do not change, and
+   `tests/e2e-fixture-identity.test.ts` keeps holding ADR-128's rules.
+5. **Two runners from Phase 1, one harness.**
+   - **Web:** the runner owns Chromium and opens a CDP port. The actor's Playwright MCP attaches to it.
+   - **Phone:** the capture app runs on one Android emulator (`EXPO_PUBLIC_E2E=1`, API at `10.0.2.2`), and the
+     actor drives it through the Maestro MCP. The runner controls the network through the emulator console, reads
+     logcat, and clears state with `pm clear`.
+   - Personas, judge, findings and reports are shared. Only `run`, `capture` and the interruptions differ by runner.
+6. **The actor is a black box.**
+   - It runs as `claude -p` in an empty temporary directory, with a strict MCP config that holds only its runner's
+     MCP server and an allow-list of that server's tools.
+   - It runs on the developer's Claude Code login. Cost is estimated from the reported usage and capped by
+     `max_steps`, `max_turns` and a time limit.
+   - Models per role, in `config.yaml`: actor Claude Sonnet 5.5; judge and triage Claude Opus 5.5.
+7. **Studio** binds `127.0.0.1` only and has no login. It refuses any other interface unless an ADR adds auth.
+   The files are the source of truth (YAML in git, results in the gitignored `tools/synth/reports/`), and SQLite is
+   a rebuildable index.
+8. **Never a gate, never production data.** Findings are hypotheses. No CI job runs Synth. Triage writes a
+   failing regression test in the app's existing suite and never commits, pushes or fixes. Evidence files keep no
+   names or contact data.
+9. **Agents and skills.** CLAUDE.md §9 says none are deployed. They are added under `tools/synth/.claude/` and
+   scoped to that folder, not to the repo's own `.claude/`, so a normal coding session never loads them.
+10. **Licences.** No code is copied from MiroFish, OASIS, UXAgent or any other project. No AGPL or GPL dependency
+    is added without the owner's approval. Every new dependency is listed in `tools/synth/THIRD_PARTY.md`.
+
+**Alternatives considered**
+
+- *N-49 as written:* nightly, on staging, with a third-party GLM model. Rejected. It waits on X-01, sends data to a
+  provider we have not vetted, and has no judge, no seeded bugs and no measured recall.
+- *`packages/synth` and `apps/synth-studio`:* rejected, because `apps/*` reads as a shipped surface.
+- *Outside the workspace:* rejected, because it loses workspace imports and every CI check.
+- *The shared local `xangarro-pg`:* rejected, because any session's `db:reset` would wipe a corrida in flight.
+- *A Postgres per run:* rejected as too heavy for the 58 GB Docker VM shared with about 14 containers.
+- *Synth writes its own seed:* rejected. ADR-128 exists because 17 hand-rolled fixtures drifted apart.
+- *A dedicated API key with provider-side spend limits:* offered and declined by the owner, who prefers the Claude
+  Code login.
+- *iOS simulator for the phone runner:* rejected. It cannot cut one device's network for `offline-mid-sale`, and
+  its logs are harder to capture.
+
+**Consequences**
+
+- `pnpm-workspace.yaml` gains `tools/*`. Turbo lints, typechecks and tests the Synth packages in CI like any
+  other.
+- `@xangarro/testing` gains a `./tenant` export that depends on `postgres` and `@xangarro/auth-core`. 50 e2e
+  specs keep their imports.
+- A corrida's concurrency is bounded by the Claude Code login's rate limits and by one Android emulator. The
+  default web concurrency is 3, and the phone runs one at a time.
+- Personas start as `hypothesis`. The first evidence comes from public reviews of Mexican POS and finance apps,
+  with names stripped.
+- The narrative lab (Phase 12) is in scope as the track's last phase. Every one of its outputs is labelled as a
+  hypothesis to validate with real people.
+- N-49 is closed as superseded. The `kind=explorador` inbox source is a later `S-` task, if ever.
+
+## ADR-154
+
+**Title:** Synth Studio has a motion vocabulary of its own: a closed list of twelve, each driven by a runner signal or a real value, each with a static fallback, and none of it reaches the product
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — owner design interview of 2026-11-19 on Synth Studio (track 24, S-20 and S-21). The spec is
+the Synth Studio canvas (https://claude.ai/artifact/HrVjKALmE6H7zTFaCDAFvp), rounds 1 to 3, with board
+`StLenguaje` as the language sheet. Amends nothing in ADR-117: El Mostrador §6 stays at five motions.
+
+**Context**
+
+El Mostrador §6 allows five motions and «nothing else», and ADR-117 makes it the style guide for every surface.
+The owner asked for Synth Studio to feel like a control room: see each persona react while a run is live, see
+progress, remaining time and cost at a glance, and have moments that land (a finding arriving, a report
+revealing its numbers). Five motions cannot carry that.
+
+Studio is not a product surface. ADR-153 puts it in `tools/synth/studio`, bound to `127.0.0.1`, for the owner
+only, never shipped. So a richer vocabulary there does not touch what an emprendedor sees, as long as it stays
+there.
+
+The owner's decisions in the same interview:
+
+- a dark «Sala de control» look built on `consoleTheme.dark`, where yellow means «en vivo»;
+- a motion vocabulary of Studio's own, recorded in an ADR, with a static state for every motion under reduced
+  motion;
+- a persona's reaction comes from runner signals only, never from what the model says it feels;
+- personas are drawn as geometric faces with a pictogram of the business type, a dashed outline for
+  `hypothesis` and a solid one for `grounded`.
+
+The canvas was drawn on those decisions: fifteen boards, every screen of spec §16.2.
+
+**Decision**
+
+1. **Scope.** This vocabulary applies to `tools/synth/studio` and nothing else. No motion on this list moves into
+   `apps/*` or `packages/ui` without an ADR of its own. Drawers and dialogs in Studio reuse the product's Panel
+   slide and Dialog pop unchanged.
+2. **Look.**
+   - Colours are `consoleTheme.dark` roles from `@xangarro/tokens`. Yellow (`accent`) means a run in flight or
+     the item you are on, and is never decoration. Red is a finding or a failure, green a success, `off` a run
+     not started.
+   - Type: Plus Jakarta Sans for the interface; the console's mono stack for console, network, traces and IDs;
+     Anton, beyond the lockup, for big figures only (remaining time, counters, step numbers).
+   - Contrast holds at 4.5:1 for all text, and selected chips stay black with yellow text, as in the product.
+3. **The list.** Twelve motions, nothing else.
+
+   | Motion | What it does | Driven by | Reduced motion |
+   | --- | --- | --- | --- |
+   | Pisada | The product's press: `pressTransform`, 100 ms | a click | as the product |
+   | Pulso en vivo | The live dot breathes | a corrida or run in flight | a solid dot |
+   | Clic del actor | A cursor glides to the target (400 ms), then a ring opens (500 ms) | the coordinates the runner recorded for the action | a fixed ring at the point |
+   | Pensamiento | The actor's thought types out, 28 ms a character | the step's `thought` | the whole line at once |
+   | Reacción | The face's loop for its state: breathes, glances, shakes with a drop, slumps, hops, dims | the reaction mapping, rule 4 | the static pose and its label |
+   | Chispa | The tile's border flashes red (600 ms) and a spark flies to the candidates tray (700 ms) | a console error, a 5xx, or a failed script check | a fixed red border; the count changes |
+   | Llenado | Bars and rings move to a value, linear, no bounce; memory strength falls the same way | steps over `max_steps`, stages done, patience spent, the forgetting script | the value, at once |
+   | Llegada | A new row slides and fades in, 220 ms: a queued run, a finding, a toast | the server's event | it appears |
+   | Sello | A verdict lands from 1.6× to its place with the press shadow, 220 ms | the judge's verdict, or a seeded bug found or missed | it appears |
+   | Aguja y trazo | Gauges sweep, lines and the optimal route draw in, the Venn circles meet, 900 ms ease-out, once per reveal | a computed result arriving | drawn at its value |
+   | Barrido | A line runs down the source as each quote is checked | the check's real progress | each verdict appears |
+   | Intercambio | Corrida A and B swap places, 400 ms | the owner's swap | the columns swap |
+
+   Every value lives in one module, `tools/synth/studio/src/motion.ts`, which reads `pressTransform` from
+   `@xangarro/tokens` and owns the rest. They do not go into `@xangarro/tokens`, because no product surface may
+   use them.
+4. **Reactions come from the runner, never from the model.** A pure function in `@xangarro/synth-core`,
+   `reaction.ts`, maps a run's signals to one of six states. It is built test-first, like the rest of `core`.
+   - **En cola:** the run has not started.
+   - **Tranquila:** the last step changed the screen and raised no error.
+   - **Dudando:** `doubt_after` steps in a row without a screen change (default 2), or the same action twice
+     on the same target.
+   - **Atorada:** `stuck_after` steps without a change (default 3), three failed attempts on one screen, a console
+     error or 5xx on the last step, or 75% of `max_steps` spent.
+   - **Se rindió:** `outcome` is `abandoned` or `blocked`, or `max_steps` ran out.
+   - **Lo logró:** `outcome` is `completed` and every success-criteria script passes. A `completed` whose
+     criteria fail ends in «Atorada», and its finding says why.
+
+   «Screen change» means the URL or the DOM fingerprint the runner records changed, and on the phone, Maestro's
+   hierarchy hash. The thresholds are `config.yaml` settings under `reactions:`. Nothing reads the tone of
+   `thought`, of the exit interview or of the judge's prose.
+5. **Motion never runs ahead of the data.**
+   - Progress, remaining time and cost move only when the server reports. Remaining time and cost always carry
+     «estimado».
+   - Only Pulso en vivo and the Reacción loops repeat, and both mean «this is live». They stop when the run
+     ends.
+   - No shimmer and no spinner, as in the product. A loading state is the empty frame or a Llenado at zero.
+6. **Reduced motion.** `prefers-reduced-motion: reduce` gives every motion the fallback in its row. Studio also
+   has its own «Reducir movimiento» switch, stored in the browser, because the owner may want it calm on one
+   screen and not on the OS. Every face's pose and label read without motion.
+7. **Built with CSS and the Web Animations API.** Only transform and opacity animate, never layout. The canvas
+   drives its boards with JS timers, but that is how the prototype was drawn, not how Studio is built. No
+   animation library and no Lottie or Rive asset is added: the faces are boxes and borders.
+8. **Adding a motion** means a board on the Synth Studio canvas first, then a new ADR that amends this list.
+
+**Alternatives considered**
+
+- *The product's five motions only:* rejected. Nothing would show a persona reacting or a finding arriving, which
+  is the point of watching a run live.
+- *Reactions from the model's own words* (sentiment of the thought, or a «feeling» field in the actor's output):
+  rejected by the owner. A model asked how it feels will perform a feeling, and the judge would then grade the
+  actor's performance instead of the app.
+- *Putting these motions in El Mostrador and in `@xangarro/tokens`:* rejected. They would read as allowed in the
+  product.
+- *An animation library, or characters in Lottie or Rive:* rejected. It adds a dependency and assets for twelve
+  motions that CSS and the Web Animations API already cover.
+- *The light brand look:* offered; the owner chose the dark control room.
+
+**Consequences**
+
+- El Mostrador §6 gains one line pointing here, so a reader of the five sees where Studio's list lives and that
+  it never applies to `apps/*`.
+- S-20 builds `reaction.ts` in `core` and `motion.ts` in `studio`, and moves the console's `monoStack` out of
+  `apps/backoffice` into `@xangarro/tokens`, so the two read one stack (CLAUDE.md §2.3).
+- S-20 and S-21 each add a Playwright spec that runs under `reducedMotion: 'reduce'` and checks the fallback
+  states.
+- The runners have to record a screen fingerprint per step for the mapping to work: URL plus DOM hash on the web
+  (S-05), the hash of `hierarchy.json` on the phone (S-06). `config.yaml` gains `reactions:` (S-03).
+
+## ADR-155
+
+**Title:** The contador's package is built from the console on each download, and the códigos agrupadores are data the founders type in and mark as validated
+
+**Date:** 2026-11-19
+
+**Status:** Accepted — E-43, and E-02's last piece; boards CD-10d and CD-10e approved by the owner on 2026-11-19
+(canvas round 19)
+
+**Context**
+
+E-43 asks for a monthly export by código agrupador (a balanza-style CSV) with the month's XML and acuses in one
+archive. ADR-125 §4 left `ACCOUNTS[k].sat` null in code until the contador validated a mapping, and E-02 has waited
+on that mapping since 2026-10-14. Writing the codes into the chart would need a release each time the contador
+changes one, and nobody but the contador knows them.
+
+The ledger has no closing entries (E-12): the result accounts are never zeroed into Resultados acumulados. The
+console holds the received invoices' XML (E-11) and the Expediente's files (E-05, E-26), but not the issued
+invoices' XML: while `CFDI_MODE=off` (ADR-070) staff stamp them in the SAT's portal and record only the folio
+fiscal, which `ingresos_del_periodo` returns.
+
+**Decision**
+
+1. **The codes are data, not code** (`corp.account_code_lists`, `corp.account_codes`). Each «Guardar los
+   códigos» writes a whole new list unless the codes are the ones there are; the newest list counts. A list may be
+   partial. A code is written as Anexo 24 writes it, `102` or `102.01` (a check holds the format; the domain's
+   chart says which accounts exist). The console never proposes a code. The chart's unused `ACCOUNTS[k].sat` goes.
+2. **A validation names the list it validated** (`corp.account_code_validations`, one per list), with the day the
+   contador validated it. Only the newest, complete list can be marked, and a trigger refuses an older one under
+   one lock, so a new list and a validation at once cannot cross. Changing a code makes a new list, so the
+   codes stand unvalidated until they are marked again.
+3. **The package comes out of any month that has ended**: «preliminar» while the month is open, built from what
+   there is that day; «final» once it is closed. It is built on each download, never stored, so a month reopened
+   and corrected exports the correction.
+4. **What goes in it**: `balanza-YYYY-MM.csv`, the 22 accounts (moved or not) with their code, opening balance,
+   the month's debits and credits and closing balance, each on its own side; `emitidas.csv`, the month's issued
+   CFDIs by folio fiscal (invoices, payment complements, the global once stamped; cancelled ones left out);
+   `recibidas/`, the month's registered received invoices as uploaded; and `acuses/`, the current version of
+   each obligation's evidence filed for the month and of each statement filed without a movement. An Expediente
+   file whose bytes are missing stops the download rather than leaving it out.
+5. **A result account opens each year at zero**, and what earlier years left in them opens in Resultados
+   acumulados, as Balance reads them. So the debit balances equal the credit ones, and the balanza «cuadra». A
+   line in an account the chart does not know is listed apart and the balanza says it does not cuadra.
+6. **A missing code leaves its cell empty**, and the drawer names the accounts without one; complete codes not yet
+   validated are warned of too.
+7. **It is not the SAT's contabilidad electrónica**, and nothing is sent: the founder downloads the zip and sends
+   it as they do today. Each download is a `staff_audit_log` row (`empresa.paquete_descargado`): it carries the
+   month's fiscal record.
+
+**Alternatives considered**
+
+- *Codes in `ACCOUNTS` once validated.* Rejected: every change by the contador would be a release, and the console
+  could not show where the list stands.
+- *Edit a code in place.* Rejected: corp is append-only (ADR-125 §2), and a validation has to name exactly the
+  codes the contador saw.
+- *Issued XMLs from the PAC.* Rejected for now: with `CFDI_MODE=off` the PAC holds none, and the backoffice has no
+  PAC key. The contador downloads them from the SAT by the folio fiscal the CSV lists.
+- *Store each final package.* Rejected: it would be a second copy of the ledger to keep in step with a reopening.
+
+**Consequences**
+
+- The hosted database needs corp `0015` before the console's deploy. The migration only adds tables; a ledger from
+  before keeps every entry (a migration test holds this).
+- E-02's código agrupador piece is closed by the founders entering the contador's codes; no code change waits on
+  the contador.
+- Once Xangarro stamps through the PAC (`CFDI_MODE=live`), the package can carry the issued XMLs too, with the
+  PAC key in the backoffice.

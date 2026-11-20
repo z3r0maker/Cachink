@@ -1,8 +1,9 @@
 /**
- * Mi turno (Track M, M-09, the Turno board): the hero says the expected cash
- * and its four parts, the four figures with their hints, the movements and
- * the due gastos; sin-turno says its way forward; and with records still to
- * send the band warns while «Cerrar mi turno» stays (ADR-123).
+ * Mi turno (Track M, M-09, board MvTurno): the head, the hero with the
+ * expected cash and its parts folded under «Ver de dónde sale», the two
+ * figures, the rows and the fixed foot; sin-turno says its way forward; and
+ * with records still to send the band warns while «Cerrar turno» stays
+ * (ADR-123).
  */
 import { describe, expect, it, vi } from 'vitest';
 import { TURNO_FIXTURE } from '@xangarro/caja/turno';
@@ -22,16 +23,24 @@ const COLA = {
 
 const ACCIONES = {
   onCerrar: vi.fn(),
+  onBloquear: vi.fn(),
   onRetry: vi.fn(),
   onIrAInicio: vi.fn(),
   onAbrirTurno: vi.fn(),
-  onVerVentas: vi.fn(),
-  onRegistrar: vi.fn(),
 };
+
+const FILAS = <div data-testid="turno-filas-de-prueba" />;
 
 function montar(over: Record<string, unknown> = {}) {
   renderWithProviders(
-    <MiTurnoScreen state="happy" data={TURNO_FIXTURE} cola={COLA} {...ACCIONES} {...over} />,
+    <MiTurnoScreen
+      state="happy"
+      data={TURNO_FIXTURE}
+      cola={COLA}
+      filas={FILAS}
+      {...ACCIONES}
+      {...over}
+    />,
   );
   return ACCIONES;
 }
@@ -44,47 +53,58 @@ const tap = (id: string): void => {
 };
 
 describe('MiTurnoScreen · turno', () => {
-  it('says the expected cash, its four parts and the way to close', () => {
+  it('heads with the operator, the opening time and the day', () => {
     montar();
     expect(screen.getByText('Mi turno')).toBeInTheDocument();
-    expect(screen.getByText('Ana Robledo, Caja 1, desde las 08:15')).toBeInTheDocument();
-    expect(screen.getAllByText('$2,710.00').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('Fondo de caja')).toBeInTheDocument();
-    expect(screen.getByText('+$1,980.00')).toBeInTheDocument();
-    expect(screen.getByText('+$550.00')).toBeInTheDocument();
-    expect(screen.getAllByText('−$620.00').length).toBe(2);
-    expect(screen.getByText('Debe haber')).toBeInTheDocument();
+    expect(screen.getByText('AR')).toBeInTheDocument();
+    expect(
+      screen.getByText('Ana Robledo, desde las 08:15 · jueves 14 de mayo'),
+    ).toBeInTheDocument();
   });
 
-  it('says the four figures with their hints, and the movements below', () => {
+  it('says the expected cash once, its parts folded until asked for', () => {
+    montar();
+    expect(screen.getAllByText('$2,710.00')).toHaveLength(1);
+    expect(screen.getByText('Es lo que debes contar cuando cierres tu turno.')).toBeInTheDocument();
+    expect(screen.queryByTestId('turno-desglose')).toBeNull();
+    expect(screen.getByTestId('turno-ver-desglose').getAttribute('aria-expanded')).toBe('false');
+    tap('turno-ver-desglose');
+    expect(screen.getByTestId('turno-ver-desglose').getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText('Ocultar de dónde sale')).toBeInTheDocument();
+    expect(screen.getByText('Fondo de caja')).toBeInTheDocument();
+    expect(screen.getByText('con el que abriste')).toBeInTheDocument();
+    expect(screen.getByText('+$1,980.00')).toBeInTheDocument();
+    expect(screen.getByText('+$550.00')).toBeInTheDocument();
+    expect(screen.getByText('−$620.00')).toBeInTheDocument();
+    expect(screen.getByText('Debe haber')).toBeInTheDocument();
+    expect(screen.getAllByText('$2,710.00')).toHaveLength(2);
+    tap('turno-ver-desglose');
+    expect(screen.queryByTestId('turno-desglose')).toBeNull();
+  });
+
+  it('says two figures only, Ventas and Cobrado, with their hints', () => {
     montar();
     expect(screen.getByText('$3,120.00')).toBeInTheDocument();
     expect(screen.getByText('Una cancelada a las 12:58')).toBeInTheDocument();
-    expect(screen.getByText('Dos clientes')).toBeInTheDocument();
-    expect(screen.getByText('Salieron de la caja · 4 comprobantes')).toBeInTheDocument();
-    expect(screen.getByTestId('turno-movimiento-v412')).toBeInTheDocument();
-    expect(screen.getByTestId('turno-movimiento-merma')).toBeInTheDocument();
-    expect(screen.getByText('Sin monto')).toBeInTheDocument();
-    expect(screen.getByTestId('turno-movimiento-gas').textContent).toContain('−$620.00');
+    expect(screen.getByText('Todos los métodos')).toBeInTheDocument();
+    expect(screen.queryByText('Dos clientes')).toBeNull();
+    expect(screen.queryByTestId('turno-movimientos')).toBeNull();
   });
 
-  it('the due gastos wait with their Registrar, and «Cerrar mi turno» opens the flow', () => {
+  it('the rows the route hands it, and the foot: lock and «Cerrar turno»', () => {
     const a = montar();
-    expect(screen.getByTestId('turno-pendiente-gas')).toBeInTheDocument();
-    expect(screen.getByTestId('turno-pendiente-renta').textContent).toContain('Vence hoy');
-    expect(screen.getByTestId('turno-pendiente-agua').textContent).toContain('Atrasado 1 día');
-    tap('turno-registrar-gas');
-    expect(a.onRegistrar).toHaveBeenCalledWith(TURNO_FIXTURE.pendientes[0]);
+    expect(screen.getByTestId('turno-filas-de-prueba')).toBeInTheDocument();
+    expect(screen.getByText('Cerrar turno')).toBeInTheDocument();
     tap('turno-cerrar-mi-turno');
     expect(a.onCerrar).toHaveBeenCalled();
+    tap('turno-bloquear');
+    expect(a.onBloquear).toHaveBeenCalled();
   });
 
-  it('an open turno with nothing captured says it is en blanco, figures standing', () => {
+  it('an open turno with nothing captured still says its figures', () => {
     montar({ data: { ...TURNO_FIXTURE, movimientos: [] }, state: 'empty' });
-    expect(screen.getByTestId('turno-movimientos-vacio').textContent).toContain(
-      'Tu turno va en blanco',
-    );
     expect(screen.getAllByText('$2,710.00').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('turno-cerrar-mi-turno')).toBeInTheDocument();
   });
 });
 
@@ -114,6 +134,9 @@ describe('MiTurnoScreen · con-registros-por-enviar', () => {
 describe('MiTurnoScreen · sin-turno y errores', () => {
   it('sin-turno opens the turno right here, not by way of Inicio', () => {
     const a = montar({ state: 'sin-turno', data: null });
+    expect(screen.getByTestId('turno-filas-de-prueba')).toBeInTheDocument();
+    expect(screen.getByTestId('turno-bloquear')).toBeInTheDocument();
+    expect(screen.queryByTestId('turno-cerrar-mi-turno')).toBeNull();
     expect(screen.getByTestId('turno-sin-turno').textContent).toContain('Sin turno abierto');
     expect(screen.queryByText('Ir a Inicio')).toBeNull();
     tap('turno-sin-turno-cta');

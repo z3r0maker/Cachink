@@ -46,12 +46,15 @@ with_timeout() {
 
 # A hung or crashed XCUITest driver poisons every subsequent flow with
 # "Failed to connect to /127.0.0.1:7001 (Connection refused)". Maestro
-# reinstalls the driver on the next run, but only if the old processes
-# are gone — so clear all three.
+# reinstalls the driver on the next run, but only if the old one is gone.
+#
+# Only the driver: with_timeout already killed the maestro it timed out.
+# This used to `pkill -9 -f maestro` (and XCTRunner, xctest) machine-wide,
+# which also killed other sessions' runs and the Maestro MCP server. The
+# caller holds the Maestro lock, so any driver left is this run's.
+# shellcheck source=maestro-lock.sh
+source "$(dirname "${BASH_SOURCE[0]}")/maestro-lock.sh"
 kill_maestro_driver() {
-  echo "  🧹  Clearing Maestro driver processes..."
-  pkill -9 -f "maestro" 2>/dev/null || true
-  pkill -9 -f "XCTRunner" 2>/dev/null || true
-  pkill -9 -f "xctest" 2>/dev/null || true
-  sleep 3
+  echo "  🧹  Clearing the Maestro driver..."
+  maestro_kill_drivers
 }

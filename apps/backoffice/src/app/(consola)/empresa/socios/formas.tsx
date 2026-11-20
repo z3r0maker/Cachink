@@ -15,6 +15,14 @@ export function Aviso({ state }: { readonly state: FormState }) {
   return (
     <p className={state.ok ? d.messageOk : d.messageBad} role={state.ok ? 'status' : 'alert'}>
       {state.message}
+      {state.enlace === undefined ? null : (
+        <>
+          {' '}
+          <a className={m.boton.quieto} href={state.enlace.href}>
+            {state.enlace.texto}
+          </a>
+        </>
+      )}
     </p>
   );
 }

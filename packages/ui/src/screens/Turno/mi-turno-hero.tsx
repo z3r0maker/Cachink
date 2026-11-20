@@ -1,137 +1,70 @@
 /**
- * «Efectivo que debe haber en la caja» (Track M, M-09; the Turno board's
- * yellow hero): the figure, its four parts signed the way the board reads
- * them, the total row, and the one way out — «Cerrar mi turno».
+ * «Efectivo que debe haber» (MvTurno's yellow hero): the figure, what it is
+ * for, and «Ver de dónde sale», which unfolds its four parts and «Debe
+ * haber». Folded on every visit, so the figure is said once. Closing the
+ * turno is the screen's fixed foot, not this card's.
  */
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
+import { Pressable } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
-import { notaFondo, type TurnoData } from '@xangarro/caja/turno';
-import { Btn } from '../../components/Btn/index';
+import type { TurnoData } from '@xangarro/caja/turno';
+import { GLYPHS, PathIcon } from '../../components/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow, HeroPanel } from '../../components/Panel/index';
-import { PathIcon } from '../../components/PathIcon/index';
 import { borderWidths, colors } from '../../theme';
+import { MiTurnoDesglose } from './mi-turno-desglose';
 
-const CANDADO =
-  'M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2ZM7 11V7a5 5 0 0 1 10 0v4';
-
-/** The four parts, signed («+$1,980.00», «−$620.00»), the gasto in red. */
-function partes(d: TurnoData): readonly {
-  readonly label: string;
-  readonly nota?: string;
-  readonly valor: string;
-  readonly rojo?: boolean;
-}[] {
-  return [
-    { label: 'Fondo de caja', nota: notaFondo(d.titular), valor: formatMoney(d.fondo) },
-    { label: 'Ventas en efectivo', valor: `+${formatMoney(d.ventasEfectivo)}` },
-    { label: 'Abonos en efectivo', valor: `+${formatMoney(d.abonosEfectivo)}` },
-    { label: 'Gastos de caja chica', valor: `−${formatMoney(d.gastosEfectivo)}`, rojo: true },
-  ];
-}
-
-function Parte(p: {
-  readonly label: string;
-  readonly nota?: string;
-  readonly valor: string;
-  readonly rojo?: boolean;
-  readonly ultima: boolean;
-}): ReactElement {
+/** «Ver de dónde sale» / «Ocultar de dónde sale», with its chevron. */
+function Pliegue(p: { readonly abierto: boolean; readonly onToggle: () => void }): ReactElement {
+  const label = p.abierto ? 'Ocultar de dónde sale' : 'Ver de dónde sale';
   return (
-    <View
-      paddingBottom={8}
-      borderBottomWidth={p.ultima ? 0 : borderWidths.thin}
-      borderBottomColor={colors.yellowDeep}
-      gap={2}
+    <Pressable
+      testID="turno-ver-desglose"
+      role="button"
+      aria-label={label}
+      aria-expanded={p.abierto}
+      onPress={p.onToggle}
+      style={{
+        marginTop: 10,
+        minHeight: 44,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        borderTopWidth: borderWidths.thin,
+        borderTopColor: colors.yellowDeep,
+      }}
     >
-      <View flexDirection="row" alignItems="baseline" gap={10}>
-        <MText size="sm" weight="bold" flex={1}>
-          {p.label}
-        </MText>
-        <MText
-          size="body"
-          weight="extraBold"
-          fontVariant={['tabular-nums']}
-          color={p.rojo ? colors.redText : colors.black}
-        >
-          {p.valor}
-        </MText>
-      </View>
-      {p.nota ? (
-        <MText size="xs" weight="semibold" color={colors.gray600}>
-          {p.nota}
-        </MText>
-      ) : null}
-    </View>
+      <MText size="md" weight="extraBold" flex={1}>
+        {label}
+      </MText>
+      <PathIcon d={p.abierto ? GLYPHS.chevronUp : GLYPHS.chevronDown} size={18} strokeWidth={2.4} />
+    </Pressable>
   );
 }
 
-/** The figure, what it is for, and the total it repeats. */
-function Cifra(p: { readonly data: TurnoData }): ReactElement {
-  return (
-    <View gap={6}>
-      {/* On yellow the default muted label read 3.57:1; ink reads 12.35:1. */}
-      <Eyebrow color={colors.ink}>Efectivo que debe haber en la caja</Eyebrow>
-      <MText size="total" weight="extraBold" fontVariant={['tabular-nums']} letterSpacing={-1.4}>
-        {formatMoney(p.data.esperado)}
-      </MText>
-      <MText size="sm" weight="semibold" color={colors.gray600}>
-        Es lo que debes contar cuando cierres tu turno.
-      </MText>
-    </View>
-  );
-}
-
-export function MiTurnoHero(p: {
-  readonly data: TurnoData;
-  /** «Cerrar mi turno»: opens the Cierre flow. */
-  readonly onCerrar: () => void;
-}): ReactElement {
-  const filas = partes(p.data);
+export function MiTurnoHero(p: { readonly data: TurnoData }): ReactElement {
+  const [abierto, setAbierto] = useState(false);
   return (
     <HeroPanel label="Efectivo que debe haber en la caja" testID="turno-hero">
-      <View gap={16}>
-        <Cifra data={p.data} />
-        <View gap={8}>
-          {filas.map((f, i) => (
-            <Parte key={f.label} {...f} ultima={i === filas.length - 1} />
-          ))}
-        </View>
-        <Total data={p.data} />
-        <Btn
-          variant="secondary"
-          size="xl"
-          sentence
-          fullWidth
-          icon={<PathIcon d={CANDADO} size={20} strokeWidth={2.4} />}
-          onPress={p.onCerrar}
-          testID="turno-cerrar-mi-turno"
+      {/* On yellow the default muted label read 3.57:1; ink reads 12.35:1. */}
+      <Eyebrow color={colors.ink}>Efectivo que debe haber</Eyebrow>
+      <View marginTop={4}>
+        <MText
+          size="total"
+          weight="extraBold"
+          fontVariant={['tabular-nums']}
+          letterSpacing={-1.4}
+          testID="turno-debe-haber"
         >
-          Cerrar mi turno
-        </Btn>
+          {formatMoney(p.data.esperado)}
+        </MText>
       </View>
+      <MText size="md" weight="semibold" color={colors.ink} marginTop={6}>
+        Es lo que debes contar cuando cierres tu turno.
+      </MText>
+      <Pliegue abierto={abierto} onToggle={() => setAbierto((x) => !x)} />
+      {abierto ? <MiTurnoDesglose data={p.data} /> : null}
     </HeroPanel>
-  );
-}
-
-/** «Debe haber», the parts summed, above the way out. */
-function Total(p: { readonly data: TurnoData }): ReactElement {
-  return (
-    <View
-      flexDirection="row"
-      alignItems="baseline"
-      gap={10}
-      paddingTop={4}
-      borderTopWidth={borderWidths.thin}
-      borderTopColor={colors.black}
-    >
-      <MText size="body" weight="extraBold" flex={1}>
-        Debe haber
-      </MText>
-      <MText size="xl3" weight="extraBold" fontVariant={['tabular-nums']} testID="turno-debe-haber">
-        {formatMoney(p.data.esperado)}
-      </MText>
-    </View>
   );
 }

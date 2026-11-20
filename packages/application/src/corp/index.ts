@@ -74,3 +74,32 @@ export {
   type ImpuestosDeps,
   type PagarDeclaracionInput,
 } from './impuestos.js';
+export {
+  cerrarMes,
+  confirmarSaldo,
+  pedirReabrir,
+  responderReapertura,
+  type CierreDeps,
+  type CierreRepository,
+} from './cierre.js';
+export {
+  pedirGasto,
+  prepararPresupuesto,
+  responderPresupuesto,
+  responderSolicitud,
+  type NuevaSolicitud,
+  type PresupuestoDeps,
+  type PresupuestoRepository,
+} from './presupuesto.js';
+export {
+  armarPaquete,
+  guardarCodigos,
+  leerEstadoDeCodigos,
+  validarCodigos,
+  type ArchivoDelPaquete,
+  type CodigosDeps,
+  type CodigosRepository,
+  type ComprobanteDelPaquete,
+  type FuentesDelPaquete,
+  type Paquete,
+} from './contador.js';

@@ -16,6 +16,19 @@ const REPO_ROOT = resolve(import.meta.dirname, '..', '..');
 const WORKSPACE_RESOLVER = resolve(import.meta.dirname, 'eslint-workspace-resolver.cjs');
 
 /**
+ * Xangarro Synth (ADR-153) is internal tooling under `tools/synth/*`, never
+ * shipped. No product code may import it: not the apps and not any package,
+ * classified by the boundaries table or not. ESLint keeps one
+ * `no-restricted-imports` per file, so every block that sets that rule for a
+ * path under `apps/` or `packages/` carries this pattern too.
+ */
+const NO_SYNTH_IMPORTS = {
+  group: ['@xangarro/synth-*', '@xangarro/synth-*/**'],
+  message:
+    'Synth is internal QA tooling (ADR-153): nothing in apps/* or packages/* may import it, so no product build can carry it.',
+};
+
+/**
  * Shared ESLint flat config for the Xangarro monorepo.
  *
  * Encodes the layer boundaries from CLAUDE.md §4.2. Each package declares its
@@ -96,6 +109,11 @@ const configs = tseslint.config(
         { type: 'sync', pattern: ['packages/sync/src/**', 'packages/sync-*/src/**'] },
         { type: 'testing', pattern: 'packages/testing/src/**' },
         { type: 'app', pattern: 'apps/**/src/**' },
+        // Synth (ADR-153): studio → server → core, and nothing product-side
+        // lists them as a destination.
+        { type: 'synth-core', pattern: 'tools/synth/core/src/**' },
+        { type: 'synth-server', pattern: 'tools/synth/server/src/**' },
+        { type: 'synth-studio', pattern: 'tools/synth/studio/src/**' },
       ],
     },
     rules: {
@@ -140,6 +158,16 @@ const configs = tseslint.config(
                 to: { type: ['domain', 'application', 'data', 'ui', 'sync', 'testing', 'caja'] },
               },
             },
+            // core mints tenants through @xangarro/testing/tenant (S-02, S-04).
+            { from: { type: 'synth-core' }, allow: { to: { type: ['domain', 'testing'] } } },
+            {
+              from: { type: 'synth-server' },
+              allow: { to: { type: ['synth-core', 'domain', 'testing'] } },
+            },
+            {
+              from: { type: 'synth-studio' },
+              allow: { to: { type: ['synth-server', 'synth-core', 'domain'] } },
+            },
           ],
         },
       ],
@@ -175,6 +203,14 @@ const configs = tseslint.config(
     },
   },
 
+  // No product code imports Synth (ADR-153).
+  {
+    files: ['apps/**', 'packages/**'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [NO_SYNTH_IMPORTS] }],
+    },
+  },
+
   // Prevent components from importing their own barrel (causes require cycles)
   {
     files: ['packages/ui/src/components/**/*.{ts,tsx}'],
@@ -183,6 +219,7 @@ const configs = tseslint.config(
         'error',
         {
           patterns: [
+            NO_SYNTH_IMPORTS,
             {
               group: ['../index', '../index.ts'],
               message:

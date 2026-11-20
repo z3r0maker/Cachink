@@ -53,6 +53,15 @@ fi
 DEV=()
 [[ -n "${MAESTRO_DEVICE_UDID:-}" ]] && DEV=(--device "$MAESTRO_DEVICE_UDID")
 
+# One Maestro at a time on this machine (lib/maestro-lock.sh). Run from
+# run-flow.sh or fold-tour.sh, this rides their lock.
+# shellcheck source=lib/maestro-lock.sh
+source "$SCRIPT_DIR/lib/maestro-lock.sh"
+if ! maestro_lock_acquire; then
+  echo "  ⚠️   Fold audit skipped: Maestro stayed busy."
+  exit 0
+fi
+
 # A real dump is 30-450 KB. Anything past this is not data.
 HIER_MAX_BYTES="${MAESTRO_HIERARCHY_MAX_BYTES:-16777216}"
 

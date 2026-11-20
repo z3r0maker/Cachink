@@ -71,14 +71,19 @@ PRIME_FLOW="${PRIME_FLOW:-$FLOWS_DIR/shared/prime-dev-client.yaml}"
 
 # Maestro sometimes hangs after an XCTest hiccup while the app is switching
 # (kAXErrorInvalidUIElement): cap each setup run and retry. Terminating the
-# app between tries clears the wedged UI element the driver chokes on.
+# app between tries clears the wedged UI element the driver chokes on, and
+# a fresh driver replaces a wedged one. (This used to `pkill -f "maestro
+# test"`, which killed other sessions' runs too; the alarm already ended
+# this one, and the caller holds the Maestro lock.)
+# shellcheck source=maestro-lock.sh
+source "$(dirname "${BASH_SOURCE[0]}")/maestro-lock.sh"
 _maestro_setup() {
   local flow="$1" try
   for try in 1 2 3; do
     perl -e 'alarm shift; exec @ARGV' 420 \
       maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$flow" && return 0
     echo "⚠️   setup flow $(basename "$flow") failed (try $try)"
-    pkill -f "maestro test" 2>/dev/null || true
+    maestro_kill_drivers
     xcrun simctl terminate "${MAESTRO_DEVICE_UDID:-booted}" "$APP_ID" 2>/dev/null || true
     sleep 3
   done

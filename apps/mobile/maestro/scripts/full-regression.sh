@@ -92,6 +92,15 @@ if [[ -n "$DEVICE_CLASS" ]]; then
   fi
 fi
 
+# ──────────── One Maestro at a time on this machine ──────────────
+# Every iOS run shares driver port 7001; two at once drive each other's
+# simulators. Held to the end of the suite (lib/maestro-lock.sh).
+# shellcheck source=lib/maestro-lock.sh
+source "$SCRIPT_DIR/lib/maestro-lock.sh"
+if [[ "$DRY_RUN" == false ]]; then
+  maestro_lock_acquire || exit 1
+fi
+
 # ──────────── Create run directory for E2E report ─────────────
 PHASE_LABEL="all"
 if [[ -n "$RUN_NAME" ]]; then

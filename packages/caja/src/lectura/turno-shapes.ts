@@ -50,6 +50,8 @@ export interface TurnoVivoPara {
   /** UTC ISO of the newest standing sale; null before the first. */
   readonly ultimaVentaAt: string | null;
   readonly gastos: number;
+  /** How many of them carry their receipt photo (ADR-149); absent where none can. */
+  readonly comprobantes?: number;
   readonly movimientos: readonly MovimientoPara[];
   readonly recurrentes: readonly RecurrentePara[];
   readonly cortes: readonly CortePara[];

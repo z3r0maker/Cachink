@@ -23,7 +23,7 @@ import type { VentasEstado } from './ventas-mostrador-screen';
 export interface VentasTurnoVivo {
   readonly state: VentasEstado;
   readonly data: VentasData | null;
-  /** The owner's name (the amber note says it); null until the last pull. */
+  /** The owner's name (the cancel dialog says it); null until the last pull. */
   readonly dueno: string | null;
   readonly refetch: () => void;
   readonly cargarDetalle: (folio: string, fila: VentaTurno | undefined) => Promise<CargaTicket>;

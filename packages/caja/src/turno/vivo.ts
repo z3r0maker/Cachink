@@ -3,6 +3,7 @@
  * screen's data. Pure, so the mapping is tested without a Worker.
  */
 
+import { diaDeApertura } from '../comun/frases';
 import type { RecurrentePara, TurnoVivoPara } from '../lectura/turno-shapes';
 import type { CobroPorMetodo, Movimiento, PendienteRecurrente, TurnoData } from './types';
 
@@ -70,6 +71,7 @@ export function comoTurno(v: TurnoVivoPara, operador: string, caja: string): Tur
     operador,
     caja,
     desde: c.desde,
+    dia: diaDeApertura(v.aperturaAt),
     fondo: BigInt(c.fondoCentavos),
     ventasEfectivo: BigInt(c.ventasEfectivoCentavos),
     abonosEfectivo: BigInt(c.abonosEfectivoCentavos),
@@ -83,8 +85,7 @@ export function comoTurno(v: TurnoVivoPara, operador: string, caja: string): Tur
     fiado: BigInt(c.resumen.fiadoCentavos),
     clientesFiados: v.fiadoClientes.length,
     gastos: gastosEfectivo,
-    // Receipt photos wait for the storage bucket (ADR-083 D3): none yet.
-    comprobantes: 0,
+    comprobantes: v.comprobantes ?? 0,
     pendientes: v.recurrentes.map(comoPendiente),
     movimientos: v.movimientos.map(comoMovimiento),
   };

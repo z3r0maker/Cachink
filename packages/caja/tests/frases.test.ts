@@ -5,6 +5,8 @@ import { kpisFor } from '../src/inicio/kpis';
 import { INICIO_FIXTURE } from '../src/inicio/fixture';
 import { TURNO_FIXTURE } from '../src/turno/fixture';
 import {
+  diaConFecha,
+  diaDeApertura,
   diasEntre,
   hintCanceladas,
   hintComprobantes,
@@ -31,6 +33,17 @@ describe('frases del operador', () => {
     assert.equal(textoVence('2026-05-14', '2026-05-17'), 'Vence el domingo');
     assert.equal(textoVence('2026-05-14', '2026-05-21'), 'Vence el 21 de mayo');
     assert.equal(diasEntre('2026-05-14', sumarDias('2026-05-14', 40)), 40);
+  });
+
+  it('says a day by its weekday and date, in lowercase (MvTurno «jueves 14 de mayo»)', () => {
+    assert.equal(diaConFecha(new Date(2026, 4, 14, 8, 15)), 'jueves 14 de mayo');
+    assert.equal(diaConFecha(new Date(2026, 8, 26, 23, 59)), 'sábado 26 de septiembre');
+  });
+
+  it('says the apertura’s local day, and nothing for a broken stamp', () => {
+    assert.equal(diaDeApertura(new Date(2026, 0, 1, 0, 5).toISOString()), 'jueves 1 de enero');
+    assert.equal(diaDeApertura(''), '');
+    assert.equal(diaDeApertura('no es fecha'), '');
   });
 
   it('shows the turno figures with the shared sentences', () => {

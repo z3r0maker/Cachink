@@ -152,6 +152,32 @@ describe('emailSenderFromEnv', () => {
     assert.equal((await readdir(dir)).length, 2);
   });
 
+  it('writes to EMAIL_OUTBOX_DIR when it is set, so two local servers keep their mail apart', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'outbox-env-'));
+    const r = await emailSenderFromEnv({ EMAIL_OUTBOX_DIR: dir }).send(msg);
+    assert.equal(r.ok, true);
+    assert.equal((await readdir(dir)).length, 2);
+  });
+
+  it('prefers an explicit outboxDir over EMAIL_OUTBOX_DIR, and ignores a blank one', async () => {
+    const [explicit, env] = await Promise.all([
+      mkdtemp(join(tmpdir(), 'outbox-explicit-')),
+      mkdtemp(join(tmpdir(), 'outbox-ignored-')),
+    ]);
+    await emailSenderFromEnv({ EMAIL_OUTBOX_DIR: env }, { outboxDir: explicit }).send(msg);
+    assert.equal((await readdir(explicit)).length, 2);
+    assert.equal((await readdir(env)).length, 0);
+    assert.equal(emailTransport({ EMAIL_OUTBOX_DIR: '  ' }), 'outbox');
+  });
+
+  it('never writes an outbox when Resend is configured, whatever EMAIL_OUTBOX_DIR says', () => {
+    assert.equal(emailTransport({ RESEND_API_KEY: 're_x', EMAIL_OUTBOX_DIR: '/tmp/x' }), 'resend');
+    assert.equal(
+      emailTransport({ VERCEL_ENV: 'production', EMAIL_OUTBOX_DIR: '/tmp/x' }),
+      'unconfigured',
+    );
+  });
+
   it('refuses to send (and says why) on Vercel without a key', async () => {
     assert.equal(emailTransport({ VERCEL_ENV: 'production' }), 'unconfigured');
     const r = await emailSenderFromEnv({ VERCEL_ENV: 'preview' }).send(msg);

@@ -1,6 +1,8 @@
 # Ventas del turno (Track M-11, M-08; board MvVentas): the Ventas tab lists
-# the turno's sales — the three-figure KPI row, each sale's folio/monto/metodo,
-# a fiado row naming its client, and a cancelled row keeping its red chip.
+# the turno's sales — the title line («N en tu turno, desde las HH:MM»), the
+# compact three-figure summary (Cobrado · En efectivo · Canceladas), each
+# sale's folio/monto/metodo, a fiado row naming its client, and a cancelled
+# row keeping its red chip.
 #
 # Cancelling needs the fixture operator who may cancel (Ana, NIP 5678 — Toni
 # may not, packages/contracts/src/mock/fixtures.ts:103-104), so the flow locks
@@ -65,13 +67,15 @@ tags:
     env:
       METODO: Transferencia
 
-# The list: the KPI row, and the row's folio, monto and metodo.
+# The list: the title line, the compact summary, and the row's folio, monto
+# and metodo.
 - tapOn: { id: 'tab-ventas|rail-ventas|sidebar-ventas' }
 - extendedWaitUntil: { visible: { id: 'venta-lista' }, timeout: 8000 }
 - assertVisible: { id: 'venta-resumen' }
-- assertVisible: '.*Ventas del turno.*'
+- assertVisible: '.*en tu turno, desde las \d{2}:\d{2}.*'
 - assertVisible: '.*Cobrado.*'
 - assertVisible: '.*En efectivo.*'
+- assertVisible: '.*Canceladas.*'
 - assertVisible: ".*V-\\d{4}.*"
 # The row carries an explicit aria-label, so iOS folds its children (concepto,
 # monto, chips) out of the tree — the label is the only matchable text, and it
@@ -99,7 +103,8 @@ tags:
 - tapOn: { id: 'cancelar-confirmar' }
 - extendedWaitUntil: { visible: { id: 'venta-detalle-aviso' }, timeout: 8000 }
 - tapOn: { id: 'venta-detalle-listo' }
-# Nothing is deleted: the row stays, struck through, with its chip and motivo.
+# Nothing is deleted: the row stays, struck through, with its Cancelada chip
+# (its label ends «, cancelada»; the motivo lives in the sheet, not the row).
 - assertVisible: '.*cancelada.*'
 
 # A fiado sale keeps its client on the row (cobrar-ticket cannot do Fiado:

@@ -1,6 +1,8 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  # Internal tooling, never shipped (ADR-153): Synth's core, server and studio.
+  - 'tools/synth/*'
   - '!archive/**'
 
 patchedDependencies:

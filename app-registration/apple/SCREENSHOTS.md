@@ -2,7 +2,8 @@
 
 Captured 2026-11-19 from the real app by one Maestro flow,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
-against the contracts mock, on `main` plus the Avisos fix (PR #175). No
+against the contracts mock, on `main` with the gasto's receipt photo (PR #181)
+and the redesigned Ventas and Mi turno (PRs #195, #196). No
 compositing, no fixture screens: what the app shows for the demo taquería
 («Tacos La Esquina») is what the shots contain. Play's set comes from the same
 flow ([`../google-play/SCREENSHOTS.md`](../google-play/SCREENSHOTS.md)).
@@ -13,22 +14,24 @@ The caja is «Caja 1». The turno opens with a $2,000 fondo; all twenty
 products arrive, so nothing reads «Quedan 0» and the bell counts only the
 owner's two messages; then three sales: cash with change (2 Alambre, 2 Agua de
 horchata, 1 Café, $265.00 paid with $500), transfer ($150.00) and card
-($227.50); and one gasto, $180.00 of tortillas. Expected cash: $2,085.00.
+($227.50); and one gasto, $180.00 of tortillas, with its ticket's photo picked
+from the gallery (the simulator has no camera), so Gastos reads «Con foto» and
+Mi turno «1 comprobante». Expected cash: $2,085.00.
 
 The numbers are the store's order, not the capture's: Inicio first, because
 Don greets there; Vincular last, because a privacy notice should not open the
 set.
 
-| Shot             | Screen                                | What it shows                      |
-| ---------------- | ------------------------------------- | ---------------------------------- |
-| `01-inicio`      | Inicio with the turno open            | The operator's view of the day     |
-| `02-cobrar`      | Cobrar: catalogue + ticket building   | The money screen                   |
-| `03-checkout`    | «¿Cómo paga?», $500 and the change    | Cash, card, transfer, fiado        |
-| `04-venta-hecha` | Venta hecha with «Dale de cambio»     | The sale closes, receipt goes out  |
-| `05-mi-turno`    | Mi turno: the cash that must be there | The turno at a glance              |
-| `06-ventas`      | Ventas del turno                      | What the turno recorded            |
-| `07-gastos`      | Gastos del turno with one gasto       | What left the drawer               |
-| `08-activacion`  | Vincular, the typed code              | This app joins an existing negocio |
+| Shot             | Screen                                  | What it shows                      |
+| ---------------- | --------------------------------------- | ---------------------------------- |
+| `01-inicio`      | Inicio with the turno open              | The operator's view of the day     |
+| `02-cobrar`      | Cobrar: catalogue + ticket building     | The money screen                   |
+| `03-checkout`    | «¿Cómo paga?», $500 and the change      | Cash, card, transfer, fiado        |
+| `04-venta-hecha` | Venta hecha with «Dale de cambio»       | The sale closes, receipt goes out  |
+| `05-mi-turno`    | Mi turno: the cash and the turno's rows | The turno at a glance              |
+| `06-ventas`      | Ventas del turno, totals and filters    | What the turno recorded            |
+| `07-gastos`      | Gastos del turno with one gasto         | What left the drawer               |
+| `08-activacion`  | Vincular, the typed code                | This app joins an existing negocio |
 
 ## Devices and sizes (Apple's required sets)
 
@@ -39,10 +42,14 @@ set.
 
 ## Known imperfections (for the next re-shoot)
 
-- **The gasto has no comprobante**: the phone's gasto form takes no photo
-  yet, so the row and the note say «Sin comprobante».
-- **«Renta local» reads «Atrasado 49 días»**: the mock's recurrente is due on
+- **Inicio greets «¡Buenas tardes, Toni!»** under a 9:41 status bar: the
+  greeting follows the simulator's real clock, and the set was taken after
+  noon.
+- **«Renta local» reads «Atrasado 18 días»**: the mock's recurrente is due on
   the 1st and nobody registers it in the story.
+- **On the iPhone, Mi turno's Gastos row is cut** («$180.00 salieron de la
+  c…»): the «Atrasado 18 días» chip takes the row's width. The iPad has room
+  and reads «· 1 comprobante».
 - **The iPad** draws its window-resize arc in the bottom-right corner, and the
   status bar's «9:41 a.m.» sits over the rail's «Caja 1» chip; both are iPadOS.
 

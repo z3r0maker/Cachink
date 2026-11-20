@@ -164,6 +164,11 @@ if [[ -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
 fi
 
 if [[ $# -gt 0 ]]; then
+  # One Maestro at a time on this machine (lib/maestro-lock.sh). Started by
+  # a runner that holds it, this rides that lock.
+  # shellcheck source=lib/maestro-lock.sh
+  source "$(cd "$(dirname "$0")" && pwd)/lib/maestro-lock.sh"
+  maestro_lock_acquire || exit 1
   ATTEMPT=1
   while [[ $ATTEMPT -le $MAX_RETRIES ]]; do
     echo "🚀  Attempt $ATTEMPT/$MAX_RETRIES: maestro test ${MAESTRO_DEVICE_FLAG[*]+"${MAESTRO_DEVICE_FLAG[*]}"} $*"

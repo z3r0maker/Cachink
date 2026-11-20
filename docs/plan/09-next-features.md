@@ -619,7 +619,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-21 Compartir por WhatsApp `[LAUNCH]` [alta]
 
 - [~] Status · **Blocked by:** N-20 (hecho) · web half landed 2026-09-20
-  **Remaining (2026-09-23, verified against the code):** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido (`share-image.ts` abre la hoja de compartir genérica), no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24.
+  **Remaining (2026-11-19, verificado contra el repo):** queda **una** cosa, no cuatro, y no es ninguna de las que decía la nota del 2026-09-23 (conservada abajo). La mitad del teléfono aterrizó con otro diseño: el comprobante se manda como **texto**, con el SVG sólo de vista previa en pantalla, y la persona escoge el contacto y le da enviar. Punto por punto, contra el repo de hoy. (1) «no hay envío a un número predefinido (`share-image.ts`)»: ese archivo ya no existe en ningún lado, ni la función `shareComprobanteAsImage` que el «What» de abajo manda cablear — sobreviven sólo en ROADMAP.md y en `docs/archive/`. El camino del número **sí** existe, en `packages/ui/src/app/abrir-whatsapp.ts` (`whatsapp://send?phone=` y `wa.me/<numero>`), y Cobranza ya lo usa en sus dos recordatorios de saldo. (2) «no hay «Enviar como texto»»: todo el camino del teléfono es texto, y además hay Mensajes por SMS y el menú del sistema (`comprobante-acciones.ts`). (3) «no hay flujo de Maestro»: `maestro/flows/comprobante-whatsapp.yaml` llega hasta la entrega y vuelve a leer el aviso de la hoja; su encabezado guarda el hallazgo de TestFlight 1.0.0 (2) que lo arregló — `canOpenURL` rechaza un esquema no declarado en iOS, así que `abrirChatWhatsApp` nunca pregunta y sólo intenta abrir. (4) «ni test unitario del fallback»: 16 pruebas en `packages/ui/tests/app/abrir-whatsapp.test.ts`. **Lo que falta de verdad:** la hoja llama `abrirChatWhatsApp({ texto })` sin `numero`, así que el teléfono del cliente que el «What» promete recordar nunca prellena el chat. El ayudante ya acepta el número y Cobranza ya se lo pasa; a esta pantalla sólo le falta hacer lo mismo. Mientras eso no pase, el hint «Escoges el contacto y le das enviar» es correcto y no debe cambiarse. **Nota vieja (2026-09-23), conservada porque su marco cambió, no sólo sus hechos:** solo falta la mitad del teléfono: no hay envío en Android a un número predefinido, no hay «Enviar como texto», no hay flujo de Maestro hasta la entrega a WhatsApp, ni test unitario del fallback de Android. Bloqueado por N-24.
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
   device-token route `GET /api/v1/comprobante?ticketId=` renders the N-20
@@ -715,7 +715,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-25 Vinculación de dispositivos por QR `[LAUNCH]` [alta]
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
-      **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24.
+      **Remaining (2026-10-05, verified against the code):** la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. Sigue bloqueado por N-24. **Verificado el 2026-11-19 contra el repo**, los cuatro huecos siguen abiertos tal cual, y los cinco cimientos siguen en pie: `activation-form.ts`, `qr-visor.native.tsx` y `vincular-escanear.tsx` están en `packages/ui/src/screens/Activation/`, y el fragmento `#c=` lo escriben `lib/pairing-token.ts` y `server/actions/pairing-qr.ts` del portal, con prueba unitaria y `e2e/devices.spec.ts` leyéndolo. Dos detalles que ahorran una búsqueda cuando esto arranque. Uno: `apps/mobile/app.json` tiene exactamente una línea de esquema y **ninguna** de `intentFilters` ni `associatedDomains`, que son las dos que Expo necesita para que el enlace https abra la app. Dos: `assetlinks.json` y el AASA no están en ningún disco, y su casa es `apps/landing/public/.well-known/`, que ya existe con `security.txt` dentro — o sea que se sirven por copia estática del build de Vite, no por una ruta, y el dominio que firman es `app.xangarro.mx`, que hoy no es el landing. Eso último es una decisión de DNS antes que de código.
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
   `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
@@ -1043,6 +1043,7 @@ fees per sale; and, in Phase 2 only, the amount typed once.
 ### N-75 Spike de conciliación — ¿podemos ver los pagos con tarjeta de cualquier terminal? [media]
 
 - [ ] Status · **Blocks:** ADR-109, N-41, N-76
+  - **Remaining (2026-11-19, verificado contra el repo):** sin empezar, y vale la pena separar lo que falta de lo que ya se investigó, porque el track se lee como virgen y no lo es del todo. **No existen** `docs/spikes/payments-reconciliation.md` ni ningún `scripts/spikes/*-payments.ts`, y ningún archivo del repo nombra a Mercado Pago ni a Clip fuera de los spikes y de los planes. **Sí existen**, de N-40, los dos spikes de terminal (`docs/spikes/payments-clip.md`, `payments-mercadopago.md`) con sus guiones (`scripts/spikes/clip-pinpad.ts`, `mercadopago-point.ts`) y un `shared.ts` que ya resuelve dos cosas que esta tarea necesita: los centavos como decimal de dos cifras que ambos proveedores aceptan, y un `pollUntil` que lee un pago hasta que asienta (porque un webhook es sólo una señal, ADR-066). Ninguno de los dos spikes toca búsqueda de pagos, reportes ni conciliación, que es justo la pregunta de N-75, así que la pregunta sigue abierta — pero con andamio. Dos cosas de esos spikes que cambian cómo se planea esto. Una: Clip **no tiene sandbox**, cada prueba es un cargo real en una terminal real y Clip tiene que instalar su app PinPad en cada lector, así que N-53 no se puede probar sin hardware y sin O-28. Dos: `payments-mercadopago.md` dice «so N-41 can be built and tested before anyone buys a reader», y eso **ya no apunta a N-41**: el ADR-109 renumeró, y el adaptador de escritura del que habla el spike es hoy N-80. Corrige esa referencia en el spike cuando lo retomes, o el que lo lea va a creer que N-41 está desbloqueada.
 - **What:** read Mercado Pago's payment search, account-money / released-money reports and settlement
   reports, and Clip's transactions-by-date and settlements endpoints (`developer.clip.mx/reference/
 transactions`, `…/settlements`). Answer, per provider: does a payment taken on a **non-integrated
@@ -1059,6 +1060,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-41 Puerto `PaymentProvider` — lado de lectura + adaptador de Mercado Pago [media]
 
 - [ ] Status · **Blocked by:** N-75, ADR-109 · **Blocks:** N-43, N-53, N-76, N-80
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y conviene saberlo porque **otro track la nombra sin saberlo**: K-22 (el adaptador CoDi, en `22-codi.md`) dice construirse «behind ADR-066's `PaymentProvider` port», y ese puerto es esta tarea. No existe un solo archivo en el repo que nombre `PaymentProvider`. O sea que N-41 bloquea a K-22 además de a las cuatro que ya lista.
 - **What:** port in `packages/application`: `listPayments(range)`, `getPayment(id)`,
   `listSettlements(range)`, `verifyWebhook` (may return "unverified — fetch to confirm"). First
   adapter `mercadopago`, backend only. A shared adapter contract suite that N-53 must also pass.
@@ -1067,6 +1069,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-43 Vinculación de la cuenta de Mercado Pago o Clip en Tipos de pago [media]
 
 - [ ] Status · **Blocked by:** N-41
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. La pantalla donde vive ya existe (`negocio/cobros/metodos.tsx`, el interruptor de Tarjeta), así que esto es una tarjeta y un panel sobre algo construido. El spike de Mercado Pago ya trae una sección «Linking a merchant (N-43)» con el OAuth, así que el camino de MP está investigado; el de Clip es pegar llaves, y depende de O-28.
 - **What:** Negocio → Tipos de pago, under the Tarjeta switch: a card «¿Cobras con Mercado Pago o
   Clip? Conecta tu cuenta» → side panel with the two providers as option cards. **Mercado Pago:**
   "Conectar" (OAuth + PKCE), refresh before the 180-day expiry. **Clip:** guided paste of an API key +
@@ -1080,6 +1083,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-76 Conciliación de tarjeta `[baja]`
 
 - [ ] Status · **Blocked by:** N-41, N-43
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Depende de la llave que N-75 todavía no nombra, así que ni el emparejador del dominio se puede escribir: no se sabe contra qué campos empareja.
 - **What:** a job pulls the linked account's card payments (and N-53's, for Clip) and matches them to
   synced ventas with método Tarjeta, by the key N-75 names. Three states per day and caja:
   **emparejada**; **venta sin cobro** (Tarjeta recorded, no payment behind it); **cobro sin venta**
@@ -1093,6 +1097,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-77 Paso del checklist e invitaciones [baja]
 
 - [ ] Status · **Blocked by:** N-43
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Nota de orden: su condición de visibilidad es que `cobrosIntegrados` esté liberado, y hoy ese nombre es **interruptor de apagado** y **capacidad de plan** a la vez (ver C-21), así que cuando se construya hay que decir cuál de los dos consulta el paso.
 - **What:** «Primeros pasos», group «Cuando quieras»: «Conecta tu cuenta Mercado Pago o Clip» — shown
   only when Tarjeta is among the business's methods and `cobrosIntegrados` is released; done when an
   account is linked (detected from data, as every step). The one-time owner-only line under Tarjeta
@@ -1106,6 +1111,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-80 Puerto `PaymentProvider` — lado de escritura + Mercado Pago Point [baja]
 
 - [ ] Status · **Blocked by:** N-41, N-40 (go de MP), C-13 · **Blocks:** N-42, N-79
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la que el spike de Mercado Pago llama (mal) «N-41»: su veredicto «go for terminals» con sandbox y terminal virtual es para esta tarea. Lo que la detiene de verdad no es técnico: es el «go de MP» de N-40 y el C-13 que todavía no tiene contrato escrito.
 - **What:** the port gains `createIntent`, `getIntent`, `cancelIntent`, `refund`, `listTerminals`,
   `setTerminalMode`; the `mercadopago` adapter implements them on the Orders API for Point (stores,
   POS per caja, PDV mode, `X-Idempotency-Key`). The contract suite runs against the Point sandbox's
@@ -1114,6 +1120,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-42 Backend de intenciones de pago [baja]
 
 - [ ] Status · **Blocked by:** N-80, C-13
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. No hay tabla `payment_intents` en ninguno de los dos esquemas ni rutas bajo `/api/v1/payments/`.
 - **What:** `POST /api/v1/payments/intents` (device token; amount in centavos, terminal id) →
   provider intent; `GET …/intents/:id` (polled every 2 s); provider webhooks →
   `payment_intents.status` — **a webhook is only a signal; status is always confirmed by fetching the
@@ -1124,6 +1131,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-79 Terminal por caja [baja]
 
 - [ ] Status · **Blocked by:** N-80, N-43, ADR-109 (D-1)
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Para la mitad de Clip, el spike ya dice lo que esto va a encontrar: Clip tiene que instalar su app PinPad en cada lector antes de que la API lo alcance, así que «Solicitar activación con Clip» no es un trámite de forma, es la condición para que el lector exista para nosotros.
 - **What:** in the Tipos de pago panel of a linked account: list the account's terminals, switch one
   to integrated mode (PDV), name it and assign it to a caja. **Clip:** register a reader by serial,
   show whether it is PinPad-ready, and a «Solicitar activación con Clip» step that files the
@@ -1134,6 +1142,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-44 Cobrar en terminal (app y caja web) [baja]
 
 - [ ] Status · **Blocked by:** N-42, N-79, N-45, N-24, N-53
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y es la de la cola más larga del track: cinco barreras, de las cuales N-45 (pentest externo) y N-53 (Clip) dependen de terceros y de dinero, no de código.
 - **What:** when the caja has a terminal, Tarjeta sends the amount to it («Cobrando en Caja 1…»,
   Cancelar). Approved → the device writes the venta (método Tarjeta, `payment_ref`) and syncs as
   usual. Declined → Reintentar / Cambiar método. Offline → «Sin conexión: cobra en tu terminal y
@@ -1145,6 +1154,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-78 Salud de la terminal en la caja [baja]
 
 - [ ] Status · **Blocked by:** N-79
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, detrás de N-79.
 - **What:** the caja reads its terminal's health (MP terminal list + mode; Clip `/devices/status`)
   and the account's token state. Broken → badge on Tarjeta; tapping it opens «Tu terminal Point
   ···3324 no responde» with **Cobrar sin terminal** (primary, records a manual Tarjeta sale),
@@ -1162,18 +1172,21 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-46 Salud de la sincronización y dispositivos [media]
 
 - [ ] Status · **Trigger:** lanzamiento + 30 días, o el primer incidente de sincronización entre inquilinos.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y el disparador no ha ocurrido. La consola tiene hoy nueve pantallas (inicio, campanas, capacidad, empresa, flags, inbox, mapa, migraciones, tenants, uso) y ninguna mira la sincronización. Lo que sí existe es la materia prima: la línea `push_anomaly` (ver N-84) y la consulta guardada `stale-devices.sql` de B-16, que es la misma pregunta hecha a mano desde Studio.
 - **What:** rejected rows across tenants by code; devices not seen in N days; force-revoke (B-12).
   Replaces the B-16 Studio saved queries for day-to-day use.
 
 ### N-47 Anuncios a todos los inquilinos [baja]
 
 - [ ] Status · **Trigger:** la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo; el disparador no ha ocurrido y no puede ocurrir antes del lanzamiento. Su cimiento sí está: la tabla `notices` del ADR-060 existe en el esquema de Postgres y la campana del portal y la del teléfono ya la leen, así que esto es redacción y filtro, no plomería nueva.
 - **What:** compose an aviso to all tenants or a filter (plan, tipo de negocio, beta allowlist);
   delivered through the ADR-060 `notices` table to the portal's Avisos and the app.
 
 ### N-48 Ciclo de vida de cuentas inactivas (ADR-064) [baja]
 
 - [ ] Status · **Trigger:** lanzamiento + 90 días (ningún inquilino puede quedar inactivo antes).
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y el disparador está a más de 90 días de distancia por definición. P-34, de quien reusa la exportación, ya está cerrada, así que la mitad de «escribir el export» existe; lo que no existe es nada del ciclo de vida (ni trabajo nocturno, ni correos d90/d150, ni el bucket cifrado, ni el camino de restaurar).
 - **What:** nightly job marks free tenants with no login and no device sync for 90 days as dormant;
   emails at d90 and d150 with a one-click "sigo aquí"; at d180 writes the full export (reuses P-34:
   Excel + JSON) to a private, encrypted bucket, verifies it (row counts), then deletes the tenant's
@@ -1188,7 +1201,8 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 
 ### N-49 Explorador de pruebas con GLM [deuda] [baja]
 
-- [ ] Status · **Trigger:** el staging de X-01 en vivo y N-29 en verde.
+- [x] Status · ~~**Trigger:** el staging de X-01 en vivo y N-29 en verde.~~
+      Done: dropped — superseded by track S (`24-synth.md`, ADR-153, 2026-11-19): local, isolated stacks instead of staging, Claude instead of GLM, a separate judge and measured recall. The `kind=explorador` source is S-25.
 - **What:** nightly agent driven by a GLM model on staging, **synthetic data only** (third-party model
   provider), with personas ("taquero con prisa", "contador revisando el mes") and goals. Findings →
   inbox `kind=explorador` with screenshots and reproduction steps. Never a CI gate.
@@ -1224,6 +1238,7 @@ transactions`, `…/settlements`). Answer, per provider: does a payment taken on
 ### N-53 Adaptador de Clip [baja]
 
 - [ ] Status · **Blocked by:** N-41, N-40 (go de Clip), N-75 (go de Clip) · **Blocks:** la salida al público de N-44
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y su barrera más dura no está en la lista: **Clip no tiene sandbox**. Según `docs/spikes/payments-clip.md`, cada prueba es un cargo real en una terminal real, y Clip tiene que instalar su app PinPad en cada lector antes de que la API lo alcance. Así que esto necesita hardware y O-28 (el KYC de Clip), no sólo los dos «go» que ya nombra. Dicho de otro modo: la suite de contrato compartida que N-41 define se puede correr contra el sandbox de Mercado Pago y **no** contra Clip.
 - **What:** `clip` adapter for the N-41 port. **Read side first (Phase 1):** transactions by date and
   settlements, for N-76. **Write side (Phase 2):** PinPad API terminal push (`/f2f/pinpad/v1`:
   payment, status, cancel, `/devices/status`); payment links only if D-2 keeps them. Basic auth from
@@ -1269,9 +1284,11 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
   (`[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[CORREO PRIVACIDAD]`, …), and have **no variante for a site
   visitor** — A is portal signup, B device linking, C operator PIN. A marketing-site visitor is
   not yet a customer, so none of them reaches one. See OQ Variante D in
-  `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
+  `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone.
+  Checkout hook in `probarGratis`; a portal-served 1×1
   pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
   because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
+  - **Remaining (2026-11-19, verificado contra el repo):** el bloqueo legal sigue en pie pero encogió, y su referencia se rompió. Lo que sigue cierto: los cuatro borradores del aviso siguen marcados «BORRADOR … No publicar», no hay variante para un visitante del sitio (siguen siendo A, B y C) y la revisión del abogado sigue abierta. Lo que cambió: de los nueve huecos ya sólo queda **uno** — `[PAÍS]`, una vez, en el renglón de Mercado Pago y Clip de `encargado-clausulas.md` — porque la razón social se constituyó el 2026-10-28 y los demás se llenaron. Y la «OQ Variante D» a la que esta nota manda **ya no existe**: el README del aviso lleva OQ-L1 … OQ-L10 y ninguna es ésa, así que la pregunta se quedó sin casa. Vale replantearla con lo que hoy dice el aviso simplificado: el pie del landing enlaza el aviso integral «sin texto simplificado», y la pregunta es si un visitante al que un pixel cuenta necesita el simplificado o le basta el integral. Eso lo contesta el abogado en la misma pasada, no una tarea de ingeniería. El gancho del checkout sigue sin ese bloqueo y puede salir solo, como dice arriba. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
 - [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
@@ -1280,11 +1297,13 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
   the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
   and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
   engineering one — the cookie-less aggregate case is weak for one, but confirm.
+  - **Remaining (2026-11-19, verificado contra el repo):** las dos cláusulas de ingeniería de esta tarea **ya están hechas**, y la nota no lo dice. Una: «closes the open TODO at `aviso-integral.md:255`» — no queda un solo `TODO` ni `DESCRIBIR` en ese archivo. Dos: «publishes an aviso route on the landing» — `/privacidad/` es una ruta prerenderizada en `apps/landing/src/routes.js`, con su título y su directorio de salida. Lo que queda es lo que la nota ya llama «not an engineering task», y de eso los huecos bajaron de nueve a uno (ver N-58). Así que lo único que separa a N-60 de cerrarse es la revisión del abogado y la variante del visitante; nada de código.
 - [x] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
       Done: 2026-09-22 · 419bd02b · `xangarro.geo_prune` (`0033_geo_prune.sql`, SECURITY DEFINER, 90-day floor, execute only for `xangarro_admin`) called with `GEO_KEEP_DAYS = 400` from the digest cron. No test calls it yet; the `0033` prefix is shared with `0033_tenant_indexes.sql` (harmless, apply order sorts the full name).
 - [ ] **N-62 · Métricas de cohortes desde el domicilio fiscal, no desde la IP.** For "which states retain best" `[baja]` or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
       fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,
       better than an IP guess, and it adds no new collection.
+  - **Remaining (2026-11-19, verificado contra el repo):** todo. Su premisa se sostiene: `businesses.codigo_postal` existe en el esquema de Postgres, así que esto no agrega recolección, como dice. Comparte la capa de consultas de cohortes con N-64, que tampoco existe, así que el que llegue primero la escribe.
 
 **Not recommended without evidence:** "we see a trend in Zapopan, so buy ads in Zapopan." That
 measures where we already won, favours big cities by construction, and at current volume cannot
@@ -1325,6 +1344,7 @@ micro-POS than location does.
 ### N-65 Línea de tiempo del inquilino [media]
 
 - [ ] Status · **Trigger:** ya (todas las tablas fuente existen). **Blocked by:** N-08
+  - **Remaining (2026-11-19, verificado contra el repo):** todo lo de la pantalla, pero el campo de arriba se contradice solo y hay que creerle al disparador: dice «ya», y **N-08 está cerrada**, así que esto no espera a nadie. Sus dos piezas de apoyo están: `/tenants/[id]` existe como ruta y `apps/backoffice/src/server/keyset.ts` es el paginador que su aceptación manda reusar. Lo que falta es la unión de tablas y el renglón por evento; ninguna tabla nueva, como dice su aceptación.
 - **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
   and revoked, plan and override changes, flag allowlist changes, inbox items, B-18 rejections,
   billing events, migrations. Each entry links to its source screen. Read-only.
@@ -1335,6 +1355,7 @@ micro-POS than location does.
 
 - [ ] Status · **Trigger:** que se agregue al segundo miembro del staff, o antes de que arranquen
       N-68 / N-71 — lo que ocurra primero. **Blocked by:** N-05 · **Blocks:** N-68, N-71
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y **N-05 ya está cerrada**, así que lo único que la detiene es su disparador: hoy hay un solo miembro del staff. Medido: `staff_members` (en el esquema propio del backoffice, `server/db/schema.ts`) tiene id, `user_id`, correo, nombre, fechas, el hash de contraseña y el TOTP — **ninguna columna de rol**; `ActiveStaff` lleva id, correo y nombre; y `requireStaff()` no toma un rol mínimo, sólo comprueba que la sesión entre a la consola. O sea que la forma del cambio es una columna, un campo en el contexto y un parámetro en la guardia, con las dos CLI que ya existen (`scripts/staff.ts`, `scripts/staff-cli.ts`) para fijarlo.
 - **What:** `staff_members.role ∈ { lector, operador, admin }`. Lector reads everything, writes
   nothing. Operador does inbox, migrations, overrides, trial extensions, "ver como". Admin also
   manages flags, staff and thresholds. Enforced in `requireStaff()` per action, not per page.
@@ -1344,6 +1365,7 @@ micro-POS than location does.
 ### N-67 `/auditoria` `[media]`
 
 - [ ] Status · **Trigger:** ya. **Blocked by:** N-05
+  - **Remaining (2026-11-19, verificado contra el repo):** falta la pantalla y nada más, y **N-05 ya está cerrada**, así que su disparador «ya» es literal. Los datos se están escribiendo desde hace tiempo: `staff_audit_log` existe en el esquema del backoffice con su llave al miembro del staff, y `recordStaffAction` los inserta por mutación, con un `auditSink` atado a la transacción de cada escritura. No hay ruta `auditoria` entre las nueve de la consola. Es un lector sobre una tabla que ya se llena: de las ocho de esta oleada, es la más barata.
 - **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
   origin. Filters by actor, action kind, tenant, date range; keyset paging; CSV export for an
   authority or the privacy audit (`docs/audits/privacidad-2026-09-22.md`).
@@ -1354,6 +1376,7 @@ micro-POS than location does.
 
 - [ ] Status · **Trigger:** lanzamiento de X-10 y el primer elemento de la bandeja que no se pueda
       resolver desde `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y correctamente al final de la fila: sus dos barreras (N-66 y N-67) siguen abiertas, y su disparador pide un lanzamiento que no ha ocurrido más un caso concreto que no se pueda resolver sin esto. Nada que replantear.
 - **What:** an operador opens the portal as a tenant's dueño in **read-only** mode for ≤ 30 min,
   with a reason (free text, required). The portal renders a persistent banner («Soporte de
   Xangarro está viendo tu cuenta»), refuses every write, and the tenant sees the session in
@@ -1366,6 +1389,7 @@ micro-POS than location does.
 ### N-69 Ciclo de vida de flags y despliegue porcentual [baja]
 
 - [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
+  - **Remaining (2026-11-19, verificado contra el repo):** todo lo que describe, sin empezar — pero **ya no está bloqueada**. Su barrera y su disparador son la misma cosa, N-09, y N-09 está cerrada: `platform-flag.ts` tiene las banderas, los interruptores y la resolución por negocio, y la consola tiene `/flags`. Lo que falta es lo de esta tarea: `kind`, `owner`, `expires_at`, la lista de vencidas y el `rollout_pct`. Esta tarea es una de seis que el tablero mostraba esperando a algo ya cerrado (ver la nota de N-84).
 - **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
   `/flags` and a line in the N-10 digest. Percentage rollout: `rollout_pct` evaluated server-side
   as `hash(business_id, flag_key) % 100 < pct`, so a business always lands on the same side;
@@ -1376,6 +1400,7 @@ micro-POS than location does.
 ### N-70 Decisiones `[baja]`
 
 - [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-07, N-63
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y de sus dos barreras sólo queda una: **N-07 está cerrada**, N-63 sigue abierta (y N-63 a su vez sólo espera datos reales). Así que el camino es N-63 y nada más.
 - **What:** `/decisiones` renders the table in `17-consola-crecimiento.md` §4: signal, source,
   threshold, current value, 8-week trend, projected crossing date, and the decision it forces.
   Thresholds are rows in a `decision_thresholds` table, editable by admin, audited. A crossed or
@@ -1524,6 +1549,7 @@ update --channel production --private-key-path keys/private-key.pem`.
 ### N-84 Push: del registro de anomalías a los rechazos y las restricciones [baja]
 
 - [ ] Status · **Surfaced by:** N-26 (F-05 c/d, ADR-140 §5) · **Trigger:** 30 días de `push_anomaly` en producción con dispositivos reales
+  - **Remaining (2026-11-19, verificado contra el repo):** todo, y correctamente: el disparador pide 30 días de producción con teléfonos reales y no hay producción todavía. Lo que esta tarea necesita para poder leerse ya está en su lugar: `server/sync/anomaly-log.ts` escribe la línea `push_anomaly` con `kinds` contados y hasta 50 renglones nombrados (tabla, id, campo, nunca un valor), y los dos detectores existen en `packages/application/src/apply-push/push-anomalies.ts` (`DEVICE_MISMATCH` y `NEGATIVE_MONEY`). O sea que el día 1 de producción ya está midiendo.
 - **What:** read the `evt: 'push_anomaly'` log. If `NEGATIVE_MONEY` never fired: add, as `NOT VALID`
   then validated, `client_payments.monto_centavos > 0` and `tickets.cambio_centavos IS NULL OR
 cambio_centavos >= 0`. Widen the detector before any further column (`caja_movimientos.monto`,
@@ -1535,6 +1561,7 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
   to the token.
 - **Acceptance:** each constraint ships with a migration test and a conformance case; a phone that
   re-links with unsent rows loses none of them.
+  - **Un patrón del tablero, encontrado el 2026-11-19 al barrer las barreras contra los estados:** seis tareas abiertas dicen «Blocked by» algo que ya está cerrado — B-16 (B-03, B-11), N-69 (N-09), N-65 (N-08), N-66 y N-67 (N-05), N-64 (N-57) — más E-02 y E-44 (E-01) y E-26 (E-05) en el Command Center. Ninguna está esperando a nadie; se leen así porque el campo se escribió una vez y nadie lo volvió a tocar cuando la barrera cayó. Una prueba lo atraparía: una tarea abierta cuyas barreras nombradas estén **todas** cerradas y existan en `docs/plan` no debería decir «Blocked by». Los ids de tracks archivados (A-16, F-01) y los de los boards del canvas (KD-01…) no cuentan, porque el recolector del tablero no los ve. Falta decidir si esa prueba se escribe.
 
 ---
 

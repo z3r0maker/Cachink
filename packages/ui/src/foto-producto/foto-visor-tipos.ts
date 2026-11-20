@@ -8,5 +8,7 @@ export interface FotoVisorHandle {
 
 export interface FotoVisorProps {
   readonly linterna: boolean;
+  /** What the permission ask says the camera is for; the product's by default. */
+  readonly permiso?: string;
   readonly ref?: Ref<FotoVisorHandle>;
 }
