@@ -8,6 +8,7 @@ import { AYUDA_ICON } from './nav-items';
 import { Palette } from './palette';
 import { SyncPill } from './sync-pill';
 import { UserMenu, type UserMenuProps } from './user-menu';
+import { srOnly } from '../styles/global.css';
 import { bell, header, inner, right } from './header.css';
 
 export interface HeaderProps {
@@ -28,12 +29,10 @@ export function Header(props: HeaderProps) {
       <div className={inner}>
         <Palette />
         <div className={right}>
-          <Link
-            href="/sincronizacion"
-            aria-label="Ver sincronización"
-            style={{ textDecoration: 'none' }}
-          >
+          {/* Named by the pill's own words, then where it goes (WCAG 2.5.3). */}
+          <Link href="/sincronizacion" style={{ textDecoration: 'none' }}>
             <SyncPill pending={props.pendingRows} />
+            <span className={srOnly}>, ver sincronización</span>
           </Link>
           <Link href="/ayuda" className={bell} aria-label="Ayuda">
             <Icon path={AYUDA_ICON} size={21} />

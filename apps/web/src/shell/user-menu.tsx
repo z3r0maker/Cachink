@@ -83,7 +83,8 @@ function Personales({ p }: { readonly p: UserMenuProps }) {
 export function UserMenu(p: UserMenuProps) {
   return (
     <Menu.Root>
-      <Menu.Trigger className={avatarHit} aria-label="Menú de usuario">
+      {/* The initials are what is seen, so the name starts with them (WCAG 2.5.3). */}
+      <Menu.Trigger className={avatarHit} aria-label={`${p.initials}, menú de usuario`}>
         <span className={avatar}>{p.initials}</span>
       </Menu.Trigger>
       <Menu.Portal>

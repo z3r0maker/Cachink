@@ -10,6 +10,7 @@ import {
   typography,
 } from '@xangarro/tokens';
 
+import { VISUALLY_HIDDEN } from '../styles/global.css';
 import { pressable } from '../styles/press.css';
 
 /** Expanded width, and the icon rail it collapses to below 1024 px. */
@@ -97,12 +98,16 @@ export const navItem = style([
   },
 ]);
 
+/**
+ * A row's label: hidden from sight in the rail and on narrow screens, never
+ * from the accessibility tree, because it is what names the link there.
+ */
 export const navLabel = style({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
-  selectors: hiddenInRail,
+  '@media': { 'screen and (max-width: 1023px)': VISUALLY_HIDDEN },
+  selectors: { [`${aside}[data-rail="true"] &`]: VISUALLY_HIDDEN },
 });
 
 export const divider = style({
