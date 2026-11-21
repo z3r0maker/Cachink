@@ -8,6 +8,7 @@ import {
   abiertas,
   estadoCliente,
   libre,
+  limiteFijado,
   ultimoAbono,
   type CuentaCliente,
 } from '@xangarro/caja/cobranza';
@@ -57,16 +58,12 @@ export function Heroe(p: {
 }
 
 /** Open tickets, the owner's limit, what is left, and the last abono. */
-export function Indicadores(p: {
-  readonly c: CuentaCliente;
-  readonly e: EstadoCuenta;
-  readonly dueno: string;
-}) {
-  return <KpiRow min={210} valueSize={26} items={indicadores(p.c, p.e, p.dueno)} />;
+export function Indicadores(p: { readonly c: CuentaCliente; readonly e: EstadoCuenta }) {
+  return <KpiRow min={210} valueSize={26} items={indicadores(p.c, p.e)} />;
 }
 
 /** «Límite de fiado» and «Disponible», only when the owner set a limit (M4). */
-function limite(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiItem[] {
+function limite(c: CuentaCliente, e: EstadoCuenta): readonly KpiItem[] {
   const libreHoy = libre(c, e);
   if (c.limite === null || libreHoy === null) return [];
   return [
@@ -74,7 +71,7 @@ function limite(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiI
       label: 'Límite de fiado',
       value: formatMoney(c.limite),
       color: e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black,
-      hint: `Lo fijó ${dueno} · plazo ${c.plazo}`,
+      hint: limiteFijado(c),
     },
     {
       label: 'Disponible',
@@ -85,7 +82,7 @@ function limite(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiI
   ];
 }
 
-function indicadores(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly KpiItem[] {
+function indicadores(c: CuentaCliente, e: EstadoCuenta): readonly KpiItem[] {
   const vieja = abiertas(c, e)[0];
   const ultimo = ultimoAbono(c);
   return [
@@ -95,7 +92,7 @@ function indicadores(c: CuentaCliente, e: EstadoCuenta, dueno: string): readonly
       color: colors.black,
       hint: vieja ? `La más antigua es del ${vieja.venta.dia}` : 'Ninguna pendiente',
     },
-    ...limite(c, e, dueno),
+    ...limite(c, e),
     {
       label: 'Último abono',
       value: ultimo ? formatMoney(ultimo.monto) : 'Ninguno',

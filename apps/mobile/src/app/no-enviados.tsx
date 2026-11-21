@@ -23,7 +23,6 @@ export default function NoEnviadosRoute(): ReactElement {
         fase={q.fase}
         cola={q.cola}
         rechazados={q.rechazados}
-        dueno={q.dueno}
         ultima={q.ultima}
         onReintentar={q.reintentar}
         onReintentarRechazado={q.reintentarRechazado}

@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import type { AvisoGrupo, AvisosData, AvisosVivo } from '@xangarro/caja/avisos';
-import { deDueno, mayuscula, sinLeer } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, sinLeer } from '@xangarro/caja/avisos';
 import { EstadoVacio } from '../../components/CajaEstado/index';
 import { Toast } from '../../components/Toast/index';
 import { EstadosCaja } from '../Pendientes/estados';
@@ -40,7 +40,6 @@ type AvisosLista = ReturnType<typeof useAvisosVista>['visibles'];
 
 function Lista(p: {
   readonly visibles: AvisosLista;
-  readonly dueno: string;
   readonly abrir: (id: string) => void;
   readonly marcar: (id: string) => void;
   readonly onAbrir: (href: string) => void;
@@ -52,7 +51,6 @@ function Lista(p: {
           <AvisoDuenoTarjeta
             key={a.id}
             aviso={a}
-            dueno={p.dueno}
             onResponder={() => p.abrir(a.id)}
             onMarcarLeido={() => p.marcar(a.id)}
             onAbrir={p.onAbrir}
@@ -79,8 +77,7 @@ function Estado(p: AvisosScreenProps): ReactElement {
         testID="avisos"
       />
     );
-  const dueno = p.data?.dueno ?? 'el dueño';
-  return <Nada cuerpo={`Ni mensajes ${deDueno(dueno)} ni avisos de tu caja.`} />;
+  return <Nada cuerpo={AVISOS_COPY.vacio} />;
 }
 
 /** «Nada por leer» with Don (RvPrimerUso), in whatever words the moment needs. */
@@ -93,23 +90,16 @@ function Nada({ cuerpo }: { readonly cuerpo: string }): ReactElement {
 }
 
 /** The empty open tab: who has not written. */
-function NadaPorLeer(p: { readonly tab: AvisoGrupo; readonly dueno: string }): ReactElement {
+function NadaPorLeer(p: { readonly tab: AvisoGrupo }): ReactElement {
   return (
     <Nada
-      cuerpo={
-        p.tab === 'dueno'
-          ? `${mayuscula(p.dueno)} no te ha escrito nada nuevo.`
-          : 'Tu caja no tiene avisos del sistema.'
-      }
+      cuerpo={p.tab === 'dueno' ? AVISOS_COPY.nadaNuevo : 'Tu caja no tiene avisos del sistema.'}
     />
   );
 }
 
 /** The sheet and the toast, above the list. */
-function Capas(p: {
-  readonly data: AvisosData;
-  readonly v: ReturnType<typeof useAvisosVista>;
-}): ReactElement | null {
+function Capas(p: { readonly v: ReturnType<typeof useAvisosVista> }): ReactElement | null {
   const respondiendo = p.v.avisos.find((a) => a.id === p.v.respondiendo) ?? null;
   return (
     <>
@@ -117,7 +107,6 @@ function Capas(p: {
         <ResponderSheet
           open
           aviso={respondiendo}
-          dueno={p.data.dueno}
           onClose={p.v.cerrarRespuesta}
           onEnviar={(texto) => p.v.responder(respondiendo.id, texto)}
         />
@@ -150,25 +139,20 @@ function Feliz(p: AvisosScreenProps & { readonly data: AvisosData }): ReactEleme
         contentContainerStyle={{ padding: 16, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
-        <AvisosCabeza
-          dueno={p.data.dueno}
-          haySinLeer={sinLeer(v.avisos) > 0}
-          onMarcarTodo={v.marcarTodo}
-        />
-        <AvisosTabs dueno={p.data.dueno} value={v.tab} sinLeer={v.sinLeer} onChange={v.setTab} />
+        <AvisosCabeza haySinLeer={sinLeer(v.avisos) > 0} onMarcarTodo={v.marcarTodo} />
+        <AvisosTabs value={v.tab} sinLeer={v.sinLeer} onChange={v.setTab} />
         {v.visibles.length === 0 ? (
-          <NadaPorLeer tab={v.tab} dueno={p.data.dueno} />
+          <NadaPorLeer tab={v.tab} />
         ) : (
           <Lista
             visibles={v.visibles}
-            dueno={p.data.dueno}
             abrir={v.abrirRespuesta}
             marcar={v.marcarLeido}
             onAbrir={p.onAbrir}
           />
         )}
       </ScrollView>
-      <Capas data={p.data} v={v} />
+      <Capas v={v} />
     </View>
   );
 }
@@ -180,11 +164,7 @@ export function AvisosScreen(p: AvisosScreenProps): ReactElement {
   return (
     <View flex={1} testID={p.testID ?? 'avisos'}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
-        <AvisosCabeza
-          dueno={p.data?.dueno ?? 'el dueño'}
-          haySinLeer={false}
-          onMarcarTodo={() => undefined}
-        />
+        <AvisosCabeza haySinLeer={false} onMarcarTodo={() => undefined} />
         <Estado {...p} />
       </ScrollView>
     </View>

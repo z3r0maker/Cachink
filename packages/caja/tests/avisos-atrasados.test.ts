@@ -52,7 +52,6 @@ describe('avisosVivos: where the queue lives', () => {
     cola: { cuantos: 2, desde: null },
     rechazados: 0,
     stockBajo: [],
-    dueno: null,
   };
 
   it('keeps the web caja’s «este navegador» by default', () => {

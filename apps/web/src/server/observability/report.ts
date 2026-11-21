@@ -22,12 +22,17 @@ export interface ReportScope {
   readonly deviceId?: string;
 }
 
-export function reportError(error: unknown, scope: ReportScope): void {
-  Sentry.withScope((s) => {
+/**
+ * Reports, and answers with the id of the Sentry event it sent: what a report
+ * from Ayuda names as the session's last error (P-48, ADR-162 §8). Undefined
+ * while Sentry is off: the SDK still mints an id then, but it names nothing.
+ */
+export function reportError(error: unknown, scope: ReportScope): string | undefined {
+  const eventId = Sentry.withScope((s) => {
     s.setTag('endpoint', scope.endpoint);
     if (scope.businessId !== undefined) s.setTag('business_id', scope.businessId);
     if (scope.deviceId !== undefined) s.setTag('device_id', scope.deviceId);
-    Sentry.captureException(redactError(error));
+    return Sentry.captureException(redactError(error));
   });
   console.error(
     JSON.stringify({
@@ -38,6 +43,7 @@ export function reportError(error: unknown, scope: ReportScope): void {
       ...describeError(error),
     }),
   );
+  return Sentry.isInitialized() ? eventId : undefined;
 }
 
 /** One line per phone-API call: who, what, how long, what came of it. */

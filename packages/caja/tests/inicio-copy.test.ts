@@ -33,4 +33,14 @@ describe('Inicio: the last cortes and the closing hour', () => {
     const h = heroFor({ ...INICIO_FIXTURE, offline: true, pendientes: 3 });
     assert.equal(h.body, 'Se envían solos cuando vuelva la señal. Puedes cerrar el turno igual.');
   });
+
+  it('speaks of «los patrones», in plural, never by name (M-25)', () => {
+    const aclarar = heroFor({ ...INICIO_FIXTURE, situacion: 'corte-por-aclarar' });
+    assert.equal(aclarar.title, 'Los patrones te pidieron aclarar el corte del 13');
+    const cerrar = heroFor({ ...INICIO_FIXTURE, situacion: 'hora-de-cerrar' });
+    assert.equal(
+      cerrar.body,
+      'Cuenta el efectivo y cierra para que los patrones tengan el día completo.',
+    );
+  });
 });

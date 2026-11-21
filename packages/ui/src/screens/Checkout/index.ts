@@ -14,4 +14,3 @@ export {
 export { useCobrarTicket, type CobrarTicketInput } from './use-cobrar-ticket';
 export { useClientesFiado, useSiguienteFolio, cobrarKeys } from './use-cobrar-datos';
 export { useCrearClienteFiado } from './use-crear-cliente-fiado';
-export { useDueno } from './use-dueno';

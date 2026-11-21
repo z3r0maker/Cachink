@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { useDueno } from '../ui/use-dueno';
 import { Lateral } from '../ui/lateral';
 import {
   conUnidad,
@@ -86,11 +85,10 @@ function Campos({ x, it }: { readonly x: Mover; readonly it: Existencia }) {
 }
 
 function Pie({ x, onClose }: { readonly x: Mover; readonly onClose: () => void }) {
-  const dueno = useDueno();
   return (
     <>
       <span className={s.explica}>
-        {`${x.merma ? 'Esto baja' : 'Esto sube'} el inventario y ${dueno} lo ve en sus números.`}
+        {`${x.merma ? 'Esto baja' : 'Esto sube'} el inventario y los patrones lo ven en sus números.`}
       </span>
       <div className={s.botones}>
         <button type="button" className={s.registrar} disabled={!x.listo} onClick={x.save}>

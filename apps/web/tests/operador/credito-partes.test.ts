@@ -93,7 +93,7 @@ describe('ClienteNuevo', () => {
 
     rerender(createElement(ClienteNuevo, { nombre: '', onNombre }));
     assert.ok(screen.getByLabelText('Nombre'));
-    assert.ok(screen.getByText(/El dueño lo revisa en su portal/));
+    assert.ok(screen.getByText('Los patrones lo revisan en su portal.'));
 
     const input = screen.getByLabelText('Nombre');
     fireEvent.change(input, { target: { value: 'Don Beto' } });

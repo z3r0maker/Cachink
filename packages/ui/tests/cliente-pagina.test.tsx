@@ -14,7 +14,7 @@ import { fireEvent, renderWithProviders, screen, waitFor } from './test-utils';
 
 initI18n();
 
-const DATOS = { cuentas: [], hoy: HOY, negocio: 'Taquería Don Pedro', dueno: 'Pedro' };
+const DATOS = { cuentas: [], hoy: HOY, negocio: 'Taquería Don Pedro' };
 
 function montar(id: string | null, over: Record<string, unknown> = {}) {
   const onRegistrar = vi.fn(async () => null);
@@ -49,7 +49,9 @@ describe('ClienteScreen · the account', () => {
     expect(screen.getByText(/cliente desde enero 2026/)).toBeInTheDocument();
     expect(screen.getByTestId('cuenta-estado').textContent).toBe('Atrasado');
     expect(screen.getByTestId('cuenta-indicadores').textContent).toContain('Ventas abiertas');
-    expect(screen.getByTestId('cuenta-indicadores').textContent).toContain('Lo fijó Pedro');
+    expect(screen.getByTestId('cuenta-indicadores').textContent).toContain(
+      'Lo fijaron los patrones · plazo 15 días',
+    );
     expect(screen.getByText(/Pasó su límite|Puede fiar hasta/)).toBeInTheDocument();
   });
 
@@ -109,6 +111,19 @@ describe('ClienteScreen · the reminder', () => {
     expect(screen.getByTestId('recordar-whatsapp')).toBeInTheDocument();
     expect(screen.getByTestId('recordar-mensajes')).toBeInTheDocument();
     expect(screen.getByTestId('recordar-compartir')).toBeInTheDocument();
+  });
+
+  it('an edited message offers «Volver al mensaje original» as a button, which restores it and goes', () => {
+    montar('chuy');
+    tap('cuenta-recordar');
+    const original = (screen.getByTestId('recordar-mensaje') as HTMLTextAreaElement).value;
+    expect(screen.queryByTestId('recordar-original')).toBeNull();
+    escribir('recordar-mensaje', 'Hola, Chuy. Nos vemos el sábado.');
+    // A real button (RvRecordarOriginal), not underlined text.
+    expect(screen.getByTestId('recordar-original').textContent).toBe('Volver al mensaje original');
+    tap('recordar-original');
+    expect((screen.getByTestId('recordar-mensaje') as HTMLTextAreaElement).value).toBe(original);
+    expect(screen.queryByTestId('recordar-original')).toBeNull();
   });
 });
 

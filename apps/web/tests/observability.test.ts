@@ -54,6 +54,12 @@ describe('observability', () => {
     assert.equal(initSentry({ dsn: '' }), false);
   });
 
+  it('names no event while Sentry is off: there is nothing a report could point at', () => {
+    const line = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    assert.equal(reportError(new Error('unsent'), { endpoint: 'sin-llave' }), undefined);
+    line.mockRestore();
+  });
+
   it('a forced error reaches Sentry tagged with business_id, device_id and endpoint', async () => {
     assert.equal(initSentry({ dsn: 'https://public@o0.ingest.sentry.io/0', transport }), true);
     reportError(new Error('forced'), {
@@ -64,6 +70,13 @@ describe('observability', () => {
     await Sentry.flush(2000);
     const [event] = events();
     assert.equal(event?.exception?.values?.[0]?.value, 'forced');
+    // The id it answers with is the sent event's own (P-48): what a report names.
+    const line = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const eventId = reportError(new Error('named'), { endpoint: 'guardarNegocio' });
+    line.mockRestore();
+    await Sentry.flush(2000);
+    assert.match(eventId ?? '', /^[0-9a-f]{32}$/);
+    assert.equal(events().at(-1)?.event_id, eventId);
     assert.deepEqual(
       { ...event?.tags },
       {

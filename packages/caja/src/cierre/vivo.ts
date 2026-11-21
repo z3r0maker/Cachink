@@ -92,7 +92,6 @@ export function comoCierre(
     readonly operador: string;
     readonly caja: string;
     readonly hasta: string;
-    readonly dueno: string;
     readonly negocio?: string;
   },
 ): CierreData {
@@ -101,7 +100,6 @@ export function comoCierre(
     caja: ctx.caja,
     desde: c.desde,
     hasta: ctx.hasta,
-    dueno: ctx.dueno,
     ...(ctx.negocio === undefined ? {} : { negocio: ctx.negocio }),
     partes: {
       fondo: BigInt(c.fondoCentavos),

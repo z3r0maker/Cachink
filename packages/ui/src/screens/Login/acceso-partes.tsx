@@ -117,8 +117,8 @@ export function OperadorFila(props: {
   );
 }
 
-/** «¿Olvidaste tu NIP?»: a note, since only the owner changes it. */
-export function OlvideNip({ aQuien }: { aQuien: string }): ReactElement {
+/** «¿Olvidaste tu NIP?»: a note, since only «los patrones» change it. */
+export function OlvideNip(): ReactElement {
   const { t } = useTranslation();
   const [abierto, setAbierto] = useState(false);
   return (
@@ -131,7 +131,7 @@ export function OlvideNip({ aQuien }: { aQuien: string }): ReactElement {
         style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}
       >
         <MText size="md" weight="bold" textAlign="center" textDecorationLine="underline">
-          {t('entrar.acceso.olvide', { aQuien })}
+          {t('entrar.acceso.olvide')}
         </MText>
       </Pressable>
       {abierto ? (

@@ -41,9 +41,7 @@ export function InicioScreen({ state, data }: InicioScreenProps) {
           />
         )}
         <div className={s.side}>
-          {data.mensajes.length > 0 ? (
-            <DeParteDe dueno={data.dueno} mensajes={data.mensajes} />
-          ) : null}
+          {data.mensajes.length > 0 ? <DeParteDe mensajes={data.mensajes} /> : null}
           {data.cortes.length > 0 ? <UltimosCortes cortes={data.cortes} /> : null}
         </div>
       </div>

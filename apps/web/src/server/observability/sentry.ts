@@ -69,3 +69,11 @@ export function initSentry(
   });
   return true;
 }
+
+/**
+ * Whether errors are reaching Sentry from this server. A screen that says
+ * «nos llega el aviso solo» says it only while this is true (ADR-162 §7, §10).
+ */
+export function sentryOn(): boolean {
+  return Sentry.isInitialized();
+}

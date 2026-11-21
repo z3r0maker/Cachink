@@ -1,6 +1,6 @@
 /**
  * Expo Router entry for /checkout/fiado (Track M, M-07; board MvFiado):
- * «Anótalo a su cuenta». A new client is created first (the owner reviews
+ * «Anótalo a su cuenta». A new client is created first (los patrones review
  * it), then the ticket goes on the client's account as a Crédito ticket.
  */
 import { useRef, type ReactElement } from 'react';
@@ -10,7 +10,6 @@ import {
   resumenTicket,
   useClientesFiado,
   useCrearClienteFiado,
-  useDueno,
   useSiguienteFolio,
   type AQuien,
 } from '@xangarro/ui';
@@ -52,7 +51,6 @@ export default function FiadoRoute(): ReactElement {
         cargando={clientes.isLoading}
         registrando={c.registrando || crear.isPending}
         error={c.error}
-        dueno={useDueno()}
         onAnotar={(a) => void anotar(a)}
       />
     </AppShellWrapper>

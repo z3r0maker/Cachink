@@ -22,7 +22,6 @@ import {
   type AvisosScreenProps,
   type AvisosVivo,
   avisosVivos,
-  DUENO_GENERICO,
 } from '@xangarro/caja/avisos';
 
 type Estado = AvisosScreenProps['state'];
@@ -32,7 +31,7 @@ interface Vivo {
   readonly data: AvisosData;
 }
 
-const VACIO: AvisosData = { dueno: DUENO_GENERICO, avisos: [] };
+const VACIO: AvisosData = { avisos: [] };
 
 async function leerAvisos(cred: Credenciales): Promise<Vivo> {
   const { device, sesion } = cred;

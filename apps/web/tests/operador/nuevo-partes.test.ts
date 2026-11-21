@@ -12,7 +12,6 @@ import { createElement } from 'react';
  * the one picked by hand once «cambiar» opens the picker.
  */
 
-vi.mock('../../src/operador/ui/use-dueno', () => ({ useDueno: () => 'Pedro' }));
 vi.mock('../../src/operador/ui/parts', () => ({
   Glyph: () => createElement('span', { 'data-glyph': true }),
 }));
@@ -122,6 +121,11 @@ describe('Muestra', () => {
     assert.ok(screen.getByText('Volcán'));
     assert.ok(screen.getByText('$55.00'));
     assert.ok(screen.getByText(/Ícono general, no reconocí el nombre/));
+    assert.ok(
+      screen.getByText(
+        'Se vende desde ya. Los patrones lo ven en su catálogo y le ponen el costo.',
+      ),
+    );
   });
 
   it('an icon picked by hand says so', () => {

@@ -20,6 +20,7 @@ import { OfflineRegister } from '@/shell/offline-register';
 import { ReconfirmarProvider } from '@/shell/reconfirmar';
 import { InvitacionFranja, RecuperacionFranja } from '@/shell/seguridad-franjas';
 import { Sidebar, type Pasos } from '@/shell/sidebar';
+import { RecuerdaPantalla } from '@/shell/ultima-pantalla';
 
 import { column, content, frame, main } from '@/shell/shell.css';
 
@@ -110,6 +111,20 @@ function Franjas(props: {
   );
 }
 
+/**
+ * What the shell runs and never draws: the offline page's service worker
+ * (N-23, on the Director surface only), and the last screen visited, so a
+ * report from Ayuda names it by itself (P-48).
+ */
+function SinDibujo() {
+  return (
+    <>
+      <OfflineRegister />
+      <RecuerdaPantalla />
+    </>
+  );
+}
+
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   // `currentSession` redirects to /login when the cookie is missing or forged,
   // so nothing below this line renders for a signed-out visitor.
@@ -126,8 +141,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
   return (
     <SessionProvider session={session}>
-      {/* N-23: the offline page's service worker, on the Director surface only. */}
-      <OfflineRegister />
+      <SinDibujo />
       <ReconfirmarProvider>
         <div className={frame}>
           <Sidebar

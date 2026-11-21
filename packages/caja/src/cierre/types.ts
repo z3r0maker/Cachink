@@ -29,7 +29,6 @@ export interface CierreData {
   readonly caja: string;
   readonly desde: string;
   readonly hasta: string;
-  readonly dueno: string;
   /** The business on the printed corte («Taquería Don Pedro»), when known. */
   readonly negocio?: string;
   readonly partes: PartesEsperado;

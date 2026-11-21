@@ -18,7 +18,7 @@ export interface CreditoProps {
 }
 
 /** Anótalo a su cuenta: no client, no sale (rule 5). A new client travels by
- *  name in the note until the client form lands (C-18); Pedro reviews it. */
+ *  name in the note until the client form lands (C-18); los patrones review it. */
 export function Credito({ caja, clientes, permitirNuevo = true }: CreditoProps) {
   const x = useCredito(caja);
   const lista = filtrar(clientes, x.q);

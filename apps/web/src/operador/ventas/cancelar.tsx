@@ -5,7 +5,6 @@ import { formatMoney } from '@xangarro/domain';
 
 import { Don } from '@/components/don/don';
 
-import { useDueno } from '../ui/use-dueno';
 import { DialogoMostrador, DialogoTitulo } from '../ui/dialogo-mostrador';
 import * as m from '../ui/mostrador.css';
 import { Aviso, Motivos, Nip, Nota, type Motivo } from './cancelar-campos';
@@ -30,7 +29,6 @@ export function CancelarVenta(p: {
   readonly onConfirm: (motivo: Motivo, nip: string, nota: string) => Promise<string | null>;
 }) {
   const f = useCancelar(p);
-  const dueno = useDueno();
   const { venta } = p;
   return (
     <DialogoMostrador open onClose={p.onClose} width={540} alerta conDon>
@@ -48,7 +46,7 @@ export function CancelarVenta(p: {
         <Motivos value={f.motivo} onChange={f.setMotivo} />
         <Nota value={f.nota} onChange={f.setNota} />
         {p.conNip ? <Nip value={f.nip} onChange={f.setNip} /> : null}
-        <Aviso texto={consecuencia(venta.metodo, venta.monto, venta.cliente, dueno)} />
+        <Aviso texto={consecuencia(venta.metodo, venta.monto, venta.cliente)} />
         {f.error ? <Aviso texto={f.error} error /> : null}
         <Pie f={f} onClose={p.onClose} />
       </div>

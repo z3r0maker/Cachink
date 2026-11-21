@@ -11,7 +11,6 @@ import type { Aviso } from '@xangarro/caja/avisos';
 
 export interface AvisoCardProps {
   readonly aviso: Aviso;
-  readonly dueno: string;
   readonly draft: string;
   readonly onDraft: (text: string) => void;
   readonly onSend: () => void;
@@ -69,7 +68,7 @@ export function AvisoCard(props: AvisoCardProps) {
   );
 }
 
-function Cuerpo({ aviso, dueno, draft, onDraft, onSend, onRead }: AvisoCardProps) {
+function Cuerpo({ aviso, draft, onDraft, onSend, onRead }: AvisoCardProps) {
   const canReply = aviso.responder !== undefined && !aviso.respuesta;
   return (
     <div className={a.body}>
@@ -81,11 +80,10 @@ function Cuerpo({ aviso, dueno, draft, onDraft, onSend, onRead }: AvisoCardProps
           <ConCifras text={aviso.cuerpo} rojo={aviso.tono === 'alerta'} />
         </p>
       </div>
-      {aviso.respuesta ? <Enviada dueno={dueno} texto={aviso.respuesta} /> : null}
+      {aviso.respuesta ? <Enviada texto={aviso.respuesta} /> : null}
       {canReply ? (
         <Reply
           id={aviso.id}
-          dueno={dueno}
           draft={draft}
           onDraft={onDraft}
           onSend={onSend}

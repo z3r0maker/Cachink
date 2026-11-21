@@ -125,13 +125,17 @@ export function historial(c: CuentaCliente): readonly Movimiento[] {
  * at the register has no limit, and «Pasó su límite de $0.00» told the
  * operator to refuse credit nobody had capped.
  */
-export function limiteNota(c: CuentaCliente, e: EstadoCuenta, dueno: string): string | null {
+export function limiteNota(c: CuentaCliente, e: EstadoCuenta): string | null {
   if (c.limite === null) return null;
   const limite = formatMoney(c.limite);
   return e.saldo > c.limite
-    ? `Pasó su límite de ${limite}. No le fíes más hasta que abone; si insiste, que hable con ${dueno}.`
-    : `Puede fiar hasta ${limite} con plazo de ${c.plazo}. El límite y el plazo los define ${dueno} en el portal.`;
+    ? `Pasó su límite de ${limite}. No le fíes más hasta que abone; si insiste, que hable con los patrones.`
+    : `Puede fiar hasta ${limite} con plazo de ${c.plazo}. El límite y el plazo los definen los patrones en el portal.`;
 }
+
+/** Under the «Límite» figure, on the phone and the web caja alike. */
+export const limiteFijado = (c: CuentaCliente): string =>
+  `Lo fijaron los patrones · plazo ${c.plazo}`;
 
 /** «28 de abril»: the day of a ticket, said in full for a message. */
 const diaLargo = (fecha: string) =>

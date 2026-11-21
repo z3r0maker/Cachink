@@ -7,15 +7,13 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { View } from '@tamagui/core';
-import type { Aviso } from '@xangarro/caja/avisos';
-import { aDueno } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, type Aviso } from '@xangarro/caja/avisos';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
 import { borderWidths, colors, radii, shapeRadii } from '../../theme';
 
 export interface AvisoDuenoProps {
   readonly aviso: Aviso;
-  readonly dueno: string;
   readonly onResponder: () => void;
   readonly onMarcarLeido: () => void;
   /** The aviso's cta href, mapped to a route by the caller. */
@@ -71,13 +69,7 @@ function Franja(p: AvisoDuenoProps): ReactElement {
 }
 
 /** What was sent, in green, where the reply form was. */
-export function RespuestaEnviada({
-  dueno,
-  texto,
-}: {
-  readonly dueno: string;
-  readonly texto: string;
-}): ReactElement {
+export function RespuestaEnviada({ texto }: { readonly texto: string }): ReactElement {
   return (
     <View
       testID="aviso-respondido"
@@ -88,11 +80,11 @@ export function RespuestaEnviada({
       gap={4}
     >
       <MText size="sm" weight="extraBold" color={colors.greenText}>
-        {`Le mandaste tu respuesta ${aDueno(dueno)}`}
+        {AVISOS_COPY.enviada}
       </MText>
       <MText size="sm" weight="semibold">{`“${texto}”`}</MText>
       <MText size="xs" weight="semibold" color={colors.gray600}>
-        Si te contesta, lo ves aquí mismo.
+        Si te contestan, lo ves aquí mismo.
       </MText>
     </View>
   );
@@ -191,9 +183,7 @@ export function AvisoDuenoTarjeta(p: AvisoDuenoProps): ReactElement {
             {a.cuerpo}
           </MText>
         )}
-        {a.respuesta !== undefined ? (
-          <RespuestaEnviada dueno={p.dueno} texto={a.respuesta} />
-        ) : null}
+        {a.respuesta !== undefined ? <RespuestaEnviada texto={a.respuesta} /> : null}
         <Acciones {...p} puedeResponder={puedeResponder} />
       </View>
     </View>

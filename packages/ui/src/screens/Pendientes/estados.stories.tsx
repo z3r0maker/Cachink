@@ -7,6 +7,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
+import { AVISOS_COPY } from '@xangarro/caja/avisos';
 import { initI18n } from '../../i18n/index';
 import { Marco } from '../Inicio/story-marco';
 import { EstadosCaja, type EstadoCaja } from './estados';
@@ -20,7 +21,7 @@ function Pantalla(p: { readonly id: EstadoCaja }): ReactElement {
         <EstadosCaja
           id={p.id}
           titulo={p.id === 'sin-nada' ? 'Sin avisos' : undefined}
-          cuerpo={p.id === 'sin-nada' ? 'Ni mensajes de Pedro ni avisos de tu caja.' : undefined}
+          cuerpo={p.id === 'sin-nada' ? AVISOS_COPY.vacio : undefined}
           onRetry={() => undefined}
           testID="estados-story"
         />

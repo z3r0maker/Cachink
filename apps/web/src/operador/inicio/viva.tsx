@@ -69,7 +69,6 @@ async function leerInicio(cred: Credenciales): Promise<InicioData> {
     pendientes,
     porCobrar: porCobrarDe(otros.cuentas),
     ahora: new Date(),
-    dueno: negocio?.dueno ?? null,
     stock: otros.stock,
     cuentas: otros.cuentas.map((c) => comoCuenta(c, hoy)),
   });

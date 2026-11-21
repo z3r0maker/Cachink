@@ -73,7 +73,7 @@ export function ClienteNuevo(p: {
               />
             </span>
           </label>
-          <span className={k.nota}>El dueño lo revisa en su portal.</span>
+          <span className={k.nota}>Los patrones lo revisan en su portal.</span>
         </div>
       ) : null}
     </div>

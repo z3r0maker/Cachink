@@ -7,7 +7,6 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { mayuscula } from '@xangarro/caja';
 import { formatMoney } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
@@ -122,8 +121,6 @@ const LISTO = {
 export function EscanerResultado(p: {
   e: UseEscaner;
   onAlta: (codigo: string) => void;
-  /** «Pedro», or «el dueño». */
-  dueno: string;
   /** Inventario's escáner (EcInventario) rather than the ticket's. */
   inventario: boolean;
 }): ReactElement {
@@ -134,7 +131,7 @@ export function EscanerResultado(p: {
       {s.tipo === 'agregado' && s.avisaDueno ? (
         <Linea
           d={COBRAR_GLYPHS.info}
-          texto={`${mayuscula(p.dueno)} va a ver el código repetido en su revisión.`}
+          texto="Los patrones van a ver el código repetido en su revisión."
           testID="escaner-aviso-dueno"
         />
       ) : null}
@@ -143,7 +140,7 @@ export function EscanerResultado(p: {
       ) : null}
       <Desconocido e={p.e} inventario={p.inventario} onAlta={p.onAlta} />
       {s.tipo === 'sinExistencias' ? (
-        <EscanerSinExistencias producto={s.p} codigo={s.codigo} dueno={p.dueno} onOtro={p.e.otro} />
+        <EscanerSinExistencias producto={s.p} codigo={s.codigo} onOtro={p.e.otro} />
       ) : null}
       {s.tipo === 'deshecho' ? (
         <Linea

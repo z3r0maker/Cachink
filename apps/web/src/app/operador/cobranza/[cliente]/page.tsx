@@ -30,7 +30,6 @@ export default async function OperadorDetalleClientePage({
       fixture={{
         negocio: 'Taquería Don Pedro',
         hoy: HOY,
-        dueno: 'Pedro',
         cuenta: cuentaPorId(cliente),
       }}
     />

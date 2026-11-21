@@ -261,7 +261,6 @@ describe('useCierreTurno · the close write', () => {
     const { result } = montar(() => useCierreTurno());
     await waitFor(() => expect(result.current.state).toBe('happy'));
     expect(result.current.data?.partes.fondo).toBe(500_00n);
-    expect(result.current.data?.dueno).toBe('el dueño');
     expect(result.current.data?.hasta).toMatch(/^\d{2}:\d{2}$/);
     const error = await result.current.cerrar({
       montoCierreCentavos: ESPERADO,

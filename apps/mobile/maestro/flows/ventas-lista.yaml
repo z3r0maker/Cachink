@@ -98,8 +98,8 @@ tags:
 - tapOn: { id: 'numpad-7' }
 - tapOn: { id: 'numpad-8' }
 
-- extendedWaitUntil: { visible: { id: 'cancelar-motivo-Error de captura' }, timeout: 5000 }
-- tapOn: { id: 'cancelar-motivo-Error de captura' }
+- extendedWaitUntil: { visible: { id: 'cancelar-motivo-Me equivoqué al cobrar' }, timeout: 5000 }
+- tapOn: { id: 'cancelar-motivo-Me equivoqué al cobrar' }
 - tapOn: { id: 'cancelar-confirmar' }
 - extendedWaitUntil: { visible: { id: 'venta-detalle-aviso' }, timeout: 8000 }
 - tapOn: { id: 'venta-detalle-listo' }

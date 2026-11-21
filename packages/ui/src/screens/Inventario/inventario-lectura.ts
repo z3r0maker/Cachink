@@ -7,7 +7,6 @@
  * repositories' rows; the shaping into `Existencia`/`Movimiento` stays in
  * `@xangarro/caja/inventario` (`comoInventario`).
  */
-import { nombreDueno } from '@xangarro/caja';
 import {
   delTurno,
   type FilaMovimiento,
@@ -15,10 +14,9 @@ import {
   type MovimientoInventarioPara,
 } from '@xangarro/caja/lectura';
 import type { BusinessId, DeviceId, Product } from '@xangarro/domain';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
 
-type R = Pick<Repositories, 'appConfig' | 'cajaTurnos' | 'products' | 'inventoryMovements'>;
+type R = Pick<Repositories, 'cajaTurnos' | 'products' | 'inventoryMovements'>;
 
 /** Stock is the screen's only when tracked, alive and not awaiting review. */
 export const seSigue = (p: Product): boolean =>
@@ -28,8 +26,6 @@ export interface FilasInventario {
   /** The turno whose movements the list says: the open one, or the newest. */
   readonly turnoId: string | null;
   readonly inventario: InventarioPara;
-  /** The owner's first name, or «el dueño» until the device knows it. */
-  readonly dueno: string;
 }
 
 /** This device's manual movements of the turno (empty without a turno). */
@@ -58,12 +54,11 @@ export async function leerFilasInventario(
 ): Promise<FilasInventario> {
   const abierto = await r.cajaTurnos.findOpenByBusiness(businessId);
   const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
-  const [productos, movimientos, dueno] = await Promise.all([
+  const [productos, movimientos] = await Promise.all([
     r.products.listForBusiness(businessId),
     turno === null
       ? Promise.resolve([])
       : movimientosDelTurno(r, businessId, deviceId, turno.fecha, turno.aperturaAt, hoy),
-    r.appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
   ]);
   const existencias = await Promise.all(
     productos.filter(seSigue).map(async (p) => ({
@@ -81,5 +76,5 @@ export async function leerFilasInventario(
     existencias: existencias.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-MX')),
     movimientos,
   };
-  return { turnoId: turno?.id ?? null, inventario, dueno: nombreDueno(dueno) };
+  return { turnoId: turno?.id ?? null, inventario };
 }

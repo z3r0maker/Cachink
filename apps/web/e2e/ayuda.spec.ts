@@ -1,46 +1,85 @@
-import { expect, test } from './test';
+import { expect, test, type Page } from './test';
 
-import { filled, filledAll } from './interact';
+import { itemsFiledFor } from './ingest';
+import { clickUntil, filled, filledAll } from './interact';
+import { SHARED_BIZ } from './shared-tenant';
+import { stamp } from './tenant';
 
 /**
- * «Ayuda» (N-08's wiring): the form files a `kind=ayuda` inbox item through
- * the console's ingest endpoint, tagged with the member's business. The
- * outbox-style fallback logs when ADMIN_INGEST_* is unset, so this spec
- * asserts the user-facing contract (send → confirmation, validation, viewer
- * access); the ingest side is covered by the backoffice suite.
+ * «Ayuda» (N-08's wiring; P-48): «Escríbele al equipo» is a page that asks
+ * first what the person needs. This file is the question path, «Tengo una
+ * duda»: it files a `kind=ayuda` inbox item through the console's ingest
+ * endpoint, tagged with the member's business, and the spec reads that item
+ * back from the ingest stand-in (`./ingest.ts`). The report path, «Algo no
+ * funciona», is `ayuda-falla.spec.ts`.
  */
-test('any member can send a help request and see the confirmation', async ({ page }) => {
+async function abrirDuda(page: Page): Promise<void> {
   await page.goto('/ayuda');
   await expect(
     page.getByRole('heading', { name: '¿En qué te echo la mano?', level: 1 }),
   ).toBeVisible();
+  // The form is a page of its own, for when the answers didn't help.
+  await page.getByRole('link', { name: 'Escribirle al equipo' }).click();
+  await expect(page.getByRole('heading', { name: 'Escríbele al equipo', level: 1 })).toBeVisible();
+  // It asks first; nothing is chosen, so there is nothing to send yet.
+  await expect(page.getByRole('button', { name: 'Enviar' })).toHaveCount(0);
+  await clickUntil(
+    page.getByRole('radio', { name: /Tengo una duda/ }),
+    page.getByPlaceholder('No entiendo el corte del día'),
+  );
+}
 
-  // The form opens beside the page only when the answers didn't help.
-  await page.getByRole('button', { name: 'Escribirle al equipo' }).click();
+test('any member can send a question, sees «Enviado», and the item reaches the inbox', async ({
+  page,
+}) => {
+  // Unique among every worker's sends: the item is found by it.
+  const asunto = `No veo el corte de ayer ${stamp()}`;
+  await abrirDuda(page);
   await filledAll([
-    [page.getByPlaceholder('No entiendo el corte del día'), 'No veo el corte de ayer'],
+    [page.getByPlaceholder('No entiendo el corte del día'), asunto],
     [
-      page.getByPlaceholder('Paso a paso, qué esperabas y qué pasó…'),
+      page.getByPlaceholder('Cuéntanos tu duda'),
       'Ayer cerré el corte pero hoy no aparece en el historial.',
     ],
   ]);
   await page.getByLabel('Es urgente').check();
   await page.getByRole('button', { name: 'Enviar' }).click();
-  await expect(page.getByText('Listo. El equipo de Xangarro recibió tu mensaje.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Gracias, Pedro. Ya nos llegó.' })).toBeVisible();
+  await expect(page.getByText(/^Te contestamos por correo a \S+@\S+\. Mientras,/)).toBeVisible();
 
-  // The form clears; a second send starts empty.
-  await expect(page.getByPlaceholder('No entiendo el corte del día')).toHaveValue('');
+  const item = (await itemsFiledFor(SHARED_BIZ)).find((i) => i.title === asunto);
+  expect(item).toMatchObject({
+    kind: 'ayuda',
+    urgent: true,
+    body: 'Ayer cerré el corte pero hoy no aparece en el historial.',
+    source: 'portal-ayuda',
+  });
+
+  // «Volver a Ayuda» is the way back.
+  await page.getByRole('link', { name: 'Volver a Ayuda' }).click();
+  await expect(
+    page.getByRole('heading', { name: '¿En qué te echo la mano?', level: 1 }),
+  ).toBeVisible();
 });
 
 test('an empty message is refused with the reason, nothing sent', async ({ page }) => {
-  await page.goto('/ayuda');
-  // Filled the same careful way: a fill lost to hydration would make the screen
+  await abrirDuda(page);
+  // Filled the careful way: a fill lost to hydration would make the screen
   // complain about the asunto instead, and the test would read as a pass on the
   // wrong claim.
-  await page.getByRole('button', { name: 'Escribirle al equipo' }).click();
   await filled(page.getByPlaceholder('No entiendo el corte del día'), 'Solo asunto');
   await page.getByRole('button', { name: 'Enviar' }).click();
   await expect(page.getByText('Escribe tu mensaje (hasta 4000 caracteres).')).toBeVisible();
+  // The form is still there, with what was typed.
+  await expect(page.getByPlaceholder('No entiendo el corte del día')).toHaveValue('Solo asunto');
+});
+
+test('«Cancelar» goes back to Ayuda without sending', async ({ page }) => {
+  await abrirDuda(page);
+  await page.getByRole('link', { name: 'Cancelar' }).click();
+  await expect(
+    page.getByRole('heading', { name: '¿En qué te echo la mano?', level: 1 }),
+  ).toBeVisible();
 });
 
 test('the sidebar footer links to Ayuda from anywhere', async ({ page }) => {

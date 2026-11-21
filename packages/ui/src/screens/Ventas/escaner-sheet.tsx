@@ -43,8 +43,6 @@ export interface EscanerSheetProps {
   readonly productos: readonly ProductoCobrar[];
   /** «Darlo de alta»: Producto nuevo with this code. */
   readonly onAlta: (codigo: string) => void;
-  /** «Pedro», or «el dueño»: who sees a shared code, who decides what keeps stock. */
-  readonly dueno: string;
 }
 
 /** `apagar` runs before Inventario's product closes the escáner, as any way out does. */
@@ -120,7 +118,6 @@ export function EscanerSheet(p: EscanerSheetProps): ReactElement {
         />
         <EscanerResultado
           e={e}
-          dueno={p.dueno}
           inventario={p.modo.tipo === 'producto'}
           onAlta={(c) => salir(() => p.onAlta(c))()}
         />

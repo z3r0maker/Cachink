@@ -28,7 +28,6 @@ function montar(over: Record<string, unknown> = {}) {
       cargando={false}
       registrando={false}
       error={null}
-      dueno="Pedro"
       onAnotar={onAnotar}
       {...over}
     />,
@@ -106,6 +105,7 @@ describe('FiadoScreen', () => {
       fireEvent.click(screen.getByTestId('fiado-nuevo'));
       expect(nombre()).toBe('');
       expect(textoDe('fiado-anotar')).toContain('Escribe su nombre');
+      expect(screen.getByText('Los patrones lo revisan en su portal.')).toBeInTheDocument();
     });
 
     it('a blank search opens empty too', () => {

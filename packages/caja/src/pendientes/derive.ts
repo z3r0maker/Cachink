@@ -1,5 +1,6 @@
 import { formatMoney, sum, type Money } from '@xangarro/domain';
 
+import { PORTAL_PATRONES } from '../comun/patrones';
 import type { RegistroEnCola } from './types';
 
 /** `reintentando`: the engine waits on a busy or slow server, or one that said when (DS-05). */
@@ -79,12 +80,8 @@ export function heroe(f: Fase, cola: readonly RegistroEnCola[], enCola: number):
   };
 }
 
-/** «el portal de Pedro»; a linked caja doesn't know the owner's name: «el portal del dueño». */
-export const portalDe = (dueno: string | null): string =>
-  dueno === null ? 'el portal del dueño' : `el portal de ${dueno}`;
-
-export const intro = (vacia: boolean, dueno: string | null = 'Pedro'): string =>
-  vacia ? `Tu caja está al día con ${portalDe(dueno)}` : 'Lo que capturaste sin internet';
+export const intro = (vacia: boolean): string =>
+  vacia ? `Tu caja está al día con ${PORTAL_PATRONES}` : 'Lo que capturaste sin internet';
 
 export type EstadoFila = 'Enviando' | 'En reintento' | 'Esperando conexión' | 'En cola';
 

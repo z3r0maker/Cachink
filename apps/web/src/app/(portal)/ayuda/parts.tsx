@@ -5,10 +5,10 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
-import { Button, Don, Drawer } from '@/components';
+import { Don } from '@/components';
+import { button } from '@/components/button.css';
 
 import * as s from './ayuda.css';
-import { FormularioAyuda } from './formulario';
 import { GuiaDrawer } from './guia-drawer';
 import { Guias, Preguntas, Temas } from './secciones';
 
@@ -42,17 +42,17 @@ function Portada(p: { readonly texto: string; readonly onTexto: (t: string) => v
   );
 }
 
-/** When nothing here answers it: a short card; the form opens beside the page. */
-function Escribenos({ onAbrir }: { readonly onAbrir: () => void }) {
+/** When nothing here answers it: a short card that leads to «Escríbele al equipo» (P-48). */
+function Escribenos() {
   return (
     <section aria-labelledby="ayuda-escribenos" className={s.caja}>
       <h2 id="ayuda-escribenos" className={s.titulo}>
         ¿No lo encontraste?
       </h2>
       <p className={s.nada}>Escríbele al equipo de Xangarro. Lo ve con tu negocio adjunto.</p>
-      <Button variant="secondary" full onClick={onAbrir}>
+      <Link href="/ayuda/escribir" className={button({ variant: 'secondary', full: true })}>
         Escribirle al equipo
-      </Button>
+      </Link>
     </section>
   );
 }
@@ -70,13 +70,12 @@ function Privacidad() {
 /**
  * «Ayuda» (ADR-107): Don Cuentas asks what's wrong. The answer is usually one
  * of the most asked or a guide; a search or a topic narrows the list, and the
- * form to the team (N-08) opens only when nothing here answered it.
+ * form to the team (N-08) is a page of its own for when nothing here answered it.
  */
 export function AyudaScreen() {
   const [texto, setTexto] = useState('');
   const [tema, setTema] = useState<TemaId | null>(null);
   const [guia, setGuia] = useState<Guia | null>(null);
-  const [escribir, setEscribir] = useState(false);
   const h = buscar(texto, tema);
   const acotado = texto.trim() !== '' || tema !== null;
   return (
@@ -94,21 +93,11 @@ export function AyudaScreen() {
         </div>
         <div className={s.columna}>
           <Guias guias={h.guias} onAbrir={setGuia} />
-          <Escribenos onAbrir={() => setEscribir(true)} />
+          <Escribenos />
         </div>
       </div>
       <Privacidad />
       <GuiaDrawer guia={guia} onCerrar={() => setGuia(null)} />
-      <Drawer
-        open={escribir}
-        onOpenChange={setEscribir}
-        eyebrow="Ayuda"
-        heading="Escríbele al equipo"
-        subtitle="Lo ve con tu negocio adjunto; te contestamos por correo."
-        width={460}
-      >
-        <FormularioAyuda />
-      </Drawer>
     </>
   );
 }

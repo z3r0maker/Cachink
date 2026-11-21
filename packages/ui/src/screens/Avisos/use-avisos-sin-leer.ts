@@ -1,5 +1,5 @@
 /**
- * The header bell's count (MvAvisos: «Avisos de Pedro, 2 sin leer»): the
+ * The header bell's count (MvAvisos: «Avisos, 2 sin leer»): the
  * owner's messages this operator hasn't read or answered. Light on purpose,
  * it runs under every screen: the messages and the read marks only, keyed
  * under `avisos` so a mark or a reply recounts it, and a pull that brings a
@@ -32,7 +32,6 @@ export function useAvisosSinLeer(): number {
         cola: { cuantos: 0, desde: null },
         rechazados: 0,
         stockBajo: [],
-        dueno: null,
       };
       return avisosVivos(a, hoyLocal()).avisos.filter((x) => !x.leido).length;
     },

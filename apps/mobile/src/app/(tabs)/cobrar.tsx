@@ -41,13 +41,7 @@ function Catalogo(p: {
         onEscanear={() => r.setHoja('escaner')}
         onProductoNuevo={() => r.abrirNuevo(null)}
       />
-      <CobrarOverlays
-        r={r}
-        productos={c.productos}
-        tipos={c.tipos}
-        folio={x.folio}
-        dueno={x.dueno}
-      />
+      <CobrarOverlays r={r} productos={c.productos} tipos={c.tipos} folio={x.folio} />
     </>
   );
 }

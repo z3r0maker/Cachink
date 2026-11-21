@@ -1,77 +1,45 @@
 /**
- * The phone's «Registros por enviar» hero and its note (M-09; the web's
- * `heroe()` in `derive.ts` says «No cierres la pestaña», a browser's words).
- * Pure, so the tests pin every wording. The phases are the board's: en espera,
- * sin internet, enviando, todo enviado, con rechazados.
+ * The phone's «Registros por enviar» status line, footer and note (M-09,
+ * RvEnvio; the web's `heroe()` in `derive.ts` says «No cierres la pestaña», a
+ * browser's words). Pure, so the tests pin every wording. The phases are the
+ * board's: en espera, sin internet, enviando, todo enviado, con rechazados.
  */
 
 import type { RegistroEnCola } from './types';
-import { suman } from './derive';
 
 /** The queue's one phase, as the phone sees it (the board's states). */
 export type FaseCola = 'espera' | 'sin-internet' | 'enviando' | 'enviado' | 'con-rechazados';
 
-export interface HeroeCola {
-  readonly eyebrow: string;
-  readonly titulo: string;
-  readonly cuerpo: string;
+/**
+ * The phone's status line and its one footer button (RvEnvio): the line says
+ * how many wait and that they send themselves; refused rows say why on their
+ * own card, so they get no line. The footer is the only retry on the screen.
+ */
+export interface PieCola {
+  readonly aviso: string | null;
   readonly boton: string;
+  /** True while it sends: the button holds. */
+  readonly ocupado: boolean;
 }
 
 const cuenta = (n: number, uno: string, varios: string): string =>
   n === 1 ? `1 ${uno}` : `${n} ${varios}`;
 
-/** The waiting hero: en espera online, or esperando conexión offline. */
-function heroeEspera(sinInternet: boolean, cola: readonly RegistroEnCola[]): HeroeCola {
-  return {
-    eyebrow: sinInternet ? 'Sin conexión' : 'En espera',
-    titulo: sinInternet
-      ? cuenta(cola.length, 'registro espera conexión', 'registros esperan conexión')
-      : cuenta(cola.length, 'registro por enviar', 'registros por enviar'),
-    cuerpo:
-      `${suman(cola)} Puedes seguir cobrando; se envían solos cuando vuelva el internet.`.trim(),
-    boton: 'Reintentar envío',
-  };
-}
+const SOLOS = 'Puedes seguir cobrando; se envían solos.';
 
-/** The hero of each phase; `rechazados` counts what the server refused. */
-export function heroeTelefono(
-  fase: FaseCola,
-  cola: readonly RegistroEnCola[],
-  rechazados: number,
-  ultima: string | null,
-): HeroeCola {
+export function pieCola(fase: FaseCola, cola: readonly RegistroEnCola[]): PieCola {
+  const n = cola.length;
   if (fase === 'enviando') {
-    const enviando = Math.max(cola.length, rechazados);
-    return {
-      eyebrow: 'Enviando',
-      titulo: `Enviando ${cuenta(enviando, 'registro', 'registros')}…`,
-      // The turno closes with rows still to send (ADR-123): never «wait».
-      cuerpo: 'Puedes seguir cobrando y cerrar el turno mientras suben.',
-      boton: 'Enviando…',
-    };
+    // The turno closes with rows still to send (ADR-123): never «wait».
+    const aviso = `Enviando ${cuenta(n, 'registro', 'registros')}… Puedes seguir cobrando y cerrar el turno mientras suben.`;
+    return { aviso, boton: 'Enviando…', ocupado: true };
   }
-  if (fase === 'con-rechazados') {
-    return {
-      eyebrow: 'Revisar',
-      titulo: `El servidor no aceptó ${cuenta(rechazados, 'registro', 'registros')}`,
-      cuerpo:
-        'Sigue en esta caja, no se pierde. Lee la razón de cada uno abajo y reintenta los que puedas.',
-      boton: 'Reintentar envío',
-    };
-  }
-  if (fase === 'enviado') {
-    return {
-      eyebrow: 'Al día',
-      titulo: 'Todo enviado',
-      cuerpo:
-        ultima === null
-          ? 'El último envío fue hace unos segundos.'
-          : `El último envío fue a las ${ultima}.`,
-      boton: 'Enviar de nuevo',
-    };
-  }
-  return heroeEspera(fase === 'sin-internet', cola);
+  if (fase === 'con-rechazados') return { aviso: null, boton: 'Reintentar', ocupado: false };
+  const cuantos =
+    fase === 'sin-internet'
+      ? cuenta(n, 'registro espera conexión', 'registros esperan conexión')
+      : cuenta(n, 'registro por enviar', 'registros por enviar');
+  return { aviso: `${cuantos}. ${SOLOS}`, boton: 'Reintentar ahora', ocupado: false };
 }
 
 /**
@@ -104,18 +72,17 @@ export function faseTelefono(
 }
 
 /**
- * The queue with nothing left to send (RvEnvio «Todo enviado»): Don and the
- * owner who already has it. `ultima` is the last send's «HH:MM», or null
- * right after one.
+ * The queue with nothing left to send (RvEnvio «Todo enviado»): Don and «los
+ * patrones», who already have it. `ultima` is the last send's «HH:MM», or
+ * null right after one.
  */
-export function todoEnviado(
-  dueno: string | null,
-  ultima: string | null,
-): { readonly titulo: string; readonly cuerpo: string } {
-  const quien = dueno !== null && dueno.trim() !== '' ? dueno.trim() : 'Tu negocio';
+export function todoEnviado(ultima: string | null): {
+  readonly titulo: string;
+  readonly cuerpo: string;
+} {
   const cuando = ultima === null ? 'hace unos segundos' : `a las ${ultima}`;
   return {
     titulo: 'Todo está enviado',
-    cuerpo: `${quien} ya tiene lo que capturaste. Última vez ${cuando}.`,
+    cuerpo: `Los patrones ya tienen lo que capturaste. Última vez ${cuando}.`,
   };
 }

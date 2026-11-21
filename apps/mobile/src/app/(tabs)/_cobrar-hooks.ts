@@ -11,7 +11,6 @@ import {
   metodosDisponibles,
   productosDeCaja,
   useCrearProducto,
-  useDueno,
   useEnabledPaymentMethods,
   useOpenCajaTurno,
   useProductosConStock,
@@ -101,5 +100,5 @@ export function useCobrarRuta() {
 export function useCobrarContexto() {
   const turno = useOpenCajaTurno();
   const metodos = metodosDisponibles(useEnabledPaymentMethods());
-  return { turno, metodos, folio: useSiguienteFolio(), dueno: useDueno() };
+  return { turno, metodos, folio: useSiguienteFolio() };
 }

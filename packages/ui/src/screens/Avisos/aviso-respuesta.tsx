@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { aDueno } from '@xangarro/caja/avisos';
+import { AVISOS_COPY } from '@xangarro/caja/avisos';
 import { Btn, Chip, MText, PathIcon } from '../../components/index';
 import { borderWidths, colors, fontFace, portalFontSizes, radii, typography } from '../../theme';
 
@@ -24,7 +24,6 @@ const ENVIAR =
 
 export interface RespuestaProps {
   readonly id: string;
-  readonly dueno: string;
   readonly draft: string;
   readonly enviando: boolean;
   readonly error: boolean;
@@ -106,7 +105,7 @@ export function Respuesta(p: RespuestaProps): ReactElement {
         multiline
         numberOfLines={3}
         maxLength={500}
-        placeholder={`Cuéntale ${aDueno(p.dueno)} lo que recuerdas`}
+        placeholder={AVISOS_COPY.cuentales}
         placeholderTextColor={colors.textMuted}
         value={p.draft}
         onChangeText={p.onDraft}
@@ -123,7 +122,7 @@ export function Respuesta(p: RespuestaProps): ReactElement {
   );
 }
 
-export function Enviada(p: { readonly dueno: string; readonly texto: string }): ReactElement {
+export function Enviada(p: { readonly texto: string }): ReactElement {
   return (
     <View
       role="status"
@@ -136,13 +135,13 @@ export function Enviada(p: { readonly dueno: string; readonly texto: string }): 
       backgroundColor={colors.greenSoft}
     >
       <MText size="md" weight="extraBold" color={colors.greenText}>
-        {`Le mandaste tu respuesta ${aDueno(p.dueno)}`}
+        {AVISOS_COPY.enviada}
       </MText>
       <MText size="body" weight="semibold" color={colors.ink} lineHeight={22}>
         {`“${p.texto}”`}
       </MText>
       <MText size="sm" weight="semibold" color={colors.gray600}>
-        Si te contesta, lo ves aquí mismo.
+        Si te contestan, lo ves aquí mismo.
       </MText>
     </View>
   );

@@ -146,13 +146,6 @@ describe('useAvisos · la lectura', () => {
     expect(titulos).toContain('Se acabó Taco de tripa');
   });
 
-  it('the owner’s name comes from the pull, «el dueño» until then', async () => {
-    const repos = misRepos();
-    await repos.appConfig.set('duenoNombre', 'Pedro Ramírez');
-    const v = await usar(repos);
-    expect(v.current.data?.dueno).toBe('Pedro');
-  });
-
   it('an empty caja has nothing to say, and still says it happily', async () => {
     const v = await usar();
     expect(v.current.state).toBe('happy');

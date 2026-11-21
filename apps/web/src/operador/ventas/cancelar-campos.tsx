@@ -2,7 +2,7 @@
 
 import { colors } from '@xangarro/tokens';
 
-import { useDueno } from '../ui/use-dueno';
+import { PATRONES } from '@xangarro/caja';
 import * as m from '../ui/mostrador.css';
 import * as c from './cancelar.css';
 
@@ -43,11 +43,10 @@ export function Motivos(p: {
 }
 
 export function Nota(p: { readonly value: string; readonly onChange: (v: string) => void }) {
-  const dueno = useDueno();
   return (
     <div className={c.grupo}>
       <label htmlFor="cv-nota" className={m.etiqueta}>
-        {`Nota para ${dueno} `}
+        {`Nota para ${PATRONES} `}
         <span className={m.opcional}>(opcional)</span>
       </label>
       <span className={m.campo}>
