@@ -91,3 +91,32 @@ export async function sessionSteppedUp(
   );
   return row?.ok === true;
 }
+
+/** The last error a session was shown: the Sentry event that names it, and when it was kept. */
+export interface SessionLastError {
+  readonly eventId: string;
+  /** An ISO instant. */
+  readonly at: string;
+}
+
+/**
+ * Keep the error this session was just shown (P-48, ADR-162 §8), so a report
+ * sent from Ayuda can name it. False when the session is not live or the id
+ * is not a Sentry event id; the newest error replaces the one before.
+ */
+export async function noteSessionError(db: Db, token: string, eventId: string): Promise<boolean> {
+  const [row] = await db.execute<{ ok: boolean }>(
+    sql`SELECT xangarro.session_note_error(${hash(token)}, ${eventId}) AS ok`,
+  );
+  return row?.ok === true;
+}
+
+/** The last error a live session was shown; null when it has seen none. */
+export async function sessionLastError(db: Db, token: string): Promise<SessionLastError | null> {
+  const [row] = await db.execute<{ event_id: string; at: unknown }>(
+    sql`SELECT event_id, at FROM xangarro.session_last_error(${hash(token)})`,
+  );
+  if (row === undefined) return null;
+  // The driver hands a timestamptz back as text or as a Date: parse, never assert.
+  return { eventId: row.event_id, at: new Date(row.at as string | Date).toISOString() };
+}

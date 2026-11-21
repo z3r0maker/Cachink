@@ -8,6 +8,7 @@ import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
 import { billingDatabaseUrl, superDatabaseUrl } from './e2e/db-url';
 import { DIAS_LIMITE } from './e2e/dias-limite';
+import { INGEST_SERVER, withIngest } from './e2e/ingest';
 import { e2ePhase, projectsForPhase } from './e2e/phases';
 import { SERIAL_TAG } from './e2e/shared-tenant';
 import { E2E_TOTP_KEY } from './e2e/totp-key';
@@ -119,7 +120,9 @@ function serverCommand(): string {
  * `today` is the one thing the edge-day servers change (e2e/dias-limite.ts).
  */
 function serverEnv(today: string): Record<string, string> {
-  return {
+  // Inbox items leave on their real wire, to the console's stand-in
+  // (e2e/ingest.ts), so a spec reads back what the portal filed (P-48).
+  return withIngest({
     // Locally, a build of its own (see next.config.mjs): other sessions'
     // builds in this directory cannot swap it out mid-run. CI builds `.next`
     // in its own step and is alone on the runner.
@@ -137,7 +140,7 @@ function serverEnv(today: string): Record<string, string> {
       poolMax: process.env.DATABASE_POOL_MAX,
       exportsPerTenant: process.env.EXPORTS_PER_TENANT,
     }),
-  };
+  });
 }
 
 /** The seed's day (seed-data.ts `TODAY`): its May rows are "this month". */
@@ -153,6 +156,9 @@ const config = defineConfig<OpcionesWebkit>({
   globalSetup: './e2e/global-setup.ts',
   globalTeardown: './e2e/global-teardown.ts',
   webServer: [
+    // The console's ingest endpoint, stood in for (e2e/ingest-stub.mjs). First:
+    // it starts in a moment, and the portal files to it from its first request.
+    INGEST_SERVER,
     {
       command: serverCommand(),
       url: BASE_URL,
