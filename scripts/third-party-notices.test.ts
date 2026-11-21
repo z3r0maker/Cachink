@@ -6,7 +6,13 @@
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { AVISOS_PATH, collectPackages, renderNotices, type Paquete } from './third-party-notices';
+import {
+  AVISOS_PATH,
+  collectPackages,
+  esDelAnfitrion,
+  renderNotices,
+  type Paquete,
+} from './third-party-notices';
 
 const MIT_A = 'MIT License\n\nCopyright (c) Meta Platforms, Inc.\n\nPermission is hereby granted…';
 const MIT_B = 'MIT License\n\nCopyright (c) 2015 Colin McDonnell\n\nPermission is hereby granted…';
@@ -50,7 +56,39 @@ describe('renderNotices', () => {
   });
 });
 
+describe('esDelAnfitrion', () => {
+  it('keeps a package that runs wherever the app runs', () => {
+    expect(esDelAnfitrion({ name: 'react' })).toBe(false);
+  });
+
+  it('drops a binary for the machine that builds the app', () => {
+    expect(esDelAnfitrion({ name: 'fsevents', os: ['darwin'] })).toBe(true);
+    expect(esDelAnfitrion({ name: '@sentry/cli-linux-x64', os: ['linux'], cpu: ['x64'] })).toBe(
+      true,
+    );
+  });
+
+  it('drops one that names only a cpu', () => {
+    expect(esDelAnfitrion({ name: '@img/sharp-wasm32', cpu: ['wasm32'] })).toBe(true);
+  });
+
+  it('keeps one whose os or cpu list is empty, which restricts nothing', () => {
+    expect(esDelAnfitrion({ name: 'x', os: [], cpu: [] })).toBe(false);
+  });
+
+  it('keeps one with a malformed field rather than guess', () => {
+    expect(esDelAnfitrion({ name: 'x', os: 'darwin' })).toBe(false);
+  });
+});
+
 describe('the committed file', () => {
+  it('names no host-only binary, so a Mac and the Linux CI write the same file', () => {
+    const actual = readFileSync(AVISOS_PATH, 'utf8');
+    for (const host of ['fsevents ', '@sentry/cli-darwin ', '@sentry/cli-linux-x64 ']) {
+      expect(actual).not.toContain(`\n${host}`);
+    }
+  });
+
   it('matches the phone app’s production tree (run `pnpm notices` after changing dependencies)', () => {
     const actual = readFileSync(AVISOS_PATH, 'utf8');
     expect(actual).toBe(renderNotices(collectPackages()));

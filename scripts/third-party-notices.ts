@@ -84,7 +84,31 @@ function registrar(indice: Map<string, string>, dir: string, hijos: (nm: string)
   hijos(join(dir, 'node_modules'));
 }
 
-/** Every production dependency of the phone app, as pnpm resolves it. */
+/**
+ * True for a native binary of the machine that builds the app, the kind a
+ * package marks with `os` or `cpu` (`fsevents`, `@sentry/cli-darwin`). pnpm
+ * installs only the one that matches the host, so counting them made the file
+ * differ between a Mac and the Linux CI; none ships inside the app's bundle.
+ */
+export function esDelAnfitrion(manifiesto: {
+  readonly os?: unknown;
+  readonly cpu?: unknown;
+}): boolean {
+  const restringe = (v: unknown): boolean => Array.isArray(v) && v.length > 0;
+  return restringe(manifiesto.os) || restringe(manifiesto.cpu);
+}
+
+function delAnfitrion(dir: string | undefined): boolean {
+  const pj = dir === undefined ? '' : join(dir, 'package.json');
+  if (!existsSync(pj)) return false;
+  try {
+    return esDelAnfitrion(JSON.parse(readFileSync(pj, 'utf8')) as Record<string, unknown>);
+  } catch {
+    return false;
+  }
+}
+
+/** Every production dependency of the phone app, as pnpm resolves it, without the host's binaries. */
 export function collectPackages(): Paquete[] {
   const json = execFileSync(
     'pnpm',
@@ -95,12 +119,11 @@ export function collectPackages(): Paquete[] {
   const indice = indiceInstalado();
   return Object.entries(porLicencia).flatMap(([license, xs]) =>
     xs.flatMap((x) =>
-      x.versions.map((version, i) => ({
-        name: x.name,
-        version,
-        license,
-        texto: textoDe(indice.get(`${x.name}@${version}`) ?? x.paths[i]),
-      })),
+      x.versions.flatMap((version, i) => {
+        const dir = indice.get(`${x.name}@${version}`) ?? x.paths[i];
+        if (delAnfitrion(dir)) return [];
+        return [{ name: x.name, version, license, texto: textoDe(dir) }];
+      }),
     ),
   );
 }
