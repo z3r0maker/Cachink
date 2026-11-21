@@ -78,6 +78,7 @@ xangarro/
 │   ├── contracts/        Wire contracts shared by phone and cloud (zod)
 │   ├── auth-core/        Passwords, sessions, throttles, TOTP
 │   ├── tokens/           Design tokens — the source of truth for the portal's pixels
+│   ├── guias/            Guides and quick answers, and the search over them
 │   ├── ui/               Shared Tamagui components (mobile)
 │   ├── email/            Transactional email templates + senders
 │   ├── observability/    Audit logging, error telemetry, health checks

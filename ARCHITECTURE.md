@@ -11788,7 +11788,7 @@ whether to host them or put them on YouTube, and what has replaced the tutorial 
 
 Checked against `origin/main` that day:
 
-- **The portal already teaches in place.** «Ayuda» (ADR-107) has a search that ignores accents, twelve answers and
+- **The portal already teaches in place.** «Ayuda» (ADR-107) has a search that ignores accents, eleven answers and
   four guides that Don Cuentas walks a step at a time, and «¿Cómo empiezo?» is a checklist on Inicio.
 - **The phone and the web caja teach nothing.** They are where the first sale happens. Their only help entry is
   the report button of ADR-162, drawn and not built.

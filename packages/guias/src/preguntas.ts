@@ -1,24 +1,6 @@
-/**
- * What «Ayuda» knows (ADR-107): topics, quick answers and Don Cuentas's
- * step-by-step guides. Plain data, in the owner's words, every link a real
- * screen of this portal. `buscar.ts` searches it; the screen draws it.
- */
-export type TemaId = 'empezar' | 'ventas' | 'productos' | 'cajas' | 'estados' | 'plan';
+import type { TemaId } from './temas.js';
 
-export interface Tema {
-  readonly id: TemaId;
-  readonly label: string;
-}
-
-export const TEMAS: readonly Tema[] = [
-  { id: 'empezar', label: 'Para empezar' },
-  { id: 'ventas', label: 'Ventas y cortes' },
-  { id: 'productos', label: 'Productos e inventario' },
-  { id: 'cajas', label: 'Cajas y sincronización' },
-  { id: 'estados', label: 'Estados financieros' },
-  { id: 'plan', label: 'Tu plan y pagos' },
-];
-
+/** A quick answer in the owner's words (ADR-107). Every link is a real screen of the portal. */
 export interface Pregunta {
   readonly tema: TemaId;
   readonly q: string;

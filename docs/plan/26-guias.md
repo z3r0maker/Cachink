@@ -8,7 +8,7 @@ replaced the old tutorial library. This track's answer: the product teaches in p
 moment someone is stuck. A short clip is a by-product of the tests we already run, and its voice
 a by-product of the guide's own words. Nobody films or records anything by hand.
 
-Half of this exists. The portal has «Ayuda» (ADR-107): a search, twelve answers and four of Don
+Half of this exists. The portal has «Ayuda» (ADR-107): a search, eleven answers and four of Don
 Cuentas's guides. The phone and the web caja, where the first sale happens, have nothing. The
 track gives the guides one home, records their clips from the test flows, and opens them where
 the person already is.
@@ -44,7 +44,7 @@ Asked one at a time. Decisions 4 and 6 are the owner's own wording, not the reco
 
 ## 2. What exists today (verified on `main` at 088c3f3f)
 
-- **Portal «Ayuda»** (`apps/web/src/app/(portal)/ayuda/`, N-08, ADR-107): six topics, twelve
+- **Portal «Ayuda»** (`apps/web/src/app/(portal)/ayuda/`, N-08, ADR-107): six topics, eleven
   answers (`contenido.ts`), four guides (`guias.ts`) shown a step at a time with Don `caminando`
   (`guia-drawer.tsx`), a search that ignores accents (`buscar.ts`), and `ayuda.spec.ts`.
 - **«¿Cómo empiezo?»** (`/como-empiezo`): the checklist, also a card on Inicio and in the menu.
@@ -145,7 +145,13 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-02 `@xangarro/guias`: las guías, sus pasos y su búsqueda en un solo paquete [media]
 
-- [ ] Status · **Blocked by:** — · **Blocks:** G-03, G-12, G-30
+- [x] Status · **Blocks:** G-03, G-12, G-30
+- **Done 2026-11-20:** `packages/guias` holds the eleven answers, the four portal guides, `plano`
+  (the one accent folding, which the ⌘K palette now imports) and the search. `buscarEn` takes
+  its source and a surface, so the caja's guides will not show in the portal; `buscar` stays the
+  portal's. No portal guide is public yet (`publica: false`); G-30 turns them on. Verified: the
+  package's 26 tests, the portal's unit suite, `ayuda-rutas.test.ts` (every link is a real page)
+  and `ayuda.spec.ts` untouched and green against a production build.
 - **What:** a zero-dependency package, like `@xangarro/tokens`. It takes `contenido.ts`,
   `guias.ts` and `buscar.ts` out of `apps/web`, which then imports them. A guide gains its
   surface (`portal` or `caja`), the screens it belongs to, whether it is public, and the id of
@@ -160,7 +166,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-03 Las primeras ocho guías de quien cobra [media]
 
-- [ ] Status · **Blocked by:** G-02 · **Blocks:** G-04, G-07, G-10, G-11
+- [ ] Status · **Blocked by:** — · **Blocks:** G-04, G-07, G-10, G-11
 - **What:** the operator's guides, written once for the phone and the web caja: abrir turno,
   cobrar una venta, cobrar con el escáner, registrar un gasto, llegó mercancía, dar de alta un
   producto, cancelar una venta, cerrar turno y contar la caja. Four steps or fewer each, short
@@ -275,7 +281,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-12 Portal: las guías con su clip, y tres entradas nuevas [media]
 
-- [ ] Status · **Blocked by:** G-01, G-02 · **Blocks:** G-21
+- [ ] Status · **Blocked by:** G-01 · **Blocks:** G-21
 - **Design first:** board `GuPortal`, its first three states. **Approval pending: no code before
   it.** «¿Cómo empiezo?» keeps its own wording for the button, «¿Cómo se hace?».
 - **What:** the guide drawer plays the guide's clip. Three new ways in: «Ver cómo» on the empty
@@ -349,7 +355,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-30 Una página pública por guía en xangarro.mx [media]
 
-- [ ] Status · **Blocked by:** G-01, G-02, G-05 · **Blocks:** G-13, G-31
+- [ ] Status · **Blocked by:** G-01, G-05 · **Blocks:** G-13, G-31
 - **Design first:** board `GuPagina`. **Approval pending: no code before it.** The landing's own
   header and footer are not redrawn there.
 - **What:** `/guias/<id>/` on the landing for every public guide, prerendered from
