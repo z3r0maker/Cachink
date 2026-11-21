@@ -1,9 +1,11 @@
 # Screenshots manifest — `screenshots/`
 
-Captured the morning of 2026-11-20 from the real app by one Maestro flow,
+Captured the afternoon of 2026-11-21 from the real app by one Maestro flow,
 [`store-screenshots.yaml`](../../apps/mobile/maestro/flows/internal/store-screenshots.yaml),
-against the contracts mock, on `main` with the gasto's receipt photo (PR #181)
-and the redesigned Ventas and Mi turno (PRs #195, #196, #220, #224). No
+against the contracts mock, on `main` after the phone's pre-store round: «los
+patrones» (#258), the help button in the header (M-23, #259), the sync banners
+(#263) and «¿Es tu negocio?» (#264), on top of the receipt photo (#181) and the
+redesigned Ventas and Mi turno (#195, #196, #220, #224). No
 compositing, no fixture screens: what the app shows for the demo taquería
 («Tacos La Esquina») is what the shots contain. Play's set comes from the same
 flow ([`../google-play/SCREENSHOTS.md`](../google-play/SCREENSHOTS.md)).
@@ -42,11 +44,12 @@ set.
 
 ## Known imperfections (for the next re-shoot)
 
-- **The times read just before eight** (the turno «desde las 07:33») under a
-  9:41 status bar: the greeting and the times follow the simulator's clock,
-  which is the Mac's. Take the set in the morning, so Inicio says «Buenos
-  días»; a run that crosses midnight reads two days.
-- **«Renta local» reads «Atrasado 19 días»**: the mock's recurrente is due on
+- **Inicio says «Buenas tardes»** and the turno opens «desde las 13:00»
+  under a 9:41 status bar: the greeting and the times follow the simulator's
+  clock, which is the Mac's. The owner chose an afternoon take on 2026-11-21
+  over waiting for the morning; for «Buenos días», take the set before noon.
+  A run that crosses midnight reads two days.
+- **«Renta local» reads «Atrasado 20 días»**: the mock's recurrente is due on
   the 1st and nobody registers it in the story.
 - **The iPad** draws its window-resize arc in the bottom-right corner, and the
   status bar's «9:41 a.m.» sits over the rail's «Caja 1» chip; both are iPadOS.
