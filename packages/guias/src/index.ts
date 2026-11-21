@@ -21,6 +21,7 @@ export {
   type Superficie,
 } from './guia.js';
 export { GUIAS } from './guias.js';
+export { VOZ_DON } from './voz.js';
 export {
   AYUDA,
   buscar,
