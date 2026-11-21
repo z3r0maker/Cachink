@@ -249,7 +249,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-10 Teléfono: «¿Cómo le hago?» detrás del botón de ayuda [media]
 
-- [ ] Status · **Blocked by:** G-01, G-03, M-23 · **Blocks:** G-20, G-22, G-23
+- [ ] Status · **Blocked by:** G-01, G-03 · **Blocks:** G-20, G-22, G-23
 - **Design first:** boards `GuPuerta`, `GuHoja` and `GuGuia`, and `GuTableta` for the tablet, where
   the door, the list and the guide are dialogs and the clip is the phone's. **Approval pending: no
   code before it.**

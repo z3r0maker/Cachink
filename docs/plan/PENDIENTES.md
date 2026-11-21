@@ -99,7 +99,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **G-03** Las primeras ocho guías de quien cobra — Bloqueada por: — · `26-guias.md:169`
 - [ ] `Media` **G-07** La voz de Don Cuentas: su descripción, sus líneas y su audio — Bloqueada por: G-03 · `26-guias.md:183`
 - [ ] `Media` **G-04** Clips del teléfono: un flujo de Maestro graba cada guía — Bloqueada por: G-03, G-07 · `26-guias.md:206`
-- [ ] `Media` **G-10** Teléfono: «¿Cómo le hago?» detrás del botón de ayuda — Bloqueada por: G-01, G-03, M-23 · `26-guias.md:252`
+- [ ] `Media` **G-10** Teléfono: «¿Cómo le hago?» detrás del botón de ayuda — Bloqueada por: G-01, G-03 · `26-guias.md:252`
 - [ ] `Media` **G-20** «Enséñame» en el teléfono: Don señala el botón de verdad — Bloqueada por: G-01, G-10 · `26-guias.md:312`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · Falta: todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:302`
 - [ ] `Baja` **G-40** Tienda de práctica — Bloqueada por: G-20 · `26-guias.md:379`
