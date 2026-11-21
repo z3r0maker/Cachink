@@ -1,12 +1,16 @@
 import type { Barra, MesGrafica, PasoPuente, Rol } from '@/server/empresa/resultados-graficas';
 import * as g from '@/styles/mostrador-graficas.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as r from '@/styles/mostrador-resultados.css';
 import * as m from '@/styles/mostrador.css';
 
 /**
  * Resultados' three charts (E-12, board CD-07), drawn from the geometry
  * `resultados-graficas.ts` computes. Every bar carries its value as text, so
- * no colour has to be read alone.
+ * no colour has to be read alone. With ADR-161's motion (board CD-21c) the
+ * cascade is the screen's hero: it lands with the sweep and builds step by
+ * step, totals growing up and each cost hanging from the level before it; the
+ * bridge fills and the trend grows. Values and labels stay still.
  */
 const LEYENDA: readonly (readonly [string, readonly Rol[]])[] = [
   ['Ingresos', ['ingreso']],
@@ -51,9 +55,34 @@ function apilar(costos: MesGrafica['costos']) {
   });
 }
 
+/** One step of the cascade: a total grows from the axis, a cost hangs from the level before it. */
+function Paso({ b }: { readonly b: Barra }) {
+  return (
+    <li className={g.columna} data-testid="cascada-barra">
+      <span className={g.valorBarra}>{b.valor}</span>
+      <div className={g.lienzo}>
+        <Lienzo>
+          <rect
+            x={12}
+            width={76}
+            y={100 - b.desde - visible(b.alto)}
+            height={visible(b.alto)}
+            className={`${g.rol[b.rol]} ${b.total ? mv.crece : mv.baja}`}
+          />
+        </Lienzo>
+      </div>
+      <span className={b.total ? g.etiquetaTotal : g.etiquetaBarra}>{b.label}</span>
+      <span className={g.notaBarra}>{b.nota}</span>
+    </li>
+  );
+}
+
 export function Cascada(props: { readonly titular: string; readonly barras: readonly Barra[] }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="cascada">
+    <section
+      className={`${m.hero} ${m.stack} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="cascada"
+    >
       <div className={r.encabezadoPanel}>
         <div>
           <h2 id="cascada" className={r.titular}>
@@ -67,24 +96,9 @@ export function Cascada(props: { readonly titular: string; readonly barras: read
         <Leyenda items={LEYENDA} />
       </div>
       <div className={g.cascadaScroll}>
-        <ol className={g.cascada} aria-label="De ingresos a utilidad neta">
+        <ol className={`${g.cascada} ${mv.cascada}`} aria-label="De ingresos a utilidad neta">
           {props.barras.map((b) => (
-            <li key={b.label} className={g.columna} data-testid="cascada-barra">
-              <span className={g.valorBarra}>{b.valor}</span>
-              <div className={g.lienzo}>
-                <Lienzo>
-                  <rect
-                    x={12}
-                    width={76}
-                    y={100 - b.desde - visible(b.alto)}
-                    height={visible(b.alto)}
-                    className={g.rol[b.rol]}
-                  />
-                </Lienzo>
-              </div>
-              <span className={b.total ? g.etiquetaTotal : g.etiquetaBarra}>{b.label}</span>
-              <span className={g.notaBarra}>{b.nota}</span>
-            </li>
+            <Paso key={b.label} b={b} />
           ))}
         </ol>
       </div>
@@ -99,7 +113,10 @@ export function Puente(props: { readonly resumen: string; readonly pasos: readon
         ¿Por qué cambió el EBITDA?
       </h2>
       <p className={r.explica}>{props.resumen}</p>
-      <ul className={m.stack} aria-label="Del EBITDA anterior al de este periodo">
+      <ul
+        className={`${m.stack} ${mv.escalona}`}
+        aria-label="Del EBITDA anterior al de este periodo"
+      >
         {props.pasos.map((p) => (
           <li key={p.label} className={g.puenteFila} data-testid="puente-paso">
             <span className={p.total ? r.nombreSubtotal : r.nombre}>{p.label}</span>
@@ -110,7 +127,7 @@ export function Puente(props: { readonly resumen: string; readonly pasos: readon
                   width={visible(p.alto)}
                   y={0}
                   height={100}
-                  className={g.rol[p.rol]}
+                  className={`${g.rol[p.rol]} ${mv.llena}`}
                 />
               </Lienzo>
             </span>
@@ -126,7 +143,7 @@ function BarrasDelMes({ mes }: { readonly mes: MesGrafica }) {
   return (
     <div className={g.mes} data-testid="tendencia-mes">
       <span className={g.valorBarra}>{mes.margen}</span>
-      <div className={g.pareja}>
+      <div className={`${g.pareja} ${mv.crece}`}>
         <Lienzo>
           <rect
             x={10}
@@ -153,7 +170,7 @@ export function Tendencia({ meses }: { readonly meses: readonly MesGrafica[] }) 
         </h2>
         <Leyenda items={LEYENDA.slice(0, 2)} />
       </div>
-      <div className={g.tendencia}>
+      <div className={`${g.tendencia} ${mv.escalona}`}>
         {meses.map((mes) => (
           <BarrasDelMes key={mes.label} mes={mes} />
         ))}

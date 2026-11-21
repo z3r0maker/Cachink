@@ -10,14 +10,17 @@ import {
   type ParamsTablero,
 } from '@/server/empresa/tablero-view';
 import { vistaDelTablero } from '@/server/empresa/tablero-vista';
+import { parseSello } from '@/server/empresa/sello';
 import { requireFounderPage } from '@/server/founder';
+import { SelloUnaVez } from '@/components/sello-una-vez';
 import * as m from '@/styles/mostrador.css';
 
 import { EncabezadoSeccion } from '../encabezado-seccion';
 import { Kanban } from './kanban';
 import { Paneles } from './paneles';
 import { Plan } from './plan';
-import { Arrastre, Banner, Objetivos, Socios } from './resumen';
+import { Arrastre, Banner, Objetivos } from './resumen';
+import { Socios } from './socio';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +67,9 @@ export default async function TableroPage(props: {
 }) {
   const { founder } = await requireFounderPage();
   const hoy = hoyEnMexico();
-  const p = parseTablero(await props.searchParams, hoy);
+  const sp = await props.searchParams;
+  const p = parseTablero(sp, hoy);
+  const sello = parseSello(sp.sello);
   const l = await leerElTablero(hoy, p.trimestre);
   const yo = socioDe(founder.numero);
   const v = vistaDelTablero(l, p, yo);
@@ -76,12 +81,13 @@ export default async function TableroPage(props: {
       {v.banners.map((b) => (
         <Banner key={b.titulo} b={b} />
       ))}
-      <Socios socios={v.socios} desbalance={v.desbalance} />
+      <Socios socios={v.socios} desbalance={v.desbalance} sello={sello === 'plan'} />
       <Objetivos v={v} trimestre={p.trimestre} />
       {v.arrastre === null ? null : <Arrastre a={v.arrastre} />}
       {v.plan === null ? null : <Plan v={v} trimestre={p.trimestre} nombres={l.nombres} />}
       {v.columnas === null ? null : <Kanban columnas={v.columnas} p={p} />}
-      <Paneles l={l} p={p} v={v} yo={yo} />
+      <Paneles l={l} p={p} v={v} yo={yo} sello={sello === 'aceptada'} />
+      {sello === null ? null : <SelloUnaVez />}
     </div>
   );
 }

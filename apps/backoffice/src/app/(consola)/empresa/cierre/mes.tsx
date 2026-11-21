@@ -6,6 +6,7 @@ import type { PasoVista } from '@/server/empresa/cierre-pasos';
 import { nombreMes } from '@/server/empresa/fechas';
 import * as k from '@/styles/mostrador-cierre.css';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 
 import { CerrarForm, SubirEstados } from './acciones';
@@ -23,7 +24,7 @@ function Check() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <polyline points="20 6 9 17 4 12" />
+      <polyline className={mv.traza} pathLength={1} points="20 6 9 17 4 12" />
     </svg>
   );
 }
@@ -32,7 +33,7 @@ function UnPaso({ mes, p }: { readonly mes: string; readonly p: PasoVista }) {
   const listo = p.estado !== 'pendiente';
   return (
     <li
-      className={k.fila[listo ? 'hecho' : 'pendiente']}
+      className={`${k.fila[listo ? 'hecho' : 'pendiente']} ${mv.entra}`}
       data-testid="paso-cierre"
       data-paso={p.id}
       data-estado={p.estado}
@@ -67,11 +68,15 @@ function Progreso({ enc, total }: { readonly enc: EncabezadoCierre; readonly tot
         <span>{`${enc.hechos} de ${total} pasos`}</span>
         <span className={i.pasoSub}>{enc.cerrado ? 'Cerrado' : 'Se recalcula al entrar'}</span>
       </div>
-      <div className={k.barra} aria-hidden="true">
+      <div className={`${k.barra} ${mv.escalona}`} aria-hidden="true">
         {Array.from({ length: total }, (_, n) => (
           <span
             key={n}
-            className={k.tramo[n >= enc.hechos ? 'vacio' : enc.cerrado ? 'cerrado' : 'hecho']}
+            className={
+              n >= enc.hechos
+                ? k.tramo.vacio
+                : `${k.tramo[enc.cerrado ? 'cerrado' : 'hecho']} ${mv.llena}`
+            }
           />
         ))}
       </div>
@@ -101,17 +106,43 @@ function Pie({ mes, enc }: { readonly mes: string; readonly enc: EncabezadoCierr
   );
 }
 
-/** Board CD-10's month: title, chip, progress, the seven steps and «Cerrar» or «Pedir reabrir». */
+/**
+ * The month's chip: «Abierto» carries the live dot (it pulses three times and
+ * rests), and «Cerrado» lands as a stamp only right after closing (ADR-161).
+ */
+function Chip({
+  chip,
+  sello,
+}: {
+  readonly chip: EncabezadoCierre['chip'];
+  readonly sello: boolean;
+}) {
+  const tono = chip.tono === 'cerrado' ? k.chipCerrado : i.tono[chip.tono];
+  const estampa = sello && chip.tono === 'cerrado' ? ` ${mv.sello}` : '';
+  return (
+    <span className={`${i.chipBase} ${tono}${estampa}`} data-testid="cierre-chip">
+      {chip.tono === 'off' ? <span className={mv.vivo} aria-hidden="true" /> : null}
+      {chip.texto}
+    </span>
+  );
+}
+
+/**
+ * Board CD-10's month: title, chip, progress, the seven steps and «Cerrar» or
+ * «Pedir reabrir». With ADR-161's motion (board CD-21d) it lands with the
+ * sweep, its steps enter with their checkmarks drawing and the bar fills.
+ */
 export function DelMes(props: {
   readonly mes: string;
   readonly enc: EncabezadoCierre;
   readonly pasos: readonly PasoVista[];
+  /** The month was closed by the action that brought the founder here. */
+  readonly sello: boolean;
 }) {
   const { mes, enc, pasos } = props;
-  const chip = enc.chip.tono === 'cerrado' ? k.chipCerrado : i.tono[enc.chip.tono];
   return (
     <section
-      className={`${m.hero} ${m.stack}`}
+      className={`${m.hero} ${m.stack} ${mv.aterriza} ${mv.barrido}`}
       aria-labelledby="cierre-titulo"
       data-testid="cierre-mes"
     >
@@ -123,12 +154,10 @@ export function DelMes(props: {
           </h2>
           <span className={i.muted}>{enc.subtitulo}</span>
         </div>
-        <span className={`${i.chipBase} ${chip}`} data-testid="cierre-chip">
-          {enc.chip.texto}
-        </span>
+        <Chip chip={enc.chip} sello={props.sello} />
       </div>
       <Progreso enc={enc} total={pasos.length} />
-      <ol className={k.pasos} aria-label="Pasos del cierre">
+      <ol className={`${k.pasos} ${mv.escalona}`} aria-label="Pasos del cierre">
         {pasos.map((p) => (
           <UnPaso key={p.id} mes={mes} p={p} />
         ))}

@@ -6,12 +6,14 @@ import { ESCENARIOS, type BarraCaja, type GraficaCaja } from '@/server/empresa/c
 import * as c from '@/styles/mostrador-caja.css';
 import * as g from '@/styles/mostrador-graficas.css';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 
 /**
  * «Caja al cierre de cada mes» (board CD-15c): each bar an SVG in a 0–100 box,
  * so heights are attributes, never inline styles. A scenario is a link: the
- * page redraws the projection on the server.
+ * page redraws the projection on the server. The bars grow in turn, the real
+ * months first, and the reserve line draws (ADR-161).
  */
 function Escenarios({ actual }: { readonly actual: Escenario }) {
   return (
@@ -69,14 +71,15 @@ function Barra({ b, reservaAlto }: { readonly b: BarraCaja; readonly reservaAlto
             width={70}
             y={100 - visible(b.alto)}
             height={visible(b.alto)}
-            className={b.real ? c.rect.real : c.rect.proyectada}
+            className={`${b.real ? c.rect.real : c.rect.proyectada} ${mv.crece}`}
           />
           <line
             x1={0}
             x2={100}
             y1={100 - reservaAlto}
             y2={100 - reservaAlto}
-            className={c.rect.reserva}
+            className={`${c.rect.reserva} ${mv.traza}`}
+            pathLength={1}
           />
         </svg>
       </div>
@@ -106,7 +109,7 @@ export function Grafica({
       </div>
       <Leyenda reserva={d.reserva} />
       <div className={c.grafica}>
-        <ol className={c.barras} aria-label="Caja al cierre de cada mes">
+        <ol className={`${c.barras} ${mv.escalona}`} aria-label="Caja al cierre de cada mes">
           {d.barras.map((b) => (
             <Barra key={b.mes} b={b} reservaAlto={d.reservaAlto} />
           ))}

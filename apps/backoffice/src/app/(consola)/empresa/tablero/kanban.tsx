@@ -10,10 +10,15 @@ import {
 } from '@/server/empresa/tablero-view';
 import type { ColumnaVista } from '@/server/empresa/tablero-vista';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as t from '@/styles/mostrador-tablero.css';
 import * as m from '@/styles/mostrador.css';
 
-/** The quarter's kanban (board CD-13b): the filter chips and four columns of cards. */
+/**
+ * The quarter's kanban (board CD-13b): the filter chips and four columns of
+ * cards. The cards enter column by column (ADR-161) and «En curso» carries
+ * the live dot.
+ */
 const ETIQUETA: Record<Filtro, string> = {
   todo: 'Todo',
   f1: 'Fundador 1',
@@ -27,7 +32,11 @@ const CLASE = { entregable: 'Entregable', tarea: 'Tarea', obligacion: 'Obligaci�
 
 function Tarjeta({ k }: { readonly k: TarjetaVista }) {
   return (
-    <Link className={t.tarjeta} href={k.href as Route} data-testid="tablero-tarjeta">
+    <Link
+      className={`${t.tarjeta} ${mv.entra}`}
+      href={k.href as Route}
+      data-testid="tablero-tarjeta"
+    >
       <span className={t.tarjetaCabeza}>
         <span className={`${m.tagBase} ${t.clase[k.clase]}`}>{CLASE[k.clase]}</span>
         {k.valor === null ? null : <span className={t.tarjetaTitulo}>{k.valor}</span>}
@@ -78,12 +87,15 @@ export function Kanban(props: {
 function Columna({ c }: { readonly c: ColumnaVista }) {
   return (
     <section
-      className={`${t.columnaBase} ${t.columna[c.columna]}`}
+      className={`${t.columnaBase} ${t.columna[c.columna]} ${mv.escalona}`}
       aria-label={c.titulo}
       data-testid={`columna-${c.columna}`}
     >
       <span className={t.columnaTitulo}>
-        <span>{c.titulo}</span>
+        <span>
+          {c.columna === 'en_curso' ? <span className={mv.vivo} aria-hidden="true" /> : null}
+          {c.titulo}
+        </span>
         <span>{c.tarjetas.length}</span>
       </span>
       <span className={t.leyenda}>{c.pista}</span>

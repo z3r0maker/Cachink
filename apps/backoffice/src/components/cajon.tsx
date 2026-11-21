@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 import * as c from '@/styles/mostrador-limites.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 
 /** Closes the dialog it sits in: a `method="dialog"` form needs no script. */
@@ -33,7 +34,8 @@ function Cerrar() {
 /**
  * A drawer over the page (board CD-12d): a modal `<dialog>`, so focus stays
  * inside, Esc closes it and the page behind is inert. Its URL is the page's
- * with a parameter; closing goes back to the page's own.
+ * with a parameter; closing goes back to the page's own. It slides in from
+ * the right and its content enters once it has arrived (ADR-161 «Panel»).
  */
 export function Cajon(props: {
   readonly eyebrow: string;
@@ -53,11 +55,11 @@ export function Cajon(props: {
   return (
     <dialog
       ref={ref}
-      className={props.ancho === 'amplio' ? c.cajonAmplio : c.cajon}
+      className={`${props.ancho === 'amplio' ? c.cajonAmplio : c.cajon} ${mv.cajon}`}
       aria-labelledby="cajon-titulo"
       onClose={() => router.replace(props.cerrar as Route, { scroll: false })}
     >
-      <div className={c.cuerpo}>
+      <div className={`${c.cuerpo} ${mv.panel}`}>
         <div className={c.cabeza}>
           <div>
             <span className={m.eyebrow}>{props.eyebrow}</span>

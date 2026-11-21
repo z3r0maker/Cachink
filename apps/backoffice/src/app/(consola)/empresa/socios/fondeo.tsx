@@ -1,7 +1,9 @@
 import type { LlamadaConEstado } from '@xangarro/data-corp';
 import { formatDate, formatMoney, parseIsoDate } from '@xangarro/domain';
 
+import { Odometro } from '@/components/odometro';
 import { estadoMitad } from '@/server/empresa/socios-view';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
 
@@ -9,7 +11,8 @@ import { PagarMitadForm, PedirFondeoForm } from './formas';
 
 /**
  * The screen's hero (E-03): the open funding call with each partner's half,
- * or, when none is open, the form to ask for one.
+ * or, when none is open, the form to ask for one. It lands with the screen's
+ * sweep and its figure rolls (ADR-161).
  */
 function Mitad({
   call,
@@ -37,7 +40,10 @@ function Mitad({
 
 function SinFondeo({ hoy }: { readonly hoy: string }) {
   return (
-    <section className={`${m.hero} ${m.stack}`} aria-labelledby="fondeo">
+    <section
+      className={`${m.hero} ${m.stack} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="fondeo"
+    >
       <div className={s.heroText}>
         <span className={m.eyebrow}>Fondeo por mitades</span>
         <h2 id="fondeo" className={s.heroTitle}>
@@ -64,11 +70,14 @@ export function Fondeo({
 }) {
   if (call === null) return <SinFondeo hoy={hoy} />;
   return (
-    <section className={`${m.hero} ${s.heroRow}`} aria-labelledby="fondeo">
+    <section
+      className={`${m.hero} ${s.heroRow} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="fondeo"
+    >
       <div className={s.heroText}>
         <span className={m.eyebrow}>Fondeo por mitades</span>
         <h2 id="fondeo" className={s.heroTitle}>
-          {call.concepto}: {formatMoney(call.total)}
+          {call.concepto}: <Odometro texto={formatMoney(call.total)} />
         </h2>
         <span className={m.sub}>
           {formatMoney(call.porSocio)} cada uno · vence el {formatDate(parseIsoDate(call.vence))} ·
