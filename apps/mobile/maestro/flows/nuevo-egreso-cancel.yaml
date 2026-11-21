@@ -24,7 +24,7 @@ appId: mx.xangarro.mobile
 - extendedWaitUntil:
     visible: { id: 'registrar-gasto-sheet' }
     timeout: 5000
-- assertVisible: ".*Registrar gasto de \\$___.*"
+- assertVisible: ".*Registrar \\$___.*"
 - tapOn: { id: 'gasto-cancelar' }
 - extendedWaitUntil:
     notVisible: { id: 'registrar-gasto-sheet' }

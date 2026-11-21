@@ -67,7 +67,7 @@ tags:
 # OS keyboard ever rises to bury the pinned footer (the phone's software
 # keyboard once ate the guardar tap — the footer never saved).
 - tapOn: { id: 'gasto-guardar' }
-- assertVisible: ".*Registrar gasto de \\$___.*"
+- assertVisible: ".*Registrar \\$___.*"
 - assertVisible: { id: 'registrar-gasto-sheet' }
 
 # Happy: monto + categoría, and the sheet closes on the saved gasto.

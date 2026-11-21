@@ -40,7 +40,7 @@ function llenar(monto: string, concepto: string, categoria: string): void {
 describe('RegistrarGastoSheet · validación', () => {
   it('waits for the monto: blocked at zero, at junk, at three decimals', () => {
     const { onGuardar } = montarRegistrar();
-    expect(textoDe('gasto-guardar')).toContain('Registrar gasto de $___');
+    expect(textoDe('gasto-guardar')).toContain('Registrar $___');
     llenar('0.00', 'Cilindro de gas', 'Insumos');
     expect(textoDe('gasto-guardar')).toContain('$___');
     escribir('gasto-monto', '12.345');
@@ -68,7 +68,7 @@ describe('RegistrarGastoSheet · validación', () => {
     const { onGuardar, onClose } = montarRegistrar();
     llenar('150', 'Cilindro de gas', 'Insumos');
     escribir('gasto-proveedor', ' Gas Express ');
-    expect(textoDe('gasto-guardar')).toContain('Registrar gasto de $150.00');
+    expect(textoDe('gasto-guardar')).toContain('Registrar $150.00');
     fireEvent.click(screen.getByTestId('gasto-guardar'));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(onGuardar).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe('PagarRecurrenteSheet', () => {
     montarPagar();
     expect(screen.getByText('Pagar gas del local')).toBeInTheDocument();
     expect(screen.getByTestId('pagar-recurrente-tarjeta').textContent).toContain('Vence hoy');
-    expect(textoDe('gasto-guardar')).toContain('Registrar gasto de $350.00');
+    expect(textoDe('gasto-guardar')).toContain('Registrar $350.00');
     expect((screen.getByTestId('gasto-concepto') as HTMLInputElement).value).toBe('Gas del local');
   });
 
