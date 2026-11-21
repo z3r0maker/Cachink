@@ -94,12 +94,12 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **K-13** Teléfono: cobrar con CoDi (puente) — Bloqueada por: K-11, board KD-04 · Falta: todo. Sus boards (`CdMvCobro`, y `CdTbCobro`/`CdOpCobro` para tableta y caja) están dibujados y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:227`
 - [ ] `Media` **G-01** Boards: la página «Guías» del canvas — Bloqueada por: — · `26-guias.md:123`
 - [ ] `Media` **G-07** La voz de Don Cuentas: su descripción, sus líneas y su audio — Bloqueada por: — · `26-guias.md:191`
-- [ ] `Media` **G-04** Clips del teléfono: un flujo de Maestro graba cada guía — Bloqueada por: G-07 · `26-guias.md:226`
-- [ ] `Media` **G-10** Teléfono: «¿Cómo le hago?» detrás del botón de ayuda — Bloqueada por: G-01 · `26-guias.md:272`
-- [ ] `Media` **G-20** «Enséñame» en el teléfono: Don señala el botón de verdad — Bloqueada por: G-01, G-10 · `26-guias.md:332`
+- [ ] `Media` **G-04** Clips del teléfono: un flujo de Maestro graba cada guía — Bloqueada por: G-07 · `26-guias.md:230`
+- [ ] `Media` **G-10** Teléfono: «¿Cómo le hago?» detrás del botón de ayuda — Bloqueada por: G-01 · `26-guias.md:276`
+- [ ] `Media` **G-20** «Enséñame» en el teléfono: Don señala el botón de verdad — Bloqueada por: G-01, G-10 · `26-guias.md:336`
 - [ ] `Baja` **M-29** `dueno_nombre` sale del cable. · `19-movil-mostrador.md:66`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · Falta: todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:302`
-- [ ] `Baja` **G-40** Tienda de práctica — Bloqueada por: G-20 · `26-guias.md:402`
+- [ ] `Baja` **G-40** Tienda de práctica — Bloqueada por: G-20 · `26-guias.md:406`
 
 ### Portal (22)
 
@@ -114,8 +114,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **P-46** Quitar `ProximamenteState`, la deuda que el ADR-117 nombró — Bloqueada por: un board del canvas para el Diagnóstico con el modelo apagado · `04-portal.md:2056`
 - [ ] `Media` **P-49** Los errores del navegador llegan a Sentry y una pantalla que falla conserva el menú (ADR-162) — Bloqueada por: O-34 · `04-portal.md:2125`
 - [ ] `Media` **K-12** Portal: Negocio → Cobros → CoDi — Bloqueada por: K-11, boards KD-01 … KD-03 · Falta: todo, y la barrera de los boards vale la pena decirla en voz alta, porque la comparten K-13, K-15, K-23, K-24, K-30 y K-31: los **ocho** boards están dibujados desde el 2026-10-08 y siguen «waiting for the owner's approval» según el encabezado de `23-codi-design.md`. Seis semanas. No falta dibujar nada; falta una revisión del dueño, que es el desbloqueo más barato de todo el track. Después de eso, la mitad del track sólo espera a K-10 y K-11, que son código y no esperan a nadie más. · `22-codi.md:213`
-- [ ] `Media` **G-12** Portal: las guías con su clip, y tres entradas nuevas — Bloqueada por: G-01 · `26-guias.md:304`
-- [ ] `Media` **G-13** «Mándale la guía por WhatsApp» al dar de alta a quien cobra — Bloqueada por: G-01, G-30 · `26-guias.md:317`
+- [ ] `Media` **G-12** Portal: las guías con su clip, y tres entradas nuevas — Bloqueada por: G-01 · `26-guias.md:308`
+- [ ] `Media` **G-13** «Mándale la guía por WhatsApp» al dar de alta a quien cobra — Bloqueada por: G-01, G-30 · `26-guias.md:321`
 - [ ] `Baja` **P-29** Catálogo desde una foto — «Próximamente» en producción — Bloqueada por: P-30 · Falta: todo, sin empezar, y su cláusula de aceptación ya no se puede cumplir tal como está escrita: «production renders «Próximamente»» es exactamente lo que el ADR-117 retiró. Cuando esto se construya, el estado de producción es la omisión, no un letrero. Arréglalo junto con P-46. · `04-portal.md:1344`
 - [ ] `Baja` **P-39** Conclusiones de Don Cuentas en Estados financieros — Bloqueada por: P-30, P-28 · Falta: todo, y sus dos barreras siguen en pie: P-28 no tiene dónde guardar una conclusión por periodo y P-30 no tiene quién llame al modelo (`pedirProsa` no tiene un solo consumidor). Nada que replantear aquí hasta entonces. · `04-portal.md:1911`
 - [ ] `Baja` **P-40** Primer diagnóstico gratis a los 90 días — Bloqueada por: P-28 · Falta: todo. Depende de P-28 por la forma de la lectura corta, y el estado `diagFreeOffer` que la nota dice que el diseño ya dibuja no está en el código (los estados del Diagnóstico siguen siendo los del `ScreenState` compartido, que P-44 va a recortar). Cuando esto se construya, revisa que el estado nuevo no herede la compuerta retirada. · `04-portal.md:1930`
@@ -123,13 +123,13 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **P-47** Editar las plantillas de gastos recurrentes — Bloqueada por: — · Disparador: que alguien pida cambiar o detener una plantilla antes de que se dispare · `04-portal.md:2084`
 - [ ] `Baja` **N-86** Virtualizar `<List>` en web cuando una lista crezca — Bloqueada por: — · Disparador: que alguna lista del portal o de la caja web pase de ~200 filas en un negocio real · `09-next-features.md:1623`
 - [ ] `Baja` **K-23** Portal: pasar a confirmación automática — Bloqueada por: K-22, board KD-02 (certified state) · Falta: todo, y está detrás de toda la fase 2. Su board (`CdActivo`, KD-02) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12), pero eso no es lo que la detiene: la detiene K-22. · `22-codi.md:294`
-- [ ] `Baja` **G-06** Clips del portal y de la caja web: un proyecto de Playwright que graba — Bloqueada por: G-05 · `26-guias.md:259`
-- [ ] `Baja` **G-21** «Enséñame» en el portal — Bloqueada por: G-12, G-20 · `26-guias.md:348`
+- [ ] `Baja` **G-06** Clips del portal y de la caja web: un proyecto de Playwright que graba — Bloqueada por: G-05 · `26-guias.md:263`
+- [ ] `Baja` **G-21** «Enséñame» en el portal — Bloqueada por: G-12, G-20 · `26-guias.md:352`
 
 ### Caja web (3)
 
 - [ ] `Media` **K-14** Caja web: cobrar con CoDi (puente) — Bloqueada por: K-13 · Falta: todo, y su camino ya está pavimentado por otra razón: `@xangarro/caja` (ADR-118) existe y el teléfono y la caja web ya comparten por ahí las derivaciones del cobro y del cierre, así que esto es la misma pantalla al tamaño de la caja, como dice, y no una segunda implementación. · `22-codi.md:238`
-- [ ] `Media` **G-11** Caja web: la misma puerta y las mismas guías — Bloqueada por: G-01 · `26-guias.md:293`
+- [ ] `Media` **G-11** Caja web: la misma puerta y las mismas guías — Bloqueada por: G-01 · `26-guias.md:297`
 - [!] `Baja` **P-37** Impresión de tickets desde la caja — Falta: el diferimiento sigue siendo correcto y su premisa se sostiene: no hay un solo «Imprimir» en la caja. Los tres que existen en el portal son otros (los códigos de recuperación de Seguridad y los estados financieros), así que nada regresa por esperar. · `04-portal.md:1879`
 
 ### Pagos y conciliación (18)
@@ -184,8 +184,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 
 - [ ] `Media` **C-21** Interruptores de apagado en la sincronización — Falta: todo, y la decisión del 2026-09-26 sigue sin aplicarse: `EntitlementSchema` dice `features: z.array(z.enum(FEATURE_FLAG_KEYS))`, no `PLATFORM_FLAG_KEYS`. El único lector de un interruptor en todo el repo es el portal (`server/comprobante/pausa.ts`, que lee `platform.comprobanteShare`); ni la caja ni el teléfono tienen por dónde. Dos cosas que conviene saber antes de ensanchar el campo. Una: hoy apagar `comprobanteShare` detiene la imagen que hace el servidor y **no** detiene al teléfono, porque desde M-07 el teléfono arma el comprobante en texto él mismo (`packages/ui/src/screens/Checkout/comprobante-acciones.ts`) y nunca pregunta. Eso es exactamente el hueco que esta tarea describe, ya con la superficie nombrada. Dos: `cobrosIntegrados` es a la vez interruptor (`KILL_SWITCH_KEYS`) y capacidad de plan (`capabilities.cobrosIntegrados` en el mismo entitlement). Ensanchar `features` lo pondría dos veces en la misma carga útil con dos significados, así que el dispositivo necesita saber cuál manda; decídelo en la tarea, no en el lector. · `02-contracts.md:578`
 - [ ] `Media` **B-20** El journal de drizzle de Postgres, al día y con guarda — Bloqueada por: — · `03-backend.md:365`
-- [ ] `Media` **G-05** Publicar los clips: dónde viven y cómo llegan — Bloqueada por: G-04 · `26-guias.md:246`
-- [ ] `Media` **G-22** Qué buscó la gente y no encontró — Bloqueada por: G-10 · `26-guias.md:356`
+- [ ] `Media` **G-05** Publicar los clips: dónde viven y cómo llegan — Bloqueada por: G-04 · `26-guias.md:250`
+- [ ] `Media` **G-22** Qué buscó la gente y no encontró — Bloqueada por: G-10 · `26-guias.md:360`
 - [ ] `Media` `ASESOR_LLM_*` nunca apuntado a un proxy personal con datos reales de tenants (agregar una salvaguarda). — Falta: la salvaguarda no existe. `clienteModelo` acepta cualquier `ASESOR_LLM_BASE_URL` con cualquier llave, sin mirar el entorno ni el destino; el propio encabezado del módulo documenta el proxy local como el camino de localhost. La buena noticia es el momento: nadie llama al modelo todavía (`pedirProsa` no tiene consumidor, ver P-30), así que la salvaguarda se puede poner **antes** de la primera llamada, que es cuando sale gratis. Lo más barato que cumple el renglón es rechazar en producción un `baseURL` que no sea el host de Foundry (o que apunte a localhost o a una IP privada), en el mismo `clienteModelo` y con prueba. · `../launch/production-readiness.md:211`
 - [ ] `Media` Regla: la frontera de modelos del Asesor sigue siendo el único módulo que sabe que existe un modelo; la IA se… — Falta: este renglón tiene dos mitades y están en estados distintos. La primera se cumple **de hecho**: `@anthropic-ai/sdk` lo importa exactamente un archivo, `apps/web/src/server/asesor/model.ts`, y la dependencia sólo la declara `apps/web`. Pero nada lo hace cumplir: no hay regla de ESLint que restrinja ese import, así que se sostiene por disciplina, y el repo ya tiene el molde para arreglarlo (`no-restricted-imports` con mensaje, en `packages/config/eslint.config.js`). La segunda mitad está **contradicha por el código**: el encabezado de `pedirProsa` dice que toda restricción de inyección es «the caller's» y que la frontera sólo rechaza una credencial ausente. O sea que la lista negativa no se aplica ahí, y hoy no se aplica en ningún lado porque no hay quien llame. Decide cuál gana — el renglón o el módulo — y escríbelo en los dos lugares; si gana el renglón, la lista negativa se aplica dentro de `pedirProsa` y se prueba ahí. · `../launch/production-readiness.md:213`
 - [ ] `Baja` **N-47** Anuncios a todos los inquilinos — Disparador: la primera ventana de mantenimiento planeada o el primer lanzamiento de funcionalidad tras salir a producción. · Falta: todo; el disparador no ha ocurrido y no puede ocurrir antes del lanzamiento. Su cimiento sí está: la tabla `notices` del ADR-060 existe en el esquema de Postgres y la campana del portal y la del teléfono ya la leen, así que esto es redacción y filtro, no plomería nueva. · `09-next-features.md:1199`
@@ -229,7 +229,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Baja` **S-23** Grafo de evidencia — Bloqueada por: S-17, S-20 · `24-synth.md:488`
 - [ ] `Baja` **S-24** Laboratorio de narrativa — Bloqueada por: S-23 · `24-synth.md:497`
 - [ ] `Baja` **S-25** Hallazgos al buzón `kind=explorador` — Disparador: the owner asks for Synth findings in the support inbox (N-05's source list). · `24-synth.md:508`
-- [ ] `Baja` **G-23** Synth mide si la ayuda sirve — Bloqueada por: G-10, S-11 · `26-guias.md:369`
+- [ ] `Baja` **G-23** Synth mide si la ayuda sirve — Bloqueada por: G-10, S-11 · `26-guias.md:373`
 
 ### Lanzamiento, stores e integración (6)
 
@@ -245,8 +245,8 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **L-05** Badges de tienda + páginas legales — Bloqueada por: X-05 (URLs reales de tienda) · Falta: `/privacidad/`, `/privacidad/arco/` y ahora `/terminos/` ya existen en el landing — la ruta de términos llegó el 2026-09-24 (`4f39a7f8`, `src/pages/legal/Terminos.jsx`, renderizada desde `docs/legal/aviso/terminos-borrador.md`, enlazada desde el footer). Falta: `docs/legal/terms.md` sigue siendo el texto previo al pivote (no incluye ni el periodo de gracia de 7 días ni el downgrade) y se retira en cuanto se apruebe el borrador, y los badges de tienda esperan las URLs reales de X-05. **Verificado el 2026-11-19 contra el repo**, las dos mitades siguen exactas. `docs/legal/terms.md` sigue ahí y sigue siendo el texto previo al pivote: cero menciones de «gracia» o «grace» en todo el archivo. Y el landing no tiene un solo badge ni enlace de tienda — lo único que lo toca es `/soporte`, la página a la que **apuntan** las fichas (X-05, ADR-136), no la que apunta a ellas. Una precisión del orden: el badge de Apple se puede poner en cuanto exista la URL de la ficha, y la de Google llega en diciembre según el orden de lanzamiento, así que esto aterriza en dos pasos, no en uno. · `06-landing.md:89`
 - [~] `Media` **N-58** Etapa 4 — compras + landing. — Falta: el bloqueo legal sigue en pie pero encogió, y su referencia se rompió. Lo que sigue cierto: los cuatro borradores del aviso siguen marcados «BORRADOR … No publicar», no hay variante para un visitante del sitio (siguen siendo A, B y C) y la revisión del abogado sigue abierta. Lo que cambió: de los nueve huecos ya sólo queda **uno** — `[PAÍS]`, una vez, en el renglón de Mercado Pago y Clip de `encargado-clausulas.md` — porque la razón social se constituyó el 2026-10-28 y los demás se llenaron. Y la «OQ Variante D» a la que esta nota manda **ya no existe**: el README del aviso lleva OQ-L1 … OQ-L10 y ninguna es ésa, así que la pregunta se quedó sin casa. Vale replantearla con lo que hoy dice el aviso simplificado: el pie del landing enlaza el aviso integral «sin texto simplificado», y la pregunta es si un visitante al que un pixel cuenta necesita el simplificado o le basta el integral. Eso lo contesta el abogado en la misma pasada, no una tarea de ingeniería. El gancho del checkout sigue sin ese bloqueo y puede salir solo, como dice arriba. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1 · `09-next-features.md:1297`
 - [ ] `Media` **K-31** Landing: «Cobra con CoDi» — Bloqueada por: K-02 (the claims), K-13 · Falta: todo. El landing no tiene ninguna sección de CoDi, y su board (`CdLanding`, KD-08) está dibujado y sin aprobar desde el 2026-10-08 (ver K-12). De sus dos barreras, la que manda es K-02: las afirmaciones las fija la opinión legal, y esto es una página que promete algo. · `22-codi.md:330`
-- [ ] `Media` **G-30** Una página pública por guía en xangarro.mx — Bloqueada por: G-01, G-05 · `26-guias.md:381`
-- [ ] `Baja` **G-31** Los mismos clips en YouTube, TikTok y Reels — Bloqueada por: G-30, L-10 · `26-guias.md:392`
+- [ ] `Media` **G-30** Una página pública por guía en xangarro.mx — Bloqueada por: G-01, G-05 · `26-guias.md:385`
+- [ ] `Baja` **G-31** Los mismos clips en YouTube, TikTok y Reels — Bloqueada por: G-30, L-10 · `26-guias.md:396`
 
 ## Corporativo, legal y terceros (38)
 
@@ -408,8 +408,8 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 
 ### `26-guias.md` · 5. Tasks (2)
 
-- [ ] `Baja` **G-41** Preguntar con tus palabras — Bloqueada por: G-22 · Disparador: the Asesor's model runs in production, and G-22 shows searches the guides cannot answer by matching words · `26-guias.md:410`
-- [ ] `Baja` **G-42** Atención al cliente automatizada con IA, WhatsApp incluido — Bloqueada por: G-22 · Disparador: after the MVP, when the owner opens customer service as a project, with G-22's numbers in hand · `26-guias.md:419`
+- [ ] `Baja` **G-41** Preguntar con tus palabras — Bloqueada por: G-22 · Disparador: the Asesor's model runs in production, and G-22 shows searches the guides cannot answer by matching words · `26-guias.md:414`
+- [ ] `Baja` **G-42** Atención al cliente automatizada con IA, WhatsApp incluido — Bloqueada por: G-22 · Disparador: after the MVP, when the owner opens customer service as a project, with G-22's numbers in hand · `26-guias.md:423`
 
 ## Por archivo
 

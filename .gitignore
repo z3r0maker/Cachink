@@ -71,8 +71,8 @@ packages/ui/storybook-static/
 packages/ui/playwright-report/
 packages/ui/test-results/
 
-# The lines Don Cuentas still has to say: rewritten by `pnpm guias:voz` (ADR-163).
-packages/guias/voz/pendientes.json
+# Takes of Don Cuentas's voice to choose from; the one kept is committed (ADR-163).
+packages/guias/voz/muestras/
 
 # Maestro E2E reports — generated data (viewer is checked in)
 e2e-reports/runs/

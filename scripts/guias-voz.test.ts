@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { describe, it } from 'vitest';
 
 import { GUIAS, VOZ_DON, type Guia } from '../packages/guias/src/index.js';
+import { siguienteToma } from './guias-voz-grabar.js';
 import { CARPETA, audios, estado, lineas } from './guias-voz-lineas.js';
 
 const ROOT = join(import.meta.dirname, '..');
@@ -136,5 +137,19 @@ describe('audios: the line files on disk', () => {
 
   it('finds none where nothing was ever recorded', () => {
     assert.deepEqual(audios(join(tmpdir(), 'guias-voz-no-existe')), []);
+  });
+});
+
+describe('siguienteToma: the number of the next take of the voice', () => {
+  it('starts at one', () => {
+    assert.equal(siguienteToma([]), 1);
+  });
+
+  it('goes one past the highest take, whatever order they come in', () => {
+    assert.equal(siguienteToma(['toma-2.wav', 'toma-10.wav', 'toma-1.wav']), 11);
+  });
+
+  it('ignores files that are not takes', () => {
+    assert.equal(siguienteToma(['linea-de-prueba.wav', 'toma-3.m4a', 'toma-x.wav']), 1);
   });
 });

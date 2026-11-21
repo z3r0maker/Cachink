@@ -189,18 +189,22 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 ### G-07 La voz de Don Cuentas: su descripción, sus líneas y su audio [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** G-04
-- **The workspace's half is done (2026-11-21); the owner's is not.** In the repo: the voice's
-  description and the sample's words (`packages/guias/src/voz.ts`), `pnpm guias:voz` with its
-  `--check`, and the runner `scripts/guias-voz-qwen.py`. A line's file is named after a hash of
-  its words and of the voice's version (`packages/guias/voz/<guía>/<paso>-<huella>.m4a`), so the
-  name is the record and nothing else has to remember it. There are 30 lines.
-- **Left, in order:** the owner runs `muestra`, listens, and keeps a sample; runs `lineas`;
-  listens to a few; commits `packages/guias/voz/`. Then `scripts/guias-voz.test.ts` is tightened
-  to demand every line (today it only refuses stale or unnamed audio, so CI stays green before
-  the voice exists).
-- **Not yet proven:** the runner was written from mlx-audio's README and source and has not been
-  run against the models. The licence was read again on 2026-11-21: Apache 2.0 on both model
-  cards. How Mexican the accent comes out is still to be heard.
+- **The tooling is done and proven (2026-11-21); the voice is not chosen.** In the repo: the
+  voice's description and the sample's words (`packages/guias/src/voz.ts`) and `pnpm guias:voz`
+  (`muestra`, `usar <n>`, `lineas`, `--check`). A line's file is named after a hash of its words
+  and of the voice's version (`packages/guias/voz/<guía>/<paso>-<huella>.m4a`), so the name is
+  the record and nothing else has to remember it. There are 30 lines.
+- **It speaks through oMLX,** which the owner already runs: both models sit in its models
+  folder and the command posts to its speech route. No Python, nothing installed in the
+  workspace. A take of the sample and a line in its voice were both generated this way. oMLX
+  wants the reference clip as base64, not a path.
+- **Left, in order:** the owner listens to the takes in `packages/guias/voz/muestras/` and keeps
+  one (`usar <n>`), or asks for the description to change; then `lineas`; he listens to a few;
+  `packages/guias/voz/` is committed. Then `scripts/guias-voz.test.ts` is tightened to demand
+  every line (today it only refuses stale or unnamed audio, so CI stays green before the voice
+  exists).
+- **Still to be heard:** how Mexican the accent comes out. The licence was read again on
+  2026-11-21: Apache 2.0 on both model cards.
 - **What:** three things, in order.
   1. One description of the voice in words (a warm, playful shopkeeper from Mexico), kept in the
      package. The owner generates a reference sample from it with Qwen3-TTS VoiceDesign and
