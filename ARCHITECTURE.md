@@ -201,6 +201,7 @@ Links to discussion, docs, prior art.
 | [160](#adr-160) | 2026-11-20 | The console signs in with passkeys only; its password and TOTP are retired | Accepted |
 | [161](#adr-161) | 2026-11-20 | The founders' «Empresa» console has a motion vocabulary of its own: eleven patterns that run once when a screen opens, never loop, keep every figure readable, and take their values from `consoleMotion` tokens | Accepted |
 | [162](#adr-162) | 2026-11-20 | Error reports are on by default and a report sent by hand always sends; the phone's door to report is a help button in the header, and no report carries a screenshot | Accepted |
+| [163](#adr-163) | 2026-11-20 | People learn inside the product: guides have one home, their clips are recorded by the tests and narrated in one invented voice, and the phone's help button opens two cards | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -11765,3 +11766,110 @@ patrimonial data, which these reports do not carry. **That reading is ours, not 
 - Sentry's free plan holds 5,000 errors a month. One noisy bug can use it up, which is what the alert is for.
 - The web caja shares the linking aviso's copy with the phone. Its new line is true there only once the browser
   SDK is live (P-49), so the line ships per surface.
+
+---
+
+## ADR-163
+
+**Title:** People learn inside the product: guides have one home, their clips are recorded by the tests and
+narrated in one invented voice, and the phone's help button opens two cards
+
+**Date:** 2026-11-20
+
+**Status:** Accepted — seven decisions by the owner, 2026-11-20, asked one at a time; amends ADR-162 decision 1
+(what the phone's help button opens) and its board `RpPuerta`; builds on ADR-107 (the portal's «Ayuda»); leaves
+ADR-117 as it is (the practice shop gets its own ADR); the canvas page «Guías» (boards `Gu*`) was drawn the same
+day and is **not yet approved** (G-01: no code before it); tasks G-01 to G-42 in `docs/plan/26-guias.md`
+
+**Context**
+
+The owner asked on 2026-11-20 how people who are not technical will learn Xangarro: whether to make short videos,
+whether to host them or put them on YouTube, and what has replaced the tutorial library of the 1990s.
+
+Checked against `origin/main` that day:
+
+- **The portal already teaches in place.** «Ayuda» (ADR-107) has a search that ignores accents, twelve answers and
+  four guides that Don Cuentas walks a step at a time, and «¿Cómo empiezo?» is a checklist on Inicio.
+- **The phone and the web caja teach nothing.** They are where the first sale happens. Their only help entry is
+  the report button of ADR-162, drawn and not built.
+- **The tests already do every job a guide would teach.** 73 Maestro flows and 105 Playwright specs make a sale,
+  open and close a shift and create a product, start to end, on invented data. Maestro and Playwright both record
+  video.
+- **A guide's text lives in `apps/web`,** so the phone could only show one by copying it (§2.3).
+
+A study of Mexican retailers by Stanford GSB found that 12% kept using digital payments when simply handed a
+device, and that structured onboarding cut the cost per active merchant by up to 63%. The figures that say
+interactive guidance beats video come from vendors that sell it and are not relied on here.
+
+**Decision**
+
+1. **A guide has one home, the package `@xangarro/guias`.** Its words, its steps, the line said aloud at each step,
+   the screen it leads to and its clip are written once. The portal, the web caja, the phone and the landing read
+   them from there. The package has no dependencies, like `@xangarro/tokens`.
+2. **The phone's help button opens two cards, «¿Cómo le hago?» and «Algo no funciona»** (owner decision 1). This
+   amends ADR-162 decision 1, which opened the report sheet directly. The sheet behind the second card stays as
+   ADR-162 decided it. M-23 ships the button with the report sheet behind it; G-10 puts the cards between them.
+3. **A clip is recorded by a test, never filmed.** A Maestro flow (phone) or a Playwright spec (portal, web caja)
+   does the job on invented data while the screen is recorded, and a script cuts the result. The same flow runs
+   in the regression, so a screen that changed fails there before its clip goes stale.
+4. **Clips are narrated, everywhere, in one invented voice** (owner decision 4; the recommendation was silent
+   clips). The voice is Don Cuentas's, described in words and never copied from a real person. The repo holds the
+   description and the line for each step. The owner generates the audio on his own machine with Qwen3-TTS: its
+   VoiceDesign model makes one reference sample from the description, and its Base model says every line in that
+   voice. The model is a tool the owner runs, not a dependency of the workspace.
+5. **A line's audio is committed with the hash of the words it was made from,** and a check fails while a line
+   has no audio or its words changed afterwards. A clip is never published with a voice that says something else.
+6. **Sound never starts by itself, and a step's words are on screen while its clip plays.** This was not one of the
+   owner's seven decisions; it is what makes a narrated clip usable with the phone muted, in a noisy shop and by
+   someone who cannot hear (WCAG 1.4.2 and 1.2.2). Under reduced motion a clip shows its poster and the steps.
+7. **Inside the product a clip is our own file; YouTube carries the public copy** (owner decision 3). The portal's
+   CSP opens to that one origin, for media only. The owner uploads the public copies; nothing posts by itself.
+8. **The steps never need a connection.** They ship inside the app. A clip that is missing or cannot load leaves
+   the steps alone on screen, with no placeholder.
+9. **A practice shop is agreed, for later** (owner decision 2), after the guides, the clips and «Enséñame». This
+   ADR does not define it. ADR-117's rule against fixture data on a live screen stands until G-40 writes the ADR
+   that does.
+10. **Asking in your own words waits** (owner decision 5) for the Asesor's production gate, and for evidence from
+    the missed searches that matching words is not enough.
+11. **No WhatsApp help line now** (owner decision 6). Row 13 of Track N stands: no API and no unofficial
+    automation. The owner kept it for after the MVP as automated customer service with AI (G-42). Guides are
+    shared by `wa.me` links, which need no API.
+12. **The help remembers three things** (owner decision 7): the guide opened, whether it was finished, and the
+    words of a search that found nothing. They are kept with the business, never with a person or a device, and
+    deleted after 90 days.
+13. **No third-party onboarding SDK.** «Enséñame» is our own overlay, with Don Cuentas pointing at the real
+    control, and each step names its target by the testID its Maestro flow already uses.
+
+**Alternatives considered**
+
+- _A library of videos on YouTube as the way to learn._ It needs a connection, sends the person out of the app at
+  the moment they are stuck, and shows other people's videos beside ours. It stays as the public copy.
+- _YouTube embeds inside the product._ Nothing to host, but the same three problems, and it opens the portal's
+  CSP to a third party's scripts.
+- _Silent clips beside the written steps_ (the recommendation). Nothing to generate again when a word changes.
+  The owner chose a voice and offered to generate it locally; decision 5 is what keeps it from going stale.
+- _A voice copied from a recording_ (Chatterbox, XTTS, F5-TTS). It needs a real person's voice and their written
+  consent, and ties the product to whoever lent it.
+- _A hosted voice service._ A cost per character, and one more processor, for audio the owner can make at home.
+- _A tour on first launch._ People close it before they have a reason to read it.
+- _Userflow, Appcues and similar._ Built for the web, a monthly cost, and they draw over El Mostrador instead of
+  through Don Cuentas.
+- _An AI answer from day one._ It waits on the same data agreements as the Asesor either way, costs per question,
+  needs a connection, and can invent a step that does not exist.
+
+**Consequences**
+
+- ADR-162's board `RpPuerta` is drawn again with the two cards, and M-23's Maestro flows (`bug-report-sheet`,
+  `bug-report-enviar`) change again when G-10 lands.
+- **A narrated guide cannot ship without the owner's machine.** Today only he can generate the voice. The check of
+  decision 5 makes a missing line visible; a guide with no clip still shows its steps.
+- A spoken line is interface copy: es-MX, reviewed with the boards, and Don still never tells the operator what
+  the business should do (ADR-117).
+- A guide's words on the phone ship in the build, and there are no OTA updates yet, so a changed word waits for
+  the next build. Its clip is fetched, so a clip can be newer than the steps beside it until then.
+- The repo grows by the audio: a mono compressed file per line, about a megabyte or two for the first eight
+  guides. Clips are build output and are not committed.
+- Recording takes a Maestro lane (ADR-157) and is a local step, like the release itself.
+- The aviso de privacidad is read against decision 12 before G-22 ships.
+- Qwen3-TTS was Apache 2.0 on 2026-11-20 (github.com/QwenLM/Qwen3-TTS). Its licence and how Mexican its Spanish
+  sounds are both checked again when G-07 starts; a different model changes nothing here but its name.
