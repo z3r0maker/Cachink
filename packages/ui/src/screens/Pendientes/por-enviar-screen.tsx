@@ -1,27 +1,25 @@
 /**
- * PorEnviarScreen — «Registros por enviar» (Track M, M-09; the board
- * `Operador Pendientes` said on the phone): the local queue's face, not only
- * its rejections. The hero says which phase the queue is in (en espera, sin
- * internet, enviando, todo enviado, con rechazados) and retries the whole
- * flush; «La cola» lists what waits; «El servidor no aceptó» shows what the
- * server refused, each with its sentence. Presentational: the route hands
- * it `usePorEnviar()`.
+ * PorEnviarScreen: «Registros por enviar» (Track M, M-09; board RvEnvio).
+ * The local queue's face: one line says how many wait and that they send
+ * themselves; «La cola» lists them in order; «El servidor no aceptó» shows
+ * what the server refused, each with its sentence; and one footer button in
+ * the thumb zone flushes («Reintentar ahora») or requeues the refused
+ * («Reintentar»). Presentational: the route hands it `usePorEnviar()`.
  */
 import type { ReactElement } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import type { Fase, RegistroEnCola } from '@xangarro/caja/pendientes';
 import {
-  heroeTelefono,
   intro,
+  pieCola,
+  type Fase,
   type FaseCola,
-  type HeroeCola,
   type RechazoVisto,
+  type RegistroEnCola,
 } from '@xangarro/caja/pendientes';
+import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
-import { GLYPHS } from '../../components/PathIcon/glyphs';
-import { PathIcon } from '../../components/PathIcon/index';
-import { borderWidths, colors, radii, shapeRadii } from '../../theme';
+import { borderColors, borderWidths, colors, radii } from '../../theme';
 import { ColaPanel } from './cola-panel';
 import { NadaSePierde, TodoEnviado } from './por-enviar-don';
 import { EstadosCaja } from './estados';
@@ -45,82 +43,55 @@ export interface PorEnviarScreenProps {
 
 const SIN_INTERNET = 'sin-internet' as const;
 
-const TINTES: Record<FaseCola, { readonly fondo: string; readonly texto: string }> = {
-  espera: { fondo: colors.warningSoft, texto: colors.warningText },
-  'sin-internet': { fondo: colors.warningSoft, texto: colors.warningText },
-  enviando: { fondo: colors.blueSoft, texto: colors.blueText },
-  enviado: { fondo: colors.greenSoft, texto: colors.greenText },
-  'con-rechazados': { fondo: colors.redSoft, texto: colors.redText },
-};
+/** The phase the line and the footer speak for: offline wins. */
+const faseVista = (p: PorEnviarScreenProps): FaseCola =>
+  p.state === SIN_INTERNET ? SIN_INTERNET : p.fase;
 
-function HeroeCabeza(p: { readonly fase: FaseCola; readonly h: HeroeCola }): ReactElement {
-  const tono = TINTES[p.fase];
+/** RvEnvio's line: how many wait, and that they send themselves. */
+function Aviso(p: { readonly texto: string; readonly enviando: boolean }): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" gap={10}>
-      <View
-        width={44}
-        height={44}
-        alignItems="center"
-        justifyContent="center"
-        borderRadius={shapeRadii.pill}
-        backgroundColor={tono.fondo}
-      >
-        <PathIcon
-          d={p.fase === 'enviado' ? GLYPHS.check : GLYPHS.nube}
-          size={20}
-          strokeWidth={2.4}
-          color={tono.texto}
-        />
-      </View>
-      <View gap={1} flex={1}>
-        <MText size="xs" weight="extraBold" color={tono.texto}>
-          {p.h.eyebrow}
-        </MText>
-        <MText size="lg" weight="extraBold">
-          {p.h.titulo}
-        </MText>
-      </View>
+    <View
+      testID="por-enviar-aviso"
+      role="status"
+      padding={12}
+      borderRadius={radii[3]}
+      borderWidth={borderWidths.quiet}
+      borderColor={p.enviando ? colors.blueText : colors.warningText}
+      backgroundColor={p.enviando ? colors.blueSoft : colors.warningSoft}
+    >
+      <MText size="sm" weight="extraBold" color={colors.ink} lineHeight={19}>
+        {p.texto}
+      </MText>
     </View>
   );
 }
 
-function Heroe(p: PorEnviarScreenProps & { readonly fase: FaseCola }): ReactElement {
-  const h = heroeTelefono(p.fase, p.cola, p.rechazados.length, p.ultima ?? null);
-  const enviando = p.fase === 'enviando';
+/** The one retry, in the thumb zone: flush, or requeue what a person must. */
+function Pie(p: PorEnviarScreenProps): ReactElement {
+  const pie = pieCola(faseVista(p), p.cola);
+  const personas = p.rechazados.filter((x) => !x.reintentando);
+  const requeue = p.fase === 'con-rechazados';
+  const quieto = pie.ocupado || (requeue && personas.length === 0);
+  const correr = (): void => (requeue ? p.onReintentarRechazado(personas) : p.onReintentar());
   return (
     <View
-      testID="por-enviar-heroe"
-      role="status"
-      gap={10}
       padding={16}
-      borderRadius={radii[4]}
-      borderWidth={borderWidths.quiet}
+      paddingTop={12}
+      borderTopWidth={borderWidths.quiet}
+      borderTopColor={borderColors.quiet}
       backgroundColor={colors.white}
     >
-      <HeroeCabeza fase={p.fase} h={h} />
-      <MText size="sm" weight="semibold" color={colors.gray600} lineHeight={19}>
-        {h.cuerpo}
-      </MText>
-      <Pressable
+      <Btn
+        variant="primary"
+        size="xl"
+        sentence
+        fullWidth
+        disabled={quieto}
+        onPress={quieto ? undefined : correr}
         testID="por-enviar-reintentar"
-        role="button"
-        accessibilityLabel={h.boton}
-        aria-disabled={enviando}
-        onPress={enviando ? undefined : p.onReintentar}
-        style={{
-          paddingVertical: 14,
-          alignItems: 'center',
-          borderRadius: radii[2],
-          borderWidth: borderWidths.thin,
-          borderColor: colors.black,
-          backgroundColor: enviando ? colors.gray100 : colors.yellow,
-          opacity: enviando ? 0.7 : 1,
-        }}
       >
-        <MText size="md" weight="extraBold">
-          {h.boton}
-        </MText>
-      </Pressable>
+        {pie.boton}
+      </Btn>
     </View>
   );
 }
@@ -138,20 +109,35 @@ function Cabeza(p: { readonly vacia: boolean }): ReactElement {
   );
 }
 
-/** The queue with data: hero, cola, refusals and the note. */
+/** The queue with data: the line, the cola, refusals and Don's note. */
 function ConDatos(p: PorEnviarScreenProps): ReactElement {
   const offline = p.state === SIN_INTERNET || p.fase === SIN_INTERNET;
   const faseFila: Fase = p.fase === 'enviando' ? 'enviando' : 'espera';
-  const faseHeroe = p.state === SIN_INTERNET ? SIN_INTERNET : p.fase;
+  const pie = pieCola(faseVista(p), p.cola);
   return (
     <>
-      <Heroe {...p} fase={faseHeroe} />
+      {pie.aviso === null ? null : <Aviso texto={pie.aviso} enviando={pie.ocupado} />}
       <ColaPanel cola={p.cola} fase={faseFila} offline={offline} onIrACierre={p.onIrACierre} />
-      {p.rechazados.length > 0 ? (
-        <RechazadosPanel rechazados={p.rechazados} onReintentar={p.onReintentarRechazado} />
-      ) : null}
+      {p.rechazados.length > 0 ? <RechazadosPanel rechazados={p.rechazados} /> : null}
       <NadaSePierde />
     </>
+  );
+}
+
+function Cuerpo(p: PorEnviarScreenProps & { readonly alDia: boolean; readonly base: string }) {
+  if (p.alDia) return <TodoEnviado {...p} />;
+  if (p.state === 'happy' || p.state === SIN_INTERNET) return <ConDatos {...p} />;
+  if (p.state === 'cargando') {
+    return <EstadosCaja id="cargando" titulo="Leyendo la cola de esta caja…" testID={p.base} />;
+  }
+  return (
+    <EstadosCaja
+      id="falla"
+      titulo="No pudimos leer la cola de esta caja"
+      cuerpo="Nada se pierde: sigue todo guardado aquí. Vuelve a intentar en un momento."
+      onRetry={p.onRetry}
+      testID={p.base}
+    />
   );
 }
 
@@ -159,24 +145,14 @@ export function PorEnviarScreen(p: PorEnviarScreenProps): ReactElement {
   const vacia = p.cola.length === 0 && p.rechazados.length === 0;
   const base = p.testID ?? 'por-enviar';
   const alDia = vacia && p.state === 'happy' && p.fase === 'enviado';
+  const conPie = !alDia && !vacia && (p.state === 'happy' || p.state === SIN_INTERNET);
   return (
-    <ScrollView testID={base} contentContainerStyle={{ padding: 16, gap: 14, flexGrow: 1 }}>
-      <Cabeza vacia={vacia} />
-      {alDia ? (
-        <TodoEnviado {...p} />
-      ) : p.state === 'happy' || p.state === SIN_INTERNET ? (
-        <ConDatos {...p} />
-      ) : p.state === 'cargando' ? (
-        <EstadosCaja id="cargando" titulo="Leyendo la cola de esta caja…" testID={base} />
-      ) : (
-        <EstadosCaja
-          id="falla"
-          titulo="No pudimos leer la cola de esta caja"
-          cuerpo="Nada se pierde: sigue todo guardado aquí. Vuelve a intentar en un momento."
-          onRetry={p.onRetry}
-          testID={base}
-        />
-      )}
-    </ScrollView>
+    <View flex={1}>
+      <ScrollView testID={base} contentContainerStyle={{ padding: 16, gap: 14, flexGrow: 1 }}>
+        <Cabeza vacia={vacia} />
+        <Cuerpo {...p} alDia={alDia} base={base} />
+      </ScrollView>
+      {conPie ? <Pie {...p} /> : null}
+    </View>
   );
 }

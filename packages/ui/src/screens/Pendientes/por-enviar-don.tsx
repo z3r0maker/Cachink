@@ -42,9 +42,7 @@ export function NadaSePierde(): ReactElement {
  * already have it. No button: the board draws none, and the owner chose
  * (2026-11-20) not to push toward closing from here.
  */
-export function TodoEnviado(p: {
-  readonly ultima?: string | null;
-}): ReactElement {
+export function TodoEnviado(p: { readonly ultima?: string | null }): ReactElement {
   const t = todoEnviado(p.ultima ?? null);
   return <EstadoVacio id="por-enviar-todo-enviado" title={t.titulo} body={t.cuerpo} />;
 }

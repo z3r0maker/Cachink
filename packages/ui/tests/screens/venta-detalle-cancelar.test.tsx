@@ -39,13 +39,6 @@ function montar(over: Partial<Parameters<typeof VentasMostradorScreen>[0]> = {})
   return llamas;
 }
 
-/** Types into the Input wrapper's native <input> (the harness's drill-down). */
-function escribir(testId: string, valor: string): void {
-  const campo = screen.getByTestId(testId).querySelector('input');
-  expect(campo).toBeTruthy();
-  fireEvent.change(campo as Element, { target: { value: valor } });
-}
-
 async function abrir(folio: string): Promise<void> {
   fireEvent.click(screen.getByTestId(`venta-fila-${folio}`));
   await waitFor(() => {
@@ -111,6 +104,20 @@ function escribirPin(digitos: string): void {
   for (const d of digitos) fireEvent.click(screen.getByTestId(`numpad-${d}`));
 }
 describe('cancelar con motivo', () => {
+  it('«Volver» on the cash step goes back to the motivo, and nothing is cancelled', async () => {
+    const l = montar();
+    await abrir('V-0412');
+    fireEvent.click(screen.getByTestId('venta-detalle-cancelar'));
+    escribirPin('1234');
+    await waitFor(() => expect(screen.getByTestId('cancelar-resumen')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('cancelar-motivo-Cobré de más'));
+    fireEvent.click(screen.getByTestId('cancelar-confirmar'));
+    await waitFor(() => expect(screen.getByTestId('cancel-cash-volver')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('cancel-cash-volver'));
+    expect(screen.getByTestId('cancelar-resumen')).toBeInTheDocument();
+    expect(l.onCancelar).not.toHaveBeenCalled();
+  });
+
   it('walks PIN → motivo (required) → cash confirm, and the sale stays listed as cancelled', async () => {
     const l = montar();
     await abrir('V-0412');
@@ -128,22 +135,33 @@ describe('cancelar con motivo', () => {
     expect(l.onCancelar).not.toHaveBeenCalled();
     expect(screen.getByText('Elige un motivo para cancelar.')).toBeInTheDocument();
 
+    // RvCancelar: «¿Por qué la cancelas?», the four motivos, no note field.
+    expect(screen.getByText('¿Por qué la cancelas?')).toBeInTheDocument();
+    expect(screen.queryByTestId('cancelar-nota')).toBeNull();
+    expect(screen.getByTestId('cancelar-volver').textContent).toBe('Mejor no');
     fireEvent.click(screen.getByTestId('cancelar-motivo-Me equivoqué al cobrar'));
 
-    // The optional note rides along.
-    escribir('cancelar-nota', 'se cobró de más');
-
-    // A cash sale confirms the cash it hands back before it goes through.
+    // A cash sale goes on to the cash it hands back before it goes through.
+    expect(screen.getByTestId('cancelar-confirmar').textContent).toBe('Continuar');
     fireEvent.click(screen.getByTestId('cancelar-confirmar'));
     await waitFor(() => {
       expect(screen.getByTestId('cancel-cash-confirm')).toBeInTheDocument();
     });
+    expect(screen.getByText('Devuelve $160.00 al cliente')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Tu NIP y tu permiso ya están confirmados. Entrégale el dinero y toca el botón.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('cancel-cash-confirm').textContent).toBe(
+      'Ya lo devolví, cancelar venta',
+    );
     fireEvent.click(screen.getByTestId('cancel-cash-confirm'));
 
     await waitFor(() => {
       expect(l.onCancelar).toHaveBeenCalledWith(
         expect.objectContaining({ folio: 'V-0412' }),
-        'Me equivoqué al cobrar: se cobró de más',
+        'Me equivoqué al cobrar',
         '1234',
       );
     });

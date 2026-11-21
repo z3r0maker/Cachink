@@ -9,7 +9,8 @@
 import { useState, type ReactElement } from 'react';
 import type { VentaTurno } from '@xangarro/caja/ventas';
 import { Modal } from '../../components/index';
-import { CashConfirmStep, PinStep } from '../Cancelaciones/cancellation-steps';
+import { PinStep } from '../Cancelaciones/cancellation-steps';
+import { DevolverStep } from './venta-cancelar-devolver';
 import type { VerificacionCancelar } from './cancelar-con-nip';
 import { Aviso, MotivoStep, SinPermiso } from './venta-cancelar-partes';
 
@@ -58,16 +59,14 @@ function useNip(p: CancelarVentaDialogProps, irA: (s: Step) => void) {
 function usePasos(p: CancelarVentaDialogProps) {
   const [step, setStep] = useState<Step>('pin');
   const [motivo, setMotivo] = useState<string | null>(null);
-  const [nota, setNota] = useState('');
   const [enviando, setEnviando] = useState(false);
   const nip = useNip(p, setStep);
   const confirmar = (): void => {
     if (motivo === null || enviando) return;
     if (p.venta.metodo === 'Efectivo' && step === 'motivo') return setStep('efectivo');
-    const completo = nota.trim() === '' ? motivo : `${motivo}: ${nota.trim()}`;
     setEnviando(true);
     void p
-      .onConfirm(completo, nip.pin)
+      .onConfirm(motivo, nip.pin)
       .then((e) => {
         setEnviando(false);
         // `!= null` also catches undefined (a missing return), and String()
@@ -79,7 +78,7 @@ function usePasos(p: CancelarVentaDialogProps) {
         nip.fallo('No se pudo cancelar. Inténtalo de nuevo.');
       });
   };
-  return { step, motivo, nota, enviando, nip, setMotivo, setNota, confirmar };
+  return { step, setStep, motivo, enviando, nip, setMotivo, confirmar };
 }
 
 export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
@@ -96,15 +95,18 @@ export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
       ) : f.step === 'sin-permiso' ? (
         <SinPermiso onEntendido={p.onClose} />
       ) : f.step === 'efectivo' ? (
-        <CashConfirmStep amount={p.venta.monto} onConfirm={f.confirmar} submitting={f.enviando} />
+        <DevolverStep
+          monto={p.venta.monto}
+          enviando={f.enviando}
+          onConfirmar={f.confirmar}
+          onVolver={() => f.setStep('motivo')}
+        />
       ) : (
         <MotivoStep
           venta={p.venta}
           motivo={f.motivo}
-          nota={f.nota}
           enviando={f.enviando}
           onMotivo={f.setMotivo}
-          onNota={f.setNota}
           onCancelar={f.confirmar}
           onVolver={p.onClose}
         />

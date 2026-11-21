@@ -1,8 +1,8 @@
 /**
  * «Registros por enviar» (M-09, board `Operador Pendientes`): the local
- * queue's face — what waits in order with its money, the hero of each
- * phase, the retry that flushes, what the server refused with its sentence
- * and the retry that requeues it, and the states cargando and falla. It
+ * queue's face (RvEnvio): what waits in order with its money, the line of
+ * each phase, the footer that flushes or requeues, what the server refused
+ * with its sentence, and the states cargando and falla. It
  * replaces «No enviados», which showed only the rejections.
  */
 import { describe, expect, it, vi } from 'vitest';
@@ -73,9 +73,9 @@ describe('PorEnviarScreen · en-espera', () => {
     montar();
     expect(screen.getByText('Registros por enviar')).toBeInTheDocument();
     expect(screen.getByText('Lo que capturaste sin internet')).toBeInTheDocument();
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('3 registros por enviar');
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('$283.00 de ventas');
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('un gasto de $620.00');
+    expect(screen.getByTestId('por-enviar-aviso').textContent).toBe(
+      '3 registros por enviar. Puedes seguir cobrando; se envían solos.',
+    );
     expect(screen.getByTestId('cola-fila-q-1').textContent).toContain('Venta V-0412');
     expect(screen.getByTestId('cola-fila-q-1').textContent).toContain('$160.00');
     expect(screen.getByTestId('cola-fila-q-3').textContent).toContain('−$620.00');
@@ -83,26 +83,28 @@ describe('PorEnviarScreen · en-espera', () => {
     expect(screen.getByText('Se envían en este orden')).toBeInTheDocument();
   });
 
-  it('the retry button runs the flush the pill runs', () => {
+  it('the footer «Reintentar ahora» runs the flush the pill runs (RvEnvio)', () => {
     const { onReintentar } = montar();
+    expect(screen.getByTestId('por-enviar-reintentar').textContent).toBe('Reintentar ahora');
     tap('por-enviar-reintentar');
     expect(onReintentar).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('PorEnviarScreen · fases', () => {
-  it('sin-internet: the hero and the rows say they wait for the connection', () => {
+  it('sin-internet: the line and the rows say they wait for the connection', () => {
     montar({ state: 'sin-internet', fase: 'sin-internet' });
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain(
-      '3 registros esperan conexión',
+    expect(screen.getByTestId('por-enviar-aviso').textContent).toBe(
+      '3 registros esperan conexión. Puedes seguir cobrando; se envían solos.',
     );
+    expect(screen.getByTestId('por-enviar-reintentar').textContent).toBe('Reintentar ahora');
     expect(screen.getAllByText('Esperando conexión').length).toBe(COLA_FIXTURE.length);
   });
 
-  it('enviando: the hero says so and the button rests', () => {
+  it('enviando: the line says so and the footer holds', () => {
     const { onReintentar } = montar({ fase: 'enviando' });
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('Enviando 3 registros…');
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain('Enviando…');
+    expect(screen.getByTestId('por-enviar-aviso').textContent).toContain('Enviando 3 registros…');
+    expect(screen.getByTestId('por-enviar-reintentar').textContent).toBe('Enviando…');
     tap('por-enviar-reintentar');
     expect(onReintentar).not.toHaveBeenCalled();
   });
@@ -112,7 +114,8 @@ describe('PorEnviarScreen · fases', () => {
     const card = screen.getByTestId('por-enviar-todo-enviado').textContent ?? '';
     expect(card).toContain('Todo está enviado');
     expect(card).toContain('Los patrones ya tienen lo que capturaste. Última vez a las 14:55.');
-    expect(screen.queryByTestId('por-enviar-heroe')).toBeNull();
+    expect(screen.queryByTestId('por-enviar-aviso')).toBeNull();
+    expect(screen.queryByTestId('por-enviar-reintentar')).toBeNull();
     expect(screen.queryByTestId('por-enviar-todo-enviado-cta')).toBeNull();
   });
 
@@ -123,36 +126,35 @@ describe('PorEnviarScreen · fases', () => {
 });
 
 describe('PorEnviarScreen · con-rechazados', () => {
-  it('the server’s sentence, its hint and the retry that requeues', () => {
+  it('the server’s sentence and its hint on each card; the footer requeues them all', () => {
     const { onReintentarRechazado } = montar({
       fase: 'con-rechazados',
       cola: [],
       rechazados: RECHAZADOS,
     });
-    expect(screen.getByTestId('por-enviar-heroe').textContent).toContain(
-      'El servidor no aceptó 2 registros',
-    );
+    expect(screen.queryByTestId('por-enviar-aviso')).toBeNull();
     expect(screen.getByTestId('rechazado-sales:r-1').textContent).toContain(
       'El producto de este registro ya no existe en el portal.',
     );
     expect(screen.getByTestId('rechazado-client_payments:r-2').textContent).toContain(
       'El cliente de este registro ya no existe en el portal.',
     );
-    tap('rechazado-retry-sales:r-1');
-    expect(onReintentarRechazado).toHaveBeenCalledWith([RECHAZADOS[0]]);
-    tap('rechazados-retry-todos');
+    expect(screen.queryByTestId('rechazado-retry-sales:r-1')).toBeNull();
+    expect(screen.getByTestId('por-enviar-reintentar').textContent).toBe('Reintentar');
+    tap('por-enviar-reintentar');
     expect(onReintentarRechazado).toHaveBeenCalledWith(RECHAZADOS);
   });
 
-  it('an automatic retry says so and keeps no button', () => {
-    montar({
+  it('an automatic retry says so, and the footer has nothing to requeue', () => {
+    const { onReintentarRechazado } = montar({
       fase: 'con-rechazados',
       cola: [],
       rechazados: [{ ...RECHAZADOS[0]!, reintentando: true }],
     });
     expect(screen.getByText('Reintentando automáticamente')).toBeInTheDocument();
     expect(screen.queryByTestId('rechazado-retry-sales:r-1')).toBeNull();
-    expect(screen.queryByTestId('rechazados-retry-todos')).toBeNull();
+    tap('por-enviar-reintentar');
+    expect(onReintentarRechazado).not.toHaveBeenCalled();
   });
 });
 

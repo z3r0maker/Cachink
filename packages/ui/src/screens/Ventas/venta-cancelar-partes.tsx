@@ -10,7 +10,6 @@ import { formatMoney } from '@xangarro/domain';
 import { MOTIVOS_CANCELAR, avisoCancelar, type VentaTurno } from '@xangarro/caja/ventas';
 import { Btn } from '../../components/Btn/index';
 import { Don } from '../../components/Don/index';
-import { Input } from '../../components/Input/index';
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
 import { Eyebrow } from '../../components/Panel/index';
@@ -67,8 +66,16 @@ function MotivoChips(p: {
 }): ReactElement {
   return (
     <View gap={8} alignItems="flex-start">
-      <Eyebrow color={colors.gray600}>Motivo</Eyebrow>
-      <View flexDirection="row" flexWrap="wrap" gap={8} role="radiogroup" aria-label="Motivo">
+      <MText size="md" weight="extraBold">
+        ¿Por qué la cancelas?
+      </MText>
+      <View
+        flexDirection="row"
+        flexWrap="wrap"
+        gap={8}
+        role="radiogroup"
+        aria-label="¿Por qué la cancelas?"
+      >
         {MOTIVOS_CANCELAR.map((m) => (
           <Chip
             key={m}
@@ -85,6 +92,8 @@ function MotivoChips(p: {
 }
 
 function Pie(p: {
+  /** A cash sale goes on to the cash it hands back: «Continuar». */
+  readonly efectivo: boolean;
   readonly listo: boolean;
   readonly enviando: boolean;
   readonly onCancelar: () => void;
@@ -93,7 +102,7 @@ function Pie(p: {
   return (
     <View flexDirection="row" gap={10}>
       <Btn variant="secondary" size="xl" onPress={p.onVolver} testID="cancelar-volver">
-        Volver
+        Mejor no
       </Btn>
       <View flex={1}>
         <Btn
@@ -106,21 +115,19 @@ function Pie(p: {
           onPress={p.onCancelar}
           testID="cancelar-confirmar"
         >
-          Cancelar la venta
+          {p.efectivo ? 'Continuar' : 'Cancelar la venta'}
         </Btn>
       </View>
     </View>
   );
 }
 
-/** The board's dialog body: the sale, one of its four motivos, the note, what it does. */
+/** RvCancelar's motivo step: the sale, why (one of four), and what it does. No note field. */
 export function MotivoStep(p: {
   readonly venta: VentaTurno;
   readonly motivo: string | null;
-  readonly nota: string;
   readonly enviando: boolean;
   readonly onMotivo: (m: string) => void;
-  readonly onNota: (n: string) => void;
   readonly onCancelar: () => void;
   readonly onVolver: () => void;
 }): ReactElement {
@@ -128,15 +135,9 @@ export function MotivoStep(p: {
     <View gap={12}>
       <Resumen venta={p.venta} />
       <MotivoChips motivo={p.motivo} onMotivo={p.onMotivo} />
-      <Input
-        label="Nota (opcional)"
-        value={p.nota}
-        onChange={p.onNota}
-        placeholder="Se cobró de más"
-        testID="cancelar-nota"
-      />
       <Aviso texto={avisoCancelar(p.venta.metodo, p.venta.monto, p.venta.cliente)} />
       <Pie
+        efectivo={p.venta.metodo === 'Efectivo'}
         listo={p.motivo !== null}
         enviando={p.enviando}
         onCancelar={p.onCancelar}
