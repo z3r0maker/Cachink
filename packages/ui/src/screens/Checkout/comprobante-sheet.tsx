@@ -25,6 +25,8 @@ export interface ComprobanteSheetProps {
   readonly open: boolean;
   readonly venta: VentaHecha;
   readonly business: Business | null;
+  /** The business logo the phone holds (`useLogoNegocio`); absent, the monogram. */
+  readonly logo?: string | null;
   readonly onClose: () => void;
   /** After a cobro: on to the next sale. Without it the foot only closes. */
   readonly onNueva?: () => void;
@@ -116,7 +118,7 @@ export function ComprobanteSheet(p: ComprobanteSheetProps): ReactElement {
       <View gap={10}>
         {p.desdeVentas ? null : (
           <Vista
-            svg={comprobanteSvgDe(v, p.business)}
+            svg={comprobanteSvgDe(v, p.business, p.logo ?? null)}
             texto={`Comprobante de la venta ${v.folio}: total ${formatMoney(v.total)}`}
           />
         )}
