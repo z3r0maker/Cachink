@@ -34,6 +34,9 @@ export const NewSupportItemSchema = z.object({
   paymentRef: z.string().nullable().default(null),
   /** `arco` only: the deadline to answer, an ISO instant (N-34). */
   dueAt: z.string().nullable().default(null),
+  /** `bug` only: what the person tapped and the Sentry event the report names (B-21). */
+  category: z.string().nullable().default(null),
+  eventId: z.string().nullable().default(null),
 });
 export type NewSupportItem = z.input<typeof NewSupportItemSchema>;
 

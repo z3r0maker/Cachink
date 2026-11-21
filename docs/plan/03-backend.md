@@ -383,7 +383,19 @@
 
 ### B-21 El reporte de la caja guarda su categoría y el error que nombra (ADR-162) [alta]
 
-- [ ] Status · **Blocked by:** C-26 · **Blocks:** M-23, N-88
+- [x] Status · **Blocked by:** C-26 · **Blocks:** M-23, N-88
+  - Done: 2026-11-20 · **Decided: columns.** `support_items` gains `category` and `event_id`
+    (console migration `0024_support_bug_report.sql`, both nullable, CHECKed to bug items and to
+    the domain's values), as `payment_ref` and `due_at` already are for their kinds: the approved
+    board (CD-22) shows both on every row, and a field read back out of free text could be forged
+    by what a person types. `SupportItem` carries `category` and `eventId` (bug only),
+    `InboxItemRequest` carries them to the console, and `fileBugReport` sends them and titles a
+    report by its category («No me dejó cobrar»); a report from an older build keeps its title.
+    Tests: domain, the console's create and SQL-text tests, `support-items.integration.test.ts`
+    against Postgres (a row as 0019 left it, a tap with no text, a named error, a resend, and the
+    CHECKs refusing another kind), and the portal's `bug-report.test.ts`.
+    **Deploy order:** apply 0024 to the console's database before the console's new build; the
+    portal may go first or last, since an older console drops the two fields it does not know.
 - **What:** `fileBugReport` (`apps/web/src/server/support/bug-report.ts`) files the report's `category`
   and `eventId` with the inbox item, so the console can show a report beside its error (N-88). With
   no description, the item's title comes from the category. ADR-141's limits (20 a day per device, 60

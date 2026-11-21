@@ -63,6 +63,34 @@ describe('conformance: /support/bug-report', () => {
     assert.equal(r.status, 200);
   });
 
+  it('accepts a report that is only a tap: a category and no text (C-26)', async () => {
+    const r = await call(h.base, 'POST', API_PATHS.bugReport, {
+      token: act.deviceToken,
+      body: report({ description: undefined, category: 'could_not_charge' }),
+    });
+    assert.equal(r.status, 200);
+    assert.deepEqual(BugReportResponseSchema.parse(r.body), { accepted: true });
+  });
+
+  it('accepts a report that names the error it is about (C-26)', async () => {
+    const r = await call(h.base, 'POST', API_PATHS.bugReport, {
+      token: act.deviceToken,
+      body: report({ category: 'froze_or_closed', eventId: '9f2c41d0a7b84e3c95d1f0a2b6c7e41a' }),
+    });
+    assert.equal(r.status, 200);
+  });
+
+  it('refuses a category nobody offers and an event id that is not one (C-26)', async () => {
+    for (const over of [{ category: 'se_trabo' }, { eventId: 'not-an-event' }]) {
+      const r = await call(h.base, 'POST', API_PATHS.bugReport, {
+        token: act.deviceToken,
+        body: report(over),
+      });
+      assert.equal(r.status, 400);
+      assert.equal(ErrorEnvelopeSchema.parse(r.body).error.code, 'VALIDATION');
+    }
+  });
+
   it('refuses a report with nothing in it, as a whole-request VALIDATION', async () => {
     const r = await call(h.base, 'POST', API_PATHS.bugReport, {
       token: act.deviceToken,

@@ -3,7 +3,13 @@ import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 
-import { SUPPORT_KINDS, SUPPORT_STATUSES, CFDI_UUID_REGEX } from '@xangarro/domain';
+import {
+  BUG_REPORT_CATEGORIES,
+  CFDI_UUID_REGEX,
+  ERROR_EVENT_ID_REGEX,
+  SUPPORT_KINDS,
+  SUPPORT_STATUSES,
+} from '@xangarro/domain';
 
 import { supportItems } from '@/server/db/support-schema';
 
@@ -13,11 +19,17 @@ import { supportItems } from '@/server/db/support-schema';
  * `support_items` cannot drift apart, and the grants stay as ADR-063 wants.
  */
 // 0002 created the table; 0011 widened the kinds CHECK for `ayuda`; 0019
-// added `arco` and its `due_at` (N-34). The rules are asserted over the set,
-// like data-pg's usage-counts-sql test.
+// added `arco` and its `due_at` (N-34); 0024 added a bug report's `category`
+// and `event_id` (B-21). The rules are asserted over the set, like data-pg's
+// usage-counts-sql test.
 const migration = (name: string) =>
   readFileSync(new URL(`../src/server/db/migrations/${name}`, import.meta.url), 'utf8');
-const sql = ['0002_support_items.sql', '0011_support_ayuda.sql', '0019_support_arco.sql']
+const sql = [
+  '0002_support_items.sql',
+  '0011_support_ayuda.sql',
+  '0019_support_arco.sql',
+  '0024_support_bug_report.sql',
+]
   .map(migration)
   .join('\n');
 /** The statements only: comments may say "no DELETE" without granting it. */
@@ -52,6 +64,13 @@ describe('0002_support_items.sql', () => {
 
   it('ties due_at to the arco kind, as the domain does', () => {
     assert.match(sql, /CHECK \(\(kind = 'arco'\) = \(due_at IS NOT NULL\)\)/);
+  });
+
+  it('keeps a category and an event id to bug items, in the domain’s shapes (B-21)', () => {
+    for (const c of BUG_REPORT_CATEGORIES) assert.ok(sql.includes(`'${c}'`), c);
+    assert.ok(sql.includes(`'${ERROR_EVENT_ID_REGEX.source}'`), 'event_id pattern');
+    assert.match(sql, /CHECK \(category IS NULL OR \(kind = 'bug' AND category IN/);
+    assert.match(sql, /CHECK \(event_id IS NULL OR \(kind = 'bug' AND event_id ~/);
   });
 
   it('grants the admin role read/insert/update but never DELETE, and shuts the portal out', () => {

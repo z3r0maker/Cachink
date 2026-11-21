@@ -1,7 +1,8 @@
 /**
  * `support_items` — the inbox (N-08), a portal-only entity (ADR-060) that
  * only `apps/backoffice` reads and writes. Same temporary home as `./schema.ts`;
- * the SQL, with its CHECKs, grants and RLS, is `./migrations/0002_support_items.sql`.
+ * the SQL, with its CHECKs, grants and RLS, is `./migrations/0002_support_items.sql`
+ * and the three that widened it (0011, 0019, 0024).
  *
  * Timestamps use `mode: 'date'` (unlike the insert-only staff tables) because
  * these rows are read back: postgres.js renders a timestamptz *string* as
@@ -31,6 +32,9 @@ export const supportItems = pgTable(
     cfdiUuid: text('cfdi_uuid'),
     /** `arco` only: the deadline to answer (0019). */
     dueAt: instant('due_at'),
+    /** `bug` only: what the person tapped, and the Sentry event the report names (0024). */
+    category: text('category'),
+    eventId: text('event_id'),
     createdAt: instant('created_at').notNull(),
     updatedAt: instant('updated_at').notNull(),
     resolvedAt: instant('resolved_at'),

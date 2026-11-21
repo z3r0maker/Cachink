@@ -119,7 +119,8 @@ export class MockApi {
   /** §9: the report is kept with the device the **token** named; ids in the body are not read. */
   private bugReport(req: MockRequest, device: Device): MockResponse {
     const parsed = BugReportRequestSchema.safeParse(req.body);
-    if (!parsed.success) return err('VALIDATION', 'a report needs a description and a date', 400);
+    if (!parsed.success)
+      return err('VALIDATION', 'a report needs a category or a description, and a date', 400);
     this.state.bugReports.push({ deviceId: device.id, report: parsed.data });
     return { status: 200, body: { accepted: true } };
   }

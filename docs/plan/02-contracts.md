@@ -185,6 +185,10 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 > **Added 2026-11-09 (C-25, N-81, ADR-141).** Additive at protocol 1: an older server answers 404
 > and the app falls back to sharing the report as a file.
+>
+> **Changed 2026-11-20 (C-26, ADR-162 §5).** `category` and `eventId` are new and optional, and
+> `description` may be empty when a category is given. Additive at protocol 1: a build made before
+> this keeps sending `description` alone and stays valid.
 
 The phone's «Reportar un problema». Device-token authed like every route but `/activate`; the server
 files the report in the staff inbox under the device and business **the token names**.
@@ -193,7 +197,9 @@ Request:
 
 ```json
 {
+  "category": "could_not_charge",
   "description": "La app se cerró al cobrar",
+  "eventId": "9f2c41d0a7b84e3c95d1f0a2b6c7e41a",
   "submittedAt": "2026-11-10T02:15:00.000Z",
   "appVersion": "1.4.2",
   "platform": "ios",
@@ -204,8 +210,13 @@ Request:
 }
 ```
 
-- `description` (1 to 5000 characters after trimming) and `submittedAt` (an ISO instant) are required;
-  the rest is optional. `snapshot` holds at most 50 audit events and 20 errors, already scrubbed by
+- `submittedAt` (an ISO instant) is required, and so is **a `category` or a `description`**: a
+  report with neither is refused. `category` is what the person tapped, one of `could_not_charge`,
+  `froze_or_closed`, `wrong_number`, `other`. `description` is what they wrote, at most 5000
+  characters after trimming, and may be empty or absent when a category is given.
+- `eventId` is optional: the 32 lower-case hex characters of the Sentry event the report is about,
+  sent when the sheet was opened from a failure.
+- The rest is optional. `snapshot` holds at most 50 audit events and 20 errors, already scrubbed by
   the phone: no stack traces, no personal data.
 - **The body has no field for who is calling.** `deviceId`, `businessId` or `userId` sent anyway are
   dropped, never read.
@@ -639,7 +650,15 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-26 `POST /support/bug-report`: categoría, descripción opcional y el error que nombra (ADR-162) [alta]
 
-- [ ] Status · **Blocked by:** — · **Blocks:** B-21, M-23
+- [x] Status · **Blocked by:** — · **Blocks:** B-21, M-23
+  - Done: 2026-11-20 · `BugReportRequestSchema` gains `category` (optional, one of
+    `BUG_REPORT_CATEGORIES`) and `eventId` (optional, 32 lower-case hex); `description` defaults to
+    empty and a report with neither a category nor a description is refused. The category list and
+    the event id's shape are the domain's (`@xangarro/domain`), re-exported here, so the phone, the
+    portal and the console share one copy. `tests/support.test.ts` (five new cases) and conformance
+    `bug-report.test.ts` (a tap with no text, a named error, an unknown category and a bad event
+    id), green against the mock. Against the real portal the same suite runs in CI
+    (`test:conformance`); it was not run against a live stack locally.
 - **Context:** §9, ADR-162 §5. The phone's sheet stops asking for text: the person taps one of four
   options and may add a sentence, and a report opened from an error names that error. Additive at
   protocol 1: a build made before this keeps sending `description` alone and stays valid.
