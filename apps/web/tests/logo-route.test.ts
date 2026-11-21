@@ -22,8 +22,8 @@ const BUSINESS = '01HZ8XQN9GZJXV8AKQ5X0BNS01';
 const HOSTILE =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://www.w3.org/2000/svg"><x:script>alert(1)</x:script></svg>';
 
-const get = (businessId: string) =>
-  GET(new Request(`http://x/api/logos/${businessId}`), {
+const get = (businessId: string, headers: Record<string, string> = {}) =>
+  GET(new Request(`http://x/api/logos/${businessId}`, { headers }), {
     params: Promise.resolve({ businessId }),
   });
 
@@ -47,6 +47,21 @@ describe('the logo route', () => {
     assert.equal(res.headers.get('Cache-Control'), 'public, max-age=3600, must-revalidate');
     assert.match(res.headers.get('ETag') ?? '', /^"[A-Za-z0-9_-]{22}"$/);
     assert.equal(res.headers.get('Content-Length'), String(Buffer.byteLength(HOSTILE)));
+  });
+
+  it('answers 304 with no body when the phone already holds those bytes', async () => {
+    const etag = (await get(BUSINESS)).headers.get('ETag') ?? '';
+    const res = await get(BUSINESS, { 'If-None-Match': etag });
+    assert.equal(res.status, 304);
+    assert.equal(res.headers.get('ETag'), etag);
+    assert.equal(res.headers.get('Content-Security-Policy'), UPLOADED_BYTES_CSP);
+    assert.equal(await res.text(), '');
+  });
+
+  it('sends the bytes again when the copy held is an older one', async () => {
+    const res = await get(BUSINESS, { 'If-None-Match': '"un-logo-anterior-000000"' });
+    assert.equal(res.status, 200);
+    assert.equal(await res.text(), HOSTILE);
   });
 
   it('answers 404 for an id that is not a ULID, without a query', async () => {
