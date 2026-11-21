@@ -1,12 +1,11 @@
 /**
- * The product photo's words and URIs (M-13): a row as a tile draws it, the
- * owner's portal as the sheets name it, and «Tomada el …».
+ * The product photo's words and URIs (M-13): a row as a tile draws it, and
+ * «Tomada el …».
  */
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import type { ProductImage } from '@xangarro/domain';
 import { comoFotoVista } from '../../src/foto-producto/fotos-context';
-import { portalDe } from '../../src/foto-producto/foto-partes';
 import { tomadaEl } from '../../src/foto-producto/foto-cambiar-sheet';
 
 const row = (bytes: string | null): ProductImage =>
@@ -35,17 +34,6 @@ describe('comoFotoVista', () => {
 
   it('a tombstone is no photo: the tile shows its icon', () => {
     assert.equal(comoFotoVista(row(null)), null);
-  });
-});
-
-describe('portalDe', () => {
-  it('names the owner with a capital', () => {
-    assert.equal(portalDe('pedro'), 'el portal de Pedro');
-  });
-
-  it('says «del dueño» until the device knows the name', () => {
-    assert.equal(portalDe('el dueño'), 'el portal del dueño');
-    assert.equal(portalDe(''), 'el portal del dueño');
   });
 });
 

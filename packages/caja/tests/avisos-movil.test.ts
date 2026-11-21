@@ -6,9 +6,10 @@ import {
   RESPUESTAS_RAPIDAS,
   RESPUESTA_MAX,
   RESPUESTA_MIN,
-  toastGuardada,
+  TOAST_GUARDADA,
   toastRespuesta,
 } from '../src/avisos/movil';
+import { AVISOS_COPY } from '../src/avisos/copy';
 
 describe('la respuesta de un aviso, móvil', () => {
   it('the quick answers write whole sentences, one tap each', () => {
@@ -31,27 +32,39 @@ describe('la respuesta de un aviso, móvil', () => {
     assert.equal(RESPUESTA_MIN, 4);
   });
 
-  it('the toast names who has it and what it was about', () => {
+  it('the toast says «los patrones» have it, and what it was about', () => {
     assert.equal(
-      toastRespuesta('Pedro', 'el corte del 13 de mayo'),
-      'Pedro ya tiene tu respuesta sobre el corte del 13 de mayo.',
+      toastRespuesta('el corte del 13 de mayo'),
+      'Los patrones ya tienen tu respuesta sobre el corte del 13 de mayo.',
     );
     assert.equal(
-      toastRespuesta('el dueño', 'su mensaje'),
-      'El dueño ya tiene tu respuesta sobre su mensaje.',
+      toastRespuesta('su mensaje'),
+      'Los patrones ya tienen tu respuesta sobre su mensaje.',
     );
   });
 });
 
 describe('la respuesta sin internet (R6)', () => {
-  it('says it is saved and reaches the owner when the signal returns', () => {
+  it('says it is saved and reaches «los patrones» when the signal returns', () => {
     assert.equal(
-      toastGuardada('Pedro'),
-      'Tu respuesta se guardó. Le llega a Pedro cuando vuelva la señal.',
+      TOAST_GUARDADA,
+      'Tu respuesta se guardó. Les llega a los patrones cuando vuelva la señal.',
     );
-    assert.equal(
-      toastGuardada('el dueño'),
-      'Tu respuesta se guardó. Le llega al dueño cuando vuelva la señal.',
-    );
+  });
+});
+
+describe('Avisos les dice «los patrones» (M-25)', () => {
+  it('words every line about the owner in plural, never a name', () => {
+    assert.deepEqual(AVISOS_COPY, {
+      sub: 'Lo que te mandan los patrones y lo que la caja te avisa',
+      tab: 'De los patrones',
+      firma: 'Los patrones',
+      tipoMensaje: 'Mensaje de los patrones',
+      vacio: 'Ni mensajes de los patrones ni avisos de tu caja.',
+      nadaNuevo: 'Los patrones no te han escrito nada nuevo.',
+      responder: 'Responder a los patrones',
+      cuentales: 'Cuéntales a los patrones lo que recuerdas',
+      enviada: 'Les mandaste tu respuesta a los patrones',
+    });
   });
 });

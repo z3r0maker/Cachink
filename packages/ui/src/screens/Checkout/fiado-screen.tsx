@@ -30,7 +30,6 @@ export interface FiadoScreenProps {
   readonly cargando: boolean;
   readonly registrando: boolean;
   readonly error: string | null;
-  readonly dueno: string;
   readonly onAnotar: (a: AQuien) => void;
   readonly testID?: string;
 }
@@ -161,7 +160,7 @@ export function FiadoScreen(p: FiadoScreenProps): ReactElement {
           keyboardDismissMode="on-drag"
         >
           <Lista {...p} e={e} />
-          <ClienteNuevo valor={e.nuevo} onCambio={e.cambiarNuevo} dueno={p.dueno} sugerido={e.q} />
+          <ClienteNuevo valor={e.nuevo} onCambio={e.cambiarNuevo} sugerido={e.q} />
         </ScrollView>
         <PieAccion
           label={etiqueta(a, e.nuevo !== null, p.total)}

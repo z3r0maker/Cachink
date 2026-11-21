@@ -25,8 +25,6 @@ export interface AccesoScreenProps {
   readonly contexto: string | null;
   /** «Jueves 14 de mayo». */
   readonly fecha: string;
-  /** The owner's first name, or null («al dueño»). */
-  readonly dueno: string | null;
   readonly onAuthenticate: (userId: UserId, pin: string) => void;
   readonly error: string | null;
   readonly submitting: boolean;
@@ -137,7 +135,7 @@ export function AccesoScreen(props: AccesoScreenProps): ReactElement {
           ))}
         </View>
         {actual ? <SeccionNip a={a} submitting={props.submitting} /> : null}
-        <OlvideNip aQuien={props.dueno ? `a ${props.dueno}` : t('entrar.acceso.alDueno')} />
+        <OlvideNip />
       </ScrollView>
     </View>
   );

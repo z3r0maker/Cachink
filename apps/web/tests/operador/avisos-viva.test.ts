@@ -34,7 +34,6 @@ vi.mock('@xangarro/caja', () => ({
   hoyLocal: () => '2026-09-30',
 }));
 vi.mock('@xangarro/caja/avisos', () => ({
-  DUENO_GENERICO: 'el dueño',
   avisosVivos: (a: unknown) => a,
 }));
 vi.mock('../../src/operador/avisos/screen', () => ({
@@ -73,7 +72,7 @@ const CRED = {
   device: { businessId: 'biz-1', deviceId: 'dev-1' },
   sesion: { userId: 'op-1' },
 };
-const FIXTURE = { dueno: 'Pedro', avisos: [{ texto: 'la fixture' }] } as never;
+const FIXTURE = { avisos: [{ texto: 'la fixture' }] } as never;
 
 beforeEach(() => {
   vi.clearAllMocks();

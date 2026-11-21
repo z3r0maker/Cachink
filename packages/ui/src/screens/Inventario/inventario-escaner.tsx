@@ -31,7 +31,6 @@ interface InventarioEscanerVivo {
   readonly abierto: boolean;
   readonly onCerrar: () => void;
   readonly existencias: readonly Existencia[];
-  readonly dueno: string;
   readonly hoja: Pick<HojaVivo, 'delEscaner' | 'esperar'>;
 }
 
@@ -69,14 +68,12 @@ export function InventarioEscaner(p: InventarioEscanerVivo): ReactElement {
         modo={f.modo}
         productos={p.config.productos}
         onAlta={f.setCodigo}
-        dueno={p.dueno}
       />
       <ProductoNuevoSheet
         open={p.abierto && f.codigo !== null}
         onClose={f.cerrarTodo}
         codigo={f.codigo}
         tipos={p.config.tipos}
-        dueno={p.dueno}
         onGuardar={p.config.onGuardar}
         alGuardar="Darlo de alta y anotar lo que llegó"
         conExistencias

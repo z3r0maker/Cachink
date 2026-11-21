@@ -8,6 +8,7 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
 import type { Fase, RegistroEnCola } from '@xangarro/caja/pendientes';
+import { PORTAL_PATRONES } from '@xangarro/caja';
 import { estadoFila } from '@xangarro/caja/pendientes';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
@@ -133,17 +134,14 @@ function Fila({
   );
 }
 
-function NadaPendiente(p: {
-  readonly portal: string;
-  readonly onIrACierre: () => void;
-}): ReactElement {
+function NadaPendiente(p: { readonly onIrACierre: () => void }): ReactElement {
   return (
     <View testID="cola-vacia" padding={16} gap={10} alignItems="center">
       <MText size="lg" weight="extraBold">
         Nada pendiente
       </MText>
       <MText size="sm" weight="semibold" color={colors.gray600} textAlign="center" lineHeight={19}>
-        {`Todo lo que capturaste ya está en ${p.portal}. Puedes cerrar el turno cuando quieras.`}
+        {`Todo lo que capturaste ya está en ${PORTAL_PATRONES}. Puedes cerrar el turno cuando quieras.`}
       </MText>
       <Btn variant="primary" sentence onPress={p.onIrACierre} testID="cola-ir-cierre">
         Ir al cierre de turno
@@ -156,7 +154,6 @@ export function ColaPanel(p: {
   readonly cola: readonly RegistroEnCola[];
   readonly fase: Fase;
   readonly offline: boolean;
-  readonly portal: string;
   readonly onIrACierre: () => void;
 }): ReactElement {
   const estado = estadoFila(p.fase, p.offline);
@@ -166,7 +163,7 @@ export function ColaPanel(p: {
       {p.cola.map((r) => (
         <Fila key={r.id} r={r} estado={estado} />
       ))}
-      {p.cola.length === 0 ? <NadaPendiente portal={p.portal} onIrACierre={p.onIrACierre} /> : null}
+      {p.cola.length === 0 ? <NadaPendiente onIrACierre={p.onIrACierre} /> : null}
     </QuietPanel>
   );
 }

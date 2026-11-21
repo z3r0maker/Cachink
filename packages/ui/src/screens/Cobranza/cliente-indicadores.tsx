@@ -7,7 +7,13 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
 import type { estadoCuenta } from '@xangarro/caja/cobranza';
-import { abiertas, libre, ultimoAbono, type CuentaCliente } from '@xangarro/caja/cobranza';
+import {
+  abiertas,
+  libre,
+  limiteFijado,
+  ultimoAbono,
+  type CuentaCliente,
+} from '@xangarro/caja/cobranza';
 import { MText } from '../../components/Mostrador/index';
 import { borderColors, borderWidths, colors, radii } from '../../theme';
 
@@ -58,11 +64,7 @@ function Indicador({
 }
 
 /** «Límite de fiado» and «Disponible», only when the owner set a limit (M4). */
-function Limite(p: {
-  readonly c: CuentaCliente;
-  readonly e: Estado;
-  readonly dueno: string;
-}): ReactElement | null {
+function Limite(p: { readonly c: CuentaCliente; readonly e: Estado }): ReactElement | null {
   const { c, e } = p;
   const libreHoy = libre(c, e);
   if (c.limite === null || libreHoy === null) return null;
@@ -71,7 +73,7 @@ function Limite(p: {
       <Indicador
         label="Límite de fiado"
         valor={formatMoney(c.limite)}
-        hint={`Lo fijó ${p.dueno} · plazo ${c.plazo}`}
+        hint={limiteFijado(c)}
         color={e.saldo * 10n > c.limite * 8n ? colors.redText : colors.black}
       />
       <Indicador
@@ -87,11 +89,9 @@ function Limite(p: {
 export function Indicadores({
   c,
   e,
-  dueno,
 }: {
   readonly c: CuentaCliente;
   readonly e: Estado;
-  readonly dueno: string;
 }): ReactElement {
   const vieja = abiertas(c, e)[0];
   const ultimo = ultimoAbono(c);
@@ -103,7 +103,7 @@ export function Indicadores({
         hint={vieja ? `La más antigua es del ${vieja.venta.dia}` : 'Ninguna pendiente'}
         color={colors.black}
       />
-      <Limite c={c} e={e} dueno={dueno} />
+      <Limite c={c} e={e} />
       <Indicador
         label="Último abono"
         valor={ultimo ? formatMoney(ultimo.monto) : 'Ninguno'}

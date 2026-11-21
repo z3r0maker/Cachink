@@ -3,8 +3,6 @@
 import { useRef } from 'react';
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '@xangarro/caja';
-import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import * as k from './comprobante.css';
 import * as d from './drawer.css';
@@ -51,13 +49,12 @@ export function Comprobante(p: {
 }
 
 function SinComprobante({ onFoto }: { readonly onFoto: () => void }) {
-  const dueno = useDueno();
   return (
     <div className={k.sin}>
       <span style={{ flex: 1, minWidth: 180 }}>
         <span className={k.titulo}>Queda sin comprobante</span>
         <span className={k.hint} style={{ color: colors.warningText }}>
-          {`${mayuscula(dueno)} lo va a ver marcado en tu corte.`}
+          Los patrones lo van a ver marcado en tu corte.
         </span>
       </span>
       <button type="button" className={k.quiet} onClick={onFoto}>

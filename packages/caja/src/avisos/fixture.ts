@@ -7,12 +7,11 @@ const CHECK = 'M20 6 9 17l-5-5';
 
 /** The design's six notices (`Operador Avisos.dc.html`). Replaced in O-06 / C-19. */
 export const AVISOS_FIXTURE: AvisosData = {
-  dueno: 'Pedro',
   avisos: [
     {
       id: 'corte',
       grupo: 'dueno',
-      tipo: 'Mensaje de Pedro',
+      tipo: 'Mensaje de los patrones',
       titulo: 'Aclara el corte del 13 de mayo',
       cuerpo:
         'Faltaron $60.00 en la Caja 2 al cerrar. No hay problema, solo dime qué recuerdas para cerrarlo.',
@@ -25,7 +24,7 @@ export const AVISOS_FIXTURE: AvisosData = {
     {
       id: 'precio',
       grupo: 'dueno',
-      tipo: 'Mensaje de Pedro',
+      tipo: 'Mensaje de los patrones',
       titulo: 'La gringa sube a $65.00 desde mañana',
       cuerpo: 'Ya lo cambié en el catálogo. Si un cliente pregunta, es por el queso.',
       hora: 'Ayer 19:40',
@@ -64,7 +63,7 @@ export const AVISOS_FIXTURE: AvisosData = {
       id: 'producto',
       grupo: 'caja',
       tipo: 'Revisión de caja',
-      titulo: 'Pedro aprobó «Orden de tripa»',
+      titulo: 'Los patrones aprobaron «Orden de tripa»',
       cuerpo: 'Ya está en el catálogo con su costo y existencias. Puedes venderla normal.',
       hora: 'Hoy 10:05',
       icono: CHECK,

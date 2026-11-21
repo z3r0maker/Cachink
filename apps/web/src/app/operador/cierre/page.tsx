@@ -27,7 +27,6 @@ function datos(): CierreData {
     caja: T.caja,
     desde: T.desde,
     hasta: '21:04',
-    dueno: 'Pedro',
     negocio: SHELL_FIXTURE.negocio.nombre,
     partes: T,
     resumen: {

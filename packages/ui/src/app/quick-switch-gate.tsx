@@ -98,7 +98,6 @@ export function QuickSwitchGate(props: QuickSwitchGateProps): ReactElement {
       operadores={operadores}
       contexto={ctx.contexto}
       fecha={ctx.fecha}
-      dueno={ctx.dueno}
       onAuthenticate={auth.handleAuth}
       error={auth.error}
       submitting={auth.submitting}

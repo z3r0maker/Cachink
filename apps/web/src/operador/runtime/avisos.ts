@@ -20,7 +20,6 @@ import { colaPendiente } from './cola';
 import type { AvisosPara, ColaRequest, MensajePara, StockBajoPara } from '@xangarro/caja/lectura';
 import type { Db } from './db-types';
 import { stockPorProducto } from './inventario';
-import { duenoNombre } from './negocio';
 
 /** Device-local read marks: never synced (ADR-075), so `app_config`. */
 const LEIDOS = 'operador.avisosLeidos';
@@ -113,7 +112,6 @@ export async function avisosDeCaja(
     cola: { cuantos: cola.length, desde: cola[0]?.en ?? null },
     rechazados: await rechazados(db),
     stockBajo: await stockBajo(db, businessId, deviceId),
-    dueno: await duenoNombre(db),
   };
 }
 

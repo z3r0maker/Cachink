@@ -15,12 +15,6 @@ import { asTenant, BIZ } from './sync-phone';
  */
 test.beforeEach(() => test.setTimeout(120_000));
 
-/**
- * The seed's owner (seed-data's OWNER, «Pedro»): the bootstrap sends the
- * owner's display name (data-pg 0044), so the caja names him, never «el dueño».
- */
-const DUENO = 'Pedro';
-
 /** The seed's Ana Robledo: the operator the door logs in. */
 const ANA = '01HZ8XQN9GZJXV8AKQ5X0ANA01';
 
@@ -54,9 +48,12 @@ test('the owner’s message is answered in place and the reply reaches the owner
   const card = page.locator('article', { hasText: m.cuerpo });
   await expect(card).toBeVisible({ timeout: 20_000 });
   await sinFixture(page);
-  await expect(page.getByRole('tab', { name: new RegExp(`^De ${DUENO}`) })).toBeVisible();
-  await expect(page.getByText(`Lo que te manda ${DUENO} y lo que la caja te avisa`)).toBeVisible();
-  await expect(page.getByRole('tab', { name: /^Del dueño/ })).toHaveCount(0);
+  // The caja never names the owner (M-25): the seed's «Pedro» is «los patrones».
+  await expect(page.getByRole('tab', { name: /^De los patrones/ })).toBeVisible();
+  await expect(
+    page.getByText('Lo que te mandan los patrones y lo que la caja te avisa'),
+  ).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^De Pedro/ })).toHaveCount(0);
   await expect(card).toContainText('Sin leer');
 
   const enviar = card.getByRole('button', { name: 'Enviar respuesta' });
@@ -64,7 +61,7 @@ test('the owner’s message is answered in place and the reply reaches the owner
   await card.getByRole('button', { name: 'Cobré y no capturé' }).click();
   await enviar.click();
   await expect(page.getByRole('status')).toContainText(
-    `${DUENO} ya tiene tu respuesta sobre el corte.`,
+    'Los patrones ya tienen tu respuesta sobre el corte.',
   );
   await expect(card.getByText('“Cobré una venta y no la capturé en la caja.”')).toBeVisible();
 
@@ -113,7 +110,7 @@ test('«De tu caja» holds the caja’s own notices, never the design’s', asyn
   await caja.click();
   await expect(caja).toHaveAttribute('aria-selected', 'true');
   await sinFixture(page);
-  await expect(page.getByText('Pedro aprobó «Orden de tripa»')).toHaveCount(0);
+  await expect(page.getByText('Los patrones aprobaron «Orden de tripa»')).toHaveCount(0);
   await expect(page.getByText('El Taller de Chuy lleva 16 días sin abonar')).toHaveCount(0);
 });
 

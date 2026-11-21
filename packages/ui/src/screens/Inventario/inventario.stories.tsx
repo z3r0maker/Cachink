@@ -43,7 +43,6 @@ function Pantalla(p: { readonly estado: Estado }): ReactElement {
               ? { ...INVENTARIO_FIXTURE, existencias: [], movimientos: [] }
               : INVENTARIO_FIXTURE
         }
-        dueno="Pedro"
         registrar={() => Promise.resolve()}
         onNuevoProducto={() => undefined}
         onRetry={() => undefined}

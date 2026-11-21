@@ -16,7 +16,6 @@ function montar(over: Partial<Parameters<typeof VentasMostradorScreen>[0]> = {})
   const props = {
     state: 'happy' as const,
     data: VENTAS_FIXTURE,
-    dueno: 'Pedro',
     onRetry: vi.fn(),
     onIrACobrar: vi.fn(),
     onAbrirTurno: vi.fn(),

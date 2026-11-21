@@ -14,7 +14,7 @@ import { fireEvent, renderWithProviders, screen, waitFor } from './test-utils';
 
 initI18n();
 
-const DATOS = { cuentas: [], hoy: HOY, negocio: 'Taquería Don Pedro', dueno: 'Pedro' };
+const DATOS = { cuentas: [], hoy: HOY, negocio: 'Taquería Don Pedro' };
 
 function montar(id: string | null, over: Record<string, unknown> = {}) {
   const onRegistrar = vi.fn(async () => null);
@@ -49,7 +49,9 @@ describe('ClienteScreen · the account', () => {
     expect(screen.getByText(/cliente desde enero 2026/)).toBeInTheDocument();
     expect(screen.getByTestId('cuenta-estado').textContent).toBe('Atrasado');
     expect(screen.getByTestId('cuenta-indicadores').textContent).toContain('Ventas abiertas');
-    expect(screen.getByTestId('cuenta-indicadores').textContent).toContain('Lo fijó Pedro');
+    expect(screen.getByTestId('cuenta-indicadores').textContent).toContain(
+      'Lo fijaron los patrones · plazo 15 días',
+    );
     expect(screen.getByText(/Pasó su límite|Puede fiar hasta/)).toBeInTheDocument();
   });
 

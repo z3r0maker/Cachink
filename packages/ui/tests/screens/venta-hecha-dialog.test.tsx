@@ -28,9 +28,7 @@ const venta = (over: Partial<VentaHecha> = {}): VentaHecha =>
 function montar(v: VentaHecha | null) {
   const onMandar = vi.fn();
   const onNueva = vi.fn();
-  renderWithProviders(
-    <VentaHechaDialog venta={v} dueno="Pedro" onMandar={onMandar} onNueva={onNueva} />,
-  );
+  renderWithProviders(<VentaHechaDialog venta={v} onMandar={onMandar} onNueva={onNueva} />);
   return { onMandar, onNueva };
 }
 
@@ -42,6 +40,9 @@ describe('VentaHechaDialog', () => {
     expect(screen.getByText('Dale de cambio')).toBeInTheDocument();
     expect(screen.getByText(/Pagó con \$500\.00/)).toBeInTheDocument();
     expect(screen.getByTestId('venta-hecha-cifra').textContent).toContain('150.00');
+    expect(
+      screen.getByText('Se guardó en la caja y se les manda a los patrones.'),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('venta-hecha-mandar'));
     fireEvent.click(screen.getByTestId('venta-hecha-nueva'));

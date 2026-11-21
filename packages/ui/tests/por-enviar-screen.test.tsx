@@ -30,7 +30,7 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     detalle: '$120.00 · Tacos',
     razon: 'El producto de este registro ya no existe en el portal.',
     pista:
-      'Pídele a Pedro que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
   {
@@ -41,7 +41,7 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     detalle: 'Chuy',
     razon: 'El cliente de este registro ya no existe en el portal.',
     pista:
-      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
 ];
@@ -57,7 +57,6 @@ function montar(over: Record<string, unknown> = {}) {
       fase="espera"
       cola={COLA_FIXTURE}
       rechazados={[]}
-      dueno="Pedro"
       ultima="14:55"
       onReintentar={onReintentar}
       onReintentarRechazado={onReintentarRechazado}
@@ -112,7 +111,7 @@ describe('PorEnviarScreen · fases', () => {
     montar({ fase: 'enviado', cola: [] });
     const card = screen.getByTestId('por-enviar-todo-enviado').textContent ?? '';
     expect(card).toContain('Todo está enviado');
-    expect(card).toContain('ya tiene lo que capturaste. Última vez a las 14:55.');
+    expect(card).toContain('Los patrones ya tienen lo que capturaste. Última vez a las 14:55.');
     expect(screen.queryByTestId('por-enviar-heroe')).toBeNull();
     expect(screen.queryByTestId('por-enviar-todo-enviado-cta')).toBeNull();
   });

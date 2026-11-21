@@ -173,9 +173,9 @@ export const esMX = {
   notifications: {
     stockLowTitle: 'Stock bajo',
     stockLowBodyOne:
-      'Un producto está por agotarse. Registra la entrada cuando llegue o avísale al dueño.',
+      'Un producto está por agotarse. Registra la entrada cuando llegue o avísales a los patrones.',
     stockLowBodyMany:
-      '{{count}} productos están por agotarse. Registra las entradas cuando lleguen o avísale al dueño.',
+      '{{count}} productos están por agotarse. Registra las entradas cuando lleguen o avísales a los patrones.',
   },
   notificaciones: {
     // Alert source titles
@@ -202,7 +202,7 @@ export const esMX = {
   // Phase 1 — User Management + Auth
   login: {
     noOperatorsTitle: 'Aún no hay operadores',
-    noOperatorsBody: 'Pide al dueño del negocio que cree un operador y luego toca Actualizar.',
+    noOperatorsBody: 'Pide a los patrones que creen un operador y luego toca Actualizar.',
     refresh: 'Actualizar',
   },
   sync: {
@@ -243,21 +243,21 @@ export const esMX = {
     hints: {
       // Never «regístrala» again: the row is still here, it would count twice (R5).
       productMissing:
-        'Pídele al dueño que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+        'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
       clientMissing:
-        'Pídele al dueño que recupere el cliente en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+        'Pídeles a los patrones que recuperen el cliente en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
       userMissing: 'El operador fue eliminado en el portal.',
     },
   },
   planLimit: {
     title: 'Llegaste a {{limit}} registros este mes',
     body: 'Tu negocio ya usó los registros incluidos este mes.',
-    where: 'Pide al dueño del negocio que revise su cuenta. Lo que ya registraste sigue guardado.',
+    where: 'Pide a los patrones que revisen su cuenta. Lo que ya registraste sigue guardado.',
     ok: 'Entendido',
   },
   planBanner: {
     grace: 'Tu pago está pendiente — tienes hasta el {{date}}.',
-    fellBack: 'La cuenta de tu negocio necesita atención. Pide al dueño del negocio que la revise.',
+    fellBack: 'La cuenta de tu negocio necesita atención. Pide a los patrones que la revisen.',
   },
   // The header's pill says it the caja's way (the web caja's header):
   // «Enviado» or «N sin enviar». Accessible names carry the long form.

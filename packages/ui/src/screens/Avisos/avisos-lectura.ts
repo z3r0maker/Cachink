@@ -9,7 +9,6 @@
  */
 import type { AvisosPara, MensajePara, StockBajoPara } from '@xangarro/caja/lectura';
 import type { BusinessId, MensajeOperador, UserId } from '@xangarro/domain';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
 import { seSigue } from '../Inventario/inventario-lectura';
 
@@ -97,11 +96,10 @@ export async function leerAvisos(
   s: { readonly businessId: BusinessId; readonly userId: UserId },
   cola: EstadoCola,
 ): Promise<AvisosPara> {
-  const [mensajes, marcas, stock, dueno] = await Promise.all([
+  const [mensajes, marcas, stock] = await Promise.all([
     leerMensajes(r, s.businessId, s.userId),
     leidos(r),
     stockBajo(r, s.businessId),
-    r.appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
   ]);
   return {
     mensajes,
@@ -109,6 +107,5 @@ export async function leerAvisos(
     cola: { cuantos: cola.cuantos, desde: cola.desde },
     rechazados: cola.rechazados,
     stockBajo: stock,
-    dueno: dueno ?? null,
   };
 }

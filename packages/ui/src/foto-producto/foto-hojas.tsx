@@ -13,7 +13,6 @@ import type { FotoAbierta, FotoFlujo } from './use-foto-flujo';
 interface HojaProps {
   readonly a: FotoAbierta;
   readonly flujo: FotoFlujo;
-  readonly dueno: string;
   /** This caja's name when the photo was taken here, else null. */
   readonly caja: string | null;
 }
@@ -42,11 +41,10 @@ function Cambiar({ a, flujo, caja }: HojaProps): ReactElement {
   );
 }
 
-function Quitar({ a, flujo, dueno }: HojaProps): ReactElement {
+function Quitar({ a, flujo }: HojaProps): ReactElement {
   return (
     <FotoQuitarDialog
       abierta={a}
-      dueno={dueno}
       guardando={flujo.guardando}
       onQuitar={flujo.quitar}
       onMejorNo={flujo.volver}
@@ -54,11 +52,10 @@ function Quitar({ a, flujo, dueno }: HojaProps): ReactElement {
   );
 }
 
-function Listo({ a, flujo, dueno }: HojaProps): ReactElement {
+function Listo({ a, flujo }: HojaProps): ReactElement {
   return (
     <FotoListoSheet
       abierta={a}
-      dueno={dueno}
       guardando={flujo.guardando}
       onGuardar={flujo.guardar}
       onOtra={flujo.camara}
@@ -71,8 +68,6 @@ const HOJAS = { camara: Camara, cambiar: Cambiar, quitar: Quitar } as const;
 
 export function FotoHojas(p: {
   readonly flujo: FotoFlujo;
-  /** The owner's first name, for «el portal de Pedro». */
-  readonly dueno: string;
   /** This caja's name, for «Tomada … en Caja 1». */
   readonly caja: string;
 }): ReactElement | null {
@@ -82,5 +77,5 @@ export function FotoHojas(p: {
   const paso = a.paso.paso;
   const Hoja = paso === 'camara' || paso === 'cambiar' || paso === 'quitar' ? HOJAS[paso] : Listo;
   const caja = a.actual?.deviceId === deviceId ? p.caja : null;
-  return <Hoja a={a} flujo={p.flujo} dueno={p.dueno} caja={caja} />;
+  return <Hoja a={a} flujo={p.flujo} caja={caja} />;
 }

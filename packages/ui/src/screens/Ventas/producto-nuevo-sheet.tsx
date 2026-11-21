@@ -7,7 +7,6 @@
 import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { InventoryCategory, Product } from '@xangarro/domain';
-import { mayuscula } from '@xangarro/caja';
 import { BottomSheet } from '../../components/BottomSheet/index';
 import { Btn } from '../../components/Btn/index';
 import { MText } from '../../components/Mostrador/index';
@@ -26,8 +25,6 @@ export interface ProductoNuevoSheetProps {
   readonly codigo: string | null;
   /** The types the catalogue already uses; one or none hides the question. */
   readonly tipos: readonly InventoryCategory[];
-  /** «Pedro», or «el dueño». */
-  readonly dueno: string;
   readonly onGuardar: (input: CrearProductoInput) => Promise<Product>;
   /** Saved: the route puts it in the ticket and says so, or Inventario opens its entrada. */
   readonly onListo: (p: Product) => void;
@@ -37,12 +34,12 @@ export interface ProductoNuevoSheetProps {
   readonly conExistencias?: boolean;
 }
 
-function Nota({ dueno }: { dueno: string }): ReactElement {
+function Nota(): ReactElement {
   return (
     <View flexDirection="row" gap={8} alignItems="flex-start">
       <PathIcon d={COBRAR_GLYPHS.info} size={18} color={colors.gray600} />
       <MText flex={1} size="md" weight="semibold" color={colors.gray600}>
-        {`Se vende desde ya. ${mayuscula(dueno)} lo revisa en su catálogo y le pone el costo.`}
+        Se vende desde ya. Los patrones lo revisan en su catálogo y le ponen el costo.
       </MText>
     </View>
   );
@@ -95,7 +92,7 @@ function Formulario(p: ProductoNuevoSheetProps & { f: ProductoNuevoForm }): Reac
         </Pregunta>
       ) : null}
       <Vista f={p.f} />
-      <Nota dueno={p.dueno} />
+      <Nota />
     </View>
   );
 }

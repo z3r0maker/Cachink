@@ -8,7 +8,6 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
 import { MOTIVOS_CANCELAR, avisoCancelar, type VentaTurno } from '@xangarro/caja/ventas';
-import { aDueno } from '@xangarro/caja';
 import { Btn } from '../../components/Btn/index';
 import { Don } from '../../components/Don/index';
 import { Input } from '../../components/Input/index';
@@ -117,7 +116,6 @@ function Pie(p: {
 /** The board's dialog body: the sale, one of its four motivos, the note, what it does. */
 export function MotivoStep(p: {
   readonly venta: VentaTurno;
-  readonly dueno: string;
   readonly motivo: string | null;
   readonly nota: string;
   readonly enviando: boolean;
@@ -137,7 +135,7 @@ export function MotivoStep(p: {
         placeholder="Se cobró de más"
         testID="cancelar-nota"
       />
-      <Aviso texto={avisoCancelar(p.venta.metodo, p.venta.monto, p.venta.cliente, p.dueno)} />
+      <Aviso texto={avisoCancelar(p.venta.metodo, p.venta.monto, p.venta.cliente)} />
       <Pie
         listo={p.motivo !== null}
         enviando={p.enviando}
@@ -157,10 +155,7 @@ export function MotivoStep(p: {
  * The operator may not cancel (RvCancelar «Sin permiso», M2): Don worried, why,
  * and that nothing is handed back. Said before any «Devuelve $X».
  */
-export function SinPermiso(p: {
-  readonly dueno: string;
-  readonly onEntendido: () => void;
-}): ReactElement {
+export function SinPermiso(p: { readonly onEntendido: () => void }): ReactElement {
   return (
     <View gap={12} alignItems="center" testID="cancelar-sin-permiso">
       <Don pose="preocupado" size={112} />
@@ -168,7 +163,8 @@ export function SinPermiso(p: {
         No tienes permiso para cancelar
       </MText>
       <MText weight="semibold" color={colors.ink} textAlign="center">
-        {`Pídele ${aDueno(p.dueno)} que te dé permiso o que la cancele desde su portal. La venta sigue igual: no devuelvas dinero.`}
+        Pídeles a los patrones que te den permiso o que la cancelen desde su portal. La venta sigue
+        igual: no devuelvas dinero.
       </MText>
       <View alignSelf="stretch">
         <Btn

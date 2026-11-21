@@ -132,7 +132,6 @@ describe('useCobranza', () => {
     expect(result.current.state).toBe('cargando');
     await waitFor(() => expect(result.current.state).toBe('happy'));
     expect(result.current.data?.negocio).toBe('Taquería Don Pedro');
-    expect(result.current.data?.dueno).toBe('el dueño');
     expect(result.current.data?.cuentas[0]?.ventas[0]?.monto).toBe(460_00n);
 
     const error = await result.current.registrar({

@@ -8,7 +8,6 @@
 import { formatMoney, sum, type Money } from '@xangarro/domain';
 
 import type { Categoria } from '../caja/types';
-import { mayuscula } from '../comun/dueno';
 import type { LineaDetalle, VentaDetalle } from './detalle/types';
 import { comoMetodo } from './derive';
 import { lineasResumen } from './lista';
@@ -160,17 +159,12 @@ export function avisoCancelada(v: VentaTurno): string {
  * by how the sale was paid). The web's shipped dialog says it with
  * `consecuencia`; the phone board is this screen's spec, so it lives here.
  */
-export function avisoCancelar(
-  metodo: MetodoVenta,
-  monto: Money,
-  cliente?: string,
-  dueno = 'el dueño',
-): string {
+export function avisoCancelar(metodo: MetodoVenta, monto: Money, cliente?: string): string {
   if (metodo === 'Fiado' && cliente !== undefined) {
     return (
       `Esta venta es fiada. Al cancelarla, el saldo de ${cliente} baja ${formatMoney(monto)}. ` +
       `Si el cliente ya abonó contra esta venta, ese dinero no sale de la caja: queda como saldo ` +
-      `a favor suyo y se aplica solo a su siguiente compra. ${mayuscula(dueno)} lo ve marcado en su portal.`
+      `a favor suyo y se aplica solo a su siguiente compra. Los patrones lo ven marcado en su portal.`
     );
   }
   if (metodo === 'Efectivo') {
@@ -180,7 +174,7 @@ export function avisoCancelar(
     );
   }
   return (
-    `Sale de tus ventas del turno y ${dueno} lo ve en su portal. ` +
+    'Sale de tus ventas del turno y los patrones lo ven en su portal. ' +
     'Si hay que devolver el dinero, se hace por el mismo medio.'
   );
 }

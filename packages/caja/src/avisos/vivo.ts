@@ -1,17 +1,14 @@
 /**
  * Avisos, live (O-16, ADR-075): the Worker's messages and the caja's real
  * state said the way the design's cards say them. Pure, so the tests pin
- * every wording. The owner is named as the last pull sent it, «el dueño» until
- * then (`ui/dueno`).
+ * every wording. The owner is «los patrones», never a name (M-25).
  */
 
 import type { AvisosPara, MensajePara, StockBajoPara } from '../lectura/cola-shapes';
 import { hhmmLocal } from '../comun/fechas';
 import { ICONS, OPERADOR_BASE } from '../rutas';
-import { DUENO_GENERICO, nombreDueno } from '../comun/dueno';
+import { AVISOS_COPY } from './copy';
 import type { Aviso, AvisosData } from './types';
-
-export { DUENO_GENERICO };
 
 const PERSONA = 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8';
 const NUBE = 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5';
@@ -65,7 +62,7 @@ function mensaje(m: MensajePara, leidos: ReadonlySet<string>, hoy: string): Avis
   const base = {
     id: m.id,
     grupo: 'dueno' as const,
-    tipo: 'Mensaje del dueño',
+    tipo: AVISOS_COPY.tipoMensaje,
     hora: cuando(m.creado, hoy),
     icono: PERSONA,
     leido: leidos.has(m.id) || m.respuesta !== null,
@@ -114,7 +111,7 @@ function rechazados(n: number): Aviso[] {
       grupo: 'caja',
       tipo: 'Sincronización',
       titulo: n === 1 ? '1 registro no se pudo enviar' : `${n} registros no se pudieron enviar`,
-      cuerpo: 'El portal no los aceptó. El dueño los revisa en Sincronización; no se borran.',
+      cuerpo: 'El portal no los aceptó. Los patrones los revisan en Sincronización; no se borran.',
       hora: 'Ahora',
       icono: NUBE,
       tono: 'alerta',
@@ -148,7 +145,6 @@ export function avisosVivos(a: AvisosPara, hoy: string, donde = 'este navegador'
   const leidos = new Set(a.leidos);
   const marcar = (x: Aviso): Aviso => (leidos.has(x.id) ? { ...x, leido: true } : x);
   return {
-    dueno: nombreDueno(a.dueno),
     avisos: [
       ...a.mensajes.map((m) => mensaje(m, leidos, hoy)),
       ...[...cola(a.cola, hoy, donde), ...rechazados(a.rechazados), ...a.stockBajo.map(stock)].map(
@@ -159,5 +155,3 @@ export function avisosVivos(a: AvisosPara, hoy: string, donde = 'este navegador'
 }
 
 export const sinLeer = (avisos: readonly Aviso[]): number => avisos.filter((x) => !x.leido).length;
-
-export { aDueno, deDueno, mayuscula } from '../comun/dueno';

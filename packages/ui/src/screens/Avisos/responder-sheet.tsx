@@ -7,7 +7,7 @@
 import { useState, type ReactElement } from 'react';
 import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { aDueno, respuestaInvalida, RESPUESTAS_RAPIDAS } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, respuestaInvalida, RESPUESTAS_RAPIDAS } from '@xangarro/caja/avisos';
 import type { Aviso } from '@xangarro/caja/avisos';
 import { BottomSheet } from '../../components/BottomSheet/index';
 import { Btn } from '../../components/Btn/index';
@@ -31,7 +31,6 @@ const CAMPO = {
 export interface ResponderSheetProps {
   readonly open: boolean;
   readonly aviso: Aviso;
-  readonly dueno: string;
   readonly onClose: () => void;
   /** Returns null when it landed; the reason it did not when it failed. */
   readonly onEnviar: (texto: string) => Promise<string | null>;
@@ -40,7 +39,6 @@ export interface ResponderSheetProps {
 function CampoRespuesta(p: {
   readonly value: string;
   readonly error: string | null;
-  readonly dueno: string;
   readonly onChange: (v: string) => void;
 }): ReactElement {
   return (
@@ -49,7 +47,7 @@ function CampoRespuesta(p: {
       <TextInput
         testID="responder-texto"
         aria-label="Tu respuesta"
-        placeholder={`Cuéntale ${aDueno(p.dueno)} lo que recuerdas`}
+        placeholder={AVISOS_COPY.cuentales}
         placeholderTextColor={colors.textMuted}
         value={p.value}
         onChangeText={p.onChange}
@@ -141,7 +139,7 @@ export function ResponderSheet(p: ResponderSheetProps): ReactElement {
     <BottomSheet
       open={p.open}
       onClose={p.onClose}
-      title={`Responder ${aDueno(p.dueno)}`}
+      title={AVISOS_COPY.responder}
       eyebrow={`Sobre ${p.aviso.responder?.asunto ?? 'su mensaje'}`}
       testID="responder-sheet"
       footer={
@@ -160,7 +158,7 @@ export function ResponderSheet(p: ResponderSheetProps): ReactElement {
       }
     >
       <View gap={12} paddingBottom={4}>
-        <CampoRespuesta value={r.texto} error={r.error} dueno={p.dueno} onChange={r.escribir} />
+        <CampoRespuesta value={r.texto} error={r.error} onChange={r.escribir} />
         <Rapidas value={r.texto} onElegir={r.escribir} />
       </View>
     </BottomSheet>

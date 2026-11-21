@@ -3,16 +3,7 @@ import assert from 'node:assert/strict';
 
 import type { AvisosPara } from '../src/lectura/cola-shapes';
 import { hoyLocal } from '../src/comun/fechas';
-import {
-  avisosVivos,
-  cuando,
-  deDueno,
-  diaLargo,
-  mayuscula,
-  partir,
-  sinLeer,
-} from '../src/avisos/vivo';
-import { nombreDueno, primerNombreDueno } from '../src/comun/dueno';
+import { avisosVivos, cuando, diaLargo, partir, sinLeer } from '../src/avisos/vivo';
 
 const HOY = '2026-05-14';
 /** Noon local on a day, as a UTC stamp: safe from any device's offset. */
@@ -24,7 +15,6 @@ const BASE: AvisosPara = {
   cola: { cuantos: 0, desde: null },
   rechazados: 0,
   stockBajo: [],
-  dueno: null,
 };
 
 describe('avisos, vivos', () => {
@@ -61,7 +51,7 @@ describe('avisos, vivos', () => {
       HOY,
     );
     const [corte, info] = data.avisos;
-    assert.equal(data.dueno, 'el dueño');
+    assert.equal(corte?.tipo, 'Mensaje de los patrones');
     assert.equal(corte?.titulo, 'Aclara el corte del 13 de mayo');
     assert.deepEqual(corte?.responder, { asunto: 'el corte del 13 de mayo' });
     assert.equal(corte?.tono, 'alerta');
@@ -123,6 +113,10 @@ describe('avisos, vivos', () => {
     );
     assert.equal(data.avisos[0]?.hora, 'Hoy 14:55');
     assert.equal(
+      data.avisos[1]?.cuerpo,
+      'El portal no los aceptó. Los patrones los revisan en Sincronización; no se borran.',
+    );
+    assert.equal(
       data.avisos[2]?.cuerpo,
       'Quedan 6 y el umbral es 15. Si llega mercancía, registra la entrada para que el stock cuadre.',
     );
@@ -142,17 +136,7 @@ describe('avisos, vivos', () => {
     assert.deepEqual(avisosVivos(BASE, hoyLocal()).avisos, []);
   });
 
-  it('words the owner with or without a name', () => {
-    assert.equal(mayuscula(deDueno('el dueño')), 'Del dueño');
-    assert.equal(mayuscula(deDueno('Pedro')), 'De Pedro');
+  it('keeps a body with no final stop whole', () => {
     assert.deepEqual(partir('Sin punto final'), { titulo: 'Sin punto final', resto: '' });
-  });
-
-  it('names the owner by the first name the pull sent, «el dueño» until then', () => {
-    assert.equal(avisosVivos({ ...BASE, dueno: 'Pedro Ramírez' }, HOY).dueno, 'Pedro');
-    assert.equal(avisosVivos({ ...BASE, dueno: '   ' }, HOY).dueno, 'el dueño');
-    assert.equal(nombreDueno(null), 'el dueño');
-    assert.equal(primerNombreDueno('  Lupita  '), 'Lupita');
-    assert.equal(primerNombreDueno(null), null);
   });
 });

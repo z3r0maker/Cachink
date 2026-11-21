@@ -23,7 +23,6 @@ function montar(over: Record<string, unknown> = {}) {
       onClose={onClose}
       codigo={null}
       tipos={['Producto Terminado']}
-      dueno="Pedro"
       onGuardar={onGuardar as never}
       onListo={onListo}
       {...over}
@@ -39,6 +38,11 @@ function escribir(testID: string, texto: string): void {
 describe('ProductoNuevoSheet', () => {
   it('waits for the name and the price; both together open the door', () => {
     montar();
+    expect(
+      screen.getByText(
+        'Se vende desde ya. Los patrones lo revisan en su catálogo y le ponen el costo.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByTestId('producto-nuevo-agregar').textContent).toContain(
       'Escribe el nombre y el precio',
     );
@@ -79,7 +83,6 @@ describe('ProductoNuevoSheet', () => {
         onClose={vi.fn()}
         codigo={null}
         tipos={['Producto Terminado']}
-        dueno="Pedro"
         onGuardar={
           vi.fn(async () => {
             throw new Error('db');

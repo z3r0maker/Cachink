@@ -3,7 +3,7 @@
  * arrived after the cash left. The camera (or the gallery) hands a file, the
  * app's port encodes it, `AgregarComprobanteGastoUseCase` writes the row the
  * outbox carries, and the list rereads: the row says «Con foto» and the
- * toast «Foto guardada. Se manda al dueño.» A receipt is never replaced, so
+ * toast «Foto guardada. Se les manda a los patrones.» A receipt is never replaced, so
  * the button only shows on a gasto without one.
  */
 import { useState } from 'react';
@@ -35,7 +35,11 @@ export interface AgregarFoto {
   readonly cerrarAviso: () => void;
 }
 
-const GUARDADA: AvisoFoto = { ok: true, titulo: 'Foto guardada', cuerpo: 'Se manda al dueño.' };
+const GUARDADA: AvisoFoto = {
+  ok: true,
+  titulo: 'Foto guardada',
+  cuerpo: 'Se les manda a los patrones.',
+};
 
 const fallo = (e: unknown): AvisoFoto => ({
   ok: false,

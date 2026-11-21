@@ -15,8 +15,6 @@ import { Aviso, MotivoStep, SinPermiso } from './venta-cancelar-partes';
 
 export interface CancelarVentaDialogProps {
   readonly venta: VentaTurno;
-  /** The owner's name for the consequence line; «el dueño» until the phone knows it. */
-  readonly dueno?: string;
   readonly onClose: () => void;
   /**
    * Checks the NIP and the permission before anything else (M2): null when
@@ -86,7 +84,6 @@ function usePasos(p: CancelarVentaDialogProps) {
 
 export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
   const f = usePasos(p);
-  const dueno = p.dueno ?? 'el dueño';
   return (
     <Modal
       open
@@ -97,13 +94,12 @@ export function CancelarVentaDialog(p: CancelarVentaDialogProps): ReactElement {
       {f.step === 'pin' ? (
         <PinStep key={f.nip.intento} onSubmit={(nip) => void f.nip.alPaso(nip)} />
       ) : f.step === 'sin-permiso' ? (
-        <SinPermiso dueno={dueno} onEntendido={p.onClose} />
+        <SinPermiso onEntendido={p.onClose} />
       ) : f.step === 'efectivo' ? (
         <CashConfirmStep amount={p.venta.monto} onConfirm={f.confirmar} submitting={f.enviando} />
       ) : (
         <MotivoStep
           venta={p.venta}
-          dueno={dueno}
           motivo={f.motivo}
           nota={f.nota}
           enviando={f.enviando}

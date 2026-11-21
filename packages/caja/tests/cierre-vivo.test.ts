@@ -225,7 +225,6 @@ describe('comoCierre y el cierre dicho', () => {
       operador: 'Ana Robledo',
       caja: 'Caja 1',
       hasta: '21:04',
-      dueno: 'Pedro',
       negocio: 'Taquería Don Pedro',
     });
     assert.equal(d.operador, 'Ana Robledo');

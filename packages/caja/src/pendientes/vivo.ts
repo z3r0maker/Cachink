@@ -33,7 +33,7 @@ const TITULO: Readonly<Record<ClaseMovimiento, string>> = {
   retiro: 'Retiro de la caja',
   apertura: 'Apertura de caja',
   cierre: 'Cierre de turno',
-  respuesta: 'Respuesta al dueño',
+  respuesta: 'Respuesta a los patrones',
   inventario: 'Movimientos de inventario',
   corte: 'Corte del día',
   entrega: 'Entrega a crédito',

@@ -9,7 +9,6 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, TicketId, UserId } from '@xangarro/domain';
 import type { CargaTicket, VentasData, VentaTurno } from '@xangarro/caja/ventas';
 import { useRepositories } from '../../app/repository-provider';
@@ -23,8 +22,6 @@ import type { VentasEstado } from './ventas-mostrador-screen';
 export interface VentasTurnoVivo {
   readonly state: VentasEstado;
   readonly data: VentasData | null;
-  /** The owner's name (the cancel dialog says it); null until the last pull. */
-  readonly dueno: string | null;
   readonly refetch: () => void;
   readonly cargarDetalle: (folio: string, fila: VentaTurno | undefined) => Promise<CargaTicket>;
   /** Resolves the error to show, or null once the ticket stands cancelled. */
@@ -38,15 +35,6 @@ export function ventasTurnoKey(
   userId: UserId | null,
 ): readonly unknown[] {
   return [...cajaKeys.byBusiness(businessId), 'ventas-turno', userId];
-}
-
-function useDueno(): string | null {
-  const { appConfig } = useRepositories();
-  const q = useQuery({
-    queryKey: ['ventas-turno', 'dueno'],
-    queryFn: () => appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
-  });
-  return q.data ?? null;
 }
 
 /** The rows with the session around them, as the screen's `VentasData`. */
@@ -125,7 +113,6 @@ export function useVentasTurno(): VentasTurnoVivo {
   const businessId = useCurrentBusinessId() as BusinessId | null;
   const userId = useUserId();
   const shell = useShellData();
-  const dueno = useDueno();
   const hoy = hoyLocal();
   const q = useQuery({
     queryKey: [...ventasTurnoKey(businessId, userId), hoy],
@@ -144,7 +131,6 @@ export function useVentasTurno(): VentasTurnoVivo {
   return {
     state: estadoVentas(q, shell.operador),
     data,
-    dueno,
     refetch: recargar,
     cargarDetalle,
     cancelar,

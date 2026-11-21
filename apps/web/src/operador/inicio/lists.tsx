@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 
-import { ICONS, OPERADOR_BASE } from '@xangarro/caja';
+import { ICONS, OPERADOR_BASE, PATRONES } from '@xangarro/caja';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import { useHoyNo } from '../ui/hoy-no';
@@ -118,14 +118,8 @@ function TareaRow({ t, onSkip }: { readonly t: Tarea; readonly onSkip: () => voi
   );
 }
 
-/** «De parte de …»: the owner's latest messages; the urgent one is tinted red. */
-export function DeParteDe({
-  dueno,
-  mensajes,
-}: {
-  readonly dueno: string;
-  readonly mensajes: readonly MensajeDueno[];
-}) {
+/** «De parte de los patrones»: their latest messages; the urgent one is tinted red. */
+export function DeParteDe({ mensajes }: { readonly mensajes: readonly MensajeDueno[] }) {
   const avisos = `${OPERADOR_BASE}/avisos`;
   const link = (
     <Link href={avisos} className={p.headLink}>
@@ -133,7 +127,7 @@ export function DeParteDe({
     </Link>
   );
   return (
-    <Panel label={`De parte de ${dueno}`} action={link}>
+    <Panel label={`De parte de ${PATRONES}`} action={link}>
       <div className={l.mensajes}>
         {mensajes.map((m) => (
           <Link

@@ -23,7 +23,6 @@ import {
   makeNewProduct,
 } from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import { useAppConfigStore } from '../src/app-config/use-app-config';
 import { initI18n } from '../src/i18n/index';
 import { useInventario } from '../src/screens/Inventario/use-inventario';
@@ -120,7 +119,6 @@ beforeEach(async () => {
   expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
   turnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
   appConfig = new InMemoryAppConfigRepository();
-  await appConfig.set(SYNC_CONFIG_KEYS.duenoNombre, 'Pedro Sánchez');
   await sembrar();
   useAppConfigStore.setState({
     currentBusinessId: BIZ,
@@ -176,12 +174,11 @@ describe('useInventario · la lectura', () => {
     expect(movs[1]).toMatchObject({ detalle: 'Se rompió', cantidad: 2 });
   });
 
-  it('carries the session names and the owner first name', async () => {
+  it('carries the session names', async () => {
     const { result } = montar();
     await waitFor(() => expect(result.current.state).toBe('happy'));
     expect(result.current.data?.operador).toBe('Ana Robledo');
     expect(result.current.data?.caja).toBe('Caja 1');
-    expect(result.current.dueno).toBe('Pedro');
   });
 });
 
