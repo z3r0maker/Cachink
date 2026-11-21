@@ -1,0 +1,21 @@
+# Opens Vincular's scan path from a pairing link, as reading the portal's QR
+# would (N-25): the link carries `${TOKEN}` in its fragment, the phone asks
+# `/activate/preview` about it, and the sheet «¿Es tu negocio?» comes up. The
+# QR visor cannot be driven from a simulator, so this is how a flow reaches
+# the scan path.
+#
+# Env: TOKEN (a mock scan token, contracts/src/mock/state.ts `MOCK_QR_TOKENS`:
+# mockqrVALDK7M3xangarro, mockqrUSEDK7M3xangarro, mockqrEXPRK7M3xangarro).
+# Precondition: the phone is not linked (Vincular is on screen).
+appId: mx.xangarro.mobile
+---
+- openLink: 'xangarro://activar#c=${TOKEN}'
+# iOS asks once before a custom scheme opens the app.
+- tapOn:
+    text: 'Open'
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'vincular-leido'
+    timeout: 15000
+- assertVisible: '.*¿Es tu negocio\?.*'

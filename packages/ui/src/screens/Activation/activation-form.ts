@@ -56,3 +56,15 @@ export function tokenDeQr(data: string): string | null {
   const m = /\/activar#(?:.*&)?c=([A-Za-z0-9_-]{22,64})(?:&|$)/.exec(data.trim());
   return m?.[1] ?? null;
 }
+
+/** Who the preview names as the owner (N-25): either half may be missing. */
+export type DuenoLeido =
+  | { readonly que: 'ambos'; readonly nombre: string; readonly correo: string }
+  | { readonly que: 'uno'; readonly dueno: string };
+
+/** «Dueño: Pedro · pedro@…», or the half there is; null when the business has no owner account. */
+export function duenoLeido(nombre: string | null, correo: string | null): DuenoLeido | null {
+  if (nombre !== null && correo !== null) return { que: 'ambos', nombre, correo };
+  const dueno = nombre ?? correo;
+  return dueno === null ? null : { que: 'uno', dueno };
+}

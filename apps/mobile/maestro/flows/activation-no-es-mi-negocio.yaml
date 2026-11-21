@@ -1,0 +1,59 @@
+# «No es mi negocio» (N-25, SEC-MOB-04; MvVincular «CÓDIGO LEÍDO»): a QR
+# someone else put in front of the caja names their business, and saying so
+# goes back to the camera without linking. The token was not spent: opening
+# the same link again names the same business, and the caja is still on
+# Vincular at the end.
+#
+# Precondition: fresh install (no activation record) and the contracts mock
+# reset (mockqrVALDK7M3xangarro redeems VALDK7M3).
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 60000
+- runFlow:
+    file: shared/vincular-enlace.yaml
+    env:
+      TOKEN: 'mockqrVALDK7M3xangarro'
+- extendedWaitUntil:
+    visible:
+      id: 'vincular-leido-nombre'
+    timeout: 15000
+- assertVisible:
+    text: '.*Tacos La Esquina.*'
+- tapOn:
+    id: 'vincular-leido-no-es'
+# Back on the camera, nothing linked.
+- extendedWaitUntil:
+    notVisible:
+      id: 'vincular-leido'
+    timeout: 10000
+- assertVisible: '.*Escanea el código del dueño.*'
+- assertVisible:
+    id: 'activation-screen'
+# The same link again: the preview still names the business, so the first
+# look redeemed nothing.
+- runFlow:
+    file: shared/vincular-enlace.yaml
+    env:
+      TOKEN: 'mockqrVALDK7M3xangarro'
+- extendedWaitUntil:
+    visible:
+      id: 'vincular-leido-nombre'
+    timeout: 15000
+- assertNotVisible:
+    id: 'activation-error'
+- tapOn:
+    id: 'vincular-leido-no-es'
+- extendedWaitUntil:
+    notVisible:
+      id: 'vincular-leido'
+    timeout: 10000
+- assertVisible:
+    id: 'activation-screen'
+- assertNotVisible:
+    id: 'quick-switch'

@@ -39,9 +39,11 @@ export const entrar = {
     faltaCorreo: 'Falta el correo del dueño.',
     faltanLetras: 'Faltan {{n}} letras del código.',
     leidoEyebrow: 'Código leído',
-    leidoTitulo: 'Conecta esta caja',
-    leidoCuerpo:
-      'La caja queda en el negocio del portal donde abriste el código. Si no es tu negocio, vuelve a la cámara.',
+    leidoTitulo: '¿Es tu negocio?',
+    leidoDueno: 'Dueño: {{nombre}} · {{correo}}',
+    leidoDuenoUno: 'Dueño: {{dueno}}',
+    leidoRevisa: 'Revisa que diga el nombre de tu negocio.',
+    noEsMiNegocio: 'No es mi negocio',
     volverCamara: 'Volver a la cámara',
   },
   acceso: {

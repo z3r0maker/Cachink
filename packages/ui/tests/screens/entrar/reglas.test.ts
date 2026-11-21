@@ -9,6 +9,7 @@ import { siguienteBloqueo, useCajaLock } from '../../../src/app/caja-lock';
 import { useAppConfigStore } from '../../../src/app-config/use-app-config';
 import {
   errorDeLoEnviado,
+  duenoLeido,
   faltaParaConectar,
   sanitizeCode,
   tokenDeQr,
@@ -99,6 +100,22 @@ describe('linking', () => {
     expect(tokenDeQr(`https://otra.app/login#c=${TOKEN}`)).toBeNull();
     expect(tokenDeQr('https://app.xangarro.mx/activar#c=corto')).toBeNull();
     expect(tokenDeQr(`https://app.xangarro.mx/activar?c=${TOKEN}`)).toBeNull();
+  });
+  it('reads the token a link opens the app with, by the app scheme too (N-25)', () => {
+    expect(tokenDeQr(`xangarro://activar#c=${TOKEN}`)).toBe(TOKEN);
+  });
+  it('names the owner by first name and correo, or by the half the preview has (N-25)', () => {
+    expect(duenoLeido('Pedro', 'pedro@taqueria.mx')).toEqual({
+      que: 'ambos',
+      nombre: 'Pedro',
+      correo: 'pedro@taqueria.mx',
+    });
+    expect(duenoLeido(null, 'pedro@taqueria.mx')).toEqual({
+      que: 'uno',
+      dueno: 'pedro@taqueria.mx',
+    });
+    expect(duenoLeido('Pedro', null)).toEqual({ que: 'uno', dueno: 'Pedro' });
+    expect(duenoLeido(null, null)).toBeNull();
   });
   it('says what is missing, the correo first', () => {
     expect(faltaParaConectar('pedro@', 'K7M3')).toEqual({ que: 'correo' });

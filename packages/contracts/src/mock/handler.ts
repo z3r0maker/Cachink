@@ -23,6 +23,7 @@ import { applyPush } from './push-handler.js';
 import { entitlementFor, scenarioOf, type Scenario } from './scenarios.js';
 import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
+import { previewPairing } from './preview.js';
 import { mockSnapshotPage } from './snapshot.js';
 import { referenceTables } from './tables.js';
 import { usageOf } from './usage.js';
@@ -83,6 +84,8 @@ export class MockApi {
     const scenario = scenarioOf(req.headers, this.state.defaultScenario);
     if (req.path === API_PATHS.activate && req.method === 'POST')
       return this.activate(req, scenario);
+    if (req.path === API_PATHS.activatePreview && req.method === 'POST')
+      return previewPairing(this.state, req.body);
     const device = this.authenticate(req, scenario);
     if (!device) return err(req.headers['authorization'] ? 'DEVICE_REVOKED' : 'UNAUTHENTICATED');
     return this.deviceRoute(req, device, scenario);

@@ -38,6 +38,17 @@ export const MOCK_CODES = {
   noSlots: 'NSLTK7M3',
 } as const;
 
+/**
+ * Scan tokens seeded beside the codes, one per refusal the scan path has, so
+ * a Maestro flow can open `xangarro://activar#c=<token>` without asking the
+ * mock first (N-25). Each redeems the code it is named after.
+ */
+export const MOCK_QR_TOKENS = {
+  valid: `mockqr${MOCK_CODES.valid}xangarro`,
+  used: `mockqr${MOCK_CODES.used}xangarro`,
+  expired: `mockqr${MOCK_CODES.expired}xangarro`,
+} as const;
+
 export class MockState {
   rows = new Map<string, StoredRow>();
   /** Rows removed by `/__mock/forget`, restorable with `/__mock/restore`. */
@@ -113,6 +124,10 @@ export class MockState {
       expiresAt: far,
       redeemedBy: null,
     });
+    for (const [kind, token] of Object.entries(MOCK_QR_TOKENS)) {
+      const code = MOCK_CODES[kind as keyof typeof MOCK_QR_TOKENS];
+      this.pairingTokens.set(token, { code, expiresAt: far });
+    }
   }
 
   /** Issue a fresh single-use code (test helper + `/__mock/code`). */

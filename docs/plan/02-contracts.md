@@ -89,6 +89,27 @@ legacy full bootstrap is sent while the tenant has at most 5,000 live movements,
 Errors: `400 CODE_INVALID` (unknown code **or** wrong email — one public answer since 2026-09-23, SEC-DEV-01 / ADR-101; the server logs the real reason) · `410 CODE_EXPIRED` · `409 CODE_USED` · `402 NO_DEVICE_SLOTS` (plan full; message names the plan) · `423 BUSINESS_SUSPENDED` (the business is archived; the code is not consumed). `403 EMAIL_MISMATCH` stays in the catalog only so an older server's answer maps to the same message. Wrong tries lock the IP and the credential (code or token) for 15 minutes after 5 in 15 (B-17).
 Rules: code is single-use; on success it is burned atomically with device creation; the same code cannot activate two devices even under a race (unique constraint on `activation_codes.redeemed_device_id` + row lock).
 
+### §3a `POST /activate/preview` (N-25, SEC-MOB-04)
+
+«¿Es tu negocio?» before a scanned phone links. Request `{ "qrToken": "<the scan token>" }`
+(`ActivatePreviewRequestSchema`; POST so the token stays out of URLs and logs). Response `200`,
+strict (`ActivatePreviewResponseSchema`: an extra field fails the parse):
+
+```json
+{
+  "businessName": "Taquería Don Pedro",
+  "ownerFirstName": "Pedro",
+  "ownerEmail": "pedro@taqueriadonpedro.mx"
+}
+```
+
+`ownerFirstName` is null when the owner set no name; both owner fields are null for a business with
+no owner account. Nothing is consumed or extended: the token redeems afterwards with `/activate`
+inside its own 15 minutes. Errors are the scan path's own: `400 CODE_INVALID` · `410 CODE_EXPIRED`
+· `409 CODE_USED` · `423 BUSINESS_SUSPENDED`. Throttled on the same per-IP and per-token keys as
+`/activate`, so previewing spends the redeem's budget. Server: data-pg `0062_preview_pairing_token.sql`;
+the mock serves the fixture business and seeds `MOCK_QR_TOKENS` for Maestro.
+
 ## §4 `POST /sync/push`
 
 Request (≤ 500 deltas):

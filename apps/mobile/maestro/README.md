@@ -5,7 +5,7 @@ app end-to-end on a running simulator (or physical device). Flows ship
 alongside the feature work that needs them and re-run as a smoke pass
 before any change that touches the wizard, tabs, or onboarding flows.
 
-**Suite size:** 70 flows + 25 shared subflows and scripts; `full-regression.sh` runs the curated 41 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
+**Suite size:** 75 flows + 30 shared subflows and scripts; `full-regression.sh` runs the curated 41 (see «Regression Script Phases»). Every flow runs against `pnpm mock:api`, never a real backend.
 
 ## Prerequisites
 
@@ -170,6 +170,7 @@ mock's business is Tacos La Esquina with operators Toni (NIP 1234) and Ana.
 | `shared/vincular-correo.yaml`      | Types the owner's correo on Vincular's typed path; Enter puts the keyboard away                       |
 | `shared/vincular-codigo.yaml`      | Scrolls to the code boxes, types `${CODE}`, Enter puts the keyboard away                              |
 | `shared/vincular-rechazado.yaml`   | Types `${CODE}` on Vincular and waits for its own refusal `${SENTENCE}`                               |
+| `shared/vincular-enlace.yaml`      | Opens the scan path by link (`xangarro://activar#c=${TOKEN}`) and waits for «¿Es tu negocio?» (N-25)  |
 | `shared/enviar-ahora.yaml`         | Sends now: the pill opens Registros por enviar and its button flushes the queue (R4)                  |
 | `shared/find-producto-stock.yaml`  | Finds a product in Inventario by search                                                               |
 | `shared/llego-mercancia.yaml`      | Records one «Llegó mercancía» from a product row by `${ID}` × `${CANTIDAD}` (RvInventario)            |
@@ -294,18 +295,20 @@ Generated from each flow's header on 2026-11-03; «Suite» marks the forty-two `
 
 ### Vincular y acceso
 
-| Flow                       | Entry     | Suite | What it proves                                                                                                                                          |
-| -------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `activation.yaml`          | fresh     | ✓     | Vincular — happy path (A-04; MvVincular, M-06): a fresh install opens on the camera; the typed path («Escribe el código»                                |
-| `activation-errors.yaml`   | fresh     | ✓     | Activation — error paths (A-04, J3-06): a code that does not exist, one that expired and one already redeemed are each refused with their own sentence. |
-| `activation-descarga.yaml` | fresh     |       | Activation of a big business (DS-10, EsMvDescarga): the snapshot comes in pages, the activation screen says «Descargando                                |
-| `login-operator-pin.yaml`  | fresh     | ✓     | Operator NIP sign-in (A-16; Acceso, MvAcceso M-06): on a freshly linked device «¿Quién va a cobrar?» asks for the operat                                |
-| `login-lockout.yaml`       | activated | ✓     | Operator sign-in guard (A-05): no PIN recovery on the device, and five wrong PINs lock PIN entry for 30 s.                                              |
-| `bloqueo.yaml`             | activated | ✓     | Bloqueo (MvBloqueo, M-06): «Bloquear la caja» on Mi turno locks the caja without closing the turno — the lock screen nam                                |
-| `inicio-entrar.yaml`       | activated |       | Entrar y empezar (Track M, M-06): the caja lands on Inicio, «Abrir turno» opens the fondo sheet, the card turns to «La c                                |
-| `auto-lock-smoke.yaml`     | activated |       | Auto-lock smoke test — verifies Bloqueo (MvBloqueo) appears after timeout.                                                                              |
-| `smoke-launch.yaml`        | activated | ✓     | Smoke: the activated caja opens on Inicio and the phone's four tabs — Inicio, Cobrar, Ventas, Mi turno — sit on the bar                                 |
-| `ipad-smoke.yaml`          | activated |       | iPad smoke test — launch, authenticate, assert all major layout regions are accessible on an iPad simulator.                                            |
+| Flow                               | Entry     | Suite | What it proves                                                                                                                                          |
+| ---------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `activation.yaml`                  | fresh     | ✓     | Vincular — happy path (A-04; MvVincular, M-06): a fresh install opens on the camera; the typed path («Escribe el código»                                |
+| `activation-errors.yaml`           | fresh     | ✓     | Activation — error paths (A-04, J3-06): a code that does not exist, one that expired and one already redeemed are each refused with their own sentence. |
+| `activation-enlace.yaml`           | fresh     |       | Vincular por enlace (N-25, SEC-MOB-04): a pairing link opens «¿Es tu negocio?» with the business and its owner; only «Conectar esta caja» links.        |
+| `activation-no-es-mi-negocio.yaml` | fresh     |       | «No es mi negocio» (N-25): back to the camera, nothing redeemed; the same link names the same business again.                                           |
+| `activation-descarga.yaml`         | fresh     |       | Activation of a big business (DS-10, EsMvDescarga): the snapshot comes in pages, the activation screen says «Descargando                                |
+| `login-operator-pin.yaml`          | fresh     | ✓     | Operator NIP sign-in (A-16; Acceso, MvAcceso M-06): on a freshly linked device «¿Quién va a cobrar?» asks for the operat                                |
+| `login-lockout.yaml`               | activated | ✓     | Operator sign-in guard (A-05): no PIN recovery on the device, and five wrong PINs lock PIN entry for 30 s.                                              |
+| `bloqueo.yaml`                     | activated | ✓     | Bloqueo (MvBloqueo, M-06): «Bloquear la caja» on Mi turno locks the caja without closing the turno — the lock screen nam                                |
+| `inicio-entrar.yaml`               | activated |       | Entrar y empezar (Track M, M-06): the caja lands on Inicio, «Abrir turno» opens the fondo sheet, the card turns to «La c                                |
+| `auto-lock-smoke.yaml`             | activated |       | Auto-lock smoke test — verifies Bloqueo (MvBloqueo) appears after timeout.                                                                              |
+| `smoke-launch.yaml`                | activated | ✓     | Smoke: the activated caja opens on Inicio and the phone's four tabs — Inicio, Cobrar, Ventas, Mi turno — sit on the bar                                 |
+| `ipad-smoke.yaml`                  | activated |       | iPad smoke test — launch, authenticate, assert all major layout regions are accessible on an iPad simulator.                                            |
 
 ### Cobrar y ventas
 

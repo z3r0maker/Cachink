@@ -34,7 +34,7 @@ export class ActivationError extends Error {
  * A release build with no usable API base or public key (audit F-15d) does
  * not try: there is no mock to fall back to and no plan it could verify.
  */
-function refuseUnusableConfig(config: ActivationConfig): void {
+export function refuseUnusableConfig(config: ActivationConfig): void {
   const problems = config.configProblems ?? [];
   if (problems.length === 0) return;
   const codes = problems.map((p) => p.code).join(', ');

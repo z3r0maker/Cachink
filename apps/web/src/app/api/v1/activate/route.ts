@@ -1,10 +1,9 @@
 import { ActivateRequestSchema } from '@xangarro/contracts';
 
-import { fail, ok, protocolRefusal, rateLimited } from '@/server/api/respond';
+import { fail, ok, rateLimited } from '@/server/api/respond';
 import { activate, Refusal } from '@/server/device/activate';
-import { activateThrottle } from '@/server/device/activate-throttle';
+import { activateDoor } from '@/server/device/activate-door';
 import { publicRefusal } from '@/server/device/public-refusal';
-import { hashPairingToken } from '@/lib/pairing-token';
 import { logApi, reportError } from '@/server/observability/report';
 
 /**
@@ -28,21 +27,10 @@ import { logApi, reportError } from '@/server/observability/report';
  * phone's contract.
  */
 
-/** What the per-credential lockout counts against: the typed code, or the scan token's hash. */
-function credentialOf(body: unknown): string | null {
-  const b = body as { code?: unknown; qrToken?: unknown } | null;
-  if (typeof b?.code === 'string') return b.code;
-  return typeof b?.qrToken === 'string' ? `qr:${hashPairingToken(b.qrToken).slice(0, 32)}` : null;
-}
-
 async function handle(request: Request): Promise<Response> {
-  const refusal = protocolRefusal(request);
-  if (refusal !== null) return refusal;
-
-  const body: unknown = await request.json().catch(() => null);
-  const throttle = activateThrottle(request, credentialOf(body));
-  const wait = await throttle.wait();
-  if (wait > 0) return rateLimited(wait);
+  const door = await activateDoor(request);
+  if (!door.open) return door.response;
+  const { body, throttle } = door;
 
   const parsed = ActivateRequestSchema.safeParse(body);
   if (!parsed.success) {
