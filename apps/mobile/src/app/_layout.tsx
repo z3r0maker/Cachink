@@ -62,6 +62,7 @@ import * as plusJakartaSans from '@expo-google-fonts/plus-jakarta-sans';
 import { AppProviders, fontFaces, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { NotificationTapHost } from '../shell/notification-tap-host';
+import { ReportarSheetHost } from '../shell/reportar-host';
 import { TurnoDeOtroHost } from '../shell/turno-de-otro-host';
 import { mobileActivationConfig } from '../shell/activation-config';
 import { fotoPuertos } from '../shell/foto-puertos';
@@ -126,6 +127,10 @@ function MobileApp(): ReactElement {
       }
     >
       <MobileStack />
+      {/* Beside the stack, not with the overlays: those sit outside the
+          activation and sync providers, and the sheet sends with the device
+          token and drains after a sync run (M-23). */}
+      <ReportarSheetHost />
     </AppProviders>
   );
 }

@@ -16,6 +16,13 @@
 appId: mx.xangarro.mobile
 ---
 - openLink: 'xangarro://settings'
+# iOS asks «Open in "Xangarro!"?» when the link arrives mid-flow, after other
+# taps; at the start of a flow it usually does not. Answer it when it is there.
+- runFlow:
+    when:
+      visible: 'Open'
+    commands:
+      - tapOn: 'Open'
 - extendedWaitUntil:
     visible: 'Ajustes'
     timeout: 8000

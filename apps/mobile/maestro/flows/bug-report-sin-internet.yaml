@@ -1,0 +1,101 @@
+# «Reportar un problema» with the server gone (M-23, ADR-162 §5; board RpHoja
+# «Sin internet»): `/__mock/down` drops every socket, as airplane mode would.
+# The report is kept on the device («Guardado. Se envía solo.»), Mi turno's
+# row says «1 reporte por enviar», and once the server is back and the app
+# returns to the front the report leaves by itself and the row returns to its
+# own line.
+# Nothing is typed, nothing is shared as a file.
+#
+# Precondition: activated device against the mock on MOCK_API, Toni signed in
+# or on Acceso. Restores the mock (`up`) at the end; if an assertion fails on
+# the way, the harness's reset does.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: ${MAESTRO_LANE_MOCK_API || 'http://127.0.0.1:3000'}
+tags:
+  - observability
+  - offline
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000
+
+# The network goes.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: down
+
+- tapOn:
+    id: 'tab-cobrar|rail-cobrar|sidebar-cobrar'
+- tapOn:
+    id: 'ayuda-reportar'
+- extendedWaitUntil:
+    visible:
+      id: 'reportar-hoja'
+    timeout: 5000
+- tapOn:
+    id: 'reportar-opcion-could_not_charge'
+- tapOn:
+    id: 'reportar-enviar'
+
+# Kept, not lost, and not asked to be shared.
+- extendedWaitUntil:
+    visible:
+      id: 'reportar-resultado-queued'
+    timeout: 45000
+- assertVisible: 'Guardado\. Se envía solo\.'
+- assertVisible:
+    id: 'reportar-por-enviar'
+- assertVisible: '1 reporte por enviar'
+- tapOn:
+    id: 'reportar-listo'
+- extendedWaitUntil:
+    notVisible:
+      id: 'reportar-hoja'
+    timeout: 5000
+
+# Mi turno's row says what waits.
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- scrollUntilVisible:
+    element:
+      id: 'otros-reportar'
+    direction: DOWN
+    timeout: 8000
+    centerElement: true
+- assertVisible:
+    id: 'otros-reportar'
+    text: '.*1 reporte por enviar.*'
+
+# The network returns. Nothing else waits in the caja's own queue, so there
+# is no «Reintentar envío» to press: the report leaves when the app comes
+# back to the front, which is the other moment it is sent by itself.
+- runScript:
+    file: shared/mock-down.js
+    env:
+      ACTION: up
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- runFlow: shared/login-operator.yaml
+- tapOn:
+    id: 'tab-turno|rail-turno|sidebar-turno'
+- scrollUntilVisible:
+    element:
+      id: 'otros-reportar'
+    direction: DOWN
+    timeout: 15000
+    centerElement: true
+- extendedWaitUntil:
+    visible:
+      id: 'otros-reportar'
+      text: '.*Cuéntanos qué pasó, sin escribir.*'
+    timeout: 45000

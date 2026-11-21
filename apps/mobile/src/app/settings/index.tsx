@@ -1,23 +1,23 @@
 /**
  * Expo Router entry for /settings — device-only Ajustes (A-12, MvAjustes):
  * Esta caja, Sincronización, En este teléfono, Privacidad y términos. Business settings live in the
- * portal. This route wires the persisted device toggles, the update check,
- * the bug-report sheet, the restart after «Desvincular y borrar» and the
- * dev-only database reset.
+ * portal. This route wires the persisted device toggles, the row that opens
+ * the report sheet (the sheet itself is `ReportarHost`'s, over the whole
+ * app), the restart after «Desvincular y borrar» and the dev-only database
+ * reset.
  */
 
-import { useState, type ReactElement } from 'react';
-import { Share, View } from 'react-native';
+import type { ReactElement } from 'react';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   APP_CONFIG_KEYS,
-  BugReportSheet,
   ResetDemoAction,
   SettingsScreen,
   useAppConfigRepository,
-  useBugReportSender,
   useCrashReportingEnabled,
   useNotificationsEnabled,
+  useReportar,
   useSetCrashReportingEnabled,
   useSetNotificationsEnabled,
   useTranslation,
@@ -26,7 +26,6 @@ import {
 import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper, useBackTo } from '../../shell/app-shell-wrapper';
 import { restartApp } from '../../shell/restart-app';
-import { useMobileDeviceContext } from '../../shell/use-device-context';
 
 /** Persist a device toggle, then update the in-memory store. */
 function usePersistedToggle(
@@ -75,12 +74,8 @@ export default function SettingsRoute(): ReactElement {
   const router = useRouter();
   const { t } = useTranslation();
   const back = useBackTo('/turno');
-  const [bugReportVisible, setBugReportVisible] = useState(false);
-  const device = useDeviceSettings(() => setBugReportVisible(true));
-  // With consent on, a linked phone sends the report through the device API
-  // (N-81); otherwise, and as the fallback, it is shared as a file.
-  const bugReportSender = useBugReportSender();
-  const deviceContext = useMobileDeviceContext();
+  const abrirReporte = useReportar((s) => s.abrir);
+  const device = useDeviceSettings(() => abrirReporte());
   return (
     <AppShellWrapper title={t('shell.turno.ajustes')} onBack={back}>
       <SettingsScreen
@@ -88,16 +83,6 @@ export default function SettingsRoute(): ReactElement {
         onOpenRejected={() => router.push('/pendientes' as never)}
         restartApp={restartApp}
         footer={devFooter}
-      />
-      <BugReportSheet
-        visible={bugReportVisible}
-        onClose={() => setBugReportVisible(false)}
-        onShare={(json, filename) => {
-          void Share.share({ message: json, title: filename });
-        }}
-        consentEnabled={device.crashReportingEnabled}
-        remote={bugReportSender}
-        deviceContext={deviceContext}
       />
     </AppShellWrapper>
   );

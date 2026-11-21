@@ -4,7 +4,8 @@
 # Ajustes are stack routes opened from Mi turno's «Lo de tu turno» rows
 # (MvTurno), each with the `otros-<key>` testID (the rename is A-15):
 # otros-gastos, otros-fiado, otros-inventario, otros-avisos,
-# otros-no-enviados, otros-configuracion.
+# otros-no-enviados, otros-configuracion. `otros-reportar` is a row too
+# (M-23), but it opens the report sheet, not a route.
 #
 # Usage:
 #   - runFlow:

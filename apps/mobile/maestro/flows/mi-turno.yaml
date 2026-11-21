@@ -88,6 +88,19 @@ appId: mx.xangarro.mobile
     id: 'otros-no-enviados'
     text: '.*(Todo enviado|por enviar).*'
 
+# «¿Algo no funciona?» (RpPuerta, M-23): the report sheet's row, before
+# «Ajustes de la caja». With nothing waiting it says its own line.
+- scrollUntilVisible:
+    element:
+      id: 'otros-reportar'
+    direction: DOWN
+    timeout: 8000
+    visibilityPercentage: 60
+    centerElement: true
+- assertVisible:
+    id: 'otros-reportar'
+    text: '.*¿Algo no funciona\?.*'
+
 # A due recurrente (mock fixture REC-1 «Renta local», due on this month's
 # 1st, contracts/mock/fixtures.ts) chips the Gastos row: by name when it is
 # the only one due, by count when there are more.
