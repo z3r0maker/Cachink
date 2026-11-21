@@ -2,11 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 import type { BannerVista } from '@/server/empresa/tablero-banner';
-import type {
-  Arrastre as ArrastreVista,
-  ObjetivoVista,
-  SocioVista,
-} from '@/server/empresa/tablero-partes';
+import type { Arrastre as ArrastreVista, ObjetivoVista } from '@/server/empresa/tablero-partes';
 import { hrefTablero } from '@/server/empresa/tablero-view';
 import type { VistaTablero } from '@/server/empresa/tablero-vista';
 import * as i from '@/styles/mostrador-impuestos.css';
@@ -14,7 +10,7 @@ import * as s from '@/styles/mostrador-socios.css';
 import * as t from '@/styles/mostrador-tablero.css';
 import * as m from '@/styles/mostrador.css';
 
-/** The Tablero's top half (board CD-13b): banner, each partner's tile, objectives, rollover. */
+/** The Tablero's top half (board CD-13b): banner, objectives, rollover; the partners are in `socio.tsx`. */
 export function Banner({ b }: { readonly b: BannerVista }) {
   return (
     <div
@@ -36,90 +32,6 @@ export function Banner({ b }: { readonly b: BannerVista }) {
 }
 
 /** Accepted in solid, in review after it, and the dashed line at half the commitment. */
-function Barra({ v }: { readonly v: SocioVista }) {
-  return (
-    <svg className={t.pista} viewBox="0 0 400 26" preserveAspectRatio="none" aria-hidden="true">
-      <rect className={t.barra.fondo} x="0" y="6" width="400" height="14" rx="4" />
-      <rect
-        className={t.barra.revision}
-        x="0"
-        y="6"
-        width={v.anchoRevision * 4}
-        height="14"
-        rx="4"
-      />
-      <rect
-        className={t.barra.aceptado}
-        x="0"
-        y="6"
-        width={v.anchoAceptado * 4}
-        height="14"
-        rx="4"
-      />
-      <line className={t.barra.linea} x1="200" x2="200" y1="0" y2="26" />
-    </svg>
-  );
-}
-
-function Socio({ v }: { readonly v: SocioVista }) {
-  return (
-    <section
-      className={`${m.panelPad} ${m.stack}`}
-      aria-label={v.nombre}
-      data-testid={`tablero-socio-${v.socio}`}
-    >
-      <div className={s.heroRow}>
-        <span className={s.who}>
-          <span className={s.avatar[v.socio]}>{v.iniciales}</span>
-          <span className={s.whoName}>{v.nombre}</span>
-        </span>
-        <span className={`${i.chipBase} ${i.tono[v.tono]}`}>{v.chip}</span>
-      </div>
-      <div className={s.figures}>
-        {(
-          [
-            ['Comprometido', v.comprometido],
-            ['Aceptado', v.aceptado],
-            ['En revisión', v.revision],
-          ] as const
-        ).map(([label, valor]) => (
-          <span key={label} className={s.figure}>
-            <span className={s.figureLabel}>{label}</span>
-            <span
-              className={s.figureValue}
-              data-testid={`tablero-${label === 'En revisión' ? 'revision' : label.toLowerCase()}-${v.socio}`}
-            >
-              {valor}
-            </span>
-          </span>
-        ))}
-      </div>
-      <Barra v={v} />
-      <span className={t.leyenda}>Línea: mínimo para cumplir (50 %) · {v.nota}</span>
-    </section>
-  );
-}
-
-export function Socios(props: {
-  readonly socios: readonly SocioVista[];
-  readonly desbalance: string | null;
-}) {
-  return (
-    <>
-      <div className={s.grid2}>
-        {props.socios.map((v) => (
-          <Socio key={v.socio} v={v} />
-        ))}
-      </div>
-      {props.desbalance === null ? null : (
-        <p className={t.aviso} role="status" data-testid="tablero-desbalance">
-          {props.desbalance}
-        </p>
-      )}
-    </>
-  );
-}
-
 export function Objetivos({
   v,
   trimestre,

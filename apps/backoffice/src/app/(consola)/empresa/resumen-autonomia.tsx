@@ -2,13 +2,16 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 import type { Hero, Tarjeta } from '@/server/empresa/resumen-hero';
+import { Odometro } from '@/components/odometro';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as r from '@/styles/mostrador-resumen.css';
 import * as m from '@/styles/mostrador.css';
 
 /**
  * «Autonomía sin nuevo capital», the Resumen's one hero (E-16): CD-12 when
  * the operation sustains itself, CD-12b when the partners still fund it,
- * CD-12c before anything is recorded.
+ * CD-12c before anything is recorded. It lands with the screen's one sweep
+ * and its three figures roll (ADR-161, board CD-21b).
  */
 const FLECHA = 'M12 5v14M19 12l-7 7-7-7';
 const PALOMITA = 'M20 6 9 17l-5-5';
@@ -34,7 +37,7 @@ function Trazo({ d }: { readonly d: string }) {
 function SinMovimientos() {
   return (
     <section
-      className={`${m.hero} ${r.heroCabeza}`}
+      className={`${m.hero} ${r.heroCabeza} ${mv.aterriza} ${mv.barrido}`}
       aria-labelledby="autonomia"
       data-testid="autonomia"
     >
@@ -65,7 +68,7 @@ function Tarjetas({ tarjetas }: { readonly tarjetas: readonly Tarjeta[] }) {
           data-testid="autonomia-tarjeta"
         >
           <span className={r.tarjetaEtiqueta}>{t.etiqueta}</span>
-          <span className={r.cifra}>{t.valor}</span>
+          <Odometro className={r.cifra} texto={t.valor} />
           <span className={r.nota}>{t.nota}</span>
         </div>
       ))}
@@ -76,7 +79,11 @@ function Tarjetas({ tarjetas }: { readonly tarjetas: readonly Tarjeta[] }) {
 export function Autonomia({ hero }: { readonly hero: Hero }) {
   if (hero.estado === 'sinDatos') return <SinMovimientos />;
   return (
-    <section className={`${m.hero} ${m.stack}`} aria-labelledby="autonomia" data-testid="autonomia">
+    <section
+      className={`${m.hero} ${m.stack} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="autonomia"
+      data-testid="autonomia"
+    >
       <div className={r.heroCabeza}>
         <div>
           <span className={m.eyebrow}>Autonomía sin nuevo capital</span>

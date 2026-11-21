@@ -2,6 +2,7 @@ import { Cajon } from '@/components/cajon';
 import type { CajonTarjeta } from '@/server/empresa/tablero-cajon';
 import { hrefTablero } from '@/server/empresa/tablero-view';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as t from '@/styles/mostrador-tablero.css';
 import * as m from '@/styles/mostrador.css';
 
@@ -102,16 +103,20 @@ function Historia({ c }: { readonly c: CajonTarjeta }) {
 export function TarjetaCajon({
   c,
   trimestre,
+  sello,
 }: {
   readonly c: CajonTarjeta;
   readonly trimestre: string;
+  readonly sello: boolean;
 }) {
   const ids: Ids = { t: trimestre, tarjeta: c.id, titulo: c.titulo };
   return (
     <Cajon eyebrow={c.eyebrow} titulo={c.titulo} sub={c.sub} cerrar={hrefTablero(trimestre)}>
       <div className={m.stack} data-testid="tarjeta-cajon">
         {c.estado === null ? null : (
-          <span className={`${t.estado} ${i.tono[c.tono]}`}>{c.estado}</span>
+          <span className={`${t.estado} ${i.tono[c.tono]}${sello ? ` ${mv.sello}` : ''}`}>
+            {c.estado}
+          </span>
         )}
         {c.criterio === '' ? null : (
           <div className={m.stack}>

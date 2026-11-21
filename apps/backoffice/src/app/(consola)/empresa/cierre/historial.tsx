@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { MesHistorial } from '@/server/empresa/cierre-historial';
 import * as k from '@/styles/mostrador-cierre.css';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 
 /** «Meses de <año>» (board CD-10): each month's state and its history in one line. */
@@ -16,14 +17,14 @@ export function Historial({
 }) {
   if (meses.length === 0) return null;
   return (
-    <section className={m.panelPad} aria-labelledby="cierre-historial">
+    <section className={`${m.panelPad} ${mv.escalona}`} aria-labelledby="cierre-historial">
       <h2 id="cierre-historial" className={i.pasoTitulo}>
         {`Meses de ${anio}`}
       </h2>
       {meses.map((h) => (
         <Link
           key={h.mes}
-          className={k.mesFila}
+          className={`${k.mesFila} ${mv.entra}`}
           href={h.href as Route}
           data-testid="cierre-historial"
         >

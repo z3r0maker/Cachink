@@ -2,17 +2,22 @@ import type { Founder } from '@xangarro/data-corp';
 import { formatMoney } from '@xangarro/domain';
 import type { CuentaSocio } from '@xangarro/domain/corp';
 
+import { Odometro } from '@/components/odometro';
 import type { FilaSocio } from '@/server/empresa/socios-view';
 import * as d from '@/styles/mostrador-data.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 import * as s from '@/styles/mostrador-socios.css';
 
-/** Each partner's account (E-03, board CD-04) and the partner movements' history. */
+/**
+ * Each partner's account (E-03, board CD-04) and the partner movements'
+ * history. The figures roll and the movements enter in turn (ADR-161).
+ */
 function Cifra(props: { readonly label: string; readonly value: bigint; readonly note?: string }) {
   return (
     <div className={s.figure}>
       <span className={s.figureLabel}>{props.label}</span>
-      <span className={s.figureValue}>{formatMoney(props.value)}</span>
+      <Odometro className={s.figureValue} texto={formatMoney(props.value)} />
       {props.note === undefined ? null : <span className={s.figureNote}>{props.note}</span>}
     </div>
   );
@@ -64,9 +69,9 @@ export function Historial({ filas }: { readonly filas: readonly FilaSocio[] }) {
       {filas.length === 0 ? (
         <p className={m.sub}>Todavía no hay dinero de socios registrado.</p>
       ) : (
-        <div>
+        <div className={mv.escalona}>
           {filas.map((f) => (
-            <div key={f.id} className={s.history} data-testid="movimiento-socio">
+            <div key={f.id} className={`${s.history} ${mv.entra}`} data-testid="movimiento-socio">
               <span className={s.historyDate}>{f.fecha}</span>
               <span>
                 {f.tipo}

@@ -14,6 +14,14 @@ import { asegurarTopes, hoyEnMexico, quitarTopes, sembrarCobroDelAnio } from './
 import { MES, registrarHonorarios, renglon, sembrarCobros } from './empresa-resultados';
 import { mesAnterior, nuevoServicioPorUso, registrarCargoDe } from './empresa-servicios';
 import { filaUtilidad, kpi, revisarAutonomia } from './empresa-resumen';
+import {
+  animado,
+  cifra,
+  cifrasEnteras,
+  nadaSeMueve,
+  PANTALLAS,
+  seAsienta,
+} from './empresa-movimiento';
 import { abrirEntrada, abrirPestana, rail, RUTAS, secciones } from './empresa-nav';
 import {
   adjuntar,
@@ -675,11 +683,11 @@ test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-
   // Real rows: E-12's March, two cobros and the contador's fee, worked by hand.
   await page.goto(`/empresa?periodo=${MES}`);
   await expect(page.getByText('Marzo de 2024', { exact: true })).toBeVisible();
-  await expect(kpi(page, 'Ingresos netos')).toContainText('$10,000');
+  await expect(cifra(kpi(page, 'Ingresos netos'))).toHaveText('$10,000');
   await expect(kpi(page, 'Ingresos netos')).toContainText('+$2,000 vs febrero');
   await expect(kpi(page, 'Margen bruto')).toContainText('Sin datos de febrero');
-  await expect(kpi(page, 'EBITDA')).toContainText('$7,000');
-  await expect(kpi(page, 'Utilidad neta')).toContainText('$4,900');
+  await expect(cifra(kpi(page, 'EBITDA'))).toHaveText('$7,000');
+  await expect(cifra(kpi(page, 'Utilidad neta'))).toHaveText('$4,900');
   await expect(kpi(page, 'Utilidad neta')).toContainText('Después de ISR estimado');
   await expect(page.getByTestId('utilidad-fila')).toHaveCount(8);
   await expect(filaUtilidad(page, 'Administración')).toContainText('−$3,000');
@@ -695,7 +703,7 @@ test('a founder opens Empresa on its Resumen and follows a tile and a signal (E-
     .getByRole('link', { name: 'Trimestre' })
     .click();
   await expect(page).toHaveURL(/periodo=2024-T1/);
-  await expect(kpi(page, 'Ingresos netos')).toContainText('$18,000');
+  await expect(cifra(kpi(page, 'Ingresos netos'))).toHaveText('$18,000');
   await kpi(page, 'Ingresos netos').click();
   await expect(page).toHaveURL(/\/empresa\/resultados\?periodo=2024-T1$/);
 
@@ -984,6 +992,13 @@ test('a founder closes a month, Registrar refuses it, and it reopens with both f
     await page.getByRole('button', { name: `Cerrar ${nombre}` }).click();
     await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
     await expect(page.getByRole('heading', { name: `${Nombre} está cerrado` })).toBeVisible();
+    // E-46: «Cerrado» lands as a stamp right after closing, and only then: the
+    // flag leaves the address bar, so a reload shows the chip still.
+    expect(await animado(page.getByTestId('cierre-chip'))).toBe(true);
+    await expect(page).not.toHaveURL(/sello=/);
+    await page.reload();
+    await expect(page.getByTestId('cierre-chip')).toHaveText('Cerrado');
+    expect(await animado(page.getByTestId('cierre-chip'))).toBe(false);
 
     // The ledger takes nothing dated in it, and Registrar says where to go.
     await registrarEnMesCerrado(page, mes, Nombre);
@@ -1029,8 +1044,8 @@ test('a founder reads Caja: cash, spending, the scenarios and the next payments 
 
   // Real data: the ledger's cash and its three-month spending reach the tiles.
   const a = await esperadoDeCaja(hoy);
-  await expect(page.getByTestId('caja-Caja')).toHaveText(formatMoney(a.caja));
-  await expect(page.getByTestId('caja-Gasto al mes')).toHaveText(formatMoney(a.sale));
+  await expect(cifra(page.getByTestId('caja-Caja'))).toHaveText(formatMoney(a.caja));
+  await expect(cifra(page.getByTestId('caja-Gasto al mes'))).toHaveText(formatMoney(a.sale));
   await expect(page.getByRole('link', { name: /^Ver el cierre de / })).toBeVisible();
 
   // The chart: real months, then six projected; a scenario redraws it.
@@ -1415,3 +1430,23 @@ test('a founder reads a quarter in figures: this one in progress, a closed one (
     'obligaciones a tiempo, con evidencia',
   );
 });
+
+// E-46 (ADR-161): every animated screen, read after the tests above filled it.
+for (const { ruta, cifras } of PANTALLAS) {
+  test(`${ruta} reads in full and still with reduced motion (E-46)`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await signInAsStaff(page, SOCIO);
+    await page.goto(ruta);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await nadaSeMueve(page);
+    await cifrasEnteras(page, cifras);
+  });
+
+  test(`${ruta} settles on its real figures within 1.5 s (E-46)`, async ({ page }) => {
+    await signInAsStaff(page, SOCIO);
+    await page.goto(ruta);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await seAsienta(page);
+    await cifrasEnteras(page, cifras);
+  });
+}
