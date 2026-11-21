@@ -28,6 +28,10 @@ export const GLYPHS = {
   check: 'M20 6 9 17l-5-5',
   sinRed:
     'M12 20h.01M8.5 16.43a5 5 0 0 1 7 0M5 12.86a10 10 0 0 1 5.17-2.69M2 8.82a15 15 0 0 1 4.18-2.65M22 8.82a15 15 0 0 0-11.29-3.76M19 12.86a10 10 0 0 0-2-1.54M2 2l20 20',
+  /** Lucide `circle-alert`: the portal refused something (N-22's red banner). */
+  alerta: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4M12 16h.01',
+  /** Lucide `history`: nothing reached the portal in days (N-22's grey banner). */
+  historial: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2',
   /** Lucide `refresh-ccw`: what is waiting to be sent. */
   nube: 'M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16M16 16h5v5',
   /** Lucide `arrow-down-up`: cash in and out of the drawer. */
