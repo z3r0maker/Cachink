@@ -28,6 +28,7 @@ import { avisarAlOtroSocio } from '../empresa/aviso-socio';
 import { failed } from '../empresa/fallas';
 import { correoPresupuesto, correoSolicitud } from '../empresa/presupuesto-correo';
 import { hrefPresupuesto, parseVista } from '../empresa/presupuesto-view';
+import { conSello, type Sello } from '../empresa/sello';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
 
@@ -50,9 +51,10 @@ const deps = (): PresupuestoDeps => {
   };
 };
 
-const volver = (form: FormData): never => {
+const volver = (form: FormData, sello?: Sello): never => {
   revalidatePath('/empresa', 'layout');
-  redirect(hrefPresupuesto(parseVista(field(form, 'vista'))) as Route);
+  const href = hrefPresupuesto(parseVista(field(form, 'vista')));
+  redirect((sello === undefined ? href : conSello(href, sello)) as Route);
 };
 
 const MONTOS_MAL: FormState = {
@@ -109,7 +111,8 @@ export async function responderPresupuestoAction(
   } catch (error) {
     return failed(error, 'responderPresupuesto');
   }
-  return volver(form);
+  // An approved budget's line lands as a stamp on this one render (ADR-161 «Sello»).
+  return volver(form, aprobar ? 'presupuesto' : undefined);
 }
 
 export async function pedirGastoAction(_p: FormState, form: FormData): Promise<FormState> {

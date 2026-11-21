@@ -14,7 +14,9 @@ import {
   parseVista,
   type VistaPresupuesto,
 } from '@/server/empresa/presupuesto-view';
+import { parseSello } from '@/server/empresa/sello';
 import { requireFounderPage } from '@/server/founder';
+import { SelloUnaVez } from '@/components/sello-una-vez';
 import * as c from '@/styles/mostrador-caja.css';
 import * as i from '@/styles/mostrador-impuestos.css';
 import * as m from '@/styles/mostrador.css';
@@ -75,7 +77,7 @@ function AvisoPresupuesto({ aviso }: { readonly aviso: Aviso }) {
  * budget. The panels open with `?panel=`.
  */
 export default async function PresupuestoPage(props: {
-  searchParams: Promise<{ vista?: string; panel?: string; solicitud?: string }>;
+  searchParams: Promise<{ vista?: string; panel?: string; solicitud?: string; sello?: string }>;
 }) {
   const { founder } = await requireFounderPage();
   const sp = await props.searchParams;
@@ -83,6 +85,7 @@ export default async function PresupuestoPage(props: {
   const d = await leerPresupuesto(hoyEnMexico());
   const calc = calculoDe(d);
   const enc = encabezadoDe(calc, d.socios, founder.id, vista);
+  const sello = parseSello(sp.sello) === 'presupuesto';
   return (
     <div className={m.page}>
       <EncabezadoSeccion actual="/empresa/presupuesto" sub={enc.sub}>
@@ -92,12 +95,13 @@ export default async function PresupuestoPage(props: {
       {calc.vigente === null ? (
         <Vacio enc={enc} />
       ) : (
-        <Tablero c={calc} p={calc.vigente} d={d} enc={enc} vista={vista} />
+        <Tablero c={calc} p={calc.vigente} d={d} enc={enc} vista={vista} sello={sello} />
       )}
       <div className={c.paneles}>
         <Limite l={limiteDe(calc, d.solicitudes, d.socios, founder.id)} />
         <Fuera f={fueraDe(calc, d.solicitudes, d.socios, founder.id, vista)} vista={vista} />
       </div>
+      {sp.sello === undefined ? null : <SelloUnaVez />}
       <Paneles
         panel={parsePanelPresupuesto(sp.panel)}
         solicitud={sp.solicitud ?? null}

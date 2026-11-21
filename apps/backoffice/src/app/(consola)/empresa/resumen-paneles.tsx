@@ -8,22 +8,28 @@ import * as a from '@/styles/mostrador-agenda.css';
 import * as l from '@/styles/mostrador-limites.css';
 import * as g from '@/styles/mostrador-graficas.css';
 import * as p from '@/styles/mostrador-resumen-paneles.css';
+import { Odometro } from '@/components/odometro';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as r from '@/styles/mostrador-resumen.css';
 import * as m from '@/styles/mostrador.css';
 
-/** The Resumen under its hero (E-16, board CD-12b): tiles, profit bars, signals, due items. */
+/**
+ * The Resumen under its hero (E-16, board CD-12b): tiles, profit bars, signals,
+ * due items. With ADR-161's motion (board CD-21b) the tiles enter in turn and
+ * roll their figures, the rows enter and the profit bars fill.
+ */
 export function Indicadores({ kpis }: { readonly kpis: readonly Kpi[] }) {
   return (
-    <section className={m.tiles} aria-label="Indicadores">
+    <section className={`${m.tiles} ${mv.escalona}`} aria-label="Indicadores">
       {kpis.map((k) => (
         <Link
           key={k.label}
-          className={k.variante === undefined ? r.kpi : `${r.kpi} ${l.tile[k.variante]}`}
+          className={`${r.kpi} ${mv.entra}${k.variante === undefined ? '' : ` ${l.tile[k.variante]}`}`}
           href={k.href as Route}
           data-testid="kpi"
         >
           <span className={m.eyebrow}>{k.label}</span>
-          <span className={r.cifra}>{k.valor}</span>
+          <Odometro className={r.cifra} texto={k.valor} />
           <span className={r.cambio[k.tono]}>{k.cambio}</span>
           <span className={r.ref}>{k.ref}</span>
         </Link>
@@ -36,7 +42,14 @@ function Barra({ f }: { readonly f: FilaPuente }) {
   const ancho = Math.max(f.ancho, 0.6);
   return (
     <svg className={p.pista} viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-      <rect className={g.rol[f.rol]} x={0} y={0} width={ancho} height={10} rx={0.6} />
+      <rect
+        className={`${g.rol[f.rol]} ${mv.llena}`}
+        x={0}
+        y={0}
+        width={ancho}
+        height={10}
+        rx={0.6}
+      />
     </svg>
   );
 }
@@ -47,7 +60,7 @@ export function Utilidad(props: {
   readonly href: string;
 }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="utilidad">
+    <section className={`${m.panelPad} ${m.stack} ${mv.escalona}`} aria-labelledby="utilidad">
       <div className={r.panelCabeza}>
         <h2 id="utilidad" className={r.panelTitulo}>
           De dónde sale la utilidad
@@ -57,7 +70,7 @@ export function Utilidad(props: {
         </Link>
       </div>
       {props.filas.map((f) => (
-        <div key={f.label} className={p.fila} data-testid="utilidad-fila">
+        <div key={f.label} className={`${p.fila} ${mv.entra}`} data-testid="utilidad-fila">
           <span className={f.fuerte ? p.etiqueta.fuerte : p.etiqueta.normal}>{f.label}</span>
           <Barra f={f} />
           <span
@@ -79,13 +92,13 @@ const AVISO =
 
 export function Senales({ senales }: { readonly senales: readonly Senal[] }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="senales">
+    <section className={`${m.panelPad} ${m.stack} ${mv.escalona}`} aria-labelledby="senales">
       <h2 id="senales" className={r.panelTitulo}>
         Señales
       </h2>
       {senales.length === 0 ? <span className={p.sinSenales}>Sin señales este mes.</span> : null}
       {senales.map((s) => (
-        <div key={s.titulo} className={p.senal[s.tono]} data-testid="senal">
+        <div key={s.titulo} className={`${p.senal[s.tono]} ${mv.entra}`} data-testid="senal">
           <span className={p.icono[s.tono]}>
             <svg
               width={16}
@@ -128,9 +141,9 @@ export function Vencimientos({ items }: { readonly items: readonly ItemAgenda[] 
       {items.length === 0 ? (
         <p className={r.tenue}>Nada pendiente en los próximos seis meses.</p>
       ) : (
-        <div>
+        <div className={mv.escalona}>
           {items.map((i) => (
-            <div key={i.key} className={p.vencimiento} data-testid="vencimiento">
+            <div key={i.key} className={`${p.vencimiento} ${mv.entra}`} data-testid="vencimiento">
               <div className={p.vencimientoTexto}>
                 <Link className={p.vencimientoLiga} href={i.href}>
                   {i.titulo}

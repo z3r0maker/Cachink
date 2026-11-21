@@ -27,6 +27,8 @@ type Props = {
   readonly p: ParamsTablero;
   readonly v: VistaTablero;
   readonly yo: Socio;
+  /** A card was just accepted: its drawer's state lands as a stamp (ADR-161). */
+  readonly sello?: boolean;
 };
 
 function Nueva({ l, p, yo }: Props) {
@@ -109,7 +111,9 @@ export function Paneles(props: Props) {
   const { l, p, yo } = props;
   if (p.tarjeta !== null) {
     const c = cajonDe(l.datos, p.tarjeta, p.trimestre, yo, l.nombres, l.hoy);
-    return c === null ? null : <TarjetaCajon c={c} trimestre={p.trimestre} />;
+    return c === null ? null : (
+      <TarjetaCajon c={c} trimestre={p.trimestre} sello={props.sello === true} />
+    );
   }
   if (p.objetivo !== null) return <Avance {...props} />;
   switch (p.panel) {
