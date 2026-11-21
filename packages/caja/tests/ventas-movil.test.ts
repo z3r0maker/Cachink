@@ -200,12 +200,12 @@ describe('ventaDetalleDe', () => {
 });
 
 describe('MOTIVOS_CANCELAR', () => {
-  it("is the board's four, verbatim", () => {
+  it("is RvCancelar's four, verbatim, in its order", () => {
     assert.deepEqual(MOTIVOS_CANCELAR, [
-      'Error de captura',
       'El cliente se arrepintió',
-      'Producto equivocado',
-      'Cobro duplicado',
+      'Me equivoqué al cobrar',
+      'Cobré de más',
+      'Otra razón',
     ]);
   });
 });

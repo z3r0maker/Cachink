@@ -129,7 +129,7 @@ describe('cancelar con motivo', () => {
     expect(l.onCancelar).not.toHaveBeenCalled();
     expect(screen.getByText('Elige un motivo para cancelar.')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('cancelar-motivo-Error de captura'));
+    fireEvent.click(screen.getByTestId('cancelar-motivo-Me equivoqué al cobrar'));
 
     // The optional note rides along.
     escribir('cancelar-nota', 'se cobró de más');
@@ -144,7 +144,7 @@ describe('cancelar con motivo', () => {
     await waitFor(() => {
       expect(l.onCancelar).toHaveBeenCalledWith(
         expect.objectContaining({ folio: 'V-0412' }),
-        'Error de captura: se cobró de más',
+        'Me equivoqué al cobrar: se cobró de más',
         '1234',
       );
     });
@@ -176,7 +176,7 @@ describe('cancelar con motivo', () => {
     await waitFor(() => {
       expect(screen.getByTestId('cancelar-resumen')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByTestId('cancelar-motivo-Error de captura'));
+    fireEvent.click(screen.getByTestId('cancelar-motivo-Me equivoqué al cobrar'));
     fireEvent.click(screen.getByTestId('cancelar-confirmar'));
     await waitFor(() => {
       expect(screen.getByTestId('cancel-cash-confirm')).toBeInTheDocument();
@@ -284,7 +284,7 @@ describe('cancelar con motivo', () => {
     await waitFor(() => {
       expect(screen.getByTestId('cancelar-resumen')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByTestId('cancelar-motivo-Cobro duplicado'));
+    fireEvent.click(screen.getByTestId('cancelar-motivo-Cobré de más'));
     fireEvent.click(screen.getByTestId('cancelar-confirmar'));
     fireEvent.click(screen.getByTestId('cancel-cash-confirm'));
     await waitFor(() => {
@@ -294,7 +294,7 @@ describe('cancelar con motivo', () => {
     expect(l.onCancelar).toHaveBeenCalledTimes(1);
     // Back at the PIN, refusing again keeps it in the dialog.
     escribirPin('1111');
-    fireEvent.click(screen.getByTestId('cancelar-motivo-Cobro duplicado'));
+    fireEvent.click(screen.getByTestId('cancelar-motivo-Cobré de más'));
     fireEvent.click(screen.getByTestId('cancelar-confirmar'));
     fireEvent.click(screen.getByTestId('cancel-cash-confirm'));
     await waitFor(() => {

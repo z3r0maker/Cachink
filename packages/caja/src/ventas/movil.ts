@@ -19,12 +19,16 @@ export function folioVisto(folio: number): string {
   return `V-${String(folio).padStart(4, '0')}`;
 }
 
-/** The motivo chips, as the board words them (one of four, required). */
+/**
+ * The motivo chips as RvCancelar words them (one of four, required). The
+ * chosen one is stored as the sale's `cancelMotivo`; sales cancelled before
+ * 2026-11-20 keep the older wording they were stored with.
+ */
 export const MOTIVOS_CANCELAR: readonly string[] = [
-  'Error de captura',
   'El cliente se arrepintió',
-  'Producto equivocado',
-  'Cobro duplicado',
+  'Me equivoqué al cobrar',
+  'Cobré de más',
+  'Otra razón',
 ];
 
 /** A ticket header as the device stores it (structural: `Ticket` satisfies it). */
