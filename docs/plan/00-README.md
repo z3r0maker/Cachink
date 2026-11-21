@@ -32,6 +32,7 @@ by track so a task is identifiable anywhere (commit messages, PR titles, chat).
 | **Empresa** (founders' command center) | `20-command-center.md`                | `E-`   | per phase                | now (ADR-125; design brief `21-command-center-design.md`) |
 | **CoDi** (bridge, then certified)      | `22-codi.md`                          | `K-`   | per phase                | now (ADR-130; design brief `23-codi-design.md`)           |
 | **Synth** (internal QA harness)        | `24-synth.md`                         | `S-`   | per phase                | now (ADR-153; design brief `25-synth-spec.md`)            |
+| **Guías** (aprender en el producto)    | `26-guias.md`                         | `G-`   | per phase                | decided (ADR-163); after its boards are approved (G-01)   |
 
 **Other files in this directory.** `PENDIENTES.md` — the **generated** board of everything still
 open, across every track (see §3). `11-pre-launch-and-deferred.md` — owner actions (`O-n` rows) and
