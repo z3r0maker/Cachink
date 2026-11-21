@@ -1,6 +1,11 @@
 'use server';
 
+import { headers } from 'next/headers';
+import { z } from 'zod';
+
 import { failure } from '../action-errors';
+import { lastErrorOfSession } from '../observability/last-error';
+import { filePortalReport } from '../support/portal-report';
 import { supportInboxFromEnv } from '../support-inbox';
 import { requireMember } from '../auth';
 
@@ -52,6 +57,56 @@ export async function enviarAyuda(form: AyudaForm): Promise<AyudaResult> {
   } catch (error) {
     return failure(error, 'enviarAyuda', {
       retry: 'No pudimos enviar tu mensaje. Intenta de nuevo.',
+    });
+  }
+}
+
+/**
+ * «Algo no funciona» (P-48, ADR-162 §8): a `bug` item that carries by itself
+ * the screen the person was on, their browser and the last error of their
+ * session. The form sends only the screen's address, an optional sentence and
+ * its attempt id; the browser and the error are read here, on the server, and
+ * the rules are `server/support/portal-report.ts`'s.
+ *
+ * Any member may send one, a read-only one included: seeing something broken
+ * needs no role. A failed send is said, reported, and never kept as the
+ * session's last error, so the retry does not name its own failure.
+ */
+export interface FallaForm {
+  /** The address of the screen it happened on (`shell/pantallas.ts`), or null. */
+  readonly pantalla: string | null;
+  readonly mensaje: string;
+  readonly urgente: boolean;
+  /** Minted once by the form: a retry of the same attempt files nothing new. */
+  readonly intento: string;
+}
+
+const FallaSchema = z.object({
+  pantalla: z.string().max(200).nullable(),
+  mensaje: z.string(),
+  urgente: z.boolean(),
+  intento: z.string().max(64),
+});
+
+export async function reportarFalla(form: FallaForm): Promise<AyudaResult> {
+  try {
+    const session = await requireMember('viewer');
+    const outcome = await filePortalReport(
+      { userId: session.sub, businessId: session.business_id, email: session.email },
+      FallaSchema.parse(form),
+      {
+        navegador: (await headers()).get('user-agent'),
+        ultimoError: await lastErrorOfSession(),
+        enviado: new Date().toISOString(),
+      },
+      supportInboxFromEnv(),
+    );
+    return outcome.kind === 'accepted' ? { ok: true } : { ok: false, message: outcome.message };
+  } catch (error) {
+    return failure(error, 'reportarFalla', {
+      invalid: () => 'Revisa lo que escribiste e intenta de nuevo.',
+      retry: 'No pudimos enviar tu reporte. Intenta de nuevo.',
+      remember: false,
     });
   }
 }

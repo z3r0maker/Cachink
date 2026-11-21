@@ -10,7 +10,9 @@ import { z } from 'zod';
  */
 
 const reportError = vi.fn();
+const keepLastError = vi.fn();
 vi.mock('../src/server/observability/report', () => ({ reportError }));
+vi.mock('../src/server/observability/last-error', () => ({ keepLastError }));
 
 const { failure, refusal, RETRY, STEP_UP_REQUIRED } = await import('../src/server/action-errors');
 
@@ -24,7 +26,8 @@ const zodError = (): unknown => {
 };
 
 beforeEach(() => {
-  reportError.mockClear();
+  reportError.mockReset();
+  keepLastError.mockClear();
 });
 
 describe('failure — the owner’s to fix: shown, not reported', () => {
@@ -128,6 +131,36 @@ describe('failure — an incident: reported, never shown in its own words', () =
       businessId: 'biz-1',
     });
     assert.deepEqual(reportError.mock.calls[1]?.[1], { endpoint: 'guardarPaso' });
+  });
+});
+
+describe('failure — the session remembers its last incident (P-48)', () => {
+  const EVENT = 'a3f1c2d4e5b60718293a4b5c6d7e8f90';
+
+  it('keeps the event an incident was reported as, for a later «Algo no funciona»', () => {
+    reportError.mockReturnValue(EVENT);
+    failure(new Error('boom'), 'guardarNegocio');
+    assert.deepEqual(keepLastError.mock.calls, [[EVENT]]);
+  });
+
+  it('hands over nothing to keep when Sentry named no event', () => {
+    failure(new Error('boom'), 'guardarNegocio');
+    assert.deepEqual(keepLastError.mock.calls, [[undefined]]);
+  });
+
+  it('a refusal is not an error the session saw: nothing is kept', () => {
+    reportError.mockReturnValue(EVENT);
+    failure(refusal('MONTO_INVALIDO', '«abc» no es un monto.'), 'saldos');
+    failure(coded('NOT_PERMITTED', 'Solo el dueño puede hacer esto.'), 'x');
+    assert.equal(keepLastError.mock.calls.length, 0);
+  });
+
+  it('an action may keep its own failure out: a report that failed to send is not what broke', () => {
+    reportError.mockReturnValue(EVENT);
+    const r = failure(new Error('inbox down'), 'reportarFalla', { remember: false });
+    assert.equal(r.message, RETRY);
+    assert.equal(reportError.mock.calls.length, 1);
+    assert.equal(keepLastError.mock.calls.length, 0);
   });
 });
 

@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { keepLastError } from './observability/last-error';
 import { reportError } from './observability/report';
 
 /**
@@ -14,6 +15,8 @@ import { reportError } from './observability/report';
  * Anything else is a bug or an outage. It goes to `reportError` and the owner
  * gets the action's retry line — never the error's own text, which for a
  * database failure is the database's words, and for a TypeError is a bug's.
+ * The event it was reported as is kept with the session, so a report sent
+ * from Ayuda can name it (P-48, `observability/last-error.ts`).
  */
 export type Failure = {
   ok: false;
@@ -42,6 +45,11 @@ export interface FailurePolicy {
   readonly retry?: string;
   /** Tags the report; undefined when the failure came before the session was read. */
   readonly businessId?: string | undefined;
+  /**
+   * False for an action whose own incident must not become the session's last
+   * error: Ayuda's report, which would otherwise name its own failed send.
+   */
+  readonly remember?: boolean;
 }
 
 export const RETRY = 'No pudimos guardar. Intenta de nuevo.';
@@ -99,6 +107,10 @@ export function failure(error: unknown, endpoint: string, policy: FailurePolicy 
     return { ok: false, message: policy.invalid(field) };
   }
   const { businessId } = policy;
-  reportError(error, { endpoint, ...(businessId === undefined ? {} : { businessId }) });
+  const eventId = reportError(error, {
+    endpoint,
+    ...(businessId === undefined ? {} : { businessId }),
+  });
+  if (policy.remember !== false) keepLastError(eventId);
   return { ok: false, message: policy.retry ?? RETRY };
 }
