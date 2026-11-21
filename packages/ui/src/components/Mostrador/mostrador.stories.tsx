@@ -13,7 +13,8 @@ import { BottomSheet } from '../BottomSheet/index';
 import { Btn } from '../Btn/index';
 import { Chip } from '../Chip/index';
 import { Dialog } from '../Dialog/index';
-import { OfflineBanner } from '../OfflineBanner/index';
+import { SyncBanner } from '../SyncBanner/index';
+import { bannerSync } from '../../sync/sync-banner';
 import { HeroPanel, QuietPanel } from '../Panel/index';
 import { GLYPHS } from '../PathIcon/index';
 import { SegmentedTabs } from '../SegmentedTabs/index';
@@ -32,7 +33,14 @@ function Gallery(): ReactElement {
   const [tab, setTab] = useState<'nuevos' | 'leidos'>('nuevos');
   return (
     <View width={390} gap={14} padding={16} backgroundColor={colors.gray200}>
-      <OfflineBanner pendientes={3} />
+      <SyncBanner
+        banner={bannerSync({
+          phase: 'offline',
+          counts: { pending: 3, rejected: 0, retrying: 0, unsent: 0 },
+          lastSyncAt: null,
+        })!}
+        onPress={() => undefined}
+      />
       <View flexDirection="row" flexWrap="wrap" gap={8}>
         {['efectivo', 'tarjeta', 'transferencia', 'fiado'].map((k) => (
           <Chip

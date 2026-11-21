@@ -37,14 +37,19 @@ env:
     env:
       METODO: Transferencia
 
-# The pill refuses and opens «Registros por enviar»
-# (app-shell.tsx onOpenPendientes → /no-enviados; it always does, R4).
+# The pill turns red, and so does the strip under the header (N-22, AtBanners):
+# «2 registros no se enviaron» (the sale and its stock movement both name the
+# lost product). The banner's tap opens «Registros por enviar»
+# (the pill does too, R4; the banner is the bigger target).
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-rejected'
     timeout: 30000
+- assertVisible:
+    id: 'sync-banner-rechazados'
+- assertVisible: '.*[0-9]+ registros? no se envi.*'
 - tapOn:
-    id: 'cloud-sync-pill'
+    id: 'sync-banner-rechazados'
 - extendedWaitUntil:
     visible:
       id: 'mobile-por-enviar'
