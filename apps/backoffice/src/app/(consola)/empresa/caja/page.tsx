@@ -9,6 +9,7 @@ import { fechaLarga } from '@/server/empresa/fechas';
 import { autonomiaDeHoy } from '@/server/empresa/resumen-hero';
 import { requireFounderPage } from '@/server/founder';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as m from '@/styles/mostrador.css';
 
 import { EncabezadoSeccion } from '../encabezado-seccion';
@@ -20,7 +21,10 @@ export const dynamic = 'force-dynamic';
 
 function SinMovimientos() {
   return (
-    <section className={`${m.hero} ${i.cabeza}`} aria-labelledby="caja-vacia">
+    <section
+      className={`${m.hero} ${i.cabeza} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="caja-vacia"
+    >
       <div>
         <span className={m.eyebrow}>Caja</span>
         <h2 id="caja-vacia" className={i.total}>

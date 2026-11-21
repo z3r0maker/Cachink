@@ -21,6 +21,7 @@ import { failed } from '../empresa/fallas';
 import { correoPlan } from '../empresa/tablero-correo';
 import { archivarEnExpediente, tableroDeps } from '../empresa/tablero-deps';
 import { leerElTablero, socioDe } from '../empresa/tablero-lectura';
+import { conSello, type Sello } from '../empresa/sello';
 import { hrefTablero, type PanelTablero } from '../empresa/tablero-view';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
@@ -30,9 +31,10 @@ import { field, type FormState } from './form-state';
  * answer the quarter's plan, type an objective and its progress, keep the
  * clause, and mark the notice sent, which files its PDF in the Expediente.
  */
-const volver = (form: FormData, panel?: PanelTablero): never => {
+const volver = (form: FormData, panel?: PanelTablero, sello?: Sello): never => {
   revalidatePath('/empresa', 'layout');
-  redirect(hrefTablero(field(form, 't'), panel === undefined ? {} : { panel }) as Route);
+  const href = hrefTablero(field(form, 't'), panel === undefined ? {} : { panel });
+  redirect((sello === undefined ? href : conSello(href, sello)) as Route);
 };
 
 const entero = (form: FormData, name: string): number => {
@@ -86,7 +88,8 @@ export async function responderPlanAction(_p: FormState, form: FormData): Promis
   } catch (error) {
     return failed(error, 'responderPlan');
   }
-  return volver(form);
+  // The partners' chips land as stamps on this one render (ADR-161 «Sello»).
+  return volver(form, undefined, field(form, 'respuesta') === 'aprobar' ? 'plan' : undefined);
 }
 
 export async function crearObjetivoAction(_p: FormState, form: FormData): Promise<FormState> {

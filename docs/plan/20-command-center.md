@@ -1439,7 +1439,7 @@ and its board shows the motion.
 
 ### E-46 Movimiento en las pantallas de Empresa `[media]`
 
-- [ ] Status · **Blocked by:** —
+- [x] Status · **Blocked by:** — · **Done:** 2026-11-20 (`mostrador-movimiento.css.ts` with the odometer in `mostrador-odometro.css.ts`, `Odometro`, «Sello» by `?sello=` stripped on arrival, the seven screens and the drawer; ADR-161)
 - **What:**
   - one stylesheet, `apps/backoffice/src/styles/mostrador-movimiento.css.ts`, with the eleven patterns as
     vanilla-extract keyframes and classes over `consoleMotion`: the stagger as generated `:nth-child()` rules,

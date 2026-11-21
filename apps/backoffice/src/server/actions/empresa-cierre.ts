@@ -30,6 +30,7 @@ import { leerDetalle } from '../empresa/cierre-lectura';
 import { fuentesDe, hrefCierre } from '../empresa/cierre-view';
 import { failed } from '../empresa/fallas';
 import { nombreMes } from '../empresa/fechas';
+import { conSello, type Sello } from '../empresa/sello';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
 
@@ -56,9 +57,10 @@ const expedienteDeps = () => {
   };
 };
 
-const volver = (periodo: string): never => {
+const volver = (periodo: string, sello?: Sello): never => {
   revalidatePath('/empresa', 'layout');
-  redirect(hrefCierre(periodo) as Route);
+  const href = hrefCierre(periodo);
+  redirect((sello === undefined ? href : conSello(href, sello)) as Route);
 };
 
 export async function cerrarMesAction(_p: FormState, form: FormData): Promise<FormState> {
@@ -72,7 +74,8 @@ export async function cerrarMesAction(_p: FormState, form: FormData): Promise<Fo
   } catch (error) {
     return failed(error, 'cerrarMes');
   }
-  return volver(periodo);
+  // «Cerrado» lands as a stamp on this one render (ADR-161 «Sello»).
+  return volver(periodo, 'cerrado');
 }
 
 async function estadoDeCuenta(form: FormData, periodo: string, founderId: string): Promise<void> {
