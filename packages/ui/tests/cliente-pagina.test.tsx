@@ -110,6 +110,19 @@ describe('ClienteScreen · the reminder', () => {
     expect(screen.getByTestId('recordar-mensajes')).toBeInTheDocument();
     expect(screen.getByTestId('recordar-compartir')).toBeInTheDocument();
   });
+
+  it('an edited message offers «Volver al mensaje original» as a button, which restores it and goes', () => {
+    montar('chuy');
+    tap('cuenta-recordar');
+    const original = (screen.getByTestId('recordar-mensaje') as HTMLTextAreaElement).value;
+    expect(screen.queryByTestId('recordar-original')).toBeNull();
+    escribir('recordar-mensaje', 'Hola, Chuy. Nos vemos el sábado.');
+    // A real button (RvRecordarOriginal), not underlined text.
+    expect(screen.getByTestId('recordar-original').textContent).toBe('Volver al mensaje original');
+    tap('recordar-original');
+    expect((screen.getByTestId('recordar-mensaje') as HTMLTextAreaElement).value).toBe(original);
+    expect(screen.queryByTestId('recordar-original')).toBeNull();
+  });
 });
 
 describe('ClienteScreen · states', () => {

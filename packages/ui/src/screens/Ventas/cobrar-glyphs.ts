@@ -31,4 +31,6 @@ export const COBRAR_GLYPHS = {
     'M10 8h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2',
   abajo: 'm6 9 6 6 6-6',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 16v-4M12 8h.01',
+  /** The arrow back: «Volver al mensaje original» (RvRecordarOriginal). */
+  deshacer: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
 } as const;

@@ -82,14 +82,14 @@ env:
 # them — one card's button would leave the other refused.
 - tapOn: { id: 'rechazados-retry-todos' }
 
-# The queue drains: Don's «Todo está enviado» takes the screen, with the
-# way to the cierre, and the pill turns green again. The retry flushes the
+# The queue drains: Don's «Todo está enviado» takes the screen, with no
+# button (the board has none), and the pill turns green again. The retry flushes the
 # whole queue through the mock: give the sweep room.
 - extendedWaitUntil:
     visible: { id: 'por-enviar-todo-enviado' }
     timeout: 30000
 - assertVisible: '.*Todo está enviado.*'
-- assertVisible: { id: 'por-enviar-todo-enviado-cta' }
+- assertNotVisible: { id: 'por-enviar-todo-enviado-cta' }
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'

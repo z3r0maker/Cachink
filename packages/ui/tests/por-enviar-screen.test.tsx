@@ -108,14 +108,13 @@ describe('PorEnviarScreen · fases', () => {
     expect(onReintentar).not.toHaveBeenCalled();
   });
 
-  it('todo-enviado: Don, who already has it, and the way to the cierre (RvEnvio)', () => {
-    const { onIrACierre } = montar({ fase: 'enviado', cola: [] });
+  it('todo-enviado: Don and who already has it, with no button: the board has none (RvEnvio)', () => {
+    montar({ fase: 'enviado', cola: [] });
     const card = screen.getByTestId('por-enviar-todo-enviado').textContent ?? '';
     expect(card).toContain('Todo está enviado');
     expect(card).toContain('ya tiene lo que capturaste. Última vez a las 14:55.');
     expect(screen.queryByTestId('por-enviar-heroe')).toBeNull();
-    tap('por-enviar-todo-enviado-cta');
-    expect(onIrACierre).toHaveBeenCalled();
+    expect(screen.queryByTestId('por-enviar-todo-enviado-cta')).toBeNull();
   });
 
   it('todo-enviado offline keeps the queue view, not Don’s card', () => {
