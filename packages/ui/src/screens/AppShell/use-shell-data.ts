@@ -40,7 +40,8 @@ export function inicialesDe(nombre: string): string {
   return `${partes[0]?.[0] ?? ''}${partes[partes.length - 1]?.[0] ?? ''}`.toUpperCase();
 }
 
-function useOperador(): ShellOperador | null {
+/** Who is signed in, by name; null with the caja locked or the read still out. */
+export function useOperador(): ShellOperador | null {
   const users = useUsersRepository();
   const userId = useUserId();
   const q = useQuery({

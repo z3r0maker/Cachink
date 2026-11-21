@@ -62,3 +62,5 @@ export * from './ejecutar-conversion/index.js';
 export * from './onboarding/index.js';
 export * from './metas/index.js';
 export * from './record-quota/index.js';
+// M-23 (ADR-162): the phone's report, sent now or kept until there is a connection.
+export * from './bug-report/index.js';

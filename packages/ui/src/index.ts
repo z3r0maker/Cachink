@@ -36,3 +36,5 @@ export { useTranslation } from './i18n/index';
 export * from './dev/index';
 export * from './activation/index';
 export * from './entitlement/index';
+// «Reportar un problema»: the help button, the sheet and its host (M-23).
+export * from './reportar/index';
