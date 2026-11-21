@@ -33,6 +33,34 @@ function deps(notified: SupportItem[] = [], fail = false) {
 }
 
 describe('createSupportItem', () => {
+  it('files a bug report with what the person tapped and the error it names (B-21)', async () => {
+    const repo = new InMemorySupportItems();
+    const eventId = '9f2c41d0a7b84e3c95d1f0a2b6c7e41a';
+    const { item } = await createSupportItem(
+      repo,
+      { ...input, category: 'could_not_charge', eventId },
+      deps(),
+    );
+    assert.equal(item.category, 'could_not_charge');
+    assert.equal(item.eventId, eventId);
+    const plain = await createSupportItem(repo, { ...input, sourceRef: 'evt_2' }, deps());
+    assert.equal(plain.item.category, null);
+    assert.equal(plain.item.eventId, null);
+  });
+
+  it('refuses a category or an event id that is not one, or on another kind (B-21)', async () => {
+    const repo = new InMemorySupportItems();
+    const eventId = '9f2c41d0a7b84e3c95d1f0a2b6c7e41a';
+    const bad = [
+      { ...input, category: 'se_trabo' },
+      { ...input, eventId: 'not-an-event' },
+      { ...input, kind: 'ayuda', category: 'other' },
+      { ...input, kind: 'sistema', eventId },
+    ];
+    for (const item of bad) await rejectsWith(createSupportItem(repo, item, deps()), 'VALIDATION');
+    assert.equal(repo.rows.size, 0);
+  });
+
   it('files an ARCO request with its deadline, and refuses one without (N-34)', async () => {
     const repo = new InMemorySupportItems();
     const arco = {

@@ -105,6 +105,57 @@ describe('fileBugReport', () => {
     assert.equal(asStored.success, true, JSON.stringify(asStored.error?.issues));
   });
 
+  it('files what the person tapped: the title is the category’s words, with no text (B-21)', async () => {
+    const { inbox, deps } = harness();
+    const { description: _unused, ...rest } = REPORT;
+    const tapped = { ...rest, category: 'could_not_charge' };
+    assert.deepEqual(await fileBugReport(CALLER, JSON.stringify(tapped), deps), {
+      kind: 'accepted',
+    });
+    const item = theOnlyItem(inbox);
+    assert.equal(item.title, 'No me dejó cobrar');
+    assert.equal(item.category, 'could_not_charge');
+    assert.equal(item.eventId, undefined);
+    assert.match(item.body, /^Dispositivo: 01HZ8XQN9GZJXV8AKQ5X0C7DEV\n/);
+  });
+
+  it('files the error the report names, beside what was written (B-21)', async () => {
+    const { inbox, deps } = harness();
+    const eventId = '9f2c41d0a7b84e3c95d1f0a2b6c7e41a';
+    const named = { ...REPORT, category: 'froze_or_closed', eventId };
+    await fileBugReport(CALLER, JSON.stringify(named), deps);
+    const item = theOnlyItem(inbox);
+    assert.equal(item.title, 'Se trabó o se cerró');
+    assert.equal(item.eventId, eventId);
+    assert.match(item.body, /^La app se cerró al cobrar\n/);
+  });
+
+  it('files a report from a build made before C-26 as it always did (B-21)', async () => {
+    const { inbox, deps } = harness();
+    await fileBugReport(CALLER, JSON.stringify(REPORT), deps);
+    const item = theOnlyItem(inbox);
+    assert.match(item.title, /^Reporte del teléfono 01HZ8XQN/);
+    assert.equal('category' in item, false);
+    assert.equal('eventId' in item, false);
+  });
+
+  it('files nothing new when the phone resends the same report (B-21)', async () => {
+    const { inbox, deps } = harness();
+    const tapped = { ...REPORT, category: 'wrong_number' };
+    await fileBugReport(CALLER, JSON.stringify(tapped), deps);
+    await fileBugReport(CALLER, JSON.stringify({ ...tapped, category: 'other' }), deps);
+    assert.equal(theOnlyItem(inbox).category, 'wrong_number');
+  });
+
+  it('refuses a report with neither a category nor a description, before any limit', async () => {
+    const { inbox, taken, deps } = harness();
+    const empty = { submittedAt: REPORT.submittedAt, appVersion: '1.4.2' };
+    const outcome = await fileBugReport(CALLER, JSON.stringify(empty), deps);
+    assert.equal(outcome.kind, 'invalid');
+    assert.equal(taken.length, 0);
+    assert.equal(inbox.items.length, 0);
+  });
+
   it('believes no id in the body', async () => {
     const { inbox, deps } = harness();
     const forged = { ...REPORT, deviceId: 'OTRO-DISPOSITIVO', businessId: 'OTRO-NEGOCIO' };

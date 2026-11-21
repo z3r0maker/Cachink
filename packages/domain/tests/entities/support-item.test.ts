@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import {
+  BUG_REPORT_CATEGORIES,
+  BUG_REPORT_CATEGORY_LABELS,
   CfdiUuidSchema,
   SupportItemSchema,
   SupportAttachmentPathSchema,
@@ -83,6 +85,42 @@ describe('SupportItemSchema', () => {
   it('rejects an empty title and a malformed source', () => {
     assert.equal(SupportItemSchema.safeParse({ ...bug, title: ' ' }).success, false);
     assert.equal(SupportItemSchema.safeParse({ ...bug, source: 'Bug Report' }).success, false);
+  });
+});
+
+/** B-21 (ADR-162): what the person tapped and the error the report names, on a bug item only. */
+describe('SupportItemSchema: a bug report’s category and error', () => {
+  const EVENT_ID = '9f2c41d0a7b84e3c95d1f0a2b6c7e41a';
+
+  it('carries the category and the event id of a bug item', () => {
+    const parsed = SupportItemSchema.parse({ ...bug, category: 'wrong_number', eventId: EVENT_ID });
+    assert.equal(parsed.category, 'wrong_number');
+    assert.equal(parsed.eventId, EVENT_ID);
+  });
+
+  it('reads an item filed before B-21, with neither, as nulls', () => {
+    const parsed = SupportItemSchema.parse(bug);
+    assert.equal(parsed.category, null);
+    assert.equal(parsed.eventId, null);
+  });
+
+  it('refuses a category nobody offers and an event id that is not 32 hex characters', () => {
+    assert.equal(SupportItemSchema.safeParse({ ...bug, category: 'se_trabo' }).success, false);
+    for (const eventId of [EVENT_ID.slice(1), EVENT_ID.toUpperCase(), 'not-an-event', '']) {
+      assert.equal(SupportItemSchema.safeParse({ ...bug, eventId }).success, false);
+    }
+  });
+
+  it('refuses either on an item that is not a bug', () => {
+    assert.equal(SupportItemSchema.safeParse({ ...factura, category: 'other' }).success, false);
+    assert.equal(SupportItemSchema.safeParse({ ...arco, eventId: EVENT_ID }).success, false);
+  });
+
+  it('has the board’s words for each category', () => {
+    assert.deepEqual(
+      BUG_REPORT_CATEGORIES.map((c) => BUG_REPORT_CATEGORY_LABELS[c]),
+      ['No me dejó cobrar', 'Se trabó o se cerró', 'Un número no cuadra', 'Otra cosa'],
+    );
   });
 });
 

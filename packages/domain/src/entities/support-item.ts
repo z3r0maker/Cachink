@@ -15,6 +15,10 @@
  * `dueAt`, the legal deadline to answer (20 días hábiles), and nothing else
  * does.
  *
+ * `kind = 'bug'` may carry what the person tapped in the report sheet
+ * (`category`) and the Sentry event the report is about (`eventId`), so the
+ * console shows a report beside its error (B-21, ADR-162). Nothing else does.
+ *
  * The branded id is declared here rather than in `ids/index.ts` because
  * nothing outside the admin console mints or passes it (as with `staff.ts`).
  */
@@ -58,6 +62,29 @@ export const SupportAttachmentPathSchema = z
   .regex(/^[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/)
   .refine((p) => !p.split('/').includes('..'));
 
+/**
+ * What a person can tap in «¿Qué pasó?» (ADR-162 §5). The wire uses the same
+ * names (contract §9); the labels are the approved board's words.
+ */
+export const BUG_REPORT_CATEGORIES = [
+  'could_not_charge',
+  'froze_or_closed',
+  'wrong_number',
+  'other',
+] as const;
+export const BugReportCategorySchema = z.enum(BUG_REPORT_CATEGORIES);
+export type BugReportCategory = z.infer<typeof BugReportCategorySchema>;
+
+export const BUG_REPORT_CATEGORY_LABELS: Readonly<Record<BugReportCategory, string>> = {
+  could_not_charge: 'No me dejó cobrar',
+  froze_or_closed: 'Se trabó o se cerró',
+  wrong_number: 'Un número no cuadra',
+  other: 'Otra cosa',
+} as const;
+
+/** A Sentry event id: 32 lower-case hex characters, as the SDK hands it out. */
+export const ERROR_EVENT_ID_REGEX = /^[0-9a-f]{32}$/;
+
 /** Who filed it, e.g. `bug-report`, `portal-ayuda`, `stripe-webhook`. */
 export const SupportSourceSchema = z.string().regex(/^[a-z][a-z0-9-]{1,39}$/);
 
@@ -84,6 +111,10 @@ const SupportItemShape = z.object({
   cfdiUuid: CfdiUuidSchema.nullable(),
   /** `arco` only: the deadline to answer the titular. */
   dueAt: isoInstant.nullable(),
+  /** `bug` only: what the person tapped in the report sheet. */
+  category: BugReportCategorySchema.nullable().default(null),
+  /** `bug` only: the Sentry event the report is about. */
+  eventId: z.string().regex(ERROR_EVENT_ID_REGEX).nullable().default(null),
   createdAt: isoInstant,
   updatedAt: isoInstant,
   resolvedAt: isoInstant.nullable(),
@@ -91,9 +122,18 @@ const SupportItemShape = z.object({
 
 type Shape = z.infer<typeof SupportItemShape>;
 
+function checkBugFields(item: Shape, ctx: z.RefinementCtx): void {
+  if (item.kind === 'bug') return;
+  const issue = (path: string) =>
+    ctx.addIssue({ code: 'custom', path: [path], message: 'Solo un reporte de error lo lleva.' });
+  if (item.category !== null) issue('category');
+  if (item.eventId !== null) issue('eventId');
+}
+
 function checkKindFields(item: Shape, ctx: z.RefinementCtx): void {
   const issue = (path: string, message: string) =>
     ctx.addIssue({ code: 'custom', path: [path], message });
+  checkBugFields(item, ctx);
   if (item.kind === 'arco' && item.dueAt === null)
     issue('dueAt', 'Un item ARCO necesita su plazo.');
   if (item.kind !== 'arco' && item.dueAt !== null) issue('dueAt', 'Solo un item ARCO lleva plazo.');

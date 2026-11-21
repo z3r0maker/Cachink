@@ -1,6 +1,7 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import {
+  BUG_REPORT_CATEGORIES,
   BugReportRequestSchema,
   BugReportResponseSchema,
   MAX_BUG_AUDIT_EVENTS,
@@ -83,6 +84,65 @@ describe('bug report request (§9)', () => {
       false,
     );
     assert.equal(BugReportRequestSchema.safeParse({ ...REPORT, platform: 7 }).success, false);
+  });
+});
+
+/** C-26 (ADR-162 §5): the sheet asks for a tap, not for text, and a report may name its error. */
+describe('bug report request: category and event id (§9, C-26)', () => {
+  const EVENT_ID = '9f2c41d0a7b84e3c95d1f0a2b6c7e41a';
+
+  it('accepts a category alone, with an empty description', () => {
+    const parsed = BugReportRequestSchema.parse({
+      category: 'could_not_charge',
+      submittedAt: REPORT.submittedAt,
+    });
+    assert.equal(parsed.category, 'could_not_charge');
+    assert.equal(parsed.description, '');
+    const blank = BugReportRequestSchema.parse({
+      ...REPORT,
+      description: '   ',
+      category: 'other',
+    });
+    assert.equal(blank.description, '');
+  });
+
+  it('knows the four things a person can tap, and no fifth', () => {
+    assert.deepEqual(
+      [...BUG_REPORT_CATEGORIES],
+      ['could_not_charge', 'froze_or_closed', 'wrong_number', 'other'],
+    );
+    for (const category of BUG_REPORT_CATEGORIES) {
+      assert.equal(BugReportRequestSchema.safeParse({ ...REPORT, category }).success, true);
+    }
+    for (const category of ['no_me_dejo_cobrar', '', 7, null]) {
+      assert.equal(BugReportRequestSchema.safeParse({ ...REPORT, category }).success, false);
+    }
+  });
+
+  it('still accepts what a build made before C-26 sends: a description and no category', () => {
+    const parsed = BugReportRequestSchema.parse(REPORT);
+    assert.equal(parsed.category, undefined);
+    assert.equal(parsed.eventId, undefined);
+    assert.equal(parsed.description, REPORT.description);
+  });
+
+  it('refuses a report with neither a category nor a description', () => {
+    const { submittedAt } = REPORT;
+    assert.equal(BugReportRequestSchema.safeParse({ submittedAt }).success, false);
+    assert.equal(BugReportRequestSchema.safeParse({ submittedAt, description: '' }).success, false);
+    assert.equal(
+      BugReportRequestSchema.safeParse({ submittedAt, description: ' \n ' }).success,
+      false,
+    );
+  });
+
+  it('carries the event the report is about, and refuses one that is not 32 hex characters', () => {
+    const parsed = BugReportRequestSchema.parse({ ...REPORT, eventId: EVENT_ID });
+    assert.equal(parsed.eventId, EVENT_ID);
+    const bad = [EVENT_ID.slice(1), `${EVENT_ID}0`, EVENT_ID.replace('9', 'g'), '', 7];
+    for (const eventId of bad) {
+      assert.equal(BugReportRequestSchema.safeParse({ ...REPORT, eventId }).success, false);
+    }
   });
 });
 

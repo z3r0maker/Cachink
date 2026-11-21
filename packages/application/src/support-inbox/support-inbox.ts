@@ -7,6 +7,8 @@
  * Stripe redelivery, a re-run cron — never files a second item.
  */
 
+import type { BugReportCategory } from '@xangarro/domain';
+
 /** The kinds this package files; the console accepts more (`SUPPORT_KINDS`). */
 export type InboxKind = 'arco' | 'ayuda' | 'bug' | 'factura' | 'limite' | 'migracion' | 'sistema';
 
@@ -25,6 +27,10 @@ export interface InboxItemRequest {
   readonly paymentRef: string | null;
   /** `arco` only: the legal deadline to answer, an ISO instant (N-34). */
   readonly dueAt?: string | null;
+  /** `bug` only: what the person tapped in the report sheet (B-21). */
+  readonly category?: BugReportCategory;
+  /** `bug` only: the Sentry event the report is about (B-21). */
+  readonly eventId?: string;
 }
 
 export interface SupportInbox {

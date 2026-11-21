@@ -7,7 +7,7 @@ import {
   MAX_BUG_REPORT_BYTES,
   type BugReportRequest,
 } from '@xangarro/contracts';
-import { SUPPORT_ITEM_BODY_MAX } from '@xangarro/domain';
+import { BUG_REPORT_CATEGORY_LABELS, SUPPORT_ITEM_BODY_MAX } from '@xangarro/domain';
 
 /**
  * The phone's «Reportar un problema», filed into the staff inbox (N-81,
@@ -21,6 +21,10 @@ import { SUPPORT_ITEM_BODY_MAX } from '@xangarro/domain';
  *   not a zero.
  * - **What is filed fits**: the description is kept whole and the snapshot is
  *   trimmed to what an inbox item holds. Stack traces are never filed.
+ * - **What the person tapped travels as data** (B-21, ADR-162): the category
+ *   and the Sentry event the report names are the item's own fields, so the
+ *   console shows a report beside its error. A report with a category takes
+ *   its title from it; one from an older build keeps the title it had.
  *
  * Filing is idempotent on the console's side by `(source, sourceRef)`, so a
  * phone that resends the same report files nothing new.
@@ -58,7 +62,7 @@ function parse(raw: string): BugReportRequest | string {
     return 'the body is not JSON';
   }
   const parsed = BugReportRequestSchema.safeParse(body);
-  return parsed.success ? parsed.data : 'a report needs a description and a date';
+  return parsed.success ? parsed.data : 'a report needs a category or a description, and a date';
 }
 
 /** The first refusal the limits give, device first; 0 when the report may go on. */
@@ -110,16 +114,23 @@ function bodyOf(report: BugReportRequest, caller: BugReportCaller): string {
   return kept === 0 ? head : `${head}${label}${context.slice(0, kept)}${TRIMMED}`;
 }
 
+function titleOf(report: BugReportRequest, caller: BugReportCaller): string {
+  if (report.category !== undefined) return BUG_REPORT_CATEGORY_LABELS[report.category];
+  return `Reporte del teléfono ${caller.deviceId.slice(0, 8)}…`;
+}
+
 function itemOf(report: BugReportRequest, caller: BugReportCaller): InboxItemRequest {
   return {
     kind: 'bug',
     urgent: false,
     businessId: caller.businessId,
-    title: `Reporte del teléfono ${caller.deviceId.slice(0, 8)}…`,
+    title: titleOf(report, caller),
     body: bodyOf(report, caller),
     source: 'bug-report',
     sourceRef: `${caller.deviceId}:${report.submittedAt}`,
     paymentRef: null,
+    ...(report.category === undefined ? {} : { category: report.category }),
+    ...(report.eventId === undefined ? {} : { eventId: report.eventId }),
   };
 }
 
