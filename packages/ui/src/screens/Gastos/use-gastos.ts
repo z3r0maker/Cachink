@@ -118,7 +118,6 @@ export function useGastos(): GastosVivo {
           caja: shell.caja ?? t('shell.cajaSinNombre'),
           desde: q.data.turno === null ? '' : hhmmLocal(q.data.turno.aperturaAt),
           gastos: q.data.gastos,
-          dueno: q.data.dueno,
         }
       : null;
   const state = q.isError ? 'error' : data === null ? 'loading' : 'happy';

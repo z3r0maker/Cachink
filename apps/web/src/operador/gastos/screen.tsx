@@ -3,8 +3,6 @@
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { mayuscula } from '@xangarro/caja';
-import { useDueno } from '../ui/use-dueno';
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
 import { FilterChips, SearchBox } from '../ui/filters';
@@ -79,7 +77,6 @@ function Filtros({ x }: { readonly x: Gastos }) {
 /** «Gastos del turno», «Salió de caja», «Sin comprobante»: one quiet strip. */
 function Cifras({ x }: { readonly x: Gastos }) {
   const r = resumen(x.gastos);
-  const dueno = useDueno();
   return (
     <section aria-label="Resumen de gastos" className={g.cifras}>
       <div className={g.cifra}>
@@ -98,7 +95,7 @@ function Cifras({ x }: { readonly x: Gastos }) {
           <span className={g.cifraValor} style={{ color: colors.warningText }}>
             {r.sinComprobante}
           </span>
-          <span className={g.cifraNota}>{`${mayuscula(dueno)} te lo va a preguntar`}</span>
+          <span className={g.cifraNota}>Los patrones te lo van a preguntar</span>
         </span>
       </div>
     </section>

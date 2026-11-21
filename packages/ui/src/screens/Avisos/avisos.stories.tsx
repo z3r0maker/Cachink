@@ -1,5 +1,5 @@
 /**
- * Avisos (Track M, M-09) in its board states — de-pedro, de-tu-caja,
+ * Avisos (Track M, M-09) in its board states — de-los-patrones, de-tu-caja,
  * respondido, responder (the sheet), sin-avisos, cargando, error-al-leer —
  * for review against the board `Operador Avisos`. Fed the caja package's
  * design fixture; the live screen reads `useAvisos()`.
@@ -17,7 +17,7 @@ import { ResponderSheet } from './responder-sheet';
 initI18n();
 
 type Situacion =
-  | 'de-pedro'
+  | 'de-los-patrones'
   | 'de-tu-caja'
   | 'respondido'
   | 'responder'
@@ -25,7 +25,7 @@ type Situacion =
   | 'cargando'
   | 'error-al-leer';
 
-/** The corte message, answered: «Le mandaste tu respuesta a Pedro». */
+/** The corte message, answered: «Les mandaste tu respuesta a los patrones». */
 const RESPONDIDO: readonly Aviso[] = AVISOS_FIXTURE.avisos.map((a) =>
   a.id === 'corte'
     ? { ...a, respuesta: 'Creo que di cambio de más a un cliente.', leido: true }
@@ -33,17 +33,17 @@ const RESPONDIDO: readonly Aviso[] = AVISOS_FIXTURE.avisos.map((a) =>
 );
 
 const DATA: Record<Situacion, AvisosData | null> = {
-  'de-pedro': AVISOS_FIXTURE,
+  'de-los-patrones': AVISOS_FIXTURE,
   'de-tu-caja': AVISOS_FIXTURE,
   respondido: { ...AVISOS_FIXTURE, avisos: RESPONDIDO },
   responder: { ...AVISOS_FIXTURE, avisos: RESPONDIDO },
-  'sin-avisos': { dueno: 'Pedro', avisos: [] },
+  'sin-avisos': { avisos: [] },
   cargando: null,
   'error-al-leer': null,
 };
 
 const ESTADO: Record<Situacion, AvisosEstado> = {
-  'de-pedro': 'happy',
+  'de-los-patrones': 'happy',
   'de-tu-caja': 'happy',
   respondido: 'happy',
   responder: 'happy',
@@ -70,7 +70,6 @@ function Pantalla(p: { readonly situacion: Situacion }): ReactElement {
           <ResponderSheet
             open
             aviso={corte}
-            dueno="Pedro"
             onClose={() => undefined}
             onEnviar={async () => null}
           />
@@ -89,7 +88,7 @@ export default meta;
 
 type Story = StoryObj<typeof Pantalla>;
 
-export const DePedro: Story = { args: { situacion: 'de-pedro' } };
+export const DeLosPatrones: Story = { args: { situacion: 'de-los-patrones' } };
 export const DeTuCaja: Story = { args: { situacion: 'de-tu-caja' } };
 export const Respondido: Story = { args: { situacion: 'respondido' } };
 export const Responder: Story = { args: { situacion: 'responder' } };

@@ -23,7 +23,6 @@ function montar(over: Partial<Parameters<typeof InventarioScreen>[0]> = {}) {
     <InventarioScreen
       state="happy"
       data={DATA}
-      dueno="Pedro"
       registrar={registrar}
       onNuevoProducto={onNuevoProducto}
       onRetry={() => undefined}
@@ -55,10 +54,10 @@ describe('InventarioScreen · existencias', () => {
     expect(screen.getAllByText('Suficiente').length).toBe(6);
   });
 
-  it('carries the regla with the owner who adjusts stock from the portal', () => {
+  it('carries the regla: «los patrones» adjust stock from the portal', () => {
     montar();
     expect(textoDe('inventario-regla')).toContain(
-      'el ajuste libre de existencias lo hace Pedro desde el portal',
+      'el ajuste libre de existencias lo hacen los patrones desde el portal',
     );
   });
 

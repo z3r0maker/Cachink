@@ -23,7 +23,6 @@ function Pantalla(props: { error: boolean }): ReactElement {
         operadores={OPERADORES}
         contexto="Caja 1 · Taquería Don Pedro"
         fecha="Jueves 14 de mayo"
-        dueno="Pedro"
         onAuthenticate={() => undefined}
         error={props.error ? 'Ese NIP no es. Revísalo e intenta otra vez.' : null}
         submitting={false}

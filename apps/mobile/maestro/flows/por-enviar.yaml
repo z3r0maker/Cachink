@@ -50,27 +50,26 @@ env:
       id: 'mobile-por-enviar'
     timeout: 10000
 
-# The phase and its hero (heroeTelefono con-rechazados, caja/pendientes);
-# «La cola» still lists the venta.
+# RvEnvio: refused rows get no status line (each card says why), and the
+# footer's one button reads «Reintentar»; «La cola» still lists the venta.
+- assertNotVisible:
+    id: 'por-enviar-aviso'
 - assertVisible:
-    id: 'por-enviar-heroe'
-- assertVisible: '.*Revisar.*'
-- assertVisible: '.*El servidor no aceptó [0-9]* registros*.*'
-- assertVisible: '.*Sigue en esta caja, no se pierde\. Lee la razón de cada uno abajo y reintenta los que puedas\..*'
-- assertVisible: '.*Reintentar envío.*'
+    id: 'por-enviar-reintentar'
+- assertVisible: 'Reintentar'
 - assertVisible:
     id: 'cola-panel'
 - assertVisible: 'Venta · .*'
 
 # «El servidor no aceptó» is below the cola: the server's sentence and hint
-# (rechazado.ts RAZON/PISTA FK_PRODUCT_MISSING), then the row's «Reintentar».
+# (rechazado.ts RAZON/PISTA FK_PRODUCT_MISSING), then the footer's «Reintentar».
 - scrollUntilVisible:
     element:
       id: 'rechazados-panel'
     direction: DOWN
     timeout: 5000
 - assertVisible: '.*El producto de este registro ya no existe en el portal\..*'
-- assertVisible: '.*que recupere el producto en el portal y toca Reintentar\..*'
+- assertVisible: '.*que recuperen el producto en el portal y toca Reintentar\..*'
 - runScript:
     file: shared/mock-row.js
     env:
@@ -78,18 +77,17 @@ env:
       TABLE: products
       ROW_ID: 01JPRD00000000000000000007
 # The refusal hits BOTH rows that name the product (the sale and its stock
-# movement), so two cards wait: «Reintentar todos» requeues every one of
-# them — one card's button would leave the other refused.
-- tapOn: { id: 'rechazados-retry-todos' }
+# movement), so two cards wait: the footer's «Reintentar» requeues them all.
+- tapOn: { id: 'por-enviar-reintentar' }
 
-# The queue drains: Don's «Todo está enviado» takes the screen, with the
-# way to the cierre, and the pill turns green again. The retry flushes the
+# The queue drains: Don's «Todo está enviado» takes the screen, with no
+# button (the board has none), and the pill turns green again. The retry flushes the
 # whole queue through the mock: give the sweep room.
 - extendedWaitUntil:
     visible: { id: 'por-enviar-todo-enviado' }
     timeout: 30000
 - assertVisible: '.*Todo está enviado.*'
-- assertVisible: { id: 'por-enviar-todo-enviado-cta' }
+- assertNotVisible: { id: 'por-enviar-todo-enviado-cta' }
 - extendedWaitUntil:
     visible:
       id: 'cloud-sync-pill-synced'

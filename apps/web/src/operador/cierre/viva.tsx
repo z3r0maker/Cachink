@@ -14,7 +14,7 @@ import { useCredenciales, type Credenciales } from '../runtime/use-credenciales'
 import { desencolar } from '../shell/cola';
 import type { MarcaDelNegocio } from '../runtime/negocio';
 import type { CierrePara } from '../runtime/protocol';
-import { type EstadoMode, horaLocal, nombreDueno } from '@xangarro/caja';
+import { type EstadoMode, horaLocal } from '@xangarro/caja';
 import { CierreScreen } from './screen';
 import type { CerrarVivo, CierreData, CierreScreenProps } from '@xangarro/caja/cierre';
 
@@ -30,7 +30,6 @@ function comoCierre(
     caja: 'Caja 1',
     desde: c.desde,
     hasta: horaLocal(),
-    dueno: nombreDueno(negocio?.dueno),
     ...(nombre === '' ? {} : { negocio: nombre }),
     partes: {
       fondo: BigInt(c.fondoCentavos),

@@ -27,7 +27,7 @@ export const TURNO_FIXTURE: TurnoData = {
   porMetodo: [
     { metodo: 'Efectivo', monto: 198_000n, nota: 'entra a la caja' },
     { metodo: 'Tarjeta', monto: 63_800n, nota: 'en la terminal' },
-    { metodo: 'Transferencia', monto: 32_000n, nota: 'a la cuenta de Pedro' },
+    { metodo: 'Transferencia', monto: 32_000n, nota: 'a la cuenta de los patrones' },
     { metodo: 'Fiado', monto: 18_200n, nota: 'Doña Mari y otro cliente' },
   ],
   fiado: 18_200n,

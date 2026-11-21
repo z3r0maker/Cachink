@@ -1,4 +1,4 @@
-/** «De Pedro» (owner messages) or «De tu caja» (derived on the device, ADR-075). */
+/** «De los patrones» (owner messages) or «De tu caja» (derived on the device, ADR-075). */
 export type AvisoGrupo = 'dueno' | 'caja';
 
 /** Head tint by kind of notice, from the design file. */
@@ -21,7 +21,6 @@ export interface Aviso {
 }
 
 export interface AvisosData {
-  readonly dueno: string;
   readonly avisos: readonly Aviso[];
 }
 

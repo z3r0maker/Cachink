@@ -1,8 +1,7 @@
 /**
  * useInicio — Inicio's data for the signed-in operator: the rows
  * (`leerFilasInicio`) said by `inicioMovil`, with the session around them
- * (their name, the caja, the business, the owner's name from the last pull)
- * and the sync state (offline, what waits to be sent). Keyed under the
+ * (their name, the caja, the business) and the sync state (offline, what waits to be sent). Keyed under the
  * caja's queries, so opening or closing a turno refreshes it.
  */
 import { useCallback } from 'react';
@@ -10,7 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
 import type { InicioData } from '@xangarro/caja/inicio';
 import type { BusinessId, UserId } from '@xangarro/domain';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useRepositories } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
@@ -33,22 +31,12 @@ export function inicioKey(
   return [...cajaKeys.byBusiness(businessId), 'inicio', userId];
 }
 
-function useDueno(): string | null {
-  const { appConfig } = useRepositories();
-  const q = useQuery({
-    queryKey: ['inicio', 'dueno'],
-    queryFn: () => appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
-  });
-  return q.data ?? null;
-}
-
 export function useInicio(): InicioVivo {
   const { t } = useTranslation();
   const repos = useRepositories();
   const businessId = useCurrentBusinessId() as BusinessId | null;
   const userId = useUserId();
   const shell = useShellData();
-  const dueno = useDueno();
   const { state: sync } = useCloudSync();
   const hoy = hoyLocal();
   const q = useQuery({
@@ -67,7 +55,6 @@ export function useInicio(): InicioVivo {
             offline: sync.phase === 'offline',
             pendientes: sync.counts.pending + sync.counts.retrying,
             ahora: new Date(),
-            dueno,
           },
           hoy,
         )

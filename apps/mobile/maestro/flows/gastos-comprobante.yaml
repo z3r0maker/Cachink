@@ -113,6 +113,17 @@ tags:
     visible:
       id: 'gasto-comprobante-lista'
     timeout: 15000
+# Back from the picker, iOS hands the focus back to «¿Cuánto?» and the
+# keyboard covers the row again (a tap «on» «Cambiar» typed a 3): put it away
+# with the same drag as above before tapping.
+- runFlow:
+    when:
+      true: ${FORMA != 'tableta'}
+    commands:
+      - swipe:
+          start: '50%, 45%'
+          end: '50%, 20%'
+      - waitForAnimationToEnd
 # «Cambiar» opens the camera again; closing it keeps the photo.
 - tapOn:
     id: 'gasto-comprobante-cambiar'
@@ -178,6 +189,15 @@ tags:
     visible:
       id: 'gasto-agregar-foto-.*'
     timeout: 10000
+# The row can sit under Gastos' «Registrar gasto» footer, where iOS still
+# counts it visible and a tap opens a new gasto: centre it first.
+- scrollUntilVisible:
+    element:
+      id: 'gasto-agregar-foto-.*'
+    direction: DOWN
+    timeout: 5000
+    visibilityPercentage: 100
+    centerElement: true
 - tapOn:
     id: 'gasto-agregar-foto-.*'
 - extendedWaitUntil:
@@ -193,7 +213,7 @@ tags:
       id: 'gasto-foto-toast'
     timeout: 15000
 - assertVisible: '.*Foto guardada.*'
-- assertVisible: '.*Se manda al dueño.*'
+- assertVisible: '.*Se les manda a los patrones.*'
 # Not «no Agregar foto left»: a reused simulator keeps gastos earlier runs
 # left without a photo. The newest row, the one just saved, reads «Con foto».
 - assertVisible:

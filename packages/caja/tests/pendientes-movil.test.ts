@@ -2,12 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { COLA_FIXTURE } from '../src/pendientes/fixture';
-import {
-  faseTelefono,
-  heroeTelefono,
-  NOTA_NADA_SE_PIERDE,
-  todoEnviado,
-} from '../src/pendientes/movil';
+import { faseTelefono, pieCola, NOTA_NADA_SE_PIERDE, todoEnviado } from '../src/pendientes/movil';
 import { cuentaRechazados, describeRechazado } from '../src/pendientes/rechazado';
 
 const VENTA = {
@@ -18,31 +13,43 @@ const VENTA = {
 };
 
 describe('registros por enviar, móviles', () => {
-  it('the hero of each phase, in the phone’s words', () => {
-    assert.deepEqual(heroeTelefono('espera', COLA_FIXTURE, 0, null), {
-      eyebrow: 'En espera',
-      titulo: '3 registros por enviar',
-      cuerpo:
-        'Suman $283.00 de ventas y un gasto de $620.00. Puedes seguir cobrando; se envían solos cuando vuelva el internet.',
-      boton: 'Reintentar envío',
+  it('the status line and the footer of each phase, as RvEnvio words them', () => {
+    assert.deepEqual(pieCola('sin-internet', COLA_FIXTURE), {
+      aviso: '3 registros esperan conexión. Puedes seguir cobrando; se envían solos.',
+      boton: 'Reintentar ahora',
+      ocupado: false,
     });
-    const uno = [COLA_FIXTURE[0]!];
-    assert.equal(heroeTelefono('sin-internet', uno, 0, null).titulo, '1 registro espera conexión');
-    assert.equal(heroeTelefono('sin-internet', uno, 0, null).eyebrow, 'Sin conexión');
-    assert.equal(heroeTelefono('enviando', COLA_FIXTURE, 0, null).titulo, 'Enviando 3 registros…');
+    assert.deepEqual(pieCola('espera', COLA_FIXTURE), {
+      aviso: '3 registros por enviar. Puedes seguir cobrando; se envían solos.',
+      boton: 'Reintentar ahora',
+      ocupado: false,
+    });
     assert.equal(
-      heroeTelefono('enviado', [], 0, '14:55').cuerpo,
-      'El último envío fue a las 14:55.',
-    );
-    assert.equal(
-      heroeTelefono('enviado', [], 0, null).cuerpo,
-      'El último envío fue hace unos segundos.',
+      pieCola('sin-internet', [COLA_FIXTURE[0]!]).aviso,
+      '1 registro espera conexión. Puedes seguir cobrando; se envían solos.',
     );
   });
 
-  it('a queue with no sums still says it sends itself', () => {
-    const h = heroeTelefono('espera', [], 0, null);
-    assert.equal(h.titulo, '0 registros por enviar');
+  it('sending holds the button and never says the close waits (R3, ADR-123)', () => {
+    const p = pieCola('enviando', COLA_FIXTURE);
+    assert.deepEqual(p, {
+      aviso: 'Enviando 3 registros… Puedes seguir cobrando y cerrar el turno mientras suben.',
+      boton: 'Enviando…',
+      ocupado: true,
+    });
+    assert.doesNotMatch(p.aviso ?? '', /espera|esperar/);
+  });
+
+  it('refused rows say why on their own card: the footer only retries them', () => {
+    assert.deepEqual(pieCola('con-rechazados', []), {
+      aviso: null,
+      boton: 'Reintentar',
+      ocupado: false,
+    });
+    assert.equal(cuentaRechazados(1), '1 registro');
+  });
+
+  it('a queue that only moves cash still says it sends itself', () => {
     const apertura = {
       id: 'q-a',
       tipo: 'movimiento' as const,
@@ -52,20 +59,9 @@ describe('registros por enviar, móviles', () => {
       hora: '08:15',
     };
     assert.equal(
-      heroeTelefono('sin-internet', [apertura], 0, null).cuerpo,
-      'Puedes seguir cobrando; se envían solos cuando vuelva el internet.',
+      pieCola('sin-internet', [apertura]).aviso,
+      '1 registro espera conexión. Puedes seguir cobrando; se envían solos.',
     );
-  });
-
-  it('refused rows win the hero and say what to do', () => {
-    assert.deepEqual(heroeTelefono('con-rechazados', [], 2, null), {
-      eyebrow: 'Revisar',
-      titulo: 'El servidor no aceptó 2 registros',
-      cuerpo:
-        'Sigue en esta caja, no se pierde. Lee la razón de cada uno abajo y reintenta los que puedas.',
-      boton: 'Reintentar envío',
-    });
-    assert.equal(cuentaRechazados(1), '1 registro');
   });
 
   it('the note says nothing is lost, and the turno closes with rows still to send (R3)', () => {
@@ -75,12 +71,6 @@ describe('registros por enviar, móviles', () => {
       'Puedes cerrar el turno; se envían cuando vuelva la conexión.',
     );
     assert.doesNotMatch(NOTA_NADA_SE_PIERDE.cuerpo, /No podrás/);
-  });
-
-  it('sending never says the close waits for it (R3, ADR-123)', () => {
-    const h = heroeTelefono('enviando', COLA_FIXTURE, 0, null);
-    assert.equal(h.cuerpo, 'Puedes seguir cobrando y cerrar el turno mientras suben.');
-    assert.doesNotMatch(h.cuerpo, /se puede cerrar/);
   });
 
   it('the phase reads in the pill’s order: sending, refused, offline, waiting, done', () => {
@@ -111,12 +101,12 @@ describe('rechazados, la sentencia del servidor', () => {
     assert.equal(v.razon, 'El producto de este registro ya no existe en el portal.');
     assert.equal(
       v.pista,
-      'Pídele al dueño que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
     );
     assert.equal(v.reintentando, false);
   });
 
-  it('the hint names the owner and never says to capture it again (R5)', () => {
+  it('the hint asks «los patrones» and never says to capture it again (R5)', () => {
     const cliente = describeRechazado(
       {
         tableName: 'expenses',
@@ -126,11 +116,10 @@ describe('rechazados, la sentencia del servidor', () => {
         retryable: false,
       },
       null,
-      'Pedro',
     );
     assert.equal(
       cliente.pista,
-      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
     );
     assert.doesNotMatch(cliente.pista ?? '', /regístral/);
   });
@@ -178,7 +167,6 @@ describe('rechazados, la sentencia del servidor', () => {
         retryable: false,
       },
       null,
-      'Pedro',
     );
     assert.equal(
       v.razon,
@@ -186,7 +174,23 @@ describe('rechazados, la sentencia del servidor', () => {
     );
     assert.equal(
       v.pista,
-      'Pídele a Pedro que lo revise en el portal. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que lo revisen en el portal. No la vuelvas a capturar: se contaría dos veces.',
+    );
+  });
+
+  it('the operator and a suspended business go to «los patrones» too', () => {
+    const pista = (code: string) =>
+      describeRechazado(
+        { tableName: 'sales', rowId: 'r', code, message: 'x', retryable: false },
+        null,
+      ).pista;
+    assert.equal(
+      pista('FK_USER_MISSING'),
+      'Pídeles a los patrones que revisen en el portal al operador.',
+    );
+    assert.equal(
+      pista('BUSINESS_SUSPENDED'),
+      'Pídeles a los patrones que lo revisen en el portal.',
     );
   });
 
@@ -237,29 +241,18 @@ describe('rechazados, la sentencia del servidor', () => {
   });
 });
 
-describe('todo enviado (RvEnvio): Don and the owner who already has it', () => {
-  it('names the owner and the last send', () => {
-    assert.deepEqual(todoEnviado('Pedro', '09:41'), {
+describe('todo enviado (RvEnvio): Don and «los patrones», who already have it', () => {
+  it('says «los patrones» have it, and the last send', () => {
+    assert.deepEqual(todoEnviado('09:41'), {
       titulo: 'Todo está enviado',
-      cuerpo: 'Pedro ya tiene lo que capturaste. Última vez a las 09:41.',
+      cuerpo: 'Los patrones ya tienen lo que capturaste. Última vez a las 09:41.',
     });
   });
 
   it('a send moments ago says so', () => {
     assert.equal(
-      todoEnviado('Pedro', null).cuerpo,
-      'Pedro ya tiene lo que capturaste. Última vez hace unos segundos.',
+      todoEnviado(null).cuerpo,
+      'Los patrones ya tienen lo que capturaste. Última vez hace unos segundos.',
     );
-  });
-
-  it('without the owner’s name it says «tu negocio»', () => {
-    assert.equal(
-      todoEnviado(null, '09:41').cuerpo,
-      'Tu negocio ya tiene lo que capturaste. Última vez a las 09:41.',
-    );
-  });
-
-  it('a blank name is no name', () => {
-    assert.match(todoEnviado('  ', null).cuerpo, /^Tu negocio ya tiene/);
   });
 });

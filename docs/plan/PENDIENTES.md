@@ -89,7 +89,6 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Alta` **N-25** Vinculación de dispositivos por QR `[LAUNCH]` — Bloqueada por: — · Falta: la lectura del token desde el fragmento y la pantalla de cámara llegaron con M-06 (`activation-form.ts` lee `#c=`; `qr-visor.native.tsx`, `vincular-escanear.tsx`). Falta: App Links y Universal Links verificados (`assetlinks.json`, AASA) para `app.xangarro.mx/activar` — `app.json` sigue declarando solo el esquema `xangarro` — la confirmación SEC-MOB-04 «¿Vincular a _negocio_?» antes de canjear (una vista previa que nombra el negocio para un token, aún no construida), y el flujo de deep link de Maestro. El contrato, el token, el QR del portal, el compartir por WhatsApp y la página de respaldo `/activar` ya existen. N-24 se cerró el 2026-11-20 (su contenido lo entregó el track del Mostrador), así que nada la bloquea. **Verificado el 2026-11-19 contra el repo**, los cuatro huecos siguen abiertos tal cual, y los cinco cimientos siguen en pie: `activation-form.ts`, `qr-visor.native.tsx` y `vincular-escanear.tsx` están en `packages/ui/src/screens/Activation/`, y el fragmento `#c=` lo escriben `lib/pairing-token.ts` y `server/actions/pairing-qr.ts` del portal, con prueba unitaria y `e2e/devices.spec.ts` leyéndolo. Dos detalles que ahorran una búsqueda cuando esto arranque. Uno: `apps/mobile/app.json` tiene exactamente una línea de esquema y **ninguna** de `intentFilters` ni `associatedDomains`, que son las dos que Expo necesita para que el enlace https abra la app. Dos: `assetlinks.json` y el AASA no están en ningún disco, y su casa es `apps/landing/public/.well-known/`, que ya existe con `security.txt` dentro — o sea que se sirven por copia estática del build de Vite, no por una ruta, y el dominio que firman es `app.xangarro.mx`, que hoy no es el landing. Eso último es una decisión de DNS antes que de código. · `09-next-features.md:720`
 - [ ] `Alta` **M-23** Reportar un problema sin escribir (ADR-162). · `19-movil-mostrador.md:60`
 - [ ] `Alta` **M-24** La caja avisa sola de los errores (ADR-162). · `19-movil-mostrador.md:61`
-- [ ] `Alta` **M-25** Lo que quedó de la revisión del teléfono. · `19-movil-mostrador.md:62`
 - [ ] `Media` **M-10** The owner corrects a sale. — Falta: todo, y antes del código hay una decisión que esta tarea no menciona: lo que pide choca de frente con el ADR-058 §2, que hizo el portal de solo lectura a propósito. `movimientos/page.tsx` lo dice en su encabezado («no «Cancelar»… those are phone affordances — `sales` and `expenses` are UP tables with no down path») y `detalle-drawer.tsx` registra que el ADR tiró la acción peligrosa del diseño porque «cancelar es trabajo de la caja, en el mostrador, con el cliente presente». Del otro lado, el teléfono **sí** corrige: `CancelarTicketUseCase` con NIP y confirmación de efectivo, desde M-08. Así que la asimetría que esta tarea llama hueco es una decisión tomada, y abrirla pide una enmienda al ADR-058 §2 (un camino hacia abajo para `sales` con su propia bitácora), no nada más una pantalla. Eso va al canvas y al ADR primero. · `19-movil-mostrador.md:33`
 - [ ] `Media` **M-14** Foto del producto en teléfonos reales. — Falta: sigue pendiente, pero una de sus premisas caducó. Esta tarea decía «su Kotlin nunca ha compilado»: ya compiló. El dev client de Android se construye y abre desde el 2026-11-11 (`7fd19ba2`), y el 2026-11-12 (`bf356c3d`, ADR-143, que enmienda el ADR-134 §5) ML Kit cambió de forma por lo que se vio corriendo: `prepare()` armaba un `SubjectSegmenter` al arrancar la app y eso carga el modelo de 17 MB, cuya sonda SME hace SIGILL en el emulador M5. `prepare()` ya no existe; `lift()` arma un segmentador, pide el modelo si falta y lo cierra. Por eso el emulador no sirve para probar esto y hace falta un teléfono de verdad — que es lo que esta tarea ya pedía, aunque por otra razón. Lo que queda por ver en hardware es sólo el recorte en sí: Vision en un iPhone con iOS 17 o más, y ML Kit en un Android con Play services y en uno sin. · `19-movil-mostrador.md:49`
 - [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:54`
@@ -102,6 +101,7 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Media` **G-04** Clips del teléfono: un flujo de Maestro graba cada guía — Bloqueada por: G-03, G-07 · `26-guias.md:206`
 - [ ] `Media` **G-10** Teléfono: «¿Cómo le hago?» detrás del botón de ayuda — Bloqueada por: G-01, G-03, M-23 · `26-guias.md:252`
 - [ ] `Media` **G-20** «Enséñame» en el teléfono: Don señala el botón de verdad — Bloqueada por: G-01, G-10 · `26-guias.md:312`
+- [ ] `Baja` **M-29** `dueno_nombre` sale del cable. · `19-movil-mostrador.md:66`
 - [ ] `Baja` **K-24** Teléfono y caja: QR en vivo — Bloqueada por: K-22, board KD-05 · Falta: todo, detrás de K-22. Su board es `CdMvVivo` (KD-05), dibujado y sin aprobar desde el 2026-10-08 (ver K-12). · `22-codi.md:302`
 - [ ] `Baja` **G-40** Tienda de práctica — Bloqueada por: G-20 · `26-guias.md:379`
 
@@ -370,7 +370,7 @@ Configuración en consolas de terceros — Vercel, Supabase, Stripe, Resend, DNS
 
 - [~] `⛔ bloquea prod` `Alta` ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad; formulario de Data Safety de Play… · `../launch/production-readiness.md:185`
 
-## Espera datos reales (22)
+## Espera datos reales (23)
 
 No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral de escala o tiempo después del lanzamiento. Cada una dice su disparador.
 
@@ -405,6 +405,10 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - [ ] `Baja` **N-73** Salud de la cuenta y microencuesta NPS — Bloqueada por: N-64, N-47 · Disparador: 50 inquilinos activos. · `09-next-features.md:1434`
 - [ ] `Baja` **N-74** Códigos promocionales y de referidos con atribución — Bloqueada por: N-64 · Disparador: lanzamiento de X-10. · `09-next-features.md:1444`
 
+### `19-movil-mostrador.md` · Phases (1)
+
+- [ ] `Media` **M-28** Después del lanzamiento: los tableros que esperan. · `19-movil-mostrador.md:65`
+
 ### `22-codi.md` · 4. Tasks (1)
 
 - [ ] `Baja` **K-30** Portal: medidor Nivel 2 Bis — Bloqueada por: the final rules for the Cuenta Nivel 2 Bis (Ley de Economía Digital, Senado), board KD-07 · `22-codi.md:321`
@@ -424,7 +428,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `08-post-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 53 abiertos (12 en curso, 0 bloqueados, 31 hechos)
 - `11-pre-launch-and-deferred.md` — 21 abiertos (0 en curso, 0 bloqueados, 14 hechos)
-- `19-movil-mostrador.md` — 8 abiertos (0 en curso, 0 bloqueados, 19 hechos)
+- `19-movil-mostrador.md` — 9 abiertos (0 en curso, 0 bloqueados, 20 hechos)
 - `20-command-center.md` — 15 abiertos (5 en curso, 0 bloqueados, 19 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `24-synth.md` — 15 abiertos (0 en curso, 0 bloqueados, 11 hechos)

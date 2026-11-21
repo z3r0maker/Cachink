@@ -3,7 +3,7 @@
 import { Icon } from '../../shell/icon';
 import * as p from '../ui/panel.css';
 import * as r from './reply.css';
-import { aDueno } from '@xangarro/caja/avisos';
+import { AVISOS_COPY } from '@xangarro/caja/avisos';
 
 /** Quick answers: a short label, the sentence it writes for the operator. */
 const RAPIDAS: readonly (readonly [string, string])[] = [
@@ -18,7 +18,6 @@ const ENVIAR =
 
 export interface ReplyProps {
   readonly id: string;
-  readonly dueno: string;
   readonly draft: string;
   readonly onDraft: (text: string) => void;
   readonly onSend: () => void;
@@ -27,7 +26,7 @@ export interface ReplyProps {
 }
 
 /** «Tu respuesta»: a note, the quick answers, and send. */
-export function Reply({ id, dueno, draft, onDraft, onSend, onRead }: ReplyProps) {
+export function Reply({ id, draft, onDraft, onSend, onRead }: ReplyProps) {
   const inputId = `respuesta-${id}`;
   return (
     <div className={r.reply}>
@@ -38,7 +37,7 @@ export function Reply({ id, dueno, draft, onDraft, onSend, onRead }: ReplyProps)
         id={inputId}
         className={r.input}
         rows={3}
-        placeholder={`Cuéntale ${aDueno(dueno)} lo que recuerdas`}
+        placeholder={AVISOS_COPY.cuentales}
         value={draft}
         onChange={(e) => onDraft(e.target.value)}
       />
@@ -89,12 +88,12 @@ function Rapidas({
 }
 
 /** What was sent, in green, where the form was. */
-export function Enviada({ dueno, texto }: { readonly dueno: string; readonly texto: string }) {
+export function Enviada({ texto }: { readonly texto: string }) {
   return (
     <div className={r.enviado}>
-      <span className={r.enviadoTitle}>{`Le mandaste tu respuesta ${aDueno(dueno)}`}</span>
+      <span className={r.enviadoTitle}>{AVISOS_COPY.enviada}</span>
       <span className={r.enviadoText}>“{texto}”</span>
-      <span className={r.enviadoNota}>Si te contesta, lo ves aquí mismo.</span>
+      <span className={r.enviadoNota}>Si te contestan, lo ves aquí mismo.</span>
     </div>
   );
 }

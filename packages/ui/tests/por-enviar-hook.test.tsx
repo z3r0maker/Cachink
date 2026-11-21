@@ -2,7 +2,7 @@
  * `usePorEnviar` (M-09) over in-memory repositories and a faked outbox: the
  * queue as the operator captured it (a ticket with its lines is one venta),
  * the phase from the bridge the pill reads (todo enviado, espera), the
- * owner's name for «el portal de Pedro», and the read that fails.
+ * read that fails.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement, ReactNode } from 'react';
@@ -115,14 +115,11 @@ describe('usePorEnviar · la cola', () => {
     });
   });
 
-  it('an empty queue at rest says todo enviado, and names the portal by its owner', async () => {
-    const repos = misRepos();
-    await repos.appConfig.set('duenoNombre', 'Pedro Ramírez');
-    const v = await usar(repos);
+  it('an empty queue at rest says todo enviado', async () => {
+    const v = await usar();
     expect(v.current.fase).toBe('enviado');
     expect(v.current.cola).toEqual([]);
     expect(v.current.rechazados).toEqual([]);
-    expect(v.current.dueno).toBe('Pedro');
     expect(v.current.ultima).toBeNull();
   });
 

@@ -51,8 +51,8 @@ test('opened online, the queue sends what waits and reads «Todo enviado»', asy
   });
   await sinFixture(page);
   await expect(page.getByText('Nada pendiente')).toBeVisible();
-  // The seed's owner, by the name the bootstrap sent (data-pg 0044).
-  await expect(page.getByText('Tu caja está al día con el portal de Pedro')).toBeVisible();
+  // The caja never names the owner (M-25).
+  await expect(page.getByText('Tu caja está al día con el portal de los patrones')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ir al cierre de turno' })).toHaveAttribute(
     'href',
     '/operador/cierre',

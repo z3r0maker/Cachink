@@ -21,7 +21,6 @@ const DATOS: DatosCobranza = {
   cuentas: CUENTAS,
   hoy: HOY,
   negocio: 'Taquería Don Pedro',
-  dueno: 'Pedro',
 };
 
 const SIN_SALDO: DatosCobranza = {

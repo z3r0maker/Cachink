@@ -46,8 +46,10 @@ describe('AvisosScreen · pestañas y tarjetas', () => {
   it('says the sub, the two tabs with their unread counts, and the corte card', () => {
     montar();
     expect(screen.getByText('Avisos')).toBeInTheDocument();
-    expect(screen.getByText('Lo que te manda Pedro y lo que la caja te avisa')).toBeInTheDocument();
-    expect(screen.getByTestId('avisos-tabs-dueno').textContent).toContain('De Pedro');
+    expect(
+      screen.getByText('Lo que te mandan los patrones y lo que la caja te avisa'),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('avisos-tabs-dueno').textContent).toContain('De los patrones');
     expect(screen.getByTestId('avisos-tabs-dueno').textContent).toContain('2');
     expect(screen.getByTestId('avisos-tabs-caja').textContent).toContain('De tu caja');
     expect(screen.getByTestId('avisos-tabs-caja').textContent).toContain('4');
@@ -89,14 +91,14 @@ describe('AvisosScreen · la respuesta', () => {
     await waitFor(() => expect(screen.getByTestId('avisos-toast')).toBeInTheDocument());
     expect(screen.getByTestId('avisos-toast').textContent).toContain('Respuesta enviada');
     expect(screen.getByTestId('avisos-toast').textContent).toContain(
-      'Pedro ya tiene tu respuesta sobre el corte del 13 de mayo.',
+      'Los patrones ya tienen tu respuesta sobre el corte del 13 de mayo.',
     );
     expect(screen.getByTestId('aviso-respondido').textContent).toContain(
-      'Le mandaste tu respuesta a Pedro',
+      'Les mandaste tu respuesta a los patrones',
     );
   });
 
-  it('offline, the reply is saved and says it reaches Pedro with the signal (R6)', async () => {
+  it('offline, the reply is saved and reaches «los patrones» with the signal (R6)', async () => {
     const { vivo } = montar({ sinInternet: true });
     tap('aviso-responder-corte');
     escribir('responder-texto', 'Salió un vale de la caja y no lo registré.');
@@ -105,7 +107,7 @@ describe('AvisosScreen · la respuesta', () => {
     await waitFor(() => expect(screen.getByTestId('avisos-toast')).toBeInTheDocument());
     expect(screen.getByTestId('avisos-toast').textContent).toContain('Respuesta guardada');
     expect(screen.getByTestId('avisos-toast').textContent).toContain(
-      'Tu respuesta se guardó. Le llega a Pedro cuando vuelva la señal.',
+      'Tu respuesta se guardó. Les llega a los patrones cuando vuelva la señal.',
     );
   });
 
@@ -130,7 +132,7 @@ describe('AvisosScreen · la respuesta', () => {
     tap('aviso-responder-corte');
     escribir('responder-texto', 'no');
     tap('responder-enviar');
-    expect(screen.getByTestId('responder-error').textContent).toContain('Cuéntale un poco más');
+    expect(screen.getByTestId('responder-error').textContent).toContain('Cuéntales un poco más');
     expect(vivo.responder).not.toHaveBeenCalled();
   });
 
@@ -158,14 +160,14 @@ describe('AvisosScreen · la respuesta', () => {
 });
 
 describe('AvisosScreen · estados', () => {
-  const avisos = (xs: readonly Aviso[]): AvisosData => ({ dueno: 'Pedro', avisos: xs });
+  const avisos = (xs: readonly Aviso[]): AvisosData => ({ avisos: xs });
 
-  it('sin-avisos: Don, nothing from Pedro nor from the caja (RvPrimerUso)', () => {
+  it('sin-avisos: Don, nothing from «los patrones» nor from the caja (RvPrimerUso)', () => {
     montar({ state: 'sin-avisos', data: avisos([]) });
     expect(screen.getByTestId('don-ayuda')).toBeInTheDocument();
     expect(screen.getByTestId('avisos-vacio').textContent).toContain('Nada por leer');
     expect(screen.getByTestId('avisos-vacio').textContent).toContain(
-      'Ni mensajes de Pedro ni avisos de tu caja.',
+      'Ni mensajes de los patrones ni avisos de tu caja.',
     );
   });
 
@@ -182,11 +184,11 @@ describe('AvisosScreen · estados', () => {
     expect(onRetry).toHaveBeenCalled();
   });
 
-  it('an empty owner tab: Don says Pedro has written nothing new', () => {
+  it('an empty owner tab: Don says «los patrones» have written nothing new', () => {
     montar({ data: avisos(AVISOS_FIXTURE.avisos.filter((a) => a.grupo === 'caja')) });
     expect(screen.getByTestId('don-ayuda')).toBeInTheDocument();
     expect(screen.getByTestId('avisos-vacio').textContent).toContain(
-      'Pedro no te ha escrito nada nuevo.',
+      'Los patrones no te han escrito nada nuevo.',
     );
   });
 

@@ -8,6 +8,7 @@ import {
   estadoCuenta,
   historial,
   libre,
+  limiteFijado,
   limiteNota,
   recordatorio,
   ultimoAbono,
@@ -75,10 +76,11 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
     const e = estadoCuenta(chuy);
     const v = vistaAbono(chuy, e, 500_00n, false);
     assert.deepEqual([v.texto, v.restante], ['V-0288 completa · V-0310 parcial', 360_00n]);
-    assert.match(
-      limiteNota(chuy, e, 'Pedro'),
-      /^Puede fiar hasta \$1,500\.00 con plazo de 15 días/,
+    assert.equal(
+      limiteNota(chuy, e),
+      'Puede fiar hasta $1,500.00 con plazo de 15 días. El límite y el plazo los definen los patrones en el portal.',
     );
+    assert.equal(limiteFijado(chuy), 'Lo fijaron los patrones · plazo 15 días');
     assert.match(
       recordatorio(chuy, e, 'Taquería Don Pedro'),
       /^Hola, Taller de Chuy\. Te escribimos de Taquería Don Pedro\. Tu saldo es de \$860\.00 \(2 ventas, la más antigua del 28 de abril\)/,
@@ -87,9 +89,9 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
 
   it('over the limit, the note says not to sell on credit', () => {
     const corta = { ...mari, limite: 300_00n };
-    assert.match(
-      limiteNota(corta, estadoCuenta(corta), 'Pedro') ?? '',
-      /^Pasó su límite de \$300\.00/,
+    assert.equal(
+      limiteNota(corta, estadoCuenta(corta)),
+      'Pasó su límite de $300.00. No le fíes más hasta que abone; si insiste, que hable con los patrones.',
     );
   });
 
@@ -97,12 +99,12 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
     const sinLimite = { ...mari, limite: null };
     const e = estadoCuenta(sinLimite);
     assert.ok(e.saldo > 0n);
-    assert.equal(limiteNota(sinLimite, e, 'Pedro'), null);
+    assert.equal(limiteNota(sinLimite, e), null);
     assert.equal(libre(sinLimite, e), null);
   });
 
   it('a limit of $0.00 set on purpose still says not to sell on credit', () => {
     const cero = { ...mari, limite: 0n };
-    assert.match(limiteNota(cero, estadoCuenta(cero), 'Pedro') ?? '', /^Pasó su límite de \$0\.00/);
+    assert.match(limiteNota(cero, estadoCuenta(cero)) ?? '', /^Pasó su límite de \$0\.00/);
   });
 });

@@ -1,5 +1,5 @@
 /**
- * A message from the owner (MvAvisos «De Pedro»; the web's `avisos/card.tsx`):
+ * A message from the owner (MvAvisos «De los patrones»; the web's `avisos/card.tsx`):
  * a strip with who wrote, whether it was read and when; the title and the
  * words, money in bold (red on a request to clear up a corte). A request
  * carries the reply form, or the reply once sent; a plain message offers
@@ -7,7 +7,7 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { mayuscula, type Aviso } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, type Aviso } from '@xangarro/caja/avisos';
 import { Btn, MText, PathIcon } from '../../components/index';
 import { borderColors, borderWidths, colors, radii, shadows, shapeRadii } from '../../theme';
 import { partesConCifras } from '../Pendientes/pendientes-logica';
@@ -15,7 +15,6 @@ import { Enviada, Respuesta } from './aviso-respuesta';
 
 export interface AvisoDuenoProps {
   readonly aviso: Aviso;
-  readonly dueno: string;
   readonly hero: boolean;
   readonly draft: string;
   readonly enviando: boolean;
@@ -67,7 +66,7 @@ function Tira(p: AvisoDuenoProps): ReactElement {
         <PathIcon d={aviso.icono} size={15} strokeWidth={2.4} />
       </View>
       <MText size="sm" weight="extraBold">
-        {mayuscula(p.dueno)}
+        {AVISOS_COPY.firma}
       </MText>
       <MText size="sm" weight="extraBold" color={t.estado} testID={`aviso-estado-${aviso.id}`}>
         {`· ${aviso.leido ? 'Leído' : 'Sin leer'}`}
@@ -120,12 +119,11 @@ function Texto({ aviso }: { readonly aviso: Aviso }): ReactElement {
 
 function Acciones(p: AvisoDuenoProps): ReactElement | null {
   const { aviso } = p;
-  if (aviso.respuesta) return <Enviada dueno={p.dueno} texto={aviso.respuesta} />;
+  if (aviso.respuesta) return <Enviada texto={aviso.respuesta} />;
   if (aviso.responder) {
     return (
       <Respuesta
         id={aviso.id}
-        dueno={p.dueno}
         draft={p.draft}
         enviando={p.enviando}
         error={p.error}

@@ -14,7 +14,6 @@ const DATA: CierreData = {
   caja: 'Caja 1',
   desde: '08:15',
   hasta: '21:04',
-  dueno: 'Pedro',
   negocio: 'Taquería Don Pedro',
   partes: { fondo: 500_00n, ventasEfectivo: 2_210_00n, abonosEfectivo: 0n, gastosEfectivo: 0n },
   resumen: {

@@ -11,6 +11,7 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
+import { PORTAL_PATRONES } from '@xangarro/caja';
 import { BottomSheet } from '../components/BottomSheet/index';
 import { Btn } from '../components/Btn/index';
 import { MText } from '../components/Mostrador/index';
@@ -21,7 +22,7 @@ import { borderWidths, colors } from '../theme';
 import { FotoCuadro } from './foto-cuadro';
 import { FOTO_GLIFOS } from './foto-glifos';
 import { FotoLevanta } from './foto-levanta';
-import { AsiSeVera, CuadroGrande, NotaFoto, portalDe } from './foto-partes';
+import { AsiSeVera, CuadroGrande, NotaFoto } from './foto-partes';
 import type { FotoLista } from './foto-acciones';
 import type { FotoAbierta } from './use-foto-flujo';
 
@@ -30,14 +31,13 @@ const DENTRO = LADO - 2 * borderWidths.thick;
 
 export interface FotoListoSheetProps {
   readonly abierta: FotoAbierta;
-  readonly dueno: string;
   readonly guardando: boolean;
   readonly onGuardar: () => void;
   readonly onOtra: () => void;
   readonly onCerrar: () => void;
 }
 
-function Recortada(p: { a: FotoAbierta; foto: FotoLista; dueno: string }): ReactElement {
+function Recortada(p: { a: FotoAbierta; foto: FotoLista }): ReactElement {
   return (
     <View gap={18}>
       <CuadroGrande
@@ -61,7 +61,7 @@ function Recortada(p: { a: FotoAbierta; foto: FotoLista; dueno: string }): React
         precio={p.a.precio}
         uri={p.foto.uri}
         tint={p.a.s.tint}
-        nota={`También en ${portalDe(p.dueno)} y en las otras cajas, en cuanto se envíe.`}
+        nota={`También en ${PORTAL_PATRONES} y en las otras cajas, en cuanto se envíe.`}
       />
     </View>
   );
@@ -93,11 +93,11 @@ function SinRecorte(p: { a: FotoAbierta; foto: FotoLista }): ReactElement {
   );
 }
 
-function Cuerpo(p: { a: FotoAbierta; dueno: string }): ReactElement {
+function Cuerpo(p: { a: FotoAbierta }): ReactElement {
   const { paso } = p.a;
   if (paso.paso === 'listo') {
     return paso.foto.lifted ? (
-      <Recortada a={p.a} foto={paso.foto} dueno={p.dueno} />
+      <Recortada a={p.a} foto={paso.foto} />
     ) : (
       <SinRecorte a={p.a} foto={paso.foto} />
     );
@@ -158,7 +158,7 @@ export function FotoListoSheet(p: FotoListoSheetProps): ReactElement {
       testID="foto-listo-sheet"
       footer={<Pie {...p} />}
     >
-      <Cuerpo a={p.abierta} dueno={p.dueno} />
+      <Cuerpo a={p.abierta} />
     </BottomSheet>
   );
 }

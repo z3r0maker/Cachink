@@ -128,17 +128,16 @@ export function CuentaPie({
 export function CuentaCuerpo(p: {
   readonly cuenta: CuentaCliente;
   readonly hoy: string;
-  readonly dueno: string;
 }): ReactElement {
   const c = p.cuenta;
   const e = estadoCuenta(c);
   return (
     <View gap={14}>
       <Heroe c={c} e={e} />
-      <Indicadores c={c} e={e} dueno={p.dueno} />
+      <Indicadores c={c} e={e} />
       <VentasAbiertas cuenta={c} e={e} hoy={p.hoy} />
       <Movimientos cuenta={c} />
-      <LimiteNota nota={limiteNota(c, e, p.dueno)} />
+      <LimiteNota nota={limiteNota(c, e)} />
     </View>
   );
 }

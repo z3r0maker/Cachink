@@ -34,7 +34,7 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     detalle: '$120.00 · Tacos',
     razon: 'El producto de este registro ya no existe en el portal.',
     pista:
-      'Pídele a Pedro que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
   {
@@ -45,7 +45,7 @@ const RECHAZADOS: readonly RechazoVisto[] = [
     detalle: 'Chuy',
     razon: 'El cliente de este registro ya no existe en el portal.',
     pista:
-      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
     reintentando: false,
   },
 ];
@@ -77,7 +77,6 @@ function Pantalla(p: { readonly situacion: Situacion }): ReactElement {
           }
           cola={s === 'todo-enviado' || conRechazados ? [] : COLA_FIXTURE}
           rechazados={conRechazados ? RECHAZADOS : []}
-          dueno="Pedro"
           ultima="14:55"
           onReintentar={() => undefined}
           onReintentarRechazado={() => undefined}

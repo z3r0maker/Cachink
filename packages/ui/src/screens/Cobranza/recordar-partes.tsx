@@ -4,9 +4,10 @@
  * bubble, editable, with the way back to the original.
  */
 import type { ReactElement } from 'react';
-import { Pressable, TextInput } from 'react-native';
+import { TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { MText } from '../../components/index';
+import { Btn, MText, PathIcon } from '../../components/index';
+import { COBRAR_GLYPHS } from '../Ventas/cobrar-glyphs';
 import {
   borderColors,
   borderWidths,
@@ -137,17 +138,21 @@ export function Mensaje(p: {
         </MText>
       </View>
       <Burbuja msg={p.msg} onMsg={p.onMsg} />
+      {/* A real button, never underlined text (CLAUDE.md §7, RvRecordarOriginal):
+          only while the message is edited, and gone once it's the original again. */}
       {p.editado ? (
-        <Pressable
-          testID="recordar-original"
-          role="button"
-          onPress={p.onOriginal}
-          style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}
-        >
-          <MText size="sm" weight="bold" color={colors.blueText} textDecorationLine="underline">
+        <View alignSelf="flex-start">
+          <Btn
+            variant="secondary"
+            size="sm"
+            sentence
+            icon={<PathIcon d={COBRAR_GLYPHS.deshacer} size={18} />}
+            onPress={p.onOriginal}
+            testID="recordar-original"
+          >
             Volver al mensaje original
-          </MText>
-        </Pressable>
+          </Btn>
+        </View>
       ) : null}
     </View>
   );

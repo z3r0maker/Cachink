@@ -70,7 +70,7 @@ const aclarar = (d: InicioData): Hero => ({
   tono: 'aclarar',
   eyebrow: 'Atiende esto',
   icon: ALERTA,
-  title: `${d.dueno} te pidió aclarar el corte del ${d.corteAclarar.dia}`,
+  title: `Los patrones te pidieron aclarar el corte del ${d.corteAclarar.dia}`,
   body: `Faltaron ${formatMoney(d.corteAclarar.monto)} en la ${d.corteAclarar.caja}. Escribe qué pasó y queda cerrado.`,
   cta: 'Responderle',
   href: `${OPERADOR_BASE}/avisos`,
@@ -84,12 +84,12 @@ export function sumarHoras(hhmm: string, horas: number): string {
   return `${String(total).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-const cerrar = (d: InicioData, t: TurnoAbierto): Hero => ({
+const cerrar = (t: TurnoAbierto): Hero => ({
   tono: 'cerrar',
   eyebrow: 'Lo primero',
   icon: RELOJ,
   title: `Llevas ${t.horasAbierto} horas con el turno abierto`,
-  body: `Cuenta el efectivo y cierra para que ${d.dueno} tenga el día completo.`,
+  body: 'Cuenta el efectivo y cierra para que los patrones tengan el día completo.',
   cta: 'Cerrar mi turno',
   href: `${OPERADOR_BASE}/cierre`,
   nota: [
@@ -130,7 +130,7 @@ export function heroFor(d: InicioData): Hero {
   const t = d.turno;
   if (d.situacion === 'turno-cerrado' || !t) return cerrado(d);
   if (d.situacion === 'corte-por-aclarar') return aclarar(d);
-  if (d.situacion === 'hora-de-cerrar') return cerrar(d, t);
+  if (d.situacion === 'hora-de-cerrar') return cerrar(t);
   return d.offline ? sinConexion(d) : vendiendo(t);
 }
 

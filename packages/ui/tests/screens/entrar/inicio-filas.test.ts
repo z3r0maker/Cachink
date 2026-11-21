@@ -163,7 +163,6 @@ const ENTORNO = {
   offline: false,
   pendientes: 0,
   ahora: AHORA,
-  dueno: 'Pedro Salas',
 };
 
 describe('inicioMovil', () => {
@@ -171,7 +170,6 @@ describe('inicioMovil', () => {
     const d = inicioMovil(filas(), ENTORNO, HOY);
     expect(d.situacion).toBe('vendiendo');
     expect(d.nombre).toBe('Ana');
-    expect(d.dueno).toBe('Pedro');
     expect(d.turno?.desde).toBe('08:15');
     expect(d.turno?.ventas).toBe(2);
     expect(d.turno?.canceladas).toBe(1);

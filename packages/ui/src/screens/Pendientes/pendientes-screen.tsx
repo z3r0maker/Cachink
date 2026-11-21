@@ -131,7 +131,7 @@ export function PendientesScreen(p: PendientesScreenProps): ReactElement {
             Registros por enviar
           </MText>
           <MText size="md" weight="semibold" color={colors.gray600}>
-            {intro(vacia && p.state === 'happy', null)}
+            {intro(vacia && p.state === 'happy')}
           </MText>
         </View>
         {p.state === 'happy' ? (

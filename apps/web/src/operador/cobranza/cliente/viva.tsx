@@ -56,7 +56,6 @@ export function DetalleClienteViva({
 
   const base = {
     negocio: fixture.negocio,
-    dueno: fixture.dueno,
     hoy: linked ? hoyLocal() : fixture.hoy,
     vinculado: linked,
   };

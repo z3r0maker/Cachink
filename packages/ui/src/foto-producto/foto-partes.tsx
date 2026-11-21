@@ -146,9 +146,3 @@ export function NotaFoto(p: { readonly titulo: string; readonly cuerpo: string }
     </View>
   );
 }
-
-/** «el portal de Pedro», or «el portal del dueño» until the device knows the name. */
-export function portalDe(dueno: string): string {
-  if (dueno.trim() === '' || dueno === 'el dueño') return 'el portal del dueño';
-  return `el portal de ${dueno.charAt(0).toUpperCase()}${dueno.slice(1)}`;
-}

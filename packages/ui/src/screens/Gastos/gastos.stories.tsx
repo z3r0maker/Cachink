@@ -17,7 +17,7 @@ initI18n();
 
 type Estado = 'lista' | 'registrar' | 'pagar' | 'sinGastos' | 'sinTurno' | 'cargando' | 'error';
 
-const DATA: GastosData = { ...GASTOS_FIXTURE, dueno: 'Pedro' };
+const DATA: GastosData = GASTOS_FIXTURE;
 const FIRMA = `${GASTOS_FIXTURE.operador}, ${GASTOS_FIXTURE.caja}`;
 
 function Pantalla(p: { readonly estado: Estado }): ReactElement {

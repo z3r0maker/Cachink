@@ -49,10 +49,9 @@ export const entrar = {
     saludoSinNombre: '¡Qué onda! Escoge tu nombre y pon tu NIP.',
     titulo: '¿Quién va a cobrar?',
     turnoDesde: 'Turno abierto desde las {{hora}}',
-    olvide: '¿Olvidaste tu NIP? Pídele {{aQuien}} que te lo cambie.',
+    olvide: '¿Olvidaste tu NIP? Pídeles a los patrones que te lo cambien.',
     olvideDetalle:
-      'Se cambia desde el portal del dueño, en Equipo y nómina. Nadie más puede cambiarlo desde la caja.',
-    alDueno: 'al dueño',
+      'Se cambia desde el portal de los patrones, en Equipo y nómina. Nadie más puede cambiarlo desde la caja.',
   },
   nip: {
     titulo: 'Tu NIP',

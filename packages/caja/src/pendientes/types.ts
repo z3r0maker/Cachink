@@ -23,8 +23,6 @@ export interface RegistroEnCola {
 export interface PendientesScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly cola: readonly RegistroEnCola[];
-  /** The owner's name in the copy; null on a linked caja, which doesn't know it. */
-  readonly dueno?: string | null;
   /** A linked caja: «Reintentar ahora» runs the real flush. */
   readonly vivo?: EnvioVivo;
 }

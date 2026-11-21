@@ -37,19 +37,12 @@ export function NadaSePierde(): ReactElement {
   );
 }
 
-/** Nothing left to send (RvEnvio «Todo enviado»): Don, and who already has it. */
-export function TodoEnviado(p: {
-  readonly dueno?: string | null;
-  readonly ultima?: string | null;
-  readonly onIrACierre: () => void;
-}): ReactElement {
-  const t = todoEnviado(p.dueno ?? null, p.ultima ?? null);
-  return (
-    <EstadoVacio
-      id="por-enviar-todo-enviado"
-      title={t.titulo}
-      body={t.cuerpo}
-      cta={{ label: 'Ir al cierre de turno', onPress: p.onIrACierre }}
-    />
-  );
+/**
+ * Nothing left to send (RvEnvio «Todo enviado»): Don, and «los patrones»
+ * already have it. No button: the board draws none, and the owner chose
+ * (2026-11-20) not to push toward closing from here.
+ */
+export function TodoEnviado(p: { readonly ultima?: string | null }): ReactElement {
+  const t = todoEnviado(p.ultima ?? null);
+  return <EstadoVacio id="por-enviar-todo-enviado" title={t.titulo} body={t.cuerpo} />;
 }

@@ -10,7 +10,7 @@ export * from './shell';
 export * from './fixtures';
 export * from './vocabulario';
 export * from './comun/descarga';
-export * from './comun/dueno';
+export * from './comun/patrones';
 export * from './comun/envio';
 export * from './comun/fechas';
 export * from './comun/frases';

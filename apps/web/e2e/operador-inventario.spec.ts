@@ -47,10 +47,11 @@ test('a linked caja lists its own stocked products, not the fixture', async ({ p
   await expect(page.getByText('Carne de pastor')).toHaveCount(0);
   await expect(page.getByText('Queso oaxaca')).toHaveCount(0);
   await expect(page.getByText('Se cortó con el calor')).toHaveCount(0);
-  // The owner by the name the bootstrap sent (the seed's «Pedro», data-pg 0044), never
-  // the fixture's hardcoded one: a caja that doesn't know it would say «el dueño».
-  await expect(page.getByText('el ajuste libre de existencias lo hace Pedro')).toBeVisible();
-  await expect(page.getByText('lo hace el dueño')).toHaveCount(0);
+  // The caja never names the owner (M-25): «los patrones», in plural.
+  await expect(
+    page.getByText('el ajuste libre de existencias lo hacen los patrones desde el portal'),
+  ).toBeVisible();
+  await expect(page.getByText('lo hace Pedro')).toHaveCount(0);
   // A fresh turno has moved nothing yet.
   await page.getByRole('tab', { name: 'Movimientos de mi turno · 0' }).click();
   await expect(page.getByText('+300 piezas')).toHaveCount(0);

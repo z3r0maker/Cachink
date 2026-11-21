@@ -1,19 +1,17 @@
 /**
- * Avisos' head (M-09): the title with its sub naming the owner, the quiet
+ * Avisos' head (M-09): the title with its sub about «los patrones», the quiet
  * «Marcar todo», and the two tabs with their unread counts (the web's
  * `Tabs`, the board's `{{ t.label }} {{ t.count }}`).
  */
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { View } from '@tamagui/core';
-import type { AvisoGrupo } from '@xangarro/caja/avisos';
-import { deDueno, mayuscula } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, type AvisoGrupo } from '@xangarro/caja/avisos';
 import { MText } from '../../components/Mostrador/index';
 import { SegmentedTabs } from '../../components/SegmentedTabs/index';
 import { colors } from '../../theme';
 
 export function AvisosCabeza(p: {
-  readonly dueno: string;
   readonly haySinLeer: boolean;
   readonly onMarcarTodo: () => void;
 }): ReactElement {
@@ -24,7 +22,7 @@ export function AvisosCabeza(p: {
           Avisos
         </MText>
         <MText size="md" weight="semibold" color={colors.gray600}>
-          {`Lo que te manda ${p.dueno} y lo que la caja te avisa`}
+          {AVISOS_COPY.sub}
         </MText>
       </View>
       {p.haySinLeer ? (
@@ -45,7 +43,6 @@ export function AvisosCabeza(p: {
 }
 
 export function AvisosTabs(p: {
-  readonly dueno: string;
   readonly value: AvisoGrupo;
   readonly sinLeer: (g: AvisoGrupo) => number;
   readonly onChange: (t: AvisoGrupo) => void;
@@ -53,7 +50,7 @@ export function AvisosTabs(p: {
   return (
     <SegmentedTabs
       tabs={[
-        { key: 'dueno' as const, label: mayuscula(deDueno(p.dueno)), count: p.sinLeer('dueno') },
+        { key: 'dueno' as const, label: AVISOS_COPY.tab, count: p.sinLeer('dueno') },
         { key: 'caja' as const, label: 'De tu caja', count: p.sinLeer('caja') },
       ]}
       value={p.value}

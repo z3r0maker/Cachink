@@ -8,7 +8,6 @@
  */
 
 import { formatMoney, type Money } from '@xangarro/domain';
-import { aDueno } from '../comun/dueno';
 
 /** What the sync engine reports about a refused row (`RejectedEntry`). */
 export interface RechazoCrudo {
@@ -83,16 +82,16 @@ const noOtraVez = (tabla: string): string =>
   `No ${FEMENINO.has(tabla) ? 'la' : 'lo'} vuelvas a capturar: se contaría dos veces.`;
 
 /** What the owner can do in the portal, then the retry (RvEnvio). */
-function pista(code: string, tabla: string, dueno: string): string | null {
-  const pide = `Pídele ${aDueno(dueno)}`;
+function pista(code: string, tabla: string): string | null {
+  const pide = 'Pídeles a los patrones';
   if (code === 'FK_PRODUCT_MISSING' || code === 'FK_CLIENT_MISSING') {
     const que = code === 'FK_PRODUCT_MISSING' ? 'el producto' : 'el cliente';
-    return `${pide} que recupere ${que} en el portal y toca Reintentar. ${noOtraVez(tabla)}`;
+    return `${pide} que recuperen ${que} en el portal y toca Reintentar. ${noOtraVez(tabla)}`;
   }
-  if (code === 'FK_USER_MISSING') return `${pide} que revise en el portal al operador.`;
+  if (code === 'FK_USER_MISSING') return `${pide} que revisen en el portal al operador.`;
   if (code === 'DUPLICATE_CONFLICT')
-    return `${pide} que lo revise en el portal. ${noOtraVez(tabla)}`;
-  if (code === 'BUSINESS_SUSPENDED') return `${pide} que lo revise en el portal.`;
+    return `${pide} que lo revisen en el portal. ${noOtraVez(tabla)}`;
+  if (code === 'BUSINESS_SUSPENDED') return `${pide} que lo revisen en el portal.`;
   return null;
 }
 
@@ -115,14 +114,10 @@ export function detalleRechazo(row: Readonly<Record<string, unknown>> | null): s
     .join(' · ');
 }
 
-/**
- * The refused row's face; the row itself may be gone (null), the refusal
- * stays. `dueno` is the owner as the caja says them, «el dueño» until known.
- */
+/** The refused row's face; the row itself may be gone (null), the refusal stays. */
 export function describeRechazado(
   r: RechazoCrudo,
   row: Readonly<Record<string, unknown>> | null,
-  dueno = 'el dueño',
 ): RechazoVisto {
   return {
     key: `${r.tableName}:${r.rowId}`,
@@ -131,7 +126,7 @@ export function describeRechazado(
     titulo: CLASE[r.tableName] ?? 'Registro',
     detalle: detalleRechazo(row),
     razon: RAZON[r.code] ?? RAZON_DESCONOCIDA,
-    pista: pista(r.code, r.tableName, dueno),
+    pista: pista(r.code, r.tableName),
     reintentando: r.retryable,
   };
 }

@@ -26,7 +26,6 @@ export interface CobrarOverlaysProps {
   readonly productos: readonly ProductoCobrar[];
   readonly tipos: readonly InventoryCategory[];
   readonly folio: string | null;
-  readonly dueno: string;
 }
 
 /** The escáner on the ticket: what a code adds, «Deshacer», and the bar's «Cobrar». */
@@ -41,7 +40,7 @@ function modoTicket(r: Ruta, folio: string | null): EscanerTicket {
   };
 }
 
-function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): ReactElement {
+function Hojas({ r, productos, tipos, folio }: CobrarOverlaysProps): ReactElement {
   const info = new Map(productos.map((p) => [p.id, p]));
   return (
     <>
@@ -62,14 +61,12 @@ function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): Reac
         modo={modoTicket(r, folio)}
         productos={productos}
         onAlta={r.abrirNuevo}
-        dueno={dueno}
       />
       <ProductoNuevoSheet
         open={r.hoja === 'nuevo'}
         onClose={() => r.setHoja(null)}
         codigo={r.codigo}
         tipos={tipos}
-        dueno={dueno}
         onGuardar={(input) => r.crear.mutateAsync(input)}
         onListo={r.nuevoListo}
       />
@@ -77,7 +74,7 @@ function Hojas({ r, productos, tipos, folio, dueno }: CobrarOverlaysProps): Reac
   );
 }
 
-function VentaHechaHost({ dueno }: { dueno: string }): ReactElement {
+function VentaHechaHost(): ReactElement {
   const venta = useVentaHecha((s) => s.venta);
   const cerrar = useVentaHecha((s) => s.cerrar);
   const business = useCurrentBusiness().data ?? null;
@@ -90,7 +87,6 @@ function VentaHechaHost({ dueno }: { dueno: string }): ReactElement {
     <>
       <VentaHechaDialog
         venta={mandar ? null : venta}
-        dueno={dueno}
         onMandar={() => setMandar(true)}
         onNueva={nueva}
       />
@@ -111,7 +107,7 @@ export function CobrarOverlays(p: CobrarOverlaysProps): ReactElement {
   return (
     <>
       <Hojas {...p} />
-      <VentaHechaHost dueno={p.dueno} />
+      <VentaHechaHost />
       {p.r.aviso.aviso ? (
         <Toast
           floating

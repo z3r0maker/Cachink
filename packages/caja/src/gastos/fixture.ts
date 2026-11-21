@@ -31,7 +31,7 @@ export const GASTOS_FIXTURE: GastosData = {
     {
       id: 'g-3',
       concepto: 'Taxi por insumos',
-      detalle: 'Sin comprobante · autorizado por Pedro',
+      detalle: 'Sin comprobante · autorizado por los patrones',
       monto: 95_00n,
       categoria: 'Transporte',
       hora: '10:05',

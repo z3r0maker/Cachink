@@ -13,7 +13,7 @@ import { fireEvent, renderWithProviders, screen, waitFor } from './test-utils';
 
 initI18n();
 
-const DATA: GastosData = { ...GASTOS_FIXTURE, dueno: 'Pedro' };
+const DATA: GastosData = GASTOS_FIXTURE;
 
 type Over = Partial<Parameters<typeof GastosScreen>[0]>;
 
@@ -45,7 +45,7 @@ describe('GastosScreen · lista', () => {
     expect(screen.getByText('$620.00')).toBeInTheDocument();
     expect(screen.getByTestId('gastos-cuantos').textContent).toBe('5');
     expect(screen.getByTestId('gastos-sin-comprobante').textContent).toBe(
-      '1 sin comprobante. Pedro te lo va a preguntar.',
+      '1 sin comprobante. Los patrones te lo van a preguntar.',
     );
     expect(screen.queryByText('Gastos del turno')).not.toBeInTheDocument();
   });
