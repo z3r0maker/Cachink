@@ -11,11 +11,13 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export const cifra = (l: Locator): Locator => l.locator('[data-cifra]');
 
 /**
- * The seven screens round 23 animates, at a period the earlier tests filled,
- * with how many rolling figures each shows at least (Resultados and Cierre
- * roll none: their values are chart labels and steps, which stay still).
+ * The screens round 23 animates, at a period the earlier tests filled, with
+ * how many rolling figures each shows at least (Resultados and Cierre roll
+ * none: their values are chart labels and steps, which stay still). Trimestre
+ * (E-17) rolls its tiles, its totals and the compliance count.
  */
 export const PANTALLAS = [
+  { ruta: '/empresa/trimestre', cifras: 6 },
   { ruta: '/empresa?periodo=2024-03', cifras: 4 },
   { ruta: '/empresa/resultados?periodo=2024-03', cifras: 0 },
   { ruta: '/empresa/cierre', cifras: 0 },

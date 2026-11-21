@@ -1413,10 +1413,12 @@ test('a founder reads a quarter in figures: this one in progress, a closed one (
   const tablero = page
     .getByTestId('trimestre-tile')
     .filter({ hasText: 'Valor aceptado en el Tablero' });
-  await expect(tablero).toContainText('$20,000');
+  await expect(cifra(tablero)).toHaveText(/^\$20,000/);
   await expect(
-    page.getByTestId('trimestre-acumulado').filter({ hasText: 'Valor aceptado en el Tablero' }),
-  ).toContainText('$20,000');
+    cifra(
+      page.getByTestId('trimestre-acumulado').filter({ hasText: 'Valor aceptado en el Tablero' }),
+    ),
+  ).toHaveText(/^\$20,000/);
   await expect(page.getByTestId('trimestre-barra')).toHaveCount(4);
   await expect(page.getByTestId('trimestre-objetivo')).toContainText('48 de 60 negocios');
   await expect(page.getByTestId('trimestre-socio-1')).toContainText('Aceptado $20,000');

@@ -18,6 +18,7 @@ import {
 } from '@/server/empresa/trimestre-view';
 import { requireFounderPage } from '@/server/founder';
 import * as d from '@/styles/mostrador-data.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as q from '@/styles/mostrador-trimestre.css';
 import * as m from '@/styles/mostrador.css';
 
@@ -87,14 +88,14 @@ function Resumen({ l, primero }: { readonly l: LecturaTrimestre; readonly primer
         chip={enCurso ? 'En curso' : 'Cerrado'}
         tiles={tiles(l)}
       />
-      <div className={q.dos}>
+      <div className={`${q.dos} ${mv.escalona}`}>
         <Crecimiento barras={trimestres(l)} />
         <Acumulados
           filas={acumulado(l)}
           nota={`Del 1 de enero al ${fechaCorta(l.rango.hasta)}. Debajo: desde el primer movimiento, el ${fechaCorta(primero)} de ${primero.slice(0, 4)}.`}
         />
       </div>
-      <div className={q.tres}>
+      <div className={`${q.tres} ${mv.escalona}`}>
         <Objetivos titulo={o.titulo} filas={o.filas} />
         <Socios filas={so.filas} fondeo={so.fondeo} tableroHref={hrefTablero(l.trimestre)} />
         <Cumplimiento cuenta={c.cuenta} lineas={c.lineas} />
