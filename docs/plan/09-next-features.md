@@ -789,7 +789,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-29 Gate E2E determinista de toda la pila `[LAUNCH]` [deuda] [alta] [bloq]
 
-- [ ] Status · **Blocked by:** N-22, N-25 · **Blocks:** N-30, X-02
+- [ ] Status · **Blocked by:** N-25 · **Blocks:** N-30, X-02
       **Remaining (2026-11-19, verificado contra el repo):** de las barreras sólo quedan dos abiertas: P-17 está cerrada y A-16 también, el 2026-10-20 (`docs/archive/05-app.md`), así que esperan N-22 y N-25. Nada del entregable de esta tarea existe todavía — no hay orquestador ni un escenario único —, pero sí existen, construidas para otras tareas, las dos mitades que va a usar. La cadena teléfono → portal **ya corre en CI contra el Postgres real**: `apps/web/e2e/telefono-cadenas.sync.spec.ts` activa un dispositivo y empuja y jala por HTTP (`sync-phone.ts`) para cuatro cadenas — una venta cancelada en el teléfono que llega a Movimientos con su stock de vuelta, un turno cerrado con faltante que llega a Cortes, un NIP reseteado en el portal que llega al siguiente pull, y el push de un dispositivo revocado que se rechaza y tras revincular aterriza una sola vez —, y los shards de `portal-e2e` la corren en cada push, de modo que un handler de push roto ya pone rojo el CI. La captura sin red es de Maestro (`sin-internet-cobrar.yaml`, `sin-internet-cierre.yaml`), pero contra el mock, no contra Supabase. Falta entonces: el escenario de punta a punta como una sola corrida (registro → asistente → operador → importación → código por QR → activar → vender en modo avión → reconectar → la venta en el portal → exportar), el script que secuencia Maestro y Playwright, y la mitad de Maestro en CI — `maestro-e2e.yml` sigue siendo `workflow_dispatch`, a la espera de un runner de macOS.
 - **What:** one scenario against a real local Supabase: signup → wizard → operator → import →
   device code (QR deep link) → activate → **sell in airplane mode** → reconnect → sale visible in the
@@ -1708,7 +1708,6 @@ X-01 ──► N-28, N-30
 
 Teléfono y portal:
 N-19 ──► N-12
-N-22 ──► N-29
 N-25 ──► N-29
 
 Beta cerrada y lanzamiento:
