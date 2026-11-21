@@ -1,0 +1,51 @@
+# Vincular por enlace (N-25, SEC-MOB-04; MvVincular «CÓDIGO LEÍDO»): a
+# pairing link opens the sheet «¿Es tu negocio?» with the business its token
+# names (mock: Tacos La Esquina, its owner Lupita), the same aviso de
+# privacidad as the typed path, and nothing links until «Conectar esta caja»,
+# which lands on «¿Quién va a cobrar?» with the portal's operators.
+#
+# Precondition: fresh install (no activation record) and the contracts mock
+# reset: the token redeems VALDK7M3, which is single-use.
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 60000
+- runFlow:
+    file: shared/vincular-enlace.yaml
+    env:
+      TOKEN: 'mockqrVALDK7M3xangarro'
+- extendedWaitUntil:
+    visible:
+      id: 'vincular-leido-nombre'
+    timeout: 15000
+- assertVisible:
+    text: '.*Tacos La Esquina.*'
+- assertVisible:
+    id: 'vincular-leido-dueno'
+    text: '.*Dueño: Lupita · dueno@tacoslaesquina\.mx.*'
+- assertVisible: '.*Revisa que diga el nombre de tu negocio\..*'
+# N-34: the aviso is on the sheet before anything is sent, as on the typed path.
+- scrollUntilVisible:
+    element:
+      id: 'activation-aviso'
+    direction: DOWN
+- assertVisible: '.*Leer el aviso completo.*'
+# Still not linked: the preview consumed nothing and the sheet waits.
+- assertVisible:
+    id: 'activation-screen'
+- tapOn:
+    id: 'vincular-leido-conectar'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 20000
+- assertNotVisible:
+    id: 'activation-screen'
+- assertVisible: '.*¿Quién va a cobrar\?.*'
+- assertVisible:
+    text: '.*Toni.*'

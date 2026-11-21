@@ -30,6 +30,9 @@ import { ulidOf } from './ids.js';
 export const FIXTURE_BUSINESS_ID = ulidOf('BZN', 1);
 export const FIXTURE_DEVICE_ID_SEED = ulidOf('DEV', 1);
 export const FIXTURE_EMAIL = 'dueno@tacoslaesquina.mx';
+export const FIXTURE_BUSINESS_NOMBRE = 'Tacos La Esquina';
+/** The owner's first name, as `/activate/preview` names it (N-25). */
+export const FIXTURE_OWNER_NOMBRE = 'Lupita';
 export const OPERATOR_PINS = { Toni: '1234', Ana: '5678' } as const;
 const T0 = '2026-09-01T12:00:00.000Z';
 
@@ -89,7 +92,7 @@ const pinHash = (pin: string): string => hashSync(pin, 4); // low cost: dev only
 function business(): Business {
   return BusinessSchema.parse({
     id: FIXTURE_BUSINESS_ID,
-    nombre: 'Tacos La Esquina',
+    nombre: FIXTURE_BUSINESS_NOMBRE,
     regimenFiscal: 'RESICO',
     isrTasa: 100,
     logoUrl: null,

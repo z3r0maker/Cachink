@@ -9,6 +9,8 @@ export const API_PREFIX = '/api/v1' as const;
 
 export const API_PATHS = {
   activate: `${API_PREFIX}/activate`,
+  /** «¿Es tu negocio?» before a scan links (N-25); consumes nothing. */
+  activatePreview: `${API_PREFIX}/activate/preview`,
   syncPush: `${API_PREFIX}/sync/push`,
   syncPull: `${API_PREFIX}/sync/pull`,
   entitlement: `${API_PREFIX}/entitlement`,

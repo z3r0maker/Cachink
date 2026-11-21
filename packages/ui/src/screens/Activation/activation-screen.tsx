@@ -1,25 +1,35 @@
 /**
  * ActivationScreen — Vincular (MvVincular; A-04, C-14, ADR-053 §2): the
  * first screen of a fresh install. The camera reads the portal's pairing QR
- * and a sheet confirms the linking; «Escribe el código» is the typed path
- * (the owner's correo and the 8 letters). No purchase UI, no checkout link.
+ * (or a link opens the app with one) and a sheet asks «¿Es tu negocio?»
+ * before anything links (N-25); «Escribe el código» is the typed path (the
+ * owner's correo and the 8 letters). No purchase UI, no checkout link.
  *
- * Presentational: the gate hands it the two submit paths, whether a request
- * is in flight and the i18n key of the last refusal.
+ * Presentational: the gate hands it the two submit paths, the preview of the
+ * token on screen, whether a request is in flight and the i18n key of the
+ * last refusal.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { colors } from '../../theme';
 import { errorDeLoEnviado } from './activation-form';
 import { VincularCodigo } from './vincular-codigo';
 import { VincularEscanear } from './vincular-escanear';
-import { VincularLeido } from './vincular-leido';
+import { VincularLeido, type VistaPrevia } from './vincular-leido';
 
 export interface ActivationScreenProps {
   readonly onSubmit: (input: { email: string; code: string }) => void;
-  /** The scan path: the pairing token alone (C-14). */
+  /** The scan path: the pairing token alone (C-14), once the person said it is their business. */
   readonly onScan: (qrToken: string) => void;
+  /** A token was read: ask which business it names (N-25). */
+  readonly onLeer?: (qrToken: string) => void;
+  /** Back to the camera: the preview of the last token no longer applies. */
+  readonly onSoltar?: () => void;
+  /** What the preview answered for the token on screen; waiting until it does. */
+  readonly vistaPrevia?: VistaPrevia;
+  /** A token a link opened the app with (`xangarro://activar#c=…`); each read its own object. */
+  readonly enlace?: { readonly token: string } | null;
   readonly submitting: boolean;
   /** i18n key of the current error, if any. */
   readonly errorKey?: string | null;
@@ -63,13 +73,33 @@ function useVincular(props: ActivationScreenProps) {
     irEscanear: () => {
       setVista('escanear');
       setToken(null);
+      props.onSoltar?.();
     },
-    leer: setToken,
+    leer: (leido: string) => {
+      setVista('escanear');
+      setToken(leido);
+      props.onLeer?.(leido);
+    },
   };
+}
+
+const CARGANDO: VistaPrevia = { estado: 'cargando' };
+
+/** A link is read like a scan, once per time it is opened. */
+function useEnlace(
+  enlace: { readonly token: string } | null | undefined,
+  leer: (token: string) => void,
+): void {
+  const ultimo = useRef(leer);
+  ultimo.current = leer;
+  useEffect(() => {
+    if (enlace) ultimo.current(enlace.token);
+  }, [enlace]);
 }
 
 export function ActivationScreen(props: ActivationScreenProps): ReactElement {
   const v = useVincular(props);
+  useEnlace(props.enlace, v.leer);
   return (
     <View testID={props.testID ?? 'activation-screen'} flex={1} backgroundColor={colors.gray200}>
       {v.vista === 'codigo' ? (
@@ -93,6 +123,7 @@ export function ActivationScreen(props: ActivationScreenProps): ReactElement {
       )}
       <VincularLeido
         open={v.vista === 'escanear' && v.token !== null}
+        vista={props.vistaPrevia ?? CARGANDO}
         onConectar={v.conectarQr}
         onVolver={v.irEscanear}
         submitting={props.submitting}

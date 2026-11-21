@@ -85,6 +85,74 @@ describe('Vincular', () => {
   });
 });
 
+describe('Vincular · «¿Es tu negocio?» (N-25)', () => {
+  const TOKEN = 'mockqrVALDK7M3xangarro';
+  const NEGOCIO = {
+    businessName: 'Taquería Don Pedro',
+    ownerFirstName: 'Pedro',
+    ownerEmail: 'pedro@taqueriadonpedro.mx',
+  };
+  const props = () => ({
+    onSubmit: vi.fn(),
+    onScan: vi.fn(),
+    onLeer: vi.fn(),
+    onSoltar: vi.fn(),
+    submitting: false,
+    enlace: { token: TOKEN },
+  });
+
+  it('asks about the token a link carries, and links only on «Conectar esta caja»', () => {
+    const p = props();
+    renderWithProviders(
+      <ActivationScreen {...p} vistaPrevia={{ estado: 'listo', negocio: NEGOCIO }} />,
+    );
+    expect(p.onLeer).toHaveBeenCalledWith(TOKEN);
+    expect(screen.getByText('¿Es tu negocio?')).toBeInTheDocument();
+    expect(screen.getByTestId('vincular-leido-nombre')).toHaveTextContent('Taquería Don Pedro');
+    expect(screen.getByTestId('vincular-leido-dueno')).toHaveTextContent(
+      'Dueño: Pedro · pedro@taqueriadonpedro.mx',
+    );
+    expect(screen.getByText('Revisa que diga el nombre de tu negocio.')).toBeInTheDocument();
+    expect(screen.getByTestId('activation-aviso')).toBeInTheDocument();
+    expect(p.onScan).not.toHaveBeenCalled();
+    tap('vincular-leido-conectar');
+    expect(p.onScan).toHaveBeenCalledWith(TOKEN);
+  });
+
+  it('«No es mi negocio» goes back to the camera and redeems nothing', () => {
+    const p = props();
+    renderWithProviders(
+      <ActivationScreen {...p} vistaPrevia={{ estado: 'listo', negocio: NEGOCIO }} />,
+    );
+    tap('vincular-leido-no-es');
+    expect(p.onSoltar).toHaveBeenCalled();
+    expect(p.onScan).not.toHaveBeenCalled();
+    expect(screen.queryByText('¿Es tu negocio?')).toBeNull();
+  });
+
+  it('waits for the preview with «Conectar esta caja» held back', () => {
+    const p = props();
+    renderWithProviders(<ActivationScreen {...p} vistaPrevia={{ estado: 'cargando' }} />);
+    expect(screen.getByTestId('vincular-leido-cargando')).toBeInTheDocument();
+    tap('vincular-leido-conectar');
+    expect(p.onScan).not.toHaveBeenCalled();
+  });
+
+  it('shows a refused token in the activation copy, with only the way back', () => {
+    const p = props();
+    renderWithProviders(
+      <ActivationScreen
+        {...p}
+        vistaPrevia={{ estado: 'error', errorKey: 'activate.errors.codeExpired' }}
+      />,
+    );
+    expect(screen.getByTestId('activation-error')).toHaveTextContent('Ese código ya venció.');
+    expect(screen.queryByTestId('vincular-leido-conectar')).toBeNull();
+    tap('vincular-leido-volver');
+    expect(p.onSoltar).toHaveBeenCalled();
+  });
+});
+
 const OPS = [
   { id: 'ana', nombre: 'Ana Robledo', iniciales: 'AR', detalle: 'Turno abierto desde las 08:15' },
   { id: 'luis', nombre: 'Luis Ortega', iniciales: 'LO' },
