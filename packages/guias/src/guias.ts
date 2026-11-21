@@ -1,5 +1,6 @@
 import type { Guia } from './guia.js';
+import { GUIAS_CAJA } from './guias-caja.js';
 import { GUIAS_PORTAL } from './guias-portal.js';
 
 /** Every guide Xangarro has, whatever surface reads it. */
-export const GUIAS: readonly Guia[] = [...GUIAS_PORTAL];
+export const GUIAS: readonly Guia[] = [...GUIAS_PORTAL, ...GUIAS_CAJA];

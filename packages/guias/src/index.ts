@@ -12,7 +12,14 @@
 export { plano, palabras } from './plano.js';
 export { TEMAS, type Tema, type TemaId } from './temas.js';
 export { PREGUNTAS, type Pregunta } from './preguntas.js';
-export type { Guia, Paso, Superficie } from './guia.js';
+export {
+  PANTALLAS_CAJA,
+  type Dispositivo,
+  type Guia,
+  type PantallaCaja,
+  type Paso,
+  type Superficie,
+} from './guia.js';
 export { GUIAS } from './guias.js';
 export {
   AYUDA,

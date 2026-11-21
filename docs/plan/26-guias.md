@@ -167,6 +167,16 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 ### G-03 Las primeras ocho guías de quien cobra [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** G-04, G-07, G-10, G-11
+- **Drafted 2026-11-21, approval pending:** the eight guides are in
+  `packages/guias/src/guias-caja-*.ts`, each step with its spoken line. Two things keep this open:
+  the owner's approval of the wording, and the check against Synth's `never_discovered`, which
+  has no data yet.
+- **Found while writing:** the web caja has no scanner, so «Cobrar con el escáner» is the phone's
+  only (`soloEn`) and the web caja shows seven. The two surfaces label some buttons differently
+  («Registrar $X» and «Registrar gasto de $X»); a step names what they share, so a guide still
+  reads the same on both. A guide ends on one of `PANTALLAS_CAJA`, which each surface maps to
+  its own route. `scripts/guias-caja.test.ts` holds the steps' controls to the Maestro flows and
+  those screens to both routers.
 - **What:** the operator's guides, written once for the phone and the web caja: abrir turno,
   cobrar una venta, cobrar con el escáner, registrar un gasto, llegó mercancía, dar de alta un
   producto, cancelar una venta, cerrar turno y contar la caja. Four steps or fewer each, short
@@ -238,7 +248,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 - [ ] Status · **Blocked by:** G-05 · **Blocks:** —
 - **What:** a `clips` project in `apps/web/playwright.config.ts` with video on, a fixed viewport
-  and a human pace, for the four portal guides and for the eight operator guides on the web caja.
+  and a human pace, for the four portal guides and for the seven operator guides the web caja has.
   Each spec mints its own tenant (`mintTenant()`, ADR-128) and composes believable rows from
   `tenant-rows.ts`. The portal guides get their spoken lines the way G-07 gives the operator's.
   Same cut, limits and publishing as G-04 and G-05.
