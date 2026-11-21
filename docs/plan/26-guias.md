@@ -166,11 +166,11 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-03 Las primeras ocho guías de quien cobra [media]
 
-- [ ] Status · **Blocked by:** — · **Blocks:** G-04, G-07, G-10, G-11
-- **Drafted 2026-11-21, approval pending:** the eight guides are in
-  `packages/guias/src/guias-caja-*.ts`, each step with its spoken line. Two things keep this open:
-  the owner's approval of the wording, and the check against Synth's `never_discovered`, which
-  has no data yet.
+- [x] Status · **Blocks:** G-04, G-07, G-10, G-11
+- **Done 2026-11-21:** the eight guides are in `packages/guias/src/guias-caja-*.ts`, each step
+  with its spoken line, and the owner read them and approved the wording, written and spoken.
+  The check of the list against Synth's `never_discovered` and the first support questions
+  could not be made: neither exists yet. It moves to G-23.
 - **Found while writing:** the web caja has no scanner, so «Cobrar con el escáner» is the phone's
   only (`soloEn`) and the web caja shows seven. The two surfaces label some buttons differently
   («Registrar $X» and «Registrar gasto de $X»); a step names what they share, so a guide still
@@ -180,9 +180,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 - **What:** the operator's guides, written once for the phone and the web caja: abrir turno,
   cobrar una venta, cobrar con el escáner, registrar un gasto, llegó mercancía, dar de alta un
   producto, cancelar una venta, cerrar turno y contar la caja. Four steps or fewer each, short
-  enough to read at the counter, and one spoken line per step of twelve words or fewer. The list
-  is checked against Synth's `never_discovered` and the first support questions before it is
-  closed.
+  enough to read at the counter, and one spoken line per step of twelve words or fewer.
 - **Tests:** every guide has between two and five steps, a destination that exists on its
   surface, a spoken line per step, and no em dash.
 - **Acceptance:** the owner has read the eight guides and approved the wording, written and
@@ -190,7 +188,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-07 La voz de Don Cuentas: su descripción, sus líneas y su audio [media]
 
-- [ ] Status · **Blocked by:** G-03 · **Blocks:** G-04
+- [ ] Status · **Blocked by:** — · **Blocks:** G-04
 - **What:** three things, in order.
   1. One description of the voice in words (a warm, playful shopkeeper from Mexico), kept in the
      package. The owner generates a reference sample from it with Qwen3-TTS VoiceDesign and
@@ -213,7 +211,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-04 Clips del teléfono: un flujo de Maestro graba cada guía [media]
 
-- [ ] Status · **Blocked by:** G-03, G-07 · **Blocks:** G-05
+- [ ] Status · **Blocked by:** G-07 · **Blocks:** G-05
 - **What:** one flow per guide under `apps/mobile/maestro/flows/guias/`, tagged `guia`, built
   from the shared subflows. A script records them in a lane and cuts each as §4 step 5 says: at
   most 45 seconds, 720 px wide, MP4 with the voice and the step's words on screen, plus a WebP
@@ -259,7 +257,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-10 Teléfono: «¿Cómo le hago?» detrás del botón de ayuda [media]
 
-- [ ] Status · **Blocked by:** G-01, G-03 · **Blocks:** G-20, G-22, G-23
+- [ ] Status · **Blocked by:** G-01 · **Blocks:** G-20, G-22, G-23
 - **Design first:** boards `GuPuerta`, `GuHoja` and `GuGuia`, and `GuTableta` for the tablet, where
   the door, the list and the guide are dialogs and the clip is the phone's. **Approval pending: no
   code before it.**
@@ -280,7 +278,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-11 Caja web: la misma puerta y las mismas guías [media]
 
-- [ ] Status · **Blocked by:** G-01, G-03 · **Blocks:** —
+- [ ] Status · **Blocked by:** G-01 · **Blocks:** —
 - **Design first:** board `GuCaja`, four states. **Approval pending: no code before it.**
 - **What:** the same door and guide view in `apps/web/src/operador/`, vanilla-extract over
   tokens, reading the same `caja` guides. A guide shows its steps alone until G-06 has recorded
@@ -359,7 +357,10 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 - [ ] Status · **Blocked by:** G-10, S-11 · **Blocks:** —
 - **What:** run Synth's phone scenarios with the help door reachable and without it, and report
   the difference in tasks finished and in `never_discovered`. Deltas only, as Track S requires.
-- **Acceptance:** a report says which guides changed an outcome and which nobody opened.
+  It also makes the check G-03 could not: the list of guides against `never_discovered` and the
+  first support questions, so a job people never find gets a guide.
+- **Acceptance:** a report says which guides changed an outcome, which nobody opened, and which
+  jobs still have none.
 
 **Phase 4 — Outside the product**
 
