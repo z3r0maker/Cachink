@@ -188,7 +188,9 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-07 La voz de Don Cuentas: su descripción, sus líneas y su audio [media]
 
-- [ ] Status · **Blocked by:** — · **Blocks:** G-04
+- [x] Status · **Blocks:** G-04
+- **Done 2026-11-21:** the eight guides have their audio in one voice and at one pace, both
+  chosen by the owner by ear, and a changed word or pace is red until the line is said again.
 - **The voice is chosen and every line is said (2026-11-21).** The owner asked for an older
   man (age, wisdom, a calm voice, patience) after the first four takes came out young, and kept
   take 7 of the second round. The 30 lines were said in it, and he found them «very slow»: 98
@@ -198,7 +200,8 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
   a third of it pauses. So the model hears the sample with its long pauses cut short and played
   `VOZ_DON.ritmo` times faster (`scripts/guias-voz-ritmo.ts`); the kept file is not touched and
   no line is stretched. Measured on six lines: 145 words a minute with the sample as kept, 166 at
-  a pace of 1, 179 at 1.15, 199 at 1.3. It is 1.15 until the owner picks by ear.
+  a pace of 1, 179 at 1.15, 199 at 1.3. The owner heard those three and chose 1.15 («B is
+  right», 2026-11-21).
 - **The voice is a file, not a description.** The design model gives a different voice on every
   run, so the description cannot make this one again. What can is the kept sample
   (`packages/guias/voz/don-cuentas.wav`), the exact words it says (`VOZ_DON.muestra`) and the
@@ -213,9 +216,9 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 - **It speaks through oMLX,** which the owner already runs: both models sit in its models
   folder and the command posts to its speech route. No Python, nothing installed in the
   workspace. oMLX wants the reference clip as base64, not a path.
-- **Left:** the owner picks the pace by ear (three were sent: 166, 179 and 199 words a minute)
-  and listens to the 30 lines at it. A line that sounds wrong is deleted and said again. The licence
-  was read again on 2026-11-21: Apache 2.0 on both model cards.
+- **Upkeep, not this task:** a line that sounds wrong on a later hearing is deleted and said
+  again (`pnpm guias:voz lineas`): same voice, new reading. The licence was read again on
+  2026-11-21: Apache 2.0 on both model cards.
 - **What:** three things, in order.
   1. One description of the voice in words (a warm, playful shopkeeper from Mexico), kept in the
      package. The owner generates a reference sample from it with Qwen3-TTS VoiceDesign and
@@ -238,7 +241,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-04 Clips del teléfono: un flujo de Maestro graba cada guía [media]
 
-- [ ] Status · **Blocked by:** G-07 · **Blocks:** G-05
+- [ ] Status · **Blocked by:** — · **Blocks:** G-05
 - **What:** one flow per guide under `apps/mobile/maestro/flows/guias/`, tagged `guia`, built
   from the shared subflows. A script records them in a lane and cuts each as §4 step 5 says: at
   most 45 seconds, 720 px wide, MP4 with the voice and the step's words on screen, plus a WebP

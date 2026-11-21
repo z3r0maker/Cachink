@@ -52,7 +52,7 @@ faster himself.
 | -------------- | ------------------------ | ----------------------------------- |
 | sample as kept | about 150                | «very slow» (the owner, 2026-11-21) |
 | 1              | about 165                |                                     |
-| 1.15           | about 185                | in use                              |
+| 1.15           | about 185                | the owner's pick (2026-11-21)       |
 | 1.3            | about 200                |                                     |
 
 A line's file name carries the pace, so a new pace leaves every line without audio:

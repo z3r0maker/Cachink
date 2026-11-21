@@ -24,7 +24,8 @@ export const VOZ_DON = {
    * the kept sample is slow, so the model hears it with its pauses cut short
    * and played this many times faster (`scripts/guias-voz-ritmo.ts`). One is
    * the sample's own pace without the pauses. The owner found take 7 «very
-   * slow» on 2026-11-21. A new pace has every line said again.
+   * slow» on 2026-11-21, heard it at 1, 1.15 and 1.3, and chose this one.
+   * A new pace has every line said again.
    */
   ritmo: 1.15,
   idioma: 'Spanish',
