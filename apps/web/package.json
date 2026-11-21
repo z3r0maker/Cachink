@@ -50,6 +50,7 @@
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/email": "workspace:*",
+    "@xangarro/guias": "workspace:*",
     "@xangarro/sync": "workspace:*",
     "@xangarro/tokens": "workspace:*",
     "exceljs": "^4.4.0",

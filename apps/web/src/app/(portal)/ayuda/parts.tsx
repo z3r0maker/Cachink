@@ -1,5 +1,6 @@
 'use client';
 
+import { TEMAS, buscar, type Guia, type TemaId } from '@xangarro/guias';
 import { useState } from 'react';
 
 import Link from 'next/link';
@@ -7,11 +8,8 @@ import Link from 'next/link';
 import { Button, Don, Drawer } from '@/components';
 
 import * as s from './ayuda.css';
-import { buscar } from './buscar';
-import { TEMAS, type TemaId } from './contenido';
 import { FormularioAyuda } from './formulario';
 import { GuiaDrawer } from './guia-drawer';
-import type { Guia } from './guias';
 import { Guias, Preguntas, Temas } from './secciones';
 
 const MAS_BUSCADO = ['corte', 'conectar caja', 'no enviados', 'factura'];

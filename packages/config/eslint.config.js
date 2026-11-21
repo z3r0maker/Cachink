@@ -65,7 +65,7 @@ const NO_CONSOLE_MOTION_FILE = {
  *   domain       → nothing internal
  *
  * Packages with no element below (contracts, data-pg, auth-core, tokens,
- * email, observability) are unclassified, and the rule skips them.
+ * guias, email, observability) are unclassified, and the rule skips them.
  *
  * Also loads sonarjs (complexity) and unicorn (best practices).
  */
