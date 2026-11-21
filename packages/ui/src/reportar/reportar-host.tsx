@@ -1,8 +1,12 @@
 /**
- * ReportarHost — the one report sheet over the app (M-23, ADR-162). Mounted
- * with the overlays, so the header's help button, Mi turno's «¿Algo no
- * funciona?» and Ajustes all open the same sheet from any screen. It also
- * sends what waited on the device when the connection returns.
+ * ReportarHost — the one report sheet over the app (M-23, ADR-162), so the
+ * header's help button, Mi turno's «¿Algo no funciona?» and Ajustes all open
+ * the same sheet from any screen. It also sends what waited on the device
+ * when the connection returns.
+ *
+ * Mount it **inside** the gated content, as a sibling of the navigator:
+ * `AppProviders`' `overlays` render outside `ActivationProvider` and
+ * `CloudSyncBridge`, where there is no device token and no sync state.
  */
 import type { ReactElement } from 'react';
 import type { DeviceContext } from '@xangarro/observability';

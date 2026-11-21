@@ -121,11 +121,14 @@ function MobileApp(): ReactElement {
           <NotificationTapHost />
           <StockLowScheduleHost />
           <TurnoDeOtroHost />
-          <ReportarSheetHost />
         </>
       }
     >
       <MobileStack />
+      {/* Beside the stack, not with the overlays: those sit outside the
+          activation and sync providers, and the sheet sends with the device
+          token and drains after a sync run (M-23). */}
+      <ReportarSheetHost />
     </AppProviders>
   );
 }

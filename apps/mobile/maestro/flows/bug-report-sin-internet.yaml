@@ -1,8 +1,9 @@
 # «Reportar un problema» with the server gone (M-23, ADR-162 §5; board RpHoja
 # «Sin internet»): `/__mock/down` drops every socket, as airplane mode would.
 # The report is kept on the device («Guardado. Se envía solo.»), Mi turno's
-# row says «1 reporte por enviar», and once the server is back and a sync run
-# reaches it the report leaves by itself and the row returns to its own line.
+# row says «1 reporte por enviar», and once the server is back and the app
+# returns to the front the report leaves by itself and the row returns to its
+# own line.
 # Nothing is typed, nothing is shared as a file.
 #
 # Precondition: activated device against the mock on MOCK_API, Toni signed in
@@ -53,7 +54,7 @@ tags:
 - assertVisible: 'Guardado\. Se envía solo\.'
 - assertVisible:
     id: 'reportar-por-enviar'
-    text: '.*1 reporte por enviar.*'
+- assertVisible: '1 reporte por enviar'
 - tapOn:
     id: 'reportar-listo'
 - extendedWaitUntil:
@@ -74,16 +75,17 @@ tags:
     id: 'otros-reportar'
     text: '.*1 reporte por enviar.*'
 
-# The network returns; a sync run that reaches the server sends what waited.
+# The network returns. Nothing else waits in the caja's own queue, so there
+# is no «Reintentar envío» to press: the report leaves when the app comes
+# back to the front, which is the other moment it is sent by itself.
 - runScript:
     file: shared/mock-down.js
     env:
       ACTION: up
-- runFlow: shared/enviar-ahora.yaml
-- extendedWaitUntil:
-    visible:
-      id: 'cloud-sync-pill-synced'
-    timeout: 60000
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- runFlow: shared/login-operator.yaml
 - tapOn:
     id: 'tab-turno|rail-turno|sidebar-turno'
 - scrollUntilVisible:

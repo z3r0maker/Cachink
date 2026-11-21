@@ -41,6 +41,10 @@ describe('ReportarHoja', () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(screen.getByText('Otra cosa')).toBeInTheDocument();
+    expect(opcion('could_not_charge')).toHaveAttribute(
+      'aria-label',
+      'No me dejó cobrar. Una venta, un pago o el ticket',
+    );
     expect(screen.getByTestId('reportar-enviar')).toBeEnabled();
     fireEvent.click(screen.getByTestId('reportar-enviar'));
     await waitFor(() => expect(onEnviar).toHaveBeenCalledTimes(1));

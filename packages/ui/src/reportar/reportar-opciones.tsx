@@ -48,10 +48,15 @@ function Card(props: {
 }): ReactElement {
   const { t } = useTranslation();
   const { category, selected } = props;
+  const label = BUG_REPORT_CATEGORY_LABELS[category];
+  const detalle = t(`reportar.detalle.${category}`);
   return (
     <Pressable
       testID={`reportar-opcion-${category}`}
       role="radio"
+      // A radio's children are not read on their own: without a name of its
+      // own a screen reader says only «botón de opción».
+      aria-label={`${label}. ${detalle}`}
       aria-checked={selected}
       onPress={props.onPress}
       style={{
@@ -69,10 +74,10 @@ function Card(props: {
     >
       <Tile d={GLYPH[category]} />
       <MText size="body" weight="extraBold">
-        {BUG_REPORT_CATEGORY_LABELS[category]}
+        {label}
       </MText>
       <MText size="xs" weight="semibold" color={colors.ink}>
-        {t(`reportar.detalle.${category}`)}
+        {detalle}
       </MText>
     </Pressable>
   );
