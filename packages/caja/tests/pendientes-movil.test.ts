@@ -2,12 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { COLA_FIXTURE } from '../src/pendientes/fixture';
-import {
-  faseTelefono,
-  heroeTelefono,
-  NOTA_NADA_SE_PIERDE,
-  todoEnviado,
-} from '../src/pendientes/movil';
+import { faseTelefono, pieCola, NOTA_NADA_SE_PIERDE, todoEnviado } from '../src/pendientes/movil';
 import { cuentaRechazados, describeRechazado } from '../src/pendientes/rechazado';
 
 const VENTA = {
@@ -18,31 +13,43 @@ const VENTA = {
 };
 
 describe('registros por enviar, móviles', () => {
-  it('the hero of each phase, in the phone’s words', () => {
-    assert.deepEqual(heroeTelefono('espera', COLA_FIXTURE, 0, null), {
-      eyebrow: 'En espera',
-      titulo: '3 registros por enviar',
-      cuerpo:
-        'Suman $283.00 de ventas y un gasto de $620.00. Puedes seguir cobrando; se envían solos cuando vuelva el internet.',
-      boton: 'Reintentar envío',
+  it('the status line and the footer of each phase, as RvEnvio words them', () => {
+    assert.deepEqual(pieCola('sin-internet', COLA_FIXTURE), {
+      aviso: '3 registros esperan conexión. Puedes seguir cobrando; se envían solos.',
+      boton: 'Reintentar ahora',
+      ocupado: false,
     });
-    const uno = [COLA_FIXTURE[0]!];
-    assert.equal(heroeTelefono('sin-internet', uno, 0, null).titulo, '1 registro espera conexión');
-    assert.equal(heroeTelefono('sin-internet', uno, 0, null).eyebrow, 'Sin conexión');
-    assert.equal(heroeTelefono('enviando', COLA_FIXTURE, 0, null).titulo, 'Enviando 3 registros…');
+    assert.deepEqual(pieCola('espera', COLA_FIXTURE), {
+      aviso: '3 registros por enviar. Puedes seguir cobrando; se envían solos.',
+      boton: 'Reintentar ahora',
+      ocupado: false,
+    });
     assert.equal(
-      heroeTelefono('enviado', [], 0, '14:55').cuerpo,
-      'El último envío fue a las 14:55.',
-    );
-    assert.equal(
-      heroeTelefono('enviado', [], 0, null).cuerpo,
-      'El último envío fue hace unos segundos.',
+      pieCola('sin-internet', [COLA_FIXTURE[0]!]).aviso,
+      '1 registro espera conexión. Puedes seguir cobrando; se envían solos.',
     );
   });
 
-  it('a queue with no sums still says it sends itself', () => {
-    const h = heroeTelefono('espera', [], 0, null);
-    assert.equal(h.titulo, '0 registros por enviar');
+  it('sending holds the button and never says the close waits (R3, ADR-123)', () => {
+    const p = pieCola('enviando', COLA_FIXTURE);
+    assert.deepEqual(p, {
+      aviso: 'Enviando 3 registros… Puedes seguir cobrando y cerrar el turno mientras suben.',
+      boton: 'Enviando…',
+      ocupado: true,
+    });
+    assert.doesNotMatch(p.aviso ?? '', /espera|esperar/);
+  });
+
+  it('refused rows say why on their own card: the footer only retries them', () => {
+    assert.deepEqual(pieCola('con-rechazados', []), {
+      aviso: null,
+      boton: 'Reintentar',
+      ocupado: false,
+    });
+    assert.equal(cuentaRechazados(1), '1 registro');
+  });
+
+  it('a queue that only moves cash still says it sends itself', () => {
     const apertura = {
       id: 'q-a',
       tipo: 'movimiento' as const,
@@ -52,20 +59,9 @@ describe('registros por enviar, móviles', () => {
       hora: '08:15',
     };
     assert.equal(
-      heroeTelefono('sin-internet', [apertura], 0, null).cuerpo,
-      'Puedes seguir cobrando; se envían solos cuando vuelva el internet.',
+      pieCola('sin-internet', [apertura]).aviso,
+      '1 registro espera conexión. Puedes seguir cobrando; se envían solos.',
     );
-  });
-
-  it('refused rows win the hero and say what to do', () => {
-    assert.deepEqual(heroeTelefono('con-rechazados', [], 2, null), {
-      eyebrow: 'Revisar',
-      titulo: 'El servidor no aceptó 2 registros',
-      cuerpo:
-        'Sigue en esta caja, no se pierde. Lee la razón de cada uno abajo y reintenta los que puedas.',
-      boton: 'Reintentar envío',
-    });
-    assert.equal(cuentaRechazados(1), '1 registro');
   });
 
   it('the note says nothing is lost, and the turno closes with rows still to send (R3)', () => {
@@ -75,12 +71,6 @@ describe('registros por enviar, móviles', () => {
       'Puedes cerrar el turno; se envían cuando vuelva la conexión.',
     );
     assert.doesNotMatch(NOTA_NADA_SE_PIERDE.cuerpo, /No podrás/);
-  });
-
-  it('sending never says the close waits for it (R3, ADR-123)', () => {
-    const h = heroeTelefono('enviando', COLA_FIXTURE, 0, null);
-    assert.equal(h.cuerpo, 'Puedes seguir cobrando y cerrar el turno mientras suben.');
-    assert.doesNotMatch(h.cuerpo, /se puede cerrar/);
   });
 
   it('the phase reads in the pill’s order: sending, refused, offline, waiting, done', () => {
