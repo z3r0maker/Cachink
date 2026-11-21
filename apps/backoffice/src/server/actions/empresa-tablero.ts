@@ -20,6 +20,7 @@ import { failed } from '../empresa/fallas';
 import { correoTerminada } from '../empresa/tablero-correo';
 import { adjuntoDelForm, tableroDeps } from '../empresa/tablero-deps';
 import { socioDe } from '../empresa/tablero-lectura';
+import { conSello, type Sello } from '../empresa/sello';
 import { hrefTablero } from '../empresa/tablero-view';
 import { requireFounder } from '../founder';
 import { field, type FormState } from './form-state';
@@ -40,9 +41,10 @@ const ACCIONES: readonly Accion[] = [
   'hacer',
 ];
 
-const volver = (form: FormData, extra: { tarjeta?: string } = {}): never => {
+const volver = (form: FormData, extra: { tarjeta?: string } = {}, sello?: Sello): never => {
   revalidatePath('/empresa', 'layout');
-  redirect(hrefTablero(field(form, 't'), extra) as Route);
+  const href = hrefTablero(field(form, 't'), extra);
+  redirect((sello === undefined ? href : conSello(href, sello)) as Route);
 };
 
 const MONTO_MAL: FormState = {
@@ -208,5 +210,10 @@ export async function moverTarjetaAction(_p: FormState, form: FormData): Promise
   } catch (error) {
     return failed(error, 'moverTarjeta');
   }
-  return volver(form, { tarjeta: tarjetaId });
+  // An accepted card's state lands as a stamp on this one render (ADR-161 «Sello»).
+  return volver(
+    form,
+    { tarjeta: tarjetaId },
+    field(form, 'accion') === 'aceptar' ? 'aceptada' : undefined,
+  );
 }

@@ -12,7 +12,9 @@ import { pasosVista } from '@/server/empresa/cierre-pasos';
 import { fuentesDe, hrefCierre, parseMesCierre, parsePanel } from '@/server/empresa/cierre-view';
 import { nombreMes } from '@/server/empresa/fechas';
 import { mesesVecinos } from '@/server/empresa/movimiento-view';
+import { parseSello } from '@/server/empresa/sello';
 import { requireFounderPage } from '@/server/founder';
+import { SelloUnaVez } from '@/components/sello-una-vez';
 import * as m from '@/styles/mostrador.css';
 
 import { EncabezadoSeccion } from '../encabezado-seccion';
@@ -65,7 +67,7 @@ function subDe(mes: string, cerrados: ReadonlySet<string>): string {
  * `?panel=`.
  */
 export default async function CierrePage(props: {
-  searchParams: Promise<{ mes?: string; panel?: string }>;
+  searchParams: Promise<{ mes?: string; panel?: string; sello?: string }>;
 }) {
   const { founder } = await requireFounderPage();
   const sp = await props.searchParams;
@@ -83,7 +85,13 @@ export default async function CierrePage(props: {
     <div className={m.page}>
       <Encabezado mes={mes} hoy={hoy} sub={subDe(mes, datos.cerrados)} />
       {enc.pedido === null ? null : <Banner mes={mes} pedido={enc.pedido} />}
-      <DelMes mes={mes} enc={enc} pasos={pasosVista(pasos, datos.detalle, mes, enc.cerrado)} />
+      <DelMes
+        mes={mes}
+        enc={enc}
+        pasos={pasosVista(pasos, datos.detalle, mes, enc.cerrado)}
+        sello={parseSello(sp.sello) === 'cerrado'}
+      />
+      {sp.sello === undefined ? null : <SelloUnaVez />}
       <Historial anio={mes.slice(0, 4)} meses={historialDe(datos)} />
       {contador === null ? null : <PanelContador mes={mes} v={contador} />}
       <Paneles panel={panel} mes={mes} founderId={founder.id} datos={datos} enc={enc} />
