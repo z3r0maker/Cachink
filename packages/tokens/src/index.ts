@@ -32,6 +32,8 @@ export {
 export { breakpoints, cajaBreakpoints, type BreakpointKey } from './layout.js';
 export { brand } from './brand.js';
 export { consoleTheme, type ConsoleTheme } from './console.js';
+// The founders' «Empresa» console only (ADR-161); lint refuses it outside apps/backoffice.
+export { consoleMotion, type ConsoleMotion } from './console-motion.js';
 
 import { colors } from './colors.js';
 import { typography } from './type.js';

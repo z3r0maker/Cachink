@@ -6,9 +6,41 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import * as tokens from '@xangarro/tokens';
+import {
+  borders,
+  breakpoints,
+  colors,
+  denseRadii,
+  emojiSizes,
+  fontSizes,
+  portalFontSizes,
+  pressTransform,
+  radii,
+  shadows,
+  shapeRadii,
+  theme as tokensTheme,
+  typography,
+} from '@xangarro/tokens';
 import * as theme from '../src/theme';
 import { tamaguiConfig } from '../src/tamagui.config';
+
+// Named, not `import * as`: the tokens also hold the console's `consoleMotion`,
+// which lint refuses outside apps/backoffice (ADR-161).
+const tokens = {
+  borders,
+  breakpoints,
+  colors,
+  denseRadii,
+  emojiSizes,
+  fontSizes,
+  portalFontSizes,
+  pressTransform,
+  radii,
+  shadows,
+  shapeRadii,
+  theme: tokensTheme,
+  typography,
+} as const;
 
 describe('theme re-exports @xangarro/tokens', () => {
   it.each([
