@@ -1,0 +1,13 @@
+# What the CLI deploy (`vercel deploy --prod --archive=tgz` from the repo root)
+# must not upload: local installs (their symlinks point at this machine, and
+# turbo trips on them on Vercel, which installs its own) and local reports.
+**/node_modules
+**/.turbo
+**/dist
+**/.next
+**/*.tsbuildinfo
+e2e-reports
+**/playwright-report
+**/test-results
+.e2e
+.claude
