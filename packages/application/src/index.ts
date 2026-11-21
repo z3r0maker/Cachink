@@ -37,6 +37,7 @@ export * from './guardar-saldos-iniciales/index.js';
 export * from './archivar-producto/index.js';
 export * from './foto-producto/index.js';
 export * from './comprobante-gasto/index.js';
+export * from './logo-negocio/index.js';
 export * from './guardar-negocio/index.js';
 export * from './empleados/index.js';
 export * from './avisos/index.js';

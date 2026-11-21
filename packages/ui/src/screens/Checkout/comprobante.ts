@@ -2,8 +2,9 @@
  * The comprobante of a sale just made (not a CFDI): as text for WhatsApp,
  * Mensajes and the share menu (the web caja's `receipt.ts` `receiptText`),
  * and as the business's N-20 template for the preview (`comprobanteSvg`,
- * the business → negocio mapping of the web's `server/comprobante/datos.ts`,
- * without the logo, which the phone does not hold).
+ * the business → negocio mapping of the web's `server/comprobante/datos.ts`).
+ * The logo is the phone's cached copy (`useLogoNegocio`, N-19); without one
+ * the template draws its monogram.
  */
 import {
   comprobanteSvg,
@@ -100,11 +101,17 @@ function plantillaDe(b: Business | null): PlantillaComprobante {
   return t === 'moderno' || t === 'clasico' || t === 'minimal' ? t : 'ticket';
 }
 
-export function comprobanteSvgDe(v: VentaHecha, b: Business | null): string {
+/** `logoDataUrl`: the cached logo as a data URL, or null for the no-logo look. */
+export function comprobanteSvgDe(
+  v: VentaHecha,
+  b: Business | null,
+  logoDataUrl: string | null = null,
+): string {
   const m = marcaDe(b);
   const c: Comprobante = {
     negocio: {
       nombre: m.negocio,
+      logoDataUrl: logoDataUrl ?? undefined,
       monograma: monograma(m.negocio),
       whatsapp: m.whatsapp ?? undefined,
       leyenda: m.leyenda ?? undefined,

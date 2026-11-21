@@ -1,6 +1,13 @@
 import 'server-only';
 
-import { dominantColor, dominantSvgFill, sanitiseSvg, svgIsSafe } from '@xangarro/domain';
+import {
+  dominantColor,
+  dominantSvgFill,
+  LOGO_MIMES,
+  MAX_LOGO_BYTES,
+  sanitiseSvg,
+  svgIsSafe,
+} from '@xangarro/domain';
 import sharp from 'sharp';
 
 /**
@@ -10,9 +17,7 @@ import sharp from 'sharp';
  * decoding only raster libraries can do.
  */
 
-export const MAX_LOGO_BYTES = 2 * 1024 * 1024;
-
-const MIMES = new Set(['image/png', 'image/jpeg', 'image/svg+xml']);
+export { MAX_LOGO_BYTES };
 
 /** Every refusal here is the owner's to fix: coded, so the action shows it and does not report it. */
 export const LOGO_INVALIDO = 'LOGO_INVALIDO';
@@ -29,7 +34,7 @@ export async function processLogo(file: File): Promise<ProcessedLogo> {
   if (file.size === 0) throw refuse('Elige un archivo.');
   if (file.size > MAX_LOGO_BYTES) throw refuse('El logo pesa más de 2 MB.');
   const mime = file.type === 'image/jpg' ? 'image/jpeg' : file.type;
-  if (!MIMES.has(mime)) throw refuse('El logo debe ser PNG, JPG o SVG.');
+  if (!LOGO_MIMES.has(mime)) throw refuse('El logo debe ser PNG, JPG o SVG.');
 
   if (mime === 'image/svg+xml') {
     const raw = await file.text();

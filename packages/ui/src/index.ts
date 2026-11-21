@@ -21,6 +21,7 @@ export * from './haptics/index';
 export * from './notifications/index';
 export * from './telemetry/index';
 export * from './foto-producto/index';
+export * from './logo-negocio/index';
 export * from './comprobante-gasto/index';
 // The Tamagui config has to be mounted in each app's shell via
 // <TamaguiProvider config={tamaguiConfig}>. Re-exported here so app shells

@@ -12,6 +12,7 @@ import {
   Toast,
   VentaHechaDialog,
   useCurrentBusiness,
+  useLogoNegocio,
   useVentaHecha,
   type EscanerTicket,
   type ProductoCobrar,
@@ -78,6 +79,9 @@ function VentaHechaHost(): ReactElement {
   const venta = useVentaHecha((s) => s.venta);
   const cerrar = useVentaHecha((s) => s.cerrar);
   const business = useCurrentBusiness().data ?? null;
+  // Mounted with Cobrar, not with the sheet: the copy is refreshed while the
+  // phone is online, so the comprobante has it when it is not (N-19).
+  const logo = useLogoNegocio(business);
   const [mandar, setMandar] = useState(false);
   const nueva = (): void => {
     setMandar(false);
@@ -95,6 +99,7 @@ function VentaHechaHost(): ReactElement {
           open={mandar}
           venta={venta}
           business={business}
+          logo={logo}
           onClose={() => setMandar(false)}
           onNueva={nueva}
         />
