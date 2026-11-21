@@ -170,6 +170,47 @@ export const esMX = {
     reportBugCta: 'Reportar un problema',
     checkForUpdatesCta: 'Buscar actualizaciones',
   },
+  // «Reportar un problema» (M-23, ADR-162; boards RpPuerta, RpHoja, RpAjustes, RpTableta).
+  reportar: {
+    ayuda: 'Ayuda',
+    ayudaAria: 'Ayuda: reportar un problema',
+    fila: '¿Algo no funciona?',
+    filaDetalle: 'Cuéntanos qué pasó, sin escribir',
+    filaPorEnviarUno: '1 reporte por enviar',
+    filaPorEnviarVarios: '{{count}} reportes por enviar',
+    ajustesSeccion: 'Ayuda',
+    titulo: '¿Qué pasó?',
+    subtitulo: 'Toca lo que más se parezca. No tienes que escribir.',
+    detalle: {
+      could_not_charge: 'Una venta, un pago o el ticket',
+      froze_or_closed: 'Se quedó pegada o se salió sola',
+      wrong_number: 'El total, el cambio o el corte',
+      other: 'Cuéntanos abajo con tus palabras',
+    },
+    masLabel: '¿Quieres contar más? (opcional)',
+    masPlaceholder: 'Por ejemplo: al cobrar con tarjeta se quedó cargando',
+    queVa: 'Va con esta caja y lo último que hizo la app. Sin nombres, sin montos.',
+    enviar: 'Enviar a Xangarro',
+    enviando: 'Enviando…',
+    cancelar: 'Cancelar',
+    listo: 'Listo',
+    reintentar: 'Intentar de nuevo',
+    enviadoTitulo: 'Gracias, {{nombre}}. Ya nos llegó.',
+    enviadoTituloSinNombre: 'Gracias. Ya nos llegó.',
+    enviadoTexto:
+      'Lo revisa el equipo de Xangarro. Si hace falta saber algo más, le escribimos al dueño.',
+    guardadoTitulo: 'Guardado. Se envía solo.',
+    guardadoTexto:
+      'Ahora no hay internet. Tu reporte sale en cuanto vuelva, junto con tus registros. No tienes que hacer nada.',
+    limiteTitulo: 'Hoy ya nos llegaron muchos reportes',
+    limiteTexto:
+      'Esta caja llegó a su límite de reportes de hoy. Mañana puedes enviar otro. Si es urgente, avísale al dueño.',
+    colaLlenaTitulo: 'Ya hay reportes guardados',
+    colaLlenaTexto:
+      'Esta caja guarda {{max}} reportes sin enviar. Salen solos cuando vuelva el internet; después puedes enviar otro.',
+    falloTitulo: 'No se pudo enviar',
+    falloTexto: 'Algo falló al enviar tu reporte. Intenta de nuevo en un momento.',
+  },
   notifications: {
     stockLowTitle: 'Stock bajo',
     stockLowBodyOne:

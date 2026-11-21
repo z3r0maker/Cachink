@@ -27,6 +27,8 @@ export interface DialogProps {
   readonly children?: ReactNode;
   readonly footer?: ReactNode;
   readonly closeLabel?: string;
+  /** A wider card than the default 342 (the tablet's report dialog, RpTableta). */
+  readonly width?: number;
   readonly testID?: string;
 }
 
@@ -38,7 +40,7 @@ function Card(props: DialogProps & { readonly id: string }): ReactElement {
       pointerEvents="auto"
       style={[
         {
-          width: DIALOG_WIDTH,
+          width: props.width ?? DIALOG_WIDTH,
           maxWidth: '100%',
           backgroundColor: colors.white,
           borderWidth: borderWidths.thick,

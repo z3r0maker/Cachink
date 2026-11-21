@@ -1,14 +1,17 @@
 /**
  * En este teléfono (A-12, MvAjustes): the settings that belong to this phone:
- * notifications, crash reports, reporting a problem, checking for updates.
+ * notifications, crash reports, checking for updates. Under it, «Ayuda»: the
+ * row that opens the report sheet (RpAjustes, M-23), no longer a grey button.
  * Exporting the business's data is the owner's, in the portal.
  */
 
 import type { ReactElement } from 'react';
-import { Btn } from '../../components/index';
+import { View } from '@tamagui/core';
+import { Btn, GLYPHS, MText, NavRows } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { CrashReportingToggle } from './crash-reporting-toggle';
 import { NotificationsToggle } from './notifications-toggle';
+import { colors, typography } from '../../theme';
 import { SettingsSection } from './settings-section';
 
 export interface DeviceSettings {
@@ -21,6 +24,39 @@ export interface DeviceSettings {
   readonly checkForUpdatesStatus?: string;
 }
 
+/** «Ayuda»: one row, with its icon, that opens the report sheet (RpAjustes). */
+function Ayuda({ onReportProblem }: { onReportProblem: () => void }): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View gap={8}>
+      <MText
+        size="xs"
+        weight="extraBold"
+        color={colors.gray600}
+        textTransform="uppercase"
+        letterSpacing={typography.letterSpacing.widest}
+      >
+        {t('reportar.ajustesSeccion')}
+      </MText>
+      <NavRows
+        testID="settings-ayuda"
+        label={t('reportar.ajustesSeccion')}
+        items={[
+          {
+            key: 'reportar',
+            title: t('settings.reportBugCta'),
+            detail: t('reportar.filaDetalle'),
+            icon: GLYPHS.ayuda,
+            tint: colors.yellow,
+            onPress: onReportProblem,
+            testID: 'settings-open-bug-report',
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
 export function SettingsDeviceSection(props: { readonly device: DeviceSettings }): ReactElement {
   const { t } = useTranslation();
   const d = props.device;
@@ -28,22 +64,25 @@ export function SettingsDeviceSection(props: { readonly device: DeviceSettings }
     ? `${t('settings.checkForUpdatesCta')} — ${d.checkForUpdatesStatus}`
     : t('settings.checkForUpdatesCta');
   return (
-    <SettingsSection title={t('settings.dispositivoSection')} testID="settings-device">
-      <NotificationsToggle enabled={d.notificationsEnabled} onChange={d.onNotificationsChange} />
-      <CrashReportingToggle enabled={d.crashReportingEnabled} onChange={d.onCrashReportingChange} />
-      <Btn variant="ghost" onPress={d.onReportProblem} fullWidth testID="settings-open-bug-report">
-        {t('settings.reportBugCta')}
-      </Btn>
-      {d.onCheckForUpdates && (
-        <Btn
-          variant="ghost"
-          onPress={d.onCheckForUpdates}
-          fullWidth
-          testID="settings-check-for-updates"
-        >
-          {updatesLabel}
-        </Btn>
-      )}
-    </SettingsSection>
+    <View gap={16}>
+      <SettingsSection title={t('settings.dispositivoSection')} testID="settings-device">
+        <NotificationsToggle enabled={d.notificationsEnabled} onChange={d.onNotificationsChange} />
+        <CrashReportingToggle
+          enabled={d.crashReportingEnabled}
+          onChange={d.onCrashReportingChange}
+        />
+        {d.onCheckForUpdates && (
+          <Btn
+            variant="ghost"
+            onPress={d.onCheckForUpdates}
+            fullWidth
+            testID="settings-check-for-updates"
+          >
+            {updatesLabel}
+          </Btn>
+        )}
+      </SettingsSection>
+      <Ayuda onReportProblem={d.onReportProblem} />
+    </View>
   );
 }
