@@ -132,7 +132,7 @@ describe('AvisosScreen · la respuesta', () => {
     tap('aviso-responder-corte');
     escribir('responder-texto', 'no');
     tap('responder-enviar');
-    expect(screen.getByTestId('responder-error').textContent).toContain('Cuéntale un poco más');
+    expect(screen.getByTestId('responder-error').textContent).toContain('Cuéntales un poco más');
     expect(vivo.responder).not.toHaveBeenCalled();
   });
 

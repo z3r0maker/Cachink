@@ -93,7 +93,7 @@ export function Enviada({ texto }: { readonly texto: string }) {
     <div className={r.enviado}>
       <span className={r.enviadoTitle}>{AVISOS_COPY.enviada}</span>
       <span className={r.enviadoText}>“{texto}”</span>
-      <span className={r.enviadoNota}>Si te contesta, lo ves aquí mismo.</span>
+      <span className={r.enviadoNota}>Si te contestan, lo ves aquí mismo.</span>
     </div>
   );
 }

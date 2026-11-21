@@ -141,7 +141,7 @@ export function Enviada(p: { readonly texto: string }): ReactElement {
         {`“${p.texto}”`}
       </MText>
       <MText size="sm" weight="semibold" color={colors.gray600}>
-        Si te contesta, lo ves aquí mismo.
+        Si te contestan, lo ves aquí mismo.
       </MText>
     </View>
   );

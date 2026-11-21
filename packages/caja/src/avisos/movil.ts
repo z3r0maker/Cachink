@@ -25,8 +25,8 @@ export const RESPUESTA_MAX = 500;
 /** null when it can go; the reason it cannot, as a red note under the box. */
 export function respuestaInvalida(texto: string): string | null {
   const t = texto.trim();
-  if (t.length === 0) return 'Escríbele algo, aunque sea «no sé qué pasó».';
-  if (t.length < RESPUESTA_MIN) return 'Cuéntale un poco más para que le sirva.';
+  if (t.length === 0) return 'Escríbeles algo, aunque sea «no sé qué pasó».';
+  if (t.length < RESPUESTA_MIN) return 'Cuéntales un poco más para que les sirva.';
   if (t.length > RESPUESTA_MAX) return `Máximo ${RESPUESTA_MAX} caracteres.`;
   return null;
 }

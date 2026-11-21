@@ -84,7 +84,7 @@ export function RespuestaEnviada({ texto }: { readonly texto: string }): ReactEl
       </MText>
       <MText size="sm" weight="semibold">{`“${texto}”`}</MText>
       <MText size="xs" weight="semibold" color={colors.gray600}>
-        Si te contesta, lo ves aquí mismo.
+        Si te contestan, lo ves aquí mismo.
       </MText>
     </View>
   );

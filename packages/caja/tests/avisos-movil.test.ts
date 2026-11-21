@@ -24,9 +24,9 @@ describe('la respuesta de un aviso, móvil', () => {
   });
 
   it('a reply needs a real sentence: empty, too short, too long', () => {
-    assert.equal(respuestaInvalida(''), 'Escríbele algo, aunque sea «no sé qué pasó».');
-    assert.equal(respuestaInvalida('   '), 'Escríbele algo, aunque sea «no sé qué pasó».');
-    assert.equal(respuestaInvalida('no'), 'Cuéntale un poco más para que le sirva.');
+    assert.equal(respuestaInvalida(''), 'Escríbeles algo, aunque sea «no sé qué pasó».');
+    assert.equal(respuestaInvalida('   '), 'Escríbeles algo, aunque sea «no sé qué pasó».');
+    assert.equal(respuestaInvalida('no'), 'Cuéntales un poco más para que les sirva.');
     assert.equal(respuestaInvalida('no sé'.repeat(200)), `Máximo ${RESPUESTA_MAX} caracteres.`);
     assert.equal(respuestaInvalida('No sé qué pasó.'), null);
     assert.equal(RESPUESTA_MIN, 4);
