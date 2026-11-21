@@ -2107,8 +2107,8 @@ WhatsApp).
   last error of the session («Va con la pantalla, tu navegador y el último error que vimos en tu
   sesión.»). No screenshot.
 - **Design first:** board `RpAyuda` on the canvas page «Reportar un problema», three states
-  (Tengo una duda, Algo no funciona, Enviado), drawn 2026-11-20. **Approval pending: no code before
-  it.**
+  (Tengo una duda, Algo no funciona, Enviado), drawn 2026-11-20. **Approved by the owner
+  2026-11-20.**
 - **How:** `apps/web/src/app/(portal)/ayuda/formulario.tsx` and `server/actions/ayuda.ts`. The last
   error is what `failure()` (`server/action-errors.ts`) and `onRequestError` already report; its id
   is kept with the session on the server, never in the URL.
@@ -2129,7 +2129,7 @@ WhatsApp).
   «Reintentar» and «Escribir a soporte», in place of today's bare HTML. Both say «Ya nos llegó el
   aviso con los detalles» **only when the report went out**.
 - **Design first:** board `RpError`, two states (Falla una pantalla, Falla todo el portal), drawn
-  2026-11-20. **Approval pending: no code before it.**
+  2026-11-20. **Approved by the owner 2026-11-20.**
 - **How:** `@sentry/node` moves to the major `@sentry/nextjs` needs, then `@sentry/nextjs`, both at
   the latest stable (§2.7). Data collection is set explicitly: no IP address, cookies, headers or
   request bodies, which the new major sends unless told not to. `scrubEvent` runs on both sides. A
