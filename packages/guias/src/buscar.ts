@@ -1,4 +1,4 @@
-import type { Guia, Superficie } from './guia.js';
+import type { Dispositivo, Guia, Superficie } from './guia.js';
 import { GUIAS } from './guias.js';
 import { palabras, plano } from './plano.js';
 import { PREGUNTAS, type Pregunta } from './preguntas.js';
@@ -17,6 +17,8 @@ export type Fuente = Hallazgos;
 export interface Filtro {
   readonly tema?: TemaId | null;
   readonly superficie?: Superficie;
+  /** The device asking. A guide only another device can follow is left out. */
+  readonly dispositivo?: Dispositivo;
 }
 
 /** Everything Xangarro teaches. */
@@ -26,6 +28,16 @@ const cabe = (texto: string, buscadas: readonly string[]): boolean => {
   const llano = plano(texto);
   return buscadas.every((p) => llano.includes(p));
 };
+
+/** Whether a guide reaches whoever asks: its surface, and the device when it needs one. */
+const alcanza =
+  (filtro: Filtro) =>
+  (g: Guia): boolean => {
+    if (filtro.superficie !== undefined && g.superficie !== filtro.superficie) return false;
+    return (
+      g.soloEn === undefined || filtro.dispositivo === undefined || g.soloEn === filtro.dispositivo
+    );
+  };
 
 const dePregunta = (p: Pregunta): string => [p.q, p.a, ...(p.tambien ?? [])].join(' ');
 const deGuia = (g: Guia): string => [g.titulo, ...g.pasos.map((p) => p.texto)].join(' ');
@@ -40,14 +52,12 @@ export function buscarEn(fuente: Fuente, texto: string, filtro: Filtro = {}): Ha
   const buscadas = palabras(texto);
   const tema = filtro.tema ?? null;
   const enTema = (x: { readonly tema: TemaId }) => tema === null || x.tema === tema;
-  const enSuperficie = (g: Guia) =>
-    filtro.superficie === undefined || g.superficie === filtro.superficie;
   const preguntas = filtro.superficie === 'caja' ? [] : fuente.preguntas;
   return {
     preguntas: preguntas.filter(enTema).filter((p) => cabe(dePregunta(p), buscadas)),
     guias: fuente.guias
-      .filter(enSuperficie)
       .filter(enTema)
+      .filter(alcanza(filtro))
       .filter((g) => cabe(deGuia(g), buscadas)),
   };
 }

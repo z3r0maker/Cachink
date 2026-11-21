@@ -23,6 +23,7 @@
     "plan:board": "tsx scripts/plan-board.ts",
     "notices": "tsx scripts/third-party-notices.ts",
     "adr:index": "tsx scripts/adr-index.ts",
+    "guias:voz": "tsx scripts/guias-voz.ts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
