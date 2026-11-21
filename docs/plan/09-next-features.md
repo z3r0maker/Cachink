@@ -1653,8 +1653,12 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
   which opens that event in Sentry. An item from the portal's Ayuda (P-48) shows the screen and the
   browser.
 - **Design first** (CLAUDE.md §6, ADR-117), on the console's canvas
-  (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): the inbox row and the item with and without an
-  error. **Not drawn yet.**
+  (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): board CD-22 `InboxReporte`, round 24, drawn
+  2026-11-20, **approval pending: no code before it**. The Inbox had no board, so it is drawn from
+  the live page in the Torre's dark theme. Its tabs: the list (each row gains «Trae su error» and
+  the business with its caja), an item with its error («Lo que mandó la caja» and «Ver el error»),
+  an item without one, and an item from the portal. No filter by category is drawn. The selected
+  filter chip is black with yellow text (§7); the live page fills it yellow.
 - **Tests:** the moved module keeps its tests and gains the console's (an unexpected error is
   reported with no staff email in it; an expected one is not reported). Playwright on Desktop Chrome:
   an item built with a category and an event id shows both, and one without an event id shows no
