@@ -9,7 +9,6 @@ import type { InicioData } from './types';
 export const INICIO_FIXTURE: InicioData = {
   nombre: 'Ana',
   fecha: 'Jueves 14 de mayo · Taquería Don Pedro, Caja 1',
-  dueno: 'Pedro',
   situacion: 'vendiendo',
   offline: false,
   pendientes: 3,

@@ -193,7 +193,7 @@ tags:
       id: 'gasto-foto-toast'
     timeout: 15000
 - assertVisible: '.*Foto guardada.*'
-- assertVisible: '.*Se manda al dueño.*'
+- assertVisible: '.*Se les manda a los patrones.*'
 # Not «no Agregar foto left»: a reused simulator keeps gastos earlier runs
 # left without a photo. The newest row, the one just saved, reads «Con foto».
 - assertVisible:

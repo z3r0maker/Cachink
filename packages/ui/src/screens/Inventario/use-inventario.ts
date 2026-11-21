@@ -32,8 +32,6 @@ import { leerFilasInventario } from './inventario-lectura';
 export interface InventarioVivo {
   readonly state: 'loading' | 'error' | 'happy';
   readonly data: InventarioData | null;
-  /** The owner's first name, for the empty answer and the regla note. */
-  readonly dueno: string;
   readonly registrar: (m: NuevoMovimientoVivo) => Promise<void>;
   readonly refetch: () => void;
 }
@@ -147,7 +145,6 @@ export function useInventario(): InventarioVivo {
   return {
     state,
     data,
-    dueno: q.data?.dueno ?? 'el dueño',
     registrar,
     refetch: recargar,
   };

@@ -58,10 +58,10 @@ function Cuenta({
     <>
       <RecordarBoton onClick={() => x.setModal('recordar')} />
       <Heroe c={c} e={x.e} onAbonar={() => x.setModal('abono')} />
-      <Indicadores c={c} e={x.e} dueno={data.dueno} />
+      <Indicadores c={c} e={x.e} />
       <Abiertas cuenta={c} e={x.e} hoy={data.hoy} />
       <Movimientos cuenta={c} />
-      <LimiteNota nota={limiteNota(c, x.e, data.dueno)} />
+      <LimiteNota nota={limiteNota(c, x.e)} />
       <Capas x={x} data={data} />
     </>
   );

@@ -10,12 +10,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
-import {
-  avisosAtrasados,
-  avisosVivos,
-  DUENO_GENERICO,
-  type AvisosData,
-} from '@xangarro/caja/avisos';
+import { avisosAtrasados, avisosVivos, type AvisosData } from '@xangarro/caja/avisos';
 import { comoCuenta } from '@xangarro/caja/cobranza/vivo';
 import type { BusinessId, UserId } from '@xangarro/domain';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
@@ -113,7 +108,7 @@ export function useAvisosCaja(): AvisosCaja {
   const { marcar, responder } = useAcciones(businessId);
   return {
     state: estadoDe(q.isError, data),
-    data: data ?? { dueno: DUENO_GENERICO, avisos: [] },
+    data: data ?? { avisos: [] },
     marcar: (ids) => {
       if (ids.length > 0) marcar.mutate(ids);
     },

@@ -104,18 +104,17 @@ export function faseTelefono(
 }
 
 /**
- * The queue with nothing left to send (RvEnvio «Todo enviado»): Don and the
- * owner who already has it. `ultima` is the last send's «HH:MM», or null
- * right after one.
+ * The queue with nothing left to send (RvEnvio «Todo enviado»): Don and «los
+ * patrones», who already have it. `ultima` is the last send's «HH:MM», or
+ * null right after one.
  */
-export function todoEnviado(
-  dueno: string | null,
-  ultima: string | null,
-): { readonly titulo: string; readonly cuerpo: string } {
-  const quien = dueno !== null && dueno.trim() !== '' ? dueno.trim() : 'Tu negocio';
+export function todoEnviado(ultima: string | null): {
+  readonly titulo: string;
+  readonly cuerpo: string;
+} {
   const cuando = ultima === null ? 'hace unos segundos' : `a las ${ultima}`;
   return {
     titulo: 'Todo está enviado',
-    cuerpo: `${quien} ya tiene lo que capturaste. Última vez ${cuando}.`,
+    cuerpo: `Los patrones ya tienen lo que capturaste. Última vez ${cuando}.`,
   };
 }

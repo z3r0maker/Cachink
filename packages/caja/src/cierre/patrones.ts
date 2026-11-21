@@ -8,10 +8,9 @@
 
 import { formatMoney, type DiferenciaCorte, type Money } from '@xangarro/domain';
 
+import { PATRONES } from '../comun/patrones';
 import { cerrarHint, DIF } from './copy';
 import type { CierreData } from './types';
-
-export const PATRONES = 'los patrones';
 
 /** Step 2's title, by what the count did. */
 export const TITULO_RESULTADO: Readonly<Record<DiferenciaCorte['tipo'], string>> = {

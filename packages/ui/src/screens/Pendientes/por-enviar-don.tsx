@@ -37,13 +37,12 @@ export function NadaSePierde(): ReactElement {
   );
 }
 
-/** Nothing left to send (RvEnvio «Todo enviado»): Don, and who already has it. */
+/** Nothing left to send (RvEnvio «Todo enviado»): Don, and «los patrones» already have it. */
 export function TodoEnviado(p: {
-  readonly dueno?: string | null;
   readonly ultima?: string | null;
   readonly onIrACierre: () => void;
 }): ReactElement {
-  const t = todoEnviado(p.dueno ?? null, p.ultima ?? null);
+  const t = todoEnviado(p.ultima ?? null);
   return (
     <EstadoVacio
       id="por-enviar-todo-enviado"

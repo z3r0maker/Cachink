@@ -108,7 +108,6 @@ describe('useGastos · la lectura', () => {
     expect(data?.gastos.map((g) => g.concepto)).toEqual(['Carbón']);
     expect(data?.gastos[0]?.categoria).toBe('Insumos');
     expect(data?.gastos[0]?.detalle).toBe('Carbonería La Flama');
-    expect(data?.dueno).toBe('el dueño');
   });
 
   it('carries the due recurrente with the prefill its sheet opens with', async () => {

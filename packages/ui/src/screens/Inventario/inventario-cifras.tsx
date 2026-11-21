@@ -126,7 +126,7 @@ export function Buscador(p: {
 
 /** What the screen says it is (the board's h1 row, said the phone's way). */
 /** The list's regla: the yellow-soft note with the info circle. */
-export function Regla(p: { readonly dueno: string }): ReactElement {
+export function Regla(): ReactElement {
   return (
     <View
       testID="inventario-regla"
@@ -140,7 +140,8 @@ export function Regla(p: { readonly dueno: string }): ReactElement {
     >
       <PathIcon d={COBRAR_GLYPHS.info} size={20} strokeWidth={2.4} color={colors.black} />
       <MText flex={1} size="md" weight="semibold">
-        {`Las ventas descuentan existencias solas. Tú registras entradas y mermas; el ajuste libre de existencias lo hace ${p.dueno} desde el portal.`}
+        Las ventas descuentan existencias solas. Tú registras entradas y mermas; el ajuste libre de
+        existencias lo hacen los patrones desde el portal.
       </MText>
     </View>
   );

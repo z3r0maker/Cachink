@@ -34,7 +34,6 @@ export default function ProductosRoute(): ReactElement {
         testID="mobile-inventario"
         state={inv.state}
         data={inv.data}
-        dueno={inv.dueno}
         reponer={reponer ?? null}
         registrar={inv.registrar}
         onNuevoProducto={() => router.push('/nuevo-producto' as never)}

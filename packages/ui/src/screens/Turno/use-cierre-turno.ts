@@ -11,9 +11,8 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CerrarCajaUseCase } from '@xangarro/application';
-import { nombreDueno, hoyLocal, horaLocal } from '@xangarro/caja';
+import { hoyLocal, horaLocal } from '@xangarro/caja';
 import { comoCierre, type CierreData } from '@xangarro/caja/cierre';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId } from '@xangarro/domain';
 import { useActivationState } from '../../activation/index';
 import { useRepositories } from '../../app/repository-provider';
@@ -32,15 +31,6 @@ export interface CierreTurnoVivo {
   /** The close write; resolves the error to show, or null once closed. */
   readonly cerrar: (c: CargaCierre) => Promise<string | null>;
   readonly refetch: () => void;
-}
-
-function useDueno(): string {
-  const { appConfig } = useRepositories();
-  const q = useQuery({
-    queryKey: ['cierre', 'dueno'],
-    queryFn: () => appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
-  });
-  return nombreDueno(q.data ?? null);
 }
 
 /** The close: `CerrarCajaUseCase` over the phone's own repositories. */
@@ -88,7 +78,6 @@ export function useCierreTurno(): CierreTurnoVivo {
   const userId = useUserId();
   const shell = useShellData();
   const cola = useColaCierre();
-  const dueno = useDueno();
   const deviceId = useActivationState().record?.deviceId ?? '';
   const q = useQuery({
     queryKey: [...miTurnoKey(businessId, userId), hoyLocal(), 'cierre'],
@@ -101,7 +90,6 @@ export function useCierreTurno(): CierreTurnoVivo {
           operador: shell.operador.nombre,
           caja: shell.caja ?? 'Caja',
           hasta: horaLocal(),
-          dueno,
           ...(shell.negocio === null ? {} : { negocio: shell.negocio }),
         })
       : null;

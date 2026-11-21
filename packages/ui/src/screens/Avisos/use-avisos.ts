@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { hoyLocal } from '@xangarro/caja';
 import type { AvisosPara, MensajePara, StockBajoPara } from '@xangarro/caja/lectura';
 import { avisosVivos, type AvisosData, type AvisosVivo } from '@xangarro/caja/avisos';
-import { SYNC_CONFIG_KEYS, unsentRows } from '@xangarro/sync';
+import { unsentRows } from '@xangarro/sync';
 import type {
   AppConfigRepository,
   CajaTurnosRepository,
@@ -119,13 +119,12 @@ async function leerAvisos(
   listRejected: () => Promise<readonly { readonly retryable: boolean }[]>,
   db: Parameters<typeof unsentRows>[0],
 ): Promise<AvisosData> {
-  const [ms, leidos, cola, rechazados, stock, dueno] = await Promise.all([
+  const [ms, leidos, cola, rechazados, stock] = await Promise.all([
     leerMensajes(l, businessId, userId),
     leerLeidos(l.appConfig),
     unsentRows(db),
     listRejected(),
     leerStockBajo(l, businessId),
-    l.appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
   ]);
   const para: AvisosPara = {
     mensajes: ms,
@@ -133,7 +132,6 @@ async function leerAvisos(
     cola: { cuantos: cola.length, desde: null },
     rechazados: rechazados.filter((r) => !r.retryable).length,
     stockBajo: stock,
-    dueno: dueno ?? null,
   };
   return avisosVivos(para, hoyLocal(), 'esta caja');
 }

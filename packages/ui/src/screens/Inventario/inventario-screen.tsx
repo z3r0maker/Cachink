@@ -35,8 +35,6 @@ import { useHoja, type Hoja } from './use-hoja';
 export interface InventarioScreenProps {
   readonly state: 'loading' | 'error' | 'happy';
   readonly data: InventarioData | null;
-  /** The owner's first name, for the empty answer and the regla note. */
-  readonly dueno: string;
   /** Which tab the screen opens on (the web's `tab`); existencias by default. */
   readonly tabInicial?: Pestana;
   /** A product to restock now: its «Llegó mercancía» opens (Inicio's «Para hoy»). */
@@ -75,7 +73,6 @@ function Cuerpo(p: {
   readonly tab: Pestana;
   readonly data: InventarioData;
   readonly query: string;
-  readonly dueno: string;
   readonly onAbrir: (it: InventarioData['existencias'][number]) => void;
   readonly onFoto: OnFoto;
 }): ReactElement {
@@ -90,7 +87,7 @@ function Cuerpo(p: {
         onAbrir={p.onAbrir}
         onFoto={p.onFoto}
       />
-      <Regla dueno={p.dueno} />
+      <Regla />
     </>
   );
 }
@@ -148,14 +145,7 @@ function ConProductos(
         onQuery={setQuery}
         onTab={setTab}
       />
-      <Cuerpo
-        tab={tab}
-        data={p.data}
-        query={query}
-        dueno={p.dueno}
-        onAbrir={p.onAbrir}
-        onFoto={porFoto(p.foto)}
-      />
+      <Cuerpo tab={tab} data={p.data} query={query} onAbrir={p.onAbrir} onFoto={porFoto(p.foto)} />
     </>
   );
 }
@@ -187,12 +177,11 @@ function Contenido(p: InventarioScreenProps & { readonly data: InventarioData })
           abierto={escaneando}
           onCerrar={() => setEscaneando(false)}
           existencias={p.data.existencias}
-          dueno={p.dueno}
           hoja={vivo}
         />
       ) : null}
       {toast === null ? null : <MovToast x={toast} onClose={cerrarToast} />}
-      {p.foto ? <FotoHojas flujo={p.foto} dueno={p.dueno} caja={p.data.caja} /> : null}
+      {p.foto ? <FotoHojas flujo={p.foto} caja={p.data.caja} /> : null}
     </>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * What «Agregar foto» shows over the Gastos list (M-18, board CgDespues):
  * the receipt camera while it is open, and the toast after a save
- * («Foto guardada. Se manda al dueño.») or a refusal.
+ * («Foto guardada. Se les manda a los patrones.») or a refusal.
  */
 import type { ReactElement } from 'react';
 import { Toast } from '../components/Toast/index';

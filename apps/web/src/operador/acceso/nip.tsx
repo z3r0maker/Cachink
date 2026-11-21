@@ -140,12 +140,12 @@ function Olvide(): ReactNode {
         aria-expanded={ver}
         onClick={() => setVer((v) => !v)}
       >
-        ¿Olvidaste tu NIP? Pídele al dueño que te lo cambie.
+        ¿Olvidaste tu NIP? Pídeles a los patrones que te lo cambien.
       </button>
       {ver ? (
         <span className={n.ayudaTexto}>
-          El dueño lo cambia desde su portal, en Equipo y nómina. Nadie más puede cambiarlo desde la
-          caja.
+          Los patrones lo cambian desde su portal, en Equipo y nómina. Nadie más puede cambiarlo
+          desde la caja.
         </span>
       ) : null}
     </div>

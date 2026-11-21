@@ -13,11 +13,11 @@ import * as a from './avisos.css';
 import { AvisoCard } from './card';
 import * as r from './reply.css';
 import { AvisoSistema } from './sistema';
-import { type AvisoGrupo, type AvisosScreenProps, deDueno, mayuscula } from '@xangarro/caja/avisos';
+import { AVISOS_COPY, type AvisoGrupo, type AvisosScreenProps } from '@xangarro/caja/avisos';
 import { useAvisos } from './use-avisos';
 
 const TABS: readonly [AvisoGrupo, string][] = [
-  ['dueno', 'De Pedro'],
+  ['dueno', AVISOS_COPY.tab],
   ['caja', 'De tu caja'],
 ];
 
@@ -33,21 +33,21 @@ export function AvisosScreen({ state, data, tab: initialTab, vivo }: AvisosScree
   return (
     <OpMain top={24}>
       <div className={a.head}>
-        <PageHead title="Avisos" sub={`Lo que te manda ${data.dueno} y lo que la caja te avisa`} />
+        <PageHead title="Avisos" sub={AVISOS_COPY.sub} />
         <button type="button" className={`${p.quietBtn} ${a.marcarTodo}`} onClick={v.markAll}>
           <Icon path={LEIDO} size={18} strokeWidth={2.2} />
           Marcar todo como leído
         </button>
       </div>
-      <Tabs v={v} dueno={data.dueno} />
+      <Tabs v={v} />
       {state === 'happy' ? (
-        <Lista v={v} dueno={data.dueno} />
+        <Lista v={v} />
       ) : (
         <OperadorEstado
           mode={state}
           icon={ICONS.bell}
           emptyTitle="Nada por leer"
-          emptyBody={`Ni mensajes ${deDueno(data.dueno)} ni avisos de tu caja.`}
+          emptyBody={AVISOS_COPY.vacio}
           errorTitle="No pudimos cargar tus avisos"
         />
       )}
@@ -58,12 +58,11 @@ export function AvisosScreen({ state, data, tab: initialTab, vivo }: AvisosScree
 
 type Avisos = ReturnType<typeof useAvisos>;
 
-function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
+function Tabs({ v }: { readonly v: Avisos }) {
   return (
     <div role="tablist" aria-label="Quién avisa" className={a.tabs}>
       {TABS.map(([key, label]) => {
         const n = v.sinLeer(key);
-        const text = key === 'dueno' ? mayuscula(deDueno(dueno)) : label;
         return (
           <button
             key={key}
@@ -73,7 +72,7 @@ function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
             className={a.tab}
             onClick={() => v.setTab(key)}
           >
-            {n ? `${text} · ${n}` : text}
+            {n ? `${label} · ${n}` : label}
           </button>
         );
       })}
@@ -81,8 +80,8 @@ function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
   );
 }
 
-function Lista({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
-  if (v.visibles.length === 0) return <NadaPorLeer tab={v.tab} dueno={dueno} />;
+function Lista({ v }: { readonly v: Avisos }) {
+  if (v.visibles.length === 0) return <NadaPorLeer tab={v.tab} />;
   if (v.tab === 'caja') {
     return (
       <div role="tabpanel" className={a.listCaja}>
@@ -98,7 +97,6 @@ function Lista({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
         <AvisoCard
           key={x.id}
           aviso={x}
-          dueno={dueno}
           draft={v.draft}
           onDraft={v.setDraft}
           onSend={() => v.send(x)}
@@ -110,15 +108,13 @@ function Lista({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
 }
 
 /** Don Cuentas with his book, on the empty tab. */
-function NadaPorLeer({ tab, dueno }: { readonly tab: AvisoGrupo; readonly dueno: string }) {
+function NadaPorLeer({ tab }: { readonly tab: AvisoGrupo }) {
   return (
     <div role="tabpanel" className={r.empty}>
       <Don pose="ayuda" size={96} />
       <span className={r.emptyTitle}>Nada por leer</span>
       <span className={r.emptyBody}>
-        {tab === 'dueno'
-          ? `${mayuscula(dueno)} no te ha escrito nada nuevo.`
-          : 'Tu caja no tiene avisos del sistema.'}
+        {tab === 'dueno' ? AVISOS_COPY.nadaNuevo : 'Tu caja no tiene avisos del sistema.'}
       </span>
     </div>
   );

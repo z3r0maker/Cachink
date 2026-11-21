@@ -5,6 +5,7 @@
  */
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
+import { PORTAL_PATRONES } from '@xangarro/caja';
 import { Btn } from '../components/Btn/index';
 import { Dialog } from '../components/Dialog/index';
 import { MText } from '../components/Mostrador/index';
@@ -12,12 +13,10 @@ import { PathIcon } from '../components/PathIcon/index';
 import { colors } from '../theme';
 import { ProductoTile } from '../screens/Inventario/mover-glifos';
 import { FOTO_GLIFOS } from './foto-glifos';
-import { portalDe } from './foto-partes';
 import type { FotoAbierta } from './use-foto-flujo';
 
 export interface FotoQuitarDialogProps {
   readonly abierta: FotoAbierta;
-  readonly dueno: string;
   readonly guardando: boolean;
   readonly onQuitar: () => void;
   readonly onMejorNo: () => void;
@@ -68,7 +67,7 @@ export function FotoQuitarDialog(p: FotoQuitarDialogProps): ReactElement {
           <ProductoTile icono={s.icono} tint={s.tint} size={56} />
         </View>
         <MText size="body" weight="semibold" color={colors.gray600} textAlign="left">
-          {`Vuelve el ícono en la caja y en ${portalDe(p.dueno)}. Puedes tomar otra cuando quieras.`}
+          {`Vuelve el ícono en la caja y en ${PORTAL_PATRONES}. Puedes tomar otra cuando quieras.`}
         </MText>
       </View>
     </Dialog>

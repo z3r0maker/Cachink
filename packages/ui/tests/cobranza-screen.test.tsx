@@ -18,7 +18,6 @@ const DATOS = {
   cuentas: CUENTAS,
   hoy: HOY,
   negocio: 'Taquería Don Pedro',
-  dueno: 'Pedro',
 };
 
 function montar(over: Record<string, unknown> = {}) {

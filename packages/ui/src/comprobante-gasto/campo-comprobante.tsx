@@ -103,7 +103,7 @@ function Vacio(p: CampoComprobanteProps): ReactElement {
       <Camarita />
       <Textos
         titulo={p.procesando ? 'Guardando la foto…' : 'Tómale foto al ticket'}
-        linea="Así el dueño no te lo pregunta."
+        linea="Así los patrones no te lo preguntan."
         tenue
       />
     </Pressable>
@@ -160,7 +160,7 @@ function Lista(p: CampoComprobanteProps & { readonly foto: string }): ReactEleme
       backgroundColor={colors.greenSoft}
     >
       <Miniatura uri={p.foto} />
-      <Textos titulo="Foto lista" linea="Se manda al dueño con el gasto." tenue={false} />
+      <Textos titulo="Foto lista" linea="Se les manda a los patrones con el gasto." tenue={false} />
       <Acciones onCambiar={p.onTomar} onQuitar={p.onQuitar} />
     </View>
   );

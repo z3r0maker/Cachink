@@ -14,7 +14,6 @@ import type { Fase, RegistroEnCola } from '@xangarro/caja/pendientes';
 import {
   heroeTelefono,
   intro,
-  portalDe,
   type FaseCola,
   type HeroeCola,
   type RechazoVisto,
@@ -33,8 +32,6 @@ export interface PorEnviarScreenProps {
   readonly fase: FaseCola;
   readonly cola: readonly RegistroEnCola[];
   readonly rechazados: readonly RechazoVisto[];
-  /** The owner's first name; null says «el portal del dueño». */
-  readonly dueno?: string | null;
   /** "HH:MM" of the last run that reached the server. */
   readonly ultima?: string | null;
   /** The manual flush: what the pill's «Actualizar» runs. */
@@ -128,14 +125,14 @@ function Heroe(p: PorEnviarScreenProps & { readonly fase: FaseCola }): ReactElem
   );
 }
 
-function Cabeza(p: { readonly vacia: boolean; readonly dueno: string | null }): ReactElement {
+function Cabeza(p: { readonly vacia: boolean }): ReactElement {
   return (
     <View gap={2}>
       <MText size="xl4" weight="extraBold" letterSpacing={-0.9} role="heading">
         Registros por enviar
       </MText>
       <MText size="md" weight="semibold" color={colors.gray600}>
-        {intro(p.vacia, p.dueno)}
+        {intro(p.vacia)}
       </MText>
     </View>
   );
@@ -143,20 +140,13 @@ function Cabeza(p: { readonly vacia: boolean; readonly dueno: string | null }): 
 
 /** The queue with data: hero, cola, refusals and the note. */
 function ConDatos(p: PorEnviarScreenProps): ReactElement {
-  const dueno = p.dueno === undefined ? 'Pedro' : p.dueno;
   const offline = p.state === SIN_INTERNET || p.fase === SIN_INTERNET;
   const faseFila: Fase = p.fase === 'enviando' ? 'enviando' : 'espera';
   const faseHeroe = p.state === SIN_INTERNET ? SIN_INTERNET : p.fase;
   return (
     <>
-      <Heroe {...p} dueno={dueno} fase={faseHeroe} />
-      <ColaPanel
-        cola={p.cola}
-        fase={faseFila}
-        offline={offline}
-        portal={portalDe(dueno)}
-        onIrACierre={p.onIrACierre}
-      />
+      <Heroe {...p} fase={faseHeroe} />
+      <ColaPanel cola={p.cola} fase={faseFila} offline={offline} onIrACierre={p.onIrACierre} />
       {p.rechazados.length > 0 ? (
         <RechazadosPanel rechazados={p.rechazados} onReintentar={p.onReintentarRechazado} />
       ) : null}
@@ -171,7 +161,7 @@ export function PorEnviarScreen(p: PorEnviarScreenProps): ReactElement {
   const alDia = vacia && p.state === 'happy' && p.fase === 'enviado';
   return (
     <ScrollView testID={base} contentContainerStyle={{ padding: 16, gap: 14, flexGrow: 1 }}>
-      <Cabeza vacia={vacia} dueno={p.dueno ?? null} />
+      <Cabeza vacia={vacia} />
       {alDia ? (
         <TodoEnviado {...p} />
       ) : p.state === 'happy' || p.state === SIN_INTERNET ? (

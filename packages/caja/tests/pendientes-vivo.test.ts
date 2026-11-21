@@ -99,7 +99,7 @@ describe('registros por enviar, vivos', () => {
       texto: 'Cobré una venta y no la capturé en la caja.',
       montoCentavos: null,
     });
-    assert.equal(r.titulo, 'Respuesta al dueño');
+    assert.equal(r.titulo, 'Respuesta a los patrones');
     assert.equal(r.detalle, '“Cobré una venta y no la capturé en la caja.”');
   });
 
@@ -122,8 +122,8 @@ describe('registros por enviar, vivos', () => {
     );
   });
 
-  it('a linked caja names no owner: «el portal del dueño»', () => {
-    assert.equal(intro(true, null), 'Tu caja está al día con el portal del dueño');
-    assert.equal(intro(true), 'Tu caja está al día con el portal de Pedro');
+  it('names no owner: «el portal de los patrones»', () => {
+    assert.equal(intro(true), 'Tu caja está al día con el portal de los patrones');
+    assert.equal(intro(false), 'Lo que capturaste sin internet');
   });
 });

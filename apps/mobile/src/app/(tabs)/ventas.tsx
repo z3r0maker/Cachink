@@ -30,7 +30,6 @@ export default function VentasTabRoute(): ReactElement {
         testID="mobile-ventas"
         state={v.state}
         data={v.data}
-        dueno={v.dueno ?? undefined}
         onRetry={v.refetch}
         onIrACobrar={() => router.navigate('/cobrar' as never)}
         onAbrirTurno={apertura.abrir}

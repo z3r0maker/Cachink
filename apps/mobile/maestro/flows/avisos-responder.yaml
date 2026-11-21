@@ -35,7 +35,7 @@ appId: mx.xangarro.mobile
     visible:
       id: 'mobile-avisos'
     timeout: 10000
-- assertVisible: '.*Lo que te manda el dueño y lo que la caja te avisa.*'
+- assertVisible: '.*Lo que te mandan los patrones y lo que la caja te avisa.*'
 - assertVisible:
     id: 'aviso-dueno-01JMSG00000000000000000001'
 - assertVisible: '.*Aclara un corte.*'
@@ -50,24 +50,24 @@ appId: mx.xangarro.mobile
     visible:
       id: 'responder-sheet'
     timeout: 5000
-- assertVisible: '.*Responder al dueño.*'
+- assertVisible: '.*Responder a los patrones.*'
 - assertVisible: '.*Sobre el corte.*'
 - tapOn:
     id: 'responder-rapida-Di cambio de más'
 - tapOn:
     id: 'responder-enviar'
 
-# The toast says it landed (toastRespuesta: «El dueño ya tiene tu respuesta
-# sobre el corte.»); the card keeps the reply and turns read.
+# The toast says it landed (toastRespuesta: «Los patrones ya tienen tu
+# respuesta sobre el corte.»); the card keeps the reply and turns read.
 - extendedWaitUntil:
     visible:
       id: 'avisos-toast'
     timeout: 8000
 - assertVisible: '.*Respuesta enviada.*'
-- assertVisible: '.*El dueño ya tiene tu respuesta sobre el corte\..*'
+- assertVisible: '.*Los patrones ya tienen tu respuesta sobre el corte\..*'
 - tapOn:
     id: 'avisos-toast-close'
 - assertVisible:
     id: 'aviso-respondido'
-- assertVisible: '.*Le mandaste tu respuesta al dueño.*'
+- assertVisible: '.*Les mandaste tu respuesta a los patrones.*'
 - assertVisible: '.*“Creo que di cambio de más a un cliente.”.*'

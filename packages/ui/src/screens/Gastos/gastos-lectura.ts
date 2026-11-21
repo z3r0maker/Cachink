@@ -6,7 +6,6 @@
  * prefill its sheet opens with, and which gastos have their receipt photo
  * (M-18). The owner's first name rides along for the «Sin comprobante» note. Pure over the repositories' rows.
  */
-import { nombreDueno } from '@xangarro/caja';
 import {
   gastosDelTurno,
   prefillDe,
@@ -14,14 +13,10 @@ import {
   type RecurrentePorPagar,
 } from '@xangarro/caja/gastos';
 import type { BusinessId, CajaTurno, IsoDate, RecurringExpense } from '@xangarro/domain';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { Repositories } from '../../app/repository-provider';
 import { comoRecurrente } from '../Inicio/inicio-filas';
 
-type R = Pick<
-  Repositories,
-  'appConfig' | 'cajaTurnos' | 'expenses' | 'expenseReceipts' | 'recurringExpenses'
->;
+type R = Pick<Repositories, 'cajaTurnos' | 'expenses' | 'expenseReceipts' | 'recurringExpenses'>;
 
 /** Each due recurring gasto: the row the list shows, and what its sheet opens with. */
 export const recurrentesPorPagar = (
@@ -37,8 +32,6 @@ export interface FilasGastos {
   readonly turno: CajaTurno | null;
   readonly gastos: readonly GastoTurno[];
   readonly recurrentes: readonly RecurrentePorPagar[];
-  /** The owner's first name, or «el dueño» until the device knows it. */
-  readonly dueno: string;
 }
 
 export async function leerFilasGastos(
@@ -49,10 +42,9 @@ export async function leerFilasGastos(
   const abierto = await r.cajaTurnos.findOpenByBusiness(businessId);
   const turno = abierto ?? (await r.cajaTurnos.findLatest(businessId));
   const fecha = turno?.fecha ?? hoy;
-  const [expenses, recurrentes, dueno] = await Promise.all([
+  const [expenses, recurrentes] = await Promise.all([
     r.expenses.findByDateRange(fecha, fecha, businessId),
     r.recurringExpenses.findDue(hoy as IsoDate, businessId),
-    r.appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
   ]);
   // Which of the day's gastos carry their ticket's photo (M-18, ADR-149).
   const conFoto = await r.expenseReceipts.findGastosWithReceipt(expenses.map((g) => g.id));
@@ -61,6 +53,5 @@ export async function leerFilasGastos(
     turno,
     gastos: gastosDelTurno(expenses, turno?.id ?? null, conFoto),
     recurrentes: recurrentesPorPagar(recurrentes, hoy),
-    dueno: nombreDueno(dueno),
   };
 }

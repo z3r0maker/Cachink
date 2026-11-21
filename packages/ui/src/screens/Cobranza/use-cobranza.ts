@@ -1,19 +1,17 @@
 /**
  * useCobranza — Fiado y abonos' data for the signed-in operator (M-08): the
  * business's credit accounts from the phone's own rows (`leerCuentas`), the
- * turno's date for «abonos de hoy», the business's name for the reminder and
- * the owner's for the limit note. The abono write is `useRegistrarAbono`'s:
+ * turno's date for «abonos de hoy» and the business's name for the reminder.
+ * The abono write is `useRegistrarAbono`'s:
  * the web register's use case (O-33), stamped with the open turno; the query
  * key sits under the caja's family, so a venta fiada or an abono refreshes
  * everything.
  */
 import { useQuery } from '@tanstack/react-query';
-import { hoyLocal, nombreDueno } from '@xangarro/caja';
+import { hoyLocal } from '@xangarro/caja';
 import type { CuentaCliente, MetodoAbono } from '@xangarro/caja/cobranza';
-import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, Money } from '@xangarro/domain';
 import {
-  useAppConfigRepository,
   useClientPaymentsRepository,
   useClientsRepository,
   useSalesRepository,
@@ -40,8 +38,6 @@ export interface DatosCobranza {
   readonly hoy: string;
   /** Named in the WhatsApp reminder («Te escribimos de Taquería Don Pedro»). */
   readonly negocio: string;
-  /** The limit note names them («El límite y el plazo los define Pedro»). */
-  readonly dueno: string;
 }
 
 export interface CobranzaVivo {
@@ -76,15 +72,6 @@ function useCuentas(hoy: string, caja: string) {
   return { cuentas: q.data ?? null, isError: q.isError, refetch: q.refetch };
 }
 
-function useDueno(): string {
-  const appConfig = useAppConfigRepository();
-  const q = useQuery({
-    queryKey: ['cobranza', 'dueno'],
-    queryFn: () => appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
-  });
-  return nombreDueno(q.data ?? null);
-}
-
 /**
  * The write: the abono recorded through `RegistrarPagoClienteUseCase` and
  * stamped with the caja's open turno (ADR-146), so the turno's expected cash
@@ -108,10 +95,9 @@ export function useCobranza(): CobranzaVivo {
   const negocio = shell.negocio ?? '';
   const { cuentas, isError, refetch } = useCuentas(hoy, shell.caja ?? 'la caja');
   const registrar = useRegistrar();
-  const dueno = useDueno();
   return {
     state: isError ? 'error' : cuentas === null ? 'cargando' : 'happy',
-    data: cuentas === null ? null : { cuentas, hoy, negocio, dueno },
+    data: cuentas === null ? null : { cuentas, hoy, negocio },
     registrar,
     refetch: () => void refetch(),
   };

@@ -80,7 +80,6 @@ function Pantalla(props: { situacion: Situacion; telefono?: boolean }): ReactEle
           <VentasMostradorScreen
             state={ESTADO[props.situacion]}
             data={feliz ? VENTAS_FIXTURE : null}
-            dueno="Pedro"
             abierta={folio}
             onRetry={() => undefined}
             onIrACobrar={() => undefined}
@@ -92,7 +91,6 @@ function Pantalla(props: { situacion: Situacion; telefono?: boolean }): ReactEle
           {props.situacion === 'cancelar-venta' && venta !== undefined && !cerrar ? (
             <CancelarVentaDialog
               venta={venta}
-              dueno="Pedro"
               onClose={() => setCerrar(true)}
               onConfirm={async () => null}
             />

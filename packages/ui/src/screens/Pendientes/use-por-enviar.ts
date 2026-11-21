@@ -8,12 +8,11 @@
  * pushes.
  */
 import { useQuery } from '@tanstack/react-query';
-import { hhmmLocal, nombreDueno, primerNombreDueno } from '@xangarro/caja';
+import { hhmmLocal } from '@xangarro/caja';
 import type { RegistroEnCola, RechazoVisto } from '@xangarro/caja/pendientes';
 import { describeRechazado, faseTelefono, type FaseCola } from '@xangarro/caja/pendientes';
-import { SYNC_CONFIG_KEYS, unsentRows } from '@xangarro/sync';
+import { unsentRows } from '@xangarro/sync';
 import {
-  useAppConfigRepository,
   useCajaMovimientosRepository,
   useCajaTurnosRepository,
   useCancelacionLogsRepository,
@@ -36,8 +35,6 @@ export interface PorEnviarVivo {
   readonly fase: FaseCola;
   readonly cola: readonly RegistroEnCola[];
   readonly rechazados: readonly RechazoVisto[];
-  /** The owner's first name for «el portal de Pedro»; null when unknown. */
-  readonly dueno: string | null;
   /** "HH:MM" of the last run that reached the server. */
   readonly ultima: string | null;
   /** The manual flush (the pill's «Actualizar»). */
@@ -80,23 +77,14 @@ function useCola(unsent: number, ultima: string | null) {
 }
 
 export function usePorEnviar(): PorEnviarVivo {
-  const appConfig = useAppConfigRepository();
   const { state: sync, syncNow, listRejected, requeue } = useCloudSync();
   const cola = useCola(sync.counts.unsent, sync.lastSyncAt);
   const rechazados = useQuery({
     queryKey: [...CLOUD_SYNC_QUERY_KEY, 'rechazados', 'por-enviar'],
     queryFn: () => listRejected(),
   });
-  const dueno = useQuery({
-    queryKey: ['por-enviar', 'dueno'],
-    queryFn: () => appConfig.get(SYNC_CONFIG_KEYS.duenoNombre),
-  });
-
   const filas = cola.data ?? [];
-  // Said with the owner's name, so the hint reads «Pídele a Pedro…» (R5).
-  const negadas = (rechazados.data ?? []).map((r) =>
-    describeRechazado(r, r.row, nombreDueno(dueno.data ?? null)),
-  );
+  const negadas = (rechazados.data ?? []).map((r) => describeRechazado(r, r.row));
   return {
     state: cola.isError
       ? 'error'
@@ -108,7 +96,6 @@ export function usePorEnviar(): PorEnviarVivo {
     fase: faseTelefono(sync.phase, filas.length, negadas.filter((x) => !x.reintentando).length),
     cola: filas,
     rechazados: negadas,
-    dueno: primerNombreDueno(dueno.data ?? null),
     ultima: sync.lastSyncAt === null ? null : hhmmLocal(sync.lastSyncAt),
     reintentar: syncNow,
     reintentarRechazado: (xs) => {

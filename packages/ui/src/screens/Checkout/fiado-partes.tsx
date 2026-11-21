@@ -7,7 +7,6 @@ import type { ReactElement } from 'react';
 import { Pressable, TextInput } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney, type Money } from '@xangarro/domain';
-import { mayuscula } from '@xangarro/caja';
 import type { ClienteFiado } from '@xangarro/caja/caja';
 import { MText } from '../../components/Mostrador/index';
 import { PathIcon } from '../../components/PathIcon/index';
@@ -124,11 +123,7 @@ export interface NuevoCliente {
   readonly telefono: string;
 }
 
-function Campos(p: {
-  v: NuevoCliente;
-  onCambio: (v: NuevoCliente) => void;
-  dueno: string;
-}): ReactElement {
+function Campos(p: { v: NuevoCliente; onCambio: (v: NuevoCliente) => void }): ReactElement {
   const { v } = p;
   return (
     <View gap={10}>
@@ -152,7 +147,7 @@ function Campos(p: {
         style={CAMPO}
       />
       <MText size="sm" weight="semibold" color={colors.gray600}>
-        {`${mayuscula(p.dueno)} lo revisa en su portal.`}
+        Los patrones lo revisan en su portal.
       </MText>
     </View>
   );
@@ -163,7 +158,6 @@ const VACIO: NuevoCliente = { nombre: '', telefono: '' };
 export function ClienteNuevo(p: {
   valor: NuevoCliente | null;
   onCambio: (v: NuevoCliente | null) => void;
-  dueno: string;
   /** What the search holds: the new client's name starts as it, not typed twice. */
   sugerido?: string;
 }): ReactElement {
@@ -182,7 +176,7 @@ export function ClienteNuevo(p: {
           Cliente nuevo
         </MText>
       </Pressable>
-      {p.valor !== null ? <Campos v={p.valor} onCambio={p.onCambio} dueno={p.dueno} /> : null}
+      {p.valor !== null ? <Campos v={p.valor} onCambio={p.onCambio} /> : null}
     </View>
   );
 }

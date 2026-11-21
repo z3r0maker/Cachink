@@ -70,7 +70,6 @@ export interface InicioData {
   /** Live only: the local time of day; the fixture keeps the design's wording. */
   readonly momento?: Momento;
   readonly fecha: string;
-  readonly dueno: string;
   readonly situacion: Situacion;
   readonly offline: boolean;
   readonly pendientes: number;

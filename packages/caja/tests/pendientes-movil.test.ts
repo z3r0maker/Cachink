@@ -111,12 +111,12 @@ describe('rechazados, la sentencia del servidor', () => {
     assert.equal(v.razon, 'El producto de este registro ya no existe en el portal.');
     assert.equal(
       v.pista,
-      'Pídele al dueño que recupere el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
     );
     assert.equal(v.reintentando, false);
   });
 
-  it('the hint names the owner and never says to capture it again (R5)', () => {
+  it('the hint asks «los patrones» and never says to capture it again (R5)', () => {
     const cliente = describeRechazado(
       {
         tableName: 'expenses',
@@ -126,11 +126,10 @@ describe('rechazados, la sentencia del servidor', () => {
         retryable: false,
       },
       null,
-      'Pedro',
     );
     assert.equal(
       cliente.pista,
-      'Pídele a Pedro que recupere el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que recuperen el cliente en el portal y toca Reintentar. No lo vuelvas a capturar: se contaría dos veces.',
     );
     assert.doesNotMatch(cliente.pista ?? '', /regístral/);
   });
@@ -178,7 +177,6 @@ describe('rechazados, la sentencia del servidor', () => {
         retryable: false,
       },
       null,
-      'Pedro',
     );
     assert.equal(
       v.razon,
@@ -186,7 +184,23 @@ describe('rechazados, la sentencia del servidor', () => {
     );
     assert.equal(
       v.pista,
-      'Pídele a Pedro que lo revise en el portal. No la vuelvas a capturar: se contaría dos veces.',
+      'Pídeles a los patrones que lo revisen en el portal. No la vuelvas a capturar: se contaría dos veces.',
+    );
+  });
+
+  it('the operator and a suspended business go to «los patrones» too', () => {
+    const pista = (code: string) =>
+      describeRechazado(
+        { tableName: 'sales', rowId: 'r', code, message: 'x', retryable: false },
+        null,
+      ).pista;
+    assert.equal(
+      pista('FK_USER_MISSING'),
+      'Pídeles a los patrones que revisen en el portal al operador.',
+    );
+    assert.equal(
+      pista('BUSINESS_SUSPENDED'),
+      'Pídeles a los patrones que lo revisen en el portal.',
     );
   });
 
@@ -237,29 +251,18 @@ describe('rechazados, la sentencia del servidor', () => {
   });
 });
 
-describe('todo enviado (RvEnvio): Don and the owner who already has it', () => {
-  it('names the owner and the last send', () => {
-    assert.deepEqual(todoEnviado('Pedro', '09:41'), {
+describe('todo enviado (RvEnvio): Don and «los patrones», who already have it', () => {
+  it('says «los patrones» have it, and the last send', () => {
+    assert.deepEqual(todoEnviado('09:41'), {
       titulo: 'Todo está enviado',
-      cuerpo: 'Pedro ya tiene lo que capturaste. Última vez a las 09:41.',
+      cuerpo: 'Los patrones ya tienen lo que capturaste. Última vez a las 09:41.',
     });
   });
 
   it('a send moments ago says so', () => {
     assert.equal(
-      todoEnviado('Pedro', null).cuerpo,
-      'Pedro ya tiene lo que capturaste. Última vez hace unos segundos.',
+      todoEnviado(null).cuerpo,
+      'Los patrones ya tienen lo que capturaste. Última vez hace unos segundos.',
     );
-  });
-
-  it('without the owner’s name it says «tu negocio»', () => {
-    assert.equal(
-      todoEnviado(null, '09:41').cuerpo,
-      'Tu negocio ya tiene lo que capturaste. Última vez a las 09:41.',
-    );
-  });
-
-  it('a blank name is no name', () => {
-    assert.match(todoEnviado('  ', null).cuerpo, /^Tu negocio ya tiene/);
   });
 });

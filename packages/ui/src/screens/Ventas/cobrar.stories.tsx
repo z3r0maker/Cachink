@@ -117,14 +117,12 @@ function Demo(props: {
         }}
         productos={productos}
         onAlta={() => setHoja('nuevoCodigo')}
-        dueno="Pedro"
       />
       <ProductoNuevoSheet
         open={hoja === 'nuevo' || hoja === 'nuevoCodigo'}
         onClose={() => setHoja(null)}
         codigo={hoja === 'nuevoCodigo' ? '7501234567897' : null}
         tipos={['Producto Terminado', 'Otro']}
-        dueno="el dueño"
         onGuardar={() => Promise.reject(new Error('solo historia'))}
         onListo={() => setHoja(null)}
       />

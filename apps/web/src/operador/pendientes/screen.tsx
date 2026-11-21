@@ -7,12 +7,12 @@ import { OperadorEstado } from '../estado';
 import { PageHead } from '../ui/panel';
 import * as pc from '../ui/panel.css';
 import { OpMain } from '../ui/parts';
+import { PORTAL_PATRONES } from '@xangarro/caja';
 import {
   ayudaReintento,
   despuesDeReintentar,
   heroe,
   intro,
-  portalDe,
   type PendientesScreenProps,
 } from '@xangarro/caja/pendientes';
 import * as i from './intentos.css';
@@ -25,18 +25,13 @@ const SYNC =
 const CHECK = 'M20 6 9 17l-5-5';
 
 /** Operador · Registros por enviar: the local queue, its retry, and the rule not to lose it. */
-export function PendientesScreen({
-  state,
-  cola: inicial,
-  dueno = 'Pedro',
-  vivo,
-}: PendientesScreenProps) {
+export function PendientesScreen({ state, cola: inicial, vivo }: PendientesScreenProps) {
   const x = usePendientes(inicial, vivo);
   // A linked caja shows no hero until its queue is read: an empty list is not «Todo enviado».
   const conHeroe = vivo === undefined || state === 'happy';
   return (
     <OpMain top={24}>
-      <PageHead title="Registros por enviar" sub={intro(x.cola.length === 0, dueno)} />
+      <PageHead title="Registros por enviar" sub={intro(x.cola.length === 0)} />
       <div className={s.column}>
         {conHeroe ? <HeroeCola x={x} /> : null}
         {state === 'happy' ? (
@@ -44,7 +39,6 @@ export function PendientesScreen({
             cola={x.cola}
             fase={x.fase}
             offline={x.offline}
-            portal={portalDe(dueno)}
             ahora={x.ahora}
             reintento={x.reintento}
           />
@@ -53,7 +47,7 @@ export function PendientesScreen({
             mode={state}
             icon={SYNC}
             emptyTitle="Nada pendiente"
-            emptyBody={`Todo lo que capturaste ya está en ${portalDe(dueno)}.`}
+            emptyBody={`Todo lo que capturaste ya está en ${PORTAL_PATRONES}.`}
             errorTitle="No pudimos leer la cola de este navegador"
           />
         )}

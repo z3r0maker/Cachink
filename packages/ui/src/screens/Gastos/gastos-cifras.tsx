@@ -8,7 +8,6 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
-import { mayuscula } from '@xangarro/caja';
 import { CATEGORIAS, resumen, type CategoriaGasto, type GastosData } from '@xangarro/caja/gastos';
 import { Chip } from '../../components/Chip/index';
 import { MText } from '../../components/Mostrador/index';
@@ -52,8 +51,8 @@ function Cifra(p: {
   );
 }
 
-/** «1 sin comprobante. Pedro te lo va a preguntar.», only when one lacks it. */
-function NotaComprobante(p: { readonly n: number; readonly dueno: string }): ReactElement | null {
+/** «1 sin comprobante. Los patrones te lo van a preguntar.», only when one lacks it. */
+function NotaComprobante(p: { readonly n: number }): ReactElement | null {
   if (p.n === 0) return null;
   return (
     <View
@@ -74,7 +73,7 @@ function NotaComprobante(p: { readonly n: number; readonly dueno: string }): Rea
         flex={1}
         testID="gastos-sin-comprobante"
       >
-        {`${p.n} sin comprobante. ${mayuscula(p.dueno)} te lo va a preguntar.`}
+        {`${p.n} sin comprobante. Los patrones te lo van a preguntar.`}
       </MText>
     </View>
   );
@@ -88,7 +87,7 @@ export function Cifras({ data }: { readonly data: GastosData }): ReactElement {
         <Cifra label="Salió de caja chica" value={formatMoney(r.total)} color={colors.redText} />
         <Cifra label="Gastos" value={String(r.cuantos)} testID="gastos-cuantos" />
       </View>
-      <NotaComprobante n={r.sinComprobante} dueno={data.dueno ?? 'el dueño'} />
+      <NotaComprobante n={r.sinComprobante} />
     </View>
   );
 }

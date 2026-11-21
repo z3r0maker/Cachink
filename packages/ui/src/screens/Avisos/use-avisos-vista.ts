@@ -7,12 +7,12 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { Aviso, AvisoGrupo, AvisosData, AvisosVivo } from '@xangarro/caja/avisos';
-import { toastGuardada, toastRespuesta } from '@xangarro/caja/avisos';
+import { TOAST_GUARDADA, toastRespuesta } from '@xangarro/caja/avisos';
 
 export interface AvisoToast {
   readonly texto: string;
   readonly ok: boolean;
-  /** Saved offline: it reaches the owner when the signal returns (R6). */
+  /** Saved offline: it reaches «los patrones» when the signal returns (R6). */
   readonly guardada?: boolean;
 }
 
@@ -37,16 +37,11 @@ export interface AvisosVista {
 
 const FALLO = 'La respuesta no se guardó. Tu texto sigue aquí; inténtalo otra vez.';
 
-/** What the toast says: who has it, or, offline, that it waits for the signal. */
-function toastDe(
-  data: AvisosData | null,
-  aviso: Aviso | undefined,
-  sinInternet: boolean,
-): AvisoToast {
-  const dueno = data?.dueno ?? 'el dueño';
+/** What the toast says: «los patrones» have it, or, offline, that it waits for the signal. */
+function toastDe(aviso: Aviso | undefined, sinInternet: boolean): AvisoToast {
   return sinInternet
-    ? { texto: toastGuardada(dueno), ok: true, guardada: true }
-    : { texto: toastRespuesta(dueno, aviso?.responder?.asunto ?? 'su mensaje'), ok: true };
+    ? { texto: TOAST_GUARDADA, ok: true, guardada: true }
+    : { texto: toastRespuesta(aviso?.responder?.asunto ?? 'su mensaje'), ok: true };
 }
 
 /** The send: write through `vivo`, then show the reply and the toast. */
@@ -68,7 +63,7 @@ async function enviar(
   }
   set((all) => all.map((x) => (x.id === id ? { ...x, respuesta: texto, leido: true } : x)));
   cierra();
-  avisa(toastDe(data, aviso, sinInternet));
+  avisa(toastDe(aviso, sinInternet));
   return null;
 }
 

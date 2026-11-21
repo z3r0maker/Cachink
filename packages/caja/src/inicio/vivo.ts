@@ -7,8 +7,7 @@
 
 import type { CuentaCliente } from '../cobranza/cliente/types';
 import type { CortePara, TurnoVivoPara } from '../lectura/turno-shapes';
-import { mayuscula, nombreDueno } from '../comun/dueno';
-import { diaConFecha, MESES } from '../comun/frases';
+import { diaConFecha, mayuscula, MESES } from '../comun/frases';
 import { tareasParaHoy, type StockTarea } from './para-hoy';
 import type { CorteReciente, InicioData, Momento, ResultadoCorte, Situacion } from './types';
 
@@ -84,8 +83,6 @@ export interface Entorno {
   /** Fiado still owed across the business, for the closed turno's figures. */
   readonly porCobrar: { readonly monto: bigint; readonly clientes: number };
   readonly ahora: Date;
-  /** The owner's display name as the last pull sent it; null: «el dueño». */
-  readonly dueno: string | null;
   /** Tracked products' stock and the business's accounts, for «Para hoy». */
   readonly stock: readonly StockTarea[];
   readonly cuentas: readonly CuentaCliente[];
@@ -99,7 +96,6 @@ export function comoInicio(v: TurnoVivoPara, e: Entorno): InicioData {
     nombre: primerNombre(e.nombre),
     momento: momentoDe(e.ahora.getHours()),
     fecha: fechaInicio(e.ahora, e.negocio, e.caja),
-    dueno: nombreDueno(e.dueno),
     situacion: situacionDe(v, e.ahora),
     offline: e.offline,
     pendientes: e.pendientes,

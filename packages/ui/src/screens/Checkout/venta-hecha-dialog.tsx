@@ -7,7 +7,6 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@xangarro/domain';
-import { aDueno } from '@xangarro/caja';
 import { Btn } from '../../components/Btn/index';
 import { Dialog } from '../../components/Dialog/index';
 import { Eyebrow } from '../../components/Panel/index';
@@ -20,7 +19,6 @@ import type { VentaHecha } from './venta-hecha';
 
 export interface VentaHechaDialogProps {
   readonly venta: VentaHecha | null;
-  readonly dueno: string;
   readonly onMandar: () => void;
   readonly onNueva: () => void;
 }
@@ -102,7 +100,7 @@ function Hecho({ v }: { v: VentaHecha }): ReactElement {
   );
 }
 
-function Cuerpo({ v, dueno }: { v: VentaHecha; dueno: string }): ReactElement {
+function Cuerpo({ v }: { v: VentaHecha }): ReactElement {
   return (
     <View gap={12}>
       <Hecho v={v} />
@@ -124,7 +122,7 @@ function Cuerpo({ v, dueno }: { v: VentaHecha; dueno: string }): ReactElement {
         />
       ) : null}
       <MText size="sm" weight="semibold" color={colors.gray600} textAlign="center">
-        {`Se guardó en la caja y se le manda ${aDueno(dueno)}.`}
+        Se guardó en la caja y se les manda a los patrones.
       </MText>
     </View>
   );
@@ -174,7 +172,7 @@ export function VentaHechaDialog(p: VentaHechaDialogProps): ReactElement {
       testID="venta-hecha"
       footer={<Pie {...p} />}
     >
-      {v ? <Cuerpo v={v} dueno={p.dueno} /> : <Eyebrow>Venta hecha</Eyebrow>}
+      {v ? <Cuerpo v={v} /> : <Eyebrow>Venta hecha</Eyebrow>}
     </Dialog>
   );
 }

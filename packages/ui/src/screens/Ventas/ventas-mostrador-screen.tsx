@@ -34,8 +34,6 @@ export type { VentasEstado } from './venta-estados';
 export interface VentasMostradorScreenProps {
   readonly state: VentasEstado;
   readonly data: VentasData | null;
-  /** The owner's name (the cancel dialog says it); «el dueño» until known. */
-  readonly dueno?: string;
   readonly onRetry: () => void;
   /** The empty state's way forward. */
   readonly onIrACobrar: () => void;
@@ -163,7 +161,6 @@ function Capas(p: {
       {v.cancelar && v.fila ? (
         <CancelarVentaDialog
           venta={v.fila}
-          dueno={p.props.dueno}
           onClose={() => v.setCancelar(false)}
           {...(p.props.onVerificar ? { onVerificar: p.props.onVerificar } : {})}
           onConfirm={v.confirmar}

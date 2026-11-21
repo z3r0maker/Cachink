@@ -1,8 +1,8 @@
 # Avisos without internet (RvAvisosSinInternet, R6): what the phone already
 # has keeps showing. The bell keeps its count, /avisos lists the owner's
 # messages under the shell's «Sin internet» strip, and a reply is saved for
-# the outbox: «Tu respuesta se guardó. Le llega al dueño cuando vuelva la
-# señal.» Before, the screen swapped every message for a sin-internet state.
+# the outbox: «Tu respuesta se guardó. Les llega a los patrones cuando vuelva
+# la señal.» Before, the screen swapped every message for a sin-internet state.
 #
 # Precondition: device activated against the mock (its two mensajes for Toni,
 # contracts/mock/fixtures.ts mensajes()). Leaves the mock up again.
@@ -62,7 +62,7 @@ tags:
       id: 'avisos-toast'
     timeout: 8000
 - assertVisible: '.*Respuesta guardada.*'
-- assertVisible: '.*Le llega al dueño cuando vuelva la señal\..*'
+- assertVisible: '.*Les llega a los patrones cuando vuelva la señal\..*'
 
 # The network returns.
 - runScript:

@@ -2,8 +2,7 @@
 
 import { formatMoney } from '@xangarro/domain';
 
-import { mayuscula, PRODUCT_ICONS } from '@xangarro/caja';
-import { useDueno } from '../ui/use-dueno';
+import { PRODUCT_ICONS } from '@xangarro/caja';
 import { Icon } from '../../shell/icon';
 import { Glyph } from '../ui/parts';
 import * as m from '../ui/mostrador.css';
@@ -105,7 +104,6 @@ function Tipo({ f }: { readonly f: Nuevo }) {
 
 /** «Así se verá en la caja»: the tile it will make, and its icon (suggested, or picked). */
 export function Muestra({ f }: { readonly f: Nuevo }) {
-  const dueno = useDueno();
   return (
     <section aria-labelledby="np-muestra" className={n.muestra}>
       <h3 id="np-muestra" className={`${m.eyebrow} ${n.h3}`}>
@@ -134,7 +132,7 @@ export function Muestra({ f }: { readonly f: Nuevo }) {
       {f.cambiar ? <Iconos f={f} /> : null}
       <p className={n.info}>
         <Icon path={INFO} size={16} strokeWidth={2} />
-        {`Se vende desde ya. ${mayuscula(dueno)} lo ve en su catálogo y le pone el costo.`}
+        Se vende desde ya. Los patrones lo ven en su catálogo y le ponen el costo.
       </p>
     </section>
   );

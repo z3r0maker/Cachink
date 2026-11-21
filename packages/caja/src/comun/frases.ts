@@ -6,6 +6,9 @@ import { enPalabras } from '../inicio/copy';
  * `Operador Detalle de cliente`; one copy lives here.
  */
 
+/** The sentence-initial form: «Jueves 14 de mayo». */
+export const mayuscula = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
 /**
  * Hint under the first KPI: «Ninguna cancelada», «Una cancelada a las 12:58»,
  * «Dos canceladas, la última a las 13:40». The file spells the plural in

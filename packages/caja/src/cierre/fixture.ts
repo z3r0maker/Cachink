@@ -13,7 +13,6 @@ export const CIERRE_FIXTURE: CierreData = {
   caja: 'Caja 1',
   desde: '08:15',
   hasta: '21:04',
-  dueno: 'Pedro',
   negocio: 'Taquería Don Pedro',
   partes: {
     fondo: TURNO_FIXTURE.fondo,

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
-import { OPERADOR_BASE } from '@xangarro/caja';
+import { OPERADOR_BASE, PORTAL_PATRONES } from '@xangarro/caja';
 import { Chip, Panel, Tile } from '../ui/panel';
 import * as p from '../ui/panel.css';
 import type { Reintento } from '@xangarro/caja';
@@ -34,8 +34,6 @@ export function ListaCola(props: {
   readonly cola: readonly RegistroEnCola[];
   readonly fase: Fase;
   readonly offline: boolean;
-  /** «el portal de Pedro», or «el portal del dueño» on a linked caja. */
-  readonly portal?: string;
   /** The clock and the engine's retry, for each row's last and next attempt (DS-07). */
   readonly ahora?: number;
   readonly reintento?: Reintento | null;
@@ -52,9 +50,7 @@ export function ListaCola(props: {
           linea={lineaIntento(r, ahora, props.reintento ?? null)}
         />
       ))}
-      {props.cola.length === 0 ? (
-        <NadaPendiente portal={props.portal ?? 'el portal de Pedro'} />
-      ) : null}
+      {props.cola.length === 0 ? <NadaPendiente /> : null}
     </Panel>
   );
 }
@@ -95,12 +91,12 @@ function Fila({
   );
 }
 
-function NadaPendiente({ portal }: { readonly portal: string }) {
+function NadaPendiente() {
   return (
     <div className={s.vacia}>
       <span className={s.vaciaTitulo}>Nada pendiente</span>
       <span className={p.rowDetail}>
-        {`Todo lo que capturaste ya está en ${portal}. Puedes cerrar el turno cuando quieras.`}
+        {`Todo lo que capturaste ya está en ${PORTAL_PATRONES}. Puedes cerrar el turno cuando quieras.`}
       </span>
       <Link href={`${OPERADOR_BASE}/cierre`} className={p.primaryBtn} style={{ marginTop: 8 }}>
         Ir al cierre de turno

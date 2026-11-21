@@ -2,6 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { VENTAS_FIXTURE } from '../src/ventas/fixture';
+import { consecuencia } from '../src/ventas/detalle/copy';
 import { DETALLE_CANCELADA, detalleDeFila } from '../src/ventas/detalle/fixture';
 import {
   MOTIVOS_CANCELAR,
@@ -64,16 +65,16 @@ describe('avisoCancelar (the dialog consequence)', () => {
   });
 
   it('for a fiado sale: the client balance drops, and an abono stays in their favor', () => {
-    const texto = avisoCancelar('Fiado', 90_00n, 'Doña Mari de la tienda', 'Pedro');
+    const texto = avisoCancelar('Fiado', 90_00n, 'Doña Mari de la tienda');
     assert.match(texto, /saldo de Doña Mari de la tienda baja \$90\.00/);
     assert.match(texto, /saldo a favor suyo/);
-    assert.match(texto, /Pedro lo ve marcado en su portal/);
+    assert.match(texto, /su siguiente compra\. Los patrones lo ven marcado en su portal\.$/);
   });
 
-  it('for tarjeta: only that it leaves the turno and the owner sees it', () => {
+  it('for tarjeta: only that it leaves the turno and «los patrones» see it', () => {
     assert.equal(
-      avisoCancelar('Tarjeta', 396_00n, undefined, 'Lupita'),
-      'Sale de tus ventas del turno y Lupita lo ve en su portal. ' +
+      avisoCancelar('Tarjeta', 396_00n),
+      'Sale de tus ventas del turno y los patrones lo ven en su portal. ' +
         'Si hay que devolver el dinero, se hace por el mismo medio.',
     );
   });
@@ -207,5 +208,18 @@ describe('MOTIVOS_CANCELAR', () => {
       'Producto equivocado',
       'Cobro duplicado',
     ]);
+  });
+});
+
+describe('consecuencia (the web caja’s cancel dialog)', () => {
+  it('says «los patrones» see it, in plural (M-25)', () => {
+    assert.equal(
+      consecuencia('Efectivo', 160_00n),
+      'Se regresan $160.00 del efectivo esperado y los patrones lo ven en su portal.',
+    );
+    assert.equal(
+      consecuencia('Tarjeta', 396_00n),
+      'Sale de tus ventas del turno y los patrones lo ven en su portal. Si hay que devolver el dinero, se hace por el mismo medio.',
+    );
   });
 });

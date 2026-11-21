@@ -82,7 +82,7 @@ function Pagina(p: ClienteScreenProps & { cuenta: CuentaCliente; data: DatosCobr
   return (
     <View flex={1} testID={p.testID ?? 'cliente'}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
-        <CuentaCuerpo cuenta={p.cuenta} hoy={p.data.hoy} dueno={p.data.dueno} />
+        <CuentaCuerpo cuenta={p.cuenta} hoy={p.data.hoy} />
       </ScrollView>
       <View
         padding={16}

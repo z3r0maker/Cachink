@@ -24,8 +24,6 @@ export interface GastosData {
   readonly caja: string;
   readonly desde: string;
   readonly gastos: readonly GastoTurno[];
-  /** The owner's first name, for the «Sin comprobante» note (M-08's read). */
-  readonly dueno?: string;
 }
 
 export interface NuevoGasto {

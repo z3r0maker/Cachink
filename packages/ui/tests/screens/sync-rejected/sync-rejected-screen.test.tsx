@@ -49,7 +49,11 @@ describe('SyncRejectedScreen', () => {
     expect(screen.getByTestId('no-enviado-reason-sales:S1')).toHaveTextContent(
       'El producto de este registro ya no existe en el portal.',
     );
-    expect(screen.getByText(/que recupere el producto en el portal/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Pídeles a los patrones que recuperen el producto en el portal y toca Reintentar. No la vuelvas a capturar: se contaría dos veces.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/regístrala/)).not.toBeInTheDocument();
   });
 

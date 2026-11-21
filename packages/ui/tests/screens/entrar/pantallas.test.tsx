@@ -98,7 +98,6 @@ describe('Acceso', () => {
         operadores={OPS}
         contexto="Caja 1 · Taquería Don Pedro"
         fecha="Jueves 14 de mayo"
-        dueno="Pedro"
         onAuthenticate={onAuthenticate}
         error={null}
         submitting={false}
@@ -120,7 +119,6 @@ describe('Acceso', () => {
         operadores={OPS}
         contexto={null}
         fecha="Jueves 14 de mayo"
-        dueno={null}
         onAuthenticate={onAuthenticate}
         error={null}
         submitting={false}
@@ -133,9 +131,13 @@ describe('Acceso', () => {
       '0 de 4 números escritos',
     );
     tap('acceso-olvide');
-    expect(screen.getByText(/Nadie más puede cambiarlo/)).toBeInTheDocument();
     expect(
-      screen.getByText('¿Olvidaste tu NIP? Pídele al dueño que te lo cambie.'),
+      screen.getByText(
+        'Se cambia desde el portal de los patrones, en Equipo y nómina. Nadie más puede cambiarlo desde la caja.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('¿Olvidaste tu NIP? Pídeles a los patrones que te lo cambien.'),
     ).toBeInTheDocument();
   });
 });
@@ -147,7 +149,6 @@ describe('Acceso: the error line is about one person’s NIP (F-08)', () => {
       operadores={OPS}
       contexto={null}
       fecha="Jueves 14 de mayo"
-      dueno={null}
       onAuthenticate={onAuthenticate}
       error={error}
       submitting={false}

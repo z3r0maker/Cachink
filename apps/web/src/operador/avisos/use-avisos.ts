@@ -7,7 +7,7 @@ import {
   type AvisoGrupo,
   type AvisosData,
   type AvisosVivo,
-  mayuscula,
+  toastRespuesta,
 } from '@xangarro/caja/avisos';
 
 interface Envio {
@@ -15,7 +15,6 @@ interface Envio {
   readonly setDraft: (s: string) => void;
   readonly setToast: (s: string | null) => void;
   readonly update: (id: string, patch: Partial<Aviso>) => void;
-  readonly dueno: string;
   readonly vivo: AvisosVivo | undefined;
 }
 
@@ -24,9 +23,7 @@ function enviarRespuesta(c: Envio, x: Aviso): void {
   const texto = c.draft.trim();
   c.update(x.id, { respuesta: texto, leido: true });
   c.setDraft('');
-  c.setToast(
-    `${mayuscula(c.dueno)} ya tiene tu respuesta sobre ${x.responder?.asunto ?? 'su mensaje'}.`,
-  );
+  c.setToast(toastRespuesta(x.responder?.asunto ?? 'su mensaje'));
   c.vivo?.responder(x.id, texto).catch(() => {
     c.update(x.id, { respuesta: undefined });
     c.setDraft(texto);
@@ -65,7 +62,6 @@ export function useAvisos(data: AvisosData, initialTab: AvisoGrupo, vivo?: Aviso
       setAvisos((all) => all.map((x) => ({ ...x, leido: true })));
       vivo?.marcar(avisos.filter((x) => !x.leido).map((x) => x.id));
     },
-    send: (x: Aviso) =>
-      enviarRespuesta({ draft, setDraft, setToast, update, dueno: data.dueno, vivo }, x),
+    send: (x: Aviso) => enviarRespuesta({ draft, setDraft, setToast, update, vivo }, x),
   };
 }

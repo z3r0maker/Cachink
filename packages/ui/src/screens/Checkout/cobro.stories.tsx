@@ -70,7 +70,6 @@ function Pantalla({ vista }: { vista: Vista }): ReactElement {
         cargando={false}
         registrando={false}
         error={null}
-        dueno="el dueño"
         onAnotar={() => undefined}
       />
     );
@@ -121,7 +120,6 @@ function Demo({ vista }: { vista: Vista }): ReactElement {
       {hecha ? (
         <VentaHechaDialog
           venta={mandar ? null : venta}
-          dueno="el dueño"
           onMandar={() => setMandar(true)}
           onNueva={() => setMandar(false)}
         />

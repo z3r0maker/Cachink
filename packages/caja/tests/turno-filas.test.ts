@@ -40,7 +40,7 @@ const existencia = (corto: string, existencias: number, umbral: number): Existen
 const aviso = (id: string, titulo: string, leido: boolean): Aviso => ({
   id,
   grupo: 'dueno',
-  tipo: 'Mensaje del dueño',
+  tipo: 'Mensaje de los patrones',
   titulo,
   cuerpo: '',
   hora: 'Hoy 09:12',

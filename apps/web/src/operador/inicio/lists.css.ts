@@ -2,7 +2,7 @@ import { style, styleVariants } from '@vanilla-extract/css';
 import { borders, colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
 
 /** Inicio's side column: the owner's messages and the last cortes. */
-/* De parte de Pedro ------------------------------------------------------ */
+/* De parte de los patrones ---------------------------------------------- */
 
 export const mensajes = style({ padding: 10, display: 'flex', flexDirection: 'column', gap: 6 });
 

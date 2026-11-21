@@ -29,7 +29,6 @@ function montar(over: Partial<Parameters<typeof VentasMostradorScreen>[0]> = {})
     <VentasMostradorScreen
       state="happy"
       data={VENTAS_FIXTURE}
-      dueno="Pedro"
       onRetry={vi.fn()}
       onIrACobrar={vi.fn()}
       {...rest}
@@ -163,7 +162,6 @@ describe('cancelar con motivo', () => {
     const props = () => ({
       state: 'happy' as const,
       data: VENTAS_FIXTURE,
-      dueno: 'Pedro',
       onRetry: vi.fn(),
       onIrACobrar: vi.fn(),
       onCompartir: vi.fn(),
@@ -257,6 +255,11 @@ describe('cancelar con motivo', () => {
       expect(screen.getByTestId('cancelar-sin-permiso')).toBeInTheDocument();
     });
     expect(screen.getByText('No tienes permiso para cancelar')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Pídeles a los patrones que te den permiso o que la cancelen desde su portal. La venta sigue igual: no devuelvas dinero.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByTestId('don-preocupado')).toBeInTheDocument();
     expect(screen.queryByTestId('cancelar-resumen')).toBeNull();
     fireEvent.click(screen.getByTestId('cancelar-sin-permiso-entendido'));
