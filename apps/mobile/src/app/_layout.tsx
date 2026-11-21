@@ -60,6 +60,7 @@ import * as plusJakartaSans from '@expo-google-fonts/plus-jakarta-sans';
 import { AppProviders, fontFaces, SplashAnimado, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { NotificationTapHost } from '../shell/notification-tap-host';
+import { ReportarSheetHost } from '../shell/reportar-host';
 import { TurnoDeOtroHost } from '../shell/turno-de-otro-host';
 import { mobileActivationConfig } from '../shell/activation-config';
 import { fotoPuertos } from '../shell/foto-puertos';
@@ -120,6 +121,7 @@ function MobileApp(): ReactElement {
           <NotificationTapHost />
           <StockLowScheduleHost />
           <TurnoDeOtroHost />
+          <ReportarSheetHost />
         </>
       }
     >

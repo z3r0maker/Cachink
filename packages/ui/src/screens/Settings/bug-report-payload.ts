@@ -1,21 +1,15 @@
 /**
- * What a bug report carries, built from the device's log snapshot: the
- * scrubbed copy, the readable timeline, and the two payloads — the contract's
- * request for a remote submit (§9, N-81) and the richer JSON a person receives
- * through the share sheet. Pure; the hook beside it owns state and the doors.
+ * What a bug report carries (contract §9, M-23): what the person tapped, the
+ * sentence they may have added, the error the report names when it was opened
+ * from one, the build, and the device's log snapshot, scrubbed. Pure; the
+ * hook in `../../reportar/` owns state and the sending.
  *
- * What must never leave through either door: a stack trace, or metadata the
- * scrubber knows as personal.
+ * What must never leave: a stack trace, a screenshot, or metadata the scrubber
+ * knows as personal.
  */
 
-import type { BugReportRequest } from '@xangarro/contracts';
-import {
-  scrubRecord,
-  formatTimelineAsText,
-  type DeviceContext,
-  type LogSnapshot,
-  type TimelineEntry,
-} from '@xangarro/observability';
+import type { BugReportCategory, BugReportRequest } from '@xangarro/contracts';
+import { scrubRecord, type DeviceContext, type LogSnapshot } from '@xangarro/observability';
 
 function scrubSnapshot(snapshot: LogSnapshot) {
   return {
@@ -32,27 +26,14 @@ function scrubSnapshot(snapshot: LogSnapshot) {
   };
 }
 
-function buildTimeline(snapshot: LogSnapshot): string {
-  const allEntries: readonly TimelineEntry[] = [
-    ...snapshot.auditEvents.map((e) => ({ type: 'audit' as const, ...e })),
-    ...snapshot.errors.map((e) => ({ type: 'error' as const, ...e })),
-  ].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  return formatTimelineAsText(allEntries);
-}
-
 export interface ReportData {
   readonly snapshot: LogSnapshot;
   readonly scrubbed: ReturnType<typeof scrubSnapshot>;
-  readonly readableTimeline: string;
 }
 
-/** The snapshot, its scrubbed copy and its timeline: everything a report is made of. */
+/** The snapshot and its scrubbed copy: what a report attaches. */
 export function collectReport(snapshot: LogSnapshot): ReportData {
-  return {
-    snapshot,
-    scrubbed: scrubSnapshot(snapshot),
-    readableTimeline: buildTimeline(snapshot),
-  };
+  return { snapshot, scrubbed: scrubSnapshot(snapshot) };
 }
 
 /** What the build is, for whoever reads the report; an unknown model is left out. */
@@ -62,47 +43,36 @@ function buildOf(deviceContext?: DeviceContext | null): Partial<BugReportRequest
   return { osName, osVersion, appVersion, platform, ...(model ? { deviceModel: model } : {}) };
 }
 
+/** What the sheet collected: a tap, maybe a sentence, maybe the error it was opened from. */
+export interface ReportInput {
+  readonly category: BugReportCategory;
+  readonly description: string;
+  readonly eventId?: string | null;
+}
+
 /**
- * The wire payload for a remote submit (contract §9). It carries no device,
- * business or user id: the server takes those from the device token.
+ * The wire payload (contract §9). It carries no device, business or user id:
+ * the server takes those from the device token. With no log store there is no
+ * snapshot, and the report still goes.
  */
 export function toBugReport(
-  description: string,
-  data: ReportData,
+  input: ReportInput,
+  data: ReportData | null,
   deviceContext?: DeviceContext | null,
 ): BugReportRequest {
   return {
-    description: description.trim(),
+    category: input.category,
+    description: input.description.trim(),
+    ...(input.eventId ? { eventId: input.eventId } : {}),
     submittedAt: new Date().toISOString(),
     ...buildOf(deviceContext),
-    snapshot: {
-      auditEvents: data.scrubbed.auditEvents as Record<string, unknown>[],
-      errors: data.scrubbed.errors as Record<string, unknown>[],
-    },
-  };
-}
-
-/** The richer JSON a human receives through the share sheet. */
-export function toSharedReport(
-  description: string,
-  data: ReportData,
-  deviceContext?: DeviceContext | null,
-  featureFlags?: Record<string, boolean> | null,
-): Record<string, unknown> {
-  return {
-    description: description.trim(),
-    submittedAt: new Date().toISOString(),
-    readableTimeline: data.readableTimeline,
-    snapshot: data.scrubbed,
-    ...(deviceContext
-      ? {
-          deviceModel: deviceContext.model,
-          osName: deviceContext.osName,
-          osVersion: deviceContext.osVersion,
-          appVersion: deviceContext.appVersion,
-          platform: deviceContext.platform,
-        }
-      : {}),
-    ...(featureFlags ? { featureFlags } : {}),
+    ...(data === null
+      ? {}
+      : {
+          snapshot: {
+            auditEvents: data.scrubbed.auditEvents as Record<string, unknown>[],
+            errors: data.scrubbed.errors as Record<string, unknown>[],
+          },
+        }),
   };
 }

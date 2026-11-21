@@ -2,10 +2,13 @@
  * The caja's headers (MvTurno, OpTopbar; the web's `OperadorHeader`).
  *
  * - `CajaHeader`, the phone's: 64 px, white, the quiet rule under it. The
- *   caja badge (or the way back on a detail screen), then the sync pill and
- *   the avisos bell.
+ *   caja badge (or the way back on a detail screen), then the sync pill, the
+ *   help button and the avisos bell.
  * - `CajaTopbar`, the tablet's beside the rail or the sidebar: 72 px on the
- *   page, the day (or the way back), then the same pill and bell.
+ *   page, the day (or the way back), then the same pill, help and bell.
+ *
+ * The help button (RpPuerta, M-23) sits on every tab: wherever the frame is
+ * `full` and there is no way back. The tablet's says «Ayuda» beside its mark.
  *
  * `status` follows the web's `headerFor`: `full` (pill + bell), `static`
  * (a pill that is not a button, Pendientes and Cierre) or `none`.
@@ -18,6 +21,7 @@ import { borderColors, borderWidths, colors, portalFontSizes, typography } from 
 import { useTranslation } from '../../i18n/index';
 import { AvisosBell, type AvisosSource } from './avisos-bell';
 import { BackButton, CajaBadge } from './app-shell-left-slot';
+import { BotonAyuda } from '../../reportar/boton-ayuda';
 import { CloudSyncPill } from './cloud-sync-pill';
 import type { ShellData } from './use-shell-data';
 
@@ -39,7 +43,7 @@ export interface CajaHeaderProps {
   readonly onOpenPendientes?: () => void;
 }
 
-function Right(p: CajaHeaderProps): ReactElement {
+function Right(p: CajaHeaderProps & { readonly ancho?: boolean }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
       {p.status === 'none' ? null : (
@@ -49,6 +53,7 @@ function Right(p: CajaHeaderProps): ReactElement {
           interactive={p.status === 'full'}
         />
       )}
+      {p.status === 'full' && !p.back ? <BotonAyuda conTexto={p.ancho} /> : null}
       {p.status === 'full' && p.avisos ? <AvisosBell {...p.avisos} /> : null}
     </View>
   );
@@ -123,7 +128,7 @@ export function CajaTopbar(props: CajaHeaderProps): ReactElement {
           {hoyLargo()}
         </Text>
       )}
-      <Right {...props} />
+      <Right {...props} ancho />
     </View>
   );
 }
