@@ -189,22 +189,33 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 ### G-07 La voz de Don Cuentas: su descripción, sus líneas y su audio [media]
 
 - [ ] Status · **Blocked by:** — · **Blocks:** G-04
-- **The tooling is done and proven (2026-11-21); the voice is not chosen.** In the repo: the
-  voice's description and the sample's words (`packages/guias/src/voz.ts`) and `pnpm guias:voz`
-  (`muestra`, `usar <n>`, `lineas`, `--check`). A line's file is named after a hash of its words
-  and of the voice's version (`packages/guias/voz/<guía>/<paso>-<huella>.m4a`), so the name is
-  the record and nothing else has to remember it. There are 30 lines.
+- **The voice is chosen and every line is said (2026-11-21).** The owner asked for an older
+  man (age, wisdom, a calm voice, patience) after the first four takes came out young, and kept
+  take 7 of the second round. The 30 lines were said in it, and he found them «very slow»: 98
+  seconds, 153 words a minute. They were said again faster: 77 seconds, 186 words a minute.
+- **The pace is set on the sample, not on the lines.** Qwen3-TTS has no speed setting (mlx-audio
+  takes `speed` and ignores it); it copies the pace of the sample it hears, and take 7 is slow,
+  a third of it pauses. So the model hears the sample with its long pauses cut short and played
+  `VOZ_DON.ritmo` times faster (`scripts/guias-voz-ritmo.ts`); the kept file is not touched and
+  no line is stretched. Measured on six lines: 145 words a minute with the sample as kept, 166 at
+  a pace of 1, 179 at 1.15, 199 at 1.3. It is 1.15 until the owner picks by ear.
+- **The voice is a file, not a description.** The design model gives a different voice on every
+  run, so the description cannot make this one again. What can is the kept sample
+  (`packages/guias/voz/don-cuentas.wav`), the exact words it says (`VOZ_DON.muestra`) and the
+  base model that copies it, whose revision is written in `scripts/guias-voz-omlx.ts`.
+  `VOZ_DON.huella` is the sample's SHA-256 and a test holds the file to it. How to say a new
+  line or change the voice is in `packages/guias/voz/README.md`.
+- **A line's file is named after a hash of its words and of the voice's version and pace**
+  (`packages/guias/voz/<guía>/<paso>-<huella>.m4a`), so the name is the record.
+  `scripts/guias-voz.test.ts` now demands every line's audio and refuses any other, so a changed
+  word, or a changed pace, is red until `pnpm guias:voz lineas` says it again; `limpiar` deletes
+  the audio left over.
 - **It speaks through oMLX,** which the owner already runs: both models sit in its models
   folder and the command posts to its speech route. No Python, nothing installed in the
-  workspace. A take of the sample and a line in its voice were both generated this way. oMLX
-  wants the reference clip as base64, not a path.
-- **Left, in order:** the owner listens to the takes in `packages/guias/voz/muestras/` and keeps
-  one (`usar <n>`), or asks for the description to change; then `lineas`; he listens to a few;
-  `packages/guias/voz/` is committed. Then `scripts/guias-voz.test.ts` is tightened to demand
-  every line (today it only refuses stale or unnamed audio, so CI stays green before the voice
-  exists).
-- **Still to be heard:** how Mexican the accent comes out. The licence was read again on
-  2026-11-21: Apache 2.0 on both model cards.
+  workspace. oMLX wants the reference clip as base64, not a path.
+- **Left:** the owner picks the pace by ear (three were sent: 166, 179 and 199 words a minute)
+  and listens to the 30 lines at it. A line that sounds wrong is deleted and said again. The licence
+  was read again on 2026-11-21: Apache 2.0 on both model cards.
 - **What:** three things, in order.
   1. One description of the voice in words (a warm, playful shopkeeper from Mexico), kept in the
      package. The owner generates a reference sample from it with Qwen3-TTS VoiceDesign and

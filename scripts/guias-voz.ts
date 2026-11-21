@@ -9,6 +9,7 @@
  *   pnpm guias:voz muestra    a new take of the voice, to listen to
  *   pnpm guias:voz usar 2     keep take 2 as the voice
  *   pnpm guias:voz lineas     say every line that has no audio, in that voice
+ *   pnpm guias:voz limpiar    delete the audio no line names any more
  *
  * `OMLX_URL` moves it off http://localhost:8000; `OMLX_API_KEY` is sent when set.
  */
@@ -19,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 import { GUIAS, VOZ_DON } from '../packages/guias/src/index.js';
 import { REFERENCIA, grabarLineas, grabarMuestra, usarToma } from './guias-voz-grabar.js';
-import { audios, estado, lineas, type Estado } from './guias-voz-lineas.js';
+import { audios, estado, limpiar, lineas, type Estado } from './guias-voz-lineas.js';
 import type { Servidor } from './guias-voz-omlx.js';
 
 const ROOT = join(fileURLToPath(import.meta.url), '../..');
@@ -32,7 +33,7 @@ function servidor(): Servidor {
 }
 
 const actual = (): { readonly total: number; readonly e: Estado } => {
-  const esperadas = lineas(GUIAS, VOZ_DON.version);
+  const esperadas = lineas(GUIAS, VOZ_DON);
   return { total: esperadas.length, e: estado(esperadas, audios(ROOT)) };
 };
 
@@ -40,7 +41,8 @@ function informe(): Estado {
   const { total, e } = actual();
   out(`${total} lines, ${e.faltan.length} with no audio, ${e.sobran.length} audio left over.`);
   for (const l of e.faltan) out(`  to say   ${l.guia} ${l.paso}: ${l.texto}`);
-  for (const a of e.sobran) out(`  delete   ${a} (no line says this any more)`);
+  for (const a of e.sobran) out(`  left     ${a} (no line says this any more)`);
+  if (e.sobran.length > 0) out('Delete them: pnpm guias:voz limpiar');
   if (!existsSync(join(ROOT, REFERENCIA))) out('No voice yet: pnpm guias:voz muestra');
   else if (e.faltan.length > 0) out('Say them: pnpm guias:voz lineas');
   return e;
@@ -62,10 +64,14 @@ const ORDENES: Readonly<Record<string, (valor?: string) => Promise<number> | num
   },
   usar: (n) => {
     if (n === undefined) throw new Error('Which take? pnpm guias:voz usar 2');
-    out(`${usarToma(ROOT, n)} is now the voice (${REFERENCIA}).`);
-    out(
-      'If lines were already said in another voice, raise `version` in packages/guias/src/voz.ts.',
-    );
+    const { toma, huella } = usarToma(ROOT, n);
+    out(`${toma} is now the voice (${REFERENCIA}).`);
+    out(`In packages/guias/src/voz.ts, set huella to ${huella}`);
+    out('and raise version if lines were already said in another voice.');
+    return 0;
+  },
+  limpiar: () => {
+    out(`Deleted ${limpiar(ROOT, actual().e.sobran)} audio files no line names.`);
     return 0;
   },
   lineas: async () => {

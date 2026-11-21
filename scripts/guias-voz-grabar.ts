@@ -7,6 +7,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   copyFileSync,
   existsSync,
@@ -20,13 +21,12 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-import { CARPETA, type Linea } from './guias-voz-lineas.js';
+import { CARPETA, TOMAS, type Linea } from './guias-voz-lineas.js';
 import { decir, pedirLinea, pedirMuestra, type Servidor, type Voz } from './guias-voz-omlx.js';
+import { apretar } from './guias-voz-ritmo.js';
 
 /** The one sample every line is said in. */
 export const REFERENCIA = `${CARPETA}/don-cuentas.wav`;
-/** Takes to listen to and choose from. */
-export const TOMAS = `${CARPETA}/muestras`;
 
 /** The next take's number: one more than the highest among these file names. */
 export function siguienteToma(nombres: readonly string[]): number {
@@ -45,12 +45,16 @@ export async function grabarMuestra(root: string, servidor: Servidor, voz: Voz):
   return toma;
 }
 
-/** Keeps take `n` as the voice. Returns the take's path. */
-export function usarToma(root: string, n: string): string {
+/** Keeps take `n` as the voice. Returns the take's path and the kept file's SHA-256. */
+export function usarToma(
+  root: string,
+  n: string,
+): { readonly toma: string; readonly huella: string } {
   const toma = `${TOMAS}/toma-${n}.wav`;
   if (!existsSync(join(root, toma))) throw new Error(`There is no ${toma}.`);
   copyFileSync(join(root, toma), join(root, REFERENCIA));
-  return toma;
+  const kept = readFileSync(join(root, REFERENCIA));
+  return { toma, huella: createHash('sha256').update(kept).digest('hex') };
 }
 
 /** WAV to mono AAC: small enough to commit, and what the clips carry anyway. */
@@ -67,15 +71,18 @@ function aM4a(wav: Buffer, destino: string): void {
   }
 }
 
-/** Says each of these lines in the kept sample's voice, telling `hecho` as each one lands. */
+/**
+ * Says each of these lines in the kept sample's voice, at the voice's pace,
+ * telling `hecho` as each one lands.
+ */
 export async function grabarLineas(
   root: string,
   servidor: Servidor,
-  voz: Voz,
+  voz: Voz & { readonly ritmo: number },
   faltan: readonly Linea[],
   hecho: (linea: Linea) => void,
 ): Promise<void> {
-  const muestra = readFileSync(join(root, REFERENCIA));
+  const muestra = apretar(readFileSync(join(root, REFERENCIA)), voz.ritmo);
   for (const linea of faltan) {
     const wav = await decir(servidor, pedirLinea(linea.texto, voz, muestra));
     aM4a(wav, join(root, linea.archivo));

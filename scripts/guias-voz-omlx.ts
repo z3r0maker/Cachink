@@ -11,7 +11,14 @@
  * that may or may not be there.
  */
 
-/** The two models, by the names oMLX gives them: their folders in its models directory. */
+/**
+ * The two models, by the names oMLX gives them: their folders in its models
+ * directory. The voice was made and first said with these, from Hugging Face on
+ * 2026-11-21 (both Apache 2.0), served by oMLX 0.8.0 (mlx-audio 0.6.3). Saying a
+ * new line in the same voice needs the base one:
+ *   mlx-community/Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16 @ 7d3824abff87e49756bb0f83fb5411de75d160c4
+ *   mlx-community/Qwen3-TTS-12Hz-1.7B-Base-bf16        @ a6eb4f68e4b056f1215157bb696209bc82a6db48
+ */
 export const MODELOS = {
   diseno: 'Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16',
   base: 'Qwen3-TTS-12Hz-1.7B-Base-bf16',

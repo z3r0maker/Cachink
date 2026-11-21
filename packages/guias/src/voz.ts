@@ -5,11 +5,28 @@
  *
  * He is an older man: the owner's words for him are age, wisdom, a calm voice
  * and patience (2026-11-21, after the first takes came out too young).
+ *
+ * The description cannot make this voice again: the model gives a different
+ * one on every run. The voice is the sample the owner chose by ear, kept as
+ * `packages/guias/voz/don-cuentas.wav`. That file, the exact words it says
+ * (`muestra`) and the model that copies it are what a future line needs to
+ * sound like today's. `huella` pins the file; a new sample changes `huella`
+ * and `version` together.
  */
 export const VOZ_DON = {
   /** Goes up when the sample is made again, so every line is said again. */
   version: 1,
+  /** The kept sample, by its SHA-256: take 7, approved by the owner on 2026-11-21. */
+  huella: '4ee642a2d394974521eeccaa5a515405d61165f01f78236b93ecede02dc87d8c',
   /** The language of every line, as the model names it. */
+  /**
+   * How fast he speaks. The model copies the pace of the sample it hears, and
+   * the kept sample is slow, so the model hears it with its pauses cut short
+   * and played this many times faster (`scripts/guias-voz-ritmo.ts`). One is
+   * the sample's own pace without the pauses. The owner found take 7 «very
+   * slow» on 2026-11-21. A new pace has every line said again.
+   */
+  ritmo: 1.15,
   idioma: 'Spanish',
   /** What the voice-design model is told. In English, as the model's own examples are. */
   descripcion:
