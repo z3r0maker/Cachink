@@ -1642,7 +1642,7 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
 
 ### N-88 La consola captura sus errores, y su bandeja muestra cada reporte junto a su error (ADR-162) [media]
 
-- [ ] Status · **Blocked by:** B-21, O-34 · **Blocks:** —
+- [ ] Status · **Blocked by:** O-34 · **Blocks:** —
       **Surfaced by:** the owner, 2026-11-20 («auto report bugs found by execution with the trace …
       so we can fix them without user input»).
 - **What:** (1) The console reports its own server errors: `initSentry`, `scrubEvent` and
