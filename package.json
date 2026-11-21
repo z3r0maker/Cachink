@@ -21,6 +21,7 @@
     "lint:store": "tsx scripts/store-compliance/index.ts",
     "storybook:smoke": "tsx scripts/storybook-smoke.ts",
     "plan:board": "tsx scripts/plan-board.ts",
+    "notices": "tsx scripts/third-party-notices.ts",
     "adr:index": "tsx scripts/adr-index.ts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "typecheck": "turbo run typecheck",

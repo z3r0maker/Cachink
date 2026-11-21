@@ -14,6 +14,11 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
+// The third-party notices (`assets/legal/avisos-de-terceros.txt`, `pnpm
+// notices`) ride in the bundle as an asset: the licences ask for their
+// notice in every copy, and the owner chose a file over a screen (2026-11-20).
+config.resolver.assetExts = [...config.resolver.assetExts, 'txt'];
+
 // A checkout nested in another one (an agent worktree in .claude/worktrees,
 // or .e2e) uses Metro's own crawler and watcher, not Watchman. Watchman
 // answers a nested path with the enclosing watch, and the main checkout's
