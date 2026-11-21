@@ -1654,7 +1654,7 @@ cambio_centavos >= 0`. Widen the detector before any further column (`caja_movim
   browser.
 - **Design first** (CLAUDE.md §6, ADR-117), on the console's canvas
   (https://claude.ai/artifact/V1Z1fnGY2ydkft28qXpmdq): board CD-22 `InboxReporte`, round 24, drawn
-  2026-11-20, **approval pending: no code before it**. The Inbox had no board, so it is drawn from
+  2026-11-20, **approved by the owner 2026-11-20**. The Inbox had no board, so it is drawn from
   the live page in the Torre's dark theme. Its tabs: the list (each row gains «Trae su error» and
   the business with its caja), an item with its error («Lo que mandó la caja» and «Ver el error»),
   an item without one, and an item from the portal. No filter by category is drawn. The selected

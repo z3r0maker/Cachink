@@ -1,12 +1,11 @@
 'use client';
 
+import { TEMAS, type Guia, type Pregunta, type TemaId } from '@xangarro/guias';
 import Link from 'next/link';
 import { useState } from 'react';
 
 import { button } from '@/components/button.css';
 
-import { TEMAS, type Pregunta, type TemaId } from './contenido';
-import type { Guia } from './guias';
 import * as s from './ayuda.css';
 import * as c from './temas.css';
 

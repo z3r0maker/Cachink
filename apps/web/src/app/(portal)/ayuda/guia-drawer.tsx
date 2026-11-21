@@ -1,5 +1,6 @@
 'use client';
 
+import type { Guia, Paso } from '@xangarro/guias';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -7,20 +8,19 @@ import { Button, DonDice, Drawer } from '@/components';
 import { button } from '@/components/button.css';
 
 import * as s from './guia.css';
-import type { Guia } from './guias';
 
-function Pasos(p: { readonly pasos: readonly string[]; readonly actual: number }) {
+function Pasos(p: { readonly pasos: readonly Paso[]; readonly actual: number }) {
   return (
     <ol className={s.pasos} aria-label="Pasos">
-      {p.pasos.map((texto, i) => (
+      {p.pasos.map((paso, i) => (
         <li
-          key={texto}
+          key={paso.texto}
           className={s.paso[i < p.actual ? 'hecho' : i === p.actual ? 'actual' : 'falta']}
         >
           <span className={s.pasoNum} aria-hidden="true">
             {i < p.actual ? '✓' : i + 1}
           </span>
-          <span>{texto}</span>
+          <span>{paso.texto}</span>
         </li>
       ))}
     </ol>
@@ -79,7 +79,7 @@ export function GuiaDrawer({
       actions={<Acciones guia={guia} paso={paso} ir={setPaso} />}
     >
       <DonDice pose={ultimo ? 'senalando' : 'caminando'} size={110}>
-        {guia.pasos[paso]}
+        {guia.pasos[paso]?.texto}
       </DonDice>
       <Pasos pasos={guia.pasos} actual={paso} />
     </Drawer>

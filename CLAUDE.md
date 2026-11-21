@@ -78,6 +78,7 @@ pnpm workspaces + Turborepo. `apps/*`, `packages/*` and `tools/synth/*`; `archiv
 | `contracts`              | API + wire contracts shared by phone and cloud (zod). No transport, no IO. |
 | `auth-core`              | Passwords, sessions, throttles, TOTP (ADR-079/080). Storage via ports.     |
 | `tokens`                 | Design tokens — colour, type, shape, shadow, motion. Zero dependencies.     |
+| `guias`                  | Guides, quick answers and the search over them (ADR-163). Zero dependencies. |
 | `ui`                     | Shared Tamagui components (mobile).                                        |
 | `email`                  | Transactional email — Spanish React Email templates + sender adapters.     |
 | `observability`          | Audit logging, error telemetry, health checks.                             |
