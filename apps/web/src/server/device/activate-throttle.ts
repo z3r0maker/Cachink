@@ -3,6 +3,7 @@ import 'server-only';
 import { ACTIVATE_PER_CODE, ACTIVATE_PER_IP, clientIp } from '@xangarro/auth-core';
 import { throttleFail, throttleKey, throttleWait } from '@xangarro/data-pg';
 
+import { hashPairingToken } from '../../lib/pairing-token';
 import { db } from '../db';
 
 /**
@@ -16,6 +17,18 @@ import { db } from '../db';
  * retry race does that — so it counts against that code alone.
  */
 const GUESSES: ReadonlySet<string> = new Set(['CODE_INVALID', 'EMAIL_MISMATCH', 'CODE_EXPIRED']);
+
+/**
+ * What the per-credential lockout counts against: the typed code, or the scan
+ * token's hash. Read from the raw body, before parsing, so a malformed try
+ * still counts. `/activate/preview` (N-25) counts on the same keys, so
+ * previewing is no way around the redeem's budget.
+ */
+export function credentialOf(body: unknown): string | null {
+  const b = body as { code?: unknown; qrToken?: unknown } | null;
+  if (typeof b?.code === 'string') return b.code;
+  return typeof b?.qrToken === 'string' ? `qr:${hashPairingToken(b.qrToken).slice(0, 32)}` : null;
+}
 
 /** `credential` is the typed code, or `qr:<hash prefix>` for a scanned token (C-14). */
 export function activateThrottle(request: Request, credential: string | null) {

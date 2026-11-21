@@ -11,6 +11,7 @@
 
 import {
   API_PATHS,
+  ActivatePreviewResponseSchema,
   ActivateResponseSchema,
   BugReportResponseSchema,
   EntitlementResponseSchema,
@@ -19,6 +20,8 @@ import {
   PushResponseSchema,
   deviceHeaders,
   encodeJson,
+  type ActivatePreviewRequest,
+  type ActivatePreviewResponse,
   type ActivateRequest,
   type ActivateResponse,
   type BugReportRequest,
@@ -145,6 +148,16 @@ export class ApiClient {
       path: API_PATHS.activate,
       body: req,
       schema: ActivateResponseSchema,
+    });
+  }
+
+  /** «¿Es tu negocio?» for a scanned token (N-25): who it would link to; consumes nothing. */
+  activatePreview(req: ActivatePreviewRequest): Promise<ApiResult<ActivatePreviewResponse>> {
+    return this.#call({
+      method: 'POST',
+      path: API_PATHS.activatePreview,
+      body: req,
+      schema: ActivatePreviewResponseSchema,
     });
   }
 

@@ -1,11 +1,14 @@
 # Activation — error paths (A-04, J3-06): a code that does not exist, one that
 # expired and one already redeemed are each refused with their own sentence
-# (es-mx.ts `activation.errors`), and the phone stays on Vincular.
+# (es-mx.ts `activation.errors`), and the phone stays on Vincular. The scan
+# path's preview (N-25) refuses a used and an expired token with the same
+# sentences, before anything is redeemed, and offers only «Volver a la cámara».
 #
 # Precondition: fresh install (no activation record) showing
 # `activation-screen`; contracts mock running and reset. Mock codes
 # (contracts/src/mock/state.ts): EXPRK7M3 (expired) → «ya venció»,
 # USEDK7M3 (already redeemed) → «ya se usó»; any other code → «no coinciden».
+# Scan tokens (MOCK_QR_TOKENS): mockqrUSEDK7M3xangarro, mockqrEXPRK7M3xangarro.
 # x-entrypoint: fresh
 appId: mx.xangarro.mobile
 ---
@@ -33,3 +36,31 @@ appId: mx.xangarro.mobile
     env:
       CODE: 'USEDK7M3'
       SENTENCE: 'Ese código ya se usó en otro dispositivo\.'
+
+# The scan path: back to the camera, then each refused token by link.
+- tapOn:
+    id: 'vincular-escanear'
+- runFlow:
+    file: shared/vincular-enlace.yaml
+    env:
+      TOKEN: 'mockqrUSEDK7M3xangarro'
+- extendedWaitUntil:
+    visible:
+      text: '.*Ese código ya se usó en otro dispositivo\..*'
+    timeout: 15000
+- assertNotVisible:
+    id: 'vincular-leido-conectar'
+- tapOn:
+    id: 'vincular-leido-volver'
+- runFlow:
+    file: shared/vincular-enlace.yaml
+    env:
+      TOKEN: 'mockqrEXPRK7M3xangarro'
+- extendedWaitUntil:
+    visible:
+      text: '.*Ese código ya venció\..*'
+    timeout: 15000
+- tapOn:
+    id: 'vincular-leido-volver'
+- assertVisible:
+    id: 'activation-screen'

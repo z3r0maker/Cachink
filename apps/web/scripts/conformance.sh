@@ -55,6 +55,7 @@ suite() {
 
 suite tests/conformance/activate.test.ts
 suite tests/conformance/activate-scan.test.ts
+suite tests/conformance/activate-preview.test.ts
 suite tests/conformance/sync.test.ts
 suite tests/conformance/snapshot.test.ts
 suite tests/conformance/bug-report.test.ts
