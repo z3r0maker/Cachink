@@ -12,6 +12,7 @@ import {
   pagoTexto,
 } from '../../../src/screens/Checkout/comprobante';
 import { ticketInput, ventaHechaDe } from '../../../src/screens/Checkout/use-cobrar-ticket';
+import { logoParaComprobante } from '../../../src/logo-negocio/use-logo-negocio';
 import type { VentaHecha } from '../../../src/screens/Checkout/venta-hecha';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -105,5 +106,47 @@ describe('comprobante', () => {
 
   it('renders the business template as SVG', () => {
     expect(comprobanteSvgDe(venta, negocio)).toMatch(/^<svg/);
+  });
+
+  describe('with the logo the phone cached (N-19)', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo=';
+    const plantillas = ['ticket', 'clasico', 'moderno', 'minimal'] as const;
+
+    it.each(plantillas)('draws the logo in the %s template’s logo box', (t) => {
+      const svg = comprobanteSvgDe(venta, { ...negocio, receiptTemplate: t }, png);
+      expect(svg).toContain(`href="${png}"`);
+    });
+
+    it('keeps today’s no-logo look without one', () => {
+      const svg = comprobanteSvgDe(venta, negocio, null);
+      expect(svg).not.toContain('<image');
+      expect(svg).toBe(comprobanteSvgDe(venta, negocio));
+    });
+
+    it('hands the comprobante a raster copy as a data URL', () => {
+      const logo = {
+        url: 'https://app.xangarro.mx/api/logos/x',
+        etag: '"e"',
+        revision: 'r',
+        mime: 'image/png',
+        base64: 'iVBORw0KGgo=',
+      };
+      expect(logoParaComprobante(logo)).toBe(png);
+      expect(logoParaComprobante({ ...logo, mime: 'image/jpeg' })).toBe(
+        'data:image/jpeg;base64,iVBORw0KGgo=',
+      );
+    });
+
+    it('leaves an SVG logo, and no logo, to the monogram', () => {
+      const svgLogo = {
+        url: 'u',
+        etag: '"e"',
+        revision: 'r',
+        mime: 'image/svg+xml',
+        base64: 'PHN2Zy8+',
+      };
+      expect(logoParaComprobante(svgLogo)).toBeNull();
+      expect(logoParaComprobante(null)).toBeNull();
+    });
   });
 });

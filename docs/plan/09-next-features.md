@@ -559,8 +559,21 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-19 Logo + color de marca `[LAUNCH]` [alta] [bloq]
 
 - [~] Status · **Blocked by:** — · **Blocks:** N-12
-  **Remaining (2026-11-18, re-verificado contra el código):** el teléfono no descarga ni guarda en caché el logo. `/api/logos` sigue teniendo un solo consumidor, el portal (`negocio/comprobantes/use-logo.ts` y sus pruebas); nada en `packages/ui`, `packages/sync` ni `apps/mobile` lo llama, y `businesses.logoUrl` en SQLite guarda la URL, no los bytes (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do».
+  **Remaining (2026-11-20):** el teléfono ya descarga y guarda el logo (ver Progress 2026-11-20); faltan dos cosas. Un logo SVG sigue mostrando el monograma en el teléfono, porque el `<image>` de react-native-svg sólo dibuja PNG y JPG. Y falta verlo en un teléfono real sin red, que es la mitad «renders offline» de la Acceptance.
 
+- Progress: 2026-11-20 · **phone half built, not yet seen on a device.**
+  `RefrescarLogoNegocioUseCase` (application, `logo-negocio/`) keeps one copy
+  of the logo on the phone, re-checked only when the synced business row's
+  `updatedAt` moves: one conditional GET with the ETag held (the route now
+  answers 304, `logo-route.test.ts`); a failed or non-logo download keeps the
+  copy, a null `logoUrl` clears it. The copy lives in
+  `<documentDirectory>logo-negocio/` (`<etag>.logo` + `actual.json`,
+  `packages/ui/src/logo-negocio/`), no SQLite change. Cobrar's «Venta hecha»
+  host runs `useLogoNegocio`, and the comprobante preview draws it in each
+  template's logo box (monogram otherwise). The upload gate's mimes and 2 MB
+  moved to `domain/comprobante/logo-negocio.ts` (`esLogoAdmitido`). **Still
+  open:** an SVG logo keeps the monogram on the phone (react-native-svg's
+  `<image>` draws only raster), and a device pass for «renders offline».
 - Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
   portal-only `business_logos` table (0023) — **deviation from the interview's bucket, ratified
   by the owner 2026-09-18**: Supabase Storage's REST upload needs a Supabase JWT the in-house
