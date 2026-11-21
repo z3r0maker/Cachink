@@ -29,6 +29,25 @@ const NO_SYNTH_IMPORTS = {
 };
 
 /**
+ * The founders' console motion (ADR-161 §5) is `apps/backoffice`'s alone: the
+ * portal and the phone keep El Mostrador's five motions, and Synth Studio keeps
+ * its own (ADR-154). `importNames` also catches `import * as` and re-exports;
+ * the pattern catches a relative reach past the package index. Every block
+ * that sets `no-restricted-imports` outside the backoffice carries both.
+ */
+const CONSOLE_MOTION_MESSAGE =
+  'consoleMotion is the founders’ «Empresa» console’s (ADR-161): only apps/backoffice may import it; the rest of the product keeps El Mostrador §6.';
+const NO_CONSOLE_MOTION_PATH = {
+  name: '@xangarro/tokens',
+  importNames: ['consoleMotion'],
+  message: CONSOLE_MOTION_MESSAGE,
+};
+const NO_CONSOLE_MOTION_FILE = {
+  group: ['**/console-motion', '**/console-motion.*', '**/console-motion-budget*'],
+  message: CONSOLE_MOTION_MESSAGE,
+};
+
+/**
  * Shared ESLint flat config for the Xangarro monorepo.
  *
  * Encodes the layer boundaries from CLAUDE.md §4.2. Each package declares its
@@ -216,9 +235,34 @@ const configs = tseslint.config(
     },
   },
 
-  // No product code imports Synth (ADR-153).
+  // No product code imports Synth (ADR-153), nor the console's motion (ADR-161).
   {
     files: ['apps/**', 'packages/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [NO_CONSOLE_MOTION_PATH],
+          patterns: [NO_SYNTH_IMPORTS, NO_CONSOLE_MOTION_FILE],
+        },
+      ],
+    },
+  },
+
+  // Synth and the repo's scripts may import Synth, never the console's motion.
+  {
+    files: ['tools/**', 'scripts/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { paths: [NO_CONSOLE_MOTION_PATH], patterns: [NO_CONSOLE_MOTION_FILE] },
+      ],
+    },
+  },
+
+  // The console owns its motion; the tokens package defines it.
+  {
+    files: ['apps/backoffice/**', 'packages/tokens/**'],
     rules: {
       'no-restricted-imports': ['error', { patterns: [NO_SYNTH_IMPORTS] }],
     },
@@ -231,8 +275,10 @@ const configs = tseslint.config(
       'no-restricted-imports': [
         'error',
         {
+          paths: [NO_CONSOLE_MOTION_PATH],
           patterns: [
             NO_SYNTH_IMPORTS,
+            NO_CONSOLE_MOTION_FILE,
             {
               group: ['../index', '../index.ts'],
               message:

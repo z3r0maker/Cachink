@@ -1423,7 +1423,7 @@ and its board shows the motion.
 
 ### E-45 Tokens de movimiento de la consola `[media]`
 
-- [ ] Status · **Blocked by:** — · **Feeds:** E-46, E-17
+- [x] Status · **Blocked by:** — · **Feeds:** E-46, E-17 · **Done:** 2026-11-20 (`consoleMotion` in `@xangarro/tokens`, the budget test, the lint rule; ADR-161)
 - **What:**
   - `consoleMotion` in `@xangarro/tokens` (`src/console-motion.ts`, exported beside `consoleTheme`), with ADR-161
     §5's durations, delays, stagger step and cap, pulse count, distances, odometer line, the `out` and `stamp`
@@ -1439,7 +1439,7 @@ and its board shows the motion.
 
 ### E-46 Movimiento en las pantallas de Empresa `[media]`
 
-- [ ] Status · **Blocked by:** E-45
+- [ ] Status · **Blocked by:** —
 - **What:**
   - one stylesheet, `apps/backoffice/src/styles/mostrador-movimiento.css.ts`, with the eleven patterns as
     vanilla-extract keyframes and classes over `consoleMotion`: the stagger as generated `:nth-child()` rules,

@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, it, vi } from 'vitest';
-import * as tokens from '@xangarro/tokens';
+import { typography as tokenTypography } from '@xangarro/tokens';
 import { fontFace, fontFaces, typography } from '../src/theme';
 import type * as Theme from '../src/theme';
 import { tamaguiConfig } from '../src/tamagui.config';
@@ -42,7 +42,7 @@ describe('fontFaces', () => {
   });
 
   it('is derived from the token, not restated', () => {
-    assert.equal(tokens.typography.fontFamily, "'Plus Jakarta Sans', sans-serif");
+    assert.equal(tokenTypography.fontFamily, "'Plus Jakarta Sans', sans-serif");
     for (const name of Object.values(fontFaces)) assert.match(name, /^PlusJakartaSans_/);
   });
 
@@ -76,12 +76,12 @@ describe('the Tamagui font', () => {
 
 describe('on the web (Storybook)', () => {
   it('keeps the CSS stack', () => {
-    assert.equal(typography.fontFamily, tokens.typography.fontFamily);
+    assert.equal(typography.fontFamily, tokenTypography.fontFamily);
   });
 
   it('fontFace gives the stack and the weight', () => {
     assert.deepEqual(fontFace(700), {
-      fontFamily: tokens.typography.fontFamily,
+      fontFamily: tokenTypography.fontFamily,
       fontWeight: '700',
     });
   });
