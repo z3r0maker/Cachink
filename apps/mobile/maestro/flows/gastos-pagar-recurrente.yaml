@@ -65,7 +65,7 @@ tags:
 - extendedWaitUntil: { visible: { id: 'pagar-recurrente-sheet' }, timeout: 5000 }
 - assertVisible: { id: 'pagar-recurrente-tarjeta' }
 - assertVisible: '.*Pagar renta local.*'
-- assertVisible: ".*Registrar gasto de \\$12,000\\.00.*"
+- assertVisible: ".*Registrar \\$12,000\\.00.*"
 
 # One write records the egreso and advances the schedule.
 - tapOn: { id: 'gasto-guardar' }

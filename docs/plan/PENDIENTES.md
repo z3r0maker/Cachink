@@ -77,11 +77,11 @@ trabajo, que es quien tiene que moverla.
 - [~] `⛔ bloquea prod` `Alta` ANTES DE STORES — Apple Privacy Nutrition Label + manifiesto de privacidad; formulario de Data Safety de Play… · `../launch/production-readiness.md:185`
 - [ ] `⛔ bloquea prod` `Alta` DPAs firmados: Supabase, Vercel, Sentry, Stripe, proveedor de correo, PAC, Microsoft (Foundry), · `../launch/production-readiness.md:209`
 
-## Código y técnico (131)
+## Código y técnico (130)
 
 Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y tests. Nadie externo tiene que actuar; si una tarea no avanza, su bloqueo es código u otra tarea.
 
-### Teléfono (15)
+### Teléfono (14)
 
 - [~] `⛔ bloquea prod` `Alta` **N-19** Logo + color de marca `[LAUNCH]` — Bloqueada por: — · Falta: el teléfono no descarga ni guarda en caché el logo. `/api/logos` sigue teniendo un solo consumidor, el portal (`negocio/comprobantes/use-logo.ts` y sus pruebas); nada en `packages/ui`, `packages/sync` ni `apps/mobile` lo llama, y `businesses.logoUrl` en SQLite guarda la URL, no los bytes (nada llama a `/api/logos`; 73324085 solo agregó las columnas de marca), así que «renders offline» sigue sin cumplirse. El logo del PDF mensual (02b207da) ya está — quítalo del «still to do». · `09-next-features.md:561`
 - [~] `Alta` **N-21** Compartir por WhatsApp `[LAUNCH]` — Bloqueada por: — · Falta: queda **una** cosa, no cuatro, y no es ninguna de las que decía la nota del 2026-09-23 (conservada abajo). La mitad del teléfono aterrizó con otro diseño: el comprobante se manda como **texto**, con el SVG sólo de vista previa en pantalla, y la persona escoge el contacto y le da enviar. Punto por punto, contra el repo de hoy. (1) «no hay envío a un número predefinido (`share-image.ts`)»: ese archivo ya no existe en ningún lado, ni la función `shareComprobanteAsImage` que el «What» de abajo manda cablear — sobreviven sólo en ROADMAP.md y en `docs/archive/`. El camino del número **sí** existe, en `packages/ui/src/app/abrir-whatsapp.ts` (`whatsapp://send?phone=` y `wa.me/<numero>`), y Cobranza ya lo usa en sus dos recordatorios de saldo. (2) «no hay «Enviar como texto»»: todo el camino del teléfono es texto, y además hay Mensajes por SMS y el menú del sistema (`comprobante-acciones.ts`). (3) «no hay flujo de Maestro»: `maestro/flows/comprobante-whatsapp.yaml` llega hasta la entrega y vuelve a leer el aviso de la hoja; su encabezado guarda el hallazgo de TestFlight 1.0.0 (2) que lo arregló — `canOpenURL` rechaza un esquema no declarado en iOS, así que `abrirChatWhatsApp` nunca pregunta y sólo intenta abrir. (4) «ni test unitario del fallback»: 16 pruebas en `packages/ui/tests/app/abrir-whatsapp.test.ts`. · `09-next-features.md:621`
@@ -90,7 +90,6 @@ Trabajo del repo, agrupado por superficie: pantallas, dominio, sync, contratos y
 - [ ] `Alta` **M-23** Reportar un problema sin escribir (ADR-162). · `19-movil-mostrador.md:60`
 - [ ] `Alta` **M-24** La caja avisa sola de los errores (ADR-162). · `19-movil-mostrador.md:61`
 - [ ] `Alta` **M-25** Lo que quedó de la revisión del teléfono. · `19-movil-mostrador.md:62`
-- [ ] `Alta` **M-26** Gastos recurrentes en el teléfono: el tablero que falta. · `19-movil-mostrador.md:63`
 - [ ] `Media` **M-10** The owner corrects a sale. — Falta: todo, y antes del código hay una decisión que esta tarea no menciona: lo que pide choca de frente con el ADR-058 §2, que hizo el portal de solo lectura a propósito. `movimientos/page.tsx` lo dice en su encabezado («no «Cancelar»… those are phone affordances — `sales` and `expenses` are UP tables with no down path») y `detalle-drawer.tsx` registra que el ADR tiró la acción peligrosa del diseño porque «cancelar es trabajo de la caja, en el mostrador, con el cliente presente». Del otro lado, el teléfono **sí** corrige: `CancelarTicketUseCase` con NIP y confirmación de efectivo, desde M-08. Así que la asimetría que esta tarea llama hueco es una decisión tomada, y abrirla pide una enmienda al ADR-058 §2 (un camino hacia abajo para `sales` con su propia bitácora), no nada más una pantalla. Eso va al canvas y al ADR primero. · `19-movil-mostrador.md:33`
 - [ ] `Media` **M-14** Foto del producto en teléfonos reales. — Falta: sigue pendiente, pero una de sus premisas caducó. Esta tarea decía «su Kotlin nunca ha compilado»: ya compiló. El dev client de Android se construye y abre desde el 2026-11-11 (`7fd19ba2`), y el 2026-11-12 (`bf356c3d`, ADR-143, que enmienda el ADR-134 §5) ML Kit cambió de forma por lo que se vio corriendo: `prepare()` armaba un `SubjectSegmenter` al arrancar la app y eso carga el modelo de 17 MB, cuya sonda SME hace SIGILL en el emulador M5. `prepare()` ya no existe; `lift()` arma un segmentador, pide el modelo si falta y lo cierra. Por eso el emulador no sirve para probar esto y hace falta un teléfono de verdad — que es lo que esta tarea ya pedía, aunque por otra razón. Lo que queda por ver en hardware es sólo el recorte en sí: Vision en un iPhone con iOS 17 o más, y ML Kit en un Android con Play services y en uno sin. · `19-movil-mostrador.md:49`
 - [ ] `Media` **M-18** El comprobante del gasto: foto del ticket (ADR-149). · `19-movil-mostrador.md:54`
@@ -406,7 +405,7 @@ No se empieza hasta que el mundo entrega: clientes reales, telemetría, umbral d
 - `08-post-launch.md` — 9 abiertos (0 en curso, 0 bloqueados, 4 hechos)
 - `09-next-features.md` — 53 abiertos (12 en curso, 0 bloqueados, 31 hechos)
 - `11-pre-launch-and-deferred.md` — 21 abiertos (0 en curso, 0 bloqueados, 14 hechos)
-- `19-movil-mostrador.md` — 9 abiertos (0 en curso, 0 bloqueados, 18 hechos)
+- `19-movil-mostrador.md` — 8 abiertos (0 en curso, 0 bloqueados, 19 hechos)
 - `20-command-center.md` — 16 abiertos (5 en curso, 0 bloqueados, 18 hechos)
 - `22-codi.md` — 16 abiertos (1 en curso, 0 bloqueados, 0 hechos)
 - `24-synth.md` — 15 abiertos (0 en curso, 0 bloqueados, 11 hechos)

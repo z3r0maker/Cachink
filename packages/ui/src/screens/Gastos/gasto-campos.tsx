@@ -150,7 +150,7 @@ export interface PieGastoProps {
   readonly onGuardar: () => void;
 }
 
-/** «Registrar gasto de $150.00»: the amount in the button, blocked until complete. */
+/** «Registrar $150.00»: the amount in the button, on one line on a phone (RvRecurrentes, 2026-11-20); blocked until complete. */
 export function PieGasto(p: PieGastoProps): ReactElement {
   const monto = p.f.monto !== null && p.f.monto > 0n ? formatMoney(p.f.monto) : '$___';
   return (
@@ -177,7 +177,7 @@ export function PieGasto(p: PieGastoProps): ReactElement {
             onPress={p.onGuardar}
             testID="gasto-guardar"
           >
-            {`Registrar gasto de ${monto}`}
+            {`Registrar ${monto}`}
           </Btn>
         </View>
       </View>
