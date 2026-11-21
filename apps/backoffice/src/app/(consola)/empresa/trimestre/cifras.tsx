@@ -1,10 +1,17 @@
+import { Odometro } from '@/components/odometro';
 import type { Acumulado, Barra, Tile } from '@/server/empresa/trimestre-cifras';
 import * as g from '@/styles/mostrador-graficas.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as s from '@/styles/mostrador-socios.css';
 import * as q from '@/styles/mostrador-trimestre.css';
 import * as m from '@/styles/mostrador.css';
 
-/** The quarter's figures (board CD-17b): the main card, quarter against quarter, the totals. */
+/**
+ * The quarter's figures (board CD-17b): the main card, quarter against
+ * quarter, the totals. The main card lands with the screen's one sweep and
+ * «en curso» pulses; figures roll and bars grow from the axis, in turn
+ * (ADR-161).
+ */
 export function Principal(props: {
   readonly eyebrow: string;
   readonly titulo: string;
@@ -12,7 +19,11 @@ export function Principal(props: {
   readonly tiles: readonly Tile[];
 }) {
   return (
-    <section className={q.hero} aria-labelledby="cifras" data-testid="trimestre-cifras">
+    <section
+      className={`${q.hero} ${mv.aterriza} ${mv.barrido}`}
+      aria-labelledby="cifras"
+      data-testid="trimestre-cifras"
+    >
       <div className={q.heroCabeza}>
         <span>
           <span className={m.eyebrow}>{props.eyebrow}</span>
@@ -21,14 +32,15 @@ export function Principal(props: {
           </h2>
         </span>
         <span className={`${m.tagBase} ${props.chip === 'Cerrado' ? m.tag.ok : m.tag.off}`}>
+          {props.chip === 'Cerrado' ? null : <span className={mv.vivo} aria-hidden="true" />}
           {props.chip}
         </span>
       </div>
-      <div className={q.tiles}>
+      <div className={`${q.tiles} ${mv.escalona}`}>
         {props.tiles.map((t) => (
           <div key={t.label} className={q.tile} data-testid="trimestre-tile">
             <span className={m.tileLabel}>{t.label}</span>
-            <span className={q.tileValor}>{t.value}</span>
+            <Odometro className={q.tileValor} texto={t.value} />
             <span className={`${q.delta} ${q.tono[t.tono]}`}>{t.delta}</span>
           </div>
         ))}
@@ -51,7 +63,7 @@ function Barras({ b, max }: { readonly b: Barra; readonly max: bigint }) {
         width={44}
         y={EJE - alto(b.ingresos)}
         height={alto(b.ingresos)}
-        className={g.rol.ingreso}
+        className={`${g.rol.ingreso} ${mv.crece}`}
       />
       {perdida ? (
         <rect
@@ -59,7 +71,7 @@ function Barras({ b, max }: { readonly b: Barra; readonly max: bigint }) {
           width={44}
           y={EJE}
           height={Math.min(alto(b.ebitda), 100 - EJE)}
-          className={g.rol.perdida}
+          className={`${g.rol.perdida} ${mv.baja}`}
         />
       ) : (
         <rect
@@ -67,7 +79,7 @@ function Barras({ b, max }: { readonly b: Barra; readonly max: bigint }) {
           width={44}
           y={EJE - alto(b.ebitda)}
           height={alto(b.ebitda)}
-          className={g.rol.restante}
+          className={`${g.rol.restante} ${mv.crece}`}
         />
       )}
       <line x1={0} x2={100} y1={EJE} y2={EJE} className={q.eje} />
@@ -101,12 +113,12 @@ export function Crecimiento({ barras }: { readonly barras: readonly Barra[] }) {
     0n,
   );
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="qoq">
+    <section className={`${m.panelPad} ${m.stack} ${mv.entra}`} aria-labelledby="qoq">
       <h2 id="qoq" className={s.sectionTitle}>
         Trimestre contra trimestre
       </h2>
       <Leyenda />
-      <div className={q.trimestres}>
+      <div className={`${q.trimestres} ${mv.escalona}`}>
         {barras.map((b) => (
           <div key={b.label} className={q.trimestre} data-testid="trimestre-barra">
             <span className={`${q.delta} ${q.tono[b.tono]}`}>{b.crecimiento}</span>
@@ -125,15 +137,15 @@ export function Crecimiento({ barras }: { readonly barras: readonly Barra[] }) {
 
 export function Acumulados(props: { readonly filas: readonly Acumulado[]; readonly nota: string }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="acumulado">
+    <section className={`${m.panelPad} ${m.stack} ${mv.entra}`} aria-labelledby="acumulado">
       <h2 id="acumulado" className={s.sectionTitle}>
         Acumulado
       </h2>
-      <div className={q.acumulado}>
+      <div className={`${q.acumulado} ${mv.escalona}`}>
         {props.filas.map((a) => (
           <div key={a.label} className={q.tile} data-testid="trimestre-acumulado">
             <span className={m.tileLabel}>{a.label}</span>
-            <span className={q.tileValor}>{a.value}</span>
+            <Odometro className={q.tileValor} texto={a.value} />
             <span className={q.nota}>{a.desdeElInicio}</span>
           </div>
         ))}

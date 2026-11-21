@@ -1,14 +1,20 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 
+import { Odometro } from '@/components/odometro';
 import type { Linea, ObjetivoTrimestre, SocioTrimestre } from '@/server/empresa/trimestre-revision';
 import * as g from '@/styles/mostrador-graficas.css';
 import * as i from '@/styles/mostrador-impuestos.css';
+import * as mv from '@/styles/mostrador-movimiento.css';
 import * as s from '@/styles/mostrador-socios.css';
 import * as q from '@/styles/mostrador-trimestre.css';
 import * as m from '@/styles/mostrador.css';
 
-/** The quarter's review (board CD-17b): objectives, partners and the Tablero, compliance. */
+/**
+ * The quarter's review (board CD-17b): objectives, partners and the Tablero,
+ * compliance. Each panel enters in turn, a partner's bar fills and the count
+ * rolls (ADR-161).
+ */
 const MARCA = { si: '✓', no: '✕', curso: '…' } as const;
 
 export function Objetivos(props: {
@@ -16,7 +22,7 @@ export function Objetivos(props: {
   readonly filas: readonly ObjetivoTrimestre[];
 }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="objetivos">
+    <section className={`${m.panelPad} ${m.stack} ${mv.entra}`} aria-labelledby="objetivos">
       <h2 id="objetivos" className={s.sectionTitle}>
         {props.titulo}
       </h2>
@@ -38,13 +44,30 @@ export function Objetivos(props: {
   );
 }
 
+/** A partner's share of the Tablero's accepted value, filling from the left. */
+function Pista({ ancho }: { readonly ancho: number }) {
+  return (
+    <svg className={q.pista} viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+      <rect x={0} y={0} width={100} height={10} rx={3} className={q.fondoPista} />
+      <rect
+        x={0}
+        y={0}
+        width={ancho}
+        height={10}
+        rx={3}
+        className={`${g.rol.ingreso} ${mv.llena}`}
+      />
+    </svg>
+  );
+}
+
 export function Socios(props: {
   readonly filas: readonly SocioTrimestre[];
   readonly fondeo: string;
   readonly tableroHref: string;
 }) {
   return (
-    <section className={`${m.panelPad} ${m.stack}`} aria-labelledby="socios-tablero">
+    <section className={`${m.panelPad} ${m.stack} ${mv.entra}`} aria-labelledby="socios-tablero">
       <div className={s.heroRow}>
         <h2 id="socios-tablero" className={s.sectionTitle}>
           Socios y Tablero
@@ -59,15 +82,7 @@ export function Socios(props: {
             <span className={s.whoName}>{p.nombre}</span>
             <span className={`${i.chipBase} ${i.tono[p.tono]}`}>{p.chip}</span>
           </span>
-          <svg
-            className={q.pista}
-            viewBox="0 0 100 10"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <rect x={0} y={0} width={100} height={10} rx={3} className={q.fondoPista} />
-            <rect x={0} y={0} width={p.ancho} height={10} rx={3} className={g.rol.ingreso} />
-          </svg>
+          <Pista ancho={p.ancho} />
           <span className={q.nota}>{p.detalle}</span>
         </div>
       ))}
@@ -82,7 +97,7 @@ export function Cumplimiento(props: {
 }) {
   return (
     <section
-      className={`${m.panelPad} ${m.stack}`}
+      className={`${m.panelPad} ${m.stack} ${mv.entra}`}
       aria-labelledby="cumplimiento"
       data-testid="trimestre-cumplimiento"
     >
@@ -90,7 +105,7 @@ export function Cumplimiento(props: {
         Cumplimiento
       </h2>
       <span>
-        <span className={q.cuenta}>{props.cuenta}</span>{' '}
+        <Odometro className={q.cuenta} texto={props.cuenta} />{' '}
         <span className={i.muted}>obligaciones a tiempo, con evidencia</span>
       </span>
       {props.lineas.map((l) => (

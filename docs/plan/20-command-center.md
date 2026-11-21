@@ -1210,7 +1210,7 @@ Changes to existing tasks:
 - **Owner decisions (2026-11-20):** figures only: no written headline nor «Lo que salió bien / Lo que
   hay que corregir / Decisiones» until the analista de cierre (E-32); «Exportar PDF» prints the page
   (the browser's «Guardar como PDF»); paying businesses (N-63) and the next pool cut (E-21) stay out
-  until they exist. The board's motion waits for the console's motion ADR (round 23).
+  until they exist. The board's motion follows ADR-161 (round 23).
 - **Progress (2026-11-20):**
   - `@xangarro/domain/corp` `trimestre/`: `crecimiento` (whole percent, null «sin base» without a
     positive base), `trimestresHasta`, `rangoDelResumen` (a quarter in progress runs to today),
@@ -1223,6 +1223,12 @@ Changes to existing tasks:
     Resultados opens. A quarter with Tablero activity but no entries still has its summary.
   - Playwright: this quarter in progress with the Tablero test's accepted card and objective, and
     its seeded closed quarter with Fundador 2 under the minimum.
+- **Motion (2026-11-21, ADR-161):** E-46 left Trimestre out, so it lands here. The main card lands
+  with the screen's one sweep and «En curso» pulses three times; its tiles, the totals and the
+  compliance count roll (`Odometro`); the quarters' bars grow from the axis (a loss hangs from it);
+  each partner's bar fills; the panels enter in turn. The hero gains El Mostrador's hard shadow,
+  as CD-17b draws it. Playwright reads the figures from the odometer's hidden copy, and
+  `/empresa/trimestre` joins E-46's reduced-motion and 1.5 s checks.
 - **What:** `/empresa/trimestre`, by year and quarter.
   - **Headline:** a one-line headline written by the analista de cierre and approved by both
     founders, with income, EBITDA and margin, paying businesses and closing cash against the

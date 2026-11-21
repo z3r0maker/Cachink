@@ -1,9 +1,17 @@
 import { globalStyle, style, styleVariants } from '@vanilla-extract/css';
-import { borders, colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
+import {
+  borders,
+  colors,
+  portalFontSizes,
+  radii,
+  shadows,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 /**
- * Socios › Trimestre (E-17, board CD-17b). Figures only. The motion the board
- * shows waits for the console's motion ADR (round 23), so nothing here moves.
+ * Socios › Trimestre (E-17, board CD-17b). Figures only. Its motion is
+ * ADR-161's, from `mostrador-movimiento.css.ts`; nothing here animates.
  * «Exportar PDF» prints the summary alone: the shell and the buttons hide.
  */
 export const hero = style({
@@ -14,6 +22,7 @@ export const hero = style({
   border: borders.thick,
   borderRadius: radii[6],
   background: colors.white,
+  boxShadow: shadows.hero,
 });
 
 export const heroCabeza = style({
