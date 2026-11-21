@@ -163,3 +163,66 @@ describe('path-scoped rules', () => {
     CONFIG_LOAD_TIMEOUT_MS,
   );
 });
+
+describe('consoleMotion stays in the founders’ console (ADR-161 §5)', () => {
+  let fromWeb: ESLint;
+  let fromBackoffice: ESLint;
+  let fromRoot: ESLint;
+
+  beforeAll(async () => {
+    fromWeb = eslintAsPackageLint('apps/web');
+    fromBackoffice = eslintAsPackageLint('apps/backoffice');
+    fromRoot = new ESLint({ cwd: REPO, overrideConfigFile: join(REPO, 'eslint.config.js') });
+    await Promise.all(
+      [fromWeb, fromBackoffice, fromRoot].map((e) =>
+        e.lintText('', { filePath: join(REPO, 'x.ts') }),
+      ),
+    );
+  }, CONFIG_LOAD_TIMEOUT_MS);
+
+  const NAMED = `import { consoleMotion } from '@xangarro/tokens';\nexport const m = consoleMotion;\n`;
+
+  it("rejects apps/web importing it, from the portal's own lint", async () => {
+    const ids = await ruleIds(fromWeb, 'apps/web/src/zz-motion.ts', NAMED);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+
+  it('rejects a namespace import and a re-export too', async () => {
+    const star = `import * as tokens from '@xangarro/tokens';\nexport const m = tokens;\n`;
+    const reExport = `export { consoleMotion } from '@xangarro/tokens';\n`;
+    for (const code of [star, reExport]) {
+      const ids = await ruleIds(fromRoot, 'apps/mobile/src/zz-motion.ts', code);
+      assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+    }
+  });
+
+  it('rejects the phone body, a ui component and Synth Studio', async () => {
+    for (const file of [
+      'packages/ui/src/zz-motion.ts',
+      'packages/ui/src/components/Zz/zz.ts',
+      'tools/synth/studio/src/zz-motion.ts',
+      'apps/landing/src/zz-motion.ts',
+    ]) {
+      const ids = await ruleIds(fromRoot, file, NAMED);
+      assert.ok(ids.includes('no-restricted-imports'), `${file}: got ${JSON.stringify(ids)}`);
+    }
+  });
+
+  it('rejects reaching past the package index to its file', async () => {
+    const deep = `import { consoleMotion } from '../../../packages/tokens/src/console-motion';\nexport const m = consoleMotion;\n`;
+    const ids = await ruleIds(fromRoot, 'apps/web/src/zz/zz-motion.ts', deep);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+
+  it('lets the backoffice import it, and the portal keep every other token', async () => {
+    const inConsole = await ruleIds(fromBackoffice, 'apps/backoffice/src/zz-motion.ts', NAMED);
+    assert.deepEqual(inConsole, []);
+    const other = `import { consoleTheme } from '@xangarro/tokens';\nexport const t = consoleTheme;\n`;
+    assert.deepEqual(await ruleIds(fromWeb, 'apps/web/src/zz-motion.ts', other), []);
+  });
+
+  it('still keeps Synth out of the backoffice', async () => {
+    const ids = await ruleIds(fromBackoffice, 'apps/backoffice/src/zz-synth.ts', SYNTH_IMPORT);
+    assert.ok(ids.includes('no-restricted-imports'), `got ${JSON.stringify(ids)}`);
+  });
+});
