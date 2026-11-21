@@ -15,8 +15,9 @@
 import type { ReactElement, ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { View } from '@tamagui/core';
-import { BottomTabBar, OfflineBanner, PathIcon, SafeAreaSpacer } from '../../components/index';
+import { BottomTabBar, PathIcon, SafeAreaSpacer, SyncBanner } from '../../components/index';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
+import { bannerSync } from '../../sync/sync-banner';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { AppMode } from '../../app-config/index';
@@ -133,10 +134,13 @@ function useFrame(props: AppShellFrameProps) {
   return { active, header, menu };
 }
 
-function OfflineSlot(): ReactElement | null {
-  const { state } = useCloudSync();
-  if (state.phase !== 'offline') return null;
-  return <OfflineBanner pendientes={state.counts.pending + state.counts.retrying} />;
+/** N-22's one banner (AtBanners): red and amber open Registros por enviar, grey sends now. */
+function SyncSlot(p: { readonly onNavigate: (path: string) => void }): ReactElement | null {
+  const { state, syncNow } = useCloudSync();
+  const banner = bannerSync(state);
+  if (banner === null) return null;
+  const alTocar = banner.accion === 'enviar' ? syncNow : () => p.onNavigate('/no-enviados');
+  return <SyncBanner banner={banner} onPress={alTocar} />;
 }
 
 /** The frame itself, fed its data: what Storybook renders without a database. */
@@ -181,7 +185,7 @@ export function AppShell(props: AppShellProps): ReactElement {
   const data = useShellData();
   const banners = (
     <>
-      <OfflineSlot />
+      <SyncSlot onNavigate={props.onNavigate} />
       <EntitlementBanner />
     </>
   );

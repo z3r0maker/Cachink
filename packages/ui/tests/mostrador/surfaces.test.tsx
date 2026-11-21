@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { ICONS } from '@xangarro/caja';
 import { BloqueoShell } from '../../src/components/Bloqueo/index';
 import { NavRows } from '../../src/components/NavRows/index';
-import { OfflineBanner } from '../../src/components/OfflineBanner/index';
+import { SyncBanner } from '../../src/components/SyncBanner/index';
+import { bannerSync } from '../../src/sync/sync-banner';
 import { HeroPanel, QuietPanel } from '../../src/components/Panel/index';
 import { PathIcon } from '../../src/components/PathIcon/index';
 import { Toast } from '../../src/components/Toast/index';
@@ -63,18 +64,40 @@ describe('Toast', () => {
   });
 });
 
-describe('OfflineBanner', () => {
-  it('says what happens in words, with the count when known', () => {
-    renderWithProviders(<OfflineBanner pendientes={3} />);
+describe('SyncBanner', () => {
+  const offline = (pending: number) =>
+    bannerSync({
+      phase: 'offline',
+      counts: { pending, rejected: 0, retrying: 0, unsent: 0 },
+      lastSyncAt: null,
+    })!;
+
+  it('says what happens in words, with the count when known, and the whole strip is one tap', () => {
+    const onPress = vi.fn();
+    renderWithProviders(<SyncBanner banner={offline(3)} onPress={onPress} />);
     const banner = screen.getByTestId('offline-banner');
-    expect(banner.getAttribute('role')).toBe('status');
+    expect(banner.getAttribute('role')).toBe('button');
     expect(banner).toHaveTextContent('Sin internet');
     expect(banner).toHaveTextContent('3 por enviar');
+    fireEvent.click(banner);
+    expect(onPress).toHaveBeenCalled();
   });
 
   it('keeps the plain message without a count', () => {
-    renderWithProviders(<OfflineBanner />);
+    renderWithProviders(<SyncBanner banner={offline(0)} onPress={vi.fn()} />);
     expect(screen.getByTestId('offline-banner')).toHaveTextContent('Todo se guarda en esta caja');
+  });
+
+  it('the red one says what the portal refused', () => {
+    const rojo = bannerSync({
+      phase: 'idle',
+      counts: { pending: 0, rejected: 2, retrying: 0, unsent: 0 },
+      lastSyncAt: null,
+    })!;
+    renderWithProviders(<SyncBanner banner={rojo} onPress={vi.fn()} />);
+    expect(screen.getByTestId('sync-banner-rechazados')).toHaveTextContent(
+      '2 registros no se enviaron',
+    );
   });
 });
 

@@ -357,11 +357,6 @@ export const esMX = {
     volver: 'Volver',
     cerrar: 'Cerrar',
     cerrarAviso: 'Cerrar aviso: {{title}}',
-    offline: {
-      title: 'Sin internet',
-      body: 'Sigue cobrando. Todo se guarda en esta caja y se envía solo.',
-      bodyCount: 'Sigue cobrando. {{count}} por enviar; se envían solos al volver.',
-    },
     bloqueo: {
       title: 'Caja bloqueada',
     },

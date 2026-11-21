@@ -9,7 +9,8 @@ import { ScrollView } from 'react-native';
 import { initI18n } from '../../i18n/index';
 import { MarcoDetalle } from '../../screens/Inventario/marco-detalle';
 import { GLYPHS } from '../PathIcon/glyphs';
-import { OfflineBanner } from '../OfflineBanner/index';
+import { SyncBanner } from '../SyncBanner/index';
+import { bannerSync } from '../../sync/sync-banner';
 import { Toast } from '../Toast/index';
 import { CajaEstado } from './caja-estado';
 
@@ -23,7 +24,18 @@ function Demo({ vista }: { vista: Vista }): ReactElement {
     <MarcoDetalle
       ruta="/ventas"
       avisos={2}
-      banners={offline ? <OfflineBanner pendientes={1} /> : null}
+      banners={
+        offline ? (
+          <SyncBanner
+            banner={bannerSync({
+              phase: 'offline',
+              counts: { pending: 1, rejected: 0, retrying: 0, unsent: 0 },
+              lastSyncAt: null,
+            })!}
+            onPress={() => undefined}
+          />
+        ) : null
+      }
     >
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <CajaEstado
