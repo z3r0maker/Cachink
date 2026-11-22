@@ -20,7 +20,8 @@
     "clean": "rm -rf dist .turbo",
     "stack": "tsx src/cli/stack.ts",
     "test:stack": "SYNTH_STACK=1 vitest run .integration.test",
-    "test:db": "SYNTH_DB=1 vitest run success.integration",
+    "test:db": "SYNTH_DB=1 tsx src/cli/stack.ts run --no-server -- vitest run success.integration",
+    "test:seeded": "SYNTH_SEEDED=1 tsx src/cli/stack.ts run -- vitest run seeded.integration",
     "setup": "pnpm install --dir ../vendor/playwright-mcp --ignore-workspace --frozen-lockfile",
     "run-one": "tsx src/cli/run-one.ts",
     "isolation": "tsx src/cli/isolation.ts",
@@ -29,6 +30,7 @@
     "corrida": "tsx src/cli/corrida.ts"
   },
   "dependencies": {
+    "@xangarro/contracts": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/testing": "workspace:*",
     "bcryptjs": "3.0.3",

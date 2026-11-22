@@ -1239,6 +1239,9 @@ importers:
 
   tools/synth/core:
     dependencies:
+      '@xangarro/contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
       '@xangarro/domain':
         specifier: workspace:*
         version: link:../../../packages/domain

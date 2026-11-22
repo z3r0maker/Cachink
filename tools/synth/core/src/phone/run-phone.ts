@@ -29,6 +29,7 @@ const DOOR_FLOW = 'tools/synth/flows/phone-door.yaml';
 
 export interface PhoneRunInput extends Common {
   readonly corridaDir: string;
+  /** Where the app reaches the API: the stack's port, or a seeded bug's proxy in front of it. */
   readonly serverPort: number;
   readonly serverLog: string;
   readonly metroPort: number;

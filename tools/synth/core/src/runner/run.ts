@@ -6,6 +6,8 @@ import { linkIn, walkOperatorDoor, walkOwnerDoor } from '@xangarro/testing/tenan
 
 import { runId, type Run } from '../schemas/run';
 import { seededTenant, type RunAccess } from '../seed/seed';
+import { afterDoor } from '../seeded/apply-web';
+import type { SeededBug } from '../seeded/bugs';
 import { businessOf } from '../success/business';
 import { accessLines, actAndRecord, seedRunTenant, type Common } from './act';
 import { mcpConfig } from './actor-args';
@@ -30,6 +32,12 @@ export interface RunInput extends Common {
   readonly outboxDir: string;
   /** The run's own client address (`runAddress`), so throttles never cross runs. */
   readonly address: string;
+  /**
+   * A seeded bug the corrida runs under (S-12); the actor is never told. Its
+   * page mutation goes on here, after the door; a network rule is already in
+   * `baseUrl`, the bug's proxy (`seeded/apply-web.ts` `webBase`).
+   */
+  readonly seeded?: SeededBug;
 }
 
 /** Where a signup's confirmation link points (N-83). */
@@ -121,6 +129,7 @@ export async function runOne(i: RunInput): Promise<Run> {
   try {
     await capture.start();
     await walkDoor(browser, i, access);
+    if (i.seeded) await afterDoor(i.seeded, browser.context, browser.page);
     return await actAndRecord({
       ...i,
       runner: 'web',
