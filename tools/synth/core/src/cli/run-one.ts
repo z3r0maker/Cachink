@@ -3,23 +3,15 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { parse } from 'yaml';
-
 import { writeCorridaFile } from '../aggregate/load';
-import { ConfigSchema } from '../schemas/config';
-import type { Run } from '../schemas/run';
-import { PersonaSchema } from '../schemas/persona';
-import { ScenarioSchema } from '../schemas/scenario';
+import { entry, loadCatalogue } from '../corrida/catalogue';
+import { mcpCliPath, runJob, useStackDatabases } from '../corrida/run-job';
 import { holdsMaestroLock, rerunUnderMaestroLock } from '../phone/lock';
-import { runPhone } from '../phone/run-phone';
-import type { Common } from '../runner/act';
-import { runOne } from '../runner/run';
+import type { Run } from '../schemas/run';
 import { nodeStackDeps } from '../stack/adapters';
 import { reportsDir } from '../stack/names';
 import { tearDownOnSignals } from '../stack/signals';
-import { startStack, type Stack, type StackDeps } from '../stack/stack';
-import { formatIssue, validateTree } from '../validate/tree';
-import { existsUnder, readTree } from './read-tree';
+import { startStack } from '../stack/stack';
 
 /**
  * `pnpm --filter @xangarro/synth-core run-one --persona <id> --scenario <id> [--repetition n]`
@@ -30,26 +22,7 @@ import { existsUnder, readTree } from './read-tree';
  */
 const REPO = resolve(import.meta.dirname, '../../../../..');
 const SYNTH = join(REPO, 'tools/synth');
-const MCP_CLI = join(SYNTH, 'vendor/playwright-mcp/node_modules/@playwright/mcp/cli.js');
-
-function load(personaId: string, scenarioId: string) {
-  const files = readTree(SYNTH);
-  const issues = validateTree(files, existsUnder(SYNTH));
-  if (issues.length > 0)
-    throw new Error(`tools/synth/ is not valid:\n${issues.map(formatIssue).join('\n')}`);
-  const text = (p: string) => files.find((f) => f.path === p)?.text;
-  const personaText = files.find(
-    (f) => f.path.startsWith('personas/') && f.path.endsWith(`/${personaId}.yaml`),
-  )?.text;
-  const scenarioText = text(`scenarios/${scenarioId}.yaml`);
-  if (personaText === undefined) throw new Error(`no persona «${personaId}»`);
-  if (scenarioText === undefined) throw new Error(`no scenario «${scenarioId}»`);
-  return {
-    config: ConfigSchema.parse(parse(text('config.yaml') ?? '')),
-    persona: PersonaSchema.parse(parse(personaText)),
-    scenario: ScenarioSchema.parse(parse(scenarioText)),
-  };
-}
+const MCP_CLI = mcpCliPath(SYNTH);
 
 function cliArgs(): { persona: string; scenario: string; repetition: number } {
   const { values } = parseArgs({
@@ -89,32 +62,12 @@ function printVerdict(run: Run, corrida: string): void {
   process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
 }
 
-/** The run itself, on a stack that is already up, by the scenario's runner. */
-async function runOn(
-  stack: Stack,
-  deps: StackDeps,
-  c: Common & { corridaDir: string },
-): Promise<Run> {
-  if (c.scenario.runner === 'phone') {
-    return runPhone({
-      ...c,
-      serverPort: stack.serverPort ?? 0,
-      serverLog: stack.names.serverLog,
-      metroPort: await deps.freePort(),
-    });
-  }
-  return runOne({
-    ...c,
-    baseUrl: stack.baseUrl ?? '',
-    cdpPort: await deps.freePort(),
-    mcpCli: MCP_CLI,
-    outboxDir: stack.names.outboxDir,
-  });
-}
-
 async function main(): Promise<void> {
   const args = cliArgs();
-  const { config, persona, scenario } = load(args.persona, args.scenario);
+  const catalogue = loadCatalogue(SYNTH);
+  const { config } = catalogue;
+  const persona = entry(catalogue.personas, 'persona', args.persona).value;
+  const scenario = entry(catalogue.scenarios, 'scenario', args.scenario).value;
   // A phone run starts over inside a shell holding the machine-wide Maestro lock.
   if (scenario.runner === 'phone' && !holdsMaestroLock())
     process.exit(await rerunUnderMaestroLock(REPO));
@@ -131,9 +84,7 @@ async function main(): Promise<void> {
   const corridaDir = join(reportsDir(REPO), id);
   mkdirSync(corridaDir, { recursive: true });
   writeCorridaFile(corridaDir, { id, mode: 'single', repetitions: 1 }, REPO);
-  process.env.DATABASE_URL = stack.urls.database;
-  process.env.DATABASE_SUPER_URL = stack.urls.superUser;
-  process.env.BILLING_DATABASE_URL = stack.urls.billing;
+  useStackDatabases(stack);
   try {
     const common = {
       repoRoot: REPO,
@@ -143,7 +94,8 @@ async function main(): Promise<void> {
       scenario,
       repetition: args.repetition,
     };
-    printVerdict(await runOn(stack, deps, { ...common, corridaDir }), id);
+    const place = { stack, deps, corridaDir, mcpCli: MCP_CLI };
+    printVerdict(await runJob(place, common, 0), id);
   } finally {
     await stack.stop();
   }

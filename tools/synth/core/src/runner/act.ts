@@ -26,6 +26,8 @@ export interface Common {
   readonly persona: Persona;
   readonly scenario: Scenario;
   readonly repetition: number;
+  /** The most this run's actor may spend, in US cents: what the corrida has left (S-11). */
+  readonly budgetCents?: number;
 }
 
 /** The run's own tenant, with a note of which it is (no NIPs or passwords written down). */
@@ -94,7 +96,7 @@ export async function actAndRecord(a: ActInput): Promise<Run> {
     args: actorArgs({
       model: a.config.models.actor,
       mcpConfigPath: mcpPath,
-      budgetUsd: a.config.estimated_cost_caps.per_corrida_usd_cents / 100,
+      budgetUsd: (a.budgetCents ?? a.config.estimated_cost_caps.per_corrida_usd_cents) / 100,
       systemPrompt,
       tools: a.tools,
     }),

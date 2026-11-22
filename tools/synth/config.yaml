@@ -21,6 +21,7 @@ limits:
   max_steps: 60
   max_turns: 80
   run_timeout_s: 900
+  max_runs_per_corrida: 40 # cells × repetitions in one corrida (spec §14)
 
 # Bounded by the Claude Code login's rate limits and one Android emulator.
 concurrency:

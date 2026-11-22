@@ -347,7 +347,21 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-11 Matriz `smoke`, concurrencia y skill `synth-run` [alta]
 
-- [ ] Status · **Blocked by:** —
+- [x] Status · **Blocked by:** —
+      Done: 2026-11-21 · `feat/synth-s11` · `pnpm --filter @xangarro/synth-core corrida --matrix smoke`
+      runs a whole corrida on one stack: the matrix's jobs through a two-lane pool (web 3, phone 1, side by
+      side), each run judged as it ends, then `aggregate`. `pool.json` records each job and an interference
+      check over the finished runs. Two runs may not share a tenant, and overlapping runs may not share a
+      CDP port, client address or browser profile. Each web run now sends its own TEST-NET
+      `x-forwarded-for`, since the portal's throttles key on it and every run had been «unknown». No run
+      starts once the corrida's or the day's cost cap is reached. The day's spend is read back from every
+      corrida on disk, and each actor's budget is what is left. `limits.max_runs_per_corrida` (40) is spec
+      §14's cap. `matrix/smoke.yaml` is the spec's cells, all tasks (the walkthrough cell waits for S-14),
+      plus primera-venta on the phone. The first smoke run took 5 runs in 319 s, 4 at once, with 0
+      interference issues. Every run met its success check, and the corrida cost about US$2.20.
+      Re-proven on Maestro 2.12.1: `isolation` (both actors isolated) and the corrida's phone run. The
+      skill is `tools/synth/.claude/skills/synth-run`. `run-one`, `judge` and `aggregate` now share one
+      catalogue loader and the corrida's run, judge and aggregate steps.
 - **What:** `matrix/smoke.yaml`, a concurrency pool (web 3, phone 1), and `tools/synth/.claude/skills/synth-run`.
 - **Acceptance:** smoke runs in parallel with no cross-run interference and finishes in under 15 minutes.
 
