@@ -5,7 +5,8 @@ import { parseArgs } from 'node:util';
 
 import { writeCorridaFile } from '../aggregate/load';
 import { entry, loadCatalogue } from '../corrida/catalogue';
-import { mcpCliPath, runJob, useStackDatabases } from '../corrida/run-job';
+import { mcpCliPath, runJob } from '../corrida/run-job';
+import { useStackDatabases } from '../stack/env';
 import { holdsMaestroLock, rerunUnderMaestroLock } from '../phone/lock';
 import type { Run } from '../schemas/run';
 import { nodeStackDeps } from '../stack/adapters';

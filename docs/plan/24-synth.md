@@ -369,7 +369,21 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-12 Ocho bugs sembrados [alta]
 
-- [ ] Status · **Blocked by:** S-11
+- [x] Status · **Blocked by:** S-11
+      Done: 2026-11-22 · `feat/synth-s12` · `core/src/seeded/`. The eight are aimed at smoke scenarios. Five
+      are page scripts on Cobrar, the cancel dialog and the wizard: «Cobrar» ignores its first click,
+      «Cobrar» reads «Procesar transacción (POS)», the total is a centavo short, the «sin permiso» refusal is
+      in English, and «Siguiente» is off-screen at 360 px. Three are network rules: a 500 on the sale's push,
+      the push held 8 s, and a rewrite of the activation and pulls that lets every operator cancel. The
+      register's network goes through its Web Worker, which route interception cannot see. So a network
+      rule runs in a proxy in front of the stack: the web run's browser uses it as its base URL, and the
+      phone reaches the API through it. The rule is the same on both runners, and its paths come from
+      `@xangarro/contracts`' `API_PATHS`. The 500 and the slow push reach the phone too; the rest are
+      web-only. `corrida --seeded-bug <id>` runs a corrida under one and writes `seeded.json` at the corrida
+      root, where the judge never looks. `test:seeded` applies each to the real app on a fresh stack and
+      checks it by script, with no model: 8 of 8. The proxy's phone path is tested against a fake upstream,
+      not on the emulator. `stack run -- <command>` runs a command on a fresh stack, and `test:db` now
+      uses it.
 - **What:**
   - The 8 mutations of spec §9. On the web they are CDP init scripts or route interception.
   - On the phone, the network ones (500 on save, 8 s save) go through a proxy in front of the stack's API. The

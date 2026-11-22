@@ -15,12 +15,15 @@ All from `@xangarro/synth-core`: `pnpm --filter @xangarro/synth-core <command>`.
 | `validate`                               | Checks every YAML file here: schemas, ids, evidence files, matrix references.  |
 | `schemas`                                | Regenerates `schemas/*.schema.json` from the zod schemas.                      |
 | `stack up` / `stack reap`                | Brings up a corrida's own Postgres and portal / removes a dead corrida's.      |
+| `stack run -- <command>`                 | Runs a command on a fresh stack, its URLs in the environment, then tears down. |
 | `run-one --persona <id> --scenario <id>` | One run, end to end, on a fresh stack: web or phone, by the scenario's runner. |
 | `isolation`                              | Proves the actor cannot leave its tools, and writes `isolation.md`.            |
 | `judge <run folder>…`                    | Opus judges each run, read-only; findings go to the corrida's `findings.json`. |
 | `aggregate <corrida folder>`             | Dedups and prioritises the findings; writes `metrics.json` and `report.md`.    |
 | `corrida --matrix <name>`                | A whole corrida: the matrix in parallel, each run judged, then `aggregate`.    |
-| `test:db`                                | Each scenario's success checks against a seeded run, on the database in env.   |
+| `corrida … --seeded-bug <id>`            | The same, under one of the eight seeded bugs (`core/src/seeded/bugs.ts`).      |
+| `test:db`                                | Each scenario's success checks against a seeded run, on its own database.      |
+| `test:seeded`                            | Each seeded bug applied to the real app and checked by script, no model.       |
 
 ## The actor is a black box
 
