@@ -109,6 +109,13 @@ describe('ConfigSchema', () => {
     ]);
   });
 
+  it('caps the runs a corrida may hold (spec §14), between 1 and 200', () => {
+    for (const n of [0, 201, 2.5]) {
+      const bad = withPatch(CONFIG, { limits: { ...CONFIG.limits, max_runs_per_corrida: n } });
+      assert.deepEqual(failingPaths(ConfigSchema, bad), ['limits.max_runs_per_corrida'], String(n));
+    }
+  });
+
   it('refuses a model that is not a Claude model id', () => {
     const bad = withPatch(CONFIG, { models: { ...CONFIG.models, judge: 'gpt-5' } });
     assert.deepEqual(failingPaths(ConfigSchema, bad), ['models.judge']);

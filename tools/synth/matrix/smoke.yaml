@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schemas/matrix.schema.json
+#
+# The smoke corrida (spec §6.3, S-11): the spec's cells, once each, plus
+# primera-venta on the phone. Every cell is a task: the spec's walkthrough
+# cell (lupita × primera-venta) joins with S-14. Four web runs and one phone
+# run fit one round of the pool plus one (web 3, phone 1).
+mode: smoke
+repetitions: 1
+runs:
+  - { persona: lupita-abarrotes, scenario: onboarding-camino-a, style: task }
+  - { persona: taquero, scenario: primera-venta, style: task }
+  - { persona: taquero, scenario: primera-venta-telefono, style: task }
+  - { persona: operador, scenario: permisos-operador, style: task }
+  - { persona: chaos, scenario: primera-venta, style: task }

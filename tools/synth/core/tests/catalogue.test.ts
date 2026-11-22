@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 
 import { PLAN_LIMITS } from '@xangarro/domain';
 import { describe, it } from 'vitest';
+import { parse } from 'yaml';
 
 import { existsUnder } from '../src/cli/read-tree';
+import { MatrixSchema } from '../src/schemas/matrix';
 import { FIXTURES } from '../src/seed/fixtures';
 import { formatIssue, validateTree } from '../src/validate/tree';
 import { catalogueScenario as scenario, personas, SYNTH, tree } from './catalogue-scenario';
@@ -67,5 +69,35 @@ describe('the v1 catalogue', () => {
     assert.equal(plan.plan, 'xangarrote');
     assert.equal(PLAN_LIMITS.xangarrote.capabilities.permisosPorUsuario, true);
     assert.equal(plan.operators[0]?.canCancelSales, false);
+  });
+});
+
+describe('matrix/smoke.yaml (S-11)', () => {
+  const smoke = MatrixSchema.parse(
+    parse(tree.find((f) => f.path === 'matrix/smoke.yaml')?.text ?? ''),
+  );
+  const runnerOf = (id: string) => scenario(id).runner;
+
+  it('is the smoke mode, once each, and every cell a task: walkthrough comes with S-14', () => {
+    assert.equal(smoke.mode, 'smoke');
+    assert.equal(smoke.repetitions, 1);
+    assert.ok(smoke.runs.every((r) => r.style === 'task'));
+  });
+
+  it('is the spec’s smoke cells, with primera-venta on the phone too', () => {
+    assert.deepEqual(smoke.runs.map((r) => `${r.persona} × ${r.scenario}`).sort(), [
+      'chaos × primera-venta',
+      'lupita-abarrotes × onboarding-camino-a',
+      'operador × permisos-operador',
+      'taquero × primera-venta',
+      'taquero × primera-venta-telefono',
+    ]);
+  });
+
+  it('has one phone run, and no more web runs than two rounds of three', () => {
+    const phone = smoke.runs.filter((r) => runnerOf(r.scenario) === 'phone').length;
+    const web = smoke.runs.length - phone;
+    assert.equal(phone, 1);
+    assert.ok(web <= 6, `${web} web runs`);
   });
 });
