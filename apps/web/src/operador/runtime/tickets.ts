@@ -62,14 +62,20 @@ export async function registrarTicket(
   return { folio: result.ticket.folio };
 }
 
-/** The turno's tickets as Operador · Ventas lists them, and since when (O-32). */
+/**
+ * The turno's tickets as Operador · Ventas lists them, since when (O-32), and
+ * the folio the next sale on this register will get, as Cobrar shows it.
+ */
 export async function ventasDelTurno(
   db: Db,
   businessId: BusinessId,
   deviceId: string,
   turnoId: string,
-): Promise<{ readonly desde: string; readonly ventas: readonly VentaPara[] }> {
-  void businessId;
+): Promise<{
+  readonly desde: string;
+  readonly ventas: readonly VentaPara[];
+  readonly siguienteFolio: number;
+}> {
   const turnos = new DrizzleCajaTurnosRepository(db as never, deviceId as never);
   const tickets = new DrizzleTicketsRepository(db as never, deviceId as never);
   const sales = new DrizzleSalesRepository(db as never, deviceId as never);
@@ -94,7 +100,11 @@ export async function ventasDelTurno(
       };
     }),
   );
-  return { desde: hhmmLocal(turno?.aperturaAt ?? ''), ventas };
+  return {
+    desde: hhmmLocal(turno?.aperturaAt ?? ''),
+    ventas,
+    siguienteFolio: await tickets.nextFolio(businessId),
+  };
 }
 
 /** The open turno's ticket by folio, as Detalle de venta shows it (O-34). */

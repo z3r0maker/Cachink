@@ -14,6 +14,8 @@ export interface VentaHecha {
   readonly nota: string;
   /** The fiado client's id, when the sale is on credit (O-33). */
   readonly clienteId?: string;
+  /** The folio the register gave it (`V-0001`), once the sale is in its database. */
+  readonly folio?: string;
 }
 
 const DURATION_MS = 8000;
@@ -54,6 +56,11 @@ export function useSaleToast() {
     setVenta(null);
   }, [stop]);
 
+  /** The registered folio, for the receipt: only the sale still on the card takes it. */
+  const conFolio = useCallback((de: VentaHecha, folio: string) => {
+    setVenta((v) => (v === de ? { ...v, folio } : v));
+  }, []);
+
   useEffect(() => stop, [stop]);
-  return { venta, progress, show, dismiss };
+  return { venta, progress, show, dismiss, conFolio };
 }

@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { matches, hoyLocal, horaLocal } from '@xangarro/caja';
+import { folioVisto } from '@xangarro/caja/ventas';
 import {
   contar,
   total,
@@ -15,6 +16,7 @@ import {
 /** The four ways a sale is paid (ADR-108: no QR/CoDi). */
 export type MetodoCobro = 'Efectivo' | 'Tarjeta' | 'Transferencia' | 'Fiado';
 import { useSaleToast, type VentaHecha } from './use-sale-toast';
+import { VENTA_REGISTRADA } from './turno-de-caja';
 import { desencolar } from '../shell/cola';
 import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './ticket-store';
 import { registerRuntime } from '../runtime/client';
@@ -56,11 +58,12 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
   function vender(v: Omit<VentaHecha, 'lines' | 'total'>): void {
     if (vendida.current === lines) return;
     vendida.current = lines;
-    toast.show({ ...v, lines, total: total(lines) });
+    const hecha: VentaHecha = { ...v, lines, total: total(lines) };
+    toast.show(hecha);
     reemplazar([]);
     setPaso('catalogo');
     setSheetOpen(false);
-    void registrarSiVinculado(lines, v);
+    registrar(lines, v, hecha, toast);
   }
   venderRef.current = vender;
   return {
@@ -87,6 +90,23 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
     setMetodo,
     deshacer: () => deshacer(toast),
   };
+}
+
+/**
+ * Linked, the sale goes to the register's database; the folio it got then
+ * reaches the card (for the receipt), and Cobrar reads its turno again.
+ */
+function registrar(
+  lines: readonly LineaTicket[],
+  v: Omit<VentaHecha, 'lines' | 'total'>,
+  hecha: VentaHecha,
+  toast: ReturnType<typeof useSaleToast>,
+): void {
+  void registrarSiVinculado(lines, v).then((folio) => {
+    if (folio === null) return;
+    toast.conFolio(hecha, folioVisto(folio));
+    dispatchEvent(new Event(VENTA_REGISTRADA));
+  });
 }
 
 /** «Deshacer»: the just-sold lines come back as the ticket in progress. */
@@ -127,12 +147,12 @@ export type Caja = ReturnType<typeof useCaja>;
 async function registrarSiVinculado(
   lines: readonly LineaTicket[],
   v: Omit<VentaHecha, 'lines' | 'total'>,
-): Promise<void> {
+): Promise<number | null> {
   const device = readDevice();
   const sesion = readSesion();
-  if (device === null || sesion === null || lines.length === 0) return;
+  if (device === null || sesion === null || lines.length === 0) return null;
   try {
-    await registerRuntime().registrar(
+    const { folio } = await registerRuntime().registrar(
       {
         ticket: {
           fecha: hoyLocal() as never,
@@ -156,7 +176,9 @@ async function registrarSiVinculado(
       { deviceId: device.deviceId, userId: sesion.userId, stockEnabled: false },
     );
     if (navigator.onLine) await desencolar();
+    return folio;
   } catch (e) {
     console.error('registrar', e);
+    return null;
   }
 }

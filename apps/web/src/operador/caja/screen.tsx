@@ -32,7 +32,13 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
   const comprobante = () => {
     const venta = caja.toast.venta;
     if (venta)
-      setCompartir({ negocio: data.negocio, caja: data.caja, folio: data.siguienteFolio, venta });
+      setCompartir({
+        negocio: data.negocio,
+        caja: data.caja,
+        // The folio the sale got; the screen's own has moved on to the next one.
+        folio: venta.folio ?? data.siguienteFolio,
+        venta,
+      });
     caja.toast.dismiss();
   };
   const agregar = (p: Producto) => {

@@ -33,6 +33,8 @@ export interface ProductoPara {
 export interface VentasTurno {
   readonly desde: string;
   readonly ventas: readonly VentaPara[];
+  /** The folio this register's next sale will get (`TicketsRepository.nextFolio`). */
+  readonly siguienteFolio: number;
 }
 
 export interface TicketVivo {

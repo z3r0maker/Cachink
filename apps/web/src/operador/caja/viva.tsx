@@ -13,6 +13,7 @@ import type {
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 import { stockDeCaja } from '@xangarro/caja/lectura';
+import { useTurnoDeCaja } from './turno-de-caja';
 
 /**
  * Caja for real (O-06): a linked register sells the products its own database
@@ -49,14 +50,19 @@ function comoProducto(r: {
   };
 }
 
-/** A linked register's catalogue and fiado clients, from its own database. */
-function useDatosVivos(device: ReturnType<typeof readDevice>): {
+/**
+ * A linked register's catalogue and fiado clients, from its own database.
+ * The device is read inside the effect: `readDevice` parses a new object on
+ * every call, and an effect keyed on it re-read the catalogue every render.
+ */
+function useDatosVivos(): {
   readonly catalogo: readonly Producto[] | null;
   readonly clientes: readonly ClienteFiado[] | null;
 } {
   const [catalogo, setCatalogo] = useState<readonly Producto[] | null>(null);
   const [clientes, setClientes] = useState<readonly ClienteFiado[] | null>(null);
   useEffect(() => {
+    const device = readDevice();
     if (device === null) return;
     const runtime = registerRuntime();
     void runtime
@@ -77,7 +83,7 @@ function useDatosVivos(device: ReturnType<typeof readDevice>): {
         );
       })
       .catch((e: unknown) => console.error('catalogo', e));
-  }, [device]);
+  }, []);
   return { catalogo, clientes };
 }
 
@@ -87,13 +93,15 @@ export function CajaViva(p: {
   readonly data: CajaData;
 }): ReactNode {
   const device = readDevice();
-  const { catalogo, clientes } = useDatosVivos(device);
+  const { catalogo, clientes } = useDatosVivos();
+  const turno = useTurnoDeCaja();
 
   if (device === null) {
     return <CajaScreen {...p} />;
   }
-  // Linked: never the fixture's pre-seeded ticket, and nothing to sell until
-  // the register's own catalogue loads — a real register starts empty.
+  // Linked: never the fixture's pre-seeded ticket, sales count or folio, and
+  // nothing to sell until the register's own catalogue loads — a real
+  // register starts empty. Until the turno is read, no folio rather than V-0413.
   return (
     <CajaScreen
       {...p}
@@ -103,6 +111,8 @@ export function CajaViva(p: {
         catalogo: catalogo ?? [],
         clientes: clientes ?? [],
         ticket: [],
+        ventasTurno: turno?.ventasTurno ?? 0,
+        siguienteFolio: turno?.siguienteFolio ?? '',
       }}
     />
   );
