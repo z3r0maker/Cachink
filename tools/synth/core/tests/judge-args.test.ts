@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, it } from 'vitest';
 
 import { JUDGE_TOOLS, judgeArgs, renderJudgePrompt } from '../src/judge/args';
@@ -62,6 +65,22 @@ describe('renderJudgePrompt', () => {
       candidates: [],
     });
     assert.match(out, /C:Ninguno: la consola y la red no registraron errores\./);
+  });
+
+  it('puts the persona and the scenario into the real prompt, as written', () => {
+    // Prettier once rewrote `{{persona}}` inside the prompt's yaml fences as
+    // `{ { persona } }`, which nothing filled: every judge until S-13 saw braces.
+    const real = readFileSync(join(import.meta.dirname, '../../prompts/judge.md'), 'utf8');
+    const out = renderJudgePrompt(real, {
+      files: ['run.json'],
+      outcome: 'completed, success false',
+      persona: 'id: operador-de-prueba',
+      scenario: 'id: escenario-de-prueba',
+      candidates: [],
+    });
+    assert.ok(out.includes('id: operador-de-prueba'), 'the persona reaches the judge');
+    assert.ok(out.includes('id: escenario-de-prueba'), 'the scenario reaches the judge');
+    assert.doesNotMatch(out, /\{\s*\{|\}\s*\}/);
   });
 
   it('refuses a template with a placeholder it does not fill', () => {
