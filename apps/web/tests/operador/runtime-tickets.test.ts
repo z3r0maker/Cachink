@@ -25,13 +25,17 @@ const {
     findOpenByBusiness: vi.fn(async () => null),
     findById: vi.fn(async () => null),
     findByCajaTurno: vi.fn(async () => [] as unknown[]),
+    nextFolio: vi.fn(async () => 1),
     findByTicket: vi.fn(async () => [] as unknown[]),
     usersFindById: vi.fn(async () => null),
     clientsFindById: vi.fn(async () => null),
   };
   // `new` refuses arrows: constructable function mocks throughout.
   const Tickets = vi.fn(function (this: unknown) {
-    Object.assign(this, { findByCajaTurno: consultas.findByCajaTurno });
+    Object.assign(this, {
+      findByCajaTurno: consultas.findByCajaTurno,
+      nextFolio: consultas.nextFolio,
+    });
     return this;
   });
   const Turnos = vi.fn(function (this: unknown) {
@@ -193,7 +197,11 @@ describe('ticketPorFolio', () => {
     ]);
     consultas.findByTicket.mockResolvedValue([{ monto: 12000n }, { monto: 8000n }]);
     consultas.clientsFindById.mockResolvedValue({ nombre: 'María López' });
+    consultas.nextFolio.mockResolvedValue(42);
     const r = await ventasDelTurno(DB, BIZ, TEST_DEVICE_ID, 't-1');
+    // Cobrar shows the folio the next sale gets, from the register's own counter.
+    assert.equal(r.siguienteFolio, 42);
+    assert.deepEqual(consultas.nextFolio.mock.calls.at(-1), [BIZ]);
     assert.deepEqual(r.ventas, [
       {
         id: 'tk-1',

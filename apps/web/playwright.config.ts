@@ -290,7 +290,7 @@ const config = defineConfig<OpcionesWebkit>({
       name: 'operador',
       dependencies: ['serial'],
       testMatch:
-        /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos|caja|ventas|cobranza|cliente|cierre|detalle-venta|chaos)\.spec\.ts/,
+        /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos|caja|folio|ventas|cobranza|cliente|cierre|detalle-venta|chaos)\.spec\.ts/,
       workers: 1,
       use: { ...DESKTOP },
     },

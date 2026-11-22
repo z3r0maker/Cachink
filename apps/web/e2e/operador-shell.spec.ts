@@ -1,15 +1,7 @@
-import {
-  addOperator,
-  mintCodeFor,
-  mintTenant,
-  resetThrottle,
-  walkOperatorDoor,
-} from '@xangarro/testing/tenant';
-import { hash } from 'bcryptjs';
-
 import { expect, test } from './test';
 
 import { puertaOperador } from './puerta-operador';
+import { OPERADORA, puertaPropia } from './puerta-propia';
 
 /**
  * O-11 (Track O, fase 10): the operator shell. The design's gate for a shell is
@@ -57,21 +49,10 @@ test('the sidebar names the operator signed in, their business and their turno, 
   page,
 }) => {
   // A business of its own, with an operator who is not the fixture's Ana.
-  const t = await mintTenant({ label: 'Fonda' });
-  await addOperator(t, { nombre: 'Rosa Medina', pinHash: await hash('4826', 10) });
-  await resetThrottle();
-  const code = await mintCodeFor(t);
-  await page.goto('/operador/caja');
-  await walkOperatorDoor(page, {
-    email: t.email,
-    code,
-    operador: 'Rosa Medina',
-    nip: '4826',
-    fondo: '500',
-  });
+  const t = await puertaPropia(page);
 
   const aside = page.locator('aside').filter({ hasText: 'XANGARRO!' });
-  await expect(aside).toContainText('Rosa Medina');
+  await expect(aside).toContainText(OPERADORA.nombre);
   await expect(aside).toContainText(t.nombre);
   await expect(aside).toContainText(/Cobrando desde las \d{2}:\d{2}/);
   await expect(aside).not.toContainText('Ana Robledo');
