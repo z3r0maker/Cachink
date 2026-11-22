@@ -11,8 +11,8 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 import { formatMoney } from '@xangarro/domain';
 
 import type { EstadoMode } from '@xangarro/caja';
-import { desencolar } from '../shell/cola';
 import { registerRuntime } from '../runtime/client';
+import { cancelarVinculada, motivoCompleto } from './cancelar-vivo';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import type { VentaPara } from '../runtime/protocol';
 import {
@@ -55,30 +55,6 @@ async function leerVentas(cred: Credenciales, base: VentasData): Promise<Vivo> {
     state: r.ventas.length === 0 ? 'empty' : 'happy',
     data: { ...base, operador: sesion.nombre, desde: r.desde, ventas: r.ventas.map(comoVenta) },
   };
-}
-
-/** Cancel through the use case; the confirmation sentence is ours to build. */
-async function cancelarEnVivo(
-  cred: Credenciales,
-  venta: VentaTurno,
-  nip: string,
-  motivo: string,
-): Promise<string> {
-  const { device, sesion } = cred;
-  if (device === null || sesion === null || venta.id === undefined) throw new Error('sin sesión');
-  const r = await registerRuntime().cancelar({
-    businessId: device.businessId,
-    deviceId: device.deviceId,
-    userId: sesion.userId,
-    ticketId: venta.id,
-    pin: nip,
-    motivo,
-  });
-  const devuelve =
-    r.cashToReturnCentavos === null
-      ? ''
-      : ` Devuelve ${formatMoney(BigInt(r.cashToReturnCentavos))}.`;
-  return `${venta.folio} cancelada · ${motivo}.${devuelve}`;
 }
 
 /** The fixture path's mark: the sale stays, shown as cancelled. */
@@ -125,14 +101,6 @@ function useCapas(abierta: Abierta | undefined) {
   return { sel, capa, setCapa, aviso, setAviso, abrir, cerrar: () => setCapa(null) };
 }
 
-/**
- * The Worker hands an error over as text, its class names first («Error:
- * TypeError: PIN incorrecto»): the dialog shows the sentence alone.
- */
-function sinClase(e: unknown): string {
-  return (e instanceof Error ? e.message : String(e)).replace(/^(?:\w*Error: )+/, '');
-}
-
 /** Resolves to the error to show in the dialog, or null once cancelled. */
 function useCancelar(p: {
   readonly fila: VentaTurno | undefined;
@@ -145,17 +113,13 @@ function useCancelar(p: {
   const { fila, capas } = p;
   return async (motivo: string, nip: string, nota: string): Promise<string | null> => {
     if (!fila) return null;
-    const completo = nota.trim() === '' ? motivo : `${motivo}: ${nota.trim()}`;
     if (p.linked && fila.id !== undefined) {
-      try {
-        capas.setAviso(await cancelarEnVivo(p.cred, fila, nip, completo));
-      } catch (e: unknown) {
-        return `No se pudo cancelar: ${sinClase(e)}`;
-      }
+      const r = await cancelarVinculada(p.cred, fila, { motivo, nip, nota });
+      if ('error' in r) return r.error;
+      capas.setAviso(r.aviso);
       await p.recargar();
-      if (navigator.onLine) void desencolar();
     } else {
-      p.setVivo((v) => marcarCancelada(v, fila.folio, completo));
+      p.setVivo((v) => marcarCancelada(v, fila.folio, motivoCompleto(motivo, nota)));
       capas.setAviso(
         `Listo, ${fila.folio} por ${formatMoney(fila.monto)} quedó cancelada. Se sigue viendo en tu turno y en el corte.`,
       );

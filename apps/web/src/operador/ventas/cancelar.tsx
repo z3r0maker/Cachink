@@ -25,6 +25,8 @@ export { MOTIVOS, type Motivo } from './cancelar-campos';
 export function CancelarVenta(p: {
   readonly venta: VentaTurno;
   readonly conNip?: boolean;
+  /** Chosen when it opens: Cobrar's «Deshacer» opens it on «Me equivoqué al cobrar». */
+  readonly motivoInicial?: Motivo;
   readonly onClose: () => void;
   readonly onConfirm: (motivo: Motivo, nip: string, nota: string) => Promise<string | null>;
 }) {
@@ -80,7 +82,7 @@ function Pie({
 }
 
 function useCancelar(p: Parameters<typeof CancelarVenta>[0]) {
-  const [motivo, setMotivo] = useState<Motivo | null>(null);
+  const [motivo, setMotivo] = useState<Motivo | null>(p.motivoInicial ?? null);
   const [nip, setNip] = useState('');
   const [nota, setNota] = useState('');
   const [error, setError] = useState<string | null>(null);

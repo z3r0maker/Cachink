@@ -118,7 +118,7 @@ function persist(): Promise<void> {
 async function registrar(
   input: Parameters<typeof registrarTicket>[1],
   ctx: Parameters<typeof registrarTicket>[2],
-): Promise<{ folio: number }> {
+): Promise<{ folio: number; ticketId: string }> {
   if (runtime === null) throw new Error(NO_ARRANCADO);
   return runAccess((rt) => registrarTicket(rt.db, input, ctx));
 }

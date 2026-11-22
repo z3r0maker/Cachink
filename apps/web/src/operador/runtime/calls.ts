@@ -37,6 +37,12 @@ export interface VentasTurno {
   readonly siguienteFolio: number;
 }
 
+/** A sale once it is in the register's database (`RegistrarTicketUseCase`). */
+export interface TicketRegistrado {
+  readonly folio: number;
+  readonly ticketId: string;
+}
+
 export interface TicketVivo {
   readonly turnoDesde: string;
   readonly capturo: string;

@@ -16,7 +16,8 @@ import { Share } from './share';
 import { TicketBar } from './barra';
 import { TicketPanel } from './ticket-panel';
 import type { CajaScreenProps, Producto } from '@xangarro/caja/caja';
-import { useCaja } from './use-caja';
+import { DeshacerVenta, useDeshacer } from './deshacer';
+import { useCaja, type Caja } from './use-caja';
 import { VentaHechaCard } from './venta-hecha';
 
 /**
@@ -28,19 +29,8 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
   const caja = useCaja(data, paso);
   useAtajosCaja(caja);
   const [nuevoOpen, setNuevoOpen] = useState(false);
-  const [compartir, setCompartir] = useState<Comprobante | null>(null);
-  const comprobante = () => {
-    const venta = caja.toast.venta;
-    if (venta)
-      setCompartir({
-        negocio: data.negocio,
-        caja: data.caja,
-        // The folio the sale got; the screen's own has moved on to the next one.
-        folio: venta.folio ?? data.siguienteFolio,
-        venta,
-      });
-    caja.toast.dismiss();
-  };
+  const compartir = useCompartir(caja, data);
+  const deshacer = useDeshacer(caja);
   const agregar = (p: Producto) => {
     caja.add(p);
     setNuevoOpen(false);
@@ -54,14 +44,33 @@ export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScree
       </div>
       <TicketBar caja={caja} />
       <NuevoProducto open={nuevoOpen} onClose={() => setNuevoOpen(false)} onAdd={agregar} />
-      <VentaHechaCard caja={caja} onComprobante={comprobante} />
+      <VentaHechaCard caja={caja} onComprobante={compartir.abrir} onDeshacer={deshacer.abrir} />
+      <DeshacerVenta venta={deshacer.venta} onClose={deshacer.cerrar} />
       <Share
-        key={compartir ? 'open' : 'closed'}
-        comprobante={compartir}
-        onClose={() => setCompartir(null)}
+        key={compartir.comprobante ? 'open' : 'closed'}
+        comprobante={compartir.comprobante}
+        onClose={compartir.cerrar}
       />
     </OpMain>
   );
+}
+
+/** «Comprobante» on the card: the receipt of the sale on it, with the folio it got. */
+function useCompartir(caja: Caja, data: CajaScreenProps['data']) {
+  const [comprobante, setComprobante] = useState<Comprobante | null>(null);
+  const abrir = (): void => {
+    const venta = caja.toast.venta;
+    if (venta)
+      setComprobante({
+        negocio: data.negocio,
+        caja: data.caja,
+        // The folio the sale got; the screen's own has moved on to the next one.
+        folio: venta.folio ?? data.siguienteFolio,
+        venta,
+      });
+    caja.toast.dismiss();
+  };
+  return { comprobante, abrir, cerrar: () => setComprobante(null) };
 }
 
 /** While cash or fiado is being taken, the catalogue steps back. */

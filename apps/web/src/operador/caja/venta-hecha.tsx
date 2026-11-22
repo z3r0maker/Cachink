@@ -16,9 +16,12 @@ const WA =
 export function VentaHechaCard({
   caja,
   onComprobante,
+  onDeshacer,
 }: {
   readonly caja: Caja;
   readonly onComprobante: () => void;
+  /** Cancels a registered sale (`deshacer.tsx`). */
+  readonly onDeshacer: () => void;
 }) {
   const venta = caja.toast.venta;
   if (!venta) return null;
@@ -34,7 +37,7 @@ export function VentaHechaCard({
             <span className={v.titulo}>Venta registrada · {formatMoney(venta.total)}</span>
           </span>
         </div>
-        <Cuerpo venta={venta} onDeshacer={caja.deshacer} onComprobante={onComprobante} />
+        <Cuerpo venta={venta} onDeshacer={onDeshacer} onComprobante={onComprobante} />
       </div>
       <div className={v.track}>
         <div className={v.fill} style={{ width: `${caja.toast.progress}%` }} />

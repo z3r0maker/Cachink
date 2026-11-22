@@ -24,9 +24,14 @@ export const OPERADORA = { nombre: 'Rosa Medina', nip: '4826' } as const;
 export async function puertaPropia(
   page: Page,
   productos: readonly ProductRow[] = [],
+  opciones: { readonly puedeCancelar?: boolean } = {},
 ): Promise<Tenant> {
   const t = await mintTenant({ label: 'Fonda' });
-  await addOperator(t, { nombre: OPERADORA.nombre, pinHash: await hash(OPERADORA.nip, 10) });
+  await addOperator(t, {
+    nombre: OPERADORA.nombre,
+    pinHash: await hash(OPERADORA.nip, 10),
+    permissions: { canCancelSales: opciones.puedeCancelar === true },
+  });
   for (const p of productos) await addProduct(t, p);
   await resetThrottle();
   const code = await mintCodeFor(t);
