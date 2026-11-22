@@ -136,10 +136,11 @@ describe('registrarTicket', () => {
     lineas: [],
   } as unknown as RegistrarTicketInput;
 
-  it('runs the phone’s own atomic use case and returns its folio', async () => {
-    execute.mockResolvedValue({ ticket: { folio: 41 } });
+  it('runs the phone’s own atomic use case and returns its folio and ticket', async () => {
+    execute.mockResolvedValue({ ticket: { folio: 41, id: 'tk-41' } });
     const r = await registrarTicket(DB, INPUT, CTX);
-    assert.deepEqual(r, { folio: 41 });
+    // The ticket is what Cobrar's «Deshacer» cancels.
+    assert.deepEqual(r, { folio: 41, ticketId: 'tk-41' });
     expect(RegistrarTicketUseCase).toHaveBeenCalled();
     expect(execute).toHaveBeenCalledWith(INPUT);
   });

@@ -87,7 +87,7 @@ test('a long ticket never pushes the total or COBRAR out of view', async ({ page
   await expect(panel.getByText('Total', { exact: true })).toBeInViewport();
 });
 
-test('«Deshacer» brings the sold lines back', async ({ page }) => {
+test('«Deshacer» cancels the sale and brings the sold lines back', async ({ page }) => {
   await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 6000, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
   await page
@@ -96,6 +96,10 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
     .click();
   await cobrarCon(page, 'Tarjeta');
   await page.getByRole('status').getByRole('button', { name: 'Deshacer' }).click();
+  // Ana may cancel (the seed): her NIP takes the sale back (operador-deshacer.spec.ts).
+  const dialogo = page.getByRole('alertdialog');
+  await dialogo.getByLabel('Tu NIP').fill('2580');
+  await dialogo.getByRole('button', { name: 'Cancelar venta' }).click();
   await expect(
     page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),
   ).toBeAttached();

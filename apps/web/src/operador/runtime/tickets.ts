@@ -45,7 +45,7 @@ export async function registrarTicket(
   db: Db,
   input: RegistrarTicketInput,
   ctx: RegistrarContext,
-): Promise<{ folio: number }> {
+): Promise<{ folio: number; ticketId: string }> {
   const useCase = new RegistrarTicketUseCase(
     new DrizzleTicketsRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
     new DrizzleSalesRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
@@ -59,7 +59,7 @@ export async function registrarTicket(
     },
   );
   const result = await useCase.execute(input);
-  return { folio: result.ticket.folio };
+  return { folio: result.ticket.folio, ticketId: result.ticket.id };
 }
 
 /**

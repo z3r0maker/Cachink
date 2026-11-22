@@ -93,8 +93,8 @@ export class RegisterRuntime {
     return this.#call<BootInfo>({ method: 'boot' });
   }
 
-  registrar(input: RegistrarTicketInput, ctx: RegistrarContext): Promise<{ folio: number }> {
-    return this.#call<{ folio: number }>({ method: 'registrar', input, ctx });
+  registrar(input: RegistrarTicketInput, ctx: RegistrarContext): Promise<calls.TicketRegistrado> {
+    return this.#call<calls.TicketRegistrado>({ method: 'registrar', input, ctx });
   }
 
   sync(

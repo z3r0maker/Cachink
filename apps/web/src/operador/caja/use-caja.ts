@@ -19,6 +19,7 @@ import { useSaleToast, type VentaHecha } from './use-sale-toast';
 import { VENTA_REGISTRADA } from './turno-de-caja';
 import { desencolar } from '../shell/cola';
 import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './ticket-store';
+import type { TicketRegistrado } from '../runtime/calls';
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 import { readSesion } from '../runtime/session-store';
@@ -93,8 +94,9 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
 }
 
 /**
- * Linked, the sale goes to the register's database; the folio it got then
- * reaches the card (for the receipt), and Cobrar reads its turno again.
+ * Linked, the sale goes to the register's database; its folio (for the
+ * receipt) and its ticket (for «Deshacer») then reach the card, and Cobrar
+ * reads its turno again.
  */
 function registrar(
   lines: readonly LineaTicket[],
@@ -102,14 +104,18 @@ function registrar(
   hecha: VentaHecha,
   toast: ReturnType<typeof useSaleToast>,
 ): void {
-  void registrarSiVinculado(lines, v).then((folio) => {
-    if (folio === null) return;
-    toast.conFolio(hecha, folioVisto(folio));
+  void registrarSiVinculado(lines, v).then((r) => {
+    if (r === null) return;
+    toast.conRegistro(hecha, { folio: folioVisto(r.folio), ticketId: r.ticketId });
     dispatchEvent(new Event(VENTA_REGISTRADA));
   });
 }
 
-/** «Deshacer»: the just-sold lines come back as the ticket in progress. */
+/**
+ * «Deshacer» for a sale with no ticket to cancel (the design's unlinked caja,
+ * or a sale the register could not record): the lines come back as the
+ * ticket in progress. A registered sale is cancelled instead (`deshacer.tsx`).
+ */
 function deshacer(toast: ReturnType<typeof useSaleToast>): void {
   if (toast.venta) reemplazar(toast.venta.lines);
   toast.dismiss();
@@ -147,12 +153,12 @@ export type Caja = ReturnType<typeof useCaja>;
 async function registrarSiVinculado(
   lines: readonly LineaTicket[],
   v: Omit<VentaHecha, 'lines' | 'total'>,
-): Promise<number | null> {
+): Promise<TicketRegistrado | null> {
   const device = readDevice();
   const sesion = readSesion();
   if (device === null || sesion === null || lines.length === 0) return null;
   try {
-    const { folio } = await registerRuntime().registrar(
+    const registrado = await registerRuntime().registrar(
       {
         ticket: {
           fecha: hoyLocal() as never,
@@ -175,8 +181,10 @@ async function registrarSiVinculado(
       // The Worker reads the business's stock switch itself (runtime/tickets.ts).
       { deviceId: device.deviceId, userId: sesion.userId, stockEnabled: false },
     );
-    if (navigator.onLine) await desencolar();
-    return folio;
+    // The sale is the register's now: the card learns its folio and ticket at
+    // once, and the queue carries it up behind (offline, on reconnect).
+    if (navigator.onLine) void desencolar();
+    return registrado;
   } catch (e) {
     console.error('registrar', e);
     return null;

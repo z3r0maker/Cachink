@@ -16,6 +16,8 @@ export interface VentaHecha {
   readonly clienteId?: string;
   /** The folio the register gave it (`V-0001`), once the sale is in its database. */
   readonly folio?: string;
+  /** Its ticket in the register's database, which «Deshacer» cancels. */
+  readonly ticketId?: string;
 }
 
 const DURATION_MS = 8000;
@@ -56,11 +58,17 @@ export function useSaleToast() {
     setVenta(null);
   }, [stop]);
 
-  /** The registered folio, for the receipt: only the sale still on the card takes it. */
-  const conFolio = useCallback((de: VentaHecha, folio: string) => {
-    setVenta((v) => (v === de ? { ...v, folio } : v));
-  }, []);
+  /**
+   * The sale as registered: its folio for the receipt, its ticket for
+   * «Deshacer». Only the sale still on the card takes it.
+   */
+  const conRegistro = useCallback(
+    (de: VentaHecha, r: { readonly folio: string; readonly ticketId: string }) => {
+      setVenta((v) => (v === de ? { ...v, ...r } : v));
+    },
+    [],
+  );
 
   useEffect(() => stop, [stop]);
-  return { venta, progress, show, dismiss, conFolio };
+  return { venta, progress, show, dismiss, conRegistro };
 }
