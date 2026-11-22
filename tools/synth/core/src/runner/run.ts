@@ -28,6 +28,8 @@ export interface RunInput extends Common {
   readonly mcpCli: string;
   /** Where the corrida's portal writes its mail (`EMAIL_OUTBOX_DIR`). */
   readonly outboxDir: string;
+  /** The run's own client address (`runAddress`), so throttles never cross runs. */
+  readonly address: string;
 }
 
 /** Where a signup's confirmation link points (N-83). */
@@ -95,7 +97,11 @@ async function openBrowser(i: RunInput, dir: string) {
     profileDir: profile,
     cdpPort: i.cdpPort,
     baseUrl: i.baseUrl,
+    address: i.address,
   });
+  // What this run held while it ran, for the corrida's interference check (S-11).
+  const held = { cdp_port: i.cdpPort, address: i.address, profile };
+  writeFileSync(join(dir, 'runner.json'), `${JSON.stringify(held, null, 2)}\n`);
   return { profile, empty, browser, capture: new Capture(dir, browser.context, browser.page) };
 }
 

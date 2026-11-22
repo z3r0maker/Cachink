@@ -48,7 +48,7 @@ export const PRIMERA_VENTA = {
 export const CONFIG = {
   allowed_hosts: ['127.0.0.1', 'localhost', '10.0.2.2'],
   models: { actor: 'claude-sonnet-5-5', judge: 'claude-opus-5-5', triage: 'claude-opus-5-5' },
-  limits: { max_steps: 60, max_turns: 80, run_timeout_s: 900 },
+  limits: { max_steps: 60, max_turns: 80, run_timeout_s: 900, max_runs_per_corrida: 40 },
   concurrency: { web: 3, phone: 1 },
   estimated_cost_caps: { per_corrida_usd_cents: 2_000, per_day_usd_cents: 5_000 },
   reactions: { doubt_after: 2, stuck_after: 3, patience_stuck_at: 0.75 },

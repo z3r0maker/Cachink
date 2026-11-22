@@ -23,6 +23,8 @@ export async function launchBrowser(o: {
   readonly cdpPort: number;
   /** The stack's portal: relative URLs (`/login`, the scenario's start) resolve against it. */
   readonly baseUrl: string;
+  /** Sent as `x-forwarded-for`: the portal's throttles key on it (owner decision 3). */
+  readonly address: string;
 }): Promise<RunBrowser> {
   const [width, height] = o.persona.device.viewport;
   const touch = o.persona.device.input === 'touch';
@@ -33,6 +35,7 @@ export async function launchBrowser(o: {
     hasTouch: touch,
     isMobile: touch,
     serviceWorkers: 'block',
+    extraHTTPHeaders: { 'x-forwarded-for': o.address },
     locale: 'es-MX',
     timezoneId: 'America/Mexico_City',
     args: [`--remote-debugging-port=${o.cdpPort}`, '--remote-debugging-address=127.0.0.1'],

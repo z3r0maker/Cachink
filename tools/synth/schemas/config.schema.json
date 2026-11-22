@@ -55,12 +55,18 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 3600
+        },
+        "max_runs_per_corrida": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
         }
       },
       "required": [
         "max_steps",
         "max_turns",
-        "run_timeout_s"
+        "run_timeout_s",
+        "max_runs_per_corrida"
       ],
       "additionalProperties": false
     },

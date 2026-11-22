@@ -25,7 +25,8 @@
     "run-one": "tsx src/cli/run-one.ts",
     "isolation": "tsx src/cli/isolation.ts",
     "judge": "tsx src/cli/judge.ts",
-    "aggregate": "tsx src/cli/aggregate.ts"
+    "aggregate": "tsx src/cli/aggregate.ts",
+    "corrida": "tsx src/cli/corrida.ts"
   },
   "dependencies": {
     "@xangarro/domain": "workspace:*",

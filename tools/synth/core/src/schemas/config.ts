@@ -29,6 +29,8 @@ export const ConfigSchema = z
       max_steps: Positive.max(200),
       max_turns: Positive.max(400),
       run_timeout_s: Positive.max(3_600),
+      /** Spec §14's «tope de runs por corrida»: cells × repetitions may not pass it. */
+      max_runs_per_corrida: Positive.max(200),
     }),
     /** The phone runner drives one emulator, so it runs one at a time (ADR-153 §5). */
     concurrency: z.strictObject({ web: Positive.max(8), phone: z.literal(1) }),
