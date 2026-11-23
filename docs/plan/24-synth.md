@@ -393,7 +393,24 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-13 `sensitivity.ts` y recall [alta]
 
-- [ ] Status · **Blocked by:** S-12
+- [x] Status · **Blocked by:** S-12
+      Done: 2026-11-22 · `feat/synth-s13` · **Recall is 70% (7/10)**: bug 83%, friction 0%, comprehension
+      100%; web 75%, phone 50%. `pnpm --filter @xangarro/synth-core sensitivity run` runs a clean smoke and
+      one smoke per seeded bug, then `sensitivity score`, which also re-scores re-judged corridas. A bug counts
+      as detected when, on its aimed scenario's runs, the judge reported the expected category under the
+      expected `área/acción` and the clean smoke had not found it in that cell. The 500 and the slow push are
+      measured on the web and the phone apart. Each scoring appends a row to
+      `calibration/sensitivity-history.csv`, with the judge prompt's hash. The first run scored 11%. Fixing an
+      S-08 bug also scored 11%: Prettier had turned the judge's `{{persona}}` and `{{scenario}}` into
+      `{ { persona } }`, so no judge until now saw either (`tools/synth/prompts/` is now in
+      `.prettierignore`, and a test renders the real prompt). The third row, 70%, came after the judge got a
+      fixed `área/acción` vocabulary for `dedupe_key` (`judge/keys.ts`, rendered into the prompt). The first
+      run's near misses were nearly all the same bug under the judge's own names (`caja/ticket-total`,
+      `sync/push`). The same change made «comprehension» include other languages and jargon, and made a
+      failed success check the scenario's truth. Misses: `cobrar-primer-clic` is found but filed as
+      `friction`; `guardado-lento` is not perceptible to the persona, since the sale saves locally and only
+      the push waits. The first `cobrar-primer-clic` corrida waited out the Maestro lock behind another
+      session's test and was re-run. The cost was about US$15 for the day.
 - **What:**
   - Run smoke once per seeded bug and compute recall per category and per runner.
   - Append a row to `calibration/sensitivity-history.csv`.

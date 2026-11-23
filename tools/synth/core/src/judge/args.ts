@@ -1,5 +1,6 @@
 import { BUILT_INS } from '../runner/actor-args';
 import type { BugCandidate } from './candidates';
+import { vocabularyText } from './keys';
 
 /**
  * How the judge is started (S-08, spec §8.3): `claude -p` in the run folder,
@@ -59,6 +60,7 @@ export function renderJudgePrompt(template: string, i: JudgeInputs): string {
     outcome: i.outcome,
     persona: i.persona.trim(),
     scenario: i.scenario.trim(),
+    claves: vocabularyText(),
     candidates:
       i.candidates.length === 0
         ? 'Ninguno: la consola y la red no registraron errores.'

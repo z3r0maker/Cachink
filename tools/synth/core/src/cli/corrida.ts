@@ -31,20 +31,37 @@ const REPO = resolve(import.meta.dirname, '../../../../..');
 const SYNTH = join(REPO, 'tools/synth');
 const MCP_CLI = mcpCliPath(SYNTH);
 
-function cliArgs(): { readonly matrix: string; readonly seeded?: SeededBug } {
+interface Args {
+  readonly matrix: string;
+  readonly seeded?: SeededBug;
+  /** The corrida's id, when the caller needs to know where it lands (`sensitivity`). */
+  readonly id?: string;
+}
+
+function cliArgs(): Args {
   const { values } = parseArgs({
-    options: { matrix: { type: 'string' }, 'seeded-bug': { type: 'string' } },
+    options: {
+      matrix: { type: 'string' },
+      'seeded-bug': { type: 'string' },
+      id: { type: 'string' },
+    },
   });
   if (!values.matrix) {
-    throw new Error('usage: corrida --matrix <name of matrix/<name>.yaml> [--seeded-bug <id>]');
+    throw new Error(
+      'usage: corrida --matrix <name of matrix/<name>.yaml> [--seeded-bug <id>] [--id <corrida id>]',
+    );
   }
   if (!existsSync(MCP_CLI)) {
     throw new Error(
       'Playwright MCP is not installed: run `pnpm --filter @xangarro/synth-core setup`',
     );
   }
-  const id = values['seeded-bug'];
-  return { matrix: values.matrix, ...(id === undefined ? {} : { seeded: seededBug(id) }) };
+  const bug = values['seeded-bug'];
+  return {
+    matrix: values.matrix,
+    ...(bug === undefined ? {} : { seeded: seededBug(bug) }),
+    ...(values.id === undefined ? {} : { id: values.id }),
+  };
 }
 
 /**
@@ -95,8 +112,9 @@ async function runAndJudge(c: Corrida, job: Job, index: number): Promise<JobDone
 async function start(
   catalogue: Catalogue,
   matrix: { readonly mode: 'smoke' | 'full'; readonly repetitions: number },
-  seeded: SeededBug | undefined,
+  args: Args,
 ) {
+  const { seeded } = args;
   const today = new Date().toISOString().slice(0, 10);
   const dayBefore = spentOnDayCents(reportsDir(REPO), today);
   if (budgetLeftCents(catalogue.config.estimated_cost_caps, { corrida: 0, dayBefore }) === 0) {
@@ -105,7 +123,7 @@ async function start(
     );
   }
   const deps = nodeStackDeps(REPO);
-  const id = `${today.replace(/-/g, '')}-${randomBytes(2).toString('hex')}`;
+  const id = args.id ?? `${today.replace(/-/g, '')}-${randomBytes(2).toString('hex')}`;
   const stack = await startStack(deps, {
     id,
     repoRoot: REPO,
@@ -133,7 +151,7 @@ async function main(): Promise<void> {
   // A corrida with a phone run holds the machine-wide Maestro lock throughout.
   if (jobs.some((j) => j.runner === 'phone') && !holdsMaestroLock())
     process.exit(await rerunUnderMaestroLock(REPO));
-  const { stack, corrida } = await start(catalogue, matrix, args.seeded);
+  const { stack, corrida } = await start(catalogue, matrix, args);
   try {
     const results = await runPool(
       jobs,

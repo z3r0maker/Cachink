@@ -18,13 +18,13 @@ la entrevista de salida. Lee las capturas de los pasos que cites y las líneas d
 **La persona:**
 
 ```yaml
-{ { persona } }
+{{persona}}
 ```
 
 **El escenario:**
 
 ```yaml
-{ { scenario } }
+{{scenario}}
 ```
 
 **Candidatos a bug** (cada error de consola y cada petición fallida de la corrida, elegidos por script):
@@ -37,7 +37,9 @@ la entrevista de salida. Lee las capturas de los pasos que cites y las líneas d
    - `bug`: la app hizo algo mal (un error, un dato equivocado, una acción que no respondió).
    - `friction`: la app funcionó, pero costó más de lo que debía (pasos de más, un control que se movió, algo
      poco claro que se resolvió).
-   - `comprehension`: la persona no entendió una palabra, un dato o lo que se le pedía.
+   - `comprehension`: la persona no entendió una palabra, un dato o lo que se le pedía. Incluye un texto en otro
+     idioma y un término técnico que la persona no conoce (lo que dice «no sabe» en la persona), aunque además
+     sea un error de la app.
    - `out_of_scope_expectation`: la persona esperaba algo que el producto no ofrece.
    - `agent_failure`: el problema fue del agente, no de la app.
 2. Para cada hallazgo responde la pregunta de corte: **¿una persona con ojos y manos habría tenido este mismo
@@ -51,12 +53,20 @@ la entrevista de salida. Lee las capturas de los pasos que cites y las líneas d
    - `major`: abandono, o un desvío largo, en un flujo principal.
    - `minor`: fricción de la que la persona se recupera rápido.
 5. `dedupe_key` es estable y en kebab-case: `área/acción/síntoma`, por ejemplo
-   `caja/cobrar/boton-no-responde`. Dos corridas que tropiezan con lo mismo dan la misma clave.
-6. **Cada hallazgo cita la traza:** pasos (`steps`), capturas (`screenshots/step-008.png`), líneas de consola
+   `caja/cobrar/boton-no-responde`. Dos corridas que tropiezan con lo mismo dan la misma clave. El área y la
+   acción salen de esta lista (la más cercana a dónde pasó, aunque el síntoma se note en otra pantalla); el
+   síntoma es tuyo:
+
+{{claves}}
+
+6. **Las verificaciones de éxito son la verdad del escenario.** Si una falló aunque el actor cree que terminó,
+   busca en la traza por qué: suele ser un bug (algo que la app debió guardar, enviar o impedir y no lo hizo).
+   Si el escenario dice que la app debe impedir algo y no lo impidió, es un `bug` `critical`.
+7. **Cada hallazgo cita la traza:** pasos (`steps`), capturas (`screenshots/step-008.png`), líneas de consola
    (`console.jsonl#L3`) o de red (`network.jsonl#L1`). Lo que solo dice la entrevista de salida no es evidencia;
    úsala para saber dónde buscar, y cita lo que encuentres en la traza.
-7. No inventes hallazgos. Si la corrida salió bien y nada estorbó, la lista de hallazgos va vacía.
-8. No juzgues si la app es buena ni des calificaciones. Títulos y descripciones en español, en una frase clara.
+8. No inventes hallazgos. Si la corrida salió bien y nada estorbó, la lista de hallazgos va vacía.
+9. No juzgues si la app es buena ni des calificaciones. Títulos y descripciones en español, en una frase clara.
 
 ## Lo que entregas
 
