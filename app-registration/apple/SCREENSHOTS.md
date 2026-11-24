@@ -40,7 +40,14 @@ set.
 | Folder        | Simulator                    | Resolution  |
 | ------------- | ---------------------------- | ----------- |
 | `iphone-6.9/` | iPhone 17 Pro Max (iOS 26.5) | 1320 × 2868 |
+| `iphone-6.3/` | Scaled from `iphone-6.9/`    | 1206 × 2622 |
 | `ipad-13/`    | iPad Pro 13-inch M5 (26.5)   | 2064 × 2752 |
+
+Since late 2026, App Store Connect's **required** iPhone set is the medium
+display (6.1" or 6.3"); the 6.9" set is optional. `iphone-6.3/` is the 6.9"
+set scaled down (`sips -z 2622 1206`), not a separate capture: the two sizes
+have the same proportions to within 0.1%. Version 1.0 was submitted on
+2026-11-24 with `iphone-6.3/` and `ipad-13/`.
 
 ## Known imperfections (for the next re-shoot)
 

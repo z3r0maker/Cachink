@@ -1,7 +1,8 @@
 # App Store metadata draft
 
-Nothing here is submitted yet — this is the draft the App Store Connect record
-gets filled from.
+The answers the App Store Connect record is filled from. Version 1.0 (build
+1.0.0 (3)) was submitted for review from them on 2026-11-24, set to release
+manually, free and in Mexico only.
 
 ## Identity
 
@@ -58,14 +59,14 @@ what App Store Connect calculates.
 
 ## Review-safety checklist
 
-- [ ] The Account Holder has accepted the current Apple Developer Program
+- [x] The Account Holder has accepted the current Apple Developer Program
       License Agreement (version of 2026-10-29)
 
 - [x] Demo tenant seeded and verified: `seed-demo.ts`, two codes; re-run before each submission (it frees the device slots too)
-- [ ] Privacy policy and support URLs live **with no placeholders** (guideline 2.1(a)): on 2026-11-18 `/soporte/` is ready, while `/privacidad/` and `/terminos/` still show `[CORREO PRIVACIDAD]`-style gaps until the landing is redeployed
-- [ ] App Privacy label filled in App Store Connect from
+- [x] Privacy policy and support URLs live **with no placeholders** (guideline 2.1(a)): checked 2026-11-24, `/privacidad/`, `/terminos/` and `/soporte/` load with no gaps
+- [x] App Privacy label filled in App Store Connect from
       [PRIVACY-LABEL.md](./PRIVACY-LABEL.md)
-- [ ] iPad screenshots uploaded (captured in `screenshots/ipad-13/`; `supportsTablet: true` makes them mandatory)
+- [x] iPad screenshots uploaded (captured in `screenshots/ipad-13/`; `supportsTablet: true` makes them mandatory)
 - [ ] Export compliance already answered in the binary
       (`ITSAppUsesNonExemptEncryption: false`)
 - [ ] Production build verified on an iOS 27 device/sim (the scene-lifecycle
