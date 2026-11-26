@@ -118,6 +118,14 @@ jobs:
       - name: Typecheck (builds referenced packages first)
         run: pnpm typecheck
 
+      # `tools/synth/core/tests/seeded-dom.test.ts` drives a real Chromium over
+      # small pages (S-12), and it is part of `pnpm test`. This job had no
+      # browser, so from the day that test merged (2026-11-22) the unit tests
+      # failed here on every PR and on main, and none of the steps below ran.
+      # Only the headless shell: it is all a headless launch asks for.
+      - name: Install Chromium (headless shell, for Synth's page-script test)
+        run: pnpm --filter @xangarro/synth-core exec playwright-core install --with-deps --only-shell chromium
+
       # Includes apps/landing, whose `test` is its production build + prerender
       # smoke assertions (ADR-084) — the marketing site's build gate.
       # Two packages at a time: each Vitest already runs a worker per core, and

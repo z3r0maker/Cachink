@@ -384,7 +384,7 @@ The same seven steps for every guide, on every surface. Steps 4 to 6 are one com
 
 ### G-23 Synth mide si la ayuda sirve [baja]
 
-- [ ] Status · **Blocked by:** G-10, S-11 · **Blocks:** —
+- [ ] Status · **Blocked by:** G-10 · **Blocks:** —
 - **What:** run Synth's phone scenarios with the help door reachable and without it, and report
   the difference in tasks finished and in `never_discovered`. Deltas only, as Track S requires.
   It also makes the check G-03 could not: the list of guides against `never_discovered` and the

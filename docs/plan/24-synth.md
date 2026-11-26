@@ -421,14 +421,14 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-14 Estilo `walkthrough` [media]
 
-- [ ] Status · **Blocked by:** S-13
+- [ ] Status · **Blocked by:** —
 - **What:** `actor-walkthrough.md` with spec §8.2's four questions per screen, and the judge reads them as
   candidates.
 - **Acceptance:** a walkthrough run yields failure points per screen with screenshot references.
 
 ### S-15 Cinco interrupciones [media]
 
-- [ ] Status · **Blocked by:** S-13
+- [ ] Status · **Blocked by:** —
 - **What:**
   - `offline-mid-sale`: CDP offline on the web, and the emulator console network off on the phone.
   - `session-expired`, `tab-away-10min` (CDP clock plus visibility events), `reload-mid-form`.
@@ -503,7 +503,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-21 Lanzar, En vivo, Comparar, Calibración [media]
 
-- [ ] Status · **Blocked by:** S-20, S-13
+- [ ] Status · **Blocked by:** S-20
 - **What:**
   - A job queue in the server that calls `run.ts`.
   - `POST /estimate`, and Launch blocks when an estimated cap would be exceeded.
@@ -517,7 +517,7 @@ The full findings are in `tools/synth/ENV.md`.
 
 ### S-22 Recorridos y memoria con olvido [baja]
 
-- [ ] Status · **Blocked by:** S-11
+- [ ] Status · **Blocked by:** —
 - **What:**
   - `journeys/*.yaml`.
   - `between.generate` pushes N days of ventas through the sync API by script.
