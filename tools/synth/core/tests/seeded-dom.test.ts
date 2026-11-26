@@ -15,7 +15,9 @@ let browser: Browser;
 beforeAll(async () => {
   browser = await chromium.launch({ headless: true });
 });
-afterAll(async () => browser.close());
+// `?.`: when the launch fails there is no browser to close, and closing one
+// anyway buried the launch's own error under a TypeError (CI, 2026-11-22).
+afterAll(async () => browser?.close());
 
 const TICKET = `
   <button id="cobrar">Cobrar<span>$25.00 · efectivo</span></button>
