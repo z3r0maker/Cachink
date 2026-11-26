@@ -30,6 +30,10 @@ overrides:
   'ws@>=8 <8.21.0': 8.23.0
   # GHSA-vc2v-76pw-4v95 (the dev server of @expo/cli).
   'compression@<1.8.2': 1.8.2
+  # docx (scripts/brand-kit) lists Node's types as a runtime dependency. Left in,
+  # a 26.x copy joins the lockfile and every package that takes them as an
+  # optional peer moves to it: 200 lines of churn for one script. Ours serve.
+  'docx>@types/node': '-'
 
 peerDependencyRules:
   allowedVersions:
